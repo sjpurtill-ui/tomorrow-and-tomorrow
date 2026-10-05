@@ -5,13 +5,15 @@ extends Control
 ## Peoples" as they are actually known (dated, uncertain); and our legacy in
 ## stone: our record of works, told as history. Reads the GreatWorks facade; acts only through it,
 ## through validated civilization orders (restore/loot/return) and through the
-## Audience Hall (conceiving a new work). Pauses while open.
+## Audience Hall (conceiving a new work). Pauses for inspection; watching
+## explicitly releases that pause and reads the running simulation.
 
 signal conceive_requested
 
 const Bridge:=preload("res://scripts/great_works_audience.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
+const WorkView:=preload("res://scripts/hud/great_work_view.gd")
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
@@ -42,6 +44,20 @@ var tab_buttons:Dictionary={}
 var legacy_box:HBoxContainer
 var toast:Label
 var picker:Control
+var model_view:Control
+var _retained_model:Control
+var watch_button:Button
+var watch_state:Label
+var watch_pace:OptionButton
+var watching:=false
+var _watch_started_paused:=false
+var _watch_clock:=0.0
+var _detail_shape:=""
+var _card_status:Dictionary={}
+var _main:BoxContainer
+var _header:BoxContainer
+var _list_scroll:ScrollContainer
+var _narrow_layout:=false
 
 static func open(hud_node:Node,terrain_node:Node=null,director_node:Node=null,focus:String="")->Control:
 	var host:Node=hud_node if is_instance_valid(hud_node) else (Engine.get_main_loop() as SceneTree).current_scene
@@ -71,20 +87,23 @@ func _ready()->void:
 	for spec in [["ours","Our great works"],["foreign","Works of other peoples"]]:
 		var id:=String(spec[0])
 		var button:=Button.new();button.name="Tab_"+id;button.text=String(spec[1]);button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size.y=34
-		T.text(button,"small");button.pressed.connect(func()->void:tab=id;selected_key="";refresh())
+		T.text(button,"small");button.pressed.connect(func()->void:
+			if watching:set_watching(false)
+			tab=id;selected_key="";refresh())
 		tabs.add_child(button);tab_buttons[id]=button
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tabs.add_child(spacer)
 	toast=Kit.label(tabs,"",13,T.TEXT_SOFT,false);toast.name="Toast"
-	var main:=HBoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",22);root.add_child(main)
-	var list_scroll:=ScrollContainer.new();list_scroll.custom_minimum_size.x=430;list_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(list_scroll)
+	var main:=BoxContainer.new();_main=main;main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",22);root.add_child(main)
+	var list_scroll:=ScrollContainer.new();_list_scroll=list_scroll;list_scroll.custom_minimum_size.x=330;list_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(list_scroll)
 	list_box=VBoxContainer.new();list_box.name="WorkList";list_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;list_box.add_theme_constant_override("separation",8);list_scroll.add_child(list_box)
-	detail_scroll=ScrollContainer.new();detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(detail_scroll)
+	detail_scroll=ScrollContainer.new();detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(detail_scroll)
 	detail=VBoxContainer.new();detail.name="WorkDetail";detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail.add_theme_constant_override("separation",10);detail_scroll.add_child(detail)
 	get_viewport().size_changed.connect(_fit)
 	_fit()
 	refresh()
 
 func _exit_tree()->void:
+	_end_watch()
 	pause.release()
 
 func _fit()->void:
@@ -92,14 +111,28 @@ func _fit()->void:
 	# Autowrapped labels report inflated heights before their first sort and a
 	# container never shrinks by itself; re-assert the panel size every frame.
 	var target:=Vector2(minf(1560,view.x-40),minf(960,view.y-40))
+	if is_instance_valid(_main):
+		_narrow_layout=view.x<960
+		_main.vertical=_narrow_layout
+		_header.vertical=_narrow_layout
+		legacy_box.visible=view.x>=1400
+		_list_scroll.custom_minimum_size=Vector2(0,128) if _narrow_layout else Vector2(300 if view.x<1320 else 330,0)
+		_list_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow_layout else Control.SIZE_FILL
 	if panel.size!=target:panel.size=target
 	var place:=((view-panel.size)*.5).round()
 	if panel.position!=place:panel.position=place
 
-func _process(_delta:float)->void:
+func _process(delta:float)->void:
 	_fit()
+	if watching and is_visible_in_tree():
+		_watch_clock+=delta
+		if _watch_clock>=.5:
+			_watch_clock=0.0
+			_refresh_live_work()
 
 func close()->void:
+	# Restore the inspection pause before another court/modal acquires it.
+	if watching:set_watching(false)
 	var layer_node:=get_parent()
 	if layer_node is CanvasLayer:layer_node.queue_free()
 	else:queue_free()
@@ -113,7 +146,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 # ---------------------------------------------------------------- header
 
 func _build_header(root:VBoxContainer)->void:
-	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",24);root.add_child(header)
+	var header:=BoxContainer.new();_header=header;header.add_theme_constant_override("separation",24);root.add_child(header)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);header.add_child(words)
 	Kit.label(words,"WONDERS OF OUR MAKING",12,T.GOLD_TEXT,false,.12)
 	Kit.display(words,"Our great works",34)
@@ -192,6 +225,14 @@ func _build_legacy()->void:
 # ---------------------------------------------------------------- data
 
 func refresh()->void:
+	if is_instance_valid(model_view) and tab=="ours" and String(model_view.get_meta("site_key",""))==selected_key:
+		_retained_model=model_view
+		model_view.get_parent().remove_child(model_view)
+	model_view=null
+	watch_button=null
+	watch_state=null
+	watch_pace=null
+	_card_status.clear()
 	works_list=Bridge.api_list("works",["player"])
 	foreign_list=Bridge.api_list("known_foreign_works",["player"])
 	for id in tab_buttons:
@@ -215,6 +256,9 @@ func refresh()->void:
 			if tab=="ours":_detail_ours(item)
 			else:_detail_foreign(item)
 	if tab=="foreign":_held_by_occupation()
+	if is_instance_valid(_retained_model):
+		_retained_model.free()
+		_retained_model=null
 	toast.text=message
 
 func _key(item:Dictionary)->String:
@@ -258,6 +302,7 @@ func _card(item:Dictionary,active:bool)->Control:
 	var name_label:=Kit.serif(words,title,17,T.INK);name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var line:=_status_words(item) if tab=="ours" else "%s · as of %s" % [who,EraWords.when(int(item.get("day",0)))]
 	var status:=Kit.label(words,line,12,T.text_for(_status_color(item)) if tab=="ours" else T.TEXT_SOFT,false);status.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	_card_status[key]=status
 	var place:=Kit.label(words,String(item.get("city_name","")),12,T.TEXT_DIM,false);place.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	card.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:select(key))
@@ -274,15 +319,128 @@ func _section(text:String)->void:
 	var head:=Kit.label(detail,text,12,T.GOLD_TEXT,false,.12)
 	head.custom_minimum_size.y=18
 
+## Inspection never advances a construction record. Watching releases this
+## modal's pause so the normal simulation clock can do the work.
+func _time_host()->Node:
+	return terrain if is_instance_valid(terrain) else get_tree().current_scene
+
+func set_watching(enabled:bool)->void:
+	if enabled==watching:return
+	var host:=_time_host()
+	if enabled:
+		if not is_instance_valid(host) or not host.has_method("_set_game_speed") or not "game_speed" in host:return
+		pause.release()
+		if preload("res://scripts/hud/simulation_pause.gd").blocks(host):
+			pause.acquire(host)
+			message="Another audience is holding time paused."
+			if is_instance_valid(toast):toast.text=message
+			return
+		_watch_started_paused=float(host.game_speed)<=0.0
+		if _watch_started_paused:host._set_game_speed(3.0)
+		watching=true
+		_watch_clock=0.0
+	else:
+		_end_watch()
+		pause.acquire(host)
+	_update_watch_words()
+
+func _end_watch()->void:
+	if not watching:return
+	var host:=_time_host()
+	if _watch_started_paused and is_instance_valid(host):
+		if preload("res://scripts/hud/simulation_pause.gd").blocks(host):
+			preload("res://scripts/hud/simulation_pause.gd").set_resume_speed(host,0.0)
+		else:host._set_game_speed(0.0)
+	_watch_started_paused=false
+	watching=false
+
+func _update_watch_words()->void:
+	if is_instance_valid(watch_button):watch_button.text="Pause to inspect" if watching else "Watch time pass"
+	var host:=_time_host()
+	var speed:=float(host.game_speed) if is_instance_valid(host) and "game_speed" in host else 0.0
+	if is_instance_valid(watch_state):
+		watch_state.text="Time is passing · the whole settlement continues" if watching and speed>0.0 else "Time is paused for inspection"
+	if is_instance_valid(watch_pace):
+		watch_pace.disabled=not watching
+		watch_pace.select(clampi(int(speed)-1,0,4) if speed>0 else 2)
+
+func _set_watch_pace(index:int)->void:
+	var host:=_time_host()
+	if watching and is_instance_valid(host) and host.has_method("_set_game_speed") and not preload("res://scripts/hud/simulation_pause.gd").blocks(host):
+		host._set_game_speed(float(clampi(index+1,1,5)))
+		_update_watch_words()
+
+func _model_record(item:Dictionary,site:Dictionary)->Dictionary:
+	var view:=site.duplicate(true)
+	view.merge(item,true)
+	# The site's progress is labor spent; the summary and fraction are 0..1.
+	view.fraction=float(item.get("progress",site.get("fraction",0.0)))
+	return view
+
+func _live_shape(item:Dictionary,site:Dictionary)->String:
+	return str(hash([item.get("status"),item.get("outcome"),site.get("decision",{}),
+		site.get("ceremony",{}).get("status",""),site.get("events",[]),
+		floori(float(item.get("condition",1.0))*10.0)]))
+
+func _build_milestones(row:HFlowContainer,item:Dictionary)->void:
+	var stage:=String(item.get("stage","foundations"))
+	var state:=String(item.get("status",""))
+	var active:=0 if stage=="foundations" else (1 if stage=="raising" else 2)
+	if state=="functioning":active=3
+	if state in ["ruined","abandoned","quarried"]:active=-1
+	for index in 4:
+		var text:=String(["01  Foundations","02  Raising","03  Crowning","04  Standing"][index])
+		var label:=Kit.label(row,text,13,T.GOLD_TEXT if index==active else T.TEXT_SOFT,false)
+		label.name="Milestone%d" % index
+		if index==active:label.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH,T.GOLD,1,3,5))
+
+func _refresh_live_work()->void:
+	if tab!="ours":return
+	_update_watch_words()
+	var items:=Bridge.api_list("works",["player"])
+	var selected:Dictionary={}
+	for item in items:
+		if not item is Dictionary:continue
+		var key:=_key(item)
+		var label:Label=_card_status.get(key)
+		if is_instance_valid(label):label.text=_status_words(item)
+		if key==selected_key:selected=item
+	if selected.is_empty():
+		set_watching(false)
+		refresh()
+		return
+	var site:=Bridge.api_dict("site",[String(selected.get("city_id","")),String(selected.get("work_id",""))])
+	if _live_shape(selected,site)!=_detail_shape:
+		# Decisions, completion and accidents change the available actions.
+		var scroll:=detail_scroll.scroll_vertical
+		refresh()
+		detail_scroll.set_deferred("scroll_vertical",scroll)
+		return
+	if is_instance_valid(model_view):model_view.configure(_model_record(selected,site))
+	var status:=detail.find_child("StatusLine",true,false) as Label
+	if status!=null:status.text=_status_words(selected)
+	var progress:=detail.find_child("Progress",true,false) as ProgressBar
+	if progress!=null:progress.value=float(selected.get("progress",0.0))
+	var milestones:=detail.find_child("StageMilestones",true,false) as HFlowContainer
+	if milestones!=null:
+		var stage:=String(selected.get("stage",""))
+		if String(milestones.get_meta("stage",""))!=stage:
+			for child in milestones.get_children():child.free()
+			_build_milestones(milestones,selected)
+			milestones.set_meta("stage",stage)
+	works_list=items
+
+func _attend_dedication(work_id:String)->void:
+	if not is_instance_valid(director) or not director.has_method("open_ceremony"):return
+	close()
+	director.open_ceremony(work_id)
+
 func _detail_ours(item:Dictionary)->void:
 	var work_id:=String(item.get("work_id",""))
 	var city_id:=String(item.get("city_id",""))
 	var site:=Bridge.api_dict("site",[city_id,work_id])
 	var d:=_definition(work_id)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",20);detail.add_child(top)
-	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.GOLD,1,4,4));top.add_child(frame)
-	var view:=item.duplicate(true);view.merge(site,false)
-	var art:=Plate.make(view,210);art.name="DetailPlate";art.custom_minimum_size=Vector2(320,210);frame.add_child(art)
+	var top:=VBoxContainer.new();top.add_theme_constant_override("separation",12);detail.add_child(top)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",4);top.add_child(words)
 	Kit.display(words,String(item.get("name","A great work")),26)
 	var concept:Dictionary=site.get("concept",{}) if site.get("concept") is Dictionary else {}
@@ -305,9 +463,34 @@ func _detail_ours(item:Dictionary)->void:
 		var summon_button:=Kit.action_button(words,"Summon %s to the court%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
 		summon_button.name="SummonArchitect"
 	var status_key:=String(item.get("status",""))
+	_detail_shape=_live_shape(item,site)
+	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.GOLD,1,4,4));top.add_child(frame)
+	var view:=_model_record(item,site)
+	if is_instance_valid(_retained_model):
+		model_view=_retained_model;_retained_model=null
+		frame.add_child(model_view);model_view.configure(view)
+	else:
+		model_view=WorkView.make(view,340);model_view.name="DetailModel";model_view.custom_minimum_size.x=0;frame.add_child(model_view)
+	model_view.set_meta("site_key",_key(item))
+	var milestones:=HFlowContainer.new();milestones.name="StageMilestones";milestones.add_theme_constant_override("h_separation",10);milestones.add_theme_constant_override("v_separation",6);top.add_child(milestones)
+	_build_milestones(milestones,item)
+	var time_row:=HFlowContainer.new();time_row.add_theme_constant_override("h_separation",12);top.add_child(time_row)
+	watch_button=Kit.action_button(time_row,"Pause to inspect" if watching else "Watch time pass",func()->void:set_watching(not watching),false,"Let the normal game clock run while you watch this site. Construction follows its real supplies and builders.")
+	watch_button.name="WatchLive"
+	watch_button.focus_mode=Control.FOCUS_ALL
+	watch_pace=OptionButton.new();watch_pace.name="WatchPace";watch_pace.custom_minimum_size.y=34
+	for pace:String in ["Slowest","Slow","Normal","Fast","Fastest"]:watch_pace.add_item(pace)
+	watch_pace.tooltip_text="The same game speeds as the settlement clock. The whole settlement continues at this pace."
+	watch_pace.item_selected.connect(_set_watch_pace);time_row.add_child(watch_pace)
+	watch_state=Kit.label(time_row,"",13,T.TEXT_SOFT);watch_state.name="WatchState"
+	_update_watch_words()
+	if String((site.get("ceremony",{}) as Dictionary).get("status",""))=="pending":
+		var dedication:=Kit.action_button(detail,"Gather for the dedication",func()->void:_attend_dedication(work_id),true,"Join the master builder and the assembly at the finished work")
+		dedication.name="DedicateWork"
+		dedication.focus_mode=Control.FOCUS_ALL
 	if status_key in ["building","stalled"]:
 		_section("THE WORKS")
-		var bar:=ProgressBar.new();bar.name="Progress";bar.min_value=0;bar.max_value=1;bar.value=float(item.get("progress",0));bar.show_percentage=false;bar.custom_minimum_size.y=12;detail.add_child(bar)
+		var bar:=ProgressBar.new();bar.name="Progress";bar.min_value=0;bar.max_value=1;bar.step=0.0;bar.value=float(item.get("progress",0));bar.show_percentage=false;bar.custom_minimum_size.y=12;detail.add_child(bar)
 		Kit.label(detail,String(site.get("reason","")),13,T.TEXT_SOFT)
 		var assessment:Dictionary=site.get("assessment",{}) if site.get("assessment") is Dictionary else {}
 		if not assessment.is_empty():

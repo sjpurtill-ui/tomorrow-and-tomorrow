@@ -163,7 +163,11 @@ func _ruin(poly:PackedVector2Array,ground:float)->PackedVector2Array:
 		var keep:=.25+.35*float((index*7+variant)%5)/4.0
 		out.append(Vector2(p.x+(ground-p.y)*.08,ground-height*keep))
 		index+=1
-	return out
+	# Uneven breaks can make the original nonconvex outline cross itself.
+	# Its enclosing broken silhouette remains drawable for every work form.
+	var hull:=Geometry2D.convex_hull(out)
+	if hull.size()>1 and hull[0].is_equal_approx(hull[-1]):hull.resize(hull.size()-1)
+	return hull
 
 func _box(cx:float,ground:float,bw:float,bh:float,lift:float=0.0)->PackedVector2Array:
 	return PackedVector2Array([Vector2(cx-bw*.5,ground-lift),Vector2(cx+bw*.5,ground-lift),Vector2(cx+bw*.5,ground-lift-bh),Vector2(cx-bw*.5,ground-lift-bh)])

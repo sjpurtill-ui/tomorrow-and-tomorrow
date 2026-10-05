@@ -78,7 +78,7 @@ func _local(id:String)->Dictionary:
 			items.append({"label":"PROTECT DAILY NEEDS","sub":"Fewer builders; pause during shortages","on_press":func()->void:U.direct(id,work_id,"careful");_refresh()})
 			items.append({"label":"PRESS AHEAD","sub":"Half the builders, even through hardship","on_press":func()->void:U.direct(id,work_id,"press");_refresh()})
 			items.append({"label":"WITHDRAW SUPPORT","sub":"Lay down the tools; the unfinished site remains","on_press":func()->void:U.direct(id,work_id,"abandon");_refresh()})
-		items.append({"label":"OPEN IN OUR GREAT WORKS","sub":"History, effects, enshrined objects, decree","on_press":func()->void:_open_works("player/%s/%s" % [id,work_id])})
+		items.append({"label":"INSPECT IN 3D","sub":"Rotate the model, see its rising courses, and watch time pass","on_press":func()->void:_open_works("player/%s/%s" % [id,work_id])})
 		blocks.append({"type":"actions","items":items})
 	var warnings:=Works.api_list("forecast",["player"])
 	if not warnings.is_empty():
