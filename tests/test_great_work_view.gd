@@ -32,7 +32,32 @@ func test_orbit_zoom_and_plan_keep_mesh_and_do_not_change_progress()->void:
 	node.reset_view()
 	assert_float(node.yaw).is_equal(View.DEFAULT_YAW)
 	assert_float(node.pitch).is_equal(View.DEFAULT_PITCH)
-	assert_float(node.zoom).is_equal(1.0)
+	assert_float(node.zoom).is_equal(View.DEFAULT_ZOOM)
+
+func test_default_view_fits_finished_bounds_for_every_form_and_narrow_layout()->void:
+	var node:=view()
+	for form:String in Concept.FORMS:
+		var item:=work(1.0);item.status="functioning";item.work_id=Concept.make_id(form,"honor_dead","grand","stone",1,"fit")
+		node.configure(item)
+		for extent:Vector2i in [Vector2i(240,326),Vector2i(650,326),Vector2i(1150,326)]:
+			node.viewport.size=extent;node.reset_view()
+			for corner in 8:
+				var pixel:Vector2=node.camera.unproject_position(node._bounds.get_endpoint(corner))
+				assert_float(pixel.x).is_between(0.0,float(extent.x))
+				assert_float(pixel.y).is_between(0.0,float(extent.y))
+
+func test_plan_defaults_to_unfinished_work_and_respects_user_choice()->void:
+	var node:=view()
+	assert_bool(node.plan_visible).is_true()
+	assert_str(node._reading.text).contains("outline shows unbuilt design")
+	node.set_plan_visible(false);node.configure(work(.75))
+	assert_bool(node.plan_visible).is_false()
+	node.set_plan_visible(true)
+	var complete:=work(1.0);complete.status="functioning";node.configure(complete)
+	assert_str(node._reading.text).is_equal("Standing")
+	assert_bool(node._plan_button.button_pressed).is_false()
+	var standing:Control=auto_free(View.make(complete));add_child(standing)
+	assert_bool(standing.plan_visible).is_false()
 
 func test_camera_stays_finite_and_bounded_at_extreme_inputs_and_narrow_size()->void:
 	var node:=view();node.size=Vector2(240,320)
