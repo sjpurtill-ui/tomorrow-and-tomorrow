@@ -127,6 +127,9 @@ func test_crossing_uses_an_actual_bounded_figure_and_finishes_its_walk()->void:
 		assert_float(active_seconds).is_greater(body.position.distance_to(origin)/1.18+.6)
 		assert_int(scene.diagnostics().body_count).is_equal(6)
 		assert_str(String(body.clip)).is_equal("stand")
+		var facing:=atan2(-body.position.x,(scene._front+.8)-body.position.z)
+		assert_float(absf(wrapf(body.rotation.y-facing,-PI,PI))).is_less(.001)
+		assert_bool(scene.diagnostics().viewport_active).is_false()
 		for guest:Node3D in scene.bodies.values():
 			if guest==body:continue
 			for sample in 41:
