@@ -1,4 +1,10 @@
-# Transparent top-bar lettering — held for approval
+# Transparent top-bar lettering — approved and integrated
+
+Approved explicitly for merge on October 5, 2026. Source `c88fdac4` is included
+in combined runtime `51042ca8f719a51a9c2e24ae14926c2f87a96977`, alongside the
+Food folio and main through `7f623669`. Origin/main was pushed and freshly
+verified before the canonical checkout advanced. Combined tests: 18/18 and a
+clean private GPU capture. All 4,739 pre-existing local files are preserved.
 
 October 5, 2026. The user likes the transparent bar but finds its pale lettering
 hard to read over the light map at high altitude. This isolated preview adds a
@@ -35,5 +41,5 @@ files and the user's screenshot stay local. First cold editor import reported
 missing font loaders before importing assets; subsequent tests and GPU run
 compiled and executed successfully.
 
-Status: HELD for the user's requested visual approval. Publishing this task
-branch is backup/review delivery, not integration into the player game.
+The original preview hold is resolved by the explicit merge approval and
+verified combined delivery above. No player/editor session was restarted.

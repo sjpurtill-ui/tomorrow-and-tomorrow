@@ -1,3 +1,24 @@
+## October 5 — Food folio and transparent top-bar contrast: INTEGRATED
+
+User-approved Food `0062bac8` and top-bar contrast `c88fdac4` are integrated
+with current main `7f623669` in runtime
+`51042ca8f719a51a9c2e24ae14926c2f87a96977`. Origin/main was pushed and verified
+with a fresh remote query before the canonical fast-forward. Main was 0/0;
+all 4,739 pre-existing local files retained their hashes.
+
+Food pairs its food/water readings, groups daily figures and stock quantities,
+and hides reserve allocations behind a persistent disclosure. Single-town
+source bars are removed; real production, care, water access, history and
+spending controls remain. Top-bar lettering gains a dark edge and shadow for
+pale terrain while preserving the transparent background and warning colors.
+No simulation ownership, map generation, population or save-format changes.
+
+Combined acceptance: 18/18 cases in three suites (report 5), plus a private
+GPU capture of both changes together, exit 0 with no engine/script errors.
+The probe exited; no player or editor was restarted. Generated captures,
+imports and test userdata remain local. The Builders preview remains excluded.
+See `docs/design/FOOD_FOLIO_PREVIEW.md` and `TOPBAR_CONTRAST_PREVIEW.md`.
+
 ## October 4 — Approved Overview paintings and readings: INTEGRATED
 
 Runtime `62dbf2ed6b9a050aa29075fc7f84841399777558` was pushed to origin/main,

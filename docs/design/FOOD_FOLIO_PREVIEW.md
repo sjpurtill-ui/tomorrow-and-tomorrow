@@ -1,4 +1,11 @@
-# Food folio — held for visual approval
+# Food folio — approved and integrated
+
+Approved for merge on October 5, 2026. Combined runtime
+`51042ca8f719a51a9c2e24ae14926c2f87a96977` includes this Food revision,
+the separately approved top-bar contrast, and main through `7f623669`.
+It was pushed and remotely verified before the canonical checkout advanced.
+Combined acceptance: 18/18 cases (report 5) and a clean private GPU capture.
+All 4,739 pre-existing canonical local files retained their hashes.
 
 October 5, 2026. Prepared on `codex/food-folio`, based on canonical main
 `222f43ca74d6cc9cbae558cbef32a2f932d8bd10`, in
@@ -49,6 +56,6 @@ and `--food-preview --mode=dark|light --width=1536|1138`. Captures are under
 `artifacts/food-folio-<mode>-<width>/food.png`. Logs and reports remain local.
 No screenshot, save, import cache or generated UID is part of this delivery.
 
-Status: HELD pending the user's requested visual approval. The separate
-top-bar contrast preview is not included; neither preview is integrated by
-this branch publication.
+The original isolated preview was held for visual approval. That hold is now
+resolved: both Food and top-bar contrast are integrated in the combined runtime
+above. Generated captures remain local; player/editor sessions were not restarted.
