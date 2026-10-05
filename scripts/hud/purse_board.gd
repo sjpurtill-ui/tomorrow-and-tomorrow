@@ -316,7 +316,7 @@ func _build_levy(current:String)->void:
 	var now:=_answer("We take %s of %s" % [String(q.words),Purse.harvest_word()],17);now.name="LevyNow"
 	now.tooltip_text="%s a season, in %s, at today's work after what is hidden." % [Purse.number(float(q.per_season)),Purse.unit_word()]
 	levy_box.add_child(now)
-	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",8);levy_box.add_child(pick)
+	var pick:=HFlowContainer.new();pick.name="Levels";pick.add_theme_constant_override("h_separation",8);pick.add_theme_constant_override("v_separation",8);levy_box.add_child(pick)
 	for level:String in Purse.LEVELS:
 		var lq:=Purse.quote(level)
 		var button:=Button.new();button.name="Level_%s" % level;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
