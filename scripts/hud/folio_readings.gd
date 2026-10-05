@@ -4,6 +4,7 @@ extends HBoxContainer
 const Tokens = preload("res://scripts/hud/hud_tokens.gd")
 const Chip = preload("res://scripts/hud/kpi_detail_chip.gd")
 const Folio = preload("res://scripts/hud/reference_folio.gd")
+const TopbarInk = preload("res://scripts/hud/topbar_ink.gd")
 const WARNING_INK = Color("ffd39b")
 const SHORTAGE_INK = Color("ffb6a8")
 
@@ -38,7 +39,7 @@ func show_readings(readings: Array[Dictionary]) -> void:
 		var value_ink: Color = Folio.RAIL_TEXT
 		if reading.note_color == Tokens.text_for(Tokens.RED): value_ink = SHORTAGE_INK
 		elif reading.note_color == Tokens.text_for(Tokens.AMBER): value_ink = WARNING_INK
-		entry.caption.add_theme_color_override("font_color", Color(Folio.RAIL_TEXT, 0.8))
+		entry.caption.add_theme_color_override("font_color", Folio.RAIL_TEXT)
 		entry.value.add_theme_color_override("font_color", value_ink)
 		entry.button.accessibility_name = "%s: %s. %s" % [reading.caption, reading.value, reading.note]
 
@@ -68,6 +69,7 @@ func _make_reading(reading: Dictionary) -> void:
 	var value := Tokens.make_label(String(reading.value), 20, Folio.RAIL_TEXT)
 	value.add_theme_font_override("font", Tokens.font("voice"))
 	for label: Label in [caption, value]:
+		TopbarInk.apply(label)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		column.add_child(label)
