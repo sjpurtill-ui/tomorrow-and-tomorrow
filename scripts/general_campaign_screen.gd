@@ -78,7 +78,7 @@ func _commit()->void:
 func refresh()->void:
 	if not WorldSimulation.campaign.active:return
 	var s:Dictionary=WorldSimulation.campaign.state;var a:=WorldSimulation.campaign.army()
-	title.text="ALDERFORD · Day %d · %s"%[int(WorldSimulation.state.elapsed_days),"Orders resolving" if s.status=="executing" else "Council paused"]
+	title.text="ALDERFORD · %s · %s"%[preload("res://scripts/calendar_date.gd").words(int(WorldSimulation.state.elapsed_days),true),"Orders resolving" if s.status=="executing" else "Council paused"]
 	kpis.text="%d FIT SOLDIERS     %d CASUALTIES     %.1f DAYS OF FOOD     %d%% EQUIPPED"%[int(a.get("troops",0)),int(s.losses),WorldSimulation.campaign.food_days(),roundi(WorldSimulation.campaign.equipment_ratio(a)*100)]
 	if float(a.get("morale",1))<.4:kpis.text+="     COHESION SHAKEN"
 	kpis.tooltip_text="Fit soldiers can fight now. Casualties counts all losses from action in this war, including soldiers who later recover. Food is carried rations at current strength. Equipment is issued weapons divided by current personnel."

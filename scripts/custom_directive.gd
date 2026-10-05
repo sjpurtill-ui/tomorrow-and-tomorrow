@@ -963,7 +963,7 @@ static func evaluate(order_id:String,snapshot:Dictionary,current_day:int)->Dicti
 static func _report_receipt(baseline:Dictionary,now:Dictionary,surfaced:Array[String])->String:
 	var parts:Array[String]=[]
 	if baseline.is_empty(): return ""
-	parts.append("since day %d" % int(baseline.get("day",0)))
+	parts.append("since %s" % preload("res://scripts/calendar_date.gd").words(int(baseline.get("day",0))))
 	parts.append("conceptions %d" % maxi(0,int(now.conceptions)-int(baseline.get("conceptions",0))))
 	parts.append("births %d" % maxi(0,int(now.births)-int(baseline.get("births",0))))
 	var newborn:=maxi(0,int(now.neonatal_deaths)-int(baseline.get("neonatal_deaths",0)))

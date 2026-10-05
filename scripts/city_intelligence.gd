@@ -368,13 +368,13 @@ func controller_label(id:String)->String:
 
 func describe(city:Dictionary)->String:
 	if city.is_empty(): return "No report identifies this city."
-	var lines:Array[String]=[String(city.name),"%s · observed day %s · report received day %d" % [String(city.freshness),"unknown" if int(city.observed_day)<0 else str(city.observed_day),int(city.reported_day)],"Source: %s (%s)" % [String(city.source),String(city.reference)],"Last reported control: %s" % controller_label(String(city.controller))]
+	var lines:Array[String]=[String(city.name),"%s · observed %s · report received %s" % [String(city.freshness),preload("res://scripts/calendar_date.gd").words(int(city.observed_day)),preload("res://scripts/calendar_date.gd").words(int(city.reported_day))],"Source: %s (%s)" % [String(city.source),String(city.reference)],"Last reported control: %s" % controller_label(String(city.controller))]
 	for key:String in FIELDS:
 		var field:Dictionary=city.fields.get(key,{})
 		var description:="Unknown — no observation supports an estimate."
 		if not field.is_empty():
 			var scale:=100.0 if FIELDS[key].unit=="capacity" else 1.0
-			description="%s–%s %s · observed day %d%s" % [str(roundi(float(field.get("observed_low",field.low))*scale)),str(roundi(float(field.get("observed_high",field.high))*scale)),"%" if scale>1 else String(FIELDS[key].unit),int(field.observed_day)," · stale" if bool(field.stale) else ""]
+			description="%s–%s %s · observed %s%s" % [str(roundi(float(field.get("observed_low",field.low))*scale)),str(roundi(float(field.get("observed_high",field.high))*scale)),"%" if scale>1 else String(FIELDS[key].unit),preload("res://scripts/calendar_date.gd").words(int(field.observed_day))," · stale" if bool(field.stale) else ""]
 		lines.append("%s: %s" % [String(FIELDS[key].label),description])
 	lines.append("Local deposits and individual stores: unknown. A city's regional supply outlook is not an inventory of its warehouses.")
 	return "\n\n".join(lines)

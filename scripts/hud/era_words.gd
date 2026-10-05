@@ -115,6 +115,13 @@ static func when(day:int)->String:
 	return preload("res://scripts/chronicle.gd").date_label(day)
 
 
+## A calendar day as year and day of the year, never the raw day count:
+## "year 150, day 32" (capital "Year" when `capital`). For a day the player
+## must act by or that something was seen on, where the season is too coarse.
+static func date(day:int,capital:bool=false)->String:
+	return preload("res://scripts/calendar_date.gd").words(day,capital)
+
+
 ## when() for the current day.
 static func today()->String:
 	return when(int(floor(GameState.elapsed_days)) if Engine.get_main_loop()!=null else 0)

@@ -143,7 +143,7 @@ static func report_text()->String:
 	if c.get("status")=="conditioning":
 		lines.append("Column preparation and reference checks: %.1f / 6 paid time units."%float(c.work))
 	elif usable():
-		lines.append("Calibrated column: %d runs remaining; calibration expires after day %d."%[int(c.remaining_runs),int(c.checked_day)+30])
+		lines.append("Calibrated column: %d runs remaining; calibration expires after %s."%[int(c.remaining_runs),preload("res://scripts/calendar_date.gd").words(int(c.checked_day)+30)])
 	else:lines.append("No ready column. Prepare a packed aqueous column and assigned PEG reference solutions.")
 	if c.get("status")!="conditioning" and (not usable() or int(c.get("remaining_runs",0))==0):
 		var missing:PackedStringArray=[]

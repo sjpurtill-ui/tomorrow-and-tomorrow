@@ -799,7 +799,7 @@ static func _set_ration(reading:Dictionary)->Dictionary:
 		if live<0: return {"ok":true,"kind":"ration","count":0,"says":"Nobody is on short rations now.","outcome":"There was no ration to end."}
 		mods.remove_at(live)
 		return {"ok":true,"kind":"ration","count":1,"says":"The ration ends: every family eats its full share again.","outcome":"The ration ends."}
-	if live>=0: return {"ok":true,"kind":"ration","count":0,"says":"The families are already on short rations, until about day %d." % int((mods[live] as Dictionary).get("until_day",day)),"outcome":"The ration goes on."}
+	if live>=0: return {"ok":true,"kind":"ration","count":0,"says":"The families are already on short rations, until about %s." % preload("res://scripts/calendar_date.gd").words(int((mods[live] as Dictionary).get("until_day",day))),"outcome":"The ration goes on."}
 	mods.append({"id":"%s_%d" % [RATION_ID,int(day)],"kind":"policy","effects":{"food_demand":-0.75,"health_target":-0.1},"magnitude":0.2,"started_day":day,"until_day":day+100.0,"description":"Court order: ration"})
 	WorldSimulation.state.simulation_metrics["cohesion"]=clampf(float(WorldSimulation.state.simulation_metrics.get("cohesion",0.58))-0.005,0.0,1.0)
 	return {"ok":true,"kind":"ration","count":1,"says":"Every family eats less from today, for about a hundred days: the stores last longer, but people grow weaker and the sick mend slower.","outcome":"The families go on short rations for about a hundred days."}

@@ -64,7 +64,7 @@ static func host_from_envoy(source:String,subject:String,travel_days:int)->Dicti
 	provider.society_exchange.scholar_visits[id]=contract.duplicate(true)
 	if not E.data().has("scholar_visits"):E.data()["scholar_visits"]={}
 	E.data().scholar_visits[id]=contract.duplicate(true)
-	return {"ok":true,"message":"A teacher of %s stays sixty days, until day %d, while your Knowledge staff learn." % [String(quote.subject_name),int(contract.leave_day)]}
+	return {"ok":true,"message":"A teacher of %s stays sixty days, until %s, while your Knowledge staff learn." % [String(quote.subject_name),preload("res://scripts/calendar_date.gd").words(int(contract.leave_day))]}
 
 static func negotiate(mission:Dictionary,source:String,day:int)->void:
 	if mission.has("research_refused"):return

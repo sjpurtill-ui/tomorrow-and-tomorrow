@@ -46,7 +46,7 @@ func tab(_sub:int)->Dictionary:
 		brief={"tone":"danger","title":"Our people are fighting now" if fights.size()==1 else "Our people are fighting in %d places" % fights.size(),
 			"why":"The war leader commands the fight. You will get his report when it ends." if fights.size()==1 else "Each war leader commands his own fight. You will get each report when it ends."}
 	elif not threat.is_empty():
-		brief={"tone":"danger","title":String(threat.get("title","A war band is coming")),"why":"Decide how to meet them before day %d, or the war leader decides for you." % int(threat.get("deadline_day",0))}
+		brief={"tone":"danger","title":String(threat.get("title","A war band is coming")),"why":"Decide how to meet them before %s, or the war leader decides for you." % preload("res://scripts/calendar_date.gd").words(int(threat.get("deadline_day",0)))}
 	elif fronts.is_empty():
 		brief={"tone":"info","title":"We are at peace","why":"If war comes, what is being fought and how it goes will be here."}
 	else:
@@ -63,7 +63,7 @@ func tab(_sub:int)->Dictionary:
 	if not threat.is_empty():
 		blocks.append({"type":"rows","heading":"COMING AT US","items":[{
 			"name":String(threat.get("title","A war band")),
-			"sub":"%s · about %d fighters · they arrive by day %d" % [String(threat.get("source_name","Strangers")),int(threat.get("estimated_strength",0)),int(threat.get("deadline_day",0))],
+			"sub":"%s · about %d fighters · they arrive by %s" % [String(threat.get("source_name","Strangers")),int(threat.get("estimated_strength",0)),preload("res://scripts/calendar_date.gd").words(int(threat.get("deadline_day",0)))],
 			"value":"","accent":Tokens.RED,"tip":"If nobody answers, the watch defends or gives way when they arrive",
 		}]})
 		blocks.append({"type":"actions","items":[
@@ -228,7 +228,7 @@ func _siege_blocks(siege:Dictionary)->Array:
 		{"name":"YOUR SUPPLY","sub":"Latest delivered ration coverage","value":"%d%%" % roundi(float(siege.own_supply_ratio)*100)},
 		{"name":"CIVILIAN HARDSHIP","sub":String(siege.civilian_hardship),"value":""},
 		{"name":"BESIEGER ENDURANCE","sub":String(siege.besieger_endurance),"value":""},
-		{"name":"ENEMY SUPPLIES","sub":String(siege.enemy_supply_assessment),"value":"reported day %d" % int(siege.enemy_supply_report_day) if int(siege.enemy_supply_report_day)>=0 else "UNKNOWN"},
+		{"name":"ENEMY SUPPLIES","sub":String(siege.enemy_supply_assessment),"value":"reported %s" % preload("res://scripts/calendar_date.gd").words(int(siege.enemy_supply_report_day)) if int(siege.enemy_supply_report_day)>=0 else "UNKNOWN"},
 	]
 	if float(siege.own_food_days)>=0: rows.append({"name":"HOME FOOD RESERVE","sub":"Current food stores at current demand; not a guaranteed survival countdown","value":"%.1f days" % float(siege.own_food_days)})
 	var blocks:Array=[{"type":"rows","heading":"SIEGE · "+String(siege.target_name),"items":rows},{"type":"actions","items":[

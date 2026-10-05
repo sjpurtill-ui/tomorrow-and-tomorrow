@@ -529,7 +529,7 @@ static func returned(mission:Dictionary,day:int)->Array[Dictionary]:
 		if data().collections.has(String(item.id)) or data().collections.size()>=COLLECTION_LIMIT:continue
 		var saved:=item.duplicate(true);saved.returned_day=day
 		data().collections[String(item.id)]=saved
-		records.append({"kind":saved.kind,"title":saved.name,"description":"%s · encountered day %d" % [saved.source_name,int(saved.observed_day)],"consequence":"Your knowledge workers will examine this. Its specific evidence becomes usable after study.","collection_id":saved.id,"position":saved.position.duplicate(),"discovery_id":saved.discovery_id})
+		records.append({"kind":saved.kind,"title":saved.name,"description":"%s · encountered %s" % [saved.source_name,preload("res://scripts/calendar_date.gd").words(int(saved.observed_day))],"consequence":"Your knowledge workers will examine this. Its specific evidence becomes usable after study.","collection_id":saved.id,"position":saved.position.duplicate(),"discovery_id":saved.discovery_id})
 	data().exposure=minf(1,float(data().exposure)+float(mission.get("contact_exposure",0)))
 	for id:String in mission.get("encountered_societies",[]):connection(id).last_visit=day
 	for sharing:Dictionary in mission.get("shared_practices",[]):

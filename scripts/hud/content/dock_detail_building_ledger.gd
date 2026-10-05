@@ -82,7 +82,7 @@ func _chronicle_blocks(records:Array[Dictionary])->Array:
 		if note!="": detail_parts.append(note)
 		items.append({
 			"name":"%s · %s" % [event_name,title],
-			"sub":"Day %d · %s" % [int(row.get("day",0)),String(row.get("settlement_name","Unknown place"))],
+			"sub":"%s · %s" % [preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),String(row.get("settlement_name","Unknown place"))],
 			"detail":" • ".join(detail_parts),
 			"value":"%d%%" % roundi(float(row.get("condition",1.0))*100.0) if row.has("condition") else "",
 			"accent":_event_color(String(row.get("event",""))),
