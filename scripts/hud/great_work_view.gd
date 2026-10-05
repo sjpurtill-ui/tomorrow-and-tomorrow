@@ -5,6 +5,7 @@ const Model:=preload("res://scripts/hud/great_work_model.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const DEFAULT_YAW:=-.62
 const DEFAULT_PITCH:=.56
+const DEFAULT_ZOOM:=.82
 var viewport:SubViewport
 var camera:Camera3D
 var model_root:Node3D
@@ -12,7 +13,7 @@ var model_rebuilds:=0
 var current_signature:=""
 var yaw:=DEFAULT_YAW
 var pitch:=DEFAULT_PITCH
-var zoom:=1.0
+var zoom:=DEFAULT_ZOOM
 var plan_visible:=false
 var scaffolds_visible:=true
 var _description:Dictionary={}
@@ -36,7 +37,9 @@ static func make(work:Dictionary,height:float=320.0)->Control:
 	return view
 
 func configure(work:Dictionary)->void:
+	var first:=_description.is_empty()
 	_description=Model.describe(work)
+	if first:plan_visible=_description.state in ["building","plan"]
 	if viewport==null:return
 	var next:=Model.signature(_description)
 	if next!=current_signature:
@@ -60,11 +63,12 @@ func _ready()->void:
 	camera=Camera3D.new();camera.name="Camera";camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.current=true;viewport.add_child(camera)
 	var world:=WorldEnvironment.new();world.environment=Environment.new()
 	world.environment.background_mode=Environment.BG_COLOR;world.environment.background_color=Color("ded5bf")
-	world.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;world.environment.ambient_light_color=Color("c1cde0");world.environment.ambient_light_energy=.65
+	world.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;world.environment.ambient_light_color=Color("c1cde0");world.environment.ambient_light_energy=.30
+	world.environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC
 	viewport.add_child(world)
-	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-52,-35,0);sun.light_color=Color("ffe4bb");sun.light_energy=1.15;sun.shadow_enabled=true
+	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-52,-35,0);sun.light_color=Color("ffead0");sun.light_energy=.80;sun.shadow_enabled=true
 	sun.directional_shadow_max_distance=300;viewport.add_child(sun)
-	var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-25,125,0);fill.light_color=Color("b7c5d5");fill.light_energy=.32;viewport.add_child(fill)
+	var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-25,125,0);fill.light_color=Color("b7c5d5");fill.light_energy=.12;viewport.add_child(fill)
 	var controls:=HFlowContainer.new();controls.add_theme_constant_override("h_separation",8);add_child(controls)
 	_button(controls,"Reset view",reset_view)
 	_plan_button=_button(controls,"Unbuilt plan",func()->void:set_plan_visible(not plan_visible));_plan_button.toggle_mode=true
@@ -92,10 +96,11 @@ func _update_reading()->void:
 	var state:=String(_description.get("state","plan"));var progress:=float(_description.get("progress",0.0))
 	var words:="Planned design · nothing built" if state=="plan" else ("Standing" if state=="standing" else "%s · %s complete" % [String(_description.get("status","building")).capitalize(),preload("res://scripts/undertaking_map_visual.gd").percent_words(progress)])
 	if String(_description.get("status",""))=="stalled":words+=" · "+String(_description.get("idle","No work today"))
-	if plan_visible or state=="plan":words+=" · outline shows unbuilt design"
+	var has_plan:=model_root.get_node_or_null("UnbuiltPlan")!=null
+	if has_plan and (plan_visible or state=="plan"):words+=" · outline shows unbuilt design"
 	_reading.text=words
 	_plan_button.disabled=state in ["standing","ruined"]
-	_plan_button.set_pressed_no_signal(plan_visible or state=="plan")
+	_plan_button.set_pressed_no_signal(has_plan and (plan_visible or state=="plan"))
 	_scaffold_button.disabled=model_root.get_node_or_null("Scaffolding")==null
 	_scaffold_button.set_pressed_no_signal(scaffolds_visible)
 
@@ -124,7 +129,7 @@ func zoom_by(steps:float)->void:
 	zoom=next;_camera_changed()
 
 func reset_view()->void:
-	yaw=DEFAULT_YAW;pitch=DEFAULT_PITCH;zoom=1.0;_camera_changed()
+	yaw=DEFAULT_YAW;pitch=DEFAULT_PITCH;zoom=DEFAULT_ZOOM;_camera_changed()
 
 func _camera_input(event:InputEvent)->void:
 	if event is InputEventMouseMotion and (event.button_mask&MOUSE_BUTTON_MASK_LEFT or event.button_mask&MOUSE_BUTTON_MASK_RIGHT):
