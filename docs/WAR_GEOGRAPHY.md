@@ -39,6 +39,29 @@ fronts in the HOI4 sense. Taking a town is the only objective there is. The
 presentation built tonight (below) is correct, but in natural play it would
 never show a border front.
 
+### How big peoples get (fast sim, `tools/sim/run.py --scenario sensible`, 3 seeds)
+
+| Game year | 100 | 300 | 600 | 800 | 1000 | 1200 |
+|---|---:|---:|---:|---:|---:|---:|
+| People | 400 | 1,230 | 4,340 | 13,200 | 19,700 | 25,600 |
+
+A people of 25,000 at year 1200 holds towns a few tens of km across. Even the
+generous realm reach below gives it about 100 km. Peoples 6,000 km apart can
+never meet at these sizes. **The map's scale and the peoples' sizes do not
+fit an HOI4 groove by 2200.** Something has to give:
+- **(a) A denser world.** Peoples a few hundred km apart, or many more of
+  them, so that peoples of 10,000 to 100,000 meet by 1000 to 2000. Historically
+  most early peoples had neighbours within days, not years.
+- **(b) Far larger peoples.** Populations in the millions by 2000, which
+  changes all balance.
+- **(c) Realms far wider than their people.** This reads false at small sizes.
+
+(a) fits history and the HOI4 goal best. It conflicts with the 2026-10-01
+choice "neighbours far, first contact years in" (memory: sparse contact). That
+was made to keep early envoys and contact rare. It could hold for the first
+centuries if peoples start far apart and spread toward each other: new towns
+founded outward, and contested middle ground filling in by 1000 to 1500.
+
 ## The ladder (what war looks like at each stage)
 
 | Stage | When (game year) | Ground | Fronts | Objectives |
@@ -92,9 +115,9 @@ If any of these disagreed with the map, the map would lie.
 
 **Decision needed from the user:**
 1. Should peoples hold country beyond their towns at all?
-2. Should the world stay this sparse (12 peoples, 6,000 km apart)? If it
-   does, realms meet only late, so the frontier stage is short and the HOI4
-   groove arrives late.
+2. Which of (a) a denser world, (b) larger peoples or (c) wider realms?
+   The sparse world (12 peoples, 6,000 km apart) and tens of thousands of
+   people per people cannot give fronts between peoples by 2200.
 3. Or should towns spread further and faster instead (founding reach and
    pace), with land staying as the towns' fields?
 
