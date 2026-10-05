@@ -60,6 +60,7 @@ var _name_row:BoxContainer
 var _result_row:BoxContainer
 var _details_scroll:ScrollContainer
 var _closing:=false
+var _fit_pending:=false
 
 ## Opens the ceremony on its own canvas layer; returns the ceremony control.
 static func open(host:Node,terrain_node:Node,voice_node:Node,entry:Dictionary)->Control:
@@ -88,7 +89,8 @@ func _ready()->void:
 	backdrop.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed:skip_reveal())
 	_build()
-	get_viewport().size_changed.connect(_fit)
+	get_viewport().size_changed.connect(_queue_fit)
+	stage.minimum_size_changed.connect(_queue_fit)
 	_fit()
 	_start_voice()
 	_theatre()
@@ -97,16 +99,25 @@ func _exit_tree()->void:
 	if is_instance_valid(voice) and voice.is_connected("ceremony_ready",_on_voice):voice.disconnect("ceremony_ready",_on_voice)
 	pause.release()
 
+func _queue_fit()->void:
+	if _fit_pending or _closing:return
+	_fit_pending=true
+	_fit.call_deferred()
+
 func _fit()->void:
+	_fit_pending=false
 	if not is_instance_valid(stage):return
 	var view:=get_viewport().get_visible_rect().size
-	stage.size=Vector2(minf(1500,view.x-20),minf(900,view.y-20))
-	stage.position=((view-stage.size)*.5).round()
 	if _middle!=null:_middle.vertical=view.x<760
 	if _name_row!=null:_name_row.vertical=view.x<760
 	if _details_scroll!=null:_details_scroll.custom_minimum_size=Vector2(240 if view.x>=760 else 0,65 if view.x<760 else 0)
 	if _result_row!=null:_result_row.vertical=view.x<850
 	if is_instance_valid(plate):plate.custom_minimum_size.y=clampf(view.y*.4,210,360)
+	# Wrapped content initially reports its minimum before containers assign
+	# the available width. Fit again when that minimum settles, so this modal
+	# never retains its transient opening height above or below the viewport.
+	stage.size=Vector2(minf(1500,view.x-20),minf(900,view.y-20))
+	stage.position=((view-stage.size)*.5).round()
 
 # ---------------------------------------------------------------- building
 

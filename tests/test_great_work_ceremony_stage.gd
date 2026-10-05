@@ -78,9 +78,8 @@ func test_compact_modal_keeps_name_and_close_inside_the_view()->void:
 	var modal:Control=auto_free(Ceremony.new())
 	modal.ceremony={"work_id":"missing_fixture_record","city_id":"none","city_name":"Ashford","title":"The Work of the Recorded People","attendees":[],"name_suggestions":["The Work of the Recorded People"]}
 	viewport.add_child(modal)
-	for frame in 8:await get_tree().process_frame
-	modal._fit()
-	for frame in 3:await get_tree().process_frame
+	# Exercise the live opening path: no external/manual fit after wrapping.
+	for frame in 20:await get_tree().process_frame
 	var bounds:=Rect2(Vector2.ZERO,Vector2(1138,640))
 	print("CEREMONY_FIT stage=",modal.stage.get_global_rect()," min=",modal.stage.get_combined_minimum_size()," close=",(modal.find_child("CloseCeremonyTop",true,false) as Control).get_global_rect()," name=",modal.dedicate_button.get_global_rect()," plate=",modal.plate.get_global_rect())
 	assert_bool(bounds.encloses(modal.stage.get_global_rect())).is_true()
