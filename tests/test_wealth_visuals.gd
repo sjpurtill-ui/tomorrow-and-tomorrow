@@ -54,6 +54,10 @@ func test_unchanged_refresh_retains_visual_nodes_and_navigation_works()->void:
 	for key:String in ["GoodsHeld","GoodsAvailability","Fifths","MakingIllustration"]:ids.append(board.find_child(key,true,false).get_instance_id())
 	for i in 5:board.refresh()
 	for i in ids.size():assert_int(board.find_child(["GoodsHeld","GoodsAvailability","Fifths","MakingIllustration"][i],true,false).get_instance_id()).is_equal(ids[i])
+	GameState.resource_stockpiles["Timber"]+=10.0
+	board.refresh()
+	assert_int(board.find_child("GoodsHeld",true,false).get_instance_id()).is_equal(ids[0])
+	assert_int(board.find_child("GoodsAvailability",true,false).get_instance_id()).is_equal(ids[1])
 	for key:String in ["SeeArms","SeeMaterials","SeeTrade","SeeStore"]:(board.find_child(key,true,false) as Button).emit_signal("pressed")
 	assert_array(destinations).is_equal([["production",2],["economy",1],["economy",3],["economy",0]])
 
