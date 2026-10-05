@@ -264,7 +264,7 @@ func test_submerged_drainage_is_not_drinking_water_in_either_daily_math_or_site_
 	var site:=coast._founding_site_advice(position,true)
 	assert_bool(site.valid).is_false()
 	assert_str(site.source_text).contains("Open water nearby")
-	assert_str(site.reason).contains("not a confirmed drinking source")
+	assert_str(site.reason).contains("the sea, and it is salt")
 	coast.charted_to=-1
 	assert_str(coast._founding_site_advice(position,true).title).is_equal("Water supply unknown")
 

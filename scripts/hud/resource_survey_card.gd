@@ -90,7 +90,7 @@ func show_survey(entries:Array,surface:Dictionary,advice:Dictionary={})->void:
 			var cell:=HBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.add_theme_constant_override("separation",6);grid.add_child(cell);icon(cell,spec[0],spec[3],18)
 			var name_label:=label(cell,String(spec[1]),13,T.INK_MUTED);name_label.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
 			surface_values[spec[0]]=label(cell,spec[2],14,T.INK);surface_values[spec[0]].text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
-	else:label(ground,"Open water. Nobody has yet said whether it is good to drink.",14,T.BODY,true)
+	else:label(ground,String(surface.get("water_words","Salt water: the sea. It is not fit to drink.")),14,T.BODY,true)
 	if not advice.is_empty():
 		var water:=HBoxContainer.new();water.add_theme_constant_override("separation",6);ground.add_child(water);icon(water,"water",advice.get("color",T.TEAL),18)
 		var water_text:=label(water,String(advice.get("source_text",advice.get("title","Drinking water not yet found"))),14,Kit.text_color(advice.get("color",T.TEAL)),true);water_text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
