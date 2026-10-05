@@ -13,7 +13,7 @@ const FORMS:={
 	"bridge":["first_crossing","The first crossing","bridge_span","cross","avenue","wave","A model span marks the path between the guests.","The dedication's witness crosses the marked threshold beside the model span."],
 	"causeway":["road_stone","The joining of the road","road_stones","place","avenue","point","A gap remains between the ceremonial paving stones.","The last ceremonial paving stone joins the two sides."],
 	"dam":["sluice_seal","The lifting of the sluice seal","sluice_gate","open","paired","nod_proud","A miniature sluice waits behind its ceremonial seal.","The miniature sluice lifts to mark the dedication."],
-	"colossus":["sculptors_reveal","The sculptor's unveiling","sculptor_figure","reveal","arc","clap_soft","A small sculptor's figure waits under a cloth.","The small sculptor's figure is unveiled before its greater likeness."],
+	"colossus":["sculptors_reveal","The sculptor's unveiling","sculptor_figure","reveal","arc","clap_soft","A small sculptor's figure waits under a cloth.","The sculptor's study is unveiled before the completed colossus."],
 	"garden":["first_branch","The first branch","garden_sapling","plant","circle","nod_slow","A ceremonial sapling waits above its planting bowl.","The sapling settles into the ceremonial planting bowl."],
 	"observatory":["sky_alignment","The first alignment","sky_marker","align","arc","point_up","A sighting marker waits beside the sky-wheel.","The marker turns into line with the ceremonial sky-wheel."],
 	"gate":["open_threshold","The open threshold","gate_arch","cross","avenue","wave","A small arch marks the gathering's threshold.","The dedication's witness passes through the ceremonial threshold."],

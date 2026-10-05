@@ -3,6 +3,8 @@ const Stage=preload("res://scripts/hud/great_work_ceremony_stage.gd")
 const Presentation=preload("res://scripts/hud/court_presentation.gd")
 const Ceremony=preload("res://scripts/hud/great_work_ceremony.gd")
 const Bridge=preload("res://scripts/great_works_audience.gd")
+const AudienceVoice=preload("res://scripts/audience_voice.gd")
+const Concept=preload("res://scripts/wonder_concept.gd")
 
 class DedicationFacade extends RefCounted:
 	var allowed:=false
@@ -76,6 +78,36 @@ func test_recorded_official_uses_the_shared_court_body_and_speaking_path()->void
 	assert_str(scene.diagnostics().camera_shot).is_equal("work")
 	scene.settle()
 	assert_bool(scene.diagnostics().viewport_active).is_false()
+
+func test_named_envoy_speech_focuses_its_recorded_body_after_settling()->void:
+	var tower:=Concept.make_id("tower","bind_tribes","modest","concrete",5,"focus_test")
+	for work:String in ["ancestor_ring",tower]:
+		for guests in [2,4]:
+			var context:={"key":work,"title":"The Recorded Work","city_name":"Ashford","outcome":"success","architect":{"id":"focus_builder","name":"Recorded builder","age":40,"sex":"male"},"official":{"person_id":23,"name":"Recorded keeper","age":40,"sex":"male"},"attendees":[]}
+			for index in guests:context.attendees.append({"civ_id":"focus_guest_%d" % index,"name":"Recorded people %d" % index})
+			var voice:Node=auto_free(AudienceVoice.new())
+			var lines:Array=voice.ceremony_named_offline(context,"The Witness Work")
+			assert_int(lines.size()).is_equal(2)
+			var envoy:Dictionary=lines.back()
+			assert_str(envoy.role).is_equal("envoy")
+			assert_str(envoy.civ_id).is_equal("focus_guest_0")
+			var scene:Control=Stage.make({"id":work,"status":"functioning","fraction":1.0},context)
+			scene.size=Vector2(760,360);add_child(scene)
+			await get_tree().process_frame
+			assert_int(scene.diagnostics().body_count).is_equal(guests+2)
+			scene.settle();scene.dedication()
+			for animate in [false,true]:
+				for line:Dictionary in lines:scene.speak(line,animate)
+				scene.settle()
+				var body:Node3D=scene.bodies.envoy_0
+				assert_str(body.get_meta("ceremony_person").name).is_equal(envoy.speaker)
+				var expected:=body.position+Vector3(4.4,2.8,7.8)
+				var face:Vector2=scene.lens.unproject_position(body.position+Vector3(0,1.5,0))
+				print("NAMED_ENVOY_FOCUS work=",work," cast=",guests+2," animated=",animate," camera_error=",scene.lens.position.distance_to(expected)," face=",face)
+				assert_float(scene.lens.position.distance_to(expected)).is_less(.001)
+				assert_float(absf(face.x-float(scene.view.size.x)*.5)).is_less(20.0)
+				assert_bool(scene.diagnostics().viewport_active).is_false()
+			scene.queue_free();await get_tree().process_frame
 
 func test_dead_architect_is_credited_in_record_but_not_cast()->void:
 	var saved:=HistoricalFigures.people.duplicate(true)
