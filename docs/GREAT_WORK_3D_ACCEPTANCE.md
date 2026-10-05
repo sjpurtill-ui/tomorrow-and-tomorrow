@@ -1,38 +1,70 @@
 # Great Work 3D acceptance
 
-The new `tests/great_work_3d_acceptance.tscn` mounts the actual Great Works
-Atlas and AudienceDirector dedication UI. It reuses the existing experience
-probe's deterministic in-memory founder/contact setup (seed 515151), commissions
-through `GreatWorks.commission`, and supplies explicit prepared elapsed work.
-It never loads or saves a campaign, changes player preferences, or opens the
-current game. The fixture host only owns the simulation-speed interface.
+Final private GPU acceptance passes **252/252 checks across twelve cases and
+eighteen captures**, with no engine/script errors and confirmed process exit 0.
+The run uses Godot 4.7.2, Compatibility/OpenGL 3.3, and an NVIDIA RTX 4090.
+Evidence is local under `artifacts/great-work-accepted-gpu/capture.json`, with
+`artifacts/great-work-accepted-gpu.log` and its `.runner.txt` companion. The
+runner's process was PID 42772; it rendered on a private, non-input desktop.
 
-Twelve bounded cases cover early foundations, raising and crowning; a real
-material shortage; an engine-applied collapse; middle and year-3000 construction;
-daily-engine completion; and offering, ribbon, illumination and narrow/dark
-unveiling dedications. Prepared middle/industrial/future states use game years
-2000/2700/3000 and actual catalog skills, including clothing and lighting.
-Known skills gate each commission. Year 3000 uses the currently supported
-modern tier 5; calendar time alone does not invent a new construction tier.
-Prepared near-completion goes through `advance_record` and its seeded outcome.
-These are presentation/contract tests, not a continuous campaign simulation.
+Runtime source in the acceptance checkout is
+`1c07e5a1cc4c962965d49e69b774afb3dccf5d10`, including origin/main
+`8bd11fddd7bc0f177c2c914fa992527451d7d026` and the calendar wording update.
+It includes Model/View through `ec691b17`, Atlas through `928d999f`, ceremony
+through `5fd87a55` (including `434a08f5` framing), and the queued court fade
+fix `8a2e2d29`. Runtime GDScript content matches root integration `72ea607b`.
 
-Strict mode (`--require-3d`) requires the selected Atlas model and ceremonial
-stage diagnostics, real geometry, bounded cast, orbit/zoom retention and paused
-idle rendering. It checks the Atlas watch control against the existing host
-clock, starts Normal (speed 3) from a previously paused host, restores that pause,
-and reads a real daily progress change. No visual helper advances the
-simulation itself. Base mode validates the engine/UI fixture before integration
-and does not claim 3D acceptance.
+The probe mounts the actual Great Works Atlas and AudienceDirector dedication
+UI. It reuses the existing experience probe's deterministic in-memory
+founder/contact setup (seed 515151), commissions through
+`GreatWorks.commission`, and supplies explicit prepared elapsed construction.
+Active crews come from a real daily work pass. Near-completion finishes through
+`advance_record` and its seeded outcome. Shortage uses actual missing materials;
+the ruin uses the engine's collapse outcome helper.
 
-Ceremony checks require opt-in opening, no gifts/rewards merely for preview,
-postpone/reopen preservation, naming through the real engine, gift conservation
-across donor/recipient stores, duplicate-delivery rejection and pause cleanup.
-Existing Great Works suites remain the authority for seeded odds, named deaths,
-owner scoping, restoration, legacy loads, rivalry and policy effects.
+| Cases | Coverage |
+| --- | --- |
+| 01-03 | Early foundations, raising and crowning; live daily progress from an initially paused host |
+| 04-05 | Material-stalled work and an engine-recorded collapse |
+| 06-08 | Middle construction, year-3000 construction, and daily-engine completion |
+| 09-12 | Offering, ribbon, illumination, and narrow/dark unveiling dedications |
 
-Run with an ignored acceptance-specific `override.cfg`, `--audio-driver Dummy`,
-and the explicit worker/integration project path:
+Prepared middle/industrial/future states use game years 2000/2700/3000 and
+actual catalog skills, including clothing and lighting. Year 3000 uses the
+supported modern tier 5; the calendar does not invent a new construction tier.
+These are prepared-record presentation/contract tests, not a continuous
+multi-century campaign.
+
+All eight Atlas cases contain actual meshes, correctly reflect progress and
+crew status, retain geometry during orbit/zoom, and stop requesting idle redraws.
+The live case starts Normal (speed 3), reads real daily work, retains its model
+within the same visible construction course, and restores the original pause.
+To verify actual GPU idling, each case records viewport pixels, hides only its
+fixture geometry without requesting a render, and confirms identical pixels.
+An explicit camera request then produces different pixels; geometry is restored
+before capture. All eight sleep/wake pairs pass. This deliberately tests the
+rendered image instead of the cached node update-mode getter
+([Godot source](https://github.com/godotengine/godot/blob/master/scene/main/viewport.cpp)).
+
+Ceremonies verify opt-in opening, no gifts/rewards for preview, postpone/reopen
+preservation, names recorded through the engine, real planned gifts conserved
+between donor and recipient stocks, duplicate-delivery rejection, and pause
+cleanup. Every cast record mounts a real court figure, with at most six people.
+Dedication retains the monument and settles the viewport. All naming, postpone,
+dedicate and result-close controls remain reachable at 1920x1080 and 1138x640.
+Whole-work and speaker/ritual views were visually inspected, including dark
+unveiling and the year-3000 opening lights.
+
+The acceptance owns only this document and the two new
+`tests/great_work_3d_acceptance` files. It loads/saves no campaign and changes no
+player preferences or save format. Its fixture host only provides the simulation
+speed interface; the real world clock is not run for centuries. Existing suites
+remain the authority for seeded odds, deaths, owner scoping, restoration, legacy
+loads, rivalry and policy effects. This run verifies bounded geometry and idle
+render behavior, not full-world frame-rate performance or other GPU backends.
+
+Run with an ignored acceptance-specific `override.cfg` whose custom userdata
+name contains `acceptance`, Dummy audio, and an explicit isolated project path:
 
 ```powershell
 & $Godot --headless --audio-driver Dummy --path $Project `
@@ -41,42 +73,16 @@ and the explicit worker/integration project path:
 
 & "$Project/tools/run_isolated_gpu_probe.ps1" -Godot $Godot -Project $Project `
   -Scene res://tests/great_work_3d_acceptance.tscn `
-  -LogFile "$Project/artifacts/great-work-capture.log" `
-  -UserArguments '--great-work-acceptance --require-3d --capture' -TimeoutSeconds 480
+  -LogFile "$Project/artifacts/great-work-accepted-gpu.log" `
+  -UserArguments '--great-work-acceptance --require-3d --capture --out=res://artifacts/great-work-accepted-gpu' `
+  -TimeoutSeconds 480
 ```
 
-`--case=<case-id>` selects one fixture; `--out=res://artifacts/<folder>` changes
-the output directory. Functional/capture JSON reports stay separate. A pass
-requires the final `GREAT_WORK_3D_ACCEPTANCE` summary, no failures or engine/script
-errors, and confirmed process exit. Captures run only on the private desktop.
-Generated images, logs, imports and test userdata remain local.
-
-Base: `9984106042088ef8f499128d5dfa740602f8116a`. The final base-mode fixture run
-passed 125/129 checks: the four old ceremony layouts exceeded the viewport, and
-the old ruin plate emitted polygon triangulation errors. Both findings were
-reported to their runtime owners. Real daily crews and real-gift checks passed;
-strict 3D acceptance is pending runtime integration.
-This delivery owns only this document
-and the two new probe files; no runtime or save-format changes.
-
-The first combined private GPU run used model `2284ad86`, Atlas `15e95fed`
-and ceremony `580067c0`. It passed 219/239 checks across all twelve cases and
-saved eighteen images. All twenty failures were ceremony viewport/essential
-control bounds, in all four dedication fixtures. Geometry, four capability-led
-ceremony modes, real transfers, retained models, idle rendering and pause
-contracts passed. The engine log was clean; the probe exited 1 for these
-assertions. This is a held visual checkpoint, not final acceptance. The owner
-is correcting the actual GPU layout. Its evidence is local under
-`artifacts/great-work-combined-gpu` and `artifacts/great-work-combined-gpu.log`.
-
-After model polish `e1a6652d` and ceremony layout fix `d26130cb`, the full
-private GPU run passes **244/244** checks with eighteen captures, no engine or
-script errors, and confirmed process exit 0. All four ceremonies fit their
-windows, including the name, dedicate, postpone and result-close controls.
-Each cast record has an actual court figure. The early live case advances
-within one construction course and retains the same geometry root. Evidence:
-`artifacts/great-work-final-gpu/capture.json` and
-`artifacts/great-work-final-gpu.log` (runner PID 64728). This validates the
-mechanics and layout through those source commits. Further final framing and
-material polish, including Atlas `928d999f`, still requires updated captures;
-the preceding construction screenshots do not represent that later revision.
+`--case=<case-id>` selects one fixture; `--out=...` changes its output directory.
+Strict mode requires the actual 3D views. Base mode only validates the prepared
+engine/UI fixture and must not be reported as 3D acceptance. GPU pixel checks
+and captures are skipped headlessly. A pass requires the final summary, no
+failures or engine/script errors, and confirmed exit. Generated images, logs,
+imports and test userdata remain local. Earlier `combined`, `final` and
+`delivery` artifact folders are intermediate evidence; `accepted` is the
+complete passing run on the final runtime above.
