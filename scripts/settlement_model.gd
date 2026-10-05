@@ -65,6 +65,7 @@ const CITY_RESOURCE_DEFAULTS:={
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]
 var _claim_shape_cache:Dictionary={}
+var _field_geometry_repair_attempts:Dictionary={}
 # CITY_RESOURCE_DEFAULTS keys as StringNames for the per-scope field swap.
 static var _city_resource_fields:Array[StringName]=[]
 static var _city_resource_keys:Array=[]
@@ -1575,6 +1576,7 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 		route_id+=1
 
 func process_local_month(context:Dictionary={})->Array[Dictionary]:
+	_repair_legacy_field_geometry(context)
 	# Keep registry refresh even when morphology is idle. Founding or summary
 	# repair still needs the real local population and follows the full path.
 	var state:=WorldSimulation.state
@@ -1586,6 +1588,7 @@ func process_local_month(context:Dictionary={})->Array[Dictionary]:
 
 func process_month(context:Dictionary={})->Array[Dictionary]:
 	ensure_founded()
+	_repair_legacy_field_geometry(context)
 	if WorldSimulation.state.settlement_plots.is_empty(): return []
 	var month_day:=int(floor(WorldSimulation.state.elapsed_days/30.0))*30
 	if month_day<=WorldSimulation.state.last_morphology_day: return []
@@ -2214,148 +2217,315 @@ func _create_field_plot(day:int,fertile_ground:Dictionary,field_index:int,contex
 	var plot_seed:=hash("%d:settlement_field:%d" % [WorldSimulation.state.world_seed,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
-	var settlement_world:=Vector2(WorldSimulation.state.settlement_founded_at.x,WorldSimulation.state.settlement_founded_at.z)
-	var deposit_position:Vector3=fertile_ground.get("position",WorldSimulation.state.settlement_founded_at)
-	var direction:=Vector2(deposit_position.x,deposit_position.z)-settlement_world
-	if direction.length()<0.01: direction=Vector2.from_angle(rng.randf()*TAU)
-	direction=direction.normalized()
-	# A single authoritative plot represents a household-scale smallholding.  The
-	# former 14-26 m base radius produced 0.4-0.8 ha cards that dominated the close
-	# aerial view; several smaller inherited parcels create the observed patchwork.
-	var radius:=rng.randf_range(0.010,0.019)
-	var center:=Vector2.ZERO
-	var found:=false
-	var best_center:=Vector2.ZERO
-	var best_site_score:=-INF
-	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
-	var height_callable:Callable=context.get("terrain_height_at",Callable())
-	var river_callable:Callable=context.get("river_distance_at",Callable())
-	var drainage_tangent_callable:Callable=context.get("drainage_tangent_at",Callable())
-	var moisture_callable:Callable=context.get("moisture_at",Callable())
-	var buildable_callable:Callable=context.get("buildable_land_at",Callable())
-	var existing_fields:Array[Dictionary]=[]
-	for existing in WorldSimulation.state.settlement_plots:
-		if String(existing.get("land_use",""))=="field" and String(existing.get("status","")) not in ["ruin","reclaimed"]: existing_fields.append(existing)
-	for attempt in 80:
-		if not existing_fields.is_empty() and rng.randf()<0.78:
-			var anchor:Dictionary=existing_fields[rng.randi_range(0,existing_fields.size()-1)]
-			var anchor_center:=Vector2(anchor.get("centroid",Vector2.ZERO))
-			var anchor_radius:=sqrt(_polygon_area_km2(anchor.get("polygon",PackedVector2Array()))/PI)
-			var seam_angle:=direction.angle()+PI*0.5*rng.randi_range(-1,1)+rng.randf_range(-0.42,0.42)
-			center=anchor_center+Vector2.from_angle(seam_angle)*(anchor_radius+radius+rng.randf_range(0.0015,0.0040))
-		else:
-			var angle:=direction.angle()+rng.randf_range(-0.88,0.88)+float(field_index)*0.17
-			center=Vector2.from_angle(angle)*rng.randf_range(0.11,0.24)
-		var clear:=true
-		for existing in WorldSimulation.state.settlement_plots:
-			var existing_polygon:PackedVector2Array=existing.get("polygon",PackedVector2Array())
-			var existing_radius:=sqrt(_polygon_area_km2(existing_polygon)/PI)
-			var clearance_factor:=1.045 if String(existing.get("land_use",""))=="field" else 1.12
-			if center.distance_to(Vector2(existing.get("centroid",Vector2.ZERO)))<(radius+existing_radius)*clearance_factor:
-				clear=false
-				break
-		if not clear: continue
-		var world_x:=origin.x+center.x
-		var world_z:=origin.z+center.y
-		if buildable_callable.is_valid() and not bool(buildable_callable.call(world_x,world_z)): continue
-		var site_score:=rng.randf_range(-0.035,0.035)
-		if height_callable.is_valid():
-			var slope_sample:=0.036
-			var slope_gradient:=Vector2(
-				float(height_callable.call(world_x+slope_sample,world_z))-float(height_callable.call(world_x-slope_sample,world_z)),
-				float(height_callable.call(world_x,world_z+slope_sample))-float(height_callable.call(world_x,world_z-slope_sample))
-			)/(slope_sample*2.0)
-			var slope:=slope_gradient.length()
-			if slope>0.30: continue
-			site_score-=slope*3.8
-		if river_callable.is_valid():
-			var candidate_water_distance:=float(river_callable.call(world_x,world_z))
-			if candidate_water_distance<0.014: continue
-			if candidate_water_distance<INF:
-				# Early hand cultivation favors moist but non-inundated ground. The
-				# optimum remains broad because swales can be intermittent or unreliable.
-				site_score+=exp(-absf(candidate_water_distance-0.095)/0.14)*0.82
-		if moisture_callable.is_valid():
-			var candidate_moisture:=float(moisture_callable.call(world_x,world_z))
-			site_score+=clampf(candidate_moisture+0.18,-0.18,0.42)*0.68
-		if not existing_fields.is_empty(): site_score+=0.24
-		# Retain the surveyed soil bearing without forcing a geometric ray of fields.
-		site_score+=maxf(0.0,center.normalized().dot(direction))*0.18
-		if site_score>best_site_score:
-			best_site_score=site_score
-			best_center=center
-			found=true
-	if not found: return {}
-	center=best_center
+	var geometry:=_choose_field_geometry(plot_seed,field_index,fertile_ground,context,WorldSimulation.state.settlement_plots)
+	if geometry.is_empty():return {}
 	WorldSimulation.state.next_settlement_plot_id+=1
-	var world_x:=origin.x+center.x
-	var world_z:=origin.z+center.y
-	var river_distance:=INF
-	if river_callable.is_valid(): river_distance=float(river_callable.call(world_x,world_z))
-	var moisture:=0.0
-	if moisture_callable.is_valid(): moisture=float(moisture_callable.call(world_x,world_z))
-	var field_pattern:="dryland_patchwork"
-	if river_distance<0.42: field_pattern="irrigated_beds"
-	elif moisture>0.04: field_pattern="smallholder_mosaic"
-	# Crop identity is authoritative simulation state, not a renderer tint. Early
-	# cultivation is heterogeneous even before formal botany: households favor
-	# different gathered grains, pulses, roots, fibres, and mixed garden staples.
+	var polygon:PackedVector2Array=geometry.polygon
+	var field_pattern:=String(geometry.field_pattern)
 	var crop_families:=["mixed_staples","grain","pulses","roots","fibre_crop"]
 	var crop_family:String=crop_families[absi(plot_seed)%crop_families.size()]
-	if field_pattern=="irrigated_beds" and absi(plot_seed)%3==0: crop_family="garden_beds"
-	var field_rotation:=direction.angle()+rng.randf_range(-0.68,0.68)+sin(float(field_index)*1.73)*0.22
-	if drainage_tangent_callable.is_valid() and river_distance<0.24:
-		var drainage_tangent:Vector2=drainage_tangent_callable.call(world_x,world_z)
-		if drainage_tangent.length_squared()>0.1:
-			# Long field edges and access strips tend to follow a nearby channel while
-			# retaining household-scale irregularity. The influence fades before the
-			# broad 'irrigated' classification does, preventing ruler-straight valleys.
-			var drainage_alignment:=clampf(1.0-river_distance/0.24,0.0,1.0)*0.68
-			field_rotation=lerp_angle(field_rotation,drainage_tangent.angle(),drainage_alignment)
-	if height_callable.is_valid():
-		var sample_radius:=0.045
-		var gradient:=Vector2(
-			float(height_callable.call(world_x+sample_radius,world_z))-float(height_callable.call(world_x-sample_radius,world_z)),
-			float(height_callable.call(world_x,world_z+sample_radius))-float(height_callable.call(world_x,world_z-sample_radius))
-		)/(sample_radius*2.0)
-		if gradient.length()>0.002:
-			var contour_angle:=Vector2(-gradient.y,gradient.x).angle()
-			field_rotation=lerp_angle(field_rotation,contour_angle,clampf(gradient.length()*7.5,0.18,0.82))
-	var polygon:=_irregular_field_polygon(center,radius,plot_seed,field_rotation,field_pattern)
+	if field_pattern=="irrigated_beds" and absi(plot_seed)%3==0:crop_family="garden_beds"
 	return {
 		"id":plot_id,"seed":plot_seed,"nucleus_id":1,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
-		"land_use":"field","secondary_use":"seasonal_grazing","form":"hand_cultivated_clearance","field_pattern":field_pattern,"crop_family":crop_family,"cultivation_phase":"prepared","crop_cover":0.16,"material_family":"earth","material_mix":{"Soil":0.86,"Fiber Plants":0.04},"construction_recipe":"clearing_and_hand_cultivation","supply_provenance":{"Fertile Soil":String(fertile_ground.get("id","local occurrence"))},"replacement_debt":{},"roof_coverage":0.0,"storeys":0,
+		"land_use":"field","secondary_use":"seasonal_grazing","form":"hand_cultivated_clearance","field_geometry_version":2,"field_pattern":field_pattern,"crop_family":crop_family,"cultivation_phase":"prepared","crop_cover":0.16,"material_family":"earth","material_mix":{"Soil":0.86,"Fiber Plants":0.04},"construction_recipe":"clearing_and_hand_cultivation","supply_provenance":{"Fertile Soil":String(fertile_ground.get("id","local occurrence"))},"replacement_debt":{},"roof_coverage":0.0,"storeys":0,
 		"resident_capacity":0,"resident_count":0,"worker_capacity":12,"worker_count":mini(12,int(WorldSimulation.state.population_allocations.get("Food",0))),"storage_capacity":0.0,"condition":0.82,"maintenance_debt":0.02,"service_access":0.28,"hazard_exposure":rng.randf_range(0.08,0.22),"prosperity":0.30,
 		"status":"active","reclamation":0.0,"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied","displaced_households":0,"returning_households":0,"claim_pressure":0.0,
 		"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
+
+## Repair only geometry made by the obsolete strip generator. This is a
+## versioned layout correction, not a crop/labor event or new land acquisition.
+## Existing hand-authored, archaeological and shared-route plots stay in place.
+func _repair_legacy_field_geometry(context:Dictionary)->int:
+	var buildable:Callable=context.get("buildable_land_at",Callable())
+	var height:Callable=context.get("terrain_height_at",Callable())
+	if not buildable.is_valid() or not height.is_valid():return 0
+	var state:=WorldSimulation.state
+	var candidates:Array[Dictionary]=[]
+	for plot in state.settlement_plots:
+		if String(plot.get("land_use",""))!="field" or String(plot.get("form",""))!="hand_cultivated_clearance":continue
+		if String(plot.get("status","")) not in ["active","stressed","damaged","vacant"] or int(plot.get("field_geometry_version",0))>=2:continue
+		if int(plot.get("seed",0))!=hash("%d:settlement_field:%d" % [state.world_seed,int(plot.get("id",-1))]):continue
+		var area:=float(plot.get("area_ha",0.0))
+		if not is_finite(area) or area<=0.0 or area>1.0:continue
+		candidates.append(plot)
+	if candidates.is_empty() or candidates.size()>72:return 0
+	var scope_key:=[state.world_seed,state.settlement_founded_at]
+	var attempt_key:=[floori(state.elapsed_days/30.0),state.morphology_revision]
+	if _field_geometry_repair_attempts.get(scope_key,[])==attempt_key:return 0
+	# Failed terrain/space attempts may retry next month or after fabric changes,
+	# never once per frame while waiting for a suitable place.
+	_field_geometry_repair_attempts[scope_key]=attempt_key
+	if _field_geometry_repair_attempts.size()>MAX_PLAYER_SETTLEMENTS:_field_geometry_repair_attempts.erase(_field_geometry_repair_attempts.keys()[0])
+	var fertile:=_recognized_fertile_ground()
+	if fertile.is_empty():return 0
+	var eligible:Array[Dictionary]=[]
+	for plot in candidates:
+		var pinned:=false
+		var frontage:=int(plot.get("frontage_route_id",-1))
+		for other in state.settlement_plots:
+			if other!=plot and frontage>=0 and int(other.get("frontage_route_id",-2))==frontage:pinned=true;break
+		if pinned:continue
+		for route in state.settlement_routes:
+			if int(route.get("id",-2))==frontage and String(route.get("kind",""))!="field_track":pinned=true;break
+			if String(route.get("kind",""))=="field_track":continue
+			for point in route.get("points",PackedVector2Array()):
+				if Vector2(point).distance_squared_to(Vector2(plot.centroid))<0.00000001:pinned=true;break
+			if pinned:break
+		if not pinned:eligible.append(plot)
+	# Removing a shared/pinned field can make its track an inherited attachment
+	# to another candidate. Propagate pins until every modified track is owned
+	# exclusively by a field that is moving in this same atomic correction.
+	for pass_index in candidates.size():
+		var moving_routes:Dictionary={}
+		for plot in eligible:
+			var route_id:=int(plot.get("frontage_route_id",-1))
+			if route_id>=0:moving_routes[route_id]=true
+		var retained:Array[Dictionary]=[]
+		for plot in eligible:
+			var pinned:=false
+			for route in state.settlement_routes:
+				if String(route.get("kind",""))=="field_track" and moving_routes.has(int(route.get("id",-2))):continue
+				for point in route.get("points",PackedVector2Array()):
+					if Vector2(point).distance_squared_to(Vector2(plot.centroid))<0.00000001:pinned=true;break
+				if pinned:break
+			if not pinned:retained.append(plot)
+		if retained.size()==eligible.size():break
+		eligible=retained
+	if eligible.is_empty():return 0
+	eligible.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.id)<int(b.id))
+	var moving_ids:Dictionary={}
+	var total_area:=0.0
+	for plot in eligible:
+		moving_ids[int(plot.id)]=true
+		total_area+=float(plot.get("area_ha",_polygon_area_km2(plot.polygon)*100.0))
+	var occupied:Array[Dictionary]=[]
+	for plot in state.settlement_plots:
+		if not moving_ids.has(int(plot.get("id",-1))):occupied.append(plot)
+	var layout_context:=context.duplicate()
+	layout_context["field_layout_area_ha"]=total_area
+	var replacements:Array[Dictionary]=[]
+	var route_points:Dictionary={}
+	for index in eligible.size():
+		var plot:Dictionary=eligible[index]
+		var area:=float(plot.get("area_ha",_polygon_area_km2(plot.polygon)*100.0))
+		if area<=0.0:return 0
+		var geometry:=_choose_field_geometry(int(plot.seed),index,fertile,layout_context,occupied,area)
+		if geometry.is_empty():return 0
+		var replacement:=plot.duplicate()
+		replacement["polygon"]=geometry.polygon
+		replacement["centroid"]=geometry.centroid
+		replacement["field_geometry_version"]=2
+		# Retain route identity/condition/history; only its dedicated field access
+		# points are rebuilt. Earlier holdings lead back to the inherited town.
+		var closest:=Vector2.ZERO
+		var nearest:=INF
+		for other in occupied:
+			var distance:=Vector2(geometry.centroid).distance_squared_to(Vector2(other.get("centroid",Vector2.ZERO)))
+			if distance<nearest:
+				nearest=distance
+				closest=Vector2(other.get("centroid",Vector2.ZERO))
+		route_points[int(plot.get("frontage_route_id",-1))]=_field_access_points(Vector2(geometry.centroid),closest,int(plot.id))
+		replacements.append(replacement)
+		occupied.append(replacement)
+	# Commit the complete validated plan atomically. No failed partial layout can
+	# overlap an unprocessed legacy holding or consume plot IDs/history/labor.
+	for index in eligible.size():
+		for key in ["polygon","centroid","field_geometry_version"]:eligible[index][key]=replacements[index][key]
+	for route in state.settlement_routes:
+		var route_id:=int(route.get("id",-2))
+		if String(route.get("kind",""))=="field_track" and route_points.has(route_id):route["points"]=route_points[route_id]
+	state.morphology_revision+=1
+	return eligible.size()
+
+func _field_access_points(center:Vector2,finish:Vector2,plot_id:int)->PackedVector2Array:
+	var direction:=finish-center
+	var side:=Vector2(-direction.y,direction.x).normalized()
+	var bend:=minf(0.004,direction.length()*0.16)
+	return PackedVector2Array([center,center.lerp(finish,0.36)+side*sin(float(plot_id*29+WorldSimulation.state.world_seed))*bend,center.lerp(finish,0.72)-side*sin(float(plot_id*17+WorldSimulation.state.world_seed)*0.67)*bend*0.62,finish])
+
+## Stable landscape patches are independent of the newest field. A fertile-soil
+## bearing suggests where to start; it is not a direction for an endless frontier.
+func _field_patch_centers(direction:Vector2)->PackedVector2Array:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d:field_patches:%s" % [WorldSimulation.state.world_seed,WorldSimulation.state.settlement_founded_at])
+	var patches:=PackedVector2Array()
+	for index in 4:
+		var angle:float=direction.angle()+[-0.24,1.15,-1.48,2.65][index]+rng.randf_range(-0.23,0.23)
+		patches.append(Vector2.from_angle(angle)*rng.randf_range(0.105,0.165))
+	return patches
+
+func _choose_field_geometry(plot_seed:int,field_index:int,fertile_ground:Dictionary,context:Dictionary,occupied:Array[Dictionary],area_ha:float=0.0)->Dictionary:
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=plot_seed
+	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
+	var deposit:Vector3=fertile_ground.get("position",WorldSimulation.state.settlement_founded_at)
+	var direction:=Vector2(deposit.x-origin.x,deposit.z-origin.z).normalized()
+	if direction.length_squared()<0.1:direction=Vector2.from_angle(float(absi(WorldSimulation.state.world_seed)%6283)/1000.0)
+	var patches:=_field_patch_centers(direction)
+	var radius:=rng.randf_range(0.011,0.018)
+	if area_ha>0.0:radius=sqrt(area_ha/100.0/3.5)
+	var fields:Array[Dictionary]=[]
+	var occupied_bounds:Array[Rect2]=[]
+	var patch_counts:=[0,0,0,0]
+	for plot in occupied:
+		occupied_bounds.append(_field_polygon_bounds(plot.get("polygon",PackedVector2Array())))
+		if String(plot.get("land_use",""))=="field" and String(plot.get("status","")) not in ["ruin","reclaimed"]:
+			fields.append(plot)
+			patch_counts[_nearest_field_patch(Vector2(plot.centroid),patches)]+=1
+	var height_at:Callable=context.get("terrain_height_at",Callable())
+	var river_at:Callable=context.get("river_distance_at",Callable())
+	var moisture_at:Callable=context.get("moisture_at",Callable())
+	var drainage_at:Callable=context.get("drainage_tangent_at",Callable())
+	var best:Dictionary={}
+	var best_score:=-INF
+	# Migration may retain larger historical holdings. Scale its search by actual
+	# cultivated area, without changing the retained area or lifting the 72 cap.
+	var spread:=maxf(0.060,sqrt(maxf(float(context.get("field_layout_area_ha",0.0)),0.0)/100.0/PI)*0.85)
+	spread=maxf(spread,minf(0.12,0.045+sqrt(float(field_index))*0.007))
+	for attempt in 112:
+		var patch_index:=attempt%patches.size()
+		var center:=patches[patch_index]+Vector2.from_angle(rng.randf()*TAU)*sqrt(rng.randf())*spread
+		if attempt%3==0 and not fields.is_empty():
+			var anchor:Dictionary=fields[rng.randi_range(0,fields.size()-1)]
+			var anchor_radius:=sqrt(_polygon_area_km2(anchor.polygon)/PI)
+			center=Vector2(anchor.centroid)+Vector2.from_angle(rng.randf()*TAU)*(anchor_radius+radius+rng.randf_range(0.003,0.013))
+			patch_index=_nearest_field_patch(center,patches)
+		var patch_distance:=center.distance_to(patches[patch_index])
+		if patch_distance>spread*1.35 or center.length()<0.058:continue
+		var x:=origin.x+center.x
+		var z:=origin.z+center.y
+		var water_distance:=float(river_at.call(x,z)) if river_at.is_valid() else INF
+		if water_distance<0.014:continue
+		var moisture:=float(moisture_at.call(x,z)) if moisture_at.is_valid() else 0.0
+		var pattern:="irrigated_beds" if water_distance<0.42 else ("smallholder_mosaic" if moisture>0.04 else "dryland_patchwork")
+		var rotation:=patches[patch_index].angle()+rng.randf_range(-0.58,0.58)
+		if drainage_at.is_valid() and water_distance<0.24:
+			var tangent:Vector2=drainage_at.call(x,z)
+			if tangent.length_squared()>0.1:rotation=lerp_angle(rotation,tangent.angle(),(1.0-water_distance/0.24)*0.68)
+		var slope:=0.0
+		if height_at.is_valid():
+			var step:=0.018
+			var gradient:=Vector2(float(height_at.call(x+step,z))-float(height_at.call(x-step,z)),float(height_at.call(x,z+step))-float(height_at.call(x,z-step)))/(step*2.0)
+			slope=gradient.length()
+			if slope>0.30:continue
+			if slope>0.002:rotation=lerp_angle(rotation,Vector2(-gradient.y,gradient.x).angle(),clampf(slope*7.5,0.18,0.82))
+		var polygon:=_irregular_field_polygon(center,radius,plot_seed,rotation,pattern)
+		if area_ha>0.0:
+			var scale:=sqrt(area_ha/100.0/maxf(_polygon_area_km2(polygon),0.00000001))
+			for vertex in polygon.size():polygon[vertex]=center+(polygon[vertex]-center)*scale
+		if not _field_polygon_clear(polygon,occupied,occupied_bounds):continue
+		var nearby:=0
+		var closest:=INF
+		for field in fields:
+			var distance:=center.distance_to(Vector2(field.centroid))
+			closest=minf(closest,distance)
+			if distance<0.075:nearby+=1
+		# Several neighbours reward filling a gap, while a long walk and a thin
+		# extension away from a patch cost more than simply following one field.
+		var score:=minf(float(nearby),3.0)*0.15-patch_distance*3.0-center.length()*2.2-slope*3.8
+		score-=maxf(0.0,float(patch_counts[patch_index]-5))*0.048
+		if closest<0.075:score+=0.16
+		score+=maxf(0.0,center.normalized().dot(direction))*0.055
+		if water_distance<INF:score+=exp(-absf(water_distance-0.095)/0.14)*0.48
+		score+=clampf(moisture+0.18,-0.18,0.42)*0.50+rng.randf_range(-0.045,0.045)
+		if score<=best_score:continue
+		# Only a candidate that can beat the incumbent pays for the complete
+		# footprint sampling. Polygon collision has already used coarse bounds.
+		if not _field_footprint_buildable(polygon,context):continue
+		best_score=score
+		best={"polygon":polygon,"centroid":_polygon_centroid(polygon),"field_pattern":pattern}
+	return best
+
+func _nearest_field_patch(center:Vector2,patches:PackedVector2Array)->int:
+	var best:=0
+	for index in range(1,patches.size()):
+		if center.distance_squared_to(patches[index])<center.distance_squared_to(patches[best]):best=index
+	return best
+
+func _field_polygon_bounds(polygon:PackedVector2Array)->Rect2:
+	if polygon.is_empty():return Rect2()
+	var bounds:=Rect2(polygon[0],Vector2.ZERO)
+	for point in polygon:bounds=bounds.expand(point)
+	return bounds
+
+func _field_polygon_clear(polygon:PackedVector2Array,occupied:Array[Dictionary],bounds:Array[Rect2])->bool:
+	var nearby:=_field_polygon_bounds(polygon).grow(0.004)
+	for index in occupied.size():
+		var other:PackedVector2Array=occupied[index].get("polygon",PackedVector2Array())
+		if other.size()<3 or not nearby.intersects(bounds[index]):continue
+		if not Geometry2D.intersect_polygons(polygon,other).is_empty():return false
+		var gap:=0.0020 if String(occupied[index].get("land_use",""))=="field" else 0.0035
+		for a in polygon.size():
+			for b in other.size():
+				if polygon[a].distance_to(Geometry2D.get_closest_point_to_segment(polygon[a],other[b],other[(b+1)%other.size()]))<gap:return false
+				if other[b].distance_to(Geometry2D.get_closest_point_to_segment(other[b],polygon[a],polygon[(a+1)%polygon.size()]))<gap:return false
+	return true
+
+func _field_footprint_buildable(polygon:PackedVector2Array,context:Dictionary)->bool:
+	var footprint:=_field_polygon_bounds(polygon)
+	if polygon.size()<3 or not footprint.position.is_finite() or not footprint.size.is_finite() or footprint.size.x>0.18 or footprint.size.y>0.18:return false
+	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
+	var buildable:Callable=context.get("buildable_land_at",Callable())
+	var river:Callable=context.get("river_distance_at",Callable())
+	var height:Callable=context.get("terrain_height_at",Callable())
+	var samples:=PackedVector2Array([_polygon_centroid(polygon)])
+	for edge in polygon.size():
+		var a:=polygon[edge]
+		var b:=polygon[(edge+1)%polygon.size()]
+		var steps:=maxi(1,ceili(a.distance_to(b)/0.008))
+		for step in steps:samples.append(a.lerp(b,float(step)/steps))
+	var bounds:=_field_polygon_bounds(polygon)
+	for ix in range(1,ceili(bounds.size.x/0.008)):
+		for iz in range(1,ceili(bounds.size.y/0.008)):
+			var point:=bounds.position+Vector2(ix,iz)*0.008
+			if Geometry2D.is_point_in_polygon(point,polygon):samples.append(point)
+	for point in samples:
+		var x:=origin.x+point.x
+		var z:=origin.z+point.y
+		if buildable.is_valid() and not bool(buildable.call(x,z)):return false
+		if river.is_valid() and float(river.call(x,z))<0.014:return false
+		if height.is_valid():
+			var step:=0.004
+			var gradient:=Vector2(float(height.call(x+step,z))-float(height.call(x-step,z)),float(height.call(x,z+step))-float(height.call(x,z-step)))/(step*2.0)
+			if gradient.length()>0.30:return false
+	return true
 
 func _irregular_field_polygon(center:Vector2,radius:float,plot_seed:int,rotation:float,field_pattern:String="smallholder_mosaic")->PackedVector2Array:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed^0x7f4a7c15
 	var right:=Vector2.from_angle(rotation)
 	var forward:=Vector2(-right.y,right.x)
-	var half_length:=radius*rng.randf_range(1.08,1.62)
-	var half_width:=radius*rng.randf_range(0.60,0.94)
-	if field_pattern=="irrigated_beds":
-		half_length*=rng.randf_range(1.12,1.42)
-		half_width*=rng.randf_range(0.58,0.78)
-	elif field_pattern=="dryland_patchwork":
-		half_length*=rng.randf_range(0.82,1.08)
-		half_width*=rng.randf_range(0.90,1.22)
-	var bottom_shift:=right*rng.randf_range(-radius*0.16,radius*0.16)
-	var top_shift:=right*rng.randf_range(-radius*0.18,radius*0.18)
-	var left_length:=half_length*rng.randf_range(0.84,1.08)
-	var right_length:=half_length*rng.randf_range(0.88,1.12)
-	# Agricultural ground is inherited as skewed strips and trapezoids following
-	# drainage, tenure and plough direction. The former six equal corners survived
-	# feathering as a conspicuous strategy-game hex.
-	return PackedVector2Array([
-		center-right*left_length-forward*half_width+bottom_shift,
-		center+right*right_length-forward*half_width-bottom_shift*0.35,
-		center+right*right_length+forward*half_width+top_shift,
-		center-right*left_length+forward*half_width-top_shift*0.30
-	])
+	var half_length:=radius*rng.randf_range(0.96,1.44)
+	var half_width:=radius*rng.randf_range(0.72,1.04)
+	# Some channel-side holdings are strips; most are broad enough to join a
+	# mosaic. Cut corners and a bent boundary are inherited clearances, not a
+	# regular many-sided circle and not four randomly rotated rectangular cards.
+	if field_pattern=="irrigated_beds" and absi(plot_seed)%3==0:
+		half_length*=1.20
+		half_width*=0.78
+	var corners:=PackedVector2Array([
+		Vector2(-half_length*rng.randf_range(0.83,1.10),-half_width*rng.randf_range(0.87,1.08)),
+		Vector2(half_length*rng.randf_range(0.88,1.12),-half_width*rng.randf_range(0.82,1.08)),
+		Vector2(half_length*rng.randf_range(0.79,1.08),half_width*rng.randf_range(0.84,1.12)),
+		Vector2(-half_length*rng.randf_range(0.90,1.15),half_width*rng.randf_range(0.83,1.04))])
+	var clipped:=absi(plot_seed)%4
+	var second:=(clipped+2)%4 if absi(plot_seed)%3!=0 else -1
+	var polygon:=PackedVector2Array()
+	for index in corners.size():
+		var corner:=corners[index]
+		if index==clipped or index==second:
+			polygon.append(corner.lerp(corners[(index+3)%4],rng.randf_range(0.18,0.39)))
+			polygon.append(corner.lerp(corners[(index+1)%4],rng.randf_range(0.16,0.36)))
+		else:polygon.append(corner)
+	# A shallow elbow on one long boundary breaks the remaining parallel pair.
+	if absi(plot_seed)%2==0:
+		var edge:=(clipped+2)%polygon.size()
+		var bend:=polygon[edge].lerp(polygon[(edge+1)%polygon.size()],rng.randf_range(0.38,0.64))
+		bend*=rng.randf_range(0.87,0.96)
+		polygon.insert(edge+1,bend)
+	for index in polygon.size():polygon[index]=center+right*polygon[index].x+forward*polygon[index].y
+	return polygon
 
 func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 	var residential:Array[Dictionary]=[]
