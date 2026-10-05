@@ -140,3 +140,20 @@ func test_a_border_front_stands_in_any_age_once_lands_meet()->void:
 	assert_bool(bool(built.fronts[0].border)).is_true()
 	# No shared border: no front in the raid age.
 	assert_array(Overlay.compose({"mode":"raid","stage":"band","friendly":[],"enemy":[]}).fronts).is_empty()
+
+
+func test_a_border_front_splits_into_sectors_with_who_holds_each()->void:
+	# Two towns of ours along the border at x=0, y=-6 and y=+6; their towns
+	# across it with fighters counted; a band of ours by the northern town.
+	var ours:=[{"at":Vector2(0,-6),"name":"North","men":10},{"at":Vector2(0,6),"name":"South","men":4}]
+	var theirs:=[{"at":Vector2(10,-6),"men":30,"known":true},{"at":Vector2(10,6),"men":0,"known":false}]
+	var sectors:=Model.border_sectors(_border(),ours,theirs,[{"pos":Vector2(4,-5),"strength":12.0}],[])
+	assert_int(sectors.size()).is_equal(2)
+	var north:Dictionary=sectors[0]; var south:Dictionary=sectors[1]
+	assert_str(String(north.town)).is_equal("North")
+	assert_int(int(north.ours)).is_equal(22)
+	assert_int(int(north.theirs)).is_equal(30)
+	assert_int(int(south.ours)).is_equal(4)
+	assert_bool(bool(south.known)).is_false()
+	# Every soldier counted once: the guards and the band, nowhere else.
+	assert_int(int(north.ours)+int(south.ours)).is_equal(26)

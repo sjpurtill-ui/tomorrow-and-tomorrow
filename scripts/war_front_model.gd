@@ -435,6 +435,70 @@ static func border_front(points:PackedVector2Array,ours_at:Array,theirs_at:Array
 	return {"points":bent,"width":width,"age":ages,"stale":false,"pressure":pressure,"toward":toward,"border":true,"civ":civ,"quiet":quiet,"border_points":line,"sigma":sigma}
 
 
+## A border front's SECTORS, as HOI4 splits a front among the armies on
+## it: each stretch of the line goes to the town of ours nearest it, and
+## carries the men who hold it (that town's guard and our forces nearest
+## that stretch) against theirs facing it (their towns' fighters as our
+## scouts counted them and their forces seen, nearest that stretch).
+## line: the front's points; ours: [{at, name, men}] our towns (men: its
+## guard); theirs: [{at, men, known}] their towns (men: fighters counted,
+## known false when nobody counted); friendly / enemy: forces {pos,
+## strength}. Returns [{start, end (point indices), mid, town, ours,
+## theirs, known}] in order along the line, at most MAX_SECTORS.
+const MAX_SECTORS:=6
+static func border_sectors(line:PackedVector2Array,ours:Array,theirs:Array,friendly:Array,enemy:Array)->Array:
+	var out:Array=[]
+	if line.size()<2 or ours.is_empty(): return out
+	var towns:=ours.slice(0,MAX_SECTORS)
+	# Each point to its nearest town of ours; runs of one town are sectors.
+	var owner:=PackedInt32Array()
+	for p in line:
+		var best:=0; var best_d:=INF
+		for i in towns.size():
+			var d:=(towns[i].at as Vector2).distance_squared_to(p)
+			if d<best_d: best_d=d; best=i
+		owner.append(best)
+	var start:=0
+	for i in range(1,line.size()+1):
+		if i<line.size() and owner[i]==owner[start]: continue
+		out.append({"start":start,"end":i-1,"mid":line[(start+i-1)/2],"town":String(towns[owner[start]].get("name","")),"town_index":owner[start],"ours":0,"theirs":0,"known":true})
+		start=i
+	# Ours: each town's guard to its own sectors (shared by their length),
+	# each force of ours to the sector nearest it.
+	for i in towns.size():
+		var mine:=out.filter(func(sec:Dictionary)->bool: return int(sec.town_index)==i)
+		var total:=0
+		for sec:Dictionary in mine: total+=int(sec.end)-int(sec.start)+1
+		var men:=int(towns[i].get("men",0))
+		var given:=0
+		for k in mine.size():
+			var sec:Dictionary=mine[k]
+			var share:=men-given if k==mine.size()-1 else roundi(float(men)*float(int(sec.end)-int(sec.start)+1)/float(maxi(1,total)))
+			sec.ours=int(sec.ours)+share; given+=share
+	for f:Dictionary in friendly:
+		var sec:=_sector_near(out,f.pos)
+		if not sec.is_empty(): sec.ours=int(sec.ours)+roundi(float(f.get("strength",0.0)))
+	# Theirs: their towns and their forces seen, each to the sector nearest it.
+	for t:Dictionary in theirs:
+		var sec:=_sector_near(out,t.at)
+		if sec.is_empty(): continue
+		sec.theirs=int(sec.theirs)+int(t.get("men",0))
+		if not bool(t.get("known",true)): sec.known=false
+	for e:Dictionary in enemy:
+		var sec:=_sector_near(out,e.pos)
+		if not sec.is_empty(): sec.theirs=int(sec.theirs)+roundi(float(e.get("strength",0.0)))
+	for sec:Dictionary in out: sec.erase("town_index")
+	return out
+
+
+static func _sector_near(sectors:Array,at:Vector2)->Dictionary:
+	var best:={}; var best_d:=INF
+	for sec:Dictionary in sectors:
+		var d:=(sec.mid as Vector2).distance_squared_to(at)
+		if d<best_d: best_d=d; best=sec
+	return best
+
+
 static func _nearest(places:Array,p:Vector2)->Vector2:
 	var best:=Vector2.INF
 	for at in places:

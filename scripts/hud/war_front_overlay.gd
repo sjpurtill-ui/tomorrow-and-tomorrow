@@ -98,6 +98,8 @@ const PAPER:=Color("#efe3c2")
 const OURS:=Color("#2f5d6b")
 const OURS_WASH:=Color("#4f9bb8")
 const THEIRS:=Color("#8e3b2e")
+## Outnumbered stretches of a front are ringed in this red.
+const WAR_RED:=Color("#b5473a")
 const THEIRS_WASH:=Color("#b5503c")
 ## Fleet ink reads on dark water; the air arm's is a cool slate that the
 ## olive and ochre ground never matches.
@@ -709,18 +711,32 @@ static func _border_inputs(home:Vector2)->Array:
 		for city:Dictionary in intel.known_cities("player","player",false):
 			var at:=_v2(city.get("position",{}))
 			if at.is_finite(): ours_at.append(at)
+	# Our towns as the borders read them (the settlement network), each with
+	# its share of the home guard (civilization_combat guard_ledger).
+	var our_towns:Array=[]
+	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").guard_ledger(MilitaryCampaign)
+	for settlement:Dictionary in WorldSimulation.settlements.settlement_network_snapshot().get("settlements",[]):
+		if not settlement.get("position") is Vector2 or String(settlement.get("occupied_by","")) not in ["","human","player"]: continue
+		our_towns.append({"at":settlement.position,"name":String(settlement.get("name","")),"men":int((guards.get(String(settlement.get("id","")),{}) as Dictionary).get("watch",0))})
+		ours_at.append(settlement.position)
 	var council:GDScript=load("res://scripts/war_council.gd")
+	var Estimate:GDScript=load("res://scripts/court_war_orders.gd")
 	for civ_id:String in hot:
 		var theirs_at:Array=[]
+		var their_towns:Array=[]
 		for town:Dictionary in council.call("known_towns",civ_id):
 			var at:=_v2(town.get("position",{}))
-			if at.is_finite(): theirs_at.append(at)
+			if not at.is_finite(): continue
+			theirs_at.append(at)
+			var counted:Dictionary=Estimate.call("enemy_estimate",String(town.get("city_id","")))
+			var men:=roundi(float(counted.get("mid",-1.0)))
+			their_towns.append({"at":at,"men":maxi(0,men),"known":bool(counted.get("known",false)) and men>=0})
 		for line:Dictionary in NationBorders.published:
 			var owners:Array=line.owners
 			if not ((owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id)): continue
 			var points:PackedVector2Array=line.points
 			if points.size()<2: continue
-			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"kind":String(hot[civ_id])})
+			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"our_towns":our_towns,"their_towns":their_towns,"kind":String(hot[civ_id])})
 			if out.size()>=Model.MAX_FRONTS: return out
 	return out
 
@@ -1184,7 +1200,9 @@ static func compose(inputs:Dictionary)->Dictionary:
 		var border_fronts:Array=[]
 		for b:Dictionary in borders:
 			var front:=Model.border_front(b.points,b.get("ours_at",[]),b.get("theirs_at",[]),holding,facing,String(b.civ),float(out.sigma) if mode in ["front","theatre"] else 0.0)
-			if not front.is_empty(): border_fronts.append(front)
+			if front.is_empty(): continue
+			front["our_towns"]=b.get("our_towns",[]); front["their_towns"]=b.get("their_towns",[])
+			border_fronts.append(front)
 		if not border_fronts.is_empty():
 			var reach:=float(border_fronts[0].sigma)*0.6
 			fronts=fronts.filter(func(d:Dictionary)->bool: return not border_fronts.any(func(b:Dictionary)->bool: return Model.along_border(d,b,reach)))
@@ -1192,6 +1210,9 @@ static func compose(inputs:Dictionary)->Dictionary:
 				var holders:Array=holding.filter(func(h:Dictionary)->bool: return not bool(h.get("garrison",false)) and Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
 				front["armies"]=holders.map(func(h:Dictionary)->int: return int(h.get("army_id",0)))
 				front["holders"]=holders
+				# Who holds each stretch of it against whom (HOI4's front allocation).
+				var near:=func(list:Array)->Array: return list.filter(func(h:Dictionary)->bool: return Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
+				front["sectors"]=Model.border_sectors(front.points,front.our_towns,front.their_towns,near.call(holders),near.call(facing))
 			fronts=border_fronts+fronts
 			out.fronts=fronts
 			if not mode in ["front","theatre"]: out.sigma=float(border_fronts[0].sigma)
@@ -1741,7 +1762,7 @@ func draw_animated(canvas:CanvasItem)->void:
 func battle_at(point:Vector2)->Dictionary:
 	var best:={}; var best_distance:=INF
 	for hit in hits:
-		if not String(hit.get("kind","")) in ["battle","battles"]: continue
+		if not String(hit.get("kind","")) in ["battle","battles","sector"]: continue
 		var d:=(hit.centre as Vector2).distance_to(point)
 		if d<=float(hit.radius) and d<best_distance: best_distance=d; best=hit
 	return best
@@ -1967,12 +1988,64 @@ func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 		var tri:=PackedVector2Array([a-along*5.0,a+along*5.0,a+normals[i]*tooth])
 		if _fillable(tri): draw_colored_polygon(tri,color)
 	hits.append({"kind":"front","line":points,"armies":data.get("armies",[]),"stale":bool(data.get("stale",false))})
+	if not (data.get("sectors",[]) as Array).is_empty(): _draw_sectors(data,alpha,wide)
 	# The line, in a few chunks, for the lettering to keep clear of.
 	var chunk:=maxi(4,n/12)
 	for start in range(0,n-1,chunk):
 		var box:=Rect2(points[start],Vector2.ZERO)
 		for i in range(start+1,mini(n,start+chunk+1)): box=box.expand(points[i])
 		front_chunks.append(box.grow(4.0))
+
+
+## A border front's sectors, as HOI4 shows who holds a front: a tick across
+## the line where one town's stretch gives way to the next, and on our side
+## of each stretch a chip of our men there against theirs facing it, ringed
+## in war red where they are two to one or more.
+func _draw_sectors(data:Dictionary,alpha:float,wide:bool)->void:
+	var sectors:Array=data.sectors
+	var source:PackedVector2Array=data.get("points",PackedVector2Array())
+	var toward:PackedVector2Array=data.get("toward",PackedVector2Array())
+	if source.size()<2: return
+	var font:=T.font("ui_strong")
+	var fs:=11 if wide else 12
+	for index in sectors.size():
+		var sec:Dictionary=sectors[index]
+		# The tick where this stretch begins (not at the line's own end).
+		if index>0:
+			var at:=_screen(source[int(sec.start)])
+			var normal:=_screen_dir(source[int(sec.start)],toward[mini(int(sec.start),toward.size()-1)] if not toward.is_empty() else Vector2.UP)
+			if at.is_finite() and normal!=Vector2.ZERO: draw_line(at-normal*9.0,at+normal*9.0,Color(INK,0.85*alpha),2.0,true)
+		var mid_index:=(int(sec.start)+int(sec.end))/2
+		var mid:=_screen(source[mid_index])
+		var into:=_screen_dir(source[mid_index],toward[mini(mid_index,toward.size()-1)] if not toward.is_empty() else Vector2.UP)
+		if not mid.is_finite() or into==Vector2.ZERO: continue
+		var mine:=EraWords.grouped(int(sec.ours))
+		var theirs:=("~"+EraWords.grouped(int(sec.theirs))) if int(sec.theirs)>0 else ("?" if not bool(sec.known) else "0")
+		var wm:=font.get_string_size(mine,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x+10.0
+		var wt:=font.get_string_size(theirs,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x+10.0
+		var h:=float(fs)+6.0
+		var centre:=mid-into*(h+12.0)
+		var box:=Rect2(centre-Vector2((wm+wt)*0.5,h*0.5),Vector2(wm+wt,h))
+		var outnumbered:=int(sec.theirs)>=2*maxi(1,int(sec.ours))
+		draw_rect(box.grow(1.5),Color(PAPER,0.95*alpha))
+		draw_rect(Rect2(box.position,Vector2(wm,h)),Color(OURS,0.9*alpha))
+		draw_rect(Rect2(box.position+Vector2(wm,0),Vector2(wt,h)),Color(THEIRS,0.9*alpha))
+		draw_string(font,box.position+Vector2(5.0,h-5.0),mine,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(PAPER,alpha))
+		draw_string(font,box.position+Vector2(wm+5.0,h-5.0),theirs,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(PAPER,alpha))
+		draw_rect(box.grow(1.5),Color(WAR_RED if outnumbered else INK,0.9*alpha),false,2.0 if outnumbered else 1.0)
+		var place:=String(sec.get("town",""))
+		hits.append({"kind":"sector","centre":box.get_center(),"radius":box.size.x*0.5+2.0,"line":"%s%s of ours hold it against %s of theirs%s" % [("The stretch by %s: " % place) if place!="" else "",EraWords.grouped(int(sec.ours)),theirs.trim_prefix("~") if theirs!="?" else "an uncounted number",(" (as our scouts counted them)" if int(sec.theirs)>0 else "")+(" · outnumbered" if outnumbered else "")]})
+		front_chunks.append(box.grow(4.0))
+
+
+## A world direction at a point, on screen (unit length; zero when the
+## point does not project).
+func _screen_dir(at:Vector2,dir:Vector2)->Vector2:
+	var a:=_screen(at)
+	var eps:=maxf(0.0001,float(scene.get("sigma",1.0))*0.05)
+	var b:=_screen(at+dir.normalized()*eps)
+	if not a.is_finite() or not b.is_finite() or a.distance_to(b)<0.0001: return Vector2.ZERO
+	return (b-a).normalized()
 
 
 func _front_run(run:PackedVector2Array,stale:bool,base:float,alpha:float)->void:
@@ -2977,7 +3050,7 @@ func hit_at(point:Vector2)->Dictionary:
 			var d:=(hit.centre as Vector2).distance_to(point)
 			if d<=float(hit.radius): score=d*0.5
 		if hit.has("poly") and score==INF and Geometry2D.is_point_in_polygon(point,hit.poly): score=12.0 if String(hit.kind) in ["zone","pocket"] else 2.0
-		if hit.has("line") and score==INF:
+		if hit.get("line") is PackedVector2Array and score==INF:
 			var d:=_distance_to_line(point,hit.line)
 			if d<=9.0: score=d+(0.0 if String(hit.kind) in ["front","arrow"] else 3.0)
 		if score<best_score: best_score=score; best=hit
@@ -2996,7 +3069,7 @@ func _input(event:InputEvent)->void:
 	if get_viewport().gui_get_hovered_control()!=null: return
 	# A battle's mark stands over the forces fighting it: it opens the battle.
 	var battle:=battle_at(event.position)
-	if not battle.is_empty():
+	if not battle.is_empty() and String(battle.get("kind",""))!="sector":
 		open_battle(battle,event.position)
 		get_viewport().set_input_as_handled()
 		return
