@@ -23,3 +23,13 @@ func test_war_turns_the_mood()->void:
 	assert_str(Soundtrack.mood_now()).is_equal("war")
 	MilitaryCampaign.active_siege={}
 	assert_str(Soundtrack.mood_now()).is_equal(Soundtrack.DEFAULT_MOOD)
+
+func test_peace_after_first_contact_has_its_own_mood()->void:
+	assert_bool(Soundtrack.pieces("contact").has("res://assets/audio/score/contact/tense_silences.mp3")).is_true()
+	var civ:Dictionary=CivilizationSystem.civilizations[1] if CivilizationSystem.civilizations.size()>1 else {}
+	if civ.is_empty():return
+	var relation:Dictionary=civ.get("player_relation",{})
+	var before:=int(relation.get("contact_level",0))
+	relation["contact_level"]=1;civ["player_relation"]=relation
+	assert_str(Soundtrack.mood_now()).is_equal("contact")
+	relation["contact_level"]=before

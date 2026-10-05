@@ -3,8 +3,10 @@ extends Node
 ##
 ## Each mood has its own folder of pieces under assets/audio/score/<mood>/;
 ## dropping a piece into the folder adds it. The mood is read from the world
-## every few seconds (mood_now): calm peacetime by default, war while the
-## people are at war or a fight, a siege or a coming war band is on them. A
+## every few seconds (mood_now): calm peacetime while our people know of no
+## other people, contact once another people has been met and all is at
+## peace, war while the people are at war or a fight, a siege or a coming
+## war band is on them. A
 ## piece of the present mood starts, then the next one GAP_MIN to GAP_MAX
 ## seconds of real time after it began (silence between when the piece is
 ## shorter), never the same piece twice running when the mood has others.
@@ -14,7 +16,7 @@ extends Node
 ## the Music bus through the scene's "Score" player (display_preferences.gd).
 
 const SCORE_DIR:="res://assets/audio/score/"
-const MOODS:=["calm","war"]
+const MOODS:=["calm","contact","war"]
 const DEFAULT_MOOD:="calm"
 ## Seconds from the start of one piece to the start of the next.
 const GAP_MIN:=480.0
@@ -66,7 +68,8 @@ static func pieces(of_mood:String)->PackedStringArray:
 	return out
 
 ## The game's mood now, from the one world: war while our people are at war
-## or a fight, a siege or a war band coming is on them; calm otherwise.
+## or a fight, a siege or a war band coming is on them; contact once another
+## people has been met; calm before that.
 static func mood_now()->String:
 	if Engine.get_main_loop()==null:return DEFAULT_MOOD
 	var military:=(Engine.get_main_loop() as SceneTree).root.get_node_or_null("MilitaryCampaign")
@@ -77,7 +80,16 @@ static func mood_now()->String:
 	var world:Variant=WorldSimulation.world if WorldSimulation!=null else null
 	if world!=null and world.has_method("player_effects"):
 		if int((world.call("player_effects") as Dictionary).get("war_count",0))>0:return "war"
+	if met_another_people():return "contact"
 	return DEFAULT_MOOD
+
+## Whether our people have met another people (first contact made).
+static func met_another_people()->bool:
+	for civ:Variant in CivilizationSystem.civilizations:
+		if not civ is Dictionary or String((civ as Dictionary).get("id",""))=="player":continue
+		var relation:Variant=(civ as Dictionary).get("player_relation",{})
+		if relation is Dictionary and int((relation as Dictionary).get("contact_level",0))>=1:return true
+	return false
 
 ## The next piece of a mood: never the one just played when there are others.
 static func choose(list:PackedStringArray,last:String,roll:float)->String:
