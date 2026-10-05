@@ -11,6 +11,7 @@ const Voice=preload("res://scripts/character_voice.gd")
 const Tokens=preload("res://scripts/hud/hud_tokens.gd")
 const MODEL_PATH:="res://scripts/hud/great_work_model.gd"
 const MAX_CAST:=6
+static var _earth:StandardMaterial3D
 var view:SubViewport
 var world:Node3D
 var lens:Camera3D
@@ -108,8 +109,12 @@ func _build_scene(profile:Dictionary)->void:
 	# adapt to its bounds rather than shrinking a monument to person scale.
 	_front=_bounds.end.z+3.0
 	var ground_size:=maxf(maxf(_bounds.size.x,_bounds.size.z)+18.0,26.0)
-	_box(world,"Forecourt",Vector3(ground_size,.15,ground_size),Vector3(_bounds.get_center().x,-.14,_bounds.get_center().z+3),Color("8b806b"))
-	var env:=WorldEnvironment.new();var atmosphere:=Environment.new();atmosphere.background_mode=Environment.BG_COLOR;atmosphere.background_color=Color("78828a")
+	# One retained plane continues below both close and overview shots. Its
+	# quiet grain gives the work a setting without inventing nearby buildings.
+	var ground:=_box(world,"Forecourt",Vector3(ground_size*8.0,.15,ground_size*8.0),Vector3(_bounds.get_center().x,-.14,_bounds.get_center().z+3),Color.WHITE)
+	ground.material_override=_earth_material()
+	var earth:StandardMaterial3D=ground.material_override.duplicate();earth.uv1_scale=Vector3.ONE*(ground_size*8.0/10.0);ground.material_override=earth
+	var env:=WorldEnvironment.new();var atmosphere:=Environment.new();atmosphere.background_mode=Environment.BG_COLOR;atmosphere.background_color=Color("aaa18e")
 	atmosphere.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;atmosphere.ambient_light_color=Color("c3cbd0");atmosphere.ambient_light_energy=.30
 	atmosphere.tonemap_mode=Environment.TONE_MAPPER_FILMIC;env.environment=atmosphere;world.add_child(env)
 	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-42,-35,0);sun.light_color=Color("fff1dc");sun.light_energy=.80;sun.shadow_enabled=true;world.add_child(sun)
@@ -226,11 +231,19 @@ func _shot(target:Vector3,from:Vector3,seconds:float)->void:
 
 func _wide(animate:=true)->void:
 	if lens==null:return
-	var height:=maxf(_bounds.size.y,4.0);var width:=maxf(_bounds.size.x,8.0)
 	var aspect:=maxf(.7,size.x/maxf(size.y,1.0))
-	var distance:=maxf(height*1.4,width/maxf(.6,aspect)*1.45)
-	var target:=Vector3(_bounds.get_center().x,height*.34,(_bounds.get_center().z+_front)*.5)
-	_shot(target,target+Vector3(distance*.45,height*.35+2.5,distance+(_front-_bounds.get_center().z)*.6),1.0 if animate else 0.0)
+	# Fit all three dimensions from the same elevated three-quarter angle.
+	# Using height alone for elevation flattened broad rings into a thin strip.
+	var framing:=_bounds.merge(AABB(Vector3(-4,0,_front),Vector3(8,2.1,3)))
+	var target:=framing.get_center()
+	var outward:=Vector3(.85,.90,1.15).normalized()
+	var basis:=Basis.looking_at(-outward,Vector3.UP)
+	var tangent:=tan(deg_to_rad(lens.fov)*.5)
+	var distance:=4.0
+	for corner_index in 8:
+		var point:=basis.transposed()*(framing.get_endpoint(corner_index)-target)
+		distance=maxf(distance,point.z+maxf(absf(point.x)/(tangent*aspect*.85),absf(point.y)/(tangent*.78)))
+	_shot(target,target+outward*distance,1.0 if animate else 0.0)
 
 func _resize_view()->void:
 	if view==null:return
@@ -267,6 +280,13 @@ func diagnostics()->Dictionary:
 
 static func _material(colour:Color)->StandardMaterial3D:
 	var material:=StandardMaterial3D.new();material.albedo_color=colour;material.roughness=.9;return material
+static func _earth_material()->StandardMaterial3D:
+	if _earth==null:
+		var noise:=FastNoiseLite.new();noise.seed=71821;noise.frequency=.09;noise.fractal_octaves=3
+		var ramp:=Gradient.new();ramp.set_color(0,Color("716b59"));ramp.set_color(1,Color("918775"))
+		var grain:=NoiseTexture2D.new();grain.width=128;grain.height=128;grain.seamless=true;grain.noise=noise;grain.color_ramp=ramp
+		_earth=_material(Color.WHITE);_earth.albedo_texture=grain
+	return _earth
 static func _box(parent:Node,label:String,dimensions:Vector3,at:Vector3,colour:Color)->MeshInstance3D:
 	var shape:=BoxMesh.new();shape.size=dimensions;return _mesh(parent,label,shape,at,colour)
 static func _cylinder(parent:Node,label:String,radius:float,height:float,at:Vector3,colour:Color)->MeshInstance3D:
