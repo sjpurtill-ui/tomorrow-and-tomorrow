@@ -3337,7 +3337,7 @@ func _kind_words(s:Dictionary)->String:
 			var brief:Dictionary=(s.get("scout_brief",{}) as Dictionary).duplicate(true)
 			brief.erase("persona")   # the cast line below already carries it
 			var findings:String=JSON.stringify(brief) if not brief.is_empty() else JSON.stringify(report.get("facts",[]))
-			return "The ruler's CHIEF SCOUT returns with a REPORT on %s (source: %s, observed on day %s). Debrief material, the only true findings: %s" % [String(report.get("subject_name","what they found")),String(report.get("source","scouts")),str(report.get("observed_day","?")),findings.substr(0,3200)]
+			return "The ruler's CHIEF SCOUT returns with a REPORT on %s (source: %s, observed in %s). Debrief material, the only true findings: %s" % [String(report.get("subject_name","what they found")),String(report.get("source","scouts")),preload("res://scripts/calendar_date.gd").words(int(report.get("observed_day",-1))),findings.substr(0,3200)]
 		"petition": return "A PETITION from the ruler's own official (topic: %s). The matter: %s%s" % [s.topic,s.summary," Their proposed remedy: \"%s\"." % s.decree if not String(s.decree).is_empty() else ""]
 		"proposal": return "An envoy of %s makes a PROPOSAL (%s): %s" % [civ,String(s.get("headline","an offer")),String(s.get("sit_summary",""))]
 		"wonder_proposal","great_work": return _work_scene_words(s)

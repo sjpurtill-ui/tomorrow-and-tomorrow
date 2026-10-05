@@ -224,7 +224,7 @@ static func remember(entry:Dictionary,day:int)->void:
 
 static func describe(entry:Dictionary,known:Variant=null)->String:
 	var origin:Dictionary=book().origins.get(String(entry.id),{})
-	if not origin.is_empty():return "Developed through %s · day %d" % [String(origin.label).to_lower(),int(origin.day)]
+	if not origin.is_empty():return "Developed through %s · %s" % [String(origin.label).to_lower(),preload("res://scripts/calendar_date.gd").words(int(origin.day))]
 	var route:=chosen(entry,-1,known)
 	return "Current approach: "+String(route.label) if not route.is_empty() else "Several approaches may lead here; foundations or evidence are still missing."
 

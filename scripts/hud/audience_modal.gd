@@ -3607,7 +3607,7 @@ func _add_civic_record()->void:
 	box.add_child(Tokens.make_label("EARLIER WITH %s" % _speaker_name().to_upper(),10,Tokens.TEXT_DIM,.12))
 	for turn in turns:
 		var who:="You" if String(turn.speaker)=="player" else (String(turn.name) if not String(turn.name).is_empty() else _speaker_name())
-		var text:=Tokens.make_label("Day %d · %s: %s" % [int(turn.day)+1,who,String(turn.text)],13,Tokens.TEXT_SOFT)
+		var text:=Tokens.make_label("%s · %s: %s" % [preload("res://scripts/calendar_date.gd").words(int(turn.day),true),who,String(turn.text)],13,Tokens.TEXT_SOFT)
 		text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.max_lines_visible=3;text.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		box.add_child(text)
 	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);box.add_child(rule)

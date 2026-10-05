@@ -1772,7 +1772,7 @@ static func _rumor_candidate(civ_id:String,name:String,used:Dictionary,day:int,s
 		if subject in ["player",civ_id,""] or mine.has(lead_id) or used.has("rumor:"+lead_id): continue
 		situation.ask="rumor:"+lead_id; situation.lead_id=lead_id
 		var confidence:="fair" if float(lead.get("confidence",0))>=.35 else ("thin" if float(lead.get("confidence",0))>=.15 else "faint")
-		situation.summary="%s's people carry an account of %s, first observed on day %d; the account is %s." % [name,String(lead.get("name","a distant people")),int(lead.get("observed_day",0)),confidence]
+		situation.summary="%s's people carry an account of %s, first observed in %s; the account is %s." % [name,String(lead.get("name","a distant people")),preload("res://scripts/calendar_date.gd").words(int(lead.get("observed_day",0))),confidence]
 		var news:={"subject_civ_id":subject,"subject_civ_name":String(lead.get("name","")),"fact_kind":"rumor","fact":String(situation.summary)}
 		return {"kind":"news","news":news,"situation":situation}
 	return {}
@@ -1791,7 +1791,7 @@ static func _intel_candidate(civ_id:String,name:String,used:Dictionary,day:int,s
 		var mine:Dictionary=intel.known("player",String(city_id))
 		if not mine.is_empty() and int(mine.get("observed_day",-1))>=int(record.get("observed_day",0))-45: continue
 		situation.ask="intel:"+String(city_id); situation.city_id=String(city_id); situation.city_name=String(record.get("name","a city"))
-		situation.summary="%s offers what its people saw of %s, a settlement of %s, on day %d." % [name,String(record.get("name","a city")),_civ_name(owner),int(record.get("observed_day",0))]
+		situation.summary="%s offers what its people saw of %s, a settlement of %s, in %s." % [name,String(record.get("name","a city")),_civ_name(owner),preload("res://scripts/calendar_date.gd").words(int(record.get("observed_day",0)))]
 		var news:={"subject_civ_id":owner,"subject_civ_name":_civ_name(owner),"fact_kind":"city_intelligence","fact":String(situation.summary)}
 		return {"kind":"news","news":news,"situation":situation}
 	return {}
@@ -1936,7 +1936,7 @@ static func _artifact_return_candidate(civ_id:String,name:String,used:Dictionary
 		var item:Dictionary=ours[String(looted.item_id)]
 		situation.ask="artifact_return:"+String(looted.item_id); situation.artifact_id=String(looted.item_id); situation.artifact_name=_artifact_label(item)
 		situation.mode="looted"; situation.work_id=String(looted.work_id); situation.value=ARTIFACTS.price(item)
-		situation.summary="%s demands the return of %s, carried off by your soldiers from one of its great works on day %d." % [name,_artifact_label(item),int(looted.day)]
+		situation.summary="%s demands the return of %s, carried off by your soldiers from one of its great works in %s." % [name,_artifact_label(item),preload("res://scripts/calendar_date.gd").words(int(looted.day))]
 		return {"kind":"proposal","situation":situation}
 	_ensure_ties(civ_id)
 	for id in _artifact_ids_by_price(ours,false):
@@ -2855,7 +2855,7 @@ static func _take_news(audience:Dictionary)->String:
 			var copy:=record.duplicate(true)
 			copy["source"]="shared by %s" % String(audience.civ_name)
 			intel.publish("player",copy,day)
-			return " Their observation of %s (day %d) is now in your city reports." % [String(record.get("name","the city")),int(record.get("observed_day",0))]
+			return " Their observation of %s (%s) is now in your city reports." % [String(record.get("name","the city")),preload("res://scripts/calendar_date.gd").words(int(record.get("observed_day",0)))]
 	var subject_id:=String(audience.news.get("subject_civ_id",""))
 	var subject_index:=_civ_index(subject_id)
 	if subject_index>=0 and not ForeignDiplomacy.civilization(subject_id).is_empty():

@@ -270,7 +270,7 @@ static func _sighting_item(observer:String,report:Dictionary,s:Dictionary,today:
 	if s.has("purpose"):state_text+="; said to be meant to %s" % String(s.purpose).replace("_"," ")
 	if s.has("pace"):state_text+="; crews worked at a %s pace" % String(s.pace)
 	var source:=String(report.get("source","a report"))
-	var text:="%s, day %d (%s): %s at %s — %s. Confidence %s." % [source.left(1).to_upper()+source.substr(1),int(s.observed_day),"today" if age<=0 else "%d days old" % age,who.left(1).to_upper()+who.substr(1),place,state_text,_confidence_word(float(s.quality))]
+	var text:="%s, %s (%s): %s at %s — %s. Confidence %s." % [source.left(1).to_upper()+source.substr(1),preload("res://scripts/calendar_date.gd").words(int(s.observed_day)),"today" if age<=0 else "%d days old" % age,who.left(1).to_upper()+who.substr(1),place,state_text,_confidence_word(float(s.quality))]
 	return {"kind":"sighting","day":int(s.observed_day),"reported_day":int(report.get("reported_day",s.observed_day)),"age_days":age,"stale":age>180,"owner":owner,"civ_name":who,"city_id":String(report.get("city_id","")),"local_city_id":String(s.local_city_id),"city_name":place,"work_id":String(s.work_id),"title":what,"form":String(s.form),"ambition":String(s.get("ambition","")),"purpose":String(s.get("purpose","")),"outcome":String(s.get("outcome","")),"status":String(s.status),"progress_low":float(s.progress_low),"progress_high":float(s.progress_high),"confidence":float(s.quality),"source":String(report.get("source","")),"text":text}
 
 static func _account_item(observer:String,owner:String,city:Dictionary,r:Dictionary,account:Dictionary,today:int)->Dictionary:
@@ -278,7 +278,7 @@ static func _account_item(observer:String,owner:String,city:Dictionary,r:Diction
 	var age:=today-int(account.day)
 	var title:=_title(r)
 	return {"kind":"account","day":int(account.day),"reported_day":int(account.day),"age_days":age,"stale":age>365*5,"owner":owner,"civ_name":who,"city_id":"","local_city_id":String(city.id),"city_name":String(city.get("name","")) if in_contact(observer,owner) else "an undisclosed city","work_id":String(r.id),"title":title,"form":String(work_info(r).form),"ambition":String(work_info(r).ambition),"purpose":String(work_info(r).purpose),"outcome":String(work_info(r).outcome),"status":"functioning","progress_low":1.0,"progress_high":1.0,"confidence":.5,"source":"travelers' accounts",
-		"text":"Travelers from %s spoke of %s, standing and in use%s. Heard on day %d (%d days ago); accounts are secondhand." % [who,title," though raised at great human cost" if int(account.get("strain",0))>=180 else "",int(account.day),age]}
+		"text":"Travelers from %s spoke of %s, standing and in use%s. Heard in %s (%d days ago); accounts are secondhand." % [who,title," though raised at great human cost" if int(account.get("strain",0))>=180 else "",preload("res://scripts/calendar_date.gd").words(int(account.day)),age]}
 
 static func _event_item(observer:String,owner:String,city:Dictionary,r:Dictionary,event:Dictionary,today:int)->Dictionary:
 	var by:=String(event.get("by",""))

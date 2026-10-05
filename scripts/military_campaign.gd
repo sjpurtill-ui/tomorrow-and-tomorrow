@@ -2056,7 +2056,7 @@ func _process_army_runners_day()->void:
 				var report_day:=int(snapshot.get("day",day))
 				var status_text:="held position at %s" % String(snapshot.get("location_name","the field")) if String(snapshot.get("status","stationed"))=="stationed" else "was marching on %s with %.0f km remaining" % [String(snapshot.get("destination_name","its objective")),float(snapshot.get("distance_remaining_km",0.0))]
 				if not String(snapshot.get("movement_block_reason","")).is_empty():status_text+=". "+String(snapshot.movement_block_reason)
-				WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d men, fed %d%%." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(SupplyState.fed(snapshot)*100.0)],"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of %s the army %s with %d men, fed %d%%." % [String(message.get("army_name","the field army")),preload("res://scripts/calendar_date.gd").words(report_day),status_text,int(snapshot.get("troops",0)),roundi(SupplyState.fed(snapshot)*100.0)],"domain":"security","severity":"notice"})
 	runner_messages=remaining_messages
 
 
@@ -3579,7 +3579,7 @@ func city_force_summary(region_id:String)->String:
 	for battle:Dictionary in battle_history:
 		if String(battle.get("target_region_id",""))!=region_id:continue
 		var side:Dictionary=battle.get(String(battle.get("home_side","attacker")),{})
-		text="Battle day %d: %d killed, %d wounded, %d scattered. " % [int(battle.get("day",0)),int(side.get("dead",0)),int(side.get("wounded_pool",0)),int(side.get("scattered_pool",0))]+text
+		text="Battle, %s: %d killed, %d wounded, %d scattered. " % [preload("res://scripts/calendar_date.gd").words(int(battle.get("day",0))),int(side.get("dead",0)),int(side.get("wounded_pool",0)),int(side.get("scattered_pool",0))]+text
 		break
 	return text
 
