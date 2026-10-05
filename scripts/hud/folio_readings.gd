@@ -3,6 +3,9 @@ extends HBoxContainer
 ## No simulation reads here: the original strip remains the authority.
 const Tokens = preload("res://scripts/hud/hud_tokens.gd")
 const Chip = preload("res://scripts/hud/kpi_detail_chip.gd")
+const Folio = preload("res://scripts/hud/reference_folio.gd")
+const WARNING_INK = Color("ffd39b")
+const SHORTAGE_INK = Color("ffb6a8")
 
 signal reading_selected(section: String, sub: int)
 signal reading_created(button: Button)
@@ -32,9 +35,11 @@ func show_readings(readings: Array[Dictionary]) -> void:
 		entry.caption.text = String(reading.caption)
 		entry.value.text = String(reading.value)
 		entry.note = String(reading.note)
-		var warning: bool = reading.note_color in [Tokens.text_for(Tokens.RED), Tokens.text_for(Tokens.AMBER)]
-		entry.caption.add_theme_color_override("font_color", Tokens.INK_MUTED)
-		entry.value.add_theme_color_override("font_color", reading.note_color if warning else Tokens.INK)
+		var value_ink: Color = Folio.RAIL_TEXT
+		if reading.note_color == Tokens.text_for(Tokens.RED): value_ink = SHORTAGE_INK
+		elif reading.note_color == Tokens.text_for(Tokens.AMBER): value_ink = WARNING_INK
+		entry.caption.add_theme_color_override("font_color", Color(Folio.RAIL_TEXT, 0.8))
+		entry.value.add_theme_color_override("font_color", value_ink)
 		entry.button.accessibility_name = "%s: %s. %s" % [reading.caption, reading.value, reading.note]
 
 func _make_reading(reading: Dictionary) -> void:
@@ -45,7 +50,7 @@ func _make_reading(reading: Dictionary) -> void:
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
 	var focus := Tokens.flat(Color.TRANSPARENT)
-	focus.border_color = Tokens.GOLD
+	focus.border_color = Folio.GOLD
 	focus.border_width_bottom = 1
 	button.add_theme_stylebox_override("hover", focus)
 	button.add_theme_stylebox_override("focus", focus)
@@ -58,9 +63,9 @@ func _make_reading(reading: Dictionary) -> void:
 	column.add_theme_constant_override("separation", -2)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	button.add_child(column)
-	var caption := Tokens.make_label(String(reading.caption), 10, Tokens.INK_MUTED)
+	var caption := Tokens.make_label(String(reading.caption), 10, Folio.RAIL_TEXT)
 	caption.add_theme_font_size_override("font_size", 10)
-	var value := Tokens.make_label(String(reading.value), 20, Tokens.INK)
+	var value := Tokens.make_label(String(reading.value), 20, Folio.RAIL_TEXT)
 	value.add_theme_font_override("font", Tokens.font("voice"))
 	for label: Label in [caption, value]:
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE

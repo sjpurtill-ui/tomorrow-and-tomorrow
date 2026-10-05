@@ -142,22 +142,23 @@ func _layout()->void:
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Folio.RAIL_WIDTH,view.y)
-	var page_open:=bool((dock and dock.visible) or (detail_dock and detail_dock.visible))
-	if brand_label:brand_label.visible=view.x>=1100 and not page_open
+	if brand_label:brand_label.visible=false
 	if brand_row:
-		brand_row.add_theme_constant_override("separation",10 if page_open else 18)
+		brand_row.add_theme_constant_override("separation",10)
 		var city_mark:=brand_row.get_node_or_null("TopCityIcon") as Control
-		if city_mark:city_mark.visible=not page_open or view.x>=1280
-	if city_selector:city_selector.custom_minimum_size.x=80 if page_open and view.x<1280 else (150 if view.x>=1100 else 120)
+		if city_mark:city_mark.visible=view.x>=1280
+	if city_selector:city_selector.custom_minimum_size.x=80 if view.x<1280 else 150
 	if top_actions:top_actions.position=Vector2(view.x-top_actions.get_combined_minimum_size().x-12,6)
 	if time_pill:
 		var actions_width:=top_actions.get_combined_minimum_size().x+24 if top_actions else 0.0
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
-		if page_open and top_frame:
+		if top_frame:
 			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-10.0))
 	if kpi_strip:
-		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
+		# Retain the original formatting and hover sources; the persistent bar
+		# presents their readings instead of a second row of boxed chips.
+		kpi_strip.visible=false
 		# The status strip is a fixed-height top-bar component. At the minimum
 		# supported canvas, retain the urgent food, survival and GDP outcomes and
 		# hide duplicate context instead of wrapping downward over the map.
@@ -183,7 +184,7 @@ func _layout()->void:
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Folio.TOP_HEIGHT+8.0)
 	if top_readings:
-		top_readings.visible=page_open
+		top_readings.visible=true
 		top_readings.show_readings(kpi_readings())
 	_layout_orders()
 	if queue_root:
@@ -399,14 +400,14 @@ func _build_frame()->void:
 	var tint:=ColorRect.new();tint.name="MapTopTint";tint.color=Color(Folio.OLIVE,0.86);tint.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	tint.set_anchors_preset(Control.PRESET_TOP_WIDE);tint.offset_left=Folio.RAIL_WIDTH;tint.offset_bottom=Folio.TOP_HEIGHT;add_child(tint)
 	top_frame=PanelContainer.new();top_frame.name="TopFrame";top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var style:=Folio.page_style();style.border_width_bottom=1
+	# The readings and clock share MapTopTint's uninterrupted background.
+	var style:=Tokens.flat(Color.TRANSPARENT)
 	top_frame.add_theme_stylebox_override("panel",style);add_child(top_frame)
-	top_frame.add_child(Folio.paper())
 	var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_left",20);margin.add_theme_constant_override("margin_right",20);top_frame.add_child(margin)
 	brand_row=HBoxContainer.new();brand_row.add_theme_constant_override("separation",18);margin.add_child(brand_row)
 	brand_label=Tokens.make_label("Tomorrow and Tomorrow",24,Tokens.INK);brand_label.add_theme_font_override("font",Tokens.font("voice"));brand_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(brand_label)
 	top_readings=preload("res://scripts/hud/folio_readings.gd").new()
-	top_readings.visible=false
+	top_readings.visible=true
 	top_readings.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	top_readings.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	brand_row.add_child(top_readings)
@@ -1034,13 +1035,18 @@ func _build_toolbar()->void:
 	city_selector.add_theme_font_override("font",Tokens.font("voice"))
 	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 	city_selector.add_theme_font_size_override("font_size",19)
-	city_selector.add_theme_color_override("font_color",Tokens.INK)
+	for color_key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
+		city_selector.add_theme_color_override(color_key,Folio.RAIL_TEXT)
+	city_selector.add_theme_color_override("icon_normal_color",Folio.RAIL_TEXT)
+	city_selector.add_theme_color_override("icon_hover_color",Folio.RAIL_TEXT)
+	city_selector.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
+	city_selector.add_theme_stylebox_override("pressed",Folio.rail_style(false,true))
 	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
 	var divider:=VSeparator.new();divider.custom_minimum_size=Vector2(1,24);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(divider)
-	var city_mark:=Folio.Approved.picture(Rect2(380,10,31,25),26,24);city_mark.name="TopCityIcon";city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
+	var city_mark:=NavIcon.new("settlement");city_mark.set_icon_color(Folio.RAIL_TEXT);city_mark.custom_minimum_size=Vector2(26,24);city_mark.name="TopCityIcon";city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
 	brand_row.add_child(city_selector)
 	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
 	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:

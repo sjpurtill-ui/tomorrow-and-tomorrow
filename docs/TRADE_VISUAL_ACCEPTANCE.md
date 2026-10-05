@@ -105,26 +105,30 @@ before exercising its visible menus and be reconciled with the approved
 layout. The assertion-free preview mode remains intended for that approval
 step; the previous prototype's passing checks do not certify the new design.
 
-## Live readings on the top bar (approval revision)
+## Live readings on the persistent gray bar (approval revision)
 
-The top bar projects the exact caption, value, note and warning color already
-formatted by CommandRailHUD. It follows the strip's era and width visibility,
+The top bar projects the exact caption, value and note already formatted by
+CommandRailHUD. It follows the strip's era and width visibility,
 retains the existing hover details and click destinations, and updates retained
 controls without rebuilding Trade or moving its scroll position. Notes remain in
-the existing hover details and accessibility text; warning values retain their
-warning color. The readings replace the wordmark while a page is open, beside
-the existing city selector. Closing the page restores the map strip. It adds no
-simulation calculations and changes no save format. The top bar is shared by
-all open pages at this
-checkpoint. The full illustrated-page revision remains HELD for user approval.
+the existing hover details and accessibility text. Warning values use light red
+and amber for contrast against the existing gray bar. The readings and city
+selector share the clock and speed controls' continuous background: the
+parchment fill above the page is removed. Readings stay visible in the same
+position with pages open or closed; the former boxed strip remains hidden.
+It adds no simulation calculations and changes no save format. The full
+illustrated-page revision remains HELD for user approval.
 
 `tests/test_folio_readings.gd` checks hidden-strip parity, live shortage updates,
 keyboard focus, navigation, hover detail, era changes, reopening, economic-state
-preservation and top-bar containment at 1536 and 1138px canvas widths.
-The 1536x1024 GPU example is retained locally in
-`artifacts/trade-top-bar-preview/trade-preview.png`; its daily reports are
+preservation, contrast, persistent open/closed placement, and top-bar containment
+at 1536 and 1138px canvas widths. The 1536x1024 GPU examples are retained locally
+in `artifacts/trade-persistent-gray-bar/trade-preview.png` and
+`persistent-bar-page-closed.png` in the same directory; their daily reports are
 prepared in memory and are not readings from the user's current campaign.
 
 Verification: all three focused regressions passed with zero errors, failures
-or orphan nodes (report 13). The clock overlap case includes a long date and
-temperature string. Broad page acceptance remains pending visual approval.
+or orphan nodes (report 14). The clock overlap case includes a long date and
+temperature string. Both private GPU captures completed with exit 0 and no
+script errors; the probe process exited. Broad page acceptance remains pending
+visual approval.

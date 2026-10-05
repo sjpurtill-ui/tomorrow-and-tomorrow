@@ -146,6 +146,9 @@ func _preview_case() -> void:
 	await _frames(8)
 	var row := {"id":"trade-preview","prototype":true,"canvas":"1536x1024","dock_width":hud.dock.size.x,"content_width":board.size.x,"images":[]}
 	await _capture("trade-preview", row)
+	hud.close_dock()
+	await _frames(8)
+	await _capture("persistent-bar-page-closed", row)
 	report.cases.append(row)
 
 ## Shared with the regression suite: real actor stores and actual ledger shape.

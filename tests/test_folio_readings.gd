@@ -38,6 +38,9 @@ func test_top_bar_matches_hidden_strip_and_preserves_navigation_and_hover() -> v
 	assert_bool(hud.top_readings.is_visible_in_tree()).is_true()
 	assert_float(hud.top_readings.get_global_rect().end.y).is_less_equal(45.0)
 	assert_object(hud.dock.find_child("FolioReadings",true,false)).is_null()
+	assert_object(hud.top_frame.find_child("FolioPaper",true,false)).is_null()
+	assert_object(hud.top_frame.get_theme_stylebox("panel").bg_color).is_equal(Color.TRANSPARENT)
+	assert_float(hud.get_node("MapTopTint").get_global_rect().end.x).is_equal(1536.0)
 	assert_int(hud.kpi_readings().size()).is_equal(5)
 	_assert_parity()
 	var chosen: Array=[]
@@ -64,6 +67,7 @@ func test_live_warning_update_retains_focus_controls_and_trade_state() -> void:
 	for i in 3: await get_tree().process_frame
 	_assert_parity()
 	assert_str(readings.entries.water.value.text).is_equal("1 day")
+	assert_object(readings.entries.water.value.get_theme_color("font_color")).is_equal(readings.SHORTAGE_INK)
 	assert_bool(button.has_focus()).is_true()
 	assert_int(hud.dock.find_child("TradeBoard",true,false).get_instance_id()).is_equal(identity)
 	assert_int(hud.dock.body_scroll.scroll_vertical).is_equal(offset)
@@ -92,6 +96,12 @@ func test_era_changes_and_narrow_layout_keep_live_values_inside_top_bar() -> voi
 	hud.open_dock("economy",2)
 	for i in 3: await get_tree().process_frame
 	assert_bool(hud.top_readings.is_visible_in_tree()).is_true()
+	var open_position:Vector2=hud.top_readings.global_position
+	var open_size:Vector2=hud.top_readings.size
 	hud.close_dock()
-	assert_bool(hud.top_readings.is_visible_in_tree()).is_false()
-	assert_bool(hud.kpi_strip.is_visible_in_tree()).is_true()
+	for i in 3: await get_tree().process_frame
+	assert_bool(hud.top_readings.is_visible_in_tree()).is_true()
+	assert_bool(hud.kpi_strip.is_visible_in_tree()).is_false()
+	assert_object(hud.top_readings.global_position).is_equal(open_position)
+	assert_object(hud.top_readings.size).is_equal(open_size)
+	_assert_parity()
