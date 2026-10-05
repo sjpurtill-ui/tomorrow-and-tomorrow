@@ -75,7 +75,7 @@ static func build(work:Dictionary,options:Dictionary={})->Dictionary:
 	# A cleared site is visible at zero; no first 8% is invented.
 	Map.append_piece(body,Map.piece(Vector3(plinth.get_center().x,-.0015,plinth.get_center().y),Vector3(plinth.size.x,.0015,plinth.size.y),Color("98866b")),0.0)
 	if fraction>0.0:
-		Map.append_piece(body,Map.piece(Vector3(plinth.get_center().x,0,plinth.get_center().y),Vector3(plinth.size.x,top,plinth.size.y),tone.lerp(Color("c8b98f"),.50)),0.0)
+		Map.append_piece(body,Map.piece(Vector3(plinth.get_center().x,0,plinth.get_center().y),Vector3(plinth.size.x,top,plinth.size.y),tone.lerp(Color("c5c0b2"),.40)),0.0)
 	if d.state=="ruined":level=design_height*minf(.42,fraction*.65)
 	for index in pieces.size():
 		var part:Dictionary=pieces[index].duplicate()
@@ -198,11 +198,15 @@ static func _ground(root:Node3D,plinth:Rect2)->void:
 	if _earth==null:
 		_earth=StandardMaterial3D.new();_earth.roughness=1.0;_earth.uv1_scale=Vector3(10,10,1)
 		var image:=Image.create_empty(64,64,false,Image.FORMAT_RGB8)
+		var noise:=FastNoiseLite.new();noise.seed=1846;noise.frequency=.12;noise.fractal_octaves=3
 		for y in 64:
 			for x in 64:
 				var grain:=float(posmod(x*73+y*131+x*y*17,97))/96.0
-				var earth:=clampf(.5+.18*sin(x*.34)+.18*cos(y*.29)+(grain-.5)*.3,0.0,1.0)
-				image.set_pixel(x,y,Color("a29375").lerp(Color("baac8c"),earth))
+				# Blend opposite samples for a seamless, irregular soil texture.
+				var a:=lerpf(noise.get_noise_2d(x,y),noise.get_noise_2d(x-64,y),float(x)/64.0)
+				var b:=lerpf(noise.get_noise_2d(x,y-64),noise.get_noise_2d(x-64,y-64),float(x)/64.0)
+				var earth:=clampf(.5+lerpf(a,b,float(y)/64.0)+(grain-.5)*.18,0.0,1.0)
+				image.set_pixel(x,y,Color("9b9180").lerp(Color("b5aa96"),earth))
 		_earth.albedo_texture=ImageTexture.create_from_image(image)
 	var ground:=MeshInstance3D.new();ground.name="Ground";ground.mesh=disk;ground.material_override=_earth;ground.position.y=-.8
 	root.add_child(ground)
