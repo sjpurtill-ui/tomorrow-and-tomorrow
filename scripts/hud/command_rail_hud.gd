@@ -7,30 +7,29 @@ const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const DockPanelScript:=preload("res://scripts/hud/dock_panel.gd")
 const NavIcon:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
+const Folio:=preload("res://scripts/hud/reference_folio.gd")
 
 signal section_requested(section:String,sub:int)
 signal menu_requested
 signal escape_pressed
 
-## The rail leads with the fantasy: the Court (the crest above), the People,
-## the Known World and the Chronicle. The management ledgers wait one click
-## away in a drawer ("Tallies" before writing, "Ledgers" after), so no detail
-## is lost but none of it greets a new god. Labels follow era_words.gd.
+## The original approved nine painted destinations lead the rail. Additional
+## existing destinations follow in the same scrollable column.
 const SECTIONS:Array[Dictionary]=[
-	{"id":"overview","label":"The People","icon":0,"tooltip":"The people: how many, how fed, how long they live · F1"},
-	{"id":"standing","label":"Standing","tooltip":"What we are, how every people we know sees us, and what it makes them do"},
-	{"id":"world","label":"Known World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
-	# The warriors stand on the rail itself, one click away as HOI4 keeps them.
-	{"id":"military","label":"Military","icon":8,"tooltip":"War: how many serve, our enemies and our leaders · F8"},
+	{"id":"settlement","label":"Overview","tooltip":"This settlement: its people, leader, stores and buildings"},
+	{"id":"overview","label":"People","tooltip":"The people: how many, how fed, how long they live · F1"},
+	{"id":"economy","label":"Food","sub":0,"tooltip":"Food and water · F2"},
+	{"id":"materials","label":"Materials","section":"economy","sub":1,"tooltip":"Material stores and supply"},
+	{"id":"wealth","label":"Wealth","section":"economy","sub":2,"tooltip":"Wealth, gifts and exchange"},
+	{"id":"construction","label":"Buildings","tooltip":"Construction and infrastructure · F7"},
+	{"id":"production","label":"Production","tooltip":"Crafts, tools and weapons in the making · F9"},
+	{"id":"civ","label":"Culture","tooltip":"Society and civic dialogue · F4"},
+	{"id":"military","label":"Security","tooltip":"War: how many serve, our enemies and our leaders · F8"},
+	{"id":"trade","label":"Trade","section":"economy","sub":3,"tooltip":"Trade with other peoples: what passes, who leans on whom, and pressure"},
+	{"id":"inquiry","label":"Research","tooltip":"What the people know and are learning · F5"},
+	{"id":"world","label":"World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
-	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
-	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"drawer":true,"tooltip":"Material stores and supply"},
-	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"drawer":true,"tooltip":"Wealth, gifts and exchange"},
-	{"id":"trade","label":"Trade","section":"economy","sub":3,"drawer":true,"tooltip":"Trade with other peoples: what passes, who leans on whom, and pressure"},
-	{"id":"construction","label":"Buildings","icon":5,"drawer":true,"tooltip":"Construction and infrastructure · F7"},
-	{"id":"production","label":"Production","icon":6,"drawer":true,"tooltip":"Crafts, tools and weapons in the making · F9"},
-	{"id":"civ","label":"Culture","icon":7,"drawer":true,"tooltip":"Society and civic dialogue · F4"},
-	{"id":"inquiry","label":"Research","drawer":true,"tooltip":"What the people know and are learning · F5"},
+	{"id":"standing","label":"Standing","tooltip":"What we are, how every people we know sees us, and what it makes them do"},
 ]
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## The WATER tile's one reading of every town's water and the dry year.
@@ -48,6 +47,9 @@ var dismissed_alert_ids:Array=[]
 
 var rail_panel:PanelContainer
 var top_frame:PanelContainer
+var brand_row:HBoxContainer
+var brand_label:Label
+var top_actions:HBoxContainer
 var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
 var rail_icons:Dictionary={}
@@ -131,26 +133,21 @@ func _ready()->void:
 
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
-	var primary:=0
-	for spec in SECTIONS:
-		if not bool(spec.get("drawer",false)):primary+=1
-	# Compact ledger rows retain readable type; short screens can scroll the
-	# final entries without shrinking their icons or labels.
-	var drawer_shown:=drawer_box!=null and drawer_box.visible
-	var tight:=drawer_shown and view.y<900.0
-	for id in rail_buttons:
-		var button:Button=rail_buttons[id]
-		if _in_drawer(String(id)):button.custom_minimum_size.y=32.0 if tight else 36.0
-		else:button.custom_minimum_size.y=62.0 if tight else clampf((view.y-170.0)/float(primary+1),62.0,78.0)
-	if drawer_button:drawer_button.custom_minimum_size.y=52.0 if tight else 58.0
+	var page_width:=Folio.page_width(view.x)
+	for id in rail_buttons:(rail_buttons[id] as Button).custom_minimum_size.y=78.0
 	if top_frame:
-		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
-		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,Tokens.TOP_BAR_HEIGHT)
+		top_frame.position=Vector2(Folio.RAIL_WIDTH,0)
+		top_frame.size=Vector2(page_width,Folio.TOP_HEIGHT)
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
-		rail_panel.size=Vector2(Tokens.RAIL_WIDTH,view.y)
+		rail_panel.size=Vector2(Folio.RAIL_WIDTH,view.y)
+	if brand_label:brand_label.visible=view.x>=1100
+	if city_selector:city_selector.custom_minimum_size.x=150 if view.x>=1100 else 120
+	if top_actions:top_actions.position=Vector2(view.x-top_actions.get_combined_minimum_size().x-12,6)
 	if time_pill:
-		time_pill.position=Vector2(Tokens.DOCK_X,4)
+		var actions_width:=top_actions.get_combined_minimum_size().x+24 if top_actions else 0.0
+		var clock_width:=time_pill.get_combined_minimum_size().x
+		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
 	if kpi_strip:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 		# The status strip is a fixed-height top-bar component. At the minimum
@@ -170,37 +167,36 @@ func _layout()->void:
 		# time pill. When a later age's chips do not fit in what is left, the
 		# least urgent go first (KPI_SHED_ORDER); food, lives and the day's
 		# labour always stay.
-		var left:=Tokens.DOCK_X
-		if time_pill and time_pill.visible:left=time_pill.position.x+time_pill.get_combined_minimum_size().x+12.0
+		var left:=Folio.RAIL_WIDTH+12.0
 		var room:=view.x-Tokens.EDGE_MARGIN-left
 		for id in KPI_SHED_ORDER:
 			if kpi_strip.get_combined_minimum_size().x<=room:break
 			_hide_kpi(String(id))
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),4)
+		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Folio.TOP_HEIGHT+8.0)
 	_layout_orders()
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		# The council's waiting matters stand just above your orders.
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,orders_top()-queue_root.size.y)
 	if dock:
-		dock.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP)
+		dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y))
+		dock.set_deferred("size",Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT))
 	if detail_dock:
-		detail_dock.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP)
-		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y))
+		detail_dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
+		detail_dock.set_deferred("size",Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT))
 	_position_toolbar()
 	if army_alerts:
 		# Under the clock at the map's top left; a dock covers that corner.
 		# The War screen's strip stands there while it is open: below it.
-		army_alerts.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
+		army_alerts.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
 		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 
 func _work_queue_width(view_width:float)->float:
-	return clampf(view_width*.65,720.0,980.0)
+	return Folio.page_width(view_width)
 
 func force_dock_layout()->void:
 	## Synchronous layout for the capture harness (no idle frames before draw).
@@ -209,7 +205,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y)
+		panel.size=Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 	# Capture only: "--capture-dock-scroll=<px>" shows a long page further down.
@@ -223,8 +219,8 @@ func _position_toolbar()->void:
 	var view:=get_viewport().get_visible_rect().size
 	# On a compact enlarged UI, the management dock needs this space. Closing
 	# it restores the map toolbar; keyboard map controls remain available.
-	toolbar.visible=active_section=="" or view.x>=1400
-	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
+	toolbar.visible=active_section==""
+	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Folio.RAIL_WIDTH
 	# Your orders hold the bottom right: the toolbar centres in the room left
 	# of them when it fits there (else the cards stand above it).
 	var right:=view.x
@@ -255,7 +251,7 @@ func _position_army_bar()->void:
 	var view:=get_viewport().get_visible_rect().size
 	army_bar.terrain=terrain
 	army_bar.set_meta("covered",(dock!=null and dock.visible) or (detail_dock!=null and detail_dock.visible))
-	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Tokens.RAIL_WIDTH
+	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Folio.RAIL_WIDTH
 	var bottom:=toolbar.position.y-8.0 if toolbar!=null and toolbar.visible else view.y-Tokens.EDGE_MARGIN
 	var height:float=army_bar.bar_height()
 	var left:=free_left+16.0
@@ -389,141 +385,54 @@ func _open_order_screen(screen:String)->void:
 # --- Rail -------------------------------------------------------------------
 
 func _build_frame()->void:
-	top_frame=PanelContainer.new()
-	top_frame.name="TopFrame"
-	top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var style:=Tokens.flat(Tokens.PAPER)
-	style.border_color=Tokens.RULE_STRONG
-	style.border_width_bottom=1
-	top_frame.add_theme_stylebox_override("panel",style)
-	add_child(top_frame)
+	var tint:=ColorRect.new();tint.name="MapTopTint";tint.color=Color(Folio.OLIVE,0.86);tint.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	tint.set_anchors_preset(Control.PRESET_TOP_WIDE);tint.offset_left=Folio.RAIL_WIDTH;tint.offset_bottom=Folio.TOP_HEIGHT;add_child(tint)
+	top_frame=PanelContainer.new();top_frame.name="TopFrame";top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var style:=Folio.page_style();style.border_width_bottom=1
+	top_frame.add_theme_stylebox_override("panel",style);add_child(top_frame)
+	top_frame.add_child(Folio.paper())
+	var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_left",20);margin.add_theme_constant_override("margin_right",20);top_frame.add_child(margin)
+	brand_row=HBoxContainer.new();brand_row.add_theme_constant_override("separation",18);margin.add_child(brand_row)
+	brand_label=Tokens.make_label("Tomorrow and Tomorrow",24,Tokens.INK);brand_label.add_theme_font_override("font",Tokens.font("voice"));brand_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(brand_label)
+	top_actions=HBoxContainer.new();top_actions.name="TopActions";top_actions.add_theme_constant_override("separation",6);add_child(top_actions)
+	var court:=Button.new();court.name="TopCourt";court.tooltip_text="Open your court · F12";court.pressed.connect(open_court);top_actions.add_child(court)
+	var world:=Button.new();world.name="TopWorld";world.tooltip_text="Known world · F6";world.pressed.connect(func()->void:section_requested.emit("world",0));top_actions.add_child(world)
+	var menu:=Button.new();menu.name="RailMenu";menu.tooltip_text="Save, load, settings, or a new world (Esc).";menu.pressed.connect(func()->void:menu_requested.emit());top_actions.add_child(menu)
+	var buttons:Array[Button]=[court,world,menu]
+	var regions:Array[Rect2]=[Rect2(1345,7,34,31),Rect2(1397,8,36,31),Rect2(1447,8,33,29)]
+	for index in buttons.size():
+		var button:=buttons[index]
+		button.custom_minimum_size=Vector2(42,32);button.add_theme_font_override("font",Tokens.font("voice"));button.add_theme_font_size_override("font_size",16)
+		button.add_theme_color_override("font_color",Folio.RAIL_TEXT);button.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT));button.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
+		var icon:=Folio.Approved.symbol(regions[index],28,28);button.add_child(icon);icon.set_anchors_preset(Control.PRESET_CENTER);icon.position=Vector2(-14,-14);icon.size=Vector2(28,28)
 
 func _build_rail()->void:
-	rail_panel=PanelContainer.new()
-	rail_panel.name="CommandRail"
-	var style:=Tokens.flat(Tokens.PAPER,Tokens.RULE,0,0)
-	style.border_color=Tokens.RULE
-	style.border_width_right=1
-	style.content_margin_top=8.0
-	style.content_margin_bottom=8.0
-	style.content_margin_left=6.0
-	style.content_margin_right=6.0
-	rail_panel.add_theme_stylebox_override("panel",style)
-	add_child(rail_panel)
-	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",3)
-	rail_panel.add_child(column)
-	# The crest heads the rail and opens the court: every conversation with
-	# your people and with foreign rulers happens there.
+	rail_panel=PanelContainer.new();rail_panel.name="CommandRail"
+	var style:=Tokens.flat(Folio.OLIVE);style.border_color=Color("9e9773");style.border_width_right=1
+	rail_panel.add_theme_stylebox_override("panel",style);add_child(rail_panel)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",0);rail_panel.add_child(column)
 	column.add_child(_make_court_button())
-	var header_rule:=ColorRect.new()
-	header_rule.color=Tokens.BORDER
-	header_rule.custom_minimum_size=Vector2(0,1)
-	column.add_child(header_rule)
-	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",2);scroll.add_child(entries)
-	for section in SECTIONS:
-		if bool(section.get("drawer",false)):continue
-		entries.add_child(_make_rail_button(section))
-	entries.add_child(_make_drawer_button())
-	drawer_box=VBoxContainer.new()
-	drawer_box.name="RailDrawer"
-	drawer_box.visible=false
-	drawer_box.add_theme_constant_override("separation",0)
-	var drawer_style:=Tokens.flat(Tokens.PAPER_SUNK,Tokens.RULE,1,Tokens.RADIUS_CONTROL)
-	drawer_style.content_margin_top=4.0;drawer_style.content_margin_bottom=4.0
-	drawer_box.add_theme_constant_override("separation",0)
-	var drawer_panel:=PanelContainer.new()
-	drawer_panel.name="RailDrawerPanel"
-	drawer_panel.add_theme_stylebox_override("panel",drawer_style)
-	entries.add_child(drawer_panel)
-	drawer_panel.add_child(drawer_box)
-	for section in SECTIONS:
-		if bool(section.get("drawer",false)):drawer_box.add_child(_make_rail_button(section))
-	drawer_panel.visible=false
-	drawer_box.visibility_changed.connect(func()->void:drawer_panel.visible=drawer_box.visible)
-	var menu_button:=Button.new()
-	menu_button.name="RailMenu"
-	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
-	menu_button.tooltip_text="Save, load, settings, or a new world (Esc)."
-	menu_button.add_theme_font_size_override("font_size",13)
-	menu_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
-	menu_button.add_theme_stylebox_override("normal",_approved_rail_style(false))
-	menu_button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
-	menu_button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
-	menu_button.add_theme_stylebox_override("focus",_rail_focus_style())
-	var menu_content:=HBoxContainer.new()
-	menu_content.set_anchors_preset(Control.PRESET_FULL_RECT)
-	menu_content.alignment=BoxContainer.ALIGNMENT_CENTER
-	menu_content.add_theme_constant_override("separation",5)
-	menu_content.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	menu_button.add_child(menu_content)
-	var menu_mark:=NavIcon.new("menu")
-	menu_mark.custom_minimum_size=Vector2(20,20)
-	menu_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	menu_content.add_child(menu_mark)
-	var menu_label:=Tokens.make_label("Menu",13,Tokens.INK_MUTED)
-	menu_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	menu_content.add_child(menu_label)
-	menu_button.pressed.connect(func()->void: menu_requested.emit())
-	column.add_child(menu_button)
+	var scroll:=ScrollContainer.new();scroll.name="RailScroll";scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_NEVER;scroll.follow_focus=true;column.add_child(scroll)
+	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",0);scroll.add_child(entries)
+	for section in SECTIONS:entries.add_child(_make_rail_button(section))
 
 func _make_rail_button(section:Dictionary)->Button:
 	var id:=String(section.id)
-	var button:=Button.new()
-	button.name="Rail"+id.capitalize().replace(" ","")
-	if id=="civ": button.name="RailCivilization"
-	button.custom_minimum_size=Vector2(0,58)
-	button.tooltip_text=String(section.tooltip)
-	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
-	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
-	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
-	button.add_theme_stylebox_override("focus",_rail_focus_style())
+	var button:=Button.new();button.name="Rail"+id.capitalize().replace(" ","")
+	if id=="civ":button.name="RailCivilization"
+	button.custom_minimum_size=Vector2(0,78);button.tooltip_text=String(section.tooltip)
+	button.add_theme_stylebox_override("normal",_approved_rail_style(false));button.add_theme_stylebox_override("hover",_approved_rail_style(false,true));button.add_theme_stylebox_override("pressed",_approved_rail_style(true));button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(func()->void:
 		var target:=String(section.get("section",id));var target_sub:=int(section.get("sub",0))
 		section_requested.emit("" if active_section==target and dock and dock.sub==target_sub else target,target_sub))
-	var drawer:=bool(section.get("drawer",false))
-	var content:BoxContainer=HBoxContainer.new() if drawer else VBoxContainer.new()
-	content.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content.alignment=BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation",4 if drawer else 3)
-	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	if drawer:content.offset_left=4;content.offset_right=-2
-	button.add_child(content)
-	var symbol:=NavIcon.new(id)
-	symbol.set_icon_color(_rail_ink())
-	symbol.custom_minimum_size=Vector2(26,26) if drawer else Vector2(40,40)
-	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-	symbol.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	content.add_child(symbol)
-	rail_icons[id]=symbol
-	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),13,Tokens.INK)
-	label.add_theme_font_override("font",Tokens.font("ui_strong"))
-	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT if drawer else HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	if drawer:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	content.add_child(label)
-	rail_labels[id]=label
-	var badge:=Label.new()
-	badge.visible=false
-	badge.custom_minimum_size=Vector2(16,16)
-	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_font_size_override("font_size",12)
-	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	# Rail width is fixed, so a plain top-left offset lands the pill at the
-	# button's top-right corner (button content width = rail - 2*8 padding).
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
-	button.add_child(badge)
-	rail_buttons[id]=button
-	rail_badges[id]=badge
-
+	var content:=VBoxContainer.new();content.set_anchors_preset(Control.PRESET_FULL_RECT);content.alignment=BoxContainer.ALIGNMENT_CENTER;content.add_theme_constant_override("separation",2);content.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(content)
+	var symbol:=Folio.rail_icon(id);symbol.custom_minimum_size=Vector2(40,40);symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(symbol);rail_icons[id]=symbol
+	var label:=Tokens.make_label(String(section.label),14,Folio.RAIL_TEXT);label.add_theme_font_override("font",Tokens.font("voice"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label);rail_labels[id]=label
+	var badge:=Label.new();badge.visible=false;badge.custom_minimum_size=Vector2(16,16);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.position=Vector2(57,3);button.add_child(badge)
+	rail_buttons[id]=button;rail_badges[id]=badge
 	return button
 
-## The ledgers drawer: food, materials, wealth, buildings, crafts, culture,
-## warriors and lore, folded under the engraved ledger until opened.
 func _make_drawer_button()->Button:
 	var button:=Button.new()
 	button.name="RailLedgers"
@@ -558,7 +467,7 @@ func _make_drawer_button()->Button:
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	badge.add_theme_font_size_override("font_size",12)
 	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
+	badge.position=Vector2(Folio.RAIL_WIDTH-16.0-14.0,2.0)
 	button.add_child(badge)
 	rail_badges["drawer"]=badge
 	drawer_button=button
@@ -615,7 +524,7 @@ func _refresh_words()->void:
 	_words_signature=signature
 	for spec in SECTIONS:
 		var label:Label=rail_labels.get(String(spec.id))
-		if label:label.text=EraWords.word("rail."+String(spec.id),String(spec.label))
+		if label:label.text=String(spec.label)
 	_style_drawer_label()
 	var military:Button=rail_buttons.get("military")
 	if military:
@@ -630,50 +539,14 @@ func _refresh_words()->void:
 	_layout()
 
 func _make_court_button()->Button:
-	var button:=Button.new()
-	button.name="RailCourt"
-	# The heart of the game gets the largest place on the rail.
-	button.custom_minimum_size=Vector2(0,76)
+	var button:=Button.new();button.name="RailCourt";button.custom_minimum_size=Vector2(0,58)
 	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
-	var gold:=Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
-	var gold_hover:=Tokens.flat(Tokens.GOLD_WASH.lerp(Tokens.GOLD,.12),Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
-	button.add_theme_stylebox_override("normal",gold)
-	button.add_theme_stylebox_override("hover",gold_hover)
-	button.add_theme_stylebox_override("pressed",gold_hover)
-	button.add_theme_stylebox_override("focus",_rail_focus_style())
-	button.pressed.connect(open_court)
-	# COURT PREWARM (L): the modelled court's people, place and clips load in
-	# the background a few seconds after the rail is up, or at once on the
-	# first hover, so the first audience opens without a stall
-	# (scripts/hud/court_prewarm.gd; never blocks the frame or the sim).
+	button.add_theme_stylebox_override("normal",_approved_rail_style(false));button.add_theme_stylebox_override("hover",_approved_rail_style(false,true));button.add_theme_stylebox_override("focus",_rail_focus_style());button.pressed.connect(open_court)
 	preload("res://scripts/hud/court_prewarm.gd").attach(button)
-	var content:=VBoxContainer.new()
-	content.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content.alignment=BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation",0)
-	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	button.add_child(content)
-	var symbol:=NavIcon.new("court")
-	symbol.custom_minimum_size=Vector2(48,48)
-	symbol.set_icon_color(Tokens.GOLD_TEXT)
-	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	content.add_child(symbol)
-	var label:=Tokens.make_label("Court",15,Tokens.GOLD_TEXT);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
-	var badge:=Label.new()
-	badge.visible=false
-	badge.custom_minimum_size=Vector2(16,16)
-	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_font_size_override("font_size",12)
-	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
-	button.add_child(badge)
-	rail_badges["court"]=badge
+	var icon:=Folio.rail_icon("court");icon.set_anchors_preset(Control.PRESET_CENTER);icon.position=Vector2(-20,-22);icon.size=Vector2(40,44);icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(icon)
+	var badge:=Label.new();badge.visible=false;badge.position=Vector2(57,3);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(badge);rail_badges["court"]=badge
 	return button
 
-## Opens (or closes) the court: the one place for every conversation.
 func open_court()->void:
 	var director:Node=get_tree().get_first_node_in_group("court_director") if is_inside_tree() else null
 	if director!=null and director.has_method("toggle_court"):director.call("toggle_court")
@@ -688,16 +561,16 @@ func set_active_section(id:String)->void:
 	active_section=id
 	for section_id in rail_buttons:
 		var button:Button=rail_buttons[section_id]
-		var target:=String(section_id);var active:bool=target==id or (target=="overview" and id=="settlement")
+		var target:=String(section_id);var active:bool=target==id
 		if id=="economy":active=target==["economy","materials","wealth","trade"][clampi(dock.sub if dock else 0,0,3)]
 		button.add_theme_stylebox_override("normal",_approved_rail_style(active))
 		button.add_theme_stylebox_override("hover",_approved_rail_style(active,true))
 		var icon:Control=rail_icons.get(section_id)
 		if icon:
 			if icon.has_method("set_active"): icon.set_active(active)
-			if icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.GOLD_TEXT if active else _rail_ink())
+			if icon.has_method("set_icon_color"): icon.set_icon_color(Folio.GOLD)
 		var label:Label=rail_labels.get(section_id)
-		if label:label.add_theme_color_override("font_color",Tokens.GOLD_TEXT if active else Tokens.INK)
+		if label:label.add_theme_color_override("font_color",Color.WHITE if active else Folio.RAIL_TEXT)
 	_sync_drawer()
 	_position_toolbar()
 
@@ -739,27 +612,28 @@ func _build_time_pill()->void:
 	style.border_width_left=0;style.border_width_top=0;style.border_width_right=0;style.border_width_bottom=0
 	time_pill.add_theme_stylebox_override("panel",style)
 	add_child(time_pill)
-	var row:=VBoxContainer.new()
-	row.add_theme_constant_override("separation",1)
+	var row:=HBoxContainer.new()
+	row.add_theme_constant_override("separation",8)
 	time_pill.add_child(row)
 	time_text=RichTextLabel.new()
 	time_text.bbcode_enabled=true
 	time_text.fit_content=true
 	time_text.autowrap_mode=TextServer.AUTOWRAP_OFF
 	time_text.scroll_active=false
-	time_text.custom_minimum_size=Vector2(166,26)
+	time_text.custom_minimum_size=Vector2(175,28)
 	time_text.mouse_filter=Control.MOUSE_FILTER_PASS
 	time_text.add_theme_font_size_override("normal_font_size",17)
 	time_text.add_theme_font_size_override("bold_font_size",17)
 	time_text.add_theme_font_override("bold_font",Tokens.font("ui_strong"))
-	time_text.add_theme_color_override("default_color",Tokens.INK)
+	time_text.add_theme_font_override("normal_font",Tokens.font("voice"))
+	time_text.add_theme_color_override("default_color",Folio.RAIL_TEXT)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
 	speed_row.add_theme_constant_override("separation",2)
 	row.add_child(speed_row)
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
-	pause_button.custom_minimum_size=Vector2(64,26)
+	pause_button.custom_minimum_size=Vector2(26,28)
 	pause_button.add_theme_font_size_override("font_size",12)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
@@ -768,9 +642,10 @@ func _build_time_pill()->void:
 	for speed:int in range(1,6):
 		var button:=Button.new()
 		button.name="Speed%d"%speed
-		button.text=SPEED_LABELS[speed]
-		button.custom_minimum_size=Vector2(0,26)
-		button.add_theme_font_size_override("font_size",12)
+		button.text=["", "›", "››", "›››", "»", "»»"][speed]
+		button.tooltip_text=SPEED_LABELS[speed]+" (key %d)" % speed
+		button.custom_minimum_size=Vector2(22,28)
+		button.add_theme_font_size_override("font_size",17)
 		button.pressed.connect(_on_speed_pressed.bind(speed))
 		speed_row.add_child(button)
 		speed_buttons.append(button)
@@ -812,7 +687,7 @@ func _style_speed_controls(selected:int)->void:
 	selected=clampi(selected,0,5)
 	if selected>0:last_running_speed=selected
 	var paused:=selected==0
-	pause_button.text="Resume" if paused else "Pause"
+	pause_button.text="▶" if paused else "Ⅱ"
 	pause_button.tooltip_text="Let time run again (key 0)" if paused else "Stop time (key 0)"
 	for index:int in speed_buttons.size():
 		var button:=speed_buttons[index]
@@ -821,11 +696,11 @@ func _style_speed_controls(selected:int)->void:
 		if active:normal.border_color=Tokens.GOLD;normal.border_width_bottom=2
 		var hover:=Tokens.flat(Tokens.HOVER_BG)
 		button.add_theme_stylebox_override("focus",_rail_focus_style())
-		for box:StyleBoxFlat in [normal,hover]:box.content_margin_left=8.0;box.content_margin_right=8.0
+		for box:StyleBoxFlat in [normal,hover]:box.content_margin_left=3.0;box.content_margin_right=3.0
 		button.add_theme_stylebox_override("normal",normal)
 		button.add_theme_stylebox_override("hover",hover)
 		button.add_theme_stylebox_override("pressed",normal)
-		button.add_theme_color_override("font_color",Tokens.GOLD_TEXT if active else Tokens.TEXT_DIM)
+		button.add_theme_color_override("font_color",Folio.GOLD if active else Folio.RAIL_TEXT)
 		button.add_theme_color_override("font_hover_color",Tokens.INK)
 
 # --- KPI strip --------------------------------------------------------------
@@ -1119,14 +994,17 @@ func _build_toolbar()->void:
 	toolbar.add_child(row)
 	city_selector=OptionButton.new()
 	city_selector.name="CitySelector"
-	city_selector.custom_minimum_size=Vector2(150,32)
-	city_selector.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
+	city_selector.custom_minimum_size=Vector2(150,30)
+	city_selector.fit_to_longest_item=false
+	city_selector.add_theme_font_override("font",Tokens.font("voice"))
+	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
+	city_selector.add_theme_font_size_override("font_size",19)
 	city_selector.add_theme_color_override("font_color",Tokens.INK)
 	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
-	row.add_child(city_selector)
+	brand_row.add_child(city_selector)
 	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
 	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:
 		var button:=Button.new()
@@ -1312,8 +1190,8 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	dock.visible=true
 	if not was_open:
 		# Slide in from the rail edge and fade up (Motion.BASE, cubic ease-out).
-		var target_x:=Tokens.DOCK_X
-		dock.position.x=Tokens.RAIL_WIDTH;dock.modulate.a=0.0
+		var target_x:=Folio.RAIL_WIDTH
+		dock.position.x=Folio.RAIL_WIDTH;dock.modulate.a=0.0
 		var tween:=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT).set_parallel(true)
 		var slide:=preload("res://scripts/hud/motion.gd").duration(preload("res://scripts/hud/motion.gd").BASE)
 		tween.tween_property(dock,"position:x",target_x,slide);tween.tween_property(dock,"modulate:a",1.0,slide)
@@ -1475,7 +1353,7 @@ func _refresh_time()->void:
 	var signature:="%s|%d|%s" % [date,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [Tokens.INK.to_html(false),date,Tokens.TEXT_SOFT.to_html(false),temperature_text]
+	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [Folio.RAIL_TEXT.to_html(false),date,Folio.RAIL_TEXT.to_html(false),temperature_text]
 	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()
@@ -1696,12 +1574,10 @@ func show_action_feedback(message:String,category:String="war")->void:
 	preload("res://scripts/hud/notification_model.gd").push({"category":category,"tier":"notable","text":message})
 
 func _approved_rail_style(active:bool,hover:bool=false)->StyleBoxFlat:
-	var style:=Tokens.flat(Tokens.PAPER_RAISED if active else Tokens.HOVER_BG if hover else Color.TRANSPARENT,Tokens.GOLD if active else Tokens.RULE,1 if active else 0,Tokens.RADIUS_CONTROL)
-	style.border_width_left=3 if active else 1 if hover else 0
-	return style
+	return Folio.rail_style(active,hover)
 
 func _rail_focus_style()->StyleBoxFlat:
 	return Tokens.flat(Color.TRANSPARENT,Tokens.GOLD,2,Tokens.RADIUS_CONTROL)
 
 ## Rail glyph ink: dark brown ink on light paper, warm gold on night paper.
-func _rail_ink()->Color:return Tokens.INK_MUTED
+func _rail_ink()->Color:return Folio.GOLD
