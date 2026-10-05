@@ -423,3 +423,15 @@ func test_the_war_map_draws_each_peoples_real_land_cut_where_lands_meet()->void:
 	# Far apart, nothing is cut.
 	var apart:=MapMode.lands([ours,Borders.make_claim("kez","town:b",Vector2(100,0),10.0)])
 	assert_float((apart[0].outline as PackedVector2Array)[0].x).is_equal_approx(10.0,0.05)
+
+## A town's worth as an objective, as HOI4 counts victory points.
+func test_each_enemy_town_is_an_objective_worth_one_to_three()->void:
+	assert_int(MapMode.victory_value(0,false)).is_equal(1)
+	assert_int(MapMode.victory_value(400,false)).is_equal(1)
+	assert_int(MapMode.victory_value(400,true)).is_equal(2)
+	assert_int(MapMode.victory_value(6000,false)).is_equal(2)
+	assert_int(MapMode.victory_value(60000,true)).is_equal(3)
+	var lines:=MapMode.objective_lines({"vp":2,"chief":true,"people":1200,"garrison":[30,50]},true)
+	assert_str(" / ".join(lines)).contains("worth 2 of 3")
+	assert_str(" / ".join(lines)).contains("30 to 50")
+	assert_str(" / ".join(lines)).contains("bid the war leader take it")

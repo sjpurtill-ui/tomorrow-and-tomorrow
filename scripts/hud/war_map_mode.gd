@@ -17,6 +17,12 @@ extends Control
 ##     (the general's own road), with who is winning in a small bar;
 ##   - while a feud is hot, a dashed arrow from their nearest town toward ours
 ##     says their raiders may come;
+##   - every town of a people at feud or war is an objective, as HOI4 marks
+##     victory points: a star in their colour, one to three by what it is
+##     worth (its people as our scouts counted them; a chief town more), and
+##     the town the ruler bid the war leader take ringed, with the general's
+##     planned thrust drawn to it from our front (from home while open land
+##     lies between) until a band is on the road there;
 ##   - our army at home is a counter on our chief town (the men under arms,
 ##     those in drill on a tab, strength against the share kept, will), and
 ##     each enemy's host a counter on their nearest town, in their colour,
@@ -226,6 +232,11 @@ func collect()->Dictionary:
 		if holder=="" or holder=="human": holder="player"
 		towns.append({"name":String(s.get("name","")),"at":at,"owner":holder,"chief":bool(s.get("primary",false))})
 		frame.append(at)
+	# Every people's chief town (the world's regions), for the objectives' worth.
+	var capitals:={}
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		for region:Dictionary in civ.get("strategic_regions",[]):
+			if String(region.get("role",""))=="capital": capitals[String(region.get("id",""))]=true
 	# Every town of another people our people know of.
 	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",true,home,REACH_KM):
 		var at:=_v2(city.get("position",{}))
@@ -235,7 +246,15 @@ func collect()->Dictionary:
 		if owner=="human": owner="player"
 		if owner=="player" and _near_any(towns,at,0.5): continue
 		# A town reported burned (the borders' own reading of the report).
-		towns.append({"name":String(city.get("name","")),"at":at,"owner":owner,"chief":false,"ruin":Borders._report_damage(city)>=0.6})
+		var fields:Dictionary=city.get("fields",{}) if city.get("fields") is Dictionary else {}
+		var people:Dictionary=fields.get("population",{}) if fields.get("population") is Dictionary else {}
+		var garrison:Dictionary=fields.get("garrison",{}) if fields.get("garrison") is Dictionary else {}
+		var chief:=capitals.has(String(city.get("city_id","")))
+		var counted:=roundi((float(people.get("low",0.0))+float(people.get("high",0.0)))*0.5)
+		towns.append({"name":String(city.get("name","")).trim_prefix("Reported home of "),"at":at,"owner":owner,"chief":chief,"ruin":Borders._report_damage(city)>=0.6,
+			"city_id":String(city.get("city_id","")),"vp":victory_value(counted,chief),"people":counted,
+			"garrison":[roundi(float(garrison.get("low",-1.0))),roundi(float(garrison.get("high",-1.0)))] if not garrison.is_empty() else [],
+			"age":int(city.get("age_days",-1))})
 	out.towns=towns
 	# Each people's land: its towns' real claims, each cut where another
 	# people's claim is stronger (nation_border_partition's own score).
@@ -280,10 +299,17 @@ func collect()->Dictionary:
 			"As the war leader reckons it" if age<99999 else "We have no word of their towns",
 			("Our word of them is %s old" % Ledger.span_words(age)) if age<99999 else "",
 			("Worn by the fighting: %d%%" % roundi(float(e.get("their_worn",0.0))*100.0)) if float(e.get("their_worn",0.0))>0.0 else ""])
+		var aim:Dictionary=WarLoop.front(civ_id).get("take",{}) if WarLoop.front(civ_id).get("take") is Dictionary and String(WarLoop.front(civ_id).get("stance",""))=="take" else {}
+		var objective:=Vector2.INF
+		for t:Dictionary in towns:
+			if String(t.get("city_id",""))!="" and String(t.city_id)==String(aim.get("city_id","")): objective=t.at
+		var marching:=false
+		for army in MilitaryCampaign.field_armies:
+			if army is Dictionary and String((army as Dictionary).get("destination_id",""))==String(aim.get("city_id","~")) and String((army as Dictionary).get("status",""))=="moving": marching=true
 		var front:=_front(civ_id,home,there)
 		var apart:=_apart_days(civ_id,home,there) if front.is_empty() else 0
 		if front.is_empty():front_tip.insert(1,"No front: open land lies between us%s" % ((", about %s on the road" % Ledger.span_words(apart)) if apart>0 else ""))
-		(out.enemies as Array).append({"tip_front":_lines(front_tip),"tip_host":_lines(host_tip),"civ_id":civ_id,"name":people,"there":there,"guessed":guessed,"front":front,"apart":apart,"meets":meets.has(civ_id),
+		(out.enemies as Array).append({"tip_front":_lines(front_tip),"tip_host":_lines(host_tip),"civ_id":civ_id,"name":people,"there":there,"guessed":guessed,"front":front,"apart":apart,"meets":meets.has(civ_id),"objective":objective,"objective_id":String(aim.get("city_id","")),"marching":marching,
 			"hot":bool(e.get("hot",false)),"war":String(e.get("kind",""))=="war","fighters":fighters,"stale":age>STALE_DAYS,
 			"worn":clampf(float(e.get("their_worn",0.0)),0.0,1.0),"ours_share":clampf(raw/(1.0+raw),0.05,0.95),"color":_color(civ_id)})
 	# Our army at home (army_bar.gd levy_card): on our chief town.
@@ -304,6 +330,15 @@ func collect()->Dictionary:
 	out.frame=frame
 	out.signature=hash([Borders.published_revision,str(out.enemies.map(func(x:Dictionary)->int:return (x.front as PackedVector2Array).size())),towns.size(),str((out.lands as Array).map(func(l:Dictionary)->Array:return [l.owner,(l.center as Vector2).snapped(Vector2.ONE*0.01),snappedf(float(l.radius),0.01),(l.outline as PackedVector2Array)[0].snapped(Vector2.ONE*0.01) if not (l.outline as PackedVector2Array).is_empty() else Vector2.ZERO])),str(out.enemies.map(func(x:Dictionary)->Array:return [x.civ_id,x.hot,x.fighters,x.stale,snappedf(float(x.ours_share),0.02)])),levy.get("ready",0),levy.get("drill",0),levy.get("watch",0)])
 	return out
+
+
+## What a town is worth as an objective, as HOI4 counts victory points:
+## 1 a village, 2 a town, 3 a city (its people as our scouts counted them,
+## 0 when not counted); a chief town is worth one more, at most 3.
+static func victory_value(people:int,chief:bool)->int:
+	var value:=1 if people<1500 else (2 if people<15000 else 3)
+	if chief: value+=1
+	return clampi(value,1,3)
 
 
 ## Our towns from the settlement network, as the borders read them.
@@ -577,6 +612,7 @@ func _draw()->void:
 		draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,5,Color(PAPER,0.7))
 		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color((n.color as Color).darkened(0.5),0.85))
 	for e:Dictionary in scene.get("enemies",[]):
+		if (e.get("objective",Vector2.INF) as Vector2).is_finite() and not bool(e.get("marching",false)): _draw_plan(e)
 		# A hot front is the war chart's to work (war_front_overlay border
 		# fronts); a quiet one is dashed here.
 		if not (bool(e.hot) or bool(e.war)): _draw_front(e)
@@ -672,9 +708,14 @@ func draw_top(canvas:Control)->void:
 		if not at.is_finite() or not view.grow(20).has_point(at): continue
 		var color:Color=_color(String(t.owner))
 		var r:=6.0 if bool(t.get("chief",false)) else 4.5
+		var enemy:=_enemy_of(String(t.owner))
+		var aimed:=not enemy.is_empty() and String(t.get("city_id",""))!="" and String(t.city_id)==String(enemy.get("objective_id",""))
 		if bool(t.get("ruin",false)):
 			canvas.draw_line(at-Vector2(r,r),at+Vector2(r,r),Color(INK,0.7),2.0,true)
 			canvas.draw_line(at-Vector2(r,-r),at+Vector2(r,-r),Color(INK,0.7),2.0,true)
+		elif not enemy.is_empty():
+			# An objective: its worth in stars, the one bid taken ringed.
+			r=_draw_victory(canvas,at,int(t.get("vp",1)),color,aimed)
 		else:
 			canvas.draw_circle(at,r+1.5,Color(PAPER,0.95))
 			canvas.draw_circle(at,r,color.darkened(0.15))
@@ -690,8 +731,9 @@ func draw_top(canvas:Control)->void:
 			if q.intersects(rect): clear=false; break
 		taken.append(Rect2(at-Vector2(r+2,r+2),Vector2(r+2,r+2)*2.0))
 		var whose:=_people_name(String(t.owner)) if String(t.owner)!="" else "strangers"
-		found.append({"civ_id":String(t.owner),"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
-			"lines":PackedStringArray([words,"Ours" if String(t.owner)=="player" else "A town of %s" % whose,"Burned" if bool(t.get("ruin",false)) else ""])})
+		var tip:=PackedStringArray([words,"Ours" if String(t.owner)=="player" else "A town of %s" % whose,"Burned" if bool(t.get("ruin",false)) else ""])
+		if not enemy.is_empty() and not bool(t.get("ruin",false)): tip.append_array(objective_lines(t,aimed))
+		found.append({"civ_id":String(t.owner),"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),"lines":tip})
 		if not clear: continue
 		taken.append(rect)
 		canvas.draw_string_outline(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,4,Color(PAPER,0.9))
@@ -945,6 +987,111 @@ func _draw_threat(e:Dictionary)->void:
 	_dashed(PackedVector2Array([a,b]),color,3.5)
 	var side:=Vector2(-dir.y,dir.x)
 	draw_colored_polygon(PackedVector2Array([b+dir*16.0,b-dir*4.0+side*9.0,b-dir*4.0-side*9.0]),color)
+
+
+## The people at feud or war with us this owner is, or {}.
+func _enemy_of(owner:String)->Dictionary:
+	for e:Dictionary in scene.get("enemies",[]):
+		if String(e.civ_id)==owner: return e
+	return {}
+
+
+## A town as an objective on the pointer: its worth, its people and its
+## fighters as our scouts counted them, and whether it is the one bid taken.
+static func objective_lines(t:Dictionary,aimed:bool)->PackedStringArray:
+	var out:=PackedStringArray()
+	var vp:=int(t.get("vp",1))
+	out.append("Objective worth %d of 3%s" % [vp,", their chief town" if bool(t.get("chief",false)) else ""])
+	if int(t.get("people",0))>0: out.append("About %s people, as last counted" % EraWords.grouped(int(t.people)))
+	var garrison:Array=t.get("garrison",[])
+	if garrison.size()==2 and int(garrison[1])>=0: out.append("Under arms there: %s to %s" % [EraWords.grouped(int(garrison[0])),EraWords.grouped(int(garrison[1]))])
+	else: out.append("Nobody has counted their fighters there")
+	if aimed: out.append("You bid the war leader take it")
+	return out
+
+
+## A victory star (or two, or three) on a town, in its people's colour;
+## ringed in war red when it is the town bid taken. Returns its half-size.
+func _draw_victory(canvas:Control,at:Vector2,vp:int,color:Color,aimed:bool)->float:
+	var r:=6.0+1.5*float(vp)
+	if aimed:
+		canvas.draw_circle(at,r+7.0,Color(WAR_RED,0.16))
+		canvas.draw_arc(at,r+7.0,0.0,TAU,28,Color(WAR_RED,0.95),2.4,true)
+	var star:=PackedVector2Array()
+	for k in 10:
+		var radius:=r if k%2==0 else r*0.45
+		star.append(at+Vector2.UP.rotated(TAU*float(k)/10.0)*radius)
+	canvas.draw_colored_polygon(star,Color(PAPER,0.95))
+	var inner:=PackedVector2Array()
+	for q in star: inner.append(at+(q-at)*0.78)
+	canvas.draw_colored_polygon(inner,color.darkened(0.2))
+	var ring:=star.duplicate(); ring.append(star[0])
+	canvas.draw_polyline(ring,Color(INK,0.9),1.3,true)
+	if vp>1:
+		var font:=T.font("ui_strong")
+		var words:=str(vp)
+		var fs:=11
+		var w:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
+		var tag:=Rect2(at+Vector2(r*0.55,-r-6.0),Vector2(w+6.0,fs+3.0))
+		canvas.draw_rect(tag,Color(PAPER,0.97))
+		canvas.draw_rect(tag,Color(INK,0.85),false,1.0)
+		canvas.draw_string(font,tag.position+Vector2(3.0,fs),words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,INK)
+	return r
+
+
+## The general's planned thrust to the town bid taken, as HOI4 draws a
+## planned offensive: a broad arrow in war red from our side of the front
+## (from home while open land lies between us) to the objective, bowed a
+## little, pale until a band is on the road (then the war chart draws the
+## march itself).
+func _draw_plan(e:Dictionary)->void:
+	var to:=_screen(e.objective)
+	var line:PackedVector2Array=e.get("front",PackedVector2Array())
+	var from_world:Vector2=scene.home
+	if line.size()>=2:
+		# The point of our front nearest the objective, a little on our side.
+		var best:=line[0]
+		for q in line:
+			if q.distance_squared_to(e.objective)<best.distance_squared_to(e.objective): best=q
+		from_world=best.lerp(scene.home,0.15)
+	var from:=_screen(from_world)
+	if not from.is_finite() or not to.is_finite(): return
+	var gap:=to-from
+	var length:=gap.length()
+	if length<30.0: return
+	var dir:=gap/length
+	var side:=Vector2(-dir.y,dir.x)
+	var tip_len:=minf(26.0,length*0.3)
+	var spine:=PackedVector2Array()
+	var steps:=16
+	for i in steps+1:
+		var t:=float(i)/float(steps)
+		var bow:=sin(t*PI)*length*0.08
+		spine.append(from.lerp(to-dir*(tip_len+10.0),t)+side*bow)
+	var left:=PackedVector2Array(); var right:=PackedVector2Array()
+	for i in spine.size():
+		var t:=float(i)/float(spine.size()-1)
+		var width:=lerpf(5.0,10.0,t)
+		var a:=spine[maxi(0,i-1)]; var b:=spine[mini(spine.size()-1,i+1)]
+		var n:=Vector2(-(b-a).normalized().y,(b-a).normalized().x)
+		left.append(spine[i]+n*width); right.append(spine[i]-n*width)
+	var end:=spine[spine.size()-1]
+	var head_dir:=(to-dir*10.0-end).normalized()
+	var head_side:=Vector2(-head_dir.y,head_dir.x)
+	var body:=left.duplicate()
+	body.append(end+head_side*17.0)
+	body.append(to-dir*8.0)
+	body.append(end-head_side*17.0)
+	right.reverse()
+	body.append_array(right)
+	if Geometry2D.triangulate_polygon(body).is_empty(): return
+	canvas_fill(body)
+
+
+func canvas_fill(body:PackedVector2Array)->void:
+	draw_colored_polygon(body,Color(WAR_RED,0.42))
+	var ring:=body.duplicate(); ring.append(body[0])
+	draw_polyline(ring,Color(WAR_RED.darkened(0.35),0.9),2.0,true)
 
 
 func _dashed(points:PackedVector2Array,color:Color,width:float)->void:
