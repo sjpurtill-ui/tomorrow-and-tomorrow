@@ -148,3 +148,28 @@ func test_a_left_town_does_not_hold_its_people_to_daily_steps()->void:
 	left["status"]="abandoned"
 	left["resource_metrics"]={}
 	assert_int(Span.food_span()).is_equal(20)
+
+func test_a_crowded_fed_seat_claims_land_and_its_land_carries_more()->void:
+	_seat()
+	var EarlyLife:=preload("res://scripts/early_life_conditions.gd")
+	GameState.simulation_metrics["food_days"]=200.0
+	var before:=EarlyLife.carrying_capacity(GameState,DiscoverySystem)
+	# Not crowded: no new land.
+	GameState.population_exact=before*0.3
+	assert_bool(OneSeat.claim_land(400)).is_false()
+	# Crowded and fed: the next ring of land, and the land carries more.
+	GameState.population_exact=before*0.9
+	assert_bool(OneSeat.claim_land(400)).is_true()
+	assert_float(EarlyLife.carrying_capacity(GameState,DiscoverySystem)).is_greater(before*1.5)
+	# At most once in LAND_CLAIM_DAYS.
+	assert_bool(OneSeat.claim_land(400+OneSeat.LAND_CLAIM_DAYS-1)).is_false()
+	# Hungry: it does not reach out.
+	GameState.simulation_metrics["food_days"]=5.0
+	assert_bool(OneSeat.claim_land(400+OneSeat.LAND_CLAIM_DAYS)).is_false()
+
+func test_folded_towns_leave_their_land_with_the_seat()->void:
+	_seat()
+	_town("Ashleyton",HOME+Vector2(18,0),120.0)
+	_town("Rivermeet",HOME+Vector2(-30,4),80.0)
+	OneSeat.fold_towns(300)
+	assert_int(int(OneSeat.seat_record().get("land_claims",0))).is_equal(2)
