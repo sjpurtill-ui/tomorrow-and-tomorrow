@@ -158,6 +158,9 @@ static func _mark_food_store(purse:Dictionary)->void:
 	var rations:=food if String(purse.unit)!="coin" else food/maxf(0.2,float(purse.get("book_price",1.0)))
 	purse["food_back"]=rations
 	purse.balance=float(purse.get("coin",0.0))
+	# The months kept were counted in food: the season starts again in goods.
+	purse["months"]=[]
+	purse["month"]=_empty_month()
 	purse["unit"]="coin" if String(purse.unit)=="coin" else "goods"
 	purse["book_price"]=1.0
 

@@ -715,9 +715,12 @@ func test_an_older_food_store_gives_its_food_back_once()->void:
 	_stock_food(200.0)
 	var food_before:=float(GameState.resource_stockpiles.get("Food",0.0))
 	GameState.realm_purse={"version":2,"balance":500.0,"coin":0.0,"backing":{},"levy":"usual","lines":{"army":true,"relief":false,"crews":false,"scholars":false},
-		"months":[],"month":{},"ledger":[],"migrated":true,"unit":"ration","book_price":1.0}
+		"months":[{"levy":1400.0,"days":30.0}],"month":{"levy":300.0},"ledger":[],"migrated":true,"unit":"ration","book_price":1.0}
 	var purse:=Purse.state()
 	assert_float(float(purse.balance)).is_equal(0.0)
+	# Its months were counted in food: the season starts again.
+	assert_array(purse.months).is_empty()
+	assert_float(float((purse.month as Dictionary).levy)).is_equal(0.0)
 	assert_str(String(purse.unit)).is_equal("goods")
 	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))-food_before).is_equal_approx(500.0,0.01)
 	assert_str(String((purse.ledger as Array)[0].why)).contains("goods now")
