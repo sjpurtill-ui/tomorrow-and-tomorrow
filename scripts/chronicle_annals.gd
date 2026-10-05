@@ -866,15 +866,48 @@ static func _name_year(a:Dictionary,annals:Array)->Dictionary:
 	for t in a.get("turnings",[]):
 		var turn:=String((t as Dictionary).get("title","")) if t is Dictionary else String(t)
 		if turn!="" and turn.length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % _lower_first(turn),"glyph":"ceremony"}
-	for f in a.firsts:
-		if String(f).length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % String(f).to_lower(),"glyph":"discovery"}
+	# Only a landmark of the people's making names a year (copper, the wheel,
+	# writing), told as what happened, and only the first time; an ordinary
+	# new practice ("pest barrier maintenance") never does.
+	for f in (a.firsts as Array)+(a.learned as Array):
+		var landmark:=landmark_name(String(f))
+		if landmark!="" and not _named_before(landmark,annals):return {"name":landmark,"glyph":"discovery"}
 	# The first of its kind is remembered even when it took no one.
 	for cr in a.crises:
 		var type:=String(cr.get("type",""))
 		if type!="" and String(cr.get("short",""))!="" and not _seen_type(annals,type):return {"name":_crisis_short(cr),"glyph":trouble_glyph(type,_crisis_short(cr))}
-	var change:=_biggest_change(a.learned)
-	if not change.is_empty() and String(change.name).length()<=NAME_MAX_CHARS:return {"name":"the year of %s" % String(change.name).to_lower(),"glyph":"discovery"}
 	return {"name":"","glyph":""}
+
+
+## The great turns of a people's making, by the words of the discovery that
+## first shows them: [pattern, the year's name].
+const LANDMARKS:=[
+	["\\bcopper\\b","the year copper came"],["\\bbronze\\b","the year bronze came"],["\\biron\\b","the year iron came"],
+	["\\bsteel\\b","the year steel came"],["\\b(writing|written|script|scribes?)\\b","the year writing began"],
+	["\\bwheels?\\b","the year the wheel came"],["\\b(plough|plow)","the year the plough came"],
+	["\\bsails?\\b","the year the first sail went up"],["\\b(boats?|canoes?|rafts?|dugouts?)\\b","the year the first boats went out"],
+	["\\b(pottery|pots|kilns?|fired clay)\\b","the year the first pots were fired"],
+	["\\b(sowing|sown|cultivat\\w*|planting|tilled|tillage)\\b","the year the first seed was sown"],
+	["\\b(herds?|herding|pastoral\\w*|domesticated animals)\\b","the year the first herds were kept"],
+	["\\b(looms?|weaving)\\b","the year the loom came"],["\\bbows?\\b","the year the bow came"],
+	["\\b(calendar|reckoning of days)\\b","the year the days were first counted"],
+	["\\b(coins?|coinage|money)\\b","the year the first coins were struck"],["\\bglass\\b","the year glass was first made"],
+	["\\b(horses?|riding)\\b","the year the horse was tamed"],["\\b(printing|printed|press)\\b","the year printing began"],
+	["\\bsteam\\b","the year steam was harnessed"],
+]
+
+## A year's name for a discovery that marks a great turn, or "" for an
+## ordinary practice.
+static func landmark_name(discovery:String)->String:
+	var lower:=discovery.to_lower()
+	for pair in LANDMARKS:
+		if RegEx.create_from_string(String(pair[0])).search(lower)!=null:return String(pair[1])
+	return ""
+
+static func _named_before(name:String,annals:Array)->bool:
+	for m in annals:
+		if m is Dictionary and String((m as Dictionary).get("name",""))==name:return true
+	return false
 
 
 ## A deadly trouble's name, counted when an earlier year bore it: "the second
@@ -969,8 +1002,20 @@ static func _types_of(m:Dictionary)->Array:
 ## such a year is shown unnamed. "" for a quiet year.
 static func display_name(m:Dictionary)->String:
 	var name:=String(m.get("name",""))
+	# A year an older rule named after an ordinary practice ("the year of pest
+	# barrier maintenance") is shown by its landmark, if it was one, else
+	# unnamed.
+	if name.begins_with("the year of ") and _named_for_learning(m):return landmark_name(name.substr(12))
 	if name=="" or not _trouble_name(name,m):return name
 	return name if deadly(int(m.get("deaths",0)),int(m.get("pop",0))) else ""
+
+
+## Whether a closed year's name came from its learning (not an aim kept, a
+## people met or a turning of the year).
+static func _named_for_learning(m:Dictionary)->bool:
+	var glyph:=String(m.get("glyph",""))
+	if glyph!="":return glyph=="discovery"
+	return (m.get("kept",[]) as Array).is_empty() and (m.get("met",[]) as Array).is_empty() and (m.get("turns",[]) as Array).is_empty()
 
 
 ## Whether a year's name is a trouble's name (with or without its count).
@@ -1018,7 +1063,11 @@ static func _quiet_title(a:Dictionary,seed:int,annals:Array=[])->String:
 	elif buried>=born+3:
 		picks.append("More buried than born")
 	if int(a.scouts.n)>=2:picks.append("A year on the roads")
-	if not learned.is_empty() and String(learned[0]).length()<=NAME_MAX_CHARS-12:picks.append("The year of %s" % String(learned[0]).to_lower())
+	# How the people grew or fell over the year, when it was more than a few.
+	var pop0:=int(a.get("pop0",0))
+	var pop1:=_people()
+	if pop0>0 and pop1-pop0>=maxi(3,ceili(pop0*.03)):picks.append("Grew to %s" % _grouped(pop1))
+	elif pop0>0 and pop0-pop1>=maxi(3,ceili(pop0*.03)):picks.append("Down to %s" % _grouped(pop1))
 	for pick in picks:
 		if String(pick)!=last:return String(pick)
 	if born>0 or buried>0:
