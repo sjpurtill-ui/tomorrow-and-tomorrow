@@ -69,6 +69,7 @@ static func families(office:String)->Array:
 
 static func menus(audience_id:String)->Array:
 	var out:Array=[]
+	out.append_array(_who_holds_it(audience_id))
 	for family in families(office_of(audience_id)):
 		match String(family):
 			"war": out.append_array(_war())
@@ -80,6 +81,55 @@ static func menus(audience_id:String)->Array:
 			"purse":
 				out.append_array(PurseOrders.menus())
 				out.append_array(BusinessOrders.menus())
+	return out
+
+
+# --- Who holds the office ------------------------------------------------------
+## How many of the best judged people the menu offers, and how many of the
+## office's weighted skills each line names.
+const CANDIDATES_SHOWN:=6
+const SKILLS_SHOWN:=3
+
+## "Who holds it ▾": the people the court would weigh for the official's own
+## office, best judged fit first, each with that judged fit as a number and
+## its spread (government_people_system.gd estimated_fit, how_sure) and their
+## marks in the skills this office weighs most (OFFICE_SKILL_WEIGHTS). A
+## choice is the god's own words, "Make Ama our headman" (court_commands
+## _appoint), so it goes the way the typed order goes.
+static func _who_holds_it(audience_id:String)->Array:
+	var audience:=Hall.find(audience_id)
+	if audience.is_empty() or String(audience.get("origin",""))!="court" or GovernmentPeopleSystem==null: return []
+	var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
+	var pid:=int(speaker.get("person_id",0))
+	if pid<=0: return []
+	var office:=String(Hall._official(pid).get("office_key",""))
+	if office=="" or not GovernmentPeopleSystem.OFFICE_SKILL_WEIGHTS.has(office) or office=="SettlementLeader": return []
+	var title:=preload("res://scripts/office_levers.gd").office_title(office)
+	var items:Array=[]
+	for row:Dictionary in candidate_rows(office,CANDIDATES_SHOWN):
+		items.append(_item(String(row.label),"Make %s our %s" % [String(row.name),title.to_lower()]))
+	if items.is_empty(): return []
+	var holder:=GovernmentPeopleSystem.officeholder(office)
+	var now:=" (now %d)" % roundi(GovernmentPeopleSystem.office_competency(holder,office)*100.0) if not holder.is_empty() else ""
+	return [_menu("Who holds it"+now,"WhoHoldsIt",items)]
+
+## The best judged people for an office: [{person_id, name, fit, spread,
+## skills, label}], fit and spread 0..100. "Ama Kel · fit 72 ±6 ·
+## Administration 81, Diplomacy 64, Provisioning 55".
+static func candidate_rows(office:String,limit:int)->Array:
+	var out:Array=[]
+	var weights:Dictionary=GovernmentPeopleSystem.OFFICE_SKILL_WEIGHTS.get(office,{})
+	var weighted:=weights.keys()
+	weighted.sort_custom(func(a:Variant,b:Variant)->bool:return float(weights[a])>float(weights[b]))
+	for row:Dictionary in GovernmentPeopleSystem.shortlist(office,limit):
+		var person:Dictionary=GovernmentPeopleSystem._person_record(int(row.person_id))
+		var marks:PackedStringArray=PackedStringArray()
+		for skill in weighted.slice(0,SKILLS_SHOWN):
+			marks.append("%s %d" % [String(skill),roundi(float(GovernmentPeopleSystem.skill_value(person,String(skill)))) if not person.is_empty() else 0])
+		var fit:=roundi(float(row.fit)*100.0)
+		var spread:=roundi((float(row.high)-float(row.low))*50.0)
+		var label:="%s · fit %d%s · %s" % [String(row.name),fit," ±%d" % spread if spread>=1 else "",", ".join(marks)]
+		out.append({"person_id":int(row.person_id),"name":String(row.name),"fit":fit,"spread":spread,"skills":marks,"label":label})
 	return out
 
 
