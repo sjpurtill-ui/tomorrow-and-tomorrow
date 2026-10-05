@@ -578,7 +578,9 @@ def clip_raise_hand(t):
 
 
 def _walk(t, T, stride, lift, bob, head_down=0.0, swing=1.0):
-    ph = t / T
+    # Forward is -Y. The straight, planted leg must sweep backward while
+    # the bent knee recovers forward; the opposite clock reads as moonwalking.
+    ph = -t / T
     p = relaxed()
     c = math.sin(2 * math.pi * ph)
     c2 = math.cos(2 * math.pi * ph)

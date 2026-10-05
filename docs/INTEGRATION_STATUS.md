@@ -1,3 +1,23 @@
+## October 4 — court walking direction: INTEGRATION VALIDATED
+
+Source `385c3806` on `codex/court-walk-facing`, based on `d7d4850c`, combines
+with canonical/origin main `be9bc80b` in code integration `c893daf7`.
+The two base walking cycles previously moved their planted feet forward;
+the corrected cycle clocks now oppose the body's travel. All seven body
+assets are updated without changing their poses, geometry, native heads,
+clothing, rigs, timestamps or other clips. The source generator is corrected.
+
+Final combined regression: 119/119 cases in six suites, no errors, failures,
+skips or orphans. Imported-foot checks cover both walks, seven bodies, five
+builds and both ankles/toes. A private GPU entrance/answer/departure capture
+passed in court tiers 0 and 1 and exited cleanly. Independent binary and
+kinematic audits confirm scope and direction. See `docs/COURT_WALK_HANDOFF.md`.
+
+No save, adjudication or simulation changes. Some existing gait sliding remains;
+this is not a new foot-locking system. No player/editor restart. Remote main is
+verified before canonical fast-forward; pre-existing local files are inventoried
+and preserved. Generated imports, reports and captures remain local.
+
 ## October 4 — graphical Wealth screen: INTEGRATION VALIDATED
 
 Prepared on `codex/wealth-visuals` from synchronized main `d7d4850c`.
