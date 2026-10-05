@@ -1,3 +1,17 @@
+## October 5, 2026 — Fields grow in compact patches
+
+Organic field source `eba1a2a6`, with validated runtime/harness `e80985d8`, is
+integrated for delivery. New fields fill local patches instead of extending a
+single soil-directed strip. Boundaries vary and the actual polygons must clear
+other parcels, unsuitable slopes and water. Existing compatible generated fields
+receive an atomic, versioned geometry correction; farm area, IDs, crops, workers
+and history remain. Unchanged paths pin dependent fields in place.
+
+All 78 combined tests passed. Private actual-renderer probes checked saved fields
+before/after and a 24-field growth fixture at two zoom levels, with no engine or
+script errors. Captures and test userdata are local only. No player/editor was
+stopped or relaunched. Details and limitations: `docs/design/ORGANIC_FIELD_GROWTH.md`.
+
 ## October 5, 2026 — Builders page delivered
 
 The previously held Builders preview `301e20e0` is now integrated at the user's
