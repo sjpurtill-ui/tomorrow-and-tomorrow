@@ -2,6 +2,18 @@ extends GdUnitTestSuite
 const Stage=preload("res://scripts/hud/great_work_ceremony_stage.gd")
 const Presentation=preload("res://scripts/hud/court_presentation.gd")
 const Ceremony=preload("res://scripts/hud/great_work_ceremony.gd")
+const Bridge=preload("res://scripts/great_works_audience.gd")
+
+class DedicationFacade extends RefCounted:
+	var allowed:=false
+	var calls:=0
+	func site(_city:String,_work:String)->Dictionary:
+		return {"id":"ancestor_ring","status":"functioning","fraction":1.0,"condition":1.0,"ceremony":{"allure":0.0}}
+	func allure_contribution(_owner:String)->Dictionary:return {"value":0.0}
+	func renown(_owner:String)->Dictionary:return {"share":0.0,"points":0.0}
+	func dedicate(_city:String,_work:String,title:String)->Dictionary:
+		calls+=1
+		return {"ok":true,"message":title+" was dedicated.","gifts":[]} if allowed else {"error":"No dedication is waiting for this work."}
 
 func test_ritual_uses_actual_capabilities_across_the_whole_history()->void:
 	for year in [0,500,1000,1500,2000,2500,3000]:
@@ -102,3 +114,36 @@ func test_narrow_stage_wraps_long_captions_within_its_frame()->void:
 		assert_bool(frame.get_global_rect().encloses(scene._caption.get_global_rect())).is_true()
 		assert_int(scene._caption.get_line_count()).is_greater(1)
 	scene.queue_free();await get_tree().process_frame
+
+func test_rite_description_changes_only_when_dedication_succeeds()->void:
+	var saved_facade:Object=Bridge.facade_override
+	var facade:=DedicationFacade.new();Bridge.facade_override=facade
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1138,640);add_child(viewport)
+	var modal:Control=Ceremony.new()
+	modal.ceremony={"work_id":"ancestor_ring","city_id":"caption_fixture","title":"The Recorded Ring","attendees":[],"name_suggestions":["The Recorded Ring"]}
+	viewport.add_child(modal)
+	await get_tree().process_frame
+	modal.skip_reveal()
+	var description:Label=modal.find_child("RitualDescription",true,false)
+	var waiting:String=modal.ritual_profile.before+" "+modal.ritual_profile.purpose_caption
+	var completed:String=modal.ritual_profile.after+" "+modal.ritual_profile.purpose_caption
+	assert_str(description.text).is_equal(waiting)
+	assert_bool(modal.dedicate_with("A Name").has("error")).is_true()
+	assert_str(description.text).is_equal(waiting)
+	assert_bool(modal.voice_ctx.ritual.dedicated).is_false()
+	assert_bool(modal.plate.diagnostics().committed).is_false()
+	assert_bool(modal.naming_box.visible).is_true()
+	facade.allowed=true
+	assert_bool(modal.dedicate_with("The Witness Ring").has("ok")).is_true()
+	assert_str(description.text).is_equal(completed)
+	assert_bool(modal.voice_ctx.ritual.dedicated).is_true()
+	assert_bool(modal.plate.diagnostics().committed).is_true()
+	assert_str(modal.title_label.text).is_equal("The Witness Ring")
+	assert_bool(modal.result_box.visible).is_true()
+	assert_bool(modal.naming_box.visible).is_false()
+	modal.dedicate_with("Another Name")
+	assert_int(facade.calls).is_equal(2)
+	assert_str(description.text).is_equal(completed)
+	assert_str(modal.title_label.text).is_equal("The Witness Ring")
+	modal.close();await get_tree().process_frame
+	Bridge.facade_override=saved_facade
