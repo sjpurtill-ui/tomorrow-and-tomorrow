@@ -6,6 +6,12 @@ var host_id:=0
 static func blocks(host:Object)->bool:
 	return is_instance_valid(host) and owners.has(host.get_instance_id())
 
+## A temporary watch mode may have started a previously paused clock before
+## another modal acquired it. Restore the requested speed when that last modal
+## releases its pause; never unpause an active owner to do so.
+static func set_resume_speed(host:Object,speed:float)->void:
+	if blocks(host):owners[host.get_instance_id()].speed=maxf(0.0,speed)
+
 func acquire(host:Node)->void:
 	if host_id!=0 or not is_instance_valid(host) or not host.has_method("_set_game_speed") or not "game_speed" in host:return
 	host_id=host.get_instance_id()

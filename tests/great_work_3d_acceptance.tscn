@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://tests/great_work_3d_acceptance.gd" id="1"]
+
+[node name="GreatWork3DAcceptance" type="Node"]
+script = ExtResource("1")
