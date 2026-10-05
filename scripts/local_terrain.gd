@@ -44,11 +44,6 @@ const LandscapeCover=preload("res://scripts/landscape_cover.gd")
 const WorldDiscoveryMapScript:=preload("res://scripts/world_discovery_map.gd")
 const WarfareMapPresentation:=preload("res://scripts/warfare_map_presentation.gd")
 const EraWordsMap:=preload("res://scripts/hud/era_words.gd")
-const SCORE_TRACKS:=[
-	preload("res://assets/audio/Tomorrow.mp3"),
-	preload("res://assets/audio/War.mp3"),
-]
-var score_track_index:=0
 
 func _settlement_model() -> Node:
 	return get_node("/root/SettlementModel")
@@ -450,6 +445,8 @@ var civilization_surface_cache:Dictionary={}
 func _ready() -> void:
 	display_preferences=preload("res://scripts/display_preferences.gd").new()
 	add_child(display_preferences)
+	# Music by the game's mood (soundtrack.gd), through the scene's Score player.
+	add_child(preload("res://scripts/soundtrack.gd").new())
 	get_tree().auto_accept_quit=false
 	get_window().close_requested.connect(_request_quit)
 	var release_version:=String(ProjectSettings.get_setting("application/config/version","development"))
@@ -15718,16 +15715,6 @@ func _zoom_camera_at_screen(screen_position:Vector2,requested_size:float,refresh
 			_set_camera_target(camera_target+correction)
 	if refresh_lod: _update_scale_lod()
 
-
-func _on_score_interval_timeout()->void:
-	# Score cadence is wall-clock based: simulation speed and pausing the world do
-	# not turn a ten-minute musical cue into a stutter or a rapid replay. Tracks
-	# rotate in score order; a cue never cuts off a piece that is still playing.
-	var score_player:=get_node_or_null("Score") as AudioStreamPlayer
-	if score_player==null or score_player.playing: return
-	score_track_index=(score_track_index+1)%SCORE_TRACKS.size()
-	score_player.stream=SCORE_TRACKS[score_track_index]
-	score_player.play()
 
 func _initialize_city_resource_sites(settlement_id:String)->void:
 	if WorldSimulation.enabled:
