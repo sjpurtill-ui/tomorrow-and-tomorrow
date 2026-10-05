@@ -135,13 +135,14 @@ static func _add_mesh(root:Node3D,label:String,mesh:Mesh,material:Material)->Mes
 
 static func _material()->StandardMaterial3D:
 	if _stone==null:
-		_stone=StandardMaterial3D.new();_stone.vertex_color_use_as_albedo=true;_stone.roughness=.92
+		# Map palettes are authored sRGB, like albedo textures, not linear light.
+		_stone=StandardMaterial3D.new();_stone.vertex_color_use_as_albedo=true;_stone.vertex_color_is_srgb=true;_stone.roughness=.92
 	return _stone
 
 static func _plan_material()->StandardMaterial3D:
 	if _plan==null:
 		_plan=StandardMaterial3D.new();_plan.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		_plan.albedo_color=Color("a38d61");_plan.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;_plan.albedo_color.a=.44
+		_plan.albedo_color=Color("746348");_plan.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;_plan.albedo_color.a=.65
 		_plan.no_depth_test=false
 	return _plan
 
@@ -200,7 +201,8 @@ static func _ground(root:Node3D,plinth:Rect2)->void:
 		for y in 64:
 			for x in 64:
 				var grain:=float(posmod(x*73+y*131+x*y*17,97))/96.0
-				image.set_pixel(x,y,Color("aca38b").lerp(Color("bcb29a"),grain))
+				var earth:=clampf(.5+.18*sin(x*.34)+.18*cos(y*.29)+(grain-.5)*.3,0.0,1.0)
+				image.set_pixel(x,y,Color("a29375").lerp(Color("baac8c"),earth))
 		_earth.albedo_texture=ImageTexture.create_from_image(image)
 	var ground:=MeshInstance3D.new();ground.name="Ground";ground.mesh=disk;ground.material_override=_earth;ground.position.y=-.8
 	root.add_child(ground)
