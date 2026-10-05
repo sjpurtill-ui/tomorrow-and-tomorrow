@@ -87,6 +87,8 @@ static func guest_position(formation:String,index:int,total:int)->Vector3:
 		_:return Vector3(side*(2.05+row*.8),0,row*.55+.5)
 
 static func camera_offset(ritual:Dictionary)->Vector3:
+	# A frontal threshold shot keeps the crossing witness clear of the posts.
+	if String(ritual.get("form",""))=="gate":return Vector3(2.2,3.6,9.4)
 	match String(ritual.get("formation","arc")):
 		"avenue":return Vector3(5.6,3.6,9.4)
 		"circle":return Vector3(6.5,5.5,9.0)
@@ -207,8 +209,9 @@ static func build(ritual:Dictionary)->Dictionary:
 			token.position=Vector3(0,1.65,0);_box(token,Vector3(1.45,.07,.07),Vector3.ZERO,wood)
 			for side in [-1.0,1.0]:_cylinder(token,Vector3(side*.62,-.2,0),.018,.4,accent);_bowl(token,Vector3(side*.62,-.44,0),.24,stone)
 	# The purpose has its own small relief beside the work-specific rite.
-	var emblem:=Node3D.new();emblem.name="Purpose_"+String(ritual.purpose_emblem);root.add_child(emblem);emblem.position=Vector3(1.95,.55,-.35)
-	_cylinder(root,Vector3(1.95,.27,-.35),.34,.54,stone);_purpose(emblem,String(ritual.purpose_emblem),accent)
+	# Keep the purpose mark beyond the six recorded guests' standing places.
+	var emblem:=Node3D.new();emblem.name="Purpose_"+String(ritual.purpose_emblem);root.add_child(emblem);emblem.position=Vector3(3.8,.55,-.35)
+	_cylinder(root,Vector3(3.8,.27,-.35),.34,.54,stone);_purpose(emblem,String(ritual.purpose_emblem),accent)
 	var action:=String(ritual.action);var motions:Array=[]
 	match action:
 		"place","plant":
