@@ -248,7 +248,8 @@ func test_rivals_covert_acts_are_rare_over_years_no_spam()->void:
 		GameState.elapsed_days=day
 		Covert.daily(day)
 	var sent:=int((Covert.state().stats as Dictionary).get("rival_sent",0))
-	assert_int(sent).override_failure_message("rivals sent %d covert acts in five years: too many" % sent).is_less_equal(30)
+	# A feud: under one a year, plus a grudge's share (covert_ops SCHEMES_*).
+	assert_int(sent).override_failure_message("rivals sent %d covert acts in five years: too many" % sent).is_less_equal(8)
 	# Nothing piled up unresolved.
 	assert_int((Covert.state().incoming as Array).size()).is_less_equal(Covert.INCOMING_MAX)
 
@@ -292,3 +293,13 @@ func test_the_covert_ledger_saves_and_loads()->void:
 	ForeignDiplomacy.import_state(payload)
 	assert_int((Covert.state().ops as Array).size()).is_equal(2)
 	assert_bool(Covert.valid_state(Covert.state())).is_true()
+
+
+func test_no_second_agent_while_one_of_theirs_is_on_the_road()->void:
+	War.blood_feud(_varesh(),int(GameState.elapsed_days),"a raid","")
+	var s:=Covert.state()
+	(s.incoming as Array).append({"civ_id":_varesh(),"civ_name":"them","kind":"watch","start_day":1,"arrive_day":int(GameState.elapsed_days)+100000,"seed":"rivaltest:held"})
+	var before:=int((s.stats as Dictionary).get("rival_sent",0))
+	for day in range(int(GameState.elapsed_days),int(GameState.elapsed_days)+3*365,Covert.RIVAL_TICK):
+		Covert._rivals_scheme(day)
+	assert_int(int((s.stats as Dictionary).get("rival_sent",0))).is_equal(before)
