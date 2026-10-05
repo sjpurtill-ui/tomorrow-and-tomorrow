@@ -267,6 +267,16 @@ static func roster(audience:Dictionary)->Array[Dictionary]:
 		var pid:=int(p.person_id)
 		out.append({"key":"person:%d" % pid,"kind":"official","person_id":pid,"figure_id":"","name":String(p.get("name","")),"title":String(p.get("office_title","")),
 			"office_key":String(p.get("office_key","")),"settlement_id":String(p.get("settlement_id","")),"speaker":pid==speaker_pid and speaker_pid>0,"present":pid==speaker_pid or present.has(pid)})
+	# The people the council could name to an office (government_people_system
+	# people with no office yet): known by name, so "Make Ama our headman"
+	# lands on Ama, never on the one spoken to.
+	var named:={}
+	for e:Dictionary in out:named[int(e.get("person_id",0))]=true
+	if GovernmentPeopleSystem!=null:
+		for p:Dictionary in GovernmentPeopleSystem.people:
+			var pid:=int(p.get("person_id",0))
+			if pid<=0 or named.has(pid) or String(p.get("status",""))!="active":continue
+			out.append({"key":"person:%d" % pid,"kind":"official","person_id":pid,"figure_id":"","name":String(p.get("name","")),"title":"","office_key":"","settlement_id":String(p.get("settlement_id","")),"speaker":false,"present":false})
 	# The realm's figures of renown who are not before the god: the war
 	# leaders who lead our bands and hold our garrisons, and the others the
 	# realm knows by name. Named, so "Kill Rovik" said to the Headman lands on

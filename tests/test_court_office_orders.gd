@@ -105,3 +105,43 @@ func test_words_the_court_cannot_carry_out_offer_the_closest_orders()->void:
 	# Talk, and a feast (a real order with no office button), offer nothing.
 	assert_array(OfficeOrders.closest("I am pleased with you",3)).is_empty()
 	assert_array(OfficeOrders.closest("Hold a feast for everyone",3)).is_empty()
+
+
+## "Who holds it ▾": the best judged people for the official's own office,
+## ranked, each with a fit number and their marks in the skills the office
+## weighs; a choice appoints that person.
+func test_who_holds_it_ranks_by_weighted_skills_and_appoints()->void:
+	var w:=h.fx.use("home_peace")
+	assert_bool(w.has("error")).is_false()
+	GameState.civic_api_enabled=false
+	var voice:=Harness.RecordingVoice.new()
+	voice.force_offline=true
+	add_child(voice)
+	var id:=h.fx.audience_for(w,"suri")
+	assert_str(id).is_not_empty()
+	var office:=String(Hall_official(id).get("office_key",""))
+	var menu:Dictionary={}
+	for m:Dictionary in OfficeOrders.menus(id):
+		if String(m.get("name",""))=="WhoHoldsIt":menu=m
+	assert_dict(menu).is_not_empty()
+	var rows:=OfficeOrders.candidate_rows(office,OfficeOrders.CANDIDATES_SHOWN)
+	assert_int(rows.size()).is_greater(0)
+	for i in range(1,rows.size()):assert_int(int(rows[i].fit)).is_less_equal(int(rows[i-1].fit))
+	var weights:Dictionary=GovernmentPeopleSystem.OFFICE_SKILL_WEIGHTS[office]
+	var heaviest:=""
+	for skill in weights:if heaviest=="" or float(weights[skill])>float(weights[heaviest]):heaviest=String(skill)
+	assert_str(String(rows[0].label)).contains("fit %d" % int(rows[0].fit)).contains(heaviest)
+	var modal:Control=Harness.Modal.new()
+	modal.voice=voice; modal.audience_id=id
+	add_child(modal)
+	await await_idle_frame()
+	voice.drain(id)
+	var heard:Dictionary=modal.office_order(String((menu.items[0] as Dictionary).text))
+	assert_bool(bool(heard.get("handled",false))).is_true()
+	assert_int(int(GovernmentPeopleSystem.officeholder(office).get("person_id",0))).is_equal(int(rows[0].person_id))
+	modal.queue_free(); voice.queue_free()
+
+
+func Hall_official(id:String)->Dictionary:
+	var hall:=preload("res://scripts/audience_hall.gd")
+	return hall._official(int((hall.find(id).get("speaker",{}) as Dictionary).get("person_id",0)))
