@@ -44,7 +44,9 @@ static func ours()->Dictionary:
 		if bool(city.get("primary",false)) and city.get("position") is Vector2 and String(city.get("occupied_by","")) in ["","human","player"]:
 			center=city.position
 	var world_reach:=float((CivilizationSystem.progression_reach_snapshot() as Dictionary).get("combined",0.0)) if CivilizationSystem.has_method("progression_reach_snapshot") else 0.0
-	return {"owner":"player","center":center,"reach":reach_km(float(WorldSimulation.state.population_total),world_reach)}
+	# A people set on spreading its land reaches further (ambition_effects.gd).
+	var course:=1.0+preload("res://scripts/ambition_effects.gd").effect("realm_reach")
+	return {"owner":"player","center":center,"reach":clampf(reach_km(float(WorldSimulation.state.population_total),world_reach)*course,MIN_KM,MAX_KM)}
 
 
 ## Another people's realm: {owner, center (its settlement, while it holds

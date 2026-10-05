@@ -741,12 +741,15 @@ func founding_focus_catalog()->Array[Dictionary]:
 
 
 func founding_focus_definition(focus_id:String=founding_focus)->Dictionary:
-	if focus_id=="collective_ambition": return {"name":String(PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}).get("name","Collective ambition")),"effects":{},"description":"Our people are pursuing a shared direction."}
+	if focus_id=="collective_ambition": return {"name":String(PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}).get("name","Collective ambition")),"effects":(preload("res://scripts/ambition_effects.gd").EFFECTS.get(WorldSimulation.direction.ambition,{}) as Dictionary).duplicate(),"description":"Our people are pursuing a shared direction."}
 	return (FOUNDING_FOCUSES.get(focus_id,{}) as Dictionary).duplicate(true)
 
 
 func founding_effect(effect_id:String)->float:
 	if founding_focus=="": return 0.0
+	# A people on its chosen course: what the courses it has chosen do, by
+	# their share of its memory (ambition_effects.gd).
+	if founding_focus=="collective_ambition": return preload("res://scripts/ambition_effects.gd").effect(effect_id)
 	var effects:Dictionary=(FOUNDING_FOCUSES.get(founding_focus,{}) as Dictionary).get("effects",{})
 	return float(effects.get(effect_id,0.0))
 

@@ -3314,7 +3314,9 @@ func scout_known_reach_km()->float:
 	var years:=maxf(0.0,(float(WorldSimulation.state.elapsed_days)-float(founded))/365.0)
 	var travel_knowledge:=clampf(WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"),0.0,0.60)
 	var mount_bonus:=1.0+WorldSimulation.discovery.adoption("mounted_scouts")*0.50
-	var reach:=(SCOUT_KNOWN_REACH_START_KM+years*SCOUT_KNOWN_REACH_KM_PER_YEAR*(1.0+travel_knowledge*1.5))*mount_bonus
+	# A people set on knowing the world learns its country faster (ambition_effects.gd).
+	var course:=1.0+preload("res://scripts/ambition_effects.gd").effect("scout_reach")
+	var reach:=(SCOUT_KNOWN_REACH_START_KM+years*SCOUT_KNOWN_REACH_KM_PER_YEAR*(1.0+travel_knowledge*1.5)*course)*mount_bonus
 	if WorldSimulation.actor_id=="player":
 		for civ:Dictionary in civilizations:
 			if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2:

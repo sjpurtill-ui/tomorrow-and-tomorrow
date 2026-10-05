@@ -39,7 +39,7 @@ const ANSWERS:={
 	"horizons":"That we walked farther than any people, and came home to tell it.",
 	"gathering":"That whoever came to our fire found a place at it.",
 	"commerce":"That what we made travelled farther than we ever walked.",
-	"expansion":"That our fires burned in many valleys.",
+	"expansion":"That our land ran to the far hills.",
 	"military":"That no one ever took what was ours.",
 	"dominion":"That other peoples bent to us.",
 	"retribution":"That none who wronged us ever slept easy.",
@@ -51,7 +51,7 @@ const ANSWERS:={
 ## The same answers as a card shows them: two to four words.
 const LABELS:={
 	"sustenance":"No child hungry","wellbeing":"Long lives","makers":"Things that last","inquiry":"Always asking why",
-	"horizons":"Walk the far lands","gathering":"A place for all","commerce":"Goods that travel","expansion":"Fires in many valleys",
+	"horizons":"Walk the far lands","gathering":"A place for all","commerce":"Goods that travel","expansion":"Our land spread wide",
 	"military":"None took ours","dominion":"Others bent to us","retribution":"Wrongs repaid","purity":"Kept ourselves apart",
 	"dynasty":"Chief's line rules","orthodoxy":"One truth held",
 }

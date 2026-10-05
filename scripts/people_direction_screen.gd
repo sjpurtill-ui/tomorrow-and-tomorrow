@@ -22,7 +22,7 @@ var more_choices:Button
 var choice_help:Label
 var review_back:Button
 
-const CARD_TITLES:=["Know the world","Build to last","Bring us together","Seek knowledge","Build strength","Create abundance","Care for people","Trade and connect","Found new horizons","Rule and extract","Chosen people","Entrench a dynasty","Rule through fear","One official truth"]
+const CARD_TITLES:=["Know the world","Build to last","Bring us together","Seek knowledge","Build strength","Create abundance","Care for people","Trade and connect","Spread our land","Rule and extract","Chosen people","Entrench a dynasty","Rule through fear","One official truth"]
 ## Plain words for what each course favours; true in every era.
 const CARD_TAGS:=["Travel and the land","Craft and building","Customs and belonging","Learning and healing","Defence and supply","Food and the land","Health and families","Making and carrying goods","New homes and families","Force and order","Kin and defence","Rank and building","Force and order","Belief and order"]
 const CARD_COLORS:=["71bcb3","d8996a","d9b978","9ba7d6","cc7c68","b8c480","81c5ac","dbb57a","c7ac69","b27256","ac9a7b","bd985e","a46658","95859f"]
@@ -113,7 +113,7 @@ func _refresh()->void:
 	if selected_focus=="":detail.text="Pick a card to see what it would change. Every choice leaves a mark on later generations."
 	else:
 		var ambition:Dictionary=PeopleDirection.AMBITIONS[selected_focus]
-		detail.text="%s %s" % [String(ambition.vision),String(ambition.get("effect",""))]
+		detail.text="%s %s" % [String(ambition.vision),effect_words(selected_focus)]
 		detail.tooltip_text=""
 	var confirm:=pages[0].get_node("ConfirmFocus") as Button
 	confirm.disabled=not pending or selected_focus==""
@@ -155,7 +155,7 @@ func _traditions_page()->void:
 	_art(portrait,focus_index,265)
 	P.kicker(portrait,"Our present course")
 	_label(portrait,CARD_TITLES[focus_index] if focus!="" else "Not yet chosen","title")
-	if focus!="":_label(portrait,String(PeopleDirection.AMBITIONS[focus].get("effect","")),"small")
+	if focus!="":_label(portrait,effect_words(focus),"small")
 	var spacer:=Control.new();spacer.size_flags_vertical=SIZE_EXPAND_FILL;portrait.add_child(spacer)
 	P.kicker(portrait,"Who decides day to day")
 	for area in ["scouting","settlement","research"]:
@@ -225,3 +225,12 @@ func _capture_opening()->void:
 	await RenderingServer.frame_post_draw
 	var result:=get_viewport().get_texture().get_image().save_png("res://artifacts/player-opening.png")
 	print("OPENING_CAPTURE: ",result,"; day=",WorldSimulation.state.elapsed_days,"; opening=",opening)
+
+
+
+## What a course does, in the engine's own numbers: its research lean, then
+## its gains and costs (ambition_effects.gd).
+static func effect_words(id:String)->String:
+	var ambition:Dictionary=PeopleDirection.AMBITIONS.get(id,{})
+	var fields:=" and ".join(PackedStringArray(ambition.get("domains",[])))
+	return "Research %s +25%%, the rest −5%%. %s" % [fields,preload("res://scripts/ambition_effects.gd").describe(id)]
