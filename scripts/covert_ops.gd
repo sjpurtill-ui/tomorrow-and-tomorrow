@@ -1024,6 +1024,9 @@ static func _rivals_scheme(day:int)->void:
 		var civ_id:=String((civ as Dictionary).get("id",""))
 		var rel:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
 		if int(rel.get("contact_level",0))<2: continue
+		# One errand at a time: no second agent while one of theirs is on the
+		# road to us or held under our guard.
+		if _theirs_in_hand(civ_id): continue
 		var chance:=_rival_scheme_chance(civ_id,rel)
 		if chance<=0.0: continue
 		var rng:=_rng("rival:%s:%d" % [civ_id,day])
@@ -1035,20 +1038,38 @@ static func _rivals_scheme(day:int)->void:
 		while (s.incoming as Array).size()>INCOMING_MAX: (s.incoming as Array).pop_back()
 		_stat("rival_sent")
 
+## Agents a people sends against us in a year, by its business with us
+## (_rival_scheme_chance): at war about one or two, in a feud under one, with
+## a deep grudge about one in three years, and a mere border quarrel hardly
+## ever. Most peoples, most years, send nobody.
+const SCHEMES_AT_WAR:=1.5
+const SCHEMES_IN_FEUD:=0.8
+const SCHEMES_PER_GRUDGE:=0.2
+const SCHEMES_GRUDGE_TRAIT:=0.1
+const SCHEMES_PER_TENSION:=0.1
+const SCHEMES_MAX:=2.0
+
 static func _rival_scheme_chance(civ_id:String,rel:Dictionary)->float:
-	## The rate a people schemes against us, per RIVAL_TICK: rare, raised by a
-	## grudge, a feud or a war, and by their ruler's cunning.
-	var base:=0.0
-	if bool(rel.get("at_war",false)): base+=0.35
-	elif bool(_war().call("feuding",civ_id)): base+=0.22
+	## The chance a people sends an agent against us this RIVAL_TICK: rare,
+	## raised by a war, a feud or a grudge (SCHEMES_* a year).
+	var yearly:=0.0
+	if bool(rel.get("at_war",false)): yearly+=SCHEMES_AT_WAR
+	elif bool(_war().call("feuding",civ_id)): yearly+=SCHEMES_IN_FEUD
 	var character:Dictionary=_rivals().call("rival_character",civ_id)
-	base+=clampf(float(character.get("grudge_weight",0.0)),0.0,1.5)*0.12
-	if String(character.get("trait",""))=="grudge": base+=0.06
-	base+=clampf(float(rel.get("border_tension",0.0)),0.0,1.0)*0.08
+	yearly+=clampf(float(character.get("grudge_weight",0.0)),0.0,1.5)*SCHEMES_PER_GRUDGE
+	if String(character.get("trait",""))=="grudge": yearly+=SCHEMES_GRUDGE_TRAIT
+	yearly+=clampf(float(rel.get("border_tension",0.0)),0.0,1.0)*SCHEMES_PER_TENSION
+	var base:=minf(yearly,SCHEMES_MAX)*float(RIVAL_TICK)/365.0
 	# Deterred for a while: one of theirs put to death, or our words heeded
 	# (captured_agents.gd scheme_factor).
 	base*=float(_captives().call("scheme_factor",civ_id))
-	return clampf(base,0.0,0.6)
+	return clampf(base,0.0,1.0)
+
+## Whether an agent of theirs is on the road to us or held under our guard.
+static func _theirs_in_hand(civ_id:String)->bool:
+	for spy in state().incoming:
+		if spy is Dictionary and String((spy as Dictionary).get("civ_id",""))==civ_id: return true
+	return bool(_captives().call("holds_from",civ_id))
 
 static func _catch_incoming(day:int)->void:
 	var s:=state()

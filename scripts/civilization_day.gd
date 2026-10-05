@@ -101,6 +101,7 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			# One seat for every people (one_seat.gd): a town standing apart
 			# from it comes home before the towns' days are planned.
 			preload("res://scripts/one_seat.gd").fold_towns(day)
+			preload("res://scripts/one_seat.gd").claim_land(day)
 			return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")
 	),
 		# A town that has had no water within reach for a week is left: its

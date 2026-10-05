@@ -1,6 +1,6 @@
 # Execution effects preview — October 5, 2026
 
-Status: HELD for the user's visual review, not integrated into the player game.
+Status: user-approved October 5; integration validation in progress against main 5740f208.
 Branch: codex/execution-effects. Base: 0b0f6c5b5b992867091d5fad7edc7ab0c937007a.
 Worktree: C:/Users/sjpur/.codex/worktrees/food-folio/TomorrowandTomorrow.
 
@@ -77,5 +77,4 @@ or player session was used. Reproduce with --headless --audio-driver Dummy
 Examples: artifacts/execution-preview/burn-recorded-{male,female}.wav.
 
 Additional shared ownership: court_sound.gd and court_reactions.gd. Audio previews
-remain local. This follow-up is still HELD with the visual branch for review;
-no change has been merged into canonical main.
+remain local. The user approved this follow-up and requested merging the full execution branch.

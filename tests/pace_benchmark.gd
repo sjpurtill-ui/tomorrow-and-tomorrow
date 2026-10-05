@@ -83,7 +83,7 @@ func run()->void:
 	var days:=int(_arg("days","30"))
 	var warm:=int(_arg("warm","2"))
 	var trace=preload("res://scripts/performance_trace.gd")
-	trace.enabled="--trace" in args;trace.totals.clear()
+	trace.enabled="--trace" in args;trace.totals.clear();trace.population_flow.clear()
 	var start_day:=int(GameState.elapsed_days)
 	var report:Dictionary={"save":saves.fixture,"load_ms":load_ms,"start_day":start_day,"year":start_day/365.0,"population":GameState.population_total,"rivals":WorldSimulation.actors.size(),"span_limit":WorldSimulation.span_limit,"days":days,"warm":warm}
 	var totals:Dictionary={}
@@ -95,7 +95,7 @@ func run()->void:
 	var day_ms:Array=[]
 	for i in days:
 		var day:=start_day+i+1
-		if i==warm:trace.totals.clear()
+		if i==warm:trace.totals.clear();trace.population_flow.clear()
 		var timings:Dictionary={"enabled":true}
 		var began:=Time.get_ticks_usec()
 		WorldSimulation.begin_day(day,terrain._discovery_context(),Callable(),Callable(),timings)
@@ -161,6 +161,7 @@ func run()->void:
 		var calls:Dictionary={}
 		for key:String in trace.totals:calls[key]=snappedf(float(trace.totals[key].calls)/warm_days,.1)
 		report["trace_calls_per_day"]=calls
+		report["population_flow"]=trace.population_flow.duplicate()
 	var out_name:=_arg("save-out","")
 	if out_name!="":
 		var saved:=saves.save_game(out_name)
@@ -179,6 +180,15 @@ func run()->void:
 		report["state_mismatch_count"]=diff.mismatch_count
 		report["float_rounding_diffs"]=diff.rounding
 		report["float_rounding_count"]=diff.rounding_count
+	if "--births" in args:
+		var m:Dictionary=GameState.simulation_metrics
+		var keys:=["health","food_security","fed_security","housing_ratio","cohesion","food_days","food_intake_ratio","water_intake_ratio","annual_death_rate","birth_rate","annual_birth_rate","births_per_year","crowding","housing_capacity"]
+		var picked:={}
+		for k in keys:if m.has(k):picked[k]=m[k]
+		var mothers:={}
+		for c in ["youth","early_adults","established_adults","mature_adults"]:mothers[c]=snappedf(GameState._mothers_ratio(c),.001)
+		print("PACE_BIRTHS ",JSON.stringify({"metrics":picked,"health":GameState.population_health,"food_security":GameState.food_security,"housing_capacity":GameState.housing_capacity,"pop":GameState.population_exact,
+			"cohorts":GameState.population_cohorts,"pregnancy":GameState.pregnancy_cohorts,"mothers":mothers,"reproductive":GameState._reproductive_age_population(),"mortality":m.get("mortality_components",{})}))
 	if "--outcomes" in args:
 		report["outcomes"]=_outcomes()
 		print("PACE_OUTCOMES ",JSON.stringify(report.outcomes))

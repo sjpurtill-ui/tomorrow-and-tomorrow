@@ -1204,6 +1204,12 @@ static func _deter(civ_id:String,days:int,factor:float,why:String)->void:
 	if not old.is_empty() and int(old.get("until",0))>until and float(old.get("factor",1.0))<=factor: return
 	deterred[civ_id]={"until":until,"factor":clampf(minf(factor,float(old.get("factor",1.0)) if int(old.get("until",0))>_day() else factor),0.0,1.0),"why":why}
 
+## Whether we hold one of their agents under guard now (held or being won over).
+static func holds_from(civ_id:String)->bool:
+	for p in state().prisoners:
+		if p is Dictionary and String((p as Dictionary).get("civ_id",""))==civ_id and String((p as Dictionary).get("status","")) in ["held","turning"]: return true
+	return false
+
 static func scheme_factor(civ_id:String)->float:
 	## How much of their usual scheming against us goes on now (covert_ops
 	## _rival_scheme_chance).

@@ -1,15 +1,32 @@
-## October 5 — Execution effects: HELD for visual review
+## October 5 — Execution effects: approved integration
 
 Prepared on `codex/execution-effects` from `0b0f6c5b`. Beheading uses the
 visible moving stump with falling pressure and runoff; burning has sustained
-body flames, struggle, progressive scorching and collapse. The user requires
-examples before integration; neither change is in the canonical player build.
+body flames, struggle, progressive scorching and collapse. The user approved the examples and authorized integration on October 5.
 The rejected synthesized scream is replaced with CC0 male/female recordings,
 timed to ignition with skip cancellation. Synthetic crowd vocals are suppressed
-for the fire act. Recorded audio examples are held for listening approval;
+for the fire act. Recorded audio examples have been approved;
 17/17 sound tests pass, but do not establish perceived quality. Original 37/37 regression cases and both private
 GPU previews pass. No adjudication,
 ledger or save changes. See `docs/design/EXECUTION_EFFECTS_PREVIEW.md`.
+
+## October 5 — Compact organic field growth: INTEGRATED
+
+Source `eba1a2a6` and validated runtime/harness `e80985d8` replace directional
+field chains with compact, asymmetric patches, gap infill and varied boundaries.
+Actual polygon separation and terrain-footprint checks prevent overlapping or
+unsuitable plots. A versioned, atomic correction updates compatible legacy
+fields and their dedicated access tracks while retaining farm identity and state.
+Shared-path anchors, archaeological plots and authored fields stay fixed.
+
+Combined validation: 78/78 cases across four suites, no errors, failures, skips
+or orphans. Private GPU saved-layout and 24-field growth captures passed at two
+zooms each. Existing farm area and nongeometry metadata matched after correction.
+Delivery `e1ab0604` was pushed and remotely verified before the canonical
+fast-forward; main was 0/0 and all 4,749 pre-existing local status entries were
+unchanged. The previous player session exited independently after validation;
+the canonical launcher can now load the update. Generated evidence and imports
+remain local. See `docs/design/ORGANIC_FIELD_GROWTH.md` for reproduction and limits.
 
 ## October 5 — Builders / The Town folio: INTEGRATED
 
