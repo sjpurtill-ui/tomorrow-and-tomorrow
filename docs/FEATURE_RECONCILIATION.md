@@ -1,3 +1,18 @@
+## October 5, 2026 — Builders page delivered
+
+The previously held Builders preview `301e20e0` is now integrated at the user's
+request, in runtime `ae1a4a03b6755e7f86f2f3414a5d58e45539a406` with main
+through `ab211f42`. Buildings / The Town has its illustrated project, large
+housing/builders/condition/era/staffing readings and persistent expanded details.
+Existing construction values, actions and save format are unchanged.
+
+All 32 combined tests passed, including existing Food and top-bar coverage.
+Private GPU captures passed at normal and compact widths and both probes exited.
+Remote main was verified before the canonical fast-forward; all 4,747 existing
+local files retained their hashes. Other Buildings tabs keep their current
+renderers; the archive-abandonment rule is outside this presentation delivery.
+Generated test evidence and import caches remain local.
+
 ## October 5, 2026 — Compact Food page and legible transparent top bar
 
 Approved sources `0062bac8` (Food) and `c88fdac4` (top bar) are delivered in

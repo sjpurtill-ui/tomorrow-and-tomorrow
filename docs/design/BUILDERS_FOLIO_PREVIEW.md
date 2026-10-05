@@ -1,7 +1,17 @@
-# Builders folio — held for visual approval
+# Builders folio — integrated
 
-Status: HELD. This is the first Buildings / The Town presentation example,
-not an integrated player feature. The user requires a rendered example before
+The user requested integration on October 5, 2026. Source `301e20e0` is merged
+with current main `ab211f42` in runtime
+`ae1a4a03b6755e7f86f2f3414a5d58e45539a406`. This was pushed to origin/main
+and freshly verified before advancing the canonical checkout. All 4,747
+pre-existing local files retained their hashes. Combined validation passed
+32/32 cases across construction, town works, Food and the persistent top bar.
+Private GPU probes at 1536px and 1138px passed, including preservation of open
+details across changed construction progress; both test processes exited.
+The historical preview hold below is resolved.
+
+Original preview status: HELD. This was the first Buildings / The Town
+presentation example. The user requires a rendered example before
 each page enters the game. Civic Works, Infrastructure and Landmarks retain
 their existing content renderers pending subsequent visual review.
 
@@ -44,5 +54,6 @@ No save schema, simulation or labor authority changes. Shared UI touchpoints:
 `dock_blocks.gd` chooses the opt-in construction renderer and styles its section
 headings; `dock_panel.gd` applies the opt-in unboxed summary style. Other page
 renderers are unchanged. Preserve concurrent edits when integrating these files.
-Do not integrate until the user approves this example. The canonical checkout
-and player process have not been changed or launched by this task.
+Approval and integration are recorded above. This delivery concerns the page
+presentation; it does not change the undertaking-abandonment rule. Generated
+captures, imports and test userdata remain local.

@@ -1,3 +1,21 @@
+## October 5 — Builders / The Town folio: INTEGRATED
+
+At the user's request, source `301e20e0` was merged with canonical main
+`ab211f42` in runtime `ae1a4a03b6755e7f86f2f3414a5d58e45539a406`.
+Origin/main was pushed and freshly verified before advancing the canonical
+checkout. All 4,747 pre-existing local files retained their hashes; main was 0/0.
+
+Buildings / The Town now uses the illustrated folio, large town readings and
+expandable explanations. Provider calculations and actions remain authoritative.
+Civic Works, Infrastructure and Landmarks retain their existing renderers.
+Food, Overview, Trade and the top-bar contrast remain integrated. No save-schema,
+simulation, labor-authority or undertaking-abandonment changes.
+
+Combined tests: 32/32 across five suites, no failures, errors, skips or orphans.
+Private GPU acceptance at 1536px and 1138px passed with open details retained
+across a progress update. Both probes exited. Generated evidence stays local.
+See `docs/design/BUILDERS_FOLIO_PREVIEW.md` for scope and reproduction.
+
 ## October 5 — Food folio and transparent top-bar contrast: INTEGRATED
 
 User-approved Food `0062bac8` and top-bar contrast `c88fdac4` are integrated
