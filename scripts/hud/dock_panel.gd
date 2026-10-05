@@ -369,6 +369,12 @@ func _rebuild_brief(brief:Dictionary)->void:
 	brief_panel.visible=not brief.is_empty()
 	if brief.is_empty(): return
 	brief_panel.add_theme_stylebox_override("panel",Tokens.brief_style(String(brief.get("tone","info"))))
+	if bool(brief.get("folio",false)):
+		var style:=Tokens.flat(Color.TRANSPARENT)
+		style.border_width_bottom=1;style.border_color=Folio.RULE
+		style.content_margin_left=8;style.content_margin_right=8
+		style.content_margin_bottom=14
+		brief_panel.add_theme_stylebox_override("panel",style)
 	var row:=HBoxContainer.new()
 	row.add_theme_constant_override("separation",10)
 	brief_panel.add_child(row)

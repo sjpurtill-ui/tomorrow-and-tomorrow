@@ -20,6 +20,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			var heading_row:=HBoxContainer.new()
 			section.add_child(heading_row)
 			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),12,Tokens.GOLD_TEXT,0.06)
+			if bool(block.get("folio",false)):
+				heading.add_theme_font_override("font",Tokens.font("voice"))
+				heading.add_theme_font_size_override("font_size",26)
+				section.add_theme_constant_override("separation",16)
 			heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			heading_row.add_child(heading)
 			if String(block.get("note",""))!="":
@@ -64,7 +68,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var impact:=preload("res://scripts/hud/impact_panel.gd").new()
 				section.add_child(impact);impact.setup(block)
 			"town_works":
-				var works:=preload("res://scripts/hud/town_works_board.gd").new()
+				var works:Control=preload("res://scripts/hud/builders_town_folio.gd").new() if bool(block.get("folio",false)) else preload("res://scripts/hud/town_works_board.gd").new()
 				section.add_child(works);works.setup(block)
 			"construction_queue":
 				var queue:=preload("res://scripts/hud/construction_queue.gd").new()

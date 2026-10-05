@@ -17,6 +17,7 @@ const Blocks:=preload("res://scripts/hud/dock_blocks.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const TownBoard:=preload("res://scripts/hud/town_works_board.gd")
 
 class FakeHud extends Control:
 	signal section_requested(section:String,sub:int)
@@ -257,7 +258,7 @@ func _contrast_failures(root:Node)->Array:
 
 func _town_boards(body:Node)->Array:
 	var nodes:Array=[];_walk(body,nodes)
-	return nodes.filter(func(n:Node)->bool:return String(n.name).begins_with("TownWorksBoard"))
+	return nodes.filter(func(n:Node)->bool:return n is TownBoard)
 
 func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
 	for mode:String in ["light","dark"]:
@@ -270,7 +271,7 @@ func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
 			var body:=_render(_page())
 			await get_tree().process_frame
 			var boards:=_town_boards(body)
-			assert_int(boards.size()).is_equal(2)
+			assert_int(boards.size()).is_equal(3)
 			for board:Node in boards:
 				assert_array(_long_texts(board)).override_failure_message("%s %s" % [mode,state]).is_empty()
 				assert_array(_contrast_failures(board)).override_failure_message("%s %s" % [mode,state]).is_empty()
