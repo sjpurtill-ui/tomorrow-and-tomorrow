@@ -11,9 +11,18 @@ const Words = preload("res://scripts/hud/era_words.gd")
 const Artifacts = preload("res://scripts/artifact_collection.gd")
 const ArtifactArt = preload("res://scripts/hud/artifact_visuals.gd")
 const Exchange = preload("res://scripts/society_exchange.gd")
+const Production = preload("res://scripts/hud/content/dock_content_production.gd")
 const SEED := 551188
 
 class WealthHud extends "res://scripts/hud/command_rail_hud.gd":
+	func _make_court_button() -> Button:
+		var button := super._make_court_button()
+		# A Wealth-only fixture has no court. Cancel its unrelated delayed asset
+		# warmup before mounting: the rail's 4-second timer would outlive a case.
+		for connection in button.tree_entered.get_connections():
+			button.tree_entered.disconnect(connection.callable)
+		return button
+
 	func _ready() -> void:
 		name = "WealthAcceptanceHud"
 		theme = Tokens.control_theme()
@@ -38,6 +47,7 @@ var background: ColorRect
 var label: Label
 var last_destination: Array = []
 var held_artifact: Dictionary = {}
+var selected_case := ""
 
 func _ready() -> void:
 	call_deferred("_run")
@@ -54,6 +64,7 @@ func _run() -> void:
 	capture = OS.get_cmdline_user_args().has("--capture")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="): output = arg.trim_prefix("--out=")
+		if arg.begins_with("--case="): selected_case = arg.trim_prefix("--case=")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output))
 	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	for node in get_tree().root.get_children():
@@ -77,8 +88,12 @@ func _run() -> void:
 		{"id": "opening-dark", "state": "opening", "palette": "dark", "size": Vector2i(1920,1080)},
 		{"id": "coin-compact", "state": "coin", "palette": "light", "size": Vector2i(1138,640)},
 		{"id": "opening-regular", "state": "opening", "palette": "light", "size": Vector2i(1920,1080), "width": T.DOCK_WIDTH},
+		{"id": "coin-regular", "state": "coin", "palette": "light", "size": Vector2i(1920,1080), "width": T.DOCK_WIDTH},
+		{"id": "opening-choices", "state": "opening", "palette": "light", "size": Vector2i(1920,1080), "width": T.DOCK_WIDTH, "choices": true},
 		{"id": "coin-dark-compact", "state": "coin", "palette": "dark", "size": Vector2i(1138,640)}]
-	for spec: Dictionary in cases: await _case(spec)
+	for spec: Dictionary in cases:
+		if selected_case.is_empty() or spec.id == selected_case: await _case(spec)
+	_check(not report.cases.is_empty(), "At least one named Wealth fixture ran")
 	_finish()
 
 func _fixture(kind: String) -> void:
@@ -112,6 +127,7 @@ func _fixture(kind: String) -> void:
 	GameState.simulation_metrics["food_consumption"] = GameState.population_exact
 	GameState.simulation_metrics["labor_efficiency"] = .78 if coin else (.3 if poor else .68)
 	GameState.civilian_goods = Goods.empty_state()
+	GameState.civilian_goods.last_day = int(GameState.elapsed_days)
 	GameState.civilian_goods.report = {"made": 94.0 if coin else (0.0 if poor else 5.6), "reason": "No makers or materials to spare" if poor else ""}
 	GameState.wealth_shares.assign([.05,.10,.16,.24,.45] if coin else [.13,.16,.19,.23,.29])
 	GameState.private_currency = 14600.0 if coin else 0.0
@@ -144,10 +160,14 @@ func _fixture(kind: String) -> void:
 			break
 
 func _case(spec: Dictionary) -> void:
+	print("WEALTH_CASE_BEGIN ", spec.id)
 	if is_instance_valid(hud):
-		hud.free()
+		hud.queue_free()
+		await _frames(8)
+	print("WEALTH_CASE_PREPARE ", spec.id)
 	_fixture(String(spec.state))
 	T.set_color_mode(String(spec.palette))
+	print("WEALTH_CASE_MOUNT ", spec.id)
 	background.color = T.PAPER_SUNK.lerp(T.GREEN, .16)
 	get_window().size = spec.size
 	label.text = "TEST · Wealth acceptance\n" + String(spec.id) + "\nPrepared records · simulation paused"
@@ -163,21 +183,56 @@ func _case(spec: Dictionary) -> void:
 	hud.open_dock("economy", 2)
 	await _frames(16)
 	hud.force_dock_layout()
-	if spec.has("width"): hud.dock.size.x = float(spec.width)
+	# The first shrink can be clamped by the old multi-column minimum. Let
+	# the real responsive grid settle, then apply the requested regular width.
+	if spec.has("width"):
+		for pass_index in 3:
+			hud.dock.size.x = float(spec.width)
+			await _frames(4)
 	await _frames(8)
+	print("WEALTH_CASE_CHECKS ", spec.id)
 	var board: Control = hud.dock.find_child("PurseBoard", true, false)
 	_check(board != null, String(spec.id) + " mounts the actual Wealth board")
 	if board == null: return
+	if bool(spec.get("choices", false)):
+		var toggle := board.find_child("StanceToggle", true, false) as Button
+		_check(toggle != null and toggle.is_visible_in_tree(), String(spec.id) + " offers the business stance disclosure")
+		if toggle != null: toggle.pressed.emit()
+		await _frames(8)
+		var choices := board.find_child("StanceChoice", true, false) as Control
+		_check(choices != null and choices.is_visible_in_tree(), String(spec.id) + " opens the actual stance choices")
 	_check(hud.dock.sub == 2 and hud.dock.title_label.text == "Wealth", String(spec.id) + " uses the actual economy Wealth tab")
 	var held := Standing.wealth_held()
 	_check(int(held.treasures) == (0 if spec.state == "poor" else 1), String(spec.id) + " counts the real held artifact or empty collection")
+	for chart_name in ["GoodsAvailability", "GoodsComparison", "Fifths"]:
+		var chart := board.find_child(chart_name, true, false) as Control
+		_check(chart != null and chart.is_visible_in_tree() and chart.size.x > 0 and chart.size.y > 0, String(spec.id) + " presents chart " + chart_name)
+	var available_width := minf(board.size.x, hud.dock.body_scroll.size.x - 24.0)
+	for grid_spec in [["WealthCards",780.0,3], ["WealthSociety",820.0,2]]:
+		var grid := board.find_child(String(grid_spec[0]), true, false) as GridContainer
+		_check(grid != null and grid.columns == (int(grid_spec[2]) if available_width >= float(grid_spec[1]) else 1), String(spec.id) + " reflows " + String(grid_spec[0]) + " for available width")
+	if not held_artifact.is_empty():
+		var painting := board.find_child("HeldTreasureIllustration", true, false) as TextureRect
+		_check(painting != null and painting.texture != null and painting.texture.resource_path == ArtifactArt.image_path(held_artifact), String(spec.id) + " displays the approved artwork of the actual held artifact")
 	for name in ["GoodsHeld", "GoodsBuy", "GoodsAHead", "GoodsSpare", "GoodsMade", "Treasures", "Materials", "Business", "Fifths", "Shares", "Pressure"]:
 		_check(board.find_child(name, true, false) != null, String(spec.id) + " preserves data node " + name)
 	var goods_label := board.find_child("GoodsHeld", true, false) as Label
 	_check(goods_label != null and goods_label.text.contains(Words.grouped(roundi(float(held.goods)))), String(spec.id) + " goods total comes from the engine ledger")
+	var made := 0.0
+	for card: Dictionary in Production.household_cards(): made += float(card.get("made", 0.0))
+	_check(is_equal_approx(made, float(GameState.civilian_goods.report.made)), String(spec.id) + " prepared production is current")
+	var made_label := board.find_child("GoodsMade", true, false) as Label
+	_check(made_label != null and made_label.text == "%s goods" % board._amount(made), String(spec.id) + " displays the current made goods")
 	_check(board.find_child("Balance", true, false) != null if spec.state == "coin" else board.find_child("StorePointer", true, false) != null, String(spec.id) + " places the treasury or food-store link correctly")
 	var bounds := Rect2(Vector2.ZERO, Vector2(spec.size))
 	_check(bounds.encloses(hud.dock.get_global_rect()), String(spec.id) + " dock fits the viewport")
+	var requested_width := float(spec.get("width", minf(hud._work_queue_width(float(Vector2i(spec.size).x)), float(Vector2i(spec.size).x) - T.DOCK_X - 12.0)))
+	if absf(hud.dock.size.x - requested_width) >= 1.0:
+		var minimums: Array = []
+		_width_constraints(hud.dock, requested_width - 64.0, minimums)
+		print("WEALTH_WIDTH_CONSTRAINTS ", spec.id, " ", JSON.stringify(minimums))
+	_check(absf(hud.dock.size.x - requested_width) < 1.0, String(spec.id) + " respects requested dock width %.1f (actual %.1f)" % [requested_width, hud.dock.size.x])
+	_check(hud.dock.get_combined_minimum_size().x <= requested_width + 1.0, String(spec.id) + " minimum width fits the requested dock")
 	var overflow: Array[String] = []
 	_horizontal_overflow(board, hud.dock.body_scroll.get_global_rect(), overflow)
 	_check(overflow.is_empty(), String(spec.id) + " has no horizontal overflow: " + ", ".join(overflow))
@@ -188,7 +243,7 @@ func _case(spec: Dictionary) -> void:
 	await _frames(3)
 	_check(hud.dock.find_child("PurseBoard", true, false).get_instance_id() == node_id, String(spec.id) + " live refresh retains the board")
 	_check(before == _economic_fingerprint(), String(spec.id) + " display refresh preserves economy records")
-	var row := {"id": spec.id, "state": spec.state, "palette": spec.palette, "canvas": str(spec.size), "dock_rect": str(hud.dock.get_global_rect()), "held": held, "artifact": held_artifact, "artifact_art": ArtifactArt.image_path(held_artifact), "purse_unit": Purse.unit_word(), "business_rung": Business.rung(), "overflow": overflow, "images": []}
+	var row := {"id": spec.id, "state": spec.state, "palette": spec.palette, "canvas": str(spec.size), "dock_rect": str(hud.dock.get_global_rect()), "requested_width": requested_width, "goods_made": made, "held": held, "artifact": held_artifact, "artifact_art": ArtifactArt.image_path(held_artifact), "purse_unit": Purse.unit_word(), "business_rung": Business.rung(), "overflow": overflow, "images": []}
 	var scroll: ScrollContainer = hud.dock.body_scroll
 	var end := maxi(0, roundi(scroll.get_v_scroll_bar().max_value - scroll.get_v_scroll_bar().page))
 	for position in [["top",0], ["middle",end / 2], ["bottom",end]]:
@@ -208,15 +263,17 @@ func _case(spec: Dictionary) -> void:
 			button.pressed.emit()
 			_check(last_destination == [route[1], route[2]], String(spec.id) + " routes " + String(route[0]) + " correctly")
 	var treasures := board.find_child("SeeTreasures", true, false) as Button
+	print("WEALTH_CASE_COLLECTION ", spec.id)
 	_check(treasures != null, String(spec.id) + " keeps collection navigation")
 	if treasures != null:
 		treasures.pressed.emit()
-		await _frames(2)
+		await _frames(8)
 		var collection: Variant = CivilizationSystem.get_meta("exchange_collection_panel", null)
 		_check(is_instance_valid(collection), String(spec.id) + " opens the actual collection panel")
-		if is_instance_valid(collection): collection.queue_free()
-		await _frames(2)
+		if is_instance_valid(collection): collection.get_child(0).close()
+		await _frames(8)
 	report.cases.append(row)
+	print("WEALTH_CASE_END ", spec.id)
 
 func _economic_fingerprint() -> PackedByteArray:
 	return var_to_bytes([GameState.resource_stockpiles, GameState.market_prices, GameState.wealth_shares, GameState.realm_purse, GameState.enterprise, GameState.civilian_goods])
@@ -226,6 +283,11 @@ func _horizontal_overflow(node: Node, bounds: Rect2, found: Array[String]) -> vo
 		var rect: Rect2 = node.get_global_rect()
 		if rect.position.x < bounds.position.x - 1.0 or rect.end.x > bounds.end.x + 1.0: found.append(String(node.name))
 	for child in node.get_children(): _horizontal_overflow(child, bounds, found)
+
+func _width_constraints(node: Node, threshold: float, found: Array) -> void:
+	if node is Control and node.get_combined_minimum_size().x > threshold:
+		found.append({"node": str(hud.dock.get_path_to(node)), "minimum": node.get_combined_minimum_size().x, "size": node.size.x, "visible": node.is_visible_in_tree()})
+	for child in node.get_children(): _width_constraints(child, threshold, found)
 
 func _frames(count: int) -> void:
 	for frame in count: await get_tree().process_frame
