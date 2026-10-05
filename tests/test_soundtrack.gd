@@ -49,3 +49,9 @@ func test_an_early_age_piece_stops_after_its_years()->void:
 	assert_bool(Soundtrack.pieces_for_year("calm",1).has(early)).is_true()
 	assert_bool(Soundtrack.pieces_for_year("calm",200).has(early)).is_true()
 	assert_bool(Soundtrack.pieces_for_year("calm",201).has(early)).is_false()
+
+func test_an_any_mood_piece_joins_every_mood_in_its_years()->void:
+	var any:="res://assets/audio/score/any/y2800-3000_pot_rhythms.mp3"
+	for mood in Soundtrack.MOODS:
+		assert_bool(Soundtrack.pieces_for_year(mood,2900).has(any)).override_failure_message(mood).is_true()
+		assert_bool(Soundtrack.pieces_for_year(mood,2799).has(any)).is_false()
