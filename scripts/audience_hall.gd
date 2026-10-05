@@ -127,7 +127,9 @@ static var envoys_only:=false
 static var _court_direct:=false
 ## Occasions that continue an earlier audience (they may follow sooner).
 const THREAD_OCCASIONS:=["sequel","promise_followup","refusal_grievance"]
-const COURT_OCCASIONS:=["condition","grievance","appointment","war_council","promise_followup","refusal_grievance","ambition"]
+## Officials bring news and grievances, never plans of their own: the ruler
+## makes every proposal (no ambitions, first tasks or suggested decrees).
+const COURT_OCCASIONS:=["condition","grievance","war_council"]
 
 ## Every situation the hall can raise, its audience kind, and the real
 ## mechanic its answers resolve through. `headline` is a short herald phrase.
@@ -446,6 +448,21 @@ static func _occasion_speaker(occasion:Dictionary)->String:
 # Daily arrivals and expiry
 # --------------------------------------------------------------------------
 
+## Court business an official raised as a plan of their own (an older world's):
+## the ruler makes every proposal now, so none waits as a matter or occasion.
+const OFFICIALS_PROPOSALS:=["ambition","introduction","promise_followup","appointment"]
+
+static func _drop_officials_proposals()->void:
+	var s:=state()
+	for list_key:String in ["matters","occasions"]:
+		var list:Variant=s.get(list_key)
+		if not list is Array:continue
+		for index in range((list as Array).size()-1,-1,-1):
+			var entry:Variant=(list as Array)[index]
+			if not entry is Dictionary:continue
+			var kind:=String((entry as Dictionary).get("situation_type",(entry as Dictionary).get("type","")))
+			if kind in OFFICIALS_PROPOSALS:(list as Array).remove_at(index)
+
 static func daily(day:int)->Array[Dictionary]:
 	var arrivals:Array[Dictionary]=[]
 	if WorldSimulation.actor_id!="player": return arrivals
@@ -454,6 +471,7 @@ static func daily(day:int)->Array[Dictionary]:
 	if not envoys_only:
 		for gone in DIVINE.daily(day,_officials()): _drop_matters_of(int(gone.get("person_id",0)))
 	_expire(day)
+	_drop_officials_proposals()
 	_observe(day)
 	_prune_occasions(day)
 	_prune_matters(day)
@@ -1220,16 +1238,10 @@ static func _observe_court(day:int,baseline:bool)->void:
 		var trust:=float(rel.get("trust",0.5))
 		var band:=2 if resentment>=0.3 or trust<0.2 else (1 if resentment>0.15 or trust<0.35 else 0)
 		var prev:Dictionary=people.get(key,{}) if people.get(key) is Dictionary else {}
-		if not baseline and prev.is_empty() and day>1:
-			_add_occasion({"key":"appointment:%s" % key,"type":"appointment","person_id":int(person.person_id),"day":day,"not_before":day+7,"expires":day+120,
-				"data":{"text":"%s has newly taken up office as %s" % [String(person.name),String(person.get("office_title","an official"))]}})
 		if band>int(prev.get("g",0 if not baseline else band)):
 			_add_occasion({"key":"grievance:%s:%d:%d" % [key,band,day],"type":"grievance","person_id":int(person.person_id),"day":day,"expires":day+120,"crisis":band>=2,
 				"data":{"band":band,"text":"%s's resentment has grown" % String(person.name)}})
 		people[key]={"g":band}
-		# A quiet official turns over a plan of their own; it waits as a matter.
-		if not baseline and day-int((state().last_person as Dictionary).get(key,-99999))>=PERSON_GAP and matters("person:"+key).is_empty() and _next_ambition(person,day)!="":
-			_add_occasion({"key":"ambition:%s:%d" % [key,day],"type":"ambition","person_id":int(person.person_id),"day":day,"expires":day+45,"data":{"text":"a plan they have been turning over"}})
 	for key in people.keys():
 		if not present.has(String(key)): people.erase(key)
 
@@ -2293,7 +2305,7 @@ static func _court_petition(type:String,person:Dictionary,data:Dictionary,day:in
 			var enemy:=String(data.get("enemy_name","the enemy"))
 			# A small people's fight is a feud (conflict_scale.gd): no war has begun.
 			var begun:="Open fighting with %s has begun; it is a feud, and their raiders will answer it." % enemy if bool(data.get("feud",false)) else "War with %s has begun." % enemy
-			return {"topic":"war","summary":"%s %s wants the frontier watched and the settlements guarded before the first raid." % [begun,String(person.name)],
+			return {"topic":"war","summary":begun,
 				"decree":"Post guards and patrol the frontier","ask":"war:%s:%d" % [enemy,int(data.get("war_day",day))],"situation_type":"war_council"}
 		"grievance","refusal_grievance":
 			var rel:Dictionary=person.get("relationships",{}).get("sovereign",{})
@@ -2301,25 +2313,13 @@ static func _court_petition(type:String,person:Dictionary,data:Dictionary,day:in
 			if type=="grievance" and float(rel.get("resentment",0))<=0.15 and float(rel.get("trust",0.5))>=0.35: return {}
 			var band:=int(data.get("band",1))
 			return {"topic":"grievance","summary":_grievance_words(person,decree),"decree":"","ask":"grievance:refused:"+decree if decree!="" else "grievance:band%d" % band,"situation_type":"grievance"}
-		"appointment":
-			var first:=_next_ambition(person,day)
-			return {"topic":"introduction","summary":"%s has taken up office as %s and asks what the ruler expects of them.%s" % [String(person.name),String(person.get("office_title","an official")),(" They would begin with this: %s." % first.to_lower()) if first!="" else ""],
-				"decree":first,"ask":"introduction:"+String(person.get("office_key","")),"situation_type":"introduction"}
-		"promise_followup":
-			var promised:=String(data.get("decree",""))
-			if promised=="": return {}
-			return {"topic":"follow_up","summary":"%d days ago you promised %s you would consider this: \"%s\". Nothing has been ordered since." % [day-int(data.get("promised_day",day)),String(person.name),promised],
-				"decree":promised,"ask":"follow_up:"+promised,"situation_type":"promise_followup"}
-		"ambition":
-			var next:=_next_ambition(person,day)
-			if next=="": return {}
-			return {"topic":"ambition","summary":String(AMBITION_WORDS.get(next,"%s has a plan.")) % String(person.name),"decree":next,"ask":"ambition:"+next,"situation_type":"ambition"}
 	return {}
 
 static func _court_audience(person:Dictionary,built:Dictionary,occasion:Dictionary,day:int)->Dictionary:
 	var audience:=_new_audience("court","petition",day)
 	audience.speaker={"name":String(person.name),"title":String(person.get("office_title","Official")),"person_id":int(person.person_id),"role":"official"}
-	audience.petition={"topic":String(built.topic),"summary":String(built.summary),"suggested_decree":String(built.decree)}
+	# The official reports; the ruler decides what, if anything, to order.
+	audience.petition={"topic":String(built.topic),"summary":String(built.summary),"suggested_decree":""}
 	var situation_type:=String(built.situation_type)
 	var occasion_data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
 	audience.situation={"type":situation_type,"ask":String(built.ask),"headline":String(SITUATIONS.get(situation_type,{}).get("headline","")),"summary":String(built.summary),
@@ -2341,19 +2341,12 @@ static func _generate_petition(person_id:int,day:int,forced_topic:String)->Dicti
 		var worst:=0
 		for key:String in bands:
 			if int(bands[key])>worst: worst=int(bands[key]); topic=key
-		if topic=="": topic="ambition"
+		if topic=="": return {}
 	var built:={}
 	match topic:
 		"food","health","housing","security","people": built=_court_petition("condition",person,{"topic":topic},day)
 		"grievance": built=_court_petition("grievance",person,{},day)
-		"introduction": built=_court_petition("appointment",person,{},day)
 		"war": built=_court_petition("war_council",person,{"enemy_name":"the enemy"},day)
-		"follow_up": built=_court_petition("promise_followup",person,{"decree":_ambition_ladder(person)[0],"promised_day":maxi(0,day-150)},day)
-		"ambition":
-			var ladder:=_ambition_ladder(person)
-			var decree:=_next_ambition(person,day)
-			if decree=="": decree=String(ladder[0])
-			built={"topic":"ambition","summary":String(AMBITION_WORDS.get(decree,"%s has a plan.")) % String(person.name),"decree":decree,"ask":"ambition:"+decree,"situation_type":"ambition"}
 	if built.is_empty(): return {}
 	return _court_audience(person,built,occasion,day)
 
@@ -2489,10 +2482,6 @@ static func options(id:String)->Array[Dictionary]:
 				"grievance":
 					result.append(_option("apologise","Acknowledge the wrong","Admit the slight and make amends in words.","warm"))
 					result.append(_option("rebuke","Rebuke them","Remind them whom they serve.","hostile"))
-				"introduction":
-					result.append(_option("decree","Charge them with their first task","\"%s\"" % decree,"warm",decree!="","They have no task to propose."))
-					result.append(_option("welcome","Welcome them warmly","Words of confidence; no order yet.","warm"))
-					result.append(_option("rebuke","Remind them of their place","Make plain that the office serves the ruler.","hostile"))
 				"mourning","callback","omen":
 					for lives_option:Dictionary in _lives().call("options",audience): result.append(lives_option)
 				"aim":
@@ -2503,14 +2492,10 @@ static func options(id:String)->Array[Dictionary]:
 					for crisis_option:Dictionary in _crises().call("options",audience): result.append(crisis_option)
 				"upkeep":
 					for upkeep_option:Dictionary in _upkeep().call("options",audience): result.append(upkeep_option)
-				"follow_up":
-					result.append(_option("decree","Issue it now","\"%s\"" % decree,"warm",decree!="","Nothing was promised."))
-					result.append(_option("patience","Ask for patience","Admit it waits; promise nothing new.","neutral"))
-					result.append(_option("dismiss","Refuse it outright","Tell them it will not be done.","hostile"))
 				_:
-					result.append(_option("decree","Issue their decree","\"%s\"" % decree,"warm",decree!="","They have no decree to propose."))
-					result.append(_option("promise","Promise to consider it","Warm words, no order yet. They will remember the promise.","neutral"))
-					result.append(_option("dismiss","Dismiss the petition","Send them away. They will resent it.","hostile"))
+					# The report is heard; any order is the ruler's own, given in their words.
+					result.append(_option("heard","I have heard you","Thank them for the report. Give your own order if you want one.","neutral"))
+					result.append(_option("dismiss","Dismiss them","Send them away. They will resent it.","hostile"))
 		"summons":
 			result.append(_option("dismiss_summons","That will be all","Send them back to their work.","neutral"))
 	# Every foreign answer shows its cost, and who at court objects.
@@ -3123,6 +3108,11 @@ static func _resolve_petition(audience:Dictionary,option_id:String)->Dictionary:
 			reaction="furious" if pride>0.7 or topic=="follow_up" else "offended"; emotion="slighted"
 			outcome="You dismissed %s's petition. Their resentment rose." % name if topic!="follow_up" else "You told %s the promised matter will not be done. They feel deceived." % name
 			memory="Petitioned about %s and was dismissed." % _topic_words(topic) if topic!="follow_up" else "The ruler broke a promise to me: %s will not be done." % String(petition.suggested_decree)
+		"heard":
+			GovernmentPeopleSystem.adjust_person_relationship(pid,0.01+mood,0.0,0.0)
+			reaction="neutral"; emotion="duty"
+			outcome="You heard %s's report on %s." % [name,_topic_words(topic)]
+			memory="Reported %s to the ruler, who heard me out." % _topic_words(topic)
 		"patience":
 			GovernmentPeopleSystem.adjust_person_relationship(pid,-0.01+mood,0.0,0.02)
 			reaction="offended" if pride>0.65 else "neutral"; emotion="doubt"

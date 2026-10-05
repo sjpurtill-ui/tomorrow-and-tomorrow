@@ -64,7 +64,7 @@ const DEFAULT_RECRUITS:=10
 const Forecast:=preload("res://scripts/levy_forecast.gd")
 ## Home orders a real system carries out: never turned into a law, a war
 ## order or a standing directive on the way (court_commands.gd).
-const ENGINE_KINDS:=["levy","recruit","arm","stand_down","found_towns","work","deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace",
+const ENGINE_KINDS:=["aim","levy","recruit","arm","stand_down","found_towns","work","deploy","training","camp_drill","line","stop_making","carts","research","inquiry","scouting","society","work_pace",
 	"build","defences","found_town","ration","provisions","declare_war","envoy","repair","sick_apart","clean_water","scout_party","town_focus"]
 
 ## "Muster" and "call out" gather the fighters we have (the war leader's);
@@ -307,10 +307,22 @@ static func work_reading(text:String)->Dictionary:
 	if ruler: return {"kind":"work","mode":"ruler"}
 	return {}
 
+## The god sets an aim for a generation (legacy_aims.gd court_order): "our
+## aim for this generation is to grow", "set the people an aim: to be feared".
+const AIM_WORDS:="(?i)(^\\W*(?:(?:our|the|a|an|my|new) )?(?:generational )?(?:aim|goal|purpose) (?:for (?:this|the|a|our) generation |for (?:the|our) people )?(?:is|shall be|will be|now is|from now on is)\\b|^\\W*(?:our|the) (?:aim|goal|purpose) for (?:this|the|a) generation\\b|\\b(?:set|make|give|declare|adopt|take up) (?:(?:the people|our people|them|us) )?(?:(?:a|an|the|our|this) )?(?:new )?(?:generational )?(?:aim|goal|purpose)\\b|\\bfor (?:this|a|the next) generation,? (?:we|our people|the people) (?:will|shall|must) (?:strive|aim|work) (?:for|to)\\b)"
+
+static func aim_reading(text:String)->Dictionary:
+	var clean:=text.strip_edges()
+	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
+	if not _has(clean,AIM_WORDS): return {}
+	return {"kind":"aim","words":clean}
+
 static func read(text:String)->Dictionary:
 	var clean:=text.strip_edges()
 	var lower:=clean.to_lower()
 	if clean.is_empty() or clean.ends_with("?"): return {}
+	var aim:=aim_reading(clean)
+	if not aim.is_empty(): return aim
 	# The god's word on new towns comes first: "at their own judgment" is not
 	# someone else's people, and "against my word" is no war.
 	var founding:=found_reading(clean)
@@ -504,6 +516,7 @@ static func _carry_out(reading:Dictionary)->Dictionary:
 		"arm": return _arm(reading)
 		"found_towns": return preload("res://scripts/auto_founding.gd").court_order(bool(reading.get("allow",true)))
 		"work": return preload("res://scripts/manual_work.gd").court_order(reading)
+		"aim": return preload("res://scripts/legacy_aims.gd").court_order(String(reading.get("words","")))
 	return {"ok":false,"kind":"","says":"","outcome":""}
 
 static func _recruit(reading:Dictionary)->Dictionary:

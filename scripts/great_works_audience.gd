@@ -445,11 +445,11 @@ static func forecast_audience(item:Dictionary)->Dictionary:
 	if speaker.is_empty():
 		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"THE WATCHING SKY WARNS","description":String(item.get("text","")),"domain":"food","severity":"major"})
 		return {}
-	var famine:=String(item.get("kind",""))=="famine"
 	var facts:={"mode":"forecast","key":String(item.get("kind","lean_season")),"text":String(item.get("text","")),"title":String(item.get("source","the sky-watchers")),
 		"in_days":int(item.get("in_days",0)),"start_day":int(item.get("start_day",0)),"end_day":int(item.get("end_day",0)),"severity":float(item.get("severity",0))}
+	# The warning is told; what to order about it is the ruler's own word.
 	return _hall().call("enqueue",{"kind":"great_work","origin":"court","speaker":speaker,"great_work":facts,
-		"petition":{"topic":"food","summary":String(item.get("text","")),"suggested_decree":"Ration food for thirty days" if famine or float(item.get("severity",0))>=.25 else "Send gatherers to find food"}})
+		"petition":{"topic":"food","summary":String(item.get("text","")),"suggested_decree":""}})
 
 # ---------------------------------------------------------------- daily scan
 
@@ -533,12 +533,9 @@ static func daily(day:int)->Array[Dictionary]:
 		var made_news:=news_audience(item)
 		if not made_news.is_empty():arrivals.append(made_news)
 		break
-	# Reading pending proposals consumes them, so only read when a pitch can be heard.
-	if not _hall_room("routine"):return arrivals
-	for trigger in api_list("pending_proposals",["player"]):
-		if not trigger is Dictionary:continue
-		var made_pitch:=proposal_audience(trigger)
-		if not made_pitch.is_empty():arrivals.append(made_pitch)
+	# Officials pitch no wonders of their own (the god orders great works): a
+	# pitch an older world still holds is set aside unheard.
+	api_list("pending_proposals",["player"])
 	return arrivals
 
 static func retire_settled()->void:
@@ -632,10 +629,7 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			result.append(_option("noted","Noted","Thank them for the word.","neutral"))
 			result.append(_option("answer","Answer it with a work of our own","The court is asked to conceive a great work. Nothing is spent yet.","warm"))
 		"forecast":
-			var decree:=String((audience.get("petition",{}) as Dictionary).get("suggested_decree",""))
-			if not decree.is_empty():result.append(_option("decree","Proclaim it: %s" % decree.to_lower(),"Issued to the civic council as a decree now, before the lean days arrive.","warm"))
-			if decree!="Send gatherers to find food":result.append(_option("decree_gather","Send gatherers out","Issued to the civic council: send gatherers to find food.","neutral"))
-			result.append(_option("noted","Noted","Thank them; plan later.","neutral"))
+			result.append(_option("noted","Noted","Thank them. Give your own order if you want one.","neutral"))
 	return result
 
 static func _mourning_cost(dead:int)->float:
