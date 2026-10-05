@@ -110,9 +110,9 @@ func _build_scene(profile:Dictionary)->void:
 	var ground_size:=maxf(maxf(_bounds.size.x,_bounds.size.z)+18.0,26.0)
 	_box(world,"Forecourt",Vector3(ground_size,.15,ground_size),Vector3(_bounds.get_center().x,-.14,_bounds.get_center().z+3),Color("8b806b"))
 	var env:=WorldEnvironment.new();var atmosphere:=Environment.new();atmosphere.background_mode=Environment.BG_COLOR;atmosphere.background_color=Color("78828a")
-	atmosphere.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;atmosphere.ambient_light_color=Color("b9c8d3");atmosphere.ambient_light_energy=.65
+	atmosphere.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;atmosphere.ambient_light_color=Color("c3cbd0");atmosphere.ambient_light_energy=.30
 	atmosphere.tonemap_mode=Environment.TONE_MAPPER_FILMIC;env.environment=atmosphere;world.add_child(env)
-	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-42,-35,0);sun.light_color=Color("ffdfb4");sun.light_energy=1.4;sun.shadow_enabled=true;world.add_child(sun)
+	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-42,-35,0);sun.light_color=Color("fff1dc");sun.light_energy=.80;sun.shadow_enabled=true;world.add_child(sun)
 	var registry:Dictionary={}
 	for index in cast.size():
 		var entry:Dictionary=cast[index];var person:Dictionary=entry.person
