@@ -22,7 +22,7 @@ var out := "res://artifacts/great-work-3d"
 var only_case := ""
 var checks := 0
 var failures: Array[String] = []
-var report := {"seed": 515151, "cases": [], "checks": []}
+var report := {"seed": 515151, "cases": [], "checks": [], "idle_viewports": []}
 var host: Host
 var director: Node
 var city: Dictionary
@@ -180,6 +180,24 @@ func _atlas_case(spec: Dictionary) -> void:
 		var idle: int = int(model.report().viewport_updates)
 		await _frames(20)
 		_check(int(model.report().viewport_updates) == idle, String(spec.id) + " paused idle view does not request redraws")
+		if DisplayServer.get_name() != "headless":
+			# SubViewport's getter retains the requested UPDATE_ONCE value; the
+			# render server disables its own state. Verify actual rendered pixels.
+			await RenderingServer.frame_post_draw
+			var frozen: PackedByteArray = model.viewport.get_texture().get_image().get_data()
+			model.model_root.visible = false
+			await _frames(4)
+			await RenderingServer.frame_post_draw
+			var slept: bool = frozen == model.viewport.get_texture().get_image().get_data()
+			model.orbit_by(Vector2(1,0))
+			await _frames(4)
+			await RenderingServer.frame_post_draw
+			var woke: bool = frozen != model.viewport.get_texture().get_image().get_data()
+			report.idle_viewports.append({"id":spec.id,"pixels_unchanged_without_request":slept,"pixels_changed_after_request":woke})
+			_check(slept and woke, String(spec.id) + " GPU freezes idle pixels and redraws only after an explicit view request")
+			model.model_root.visible = true
+			model.orbit_by(Vector2(-1,0))
+			await _frames(4)
 		model.reset_view()
 	if bool(spec.get("live", false)) and require_3d:
 		var watch := view.find_child("WatchLive", true, false) as Button
