@@ -1,19 +1,17 @@
 extends RefCounted
-## OUR NATION'S NAME: what all our towns together are called.
+## OUR PEOPLE'S NAME: what we call ourselves, and other peoples call us.
 ##
-## A people of one town goes by that town (GameState.settlement_name): "the
-## people of Seanstone" on the Standing board, "the god of Seanstone" in an
-## envoy's mouth. Once a second town stands, the ruler may give the whole
-## people a name of its own (GameState.nation_name, "" until then):
-##   - offered with that founding, beside the new town's name (the naming
-##     card, hud/nation_name_card.gd); skipped, it is offered again only at
-##     the next founding, never in between;
-##   - spoken in the court ("call our nation the Reedfolk",
+## Every people has one settlement that grows (no new towns). Our people's
+## name (GameState.nation_name, "" until given) may be given from the start:
+##   - at the first fire, under the settlement's own name
+##     (hud/fire_circle_opening.gd, mode "name");
+##   - spoken in the court ("call our people the Reedfolk",
 ##     court_realm_acts.nation);
 ##   - named or changed in the court (the Headman's "Name our nation" choices).
-## Unnamed, everything reads as before. The towns keep their own names, and
-## the home town's own uses (where the army stands, where the stores are)
-## never change.
+## Unnamed, our people go by the settlement's name ("the people of
+## Seanstone"), and everything reads as before. The settlement keeps its own
+## name, and its own uses (where the army stands, where the stores are) never
+## change.
 ##
 ## Suggestions are invented, in the people's own words for their time
 ## (era_names.gd stages): what they call themselves in their own tongue
@@ -51,10 +49,9 @@ static func towns()->int:
 	return count
 
 
-## May the nation be named (or renamed) now: two towns of ours, or a name
-## given already.
+## May our people be named (or renamed) now: always (one settlement each).
 static func can_name()->bool:
-	return named() or towns()>=TOWNS_TO_NAME
+	return true
 
 
 ## A town's founding asks for the nation's name while it has none.
@@ -129,6 +126,8 @@ static func _tell(name:String,old:String,how:String,town:String)->void:
 	var text:=""
 	if old!="":
 		text="By the god's word, %s are called %s from this day." % [in_sentence(old),in_sentence(name)]
+	elif how=="start":
+		text="At the first fire the god named our people: %s." % in_sentence(name)
 	elif how=="founding" and town!="":
 		text="With %s founded, our people live in %s %s, and the god gave them one name for all of them: %s." % [town,EraWords.count_word(towns()),EraWords.word("places","towns"),in_sentence(name)]
 	else:

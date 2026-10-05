@@ -1,12 +1,10 @@
 extends RefCounted
 ## OUR NATION'S NAME ON PAPER (nation_name.gd holds the name and its rules).
 ##
-##   add_field  the line beside a new town's name on its naming card when the
-##              second (or a later) town is founded and the nation has no
-##              name yet: "And our nation", a line to type in, and the names
-##              heard among the people as chips that fill it. Left empty,
-##              nothing is named and the next founding asks again; nothing
-##              nags in between.
+##   add_field  the line under the settlement's name on its naming card while
+##              our people have no name: "And our people", a line to type in,
+##              and the names heard among the people as chips that fill it.
+##              Left empty, nothing is named; nothing nags in between.
 ## Between foundings the nation is named or renamed in the court ("call our
 ## nation the Reedfolk", or the Headman's "Name our nation" choices).
 ## Static helpers; preload.
@@ -29,10 +27,10 @@ static func founding_heading(column:VBoxContainer,town:String)->void:
 	Kit.label(column,founding_words(),"body").custom_minimum_size.x=460
 
 
-## "And our nation", its line and the names heard among the people, added
+## "And our people", its line and the names heard among the people, added
 ## to a naming card's column. Returns the line.
 static func add_field(column:VBoxContainer,prefill:String="")->LineEdit:
-	Kit.label(column,"And our nation","heading")
+	Kit.label(column,"And our people","heading")
 	var input:=_line(column,prefill)
 	# Why a name could not be given stays on the card, under the names heard.
 	var status:=Kit.label(column,"","note")
@@ -46,7 +44,7 @@ static func add_field(column:VBoxContainer,prefill:String="")->LineEdit:
 ## a refusal's reason is shown on the card.
 static func commit_founding(input:LineEdit,town:String)->Dictionary:
 	if input==null or not is_instance_valid(input) or NationName.tidy(input.text)=="": return {}
-	var done:=NationName.give_name(input.text,"founding",town)
+	var done:=NationName.give_name(input.text,String(input.get_meta("how","founding")),town)
 	if bool(done.get("ok",false)): done["line"]="Our people are now called %s." % NationName.in_sentence(String(done.name))
 	var status:Variant=input.get_meta("status",null)
 	if not bool(done.get("ok",false)) and is_instance_valid(status) and status is Label: (status as Label).text=String(done.get("reason",""))
@@ -56,7 +54,7 @@ static func commit_founding(input:LineEdit,town:String)->Dictionary:
 static func _line(column:VBoxContainer,prefill:String)->LineEdit:
 	var input:=LineEdit.new()
 	input.name="NationName"
-	input.placeholder_text="Our nation's name"
+	input.placeholder_text="What we call ourselves"
 	input.max_length=NationName.MAX_LENGTH
 	input.text=prefill
 	input.custom_minimum_size=Vector2(0,44)

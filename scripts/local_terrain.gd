@@ -327,7 +327,7 @@ var settlement_name_input: LineEdit
 var settlement_name_confirm: Button
 var naming_previous_speed := 0.0
 var settlement_naming_target_id:=""
-## The naming card's "And our nation" line at a town's founding (hud/nation_name_card.gd).
+## The naming card's "And our people" line, while our people have no name (hud/nation_name_card.gd).
 var nation_name_input: LineEdit
 var naming_offers_nation := false
 var suppress_naming_prompt := false
@@ -812,6 +812,10 @@ func _capture_preview_if_requested() -> void:
 		# force the dock's layout so its content is arranged in the screenshot.
 		hud.force_dock_layout()
 	if capture_naming_panel:
+		# Capture only: past the century's choice, to the first fire.
+		if WorldSimulation.direction.needs_century_choice():WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
+		for screen in get_tree().root.find_children("*","",true,false):
+			if String(screen.get_script().resource_path if screen.get_script()!=null else "").ends_with("people_direction_screen.gd"):screen.queue_free()
 		_open_settlement_naming_panel()
 		capture_audit_root=settlement_naming_panel
 	if capture_world_menu:
@@ -13075,7 +13079,12 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	var parts:=PaperKit.modal(interface_layer,520.0,HudT.GOLD,"RenameSettlement")
 	settlement_naming_panel=parts[0]
 	var column:VBoxContainer=parts[1]
+	var asks_people:=not founding and not preload("res://scripts/nation_name.gd").named()
 	if founding: nation_card.founding_heading(column,String(target.get("name","this settlement")))
+	elif asks_people:
+		PaperKit.label(column,"Names","kicker")
+		PaperKit.label(column,"Name %s, and our people" % String(target.get("name","this settlement")),"title")
+		PaperKit.label(column,"Our home's name shows on the map and in the Chronicle; our people's is the name other peoples will know us by.","body").custom_minimum_size.x=460
 	else:
 		PaperKit.label(column,"Rename","kicker")
 		PaperKit.label(column,"A new name for %s" % String(target.get("name","this settlement")),"title")
@@ -13092,12 +13101,16 @@ func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	if founding:
 		settlement_name_input.set_meta("founded_as",String(target.get("name","")))
 		nation_name_input=nation_card.add_field(column)
+	elif not preload("res://scripts/nation_name.gd").named():
+		# Our people still have no name of their own: the card asks it too.
+		nation_name_input=nation_card.add_field(column)
+		nation_name_input.set_meta("how","screen")
 	var footer:=HBoxContainer.new()
 	footer.alignment=BoxContainer.ALIGNMENT_END
 	footer.add_theme_constant_override("separation",10)
 	column.add_child(footer)
 	PaperKit.button(footer,"Not now",false,_dismiss_settlement_naming_panel)
-	settlement_name_confirm=PaperKit.button(footer,"Name them" if founding else "Rename",true,_commit_settlement_name)
+	settlement_name_confirm=PaperKit.button(footer,"Name them" if founding or asks_people else "Rename",true,_commit_settlement_name)
 	settlement_name_confirm.disabled=settlement_name_input.text.strip_edges()==""
 	settlement_name_input.grab_focus.call_deferred()
 
@@ -13116,6 +13129,14 @@ func _commit_settlement_name() -> void:
 		return
 	var result:Dictionary
 	if settlement_naming_target_id=="__founding__":
+		# The people's own name, when the fire's second line holds one: a
+		# refusal (another people's name) stays on the card.
+		var people_line:Variant=settlement_naming_panel.get("people_input") if settlement_naming_panel else null
+		if people_line is LineEdit and preload("res://scripts/nation_name.gd").tidy((people_line as LineEdit).text)!="":
+			var given:Dictionary=preload("res://scripts/nation_name.gd").give_name((people_line as LineEdit).text,"start")
+			if not bool(given.get("ok",false)) and String(given.get("why",""))!="same":
+				_tell(PaperKit.sentence(String(given.get("reason","That name could not be given"))),"people","notable")
+				return
 		GameState.settlement_name=chosen.substr(0,32)
 		result={"ok":true,"name":GameState.settlement_name}
 	else:
@@ -13140,7 +13161,8 @@ func _commit_settlement_name() -> void:
 	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":description,"domain":"settlement","severity":"major"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
-	_tell("The settlement is now called %s." % final_name,"people","notable")
+	var people_called:=preload("res://scripts/nation_name.gd").current()
+	_tell(("The settlement is now called %s, and our people %s." % [final_name,preload("res://scripts/nation_name.gd").in_sentence(people_called)]) if settlement_naming_target_id=="__founding__" and people_called!="" else "The settlement is now called %s." % final_name,"people","notable")
 	_update_time_interface()
 	_dismiss_settlement_naming_panel()
 

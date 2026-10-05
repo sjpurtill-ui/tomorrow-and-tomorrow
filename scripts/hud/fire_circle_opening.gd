@@ -7,8 +7,10 @@ extends Control
 ## and a god who is online may answer in their own words.
 ##
 ## The same scene returns at the first fire, when the Hearth Chief asks what the
-## new home is called (mode "name"); the terrain wires that mode to its own
-## naming commit, and the name may be left for later.
+## new home is called (mode "name"), and under it what our people call
+## themselves (nation_name.gd; every people has one settlement, so the name is
+## given at the start, not when a second town stands). The terrain wires that
+## mode to its own naming commit, and either name may be left for later.
 ##
 ## Compatibility: `opening`, `ambition_buttons`, `selected_focus` and a page
 ## holding a "ConfirmFocus" button mirror the old direction screen for callers.
@@ -37,6 +39,8 @@ var confirm:Button
 var name_input:LineEdit
 var name_confirm:Button
 var later_button:Button
+## The people's own name, under the settlement's (mode "name"); may stay empty.
+var people_input:LineEdit
 var suggestions:HBoxContainer
 var card:PanelContainer
 var backdrop:Control
@@ -168,10 +172,24 @@ func _build_name(column:VBoxContainer)->void:
 		chip.pressed.connect(func()->void:
 			name_input.text=suggestion;name_input.text_changed.emit(suggestion);name_input.grab_focus())
 		suggestions.add_child(chip)
+	# And what our people call themselves: the name other peoples will know us by.
+	var NationName:=preload("res://scripts/nation_name.gd")
+	var ask:=_label("And our people — what do we call ourselves?",15,Color("d9b56a"));ask.name="PeopleAsk";column.add_child(ask)
+	people_input=LineEdit.new();people_input.name="PeopleName";people_input.placeholder_text="Name our people…";people_input.max_length=NationName.MAX_LENGTH;people_input.custom_minimum_size.y=46
+	people_input.add_theme_font_size_override("font_size",18)
+	column.add_child(people_input)
+	var heard:=HBoxContainer.new();heard.name="PeopleSuggestions";heard.add_theme_constant_override("separation",8);column.add_child(heard)
+	heard.add_child(_label("Heard among the people:",13,Color("a89a7c")))
+	for suggestion in NationName.suggestions(4):
+		var chosen:=String(suggestion)
+		var chip:=Button.new();chip.text=chosen;chip.flat=true;chip.add_theme_color_override("font_color",Color("d9b56a"))
+		chip.pressed.connect(func()->void:
+			people_input.text=chosen;people_input.text_changed.emit(chosen);people_input.grab_focus())
+		heard.add_child(chip)
 	var footer:=HBoxContainer.new();footer.alignment=BoxContainer.ALIGNMENT_END;footer.add_theme_constant_override("separation",10);column.add_child(footer)
-	later_button=Button.new();later_button.text="Let the name come later";later_button.custom_minimum_size=Vector2(0,42);later_button.flat=true
+	later_button=Button.new();later_button.text="Let the names come later";later_button.custom_minimum_size=Vector2(0,42);later_button.flat=true
 	later_button.add_theme_color_override("font_color",Color("a89a7c"));footer.add_child(later_button)
-	name_confirm=Button.new();name_confirm.text="Name it";name_confirm.custom_minimum_size=Vector2(150,42);name_confirm.disabled=true
+	name_confirm=Button.new();name_confirm.text="Name them";name_confirm.custom_minimum_size=Vector2(150,42);name_confirm.disabled=true
 	name_confirm.add_theme_stylebox_override("normal",_box(Color("c7a55f"),Color("c7a55f"),8));name_confirm.add_theme_stylebox_override("disabled",_box(Color("3a3226"),Color("5c4a2c"),8));name_confirm.add_theme_color_override("font_color",Color("112126"))
 	name_confirm.add_theme_color_override("font_disabled_color",Color("6a6150"))
 	footer.add_child(name_confirm)

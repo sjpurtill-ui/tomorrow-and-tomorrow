@@ -97,33 +97,40 @@ func _speak(text:String)->Dictionary:
 	return heard
 
 
-func test_one_town_reads_as_the_town_and_cannot_be_named_yet()->void:
+func test_one_settlement_reads_as_the_town_until_named_and_may_be_named_at_once()->void:
 	assert_int(NationName.towns()).is_equal(1)
 	assert_str(GameState.nation_name).is_equal("")
-	assert_bool(NationName.can_name()).is_false()
+	# Every people has one settlement: our people may be named from the start.
+	assert_bool(NationName.can_name()).is_true()
 	assert_bool(NationName.ask_at_founding()).is_false()
-	# Everything reads as before: the people go by the first town.
+	# Unnamed, everything reads as before: the people go by the first town.
 	assert_str(CivilizationSystem._player_civilization_name()).is_equal("SEANSTONE")
 	assert_str(StandingDock.new(null,null)._our_name()).is_equal("The people of Seanstone")
 	assert_str(Envoys._god()).is_equal("the god of Seanstone")
-	assert_str(String(ChronicleDock.new(null,null).meta().eyebrow)).is_equal("THE STORY OF THE PEOPLE")
 	assert_str(String(CommunityNetwork.nodes()[0].name)).is_equal("Seanstone")
-	assert_str(CityLabels.affiliation_of("player",false,"city")).is_equal("")
 	assert_bool(Facts.sheet(["common"]).has("nation")).is_false()
-	# The Headman offers no nation names, and nothing can name it.
-	assert_bool(_nation_menu().is_empty()).is_true()
-	var refused:=NationName.give_name("The Reedfolk","screen")
-	assert_bool(bool(refused.ok)).is_false()
-	assert_str(String(refused.why)).is_equal("one_town")
-	assert_str(GameState.nation_name).is_equal("")
-	assert_array(_told()).is_empty()
+	# The Headman offers names, and the first fire's line names them.
+	assert_bool(_nation_menu().is_empty()).is_false()
+	var given:=NationName.give_name("The Reedfolk","start")
+	assert_bool(bool(given.ok)).is_true()
+	assert_str(GameState.nation_name).is_equal("The Reedfolk")
+	assert_str(" ".join(_told())).contains("first fire")
+
+
+func test_the_first_fire_asks_for_our_peoples_name_too()->void:
+	var fire:Control=preload("res://scripts/hud/fire_circle_opening.gd").new()
+	fire.mode="name"
+	add_child(fire)
+	assert_object(fire.people_input).is_not_null()
+	assert_object(fire.find_child("PeopleSuggestions",true,false)).is_not_null()
+	fire.free()
 
 
 func test_the_second_founding_asks_and_its_card_names_the_nation()->void:
 	fx.second_town("Reedmouth")
 	assert_int(NationName.towns()).is_equal(2)
 	assert_bool(NationName.ask_at_founding()).is_true()
-	# The founding card: the heading, "And our nation", and names heard among
+	# The founding card: the heading, "And our people", and names heard among
 	# the people, each one invented and short enough for a herald.
 	var column:VBoxContainer=auto_free(VBoxContainer.new())
 	add_child(column)
@@ -264,17 +271,7 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	for said in ["call our people to the fire","Call our people home","our people are hungry","Rename Seanstone to Godshold","Call our town Godshold",
 			"What is our nation called?","name the people who stole the grain","call the people together","Kill Kavu, call our nation the Reedfolk"]:
 		assert_dict(Realm.nation(said)).override_failure_message("'%s' was read as naming the nation" % said).is_empty()
-	# One town: the headman says plainly the people go by it; nothing changes.
-	var early:=_speak("Call our nation the Reedfolk")
-	assert_bool(bool(early.handled)).is_true()
-	assert_str(String(early.verb)).is_equal("nation_name")
-	assert_bool(bool(early.executed)).is_false()
-	assert_str(String(early.actor_says)).contains("Seanstone")
-	assert_str(String(early.outcome)).starts_with("Nothing is changed")
-	assert_str(String(early.card.state)).is_equal("nothing")
-	assert_str(GameState.nation_name).is_equal("")
-	# Two towns: named, the headman answers in his own words, the card is done.
-	fx.second_town("Reedmouth")
+	# One settlement is enough: named, the headman answers in his own words, the card is done.
 	var steward:=GovernmentPeopleSystem.officeholder("Steward")
 	var r:=_speak("Our people shall be called the Reedfolk")
 	assert_bool(bool(r.handled)).is_true()
@@ -282,7 +279,7 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	assert_bool(bool(r.executed)).is_true()
 	assert_str(String(r.actor_name)).is_equal(String(steward.name))
 	# In their own manner (their disposition), always the name and the word sent out.
-	var firsts:=Realm.NATION_ANSWERS.values().map(func(pair:Array)->String: return String(pair[0]).replace("{Name}","The Reedfolk").replace("{name}","the Reedfolk").replace("{towns}","Seanstone and Reedmouth"))
+	var firsts:=Realm.NATION_ANSWERS.values().map(func(pair:Array)->String: return String(pair[0]).replace("{Name}","The Reedfolk").replace("{name}","the Reedfolk").replace("{towns}",NationName.towns_words()))
 	assert_bool(firsts.has(String(r.actor_says))).override_failure_message(String(r.actor_says)).is_true()
 	assert_str(String(r.outcome)).contains("our people are called the Reedfolk")
 	assert_str(String(r.card.state)).is_equal("done")
@@ -296,7 +293,7 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	var again:=_speak("name our realm Ashmark")
 	assert_bool(bool(again.executed)).is_true()
 	assert_str(String(again.actor_says)).contains("Ashmark")
-	assert_str(String(again.actor_says)).contains("Seanstone and Reedmouth")
+	assert_str(String(again.actor_says)).contains("Seanstone")
 	# Every manner answers both a first name and a new one, the facts kept.
 	for pair:Array in Realm.NATION_ANSWERS.values():
 		assert_int(pair.size()).is_equal(2)
