@@ -166,7 +166,7 @@ func finish_search(mission:Dictionary,observer:String,day:int,found:bool)->Strin
 func describe(lead:Dictionary)->String:
 	var direction:String=system._compass_phrase(system.player_world_origin,vector(lead.center))
 	var confidence:="moderate" if float(lead.confidence)>=.35 else "weak" if float(lead.confidence)>=.15 else "faint"
-	return "%s · %s · %s confidence · area about %.0f km across\nHeard via %s; observation day %d, received day %d. %d returned search(es).%s" % [direction.capitalize(),String(lead.state),confidence,float(lead.radius)*2,String(lead.via),int(lead.observed_day),int(lead.reported_day),int(lead.attempts)," Accounts point to different areas." if bool(lead.conflicting) else ""]
+	return "%s · %s · %s confidence · area about %.0f km across\nHeard via %s; observed %s, received %s. %d returned search(es).%s" % [direction.capitalize(),String(lead.state),confidence,float(lead.radius)*2,String(lead.via),preload("res://scripts/calendar_date.gd").words(int(lead.observed_day)),preload("res://scripts/calendar_date.gd").words(int(lead.reported_day)),int(lead.attempts)," Accounts point to different areas." if bool(lead.conflicting) else ""]
 func valid_lead(value:Variant)->bool:
 	if not value is Dictionary or not value.has_all(["id","subject","name","center","radius","confidence","observed_day","reported_day","origin","source","via","path","attempts","searched"]): return false
 	for key:String in ["id","subject","name","origin","source","via"]:

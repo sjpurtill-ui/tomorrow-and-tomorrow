@@ -28,7 +28,7 @@ func _draw()->void:
 		draw_string(font,p+Vector2(-55,-13),String(known.name),HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color("f4d8c6"))
 		var observed:=point(known.cell)
 		_draw_front({"troops":int(known.troops)},observed,Color("de795e"))
-		draw_string(font,observed+Vector2(9,20),"%d seen · day %d"%[int(known.troops),int(known.day)],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e5c6b4"))
+		draw_string(font,observed+Vector2(9,20),"%d seen · %s"%[int(known.troops),preload("res://scripts/calendar_date.gd").words(int(known.day))],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e5c6b4"))
 	var here:=point(state.cell)
 	_draw_front(WorldSimulation.campaign.army(),here,Color("73ddcc"))
 	draw_arc(here,13,0,TAU,32,Color("c0fff0"),2)

@@ -174,7 +174,7 @@ static func findings(event:Dictionary)->Dictionary:
 	# -- dating -----------------------------------------------------------------
 	var age:=maxi(0,_today()-observed_day)
 	var obs_days:=int(city.get("observation_days",1)) if not city.is_empty() else 1
-	var seen_text:="Observed on day %d; %s." % [observed_day,"reported today" if age==0 else "%d days ago" % age]
+	var seen_text:="Observed in %s; %s." % [preload("res://scripts/calendar_date.gd").words(observed_day),"reported today" if age==0 else "%d days ago" % age]
 	facts.append(_fact("seen","seen today" if age==0 else "seen %d days ago" % age,seen_text,1.0,{"value":age,"observation_days":obs_days,"observed_day":observed_day}))
 	if facts.size()>FACTS_MAX: facts.resize(FACTS_MAX)
 

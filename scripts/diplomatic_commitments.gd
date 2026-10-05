@@ -175,7 +175,7 @@ func note_food_aid(id:String,amount:float,day:int)->void:
 	for obligation:Dictionary in state.obligations:
 		if obligation.donor=="player" and obligation.beneficiary==id and obligation.status=="requested":
 			obligation.status="food_aid_delivered"
-			record("Day %d: %.1f Food reached %s in response to their call. Food support has been delivered; no military force was promised or created by this shipment." % [day,amount,id])
+			record("%s: %.1f Food reached %s in response to their call. Food support has been delivered; no military force was promised or created by this shipment." % [preload("res://scripts/calendar_date.gd").words(day,true),amount,id])
 
 func policy_allocations(id:String,allocations:Dictionary)->Dictionary:
 	var league:=faction(id)
@@ -299,7 +299,7 @@ func dispatch_relief(donor:String,beneficiary:String,siege_id:String)->Dictionar
 	state.relief.append(receipt)
 	for obligation:Dictionary in state.obligations:
 		if obligation.donor==donor and obligation.beneficiary==beneficiary and obligation.siege_id==siege_id: obligation.status="dispatched"
-	var message:="%s sends %d existing troops with %.1f Food reserved for both travel legs and thirty days at the siege. Arrival is expected around day %d." % [String(source.name),int(quote.troops),float(quote.food),int(receipt.due_day)]
+	var message:="%s sends %d existing troops with %.1f Food reserved for both travel legs and thirty days at the siege. Arrival is expected around %s." % [String(source.name),int(quote.troops),float(quote.food),preload("res://scripts/calendar_date.gd").words(int(receipt.due_day))]
 	record(message)
 	return {"ok":true,"message":message,"receipt_id":receipt.id}
 

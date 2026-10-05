@@ -86,7 +86,7 @@ static func band_details(band:Dictionary)->String:
 	var size:=("about %d" % high) if low==high or low<=0 else "%d to %d" % [low,high]
 	var who:=String(band.get("enemy",""))
 	var day:=int(band.get("seen_day",-1))
-	var seen:=(" Seen on day %d." % day) if day>=0 else ""
+	var seen:=(" Seen in %s." % preload("res://scripts/calendar_date.gd").words(day)) if day>=0 else ""
 	if who=="": return "Strangers, %s of them, armed.%s" % [size,seen]
 	return "%s men, %s of them, armed.%s" % [_cap(who),size,seen]
 

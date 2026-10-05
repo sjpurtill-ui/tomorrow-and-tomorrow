@@ -126,6 +126,6 @@ static func describe()->String:
 		text+="Line %d · %s · %s\n" % [int(line.id),String(line.material),String(line.status).replace("_"," ")]
 		if line.status=="under_construction":text+="Construction %.1f / %.1f work\n" % [float(line.work_done),float(line.work_required)]
 		else:text+="Delivered %.1f today · condition %d%%\n" % [float(line.get("delivered_today",0)),roundi(float(line.condition)*100)]
-		if line.has("inspected_day"):text+="Last inspected day %d · observed loss %d%%\n" % [int(line.inspected_day),roundi(float(line.observed_leakage)*100)]
+		if line.has("inspected_day"):text+="Last inspected %s · observed loss %d%%\n" % [preload("res://scripts/calendar_date.gd").words(int(line.inspected_day)),roundi(float(line.observed_leakage)*100)]
 		if not String(line.get("blocker","")).is_empty():text+=String(line.blocker)+"\n"
 	return text
