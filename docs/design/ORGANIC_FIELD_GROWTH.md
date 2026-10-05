@@ -62,6 +62,7 @@ private `override.cfg` user directory, optionally containing a copy of a save:
 ```
 
 The capture does not write saves. Generated captures, logs, imports, reports and
-the private user-directory override are excluded from commits. The existing
-player process remains open; save and relaunch normally, then resume simulation
-to use the integrated correction.
+the private user-directory override are excluded from commits. Validation left
+the player process undisturbed; that session subsequently exited independently.
+The canonical launcher loads the update, and resumed simulation applies the
+integrated correction where eligible.

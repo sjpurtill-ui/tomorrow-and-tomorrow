@@ -10,8 +10,10 @@ Shared-path anchors, archaeological plots and authored fields stay fixed.
 Combined validation: 78/78 cases across four suites, no errors, failures, skips
 or orphans. Private GPU saved-layout and 24-field growth captures passed at two
 zooms each. Existing farm area and nongeometry metadata matched after correction.
-The canonical player remains running on its previously loaded scripts; it needs
-a normal save/relaunch and resumed simulation. Generated evidence and imports
+Delivery `e1ab0604` was pushed and remotely verified before the canonical
+fast-forward; main was 0/0 and all 4,749 pre-existing local status entries were
+unchanged. The previous player session exited independently after validation;
+the canonical launcher can now load the update. Generated evidence and imports
 remain local. See `docs/design/ORGANIC_FIELD_GROWTH.md` for reproduction and limits.
 
 ## October 5 — Builders / The Town folio: INTEGRATED

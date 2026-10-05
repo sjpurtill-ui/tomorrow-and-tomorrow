@@ -9,8 +9,10 @@ and history remain. Unchanged paths pin dependent fields in place.
 
 All 78 combined tests passed. Private actual-renderer probes checked saved fields
 before/after and a 24-field growth fixture at two zoom levels, with no engine or
-script errors. Captures and test userdata are local only. No player/editor was
-stopped or relaunched. Details and limitations: `docs/design/ORGANIC_FIELD_GROWTH.md`.
+script errors. Delivery `e1ab0604` was remotely verified before advancing canonical
+main (0/0); its 4,749 local status entries were unchanged. No player/editor was
+stopped by this task. The prior session exited independently after validation.
+Captures and test userdata are local only. Details: `docs/design/ORGANIC_FIELD_GROWTH.md`.
 
 ## October 5, 2026 — Builders page delivered
 
