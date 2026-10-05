@@ -33,6 +33,9 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
 const Goods:=preload("res://scripts/civilian_goods.gd")
 const Arms:=preload("res://scripts/weapons_stock.gd")
+const Graphics:=preload("res://scripts/hud/trade_graphics.gd")
+const Emblem:=preload("res://scripts/hud/hud_chrome_icon.gd")
+const MaterialArt:=preload("res://scripts/hud/materials_art.gd")
 const REFRESH_SECONDS:=1.0
 const MAX_WORDS:=12
 const HOVER_HOLD_SECONDS:=5.0
@@ -48,17 +51,43 @@ var signature:=""
 var waited:=0.0
 var built_msec:=-100000
 const REBUILD_MS:=2000
+var summary_signature:=""
+var others_signature:=""
+var people_signatures:Dictionary={}
+var responsive_grids:Array[GridContainer]=[]
+var visual_sections:Array[Dictionary]=[]
+
+func _ready()->void:
+	_bind_layout.call_deferred()
+
+func _bind_layout()->void:
+	var ancestor:=get_parent()
+	while ancestor!=null:
+		if ancestor is ScrollContainer:
+			if not ancestor.resized.is_connected(_responsive):ancestor.resized.connect(_responsive)
+			break
+		ancestor=ancestor.get_parent()
+	_responsive()
 
 
 func setup(_block:Dictionary={})->void:
 	name="TradeBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",14)
-	summary_box=_section("Our trade")
+	theme=T.control_theme()
+	add_theme_constant_override("separation",16)
+	summary_box=_visual_section("Our trade",self,"TradeHero","trade",true)
 	feedback=_line("",15,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	peoples_box=_section("Peoples we know")
-	others_box=_section("Between other peoples")
+	others_box=_visual_section("Between other peoples",self,"OtherTrade","trade")
+	resized.connect(_responsive)
 	refresh(true)
+	_responsive()
+
+## Daily dock refresh keeps the board, its scroll position and open choices.
+func update_block(_block:Dictionary)->bool:
+	clock=0.0
+	refresh()
+	return true
 
 
 func _process(delta:float)->void:
@@ -71,17 +100,11 @@ func _process(delta:float)->void:
 ## What the page shows has changed: a settlement, a stance, an answer, a day.
 static func reading_signature()->String:
 	var s:=Ledger.peek()
-	if s.is_empty():return "empty:%d" % int(GameState.elapsed_days/30)
-	var parts:=PackedStringArray()
-	for k:String in (s.get("pairs",{}) as Dictionary):
-		var p:Dictionary=s.pairs[k]
-		parts.append("%s:%d:%s" % [k,int(p.get("last_day",-1)),String(p.get("form",""))])
-	parts.append(str(s.get("stances",{})))
-	parts.append(str((s.get("answers",{}) as Dictionary).keys()))
-	parts.append(str(s.get("tributes",{})))
-	parts.append(str((s.get("news",[]) as Array).size()))
-	parts.append(str(int(GameState.elapsed_days)/7))
-	return str(hash("|".join(parts)))
+	var peoples:Array=[]
+	for c:Dictionary in CivilizationSystem.civilizations:
+		peoples.append([c.get("id",""),c.get("name",""),c.get("alive",true),c.get("player_relation",{})])
+	return str(hash([s.get("pairs",{}),s.get("stances",{}),s.get("answers",{}),s.get("tributes",{}),s.get("reports",{}),peoples,
+		int(GameState.elapsed_days),Ledger.revision,Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),T.color_mode]))
 
 
 func refresh(force:=false)->void:
@@ -96,15 +119,40 @@ func refresh(force:=false)->void:
 	waited=0.0
 	built_msec=Time.get_ticks_msec()
 	signature=next
-	_build_summary()
-	_build_peoples()
-	_build_others()
+	theme=T.control_theme()
+	feedback.add_theme_color_override("font_color",T.GOLD_TEXT)
+	var kept_sections:Array[Dictionary]=[]
+	for item:Dictionary in visual_sections:
+		if not is_instance_valid(item.get("panel")):continue
+		var panel:=item.panel as PanelContainer
+		if not is_instance_valid(panel) or not panel.is_inside_tree():continue
+		kept_sections.append(item)
+		var skin:=_skin(T.PAPER_RAISED,T.RULE,18,0)
+		if bool(item.hero):skin.border_width_top=3;skin.border_color=T.GOLD
+		panel.add_theme_stylebox_override("panel",skin)
+		(item.kicker as Label).add_theme_color_override("font_color",T.GOLD_TEXT)
+	visual_sections=kept_sections
+	var peoples_kicker:=get_node_or_null("PeoplesHeading") as Label
+	if peoples_kicker!=null:peoples_kicker.add_theme_color_override("font_color",T.INK_MUTED)
+	var next_summary:=str(hash([_known_rows(),Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),Ledger.peek().get("tributes",{}),T.color_mode]))
+	if force or next_summary!=summary_signature:
+		summary_signature=next_summary
+		_build_summary()
+	_build_peoples(force)
+	var state:=Ledger.peek()
+	var next_others:=str(hash([state.get("pairs",{}),state.get("stances",{}),_known_rows(),T.color_mode]))
+	if force or next_others!=others_signature:
+		others_signature=next_others
+		_build_others()
+	_responsive()
 
 
 func _in_use(waited_seconds:float)->bool:
 	if not is_visible_in_tree():return false
 	for node in find_children("*","",true,false):
 		if node is MenuButton and (node as MenuButton).get_popup().visible:return true
+	var focused:=get_viewport().gui_get_focus_owner()
+	if focused!=null and is_ancestor_of(focused) and Input.is_action_pressed("ui_accept"):return true
 	if not get_global_rect().has_point(get_global_mouse_position()):return false
 	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or waited_seconds<HOVER_HOLD_SECONDS
 
@@ -113,37 +161,38 @@ func _in_use(waited_seconds:float)->bool:
 
 func _build_summary()->void:
 	_clear(summary_box)
-	var panel:=_panel(summary_box,"Summary")
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
-	var partners:=Ledger.partners("player").filter(func(row:Dictionary)->bool:return float(row.value)>=Ledger.PARTNER_FLOOR)
+	var top:=_grid(summary_box,"TradeOverview",2,720)
+	var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.add_theme_constant_override("separation",6);top.add_child(reading)
+	var spare:=_answer("%s goods" % EraWords.grouped(roundi(Goods.spare())),48);spare.name="GoodsToTrade";reading.add_child(spare)
+	spare.tooltip_text="Goods beyond household use and workshop reserves, available to buy what other peoples can spare. This is the same balance used by Buy with goods."
+	reading.add_child(_line("available to trade or give",14,T.INK_MUTED,true))
+	var unit:=Ledger.purse_unit("player")
+	if unit!="":
+		var money:=_line("%s %s to pay with" % [EraWords.grouped(roundi(Ledger.purse_balance("player"))),unit],20,T.GOLD_TEXT,true);money.name="TradePurse";reading.add_child(money)
+	var partners:=0
 	var sent:=0.0;var came:=0.0
-	for row:Dictionary in Ledger.partners("player"):
+	for row:Dictionary in _known_rows():
+		if int(row.contact)<2:continue
 		sent+=Ledger.flow_value("player",String(row.id))
 		came+=Ledger.flow_value(String(row.id),"player")
-	# The answer first: whom we trade with and how much passes a season.
-	var answer:=_line("No goods pass between us and any people yet" if partners.is_empty() else "%d trading %s: %s sent, %s brought in a season" % [partners.size(),"partner" if partners.size()==1 else "partners",EraWords.grouped(roundi(sent*3.0)),EraWords.grouped(roundi(came*3.0))],17,T.INK,true)
-	answer.name="TradeAnswer";answer.add_theme_font_override("font",T.font("ui_strong"))
-	answer.tooltip_text="Worth of goods, a season. Gifts and barter settle each season; silver and coin each month."
-	column.add_child(answer)
-	# What we can trade and pay with, on one small line.
-	var means:PackedStringArray=["%s goods to trade" % EraWords.grouped(roundi(Goods.spare()))]
-	var unit:=Ledger.purse_unit("player")
-	# What we can pay other peoples with now (trade_ledger.pay moves no more).
-	if unit!="":means.append("%s %s to pay with" % [EraWords.grouped(roundi(Ledger.purse_balance("player"))),unit])
+		if float(row.value)>=Ledger.PARTNER_FLOOR:partners+=1
+	var answer:=_line("No trade recorded yet" if partners==0 else "%d recent trading %s" % [partners,"partner" if partners==1 else "partners"],17,T.INK,true)
+	answer.name="TradeAnswer";reading.add_child(answer)
 	var tribute_in:=0.0
 	for c:Dictionary in CivilizationSystem.civilizations:
 		var t:=Stances.tribute(String(c.get("id","")),"player")
 		if not t.is_empty():tribute_in+=float(t.value)
-	if tribute_in>0.0:means.append("%s tribute a season" % EraWords.grouped(roundi(tribute_in)))
-	var spare:=_line(" · ".join(means)+".",13,T.INK_MUTED,true);spare.name="GoodsToTrade"
-	spare.tooltip_text="Goods beyond what the homes use: they buy what other peoples have to spare, arms, and families who come to work. Makers make about %s a day.\nArms beyond what the watch lacks can be traded too; they are counted on the Production screen, under Military." % str(snappedf(float((GameState.civilian_goods.get("report",{}) as Dictionary).get("made",0.0)),0.1))
-	column.add_child(spare)
+	if tribute_in>0.0:reading.add_child(_line("Tribute worth %s a season" % EraWords.grouped(roundi(tribute_in)),14,T.GOLD_TEXT,true))
+	var exchange:=VBoxContainer.new();exchange.size_flags_horizontal=Control.SIZE_EXPAND_FILL;exchange.add_theme_constant_override("separation",4);top.add_child(exchange)
+	exchange.add_child(_line("RECENT PACE · WORTH A SEASON",12,T.GOLD_TEXT,true))
+	var chart:=Graphics.new();chart.name="FlowTotals";chart.values=[sent*3.0,came*3.0];exchange.add_child(chart)
+	chart.tooltip_text="Smoothed monthly trade values, expressed as a seasonal pace. Each direction uses the sender's own prices; the figures are trade value, not goods in store, coin, or profit."
+	exchange.add_child(_line("Each sender's prices · both bars share one scale",12,T.INK_MUTED,true))
 
 
 # --- One row per people ---------------------------------------------------------
 
-func _build_peoples()->void:
-	_clear(peoples_box)
+func _known_rows()->Array:
 	var rows:Array=[]
 	for c:Dictionary in CivilizationSystem.civilizations:
 		var id:=String(c.get("id",""))
@@ -151,13 +200,42 @@ func _build_peoples()->void:
 		var contact:=int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))
 		if contact<1:continue
 		var value:=Ledger.flow_value("player",id)+Ledger.flow_value(id,"player")
-		rows.append({"id":id,"contact":contact,"value":value,"name":String(c.get("name",id))})
+		rows.append({"id":id,"contact":contact,"value":value,"name":String(c.get("name",id)),"sent":Ledger.flow_value("player",id),"received":Ledger.flow_value(id,"player")})
 	rows.sort_custom(func(x:Dictionary,y:Dictionary)->bool: return int(x.contact)>int(y.contact) or (int(x.contact)==int(y.contact) and (float(x.value)>float(y.value) or (float(x.value)==float(y.value) and String(x.name)<String(y.name)))))
+	return rows
+
+func _build_peoples(force:=false)->void:
+	var rows:=_known_rows()
 	if rows.is_empty():
-		var calm:=_panel(peoples_box,"None")
-		calm.add_child(_line("We have met no other people yet.",14,T.INK_MUTED,true))
+		if force or peoples_box.get_node_or_null("None")==null:
+			_clear(peoples_box);people_signatures.clear()
+			var calm:=_visual_section("No trading contacts",peoples_box,"None","trade")
+			calm.add_child(_line("We have met no other people yet.",16,T.INK_MUTED,true))
 		return
-	for row:Dictionary in rows:peoples_box.add_child(_people_row(String(row.id),int(row.contact)))
+	var keep:Array[String]=[]
+	var state:=Ledger.peek()
+	for row:Dictionary in rows:
+		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
+		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{})]
+		if int(row.contact)>=2:
+			details.append_array([Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
+				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
+				state.get("answers",{}),state.get("tributes",{}),Ledger.revision,int(GameState.elapsed_days),Goods.spare(),Ledger.purse_balance("player")])
+		var next:=str(hash(details))
+		var old:=peoples_box.get_node_or_null(NodePath(node_name))
+		if force or old==null or next!=String(people_signatures.get(id,"")):
+			var focused:=get_viewport().gui_get_focus_owner()
+			var focus_name:=String(focused.name) if focused!=null and old!=null and old.is_ancestor_of(focused) else ""
+			if old!=null:peoples_box.remove_child(old);old.queue_free()
+			old=_people_row(id,int(row.contact));peoples_box.add_child(old);people_signatures[id]=next
+			if not focus_name.is_empty():
+				var replacement:=old.find_child(focus_name,true,false) as Control
+				if replacement!=null:replacement.grab_focus.call_deferred()
+		peoples_box.move_child(old,keep.size()-1)
+	for child in peoples_box.get_children():
+		if not String(child.name) in keep:peoples_box.remove_child(child);child.queue_free()
+	for id:String in people_signatures.keys():
+		if not "People_"+id in keep:people_signatures.erase(id)
 
 
 func _people_row(civ_id:String,contact:int)->Control:
@@ -168,41 +246,47 @@ func _people_row(civ_id:String,contact:int)->Control:
 	if String(ours.get("id","free")) in Stances.COERCIVE or String(theirs.get("id","free")) in Stances.COERCIVE:tone=T.AMBER
 	if "embargo" in [String(ours.get("id","")),String(theirs.get("id",""))]:tone=T.RED
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,tone,12,3))
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
+	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,tone,18,3))
+	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",12);panel.add_child(column)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);column.add_child(head)
-	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(36,36);head.add_child(emblem)
+	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(48,48);head.add_child(emblem)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(words)
-	var title:=Label.new();title.name="Name";title.text=name;T.text(title,"voice",T.INK);words.add_child(title)
+	var title:=_answer(name,26);title.name="Name";title.tooltip_text=name;words.add_child(title)
 	var p:=Ledger.pair("player",civ_id)
 	var subtitle:="Known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "Met; no goods have passed yet")
 	if not p.is_empty() and Ledger.blocked("player",civ_id)!="":subtitle=_blocked_words(Ledger.blocked("player",civ_id))
-	words.add_child(_line(subtitle,13,T.INK_MUTED))
-	var bar:=FlowBar.new();bar.name="Flows";bar.out_value=Ledger.flow_value("player",civ_id);bar.in_value=Ledger.flow_value(civ_id,"player");bar.custom_minimum_size=Vector2(180,22)
-	bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	bar.tooltip_text="Worth a month: we send %s, they send %s (each side's own prices)." % [EraWords.grouped(roundi(bar.out_value)),EraWords.grouped(roundi(bar.in_value))]
-	head.add_child(bar)
+	words.add_child(_line(subtitle,14,T.RED_TEXT if not p.is_empty() and Ledger.blocked("player",civ_id)!="" else T.INK_MUTED,true))
 	if contact<2:return panel
-	column.add_child(_flows("We send",Words.flow_items("player",civ_id),String(p.get("form","gift"))))
-	column.add_child(_flows("They send",Words.flow_items(civ_id,"player"),String(p.get("form","gift"))))
-	for pair_:Array in [[civ_id,"player"],["player",civ_id]]:
-		var lean:=Words.lean_label(String(pair_[0]),String(pair_[1]))
-		if lean=="":continue
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);column.add_child(line)
-		var l1:=_line(lean,13,T.INK);l1.name="Lean";line.add_child(l1)
-		var lasts:=Words.lasts_label(String(pair_[0]),String(pair_[1]))
-		if lasts!="":line.add_child(_line("· "+lasts,13,T.INK_MUTED))
-		line.tooltip_text=Words.leaning_line(String(pair_[0]),String(pair_[1]))
+	var form:=String(p.get("form","gift"))
+	var overview:=_grid(column,"PartnerExchange",2,720)
+	var chart_box:=VBoxContainer.new();chart_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(chart_box)
+	chart_box.add_child(_line("RECENT PACE · WORTH "+Words.period_word(form).to_upper(),12,T.GOLD_TEXT,true))
+	var bar:=Graphics.new();bar.name="Flows";bar.values=[Words.per_period(Ledger.flow_value("player",civ_id),form),Words.per_period(Ledger.flow_value(civ_id,"player"),form)];chart_box.add_child(bar)
+	bar.tooltip_text="Recent trading pace at each sender's own prices. These are smoothed values, so blocked routes can retain readings from earlier trade. Both bars share one scale."
+	chart_box.add_child(_line("Each sender's prices",12,T.INK_MUTED,true))
+	var goods:=VBoxContainer.new();goods.size_flags_horizontal=Control.SIZE_EXPAND_FILL;goods.add_theme_constant_override("separation",10);overview.add_child(goods)
+	goods.add_child(_flows("We send",Words.flow_items("player",civ_id),form))
+	goods.add_child(_flows("They send",Words.flow_items(civ_id,"player"),form))
+	var needs:=_grid(column,"Dependence",2,640)
+	for pair_:Array in [["player",civ_id],[civ_id,"player"]]:
+		var owner:=String(pair_[0]);var from:=String(pair_[1])
+		var need:=Ledger.most_needed(owner,from)
+		if need.is_empty() or float(need.get("share",0))<0.05:continue
+		needs.add_child(_dependence(owner,from,need))
+	if needs.get_child_count()==0:needs.visible=false
 	var theirs_words:=Words.theirs_label(civ_id)
 	if theirs_words!="":
-		var against:=_line(theirs_words,13,T.RED_TEXT if String(theirs.get("id","")) in Stances.COERCIVE else T.GREEN_TEXT);against.name="Theirs";column.add_child(against)
+		var against:=_line(theirs_words,14,T.RED_TEXT if String(theirs.get("id","")) in Stances.COERCIVE else T.GREEN_TEXT,true);against.name="Theirs";column.add_child(against)
 	var tribute:=Words.tribute_label(civ_id)
-	if tribute!="":column.add_child(_line(tribute,13,T.GOLD_TEXT))
+	if tribute!="":column.add_child(_line(tribute,14,T.GOLD_TEXT,true))
 	var owed:=Words.owed_label(civ_id)
 	if owed!="":
-		var debt:=_line(owed,13,T.INK_MUTED);debt.name="Owed"
+		var debt:=_line(owed,13,T.INK_MUTED,true);debt.name="Owed"
 		debt.tooltip_text="Gifts not yet returned. A people that owes us gives way more readily: up to 1 in 10 on its answer."
 		column.add_child(debt)
+	column.add_child(HSeparator.new())
+	column.add_child(_line("OUR TERMS",12,T.GOLD_TEXT,true))
 	column.add_child(_stance_buttons(civ_id,ours))
 	var buy:=_buy_menu(civ_id)
 	if buy!=null:column.add_child(buy)
@@ -210,7 +294,7 @@ func _people_row(civ_id:String,contact:int)->Control:
 	if odds_row!=null:column.add_child(odds_row)
 	var last:=Words.answer_label("player",civ_id)
 	if last!="":
-		var said:=_line(last,13,T.INK_MUTED);said.name="LastWord";said.tooltip_text=Words.answer_line("player",civ_id);column.add_child(said)
+		var said:=_line(last,13,T.INK_MUTED,true);said.name="LastWord";said.tooltip_text=Words.answer_line("player",civ_id);column.add_child(said)
 	return panel
 
 
@@ -224,18 +308,43 @@ func _blocked_words(why:String)->String:
 
 ## "We send ▸ [mark] 12 flint · [mark] 30 food · a season".
 func _flows(lead:String,items:Array,form:String)->Control:
-	var row:=HBoxContainer.new();row.name=lead.replace(" ","");row.add_theme_constant_override("separation",8)
-	var label:=_line(lead,13,T.INK_MUTED);label.custom_minimum_size=Vector2(78,0);row.add_child(label)
+	var row:=VBoxContainer.new();row.name=lead.replace(" ","");row.add_theme_constant_override("separation",6)
+	row.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	row.add_child(_line(lead.to_upper()+" · "+Words.period_word(form),12,T.GOLD_TEXT if lead=="We send" else T.TEAL_TEXT,true))
 	if items.is_empty():
-		row.add_child(_line("nothing yet",13,T.INK_MUTED))
+		row.add_child(_line("Nothing recorded yet",14,T.INK_MUTED,true))
 		return row
+	var goods:=HFlowContainer.new();goods.name="Goods";goods.add_theme_constant_override("h_separation",12);goods.add_theme_constant_override("v_separation",8);row.add_child(goods)
 	for item:Array in items:
 		var good:=String(item[0])
-		var mark:=TextureRect.new();mark.texture=Icons.texture_for(good);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.custom_minimum_size=Vector2(20,20)
-		mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(mark)
-		row.add_child(_line(Words.amount(float(item[1]),good),13,T.INK))
-	row.add_child(_line(Words.period_word(form),13,T.INK_MUTED))
+		var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",8);chip.set_meta("good",good);chip.set_meta("amount",float(item[1]));goods.add_child(chip)
+		chip.tooltip_text="%s %s, at the recent trading pace." % [Words.amount(float(item[1]),good),Words.period_word(form)]
+		var mark:=TextureRect.new()
+		var material:=MaterialArt.material(good)
+		mark.texture=MaterialArt.texture(material) if material>=0 else Icons.texture_for(good)
+		mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.custom_minimum_size=Vector2(42,42)
+		mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(mark)
+		var words:=VBoxContainer.new();words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(words)
+		words.add_child(_answer(Words.qty(float(item[1])),22))
+		words.add_child(_line("fighters armed" if good=="Arms" else Words.good_word(good),12,T.INK_MUTED))
 	return row
+
+func _dependence(owner:String,from:String,need:Dictionary)->Control:
+	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	panel.name="OurDependence" if owner=="player" else "TheirDependence"
+	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,10,0))
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);panel.add_child(column)
+	column.add_child(_line("Our supply from them" if owner=="player" else "Their supply from us",12,T.INK_MUTED,true))
+	var share:=clampf(float(need.share),0.0,1.0)
+	var value:=_answer("%d%% of %s" % [roundi(share*100.0),Words.good_word(String(need.good))],22);value.name="Lean";column.add_child(value)
+	var meter:=ProgressBar.new();meter.name="SupplyShare";meter.min_value=0;meter.max_value=100;meter.value=share*100.0;meter.show_percentage=false;meter.custom_minimum_size=Vector2(0,6)
+	meter.add_theme_stylebox_override("background",_skin(Color(T.RULE,0.24),Color.TRANSPARENT,0,0))
+	meter.add_theme_stylebox_override("fill",_skin(T.TEAL if owner=="player" else T.GOLD,Color.TRANSPARENT,0,0));column.add_child(meter)
+	var days:=float(need.get("days",-1))
+	var duration:="No shortage without this supply" if days<0 else "%s without this supply" % EraWords.days(days)
+	column.add_child(_line(duration,12,T.INK_MUTED,true))
+	panel.tooltip_text=Words.leaning_line(owner,from)
+	return panel
 
 
 ## The stance buttons: the one in force pressed; the pointer tells what each
@@ -247,7 +356,7 @@ func _stance_buttons(civ_id:String,ours:Dictionary)->Control:
 		if id=="squeeze":
 			row.add_child(_squeeze_button(civ_id,chosen=="squeeze",String(ours.get("good",""))))
 			continue
-		var button:=Button.new();button.name="Stance_%s" % id;button.text=String(Words.LABELS[id]);button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+		var button:=Button.new();button.name="Stance_%s" % id;button.text=String(Words.LABELS[id]);button.toggle_mode=true;_style_action(button)
 		button.set_pressed_no_signal(chosen==id)
 		button.tooltip_text=Words.tip(id,"player",civ_id)
 		button.pressed.connect(func()->void:_choose(civ_id,id,""))
@@ -256,7 +365,7 @@ func _stance_buttons(civ_id:String,ours:Dictionary)->Control:
 
 
 func _squeeze_button(civ_id:String,chosen:bool,good_now:String)->Control:
-	var pick:=MenuButton.new();pick.name="Stance_squeeze";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
+	var pick:=MenuButton.new();pick.name="Stance_squeeze";pick.flat=false;_style_action(pick)
 	pick.text=("Squeeze %s ▾" % Words.good_word(good_now)) if chosen and good_now!="" else "Squeeze ▾"
 	if chosen:pick.add_theme_stylebox_override("normal",T.button_pressed_style())
 	var goods:=_squeeze_goods(civ_id)
@@ -292,7 +401,7 @@ func _squeeze_goods(civ_id:String)->Array:
 func _buy_menu(civ_id:String)->Control:
 	# The terms are read once a day for each people (trade_ledger.gd deal_offers).
 	var offers:=Ledger.deal_offers("player",civ_id)
-	var pick:=MenuButton.new();pick.name="BuyWithGoods";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
+	var pick:=MenuButton.new();pick.name="BuyWithGoods";pick.flat=false;_style_action(pick)
 	pick.text="Buy with goods ▾"
 	if offers.is_empty():
 		pick.disabled=true;pick.tooltip_text="They have nothing to spare for our goods."
@@ -306,7 +415,7 @@ func _buy_menu(civ_id:String)->Control:
 		else:
 			popup.add_item(_short("%s · %s" % [_deal_name(what),String(t.why)]),i)
 			popup.set_item_disabled(popup.get_item_count()-1,true)
-		popup.set_item_tooltip(popup.get_item_count()-1,"%s goods a %s at their own prices. We have %s goods to spare." % [str(snappedf(float(t.each),0.1)),"head" if what in Ledger.PEOPLE else ("set" if what==Ledger.ARMS else "load"),str(roundi(float(t.spare)))])
+		popup.set_item_tooltip(popup.get_item_count()-1,"%s\n%s\nWith %s: %s goods a %s at their prices. We have %s goods to spare." % [String(t.get("words","")),String(t.get("why","")),Ledger.name_of(civ_id),str(snappedf(float(t.each),0.1)),"head" if what in Ledger.PEOPLE else ("set" if what==Ledger.ARMS else "load"),str(roundi(float(t.spare)))])
 	pick.tooltip_text="Our goods buy what they have to spare, at their prices."
 	popup.id_pressed.connect(func(index:int)->void:_deal(civ_id,terms[index] as Dictionary))
 	return pick
@@ -386,7 +495,7 @@ func _build_others()->void:
 	if rows.is_empty():
 		others_box.add_child(_line("We know of no trade between other peoples.",13,T.INK_MUTED,true))
 		return
-	for row:Dictionary in rows.slice(0,6):others_box.add_child(_line(String(row.line),13,T.INK))
+	for row:Dictionary in rows.slice(0,6):others_box.add_child(_line(String(row.line),14,T.INK,true))
 
 
 func _met(id:String)->bool:
@@ -402,9 +511,57 @@ func _say(text:String)->void:
 
 
 func _section(title:String)->VBoxContainer:
-	var kicker:=_line(title.to_upper(),13,T.INK_MUTED);kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(kicker)
+	var kicker:=_line(title.to_upper(),13,T.INK_MUTED,true);kicker.name="PeoplesHeading";kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(kicker)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);add_child(box)
 	return box
+
+func _visual_section(title:String,parent:Node,node_name:String,icon:String,hero:=false)->VBoxContainer:
+	var panel:=PanelContainer.new();panel.name=node_name;panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var style:=_skin(T.PAPER_RAISED,T.RULE,18,0)
+	if hero:style.border_width_top=3;style.border_color=T.GOLD
+	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
+	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",8);column.add_child(header)
+	if not icon.is_empty():
+		var mark:=Emblem.new(icon);mark.custom_minimum_size=Vector2(28,28);header.add_child(mark)
+	var kicker:=_line(title.to_upper(),12,T.GOLD_TEXT,true);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;header.add_child(kicker)
+	visual_sections.append({"panel":panel,"kicker":kicker,"hero":hero})
+	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",8);column.add_child(box)
+	return box
+
+func _grid(parent:Node,node_name:String,count:int,threshold:float)->GridContainer:
+	var grid:=GridContainer.new();grid.name=node_name;grid.columns=1;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation",18);grid.add_theme_constant_override("v_separation",12)
+	grid.set_meta("wide_columns",count);grid.set_meta("wide_threshold",threshold);parent.add_child(grid)
+	responsive_grids.append(grid)
+	return grid
+
+func _responsive()->void:
+	var available:=size.x
+	var ancestor:=get_parent()
+	while ancestor!=null:
+		if ancestor is ScrollContainer:
+			if ancestor.size.x>0:available=minf(available,maxf(0.0,ancestor.size.x-24.0))
+			break
+		ancestor=ancestor.get_parent()
+	var retained:Array[GridContainer]=[]
+	for grid:GridContainer in responsive_grids:
+		if not is_instance_valid(grid) or not grid.is_inside_tree():continue
+		retained.append(grid)
+		var count:=int(grid.get_meta("wide_columns")) if available>=float(grid.get_meta("wide_threshold")) else 1
+		if grid.columns!=count:grid.columns=count
+	responsive_grids=retained
+
+func _style_action(button:Button)->void:
+	button.focus_mode=Control.FOCUS_ALL
+	button.custom_minimum_size.y=32
+	button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	button.add_theme_font_size_override("font_size",14)
+
+func _answer(text:String,size:=30)->Label:
+	var label:=_line(text,size,T.INK,true)
+	label.add_theme_font_override("font",T.font("voice"))
+	return label
 
 
 func _panel(parent:Node,name_hint:String)->PanelContainer:
