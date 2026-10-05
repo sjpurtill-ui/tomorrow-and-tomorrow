@@ -68,3 +68,11 @@ func test_legacy_identity_preserves_specialized_forms_and_materials()->void:
 	assert_str(Design.describe({"id":"kiln_court"}).form).is_equal("kilns")
 	assert_str(Design.describe({"id":"great_hall"}).material).is_equal("timber")
 	assert_str(Design.describe({"id":"flood_terraces"}).material).is_equal("earth")
+
+func test_ring_phases_follow_recorded_joinery_and_material()->void:
+	var early:=Design.describe({"id":Concept.make_id("ring","give_thanks","grand","timber",0,"posts")})
+	assert_str(early.title).contains("posts")
+	assert_str(early.construction_labels[1]).is_equal("Raising posts")
+	assert_str(early.construction_labels[2]).is_equal("Finishing the circle")
+	var joined:=Design.describe({"id":Concept.make_id("ring","give_thanks","grand","stone",1,"joined")})
+	assert_str(joined.construction_labels[2]).is_equal("Setting lintels")

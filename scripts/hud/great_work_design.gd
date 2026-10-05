@@ -87,6 +87,11 @@ static func describe(work:Dictionary)->Dictionary:
 	var ambition:=String(parsed.get("ambition",definition.get("ambition",work.get("ambition","grand"))))
 	if not SCALES.has(ambition):ambition="grand"
 	var tier:=clampi(int(parsed.get("tier",definition.get("tier",0))),0,5)
+	if valid and not legacy and form=="ring":
+		if material=="timber":
+			title="The circle of standing posts"
+			phases[1]="Raising posts"
+		if tier==0:phases[2]="Finishing the circle"
 	return {"valid":valid,"id":id,"design_id":("legacy:"+id if legacy else "form:"+form) if valid else "",
 		"legacy":legacy,"form":form,"material":material,"purpose":purpose,"ambition":ambition,"tier":tier,
 		"seed":absi(id.hash()),"scale":float(SCALES[ambition]),"title":title,"construction_labels":phases,
