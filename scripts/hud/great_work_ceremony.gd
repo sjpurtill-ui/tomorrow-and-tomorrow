@@ -11,6 +11,7 @@ signal closed(work_id:String)
 
 const Bridge:=preload("res://scripts/great_works_audience.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
+const CeremonyStage:=preload("res://scripts/hud/great_work_ceremony_stage.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
@@ -54,6 +55,11 @@ var envoy_cards:Array[Control]=[]
 var intro_tweens:Array[Tween]=[]
 var _serif:Font
 var _italic:Font
+var _middle:BoxContainer
+var _name_row:BoxContainer
+var _result_row:BoxContainer
+var _details_scroll:ScrollContainer
+var _closing:=false
 
 ## Opens the ceremony on its own canvas layer; returns the ceremony control.
 static func open(host:Node,terrain_node:Node,voice_node:Node,entry:Dictionary)->Control:
@@ -77,6 +83,7 @@ func _ready()->void:
 	record=Bridge.api_dict("site",[city_id,work_id])
 	allure_before=float(Bridge.api_dict("allure_contribution",["player"]).get("value",0.0))
 	renown_before=Bridge.api_dict("renown",["player"])
+	_prepare_voice_context()
 	backdrop=Backdrop.new();backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(backdrop)
 	backdrop.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed:skip_reveal())
@@ -87,13 +94,19 @@ func _ready()->void:
 	_theatre()
 
 func _exit_tree()->void:
+	if is_instance_valid(voice) and voice.is_connected("ceremony_ready",_on_voice):voice.disconnect("ceremony_ready",_on_voice)
 	pause.release()
 
 func _fit()->void:
 	if not is_instance_valid(stage):return
 	var view:=get_viewport().get_visible_rect().size
-	stage.size=Vector2(minf(1500,view.x-40),minf(900,view.y-30))
+	stage.size=Vector2(minf(1500,view.x-20),minf(900,view.y-20))
 	stage.position=((view-stage.size)*.5).round()
+	if _middle!=null:_middle.vertical=view.x<760
+	if _name_row!=null:_name_row.vertical=view.x<760
+	if _details_scroll!=null:_details_scroll.custom_minimum_size=Vector2(240 if view.x>=760 else 0,65 if view.x<760 else 0)
+	if _result_row!=null:_result_row.vertical=view.x<850
+	if is_instance_valid(plate):plate.custom_minimum_size.y=clampf(view.y*.4,210,360)
 
 # ---------------------------------------------------------------- building
 
@@ -131,54 +144,59 @@ func _lore()->String:
 
 func _build()->void:
 	stage=PanelContainer.new();stage.name="CeremonyStage"
-	stage.add_theme_stylebox_override("panel",P.sheet_style(24));add_child(stage)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);stage.add_child(column)
+	stage.add_theme_stylebox_override("panel",P.sheet_style(16));add_child(stage)
+	var shell:=VBoxContainer.new();shell.add_theme_constant_override("separation",8);stage.add_child(shell)
+	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);shell.add_child(controls)
+	var heading:=_label(String(CeremonyStage.ritual_spec(GameState.known_discoveries,preload("res://scripts/hud/court_presentation.gd").for_owner()).label),14,Tokens.INK_MUTED);heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_child(heading)
+	var skip:=P.button(controls,"Skip reveal",skip_reveal);skip.name="SkipCeremony";skip.autowrap_mode=TextServer.AUTOWRAP_OFF;skip.size_flags_horizontal=Control.SIZE_SHRINK_END
+	var leave:=P.button(controls,"Close",close);leave.name="CloseCeremonyTop";leave.autowrap_mode=TextServer.AUTOWRAP_OFF;leave.size_flags_horizontal=Control.SIZE_SHRINK_END
+	var scroll:=ScrollContainer.new();_details_scroll=scroll;scroll.name="CeremonyScroll";scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",10);scroll.add_child(column)
 	var cream:=Tokens.INK;var gold:=Tokens.GOLD
 	var eyebrow:=_label("THE DEDICATION OF A GREAT WORK · %s" % String(ceremony.get("city_name",record.get("city_name",""))).to_upper(),12,Tokens.INK_MUTED,.18)
-	eyebrow.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(eyebrow)
-	title_label=_label(_title(),50,cream);title_label.name="CeremonyTitle";title_label.add_theme_font_override("font",DISPLAY_FONT)
-	title_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(title_label)
-	var sub:=HBoxContainer.new();sub.alignment=BoxContainer.ALIGNMENT_CENTER;sub.add_theme_constant_override("separation",14);column.add_child(sub)
-	var purpose:=_label(_purpose_line(),17,Tokens.BODY);purpose.add_theme_font_override("font",_italic);sub.add_child(purpose)
+	eyebrow.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(eyebrow)
+	title_label=_label(_title(),26,cream);title_label.name="CeremonyTitle";title_label.add_theme_font_override("font",DISPLAY_FONT)
+	title_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;shell.add_child(title_label)
+	var sub:=VBoxContainer.new();sub.add_theme_constant_override("separation",4);column.add_child(sub)
+	var purpose:=_label(_purpose_line(),16,Tokens.BODY);purpose.add_theme_font_override("font",_italic);purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;purpose.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;sub.add_child(purpose)
 	var badge:=PanelContainer.new();var badge_style:=Tokens.flat(Color(gold,.16),gold,1,12,0);badge_style.content_margin_left=12;badge_style.content_margin_right=12;badge_style.content_margin_top=2;badge_style.content_margin_bottom=3
-	badge.add_theme_stylebox_override("panel",badge_style);badge.name="OutcomeBadge";sub.add_child(badge)
+	badge.add_theme_stylebox_override("panel",badge_style);badge.name="OutcomeBadge";badge.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;sub.add_child(badge)
 	badge.add_child(_label(String(OUTCOME_WORDS[_outcome()]),14,Tokens.GOLD_TEXT))
-	column.add_child(Flourish.new())
-	var middle:=HBoxContainer.new();middle.size_flags_vertical=Control.SIZE_EXPAND_FILL;middle.add_theme_constant_override("separation",26);column.add_child(middle)
+	var middle:=BoxContainer.new();_middle=middle;middle.size_flags_vertical=Control.SIZE_EXPAND_FILL;middle.add_theme_constant_override("separation",14);shell.add_child(middle)
 	# The work itself and its lore.
-	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.size_flags_stretch_ratio=1.15;left.add_theme_constant_override("separation",10);middle.add_child(left)
+	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.size_flags_stretch_ratio=2.6;left.add_theme_constant_override("separation",10);middle.add_child(left)
 	var frame:=PanelContainer.new();frame.name="PlateFrame";frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	var frame_style:=Tokens.flat(Tokens.PAPER_RAISED,gold,1,4,6);frame_style.shadow_color=Color(1,.8,.35,.25);frame_style.shadow_size=18
 	frame.add_theme_stylebox_override("panel",frame_style);left.add_child(frame)
 	var work_view:=record.duplicate(true)
 	work_view["work_id"]=work_id
-	work_view["dedicated_day"]=0
 	if not _concept().is_empty():work_view.merge(_concept(),false)
-	plate=Plate.make(work_view,340);plate.set("night",true);plate.name="WorkPlate";plate.size_flags_vertical=Control.SIZE_EXPAND_FILL;frame.add_child(plate)
+	plate=CeremonyStage.make(work_view,voice_ctx,340);plate.name="WorkPlate";plate.size_flags_horizontal=Control.SIZE_EXPAND_FILL;plate.size_flags_vertical=Control.SIZE_EXPAND_FILL;frame.add_child(plate)
 	var lore:=_label(_lore(),17,Tokens.BODY);lore.name="Lore";lore.add_theme_font_override("font",_italic);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	left.add_child(lore)
+	column.add_child(lore)
 	var architect:Dictionary=record.get("architect",{}) if record.get("architect") is Dictionary else {}
 	if not String(architect.get("name","")).is_empty():
 		var builder:=_label("Raised by the master builder %s%s" % [String(architect.name),(", in the %s style" % String(architect.get("style",""))) if not String(architect.get("style","")).is_empty() else ""],13,Tokens.INK_MUTED,.04)
-		builder.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;left.add_child(builder)
+		builder.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;builder.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(builder)
 	# The assembly: envoys with flags and gifts, then the speeches.
-	var right:=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",10);middle.add_child(right)
+	var right:=column;middle.add_child(scroll)
 	right.add_child(_label("THE ASSEMBLY",12,Tokens.INK_MUTED,.18))
 	assembly=VBoxContainer.new();assembly.name="Assembly";assembly.add_theme_constant_override("separation",6);right.add_child(assembly)
 	var attendees:Array=ceremony.get("attendees",[])
 	if attendees.is_empty():
-		var alone:=_label("No foreign envoys came. Your own people crowd the square instead.",14,Tokens.BODY);alone.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;alone.add_theme_font_override("font",_italic);assembly.add_child(alone)
+		var alone:=_label("No foreign envoys are recorded for this dedication.",14,Tokens.BODY);alone.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;alone.add_theme_font_override("font",_italic);assembly.add_child(alone)
 	for attendee in attendees:
 		if attendee is Dictionary:
 			var card:=_envoy_card(attendee)
 			assembly.add_child(card);envoy_cards.append(card)
 	right.add_child(_label("SPOKEN BEFORE THE CROWD",12,Tokens.INK_MUTED,.18))
 	speech_scroll=ScrollContainer.new();speech_scroll.name="Speeches";speech_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;speech_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	speech_scroll.custom_minimum_size.y=140
 	right.add_child(speech_scroll)
 	speeches=VBoxContainer.new();speeches.size_flags_horizontal=Control.SIZE_EXPAND_FILL;speeches.add_theme_constant_override("separation",9);speech_scroll.add_child(speeches)
 	# Naming, then the record.
-	naming_box=VBoxContainer.new();naming_box.name="Naming";naming_box.add_theme_constant_override("separation",8);column.add_child(naming_box)
-	var name_row:=HBoxContainer.new();name_row.add_theme_constant_override("separation",12);naming_box.add_child(name_row)
+	naming_box=VBoxContainer.new();naming_box.name="Naming";naming_box.add_theme_constant_override("separation",6);shell.add_child(naming_box)
+	var name_row:=BoxContainer.new();_name_row=name_row;name_row.add_theme_constant_override("separation",8);naming_box.add_child(name_row)
 	var ask:=_label("Name it for the ages",20,Tokens.INK);ask.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_row.add_child(ask)
 	name_input=LineEdit.new();name_input.name="NameInput";name_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_input.max_length=60;name_input.custom_minimum_size.y=46
 	name_input.add_theme_font_size_override("font_size",20);name_input.add_theme_font_override("font",_serif)
@@ -191,18 +209,20 @@ func _build()->void:
 	dedicate_button.tooltip_text="Uses the name you typed, or the first suggestion if the box is empty."
 	name_row.add_child(dedicate_button)
 	suggestion_row=HFlowContainer.new();suggestion_row.add_theme_constant_override("h_separation",8);naming_box.add_child(suggestion_row)
-	suggestion_row.add_child(_label("Or take a name the court suggests:",14,Tokens.INK_MUTED))
+	suggestion_row.add_child(_label("Suggested names:",13,Tokens.INK_MUTED))
 	for suggestion in suggestions:
 		# One press names and dedicates the work: no second step.
 		var chosen:=String(suggestion)
 		var chip:=P.button(null,chosen,func()->void:dedicate_with(chosen))
+		chip.autowrap_mode=TextServer.AUTOWRAP_OFF
 		chip.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;chip.focus_mode=Control.FOCUS_NONE;chip.add_theme_font_override("font",_italic)
 		chip.tooltip_text="Dedicate it as %s" % chosen
 		suggestion_row.add_child(chip)
 	var later:=P.button(null,"Name it later",Callable());later.name="Later";later.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	later.autowrap_mode=TextServer.AUTOWRAP_OFF
 	later.tooltip_text="Close the ceremony. If you never name it, the council dedicates it under the first suggestion."
 	later.pressed.connect(close);suggestion_row.add_child(later)
-	result_box=VBoxContainer.new();result_box.name="Result";result_box.visible=false;result_box.add_theme_constant_override("separation",8);column.add_child(result_box)
+	result_box=VBoxContainer.new();result_box.name="Result";result_box.visible=false;result_box.add_theme_constant_override("separation",8);shell.add_child(result_box)
 
 func _envoy_card(attendee:Dictionary)->Control:
 	var card:=PanelContainer.new();card.name="Envoy_"+String(attendee.get("civ_id",""))
@@ -213,7 +233,7 @@ func _envoy_card(attendee:Dictionary)->Control:
 	var flag:=TextureRect.new();flag.texture=Identity.foreign(String(attendee.get("civ_id",""))).texture;flag.custom_minimum_size=Vector2(42,48)
 	flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(flag)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);row.add_child(words)
-	var who:=_label(String(attendee.get("name","A foreign people")),17,Tokens.INK);who.add_theme_font_override("font",_serif);words.add_child(who)
+	var who:=_label(String(attendee.get("name","A foreign people")),17,Tokens.INK);who.add_theme_font_override("font",_serif);who.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(who)
 	var gift:Dictionary=attendee.get("gift",{}) if attendee.get("gift") is Dictionary else {}
 	if gift.is_empty() or float(gift.get("amount",0))<=0:
 		var plain:=_label("come in admiration, empty-handed",13,Tokens.INK_MUTED);plain.add_theme_font_override("font",_italic);words.add_child(plain)
@@ -254,7 +274,7 @@ func _theatre()->void:
 		delay+=.35
 	reveal_clock=-delay
 
-func _start_voice()->void:
+func _prepare_voice_context()->void:
 	var official:Dictionary=GovernmentPeopleSystem.officeholder("Steward")
 	if official.is_empty():
 		for key in ["Envoy","Scholar","Quartermaster"]:
@@ -262,6 +282,11 @@ func _start_voice()->void:
 			if not official.is_empty():break
 	voice_ctx={"key":work_id,"title":_title(),"lore":_lore(),"city_name":String(ceremony.get("city_name",record.get("city_name",""))),"outcome":_outcome(),"purpose":_purpose_line(),
 		"architect":(record.get("architect",{}) as Dictionary).duplicate() if record.get("architect") is Dictionary else {},"official":official,"attendees":(ceremony.get("attendees",[]) as Array).duplicate(true)}
+	var actual:Dictionary=HistoricalFigures.by_id(String((voice_ctx.architect as Dictionary).get("id","")))
+	if not actual.is_empty() and (String(actual.get("status","living"))=="dead" or int(actual.get("death_day",-1))>=0):voice_ctx.architect={}
+	voice_ctx["ritual"]=CeremonyStage.ritual_spec(GameState.known_discoveries,preload("res://scripts/hud/court_presentation.gd").for_owner())
+
+func _start_voice()->void:
 	if is_instance_valid(voice) and voice.has_method("ceremony_speeches"):
 		if not voice.is_connected("ceremony_ready",_on_voice):voice.connect("ceremony_ready",_on_voice)
 		voice.call("ceremony_speeches",voice_ctx)
@@ -279,7 +304,6 @@ func _on_voice(key:String,lines:Array)->void:
 
 func _process(delta:float)->void:
 	clock+=delta
-	_fit()
 	reveal_clock+=delta
 	if follow>0.0 and is_instance_valid(speech_scroll):
 		follow-=delta
@@ -300,8 +324,10 @@ func skip_reveal()->void:
 	if is_instance_valid(title_label):title_label.modulate.a=1.0;title_label.scale=Vector2.ONE
 	if is_instance_valid(plate):plate.modulate.a=1.0
 	for card in envoy_cards:card.modulate.a=1.0
+	if is_instance_valid(plate) and plate.has_method("settle"):plate.call("settle")
 
 func _add_speech(line:Dictionary,animate:bool)->void:
+	if is_instance_valid(plate) and plate.has_method("speak"):plate.call("speak",line,animate)
 	var role:=String(line.get("role","narrator"))
 	var text:=String(line.get("text",""))
 	var row:Control
@@ -318,7 +344,7 @@ func _add_speech(line:Dictionary,animate:bool)->void:
 			var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(line.get("person_id",0))) if int(line.get("person_id",0))>0 else {"name":String(line.get("speaker","")),"person_id":0}
 			face.add_child(Portrait.picture(person,40,46))
 		var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);box.add_child(words)
-		var who:=_label("%s  ·  %s" % [String(line.get("speaker","")),String(line.get("title",""))],13,Tokens.GOLD_TEXT,.04);words.add_child(who)
+		var who:=_label("%s  ·  %s" % [String(line.get("speaker","")),String(line.get("title",""))],13,Tokens.GOLD_TEXT,.04);who.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(who)
 		var said:=_label(text,17,Tokens.INK);said.add_theme_font_override("font",_serif);said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.name="SpeechText";words.add_child(said)
 	speeches.add_child(row)
 	if animate:
@@ -342,6 +368,7 @@ func dedicate_with(text:String)->Dictionary:
 	result=answer
 	skip_reveal()
 	_show_result(chosen)
+	if is_instance_valid(plate) and plate.has_method("dedication"):plate.call("dedication")
 	if is_instance_valid(voice) and voice.has_method("ceremony_named"):voice.call("ceremony_named",voice_ctx,chosen)
 	return result
 
@@ -356,7 +383,7 @@ func _show_result(chosen:String)->void:
 	var dedicated:=Bridge.api_dict("site",[city_id,work_id])
 	var spike:=float((dedicated.get("ceremony",{}) as Dictionary).get("allure",after-allure_before)) if dedicated.get("ceremony") is Dictionary else after-allure_before
 	result_box.visible=true
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",24);result_box.add_child(row)
+	var row:=BoxContainer.new();_result_row=row;row.vertical=get_viewport().get_visible_rect().size.x<850;row.add_theme_constant_override("separation",16);result_box.add_child(row)
 	var seal:=AllureBurst.new();seal.name="AllureBurst";seal.value=spike;seal.custom_minimum_size=Vector2(150,110);row.add_child(seal)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",4);row.add_child(words)
 	words.add_child(_label("SET DOWN IN THE CHRONICLE",12,Tokens.INK_MUTED,.18))
@@ -366,7 +393,7 @@ func _show_result(chosen:String)->void:
 		var received:=_label("Gifts received: "+"; ".join(PackedStringArray(gifts.map(func(g:Variant)->String:return String(g)))),14,Tokens.BODY);received.name="GiftsReceived";received.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(received)
 	var effect:=_label(dedication_words(spike,renown_before,Bridge.api_dict("renown",["player"])),14,Tokens.GOLD_TEXT)
 	effect.name="DedicationEffect";effect.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(effect)
-	var close_button:=P.button(null,"Let the feast begin",close,true);close_button.name="CloseCeremony";close_button.custom_minimum_size=Vector2(220,46)
+	var close_button:=P.button(null,"Return to the settlement",close,true);close_button.name="CloseCeremony";close_button.custom_minimum_size=Vector2(220,46)
 	close_button.size_flags_horizontal=Control.SIZE_SHRINK_END;close_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(close_button)
 
 ## What the dedication does, in the engine's numbers: its allure (fading over
@@ -384,7 +411,10 @@ static func dedication_words(spike:float,before:Dictionary,after:Dictionary)->St
 	return "Other peoples will talk of this dedication for %d years: it adds %.0f allure, fading to nothing by then. Now that is +%d to how alluring our culture is and +%d Splendor (our works give +%d and +%d in all)." % [years,spike,roundi(gain*100.0),roundi(maxf(0.0,now-then)*100.0),roundi(float(after.get("share",0.0))*100.0),roundi(now*100.0)]
 
 func close()->void:
-	if is_queued_for_deletion():return
+	if _closing or is_queued_for_deletion():return
+	_closing=true
+	if is_instance_valid(plate) and plate.has_method("settle"):plate.call("settle")
+	pause.release()
 	closed.emit(work_id)
 	var layer:=get_parent()
 	if layer is CanvasLayer:layer.queue_free()
@@ -403,6 +433,7 @@ class Backdrop extends Control:
 	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_STOP
 	func _process(delta:float)->void:
 		clock+=delta;queue_redraw()
+		if clock>=3.0:set_process(false)
 	func _draw()->void:
 		var r:=get_rect()
 		draw_rect(r,Color("0b0d12") if not HudTokens.is_light() else Color("1c160e"))
@@ -429,6 +460,7 @@ class AllureBurst extends Control:
 	var clock:=0.0
 	func _process(delta:float)->void:
 		clock+=delta;queue_redraw()
+		if clock>=3.0:set_process(false)
 	func _draw()->void:
 		var c:=size*.5;var r:=minf(size.x,size.y)*.42
 		var grow:=clampf(clock/.8,0,1)
