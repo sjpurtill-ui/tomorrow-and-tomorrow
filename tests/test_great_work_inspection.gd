@@ -50,6 +50,7 @@ func test_inspection_is_live_data_without_advancing_work()->void:
 	await _open()
 	assert_float(host.game_speed).is_equal(0.0)
 	assert_object(view.find_child("DetailModel",true,false)).is_not_null()
+	assert_str((view.find_child("Milestone1",true,false) as Label).text).contains("Raising stones")
 	assert_float(float(view._model_record({"progress":.32},record).fraction)).is_equal(.32)
 	view._refresh_live_work()
 	assert_dict(record).is_equal(before)

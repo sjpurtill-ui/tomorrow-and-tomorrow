@@ -14,6 +14,7 @@ const Bridge:=preload("res://scripts/great_works_audience.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
 const WorkView:=preload("res://scripts/hud/great_work_view.gd")
+const WorkDesign:=preload("res://scripts/hud/great_work_design.gd")
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
@@ -385,11 +386,13 @@ func _live_shape(item:Dictionary,site:Dictionary)->String:
 func _build_milestones(row:HFlowContainer,item:Dictionary)->void:
 	var stage:=String(item.get("stage","foundations"))
 	var state:=String(item.get("status",""))
+	var design:=WorkDesign.describe(item)
+	var labels:Array=design.construction_labels if bool(design.valid) else ["Foundations","Raising","Crowning","Standing"]
 	var active:=0 if stage=="foundations" else (1 if stage=="raising" else 2)
 	if state=="functioning":active=3
 	if state in ["ruined","abandoned","quarried"]:active=-1
 	for index in 4:
-		var text:=String(["01  Foundations","02  Raising","03  Crowning","04  Standing"][index])
+		var text:="%02d  %s" % [index+1,String(labels[index])]
 		var label:=Kit.label(row,text,13,T.GOLD_TEXT if index==active else T.TEXT_SOFT,false)
 		label.name="Milestone%d" % index
 		if index==active:label.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH,T.GOLD,1,3,5))
