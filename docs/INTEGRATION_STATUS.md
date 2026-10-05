@@ -1,3 +1,26 @@
+## October 4 — Approved Trade folio and persistent bar: INTEGRATED
+
+User approval covers the final rendered example at runtime `0bb4b393`.
+Integration `445c44fa5fe5aaaad8107877e23cdeec7ec95254` was pushed to origin/main,
+verified with a fresh remote query, then fast-forwarded into the canonical
+checkout. Canonical main and origin/main matched with zero ahead/behind.
+
+Trade now uses the illustrated parchment folio, the approved sidebar tools,
+Received-left / Sent-right centered balance bars, expandable existing trade
+actions, and live readings on the same persistent gray bar as speed controls.
+The shared frame applies across pages; future page-specific redesigns still
+require their own preview approval. No save or simulation authority changes.
+
+Validation: 630/630 private GPU checks, nine cases, both themes, three supported
+canvas widths, expanded menus and 41 captures. All 35 selected functional cases
+verified across reports 16 and 17, including the corrected active-page toggle
+fixture. No runtime changes followed approval. All 4,705 pre-existing local
+files retained their hashes after integration. Captures/caches remain local.
+
+Canonical player PID 31204 remained open with its original loaded session.
+The update is delivered on disk; the next normal launcher restart imports and
+loads it. No player or editor was stopped or a second game launched.
+
 ## October 4 — Great Works in construction and dedication: INTEGRATION VALIDATED
 
 Prepared on `codex/great-works-experience` from main `99841060`, with subsequent

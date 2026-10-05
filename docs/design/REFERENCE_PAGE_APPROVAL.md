@@ -1,6 +1,7 @@
 # Reference page — approved Trade design
 
-Status: APPROVED by the user on October 4, 2026. Integration checks complete.
+Status: APPROVED by the user on October 4, 2026, and INTEGRATED at `445c44fa`.
+Origin/main and the canonical checkout were verified synchronized afterward.
 
 The user rejected the first Trade implementation and the earlier Wealth
 interpretation because they did not reproduce the approved photo's composition

@@ -1,6 +1,7 @@
 # Trade visual acceptance
 
-Current status: user-approved October 4, 2026; integration validation complete.
+Current status: user-approved October 4, 2026; delivered to canonical main and
+origin/main at `445c44fa`, with matching verified hashes and zero ahead/behind.
 The held-prototype notes below document earlier checkpoints and are superseded
 by this approval. Future page redesigns retain the preview requirement.
 
