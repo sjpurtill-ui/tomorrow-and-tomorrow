@@ -4,7 +4,8 @@ extends Node
 ## Each mood has its own folder of pieces under assets/audio/score/<mood>/;
 ## dropping a piece into the folder adds it. A piece named "y500_..." plays
 ## only from game year 500 on, "y1-200_..." only in years 1 to 200 (years);
-## a piece with no years plays in every age. The mood is read from the world
+## a piece with no years plays in every age. Pieces in the "any" folder
+## belong to every mood. The mood is read from the world
 ## every few seconds (mood_now): calm peacetime while our people know of no
 ## other people, contact once another people has been met and all is at
 ## peace, war while the people are at war or a fight, a siege or a coming
@@ -20,6 +21,8 @@ extends Node
 const SCORE_DIR:="res://assets/audio/score/"
 const MOODS:=["calm","contact","war"]
 const DEFAULT_MOOD:="calm"
+## The folder whose pieces join every mood's.
+const ANY_MOOD:="any"
 ## Seconds from the start of one piece to the start of the next.
 const GAP_MIN:=480.0
 const GAP_MAX:=720.0
@@ -83,7 +86,9 @@ static func from_year(piece:String)->int:
 ## The pieces of a mood that belong to the game year `year`.
 static func pieces_for_year(of_mood:String,year:int)->PackedStringArray:
 	var out:PackedStringArray=[]
-	for piece:String in pieces(of_mood):
+	var every:=pieces(of_mood)
+	if of_mood!=ANY_MOOD:every.append_array(pieces(ANY_MOOD))
+	for piece:String in every:
 		var span:=years(piece)
 		if int(span[0])<=year and (int(span[1])==0 or year<=int(span[1])):out.append(piece)
 	return out
