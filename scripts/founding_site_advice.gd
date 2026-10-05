@@ -53,8 +53,8 @@ func _assess(position:Vector3)->Dictionary:
 	if nearest.is_empty() or distance>COLLECTION_LIMIT_KM:
 		result.merge({"title":"No usable water found","reason":"No known fresh water within the 6 km collection limit. Choose a marked site or scout further."},true)
 		if _known_open_water_near(position):
-			result["source_text"]="Open water nearby · fresh water unconfirmed"
-			result["reason"]="The nearby open water is not a confirmed drinking source. Find fresh water on dry land within 6 km before founding."
+			result["source_text"]="Open water nearby is the sea: salt, not fit to drink"
+			result["reason"]="The open water nearby is the sea, and it is salt. Find a river or stream on dry land within 6 km before founding."
 		return result
 	var ratio:=WorldSimulation.resources._household_surface_water_access_ratio(distance)
 	var nearby:=distance<=NEAR_WATER_KM

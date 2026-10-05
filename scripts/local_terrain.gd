@@ -13009,7 +13009,7 @@ func _convoy_water_readout()->String:
 	if settler_marker==null: return "WATER: UNKNOWN"
 	var advice:=_founding_site_advice(settler_marker.position)
 	if not bool(advice.valid):
-		return "Fresh water unconfirmed · Review site"
+		return "No fresh water found · Review site"
 	return "Water %.1f km · %s" % [float(advice.distance_km),"Review site" if bool(advice.water_recommended) else "Long carry"]
 
 
@@ -14678,12 +14678,28 @@ func _inspect_location_local(position: Vector3) -> void:
 		card.show_account("Our own ground",where_text,_surface_resource_report(position)+GroundLens.inside_border(String(settlement_context.get("name","the settlement")),float(settlement_context.get("controlled_area_km2",0.0)),_compact_population(int(settlement_context.get("population",0)))))
 		return
 	var survey_advice:Dictionary={}
-	if not inside:survey_advice=_founding_site_advice(position)
+	# Where to found is a question only before the people have settled.
+	if not inside and not GameState.settlement_site_committed:survey_advice=_founding_site_advice(position)
 	# Written account kept in step with the card for probes and old readers.
 	lens_body.text=_surface_resource_report(position)+(GroundLens.water_advice(survey_advice) if not survey_advice.is_empty() else "")+(GroundLens.resources(entries) if not entries.is_empty() else GroundLens.unsurveyed())
 	var biome:=_biome_at(position.x,position.z)
 	var surface:={"id":biome.id,"label":biome.label,"tree_cover":_woodland_density_at(position.x,position.z),"stone":"abundant" if float(biome.stone)>0.5 else "scattered" if float(biome.stone)>0.12 else "limited","soil":"high" if float(biome.fertility)>0.65 else "moderate" if float(biome.fertility)>0.3 else "low","fiber":"plentiful" if _surface_material_density(biome,"Fiber Plants")>0.4 else "scattered" if _surface_material_density(biome,"Fiber Plants")>=0.08 else "limited"}
+	if String(biome.id)=="water":surface["water_words"]=open_water_words()
 	card.show_ground("Ground survey",where_text,entries,surface,survey_advice)
+
+
+## The open water of the map is the sea (below sea level): salt. A people
+## tastes the water it comes to the first day, so what it is is known at once,
+## and once settled, where they drink instead is said with it.
+func open_water_words()->String:
+	var words:="Salt water: the sea. Our people tasted it the day they first came to it, and it is not fit to drink."
+	var water:Dictionary=GameState.water_metrics
+	if GameState.settlement_site_committed and bool(water.get("source_accessible",false)):
+		var kind:=String(water.get("source_kind","fresh water")).to_lower()
+		var km:=float(water.get("source_distance_km",0.0))
+		var home:=String(GameState.settlement_name).strip_edges()
+		words+=" They drink from the %s, %s from %s." % [kind if kind!="" else "fresh water","%.1f km" % km if km>=0.1 else "beside it",home if home!="" else "home"]
+	return words
 
 
 # Only one primary destination may own the interaction layer. Detail screens
