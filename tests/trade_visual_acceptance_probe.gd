@@ -111,6 +111,9 @@ func _run() -> void:
 ## not run acceptance contracts: those follow approval of the visual direction.
 func _preview_case() -> void:
 	prepare_fixture("coin" if selected_case.begins_with("coin") else "barter")
+	# Prepared daily reports feed the same civilization readings as the game.
+	GameState.simulation_metrics={"food_total_stock":7000.0,"food_consumption":120.0,"food_eaten":120.0,"food_production":132.0}
+	GameState.water_metrics={"stored":1680.0,"required_today":120.0,"intake_ratio":1.0,"collected_today":126.0}
 	SettlementModel._ensure_primary_settlement_record()
 	# The layout stress cases retain deliberately long names. This approval
 	# example uses ordinary names in the same prepared records.
@@ -121,6 +124,7 @@ func _preview_case() -> void:
 	get_window().size = Vector2i(1536, 1024)
 	hud = TradeHud.new()
 	add_child(hud)
+	hud._refresh_kpis()
 	hud.register_provider("economy", Economy.new(null, hud))
 	hud.time_text.text = "[b]%s[/b] · Paused" % preload("res://scripts/calendar_date.gd").words(int(GameState.elapsed_days),true)
 	hud.drawer_open = true

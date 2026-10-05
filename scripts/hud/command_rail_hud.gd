@@ -49,6 +49,7 @@ var rail_panel:PanelContainer
 var top_frame:PanelContainer
 var brand_row:HBoxContainer
 var brand_label:Label
+var top_readings:Control
 var top_actions:HBoxContainer
 var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
@@ -141,13 +142,20 @@ func _layout()->void:
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Folio.RAIL_WIDTH,view.y)
-	if brand_label:brand_label.visible=view.x>=1100
-	if city_selector:city_selector.custom_minimum_size.x=150 if view.x>=1100 else 120
+	var page_open:=bool((dock and dock.visible) or (detail_dock and detail_dock.visible))
+	if brand_label:brand_label.visible=view.x>=1100 and not page_open
+	if brand_row:
+		brand_row.add_theme_constant_override("separation",10 if page_open else 18)
+		var city_mark:=brand_row.get_node_or_null("TopCityIcon") as Control
+		if city_mark:city_mark.visible=not page_open or view.x>=1280
+	if city_selector:city_selector.custom_minimum_size.x=80 if page_open and view.x<1280 else (150 if view.x>=1100 else 120)
 	if top_actions:top_actions.position=Vector2(view.x-top_actions.get_combined_minimum_size().x-12,6)
 	if time_pill:
 		var actions_width:=top_actions.get_combined_minimum_size().x+24 if top_actions else 0.0
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
+		if page_open and top_frame:
+			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-10.0))
 	if kpi_strip:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 		# The status strip is a fixed-height top-bar component. At the minimum
@@ -174,6 +182,9 @@ func _layout()->void:
 			_hide_kpi(String(id))
 		kpi_strip.reset_size()
 		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Folio.TOP_HEIGHT+8.0)
+	if top_readings:
+		top_readings.visible=page_open
+		top_readings.show_readings(kpi_readings())
 	_layout_orders()
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
@@ -394,6 +405,13 @@ func _build_frame()->void:
 	var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_left",20);margin.add_theme_constant_override("margin_right",20);top_frame.add_child(margin)
 	brand_row=HBoxContainer.new();brand_row.add_theme_constant_override("separation",18);margin.add_child(brand_row)
 	brand_label=Tokens.make_label("Tomorrow and Tomorrow",24,Tokens.INK);brand_label.add_theme_font_override("font",Tokens.font("voice"));brand_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(brand_label)
+	top_readings=preload("res://scripts/hud/folio_readings.gd").new()
+	top_readings.visible=false
+	top_readings.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	top_readings.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	brand_row.add_child(top_readings)
+	top_readings.reading_selected.connect(func(section:String,sub:int)->void:section_requested.emit(section,sub))
+	top_readings.reading_created.connect(func(button:Button)->void:_hover_host().attach(button,button.hover_spec))
 	top_actions=HBoxContainer.new();top_actions.name="TopActions";top_actions.add_theme_constant_override("separation",6);add_child(top_actions)
 	var court:=Button.new();court.name="TopCourt";court.tooltip_text="Open your court · F12";court.pressed.connect(open_court);top_actions.add_child(court)
 	var world:=Button.new();world.name="TopWorld";world.tooltip_text="Known world · F6";world.pressed.connect(func()->void:section_requested.emit("world",0));top_actions.add_child(world)
@@ -807,6 +825,19 @@ func _build_kpi_strip()->void:
 		text_column.add_child(delta)
 		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption,"accent":accent,"mark":mark,"accent_color":def.accent}
 
+func kpi_readings()->Array[Dictionary]:
+	## Project the exact visible strip values; do not recompute inside a city's
+	## resource scope. The strip's parent is hidden while a page is open.
+	var readings:Array[Dictionary]=[]
+	for def:Dictionary in KPI_DEFS:
+		var parts:Dictionary=kpi_chips.get(String(def.id),{})
+		if parts.is_empty() or not (parts.chip as Control).visible:continue
+		readings.append({"id":String(def.id),"caption":(parts.caption as Label).text,
+			"value":(parts.value as Label).text,"note":(parts.delta as Label).text,
+			"note_color":(parts.delta as Label).get_theme_color("font_color"),
+			"section":String(def.section),"sub":int(def.sub)})
+	return readings
+
 func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,_tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
 	if parts.is_empty(): return
@@ -1009,7 +1040,7 @@ func _build_toolbar()->void:
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
 	var divider:=VSeparator.new();divider.custom_minimum_size=Vector2(1,24);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(divider)
-	var city_mark:=Folio.Approved.picture(Rect2(380,10,31,25),26,24);city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
+	var city_mark:=Folio.Approved.picture(Rect2(380,10,31,25),26,24);city_mark.name="TopCityIcon";city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
 	brand_row.add_child(city_selector)
 	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
 	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:

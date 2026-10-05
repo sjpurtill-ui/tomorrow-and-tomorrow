@@ -4,7 +4,9 @@
 `command_rail_hud.gd`, `dock_content_economy.gd`, `dock_panel.gd`, and
 `trade_board.gd`. It prepares in-memory records and pauses simulation. No player
 campaign is loaded, saved, or represented by its screenshots. The fixture shell
-does not initialize terrain or live top-bar KPIs. As in the Wealth probe, it
+does not initialize terrain. The approval preview initializes the real HUD
+readings from prepared daily food and water reports; those readings appear
+on the top bar above the page. As in the Wealth probe, it
 disconnects only the unrelated Court-button prewarm timer before mounting the
 short-lived HUD shell.
 
@@ -102,3 +104,27 @@ reworks the whole page chrome. Broad acceptance must open that disclosure
 before exercising its visible menus and be reconciled with the approved
 layout. The assertion-free preview mode remains intended for that approval
 step; the previous prototype's passing checks do not certify the new design.
+
+## Live readings on the top bar (approval revision)
+
+The top bar projects the exact caption, value, note and warning color already
+formatted by CommandRailHUD. It follows the strip's era and width visibility,
+retains the existing hover details and click destinations, and updates retained
+controls without rebuilding Trade or moving its scroll position. Notes remain in
+the existing hover details and accessibility text; warning values retain their
+warning color. The readings replace the wordmark while a page is open, beside
+the existing city selector. Closing the page restores the map strip. It adds no
+simulation calculations and changes no save format. The top bar is shared by
+all open pages at this
+checkpoint. The full illustrated-page revision remains HELD for user approval.
+
+`tests/test_folio_readings.gd` checks hidden-strip parity, live shortage updates,
+keyboard focus, navigation, hover detail, era changes, reopening, economic-state
+preservation and top-bar containment at 1536 and 1138px canvas widths.
+The 1536x1024 GPU example is retained locally in
+`artifacts/trade-top-bar-preview/trade-preview.png`; its daily reports are
+prepared in memory and are not readings from the user's current campaign.
+
+Verification: all three focused regressions passed with zero errors, failures
+or orphan nodes (report 13). The clock overlap case includes a long date and
+temperature string. Broad page acceptance remains pending visual approval.
