@@ -122,4 +122,26 @@ func test_crossing_uses_an_actual_bounded_figure_and_finishes_its_walk()->void:
 		assert_float(body.position.distance_to(origin)).is_greater(3.0)
 		assert_int(scene.diagnostics().body_count).is_equal(1)
 		assert_str(String(body.clip)).is_equal("stand")
+		if form=="gate":
+			# Project the witness's face and both posts through the actual final
+			# lens. The witness must not finish hidden behind either gatepost.
+			var face:Vector2=scene.lens.unproject_position(body.position+Vector3(0,1.5,0))
+			for side in [-1.0,1.0]:
+				var post:Vector2=scene.lens.unproject_position(Vector3(side*.875,1.5,scene._front+.8))
+				assert_float(absf(face.x-post.x)).is_greater(18.0)
 		scene.queue_free();await get_tree().process_frame
+
+func test_all_six_guest_formations_clear_the_purpose_pedestal()->void:
+	for record:Dictionary in records():
+		var profile:=Rituals.describe(record,[],EARLY)
+		var built:=Rituals.build(profile)
+		var root:Node3D=built.root
+		var emblem:Node3D=root.get_node("Purpose_"+String(profile.purpose_emblem))
+		var pedestal:=Vector2(emblem.position.x,emblem.position.z+.8)
+		for count in range(1,7):
+			for index in count:
+				var at:=Rituals.guest_position(profile.formation,index,count)
+				# .34m pedestal radius plus .3m body/gesture clearance.
+				assert_float(pedestal.distance_to(Vector2(at.x,at.z))).is_greater(.64)
+		assert_float(absf(emblem.position.x)+.5).is_less(5.0)
+		root.free()

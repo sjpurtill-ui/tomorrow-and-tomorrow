@@ -88,3 +88,17 @@ func test_compact_modal_keeps_name_and_close_inside_the_view()->void:
 	assert_float(modal.plate.size.x).is_greater(600.0)
 	modal.skip_reveal()
 	assert_bool(modal.plate.diagnostics().committed).is_false()
+
+func test_narrow_stage_wraps_long_captions_within_its_frame()->void:
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(360,360);add_child(viewport)
+	var scene:Control=Stage.make({"id":"ancestor_ring","status":"functioning","fraction":1.0},{"key":"caption","architect":{},"official":{},"attendees":[]},300)
+	scene.size=Vector2(340,320);scene.position=Vector2(10,10);viewport.add_child(scene)
+	for frame in 20:await get_tree().process_frame
+	var frame:Control=scene.get_node("CeremonyCaption")
+	for line in ["The dedication beacon is kindled before the lighthouse. The open-way mark recalls the work's purpose of welcoming strangers.","The miniature sluice lifts to mark the dedication. The wave-mark recalls the work's purpose of taming water.","The beam comes level beside the common measuring rod. The tool-mark recalls the work's purpose of showing mastery."]:
+		scene.speak({"text":line},false)
+		for settled in 4:await get_tree().process_frame
+		assert_bool(scene.get_global_rect().encloses(frame.get_global_rect())).is_true()
+		assert_bool(frame.get_global_rect().encloses(scene._caption.get_global_rect())).is_true()
+		assert_int(scene._caption.get_line_count()).is_greater(1)
+	scene.queue_free();await get_tree().process_frame
