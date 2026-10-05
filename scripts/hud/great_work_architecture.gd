@@ -206,18 +206,58 @@ class Builder extends RefCounted:
 			box(x,18,3,5,4,5,tone);roof(x,22,3,6,2,6)
 	func colossus()->void:
 		for i in 3:box(0,i*1.4,0,24-i*4,1.4,19-i*3,trim)
+		# A seven-head guardian, facing +Z. The staff and bent forearms give
+		# the silhouette quiet support; all joints overlap their actual volume.
+		# These are carved surfaces, not costume/technology inferred from a year.
+		for side:int in [-1,1]:
+			var x:=side*2.1;var z:=.6 if side<0 else -.2
+			sculpt(Vector3(x,4.2,z+1.05),Vector3(2.9,1.6,5.4),tone,"ellipsoid","foot")
+			limb(Vector3(x,5.0,z),Vector3(x*.86,11.8,z-.2),2.5,2.6,tone,"shin")
+			limb(Vector3(x*.86,11.8,z-.2),Vector3(x*.78,19.2,0),3.2,3.5,tone,"thigh")
+		sculpt(Vector3(0,6.0,0),Vector3(9.1,13.0,5.6),tone,"guardian_robe","robe")
+		sculpt(Vector3(0,18.4,0),Vector3(10.2,10.0,5.0),tone,"guardian_torso","torso")
+		# A plain gathered belt and a diagonal mantle, with shallow integral
+		# pleats in the skirt rather than painted stripes or a conical body.
+		roundel(0,18.4,0,6.6,.55,4.55,tone.darkened(.10),"cylinder",false)
+		limb(Vector3(-3.4,27.0,1.6),Vector3(2.55,19.0,2.0),1.5,.48,trim,"mantle")
+		for i in 3:
+			limb(Vector3(-3.65-i*.19,26.9-i*.36,1.85),Vector3(1.9-i*.45,19.1,2.25),.22,.18,tone.lightened(.07),"mantle_fold")
+		# A visible neck and a shaped jaw/cheek/forehead profile. No headgear.
+		sculpt(Vector3(0,27.6,0),Vector3(2.55,2.8,2.5),tone,"ellipsoid","neck")
+		sculpt(Vector3(0,29.4,.12),Vector3(3.9,5.1,3.8),tone,"guardian_head","head")
+		sculpt(Vector3(0,32.35,-.10),Vector3(4.02,2.2,3.95),tone.darkened(.12),"guardian_hair","hair")
 		for side in [-1,1]:
-			box(side*3.6,4.2,1,4.7,2,8,tone)
-			p(Vector3(side*3.6,6.2,0),Vector3(4.2,12,5),tone,"taper")
-		p(Vector3(0,17,0),Vector3(13,13,8),tone,"taper")
-		parts.back().feature="torso"
-		# Anchor inside the narrower upper cross-section, not its ground width.
-		beam(Vector3(-4.7,27,0),Vector3(-10,18,1),3.1,tone);parts.back().feature="left_arm"
-		beam(Vector3(4.7,27,0),Vector3(10,33,0),3.1,tone);parts.back().feature="right_arm"
-		p(Vector3(0,30,0),Vector3(7,8,6),trim,"taper")
-		box(0,34,3,2.2,1.2,.6,tone.darkened(.2),0,false)
-		box(0,38,0,8,1.2,7,accent)
-		for x in [-3,0,3]:box(x,39,0,1,2.2,1,accent,0,false)
+			sculpt(Vector3(side*1.84,31.1,.08),Vector3(.53,1.15,.68),tone,"ellipsoid","ear")
+			sculpt(Vector3(side*.83,32.34,1.73),Vector3(1.34,.24,.39),tone.darkened(.04),"ellipsoid","brow")
+			sculpt(Vector3(side*.78,32.15,1.86),Vector3(.67,.16,.07),tone.darkened(.36),"ellipsoid","eye")
+		sculpt(Vector3(0,31.22,1.77),Vector3(.59,1.25,.71),tone,"ellipsoid","nose")
+		sculpt(Vector3(0,30.89,1.83),Vector3(1.1,.18,.20),tone.darkened(.13),"ellipsoid","mouth")
+		# Shoulders are rounded beneath the mantle; tapered upper and lower
+		# limbs meet at elbows/wrists, with palms and four grouped fingers.
+		var left_shoulder:=Vector3(-4.1,26.2,.05);var left_elbow:=Vector3(-5.2,21.2,1.1)
+		var left_wrist:=Vector3(-1.25,24.05,2.92)
+		var right_shoulder:=Vector3(4.1,26.2,.05);var right_elbow:=Vector3(5.55,21.0,.65)
+		var right_wrist:=Vector3(6.55,22.0,2.0)
+		for at:Vector3 in [left_shoulder,right_shoulder]:sculpt(at-Vector3(0,1.7,0),Vector3(3.35,3.9,3.3),tone,"ellipsoid","shoulder")
+		limb(left_shoulder,left_elbow,2.95,2.9,tone,"left_upper_arm")
+		limb(left_elbow,left_wrist,2.05,2.1,tone,"left_forearm")
+		limb(right_shoulder,right_elbow,2.95,2.9,tone,"right_upper_arm")
+		limb(right_elbow,right_wrist,2.05,2.1,tone,"right_forearm")
+		for at:Vector3 in [left_elbow,right_elbow]:sculpt(at-Vector3(0,.95,0),Vector3(2.1,2.1,2.1),tone,"ellipsoid","elbow")
+		limb(left_wrist,Vector3(.35,25.05,2.86),1.30,.64,tone,"left_hand")
+		for i in 4:
+			limb(Vector3(-.28+i*.20,24.63+i*.07,3.0),Vector3(.55+i*.16,25.24+i*.06,2.79),.24,.26,tone,"finger")
+		sculpt(Vector3(6.67,21.6,2.05),Vector3(1.45,1.6,1.45),tone,"ellipsoid","right_hand")
+		for i in 4:sculpt(Vector3(6.87,21.78+i*.25,2.64),Vector3(.80,.26,.35),tone,"ellipsoid","finger")
+		p(Vector3(7.10,4.2,2.48),Vector3(.65,25.3,.65),tone.darkened(.08),"cylinder",0,false)
+		parts.back().feature="staff"
+		sculpt(Vector3(7.10,29.10,2.48),Vector3(.88,1.0,.88),tone,"ellipsoid","staff_finial")
+	func sculpt(at:Vector3,size:Vector3,color:Color,kind:String,feature:String)->void:
+		p(at,size,color,kind,0,feature in ["robe","torso","head"])
+		parts.back().feature=feature
+	func limb(a:Vector3,b:Vector3,width:float,deep:float,color:Color,feature:String)->void:
+		sculpt(a,Vector3(width,a.distance_to(b),deep),color,"guardian_limb",feature)
+		parts.back().basis=Basis(Quaternion(Vector3.UP,(b-a).normalized()))
 	func garden()->void:
 		box(0,0,0,62,.35,53,Color("898567"))
 		box(0,.35,0,7,.18,53,trim);box(0,.35,0,62,.18,6,trim)
@@ -505,6 +545,26 @@ static func _unit(kind:String)->PackedVector3Array:
 			_prism(vertices,face,Vector3(0,0,1))
 	elif kind=="buttress":
 		_prism(vertices,[Vector3(-.5,0,-.5),Vector3(.5,0,-.5),Vector3(.15,1,-.5),Vector3(-.15,1,-.5)],Vector3(0,0,1))
+	elif kind=="ellipsoid":
+		var rings:Array[Vector3]=[]
+		for i in 9:
+			var angle:=PI*i/8
+			rings.append(Vector3((1-cos(angle))*.5,sin(angle)*.5,sin(angle)*.5))
+		_profile(vertices,rings,16)
+	elif kind=="guardian_limb":
+		_profile(vertices,[Vector3(0,.40,.40),Vector3(.18,.5,.5),Vector3(.55,.45,.45),Vector3(.85,.35,.35),Vector3(1,.29,.29)],16)
+	elif kind=="guardian_torso":
+		_profile(vertices,[Vector3(0,.29,.39),Vector3(.17,.31,.44),Vector3(.45,.39,.48),Vector3(.70,.46,.50),Vector3(.86,.50,.44),Vector3(.95,.39,.36),Vector3(1,.17,.25)],20)
+	elif kind=="guardian_robe":
+		_profile(vertices,[Vector3(0,.49,.49),Vector3(.05,.5,.5),Vector3(.25,.46,.48),Vector3(.52,.41,.45),Vector3(.78,.37,.41),Vector3(1,.33,.37)],24,true)
+	elif kind=="guardian_head":
+		_profile(vertices,[Vector3(0,.20,.24),Vector3(.10,.33,.35),Vector3(.28,.44,.43),Vector3(.48,.49,.49),Vector3(.69,.48,.50),Vector3(.86,.40,.43),Vector3(.97,.22,.25),Vector3(1,0,0)],20)
+	elif kind=="guardian_hair":
+		var rings:Array[Vector3]=[]
+		for i in 7:
+			var angle:=PI*.5*i/6
+			rings.append(Vector3(sin(angle),cos(angle)*.5,cos(angle)*.5))
+		_profile(vertices,rings,20,false,true)
 	else:
 		var top:=.5 if kind=="cylinder" else (0.0 if kind=="cone" else .34)
 		for i in 12:
@@ -517,6 +577,27 @@ static func _unit(kind:String)->PackedVector3Array:
 			_triangle(vertices,Vector3.UP,high_a,high_b,Vector3(0,.5,0))
 	_units[kind]=vertices
 	return vertices
+
+## Closed sculptural sections. Only the guardian uses these profiles; existing
+## architecture primitives and their cached geometry remain byte-for-byte stable.
+static func _profile(vertices:PackedVector3Array,rings:Array,segments:int,pleats:bool=false,hair:bool=false)->void:
+	var rows:Array=[]
+	for ring:Vector3 in rings:
+		var row:Array[Vector3]=[]
+		for i in segments:
+			var angle:=TAU*i/segments
+			var fold:=1.0-(.025+.065*(1.0-ring.x))*(.5+.5*cos(angle*6)) if pleats else 1.0
+			var rise:=.06*(.5+.5*sin(angle*7))*(1.0-ring.x) if hair else 0.0
+			row.append(Vector3(cos(angle)*ring.y*fold,minf(1.0,ring.x+rise),sin(angle)*ring.z*fold))
+		rows.append(row)
+	for r in range(rows.size()-1):
+		for i in segments:
+			var next:=(i+1)%segments
+			_triangle(vertices,rows[r][i],rows[r+1][i],rows[r+1][next],Vector3(0,.5,0))
+			_triangle(vertices,rows[r][i],rows[r+1][next],rows[r][next],Vector3(0,.5,0))
+	for i in segments:
+		_triangle(vertices,Vector3(0,rings[0].x,0),rows[0][(i+1)%segments],rows[0][i],Vector3(0,.5,0))
+		_triangle(vertices,Vector3(0,rings.back().x,0),rows.back()[i],rows.back()[(i+1)%segments],Vector3(0,.5,0))
 
 static func _prism(vertices:PackedVector3Array,front:Array,depth:Vector3)->void:
 	var center:=Vector3.ZERO
