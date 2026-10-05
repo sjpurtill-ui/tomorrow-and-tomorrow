@@ -49,6 +49,7 @@ const Counter:=preload("res://scripts/hud/army_counter.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const March:=preload("res://scripts/march_terrain.gd")
+const NationBorders:=preload("res://scripts/nation_borders.gd")
 
 const COLLECT_EVERY:=0.5
 ## Clash shapes and arrows blend over this long after a change.
@@ -684,7 +685,7 @@ func collect()->Dictionary:
 	var battles:Array=[]
 	if BattleSource.any_fighting(MilitaryCampaign,rivals) or not rival_memory.is_empty():
 		battles=BattleSource.collect(MilitaryCampaign,rivals,_battle_context(today,home,friendly,garrisons),rival_memory)
-	var inputs:={"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+	var inputs:={"borders":_border_inputs(home),"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
 		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today),"battles":battles}
@@ -692,6 +693,36 @@ func collect()->Dictionary:
 		var value:Variant=extra_inputs[key]
 		inputs[key]=(inputs.get(key,[]) as Array)+(value as Array) if value is Array and inputs.get(key) is Array else value
 	return inputs
+
+
+## The lines where our land meets the land of a people we are at war or in
+## hot feud with (nation_borders.gd publishes them as the map draws them),
+## with which side is whose: [{civ, points, ours_at, theirs_at}]. No shared
+## line, no border front: their land and ours do not touch.
+static func _border_inputs(home:Vector2)->Array:
+	var out:Array=[]
+	var hot:Dictionary=NationBorders.hot_enemies()
+	if hot.is_empty() or NationBorders.published.is_empty(): return out
+	var ours_at:Array=[home]
+	var intel:Variant=CivilizationSystem.city_intelligence
+	if intel!=null:
+		for city:Dictionary in intel.known_cities("player","player",false):
+			var at:=_v2(city.get("position",{}))
+			if at.is_finite(): ours_at.append(at)
+	var council:GDScript=load("res://scripts/war_council.gd")
+	for civ_id:String in hot:
+		var theirs_at:Array=[]
+		for town:Dictionary in council.call("known_towns",civ_id):
+			var at:=_v2(town.get("position",{}))
+			if at.is_finite(): theirs_at.append(at)
+		for line:Dictionary in NationBorders.published:
+			var owners:Array=line.owners
+			if not ((owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id)): continue
+			var points:PackedVector2Array=line.points
+			if points.size()<2: continue
+			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"kind":String(hot[civ_id])})
+			if out.size()>=Model.MAX_FRONTS: return out
+	return out
 
 
 ## The rival peoples' campaigns (each owner's own MilitaryCampaign), read
@@ -1145,7 +1176,26 @@ static func compose(inputs:Dictionary)->Dictionary:
 			front["holders"]=holders
 		out.fronts=fronts
 		out.pockets=Model.pockets(fronts,holding,facing)
-	elif mode=="host":
+	# At war with a people whose land meets ours, the front is that meeting
+	# line, worked by the forces near it (war_front_model border_front); a
+	# front derived from the forces alone that runs along it gives way to it.
+	var borders:Array=(inputs.get("borders",[]) as Array).slice(0,Model.MAX_FRONTS)
+	if not borders.is_empty():
+		var border_fronts:Array=[]
+		for b:Dictionary in borders:
+			var front:=Model.border_front(b.points,b.get("ours_at",[]),b.get("theirs_at",[]),holding,facing,String(b.civ),float(out.sigma) if mode in ["front","theatre"] else 0.0)
+			if not front.is_empty(): border_fronts.append(front)
+		if not border_fronts.is_empty():
+			var reach:=float(border_fronts[0].sigma)*0.6
+			fronts=fronts.filter(func(d:Dictionary)->bool: return not border_fronts.any(func(b:Dictionary)->bool: return Model.along_border(d,b,reach)))
+			for front:Dictionary in border_fronts:
+				var holders:Array=holding.filter(func(h:Dictionary)->bool: return not bool(h.get("garrison",false)) and Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
+				front["armies"]=holders.map(func(h:Dictionary)->int: return int(h.get("army_id",0)))
+				front["holders"]=holders
+			fronts=border_fronts+fronts
+			out.fronts=fronts
+			if not mode in ["front","theatre"]: out.sigma=float(border_fronts[0].sigma)
+	if mode=="host":
 		var reach:=6.0
 		for f in holding:
 			for e in facing: reach=minf(reach,maxf(0.6,(f.pos as Vector2).distance_to(e.pos)*1.01))
@@ -1438,7 +1488,12 @@ func _draw()->void:
 	var band:=_band()
 	if band=="ground":
 		# Up close only the forces' small paper cards stay, placed clear of
-		# the town cards; the front and its ink stand aside for the ground.
+		# the town cards; the front and its ink stand aside for the ground,
+		# all but a front along a border at war: that is the ground itself.
+		var step_near:=_world_per_px(_centre_of_scene())*14.0
+		for index in live_fronts.size():
+			var entry:Dictionary=live_fronts[index]
+			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("border",false)): _draw_front(entry,"local",step_near)
 		_draw_marks(band,[],[])
 		_letter_captions(T.voice_font(true))
 		last_draw_usec=Time.get_ticks_usec()-started

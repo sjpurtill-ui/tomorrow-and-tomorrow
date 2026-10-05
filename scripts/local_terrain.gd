@@ -796,9 +796,9 @@ func _capture_preview_if_requested() -> void:
 		var inspected_position:=Vector3(GameState.settlement_founded_at.x+inspected_centroid.x,0.0,GameState.settlement_founded_at.z+inspected_centroid.y)
 		inspected_position.y=_height_at(inspected_position.x,inspected_position.z)
 		_inspect_location(inspected_position)
-	if "--capture-war" in OS.get_cmdline_user_args() or "--capture-war-calm" in OS.get_cmdline_user_args() or "--capture-war-battle" in OS.get_cmdline_user_args():
+	if "--capture-war" in OS.get_cmdline_user_args() or "--capture-war-calm" in OS.get_cmdline_user_args() or "--capture-war-battle" in OS.get_cmdline_user_args() or "--capture-war-border" in OS.get_cmdline_user_args():
 		# Capture only: a small real war (or the calm before one) for War screen screenshots.
-		print("CAPTURE WAR FIXTURE ",load("res://tools/war_screen_fixture.gd").call("stage",self,"calm" if "--capture-war-calm" in OS.get_cmdline_user_args() else ("battle" if "--capture-war-battle" in OS.get_cmdline_user_args() else "war")))
+		print("CAPTURE WAR FIXTURE ",load("res://tools/war_screen_fixture.gd").call("stage",self,"calm" if "--capture-war-calm" in OS.get_cmdline_user_args() else ("battle" if "--capture-war-battle" in OS.get_cmdline_user_args() else ("border" if "--capture-war-border" in OS.get_cmdline_user_args() else "war"))))
 	if capture_dock!="" and hud:
 		var dock_parts:=capture_dock.split("/")
 		_on_hud_section_requested(dock_parts[0],int(dock_parts[1]) if dock_parts.size()>1 else 0)
@@ -855,6 +855,12 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Capture only: the War screen's map (its camera easing, the borders built
+	# on a worker thread and the fronts read from them) settles over a few
+	# seconds; give it them.
+	if "--capture-war-border" in OS.get_cmdline_user_args() or "--capture-war-settle" in OS.get_cmdline_user_args():
+		var settle_until:=Time.get_ticks_msec()+4000
+		while Time.get_ticks_msec()<settle_until: await get_tree().process_frame
 	# Regional terrain is streamed in slices. Finish the initial patch, then the
 	# requested camera's patch before taking an audit image of either surface.
 	for capture_stream_pass in 2:

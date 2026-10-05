@@ -380,6 +380,82 @@ static func derive(friendly:Array,enemy:Array)->Dictionary:
 	return {"fronts":fronts,"sigma":float(f.sigma),"broken":fronts.size()>1}
 
 
+## FRONTS FROM BORDERS: at war with a people whose land meets ours, the
+## front is the line where the two lands meet (nation_borders.gd publishes
+## it from the same partition the map washes). It is a front of ground, as
+## HOI4's is: it moves when a town changes hands, because the town's claim
+## moves with its holder. The forces near it work it: where one side is
+## locally stronger the line bends into the weaker side's ground (bounded:
+## a share of the theatre's scale), it thickens where both sides are massed,
+## and battles on it heat it (battle_marks heat, in the overlay).
+## points: the published meeting line; ours_at / theirs_at: our towns' and
+## their known towns' places (which side of the line is whose); friendly /
+## enemy: the forces (substantial ones), as derive() takes them.
+## Returns a front as derive() makes them, with "border": true, "civ" and
+## "quiet" (no force of either side near it).
+const BORDER_BEND:=0.3
+const BORDER_POINTS:=64
+static func border_front(points:PackedVector2Array,ours_at:Array,theirs_at:Array,friendly:Array,enemy:Array,civ:String,sigma_hint:=0.0)->Dictionary:
+	if points.size()<2: return {}
+	var length:=_length(points)
+	var line:=resample(points,BORDER_POINTS)
+	var sigma:=sigma_hint if sigma_hint>0.0 else length*0.12
+	var f:={}
+	if not friendly.is_empty() and not enemy.is_empty():
+		f=field(friendly.slice(0,MAX_FRIENDLY),enemy.slice(0,MAX_ENEMY))
+		sigma=float(f.sigma)
+	var width:=PackedFloat32Array(); var ages:=PackedFloat32Array(); var pressure:=PackedFloat32Array()
+	var toward:=PackedVector2Array(); var bent:=PackedVector2Array()
+	var quiet:=true
+	for index in line.size():
+		var p:=line[index]
+		var along:=(line[mini(line.size()-1,index+1)]-line[maxi(0,index-1)]).normalized()
+		var normal:=along.orthogonal()
+		# Their side: toward their nearest town and away from ours.
+		var side:=_nearest(theirs_at,p)-_nearest(ours_at,p)
+		if side.is_finite() and side.length_squared()>0.0 and normal.dot(side)<0.0: normal=-normal
+		toward.append(normal)
+		var push:=0.0
+		var thick:=0.3
+		if not f.is_empty():
+			var here:=presence(f,p)
+			if maxf(here.x,here.y)>=CONTACT: quiet=false
+			# Only where a side is actually present does it bend the line.
+			push=clampf(here.x-here.y,-1.0,1.0)*clampf(maxf(here.x,here.y)*1.5,0.0,1.0)
+			thick=clampf(sqrt(here.x*here.y)*1.6,0.3,1.0)
+		pressure.append(push)
+		width.append(thick)
+		ages.append(0.0)
+		bent.append(p+normal*push*sigma*BORDER_BEND)
+	# Ends stay on the border: the bend fades in over the first and last few points.
+	var n:=bent.size()
+	for i in n:
+		var edge:=minf(float(i),float(n-1-i))/maxf(1.0,float(n)*0.12)
+		bent[i]=line[i].lerp(bent[i],clampf(edge,0.0,1.0))
+	return {"points":bent,"width":width,"age":ages,"stale":false,"pressure":pressure,"toward":toward,"border":true,"civ":civ,"quiet":quiet,"border_points":line,"sigma":sigma}
+
+
+static func _nearest(places:Array,p:Vector2)->Vector2:
+	var best:=Vector2.INF
+	for at in places:
+		if at is Vector2 and (at as Vector2).is_finite() and (not best.is_finite() or (at as Vector2).distance_squared_to(p)<best.distance_squared_to(p)): best=at
+	return best
+
+
+## Whether a derived front runs along a border front (most of its points
+## within reach of the border's line): the border front stands for it.
+static func along_border(front:Dictionary,border:Dictionary,reach:float)->bool:
+	var line:PackedVector2Array=border.get("border_points",border.get("points",PackedVector2Array()))
+	var points:PackedVector2Array=front.get("points",PackedVector2Array())
+	if line.size()<2 or points.is_empty(): return false
+	var near:=0
+	for p in points:
+		var best:=INF
+		for i in range(1,line.size()): best=minf(best,p.distance_to(Geometry2D.get_closest_point_to_segment(p,line[i-1],line[i])))
+		if best<=reach: near+=1
+	return float(near)>=float(points.size())*0.5
+
+
 ## A face-off line for hosts in the field: only where two hosts are within
 ## reach of each other; a short arc across the line between them.
 static func face_offs(friendly:Array,enemy:Array,reach:float)->Array:

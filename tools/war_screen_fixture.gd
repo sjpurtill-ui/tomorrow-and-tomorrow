@@ -11,6 +11,9 @@ extends RefCounted
 ## people, four on the watch, two in drill and no band out, at peace.
 ## "battle" (--capture-war-battle): the war, and the band met on the road by
 ## a band of theirs: a real battle begins (begin_threat_engagement).
+## "border" (--capture-war-border): the war, with the feuding people's town
+## set down beside ours so that their land meets ours: the front along the
+## border. An authored placement for the capture, never a natural world.
 
 const Commands:=preload("res://scripts/leader_commands.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
@@ -25,6 +28,7 @@ static func stage(_terrain:Node,mode:="war")->Dictionary:
 	if WorldSimulation.direction.needs_century_choice():WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	if mode=="calm":return _calm()
 	if mode=="battle":return _battle(stage(_terrain,"war"))
+	if mode=="border":return _border(stage(_terrain,"war"))
 	GameState.ensure_population_total(PEOPLE)
 	GameState.housing_capacity=maxi(GameState.housing_capacity,PEOPLE+PEOPLE/5)
 	GameState.elapsed_days=maxf(GameState.elapsed_days,40.0)
@@ -163,3 +167,50 @@ static func _nearest_people()->Dictionary:
 			best=civ
 			near=d
 	return best
+
+
+## The war, with their town moved to stand a short walk from ours, its land
+## meeting ours (the world's region and our book both moved), and our band
+## at the border between.
+static func _border(war:Dictionary)->Dictionary:
+	var civ_id:=String(war.get("civ_id",""))
+	if civ_id=="":return war
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var reach:=1.0
+	var network:Array=WorldSimulation.settlements.settlement_network_snapshot().get("settlements",[])
+	for claim:Dictionary in preload("res://scripts/nation_borders.gd").own_claims(network):
+		if float(claim.radius)>reach or reach==1.0:home=claim.center;reach=maxf(0.3,float(claim.radius))
+	var intel:Variant=WorldSimulation.world.city_intelligence
+	var civ:Dictionary=WorldSimulation.world.civilizations[WorldSimulation.world._civilization_index(civ_id)]
+	var moved:=0
+	var direction:=Vector2(1.0,-0.35).normalized()
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		var rid:=String(region.get("id",""))
+		var known:Dictionary=intel.known("player",rid)
+		if known.is_empty():continue
+		# Their land about as wide as ours, the two overlapping by a fifth.
+		var at:=home+direction.rotated(float(moved)*0.6)*reach*(1.3+float(moved)*0.9)
+		region["position"]=at
+		var outline:Array=[]
+		for k in 48:outline.append(at+Vector2.RIGHT.rotated(TAU*float(k)/48.0)*reach)
+		region["boundary"]=outline
+		region["population"]=150.0
+		region["settlement_founded"]=true
+		var record:Dictionary=intel.records["player"][rid]
+		record["position"]={"x":at.x,"z":at.y}
+		war["at"]=at
+		moved+=1
+		if moved>=2:break
+	# The ground about both towns charted, as our scouts would have it.
+	CivilizationSystem.revealed_areas.append({"kind":"circle","x":home.x,"z":home.y,"radius":maxf(1.0,reach*5.0),"source":"capture fixture","day":int(WorldSimulation.state.elapsed_days)})
+	CivilizationSystem.fog_revision+=1
+	war["moved"]=moved
+	war["home"]=home;war["reach"]=reach;war["origin"]=CivilizationSystem.player_world_origin
+	# Our band at the border, facing their town.
+	var index:int=MilitaryCampaign._field_army_index(int(war.get("army_id",0)))
+	if index>=0:
+		var band:Dictionary=MilitaryCampaign.field_armies[index]
+		var near:=home+direction*reach*0.65
+		band.merge({"status":"stationed","position":{"x":near.x,"z":near.y},"location_name":"the border"},true)
+		MilitaryCampaign.field_armies[index]=band
+	return war

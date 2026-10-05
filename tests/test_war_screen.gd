@@ -326,10 +326,12 @@ func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
 	# Our counter counts the army at home as the strip does; the watch is not the army.
 	var card:=Bar.levy_card(MilitaryCampaign)
 	assert_int(int(mode.scene.levy.troops)).is_equal(int(card.ready)+int(card.drill)+int(card.waiting))
-	# The front stands across the way between us, about halfway.
+	# Open land lies between us: no front is drawn across it (a front is
+	# ground against ground); the pointer says so, and how far.
 	var front:PackedVector2Array=e.front
-	assert_int(front.size()).is_greater_equal(2)
-	assert_float(front[front.size()/2].distance_to(home.lerp(there,0.5))).is_less(30.0)
+	assert_int(front.size()).is_equal(0)
+	assert_bool(bool(e.meets)).is_false()
+	assert_str(front_tip).contains("No front")
 	# Our ground and theirs are both drawn; the towns' cards step aside.
 	var owners:Array=mode._owners()
 	assert_bool(owners.has(civ_id)).is_true()
@@ -344,18 +346,6 @@ func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
 	assert_bool(map.city_labels.get_parent().visible).is_true()
 	assert_float(map.camera.size).is_equal_approx(12.0,0.01)
 	map.free()
-
-
-## Each people ranges a share of the way to its nearest neighbour, never less
-## than a town's own reach nor more than a long march.
-func test_each_people_ranges_a_share_of_the_way_to_its_neighbour()->void:
-	var towns:=[{"owner":"player","at":Vector2.ZERO},{"owner":"a","at":Vector2(100,0)},{"owner":"b","at":Vector2(0,1000)},{"owner":"c","at":Vector2(0,1010)}]
-	var r:=MapMode._ranges(towns)
-	assert_float(float(r.player)).is_equal_approx(100.0*MapMode.RANGE_SHARE,0.01)
-	assert_float(float(r.a)).is_equal_approx(100.0*MapMode.RANGE_SHARE,0.01)
-	assert_float(float(r.b)).is_equal_approx(MapMode.RANGE_MIN_KM,0.01)
-	var far:=MapMode._ranges([{"owner":"player","at":Vector2.ZERO},{"owner":"a","at":Vector2(5000,0)}])
-	assert_float(float(far.player)).is_equal_approx(MapMode.RANGE_MAX_KM,0.01)
 
 
 ## A host's counter never covers a town's name, nor stands under the War
@@ -416,3 +406,20 @@ func test_where_every_soldier_stands_adds_up_to_everyone_under_arms()->void:
 	assert_object(board.find_child("Allocation",true,false)).is_not_null()
 	assert_object(board.find_child("Legend",true,false)).is_not_null()
 	assert_object(board.find_child("Readiness",true,false)).is_not_null()
+
+## Each people's land on the war map is its towns' real claims, cut where
+## another people's claim is stronger: two equal claims meet halfway.
+func test_the_war_map_draws_each_peoples_real_land_cut_where_lands_meet()->void:
+	var Borders:=preload("res://scripts/nation_borders.gd")
+	var ours:=Borders.make_claim("player","own:a",Vector2.ZERO,10.0)
+	var theirs:=Borders.make_claim("kez","town:b",Vector2(16,0),10.0)
+	var lands:=MapMode.lands([ours,theirs])
+	assert_int(lands.size()).is_equal(2)
+	var ring:PackedVector2Array=lands[0].outline
+	# Toward them (bearing 0) our land stops at the meeting point, x = 8.
+	assert_float(ring[0].x).is_equal_approx(8.0,0.05)
+	# Away from them it keeps its whole reach.
+	assert_float(ring[ring.size()/2].x).is_equal_approx(-10.0,0.05)
+	# Far apart, nothing is cut.
+	var apart:=MapMode.lands([ours,Borders.make_claim("kez","town:b",Vector2(100,0),10.0)])
+	assert_float((apart[0].outline as PackedVector2Array)[0].x).is_equal_approx(10.0,0.05)

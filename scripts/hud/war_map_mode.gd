@@ -3,14 +3,18 @@ extends Control
 ## itself is the war, as HOI4's is:
 ##   - the camera pulls back to frame our towns, every enemy's known towns
 ##     and our bands out, and goes back where it was when the screen closes;
-##   - every people we know is a patch of colour: the ground about its towns
-##     it ranges over (a share of the way to its nearest neighbour), its name
-##     lettered across it;
+##   - every people we know is a patch of colour: the land its towns
+##     actually claim (nation_borders.gd claims, the same ones the borders
+##     are cut from), cut where another people's claim is stronger, its name
+##     lettered across it. Early on a people's land is a speck in open
+##     country; it grows with its towns until lands meet;
 ##   - the towns' paper cards give way to small dots and plain names, as on a
 ##     strategic map, so the war reads before the towns do;
-##   - a front stands between us and each people at feud or war, inked in
-##     both colours, solid with teeth toward them while it is hot, dashed
-##     while it is quiet, with who is winning in a small bar;
+##   - a front stands only where our land meets theirs: the war chart
+##     (war_front_overlay.gd) works it while the war or feud is hot; here it
+##     is dashed in both colours while quiet. Where open land lies between
+##     us there is no front: the chip says how many days' march lies between
+##     (the general's own road), with who is winning in a small bar;
 ##   - while a feud is hot, a dashed arrow from their nearest town toward ours
 ##     says their raiders may come;
 ##   - our army at home is a counter on our chief town (the men under arms,
@@ -31,6 +35,7 @@ const ArmyBar:=preload("res://scripts/hud/army_bar.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
 const Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
 const Borders:=preload("res://scripts/nation_borders.gd")
+const Partition:=preload("res://scripts/nation_border_partition.gd")
 const Law:=preload("res://scripts/army_levy_law.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
@@ -40,26 +45,14 @@ const COLLECT_EVERY:=0.5
 ## The camera eases to and from the war view over this long (seconds).
 const FRAME_SECONDS:=0.6
 ## The war view never comes closer than this, nor goes wider (camera size, km).
-const FRAME_MIN:=18.0
+const FRAME_MIN:=5.0
 const FRAME_MAX:=1600.0
 ## Room left around what is framed.
 const FRAME_MARGIN:=1.3
 ## Known towns this far from home are read (km).
 const REACH_KM:=2400.0
-## A people's ground: this share of the way to its nearest neighbour's town,
-## within these bounds (km); alone, the middle of them.
-const RANGE_SHARE:=0.38
-const RANGE_MIN_KM:=12.0
-const RANGE_MAX_KM:=180.0
-## A people with no neighbour we know of ranges this far (km).
-const RANGE_LONE_KM:=20.0
 ## A people's ground is at least this wide about each town on screen (px).
 const LAND_MIN_PX:=30.0
-## A front with no drawn meeting line is this share of the distance long,
-## within these bounds (km).
-const FRONT_SHARE:=0.32
-const FRONT_MIN_KM:=4.0
-const FRONT_MAX_KM:=120.0
 ## Word of an enemy's host older than this is drawn faded (days).
 const STALE_DAYS:=180
 ## Colours: our blue for our side of a front, ink, paper and war red.
@@ -87,6 +80,8 @@ var counters:Control
 ## What the pointer can rest on, as last drawn: [{rect | poly | line, lines}],
 ## topmost first; and the one it rests on now (its index, -1 for none).
 var hits:Array=[]
+## Strangers' claims kept between reads (nation_borders foreign_claims cache).
+var _claim_cache:={}
 var hovered:=-1
 
 
@@ -242,19 +237,23 @@ func collect()->Dictionary:
 		# A town reported burned (the borders' own reading of the report).
 		towns.append({"name":String(city.get("name","")),"at":at,"owner":owner,"chief":false,"ruin":Borders._report_damage(city)>=0.6})
 	out.towns=towns
-	# Each people's ground: a share of the way to its nearest neighbour.
-	var ranges:=_ranges(towns)
-	for t:Dictionary in towns:
-		if String(t.owner)=="" or bool(t.get("ruin",false)): continue
-		(out.lands as Array).append({"owner":String(t.owner),"center":t.at,"radius":float(ranges.get(String(t.owner),40.0))})
+	# Each people's land: its towns' real claims, each cut where another
+	# people's claim is stronger (nation_border_partition's own score).
+	out.lands=lands(Borders.own_claims(_settlements())+Borders.foreign_claims(home,REACH_KM,_claim_cache))
 	# Our bands out (the chart draws them; the view frames them).
 	for army in MilitaryCampaign.field_armies:
 		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
 		var pos:=_v2((army as Dictionary).get("position",{}))
 		if pos.is_finite(): frame.append(pos)
-	# Our ground, whole, in the frame.
+	# Our land, whole, in the frame.
 	for land:Dictionary in out.lands:
 		if String(land.owner)=="player": frame.append_array(_extent(land.center,float(land.radius)))
+	# Lands that meet ours: the lines drawn where they meet.
+	var meets:={}
+	for line:Dictionary in Borders.published:
+		var owners:Array=line.owners
+		if owners[0]=="player": meets[String(owners[1])]=true
+		elif owners[1]=="player": meets[String(owners[0])]=true
 	# Every people at feud or war with us: their front and their host.
 	for e:Dictionary in Ledger.entries():
 		if String(e.get("kind",""))=="ended": continue
@@ -281,7 +280,10 @@ func collect()->Dictionary:
 			"As the war leader reckons it" if age<99999 else "We have no word of their towns",
 			("Our word of them is %s old" % Ledger.span_words(age)) if age<99999 else "",
 			("Worn by the fighting: %d%%" % roundi(float(e.get("their_worn",0.0))*100.0)) if float(e.get("their_worn",0.0))>0.0 else ""])
-		(out.enemies as Array).append({"tip_front":_lines(front_tip),"tip_host":_lines(host_tip),"civ_id":civ_id,"name":people,"there":there,"guessed":guessed,"front":_front(civ_id,home,there),
+		var front:=_front(civ_id,home,there)
+		var apart:=_apart_days(civ_id,home,there) if front.is_empty() else 0
+		if front.is_empty():front_tip.insert(1,"No front: open land lies between us%s" % ((", about %s on the road" % Ledger.span_words(apart)) if apart>0 else ""))
+		(out.enemies as Array).append({"tip_front":_lines(front_tip),"tip_host":_lines(host_tip),"civ_id":civ_id,"name":people,"there":there,"guessed":guessed,"front":front,"apart":apart,"meets":meets.has(civ_id),
 			"hot":bool(e.get("hot",false)),"war":String(e.get("kind",""))=="war","fighters":fighters,"stale":age>STALE_DAYS,
 			"worn":clampf(float(e.get("their_worn",0.0)),0.0,1.0),"ours_share":clampf(raw/(1.0+raw),0.05,0.95),"color":_color(civ_id)})
 	# Our army at home (army_bar.gd levy_card): on our chief town.
@@ -300,7 +302,7 @@ func collect()->Dictionary:
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
 		"tab":("%d in drill" % int(levy.get("drill",0))) if int(levy.get("drill",0))>0 else ""}
 	out.frame=frame
-	out.signature=hash([towns.size(),str(out.enemies.map(func(x:Dictionary)->Array:return [x.civ_id,x.hot,x.fighters,x.stale,snappedf(float(x.ours_share),0.02)])),levy.get("ready",0),levy.get("drill",0),levy.get("watch",0)])
+	out.signature=hash([Borders.published_revision,str(out.enemies.map(func(x:Dictionary)->int:return (x.front as PackedVector2Array).size())),towns.size(),str((out.lands as Array).map(func(l:Dictionary)->Array:return [l.owner,(l.center as Vector2).snapped(Vector2.ONE*0.01),snappedf(float(l.radius),0.01),(l.outline as PackedVector2Array)[0].snapped(Vector2.ONE*0.01) if not (l.outline as PackedVector2Array).is_empty() else Vector2.ZERO])),str(out.enemies.map(func(x:Dictionary)->Array:return [x.civ_id,x.hot,x.fighters,x.stale,snappedf(float(x.ours_share),0.02)])),levy.get("ready",0),levy.get("drill",0),levy.get("watch",0)])
 	return out
 
 
@@ -312,26 +314,6 @@ func _settlements()->Array:
 			var network:Variant=model.call("settlement_network_snapshot")
 			if network is Dictionary and (network as Dictionary).get("settlements") is Array: return network.settlements
 	return GameState.player_settlements
-
-
-## Each people's reach (km): a share of the way from its towns to the
-## nearest town of any other people we know, within bounds.
-static func _ranges(towns:Array)->Dictionary:
-	var nearest:={}
-	for a:Dictionary in towns:
-		var owner:=String(a.owner)
-		if owner=="" or bool(a.get("ruin",false)): continue
-		for b:Dictionary in towns:
-			var other:=String(b.owner)
-			if other==owner or other=="" or bool(b.get("ruin",false)): continue
-			var d:=(a.at as Vector2).distance_to(b.at)
-			if not nearest.has(owner) or d<float(nearest[owner]): nearest[owner]=d
-	var out:={}
-	for a:Dictionary in towns:
-		var owner:=String(a.owner)
-		if owner=="" or out.has(owner): continue
-		out[owner]=clampf(float(nearest[owner])*RANGE_SHARE,RANGE_MIN_KM,RANGE_MAX_KM) if nearest.has(owner) else RANGE_LONE_KM
-	return out
 
 
 ## A ground's four furthest points, to frame it whole.
@@ -376,29 +358,67 @@ static func _word_age(civ_id:String)->int:
 	return 99999 if newest<0 else maxi(0,today-newest)
 
 
-## The front with a people: the drawn line where our lands meet, else a
-## stretch across the way between us, halfway.
-static func _front(civ_id:String,home:Vector2,there:Vector2)->PackedVector2Array:
+## The front with a people: the drawn line where our lands meet (the
+## longest when they meet in several places); none while open land lies
+## between us. A front is ground held against ground, never a line drawn
+## across open country.
+static func _front(civ_id:String,_home:Vector2,_there:Vector2)->PackedVector2Array:
+	var best:=PackedVector2Array()
 	for line:Dictionary in Borders.published:
 		var owners:Array=line.owners
 		if (owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id):
 			var points:PackedVector2Array=line.points
-			if points.size()>=2: return points
-	var gap:=there-home
-	var dist:=gap.length()
-	if dist<=0.01: return PackedVector2Array()
-	var mid:=home+gap*0.5
-	var across:=Vector2(-gap.y,gap.x)/dist
-	var half:=clampf(dist*FRONT_SHARE*0.5,FRONT_MIN_KM*0.5,FRONT_MAX_KM*0.5)
-	# A hand-inked line, never a ruler's: a little wander, the same each time.
-	var r:=RandomNumberGenerator.new(); r.seed=hash("front|"+civ_id)
-	var out:=PackedVector2Array()
-	var steps:=10
-	for i in steps+1:
-		var t:=-1.0+2.0*float(i)/float(steps)
-		var wander:=(r.randf()-0.5)*half*0.22*(1.0-absf(t))
-		out.append(mid+across*half*t+gap/dist*wander)
+			if points.size()>=2 and points.size()>best.size(): best=points
+	return best
+
+
+## Days of road between our home and their nearest town, by the general's
+## own reckoning (war_allocation_model enemy), kept while their town stands
+## where it stood.
+static var _apart_cache:={}
+static func _apart_days(civ_id:String,home:Vector2,there:Vector2)->int:
+	var key:=hash([civ_id,home.snapped(Vector2.ONE),there.snapped(Vector2.ONE)])
+	if _apart_cache.has(key): return int(_apart_cache[key])
+	var e:Dictionary=preload("res://scripts/hud/war_allocation_model.gd").enemy(civ_id,0)
+	var days:=int((e.get("nearest",{}) as Dictionary).get("days",0))
+	if days<=0 and there.is_finite(): days=ceili(home.distance_to(there)/16.0)
+	if _apart_cache.size()>64: _apart_cache.clear()
+	_apart_cache[key]=days
+	return days
+
+
+## Every people's land from the claims: [{owner, center, radius, outline
+## (world points, one per bearing)}], each claim cut back along each bearing
+## to where another people's claim scores higher (the partition's rule: a
+## place goes to the claim that scores highest there).
+static func lands(claims:Array)->Array:
+	var out:Array=[]
+	var samples:=Partition.SHAPE_SAMPLES
+	for claim:Dictionary in claims:
+		var rivals:=claims.filter(func(c:Dictionary)->bool: return String(c.owner)!=String(claim.owner) and (c.center as Vector2).distance_to(claim.center)<float(c.radius)+float(claim.radius))
+		var table:PackedFloat32Array=claim.table
+		var outline:=PackedVector2Array()
+		var center:Vector2=claim.center
+		for k in samples:
+			var dir:=Vector2.RIGHT.rotated(TAU*float(k)/float(samples))
+			var reach:=float(table[k])
+			if not rivals.is_empty() and _wins(claim,rivals,center+dir*reach)==false:
+				var lo:=0.0;var hi:=reach
+				for step in 12:
+					var mid:=(lo+hi)*0.5
+					if _wins(claim,rivals,center+dir*mid): lo=mid
+					else: hi=mid
+				reach=lo
+			outline.append(center+dir*reach)
+		out.append({"owner":String(claim.owner),"center":center,"radius":float(claim.radius),"outline":outline})
 	return out
+
+
+static func _wins(claim:Dictionary,rivals:Array,point:Vector2)->bool:
+	var mine:=Partition.claim_score(claim,point)
+	for rival:Dictionary in rivals:
+		if Partition.claim_score(rival,point)>mine: return false
+	return true
 
 
 static func _color(owner:String)->Color:
@@ -557,8 +577,10 @@ func _draw()->void:
 		draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,5,Color(PAPER,0.7))
 		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color((n.color as Color).darkened(0.5),0.85))
 	for e:Dictionary in scene.get("enemies",[]):
-		_draw_front(e)
-		if (bool(e.hot) or bool(e.war)) and not bool(e.guessed): _draw_threat(e)
+		# A hot front is the war chart's to work (war_front_overlay border
+		# fronts); a quiet one is dashed here.
+		if not (bool(e.hot) or bool(e.war)): _draw_front(e)
+		if (bool(e.hot) or bool(e.war)) and not bool(e.guessed) and (e.front as PackedVector2Array).is_empty(): _draw_threat(e)
 
 
 ## How far the war leader's count of a host may be off: wider when our word
@@ -591,7 +613,17 @@ func _land_of(owner:String)->Array:
 		if String(land.owner)!=owner: continue
 		var c:=_screen(land.center)
 		if not c.is_finite(): continue
-		towns.append({"at":c,"r":clampf(float(land.radius)*_px_per_km(land.center),LAND_MIN_PX,420.0)})
+		# The land as claimed, on screen; a speck at least, so a village far
+		# off still shows where it lies.
+		var ring:=PackedVector2Array()
+		for q:Vector2 in (land.get("outline",PackedVector2Array()) as PackedVector2Array):
+			var on:=_screen(q)
+			if on.is_finite(): ring.append(on)
+		var r:=float(land.radius)*_px_per_km(land.center)
+		if r<LAND_MIN_PX or ring.size()<3:
+			ring=PackedVector2Array()
+			for n in 20: ring.append(c+Vector2.RIGHT.rotated(TAU*float(n)/20.0)*maxf(r,LAND_MIN_PX))
+		towns.append({"at":c,"r":maxf(r,LAND_MIN_PX),"ring":ring})
 	var group:=range(towns.size())
 	for i in towns.size():
 		for j in range(i+1,towns.size()):
@@ -607,13 +639,19 @@ func _land_of(owner:String)->Array:
 		# Packed arrays are values: build the ring here, then store it back.
 		var ring:PackedVector2Array=clusters.get(key,PackedVector2Array())
 		var t:Dictionary=towns[i]
-		for n in 20: ring.append((t.at as Vector2)+Vector2.RIGHT.rotated(TAU*float(n)/20.0)*float(t.r))
+		ring.append_array(t.ring)
 		clusters[key]=ring
 	var out:Array=[]
 	for key in clusters:
-		var hull:=Geometry2D.convex_hull(clusters[key])
-		if hull.size()>=2 and hull[0].is_equal_approx(hull[hull.size()-1]): hull.remove_at(hull.size()-1)
-		if hull.size()>=3: out.append(hull)
+		var members:=0
+		for i in towns.size():
+			if group[i]==key: members+=1
+		# A lone town keeps its own cut outline (concave where a rival's
+		# land bites into it); a cluster is drawn as its hull.
+		var shape:PackedVector2Array=clusters[key] if members==1 else Geometry2D.convex_hull(clusters[key])
+		if shape.size()>=2 and shape[0].is_equal_approx(shape[shape.size()-1]): shape.remove_at(shape.size()-1)
+		if shape.size()>=3 and (members>1 or not Geometry2D.triangulate_polygon(shape).is_empty()): out.append(shape)
+		elif shape.size()>=3: out.append(Geometry2D.convex_hull(shape))
 	return out
 
 
@@ -735,19 +773,24 @@ func _draw_tip(canvas:Control,lines:PackedStringArray)->void:
 ## clear of everything already placed.
 func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2:
 	var line:PackedVector2Array=e.get("front",PackedVector2Array())
-	if line.size()<2: return Rect2()
+	var home:=_screen(scene.home)
+	var there:=_screen(e.there)
+	if not home.is_finite() or not there.is_finite(): return Rect2()
 	var pts:=PackedVector2Array()
 	for p in line:
 		var q:=_screen(p)
 		if not q.is_finite(): return Rect2()
 		pts.append(q)
-	var home:=_screen(scene.home)
-	var there:=_screen(e.there)
-	if not home.is_finite() or not there.is_finite(): return Rect2()
+	# No front: the chip stands on the way between us, a third of the way
+	# from their town, and says how far.
+	if pts.size()<2:
+		var mid:=there.lerp(home,0.33)
+		pts=PackedVector2Array([mid,mid])
 	var toward:=(there-home).normalized()
 	var hot:=bool(e.hot) or bool(e.war)
 	var font:=T.font("ui_strong")
 	var words:=String(e.name).to_upper()+("  WAR" if bool(e.war) else ("  HOT" if bool(e.hot) else ""))
+	if line.size()<2 and int(e.get("apart",0))>0: words+="  · %s off" % Ledger.span_words(int(e.apart))
 	var fs:=12
 	var tw:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
 	var w:=maxf(70.0,tw+12.0)

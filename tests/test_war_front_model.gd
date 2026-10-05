@@ -102,3 +102,41 @@ func test_a_clash_carries_the_generals_tactic_shape()->void:
 	assert_str(String(clash.label)).is_equal("A double envelopment")
 	assert_float(float(clash.shape_ours.closure)).is_greater(0.0)
 	assert_float(float(clash.shape_ours.wings)).is_greater(0.5)
+
+
+## The border between our town at x=0 and theirs at x=10: a line at x=5.
+static func _border()->PackedVector2Array:
+	var line:=PackedVector2Array()
+	for i in 21: line.append(Vector2(5.0,-10.0+float(i)))
+	return line
+
+
+func test_at_war_the_front_is_where_our_lands_meet()->void:
+	var quiet:=Model.border_front(_border(),[Vector2(0,0)],[Vector2(10,0)],[],[],"kez")
+	assert_bool(bool(quiet.border)).is_true()
+	assert_bool(bool(quiet.quiet)).is_true()
+	# With no force near it, the front is the border itself, teeth into their land.
+	assert_float(_mean(quiet.points).x).is_equal_approx(5.0,0.01)
+	assert_float((quiet.toward as PackedVector2Array)[10].x).is_greater(0.0)
+	# A strong host of ours at the middle of the border bends it into their
+	# ground there; the ends stay on the border.
+	var ours:=[{"id":"1","army_id":1,"pos":Vector2(4.5,0),"strength":6000.0}]
+	var theirs:=[{"id":"a","pos":Vector2(6,0),"strength":600.0,"age_days":0}]
+	var worked:=Model.border_front(_border(),[Vector2(0,0)],[Vector2(10,0)],ours,theirs,"kez")
+	assert_bool(bool(worked.quiet)).is_false()
+	var pts:PackedVector2Array=worked.points
+	assert_float(pts[pts.size()/2].x).is_greater(5.05)
+	assert_float(pts[0].x).is_equal_approx(5.0,0.01)
+	assert_float(pts[pts.size()-1].x).is_equal_approx(5.0,0.01)
+	# The bend is bounded: a share of the theatre's scale, never a lunge.
+	assert_float(pts[pts.size()/2].x).is_less(5.0+float(worked.sigma)*Model.BORDER_BEND+0.01)
+
+
+func test_a_border_front_stands_in_any_age_once_lands_meet()->void:
+	# The raid age draws no front from the forces, but a shared border at
+	# war is a front all the same; a front along it gives way to it.
+	var built:=Overlay.compose({"mode":"raid","stage":"band","friendly":[],"enemy":[],"borders":[{"civ":"kez","points":_border(),"ours_at":[Vector2(0,0)],"theirs_at":[Vector2(10,0)]}]})
+	assert_int((built.fronts as Array).size()).is_equal(1)
+	assert_bool(bool(built.fronts[0].border)).is_true()
+	# No shared border: no front in the raid age.
+	assert_array(Overlay.compose({"mode":"raid","stage":"band","friendly":[],"enemy":[]}).fronts).is_empty()
