@@ -1,3 +1,24 @@
+## October 4, 2026 — forward court walking
+
+Source `385c3806` on `codex/court-walk-facing` reverses the two backward-authored
+base walking cycles in all seven figures and fixes their Blender source clock.
+Code integration `c893daf7` combines the change with canonical/origin main
+`be9bc80b`, preserving the completed Wealth work without conflicts.
+Court visitors now recover their lifted leg forward while their low foot
+moves backward against forward body travel. Existing meshes, native heads,
+clothes, bone rests, clip timestamps and every other animation are unchanged.
+
+Combined validation passes 119/119 cases across six court suites, including
+imported ankle/toe motion across all bodies and five builds. Private GPU
+entrance, speech-during-entry and departure captures passed in tiers 0 and 1;
+the test process exited. Binary reconstruction proves the asset change is
+limited to walking samples. Details: `docs/COURT_WALK_HANDOFF.md`.
+
+Save-compatible presentation change; no simulation hotspots edited. Normal
+foot sliding in the existing poses remains. The canonical player is untouched
+and loads the correction on its next normal launch. Delivery verifies origin
+main before canonical fast-forward; local imports and captures are excluded.
+
 ## October 4, 2026 — illustrated Wealth overview
 
 Integration on `codex/wealth-visuals`, base `d7d4850c`, includes runtime through
