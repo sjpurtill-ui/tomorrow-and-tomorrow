@@ -1,3 +1,34 @@
+## October 4 — Great Works in construction and dedication: INTEGRATION VALIDATED
+
+Prepared on `codex/great-works-experience` from main `99841060`, with subsequent
+main `22e31df1` and `8bd11fdd` merged without conflicts. Runtime through
+`72ea607b` adds retained, rotatable 3D construction models, planned outlines,
+scaffolds, live clock controls and an automatic inspection pause when the work
+is ready for dedication. Existing map forms, material choices and actual work
+progress drive the model; the UI never advances the construction engine.
+
+Dedications now assemble the recorded builder, official and foreign envoys
+in a 3D forecourt using the court's figures and acting. Early offerings,
+unveilings, later ribbons and electric opening lights follow supported
+capabilities. Naming, gifts and consequences still go through GreatWorks.dedicate.
+Models persist across unchanged updates; inspector viewports sleep between
+changes and ceremonial animation stops when idle. Current procedural forms
+are reused; this does not add a full new monument art library for every era.
+
+Final combined regression: 69/69 cases across eight suites, clean engine log,
+no failures, skips or orphans, report 21 and exit 0. Final private GPU:
+252/252 checks, twelve cases, eighteen captures, clean log and exit 0.
+Pixel checks prove real viewport sleep/wake behavior. These prepared-record
+checks are not a campaign or FPS benchmark. Details and limits:
+`docs/GREAT_WORK_3D_HANDOFF.md` and `docs/GREAT_WORK_3D_ACCEPTANCE.md`.
+
+No save-schema, cost, progression, odds, population or labor-owner changes.
+A small court fade guard also fixes an immediate-close deferred error found
+by the combined tests. Delivery verifies remote main before the canonical
+fast-forward and preserves the existing 4700-file local inventory. Captures,
+imports, reports and isolated userdata stay local. The player was not restarted;
+the next normal canonical launch loads the new scripts.
+
 ## October 4 — court walking direction: INTEGRATION VALIDATED
 
 Source `385c3806` on `codex/court-walk-facing`, based on `d7d4850c`, combines

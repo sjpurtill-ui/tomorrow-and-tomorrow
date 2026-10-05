@@ -1,3 +1,36 @@
+## October 4, 2026 — Great Work construction and court-like dedications
+
+Integration on `codex/great-works-experience`, base `99841060`, combines the
+3D model/view through worker `ec691b17`, ceremony through `5fd87a55`, and
+Atlas/watch controls through `928d999f`. Runtime integration is `72ea607b`.
+Concurrent main `8bd11fdd`, including the earlier Research pace wording,
+is merged without conflicts. Each selected work now has a rotatable, zoomable
+model built from actual progress and the existing form/material catalog.
+Planned outlines and scaffolds distinguish unfinished construction. Watching
+uses the ordinary game clock and pauses when its real dedication is pending.
+
+The dedication uses the court's existing people and acting in a 3D forecourt.
+Its early offering, unveiling, ribbon or electric-light ritual follows known
+capabilities. The completed monument remains visible; camera shots frame its
+speakers or the entire work. Names, received gifts and recorded effects retain
+the existing GreatWorks.dedicate authority. Preview and postponement confer
+no gifts or rewards. Bounded geometry/cast and sleeping viewports keep the
+new presentation from continuously rebuilding or drawing unchanged work.
+
+Final validation: 69/69 combined cases across eight suites; 252/252 private
+GPU checks across twelve prepared fixtures and eighteen captures. Both logs
+are clean and processes exit 0. Pixel-level sleep/wake checks verify the actual
+inspector render cache. Details, source hashes, commands and limits are in
+`docs/GREAT_WORK_3D_HANDOFF.md` and `docs/GREAT_WORK_3D_ACCEPTANCE.md`.
+This is the current procedural monument library, not an all-era art replacement
+or a continuous campaign performance certification.
+
+Save-compatible presentation change with no construction economy or state-owner
+changes. A queued court fade now safely cancels after an immediate close.
+Remote main is verified before canonical fast-forward; existing local files
+are preserved. Generated captures/imports/reports remain local. The running
+player remains untouched and gets the scripts on its next normal launch.
+
 ## October 4, 2026 — forward court walking
 
 Source `385c3806` on `codex/court-walk-facing` reverses the two backward-authored
