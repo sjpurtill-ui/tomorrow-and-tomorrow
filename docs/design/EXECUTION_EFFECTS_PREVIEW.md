@@ -52,22 +52,29 @@ user data, and unrelated imported assets are excluded from the commit.
 
 ## Burning voice follow-up
 
-The burning victim now gives a 4.45-second synthesized scream, beginning 0.1s
-past ignition and weakening through collapse. It uses the actual victim figure's
-court voice profile (age, sex and individual timbre), at -5dB, with strained open
-vowels, short breaths and an ending fade. It is independent of crowd dread,
+The user rejected the synthesized scream as breathy singing. It is replaced
+with recorded male/female performances (CC0; assets/audio/court/SOURCES.md),
+beginning 0.1s past ignition at -5dB. The male recording lasts about 3.5s; the
+female recording is a short natural 1.14s scream. Neither is looped or stretched.
+Selection follows the victim's voice register, with at most 2% seeded rate
+variation. These are two stock performances, not unique voices per individual.
+The fire act's synthesized crowd reactions, cough and muttered aside are omitted
+to remove the competing breathy overlay; other court scenes remain unchanged.
+The victim's scream is independent of crowd dread,
 respects gore-off, and uses the existing execution cancellation epoch and audio
 pool so skipping stops queued/playing vocals and rejects late worker results.
 No new room-reaction choice can make bystanders randomly scream this way.
 
-Audio follow-up validation: 16/16 court execution sound tests, zero errors,
-failures, skips or orphans (report 10). New tests check victim attachment,
-ignition-relative timing, duration, male/female voice distinction, deterministic
-output, bounded peaks, fade, gore-off and stale-job cancellation. Two headless
+Audio follow-up validation: 17/17 sound tests pass, zero errors, failures,
+skips or orphans (report 11). Coverage includes victim attachment, ignition-relative timing,
+duration, male/female recording distinction, deterministic output, bounded peaks,
+edge fades, PCM import format, absence of the fire crowd overlay, gore-off and
+stale-job cancellation. These checks do not establish perceived audio quality.
+Two headless
 6-second audio examples contain ignition, the scream and fire pops; no speaker
 or player session was used. Reproduce with --headless --audio-driver Dummy
 --path <this worktree> -s res://tests/court_burn_voice_preview.gd.
-Examples: artifacts/execution-preview/burn-scream-{male,female}.wav.
+Examples: artifacts/execution-preview/burn-recorded-{male,female}.wav.
 
 Additional shared ownership: court_sound.gd and court_reactions.gd. Audio previews
 remain local. This follow-up is still HELD with the visual branch for review;

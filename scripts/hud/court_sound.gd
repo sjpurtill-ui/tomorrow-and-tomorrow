@@ -651,6 +651,8 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 		var cond:=String(item.get("if",""))
 		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
 		var cue_name:=String(item.cue)
+		# Let the recorded victim carry this scene; no overlapping airy crowd or cough.
+		if String(act)=="into_the_fire" and (cue_name in Gore.ROOM_NOISE or cue_name=="cough"):continue
 		if cue_name=="punch":punch_at=float(item.t)
 		if frightened and cue_name in Gore.ROOM_NOISE:continue
 		# the room's noises come from the people present, each in their own voice
@@ -666,7 +668,7 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 		if v>=0:o["variant"]=v
 		if who=="musician":o["pan"]=_music_pan()
 		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o,"act":_act_epoch})
-	if not frightened and not people.is_empty() and rrng.randf()<0.75:
+	if String(act)!="into_the_fire" and not frightened and not people.is_empty() and rrng.randf()<0.75:
 		# and someone mutters an aside, in their own tongue, under their breath
 		var who:Dictionary=people[rrng.randi_range(0,people.size()-1)]
 		_job(jobs,who,"mutter",now+lead+punch_at+rrng.randf_range(0.9,1.6),rrng)

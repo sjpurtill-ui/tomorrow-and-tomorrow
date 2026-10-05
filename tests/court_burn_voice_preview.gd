@@ -1,5 +1,5 @@
 extends SceneTree
-## Headless audio examples from the same synthesis and timing used at court.
+## Headless audio examples from the same recordings and timing used at court.
 const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Reactions:=preload("res://scripts/hud/court_reactions.gd")
 const Gore:=preload("res://scripts/hud/court_gore_foley.gd")
@@ -16,7 +16,7 @@ func render_examples()->void:
 		Synth.mix_into(samples,Reactions.make("burn_scream",spec,81),Synth.n_of(0.1),db_to_linear(-5.0))
 		for at:float in [1.2,3.1,5.4]:Synth.mix_into(samples,Gore.make("fire_pop",2),Synth.n_of(at),0.16)
 		var stream:=Synth.to_stream(samples)
-		var error:=stream.save_to_wav(folder+"burn-scream-"+sex+".wav")
+		var error:=stream.save_to_wav(folder+"burn-recorded-"+sex+".wav")
 		if error!=OK:push_error("Could not save audio example");quit(1);return
 		print("BURN_VOICE_PREVIEW ",sex," seconds=",stream.get_length()," peak=",Synth.peak_of(samples))
 	quit(0)

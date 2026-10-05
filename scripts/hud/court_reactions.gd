@@ -14,6 +14,7 @@ extends RefCounted
 ## (the punchline), "applause" (the flatterer's moment), "sick".
 ## Pure; make() is safe on a worker thread.
 
+const Screams:=preload("res://scripts/hud/court_recorded_screams.gd")
 const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Synth:=preload("res://scripts/hud/court_synth.gd")
 const RATE:=22050
@@ -84,17 +85,7 @@ static func make(kind:String,voice:Dictionary,seed_value:int)->PackedFloat32Arra
 	var b:PackedFloat32Array
 	match kind:
 		"burn_scream":
-			# The victim's own register, strained into an open, breaking cry.
-			# Fixed duration follows ignition at 2.5s through collapse at 7.15s.
-			v["rd"]=0.45;v["tilt"]=4200.0;v["breath"]=0.12
-			v["jitter"]=0.018;v["shimmer"]=0.08;v["tremor"]=0.045;v["tremor_hz"]=8.3
-			var steps:Array=[[0.08,"a",0.0,0.75,1.3],[0.12,"a",0.95,0.16,2.05]]
-			for k in 16:
-				var breath:=k in [5,10]
-				steps.append([0.2,"ae" if k%4==2 else "a",0.12 if breath else 0.95,0.6 if breath else 0.18,p.call(1.85+0.3*sin(k*1.7))])
-			steps.append_array([[0.30,"a",0.6,0.3,1.55],[0.35,"a",0.3,0.38,1.22],[0.35,"a",0.0,0.0,1.0]])
-			b=Voice.gesture(v,steps,rng.randi(),{"fear":0.95,"anger":0.35})
-			Synth.fade_edges(b,0.008,0.35)
+			b=Screams.samples(voice)
 		"gasp":
 			v["breath"]=0.3
 			b=Voice.gesture(v,[[0.012,"a",0.0,0.0,1.0],[s.call(0.05),"a",0.0,1.0,1.0],[s.call(0.07),"e",0.15,0.8,p.call(1.3)],[s.call(0.1),"e",0.1,0.5,p.call(1.35)],[0.06,"y",0.0,0.1,1.2]],rng.randi(),{"fear":0.5})
