@@ -653,8 +653,8 @@ func test_the_wealth_tab_shows_business_with_short_plain_labels()->void:
 	assert_bool((board.find_child("StanceChoice",true,false) as Control).visible).is_true()
 	# The section follows what the makers make and comes before who holds the wealth.
 	var order:=[]
-	for child in board.get_children():
-		if child is Label:order.append((child as Label).text)
+	for child in board.find_children("*","Label",true,false):
+		if child.get_meta("wealth_section",false):order.append((child as Label).text)
 	assert_int(order.find("TRADE AND BUSINESS")).is_greater(order.find("WHAT WE MAKE"))
 	assert_int(order.find("TRADE AND BUSINESS")).is_less(order.find("WHO HOLDS THE WEALTH"))
 	# A stance chosen on the screen is the engine's stance.
