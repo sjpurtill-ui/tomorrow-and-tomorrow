@@ -15,6 +15,7 @@ extends Node
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
+const Effects:=preload("res://scripts/hud/court_execution_effects.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
 const Director:=preload("res://scripts/hud/court_director.gd")
 ## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
@@ -66,6 +67,8 @@ func begin(on_stage:Control,method_id:String,victim_key:String,how:String)->void
 var _pieces:Dictionary={}
 ## Where their neck was at the blow (the spray comes from there).
 var _necks:Dictionary={}
+var _wounds:Dictionary={}
+var _bleeding:Dictionary={}
 
 # --- the beats ------------------------------------------------------------------------
 
@@ -88,9 +91,10 @@ func op(name:String,args:Dictionary)->void:
 		"drag":_drag(args)
 		"walk":_walk_to(String(args.get("who",victim)),point(String(args.get("to","petitioner"))),float(args.get("time",1.0)))
 		"heave":_heave(args)
+		"burn":_burn(String(args.get("who",victim)),float(args.get("seconds",7.0)))
 		"flare":
 			var court:=_court()
-			if court!=null and court.has_method("fire_flare"):court.call("fire_flare",1.2,0.8)
+			if court!=null and court.has_method("fire_flare"):court.call("fire_flare",float(args.get("seconds",1.2)),float(args.get("strength",0.8)))
 		"dogs":_dogs(args)
 		"fetch":_fetch(args)
 		"throw":_throw(args)
@@ -928,9 +932,16 @@ func _on_plan_cue(fig:Node3D,event:Dictionary)->void:
 				args["blink_at"]=float(part.get("blink_t",float(part.get("t1",1.0))+0.8))-float(part.get("t0",0.0))
 			else:
 				args["fly"]="pot";args["land_y"]=0.7
+			if method=="behead":
+				args["face_god"]=false;args["blink"]=false;args["arc"]=0.12;args["spin"]=0.65
 			_behead(args)
+			if method=="behead":
+				_bleed(victim)
+				_tween().tween_callback(_fall.bind(victim,"side",0.7)).set_delay(0.28)
 		"spray","geyser":
 			if style!="full":return
+			if method=="behead":
+				_bleed(victim);return
 			var dir_local:Array=event.get("dir",[0,1,0])
 			var dir:=fig.global_transform.basis*Vector3(float(dir_local[0]),float(dir_local[1]),float(dir_local[2]))
 			var neck:Vector3=_necks.get(victim,fig.global_position+Vector3(0,1.3,0))
@@ -1105,6 +1116,9 @@ func _behead(args:Dictionary)->void:
 		_shrink(body,{"neck":Vector3.ONE*0.02})
 	if head==null:return
 	_things["head:"+key]=head
+	if theirs:
+		var torso:Node3D=(_pieces[key] as Dictionary).get("torso_limbs")
+		if torso!=null:_wounds[key]=torso.get_node_or_null("Stump")
 	# the stump: a red cap where the neck was
 	if chest>=0 and not theirs:
 		var cap:=BoneAttachment3D.new();cap.name="ExecStump";cap.bone_name="chest"
@@ -1113,6 +1127,7 @@ func _behead(args:Dictionary)->void:
 		var stump:=_mesh(disc,BLOOD)
 		cap.add_child(stump)
 		stump.global_position=neck_world
+		_wounds[key]=stump
 	# where it goes
 	var to_name:=String(args.get("fly","floor"))
 	var to:Vector3
@@ -1143,7 +1158,7 @@ func _behead(args:Dictionary)->void:
 			t.tween_callback(_blink.bind(head))
 			t.tween_interval(0.45)
 			t.tween_callback(_blink.bind(head))
-	elif to_name!="floor" and to_name!="roll":
+	elif to_name=="pot":
 		# into the pot: it sinks out of sight
 		t.tween_property(head,"global_position",to-Vector3(0.0,0.35,0.0),0.25)
 		t.tween_callback(head.hide)
@@ -1198,6 +1213,8 @@ func _spray_at(args:Dictionary)->void:
 	if court==null:return
 	var at_name:=String(args.get("at",""))
 	var origin:Vector3
+	if method=="behead" and at_name.begins_with("neck:"):
+		_bleed(at_name.trim_prefix("neck:"));return
 	if at_name.begins_with("neck:") and _necks.has(at_name.trim_prefix("neck:")):
 		origin=_necks[at_name.trim_prefix("neck:")]
 	elif at_name.begins_with("neck:"):
@@ -1209,7 +1226,8 @@ func _spray_at(args:Dictionary)->void:
 	else:
 		origin=point(at_name)+Vector3(0.0,float(args.get("y",0.3)),0.0)
 	if court.has_method("blood"):
-		court.call("blood",String(args.get("kind","spray")),origin,args)
+		var blood:Node=court.call("blood")
+		blood.call("geyser",origin,Vector3.UP,float(args.get("seconds",1.2)),float(args.get("speed",3.4))/4.8)
 		return
 	var p:=CPUParticles3D.new();p.name="ExecBlood"
 	court.add_child(p);_made.append(p)
@@ -1328,12 +1346,29 @@ func _fetch(args:Dictionary)->void:
 
 # --- fire -----------------------------------------------------------------------------
 
+func _bleed(key:String)->void:
+	if style!="full" or _bleeding.has(key):return
+	var wound:Node3D=_wounds.get(key)
+	if not is_instance_valid(wound):return
+	var fx:=Effects.new()
+	_court().add_child(fx);_made.append(fx)
+	fx.bleed(wound,_court().call("blood"))
+	_bleeding[key]=fx
+
+func _burn(key:String,seconds:float)->void:
+	var b:=_body(key)
+	if style!="full" or b==null or not bool(b.call("gore_allowed")):return
+	var fx:=Effects.new()
+	_court().add_child(fx);_made.append(fx)
+	fx.burn(b,seconds)
+
 func _char(key:String,time:float)->void:
 	var b:=_body(key)
 	if b==null:return
 	var kit:=gore_kit()
 	if kit!=null and style=="full" and bool(kit.call("allowed",b)):
-		kit.call("char",b,true)
+		var scorch:=_tween()
+		scorch.tween_method(func(v:float)->void:if is_instance_valid(b):kit.call("char_amount",b,v),0.0,1.0,time)
 		return
 	var t:=_tween()
 	t.tween_method(func(v:float)->void:if is_instance_valid(b):b.set_light(v),1.0,0.05,time)

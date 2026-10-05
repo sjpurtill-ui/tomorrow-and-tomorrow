@@ -47,7 +47,7 @@ func test_each_acts_track_names_sounds_that_exist()->void:
 			if name=="punch":punch=true;continue
 			if name=="roll":roll=true;assert_float(float(item.t)).is_less(0.0);continue
 			assert_bool(Gore.has(name) or Foley.CUES.has(name)).override_failure_message("%s: %s is not a sound" % [act,name]).is_true()
-		assert_bool(punch and roll).override_failure_message("%s lacks the roll or the punchline" % act).is_true()
+		assert_bool((not punch and not roll) if act=="into_the_fire" else (punch and roll)).override_failure_message("%s lacks the roll or the punchline" % act).is_true()
 
 func _court(known:Array)->Node:
 	var stage:=Control.new()
@@ -78,7 +78,7 @@ func test_an_act_plays_its_roll_and_its_punchline_by_the_age()->void:
 	# a temple age rings its cymbals on the punchline; before any drum, hands on a log
 	var temple:=_court(["bone_flutes_drums","rattles_drums_pipes","harps_and_lyres","temple_choirs"])
 	temple.call("play_act","three_swing_beheading",{},{})
-	assert_array(_queued(temple)).contains(["punch_cymbal","axe_thunk","axe_clang","gore_chop","blood_geyser","blood_patter"])
+	assert_array(_queued(temple)).contains(["punch_cymbal","axe_thunk","axe_clang","gore_chop","blood_patter"])
 	var early:=_court([])
 	early.call("play_act","dog_dinner",{},{})
 	assert_array(_queued(early)).contains(["log_roll","punch_log","tug","slip","crunch","bone_drop"])
@@ -111,7 +111,7 @@ func test_all_twenty_five_acts_have_a_track()->void:
 		for item:Dictionary in track:
 			if absf(float(item.t))<0.3 and String(item.cue) not in ["roll","punch"]:at_blow=true
 			if String(item.cue)=="punch" and float(item.t)>0.5:punch_after=true
-		assert_bool(at_blow and punch_after).override_failure_message("act %d lacks a blow or a late punchline" % n).is_true()
+		assert_bool(at_blow and (not punch_after if act=="into_the_fire" else punch_after)).override_failure_message("act %d lacks a blow or a late punchline" % n).is_true()
 		# 2.5-11.5 s from the blow to the room's last word (the dog's walk back is long)
 		var last:=0.0
 		for item:Dictionary in track:last=maxf(last,float(item.t))

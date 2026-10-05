@@ -457,6 +457,11 @@ static func char(fig:Node3D,on:=true)->void:
 	if not allowed(fig):return
 	_set_all(fig,"charred",1.0 if on else 0.0)
 
+## Progressive scorching, owned by the same per-figure materials as char().
+static func char_amount(fig:Node3D,amount:float)->void:
+	if not allowed(fig):return
+	_set_all(fig,"charred",clampf(amount,0.0,1.0))
+
 ## Falls to ash from the top down (0 whole, 1 gone).
 static func crumble(fig:Node3D,amount:float)->void:
 	if not allowed(fig):return

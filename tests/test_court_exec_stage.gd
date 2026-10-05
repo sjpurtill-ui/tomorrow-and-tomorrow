@@ -216,9 +216,7 @@ func test_soundtrack_start_is_owned_by_the_same_cancellable_beats()->void:
 
 func test_a_terminal_order_keeps_the_victim_until_the_execution_finishes()->void:
 	if not _ready_or_skip():return
-	var audience:=Hall.debug_force("petition")
-	assert_bool(audience.is_empty()).is_false()
-	var modal:Control=await _open(String(audience.id))
+	var modal:Control=await _open(_home_audience())
 	var stage:Control=modal.court_stage
 	var main:Stage.Figure=stage.figure(Stage.MAIN)
 	var order:="Put %s to death in the fire." % String(main.person.get("name",""))
@@ -477,3 +475,49 @@ func test_the_dog_pack_stays_with_both_drags_and_releases_at_the_windbreak()->vo
 	exec.call("_pack_crunch",{"seconds":2.4})
 	assert_bool(follow.is_valid()).is_false()
 	stage.skip_execution()
+
+func test_beheading_flow_follows_visible_cut_through_collapse_and_skip()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	assert_bool(stage.execute("behead",Stage.MAIN)).is_true()
+	var exec:Node=stage.get_node("Execution")
+	exec._things["roll_to"]=exec.call("_point_node",Vector3(0,0,0))
+	exec.call("_behead",{"who":Stage.MAIN,"fly":"roll_to","face_god":false,"time":0.1,"land_y":0.11})
+	for t in exec._tweens:
+		if t is Tween and t.is_valid():t.custom_step(1.0)
+	assert_bool(exec._things["head:"+Stage.MAIN].visible).is_true()
+	exec.call("_bleed",Stage.MAIN)
+	var fx:Node3D=stage.court_set.get_node("WoundFlow")
+	var torso:Node3D=exec._pieces[Stage.MAIN].torso_limbs
+	var stump:Node3D=torso.get_node("Stump")
+	var before:=stump.global_position
+	torso.rotate_z(1.1);torso.global_position+=Vector3(0.3,-0.4,0.2)
+	fx.call("_update_wound",0.0)
+	assert_float(fx.drops.global_position.distance_to(stump.global_position)).is_less(0.001)
+	assert_float(fx.drops.global_position.distance_to(before)).is_greater(0.1)
+	assert_bool(fx.drops.local_coords).is_false()
+	var initial:float=fx.drops.initial_velocity_max
+	fx.elapsed=1.5;fx.call("_update_wound",0.0)
+	assert_float(fx.drops.initial_velocity_max).is_less(initial*0.3)
+	assert_int(stage.court_set.blood().jets_on()).is_equal(0)
+	exec.call("_bleed",Stage.MAIN)
+	assert_int(_named(stage,"WoundFlow")).is_equal(1)
+	stage.skip_execution();await await_idle_frame()
+	assert_int(_named(stage,"WoundFlow")).is_equal(0)
+
+func test_body_fire_scorches_gradually_and_is_removed_on_skip()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	assert_bool(stage.execute("fire",Stage.MAIN)).is_true()
+	var exec:Node=stage.get_node("Execution")
+	exec.call("_burn",Stage.MAIN,8.5)
+	assert_int(_named(stage,"BodyFire")).is_equal(1)
+	var body:Node3D=stage.figure(Stage.MAIN).body3d
+	var gore:=preload("res://scripts/hud/court_figure_gore.gd")
+	gore.char_amount(body,0.4)
+	var mat:ShaderMaterial=body._merged.Body.get_surface_override_material(0)
+	assert_float(float(mat.get_shader_parameter("charred"))).is_equal_approx(0.4,0.001)
+	stage.skip_execution();await await_idle_frame()
+	assert_int(_named(stage,"BodyFire")).is_equal(0)

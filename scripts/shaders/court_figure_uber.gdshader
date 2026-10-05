@@ -205,7 +205,10 @@ void fragment() {
 		base = mix(base, metal, bronze);
 	}
 	if (charred > 0.0) {
-		base = mix(base, vec3(0.035, 0.028, 0.024) * (0.8 + 0.4 * noise3(v_obj * 30.0)), charred);
+		float scorch = smoothstep(noise3(v_obj * 11.0) * 0.55, 0.85, charred);
+		vec3 injured = skin ? vec3(0.20, 0.045, 0.025) : base * 0.35;
+		vec3 ash = mix(vec3(0.022, 0.017, 0.015), vec3(0.12, 0.105, 0.09), noise3(v_obj * 32.0));
+		base = mix(mix(base, injured, charred), ash, scorch);
 	}
 	ALBEDO = base * dim;
 	ROUGHNESS = 1.0;
@@ -239,10 +242,10 @@ void fragment() {
 		glow = mix(glow, base * 0.10 + vec3(1.0, 0.82, 0.50) * pow(fres, 1.5) * 0.45, bronze);
 	}
 	if (charred > 0.0) {
-		// embers in the cracks, breathing
-		float crack = noise3(v_obj * 38.0 + vec3(0.0, TIME * 0.15, 0.0));
-		float ember = smoothstep(0.66, 0.74, crack) * (0.65 + 0.35 * sin(TIME * 6.0 + v_obj.y * 30.0));
-		glow = mix(glow, vec3(1.0, 0.36, 0.06) * ember * 1.6, charred);
+		// Sparse, fixed fissures under the soot; no swimming neon spots.
+		float crack = noise3(v_obj * vec3(29.0, 16.0, 29.0));
+		float ember = (1.0 - smoothstep(0.012, 0.036, abs(crack - 0.52))) * smoothstep(0.55, 0.78, noise3(v_obj * 9.0));
+		glow = mix(glow, base * 0.10 + vec3(0.6, 0.09, 0.012) * ember * (0.35 + 0.1 * sin(TIME * 2.0)), charred);
 	}
 	EMISSION = glow;
 }

@@ -2532,7 +2532,7 @@ static func _exec_mild(out:Array,ctx:Dictionary,victim:String,roles:Dictionary)-
 	var impact:=INF
 	var kept:Array=[]
 	for beat:Dictionary in out:
-		if String(beat.who)=="exec" and String(beat.act) in ["behead","spray","pool","char","crumble","fall","blow"]:
+		if String(beat.who)=="exec" and String(beat.act) in ["behead","spray","pool","burn","char","crumble","fall","blow"]:
 			impact=minf(impact,float(beat.t))
 			if String(beat.act)!="blow":continue
 		kept.append(beat)
@@ -2638,7 +2638,7 @@ static func _exec_behead(ctx:Dictionary,out:Array,victim:String,roles:Dictionary
 	_exec(out,blow+4.6,"lunge",{"who":ex,"dist":0.25,"time":0.1})
 	_beat(out,blow+4.6,ex,"swing",{"dur":0.6},"action")
 	_snd(out,blow+4.8,"chop",1.0,"crack")
-	_exec(out,blow+4.82,"behead",{"who":victim,"fly":"roll","roll_dist":1.5,"time":1.0,"arc":0.45,"spin":2.0,"face_god":true,"blink":true,"blink_at":2.18})
+	_exec(out,blow+4.82,"behead",{"who":victim,"fly":"roll","roll_dist":1.5,"time":1.0,"arc":0.45,"spin":0.65,"face_god":false,"blink":false})
 	_exec(out,blow+5.1,"spray",{"at":"neck:"+victim,"dir":"camera","seconds":1.8,"amount":120,"speed":4.4,"spread":18.0,"pool_r":0.7})
 	_exec(out,blow+5.3,"fall",{"who":victim,"kind":"forward","time":0.5})
 	_shot(out,blow+4.9,"frame",{"on":[victim,ex,"front:"+victim+":1.5"],"time":0.5})
@@ -2672,31 +2672,27 @@ static func _exec_dogs(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)-
 	_shot(out,blow+5.4,"frame",{"on":["god_feet","windbreak"],"time":0.8})
 	return length
 
-## 3. Into the fire: heaved onto the hearth, WHOOMPH; a charred figure walks
-## two steps out, coughs a ring of smoke, and crumbles to ash; the elder
-## warms their hands at the heap.
+## Sustained body fire, progressive scorching and a heavy collapse.
 static func _exec_fire(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
 	var ex:=String(roles.ex)
-	var length:=10.0
+	var length:=12.0
 	_exec_before(ctx,out,victim,roles,length)
 	_shot(out,0.0,"wide",{"weight":5})
 	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.6,"time":0.9})
 	_beat(out,1.2,ex,"grab",{"at":victim},"action")
 	_exec(out,1.5,"heave",{"who":victim,"to":"fire","time":0.9})
 	_exec(out,2.4,"blow",{})
-	_exec(out,2.4,"flare",{})
-	_snd(out,2.4,"whoomph",1.0)
-	_exec(out,2.4,"char",{"who":victim,"time":0.4})
+	_exec(out,2.4,"flare",{"seconds":3.5,"strength":0.85})
+	_exec(out,2.4,"burn",{"who":victim,"seconds":8.5})
+	_exec(out,2.4,"char",{"who":victim,"time":4.8})
 	_shot(out,2.3,"frame",{"on":[victim,"fire","petitioner"]})
-	_exec(out,3.2,"walk",{"who":victim,"to":"petitioner","time":1.4})
-	_beat(out,4.7,victim,"cough_smoke",{},"action")
-	_exec(out,5.4,"crumble",{"who":victim,"time":1.0})
-	_snd(out,5.4,"crumble",0.8)
-	_exec_after(ctx,out,5.6,victim,roles,false)
-	for elder:Dictionary in _of_kind(ctx,["elder"]):
-		_exec(out,7.0,"approach",{"who":String(elder.key),"to":"petitioner","side":1.0,"dist":0.5,"time":1.0})
-		_beat(out,8.1,String(elder.key),"warm_hands",{"dur":1.6},"reaction")
-		break
+	_beat(out,2.5,victim,"flinch",{"dur":0.7},"action")
+	_exec(out,3.2,"walk",{"who":victim,"to":"petitioner","time":2.1})
+	_beat(out,5.4,victim,"wobble",{"dur":0.8},"action")
+	_exec(out,6.3,"fall",{"who":victim,"kind":"side","time":0.85})
+	_shot(out,6.4,"frame",{"on":[victim,"fire"],"time":0.65})
+	for m:Dictionary in _people(ctx,[victim,ex]):
+		_beat(out,6.6,String(m.key),"cover_eyes_peek",{"dur":2.5},"reaction")
 	return length
 
 ## 5. Spear pincushion: the watch hurls spears; they wobble; the child's

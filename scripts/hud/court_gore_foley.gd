@@ -178,7 +178,7 @@ const ACTS:={
 		{"t":-0.12,"cue":"swing_whoosh","who":"executioner","variant":0},
 		{"t":0.0,"cue":"gore_chop","who":"victim","variant":0},
 		{"t":0.04,"cue":"bone_pop","who":"victim","variant":1},
-		{"t":0.05,"cue":"blood_geyser","who":"victim","variant":0},
+		{"t":0.05,"cue":"blood_patter","who":"victim","variant":0,"db":-9.0},
 		{"t":0.35,"cue":"room_gasp","who":"room"},
 		{"t":0.8,"cue":"blood_patter","who":"front_row","variant":0},
 		{"t":1.45,"cue":"head_roll","who":"victim","variant":1},
@@ -235,25 +235,20 @@ const ACTS:={
 		{"t":7.8,"cue":"step_earth","who":"executioner","variant":2},
 		{"t":8.2,"cue":"crowd_groan","who":"room","variant":1},
 	],
-	# 3. Into the fire: heaved on, WHOOMPH; a charred figure walks two steps,
-	# coughs a smoke ring, crumbles; the elder warms his hands.
+	# Sustained fire, footsteps, collapse and the remaining crackle.
 	"into_the_fire":[
-		# The director's impact is at 2.4 s; these share the visible walk,
-		# cough, collapse and the elder's approach, all inside the ten-second act.
-		{"t":-2.4,"cue":"roll","who":"musician"},
 		{"t":-1.0,"cue":"heave","who":"executioner","variant":0},
 		{"t":-0.3,"cue":"swing_whoosh","who":"victim","variant":1},
 		{"t":0.0,"cue":"whoomph","who":"victim","variant":0},
 		{"t":0.4,"cue":"room_gasp","who":"room"},
 		{"t":1.2,"cue":"fire_pop","who":"victim","variant":4},
-		{"t":1.05,"cue":"step_earth","who":"victim","variant":0},
-		{"t":1.65,"cue":"step_earth","who":"victim","variant":1},
-		{"t":2.3,"cue":"cough","who":"victim","variant":0},
-		{"t":2.7,"cue":"smoke_poof","who":"victim"},
-		{"t":3.0,"cue":"crumble","who":"victim"},
-		{"t":4.9,"cue":"punch","who":"musician"},
-		{"t":5.7,"cue":"rub_hands","who":"elder","db":6.0},
-		{"t":6.3,"cue":"hum_yes","who":"elder","variant":2},
+		{"t":1.3,"cue":"step_earth","who":"victim","variant":0},
+		{"t":2.1,"cue":"step_earth","who":"victim","variant":1},
+		{"t":2.6,"cue":"cough","who":"victim","variant":0},
+		{"t":3.1,"cue":"fire_pop","who":"victim","variant":2},
+		{"t":4.7,"cue":"faint_thump","who":"victim","variant":1},
+		{"t":5.4,"cue":"fire_pop","who":"victim","variant":3},
+		{"t":6.7,"cue":"fire_pop","who":"victim","variant":1},
 	],
 	# 5. Spear pincushion: spear after spear; they wobble; the child's spear
 	# hits the hide wall; one last spear, and down like a felled tree.
