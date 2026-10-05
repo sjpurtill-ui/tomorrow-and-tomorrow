@@ -1,3 +1,22 @@
+## October 4, 2026 — User-approved Trade folio and persistent top bar
+
+Delivered integration `445c44fa` combines the approved runtime `0bb4b393` with
+canonical main `ad8d0913`. Origin/main was pushed and remotely verified before
+the canonical checkout advanced. The page preserves the existing trade ledger,
+offers, pressure choices, odds and purchase callbacks, with large illustrations
+and fine rules. Each balance is one centered bar: Received left, Sent right.
+Civilization readings remain on the same gray bar as the clock and speed
+controls, whether pages are open or closed. Shared page chrome and sidebar
+tools follow the approved reference; other page redesigns still need previews.
+
+Acceptance: 630 GPU checks across nine prepared cases / 41 captures, and 35
+functional cases verified across reports 16 and 17. The only initial failure
+was a new test expecting an already-open Trade button to open rather than
+close; its assertion was corrected and the four-case folio suite passed.
+Save schemas, aggregate populations and simulation ownership are unchanged.
+All 4,705 pre-existing canonical local files were hash-verified unchanged.
+Player PID 31204 was left running; restart normally to load the delivered UI.
+
 ## October 4, 2026 — Great Work construction and court-like dedications
 
 Integration on `codex/great-works-experience`, base `99841060`, combines the
