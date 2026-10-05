@@ -33,3 +33,18 @@ func test_peace_after_first_contact_has_its_own_mood()->void:
 	relation["contact_level"]=1;civ["player_relation"]=relation
 	assert_str(Soundtrack.mood_now()).is_equal("contact")
 	relation["contact_level"]=before
+
+func test_a_later_age_piece_waits_for_its_year()->void:
+	var later:="res://assets/audio/score/calm/y500_sparse_pulse.mp3"
+	assert_int(Soundtrack.from_year(later)).is_equal(500)
+	assert_int(Soundtrack.from_year("res://assets/audio/score/calm/taut_bow.mp3")).is_equal(0)
+	assert_bool(Soundtrack.pieces_for_year("calm",172).has(later)).is_false()
+	assert_bool(Soundtrack.pieces_for_year("calm",172).has("res://assets/audio/score/calm/taut_bow.mp3")).is_true()
+	assert_bool(Soundtrack.pieces_for_year("calm",500).has(later)).is_true()
+
+func test_an_early_age_piece_stops_after_its_years()->void:
+	var early:="res://assets/audio/score/calm/y1-200_espacio_silencio.mp3"
+	assert_array(Soundtrack.years(early)).is_equal([1,200])
+	assert_bool(Soundtrack.pieces_for_year("calm",1).has(early)).is_true()
+	assert_bool(Soundtrack.pieces_for_year("calm",200).has(early)).is_true()
+	assert_bool(Soundtrack.pieces_for_year("calm",201).has(early)).is_false()
