@@ -33,7 +33,7 @@ func test_cast_is_bounded_and_drawn_only_from_supplied_people()->void:
 	assert_array(Stage.cast_for(context)).contains_exactly(cast)
 
 func test_scene_is_retained_and_idle_or_hidden_viewport_stops()->void:
-	var record:={"id":"stone_ring","form":"ring","status":"complete","progress":1.0,"condition":1.0,"outcome":"success"}
+	var record:={"id":"ancestor_ring","status":"functioning","fraction":1.0,"condition":1.0,"outcome":"success"}
 	var before:=record.duplicate(true)
 	var scene:Control=auto_free(Stage.make(record,{"key":"testwork","architect":{},"official":{},"attendees":[]}))
 	scene.size=Vector2(720,340);add_child(scene)
@@ -53,7 +53,7 @@ func test_scene_is_retained_and_idle_or_hidden_viewport_stops()->void:
 
 func test_recorded_official_uses_the_shared_court_body_and_speaking_path()->void:
 	var person:={"name":"Tovan","person_id":123,"sex":"male","age":40}
-	var scene:Control=auto_free(Stage.make({"id":"stone_ring","work_id":"stone_ring","status":"functioning","progress":1.0},{"key":"testwork","architect":{},"official":person,"attendees":[]}))
+	var scene:Control=auto_free(Stage.make({"id":"ancestor_ring","status":"functioning","fraction":1.0},{"key":"testwork","architect":{},"official":person,"attendees":[]}))
 	scene.size=Vector2(720,340);add_child(scene)
 	for frame in 2:await get_tree().process_frame
 	assert_int(scene.diagnostics().body_count).is_equal(1)

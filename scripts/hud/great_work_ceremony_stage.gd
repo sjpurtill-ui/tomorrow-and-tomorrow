@@ -9,6 +9,7 @@ const Presentation=preload("res://scripts/hud/court_presentation.gd")
 const Stages=preload("res://scripts/civic_stages.gd")
 const Voice=preload("res://scripts/character_voice.gd")
 const Tokens=preload("res://scripts/hud/hud_tokens.gd")
+const Rituals=preload("res://scripts/hud/great_work_rituals.gd")
 const MODEL_PATH:="res://scripts/hud/great_work_model.gd"
 const MAX_CAST:=6
 static var _earth:StandardMaterial3D
@@ -27,15 +28,18 @@ var _front:=6.0
 var _remaining:=0.0
 var _moving:Tween
 var _ritual:Tween
+var _moving_paused:=false
+var _ritual_paused:=false
 var _props:Node3D
 var _opening:Array[Node3D]=[]
-var _offering:Node3D
+var ritual_profile:Dictionary={}
+var _specific:Dictionary={}
 var _light:OmniLight3D
 var _work:Dictionary={}
 var _context:Dictionary={}
-var _opening_started:=false
 var _caption:Label
 var _shot_kind:="gathering"
+var _whole_button:Button
 
 static func make(work:Dictionary,context:Dictionary,height:float=330.0)->Control:
 	var made=load("res://scripts/hud/great_work_ceremony_stage.gd").new()
@@ -86,6 +90,7 @@ func _ready()->void:
 	name="WorkPlate";clip_contents=true;mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var profile:=Presentation.for_owner()
 	mode=String(ritual_spec(Stages.known_for(),profile).mode)
+	ritual_profile=Rituals.describe(_work,Stages.known_for(),profile)
 	cast=cast_for(_context)
 	view=SubViewport.new();view.name="Dedication3D";view.own_world_3d=true;view.msaa_3d=Viewport.MSAA_2X
 	view.render_target_update_mode=SubViewport.UPDATE_DISABLED;add_child(view)
@@ -93,8 +98,8 @@ func _ready()->void:
 	image=TextureRect.new();image.texture=view.get_texture();image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_SCALE;image.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(image);image.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_build_scene(profile)
 	var caption_frame:=PanelContainer.new();caption_frame.name="CeremonyCaption";caption_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE;caption_frame.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE);caption_frame.grow_vertical=Control.GROW_DIRECTION_BEGIN;caption_frame.add_theme_stylebox_override("panel",Tokens.paper_panel_style(true,0,10));add_child(caption_frame)
-	_caption=Tokens.make_label(String(ritual_spec(Stages.known_for(),profile).action),16,Tokens.INK);_caption.add_theme_font_override("font",Tokens.voice_font());_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_caption.max_lines_visible=4;_caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;caption_frame.add_child(_caption)
-	var whole:=Button.new();whole.name="SeeWholeWork";whole.text="See the whole work";whole.theme=Tokens.control_theme();whole.position=Vector2(8,8);whole.custom_minimum_size=Vector2(145,30);whole.add_theme_stylebox_override("normal",Tokens.paper_panel_style(true,2,6));whole.pressed.connect(show_work);add_child(whole)
+	_caption=Tokens.make_label(String(ritual_profile.get("before","The dedication waits.")),16,Tokens.INK);_caption.add_theme_font_override("font",Tokens.voice_font());_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_caption.max_lines_visible=4;_caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;caption_frame.add_child(_caption)
+	var whole:=Button.new();_whole_button=whole;whole.name="SeeWholeWork";whole.text="See the whole work";whole.theme=Tokens.control_theme();whole.position=Vector2(8,8);whole.custom_minimum_size=Vector2(145,30);whole.add_theme_stylebox_override("normal",Tokens.paper_panel_style(true,2,6));whole.pressed.connect(_toggle_work);add_child(whole)
 	resized.connect(_resize_view);visibility_changed.connect(_visibility);_resize_view();_wake(7.0)
 
 func _build_scene(profile:Dictionary)->void:
@@ -129,9 +134,9 @@ func _build_scene(profile:Dictionary)->void:
 		look["stance"]="stand";look["lit"]=true
 		var body:=Figure.new();body.name="Guest_"+String(entry.key);world.add_child(body)
 		if not body.setup(look):body.queue_free();continue
-		var side:=-1.0 if index%2==0 else 1.0
-		body.position=Vector3(side*(1.3+float(index/2)*1.05),0,_front+float(index/2)*.6)
-		body.rotation_degrees.y=-side*18.0
+		body.position=Rituals.guest_position(String(ritual_profile.get("formation","arc")),index,cast.size())+Vector3(0,0,_front)
+		if index==0 and String(ritual_profile.get("action",""))=="cross":body.position=Vector3(0,0,_front+3.1) if String(ritual_profile.get("form",""))=="gate" else Vector3(-2.8,0,_front+2.4)
+		body.rotation.y=atan2(-body.position.x,(_front+.8)-body.position.z)*.45
 		body.set_meta("ceremony_person",person.duplicate(true));bodies[entry.key]=body
 		Acting.idle(body,"stand")
 	_props=Node3D.new();_props.name="DedicationRitual";world.add_child(_props)
@@ -141,34 +146,29 @@ func _build_scene(profile:Dictionary)->void:
 
 func _build_ritual()->void:
 	var at:=Vector3(0,0,_front+.8)
+	if not ritual_profile.is_empty():
+		_specific=Rituals.build(ritual_profile)
+		var specific_root:Node3D=_specific.root;_props.add_child(specific_root);specific_root.position=at
 	match mode:
 		"offering":
-			_cylinder(_props,"OfferingStone",.58,.42,at+Vector3(0,.21,0),Color("777267"))
-			_offering=Node3D.new();_offering.name="FlowersAndStone";_props.add_child(_offering);_offering.position=at+Vector3(0,.49,0)
-			for i in 7:
-				var angle:=float(i)*TAU/7.0
-				_sphere(_offering,"Flower",.065,Vector3(cos(angle)*.2,.02,sin(angle)*.15),Color("e0c99f") if i%2==0 else Color("a47873"))
-			_sphere(_offering,"DedicationStone",.11,Vector3(0,.03,0),Color("bbb3a0"))
-			_offering.visible=false
 			for i in 9:
 				var a:=float(i)*TAU/9.0
-				_sphere(_props,"HearthStone",.14,at+Vector3(-1.2+cos(a)*.38,.08,-.7+sin(a)*.38),Color("706c60"))
-			var fire:=_sphere(_props,"HearthEmber",.2,at+Vector3(-1.2,.13,-.7),Color("e5a34f"));_emission(fire,Color("e59944"),.8)
+				_sphere(_props,"HearthStone",.14,at+Vector3(-1.9+cos(a)*.32,.08,-.7+sin(a)*.32),Color("706c60"))
+			var fire:=_sphere(_props,"HearthEmber",.16,at+Vector3(-1.9,.13,-.7),Color("ac6938"));_emission(fire,Color("a45b30"),.25)
 		"ribbon","unveiling":
 			for side in [-1.0,1.0]:
-				_cylinder(_props,"CeremonyPost",.07,1.15,at+Vector3(side*1.1,.575,0),Color("775941"))
-				var hinge:=Node3D.new();hinge.position=at+Vector3(side*1.1,1.02,0);_props.add_child(hinge)
-				_box(hinge,"Ribbon" if mode=="ribbon" else "UnveilingCloth",Vector3(1.1,.12 if mode=="ribbon" else .9,.025),Vector3(-side*.55,-.05 if mode=="ribbon" else -.36,0),Color("954c40"))
+				_cylinder(_props,"CeremonyPost",.055,1.15,at+Vector3(side*1.55,.575,1.0),Color("775941"))
+				var hinge:=Node3D.new();hinge.position=at+Vector3(side*1.55,1.02,1.0);_props.add_child(hinge)
+				_box(hinge,"Ribbon" if mode=="ribbon" else "UnveilingCloth",Vector3(1.55,.09 if mode=="ribbon" else .45,.025),Vector3(-side*.775,-.05 if mode=="ribbon" else -.18,0),ritual_profile.get("accent",Color("954c40")))
 				_opening.append(hinge)
 			if mode=="ribbon":
 				# The tool is a ceremonial prop, never credited as a produced good.
-				var scissors:=Node3D.new();scissors.name="OpeningShears";scissors.position=at+Vector3(0,1.07,.06);_props.add_child(scissors)
+				var scissors:=Node3D.new();scissors.name="OpeningShears";scissors.position=at+Vector3(0,1.07,1.06);_props.add_child(scissors)
 				for angle in [-.3,.3]:
 					var blade:=_box(scissors,"Blade",Vector3(.025,.28,.018),Vector3(0,.05,0),Color("c3c9c8"));blade.rotation.z=angle
 		"illumination":
 			for side in [-1.0,1.0]:
-				var lamp:=_box(_props,"OpeningLight",Vector3(.08,1.1,.08),at+Vector3(side*1.4,.55,0),Color("687e81"));_emission(lamp,Color("95d6d4"),.15);_opening.append(lamp)
-			_box(_props,"OpeningLectern",Vector3(.55,.85,.35),at+Vector3(0,.425,.4),Color("495759"))
+				var lamp:=_box(_props,"OpeningLight",Vector3(.06,1.1,.06),at+Vector3(side*1.7,.55,.2),Color("687e81"));_emission(lamp,Color("95d6d4"),.10);_opening.append(lamp)
 	_light=OmniLight3D.new();_light.name="DedicationLight";_light.position=at+Vector3(0,1.3,-1);_light.omni_range=12;_light.light_color=Color("eab86d") if mode=="offering" else Color("a8dad9");_light.light_energy=.4 if mode=="offering" else .0;_props.add_child(_light)
 
 func speak(line:Dictionary,animate:=true)->void:
@@ -191,42 +191,67 @@ func speak(line:Dictionary,animate:=true)->void:
 ## animation cannot receive a gift or append another event to the ledger.
 func dedication()->void:
 	if committed:return
-	committed=true;_opening_started=true
-	if _caption!=null:_caption.text="Flowers and a stone are laid before the work." if mode=="offering" else ("The ribbon is cut. The work is dedicated." if mode=="ribbon" else ("The cloth is drawn aside. The work is dedicated." if mode=="unveiling" else "The opening lights rise. The work is dedicated."))
+	committed=true
+	if _caption!=null:_caption.text=String(ritual_profile.get("after","The work is dedicated."))+" "+String(ritual_profile.get("purpose_caption",""))
 	if _ritual!=null and _ritual.is_valid():_ritual.kill()
 	_ritual=create_tween().set_parallel(true)
-	if mode=="offering" and _offering!=null:
-		_offering.visible=true;var destination:=_offering.position;_offering.position+=Vector3(.45,.65,.45)
-		_ritual.tween_property(_offering,"position",destination,1.4).set_trans(Tween.TRANS_SINE)
-	elif mode in ["ribbon","unveiling"]:
+	_ritual_paused=false
+	if not _specific.is_empty():
+		(_specific.after as Node3D).visible=true
+		for motion:Dictionary in _specific.motions:
+			_ritual.tween_property(motion.node,NodePath(motion.property),motion.to,1.8).set_delay(.55).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if mode in ["ribbon","unveiling"]:
 		for index in _opening.size():_ritual.tween_property(_opening[index],"rotation:z",-.85 if index==0 else .85,1.3).set_trans(Tween.TRANS_SINE)
 		var tool:=_props.get_node_or_null("OpeningShears")
 		if tool!=null:tool.visible=false
-	else:
+	elif mode=="illumination":
 		for lamp:Node3D in _opening:
 			var material:StandardMaterial3D=(lamp as MeshInstance3D).material_override
 			_ritual.tween_property(material,"emission_energy_multiplier",2.0,1.6)
 	_ritual.tween_property(_light,"light_energy",2.0 if mode=="illumination" else 1.0,1.6)
-	for body:Node3D in bodies.values():Acting.play(body,"bow_shallow" if mode=="offering" else "clap_soft")
+	var index:=0
+	for body:Node3D in bodies.values():
+		Acting.play(body,String(ritual_profile.get("gesture","nod_slow")) if index==0 else String(ritual_profile.get("purpose_gesture","clap_soft")))
+		index+=1
+	if String(ritual_profile.get("action",""))=="cross" and not bodies.is_empty():
+		var leader:Node3D=bodies.values()[0]
+		var travel:=Vector3(0,0,-3.8) if String(ritual_profile.get("form",""))=="gate" else Vector3(5.4,0,0)
+		leader.rotation.y=atan2(travel.x,travel.z);leader.play("walk_in");leader.set_locomotion_rate(1.0)
+		var walk:=_ritual.tween_property(leader,"position",leader.position+travel,travel.length()/1.18).set_delay(.6)
+		walk.finished.connect(_finish_walk.bind(leader))
 	_shot_kind="ritual"
-	_shot(Vector3(0,1.0,_front+.5),Vector3(6,4,_front+10),1.0)
-	_wake(5.0)
+	var focus:=Vector3(0,.85,_front+.8)
+	_shot(focus,focus+Rituals.camera_offset(ritual_profile),1.0)
+	_wake(7.0)
+
+func _finish_walk(body:Node3D)->void:
+	if not is_instance_valid(body):return
+	body.face(atan2(-body.position.x,(_front+.8)-body.position.z)*180.0/PI,.3)
+	Acting.idle(body,"stand");Acting.play(body,"nod_proud")
 
 func settle()->void:
-	if _moving!=null and _moving.is_valid():_moving.custom_step(20.0)
-	if _ritual!=null and _ritual.is_valid():_ritual.custom_step(20.0)
+	if _moving!=null and _moving.is_valid():_moving.custom_step(20.0);_moving.kill()
+	if _ritual!=null and _ritual.is_valid():_ritual.custom_step(20.0);_ritual.kill()
+	_moving=null;_ritual=null;_moving_paused=false;_ritual_paused=false
 	_remaining=0.0;_set_active(false)
 
 func show_work()->void:
 	_shot_kind="work";_wide();_wake(1.2)
 
+func _toggle_work()->void:
+	if _shot_kind=="work":_gathering();_wake(1.2)
+	else:show_work()
+
 func _gathering()->void:
 	_shot_kind="gathering"
-	_shot(Vector3(0,1.8,_front-1.5),Vector3(6.5,4.2,_front+11),0.0)
+	var focus:=Vector3(0,1.0,_front+.55)
+	_shot(focus,focus+Rituals.camera_offset(ritual_profile),0.0)
 
 func _shot(target:Vector3,from:Vector3,seconds:float)->void:
 	if lens==null:return
+	if _whole_button!=null:_whole_button.text="Return to the assembly" if _shot_kind=="work" else "See the whole work"
 	if _moving!=null and _moving.is_valid():_moving.kill()
+	_moving=null;_moving_paused=false
 	var destination:=Transform3D(Basis.looking_at(target-from,Vector3.UP),from)
 	if seconds<=0:lens.transform=destination
 	else:
@@ -237,7 +262,7 @@ func _wide(animate:=true)->void:
 	var aspect:=maxf(.7,size.x/maxf(size.y,1.0))
 	# Fit all three dimensions from the same elevated three-quarter angle.
 	# Using height alone for elevation flattened broad rings into a thin strip.
-	var framing:=_bounds.merge(AABB(Vector3(-4,0,_front),Vector3(8,2.1,3)))
+	var framing:=_bounds.merge(AABB(Vector3(-5,0,_front-.4),Vector3(10,3,5)))
 	var target:=framing.get_center()
 	var outward:=Vector3(.85,.90,1.15).normalized()
 	var basis:=Basis.looking_at(-outward,Vector3.UP)
@@ -267,11 +292,11 @@ func _set_active(active:bool)->void:
 	view.render_target_update_mode=SubViewport.UPDATE_ALWAYS if active else (SubViewport.UPDATE_ONCE if is_visible_in_tree() else SubViewport.UPDATE_DISABLED)
 	world.process_mode=Node.PROCESS_MODE_INHERIT if active else Node.PROCESS_MODE_DISABLED
 	if _moving!=null and _moving.is_valid():
-		if active:_moving.play()
-		else:_moving.pause()
+		if active and _moving_paused:_moving.play();_moving_paused=false
+		elif not active and _moving.is_running():_moving.pause();_moving_paused=true
 	if _ritual!=null and _ritual.is_valid():
-		if active:_ritual.play()
-		else:_ritual.pause()
+		if active and _ritual_paused:_ritual.play();_ritual_paused=false
+		elif not active and _ritual.is_running():_ritual.pause();_ritual_paused=true
 	set_process(active)
 
 func _process(delta:float)->void:
@@ -279,7 +304,8 @@ func _process(delta:float)->void:
 	if _remaining<=0.0:_set_active(false)
 
 func diagnostics()->Dictionary:
-	return {"mode":mode,"cast_count":cast.size(),"cast_keys":cast.map(func(member:Dictionary)->String:return String(member.key)),"body_count":bodies.size(),"model_node_id":model.get_instance_id() if is_instance_valid(model) else 0,"mesh_count":model.find_children("*","MeshInstance3D",true,false).size() if is_instance_valid(model) else 0,"viewport_active":view!=null and view.render_target_update_mode==SubViewport.UPDATE_ALWAYS,"committed":committed,"build_count":build_count,"camera_shot":_shot_kind}
+	return {"mode":mode,"cast_count":cast.size(),"cast_keys":cast.map(func(member:Dictionary)->String:return String(member.key)),"body_count":bodies.size(),"model_node_id":model.get_instance_id() if is_instance_valid(model) else 0,"mesh_count":model.find_children("*","MeshInstance3D",true,false).size() if is_instance_valid(model) else 0,"viewport_active":view!=null and view.render_target_update_mode==SubViewport.UPDATE_ALWAYS,"committed":committed,"build_count":build_count,"camera_shot":_shot_kind,
+		"design_id":ritual_profile.get("design_id",""),"ritual_id":ritual_profile.get("ritual_id",""),"purpose":ritual_profile.get("purpose",""),"prop":ritual_profile.get("prop",""),"action":ritual_profile.get("action",""),"formation":ritual_profile.get("formation",""),"ritual_node_id":(_specific.root as Node3D).get_instance_id() if not _specific.is_empty() else 0,"ritual_mesh_count":(_specific.root as Node3D).find_children("*","MeshInstance3D",true,false).size() if not _specific.is_empty() else 0}
 
 static func _material(colour:Color)->StandardMaterial3D:
 	var material:=StandardMaterial3D.new();material.albedo_color=colour;material.roughness=.9;return material
