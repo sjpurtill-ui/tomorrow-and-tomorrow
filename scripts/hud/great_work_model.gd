@@ -6,6 +6,8 @@ const Map:=preload("res://scripts/undertaking_map_visual.gd")
 const Catalog:=preload("res://scripts/undertaking_catalog.gd")
 const Concept:=preload("res://scripts/wonder_concept.gd")
 const U:=preload("res://scripts/undertaking_system.gd")
+const Design:=preload("res://scripts/hud/great_work_design.gd")
+const Architecture:=preload("res://scripts/hud/great_work_architecture.gd")
 const COURSES:=40
 const METRES:=1000.0
 const MAX_WORKERS:=6
@@ -22,8 +24,9 @@ static func describe(work:Dictionary)->Dictionary:
 	var id:=String(work.get("work_id",work.get("id",concept.get("id",""))))
 	var definition:=Catalog.get_definition(id)
 	var parsed:=Concept.parse(id)
-	var shape:=String(parsed.get("form",definition.get("shape",work.get("shape",work.get("form",definition.get("form","hall"))))))
-	var material:=String(parsed.get("material",definition.get("material",work.get("material",concept.get("material","stone")))))
+	var design:=Design.describe(work)
+	var shape:=String(design.form)
+	var material:=String(design.material)
 	if not Map.MATERIAL_TINTS.has(material):material="stone"
 	var status:=String(work.get("status","plan"))
 	var progress:=0.0
@@ -39,7 +42,7 @@ static func describe(work:Dictionary)->Dictionary:
 	elif status=="plan":state="plan"
 	var course:=mini(COURSES,floori(progress*COURSES+.0000001))
 	var working:=status=="building" and _number(work.get("last_work",0.0))>0.0
-	return {"_great_work_model":true,"id":id,"shape":shape,"map_shape":String(Map.SHAPE_ALIASES.get(shape,shape)),"material":material,
+	return {"_great_work_model":true,"id":id,"shape":shape,"map_shape":shape,"material":material,"design":design,"design_id":design.design_id,"valid":design.valid,
 		"status":status,"state":state,"progress":progress,"course":course,"working":working,
 		"condition":clampf(_number(work.get("condition",1.0)),0.0,1.0),"tier":int(parsed.get("tier",definition.get("tier",0))),
 		"ambition":String(parsed.get("ambition",definition.get("ambition","grand"))),
@@ -52,7 +55,7 @@ static func _number(value:Variant)->float:
 ## Progress within a course changes its reading, not thousands of vertices.
 static func signature(work:Dictionary)->String:
 	var d:=describe(work)
-	return str([d.id,d.map_shape,d.material,d.state,d.course,d.working,roundi(float(d.condition)*10.0),d.tier])
+	return str([d.id,d.design,d.state,d.course,d.working,roundi(float(d.condition)*10.0)])
 
 ## All dimensions and the returned AABB are metres. The root is unattached.
 ## Options: plan/scaffolds/workers/ground; callers own lights and the camera.
@@ -60,11 +63,9 @@ static func build(work:Dictionary,options:Dictionary={})->Dictionary:
 	var d:=describe(work)
 	var root:=Node3D.new();root.name="GreatWorkModel"
 	var pieces:=_pieces(d)
-	var footprint:=Map.footprint(pieces)
+	var footprint:=Architecture.footprint(pieces)
 	var plinth:=footprint.grow(Map.PLINTH_MARGIN)
-	var design_height:=0.0
-	for part:Dictionary in pieces:
-		if part.kind!="water":design_height=maxf(design_height,float(part.position.y)+float(part.size.y))
+	var design_height:=maxf(0.0,Architecture.extent(pieces).end.y)
 	var fraction:=float(d.course)/COURSES
 	var level:=design_height*fraction
 	var top:=Map.PLINTH_RISE
@@ -82,15 +83,11 @@ static func build(work:Dictionary,options:Dictionary={})->Dictionary:
 		var base:=float(part.position.y)
 		var unfinished:bool=d.state!="standing"
 		if unfinished:
-			if part.kind=="water" or base>=level-.000001:continue
-			if base+float(part.size.y)>level:
-				part.size.y=level-base;part.kind="box"
+			if part.kind=="water" or bool(part.get("finish",false)) or Architecture.extent([part]).position.y>=level-.000001:continue
 			if d.state in ["abandoned","ruined"]:part.color=(part.color as Color).lerp(Map.WEATHERED,.5)
 		part.position.y=base+top
-		if unfinished and part.kind=="box" and part.size.x>.012 and part.size.z>.012:
-			_open_walls(body,part,top)
-		else:Map.append_piece(body,part,0.0)
-		if d.material in ["stone","brick","concrete"] and part.kind=="box":joint_count+=_course_lines(joints,part,String(d.material))
+		Architecture.append_piece(body,part,level+top if unfinished else INF)
+		if d.material in ["stone","brick","concrete"] and part.kind=="box":joint_count+=_course_lines(joints,part,String(d.material),level+top if unfinished else INF)
 	_add_mesh(root,"Masonry",body.commit(),_material())
 	if joint_count>0:_add_mesh(root,"Courses",joints.commit(),_joint_material())
 	if bool(options.get("scaffolds",true)) and d.state=="building" and fraction>0.0:
@@ -107,26 +104,14 @@ static func build(work:Dictionary,options:Dictionary={})->Dictionary:
 	if bool(options.get("ground",false)):_ground(root,plinth)
 	# Fit the finished design, so foundations and later courses share a camera.
 	var bounds:=AABB(Vector3(plinth.position.x,-.0015,plinth.position.y)*METRES,Vector3(plinth.size.x,design_height+top+.0015,plinth.size.y)*METRES)
-	root.set_meta("work_id",d.id);root.set_meta("course",d.course);root.set_meta("progress",d.progress)
-	return {"root":root,"bounds":bounds,"progress":d.progress,"course":d.course,"worker_count":worker_count,"signature":signature(d),"description":d}
+	root.set_meta("work_id",d.id);root.set_meta("design_id",d.design_id);root.set_meta("course",d.course);root.set_meta("progress",d.progress)
+	return {"root":root,"bounds":bounds,"progress":d.progress,"course":d.course,"worker_count":worker_count,"signature":signature(d),"description":d,"design_id":d.design_id}
 
 static func _pieces(d:Dictionary)->Array:
-	var pieces:=Map.forms(String(d.id),String(d.map_shape),String(d.material))
-	var tone:Color=Map.MATERIAL_TINTS[d.material]
+	var pieces:=Architecture.pieces(d.design)
 	for part:Dictionary in pieces:
-		# The map's hall/granary templates share timber/clay colors. Their main
-		# walls must still show the material encoded in this particular work.
-		if String(d.id).begins_with("wonder:") and d.map_shape in ["hall","granary"] and part.kind=="box" and part.size.x>.01:part.color=tone
-		if d.material in ["iron","concrete"] and part.kind=="roof":part.color=tone.darkened(.15)
-		if part.kind!="water":part.color=(part.color as Color).lerp(Map.WEATHERED,(1.0-float(d.condition))*.3)
+		if part.kind!="water":part.color=(part.color as Color).lerp(Map.WEATHERED,(1.0-roundf(float(d.condition)*10.0)/10.0)*.3)
 	return pieces
-
-static func _open_walls(surface:SurfaceTool,part:Dictionary,top:float)->void:
-	var wall:=.0014;var size:Vector3=part.size;var at:Vector3=part.position
-	Map.append_piece(surface,Map.piece(Vector3(at.x,top,at.z),Vector3(size.x-wall,.0004,size.z-wall),Color("b09a70")),0.0)
-	for side in [-1.0,1.0]:
-		Map.append_piece(surface,Map.piece(at+Vector3(side*(size.x-wall)*.5,0,0),Vector3(wall,size.y,size.z),part.color),0.0)
-		Map.append_piece(surface,Map.piece(at+Vector3(0,0,side*(size.z-wall)*.5),Vector3(size.x-wall*2.0,size.y,wall),part.color),0.0)
 
 static func _add_mesh(root:Node3D,label:String,mesh:Mesh,material:Material)->MeshInstance3D:
 	var node:=MeshInstance3D.new();node.name=label;node.mesh=mesh;node.material_override=material
@@ -151,15 +136,20 @@ static func _plan_mesh(pieces:Array,level:float,top:float)->ArrayMesh:
 	var count:=0
 	# Box edge guides describe only the volume that has yet to be raised.
 	for part:Dictionary in pieces:
-		if part.kind=="water" or part.position.y+part.size.y<=level:continue
+		if part.kind=="water" or not bool(part.get("plan",true)) or Architecture.extent([part]).end.y<=level:continue
 		var base:=maxf(float(part.position.y),level)+top
 		var height:=float(part.position.y)+float(part.size.y)+top-base
 		var corners:Array[Vector3]=[]
-		for y in [base,base+height]:
+		var basis:Basis=part.get("basis",Basis.IDENTITY)
+		for y in [0.0,float(part.size.y)]:
 			for z in [-.5,.5]:
-				for x in [-.5,.5]:corners.append(Vector3(part.position.x+part.size.x*x,y,part.position.z+part.size.z*z))
+				for x in [-.5,.5]:corners.append(basis*Vector3(part.size.x*x,y,part.size.z*z)+part.position+Vector3.UP*top)
 		for edge:Array in [[0,1],[0,2],[1,3],[2,3],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]]:
-			lines.add_vertex(corners[edge[0]]);lines.add_vertex(corners[edge[1]])
+			var a:Vector3=corners[edge[0]];var b:Vector3=corners[edge[1]]
+			if maxf(a.y,b.y)<level+top:continue
+			if a.y<level+top:a=a.lerp(b,(level+top-a.y)/(b.y-a.y))
+			elif b.y<level+top:b=b.lerp(a,(level+top-b.y)/(a.y-b.y))
+			lines.add_vertex(a);lines.add_vertex(b)
 			count+=1
 	return lines.commit() if count>0 else null
 
@@ -168,7 +158,7 @@ static func _joint_material()->StandardMaterial3D:
 		_joints=StandardMaterial3D.new();_joints.albedo_color=Color("756957");_joints.roughness=1.0
 	return _joints
 
-static func _course_lines(lines:SurfaceTool,part:Dictionary,material:String)->int:
+static func _course_lines(lines:SurfaceTool,part:Dictionary,material:String,limit:float=INF)->int:
 	if part.size.x<.008 or part.size.z<.008:return 0
 	var spacing:=.00065 if material=="brick" else (.004 if material=="concrete" else .0014)
 	var count:=0
@@ -176,8 +166,10 @@ static func _course_lines(lines:SurfaceTool,part:Dictionary,material:String)->in
 		var y:=float(part.position.y)+float(row+1)*spacing
 		if y>=float(part.position.y)+float(part.size.y)-.00005:break
 		var x:=float(part.size.x)*.5+.000015;var z:=float(part.size.z)*.5+.000015
-		var p:Vector3=part.position
-		var corners:=[Vector3(p.x-x,y,p.z-z),Vector3(p.x+x,y,p.z-z),Vector3(p.x+x,y,p.z+z),Vector3(p.x-x,y,p.z+z)]
+		if y>limit:break
+		var p:Vector3=part.position;var basis:Basis=part.get("basis",Basis.IDENTITY)
+		var corners:Array[Vector3]=[]
+		for local:Vector3 in [Vector3(-x,y-p.y,-z),Vector3(x,y-p.y,-z),Vector3(x,y-p.y,z),Vector3(-x,y-p.y,z)]:corners.append(basis*local+p)
 		for side in 4:lines.add_vertex(corners[side]);lines.add_vertex(corners[(side+1)%4])
 		count+=1
 	return count
