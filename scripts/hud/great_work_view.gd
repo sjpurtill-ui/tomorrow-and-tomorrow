@@ -96,7 +96,9 @@ func _bind_scroll()->void:
 func _update_reading()->void:
 	if _reading==null:return
 	var state:=String(_description.get("state","plan"));var progress:=float(_description.get("progress",0.0))
-	var words:="Planned design · nothing built" if state=="plan" else ("Standing" if state=="standing" else "%s · %s complete" % [String(_description.get("status","building")).capitalize(),preload("res://scripts/undertaking_map_visual.gd").percent_words(progress)])
+	var progress_words:=preload("res://scripts/undertaking_map_visual.gd").percent_words(progress)
+	if progress>0.0:progress_words+=" complete"
+	var words:="Planned design · nothing built" if state=="plan" else ("Standing" if state=="standing" else "%s · %s" % [String(_description.get("status","building")).capitalize(),progress_words])
 	if String(_description.get("status",""))=="stalled":words+=" · "+String(_description.get("idle","No work today"))
 	var has_plan:=model_root.get_node_or_null("UnbuiltPlan")!=null
 	if has_plan and (plan_visible or state=="plan"):words+=" · outline shows unbuilt design"

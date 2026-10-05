@@ -1,7 +1,8 @@
 extends RefCounted
 ## One site's recorded construction, shared by inspection and dedication.
-## The map's forms and mesh primitives stay authoritative. This close view
-## separates building, scaffolding and unbuilt plan; it never advances a work.
+## Authored architecture follows the saved catalog identity and material.
+## This close view separates building, scaffolding and unbuilt plan; it never
+## advances a work.
 const Map:=preload("res://scripts/undertaking_map_visual.gd")
 const Catalog:=preload("res://scripts/undertaking_catalog.gd")
 const Concept:=preload("res://scripts/wonder_concept.gd")
