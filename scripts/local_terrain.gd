@@ -4185,6 +4185,7 @@ func _update_world_streaming() -> void:
 	_rebuild_regional_terrain_patch(Vector2(camera_target.x,camera_target.z),desired_span)
 
 func _process_camera_navigation(delta: float) -> void:
+	if has_meta("village_portrait"): return
 	if not SEAMLESS_WORLD or camera==null:
 		return
 	if is_instance_valid(world_menu_panel) or is_instance_valid(world_globe):
@@ -15382,6 +15383,7 @@ func _pointer_over_ui()->bool:
 
 
 func _handle_camera_zoom_key(event:InputEventKey)->bool:
+	if has_meta("village_portrait"):return false
 	if not event.pressed or event.alt_pressed or event.ctrl_pressed or event.meta_pressed:return false
 	if is_instance_valid(world_menu_panel):return false
 	var focused:=get_viewport().gui_get_focus_owner()
@@ -15402,6 +15404,7 @@ func _handle_camera_zoom_key(event:InputEventKey)->bool:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if has_meta("village_portrait"):return
 	if is_instance_valid(MilitaryCampaign.joint_operations.screen):
 		if MilitaryCampaign.joint_operations.screen.handle_map_input(event):
 			get_viewport().set_input_as_handled();return

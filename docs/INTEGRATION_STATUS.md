@@ -1,3 +1,22 @@
+## October 5 — Living village Overview: HELD for user review
+
+`codex/living-village-overview`, based on `5d8994b3`, replaces the generated
+Overview painting with the actual map world, framed around inhabited plots.
+History stores bounded, dated images and exact readings in the campaign save.
+Captures happen during Overview visits; earlier/unseen views are not invented.
+Visit opens that exact place, and dismissal restores the previous map camera.
+
+Real-campaign preview exposed disappearing upgraded houses: larger late models
+could not fit old parcels after their saved sites were discarded. Valid inherited
+sites now retain their location and fit the upgraded mesh inside the same footprint.
+The tested campaign renders 83 building representatives with its 874 people intact.
+The ordinary map uses the same correction. No simulation authority changed.
+
+25/25 UI/album/camera checks and 31/31 architecture/placement checks pass;
+private GPU Overview/History/Visit and narrow-layout capture passed (PID 66244).
+See `docs/design/LIVING_VILLAGE_OVERVIEW.md` for save behavior, scope and limits.
+Source remains isolated; this is not yet in canonical main.
+
 ## October 5 — Execution effects: INTEGRATED
 
 Prepared on `codex/execution-effects` from `0b0f6c5b`. Beheading uses the

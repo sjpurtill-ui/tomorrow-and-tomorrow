@@ -10,6 +10,39 @@ func fixture(form: String = "portable_shelter_cluster", family: String = "organi
 
 func dry(_point: Vector2) -> bool: return true
 
+func test_completed_upgrade_keeps_existing_homes_inside_their_recorded_sites()->void:
+	var data:=fixture("round_household","organic","round_thatch")
+	data.plots[0].form="timber_household"
+	var first:=EARLY.layout(data.plots,data.routes,dry)
+	assert_int(first.buildings.size()).is_greater(0)
+	EARLY.remember_layout(first,data.plots)
+	data.plots[0].fabric_generation=6
+	data.plots[0].form="compact_courtyard_row"
+	data.plots[0].material_family="earth"
+	data.plots[0].roof_plan="courtyard_flat"
+	var before:Dictionary=data.duplicate(true)
+	var next:=EARLY.layout(data.plots,data.routes,dry)
+	assert_dict(data).is_equal(before)
+	assert_int(next.buildings.size()).is_greater_equal(first.buildings.size())
+	var kit:=preload("res://scripts/settlement_architecture_kit.gd")
+	for original:Dictionary in first.buildings:
+		var matches:Array=next.buildings.filter(func(r:Dictionary)->bool:return r.id==original.id)
+		assert_int(matches.size()).is_equal(1)
+		if matches.is_empty():continue
+		var record:Dictionary=matches[0]
+		assert_vector(record.position).is_equal(original.position)
+		assert_array(Array(record.footprint)).is_equal(Array(original.footprint))
+		var mesh:Mesh=kit.mesh_for_plot(record.plot)
+		var scale:float=kit.inherited_site_scale(record)
+		assert_float(scale).is_greater(0.0)
+		var turn:=Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001*scale)
+		for corner in 8:
+			var p:Vector3=turn*mesh.get_aabb().get_endpoint(corner)
+			assert_bool(Geometry2D.is_point_in_polygon(Vector2(p.x,p.z)+Vector2(record.position),record.footprint)).is_true()
+	var parent:Node3D=auto_free(Node3D.new())
+	EARLY.render(next,Vector3.ZERO,func(_x:float,_z:float)->float:return 0.0,parent)
+	assert_bool(parent.find_children("SettlementArchitecture_*","MultiMeshInstance3D",true,false).is_empty()).is_false()
+
 func before_test() -> void:
 	GameState.reset_for_new_world(910137)
 

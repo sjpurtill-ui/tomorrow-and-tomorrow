@@ -368,10 +368,17 @@ func test_the_leader_counts_in_words_and_seasons()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	assert_str(Model.since(400)).is_equal("13 months ago")
 
-func test_the_history_tab_is_unchanged()->void:
+func test_history_adds_observed_views_and_keeps_the_event_chronicle()->void:
 	var history:Array=Provider.new(terrain,hud).tab(1).blocks
-	assert_str(String(history[0].type)).is_equal("chronicle")
+	assert_str(String(history[0].type)).is_equal("village_history")
+	assert_str(String(history[1].type)).is_equal("chronicle")
 	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
+
+func test_live_portrait_refresh_keeps_the_model_population_instead_of_raw_record_defaults()->void:
+	var block:=_block()
+	var state:Dictionary=preload("res://scripts/hud/village_view_record.gd").current(_primary_id())
+	assert_int(int(state.population)).is_equal(93)
+	assert_int(int(state.population)).is_equal(int(block.sketch.portrait.state.population))
 
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door

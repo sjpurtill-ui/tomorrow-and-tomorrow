@@ -468,7 +468,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var placed:Array[Transform3D]=[]
 		for i in group.size():
 			var record:Dictionary=group[i];var point:Vector2=record.position+Vector2(center.x,center.z)
-			var placement:=Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
+			var placement:=Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001*inherited_site_scale(record)),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
 			placed.append(placement)
 			batch.set_instance_transform(i,placement)
 			var wear:=1-clampf(float(record.plot.get("condition",1)),0,1)
@@ -477,6 +477,20 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+key.replace(":","_"),placed,batch.mesh.get_aabb())
+
+static func inherited_site_scale(record:Dictionary)->float:
+	if not bool(record.get("fit_inherited_site",false)):return 1.0
+	var footprint:PackedVector2Array=record.get("footprint",PackedVector2Array())
+	var origin:Vector2=record.position
+	if footprint.size()<3 or not Geometry2D.is_point_in_polygon(origin,footprint):return 0.0
+	var radius:=INF
+	for i in footprint.size():
+		radius=minf(radius,origin.distance_to(Geometry2D.get_closest_point_to_segment(origin,footprint[i],footprint[(i+1)%footprint.size()])))
+	var bounds:=mesh_for_plot(record.plot).get_aabb()
+	var extent:=bounds.position.abs().max(bounds.end.abs())
+	# Circumscribed mesh radius inside the inscribed site radius is safe at every
+	# retained angle, including old round huts whose doors faced the hearth.
+	return clampf(radius*.98/maxf(.00001,Vector2(extent.x,extent.z).length()*.001),0.0,1.0)
 
 static func installed_features(plot:Dictionary)->int:
 	var installed:Variant=plot.get("fabric_components",{})

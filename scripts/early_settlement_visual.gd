@@ -72,6 +72,21 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			plot["roof_plan"] = "unsupported_early_adapter_form"
 			continue
 		plot["visual_form"]=kind(plot) if not kind(plot).is_empty() else String(plot.get("form",""))
+		# A completed upgrade changes architecture, not the location of an existing
+		# home. Later kit envelopes can exceed founding parcels; retain recorded
+		# sites and fit the new mesh inside their already reserved footprint.
+		if LATE.kind(plot)!="" and String(plot.get("visual_sites_form",""))!=String(plot.visual_form):
+			var inherited:Array=[]
+			var parcel:PackedVector2Array=plot.get("polygon",PackedVector2Array())
+			for saved:Dictionary in plot.get("visual_building_sites",[]):
+				var footprint:PackedVector2Array=saved.get("footprint",PackedVector2Array())
+				if footprint.size()<3 or parcel.size()<3:continue
+				if not Geometry2D.clip_polygons(footprint,parcel).is_empty():continue
+				var site:=saved.duplicate(true);site["fit_inherited_site"]=true
+				inherited.append(site)
+			if not inherited.is_empty():
+				plot["visual_building_sites"]=inherited
+				plot["visual_sites_form"]=plot.visual_form
 		if LATE.kind(plot)=="" and kind(plot) not in KIT and TOWN.supports(plot) and LATE.installed_features(plot)>0:
 			# Variant is selected inside TOWN.layout; reserve the maximum envelope
 			# of its finite kit so overlays cannot bypass road/neighbor clearance.

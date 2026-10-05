@@ -49,6 +49,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/overview_folio.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
+			"village_history":
+				var panel:=preload("res://scripts/hud/village_view_history.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
 			"purse_board":

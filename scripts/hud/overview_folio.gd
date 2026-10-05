@@ -1,12 +1,12 @@
 extends "res://scripts/hud/settlement_overview.gd"
 ## The same town ledger and callbacks, presented as an illustrated folio.
 const Base := preload("res://scripts/hud/settlement_overview.gd")
-const TownArt := preload("res://scripts/hud/overview_town_art.gd")
+const VillageView := preload("res://scripts/hud/living_village_view.gd")
 var comparing := false
 var leader_spread: BoxContainer
 
 func _sketch(drawing: Dictionary, parent: Node) -> void:
-	sketch = PaintedTown.new()
+	sketch = LivingTown.new()
 	sketch.name = "TownSketch"
 	sketch.data = drawing
 	sketch.custom_minimum_size = Vector2(280, 420)
@@ -120,21 +120,19 @@ func restore_view_state(state: Dictionary) -> void:
 func _layout() -> void:
 	if spread: spread.vertical = true
 	if leader_spread: leader_spread.vertical = size.x < 620
-	if sketch: sketch.custom_minimum_size.y = 420 if size.x >= 690 else 310
+	if sketch:
+		sketch.custom_minimum_size.y = 490 if size.x >= 690 else 370
+		if sketch.get("portrait") != null:
+			sketch.portrait.picture.custom_minimum_size.y = 360 if size.x >= 690 else 240
 	if grid: grid.columns = 2 if size.x >= 540 else 1
 
-class PaintedTown extends Base.OwnSketch:
-	var painting: TextureRect
+class LivingTown extends Base.OwnSketch:
+	var portrait: Control
 	func _ready() -> void:
-		painting = TextureRect.new()
-		painting.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		painting.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		painting.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(painting)
+		portrait = VillageView.new()
+		add_child(portrait)
+		portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		portrait.setup(data.get("portrait", {}))
+		custom_minimum_size.y = 460
 	func _draw() -> void:
-		var art := TownArt.texture(data)
-		if painting != null:
-			painting.texture = art
-			painting.size = Vector2(size.x, size.y - 32)
-		var caption := String(data.get("held_caption", ""))
-		draw_string(T.font("voice"), Vector2(0, size.y - 8), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 16, T.GOLD_TEXT)
+		pass

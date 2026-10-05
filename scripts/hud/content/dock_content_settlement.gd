@@ -7,6 +7,7 @@ const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Works:=preload("res://scripts/hud/water_conveyance_controls.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
+const VillageRecord:=preload("res://scripts/hud/village_view_record.gd")
 ## SETTLEMENT section: our town's own page (Overview) and its History.
 ## The Overview is as rich as a stranger's town's page and exact because the
 ## town is ours: the town drawn from its figures, the local leader's word,
@@ -109,6 +110,7 @@ func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
 	var events:Array=memo.take("events",[id,String(settlement.get("name","Settlement")),settlement.has("founded_day"),int(settlement.get("founded_day",0)),Memo.log_identity(GameState.discovery_log),Memo.log_identity(GameState.building_ledger)],
 		func()->Array:return preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger))
 	return [
+		{"type":"village_history","city_id":id},
 		{"type":"chronicle","heading":"The years remembered","events":events,"_print":memo.print_of("events")},
 		Charts.population(id,true),
 		Charts.reserves(id),
@@ -197,13 +199,22 @@ func _overview_blocks(settlement:Dictionary)->Array:
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
 		"ruler_sets_work":ruler and not management.is_empty() and not occupied,"on_leaders":_work_to_leaders,"on_people":jump("overview",0),
 		"work_warning":warning,"on_food_fix":_put_on_food.bind(int(warning.get("fix",0))) if int(warning.get("fix",0))>0 else Callable(),
-		"town_name":String(facts.name),"sketch":Model.sketch_data(facts,caption),"lead":Model.lead(facts),
+		"town_name":String(facts.name),"sketch":_living_sketch(facts,caption,settlement),"lead":Model.lead(facts),
 		"groups":groups,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":_founding,
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":on_population,
 		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
+
+func _living_sketch(facts:Dictionary,caption:String,settlement:Dictionary)->Dictionary:
+	var drawing:=Model.sketch_data(facts,caption)
+	drawing["portrait"]={"terrain":terrain,"on_visit":_visit_village,
+		"state":VillageRecord.observations(settlement,GameState.settlement_plots,GameState.settlement_completed,int(GameState.elapsed_days))}
+	return drawing
+
+func _visit_village()->void:
+	if is_instance_valid(hud) and hud.has_method("close_dock"):hud.close_dock()
 
 static func _since(days:int)->String:
 	return Model.since(days)

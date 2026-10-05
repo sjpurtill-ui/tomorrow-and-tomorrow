@@ -235,6 +235,8 @@ var market_prices:Dictionary={}
 var economy_metrics:Dictionary={}
 var economy_history:Array[Dictionary]=[]
 var strategic_history:Dictionary={}
+## Bounded observed settlement images and their dated readings; saved by reflection.
+var settlement_portrait_history:Dictionary={}
 var economy_events:Array[Dictionary]=[]
 var economy_known_goods:Dictionary={}
 var currency_supply:=0.0
@@ -615,6 +617,7 @@ func reset_for_new_world(new_seed:int)->void:
 	economy_metrics={}
 	economy_history=[]
 	strategic_history={}
+	settlement_portrait_history={}
 	economy_events=[]
 	economy_known_goods={}
 	currency_supply=0.0
