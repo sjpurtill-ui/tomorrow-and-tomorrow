@@ -651,10 +651,20 @@ func test_the_wealth_tab_shows_business_with_short_plain_labels()->void:
 	assert_bool((board.find_child("StanceChoice",true,false) as Control).visible).is_false()
 	(board.find_child("StanceToggle",true,false) as Button).emit_signal("pressed")
 	assert_bool((board.find_child("StanceChoice",true,false) as Control).visible).is_true()
+	# Opening all real stance choices must still fit a narrow Wealth panel.
+	board.size.x=420.0
+	board._responsive()
+	await await_idle_frame()
+	await await_idle_frame()
+	assert_float(board.get_combined_minimum_size().x).is_less_equal(420.0)
+	var business_card:Control=board.find_child("BusinessCard",true,false)
+	for id:String in Business.choices():
+		var option:Control=board.find_child("Stance_"+id,true,false)
+		assert_float(option.get_global_rect().end.x).is_less_equal(business_card.get_global_rect().end.x+1.0)
 	# The section follows what the makers make and comes before who holds the wealth.
 	var order:=[]
-	for child in board.get_children():
-		if child is Label:order.append((child as Label).text)
+	for child in board.find_children("*","Label",true,false):
+		if child.get_meta("wealth_section",false):order.append((child as Label).text)
 	assert_int(order.find("TRADE AND BUSINESS")).is_greater(order.find("WHAT WE MAKE"))
 	assert_int(order.find("TRADE AND BUSINESS")).is_less(order.find("WHO HOLDS THE WEALTH"))
 	# A stance chosen on the screen is the engine's stance.

@@ -415,8 +415,8 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 		assert_object(wealth.find_child(part,true,false)).override_failure_message("the wealth board has no %s" % part).is_not_null()
 	for gone in ["Balance","Levels","Line_army","StoreAnswer"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
 	var kickers:=[]
-	for child in wealth.get_children():
-		if child is Label and (child as Label).text!="":kickers.append((child as Label).text)
+	for child in wealth.find_children("*","Label",true,false):
+		if child.get_meta("wealth_section",false):kickers.append((child as Label).text)
 	assert_str(String(kickers[0])).is_equal("WHAT WE OWN")
 	assert_int(kickers.find("WHAT WE MAKE")).is_less(kickers.find("TREASURES"))
 	assert_int(kickers.find("TREASURES")).is_less(kickers.find("MATERIALS IN STORE"))
