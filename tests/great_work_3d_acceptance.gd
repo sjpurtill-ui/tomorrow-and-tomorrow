@@ -185,13 +185,18 @@ func _atlas_case(spec: Dictionary) -> void:
 		var watch := view.find_child("WatchLive", true, false) as Button
 		_check(watch != null, String(spec.id) + " exposes watching through the existing clock")
 		if watch != null:
+			var before_live: Dictionary = model.report() if is_instance_valid(model) else {}
+			var live_root: int = model.model_root.get_instance_id() if is_instance_valid(model) else 0
 			watch.pressed.emit()
 			await _frames(3)
 			_check(host.game_speed == (3.0 if float(spec.get("initial_speed",1.0)) == 0.0 else float(spec.get("initial_speed",1.0))), String(spec.id) + " watching uses Normal from pause or preserves the original pace")
 			GameState.elapsed_days += 1.0
 			U.advance_record(GameState, work, int(GameState.elapsed_days), city)
 			await get_tree().create_timer(.7).timeout
-			if is_instance_valid(model): _check(is_equal_approx(float(model.report().progress), U.fraction(work)), String(spec.id) + " watching updates from real daily progress")
+			if is_instance_valid(model):
+				_check(is_equal_approx(float(model.report().progress), U.fraction(work)), String(spec.id) + " watching updates from real daily progress")
+				if int(model.report().course) == int(before_live.course):
+					_check(int(model.report().builds) == int(before_live.builds) and model.model_root.get_instance_id() == live_root, String(spec.id) + " daily progress within a course retains geometry")
 			watch.pressed.emit()
 			await _frames(3)
 			_check(host.game_speed == 0.0, String(spec.id) + " stopping watch restores the Atlas pause")
@@ -224,6 +229,7 @@ func _ceremony_case(spec: Dictionary) -> void:
 	if view.plate.has_method("diagnostics"):
 		diagnostics = view.plate.diagnostics()
 		_check(int(diagnostics.mesh_count) > 0 and int(diagnostics.cast_count) <= 6, String(spec.id) + " bounds the real 3D cast and model")
+		_check(int(diagnostics.cast_count) >= 2 and int(diagnostics.body_count) == int(diagnostics.cast_count), String(spec.id) + " mounts every recorded visual participant as a real court figure")
 		_check(not diagnostics.committed and not diagnostics.viewport_active, String(spec.id) + " preview settles without a dedication or ongoing viewport draw")
 		if spec.has("mode"): _check(String(diagnostics.mode) == String(spec.mode), String(spec.id) + " uses the appropriate dedication action")
 	_check(Rect2(Vector2.ZERO, Vector2(get_window().size)).encloses(view.stage.get_global_rect()), String(spec.id) + " ceremony fits the viewport: " + str(view.stage.get_global_rect()))
