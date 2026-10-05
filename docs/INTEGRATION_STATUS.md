@@ -1,3 +1,28 @@
+## October 4 — graphical Wealth screen: INTEGRATION VALIDATED
+
+Prepared on `codex/wealth-visuals` from synchronized main `d7d4850c`.
+Runtime through `46c42c1a` combines the new goods/buying-power hero, available
+stock ring, illustrated making/treasure/material cards, five household wealth
+columns, and a graphical work/account ledger. Figures remain bound to the
+existing economy. Changed-data refresh and retained chart controls avoid
+per-frame rebuilding. Narrow business and levy choices wrap within the panel.
+
+Combined regression passes 72/72 cases across five suites. Final private GPU
+acceptance passes 363/363 checks across nine cases and 27 captures, with a clean
+engine log and process exit 0. Light/dark, poor stock, coin accounts, regular
+540px panels, expanded 980px panels, compact screens and opened choices are
+covered. This is prepared-record UI acceptance, not a continuous campaign run.
+Headless test exit reports resource cleanup diagnostics; the unrelated Court
+background prewarm hook is excluded only by the isolated acceptance harness.
+Details and reproduction: `docs/WEALTH_VISUAL_HANDOFF.md` and
+`docs/WEALTH_VISUAL_ACCEPTANCE.md`.
+
+No simulation, save-format, art-asset or state-ownership changes. Delivery
+verifies origin/main before fast-forwarding canonical main and checks the
+4700-file existing-local SHA256 inventory. Generated captures, imports,
+reports and userdata remain local. The running player session is untouched;
+the next normal launch loads the new scripts.
+
 ## October 4 — organic central settlement growth: INTEGRATION VALIDATED
 
 Prepared on `codex/settlement-growth-integration` from synchronized main

@@ -1,3 +1,29 @@
+## October 4, 2026 — illustrated Wealth overview
+
+Integration on `codex/wealth-visuals`, base `d7d4850c`, includes runtime through
+`46c42c1a`: large goods and buying-power readings, an available-stock ring,
+illustrated production/material/held-treasure cards, household wealth columns,
+and the graphical daily-work and currency-account ledger. Existing economy
+values, navigation and actions remain authoritative. Capability-selected craft
+art and origin-checked held-artifact art reuse the current library. Charts
+redraw on changed data, theme or size; unchanged sections and controls persist.
+Responsive grids and wrapped choices fit narrow panels in either theme.
+
+Combined regression passes 72/72 across five suites. Final private GPU
+acceptance passes 363/363, including 27 captures across nine cases and exact
+540px regular widths with open business choices or the coin treasury. The
+GPU log is clean and the isolated process exits 0. Prepared fixtures exclude
+the unrelated Court background prewarm hook; no Court runtime is modified.
+Headless exit cleanup diagnostics are documented. Source ownership, tests,
+limits and reproduction are recorded in `docs/WEALTH_VISUAL_HANDOFF.md` and
+`docs/WEALTH_VISUAL_ACCEPTANCE.md`.
+
+No economy formulas, save schema or simulation authorities change. Verified
+remote-main delivery precedes the canonical fast-forward, preserving existing
+local files. Test captures and generated files are excluded from source
+delivery. The active game remains running and loads new scripts on its next
+normal launch.
+
 ## October 4, 2026 — one settlement growing from earliest history to year 3000
 
 Integration on `codex/settlement-growth-integration`, base `bdacd023`, combines
