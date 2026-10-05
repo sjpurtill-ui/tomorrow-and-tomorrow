@@ -58,6 +58,8 @@ func test_opening_conversation_pauses_and_closing_restores_game()->void:
 	assert_float(host.game_speed).is_equal(0.0)
 	court.free()
 	assert_float(host.game_speed).is_equal(3.0)
+	# Drain the deferred opening transition after an immediate close.
+	await get_tree().process_frame
 
 func test_map_speed_controls_cannot_run_time_through_a_conversation()->void:
 	GameState.founding_focus="provision"
