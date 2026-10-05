@@ -284,12 +284,16 @@ func _reset_card(next_mode:String)->void:
 	mood_meter=null;regard_meter=null;regard_label=null;divine_row=null;speaker_frame=null;scene_area=null;persons_row=null;orders_row=null;suggest_row=null;command_line=null;orders_strip=null
 	weigh_clock=-1.0
 	# A different view of the court cross-fades in (BASE); a refresh does not.
-	if next_mode!=mode and is_inside_tree():Motion.cross_fade.call_deferred(card)
+	if next_mode!=mode and is_inside_tree():_cross_fade_card.call_deferred()
 	mode=next_mode
 	if next_mode!="audience":audience_id=""
 	if next_mode!="foreign":foreign_civ=""
 	for child in card.get_children():card.remove_child(child);child.queue_free()
 	court_tier=Backdrop.current_tier()
+
+func _cross_fade_card()->void:
+	# The court may close before the queued transition gets its frame.
+	if is_instance_valid(card) and not card.is_queued_for_deletion():Motion.cross_fade(card)
 
 func _add_backdrop(parent:Control)->Control:
 	## The era's setting, drawn behind everything; subtle behind the veil.
