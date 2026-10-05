@@ -2,26 +2,36 @@ extends RefCounted
 ## Every seat uses the same seeded planet sampling and viability search. No
 ## distance calculation is relative to the human player's selected location.
 ##
-## Peoples are spread over the whole planet. Each seat is placed anywhere the
+## A SMALLER WORLD (the user, 2026-10-05: "can't we just make the world
+## smaller?" and "6-7 on one continent and 6-7 on another (think Europe and
+## Asia)"). A world's peoples live on two continents of the planet, each a
+## region REGION_HALF_X_KM by REGION_HALF_Z_KM about a centre drawn from the
+## seed, at least CONTINENT_APART_KM apart: seats alternate between them, so
+## ours (seat 0) shares its continent with six peoples and six live on the
+## other, instead of all scattered over the whole globe. Each seat is placed anywhere in that region the
 ## shared founding kit can live, and never nearer than SEAT_SEPARATION_KM to
 ## any seat placed before it. The player's people is seat 0 and is placed
 ## first by the same draw; every other people keeps the same distance from
-## every other, the player's included. The first farming peoples of Earth rose
-## thousands of kilometres apart (the Levant, the Yellow River, Mesoamerica,
-## the Andes, New Guinea), so the nearest people is at least 2,000 km off and
-## usually 2,000-5,000 km, across real land or sea. Nobody is met in the first
-## decades: first contact waits until someone's parties actually walk that far
-## (the known country of scout_known_reach_km: 110 km, about 18 km more a
-## year). Two parties at the edges of their known country, walking toward each
-## other, cannot glimpse each other in the first thirty years, and no party
-## can reach another people's home in the first forty even with the most
-## route lore there is (tests/test_far_peoples.gd). Worlds already made keep
-## their stored positions; this only shapes new worlds.
-const SEAT_SEPARATION_KM:=2000.0
+## every other, the player's included. So the nearest people is about 1,100
+## km off: nobody is glimpsed in the first fifteen years and nobody's party can
+## reach another people's home in the first quarter century
+## (tests/test_far_peoples.gd), but their lands, which grow with them
+## (realm_reach.gd), come to meet in the middle centuries, and the frontiers,
+## realms and fronts of docs/WAR_GEOGRAPHY.md follow. Worlds already made
+## keep their stored positions; this only shapes new worlds.
+const SEAT_SEPARATION_KM:=1100.0
+## The region every people of a world lives in: half its width and depth (km).
+const REGION_HALF_X_KM:=3200.0
+const REGION_HALF_Z_KM:=2000.0
+## The two continents' centres stand at least this far apart (km).
+const CONTINENT_APART_KM:=8000.0
+## The planet's own half extents (CivilizationSystem.CIVILIZATION_WORLD_RADIUS_*).
+const PLANET_HALF_X_KM:=18000.0
+const PLANET_HALF_Z_KM:=8000.0
 ## Draws the first seat takes (as every seat did before separation).
 const FIRST_DRAWS:=48
 ## More draws a later seat may take to keep its distance from earlier seats.
-const SEPARATION_DRAWS:=208
+const SEPARATION_DRAWS:=600
 ## Seats already placed, per world: {"seed:world_seed": [Vector2, ...]}. A seat
 ## depends on every seat before it, so each world is placed once, in order.
 static var _placed:Dictionary={}
@@ -51,8 +61,11 @@ static func _planet_candidate(seed_value:int,seat:int,earlier:Array=[])->Vector2
 	# Generated communities share a generalist founding kit. Select places where
 	# that kit has a plausible subsistence base, not merely a patch of dry ground.
 	# This does not restrict later player settlement or grant local resources.
+	var centre:=region_centre(seed_value,seat%2)
 	for attempt in FIRST_DRAWS+(0 if earlier.is_empty() else SEPARATION_DRAWS):
-		var desired:=Vector2(rng.randf_range(-18000,18000),rng.randf_range(-8000,8000))
+		# A crowded continent: its later draws reach a little past its edges.
+		var spread:=1.0 if attempt<FIRST_DRAWS+SEPARATION_DRAWS/2 else 1.35
+		var desired:=centre+Vector2(rng.randf_range(-REGION_HALF_X_KM,REGION_HALF_X_KM),rng.randf_range(-REGION_HALF_Z_KM,REGION_HALF_Z_KM))*spread
 		var point:=PlanetEnvironment.nearest_viable_land(desired,seed_value^((seat+1)*104729+attempt))
 		var profile:=PlanetEnvironment.profile_at(point)
 		var score:=float(profile.food_potential)+minf(.3,float(profile.growing_season)*.3)
@@ -63,6 +76,34 @@ static func _planet_candidate(seed_value:int,seat:int,earlier:Array=[])->Vector2
 		var value:=minf(apart,SEAT_SEPARATION_KM)+(100000.0 if fits else 0.0)
 		if value>far_value:far=point;far_value=value
 	return best if earlier.is_empty() else far
+
+## The centres of a world's two continents: of two dozen seeded places in
+## the planet's middle latitudes, the one whose region holds the most land,
+## then the best of the rest at least CONTINENT_APART_KM from it. `which` 0 is
+## ours (seat 0's), 1 the other.
+static var _centres:Dictionary={}
+static func region_centre(seed_value:int,which:=0)->Vector2:
+	var key:="%d:%d" % [seed_value,int(WorldSimulation.state.world_seed)]
+	if not _centres.has(key):
+		var rng:=RandomNumberGenerator.new()
+		rng.seed=seed_value^0x5eedc0de
+		var options:Array=[]
+		for option in 24:
+			var centre:=Vector2(rng.randf_range(-(PLANET_HALF_X_KM-REGION_HALF_X_KM),PLANET_HALF_X_KM-REGION_HALF_X_KM),rng.randf_range(-(PLANET_HALF_Z_KM-REGION_HALF_Z_KM)*0.6,(PLANET_HALF_Z_KM-REGION_HALF_Z_KM)*0.6))
+			var land:=0
+			for i in 7:
+				for j in 5:
+					if PlanetEnvironment.is_land(centre+Vector2((float(i)/6.0*2.0-1.0)*REGION_HALF_X_KM*0.9,(float(j)/4.0*2.0-1.0)*REGION_HALF_Z_KM*0.9)):land+=1
+			options.append([land,centre])
+		options.sort_custom(func(a:Array,b:Array)->bool:return int(a[0])>int(b[0]))
+		var first:Vector2=options[0][1]
+		var second:=first+Vector2(CONTINENT_APART_KM*1.5,0.0)
+		for option:Array in options:
+			if (option[1] as Vector2).distance_to(first)>=CONTINENT_APART_KM:second=option[1];break
+		if _centres.size()>=8:_centres.clear()
+		_centres[key]=[first,second]
+	return (_centres[key] as Array)[clampi(which,0,1)]
+
 
 static func supports_founders(profile:Dictionary)->bool:
 	return bool(profile.get("land",false)) and float(profile.get("food_potential",0))>=.4 and float(profile.get("mean_temperature_c",-100))>=6.0 and float(profile.get("growing_season",0))>=.35

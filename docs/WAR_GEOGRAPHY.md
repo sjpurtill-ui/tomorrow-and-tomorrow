@@ -1,6 +1,11 @@
 # War geography: from one settlement to HOI4 fronts
 
-Status: proposal plus what branch `codex/war-night` built (2026-10-04/05).
+Status: decided and built (2026-10-05). The user: "make the world smaller",
+"6-7 on one continent and 6-7 on another (think Europe and Asia)", and
+"everybody has one settlement that expands" (no new towns: they cost too
+much run rate). Built: the two-continent placement (`civilization_start.gd`)
+and realm reach (`realm_reach.gd`). The presentation was built on
+`codex/war-night` (PR #157).
 Read with `GENERAL_CAMPAIGN_DESIGN.md` and `ADJUDICATION.md`.
 
 ## The goal
@@ -113,7 +118,9 @@ the same land. The realm reach must be one pure function, read by:
 
 If any of these disagreed with the map, the map would lie.
 
-**Decision needed from the user:**
+**Decided 2026-10-05:** (a) a smaller world (two continents of six or
+seven peoples each, about 1,100 km between neighbours) together with realm
+reach, centred on each people's one settlement. The earlier questions were:
 1. Should peoples hold country beyond their towns at all?
 2. Which of (a) a denser world, (b) larger peoples or (c) wider realms?
    The sparse world (12 peoples, 6,000 km apart) and tens of thousands of

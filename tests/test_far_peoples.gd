@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
-## Peoples live far apart over the whole planet (civilization_start.gd), so
-## nobody is met in the first decades and the court has no foreign business
+## Peoples live far apart in one region of the planet (civilization_start.gd:
+## about 1,100 km between neighbours), so nobody is met in the first decades and the court has no foreign business
 ## until someone's party really walks that far. Twenty generated worlds, each
 ## measured between the real founding sites (local_terrain._civilization_start),
 ## with contact decided by the real code paths: our returned party
@@ -15,7 +15,7 @@ const SEEDS:=[7932,15851,23770,31689,39608,47527,55446,63365,71284,79203,87122,9
 ## travels far. 1,000 km is about two months' walk at a caravan's 16 km a day,
 ## and a young people's known country (110 km, 18 km more a year) reaches that
 ## far only after about fifty years.
-const FAR_RADIUS_KM:=1000.0
+const FAR_RADIUS_KM:=900.0
 ## The boldest ruler settles new towns this far from home (civilization_strategy.gd
 ## settle_distance, 16 + 24 × boldness).
 const BOLDEST_SETTLE_KM:=40.0
@@ -24,11 +24,11 @@ const BOLDEST_SETTLE_KM:=40.0
 const FOUNDING_MOVE_KM:=40.0
 ## Nobody even glimpses anybody for this many years, with the route lore a
 ## people has by then (the route_speed of a few wayfinding practices).
-const GLIMPSE_YEARS:=30
+const GLIMPSE_YEARS:=15
 const GLIMPSE_LORE:=0.3
 ## Nobody reaches anybody's home for this many years, even with route lore at
 ## the engine's cap (no mounts in the stone age).
-const MEET_YEARS:=40
+const MEET_YEARS:=25
 const LORE_CAP:=0.6
 
 var _sites:Dictionary={}
@@ -206,3 +206,15 @@ func test_a_saved_world_keeps_its_peoples_where_they_were()->void:
 	CivilizationSystem.reset_for_new_world()
 	assert_str(String(CivilizationSystem.import_state(saved).get("error",""))).is_empty()
 	assert_float(CivilizationSystem._civilization_world_position(CivilizationSystem.civilizations[0]).distance_to(near)).is_less(1.0)
+
+func test_peoples_share_two_continents_six_or_seven_each()->void:
+	# "6-7 on one continent and 6-7 on another (think Europe and Asia)."
+	for seed_value in SEEDS.slice(0,6):
+		var sites:=_world(seed_value)
+		var ours:=Start.region_centre(seed_value,0)
+		var other:=Start.region_centre(seed_value,1)
+		assert_float(ours.distance_to(other)).is_greater_equal(Start.CONTINENT_APART_KM)
+		var with_us:=0
+		for site:Vector2 in sites:
+			if site.distance_to(ours)<site.distance_to(other): with_us+=1
+		assert_int(with_us).override_failure_message("seed %d: %d peoples on our continent" % [seed_value,with_us]).is_between(6,8)
