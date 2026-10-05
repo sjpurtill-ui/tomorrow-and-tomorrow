@@ -26,7 +26,11 @@ class TradeHud extends "res://scripts/hud/command_rail_hud.gd":
 		_build_rail()
 		_build_time_pill()
 		_build_kpi_strip()
+		_build_toolbar()
 		_build_dock()
+		dock.visibility_changed.connect(_layout)
+		detail_dock.visibility_changed.connect(_layout)
+		_refresh_city_selector()
 		get_viewport().size_changed.connect(_layout)
 		_layout()
 		set_process(false)
@@ -107,13 +111,18 @@ func _run() -> void:
 ## not run acceptance contracts: those follow approval of the visual direction.
 func _preview_case() -> void:
 	prepare_fixture("coin" if selected_case.begins_with("coin") else "barter")
+	SettlementModel._ensure_primary_settlement_record()
+	# The layout stress cases retain deliberately long names. This approval
+	# example uses ordinary names in the same prepared records.
+	for index in CivilizationSystem.civilizations.size():
+		CivilizationSystem.civilizations[index].name=["Willow River", "Red Clay Houses", "Distant Cedar People"][index]
 	T.set_color_mode("dark" if selected_case.contains("dark") else "light")
 	background.color = T.PAPER_SUNK.lerp(T.GREEN, 0.16)
 	get_window().size = Vector2i(1536, 1024)
 	hud = TradeHud.new()
 	add_child(hud)
 	hud.register_provider("economy", Economy.new(null, hud))
-	hud.time_text.text = "[b]Year 1 · Spring[/b] · Paused"
+	hud.time_text.text = "[b]%s[/b] · Paused" % preload("res://scripts/calendar_date.gd").words(int(GameState.elapsed_days),true)
 	hud.drawer_open = true
 	hud._sync_drawer()
 	hud.open_dock("economy", 3)
@@ -121,9 +130,10 @@ func _preview_case() -> void:
 	hud.force_dock_layout()
 	await _frames(12)
 	label.add_theme_font_size_override("font_size", 12)
-	label.text = "TEST\nPrepared records"
+	label.text = "UI PREVIEW\nPrepared trade records\nNot integrated into the game"
 	label.modulate = T.INK
-	label.position = Vector2(10, 926)
+	label.position = Vector2(hud.dock.position.x + hud.dock.size.x + 24, 90)
+	move_child(label, get_child_count() - 1)
 	var board: Control = hud.dock.find_child("TradeBoard", true, false)
 	if board == null:
 		_check(false, "Preview could not mount the actual Trade board")

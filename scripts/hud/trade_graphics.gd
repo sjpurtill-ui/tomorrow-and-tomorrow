@@ -1,5 +1,6 @@
 extends Control
-## Two recent trade values on one scale. No history or net profit is inferred.
+## One balance bar: left is more sent, right is more received. The midpoint
+## is equal exchange. This compares recorded worth, not net profit or stocks.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 
@@ -32,32 +33,25 @@ func _fraction(index:int)->float:
 	var top:=maxf(_value(0),_value(1))
 	return _value(index)/top if top>0.0 else 0.0
 
+func _balance()->float:
+	var total:=_value(0)+_value(1)
+	return (_value(1)-_value(0))/total if total>0.0 else 0.0
+
 func _draw()->void:
-	var font:=T.font("ui")
 	var number_font:=T.font("voice")
-	if inline:
-		var width:=maxf(0.0,(size.x-24.0)/2.0)
-		for index in 2:
-			var x:=(width+24.0)*index
-			var color:=T.GOLD if index==0 else T.TEAL
-			draw_string(number_font,Vector2(x,17),String(labels[index]),HORIZONTAL_ALIGNMENT_LEFT,width,17,T.INK_MUTED)
-			draw_string(number_font,Vector2(x,48),EraWords.grouped(roundi(_value(index))),HORIZONTAL_ALIGNMENT_LEFT,width,30,T.INK)
-			draw_rect(Rect2(x,59,width,4),Color(T.RULE,0.24))
-			draw_rect(Rect2(x,59,width*_fraction(index),4),Color(color,0.85))
-		return
-	var row:=size.y/2.0
+	var width:=maxf(0.0,(size.x-24.0)/2.0)
 	for index in 2:
-		var y:=row*index
-		var color:=T.GOLD if index==0 else T.TEAL
+		var x:=(width+24.0)*index
+		var alignment:=HORIZONTAL_ALIGNMENT_LEFT if index==0 else HORIZONTAL_ALIGNMENT_RIGHT
 		var label:=String(labels[index]) if index<labels.size() else ("Sent" if index==0 else "Received")
 		var number:=EraWords.grouped(roundi(_value(index)))
-		draw_string(font,Vector2(0,y+18),label,HORIZONTAL_ALIGNMENT_LEFT,maxf(0,size.x*.48),14,T.INK_MUTED)
-		var number_size:=26
-		var width:=number_font.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,number_size).x
-		while number_size>14 and width>size.x*.5:
+		draw_string(number_font,Vector2(x,17),label,alignment,width,17,T.INK_MUTED)
+		var number_size:=30
+		while number_size>14 and number_font.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,number_size).x>width:
 			number_size-=1
-			width=number_font.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,number_size).x
-		draw_string(number_font,Vector2(maxf(size.x*.5,size.x-width),y+23),number,HORIZONTAL_ALIGNMENT_LEFT,size.x*.5,number_size,T.INK)
-		var bar:=Rect2(0,y+34,size.x,8)
-		draw_rect(bar,Color(T.RULE,0.24))
-		if _fraction(index)>0.0:draw_rect(Rect2(bar.position,Vector2(bar.size.x*_fraction(index),bar.size.y)),Color(color,0.85))
+		draw_string(number_font,Vector2(x,48),number,alignment,width,number_size,T.INK)
+	var center:=size.x/2.0
+	var offset:=_balance()*center
+	draw_rect(Rect2(0,59,size.x,5),Color(T.RULE,0.3))
+	if absf(offset)>0.0:draw_rect(Rect2(center+minf(0.0,offset),59,absf(offset),5),T.TEAL if offset>0.0 else T.GOLD)
+	draw_line(Vector2(center,55),Vector2(center,69),T.INK_MUTED,1.0)

@@ -133,7 +133,7 @@ func refresh(force:=false)->void:
 		panel.add_theme_stylebox_override("panel",skin)
 		(item.kicker as Label).add_theme_color_override("font_color",T.INK)
 	visual_sections=kept_sections
-	var peoples_kicker:=get_node_or_null("PeoplesHeading") as Label
+	var peoples_kicker:=find_child("PeoplesHeading",true,false) as Label
 	if peoples_kicker!=null:peoples_kicker.add_theme_color_override("font_color",T.INK_MUTED)
 	var next_summary:=str(hash([_known_rows(),Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),Ledger.peek().get("tributes",{}),T.color_mode]))
 	if force or next_summary!=summary_signature:
@@ -189,7 +189,7 @@ func _build_summary()->void:
 	var exchange:=VBoxContainer.new();exchange.size_flags_horizontal=Control.SIZE_EXPAND_FILL;exchange.add_theme_constant_override("separation",4);top.add_child(exchange)
 	exchange.add_child(_line("Recent exchange · worth a season",16,T.INK_MUTED,true))
 	var chart:=Graphics.new();chart.name="FlowTotals";chart.inline=true;chart.values=[sent*3.0,came*3.0];exchange.add_child(chart)
-	chart.tooltip_text="Smoothed monthly trade values, expressed as a seasonal pace. Each direction uses the sender's own prices; the figures are trade value, not goods in store, coin, or profit."
+	chart.tooltip_text="Smoothed monthly values expressed as a seasonal pace, at each sender's own prices. The one bar is centered on equal exchange: left means more sent, right means more received. It compares recorded worth, not stock, coin or profit."
 	exchange.add_child(_line("At each sender's prices",13,T.INK_MUTED,true))
 
 
@@ -248,10 +248,10 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var theirs:=Stances.stance(civ_id,"player")
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel",_folio_rule(12))
+	panel.add_theme_stylebox_override("panel",_folio_rule(6))
 	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",16);panel.add_child(column)
 	var overview:=_grid(column,"PartnerExchange",2,740)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",16);head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(head)
+	var head:=HBoxContainer.new();head.name="PartnerIdentity";head.add_theme_constant_override("separation",16);head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(head)
 	var art:=_partner_art(civ_id,contact);head.add_child(art)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",4);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(words)
 	var title:=_answer(name,25);title.name="Name";title.tooltip_text=name;words.add_child(title)
@@ -260,13 +260,14 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
 	if blocked!="":subtitle=_blocked_words(blocked)
 	var form_label:=_line(subtitle,16,T.RED_TEXT if blocked!="" else T.INK_MUTED,true);form_label.add_theme_font_override("font",T.font("voice_italic"));words.add_child(form_label)
-	if contact<2:return panel
+	if contact<2:
+		overview.set_meta("wide_columns",1);overview.columns=1
+		return panel
 	var form:=String(p.get("form","gift"))
 	var measured:=HBoxContainer.new();measured.add_theme_constant_override("separation",16);measured.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(measured)
 	var chart_box:=VBoxContainer.new();chart_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;measured.add_child(chart_box)
-	chart_box.add_child(_line("Worth "+Words.period_word(form),15,T.INK_MUTED,true))
 	var bar:=Graphics.new();bar.name="Flows";bar.inline=true;bar.values=[Words.per_period(Ledger.flow_value("player",civ_id),form),Words.per_period(Ledger.flow_value(civ_id,"player"),form)];chart_box.add_child(bar)
-	bar.tooltip_text="Recent trading pace at each sender's own prices. These are smoothed values, so blocked routes can retain readings from earlier trade. Both bars share one scale."
+	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more sent; right means more received. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
 	var toggle:=Button.new();toggle.name="TermsToggle";toggle.text="⌄" if bool(expanded_people.get(civ_id,false)) else "›";toggle.flat=true;toggle.custom_minimum_size=Vector2(32,40);toggle.size_flags_vertical=Control.SIZE_SHRINK_CENTER;toggle.add_theme_font_override("font",T.font("voice"));toggle.add_theme_font_size_override("font_size",32);toggle.tooltip_text="Show goods, dependence and trade terms";toggle.pressed.connect(_toggle_people.bind(civ_id));measured.add_child(toggle)
 	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",16);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
 	var goods:=_grid(column,"GoodsExchanged",2,640)
@@ -309,14 +310,19 @@ func _toggle_people(civ_id:String)->void:
 
 func _partner_art(civ_id:String,contact:int)->TextureRect:
 	var texture:Texture2D
+	var painted:=false
 	if contact>=2:
+		var materials:Array[int]=[]
 		for item:Array in Words.flow_items("player",civ_id)+Words.flow_items(civ_id,"player"):
 			var material:=MaterialArt.material(String(item[0]))
-			if material>=0:texture=MaterialArt.texture(material);break
+			if material>=0 and not material in materials:materials.append(material)
+		if not materials.is_empty():texture=MaterialArt.texture(materials[posmod(civ_id.hash(),materials.size())]);painted=true
 		if texture==null and Ledger.flow(civ_id,"player","Food")+Ledger.flow("player",civ_id,"Food")>0:texture=ProvisionsArt.texture(2)
 	if texture==null:texture=Identity.emblem(civ_id)
 	var art:=TextureRect.new();art.name="PartnerIllustration";art.texture=texture
-	art.custom_minimum_size=Vector2(158,100);art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.size_flags_vertical=Control.SIZE_SHRINK_CENTER;art.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if painted:
+		var ink:=ShaderMaterial.new();ink.shader=preload("res://scripts/hud/trade_paper_art.gdshader");art.material=ink
+	art.custom_minimum_size=Vector2(220,90);art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.size_flags_vertical=Control.SIZE_SHRINK_CENTER;art.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	return art
 
 
@@ -325,7 +331,7 @@ func _build_story()->void:
 	var row:=_grid(story,"TradeStoryLayout",2,740)
 	var path:="res://assets/ui/trade/barter-vignette-v1.png"
 	if FileAccess.file_exists(path):
-		var art:=TextureRect.new();art.name="BarterIllustration";art.texture=load(path) as Texture2D if ResourceLoader.exists(path) else ImageTexture.create_from_image(Image.load_from_file(path));art.custom_minimum_size=Vector2(240,136);art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(art)
+		var art:=TextureRect.new();art.name="BarterIllustration";art.texture=load(path) as Texture2D if ResourceLoader.exists(path) else ImageTexture.create_from_image(Image.load_from_file(path));art.custom_minimum_size=Vector2(240,136);art.size_flags_horizontal=Control.SIZE_EXPAND_FILL;art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(art)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;words.add_theme_constant_override("separation",8);row.add_child(words)
 	words.add_child(_answer("Goods, gifts and obligations",26))
 	words.add_child(_line("Open a people's record to set terms or exchange goods.",17,T.INK_MUTED,true))
@@ -544,8 +550,10 @@ func _say(text:String)->void:
 
 
 func _section(title:String)->VBoxContainer:
-	var kicker:=_line(title.to_upper(),20,T.INK,true);kicker.name="PeoplesHeading";kicker.add_theme_font_override("font",T.font("voice"));add_child(kicker)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);add_child(box)
+	var section:=VBoxContainer.new();section.add_theme_constant_override("separation",8);add_child(section)
+	var kicker:=_line(title.to_upper(),20,T.INK,true);kicker.name="PeoplesHeading";kicker.add_theme_font_override("font",T.font("voice"));section.add_child(kicker)
+	section.add_child(HSeparator.new())
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);section.add_child(box)
 	return box
 
 func _visual_section(title:String,parent:Node,node_name:String,icon:String,hero:=false)->VBoxContainer:
@@ -554,6 +562,7 @@ func _visual_section(title:String,parent:Node,node_name:String,icon:String,hero:
 	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",8);column.add_child(header)
+	header.visible=not hero
 	if not icon.is_empty():
 		var mark:=Emblem.new(icon);mark.custom_minimum_size=Vector2(28,28);header.add_child(mark)
 	var kicker:=_line(title.to_upper(),20,T.INK,true);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;header.add_child(kicker)
@@ -581,6 +590,10 @@ func _responsive()->void:
 			if ancestor.size.x>0:available=minf(available,maxf(0.0,ancestor.size.x-24.0))
 			break
 		ancestor=ancestor.get_parent()
+	for art:TextureRect in find_children("PartnerIllustration","TextureRect",true,false):
+		art.custom_minimum_size.x=220 if available>=740 else 118
+	for head:HBoxContainer in find_children("PartnerIdentity","HBoxContainer",true,false):
+		head.custom_minimum_size.x=430 if available>=740 else 0
 	var retained:Array[GridContainer]=[]
 	for grid:GridContainer in responsive_grids:
 		if not is_instance_valid(grid) or not grid.is_inside_tree():continue

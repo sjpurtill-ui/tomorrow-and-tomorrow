@@ -10,6 +10,12 @@ const Goods = preload("res://scripts/civilian_goods.gd")
 const EraWords = preload("res://scripts/hud/era_words.gd")
 var ids: Array
 
+func test_one_balance_bar_is_centered_and_changes_direction() -> void:
+	var chart: Control = auto_free(preload("res://scripts/hud/trade_graphics.gd").new())
+	for sample: Array in [[[0.0,0.0],0.0],[[80.0,80.0],0.0],[[80.0,0.0],-1.0],[[0.0,80.0],1.0],[[30.0,90.0],0.5],[[90.0,30.0],-0.5]]:
+		chart.values=sample[0]
+		assert_float(float(chart._balance())).is_equal_approx(float(sample[1]),0.001)
+
 func before_test() -> void:
 	ids = Probe.prepare_fixture("barter")
 

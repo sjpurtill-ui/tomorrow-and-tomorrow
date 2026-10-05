@@ -398,13 +398,17 @@ func _build_frame()->void:
 	var court:=Button.new();court.name="TopCourt";court.tooltip_text="Open your court · F12";court.pressed.connect(open_court);top_actions.add_child(court)
 	var world:=Button.new();world.name="TopWorld";world.tooltip_text="Known world · F6";world.pressed.connect(func()->void:section_requested.emit("world",0));top_actions.add_child(world)
 	var menu:=Button.new();menu.name="RailMenu";menu.tooltip_text="Save, load, settings, or a new world (Esc).";menu.pressed.connect(func()->void:menu_requested.emit());top_actions.add_child(menu)
-	var buttons:Array[Button]=[court,world,menu]
-	var regions:Array[Rect2]=[Rect2(1345,7,34,31),Rect2(1397,8,36,31),Rect2(1447,8,33,29)]
+	var help:=Button.new();help.name="TopHelp";help.tooltip_text="Map controls and help";help.pressed.connect(func()->void:
+		if is_instance_valid(terrain) and terrain.has_method("_toggle_map_help"):
+			close_dock();terrain.call("_toggle_map_help"))
+	top_actions.add_child(help)
+	var buttons:Array[Button]=[court,world,menu,help]
+	var regions:Array[Rect2]=[Rect2(1345,7,34,31),Rect2(1397,8,36,31),Rect2(1447,8,33,29),Rect2(1492,8,30,31)]
 	for index in buttons.size():
 		var button:=buttons[index]
 		button.custom_minimum_size=Vector2(42,32);button.add_theme_font_override("font",Tokens.font("voice"));button.add_theme_font_size_override("font_size",16)
 		button.add_theme_color_override("font_color",Folio.RAIL_TEXT);button.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT));button.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
-		var icon:=Folio.Approved.symbol(regions[index],28,28);button.add_child(icon);icon.set_anchors_preset(Control.PRESET_CENTER);icon.position=Vector2(-14,-14);icon.size=Vector2(28,28)
+		var icon:=Folio.Approved.symbol(regions[index],28,28);button.add_child(icon);icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);icon.offset_left=7;icon.offset_right=-7;icon.offset_top=2;icon.offset_bottom=-2
 
 func _build_rail()->void:
 	rail_panel=PanelContainer.new();rail_panel.name="CommandRail"
@@ -1004,6 +1008,8 @@ func _build_toolbar()->void:
 	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
+	var divider:=VSeparator.new();divider.custom_minimum_size=Vector2(1,24);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(divider)
+	var city_mark:=Folio.Approved.picture(Rect2(380,10,31,25),26,24);city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
 	brand_row.add_child(city_selector)
 	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
 	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:
