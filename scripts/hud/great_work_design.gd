@@ -20,7 +20,7 @@ const FORMS:={
 	"bridge":["The great crossing",["Setting abutments","Raising the spans","Laying the crossing","Standing"],"crossing","8aada8"],
 	"causeway":["The raised causeway",["Groundworks","Banking the road","Laying the crest","Standing"],"road","a39071"],
 	"dam":["The river wall",["Setting foundations","Raising the wall","Finishing the spillways","Standing"],"sluice","668b9f"],
-	"colossus":["The great carved figure",["Laying the plinth","Raising the figure","Crowning the carving","Standing"],"figure","b69a74"],
+	"colossus":["The great carved figure",["Laying the plinth","Raising the figure","Finishing the carving","Standing"],"figure","b69a74"],
 	"garden":["The ordered garden",["Marking the paths","Forming the beds","Planting the canopy","Standing"],"bough","718958"],
 	"observatory":["The house of the heavens",["Aligning foundations","Raising the sky court","Setting the instruments","Standing"],"stars","7892ae"],
 	"gate":["The monumental gateway",["Footings","Raising the gatehouses","Joining the arch","Standing"],"threshold","b4915b"],
