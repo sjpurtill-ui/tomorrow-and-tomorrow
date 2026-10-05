@@ -38,7 +38,7 @@ func _local_tab(sub:int)->Dictionary:
 ## After coinage the treasury is coin and lives on Wealth.
 func _food_tab()->Dictionary:
 	var blocks:Array=[_provisions_data()]
-	if Purse.in_kind():blocks.append({"type":"purse_board","mode":"store","on_open":_open_section})
+	if Purse.in_kind():blocks.append({"type":"purse_board","mode":"store","compact_food":true,"on_open":_open_section})
 	return {"blocks":blocks}
 
 func _open_section(section:String,sub:int)->void:
@@ -120,7 +120,7 @@ func _food_blocks(metrics:Dictionary)->Array:
 	if not stock_items.is_empty():
 		blocks.append({"type":"rows","heading":"Stores by kind","items":stock_items})
 	if not source_items.is_empty():
-		blocks.append({"type":"rows","heading":"Where food comes from","items":source_items})
+		blocks.append({"type":"rows","heading":"Food production","items":source_items})
 	return blocks
 
 func signature()->Array:
@@ -234,7 +234,11 @@ func _provisions_data()->Dictionary:
 			stock+=amount;lost+=waste;parts.append("%s: %s rations in store, %s spoiled today. %s" % [kind,Plain.number(amount),Plain.number(waste),String(hands.get(kind,""))])
 		rows.append({"name":"Meat & fish" if group.size()>1 else group[0],"stock":stock,"lost":lost,"detail":"\n".join(parts)})
 	var management:=GovernmentPeopleSystem.settlement_management(GameState.selected_player_settlement_id)
-	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),"water":GameState.water_metrics.duplicate(true),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),"flow":{"Produced":metrics.get("food_production",0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Missions":FoodSystem.issued_on_day(int(GameState.elapsed_days)),"Net":metrics.get("food_net",0)},"selected":selected_food,"priorities":show_priorities,"on_select":func(kind:String):selected_food="" if kind==selected_food else kind;hud.request_immediate_dock_refresh(),"on_toggle":func():show_priorities=not show_priorities;hud.request_immediate_dock_refresh(),"on_focus":_provisions_focus,"on_water":_open_water,"on_sources":focused_action("Where food comes from","",_economy_report.bind("sources")).on_press,"on_history":focused_action("Past seasons","",_economy_report.bind("outlook")).on_press,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),"water":GameState.water_metrics.duplicate(true),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),"flow":{"Produced":metrics.get("food_production",0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Missions":FoodSystem.issued_on_day(int(GameState.elapsed_days)),"Net":metrics.get("food_net",0)},"selected":selected_food,"priorities":show_priorities,"on_select":func(kind:String):selected_food="" if kind==selected_food else kind;hud.request_immediate_dock_refresh(),"on_toggle":func():show_priorities=not show_priorities;hud.request_immediate_dock_refresh(),"on_focus":_provisions_focus,"on_water":_open_water,"has_deliveries":_has_food_deliveries(),"on_sources":focused_action("Gathering & preparation","",_economy_report.bind("sources")).on_press,"on_history":focused_action("Past seasons","",_economy_report.bind("outlook")).on_press,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+func _has_food_deliveries()->bool:
+	var trade:=SettlementModel.city_trade_snapshot(GameState.selected_player_settlement_id)
+	return not (trade.get("shipments",[]) as Array).is_empty() or not (trade.get("history",[]) as Array).is_empty()
+
 func _provisions_focus(focus:String)->void:
 	var id:=GameState.selected_player_settlement_id
 	if focus.is_empty():GovernmentPeopleSystem.restore_delegation(id)
