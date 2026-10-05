@@ -30,6 +30,7 @@ var _moving:Tween
 var _ritual:Tween
 var _moving_paused:=false
 var _ritual_paused:=false
+var _settling:=false
 var _props:Node3D
 var _opening:Array[Node3D]=[]
 var ritual_profile:Dictionary={}
@@ -229,12 +230,16 @@ func dedication()->void:
 
 func _finish_walk(body:Node3D)->void:
 	if not is_instance_valid(body):return
-	body.face(atan2(-body.position.x,(_front+.8)-body.position.z)*180.0/PI,.3)
+	# Skipping completes this callback inside the ritual tween's custom step.
+	# Finish its turn immediately before settle disables the body's processing.
+	body.face(atan2(-body.position.x,(_front+.8)-body.position.z)*180.0/PI,0.0 if _settling else .3)
 	Acting.idle(body,"stand");Acting.play(body,"nod_proud")
 
 func settle()->void:
+	_settling=true
 	if _moving!=null and _moving.is_valid():_moving.custom_step(20.0);_moving.kill()
 	if _ritual!=null and _ritual.is_valid():_ritual.custom_step(20.0);_ritual.kill()
+	_settling=false
 	_moving=null;_ritual=null;_moving_paused=false;_ritual_paused=false
 	_remaining=0.0;_set_active(false)
 
