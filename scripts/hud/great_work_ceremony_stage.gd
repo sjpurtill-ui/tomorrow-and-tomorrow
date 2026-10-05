@@ -135,7 +135,7 @@ func _build_scene(profile:Dictionary)->void:
 		var body:=Figure.new();body.name="Guest_"+String(entry.key);world.add_child(body)
 		if not body.setup(look):body.queue_free();continue
 		body.position=Rituals.guest_position(String(ritual_profile.get("formation","arc")),index,cast.size())+Vector3(0,0,_front)
-		if index==0 and String(ritual_profile.get("action",""))=="cross":body.position=Vector3(0,0,_front+3.1) if String(ritual_profile.get("form",""))=="gate" else Vector3(-2.8,0,_front+2.4)
+		if index==0 and String(ritual_profile.get("action",""))=="cross":body.position=Vector3(0,0,_front+3.1) if String(ritual_profile.get("form",""))=="gate" else Vector3(-3.9,0,_front+3.2)
 		body.rotation.y=atan2(-body.position.x,(_front+.8)-body.position.z)*.45
 		body.set_meta("ceremony_person",person.duplicate(true));bodies[entry.key]=body
 		Acting.idle(body,"stand")
@@ -213,16 +213,19 @@ func dedication()->void:
 	for body:Node3D in bodies.values():
 		Acting.play(body,String(ritual_profile.get("gesture","nod_slow")) if index==0 else String(ritual_profile.get("purpose_gesture","clap_soft")))
 		index+=1
+	var active_seconds:=7.0
 	if String(ritual_profile.get("action",""))=="cross" and not bodies.is_empty():
 		var leader:Node3D=bodies.values()[0]
-		var travel:=Vector3(0,0,-3.8) if String(ritual_profile.get("form",""))=="gate" else Vector3(5.4,0,0)
+		# The bridge procession passes in front of all three guest rows.
+		var travel:=Vector3(0,0,-3.8) if String(ritual_profile.get("form",""))=="gate" else Vector3(7.8,0,0)
 		leader.rotation.y=atan2(travel.x,travel.z);leader.play("walk_in");leader.set_locomotion_rate(1.0)
 		var walk:=_ritual.tween_property(leader,"position",leader.position+travel,travel.length()/1.18).set_delay(.6)
 		walk.finished.connect(_finish_walk.bind(leader))
+		active_seconds=maxf(active_seconds,travel.length()/1.18+1.5)
 	_shot_kind="ritual"
 	var focus:=Vector3(0,.85,_front+.8)
 	_shot(focus,focus+Rituals.camera_offset(ritual_profile),1.0)
-	_wake(7.0)
+	_wake(active_seconds)
 
 func _finish_walk(body:Node3D)->void:
 	if not is_instance_valid(body):return
