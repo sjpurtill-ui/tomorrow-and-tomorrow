@@ -3,28 +3,30 @@ extends RefCounted
 ##
 ## Every town keeps its own stores, and its households keep their own money;
 ## the realm's account is one, and it holds only what is really in it.
-## Before coinage it is the common store: food the levy took out of each
-## town's own stores, counted in rations (one ration of food, one in the
-## purse). After coinage it is the treasury: coin, with the metal that backs
-## it, and the food still taken in kind, counted in coin at the market price
-## (the unit changes once, at coinage: _sync_unit). The balance is what is
-## held: the coin, and the food in kind (balance - coin). After coinage the
-## food is kept at one book price (book_price, today's market price at
-## coinage), so a ration in is a ration out whatever grain fetches.
+## Before coinage it is the common store: goods (civilian_goods.gd: tools,
+## cord, baskets, pots, the first money) the levy took out of each town's
+## own stores, counted in goods (one goods-worth held, one in the purse).
+## After coinage it is the treasury: coin, with the metal that backs it, and
+## the goods still taken in kind, counted in coin at the market price (the
+## unit changes once, at coinage: _sync_unit). The balance is what is held:
+## the coin, and the goods in kind (balance - coin). After coinage the goods
+## are kept at one book price (book_price, today's price at coinage), so a
+## goods-worth in is a goods-worth out whatever goods fetch.
 ##
-## IN: the levy, a share of what every town brings in (mostly its harvest),
-##   taken by each town's own economy day (accrue(): what the realm's hands
-##   reach, less what is hidden): food out of that town's stores, only what
-##   it holds beyond LEVY_KEEP_DAYS of its people's need; after coinage the share on goods
+## IN: the levy, a share of what every town brings in, taken by each town's
+##   own economy day (accrue(): what the realm's hands reach, less what is
+##   hidden): goods out of that town's stores, only what it holds beyond its
+##   homes' need (civilian_goods.gd spare); after coinage the share on goods
 ##   sold for money in coin, from households, with its backing (as
 ##   artifact_collection.gd moves coin between peoples). And what other
 ##   systems put in (deposit(): tolls, tribute, spoils, sales).
-## OUT, reckoned once a month for the month just past (settle()): what rotted
-##   in the store (the capital's own rate for stored food), old debts, the
-##   soldiers' pay, food for hungry towns (from the store first, then bought
-##   with coin), paid crews and the scholars' keep, each as far as the purse
-##   holds out; and what other systems pay (spend(): gifts, purchases). Pay
-##   puts the food and coin back where people live (_hand_out).
+## OUT, reckoned once a month for the month just past (settle()): what wore
+##   out in the store (the homes' own wear on goods), old debts, the
+##   soldiers' pay, food for hungry towns (bought from towns with food to
+##   spare, with the store's goods or coin), paid crews and the scholars'
+##   keep, each as far as the purse holds out; and what other systems pay
+##   (spend(): gifts, purchases). Pay puts the goods and coin back where
+##   people live (_hand_out).
 ##
 ## Every people keeps its own purse in its own scope (WorldSimulation.state
 ## .realm_purse), by the same rules; a computer ruler sets the same levers by
@@ -37,8 +39,12 @@ extends RefCounted
 
 const Levers:=preload("res://scripts/office_levers.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Goods:=preload("res://scripts/civilian_goods.gd")
+const Prices:=preload("res://scripts/trade_prices.gd")
 
-const VERSION:=2
+## 3: the store holds goods, not food (a version-2 store's food goes back to
+## the capital's stores once: _food_back).
+const VERSION:=3
 ## The levy's levels, lightest first, as shares of the most the age can take.
 const LEVELS:=["light","usual","heavy"]
 const LEVEL_NAMES:={"light":"Light","usual":"Usual","heavy":"Heavy"}
@@ -79,20 +85,16 @@ const CREWS_MAX:=0.15
 ## Who the pay reaches, for the wealth of the poorer households: food for the
 ## hungry all of it, builders and soldiers mostly common folk, scholars few.
 const REDISTRIBUTION_WEIGHT:={"relief":1.0,"crews":0.8,"army":0.5,"scholars":0.2,"debts":0.0}
-## Relief: a town is hungry under HUNGRY_DAYS of food; food is bought from
-## towns holding more than SELLER_DAYS (down to SELLER_KEEP) to bring each
+## Relief: a town is hungry under HUNGRY_DAYS of food; food is bought (with
+## the store's goods, or coin) from towns holding more than SELLER_DAYS (down to SELLER_KEEP) to bring each
 ## hungry town to RELIEF_TARGET days, at most RELIEF_SHARE of the purse a
 ## month while the line is on. All are set from the lean buffer
 ## (food_care.gd LEAN_DAYS, the store food security counts), in this order:
-## HUNGRY_DAYS < RELIEF_TARGET <= LEVY_KEEP_DAYS < SELLER_KEEP < SELLER_DAYS,
-## so relief never lifts a town past what the levy leaves it (the levy never
-## takes relief back) and no seller is left hungry.
+## HUNGRY_DAYS < RELIEF_TARGET < SELLER_KEEP < SELLER_DAYS, so no seller is
+## left hungry. The levy takes goods, never food.
 const LEAN_DAYS:=preload("res://scripts/food_care.gd").LEAN_DAYS
 const HUNGRY_DAYS:=LEAN_DAYS*0.75
 const RELIEF_TARGET:=LEAN_DAYS
-## The levy takes only what a town holds beyond this many days of its
-## people's need, so the keepers never push a town below the lean buffer.
-const LEVY_KEEP_DAYS:=LEAN_DAYS
 const SELLER_DAYS:=LEAN_DAYS*2.0
 const SELLER_KEEP:=LEAN_DAYS*1.5
 const RELIEF_SHARE:=0.25
@@ -121,7 +123,7 @@ static func _fresh()->Dictionary:
 	return {"version":VERSION,"balance":0.0,"coin":0.0,"backing":{},"levy":"usual","rate":0.0,"cap":0.0,"take":0.0,"stage":"subsistence",
 		"lines":DEFAULT_LINES.duplicate(),"line_days":{},"funded":{"army":1.0,"relief":1.0,"crews":1.0,"scholars":1.0},
 		"month":_empty_month(),"months":[],"last_settle_day":-1,"ledger":[],
-		"unpaid_months":0,"desertion_carry":0.0,"deserted":0,"last_army":{},"debt":0.0,"events":{},"redistribution":0.0,"migrated":false,"unit":"ration","book_price":1.0}
+		"unpaid_months":0,"desertion_carry":0.0,"deserted":0,"last_army":{},"debt":0.0,"events":{},"redistribution":0.0,"migrated":false,"unit":"goods","book_price":1.0}
 
 static func _empty_month()->Dictionary:
 	return {"levy":0.0,"rich":0.0,"charter":0.0,"assessed":0.0,"evaded":0.0,"output":0.0,"person_days":0.0,"coin":0.0,"deposits":0.0,"short":0.0,
@@ -136,6 +138,7 @@ static func state()->Dictionary:
 	var purse:Dictionary=s.realm_purse
 	if int(purse.get("version",0))!=VERSION or not purse.has("lines"):
 		var older:=not purse.has("unit") and (float(purse.get("balance",0.0))>0.0 or not (purse.get("ledger",[]) as Array).is_empty())
+		_mark_food_store(purse)
 		var fresh:=_fresh()
 		for key in fresh:
 			if not purse.has(key):purse[key]=fresh[key]
@@ -144,7 +147,30 @@ static func state()->Dictionary:
 	if String(s.resource_settlement_id)=="":
 		if not bool(purse.get("migrated",false)):_merge_town_money(purse)
 		if bool(purse.get("recount",false)):_recount(purse)
+		if purse.has("food_back"):_food_back(purse)
 	return purse
+
+## A store kept in food (version 2, its unit "ration" or its food at a book
+## price in coin) is marked once, to give its food back (_food_back).
+static func _mark_food_store(purse:Dictionary)->void:
+	if not purse.has("unit") or int(purse.get("version",0))!=2:return
+	var food:=maxf(0.0,float(purse.get("balance",0.0))-float(purse.get("coin",0.0)))
+	var rations:=food if String(purse.unit)!="coin" else food/maxf(0.2,float(purse.get("book_price",1.0)))
+	purse["food_back"]=rations
+	purse.balance=float(purse.get("coin",0.0))
+	purse["unit"]="coin" if String(purse.unit)=="coin" else "goods"
+	purse["book_price"]=1.0
+
+## Once, at the realm's own level: the food an older store held goes back
+## into the capital's stores (it was real food), and the store starts again
+## in goods. Coin stays.
+static func _food_back(purse:Dictionary)->void:
+	var rations:=maxf(0.0,float(purse.get("food_back",0.0)))
+	purse.erase("food_back")
+	if String(purse.unit)=="coin":purse["book_price"]=goods_price()
+	if rations<0.5 or WorldSimulation.food==null:return
+	WorldSimulation.food.receive_external_food(rations)
+	_note(purse,0.0,"The common store keeps goods now, not food: its %s rations went back into %s's stores" % [number(rations),String(WorldSimulation.state.settlement_name)],"recount")
 
 static func balance()->float:
 	return float(state().balance)
@@ -152,66 +178,71 @@ static func balance()->float:
 
 # --- What the store holds -------------------------------------------------------
 
-## Counted in rations (before coinage) or in coin (after): the purse's unit.
+## Counted in goods (before coinage) or in coin (after): the purse's unit.
 static func in_kind()->bool:
 	var purse:Dictionary=WorldSimulation.state.realm_purse
-	return String(purse.get("unit","ration"))!="coin"
+	return String(purse.get("unit","goods"))!="coin"
 
-## Food's market price where the day runs now (1 before prices are kept).
+## A goods-worth's market price where the day runs now (its base price,
+## trade_prices.gd, before prices are kept).
+static func goods_price()->float:
+	return _price(Goods.GOODS)
+
+## Food's market price where the day runs now, the same way.
 static func food_price()->float:
-	return maxf(0.2,float(WorldSimulation.state.market_prices.get("Food",1.0)))
+	return _price("Food")
 
-## A value at the economy's market prices, in the purse's unit: rations at
-## this place's food price before coinage, coin after.
+static func _price(good:String)->float:
+	var held:Variant=WorldSimulation.state.market_prices.get(good)
+	return maxf(0.05,float(held) if held!=null else Prices.base(good))
+
+## A value at the economy's market prices, in the purse's unit: goods at
+## this place's goods price before coinage, coin after.
 static func units(value:float)->float:
-	return value/food_price() if in_kind() else value
+	return value/goods_price() if in_kind() else value
 
-## The coin a ration of the store's food is kept at (1 before coinage).
+## The coin a goods-worth of the store's goods is kept at (1 before coinage).
 static func _book()->float:
 	if in_kind():return 1.0
-	return maxf(0.2,float((WorldSimulation.state.realm_purse as Dictionary).get("book_price",1.0)))
+	return maxf(0.05,float((WorldSimulation.state.realm_purse as Dictionary).get("book_price",1.0)))
 
-## The purse's food in kind, in rations.
-static func _rations(amount:float)->float:
+## The purse's goods in kind, counted in goods.
+static func _goods_of(amount:float)->float:
 	return amount/_book()
 
-## Rations of the store's food in the purse's unit.
-static func _units_of_rations(rations:float)->float:
-	return rations*_book()
+## Goods of the store in the purse's unit.
+static func _units_of_goods(goods:float)->float:
+	return goods*_book()
 
-## Rations of food the store holds now.
-static func held_food()->float:
+## Goods the store holds now.
+static func held_goods()->float:
 	var purse:=state()
-	return _rations(maxf(0.0,float(purse.balance)-float(purse.coin)))
+	return _goods_of(maxf(0.0,float(purse.balance)-float(purse.coin)))
 
-## Days the store would feed all our people (each town's own need).
-static func days_of_food()->float:
-	var need:=0.0
-	for p:Dictionary in food_places():need+=float(p.need)
-	return held_food()/maxf(0.1,need)
+## What the store's goods are worth in food at today's prices, in rations.
+static func goods_in_rations(goods:float)->float:
+	return goods*goods_price()/food_price()
 
 ## Takes `amount` of the levy in kind (in the purse's unit) out of the
-## stores of the place whose day runs now: food, only what it holds beyond
-## LEVY_KEEP_DAYS of its people's need. After coinage `amount` is coin: the
-## food it buys at this town's price is taken, and kept at the book price.
-## Returns {taken, short}, in the purse's unit.
-static func _take_food(amount:float)->Dictionary:
+## stores of the place whose day runs now: goods, only what its homes can
+## spare beyond their need (civilian_goods.gd spare). After coinage `amount`
+## is coin: the goods it buys at this town's price are taken, and kept at
+## the book price. Returns {taken, short}, in the purse's unit.
+static func _take_goods(amount:float)->Dictionary:
 	if amount<=0.0:return {"taken":0.0,"short":0.0}
-	var wanted:=amount if in_kind() else amount/food_price()
-	if WorldSimulation.food==null:return {"taken":0.0,"short":_units_of_rations(wanted)}
-	var s=WorldSimulation.state
-	var need:=maxf(0.1,float(s.simulation_metrics.get("food_consumption",s.population_exact)))
-	var spare:=maxf(0.0,float(s.resource_stockpiles.get("Food",0.0))-need*LEVY_KEEP_DAYS)
-	var rations:=minf(wanted,spare)
-	var took:=float(WorldSimulation.food.take_for_levy(rations)) if rations>0.0001 else 0.0
-	return {"taken":_units_of_rations(took),"short":_units_of_rations(maxf(0.0,wanted-took))}
+	var wanted:=amount if in_kind() else amount/goods_price()
+	# Nothing beyond the homes' own need: nothing to read further.
+	var stock:=Goods.stock()
+	var spare:=Goods.spare() if stock>0.0001 and stock>Goods.target() else 0.0
+	var took:=Goods.draw(minf(wanted,spare)) if spare>0.0001 else 0.0
+	return {"taken":_units_of_goods(took),"short":_units_of_goods(maxf(0.0,wanted-took))}
 
-## Puts `amount` of the store's food back in common hands: in the place `to`
+## Puts `amount` of the store's goods back in common hands: in the place `to`
 ## names, else in every town of ours by its share of the people. Called at
 ## the realm's own level (the monthly reckoning, the court, the screens).
 static func _hand_out(amount:float,to:Dictionary={})->void:
-	var rations:=_rations(amount)
-	if rations<=0.0001 or WorldSimulation.food==null:return
+	var goods:=_goods_of(amount)
+	if goods<=0.0001:return
 	var places:=_places()
 	var paid_to:Array=[]
 	if not to.is_empty():
@@ -221,22 +252,27 @@ static func _hand_out(amount:float,to:Dictionary={})->void:
 	var total:=0.0
 	for place:Dictionary in paid_to:total+=maxf(0.0001,float(place.share))
 	for place:Dictionary in paid_to:
-		var part:=rations*maxf(0.0001,float(place.share))/total
-		if bool(place.primary):WorldSimulation.food.receive_external_food(part)
-		else:WorldSimulation.settlements.with_city_resources(String((place.record as Dictionary).get("id","")),func()->void:WorldSimulation.food.receive_external_food(part))
+		var part:=goods*maxf(0.0001,float(place.share))/total
+		if bool(place.primary):_receive_goods(part)
+		else:WorldSimulation.settlements.with_city_resources(String((place.record as Dictionary).get("id","")),func()->void:_receive_goods(part))
 
-## The unit follows the age, once: at coinage the food held in kind is
+## Goods into the stores of the place whose day runs now.
+static func _receive_goods(goods:float)->void:
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	stocks[Goods.GOODS]=maxf(0.0,float(stocks.get(Goods.GOODS,0.0)))+goods
+
+## The unit follows the age, once: at coinage the goods held in kind are
 ## counted in coin at the market price (and back, should coin be lost).
 static func _sync_unit(purse:Dictionary)->void:
-	var unit:="coin" if String(WorldSimulation.state.economy_stage)=="currency" else "ration"
-	if String(purse.get("unit","ration"))==unit:return
-	var food:=maxf(0.0,float(purse.balance)-float(purse.coin))
+	var unit:="coin" if String(WorldSimulation.state.economy_stage)=="currency" else "goods"
+	if String(purse.get("unit","goods"))==unit:return
+	var goods:=maxf(0.0,float(purse.balance)-float(purse.coin))
 	if unit=="coin":
-		# The food is kept at today's price from now on: a ration in, a ration out.
-		purse["book_price"]=food_price()
-		purse.balance=float(purse.coin)+food*float(purse.book_price)
+		# The goods are kept at today's price from now on: a goods-worth in, a goods-worth out.
+		purse["book_price"]=goods_price()
+		purse.balance=float(purse.coin)+goods*float(purse.book_price)
 	else:
-		purse.balance=float(purse.coin)+food/maxf(0.2,float(purse.get("book_price",1.0)))
+		purse.balance=float(purse.coin)+goods/maxf(0.05,float(purse.get("book_price",1.0)))
 	purse["unit"]=unit
 
 ## What the purse holds, in the people's words: "340 coin".
@@ -248,7 +284,7 @@ static func number(value:float)->String:
 	return EraWords.grouped(roundi(value))
 
 ## Puts value into the purse from outside the levy: tolls, tribute, spoils,
-## sales, in the purse's unit. Taken in kind (food held for all), never as new
+## sales, in the purse's unit. Taken in kind (goods held for all), never as new
 ## coin: the caller has taken it out of somewhere else. Returns what was
 ## taken in.
 static func deposit(amount:float,why:String)->float:
@@ -261,7 +297,7 @@ static func deposit(amount:float,why:String)->float:
 
 ## Pays from the purse for something outside its lines (gifts, purchases from
 ## other peoples): all or nothing. Coin paid this way leaves the realm with
-## the metal that backs it, and food in kind leaves with it. Returns whether
+## the metal that backs it, and goods in kind leave with it. Returns whether
 ## it was paid.
 static func spend(amount:float,why:String)->bool:
 	if not is_finite(amount) or amount<0.0:return false
@@ -279,7 +315,7 @@ static func spend(amount:float,why:String)->bool:
 
 ## Pays the realm's own people for work done in the place whose day runs now
 ## (wages for a great work's crews): coin goes to that place's households
-## with its backing; the rest is food from the store, into that place's
+## with its backing; the rest is goods from the store, into that place's
 ## stores. All or nothing. Returns whether it was paid.
 static func pay_home(amount:float,why:String)->bool:
 	if not is_finite(amount) or amount<0.0:return false
@@ -298,7 +334,7 @@ static func pay_home(amount:float,why:String)->bool:
 		else:
 			s.resource_stockpiles["Coin"]=float(s.resource_stockpiles.get("Coin",0.0))+coin
 			_move_backing(purse.backing,{},coin*BACKING_RATIO)
-	if amount-coin>0.0001 and WorldSimulation.food!=null:WorldSimulation.food.receive_external_food(_rations(amount-coin))
+	if amount-coin>0.0001:_receive_goods(_goods_of(amount-coin))
 	(purse.month as Dictionary).crews=float(purse.month.crews)+amount
 	_note(purse,-amount,why,"out")
 	return true
@@ -363,8 +399,8 @@ static func stage()->String:
 		return now
 	return String(purse.get("stage","subsistence"))
 
-## What the account is called: before coinage it holds food, the common
-## store, counted in rations (whatever metal the people work: the store is
+## What the account is called: before coinage it holds goods, the common
+## store, counted in goods (whatever metal the people work: the store is
 ## not silver). After coinage, the treasury: "coin" once the people keep
 ## registers or public credit (character_voice.gd era gates), else "silver".
 static var _form_key:=""
@@ -391,20 +427,19 @@ static func unit_word()->String:
 	match _form():
 		"coin":return "coin"
 		"silver":return "silver"
-	return "rations"
+	return "goods"
 
-## Before coinage, pay is food from the store; then coin (or silver).
+## Before coinage, pay is goods from the store; then coin (or silver).
 static func pay_word()->String:
 	match _form():
 		"coin":return "coin"
 		"silver":return "silver"
-	return "food"
+	return "goods"
 
-## What the levy is taken from, in the people's words.
+## What the levy is reckoned on, in the people's words: everything a
+## household brings in, paid in goods (or coin) out of what it holds.
 static func harvest_word()->String:
-	var voice:=load("res://scripts/character_voice.gd") as GDScript
-	var farming:=voice!=null and bool((voice.call("era_tags",WorldSimulation.actor_id if WorldSimulation.actor_id!="" else "player") as Array).has("farming"))
-	return "every harvest" if farming else "all that is gathered"
+	return "what every household brings in"
 
 
 # --- The levy --------------------------------------------------------------------
@@ -501,8 +536,8 @@ static func quote(level:String)->Dictionary:
 ## in each town's own scope, the capital's first): the share of what it
 ## brought in that the realm's hands reach, less what is hidden, in the
 ## purse's unit. After coinage the share of it on goods sold for money is
-## paid in coin, with its backing. The rest is taken in kind: food out of
-## this town's own stores beyond LEVY_KEEP_DAYS of its need (what a town
+## paid in coin, with its backing. The rest is taken in kind: goods out of
+## this town's stores beyond its homes' need (what a town
 ## without that much cannot give is left with it: "short"). Returns the
 ## day's account for the economy's report.
 static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
@@ -536,10 +571,9 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 			s.private_currency=float(s.private_currency)-coin
 			s.currency_supply=maxf(0.0,float(s.currency_supply)-coin)
 			_move_backing(s.monetary_reserve_metals,purse.backing,coin*BACKING_RATIO)
-	var took:=_take_food(owed-coin)
-	var food:=float(took.taken)
+	var took:=_take_goods(owed-coin)
 	var short:=float(took.short)
-	var levy:=coin+food
+	var levy:=coin+float(took.taken)
 	purse.balance=float(purse.balance)+levy
 	purse.coin=float(purse.coin)+coin
 	# Charter fees (or the state works' surplus): a share of the business
@@ -559,8 +593,8 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 				s.private_currency=float(s.private_currency)-fee_coin
 				s.currency_supply=maxf(0.0,float(s.currency_supply)-fee_coin)
 				_move_backing(s.monetary_reserve_metals,purse.backing,fee_coin*BACKING_RATIO)
-		var fee_food:=_take_food(fee_owed-fee_coin)
-		charter=fee_coin+float(fee_food.taken)
+		var fee_goods:=_take_goods(fee_owed-fee_coin)
+		charter=fee_coin+float(fee_goods.taken)
 		purse.balance=float(purse.balance)+charter
 		purse.coin=float(purse.coin)+fee_coin
 		coin+=fee_coin
@@ -779,9 +813,9 @@ static func settle(day:int)->Dictionary:
 	var fees:=maxf(0.0,float(month.get("charter",0.0))-surplus)
 	if fees>0.0:_note(purse,fees,"The month's charter fees","charter")
 	if surplus>0.0:_note(purse,surplus,"The month's surplus from the state works","charter")
-	# The store's food rots as the capital's own stored food does.
-	var rotted:=_spoil(purse,days)
-	if rotted>=0.5:_note(purse,-rotted,"Rotted in the store","out")
+	# The store's goods wear as the homes' own goods do.
+	var worn:=_spoil(purse,days)
+	if worn>=0.5:_note(purse,-worn,"Worn out in the store","out")
 	if float(purse.debt)>0.0:
 		var repay:=minf(float(purse.debt),float(purse.balance)*DEBT_SHARE)
 		repay=_pay_out(purse,repay,"debts")
@@ -868,7 +902,7 @@ static func _cap(text:String)->String:
 
 ## Pays `amount` (or what is left) out of the purse to the realm's own people:
 ## coin to households where people live, by their share of the people, with
-## its backing; the rest food and goods from the common store. `to` names the
+## its backing; the rest goods from the common store. `to` names the
 ## one place paid (relief bought from a town pays that town's sellers).
 static func _pay_out(purse:Dictionary,amount:float,line:String,to:Dictionary={})->float:
 	var paid:=minf(maxf(0.0,amount),maxf(0.0,float(purse.balance)))
@@ -876,23 +910,27 @@ static func _pay_out(purse:Dictionary,amount:float,line:String,to:Dictionary={})
 	var coin:=_coin_part(purse,paid)
 	purse.balance=maxf(0.0,float(purse.balance)-paid)
 	if coin>0.0:_scatter_coin(purse,coin,to)
-	# The rest is food from the store, back in the hands of those paid.
+	# The rest is goods from the store, back in the hands of those paid.
 	_hand_out(paid-coin,to)
 	var month:Dictionary=purse.month
 	month[line]=float(month.get(line,0.0))+paid
 	return paid
 
-## What rots of the store's food over `days`, at the capital's own rate for
-## stored food: taken off the balance and kept in the month. Returns it.
+## What wears out of the store's goods over `days`, at the homes' own wear
+## on goods (civilian_goods.gd daily_wear): taken off the balance and kept in
+## the month. Returns it.
 static func _spoil(purse:Dictionary,days:float)->float:
-	var food:=maxf(0.0,float(purse.balance)-float(purse.coin))
-	if food<=0.0 or days<=0.0 or WorldSimulation.food==null:return 0.0
-	var rate:=float(WorldSimulation.food.stored_spoilage_rate())
-	var lost:=food*(1.0-pow(1.0-clampf(rate,0.0,1.0),days))
+	var goods:=maxf(0.0,float(purse.balance)-float(purse.coin))
+	if goods<=0.0 or days<=0.0:return 0.0
+	var lost:=goods*_wear(days)
 	purse.balance=maxf(float(purse.coin),float(purse.balance)-lost)
 	var month:Dictionary=purse.month
 	month["spoiled"]=float(month.get("spoiled",0.0))+lost
 	return lost
+
+## The share of the store's goods that wears out in `days`.
+static func _wear(days:float)->float:
+	return 1.0-pow(1.0-clampf(Goods.daily_wear(),0.0,1.0),maxf(0.0,days))
 
 ## The coin in a payment: the purse pays coin and goods in the share it holds them.
 static func _coin_part(purse:Dictionary,amount:float)->float:
@@ -977,7 +1015,8 @@ static func _move_backing(from:Dictionary,to:Dictionary,value:float)->float:
 static func market_open()->bool:
 	return int(WorldSimulation.state.economy_metrics.get("price_observations",0))>0
 
-## Each town's food: [{id, name, primary, record, days, need, food, price, position}].
+## Each town's food: [{id, name, primary, record, days, need, food, price,
+## goods_price, position}] (prices at the town's own market).
 static func food_places()->Array:
 	var s=WorldSimulation.state
 	var out:Array=[]
@@ -992,15 +1031,18 @@ static func food_places()->Array:
 		var prices:Dictionary=s.market_prices if primary else (local.get("market_prices",{}) as Dictionary)
 		var need:=maxf(0.1,float(metrics.get("food_consumption",WorldSimulation.settlements._settlement_population(city))))
 		out.append({"id":String(city.get("id","")),"name":String(city.get("name","")),"primary":primary,"record":city,"days":float(metrics.get("food_days",float(stores.get("Food",0.0))/need)),
-			"need":need,"food":float(stores.get("Food",0.0)),"price":maxf(0.2,float(prices.get("Food",1.0))),"position":city.get("position",Vector2.ZERO)})
+			"need":need,"food":float(stores.get("Food",0.0)),"price":maxf(0.05,float(prices.get("Food",Prices.base("Food")))),"goods_price":maxf(0.05,float(prices.get(Goods.GOODS,Prices.base(Goods.GOODS)))),"position":city.get("position",Vector2.ZERO)})
 	return out
 
-## Food for hungry towns, up to `budget` from the purse: first the store's
-## own food, carried from the capital; then, with coin, food bought from
-## towns with food to spare at the seller's market price. The food goes on
-## the road to each hungry town. {spent, rations, deliveries:[{to, from,
-## rations, price, days}], reason}. Nothing is sent without a hungry town;
-## nothing is bought without coin, a market and a town with food to sell.
+## Food for hungry towns, up to `budget` from the purse: food bought from
+## towns with food to spare, at the seller's own food price, paid with the
+## store's goods (bartered, at the goods price) and, after coinage, coin in
+## the share the purse holds them. The payment goes to the seller's
+## households and stores; the food goes on the road to each hungry town.
+## {spent, rations, deliveries:[{to, from, rations, price, days}], reason}:
+## price is what a ration cost in the purse's unit. Nothing is sent without
+## a hungry town; nothing is bought without a market and a town with food to
+## sell.
 static func buy_relief(budget:float,standing:=false)->Dictionary:
 	var purse:=state()
 	var out:={"spent":0.0,"rations":0.0,"deliveries":[],"reason":""}
@@ -1011,72 +1053,46 @@ static func buy_relief(budget:float,standing:=false)->Dictionary:
 	if hungry.is_empty():out.reason="no town is hungry; every town has %d days of food or more" % int(HUNGRY_DAYS);return out
 	hungry.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.days)<float(b.days))
 	var speed:=maxf(4.0,float(WorldSimulation.settlements.city_trade_capacity().get("speed_km_per_day",8.0)))
-	var capital:Dictionary={}
-	for p:Dictionary in places:
-		if bool(p.primary):capital=p
-	if capital.is_empty():capital={"id":"","name":String(WorldSimulation.state.settlement_name),"primary":true,"position":Vector2.ZERO}
 	var month:Dictionary=purse.month
-	var sent:=0.0
-	# The store's own food first: it is the realm's, and it only rots there.
-	var store:=minf(limit,maxf(0.0,float(purse.balance)-float(purse.coin)))
-	var had_food:=store>0.01
-	for h:Dictionary in hungry:
-		var want:=maxf(0.0,(RELIEF_TARGET-float(h.days))*float(h.need)-_incoming_food(String(h.id)))
-		var rations:=minf(want,_rations(store))
-		if rations<1.0:continue
-		var cost:=_units_of_rations(rations)
-		purse.balance=maxf(float(purse.coin),float(purse.balance)-cost)
-		store-=cost;limit-=cost
-		month["relief"]=float(month.get("relief",0.0))+cost
-		month.rations=float(month.rations)+rations
-		var travel:=0.0
-		if bool(h.primary):
-			if WorldSimulation.food!=null:WorldSimulation.food.receive_external_food(rations)
-		else:
-			var from_at:Vector2=capital.position if capital.position is Vector2 else Vector2.ZERO
-			var to_at:Vector2=h.position if h.position is Vector2 else Vector2.ZERO
-			travel=maxf(1.0,ceilf(from_at.distance_to(to_at)/speed))
-			_ship(capital,h,rations,travel,"Sent from %s for the hungry." % account_name())
-		h.days=float(h.days)+rations/maxf(0.1,float(h.need))
-		sent+=rations
-		out.spent=float(out.spent)+cost;out.rations=float(out.rations)+rations
-		(out.deliveries as Array).append({"to":String(h.name),"from":_cap(account_name()),"rations":rations,"price":0.0,"days":travel})
-	if sent>0.0:_note(purse,-_units_of_rations(sent),"Food sent from the store to the hungry: %s rations" % number(sent),"out")
-	# Then, with coin, food bought from towns with food to spare.
-	var coin_limit:=minf(limit,float(purse.coin))
 	var sellers:=places.filter(func(p:Dictionary)->bool:return float(p.days)>SELLER_DAYS)
 	var bought:=0.0;var paid:=0.0
-	if coin_limit>0.01 and market_open() and not sellers.is_empty():
+	if market_open() and not sellers.is_empty():
 		for h:Dictionary in hungry:
 			var want:=maxf(0.0,(RELIEF_TARGET-float(h.days))*float(h.need)-_incoming_food(String(h.id)))
 			for seller:Dictionary in sellers:
-				if want<=1.0 or coin_limit<=0.01:break
+				if want<=1.0 or limit<=0.01:break
 				if String(seller.id)==String(h.id):continue
 				var spare:=maxf(0.0,(float(seller.days)-SELLER_KEEP)*float(seller.need))
-				var price:=float(seller.price)
-				var quantity:=minf(want,minf(spare,coin_limit/price))
+				# What a ration costs in the purse's unit at the seller's prices.
+				var price:=float(seller.price)/(float(seller.goods_price) if in_kind() else 1.0)
+				var quantity:=minf(want,minf(spare,limit/maxf(0.0001,price)))
 				if quantity<1.0:continue
 				var sold:float=WorldSimulation.settlements.with_city_resources(String(seller.id),func()->float:return WorldSimulation.food.issue_for_obligation(quantity,"relief","Sold for %s's hungry" % String(h.name)))
 				if sold<=0.01:continue
-				var cost:=minf(sold*price,float(purse.coin))
-				purse.balance=maxf(0.0,float(purse.balance)-cost)
-				_scatter_coin(purse,cost,{"id":String(seller.id),"primary":bool(seller.primary)})
+				var cost:=minf(sold*price,float(purse.balance))
+				_pay_seller(purse,cost,{"id":String(seller.id),"primary":bool(seller.primary)})
 				month["relief"]=float(month.get("relief",0.0))+cost
 				month.rations=float(month.rations)+sold
 				var from_at:Vector2=seller.position if seller.position is Vector2 else Vector2.ZERO
 				var to_at:Vector2=h.position if h.position is Vector2 else Vector2.ZERO
 				var travel:=maxf(1.0,ceilf(from_at.distance_to(to_at)/speed))
-				_ship(seller,h,sold,travel,"Bought for the hungry with %s, at %s a ration." % [account_name(),number(price)])
+				_ship(seller,h,sold,travel,"Bought for the hungry with %s, at %s %s a ration." % [account_name(),number(price),unit_word()])
 				seller.days=float(seller.days)-sold/maxf(0.1,float(seller.need))
-				coin_limit-=cost;want-=sold;bought+=sold;paid+=cost
+				limit-=cost;want-=sold;bought+=sold;paid+=cost
 				out.spent=float(out.spent)+cost;out.rations=float(out.rations)+sold
 				(out.deliveries as Array).append({"to":String(h.name),"from":String(seller.name),"rations":sold,"price":price,"days":travel})
 	if paid>0.0:_note(purse,-paid,"Food bought for the hungry: %s rations" % number(bought),"out")
 	if float(out.rations)<=0.0 and String(out.reason)=="":
-		if had_food:out.reason="the food already on the road covers the hungry towns"
-		elif in_kind():out.reason="%s holds no food to send" % account_name()
-		else:out.reason="%s holds no food to send, and %s" % [account_name(),"there is no coin to buy it with" if float(purse.coin)<=0.01 else ("there is no market yet" if not market_open() else ("no town of ours has food to sell" if sellers.is_empty() else "the towns with food to spare are already sending what they can"))]
+		out.reason="there is no market yet" if not market_open() else ("no town of ours has food to sell" if sellers.is_empty() else "the towns with food to spare are already sending what they can")
 	return out
+
+## Pays a seller of food from the purse: coin and goods in the share it
+## holds them, to that town's households and stores.
+static func _pay_seller(purse:Dictionary,cost:float,to:Dictionary)->void:
+	var coin:=_coin_part(purse,cost)
+	purse.balance=maxf(0.0,float(purse.balance)-cost)
+	if coin>0.0:_scatter_coin(purse,coin,to)
+	_hand_out(cost-coin,to)
 
 static func _incoming_food(town_id:String)->float:
 	var total:=0.0
@@ -1106,8 +1122,8 @@ static func _ship(seller:Dictionary,buyer:Dictionary,quantity:float,travel:float
 static func _recount(purse:Dictionary)->void:
 	purse.erase("recount")
 	var coined:=String(WorldSimulation.state.economy_stage)=="currency"
-	purse["unit"]="coin" if coined else "ration"
-	var price:=food_price()
+	purse["unit"]="coin" if coined else "goods"
+	var price:=goods_price()
 	purse["book_price"]=price
 	var said:=maxf(0.0,float(purse.balance)-float(purse.coin))
 	var held:=said if coined else said/price
@@ -1192,8 +1208,8 @@ static func season()->Dictionary:
 	return {"in":inn,"out":out,"total_in":total_in,"total_out":total_out,"days":days,"rations":rations,"army_due":army_due,"short":short}
 
 ## A season at today's settings: what comes in and goes out, line by line,
-## in the purse's unit, with what the store's food would rot in a season at
-## today's rate. {levy, rich, in, lines:{line:{on, per_season, who}}, rot,
+## in the purse's unit, with what the store's goods would wear out in a
+## season at today's rate. {levy, rich, in, lines:{line:{on, per_season, who}}, rot,
 ## out, net, balance, seasons_left}.
 static func forecast()->Dictionary:
 	var purse:=state()
@@ -1213,9 +1229,7 @@ static func forecast()->Dictionary:
 		if line=="relief":per=float(season().out.relief)
 		lines[line]={"on":on,"per_season":per,"who":String(who.get(line,""))}
 		if on:out+=per
-	var rot:=0.0
-	var food:=maxf(0.0,float(purse.balance)-float(purse.coin))
-	if food>0.0 and WorldSimulation.food!=null:rot=food*(1.0-pow(1.0-float(WorldSimulation.food.stored_spoilage_rate()),SEASON_DAYS))
+	var rot:=maxf(0.0,float(purse.balance)-float(purse.coin))*_wear(SEASON_DAYS)
 	out+=rot
 	var charter:=charter_per_day()*SEASON_DAYS
 	var income:=float(q.per_season)+rich+charter
@@ -1226,8 +1240,8 @@ static func forecast()->Dictionary:
 ## Where the purse's coming-in comes from, a season at the pace of the last
 ## months kept (the month under way when none is kept yet): each town's levy
 ## on what its people make, what households hid from it, what lay beyond the
-## keepers' reach, what towns could not give (the keepers leave every town
-## LEVY_KEEP_DAYS of food), the rich's levy and what other
+## keepers' reach, what towns could not give (the keepers leave every home
+## the goods it needs), the rich's levy and what other
 ## systems paid in. {towns:[{id, name, levy, evaded, unreached, short,
 ## people}], rich, deposits, evaded, unreached, short, coin_share}.
 static func sources()->Dictionary:
@@ -1263,11 +1277,10 @@ static func sources()->Dictionary:
 	return {"towns":out,"rich":rich*scale,"charter":charter*scale,"deposits":deposits*scale,"evaded":evaded,"unreached":unreached,"short":short,"coin_share":clampf(coin/maxf(0.001,levy_all),0.0,1.0) if levy_all>0.0 else 0.0,"days":days}
 
 ## What the purse would buy at today's food price, in rations (-1 with no
-## market). Before coinage the store holds food: it is the rations it holds.
+## market): the store's goods at the goods price, and its coin.
 static func buys_rations()->float:
-	if in_kind():return held_food()
 	if not market_open():return -1.0
-	return float(state().balance)/food_price()
+	return goods_in_rations(held_goods())+float(state().coin)/food_price()
 
 
 # --- Realm-wide news --------------------------------------------------------------------

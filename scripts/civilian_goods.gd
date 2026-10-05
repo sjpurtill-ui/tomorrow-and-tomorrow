@@ -79,11 +79,20 @@ static func _stock_of(item:String)->float:
 	return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(item,0.0)))
 
 ## Goods the current population expects to hold, given adopted techniques.
+## The holding a head is read once a day per people and place (the making,
+## the barter and the levy each ask it daily).
+static var _per_person_key:=[]
+static var _per_person:=BASE_TARGET_PER_PERSON
 static func target()->float:
-	var per_person:=BASE_TARGET_PER_PERSON
-	for id:String in TECHNIQUES:
-		if id in WorldSimulation.state.known_discoveries:per_person+=float(TARGET_PER_PERSON[id])*clampf(WorldSimulation.discovery.adoption(id),0.0,1.0)
-	return maxf(.25,WorldSimulation.state.population_exact*per_person)
+	var state=WorldSimulation.state
+	var key:=_day_key(String(state.resource_settlement_id))
+	if key!=_per_person_key:
+		var per_person:=BASE_TARGET_PER_PERSON
+		for id:String in TECHNIQUES:
+			if id in state.known_discoveries:per_person+=float(TARGET_PER_PERSON[id])*clampf(WorldSimulation.discovery.adoption(id),0.0,1.0)
+		_per_person=per_person
+		_per_person_key=key
+	return maxf(.25,state.population_exact*_per_person)
 
 ## Stock relative to what households expect, 0 to 1.
 static func coverage()->float:
@@ -180,14 +189,39 @@ static func draw(amount:float)->float:
 	if taken>0.0:WorldSimulation.state.resource_stockpiles[GOODS]=stock()-taken
 	return taken
 
+## The plants whose installation costs goods (only they can hold goods
+## back), found once: the rest never change the reserve.
+static var _plants_costing_goods:Array=[]
+static var _plants_read:=false
+static func _goods_plants()->Array:
+	if not _plants_read:
+		var plants:Dictionary=preload("res://scripts/technology_operations.gd").PLANTS
+		for plant:String in plants:
+			if float((plants[plant] as Dictionary).get("cost",{}).get(GOODS,0.0))>0.0:_plants_costing_goods.append(plant)
+		_plants_read=true
+	return _plants_costing_goods
+
+## The capital's reserve, read once a day per people (the making, the barter
+## and the levy each ask it daily); a plant raised today counts from tomorrow.
+static var _reserve_key:=[]
+static var _reserve_value:=0.0
+
+## What a once-a-day reading is kept under: the people, the place, the day
+## and how much they know.
+static func _day_key(place:String)->Array:
+	var state=WorldSimulation.state
+	return [WorldSimulation.actor_id,place,int(state.elapsed_days),(state.known_discoveries as Array).size()]
+
 static func capital_reserve()->float:
 	# Goods also build the first local plant. A small city's household target must
 	# not keep its stock permanently below one paid installation.
 	var state=WorldSimulation.state
 	if not state.resource_settlement_id.is_empty():return 0.0
+	var key:=_day_key("")
+	if key==_reserve_key:return _reserve_value
 	var ops=preload("res://scripts/technology_operations.gd")
 	var reserve:=0.0
-	for plant:String in ops.PLANTS:
+	for plant:String in _goods_plants():
 		var spec:Dictionary=ops.PLANTS[plant]
 		var record:Dictionary=ops.data().plants.get(plant,{})
 		if int(record.get("installed",0))+int(record.get("building",0))>0:continue
@@ -195,6 +229,8 @@ static func capital_reserve()->float:
 		for gate:String in [String(spec.gate)]+spec.get("requires",[]):
 			if gate not in state.known_discoveries or WorldSimulation.discovery.adoption(gate)<.25:ready=false;break
 		if ready:reserve=maxf(reserve,float(spec.cost.get(GOODS,0.0)))
+	_reserve_key=key
+	_reserve_value=reserve
 	return reserve
 
 # Ids with a special factor below; techniques use goods coverage; others are 1.0.

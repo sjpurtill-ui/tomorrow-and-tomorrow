@@ -213,7 +213,7 @@ static func _relief(amount:float)->Dictionary:
 	var parts:PackedStringArray=[]
 	for d:Dictionary in bought.deliveries:
 		var road:="" if int(d.days)<=0 else ", %d %s on the road" % [int(d.days),"day" if int(d.days)==1 else "days"]
-		if float(d.price)>0.0:parts.append("%s rations bought from %s for %s at %s a ration%s" % [Purse.number(float(d.rations)),String(d.from),String(d.to),Purse.number(float(d.price)),road])
+		if float(d.price)>0.0:parts.append("%s rations bought from %s for %s at %s a ration%s" % [Purse.number(float(d.rations)),String(d.from),String(d.to),Purse.amount_text(float(d.price)),road])
 		else:parts.append("%s rations from %s to %s%s" % [Purse.number(float(d.rations)),String(d.from).to_lower(),String(d.to),road])
 	var now:=""
 	if float(bought.rations)>0.0:now="Sent %s: %s from %s." % ["; ".join(parts),_amount(float(bought.spent)),store]

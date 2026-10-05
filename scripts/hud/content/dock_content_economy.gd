@@ -33,13 +33,10 @@ func _local_tab(sub:int)->Dictionary:
 		3:return {"blocks":[{"type":"trade_board"}]}
 	return _food_tab()
 
-## The Food & water tab: this place's food and water, then the common store
-## while it is food (hud/purse_board.gd "store": the levy, what it pays for).
-## After coinage the treasury is coin and lives on Wealth.
+## The Food & water tab: this place's food and water. The common store holds
+## goods and lives on Wealth (hud/purse_board.gd), as the treasury does.
 func _food_tab()->Dictionary:
-	var blocks:Array=[_provisions_data()]
-	if Purse.in_kind():blocks.append({"type":"purse_board","mode":"store","compact_food":true,"on_open":_open_section})
-	return {"blocks":blocks}
+	return {"blocks":[_provisions_data()]}
 
 func _open_section(section:String,sub:int)->void:
 	if is_instance_valid(hud):hud.section_requested.emit(section,sub)

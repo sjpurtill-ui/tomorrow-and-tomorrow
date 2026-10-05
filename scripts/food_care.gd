@@ -23,8 +23,8 @@ extends RefCounted
 const SPAN:=preload("res://scripts/day_span.gd")
 
 ## Days of food that carry the people through a lean spell. Food security
-## counts the store up to here (consequence_engine.gd), and the realm's levy
-## leaves every town this much (realm_purse.gd LEVY_KEEP_DAYS).
+## counts the store up to here (consequence_engine.gd), and the realm's
+## relief brings a hungry town back to it (realm_purse.gd RELIEF_TARGET).
 const LEAN_DAYS:=20.0
 ## Food-security points the lean buffer gives when it is full.
 const LEAN_WEIGHT:=0.30

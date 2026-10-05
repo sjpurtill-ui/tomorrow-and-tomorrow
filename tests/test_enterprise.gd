@@ -73,10 +73,12 @@ func _size(share:float,stance:String="")->Dictionary:
 	Business._refresh(e)
 	return e
 
-func _stock_food(days:float,need:float=900.0)->void:
-	GameState.simulation_metrics["food_consumption"]=need
-	GameState.food_stocks={"Fresh food":0.0,"Stored food":need*days}
-	GameState.resource_stockpiles["Food"]=need*days
+## The capital's goods: what its homes need and `spare` beyond it (the levy
+## and the fees take goods only out of the spare).
+func _stock_goods(spare:float)->void:
+	var goods:=preload("res://scripts/civilian_goods.gd")
+	GameState.resource_stockpiles[goods.GOODS]=1000000.0
+	GameState.resource_stockpiles[goods.GOODS]=1000000.0-goods.spare()+spare
 
 func _form(variant:String)->void:
 	var values:Dictionary=GameState.societal_values
@@ -360,29 +362,28 @@ func test_a_change_of_stance_costs_trust_once()->void:
 
 func test_charter_fees_come_out_of_real_stores()->void:
 	_at_rung(2)
-	_stock_food(200.0)
+	_stock_goods(50000.0)
 	GameState.economy_metrics["real_economy"]={"daily_output_value":1000.0}
 	_size(0.08,"chartered")
 	var purse:=Purse.state()
-	var food:=float(GameState.resource_stockpiles.Food)
+	var goods:=float(GameState.resource_stockpiles["Civilian Goods"])
 	var held:=float(purse.balance)
 	var day:=Purse.accrue({"daily_output_value":1000.0},0.0)
-	var output:=1000.0/Purse.food_price()
+	var output:=1000.0/Purse.goods_price()
 	assert_float(float(day.charter)).is_equal_approx(output*0.08*(1.0/20.0)*float(day.reach),0.001)
 	# What came in is what left the town's stores: nothing is created.
-	var taken:=food-float(GameState.resource_stockpiles.Food)
+	var taken:=goods-float(GameState.resource_stockpiles["Civilian Goods"])
 	assert_float(float(purse.balance)-held).is_equal_approx(float(day.levy)+float(day.charter),0.001)
 	assert_float(taken).is_equal_approx(float(day.levy)+float(day.charter),0.001)
 	assert_float(float((purse.month as Dictionary).charter)).is_equal_approx(float(day.charter),0.0001)
 	assert_float(float(Purse.sources().charter)).is_greater(0.0)
 	assert_float(float(Purse.forecast().charter)).is_greater(0.0)
-	# A town with nothing to spare (under its lean buffer, Purse.LEVY_KEEP_DAYS)
-	# gives nothing: no fee is made up.
-	_stock_food(Purse.LEVY_KEEP_DAYS-5.0)
+	# A town with no goods beyond its homes' need gives nothing: no fee is made up.
+	_stock_goods(0.0)
 	var bare:=Purse.accrue({"daily_output_value":1000.0},0.0)
 	assert_float(float(bare.charter)).is_equal(0.0)
 	# Guarded takes nothing beyond the levy.
-	_stock_food(200.0)
+	_stock_goods(50000.0)
 	_size(0.08,"guarded")
 	assert_float(float(Purse.accrue({"daily_output_value":1000.0},0.0).charter)).is_equal(0.0)
 
@@ -819,7 +820,7 @@ func test_the_first_step_after_a_load_rolls_only_the_part_of_the_month()->void:
 
 func test_charter_coin_shares_the_levys_one_draw_and_counts_as_revenue()->void:
 	_at_rung(3)
-	_stock_food(200.0)
+	_stock_goods(50000.0)
 	GameState.private_currency=1000.0
 	GameState.currency_supply=1400.0
 	GameState.monetary_reserve_metals={"Silver":600.0}
@@ -841,7 +842,7 @@ func test_charter_coin_shares_the_levys_one_draw_and_counts_as_revenue()->void:
 
 func test_the_month_tells_charter_fees_on_their_own_line()->void:
 	_at_rung(2)
-	_stock_food(200.0)
+	_stock_goods(50000.0)
 	_size(0.08,"chartered")
 	var purse:=Purse.state()
 	purse.last_settle_day=0
@@ -859,8 +860,8 @@ func test_the_fee_is_said_at_todays_size_and_once_grown()->void:
 	GameState.economy_metrics["real_economy"]={"daily_output_value":1000.0}
 	_size(0.02)
 	var q:=Business.quote("chartered")
-	assert_float(float(q.purse_now)).is_equal_approx(1000.0/Purse.food_price()*0.02*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
-	assert_float(float(q.purse_season)).is_equal_approx(1000.0/Purse.food_price()*float(q.target)*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
+	assert_float(float(q.purse_now)).is_equal_approx(1000.0/Purse.goods_price()*0.02*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
+	assert_float(float(q.purse_season)).is_equal_approx(1000.0/Purse.goods_price()*float(q.target)*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
 	var said:=String(BusinessOrders.perform({"stance":"chartered"}).says)
 	assert_str(said).contains("at today's size")
 	assert_str(said).contains("once grown")

@@ -10,14 +10,22 @@ constraints.
 One account the god commands for the whole people. Towns keep their own
 stores, money stage and households' money; the public account is the realm's,
 and it holds only what is really in it. Before coinage it is **the common
-store**: food the levy took out of each town's own stores, counted in rations.
-After coinage it is **the treasury**: coin with its backing, plus the food
-still taken in kind, counted in coin at the market price (the unit changes once,
-at coinage). Working metal does not make the store silver.
+store**: goods (tools, cord, baskets, pots: civilian_goods.gd, the first
+money) the levy took out of each town's spare, counted in goods. After coinage
+it is **the treasury**: coin with its backing, plus the goods still taken in
+kind, counted in coin at the market price (the unit changes once, at coinage).
+Working metal does not make the store silver. It is shown on the Wealth page,
+not Food & water.
 Older saves merge every town's treasury, public debt and soldiers' arrears into
 it once on load, moving each treasury's coin out of its town's circulation with
 its backing; no town keeps a treasury, borrows or pays upkeep afterwards, and
 the per-town public finance described further down is superseded by it.
+
+Why it holds goods (2026-10-05): the player read a common store of food on the
+Food & water page, paying soldiers, crews and scholars in rations, and said it
+made no sense: the realm's account should be out of our goods. A store kept in
+food (version 2) gives its food back to the capital's stores once on load and
+keeps goods from then on; its coin stays.
 
 Why it changed (2026-10-02): the levy used to be only written down. Nothing
 left the towns' stores, pay handed nothing over, and nothing rotted, so the
@@ -25,32 +33,34 @@ player's year-237 store read 225,000 "silver" against 100,000 rations in all
 seven towns. A purse kept that way is counted again once on load: it keeps
 a year of the levy at its own last pace, and the record says so.
 
-- **The levy** is light, usual or heavy: a plain fraction of every harvest and
-  load brought in (light a quarter, usual half, heavy all of the age's most:
+- **The levy** is light, usual or heavy: a plain fraction of what every
+  household brings in (light a quarter, usual half, heavy all of the age's most:
   a tenth before money, a fifth at weighed metal and coin, up to a third once
   the state counts every household). Each town's own economy day takes it:
   output x rate x the realm's reach (office_levers.reach with tallies and
-  registers) x (1 - the share hidden), as food out of that town's stores
-  (FoodSystem.take_for_levy, from fresh and stored food in the share each is
-  held). The keepers take only what a town holds beyond 45 days of its need,
-  where its food security starts to fall: what a town without that much
-  cannot give stays with it ("left with hungry towns"). After coinage the
-  food is kept at one book price (the market price at coinage), so a ration
-  in is a ration out whatever grain fetches. After coinage the households' money share is paid in coin, with
+  registers) x (1 - the share hidden), valued at the goods price, as goods
+  out of that town's stores. The keepers take only goods beyond what the
+  homes need (CivilianGoods.spare: the homes' holding, the learners' share and
+  the goods kept for the first plant): what a town without spare goods
+  cannot give stays with it ("left with towns that had none to spare"). Food
+  is never levied. After coinage the goods are kept at one book price (the
+  market price at coinage), so a goods-worth in is a goods-worth out whatever
+  goods fetch. After coinage the households' money share is paid in coin, with
   its backing. It weighs on trust in the chiefs (up to 4.8 points) and on
   holding together (up to 2.6) through the social pressure, beside its clamp.
-- **Rot**: the store's food rots each month at the capital's own rate for
-  stored food (FoodSystem.stored_spoilage_rate: storage pits, preserving
-  methods and the keeper of stores lower it). So the store cannot grow without
-  end: it settles where the levy left over after pay equals what rots.
+- **Wear**: the store's goods wear out each month at the homes' own wear on
+  goods (CivilianGoods.daily_wear: repair knowledge lowers it). So the store
+  cannot grow without end: it settles where the levy left over after pay
+  equals what wears out.
 - **The lines**, reckoned once a month for the month past: old debts (a
   quarter of the purse at most), the soldiers' pay (half a day's output per
   head for each soldier at arms, a quarter for those in drill), food for hungry
-  towns (the store's own food carried from the capital first; then, with coin,
-  food bought at the seller's market price, a delivery between towns), hired
-  crews (building +15%) and the scholars' keep (research +12%), each a seventh
-  of a day's output per head. Pay is food back in common hands: into every town's
-  stores by its share of the people (a great work's wages into that town's).
+  towns (bought from our towns with food to spare at the seller's own prices,
+  paid with the store's goods, or coin after coinage; a delivery between
+  towns), hired crews (building +15%) and the scholars' keep (research +12%),
+  each a seventh of a day's output per head. Pay is goods back in common
+  hands: into every town's stores by its share of the people (a great work's
+  wages into that town's).
   Unpaid soldiers lose will (6 points a month at most), readiness (to 0.85
   after three months) and some go home (1 in 50 a month, 1 in 25 from the
   third), through MilitaryCampaign.pay_shortfall.

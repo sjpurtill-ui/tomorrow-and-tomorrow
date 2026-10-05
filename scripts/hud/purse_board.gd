@@ -46,7 +46,7 @@ const ArtifactArt:=preload("res://scripts/hud/artifact_visuals.gd")
 const Emblem:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const REFRESH_SECONDS:=1.0
-const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Rot"}
+const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Wear"}
 ## Business does "hardly anything yet" below this much added to all work;
 ## its stance is then tucked behind one button.
 const BUSINESS_MATTERS:=0.01
@@ -61,7 +61,6 @@ var goods_box:VBoxContainer
 var own_box:VBoxContainer
 var treasures_box:VBoxContainer
 var materials_box:VBoxContainer
-var store_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
 var ledger_box:VBoxContainer
@@ -117,16 +116,15 @@ func setup(block:Dictionary={})->void:
 		var society:=_grid(self,"WealthSociety",2,820)
 		business_box=_visual_section("Trade and business",society,"BusinessCard","trade")
 		wealth_box=_visual_section("Who holds the wealth",society,"DistributionCard","overview")
-		if kind_at_setup:store_box=_section(Purse.account_name())
 	if _purse_here():ledger_box=_section("Lately")
 	resized.connect(_responsive)
 	refresh(true)
 	_responsive()
 
-## Whether this board holds the purse's own sections: the store's on Food &
-## water while it is food, the treasury's on Wealth once it is coin.
+## Whether this board holds the purse's own sections: always. The common
+## store holds goods and the treasury coin; both live on Wealth.
 func _purse_here()->bool:
-	return (mode=="store")==kind_at_setup
+	return true
 
 
 func _process(delta:float)->void:
@@ -153,7 +151,7 @@ func refresh(force:=false)->void:
 		var forecast:=Purse.forecast()
 		var purse:=Purse.state()
 		var season:=Purse.season()
-		_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),roundi(Purse.days_of_food()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
+		_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
 		var sources:=Purse.sources()
 		_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
 		_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
@@ -175,7 +173,6 @@ func refresh(force:=false)->void:
 	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices().map(func(id:String)->Array:var q:=Business.quote(id);return [id,Purse.number(float(q.purse_now)),Purse.number(float(q.purse_season))]),Business.next_needs(),Purse.unit_word(),stances_open,String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01)]),force,func()->void:_build_business())
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
 	_rebuild("wealth",wealth_box,str([WorldSimulation.state.wealth_shares,parts,String(WorldSimulation.state.economy_stage)]),force,func()->void:_build_wealth())
-	if store_box!=null:_rebuild("store",store_box,str([roundi(Purse.balance()),roundi(Purse.days_of_food())]),force,func()->void:_build_store_pointer())
 	_responsive()
 
 
@@ -200,7 +197,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	if kicker!=null:kicker.text=Purse.account_name().to_upper()
 	var panel:=_panel(head_box,"Purse")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
-	panel.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Food the levy took from every town's stores, kept for all. The god's to spend: it pays the soldiers, feeds the hungry, keeps scholars and crews. It rots slowly, as stored food does."
+	panel.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from every town's spare: tools, cord, baskets, pots. Kept for all, the god's to spend: it pays the soldiers, buys food for the hungry, keeps scholars and crews. Goods wear out slowly, as they do in the homes."
 	var net:=float(forecast.net)
 	var trend:=_trend(net,float(forecast.seasons_left))
 	var head:=HBoxContainer.new();head.name="Headline";head.add_theme_constant_override("separation",12);column.add_child(head)
@@ -230,15 +227,12 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	if float(forecast.debt)>0.5:column.add_child(_line("Old debts owed: %s, repaid from it monthly." % Purse.number(float(forecast.debt)),13,T.INK_MUTED,true))
 
 
-## "408 days of food", or "1,200 coin" after coinage.
+## "1,200 goods", or "1,200 coin" after coinage.
 func _store_words(forecast:Dictionary)->String:
-	if Purse.in_kind():return "%s days of food" % EraWords.grouped(roundi(Purse.days_of_food()))
 	return Purse.amount_text(float(forecast.balance))
 
-## The small line under the answer: what it holds, and before coinage who it
-## feeds; after, what it buys.
+## The small line under the answer: what it buys.
 func _held_words(forecast:Dictionary)->String:
-	if Purse.in_kind():return "%s rations held: enough to feed everyone that long." % Purse.number(Purse.balance())
 	var rations:=Purse.buys_rations()
 	if rations>=0.0:return "It buys %s rations at today's market price." % EraWords.grouped(roundi(rations))
 	var army:=float(((forecast.lines as Dictionary).get("army",{}) as Dictionary).get("per_season",0.0))
@@ -400,20 +394,17 @@ func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->Strin
 		"relief":
 			var towns:=Purse.food_places()
 			var hungry:=towns.filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
-			if Purse.in_kind():return "%d hungry %s now" % [hungry,"town" if hungry==1 else "towns"]
 			if not Purse.market_open():return "%d hungry %s · no market to buy more" % [hungry,"town" if hungry==1 else "towns"]
-			return "%d hungry %s · food about %s a ration" % [hungry,"town" if hungry==1 else "towns",Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))]
+			return "%d hungry %s · a ration costs about %s" % [hungry,"town" if hungry==1 else "towns",Purse.amount_text(Purse.food_price()/(Purse.goods_price() if Purse.in_kind() else 1.0))]
 	return ""
 
 func _effect_tip(line:String)->String:
 	match line:
-		"army":return "Pay on top of rations: %s. Unpaid soldiers lose will each month, are slower to muster, and some go home; more after three months." % Purse.pay_word()
+		"army":return "Pay on top of rations, in %s. Unpaid soldiers lose will each month, are slower to muster, and some go home; more after three months." % Purse.pay_word()
 		"scholars":return "A keep for those at research, a seventh of a day's work each. While it is paid, research goes faster."
 		"crews":return "Wages for those at building, a seventh of a day's work each. While they are paid, building goes faster."
 		"relief":
-			var tip:="Each month, food goes from the store to towns under %d days of it, up to a quarter of the store." % int(Purse.HUNGRY_DAYS)
-			if not Purse.in_kind():tip+=" With coin, more is bought at the market price from towns with more than %d days of it." % int(Purse.SELLER_DAYS)
-			return tip
+			return "Each month, up to a quarter of %s buys food for towns under %d days of it, from our towns with more than %d days, at their own price. The goods (or coin) go to the sellers." % [Purse.account_name(),int(Purse.HUNGRY_DAYS),int(Purse.SELLER_DAYS)]
 	return ""
 
 func _toggle(line:String,on:bool)->void:
@@ -557,15 +548,6 @@ func _build_materials(held:Dictionary)->void:
 
 ## Before coinage the common store is food: it lives on Food & water. One
 ## line and a way there.
-func _build_store_pointer()->void:
-	_clear(store_box)
-	var row:=HBoxContainer.new();row.name="StorePointer";row.add_theme_constant_override("separation",10);store_box.add_child(row)
-	var said:=_line("%s rations, %s days of food; kept with Food & water." % [EraWords.grouped(roundi(Purse.balance())),EraWords.grouped(roundi(Purse.days_of_food()))],13,T.INK_MUTED,true)
-	said.name="StoreLine";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(said)
-	said.tooltip_text="Food the levy took from every town's stores, kept for all. It pays the soldiers, feeds the hungry, keeps scholars and crews. It is food, so it lives with the food; with coin it becomes the treasury, here."
-	row.add_child(_go("SeeStore","See the store","Open Food & water: the common store, the levy and what it pays for.","economy",0))
-
-
 ## A button that opens another screen (the dock's provider).
 func _go(node_name:String,text:String,tip:String,section:String,sub:int)->Button:
 	var go:=Button.new();go.name=node_name;go.text=text;go.size_flags_vertical=Control.SIZE_SHRINK_CENTER
