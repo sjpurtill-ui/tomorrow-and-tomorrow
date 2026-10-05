@@ -63,12 +63,14 @@ func _ready()->void:
 	camera=Camera3D.new();camera.name="Camera";camera.projection=Camera3D.PROJECTION_ORTHOGONAL;camera.current=true;viewport.add_child(camera)
 	var world:=WorldEnvironment.new();world.environment=Environment.new()
 	world.environment.background_mode=Environment.BG_COLOR;world.environment.background_color=Color("ded5bf")
-	world.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;world.environment.ambient_light_color=Color("c1cde0");world.environment.ambient_light_energy=.30
+	# Compatibility lighting clips warm albedos with studio-strength lights;
+	# keep the light neutral and let the recorded materials supply their color.
+	world.environment.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;world.environment.ambient_light_color=Color.WHITE;world.environment.ambient_light_energy=.16
 	world.environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC
 	viewport.add_child(world)
-	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-52,-35,0);sun.light_color=Color("ffead0");sun.light_energy=.80;sun.shadow_enabled=true
+	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-52,-35,0);sun.light_color=Color.WHITE;sun.light_energy=.35;sun.shadow_enabled=true
 	sun.directional_shadow_max_distance=300;viewport.add_child(sun)
-	var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-25,125,0);fill.light_color=Color("b7c5d5");fill.light_energy=.12;viewport.add_child(fill)
+	var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-25,125,0);fill.light_color=Color.WHITE;fill.light_energy=.04;viewport.add_child(fill)
 	var controls:=HFlowContainer.new();controls.add_theme_constant_override("h_separation",8);add_child(controls)
 	_button(controls,"Reset view",reset_view)
 	_plan_button=_button(controls,"Unbuilt plan",func()->void:set_plan_visible(not plan_visible));_plan_button.toggle_mode=true
