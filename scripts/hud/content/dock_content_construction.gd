@@ -26,7 +26,11 @@ func tab(sub:int)->Dictionary:
 	# outside any one town's stores (home_defense.gd).
 	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	_defence=_defence_card() if sub==0 and GameState.settlement_site_committed and (picked.is_empty() or bool(picked.get("primary",false))) else {}
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
+	var page:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
+	if sub==0:
+		page.brief["folio"]=true
+		for block:Dictionary in page.blocks:block["folio"]=true
+	return page
 
 const ERAS:=["Founding","Foothold","Hamlet","Village","Local centre","Town","Mature town","Urban system","City","Historic city","Regional system","Industrial age","Metropolitan age"]
 
@@ -59,8 +63,9 @@ func _city_tab()->Dictionary:
 	if not _defence.is_empty():going_up.append(_defence)
 	going_up.append(_new_homes_row(housing,crews))
 	return {"brief":_now_brief(city,project,housing,crews),"blocks":[
-		{"type":"town_works","heading":town,"note":_count(int(crews.heads),"builder"),"cards":going_up},
-		{"type":"town_works","heading":"The town now","note":_count(int(housing.people),"person","people"),"cards":[_home_row(housing),_builders_row(crews),_condition_row(),_era_row(crews),_workshops_row()]}]+_fabric_blocks()+[
+		{"type":"town_works","heading":town,"note":_count(int(crews.heads),"builder"),"cards":going_up.slice(0,1)},
+		{"type":"town_works","heading":"The town now","readings":true,"note":_count(int(housing.people),"person","people"),"cards":[_home_row(housing),_builders_row(crews),_condition_row(),_era_row(crews),_workshops_row()]},
+		{"type":"town_works","heading":"Around the town","cards":going_up.slice(1)}]+_fabric_blocks()+[
 		{"type":"impact_lines","heading":"What the buildings do","compact":true,"columns":3,"lines":Impact.summary()},
 		{"type":"impact_lines","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"compact":true,"columns":3,"lines":homes.lines},
 		{"type":"actions","items":[
