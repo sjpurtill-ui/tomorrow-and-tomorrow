@@ -140,6 +140,9 @@ func _prepare(spec: Dictionary) -> void:
 		# seeded decision, never a visual-only status flag.
 		U.advance_record(GameState, work, int(GameState.elapsed_days), city)
 		_check(work.status == "functioning", String(spec.id) + " daily engine completes a standing work: " + String(work.get("outcome", "")))
+	else:
+		U.advance_record(GameState, work, int(GameState.elapsed_days), city)
+		_check(work.status == "building" and float(work.get("last_work",0)) > 0, String(spec.id) + " actual daily work supplies active crews")
 	T.set_color_mode("dark" if spec.get("dark", false) else "light")
 	get_window().size = Vector2i(1138,640) if spec.get("narrow", false) else Vector2i(1920,1080)
 	host = Host.new()
@@ -167,6 +170,7 @@ func _atlas_case(spec: Dictionary) -> void:
 		metrics = model.report()
 		_check(model.model_root != null and model.find_children("*", "MeshInstance3D", true, false).size() > 0, String(spec.id) + " has actual mesh geometry")
 		_check(is_equal_approx(float(metrics.progress), U.fraction(work)), String(spec.id) + " 3D progress matches the engine")
+		_check(int(metrics.worker_count) <= 6 and (int(metrics.worker_count) > 0 if work.status == "building" else int(metrics.worker_count) == 0), String(spec.id) + " bounded crew follows actual daily work and status")
 		var root_id: int = model.model_root.get_instance_id()
 		var before: int = int(metrics.builds)
 		model.orbit_by(Vector2(55,-12))
@@ -191,6 +195,7 @@ func _atlas_case(spec: Dictionary) -> void:
 			watch.pressed.emit()
 			await _frames(3)
 			_check(host.game_speed == 0.0, String(spec.id) + " stopping watch restores the Atlas pause")
+	if is_instance_valid(model) and model.has_method("report"): metrics = model.report()
 	await _capture(String(spec.id))
 	report.cases.append({"id":spec.id, "state":work.status, "year":floori(GameState.elapsed_days/365.0), "stage":U.stage_of(work), "progress":U.fraction(work), "concept":Concept.parse(String(work.id)), "model":metrics})
 	view.close()
@@ -219,9 +224,22 @@ func _ceremony_case(spec: Dictionary) -> void:
 	if view.plate.has_method("diagnostics"):
 		diagnostics = view.plate.diagnostics()
 		_check(int(diagnostics.mesh_count) > 0 and int(diagnostics.cast_count) <= 6, String(spec.id) + " bounds the real 3D cast and model")
+		_check(not diagnostics.committed and not diagnostics.viewport_active, String(spec.id) + " preview settles without a dedication or ongoing viewport draw")
 		if spec.has("mode"): _check(String(diagnostics.mode) == String(spec.mode), String(spec.id) + " uses the appropriate dedication action")
 	_check(Rect2(Vector2.ZERO, Vector2(get_window().size)).encloses(view.stage.get_global_rect()), String(spec.id) + " ceremony fits the viewport: " + str(view.stage.get_global_rect()))
+	if require_3d:
+		for control_name in ["NameInput", "Dedicate", "Later"]:
+			var control := view.find_child(control_name, true, false) as Control
+			_check(control != null and Rect2(Vector2.ZERO, Vector2(get_window().size)).encloses(control.get_global_rect()), String(spec.id) + " keeps " + control_name + " reachable")
 	await _capture(String(spec.id) + "-before")
+	if require_3d and String(spec.era) in ["early", "future"]:
+		var whole := view.find_child("SeeWholeWork", true, false) as Button
+		_check(whole != null, String(spec.id) + " offers the whole-work shot")
+		if whole != null:
+			whole.pressed.emit()
+			view.plate.settle()
+			_check(view.plate.diagnostics().camera_shot == "work", String(spec.id) + " whole-work camera uses the actual stage")
+			await _capture(String(spec.id) + "-whole")
 	view.close()
 	await _frames(5)
 	_check(host.game_speed == 1.0 and not Pause.blocks(host), String(spec.id) + " postponing releases its pause")
@@ -229,6 +247,7 @@ func _ceremony_case(spec: Dictionary) -> void:
 	view = director.open_ceremony(String(work.id))
 	await _frames(8)
 	view.skip_reveal()
+	var retained_model: int = int(view.plate.diagnostics().model_node_id) if view.plate.has_method("diagnostics") else 0
 	var sums := _gift_totals(pending.attendees)
 	var title := "The Accepted " + String(spec.era).capitalize() + " Work"
 	var result: Dictionary = view.dedicate_with(title)
@@ -242,6 +261,13 @@ func _ceremony_case(spec: Dictionary) -> void:
 	var duplicate := GW.dedicate(String(city.id), String(work.id), title)
 	_check(duplicate.has("error") and _economy() == after, String(spec.id) + " repeated UI and engine requests cannot deliver gifts twice")
 	view.skip_reveal()
+	if view.plate.has_method("diagnostics"):
+		var after_stage: Dictionary = view.plate.diagnostics()
+		_check(after_stage.committed and int(after_stage.model_node_id) == retained_model and not after_stage.viewport_active, String(spec.id) + " dedication settles its action while retaining the monument")
+		diagnostics["after"] = after_stage
+	if require_3d:
+		var close_button := view.find_child("CloseCeremony", true, false) as Control
+		_check(close_button != null and Rect2(Vector2.ZERO, Vector2(get_window().size)).encloses(close_button.get_global_rect()), String(spec.id) + " result close remains reachable")
 	await _capture(String(spec.id) + "-after")
 	report.cases.append({"id":spec.id, "year":floori(GameState.elapsed_days/365.0), "concept":Concept.parse(String(work.id)), "stage":diagnostics, "attendees":pending.attendees, "result":result})
 	view.close()
