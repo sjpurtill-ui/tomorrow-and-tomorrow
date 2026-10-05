@@ -3,6 +3,8 @@ extends Node
 ## art reviews at the settlement and regional views.
 ##   -- --out=<absolute dir> [--prefix=name] [--sizes=6,40,160,900] [--saved] [--hide-ui] [--river] [--woodland] [--timing]
 ##      [--town] (a later-era walled town fixture in place of the new camp)
+##      [--fields=n] (generate n real field parcels using the terrain's siting context)
+##      [--repair-fields] (apply the one-time legacy field correction in this isolated run)
 ##      [--look=dx,dz] (aim the camera this far from the settlement, km)
 ##      [--midwinter] [--fresh-snow] (the settlement in winter, snow lying)
 ##      [--foreign] (the nearest known foreign city) [--second-town]
@@ -86,6 +88,14 @@ func _ready()->void:
 	var target:Vector3=GameState.settlement_founded_at
 	if "--great-works" in args:_seed_great_works(target)
 	if "--town" in args:_seed_town()
+	if "--repair-fields" in args:
+		_report_fields("before")
+		var repair_start:=Time.get_ticks_usec()
+		var repaired:int=SettlementModel.call("_repair_legacy_field_geometry",terrain._settlement_spatial_context())
+		print("FIELD_REPAIR count=",repaired," ms=",float(Time.get_ticks_usec()-repair_start)/1000.0)
+		_report_fields("after")
+	for argument in args:
+		if argument.begins_with("--fields="):_seed_fields(clampi(int(argument.trim_prefix("--fields=")),1,72))
 	for argument in args:
 		# `--look=dx,dz`: aim the camera this far (km) from the settlement.
 		if argument.begins_with("--look="):
@@ -558,6 +568,40 @@ func _seed_great_works(center:Vector3)->void:
 ## palisade with gates.
 ## `--town`: a later-era market town (tests/town_fixture.gd) in place of the
 ## new camp, behind a palisade with gates.
+func _report_fields(tag:String)->void:
+	var fields:Array[Dictionary]=[]
+	var area:=0.0
+	var extent:=0.0
+	for plot in GameState.settlement_plots:
+		if String(plot.get("land_use",""))!="field":continue
+		fields.append(plot)
+		area+=float(plot.get("area_ha",0.0))
+		extent=maxf(extent,Vector2(plot.get("centroid",Vector2.ZERO)).length())
+	print("FIELD_LAYOUT ",tag," count=",fields.size()," area_ha=",area," reach_km=",extent)
+	var output:=FileAccess.open("res://artifacts/field-layout-"+tag+".json",FileAccess.WRITE)
+	if output:output.store_string(JSON.stringify(fields,"  "))
+
+func _seed_fields(count:int)->void:
+	# Isolated acceptance fixture: exercise the production generator rather than
+	# arranging picturesque parcels by hand. No save is written by this capture.
+	var origin:Vector3=GameState.settlement_founded_at
+	var soil:={"id":"field_acceptance_soil","resource":"Fertile Soil","stage":"surveyed","position":origin+Vector3(.8,0,.45)}
+	var context:Dictionary=terrain._settlement_spatial_context()
+	var made:=0
+	var started:=Time.get_ticks_usec()
+	for index in count:
+		var plot:Dictionary=SettlementModel._create_field_plot(180+index,soil,index,context)
+		if plot.is_empty():continue
+		SettlementModel._create_growth_route(plot,180+index,"field_track")
+		plot["worker_count"]=12
+		GameState.settlement_plots.append(plot)
+		made+=1
+	SettlementModel._update_field_seasons(220)
+	GameState.morphology_revision+=1
+	print("FIELD_ACCEPTANCE requested=",count," generated=",made," ms=",float(Time.get_ticks_usec()-started)/1000.0)
+	var output:=FileAccess.open("res://artifacts/field-acceptance-layout.json",FileAccess.WRITE)
+	if output:output.store_string(JSON.stringify(GameState.settlement_plots,"  "))
+
 func _seed_town()->void:
 	var town:Dictionary=preload("res://tests/town_fixture.gd").build()
 	GameState.settlement_plots.assign(town.plots)

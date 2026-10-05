@@ -1,3 +1,21 @@
+## October 5 — Compact organic field growth: INTEGRATED
+
+Source `eba1a2a6` and validated runtime/harness `e80985d8` replace directional
+field chains with compact, asymmetric patches, gap infill and varied boundaries.
+Actual polygon separation and terrain-footprint checks prevent overlapping or
+unsuitable plots. A versioned, atomic correction updates compatible legacy
+fields and their dedicated access tracks while retaining farm identity and state.
+Shared-path anchors, archaeological plots and authored fields stay fixed.
+
+Combined validation: 78/78 cases across four suites, no errors, failures, skips
+or orphans. Private GPU saved-layout and 24-field growth captures passed at two
+zooms each. Existing farm area and nongeometry metadata matched after correction.
+Delivery `e1ab0604` was pushed and remotely verified before the canonical
+fast-forward; main was 0/0 and all 4,749 pre-existing local status entries were
+unchanged. The previous player session exited independently after validation;
+the canonical launcher can now load the update. Generated evidence and imports
+remain local. See `docs/design/ORGANIC_FIELD_GROWTH.md` for reproduction and limits.
+
 ## October 5 — Builders / The Town folio: INTEGRATED
 
 At the user's request, source `301e20e0` was merged with canonical main
