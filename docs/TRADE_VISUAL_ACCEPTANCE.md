@@ -1,5 +1,9 @@
 # Trade visual acceptance
 
+Current status: user-approved October 4, 2026; integration validation complete.
+The held-prototype notes below document earlier checkpoints and are superseded
+by this approval. Future page redesigns retain the preview requirement.
+
 `tests/trade_visual_acceptance_probe.tscn` mounts the actual Trade dock through
 `command_rail_hud.gd`, `dock_content_economy.gd`, `dock_panel.gd`, and
 `trade_board.gd`. It prepares in-memory records and pauses simulation. No player
@@ -18,8 +22,8 @@ and a previous answer. The third is known only by word. Monthly flow history
 is prepared in the ledger's real shape; these fixtures do not claim a campaign
 has simulated that history.
 
-Nine cases exercise light and dark palettes, 980px expanded docks, 540px
-regular docks and the shared dock's 375px minimum (331px Trade content). An
+Nine cases exercise light and dark palettes at 1920, 1536 and 1138px canvas
+widths, using the actual proportional folio width. An
 independent regression mounts the actual TradeBoard in a 320px scroll viewport;
 the existing dock chrome cannot itself shrink to that width. Exact
 width, minimum size, viewport containment and all visible descendant horizontal
@@ -144,3 +148,18 @@ prepared-data preview is local at
 All 11 Trade presentation regressions passed with zero errors, failures or
 orphans (report 15). The private GPU preview completed with exit 0; its process
 was confirmed exited. Generated captures and logs remain local.
+
+## Approved integration validation
+
+Runtime is the approved 0bb4b393 checkpoint over main ad8d0913. The harness
+now uses supported canvas widths and opens the terms disclosure before menu
+checks. Private GPU: 630/630 checks, nine cases, 41 captures, clean log, exit 0,
+process 62908 confirmed exited. Local evidence: artifacts/trade-integration-gpu.
+Trade visuals (11), dock view persistence (6), and KPI details (14) passed in
+report 16. Folio readings/navigation (4) passed in report 17 after correcting
+the test's expected active-Trade toggle behavior. All 35 selected cases are
+verified without errors or orphans; no runtime change was needed.
+
+No save schema or ledger authority changes. The active canonical player stays
+open; the next normal launcher start imports the integrated commit's resources.
+Captures, imports, generated UIDs, isolated userdata and logs remain local.

@@ -1,6 +1,6 @@
-# Reference page preview — approval required
+# Reference page — approved Trade design
 
-Status: HELD. Development branch only; not a delivered game update.
+Status: APPROVED by the user on October 4, 2026. Integration checks complete.
 
 The user rejected the first Trade implementation and the earlier Wealth
 interpretation because they did not reproduce the approved photo's composition
@@ -25,14 +25,14 @@ trends, account balances or trade outcomes. The new barter vignette is symbolic
 early-era art, not a recorded event or portrait of an official.
 
 The user's follow-up requires ONE trade balance bar. Its midpoint means equal
-exchange; the fill extends left for more sent and right for more received.
-The signed fraction is `(received - sent) / (received + sent)`, with an empty
+exchange; the fill extends left for more received and right for more sent.
+The signed fraction is `(sent - received) / (received + sent)`, with an empty
 or equal exchange centered. Displayed figures retain the ledger's period and
 sender-price meaning; they are not profit or physical stock.
 
 ## First rendered example
 
-Local output: `artifacts/trade-approval-example-final/trade-preview.png`,
+Local output: `artifacts/trade-received-left/trade-preview.png`,
 1536 by 1024, mounted through the real economy provider and dock. The review
 shell has the same city selector, page visibility hooks and navigation widgets
 as the game. Its plain map area and prepared records are labelled explicitly.
@@ -54,3 +54,14 @@ local. No player/editor process is launched or interrupted.
 This is a visual approval checkpoint. After visual approval, finish multi-size,
 theme, navigation and disclosure acceptance against the final integrated code
 before remote-first delivery under `AGENTS.md`.
+
+The user approved the final rendered Trade example at runtime commit 0bb4b393
+with Received on the left, Sent on the right, and live readings on the same
+persistent gray bar as the speed controls. This approval covers that Trade
+page and its shared frame. Future page-specific redesigns still need previews.
+
+Integration validation: nine GPU cases at 1920, 1536 and 1138px canvas widths,
+both palettes, collapsed and expanded terms, 41 captures, 630/630 checks;
+35 selected functional cases verified across reports 16 and 17. The new
+sidebar test was corrected to distinguish opening a page from toggling the
+active page closed. Runtime code required no change after visual approval.

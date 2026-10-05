@@ -4,6 +4,10 @@ const Economy = preload("res://scripts/hud/content/dock_content_economy.gd")
 var canvas: SubViewport
 var hud: Control
 
+class SpeedTarget extends Node:
+	var game_speed:=0.0
+	func _set_game_speed(speed:float)->void:game_speed=speed
+
 func before_test() -> void:
 	Probe.prepare_fixture("barter")
 	GameState.simulation_metrics={"food_days":12.0,"food_consumption":120.0,"food_eaten":120.0}
@@ -81,6 +85,7 @@ func test_era_changes_and_narrow_layout_keep_live_values_inside_top_bar() -> voi
 	hud._refresh_words()
 	hud._refresh_kpis()
 	_assert_parity()
+
 	assert_bool(hud.top_readings.entries.gdp.button.visible).is_true()
 	for width: int in [1536,1138]:
 		canvas.size=Vector2i(width,1024)
@@ -105,3 +110,25 @@ func test_era_changes_and_narrow_layout_keep_live_values_inside_top_bar() -> voi
 	assert_object(hud.top_readings.global_position).is_equal(open_position)
 	assert_object(hud.top_readings.size).is_equal(open_size)
 	_assert_parity()
+
+func test_reference_sidebar_and_speed_controls_keep_their_actions() -> void:
+	var target:=SpeedTarget.new()
+	hud.add_child(target)
+	hud.terrain=target
+	for speed in range(1,6):
+		hud.speed_buttons[speed].pressed.emit()
+		assert_float(target.game_speed).is_equal(float(speed))
+		hud._style_speed_controls(speed)
+	hud.pause_button.pressed.emit()
+	assert_float(target.game_speed).is_equal(0.0)
+	hud.pause_button.pressed.emit()
+	assert_float(target.game_speed).is_equal(5.0)
+	hud.close_dock()
+	var chosen:Array=[]
+	hud.section_requested.connect(func(section:String,sub:int)->void:chosen.assign([section,sub]))
+	for target_page:Array in [["trade","economy",3],["wealth","economy",2],["materials","economy",1]]:
+		hud.rail_buttons[target_page[0]].pressed.emit()
+		assert_array(chosen).is_equal([target_page[1],target_page[2]])
+	hud.open_dock("economy",3)
+	hud.rail_buttons.trade.pressed.emit()
+	assert_array(chosen).is_equal(["",3])

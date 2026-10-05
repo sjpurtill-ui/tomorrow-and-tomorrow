@@ -89,15 +89,15 @@ func _run() -> void:
 		_finish()
 		return
 	var cases := [
-		{"id":"empty-light", "state":"empty", "palette":"light", "width":980.0},
-		{"id":"word-regular", "state":"word", "palette":"light", "width":540.0},
-		{"id":"barter-light", "state":"barter", "palette":"light", "width":980.0},
-		{"id":"barter-dark", "state":"barter", "palette":"dark", "width":980.0},
-		{"id":"coin-light", "state":"coin", "palette":"light", "width":980.0},
-		{"id":"barter-regular", "state":"barter", "palette":"light", "width":540.0},
-		{"id":"coin-dark-regular", "state":"coin", "palette":"dark", "width":540.0},
-		{"id":"barter-compact", "state":"barter", "palette":"light", "width":375.0},
-		{"id":"coin-dark-compact", "state":"coin", "palette":"dark", "width":375.0}]
+		{"id":"empty-light", "state":"empty", "palette":"light", "canvas_width":1920},
+		{"id":"word-regular", "state":"word", "palette":"light", "canvas_width":1536},
+		{"id":"barter-light", "state":"barter", "palette":"light", "canvas_width":1920},
+		{"id":"barter-dark", "state":"barter", "palette":"dark", "canvas_width":1920},
+		{"id":"coin-light", "state":"coin", "palette":"light", "canvas_width":1920},
+		{"id":"barter-regular", "state":"barter", "palette":"light", "canvas_width":1536},
+		{"id":"coin-dark-regular", "state":"coin", "palette":"dark", "canvas_width":1536},
+		{"id":"barter-compact", "state":"barter", "palette":"light", "canvas_width":1138},
+		{"id":"coin-dark-compact", "state":"coin", "palette":"dark", "canvas_width":1138}]
 	for spec: Dictionary in cases:
 		if selected_case.is_empty() or selected_case == String(spec.id): await _case(spec)
 	_check(not report.cases.is_empty(), "At least one named Trade fixture ran")
@@ -253,7 +253,7 @@ func _case(spec: Dictionary) -> void:
 	var ids := prepare_fixture(String(spec.state))
 	T.set_color_mode(String(spec.palette))
 	background.color = T.PAPER_SUNK.lerp(T.GREEN, 0.16)
-	get_window().size = Vector2i(1920, 1080)
+	get_window().size = Vector2i(int(spec.canvas_width), 1080)
 	label.text = "TEST · Trade acceptance\n" + String(spec.id) + "\nPrepared records · simulation paused"
 	label.modulate = T.INK
 	hud = TradeHud.new()
@@ -268,10 +268,7 @@ func _case(spec: Dictionary) -> void:
 	var board: Control = hud.dock.find_child("TradeBoard", true, false)
 	_check(board != null, String(spec.id) + " mounts the actual Trade board")
 	if board == null: return
-	var requested_width := float(spec.width)
-	for pass_index in 4:
-		hud.dock.size.x = requested_width
-		await _frames(5)
+	var requested_width := preload("res://scripts/hud/reference_folio.gd").page_width(float(spec.canvas_width))
 	await _frames(6)
 	_check(hud.dock.sub == 3 and hud.dock.title_label.text == "Trade", String(spec.id) + " uses the actual Trade tab")
 	var totals := board.find_child("FlowTotals", true, false) as Control
@@ -286,7 +283,7 @@ func _case(spec: Dictionary) -> void:
 		_check(Array(totals.values) == [received * 3.0, sent * 3.0], String(spec.id) + " hero converts ledger monthly values once")
 	_check(absf(hud.dock.size.x - requested_width) < 1.0, String(spec.id) + " fits requested dock width %.1f (actual %.1f)" % [requested_width, hud.dock.size.x])
 	_check(hud.dock.get_combined_minimum_size().x <= requested_width + 1.0, String(spec.id) + " minimum width fits dock")
-	_check(Rect2(Vector2.ZERO, Vector2(1920,1080)).encloses(hud.dock.get_global_rect()), String(spec.id) + " dock fits viewport")
+	_check(Rect2(Vector2.ZERO, Vector2(float(spec.canvas_width),1080)).encloses(hud.dock.get_global_rect()), String(spec.id) + " dock fits viewport")
 	var overflow: Array[String] = []
 	horizontal_overflow(board, hud.dock.body_scroll.get_global_rect(), overflow)
 	_check(overflow.is_empty(), String(spec.id) + " no horizontal overflow: " + ", ".join(overflow))
@@ -341,6 +338,16 @@ func _case(spec: Dictionary) -> void:
 		await _frames(4)
 		await _capture(String(spec.id) + "-" + String(position[0]), row)
 	if not ids.is_empty() and String(spec.state) in ["barter", "coin"]:
+		var disclosure: Button=board.find_child("People_" + String(ids[0]),true,false).find_child("TermsToggle",true,false)
+		_check(disclosure!=null, String(spec.id)+" provides trade terms disclosure")
+		if disclosure:
+			disclosure.pressed.emit()
+			await _frames(8)
+			var terms: Control=board.find_child("People_" + String(ids[0]),true,false).find_child("TradeTerms",true,false)
+			_check(terms.is_visible_in_tree(),String(spec.id)+" opens trade terms")
+			var terms_overflow:Array[String]=[]
+			horizontal_overflow(board,hud.dock.body_scroll.get_global_rect(),terms_overflow)
+			_check(terms_overflow.is_empty(),String(spec.id)+" expanded terms fit: "+", ".join(terms_overflow))
 		for menu_name in ["Stance_squeeze", "BuyWithGoods"]:
 			var people := board.find_child("People_" + String(ids[0]), true, false)
 			var menu := people.find_child(menu_name, true, false) as MenuButton
