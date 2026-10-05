@@ -79,6 +79,8 @@ static func _age(entry:Dictionary)->Dictionary:
 static func _closed(m:Dictionary,slot:Dictionary,shown_names:Array)->Dictionary:
 	var r:=_base(int(m.get("y",0)),slot)
 	var name:=_recounted(Annals.display_name(m),m,shown_names)
+	# A landmark names only the first year that reached it.
+	if name!="" and shown_names.has(name) and name==Annals.landmark_name(name.trim_prefix("the year ")):name=""
 	if name!="":shown_names.append(name)
 	r.name=name
 	r.glyph=Annals.glyph_of(m)
