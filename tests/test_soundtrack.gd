@@ -9,7 +9,7 @@ func after_test()->void:
 
 func test_the_calm_mood_has_its_pieces_and_they_load()->void:
 	var calm:=Soundtrack.pieces("calm")
-	assert_bool(calm.has("res://assets/audio/score/calm/dry_hall_arpeggios.mp3")).is_true()
+	assert_bool(calm.has("res://assets/audio/score/calm/y500-700_dry_hall_arpeggios.mp3")).is_true()
 	for piece:String in calm:assert_object(load(piece) as AudioStream).override_failure_message(piece).is_not_null()
 
 func test_never_the_same_piece_twice_running()->void:
@@ -37,9 +37,10 @@ func test_peace_after_first_contact_has_its_own_mood()->void:
 func test_a_later_age_piece_waits_for_its_year()->void:
 	var later:="res://assets/audio/score/calm/y500_sparse_pulse.mp3"
 	assert_int(Soundtrack.from_year(later)).is_equal(500)
-	assert_int(Soundtrack.from_year("res://assets/audio/score/calm/taut_bow.mp3")).is_equal(0)
+	assert_int(Soundtrack.from_year("res://assets/audio/score/calm/any_age.mp3")).is_equal(0)
 	assert_bool(Soundtrack.pieces_for_year("calm",172).has(later)).is_false()
-	assert_bool(Soundtrack.pieces_for_year("calm",172).has("res://assets/audio/score/calm/taut_bow.mp3")).is_true()
+	assert_bool(Soundtrack.pieces_for_year("calm",172).has("res://assets/audio/score/calm/y1-200_click_clack_raw.mp3")).is_true()
+	assert_bool(Soundtrack.pieces_for_year("calm",701).has("res://assets/audio/score/calm/y500-700_taut_bow.mp3")).is_false()
 	assert_bool(Soundtrack.pieces_for_year("calm",500).has(later)).is_true()
 
 func test_an_early_age_piece_stops_after_its_years()->void:
