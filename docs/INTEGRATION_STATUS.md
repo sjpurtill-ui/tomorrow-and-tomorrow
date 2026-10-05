@@ -1,4 +1,4 @@
-## October 5 — Living village Overview: HELD for user review
+## October 5 — Living village Overview: INTEGRATED
 
 `codex/living-village-overview`, based on `5d8994b3`, replaces the generated
 Overview painting with the actual map world, framed around inhabited plots.
@@ -15,7 +15,14 @@ The ordinary map uses the same correction. No simulation authority changed.
 25/25 UI/album/camera checks and 31/31 architecture/placement checks pass;
 private GPU Overview/History/Visit and narrow-layout capture passed (PID 66244).
 See `docs/design/LIVING_VILLAGE_OVERVIEW.md` for save behavior, scope and limits.
-Source remains isolated; this is not yet in canonical main.
+The user approved the preview on October 5. Approved source `b8854408` is
+combined with main `ee1a2a99` in runtime `a076fab9133da7d680947005e37dff6ff621f1d1`.
+All 75/75 combined cases across nine suites pass with no errors, failures,
+skips or orphans (report 18), including the concurrent water-survey changes.
+Delivery uses a verified remote-first push before the canonical fast-forward.
+The optional album field is compatible with existing saves. No player session
+is restarted; the updated source is available on the next normal launch.
+Local imports, saved test fixtures and captures remain excluded.
 
 ## October 5 — Execution effects: INTEGRATED
 

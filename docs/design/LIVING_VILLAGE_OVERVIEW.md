@@ -1,6 +1,6 @@
 # Living village Overview — October 5, 2026
 
-HELD for user review. Branch `codex/living-village-overview`, based on
+Approved by the user on October 5. Branch `codex/living-village-overview`, based on
 `5d8994b39a43b1740ededd8b16f982bf9c3a00d2`. Worktree:
 `C:/Users/sjpur/.codex/worktrees/food-folio/TomorrowandTomorrow`.
 
@@ -81,4 +81,15 @@ the optional album field/reset in `game_state.gd`, and inherited visual-site
 handling in `early_settlement_visual.gd` / `settlement_architecture_kit.gd`.
 No `save_system.gd`, project settings, simulation authority, or terrain assets
 are changed. Generated imports, local saves, dependency caches and captures are
-excluded. Canonical main and the player's running session are untouched.
+excluded. The player's running session is untouched.
+
+## Approved integration
+
+Approved source `b8854408` merges main `ee1a2a99` in runtime
+`a076fab9133da7d680947005e37dff6ff621f1d1`. All 75/75 tests across the seven
+suites above plus `test_water_tasted` and `test_founding_water_guidance` pass
+with no errors, failures, skips or orphans (report 18). The shared terrain file
+merged cleanly; water-survey behavior remains intact. The approved GPU captures
+remain representative: integration adds only the independent survey changes.
+Main delivery follows verified remote push before canonical fast-forward.
+Existing local files are preserved; no running player is restarted.

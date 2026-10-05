@@ -1,3 +1,20 @@
+## October 5, 2026 — Actual village Overview and dated album
+
+The approved living-village source `b8854408` is combined with main `ee1a2a99`
+in runtime `a076fab9133da7d680947005e37dff6ff621f1d1`. Overview now shows the
+actual map settlement; History retains dated views recorded during Overview
+visits in the campaign save. Valid inherited building sites also retain upgraded
+houses that previously disappeared when later models could not fit old parcels.
+
+All 75/75 combined tests pass with no errors, failures, skips or orphans.
+Approved private GPU evidence covers wide/narrow layouts, History, Visit,
+camera restoration and save serialization using the real campaign. The tested
+town renders 83 building representatives with its 874 population unchanged.
+The additive optional album field supports existing saves; unseen history is
+not reconstructed. Delivery is remote-first, then canonical fast-forward.
+Local generated files remain excluded and no player session is restarted.
+See `docs/design/LIVING_VILLAGE_OVERVIEW.md` for scope, evidence and limits.
+
 ## October 5, 2026 — Fields grow in compact patches
 
 Organic field source `eba1a2a6`, with validated runtime/harness `e80985d8`, is
