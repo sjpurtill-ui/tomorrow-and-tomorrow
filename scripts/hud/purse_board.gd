@@ -166,7 +166,7 @@ func refresh(force:=false)->void:
 	for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
 	if cards.is_empty():spare=Goods.spare()
 	var people:=roundi(float(WorldSimulation.state.population_exact))
-	_rebuild("own",own_box,str([held,Goods.buys(float(held.goods),["Food","Timber","Stone","Fiber Plants"]),spare,people,int(_year()),T.color_mode]),force,func()->void:_build_own(held,spare))
+	_rebuild("own",own_box,str([held.goods,held.coin,held.coin_word,held.worth,Goods.buys(float(held.goods),["Food","Timber","Stone","Fiber Plants"]),spare,people,int(_year()),T.color_mode]),force,func()->void:_build_own(held,spare))
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
 	_rebuild("goods",goods_box,str([int(WorldSimulation.state.elapsed_days),GameState.player_settlements.size(),snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Arms.watch()),roundi(Goods.worth_in_rations(1.0)*10.0),Production._goods_bench()]),force,func()->void:_build_goods(cards))
 	_rebuild("treasures",treasures_box,str([int(held.treasures),roundi(float(held.treasure_worth)),people,int(_year()),_treasure_picture_key()]),force,func()->void:_build_treasures(held))
@@ -226,7 +226,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	budget.tooltip_text="Last season: %s came in, %s went out." % [Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
 	budget.mouse_filter=Control.MOUSE_FILTER_PASS
 	budget.add_child(_flow_row("ComingIn","Comes in","+"+Purse.number(float(forecast["in"]))+" a season",ins,scale,T.GREEN_TEXT))
-	budget.add_child(_flow_row("GoingOut","Goes out","−"+Purse.number(float(forecast.out))+" a season",outs,scale,T.RED_TEXT if net<-0.01 else T.INK))
+	budget.add_child(_flow_row("GoingOut","Goes out","âˆ’"+Purse.number(float(forecast.out))+" a season",outs,scale,T.RED_TEXT if net<-0.01 else T.INK))
 	if float(forecast.debt)>0.5:column.add_child(_line("Old debts owed: %s, repaid from it monthly." % Purse.number(float(forecast.debt)),13,T.INK_MUTED,true))
 
 
@@ -295,7 +295,7 @@ func _build_sources(sources:Dictionary)->void:
 		var who:=_line(String(r[0]),13,T.INK);who.custom_minimum_size=Vector2(140,0);row.add_child(who)
 		var bar:=PartsBar.new();bar.parts=[[String(r[0]),float(r[1]),T.GREEN]];bar.scale_to=maxf(1.0,total);bar.custom_minimum_size=Vector2(80,10)
 		bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(bar)
-		var amount:=_line("+%s · %d%%" % [Purse.number(float(r[1])),roundi(float(r[1])/maxf(0.001,total)*100.0)],13,T.GREEN_TEXT);amount.custom_minimum_size=Vector2(132,0);amount.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(amount)
+		var amount:=_line("+%s Â· %d%%" % [Purse.number(float(r[1])),roundi(float(r[1])/maxf(0.001,total)*100.0)],13,T.GREEN_TEXT);amount.custom_minimum_size=Vector2(132,0);amount.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(amount)
 		row.tooltip_text=_cap(String(r[2]))+(". "+_cap(String(r[3]))+"." if String(r[3])!="" else ".")
 		sources_box.add_child(row)
 	var lost:PackedStringArray=[]
@@ -320,14 +320,14 @@ func _build_levy(current:String)->void:
 	for level:String in Purse.LEVELS:
 		var lq:=Purse.quote(level)
 		var button:=Button.new();button.name="Level_%s" % level;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		var cost:="no cost to trust" if roundi(float(lq.trust))<=0 else "trust −%d" % roundi(float(lq.trust))
-		button.text="%s: %s\n+%s a season · %s" % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.number(float(lq.per_season)),cost]
+		var cost:="no cost to trust" if roundi(float(lq.trust))<=0 else "trust âˆ’%d" % roundi(float(lq.trust))
+		button.text="%s: %s\n+%s a season Â· %s" % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.number(float(lq.per_season)),cost]
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.set_pressed_no_signal(level==current)
-		button.tooltip_text="%s: %s of %s.\nBrings about %s a season.\nAbout 1 in %d hide what they owe.\nTrust in you −%d, holding together −%d." % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.harvest_word(),Purse.amount_text(float(lq.per_season)),int(lq.hidden_one_in),roundi(float(lq.trust)),roundi(float(lq.cohesion))]
+		button.tooltip_text="%s: %s of %s.\nBrings about %s a season.\nAbout 1 in %d hide what they owe.\nTrust in you âˆ’%d, holding together âˆ’%d." % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.harvest_word(),Purse.amount_text(float(lq.per_season)),int(lq.hidden_one_in),roundi(float(lq.trust)),roundi(float(lq.cohesion))]
 		button.pressed.connect(func()->void:_choose_levy(level))
 		pick.add_child(button)
-	var cost:=_line("1 in %d hide their dues; holding together −%d." % [int(q.hidden_one_in),roundi(float(q.cohesion))],13,T.INK_MUTED,true);cost.name="LevyCost"
+	var cost:=_line("1 in %d hide their dues; holding together âˆ’%d." % [int(q.hidden_one_in),roundi(float(q.cohesion))],13,T.INK_MUTED,true);cost.name="LevyCost"
 	cost.tooltip_text="A light levy is what custom expects. Heavier ones are resented: trust in you and how well the people hold together fall while it lasts, and more is hidden.\nOur hands reach %d in 100 of what is owed: helpers and clerks, tallies and registers find it." % roundi(float(q.reach)*100.0)
 	levy_box.add_child(cost)
 
@@ -353,7 +353,7 @@ func _build_lines(forecast:Dictionary,purse:Dictionary)->void:
 	for line:String in Purse.LINES:lines_box.add_child(_line_row(line,forecast,purse))
 	var army:Dictionary=purse.get("last_army",{}) if purse.get("last_army") is Dictionary else {}
 	if int(purse.get("unpaid_months",0))>0:
-		var warn:=_line("Soldiers unpaid %d %s: will −%d, %d went home." % [int(purse.unpaid_months),"month" if int(purse.unpaid_months)==1 else "months",roundi(float(army.get("will_lost",0.0))*100.0),int(army.get("deserted",0))],13,T.RED_TEXT,true)
+		var warn:=_line("Soldiers unpaid %d %s: will âˆ’%d, %d went home." % [int(purse.unpaid_months),"month" if int(purse.unpaid_months)==1 else "months",roundi(float(army.get("will_lost",0.0))*100.0),int(army.get("deserted",0))],13,T.RED_TEXT,true)
 		warn.name="Unpaid";lines_box.add_child(warn)
 
 
@@ -393,16 +393,16 @@ func _line_row(line:String,forecast:Dictionary,purse:Dictionary)->Control:
 func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->String:
 	match line:
 		"army":
-			if on and int(purse.get("unpaid_months",0))==0:return "%s · will and readiness kept" % String(entry.get("who",""))
-			return "Unpaid: will −%d a month, 1 in 50 go home" % roundi(100.0*0.06)
-		"scholars":return ("%s · research %d%% faster: a 100-day discovery in %d days" if on else "%s · would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
-		"crews":return ("%s · building %d%% faster: a 100-day work in %d days" if on else "%s · would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
+			if on and int(purse.get("unpaid_months",0))==0:return "%s Â· will and readiness kept" % String(entry.get("who",""))
+			return "Unpaid: will âˆ’%d a month, 1 in 50 go home" % roundi(100.0*0.06)
+		"scholars":return ("%s Â· research %d%% faster: a 100-day discovery in %d days" if on else "%s Â· would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
+		"crews":return ("%s Â· building %d%% faster: a 100-day work in %d days" if on else "%s Â· would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
 		"relief":
 			var towns:=Purse.food_places()
 			var hungry:=towns.filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
 			if Purse.in_kind():return "%d hungry %s now" % [hungry,"town" if hungry==1 else "towns"]
-			if not Purse.market_open():return "%d hungry %s · no market to buy more" % [hungry,"town" if hungry==1 else "towns"]
-			return "%d hungry %s · food about %s a ration" % [hungry,"town" if hungry==1 else "towns",Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))]
+			if not Purse.market_open():return "%d hungry %s Â· no market to buy more" % [hungry,"town" if hungry==1 else "towns"]
+			return "%d hungry %s Â· food about %s a ration" % [hungry,"town" if hungry==1 else "towns",Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))]
 	return ""
 
 func _effect_tip(line:String)->String:
@@ -483,6 +483,7 @@ func _build_own(held:Dictionary,spare:float)->void:
 	var value:=_line("Worth %s rations" % EraWords.grouped(roundi(Goods.worth_in_rations(goods))),22,T.GOLD_TEXT,true);value.name="GoodsValue";reading.add_child(value)
 	var available:=HBoxContainer.new();available.add_theme_constant_override("separation",12);available.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(available)
 	var ring:=Graphics.new();ring.name="GoodsAvailability";ring.kind="ring";ring.values=[spare,goods];ring.custom_minimum_size=Vector2(136,136);available.add_child(ring)
+	ring.mouse_filter=Control.MOUSE_FILTER_PASS
 	ring.tooltip_text="Share of recorded goods available to change hands, after homes, learners and workshop reserves."
 	var reserve:=VBoxContainer.new();reserve.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reserve.size_flags_vertical=Control.SIZE_SHRINK_CENTER;available.add_child(reserve)
 	var change:=_answer("%s available" % EraWords.grouped(roundi(spare)),22);change.name="GoodsSpare";reserve.add_child(change)
@@ -491,12 +492,11 @@ func _build_own(held:Dictionary,spare:float)->void:
 	reserve.add_child(_line("%s kept for use" % EraWords.grouped(roundi(maxf(0.0,goods-spare))),14,T.INK_MUTED,true))
 	var buys:=Goods.buys(goods,["Timber","Stone","Fiber Plants"])
 	var typical:=float(Scale.anchors(Scale.GOODS,_year())[1])
-	var head:=_line("%s per person · %s typical for our age" % [_amount(goods/people),_amount(typical)],14,T.INK_MUTED,true);head.name="GoodsAHead"
-	var wealth:Dictionary=Standing.strengths().get("wealth",{})
-	head.tooltip_text="A typical people of our age, counted the same way.\nOur Wealth against the age: %d%%. %s." % [roundi(float(wealth.get("value",0.0))*100.0),_cap(String(wealth.get("why","")))]
+	var head:=_line("%s per person Â· %s typical for our age" % [_amount(goods/people),_amount(typical)],14,T.INK_MUTED,true);head.name="GoodsAHead"
+	head.tooltip_text="Goods held per person, compared with a typical people of our age. Both bars use the same scale."
 	reading.add_child(head)
 	var compare:=Graphics.new();compare.name="GoodsComparison";compare.kind="comparison";compare.values=[goods/people,typical];compare.labels=["Ours","Typical"];compare.custom_minimum_size=Vector2(180,62);reading.add_child(compare)
-	var buy:=_line("Buying power · choose one equivalent",12,T.GOLD_TEXT,true);buy.name="GoodsBuy"
+	var buy:=_line("Buying power Â· choose one equivalent",12,T.GOLD_TEXT,true);buy.name="GoodsBuy"
 	buy.tooltip_text="All %s goods would buy %s timber, %s stone OR %s fibre at our own prices. These are alternatives, not additional holdings." % [EraWords.grouped(roundi(goods)),EraWords.grouped(roundi(float(buys.Timber))),EraWords.grouped(roundi(float(buys.Stone))),EraWords.grouped(roundi(float(buys["Fiber Plants"])))];own_box.add_child(buy)
 	var exchange:=_grid(own_box,"GoodsEquivalents",3,560)
 	for spec:Array in [["Timber","timber",0],["Stone","stone",1],["Fiber Plants","fibre",3]]:
@@ -548,7 +548,7 @@ func _build_materials(held:Dictionary)->void:
 		var art:=MaterialArt.picture(index,48,48);art.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(art)
 	var said:=_answer("%s loads" % EraWords.grouped(roundi(materials)),30);said.name="Materials";materials_box.add_child(said)
 	said.tooltip_text="In every town's yards. Builders and makers draw on them; what they can spare also changes hands by barter."
-	var head:=_line("%s per person · %s typical" % [_amount(materials/people),_amount(typical)],13,T.INK_MUTED,true);head.name="MaterialsAHead";materials_box.add_child(head)
+	var head:=_line("%s per person Â· %s typical" % [_amount(materials/people),_amount(typical)],13,T.INK_MUTED,true);head.name="MaterialsAHead";materials_box.add_child(head)
 	head.tooltip_text="A typical people of our age, counted the same way."
 	materials_box.add_child(_go("SeeMaterials","See materials","Open Materials: each one in store, coming in and going out.","economy",1))
 
@@ -600,7 +600,7 @@ func _build_business()->void:
 	var work:=float(x.work)
 	var matters:=work>=BUSINESS_MATTERS or Business.booming() or Business.bust_left()>0
 	var ladder:PackedStringArray=[]
-	for index in Business.RUNGS.size():ladder.append(("› " if index==r else "   ")+Business.rung_name(index))
+	for index in Business.RUNGS.size():ladder.append(("â€º " if index==r else "   ")+Business.rung_name(index))
 	var effect_word:="" if r<1 else (": hardly any effect yet" if not matters else ": all work %s" % Business.percent(work))
 	var where:=_answer(Business.rung_name(r)+effect_word,17);where.name="RungNow"
 	where.tooltip_text="The steps of business, ours marked:\n"+"\n".join(ladder)
@@ -632,17 +632,17 @@ func _build_business()->void:
 	var current:=Business.stance()
 	var shown:=matters or stances_open
 	var toggle:=Button.new();toggle.name="StanceToggle";toggle.focus_mode=Control.FOCUS_NONE;toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-	toggle.text=("Stance: %s · hide" if shown else "Stance: %s · change") % Business.stance_name(current)
+	toggle.text=("Stance: %s Â· hide" if shown else "Stance: %s Â· change") % Business.stance_name(current)
 	toggle.tooltip_text="How the god treats business: guarded, chartered or open. It matters little while business is this small."
 	toggle.pressed.connect(func()->void:stances_open=not shown;refresh(true))
 	toggle.visible=not matters
 	column.add_child(toggle)
 	var choice:=VBoxContainer.new();choice.name="StanceChoice";choice.add_theme_constant_override("separation",6);choice.visible=shown;column.add_child(choice)
-	var pick:=HBoxContainer.new();pick.name="Stances";pick.add_theme_constant_override("separation",8);choice.add_child(pick)
+	var pick:=HFlowContainer.new();pick.name="Stances";pick.add_theme_constant_override("h_separation",8);pick.add_theme_constant_override("v_separation",8);choice.add_child(pick)
 	for id:String in Business.choices():
 		var q:=Business.quote(id)
-		var button:=Button.new();button.name="Stance_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		button.text="%s\n%s work · %s" % [Business.stance_name(id),Business.percent(float(q.work)),_short_odds(float(q.bust_year))]
+		var button:=Button.new();button.name="Stance_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_ALL
+		button.text="%s\n%s work Â· %s" % [Business.stance_name(id),Business.percent(float(q.work)),_short_odds(float(q.bust_year))]
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.set_pressed_no_signal(id==current)
 		var fee:=("\n%s: about %s a season at today's size, %s once grown." % [String(q.purse_name),Purse.amount_text(float(q.purse_now)),Purse.number(float(q.purse_season))]) if float(q.purse_season)>=0.5 else ""
@@ -672,7 +672,7 @@ static func _short_odds(year:float)->String:
 
 func _choose_stance(id:String)->void:
 	var result:=Business.set_stance(id)
-	var said:=String(result.get("error","")) if not bool(result.get("ok",false)) else "Business is %s%s." % [Business.stance_name(id).to_lower(),(": trust −%d" % roundi(float(result.trust)*100.0)) if float(result.get("trust",0.0))>0.0 else ""]
+	var said:=String(result.get("error","")) if not bool(result.get("ok",false)) else "Business is %s%s." % [Business.stance_name(id).to_lower(),(": trust âˆ’%d" % roundi(float(result.trust)*100.0)) if float(result.get("trust",0.0))>0.0 else ""]
 	_say(said)
 	Tracker.setting_order("Business: %s" % Business.stance_name(id),{"ok":bool(result.get("ok",false)),"message":said,"reason":said},"purse",_keeper(),"economy:2")
 	refresh(true)
@@ -688,6 +688,7 @@ func _build_wealth()->void:
 	var said:=_answer("The richest fifth hold %d in 100; the poorest %d" % [top,roundi(float(shares[0])*100.0)],17);said.name="Shares"
 	wealth_box.add_child(said)
 	var fifths:=Graphics.new();fifths.name="Fifths";fifths.kind="fifths";fifths.values=shares.duplicate();fifths.labels=["Poorest","2nd","Middle","4th","Richest"];fifths.custom_minimum_size=Vector2(200,180)
+	fifths.mouse_filter=Control.MOUSE_FILTER_PASS
 	fifths.tooltip_text="Each fifth of our households, poorest to richest, and its part of all we have."
 	wealth_box.add_child(fifths)
 	var ends:=_line("Each column is one fifth of households.",13,T.INK_MUTED,true);ends.name="FifthsEnds";wealth_box.add_child(ends)
@@ -696,7 +697,7 @@ func _build_wealth()->void:
 	var causes:PackedStringArray=[]
 	for pair:Array in [["unequal","shares"],["want","want"],["prices","prices"],["levy","levy"]]:
 		var points:=float(parts.get(String(pair[0]),0.0))*100.0
-		if points>=0.5:causes.append("%s −%d" % [String(pair[1]),roundi(points)])
+		if points>=0.5:causes.append("%s âˆ’%d" % [String(pair[1]),roundi(points)])
 	var pressure:=_line(("Pressure on trust: "+", ".join(causes)+".") if not causes.is_empty() else "No pressure on trust from want or shares.",13,T.RED_TEXT if not causes.is_empty() else T.INK_MUTED,true)
 	pressure.name="Pressure"
 	pressure.tooltip_text="Points a day's reckoning takes from trust in you; holding together loses about half as much.\nIn this age the richest fifth's part settles near %d in 100 and cannot pass %d. Sharing out, feasts and the purse's pay pull it down; want, rising prices and failed debts push it up." % [roundi(float(bounds[2])*100.0),roundi(float(bounds[1])*100.0)]
@@ -716,7 +717,7 @@ func _build_ledger(purse:Dictionary)->void:
 		var when:=_line(EraWords.when(int(entry.get("day",0))),13,T.INK_MUTED);when.custom_minimum_size=Vector2(118,0);row.add_child(when)
 		var what:=_line(Tracker.short(String(entry.get("why","")),9),13,T.INK,true);what.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(what)
 		what.tooltip_text=String(entry.get("why",""))
-		if absf(amount)>=0.05:row.add_child(_line(("+" if amount>0.0 else "−")+Purse.number(absf(amount)),13,T.GREEN_TEXT if amount>0.0 else T.RED_TEXT))
+		if absf(amount)>=0.05:row.add_child(_line(("+" if amount>0.0 else "âˆ’")+Purse.number(absf(amount)),13,T.GREEN_TEXT if amount>0.0 else T.RED_TEXT))
 		ledger_box.add_child(row)
 
 
@@ -802,13 +803,17 @@ func _style_link(button:Button)->void:
 		button.add_theme_stylebox_override(state,style)
 	button.add_theme_color_override("font_color",T.TEAL_TEXT)
 
-func _goods_picture()->TextureRect:
-	var picture:=TextureRect.new();picture.name="MakingIllustration";picture.custom_minimum_size=Vector2(76,76)
-	picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE
+func _goods_picture()->Control:
+	var mount:=PanelContainer.new();mount.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var paper:=_skin(Color("eee5d6"),T.RULE,6,0,T.RULE)
+	mount.add_theme_stylebox_override("panel",paper)
+	var picture:=TextureRect.new();picture.name="MakingIllustration";picture.custom_minimum_size=Vector2(64,64)
+	picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;picture.mouse_filter=Control.MOUSE_FILTER_PASS
 	var bench:=Production._goods_bench()
-	picture.texture=ProductArt.texture(1) if bench=="kiln" else Icons.workshop_texture(bench,T.INK,96)
+	picture.texture=ProductArt.texture(1) if bench=="kiln" else Icons.workshop_texture(bench,Color("39352d"),96)
 	picture.tooltip_text="The crafts our people can practise."
-	return picture
+	mount.add_child(picture)
+	return mount
 
 func _treasure_picture_key()->Array:
 	var result:Array=[]
@@ -824,7 +829,7 @@ func _treasure_picture()->TextureRect:
 		var texture:=ArtifactArt.texture(item)
 		if texture==null:continue
 		var picture:=TextureRect.new();picture.name="HeldTreasureIllustration";picture.texture=texture;picture.custom_minimum_size=Vector2(82,82)
-		picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;picture.mouse_filter=Control.MOUSE_FILTER_PASS
 		picture.tooltip_text=String(item.get("name","A treasure in our collection"))
 		return picture
 	return null
@@ -866,20 +871,4 @@ class PartsBar extends Control:
 		for entry:Array in parts:
 			var width:=size.x*float(entry[1])/maxf(0.001,scale_to)
 			if width>0.5:draw_rect(Rect2(x,0.0,minf(width,size.x-x),size.y),entry[2]);x+=width
-		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
-
-
-## The fifths of our households, poorest first, each its share of the wealth.
-class FifthsBar extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var shares:Array=[]
-	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
-	func _draw()->void:
-		var inks:=[T.TEAL.lightened(0.35),T.TEAL.lightened(0.18),T.TEAL,T.GOLD.lightened(0.15),T.GOLD]
-		var x:=0.0
-		for index in mini(5,shares.size()):
-			var width:=size.x*clampf(float(shares[index]),0.0,1.0)
-			draw_rect(Rect2(x,0.0,width,size.y),inks[index])
-			if index>0:draw_line(Vector2(x,0.0),Vector2(x,size.y),T.PAPER,1.0)
-			x+=width
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
