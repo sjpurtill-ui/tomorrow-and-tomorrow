@@ -135,6 +135,6 @@ static func describe()->String:
 		text+="%s → %s · %d mm · %d wagons\n" % [String(city(String(line.source_id)).get("name",line.source_id)),String(city(String(line.destination_id)).get("name",line.destination_id)),int(line.gauge_mm),int(line.wagons)]
 		if F.building(line):text+="Construction %.1f / %.1f work\n" % [float(line.work_done),float(line.work_required)]
 		else:text+="Track %d%% · wagons %d%%\n" % [roundi(float(line.condition)*100),roundi(float(line.wagon_condition)*100)]
-		if not line.trip.is_empty():text+="Crew and wagons committed through day %d; pending cargo or blocked return can extend this.\n" % int(line.trip.return_day)
+		if not line.trip.is_empty():text+="Crew and wagons committed through %s; pending cargo or blocked return can extend this.\n" % preload("res://scripts/calendar_date.gd").words(int(line.trip.return_day))
 		if not String(line.blocker).is_empty():text+=String(line.blocker)+"\n"
 	return text

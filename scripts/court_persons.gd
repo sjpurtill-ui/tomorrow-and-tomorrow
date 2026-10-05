@@ -1068,7 +1068,7 @@ static func hidden_words(audience_id:String)->String:
 		var scape:=by_id(String((rec.get("scapegoat",{}) as Dictionary).get("id","")))
 		if not scape.is_empty():
 			var alibi:Dictionary=scape.get("alibi",{}) if scape.get("alibi") is Dictionary else {}
-			parts.append("%s was %s from day %d to %d with %s." % [String(scape.name),String(alibi.get("place","")),int(alibi.get("from",0)),int(alibi.get("to",0)),String(alibi.get("witness",""))])
+			parts.append("%s was %s from %s to %s with %s." % [String(scape.name),String(alibi.get("place","")),preload("res://scripts/calendar_date.gd").words(int(alibi.get("from",0))),preload("res://scripts/calendar_date.gd").words(int(alibi.get("to",0))),String(alibi.get("witness",""))])
 		var shown:PackedStringArray=PackedStringArray()
 		for t in rec.get("revealed",[]): shown.append(String(t))
 		parts.append("Exposed already: %s. Tells shown: %s." % ["yes" if bool(rec.get("exposed",false)) else "no",", ".join(shown)])

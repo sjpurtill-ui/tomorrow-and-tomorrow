@@ -94,4 +94,4 @@ static func describe(subject:String)->String:
 	var contract:Dictionary=records().get(subject,{})
 	if contract.is_empty():return ""
 	if independent(subject):return "Local mastery supports independent manufacture; the foreign production contract is no longer required."
-	return "Production license: %s; expires on day %d. Licensed throughput: 65%%. Materials, tooling, labor and power still apply." % ["supplier support available" if active(subject) else "expired or supplier support interrupted",int(contract.expires_day)]
+	return "Production license: %s; expires in %s. Licensed throughput: 65%%. Materials, tooling, labor and power still apply." % ["supplier support available" if active(subject) else "expired or supplier support interrupted",preload("res://scripts/calendar_date.gd").words(int(contract.expires_day))]

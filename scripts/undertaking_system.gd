@@ -509,7 +509,7 @@ static func advance_record(state:Node,r:Dictionary,day:int,city:Dictionary={})->
 				_pose(r,String(gate[1]),day)
 				return
 	if int(r.get("halt_until",-1))>day:
-		r.reason="Crews have laid down their tools; work resumes on day %d." % (int(r.halt_until)%365+1)
+		r.reason="Crews have laid down their tools; work resumes in %s." % preload("res://scripts/calendar_date.gd").words(int(r.halt_until))
 		return
 	var allocated:=float(state.population_allocations.get("Construction",0))
 	var remaining:float=state.effective_workers("Construction")

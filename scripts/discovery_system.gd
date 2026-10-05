@@ -1810,7 +1810,7 @@ func established_knowledge_threads()->Array[Dictionary]:
 		var count:=int(thread.get("breakthrough_count",1))
 		thread["description"]="Latest breakthrough: %s\n%s" % [String(thread.get("latest_breakthrough","Established practice")),String(thread.get("description",""))]
 		thread["effect_summary"]=_effect_summary(thread.get("effects",{}))
-		thread["record_summary"]="Archived practice · %d historical refinements · no further repeat research" % count if bool(thread.get("legacy_refinement",false)) else "Discovered once · day %d" % int(thread.get("day",0))
+		thread["record_summary"]="Archived practice · %d historical refinements · no further repeat research" % count if bool(thread.get("legacy_refinement",false)) else "Discovered once · %s" % preload("res://scripts/calendar_date.gd").words(int(thread.get("day",0)))
 		result.append(thread)
 	established_threads_signature=log_signature
 	established_threads_cache=result.duplicate(true)
