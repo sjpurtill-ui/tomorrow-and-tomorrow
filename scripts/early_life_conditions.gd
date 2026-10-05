@@ -206,11 +206,20 @@ static func people_on_the_land(state:Node)->float:
 ## People the society's settled land can carry now: its home land
 ## (home_capacity) widened by the land its other towns claim.
 static func carrying_capacity(state:Node,discovery:Node)->float:
-	# Only towns people live in work land (settlement_model.lived_in).
-	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())
-	# Daughter settlements claim less new land each than the first.
+	# Only towns people live in work land (settlement_model.lived_in), and the
+	# land the one seat has claimed as it grew outward (one_seat.gd
+	# claim_land): each claim widens the land as a daughter town once did.
+	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())+seat_land_claims(state)
+	# Each claim past the first adds less new land than the one before.
 	var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE
 	return home_capacity(state,discovery)*territory
+
+## Rings of land the people's seat has claimed around it (one_seat.gd), kept
+## on the seat's own record.
+static func seat_land_claims(state:Node)->int:
+	for city:Variant in state.player_settlements:
+		if city is Dictionary and bool((city as Dictionary).get("primary",false)):return maxi(0,int((city as Dictionary).get("land_claims",0)))
+	return 0
 
 ## People one home land can carry now, whatever the number of towns: the era's
 ## territory, raised by (era-capped) cultivation, soil and storage knowledge

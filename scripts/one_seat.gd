@@ -42,6 +42,34 @@ const STAGES:=[
 	{"id":"country","name":"Country","people":2000000,"districts":8},
 ]
 
+## The land the seat works grows outward with it. When its people press on
+## the land they have (past early_life_conditions.gd CROWDING_ONSET of what it
+## carries) and they are fed and at peace, the seat claims the next ring of
+## land around it, at most once every LAND_CLAIM_DAYS. A claim widens the
+## land as a daughter town once did (early_life_conditions.carrying_capacity),
+## so crowding holds a people only while hunger or war keep it from reaching
+## out, as it did when towns were founded.
+const LAND_CLAIM_DAYS:=180
+## Days of food in store below which the people does not reach for new land.
+const LAND_CLAIM_FOOD_DAYS:=30.0
+const EarlyLife:=preload("res://scripts/early_life_conditions.gd")
+
+## Claims the next ring of land for the people in scope when it is due.
+## Returns true when land was claimed.
+static func claim_land(day:int)->bool:
+	if not has_seat():return false
+	var seat:=seat_record()
+	var last:=int(seat.get("land_claim_day",-LAND_CLAIM_DAYS))
+	if day-last<LAND_CLAIM_DAYS:return false
+	var state=WorldSimulation.state
+	if float(state.simulation_metrics.get("food_days",0.0))<LAND_CLAIM_FOOD_DAYS:return false
+	if int(WorldSimulation.world.player_effects().get("war_count",0))>0:return false
+	var capacity:=EarlyLife.carrying_capacity(state,WorldSimulation.discovery)
+	if EarlyLife.people_on_the_land(state)<EarlyLife.CROWDING_ONSET*capacity:return false
+	seat["land_claims"]=int(seat.get("land_claims",0))+1
+	seat["land_claim_day"]=day
+	return true
+
 ## Whether the people in scope has a seat of its own to grow (not lost to a
 ## siege).
 static func has_seat()->bool:
@@ -88,6 +116,8 @@ static func fold_towns(day:int)->Array[Dictionary]:
 	for index in range(state.player_settlements.size()-1,-1,-1):
 		if gone.has(String((state.player_settlements[index] as Dictionary).get("id",""))):state.player_settlements.remove_at(index)
 	if gone.has(String(state.selected_player_settlement_id)):state.selected_player_settlement_id=String(seat.get("id",""))
+	# The land those towns worked stays the people's, as the seat's own.
+	seat["land_claims"]=int(seat.get("land_claims",0))+folded.size()
 	state.settlement_network_revision+=1
 	if WorldSimulation.state==GameState:_tell(folded)
 	return folded
