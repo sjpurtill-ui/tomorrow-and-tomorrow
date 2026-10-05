@@ -115,9 +115,12 @@ func _build_scene(profile:Dictionary)->void:
 	ground.material_override=_earth_material()
 	var earth:StandardMaterial3D=ground.material_override.duplicate();earth.uv1_scale=Vector3.ONE*(ground_size*8.0/10.0);ground.material_override=earth
 	var env:=WorldEnvironment.new();var atmosphere:=Environment.new();atmosphere.background_mode=Environment.BG_COLOR;atmosphere.background_color=Color("aaa18e")
-	atmosphere.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;atmosphere.ambient_light_color=Color("c3cbd0");atmosphere.ambient_light_energy=.30
+	atmosphere.ambient_light_source=Environment.AMBIENT_SOURCE_COLOR;atmosphere.ambient_light_color=Color.WHITE;atmosphere.ambient_light_energy=.16
 	atmosphere.tonemap_mode=Environment.TONE_MAPPER_FILMIC;env.environment=atmosphere;world.add_child(env)
-	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-42,-35,0);sun.light_color=Color("fff1dc");sun.light_energy=.80;sun.shadow_enabled=true;world.add_child(sun)
+	# Measured in Compatibility: restrained neutral energy retains the
+	# palette and face detail instead of clipping pale stone into yellow.
+	var sun:=DirectionalLight3D.new();sun.rotation_degrees=Vector3(-42,-35,0);sun.light_color=Color.WHITE;sun.light_energy=.35;sun.shadow_enabled=true;world.add_child(sun)
+	var fill:=DirectionalLight3D.new();fill.rotation_degrees=Vector3(-25,125,0);fill.light_color=Color.WHITE;fill.light_energy=.04;world.add_child(fill)
 	var registry:Dictionary={}
 	for index in cast.size():
 		var entry:Dictionary=cast[index];var person:Dictionary=entry.person
