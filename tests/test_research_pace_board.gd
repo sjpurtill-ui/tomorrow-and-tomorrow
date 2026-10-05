@@ -27,8 +27,8 @@ func test_short_goods_show_in_red_and_name_the_limit()->void:
 	var words:=Board.pace_words(_pace({"goods_cover":0.6,"goods_factor":R.goods_factor(0.6)}))
 	var goods:Dictionary=(words.chips as Array).filter(func(c:Dictionary)->bool:return c.kind=="goods")[0]
 	assert_str(String(goods.tone)).is_equal("bad")
-	assert_str(String(goods.value)).is_equal("2.5 of 4.2 a day")
-	assert_str(String(goods.label)).contains("1.7 short")
+	assert_str(String(goods.value)).is_equal("4.2 goods a day")
+	assert_str(String(goods.label)).is_equal("only 2.5 given, 1.7 short")
 	assert_str(String(words.limiter)).starts_with("Short of goods").contains("60 in 100").contains("80 in 100")
 	assert_str(String(Board.limiter(_pace({"goods_cover":0.6,"goods_factor":R.goods_factor(0.6)})).kind)).is_equal("goods")
 
