@@ -35,6 +35,7 @@ const Goods:=preload("res://scripts/civilian_goods.gd")
 const Graphics:=preload("res://scripts/hud/trade_graphics.gd")
 const Emblem:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const MaterialArt:=preload("res://scripts/hud/materials_art.gd")
+const ProvisionsArt:=preload("res://scripts/hud/provisions_art.gd")
 const REFRESH_SECONDS:=1.0
 const MAX_WORDS:=12
 const HOVER_HOLD_SECONDS:=5.0
@@ -55,6 +56,7 @@ var others_signature:=""
 var people_signatures:Dictionary={}
 var responsive_grids:Array[GridContainer]=[]
 var visual_sections:Array[Dictionary]=[]
+var expanded_people:Dictionary={}
 
 func _ready()->void:
 	_bind_layout.call_deferred()
@@ -73,11 +75,12 @@ func setup(_block:Dictionary={})->void:
 	name="TradeBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	theme=T.control_theme()
-	add_theme_constant_override("separation",16)
-	summary_box=_visual_section("Our trade",self,"TradeHero","trade",true)
+	add_theme_constant_override("separation",22)
+	summary_box=_visual_section("Our exchange",self,"TradeHero","",true)
 	feedback=_line("",15,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	peoples_box=_section("Peoples we know")
-	others_box=_visual_section("Between other peoples",self,"OtherTrade","trade")
+	_build_story()
+	others_box=_visual_section("Between other peoples",self,"OtherTrade","")
 	resized.connect(_responsive)
 	refresh(true)
 	_responsive()
@@ -126,10 +129,9 @@ func refresh(force:=false)->void:
 		var panel:=item.panel as PanelContainer
 		if not is_instance_valid(panel) or not panel.is_inside_tree():continue
 		kept_sections.append(item)
-		var skin:=_skin(T.PAPER_RAISED,T.RULE,18,0)
-		if bool(item.hero):skin.border_width_top=3;skin.border_color=T.GOLD
+		var skin:=_folio_rule(0)
 		panel.add_theme_stylebox_override("panel",skin)
-		(item.kicker as Label).add_theme_color_override("font_color",T.GOLD_TEXT)
+		(item.kicker as Label).add_theme_color_override("font_color",T.INK)
 	visual_sections=kept_sections
 	var peoples_kicker:=get_node_or_null("PeoplesHeading") as Label
 	if peoples_kicker!=null:peoples_kicker.add_theme_color_override("font_color",T.INK_MUTED)
@@ -162,9 +164,9 @@ func _build_summary()->void:
 	_clear(summary_box)
 	var top:=_grid(summary_box,"TradeOverview",2,720)
 	var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.add_theme_constant_override("separation",6);top.add_child(reading)
-	var spare:=_answer("%s goods" % EraWords.grouped(roundi(Goods.spare())),48);spare.name="GoodsToTrade";reading.add_child(spare)
+	var spare:=_answer("%s goods" % EraWords.grouped(roundi(Goods.spare())),40);spare.name="GoodsToTrade";reading.add_child(spare)
 	spare.tooltip_text="Goods beyond household use and workshop reserves, available to buy what other peoples can spare. This is the same balance used by Buy with goods."
-	reading.add_child(_line("available to trade or give",14,T.INK_MUTED,true))
+	reading.add_child(_line("Available to trade or give",18,T.INK_MUTED,true))
 	var unit:=Ledger.purse_unit("player")
 	if unit!="":
 		var money:=_line("%s %s to pay with" % [EraWords.grouped(roundi(Ledger.purse_balance("player"))),unit],20,T.GOLD_TEXT,true);money.name="TradePurse";reading.add_child(money)
@@ -185,10 +187,10 @@ func _build_summary()->void:
 		if not t.is_empty():tribute_in+=float(t.value)
 	if tribute_in>0.0:reading.add_child(_line("Tribute worth %s a season" % EraWords.grouped(roundi(tribute_in)),14,T.GOLD_TEXT,true))
 	var exchange:=VBoxContainer.new();exchange.size_flags_horizontal=Control.SIZE_EXPAND_FILL;exchange.add_theme_constant_override("separation",4);top.add_child(exchange)
-	exchange.add_child(_line("RECENT PACE · WORTH A SEASON",12,T.GOLD_TEXT,true))
-	var chart:=Graphics.new();chart.name="FlowTotals";chart.values=[sent*3.0,came*3.0];exchange.add_child(chart)
+	exchange.add_child(_line("Recent exchange · worth a season",16,T.INK_MUTED,true))
+	var chart:=Graphics.new();chart.name="FlowTotals";chart.inline=true;chart.values=[sent*3.0,came*3.0];exchange.add_child(chart)
 	chart.tooltip_text="Smoothed monthly trade values, expressed as a seasonal pace. Each direction uses the sender's own prices; the figures are trade value, not goods in store, coin, or profit."
-	exchange.add_child(_line("Each sender's prices · both bars share one scale",12,T.INK_MUTED,true))
+	exchange.add_child(_line("At each sender's prices",13,T.INK_MUTED,true))
 
 
 # --- One row per people ---------------------------------------------------------
@@ -218,7 +220,7 @@ func _build_peoples(force:=false)->void:
 	var state:=Ledger.peek()
 	for row:Dictionary in rows:
 		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
-		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{})]
+		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false)]
 		if int(row.contact)>=2:
 			details.append_array([Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
 				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
@@ -244,32 +246,30 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var name:=Ledger.name_of(civ_id)
 	var ours:=Stances.stance("player",civ_id)
 	var theirs:=Stances.stance(civ_id,"player")
-	var tone:=T.GREEN if Ledger.flow_value("player",civ_id)+Ledger.flow_value(civ_id,"player")>=Ledger.PARTNER_FLOOR else T.RULE
-	if String(ours.get("id","free")) in Stances.COERCIVE or String(theirs.get("id","free")) in Stances.COERCIVE:tone=T.AMBER
-	if "embargo" in [String(ours.get("id","")),String(theirs.get("id",""))]:tone=T.RED
-	if contact<2:tone=T.RULE
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,tone,18,3))
-	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",12);panel.add_child(column)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);column.add_child(head)
-	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(48,48);head.add_child(emblem)
-	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(words)
-	var title:=_answer(name,26);title.name="Name";title.tooltip_text=name;words.add_child(title)
+	panel.add_theme_stylebox_override("panel",_folio_rule(12))
+	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",16);panel.add_child(column)
+	var overview:=_grid(column,"PartnerExchange",2,740)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",16);head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(head)
+	var art:=_partner_art(civ_id,contact);head.add_child(art)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",4);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(words)
+	var title:=_answer(name,25);title.name="Name";title.tooltip_text=name;words.add_child(title)
 	var p:=Ledger.pair("player",civ_id)
 	var subtitle:="Known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "Met; no goods have passed yet")
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
 	if blocked!="":subtitle=_blocked_words(blocked)
-	words.add_child(_line(subtitle,14,T.RED_TEXT if blocked!="" else T.INK_MUTED,true))
+	var form_label:=_line(subtitle,16,T.RED_TEXT if blocked!="" else T.INK_MUTED,true);form_label.add_theme_font_override("font",T.font("voice_italic"));words.add_child(form_label)
 	if contact<2:return panel
 	var form:=String(p.get("form","gift"))
-	var overview:=_grid(column,"PartnerExchange",2,720)
-	var chart_box:=VBoxContainer.new();chart_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(chart_box)
-	chart_box.add_child(_line("RECENT PACE · WORTH "+Words.period_word(form).to_upper(),12,T.GOLD_TEXT,true))
-	var bar:=Graphics.new();bar.name="Flows";bar.values=[Words.per_period(Ledger.flow_value("player",civ_id),form),Words.per_period(Ledger.flow_value(civ_id,"player"),form)];chart_box.add_child(bar)
+	var measured:=HBoxContainer.new();measured.add_theme_constant_override("separation",16);measured.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(measured)
+	var chart_box:=VBoxContainer.new();chart_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;measured.add_child(chart_box)
+	chart_box.add_child(_line("Worth "+Words.period_word(form),15,T.INK_MUTED,true))
+	var bar:=Graphics.new();bar.name="Flows";bar.inline=true;bar.values=[Words.per_period(Ledger.flow_value("player",civ_id),form),Words.per_period(Ledger.flow_value(civ_id,"player"),form)];chart_box.add_child(bar)
 	bar.tooltip_text="Recent trading pace at each sender's own prices. These are smoothed values, so blocked routes can retain readings from earlier trade. Both bars share one scale."
-	chart_box.add_child(_line("Each sender's prices",12,T.INK_MUTED,true))
-	var goods:=VBoxContainer.new();goods.size_flags_horizontal=Control.SIZE_EXPAND_FILL;goods.add_theme_constant_override("separation",10);overview.add_child(goods)
+	var toggle:=Button.new();toggle.name="TermsToggle";toggle.text="⌄" if bool(expanded_people.get(civ_id,false)) else "›";toggle.flat=true;toggle.custom_minimum_size=Vector2(32,40);toggle.size_flags_vertical=Control.SIZE_SHRINK_CENTER;toggle.add_theme_font_override("font",T.font("voice"));toggle.add_theme_font_size_override("font_size",32);toggle.tooltip_text="Show goods, dependence and trade terms";toggle.pressed.connect(_toggle_people.bind(civ_id));measured.add_child(toggle)
+	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",16);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
+	var goods:=_grid(column,"GoodsExchanged",2,640)
 	goods.add_child(_flows("We send",Words.flow_items("player",civ_id),form))
 	goods.add_child(_flows("They send",Words.flow_items(civ_id,"player"),form))
 	var needs:=_grid(column,"Dependence",2,640)
@@ -300,6 +300,35 @@ func _people_row(civ_id:String,contact:int)->Control:
 	if last!="":
 		var said:=_line(last,13,T.INK_MUTED,true);said.name="LastWord";said.tooltip_text=Words.answer_line("player",civ_id);column.add_child(said)
 	return panel
+
+
+func _toggle_people(civ_id:String)->void:
+	expanded_people[civ_id]=not bool(expanded_people.get(civ_id,false))
+	_build_peoples();_responsive()
+
+
+func _partner_art(civ_id:String,contact:int)->TextureRect:
+	var texture:Texture2D
+	if contact>=2:
+		for item:Array in Words.flow_items("player",civ_id)+Words.flow_items(civ_id,"player"):
+			var material:=MaterialArt.material(String(item[0]))
+			if material>=0:texture=MaterialArt.texture(material);break
+		if texture==null and Ledger.flow(civ_id,"player","Food")+Ledger.flow("player",civ_id,"Food")>0:texture=ProvisionsArt.texture(2)
+	if texture==null:texture=Identity.emblem(civ_id)
+	var art:=TextureRect.new();art.name="PartnerIllustration";art.texture=texture
+	art.custom_minimum_size=Vector2(158,100);art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.size_flags_vertical=Control.SIZE_SHRINK_CENTER;art.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	return art
+
+
+func _build_story()->void:
+	var story:=_visual_section("Trade & custom",self,"TradeStory","")
+	var row:=_grid(story,"TradeStoryLayout",2,740)
+	var path:="res://assets/ui/trade/barter-vignette-v1.png"
+	if FileAccess.file_exists(path):
+		var art:=TextureRect.new();art.name="BarterIllustration";art.texture=load(path) as Texture2D if ResourceLoader.exists(path) else ImageTexture.create_from_image(Image.load_from_file(path));art.custom_minimum_size=Vector2(240,136);art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(art)
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;words.add_theme_constant_override("separation",8);row.add_child(words)
+	words.add_child(_answer("Goods, gifts and obligations",26))
+	words.add_child(_line("Open a people's record to set terms or exchange goods.",17,T.INK_MUTED,true))
 
 
 func _blocked_words(why:String)->String:
@@ -336,7 +365,7 @@ func _flows(lead:String,items:Array,form:String)->Control:
 func _dependence(owner:String,from:String,need:Dictionary)->Control:
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	panel.name="OurDependence" if owner=="player" else "TheirDependence"
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,10,0))
+	panel.add_theme_stylebox_override("panel",_folio_rule(10))
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);panel.add_child(column)
 	column.add_child(_line("Our supply from them" if owner=="player" else "Their supply from us",12,T.INK_MUTED,true))
 	var share:=clampf(float(need.share),0.0,1.0)
@@ -515,23 +544,27 @@ func _say(text:String)->void:
 
 
 func _section(title:String)->VBoxContainer:
-	var kicker:=_line(title.to_upper(),13,T.INK_MUTED,true);kicker.name="PeoplesHeading";kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(kicker)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);add_child(box)
+	var kicker:=_line(title.to_upper(),20,T.INK,true);kicker.name="PeoplesHeading";kicker.add_theme_font_override("font",T.font("voice"));add_child(kicker)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);add_child(box)
 	return box
 
 func _visual_section(title:String,parent:Node,node_name:String,icon:String,hero:=false)->VBoxContainer:
 	var panel:=PanelContainer.new();panel.name=node_name;panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var style:=_skin(T.PAPER_RAISED,T.RULE,18,0)
-	if hero:style.border_width_top=3;style.border_color=T.GOLD
+	var style:=_folio_rule(0)
 	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
 	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",8);column.add_child(header)
 	if not icon.is_empty():
 		var mark:=Emblem.new(icon);mark.custom_minimum_size=Vector2(28,28);header.add_child(mark)
-	var kicker:=_line(title.to_upper(),12,T.GOLD_TEXT,true);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;header.add_child(kicker)
+	var kicker:=_line(title.to_upper(),20,T.INK,true);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;header.add_child(kicker)
 	visual_sections.append({"panel":panel,"kicker":kicker,"hero":hero})
 	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",8);column.add_child(box)
 	return box
+
+static func _folio_rule(padding:int)->StyleBoxFlat:
+	var style:=StyleBoxFlat.new();style.bg_color=Color.TRANSPARENT;style.border_color=T.RULE;style.border_width_bottom=1
+	style.content_margin_top=padding;style.content_margin_bottom=maxi(16,padding)
+	return style
 
 func _grid(parent:Node,node_name:String,count:int,threshold:float)->GridContainer:
 	var grid:=GridContainer.new();grid.name=node_name;grid.columns=1;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -590,6 +623,6 @@ static func _skin(bg:Color,border:Color,margin:int,left:int)->StyleBoxFlat:
 
 static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	var label:=Label.new();label.text=text;label.mouse_filter=Control.MOUSE_FILTER_PASS
-	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
+	label.add_theme_font_override("font",T.font("voice") if size>=14 else T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label

@@ -11,6 +11,9 @@ var labels:Array=["Sent","Received"]:
 	set(next):
 		if labels==next:return
 		labels=next.duplicate();queue_redraw()
+var inline:bool=false:
+	set(next):
+		inline=next;custom_minimum_size.y=76 if inline else 112;queue_redraw()
 
 func _init()->void:
 	custom_minimum_size=Vector2(180,112)
@@ -32,6 +35,16 @@ func _fraction(index:int)->float:
 func _draw()->void:
 	var font:=T.font("ui")
 	var number_font:=T.font("voice")
+	if inline:
+		var width:=maxf(0.0,(size.x-24.0)/2.0)
+		for index in 2:
+			var x:=(width+24.0)*index
+			var color:=T.GOLD if index==0 else T.TEAL
+			draw_string(number_font,Vector2(x,17),String(labels[index]),HORIZONTAL_ALIGNMENT_LEFT,width,17,T.INK_MUTED)
+			draw_string(number_font,Vector2(x,48),EraWords.grouped(roundi(_value(index))),HORIZONTAL_ALIGNMENT_LEFT,width,30,T.INK)
+			draw_rect(Rect2(x,59,width,4),Color(T.RULE,0.24))
+			draw_rect(Rect2(x,59,width*_fraction(index),4),Color(color,0.85))
+		return
 	var row:=size.y/2.0
 	for index in 2:
 		var y:=row*index
