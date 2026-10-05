@@ -42,7 +42,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"people":
 				var screen:=preload("res://scripts/hud/people_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"settlement_overview":
-				var panel:=preload("res://scripts/hud/settlement_overview.gd").new();section.add_child(panel);panel.setup(block)
+				var panel:=preload("res://scripts/hud/overview_folio.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle_feed":

@@ -407,7 +407,7 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			if String(row.get("state",""))!="" and String(row.value)!="nothing":lines.append("Now: %s." % String(row.state))
 		"learning":
 			lines.append(("We know %s ways of doing things." if EraWords.hearth() else "We have learned %s things.") % EraWords.grouped(int(f.known)))
-			lines.append("The bar shows how well what we know is kept and passed on.")
+			lines.append("The lore reading tells how well what we know is kept and passed on.")
 	for mark:Dictionary in row.get("marks",[]):
 		lines.append("%s: %s, seen %s." % [String(mark.name),String(mark.words),String(mark.seen)])
 	lines.append("Opens %s." % ("this town's ages and families" if key=="population" else "the %s page" % String(row.get("owner",""))))
@@ -482,6 +482,7 @@ static func sketch_data(f:Dictionary,caption:String)->Dictionary:
 	if float(f.logistics)>0.0:fields["logistics"]=_exact(clampf(float(f.logistics),0.0,1.0))
 	var water:=float(Words.water(f.water).get("ratio",-1.0))
 	return {"city_id":"own:"+String(f.id),"fields":fields,"fresh_level":5,"fresh_status":"","caption":"","held_caption":caption,
+		"architecture_tier":float(SettlementModel.city_form().get("tier",0.0)),
 		"flag":String(f.get("occupied",""))=="","wall_stage":int(s.get("wall_stage",0)) if not s.is_empty() else 0,
 		"wall_integrity":float(s.get("wall_integrity",1.0)) if not s.is_empty() else 1.0,"water":water,
 		"works":(f.completed as Array).duplicate(),"food_days":float(f.food_days)}

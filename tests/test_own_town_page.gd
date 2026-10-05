@@ -8,7 +8,7 @@ extends GdUnitTestSuite
 ## number its owning dock shows for the same state.
 
 const Provider:=preload("res://scripts/hud/content/dock_content_settlement.gd")
-const Overview:=preload("res://scripts/hud/settlement_overview.gd")
+const Overview:=preload("res://scripts/hud/overview_folio.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
 const Health:=preload("res://scripts/hud/content/dock_detail_health.gd")
 const Economy:=preload("res://scripts/hud/content/dock_content_economy.gd")
@@ -263,12 +263,18 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	# is told in the tooltip, never drawn against our scale.
 	assert_bool(bool(rows.damage.get("bands",true))).is_false()
 	assert_str(String(rows.damage.tip)).contains("Flintwick: ")
+	page.name="PreviousOverview"
 	page=_page(block)
-	assert_object(page.find_child("Legend",true,false)).is_not_null()
-	var repair:=page.find_child("Row_damage",true,false).find_child("Scale",true,false)
-	assert_array(repair.marks).is_empty()
-	var people:=page.find_child("Row_population",true,false).find_child("Scale",true,false)
-	assert_int((people.marks as Array).size()).is_equal(1)
+	var compare:=page.find_child("CompareTowns",true,false) as Button
+	assert_object(compare).is_not_null()
+	assert_object(page.find_child("Scale",true,false)).is_null()
+	var people:=page.find_child("Row_population",true,false).find_child("Comparison",true,false) as Label
+	assert_bool(people.visible).is_false()
+	compare.button_pressed=true
+	assert_bool(people.visible).is_true()
+	assert_str(people.text).contains("Flintwick").contains(String(rows.population.marks[0].words))
+	assert_bool(page.update_block(block)).is_true()
+	assert_bool(compare.button_pressed).is_true()
 
 # --------------------------------------------------------------------------
 # Other towns of ours
@@ -316,15 +322,13 @@ func test_a_second_town_shows_its_own_figures_not_home()->void:
 # What stays: the leader, the hands, the New towns switch, the reports
 # --------------------------------------------------------------------------
 
-func test_new_towns_switch_leader_card_hands_and_reports_still_act()->void:
+func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var court:=FakeCourt.new();court.add_to_group(Director.GROUP);add_child(court)
 	var id:=_primary_id()
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
-	assert_str(text).contains("New towns").contains("Our leaders found them (now)").contains("Only when I order")
-	(page.find_child("Choice_Ruler",true,false) as Button).pressed.emit()
-	assert_bool(PeopleDirection.auto_settlement).is_false()
-	assert_int(hud.refreshed).is_greater_equal(1)
+	assert_str(text).contains("How our seat grows").contains("district by district")
+	assert_object(page.find_child("Choice_Ruler",true,false)).is_null()
 	# The one way to ask for more hands.
 	var ask:=page.find_child("AskForHands",true,false)
 	assert_object(ask).is_not_null()
