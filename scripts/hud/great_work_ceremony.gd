@@ -61,6 +61,7 @@ var _middle:BoxContainer
 var _name_row:BoxContainer
 var _result_row:BoxContainer
 var _details_scroll:ScrollContainer
+var _ritual_description:Label
 var _closing:=false
 var _fit_pending:=false
 
@@ -188,7 +189,7 @@ func _build()->void:
 	var lore:=_label(_lore(),17,Tokens.BODY);lore.name="Lore";lore.add_theme_font_override("font",_italic);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(lore)
 	if not ritual_profile.is_empty():
-		var rite:=_label(String(ritual_profile.before)+" "+String(ritual_profile.purpose_caption),14,Tokens.BODY);rite.name="RitualDescription";rite.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(rite)
+		_ritual_description=_label(String(ritual_profile.before)+" "+String(ritual_profile.purpose_caption),14,Tokens.BODY);_ritual_description.name="RitualDescription";_ritual_description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(_ritual_description)
 	var architect:Dictionary=record.get("architect",{}) if record.get("architect") is Dictionary else {}
 	if not String(architect.get("name","")).is_empty():
 		var builder:=_label("Raised by the master builder %s%s" % [String(architect.name),(", in the %s style" % String(architect.get("style",""))) if not String(architect.get("style","")).is_empty() else ""],13,Tokens.INK_MUTED,.04)
@@ -386,6 +387,7 @@ func dedicate_with(text:String)->Dictionary:
 	_show_result(chosen)
 	if is_instance_valid(plate) and plate.has_method("dedication"):plate.call("dedication")
 	voice_ctx["ritual"]=Rituals.voice_facts(ritual_profile,true)
+	if is_instance_valid(_ritual_description):_ritual_description.text=String(ritual_profile.after)+" "+String(ritual_profile.purpose_caption)
 	if is_instance_valid(voice) and voice.has_method("ceremony_named"):voice.call("ceremony_named",voice_ctx,chosen)
 	return result
 
