@@ -103,3 +103,39 @@ func test_purpose_ornament_covers_all_twelve_purposes_without_claiming_productio
 	assert_int(signatures.size()).is_equal(12)
 	var kilns:=Architecture.pieces(Design.describe({"id":"kiln_court"}))
 	assert_bool(kilns.any(func(piece:Dictionary)->bool:return piece.get("emission",false))).is_false()
+
+func test_colossus_shoulders_start_inside_the_actual_tapered_torso()->void:
+	for ambition:String in Concept.AMBITIONS:
+		var parts:=Architecture.pieces(Design.describe(work("colossus",2,ambition)))
+		var torso:Dictionary=parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")=="torso")[0]
+		for arm:Dictionary in parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","") in ["left_arm","right_arm"]):
+			var local:Vector3=arm.position-torso.position
+			var taper:=lerpf(1.0,.68,local.y/torso.size.y)
+			var section:=PackedVector2Array()
+			for i in 12:section.append(Vector2(cos(TAU*i/12)*torso.size.x*.5*taper,sin(TAU*i/12)*torso.size.z*.5*taper))
+			assert_bool(Geometry2D.is_point_in_polygon(Vector2(local.x,local.z),section)).is_true()
+
+func test_canal_water_waits_for_standing_and_is_absent_from_ruins()->void:
+	for status:String in ["building","stalled","ruined","abandoned","functioning"]:
+		var record:=work("canal");record.status=status
+		if status in ["building","stalled"]:record.progress=.7
+		var built:=Model.build(record)
+		var root:Node3D=built.root
+		var colors:PackedColorArray=(root.get_node("Masonry") as MeshInstance3D).mesh.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		var water:=false
+		for color:Color in colors:
+			if color.is_equal_approx(Color("697d7a")):water=true;break
+		assert_bool(water).is_equal(status=="functioning")
+		root.free()
+
+func test_cone_roofs_have_real_peaks_and_outward_sloping_faces()->void:
+	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	Architecture.append_piece(surface,{"position":Vector3.ZERO,"size":Vector3(13,3,11),"kind":"cone","color":Color.WHITE})
+	var arrays:=surface.commit().surface_get_arrays(0)
+	var points:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX];var normals:PackedVector3Array=arrays[Mesh.ARRAY_NORMAL]
+	var apex:=false;var upward_faces:=0
+	for i in points.size():
+		if points[i].is_equal_approx(Vector3(0,3,0)):apex=true
+		if normals[i].y>0.1 and Vector2(normals[i].x,normals[i].z).length()>.1:upward_faces+=1
+	assert_bool(apex).is_true()
+	assert_int(upward_faces).is_greater_equal(36)
