@@ -7,6 +7,7 @@ extends PanelContainer
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const Blocks:=preload("res://scripts/hud/dock_blocks.gd")
 const ViewState:=preload("res://scripts/hud/view_state.gd")
+const Folio:=preload("res://scripts/hud/reference_folio.gd")
 ## Block types drawn purely from their dictionary. An identical block keeps its
 ## nodes across a live refresh; widget blocks may read live state, so they are
 ## always rebuilt (with their scroll and view state carried over).
@@ -21,7 +22,7 @@ var sub:int=0
 var eyebrow_label:Label
 var title_label:Label
 var tab_buttons:Array[Button]=[]
-var tabs_row:HBoxContainer
+var tabs_row:HFlowContainer
 var kpi_row:GridContainer
 var brief_panel:PanelContainer
 var body_scroll:ScrollContainer
@@ -41,19 +42,19 @@ var sections_built:=0
 
 func _ready()->void:
 	name="DockPanel" if name=="" or String(name).begins_with("@") else name
-	var panel_style:=Tokens.dock_style()
-	panel_style.bg_color.a=1.0
+	var panel_style:=Folio.page_style()
 	add_theme_stylebox_override("panel",panel_style)
 	clip_contents=true
-	var root:=VBoxContainer.new()
+	add_child(Folio.paper())
+	var root:=VBoxContainer.new();root.name="DockContentRoot"
 	root.add_theme_constant_override("separation",0)
 	add_child(root)
 	# Header
 	var header:=MarginContainer.new()
-	header.add_theme_constant_override("margin_left",18)
-	header.add_theme_constant_override("margin_right",18)
+	header.add_theme_constant_override("margin_left",26)
+	header.add_theme_constant_override("margin_right",26)
 	header.add_theme_constant_override("margin_top",14)
-	header.add_theme_constant_override("margin_bottom",10)
+	header.add_theme_constant_override("margin_bottom",22)
 	root.add_child(header)
 	var header_row:=HBoxContainer.new()
 	header_row.add_theme_constant_override("separation",10)
@@ -66,36 +67,43 @@ func _ready()->void:
 	title_column.add_child(eyebrow_label)
 	title_label=Tokens.make_label("",21,Tokens.INK)
 	title_column.add_child(title_label)
+	title_column.move_child(title_label,0)
+	title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	eyebrow_label.add_theme_font_override("font",Tokens.font("voice_italic"))
+	eyebrow_label.add_theme_font_size_override("font_size",17)
+	eyebrow_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var close:=Button.new()
 	close_button=close
 	close.name="DockClose"
 	# One clear control: "Back" in the detail dock, "Close" in the main dock.
 	# Esc does the same; the tooltip says so, so no separate ESC label.
-	close.text="Back" if back_mode else "Close"
-	close.custom_minimum_size=Vector2(64,32)
+	close.text="‹" if back_mode else "×"
+	close.custom_minimum_size=Vector2(32,40)
 	close.tooltip_text="Back to the previous page (Esc)" if back_mode else "Close and return to the map (Esc)"
-	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	close.add_theme_font_size_override("font_size",14)
+	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	close.add_theme_font_size_override("font_size",32)
+	close.add_theme_font_override("font",Tokens.font("voice"))
 	close.add_theme_color_override("font_color",Tokens.TEXT_DIM)
-	close.add_theme_stylebox_override("normal",Tokens.flat(Color(0,0,0,0),Tokens.BORDER_2,1,4))
+	close.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 	close.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,4))
 	close.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	close.pressed.connect(func()->void: close_requested.emit())
 	header_row.add_child(close)
 	# Sub-tabs
 	var tabs_margin:=MarginContainer.new()
-	tabs_margin.add_theme_constant_override("margin_left",18)
-	tabs_margin.add_theme_constant_override("margin_right",18)
+	tabs_margin.add_theme_constant_override("margin_left",26)
+	tabs_margin.add_theme_constant_override("margin_right",26)
 	root.add_child(tabs_margin)
-	tabs_row=HBoxContainer.new()
-	tabs_row.add_theme_constant_override("separation",2)
+	tabs_row=HFlowContainer.new()
+	tabs_row.add_theme_constant_override("h_separation",0)
+	tabs_row.add_theme_constant_override("v_separation",0)
 	tabs_margin.add_child(tabs_row)
-	var tabs_rule:=ColorRect.new()
+	var tabs_rule:=ColorRect.new();tabs_rule.name="TabRule"
 	tabs_rule.color=Tokens.BORDER
 	tabs_rule.custom_minimum_size=Vector2(0,1)
 	root.add_child(tabs_rule)
 	# KPI row
-	var kpi_margin:=MarginContainer.new()
+	var kpi_margin:=MarginContainer.new();kpi_margin.name="KpiMargin"
 	kpi_margin.add_theme_constant_override("margin_left",18)
 	kpi_margin.add_theme_constant_override("margin_right",18)
 	kpi_margin.add_theme_constant_override("margin_top",12)
@@ -105,7 +113,7 @@ func _ready()->void:
 	kpi_row.add_theme_constant_override("h_separation",8)
 	kpi_margin.add_child(kpi_row)
 	# Decision brief
-	var brief_margin:=MarginContainer.new()
+	var brief_margin:=MarginContainer.new();brief_margin.name="BriefMargin"
 	brief_margin.add_theme_constant_override("margin_left",18)
 	brief_margin.add_theme_constant_override("margin_right",18)
 	brief_margin.add_theme_constant_override("margin_top",10)
@@ -119,10 +127,10 @@ func _ready()->void:
 	root.add_child(body_scroll)
 	var body_margin:=MarginContainer.new()
 	body_margin.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body_margin.add_theme_constant_override("margin_left",18)
-	body_margin.add_theme_constant_override("margin_right",18)
-	body_margin.add_theme_constant_override("margin_top",12)
-	body_margin.add_theme_constant_override("margin_bottom",18)
+	body_margin.add_theme_constant_override("margin_left",26)
+	body_margin.add_theme_constant_override("margin_right",26)
+	body_margin.add_theme_constant_override("margin_top",24)
+	body_margin.add_theme_constant_override("margin_bottom",26)
 	body_scroll.add_child(body_margin)
 	body=VBoxContainer.new()
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -150,16 +158,15 @@ func rebuild()->void:
 	eyebrow_label.text=Tokens.sentence_case(String(meta.get("eyebrow","")))
 	eyebrow_label.visible=eyebrow_label.text!=""
 	title_label.text=Tokens.sentence_case(String(meta.get("title","")))
-	title_label.add_theme_font_size_override("font_size",int(meta.get("title_size",24)))
-	if bool(meta.get("serif",false)):
-		title_label.add_theme_font_override("font",preload("res://scripts/hud/hud_tokens.gd").voice_font())
-	else:title_label.remove_theme_font_override("font")
+	title_label.add_theme_font_size_override("font_size",64 if size.x>=600 else 48)
+	title_label.add_theme_font_override("font",Tokens.font("voice_bold"))
 	var subtabs:Array=meta.get("subtabs",[])
 	tabs_row.visible=subtabs.size()>1
 	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
-		tab.custom_minimum_size=Vector2(0,28)
+		tab.custom_minimum_size=Vector2(0,42)
+		tab.add_theme_font_override("font",Tokens.font("voice"))
 		tab.add_theme_font_size_override("font_size",12)
 		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		tab.pressed.connect(_on_tab_pressed.bind(tab_buttons.size()))
@@ -168,21 +175,14 @@ func rebuild()->void:
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()
-		if index<subtabs.size(): tab.text=Tokens.sentence_case(String(subtabs[index]))
+		if index<subtabs.size(): tab.text=String(subtabs[index]).to_upper()
 		var active:=index==sub
-		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL if bool(meta.get("spread_tabs",false)) else Control.SIZE_FILL
-		var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Color(0,0,0,0),Tokens.BORDER,1,3)
-		style.border_width_bottom=0
-		style.corner_radius_bottom_left=0
-		style.corner_radius_bottom_right=0
-		style.content_margin_left=12.0
-		style.content_margin_right=12.0
-		if bool(meta.get("spread_tabs",false)):
-			style=Tokens.flat(Color.TRANSPARENT,Tokens.GOLD if active else Tokens.BORDER_SOFT,0,0,10)
-			style.border_width_bottom=3 if active else 1
-			style.border_color=Tokens.GOLD if active else Tokens.BORDER_SOFT
-			tab.add_theme_font_size_override("font_size",12)
-		else:tab.add_theme_font_size_override("font_size",12)
+		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		var style:=Tokens.flat(Color.TRANSPARENT)
+		style.border_color=Tokens.GOLD if active else Folio.RULE
+		style.border_width_bottom=3 if active else 1
+		style.content_margin_left=10;style.content_margin_right=10
+		tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
@@ -211,7 +211,10 @@ func rebuild_body()->void:
 	# only when the palette moved: setting a style or ink, even the same one,
 	# lays the whole dock out again on the next frame.
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
-	var paper:=Tokens.dock_style()
+	var paper:=Folio.page_style()
+	var surface:=get_node_or_null("FolioPaper") as ColorRect
+	if surface and surface.material is ShaderMaterial:
+		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER if Tokens.color_mode=="dark" else Color("f2ebdc"))
 	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
 	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
 		add_theme_stylebox_override("panel",paper)
@@ -321,6 +324,7 @@ func _clear_body()->void:
 
 
 func _rebuild_kpis(kpis:Array)->void:
+	kpi_row.get_parent().visible=not kpis.is_empty()
 	for child in kpi_row.get_children():
 		kpi_row.remove_child(child)
 		child.queue_free()
@@ -328,7 +332,7 @@ func _rebuild_kpis(kpis:Array)->void:
 		var kpi:Dictionary=kpi_variant
 		var tile:=PanelContainer.new()
 		tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		tile.add_theme_stylebox_override("panel",Tokens.tile_style(kpi.get("accent",Tokens.TEAL)))
+		tile.add_theme_stylebox_override("panel",Tokens.flat(Color.TRANSPARENT))
 		tile.tooltip_text=String(kpi.get("tip",""))
 		kpi_row.add_child(tile)
 		var column:=VBoxContainer.new()
@@ -358,6 +362,7 @@ func _rebuild_kpis(kpis:Array)->void:
 
 
 func _rebuild_brief(brief:Dictionary)->void:
+	brief_panel.get_parent().visible=not brief.is_empty()
 	for child in brief_panel.get_children():
 		brief_panel.remove_child(child)
 		child.queue_free()
@@ -419,13 +424,17 @@ func _set_fit(enabled:bool)->void:
 		_fitting=true;size.y=_room;_fitting=false
 
 func _on_resized()->void:
+	if title_label:
+		title_label.add_theme_font_size_override("font_size",64 if size.x>=600 else 48)
+		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
+	if kpi_row:kpi_row.columns=4 if size.x>=600 else 2
 	if _fitting:return
 	_room=size.y
 	if fit_height:call_deferred("_fit")
 
 func _fit()->void:
 	if not fit_height or _room<=0.0 or get_child_count()==0:return
-	var chrome:=(get_child(0) as Control).get_combined_minimum_size().y
+	var chrome:=(get_node("DockContentRoot") as Control).get_combined_minimum_size().y
 	var style:=get_theme_stylebox("panel")
 	if style!=null:chrome+=style.get_minimum_size().y
 	# The body's own margins (12 above, 18 below) are outside its minimum size.
