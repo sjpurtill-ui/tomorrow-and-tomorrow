@@ -1,7 +1,7 @@
 extends VBoxContainer
-## THE TRADE PAGE: trade with every people we know, one row each, as the War
-## screen keeps one row per enemy. Each row shows, from the trade ledger's
-## own numbers (trade_ledger.gd, trade_words.gd):
+## THE TRADE PAGE: the Wealth page's illustrated, at-a-glance cards, with one
+## card per people we know. Each reads the trade ledger's own numbers
+## (trade_ledger.gd, trade_words.gd):
 ##   what flows each way a season (or a month, once silver or coin pays), with
 ##   each good's mark and a bar of its worth each way;
 ##   how much they lean on us and we on them: the share of a good's supply
@@ -32,7 +32,6 @@ const Icons:=preload("res://scripts/resource_icons.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
 const Goods:=preload("res://scripts/civilian_goods.gd")
-const Arms:=preload("res://scripts/weapons_stock.gd")
 const Graphics:=preload("res://scripts/hud/trade_graphics.gd")
 const Emblem:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const MaterialArt:=preload("res://scripts/hud/materials_art.gd")
@@ -176,7 +175,9 @@ func _build_summary()->void:
 		sent+=Ledger.flow_value("player",String(row.id))
 		came+=Ledger.flow_value(String(row.id),"player")
 		if float(row.value)>=Ledger.PARTNER_FLOOR:partners+=1
-	var answer:=_line("No trade recorded yet" if partners==0 else "%d recent trading %s" % [partners,"partner" if partners==1 else "partners"],17,T.INK,true)
+	var activity:="%d recent trading %s" % [partners,"partner" if partners==1 else "partners"]
+	if partners==0:activity="Little recent trade" if sent+came>0.0 else "No trade recorded yet"
+	var answer:=_line(activity,17,T.INK,true)
 	answer.name="TradeAnswer";reading.add_child(answer)
 	var tribute_in:=0.0
 	for c:Dictionary in CivilizationSystem.civilizations:
@@ -207,8 +208,9 @@ func _known_rows()->Array:
 func _build_peoples(force:=false)->void:
 	var rows:=_known_rows()
 	if rows.is_empty():
-		if force or peoples_box.get_node_or_null("None")==null:
+		if force or peoples_box.get_node_or_null("None")==null or people_signatures.get("empty_theme","")!=T.color_mode:
 			_clear(peoples_box);people_signatures.clear()
+			people_signatures["empty_theme"]=T.color_mode
 			var calm:=_visual_section("No trading contacts",peoples_box,"None","trade")
 			calm.add_child(_line("We have met no other people yet.",16,T.INK_MUTED,true))
 		return
@@ -245,6 +247,7 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var tone:=T.GREEN if Ledger.flow_value("player",civ_id)+Ledger.flow_value(civ_id,"player")>=Ledger.PARTNER_FLOOR else T.RULE
 	if String(ours.get("id","free")) in Stances.COERCIVE or String(theirs.get("id","free")) in Stances.COERCIVE:tone=T.AMBER
 	if "embargo" in [String(ours.get("id","")),String(theirs.get("id",""))]:tone=T.RED
+	if contact<2:tone=T.RULE
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,tone,18,3))
@@ -255,8 +258,9 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var title:=_answer(name,26);title.name="Name";title.tooltip_text=name;words.add_child(title)
 	var p:=Ledger.pair("player",civ_id)
 	var subtitle:="Known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "Met; no goods have passed yet")
-	if not p.is_empty() and Ledger.blocked("player",civ_id)!="":subtitle=_blocked_words(Ledger.blocked("player",civ_id))
-	words.add_child(_line(subtitle,14,T.RED_TEXT if not p.is_empty() and Ledger.blocked("player",civ_id)!="" else T.INK_MUTED,true))
+	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
+	if blocked!="":subtitle=_blocked_words(blocked)
+	words.add_child(_line(subtitle,14,T.RED_TEXT if blocked!="" else T.INK_MUTED,true))
 	if contact<2:return panel
 	var form:=String(p.get("form","gift"))
 	var overview:=_grid(column,"PartnerExchange",2,720)
@@ -325,7 +329,7 @@ func _flows(lead:String,items:Array,form:String)->Control:
 		mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.custom_minimum_size=Vector2(42,42)
 		mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(mark)
 		var words:=VBoxContainer.new();words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(words)
-		words.add_child(_answer(Words.qty(float(item[1])),22))
+		var amount:=_answer(Words.qty(float(item[1])),22);amount.autowrap_mode=TextServer.AUTOWRAP_OFF;words.add_child(amount)
 		words.add_child(_line("fighters armed" if good=="Arms" else Words.good_word(good),12,T.INK_MUTED))
 	return row
 
@@ -343,7 +347,7 @@ func _dependence(owner:String,from:String,need:Dictionary)->Control:
 	var days:=float(need.get("days",-1))
 	var duration:="No shortage without this supply" if days<0 else "%s without this supply" % EraWords.days(days)
 	column.add_child(_line(duration,12,T.INK_MUTED,true))
-	panel.tooltip_text=Words.leaning_line(owner,from)
+	panel.tooltip_text="%s: %d%% of %s supply comes from %s. %s." % [Ledger.name_of(owner),roundi(share*100.0),Words.good_word(String(need.good)),Ledger.name_of(from),duration]
 	return panel
 
 
@@ -564,18 +568,6 @@ func _answer(text:String,size:=30)->Label:
 	return label
 
 
-func _panel(parent:Node,name_hint:String)->PanelContainer:
-	var panel:=PanelContainer.new();panel.name=name_hint;panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,12,0));parent.add_child(panel)
-	return panel
-
-
-func _number(parent:Node,value:String,word:String)->Control:
-	var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",6);chip.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(chip)
-	var big:=_line(value,22,T.INK);big.add_theme_font_override("font",T.font("ui_strong"));chip.add_child(big)
-	var small:=_line(word,13,T.INK_MUTED);small.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(small)
-	return chip
-
-
 func _clear(box:Node)->void:
 	for child in box.get_children():box.remove_child(child);child.queue_free()
 
@@ -601,22 +593,3 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
-
-
-## Worth each way a month: our goods out (amber, left) against theirs in
-## (teal, right), each against the larger.
-class FlowBar extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var out_value:=0.0
-	var in_value:=0.0
-	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
-	func _draw()->void:
-		var top:=maxf(0.001,maxf(out_value,in_value))
-		var half:=size.x*0.5
-		draw_rect(Rect2(Vector2(0,4),Vector2(size.x,size.y-8)),T.PAPER_SUNK)
-		var w_out:=half*clampf(out_value/top,0.0,1.0)
-		var w_in:=half*clampf(in_value/top,0.0,1.0)
-		if w_out>0.0:draw_rect(Rect2(Vector2(half-w_out,4),Vector2(w_out,size.y-8)),T.AMBER)
-		if w_in>0.0:draw_rect(Rect2(Vector2(half,4),Vector2(w_in,size.y-8)),T.TEAL)
-		draw_line(Vector2(half,0),Vector2(half,size.y),T.INK,1.5)
-		draw_rect(Rect2(Vector2(0,4),Vector2(size.x,size.y-8)),T.RULE,false,1.0)
