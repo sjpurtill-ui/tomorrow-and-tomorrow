@@ -1247,18 +1247,24 @@ static func compose(inputs:Dictionary)->Dictionary:
 			var chase:=Model.arrow(f.pos,objective,[],0.1)
 			out.arrows.append({"id":"chase:%d" % id,"kind":"pursuit","points":_resample(road,20) if road.size()>=2 else Model.arrow_points(chase,20),"ours":true,"offensive":true,"weight":0.3,"stale":false,"army_id":id})
 			continue
+		# Where the march ends and when, lettered at its head.
+		var context:Dictionary=f.get("doing_context",{})
+		var bound:=String(context.get("destination_name",""))
+		if String(context.get("destination_id",""))=="player_home": bound="home"
+		var days_left:=int(f.get("days_left",0))
+		var head:=("%s · %s" % [bound,"1 day" if days_left==1 else "%d days" % days_left]) if bound!="" and days_left>0 else bound
 		if mode=="raid" and road.size()>=3:
-			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":id})
+			out.raids.append({"points":_resample(f.road,20),"ours":true,"fought":false,"alpha":1.0,"army_id":id,"head":head})
 			continue
 		if mode=="raid":
 			var delta:=objective-(f.pos as Vector2)
 			var spec:=PackedVector2Array([f.pos,(f.pos as Vector2)+delta*0.5+delta.orthogonal()*0.12,objective])
-			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":id})
+			out.raids.append({"points":Model.arrow_points(spec,14),"ours":true,"fought":false,"alpha":1.0,"army_id":id,"head":head})
 			continue
 		var spec:=Model.arrow(f.pos,objective,fronts,bias)
 		bias=-bias+0.05 if bias<=0.0 else -bias
 		var offensive:=bool(f.get("offensive",false))
-		out.arrows.append({"id":"army:%d" % id,"kind":"offensive" if offensive else "march","points":_resample(road,20) if road.size()>=2 else Model.arrow_points(spec,20),"ours":true,"offensive":offensive,"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":id})
+		out.arrows.append({"id":"army:%d" % id,"kind":"offensive" if offensive else "march","points":_resample(road,20) if road.size()>=2 else Model.arrow_points(spec,20),"ours":true,"offensive":offensive,"weight":clampf(log(maxf(10.0,float(f.strength)))/log(10.0)/5.0,0.25,1.0),"stale":int(f.get("report_age",0))>=Model.STALE_DAYS,"army_id":id,"head":head})
 		# Many hosts sent to one place share one objective mark.
 		var key:=Vector2i((objective/maxf(0.001,float(out.sigma)*0.05)).round())
 		if not marked.has(key):
@@ -2035,6 +2041,8 @@ func _draw_arrow(entry:Dictionary,_t:float,wide:bool)->void:
 			var ahead:=(points[k+1]-points[k-1]).normalized()
 			var side:=ahead.orthogonal()*base*0.34
 			draw_polyline(PackedVector2Array([points[k]-ahead*4.0+side,points[k]+ahead*2.0,points[k]-ahead*4.0-side]),Color(INK,0.8*alpha),1.4,true)
+	if ours and String(arrow.get("head",""))!="" and grow>=1.0:
+		_request_caption("march:%d" % int(arrow.get("army_id",0)),Vector2.INF,String(arrow.head),INK,5,14.0,points[-1],"plate")
 	if body.size()>=3:
 		hits.append({"kind":"arrow" if ours else "enemy_arrow","poly":body,"line":points,"army_id":int(arrow.get("army_id",0)),"enemy_id":String(arrow.get("enemy_id","")),"seen_day":int(arrow.get("seen_day",-1))})
 
@@ -2126,9 +2134,15 @@ func _draw_raid(raid:Dictionary)->void:
 		draw_circle(points[k],2.6,color)
 	var tip:=points[-1]; var back:=points[-2]
 	var direction:=(tip-back).normalized()
-	draw_line(tip,tip-direction.rotated(0.5)*11.0,color,2.2,true)
-	draw_line(tip,tip-direction.rotated(-0.5)*11.0,color,2.2,true)
+	var head:=PackedVector2Array([tip+direction*4.0,tip-direction*10.0+direction.orthogonal()*7.0,tip-direction*10.0-direction.orthogonal()*7.0])
+	if _fillable(head):
+		draw_colored_polygon(head,color)
+		var ring:=head.duplicate(); ring.append(head[0])
+		draw_polyline(ring,Color(INK,0.7*color.a),1.2,true)
 	if bool(raid.get("fought",false)): _crossed_strokes(tip,7.0,Color(THEIRS,color.a))
+	# Where it ends and when, on a small plate by the head.
+	if String(raid.get("head",""))!="" and raid.has("army_id"):
+		_request_caption("march:%d" % int(raid.army_id),Vector2.INF,String(raid.head),INK,5,14.0,tip,"plate")
 	if raid.has("army_id"): hits.append({"kind":"arrow","line":points,"army_id":int(raid.army_id)})
 
 

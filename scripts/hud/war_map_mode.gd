@@ -855,6 +855,14 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 			if cover<=0.0: break
 		if least<=0.0: break
 	if not place.is_finite(): place=pts[n/2]-toward*34.0
+	# Off the open map (their land far beyond it): the chip waits at its
+	# edge on the way toward them, with a small pointer their way.
+	var off:=false
+	if free.has_area():
+		var inner:=free.grow_individual(-size.x*0.5-8.0,-size.y*0.5-8.0,-size.x*0.5-8.0,-size.y*0.5-8.0)
+		if inner.has_area() and not inner.has_point(place):
+			off=true
+			place=Vector2(clampf(place.x,inner.position.x,inner.end.x),clampf(place.y,inner.position.y,inner.end.y))
 	var box:=Rect2(place-size*0.5,size)
 	taken.append(box.grow(3.0))
 	var chip:=Rect2(box.position,Vector2(w,fs+6.0))
@@ -867,6 +875,11 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 	canvas.draw_rect(Rect2(bar.position,Vector2(w*float(e.ours_share),bar.size.y)),OURS)
 	canvas.draw_rect(Rect2(bar.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),bar.size.y)),theirs.darkened(0.1))
 	canvas.draw_rect(bar.grow(1.5),Color(INK,0.85),false,1.2)
+	if off:
+		var way:=(there-box.get_center()).normalized()
+		var edge:=box.get_center()+way*(absf(way.x)*size.x*0.5+absf(way.y)*size.y*0.5+6.0)
+		var side:=Vector2(-way.y,way.x)
+		canvas.draw_colored_polygon(PackedVector2Array([edge+way*10.0,edge+side*6.0,edge-side*6.0]),Color(WAR_RED if hot else INK,0.9))
 	return box
 
 
