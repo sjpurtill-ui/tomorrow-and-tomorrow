@@ -297,3 +297,34 @@ func test_cancel_act_keeps_other_sound_and_discards_late_reactions()->void:
 	var late:={"at":float(sound.call("_now"))+2.0,"stream":Synth.to_stream(Synth.buffer(0.02)),"body_id":0,"kind":"gasp","act":epoch}
 	sound.call("_reactions_ready",[late])
 	assert_array(_queued(sound)).is_equal(["creak"])
+
+func test_burning_victim_screams_even_when_the_room_is_silent_and_skip_cancels_it()->void:
+	var setup:=_hall();var sound:Node=setup[0];var roles:Dictionary=setup[1]
+	var start:float=sound.call("_now")
+	var lead:float=sound.call("play_act","into_the_fire",roles,{"dread":1.0})
+	var screams:Array=(sound.get("_queue") as Array).filter(func(q:Dictionary)->bool:return q.get("label","")=="react_burn_scream")
+	assert_int(screams.size()).is_equal(1)
+	assert_int(screams[0].body_id).is_equal(roles.victim.get_instance_id())
+	assert_float(float(screams[0].at)-start-lead).is_equal_approx(0.1,0.03)
+	assert_float((screams[0].stream as AudioStreamWAV).get_length()).is_between(4.4,4.6)
+	var epoch:int=screams[0].act
+	sound.call("stop_act")
+	assert_array(_queued(sound)).not_contains(["react_burn_scream"])
+	# A finished background render must not resurrect a skipped scream.
+	sound.call("_reactions_ready",[{"at":start+10,"stream":screams[0].stream,"body_id":roles.victim.get_instance_id(),"kind":"burn_scream","act":epoch}])
+	assert_array(_queued(sound)).not_contains(["react_burn_scream"])
+	sound.call("play_act","into_the_fire",roles,{"gore":"off"})
+	assert_array(_queued(sound)).is_empty()
+
+func test_burn_screams_keep_the_persons_register_and_fade_without_clipping()->void:
+	var prior:=PackedFloat32Array()
+	for sex:String in ["male","female"]:
+		var spec:=Voice.spec({"name":"Ash","age":32,"sex":sex},"player",7)
+		var voice:=Reactions.make("burn_scream",spec,81)
+		assert_float(float(voice.size())/Voice.RATE).is_between(4.4,4.6)
+		assert_float(Synth.peak_of(voice)).is_between(0.59,0.61)
+		assert_float(absf(voice[0])+absf(voice[-1])).is_less(0.02)
+		assert_float(Synth.rms_of(voice.slice(voice.size()-4410))).is_less(Synth.rms_of(voice.slice(11025,22050)))
+		assert_bool(voice==Reactions.make("burn_scream",spec,81)).is_true()
+		if not prior.is_empty():assert_bool(voice==prior).is_false()
+		prior=voice

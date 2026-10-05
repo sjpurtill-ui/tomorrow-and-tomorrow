@@ -644,6 +644,9 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 	rrng.seed=hash("%s|%s|%d|react" % [String(stage.get("audience_key")) if stage!=null and stage.get("audience_key")!=null else "court",String(act),_act_n])
 	var jobs:Array=[]
 	last_reactions=[]
+	if String(act)=="into_the_fire":
+		var victim_voice:=_victim_voice(roles)
+		if not victim_voice.is_empty():_job(jobs,victim_voice,"burn_scream",now+lead+0.1,rrng)
 	for item:Dictionary in track:
 		var cond:=String(item.get("if",""))
 		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
@@ -682,6 +685,22 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 	_music_next=maxf(_music_next,now+lead+12.0)
 	_ensure_timer()
 	return lead
+
+## A victim vocal is independent of the audience's willingness to react.
+## Resolve the actual figure so age, sex and individual timbre stay consistent.
+func _victim_voice(roles:Dictionary)->Dictionary:
+	if stage==null or not stage.has_method("figure") or not roles.get("victim") is Node3D:return {}
+	var order:Variant=stage.get("cast_order")
+	if not order is Array:return {}
+	for key in order:
+		var fig:Object=stage.call("figure",String(key))
+		if fig==null or _body(fig)!=roles.victim:continue
+		var person:=_person(fig)
+		var extras:Dictionary=stage.get("extras") if stage.get("extras") is Dictionary else {}
+		var entry:Dictionary=extras.get(key,{})
+		if Reactions.temper_of(person,entry)=="child":return {}
+		return {"key":String(key),"body":roles.victim,"person":person,"entry":entry,"role":"victim"}
+	return {}
 
 ## The people standing in the hall who can react (not the one put to death,
 ## not the executioner, no animals): [{key, body, person, entry, role}].

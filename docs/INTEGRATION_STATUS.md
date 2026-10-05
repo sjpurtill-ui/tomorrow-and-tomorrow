@@ -4,7 +4,10 @@ Prepared on `codex/execution-effects` from `0b0f6c5b`. Beheading uses the
 visible moving stump with falling pressure and runoff; burning has sustained
 body flames, struggle, progressive scorching and collapse. The user requires
 examples before integration; neither change is in the canonical player build.
-37/37 regression cases and both private GPU previews pass. No adjudication,
+The burning victim also screams in their own synthesized voice, with ignition/
+collapse timing and skip cancellation. Audio follow-up: 16/16 sound tests and
+male/female audio examples pass. Original 37/37 regression cases and both private
+GPU previews pass. No adjudication,
 ledger or save changes. See `docs/design/EXECUTION_EFFECTS_PREVIEW.md`.
 
 ## October 5 — Builders / The Town folio: INTEGRATED
