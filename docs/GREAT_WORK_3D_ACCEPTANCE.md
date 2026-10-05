@@ -68,3 +68,15 @@ contracts passed. The engine log was clean; the probe exited 1 for these
 assertions. This is a held visual checkpoint, not final acceptance. The owner
 is correcting the actual GPU layout. Its evidence is local under
 `artifacts/great-work-combined-gpu` and `artifacts/great-work-combined-gpu.log`.
+
+After model polish `e1a6652d` and ceremony layout fix `d26130cb`, the full
+private GPU run passes **244/244** checks with eighteen captures, no engine or
+script errors, and confirmed process exit 0. All four ceremonies fit their
+windows, including the name, dedicate, postpone and result-close controls.
+Each cast record has an actual court figure. The early live case advances
+within one construction course and retains the same geometry root. Evidence:
+`artifacts/great-work-final-gpu/capture.json` and
+`artifacts/great-work-final-gpu.log` (runner PID 64728). This validates the
+mechanics and layout through those source commits. Further final framing and
+material polish, including Atlas `928d999f`, still requires updated captures;
+the preceding construction screenshots do not represent that later revision.
