@@ -65,5 +65,5 @@ static func occupation(day:int)->void:
 						tribute=take(String(civ.id),"Food",population*.025*function*(1-resistance),local_id)
 						receive(id,"Food",tribute)
 						_ledger().call("note_flow",String(civ.id),id,"Food",tribute,"tribute")
-					WorldSimulation.economy._ledger("occupation_supply",delivered+tribute,id,String(civ.id),"Day %d: %.2f food delivered, %.2f tribute received from actual city stores" % [day,delivered,tribute])
+					WorldSimulation.economy._ledger("occupation_supply",delivered+tribute,id,String(civ.id),"%s: %.2f food delivered, %.2f tribute received from actual city stores" % [preload("res://scripts/calendar_date.gd").words(day,true),delivered,tribute])
 		)

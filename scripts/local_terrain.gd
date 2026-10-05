@@ -14192,7 +14192,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 		var where:Dictionary=contact.get("position",{})
 		var sighting:=_scout_chart_mark("sighting",ink,Vector2(float(where.get("x",0.0)),float(where.get("z",0.0))),clearance*1.2,mark_size)
 		marks_root.add_child(sighting)
-		placed.append([sighting,"Sighting · met the %s, day %d" % [String(contact.get("name","strangers")),int(contact.get("day",0))]])
+		placed.append([sighting,"Sighting · met the %s, %s" % [String(contact.get("name","strangers")),preload("res://scripts/calendar_date.gd").words(int(contact.get("day",0)))]])
 	for entry in placed: hover_marks.append({"position":(entry[0] as Node3D).position,"caption":entry[1]})
 	if active:
 		var walker:=_scout_chart_mark("walker",ink,chart[0],clearance*1.4,mark_size*1.2)
@@ -14214,9 +14214,9 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	hover.points.append(Vector3(chart[chart.size()-1].x,heights[heights.size()-1],chart[chart.size()-1].y))
 	hover.marks=hover_marks
 	if active:
-		hover.caption="%s · planned route · due day %d · the walker marks the reckoned position" % [first_line.capitalize(),int(mission.get("return_day",0))]
+		hover.caption="%s · planned route · due %s · the walker marks the reckoned position" % [first_line.capitalize(),preload("res://scripts/calendar_date.gd").words(int(mission.get("return_day",0)))]
 	else:
-		hover.caption="Returned chart · day %d · %s" % [int(mission.get("day",0)),String(mission.get("target_label","open exploration")).capitalize()]
+		hover.caption="Returned chart · %s · %s" % [preload("res://scripts/calendar_date.gd").words(int(mission.get("day",0))),String(mission.get("target_label","open exploration")).capitalize()]
 	hover_layer.add_child(hover)
 	_configure_warfare_overlay_layers(root,10)
 	return root

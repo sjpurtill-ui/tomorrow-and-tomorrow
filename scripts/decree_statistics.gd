@@ -182,7 +182,7 @@ static func effect_text(effect:Dictionary)->String:
 		"migration": text="%s" % ("arrivals up" if strength>0.0 else "departures up")
 		_: text="%s %+.3f" % [label(parameter),value]
 	var start:=int(effect.get("delay_days",0))
-	if start>0: text+=" from day %d" % start
+	if start>0: text+=" from %s" % preload("res://scripts/calendar_date.gd").words(start)
 	return text
 
 static func custom_receipt(realized:Array,direct_effects:Dictionary,costs:Dictionary,days:float)->String:

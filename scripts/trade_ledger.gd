@@ -1036,7 +1036,7 @@ static func deal_terms(buyer:String,seller:String,what:String,count:float)->Dict
 				return out
 			var last:=_families_day(p)
 			if last>=0 and _day()-last<FAMILY_DAYS:
-				out.why="Families came between us this season; no more before day %d." % (last+FAMILY_DAYS)
+				out.why="Families came between us this season; no more before %s." % preload("res://scripts/calendar_date.gd").words(last+FAMILY_DAYS)
 				return out
 			var free:=families_free(seller)
 			most=float(free.most)

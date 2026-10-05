@@ -387,7 +387,7 @@ func _exercise_progress_text()->String:
 	if not active.is_empty():
 		return "%s\n%d attending · %.1f / %.0f effective days · %.1f extra rations used. %s" % [String(active.label),int(active.participants),float(active.progress_days),float(active.duration_days),float(active.food_consumed_total),String(active.paused_reason)]
 	var completed:Dictionary=MilitaryCampaign.last_training_program
-	if not completed.is_empty():return "No exercise is active. Last completed: %s on day %d." % [String(completed.get("label","Exercise")),int(completed.get("completed_day",0))]
+	if not completed.is_empty():return "No exercise is active. Last completed: %s in %s." % [String(completed.get("label","Exercise")),preload("res://scripts/calendar_date.gd").words(int(completed.get("completed_day",0)))]
 	return String(MilitaryCampaign.training_staff.snapshot("army").status)
 
 func _build_status(template_id:int)->String:
