@@ -2,7 +2,9 @@ extends Node
 ## THE SOUNDTRACK: music by the mood of the game.
 ##
 ## Each mood has its own folder of pieces under assets/audio/score/<mood>/;
-## dropping a piece into the folder adds it. The mood is read from the world
+## dropping a piece into the folder adds it. A piece named "y500_..." plays
+## only from game year 500 on, "y1-200_..." only in years 1 to 200 (years);
+## a piece with no years plays in every age. The mood is read from the world
 ## every few seconds (mood_now): calm peacetime while our people know of no
 ## other people, contact once another people has been met and all is at
 ## peace, war while the people are at war or a fight, a siege or a coming
@@ -67,6 +69,25 @@ static func pieces(of_mood:String)->PackedStringArray:
 	out.sort()
 	return out
 
+## The game years a piece plays in, from its file name: "y500_..." from
+## year 500 on, "y1-200_..." in years 1 to 200; a name with no years plays in
+## every year. [first, last] (last 0: no end).
+static func years(piece:String)->Array:
+	var found:=RegEx.create_from_string("^y(\\d\\d*)(?:-(\\d\\d*))?_").search(piece.get_file())
+	if found==null:return [0,0]
+	return [int(found.get_string(1)),int(found.get_string(2)) if found.get_string(2)!="" else 0]
+
+static func from_year(piece:String)->int:
+	return int(years(piece)[0])
+
+## The pieces of a mood that belong to the game year `year`.
+static func pieces_for_year(of_mood:String,year:int)->PackedStringArray:
+	var out:PackedStringArray=[]
+	for piece:String in pieces(of_mood):
+		var span:=years(piece)
+		if int(span[0])<=year and (int(span[1])==0 or year<=int(span[1])):out.append(piece)
+	return out
+
 ## The game's mood now, from the one world: war while our people are at war
 ## or a fight, a siege or a war band coming is on them; contact once another
 ## people has been met; calm before that.
@@ -99,7 +120,7 @@ static func choose(list:PackedStringArray,last:String,roll:float)->String:
 	return String(choices[mini(choices.size()-1,floori(roll*choices.size()))])
 
 func play_next()->void:
-	var piece:=choose(pieces(mood),last_piece,_rng.randf())
+	var piece:=choose(pieces_for_year(mood,int(GameState.elapsed_days)/365+1),last_piece,_rng.randf())
 	_next_cue=_seconds()+_rng.randf_range(GAP_MIN,GAP_MAX)
 	if piece=="":return
 	var stream:=load(piece) as AudioStream
