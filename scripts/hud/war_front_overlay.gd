@@ -1621,7 +1621,7 @@ func _battle_entries(band:String)->Array:
 		var r:=BattleMarks.MARK_RADIUS*s
 		var bar:=BattleMarks.BAR_WIDTH*maxf(0.75,s)
 		entry["radius"]=r+3.0
-		entry["rect"]=Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
+		entry["rect"]=BattleMarks.plate_rect(entry.at,s).grow(2.0) if not entry.has("group") else Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
 		entry["live"]=int(battle.get("age_days",0))==0
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
 		if bool(entry.live): pulse_live=true
@@ -1675,13 +1675,13 @@ func _draw_battles(entries:Array,band:String)->void:
 			continue
 		var battle:Dictionary=entry.battle
 		var scale:=_mark_scale(battle,band)
-		BattleMarks.draw_battle(self,at,battle,era,scale)
+		var plate:=BattleMarks.draw_battle(self,at,battle,era,scale)
 		if band!="world":
 			var id:=String(battle.get("id",""))
 			var priority:=8 if id==hover_id else (6 if biggest.has(id) else (5 if bool(battle.get("ours",false)) else 4))
 			# Set out to the side of the front with a leader line, not on it.
 			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,float(entry.radius)+(16.0 if wide else 22.0),at,"plate")
-		hits.append({"kind":"battle","centre":at,"radius":float(entry.radius)+4.0,"battle":battle,"line":String(battle.get("hover",""))})
+		hits.append({"kind":"battle","centre":plate.get_center(),"radius":plate.size.x*0.5+2.0,"battle":battle,"line":String(battle.get("hover",""))})
 
 
 ## The fighting's own motion, on the pulse canvas behind the chart's ink:

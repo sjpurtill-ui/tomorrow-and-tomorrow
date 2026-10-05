@@ -24,6 +24,7 @@ extends RefCounted
 
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const T:=preload("res://scripts/hud/hud_tokens.gd")
 
 const INK:=Color("#2b2118")
 const PAPER:=Color("#efe3c2")
@@ -348,22 +349,56 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,progress:float,a:Color,b:Color
 	canvas.draw_rect(rect,Color(INK,0.85*alpha),false,1.0)
 
 
-## A battle mark at `at`: the crossed weapons over a soft paper ground, the
-## bar below. Returns the rect it covers (for hits and lettering clearance).
+## A battle as HOI4 plates one: a small paper plate on the front with the
+## crossed weapons in a ring at its left, the men on each side ("12 v ~15",
+## ours in our colour, theirs as our watchers count them) and, along its
+## foot, the bar of who is winning. A fight seen before stands faded.
+## Returns the rect it covers (for hits and lettering clearance).
+const PLATE_SIZE:=Vector2(124.0,40.0)
+static func plate_rect(at:Vector2,scale:float=1.0)->Rect2:
+	var size:=PLATE_SIZE*maxf(0.8,scale)
+	return Rect2(at-Vector2(size.y*0.5,size.y*0.5),size)
+
+
 static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,scale:float=1.0,alpha:float=1.0)->Rect2:
 	# The battle's own weapons when its armies' kits are known; else the chart's.
 	era=int(battle.get("era",era))
 	var sides:Dictionary=battle.get("sides",{})
-	var r:=MARK_RADIUS*scale
+	var a:Dictionary=sides.get("a",{}); var b:Dictionary=sides.get("b",{})
 	var seen_before:=int(battle.get("age_days",0))>0
 	var fade:=alpha*(0.6 if seen_before else 1.0)
-	canvas.draw_circle(at,r+1.0,Color(PAPER,0.45*fade))
-	var ink:=Color(INK,fade) if bool(battle.get("ours",false)) else Color(INK.lerp(OXBLOOD,0.4),fade)
+	var ours:=bool(battle.get("ours",false))
+	var plate:=plate_rect(at,scale)
+	var k:=plate.size.y/PLATE_SIZE.y
+	# The plate: paper, a war-red rule for a fight of ours, ink for others'.
+	canvas.draw_rect(Rect2(plate.position+Vector2(2,3)*k,plate.size),Color(0,0,0,0.18*fade))
+	canvas.draw_rect(plate,Color(PAPER,0.97*fade))
+	canvas.draw_rect(plate,Color(OXBLOOD if ours else INK,0.9*fade),false,1.4*k)
+	# The weapons in their ring, at the plate's left end (on the contact point).
+	var r:=plate.size.y*0.36
+	canvas.draw_circle(at,r+2.0*k,Color(OXBLOOD if ours else INK.lerp(OXBLOOD,0.4),0.14*fade))
+	var ink:=Color(INK,fade) if ours else Color(INK.lerp(OXBLOOD,0.4),fade)
 	draw_weapons(canvas,at,r,era,ink,Color(PAPER,0.95*fade))
-	var width:=BAR_WIDTH*maxf(0.75,scale)
-	var bar:=Rect2(at+Vector2(-width*0.5,r+5.0),Vector2(width,BAR_HEIGHT))
-	draw_bar(canvas,bar,float(battle.get("progress",0.0)),(sides.get("a",{}) as Dictionary).get("colour",PAPER),(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD),fade)
-	return Rect2(at-Vector2(maxf(r+3.0,width*0.5),r+3.0),Vector2(maxf(r+3.0,width*0.5)*2.0,r*2.0+9.0+BAR_HEIGHT))
+	# The men on each side.
+	var font:=T.font("ui_strong")
+	var fs:=roundi(15.0*k)
+	var mine:=count(int(a.get("troops",0)),ours)
+	var theirs:=count(int(b.get("troops",0)),false)
+	if not ours or int(b.get("troops",0))<=0: theirs="?" if int(b.get("troops",0))<=0 else theirs
+	var left:=at.x+r+6.0*k
+	var base:=plate.position.y+fs+3.0*k
+	var colour_a:Color=a.get("colour",VERDIGRIS)
+	var colour_b:Color=b.get("colour",OXBLOOD)
+	canvas.draw_string(font,Vector2(left,base),mine,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(colour_a.darkened(0.35),fade))
+	var w_mine:=font.get_string_size(mine,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
+	var vs:=T.font("ui")
+	canvas.draw_string(vs,Vector2(left+w_mine+4.0*k,base),"v",HORIZONTAL_ALIGNMENT_LEFT,-1,roundi(fs*0.85),Color(INK,0.7*fade))
+	var w_v:=vs.get_string_size("v",HORIZONTAL_ALIGNMENT_LEFT,-1,roundi(fs*0.85)).x
+	canvas.draw_string(font,Vector2(left+w_mine+w_v+8.0*k,base),theirs,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(colour_b.darkened(0.3),fade))
+	# Who is winning, along the plate's foot.
+	var bar:=Rect2(Vector2(left,plate.end.y-11.0*k),Vector2(plate.end.x-left-7.0*k,7.0*k))
+	draw_bar(canvas,bar,float(battle.get("progress",0.0)),colour_a,colour_b,fade)
+	return plate.grow(2.0)
 
 
 ## Many battles in one place, far out: the weapons with a count beside them.
