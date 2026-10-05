@@ -1,5 +1,5 @@
 extends Control
-## One balance bar: left is more sent, right is more received. The midpoint
+## One balance bar: left is more received, right is more sent. The midpoint
 ## is equal exchange. This compares recorded worth, not net profit or stocks.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
@@ -8,7 +8,7 @@ var values:Array=[]:
 	set(next):
 		if values==next:return
 		values=next.duplicate();queue_redraw()
-var labels:Array=["Sent","Received"]:
+var labels:Array=["Received","Sent"]:
 	set(next):
 		if labels==next:return
 		labels=next.duplicate();queue_redraw()
@@ -43,7 +43,7 @@ func _draw()->void:
 	for index in 2:
 		var x:=(width+24.0)*index
 		var alignment:=HORIZONTAL_ALIGNMENT_LEFT if index==0 else HORIZONTAL_ALIGNMENT_RIGHT
-		var label:=String(labels[index]) if index<labels.size() else ("Sent" if index==0 else "Received")
+		var label:=String(labels[index]) if index<labels.size() else ("Received" if index==0 else "Sent")
 		var number:=EraWords.grouped(roundi(_value(index)))
 		draw_string(number_font,Vector2(x,17),label,alignment,width,17,T.INK_MUTED)
 		var number_size:=30
@@ -53,5 +53,5 @@ func _draw()->void:
 	var center:=size.x/2.0
 	var offset:=_balance()*center
 	draw_rect(Rect2(0,59,size.x,5),Color(T.RULE,0.3))
-	if absf(offset)>0.0:draw_rect(Rect2(center+minf(0.0,offset),59,absf(offset),5),T.TEAL if offset>0.0 else T.GOLD)
+	if absf(offset)>0.0:draw_rect(Rect2(center+minf(0.0,offset),59,absf(offset),5),T.GOLD if offset>0.0 else T.TEAL)
 	draw_line(Vector2(center,55),Vector2(center,69),T.INK_MUTED,1.0)

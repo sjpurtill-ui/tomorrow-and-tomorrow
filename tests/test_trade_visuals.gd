@@ -12,6 +12,7 @@ var ids: Array
 
 func test_one_balance_bar_is_centered_and_changes_direction() -> void:
 	var chart: Control = auto_free(preload("res://scripts/hud/trade_graphics.gd").new())
+	# Values follow the visual order: received on the left, sent on the right.
 	for sample: Array in [[[0.0,0.0],0.0],[[80.0,80.0],0.0],[[80.0,0.0],-1.0],[[0.0,80.0],1.0],[[30.0,90.0],0.5],[[90.0,30.0],-0.5]]:
 		chart.values=sample[0]
 		assert_float(float(chart._balance())).is_equal_approx(float(sample[1]),0.001)
@@ -40,8 +41,8 @@ func test_hero_totals_convert_real_monthly_flows_once() -> void:
 	for row: Dictionary in Ledger.partners("player"):
 		sent += Ledger.flow_value("player", String(row.id))
 		received += Ledger.flow_value(String(row.id), "player")
-	assert_array(Array(chart.values)).is_equal([sent * 3.0, received * 3.0])
-	assert_array(Array(chart.labels)).is_equal(["Sent", "Received"])
+	assert_array(Array(chart.values)).is_equal([received * 3.0, sent * 3.0])
+	assert_array(Array(chart.labels)).is_equal(["Received", "Sent"])
 	assert_str((board.find_child("GoodsToTrade", true, false) as Label).text).contains(EraWords.grouped(roundi(Goods.spare())))
 
 func test_partner_flow_periods_follow_barter_and_coin_ledger() -> void:
@@ -54,7 +55,7 @@ func test_partner_flow_periods_follow_barter_and_coin_ledger() -> void:
 		assert_object(chart).is_not_null()
 		if chart == null: continue
 		var form := String(Ledger.pair("player", id).form)
-		assert_array(Array(chart.values)).is_equal([Words.per_period(Ledger.flow_value("player", id), form), Words.per_period(Ledger.flow_value(id, "player"), form)])
+		assert_array(Array(chart.values)).is_equal([Words.per_period(Ledger.flow_value(id, "player"), form), Words.per_period(Ledger.flow_value("player", id), form)])
 		assert_object(people.find_child("Wesend", true, false)).is_not_null()
 		assert_object(people.find_child("Theysend", true, false)).is_not_null()
 		assert_str((people.find_child("Name", true, false) as Label).text).is_equal(Ledger.name_of(id))
@@ -102,8 +103,8 @@ func test_directional_change_updates_totals_even_when_combined_value_is_equal() 
 	board.refresh()
 	await await_idle_frame()
 	chart = board.find_child("FlowTotals", true, false)
-	assert_float(float(chart.values[0])).is_equal_approx(float(before[0]) + 30.0, 0.001)
-	assert_float(float(chart.values[1])).is_equal_approx(float(before[1]) - 30.0, 0.001)
+	assert_float(float(chart.values[0])).is_equal_approx(float(before[0]) - 30.0, 0.001)
+	assert_float(float(chart.values[1])).is_equal_approx(float(before[1]) + 30.0, 0.001)
 
 func test_actual_board_fits_320px_independently_of_shared_dock_minimum() -> void:
 	var scroll: ScrollContainer = auto_free(ScrollContainer.new())

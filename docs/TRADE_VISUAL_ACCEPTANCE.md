@@ -132,3 +132,15 @@ or orphan nodes (report 14). The clock overlap case includes a long date and
 temperature string. Both private GPU captures completed with exit 0 and no
 script errors; the probe process exited. Broad page acceptance remains pending
 visual approval.
+
+### Received / Sent order
+
+The summary and every partner balance now show Received on the left and Sent
+on the right. Values, directional fill and explanatory tooltips follow that
+order; received remains teal and sent remains gold. The midpoint still means
+equal exchange. No ledger calculations or save formats change. The updated
+prepared-data preview is local at
+`artifacts/trade-received-left/trade-preview.png` and remains held for approval.
+All 11 Trade presentation regressions passed with zero errors, failures or
+orphans (report 15). The private GPU preview completed with exit 0; its process
+was confirmed exited. Generated captures and logs remain local.

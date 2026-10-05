@@ -283,7 +283,7 @@ func _case(spec: Dictionary) -> void:
 		sent += Ledger.flow_value("player", String(partner.id))
 		received += Ledger.flow_value(String(partner.id), "player")
 	if totals != null:
-		_check(Array(totals.values) == [sent * 3.0, received * 3.0], String(spec.id) + " hero converts ledger monthly values once")
+		_check(Array(totals.values) == [received * 3.0, sent * 3.0], String(spec.id) + " hero converts ledger monthly values once")
 	_check(absf(hud.dock.size.x - requested_width) < 1.0, String(spec.id) + " fits requested dock width %.1f (actual %.1f)" % [requested_width, hud.dock.size.x])
 	_check(hud.dock.get_combined_minimum_size().x <= requested_width + 1.0, String(spec.id) + " minimum width fits dock")
 	_check(Rect2(Vector2.ZERO, Vector2(1920,1080)).encloses(hud.dock.get_global_rect()), String(spec.id) + " dock fits viewport")
@@ -312,7 +312,7 @@ func _case(spec: Dictionary) -> void:
 		_check((flow == null) == is_word, String(spec.id) + " word-only contact has no measured chart " + id)
 		if flow != null:
 			var form := String(Ledger.pair("player", id).get("form", "gift"))
-			var expected := [Words.per_period(Ledger.flow_value("player", id), form), Words.per_period(Ledger.flow_value(id, "player"), form)]
+			var expected := [Words.per_period(Ledger.flow_value(id, "player"), form), Words.per_period(Ledger.flow_value("player", id), form)]
 			_check(Array(flow.values) == expected, String(spec.id) + " partner chart uses its ledger period " + id)
 	if not ids.is_empty() and not String(spec.state) in ["empty", "word"]:
 		var first := board.find_child("People_" + String(ids[0]), true, false)

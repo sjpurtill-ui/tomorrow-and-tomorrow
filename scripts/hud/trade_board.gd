@@ -188,8 +188,8 @@ func _build_summary()->void:
 	if tribute_in>0.0:reading.add_child(_line("Tribute worth %s a season" % EraWords.grouped(roundi(tribute_in)),14,T.GOLD_TEXT,true))
 	var exchange:=VBoxContainer.new();exchange.size_flags_horizontal=Control.SIZE_EXPAND_FILL;exchange.add_theme_constant_override("separation",4);top.add_child(exchange)
 	exchange.add_child(_line("Recent exchange · worth a season",16,T.INK_MUTED,true))
-	var chart:=Graphics.new();chart.name="FlowTotals";chart.inline=true;chart.values=[sent*3.0,came*3.0];exchange.add_child(chart)
-	chart.tooltip_text="Smoothed monthly values expressed as a seasonal pace, at each sender's own prices. The one bar is centered on equal exchange: left means more sent, right means more received. It compares recorded worth, not stock, coin or profit."
+	var chart:=Graphics.new();chart.name="FlowTotals";chart.inline=true;chart.values=[came*3.0,sent*3.0];exchange.add_child(chart)
+	chart.tooltip_text="Smoothed monthly values expressed as a seasonal pace, at each sender's own prices. The one bar is centered on equal exchange: left means more received, right means more sent. It compares recorded worth, not stock, coin or profit."
 	exchange.add_child(_line("At each sender's prices",13,T.INK_MUTED,true))
 
 
@@ -266,8 +266,8 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var form:=String(p.get("form","gift"))
 	var measured:=HBoxContainer.new();measured.add_theme_constant_override("separation",16);measured.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(measured)
 	var chart_box:=VBoxContainer.new();chart_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;measured.add_child(chart_box)
-	var bar:=Graphics.new();bar.name="Flows";bar.inline=true;bar.values=[Words.per_period(Ledger.flow_value("player",civ_id),form),Words.per_period(Ledger.flow_value(civ_id,"player"),form)];chart_box.add_child(bar)
-	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more sent; right means more received. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
+	var bar:=Graphics.new();bar.name="Flows";bar.inline=true;bar.values=[Words.per_period(Ledger.flow_value(civ_id,"player"),form),Words.per_period(Ledger.flow_value("player",civ_id),form)];chart_box.add_child(bar)
+	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more received; right means more sent. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
 	var toggle:=Button.new();toggle.name="TermsToggle";toggle.text="⌄" if bool(expanded_people.get(civ_id,false)) else "›";toggle.flat=true;toggle.custom_minimum_size=Vector2(32,40);toggle.size_flags_vertical=Control.SIZE_SHRINK_CENTER;toggle.add_theme_font_override("font",T.font("voice"));toggle.add_theme_font_size_override("font_size",32);toggle.tooltip_text="Show goods, dependence and trade terms";toggle.pressed.connect(_toggle_people.bind(civ_id));measured.add_child(toggle)
 	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",16);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
 	var goods:=_grid(column,"GoodsExchanged",2,640)
