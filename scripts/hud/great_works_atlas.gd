@@ -410,6 +410,9 @@ func _refresh_live_work()->void:
 		refresh()
 		return
 	var site:=Bridge.api_dict("site",[String(selected.get("city_id","")),String(selected.get("work_id",""))])
+	if watching and String((site.get("ceremony",{}) as Dictionary).get("status",""))=="pending":
+		set_watching(false)
+		message="The work stands. Its dedication is ready."
 	if _live_shape(selected,site)!=_detail_shape:
 		# Decisions, completion and accidents change the available actions.
 		var scroll:=detail_scroll.scroll_vertical
@@ -449,18 +452,19 @@ func _detail_ours(item:Dictionary)->void:
 	var purpose:=Bridge.purpose_label(String(item.get("purpose","")))
 	Kit.serif(words,"A %s%s · %s ambition · %s" % [shape.replace("_"," "),(" raised to %s" % purpose) if not purpose.is_empty() else "",String(item.get("ambition","grand")).capitalize(),String(item.get("city_name",""))],15,T.BODY,true)
 	var status:=Kit.label(words,_status_words(item),14,T.text_for(_status_color(item)),false,.04);status.name="StatusLine"
+	var about:=VBoxContainer.new();about.add_theme_constant_override("separation",4)
 	var lore:=String(item.get("ruin_lore","")) if String(item.get("status",""))=="ruined" else ""
 	if lore.is_empty():lore=String(item.get("lore",""))
-	if not lore.is_empty():Kit.serif(words,lore,15,T.TEXT_SOFT,true)
+	if not lore.is_empty():Kit.serif(about,lore,15,T.TEXT_SOFT,true)
 	var motive:=String(concept.get("motive",""))
-	if not motive.is_empty():Kit.label(words,motive.substr(0,1).to_upper()+motive.substr(1),13,T.TEXT_DIM)
+	if not motive.is_empty():Kit.label(about,motive.substr(0,1).to_upper()+motive.substr(1),13,T.TEXT_DIM)
 	var architect:=String(item.get("architect",""))
 	var arch:Dictionary=site.get("architect",{}) if site.get("architect") is Dictionary else {}
-	if not architect.is_empty():Kit.label(words,"Master builder: %s%s" % [architect,(" — %s in style" % String(arch.get("style",""))) if not String(arch.get("style","")).is_empty() else ""],13,T.BODY)
+	if not architect.is_empty():Kit.label(about,"Master builder: %s%s" % [architect,(" — %s in style" % String(arch.get("style",""))) if not String(arch.get("style","")).is_empty() else ""],13,T.BODY)
 	var figure_id:=String(arch.get("id",""))
 	if not figure_id.is_empty() and not architect.is_empty():
 		var held:=int(Hall.matter_counts().get("figure:"+figure_id,0))
-		var summon_button:=Kit.action_button(words,"Summon %s to the court%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
+		var summon_button:=Kit.action_button(about,"Summon %s to the court%s" % [architect,(" · %d matter%s" % [held,"" if held==1 else "s"]) if held>0 else ""],func()->void:_summon({"figure_id":figure_id,"name":architect}),false,"Call the master builder in now")
 		summon_button.name="SummonArchitect"
 	var status_key:=String(item.get("status",""))
 	_detail_shape=_live_shape(item,site)
@@ -470,7 +474,7 @@ func _detail_ours(item:Dictionary)->void:
 		model_view=_retained_model;_retained_model=null
 		frame.add_child(model_view);model_view.configure(view)
 	else:
-		model_view=WorkView.make(view,340);model_view.name="DetailModel";model_view.custom_minimum_size.x=0;frame.add_child(model_view)
+		model_view=WorkView.make(view,420 if get_viewport().get_visible_rect().size.y>=800 else 270);model_view.name="DetailModel";model_view.custom_minimum_size.x=0;frame.add_child(model_view)
 	model_view.set_meta("site_key",_key(item))
 	var milestones:=HFlowContainer.new();milestones.name="StageMilestones";milestones.add_theme_constant_override("h_separation",10);milestones.add_theme_constant_override("v_separation",6);top.add_child(milestones)
 	_build_milestones(milestones,item)
@@ -484,6 +488,7 @@ func _detail_ours(item:Dictionary)->void:
 	watch_pace.item_selected.connect(_set_watch_pace);time_row.add_child(watch_pace)
 	watch_state=Kit.label(time_row,"",13,T.TEXT_SOFT);watch_state.name="WatchState"
 	_update_watch_words()
+	top.add_child(about)
 	if String((site.get("ceremony",{}) as Dictionary).get("status",""))=="pending":
 		var dedication:=Kit.action_button(detail,"Gather for the dedication",func()->void:_attend_dedication(work_id),true,"Join the master builder and the assembly at the finished work")
 		dedication.name="DedicateWork"

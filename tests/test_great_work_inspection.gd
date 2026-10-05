@@ -119,6 +119,7 @@ func test_nested_pause_during_watch_keeps_the_originally_paused_clock()->void:
 
 func test_completion_exposes_the_actual_pending_dedication()->void:
 	await _open()
+	view.set_watching(true)
 	assert_object(view.find_child("DedicateWork",true,false)).is_null()
 	record.progress=U.total_work(record);record.status="functioning";record.outcome="success"
 	record.ceremony={"status":"pending","day":0,"attendees":[],"name_suggestions":["First Light Stones"]}
@@ -126,6 +127,9 @@ func test_completion_exposes_the_actual_pending_dedication()->void:
 	assert_object(view.find_child("DedicateWork",true,false)).is_not_null()
 	assert_str((view.find_child("StatusLine",true,false) as Label).text).contains("Standing")
 	assert_str(record.ceremony.status).is_equal("pending")
+	assert_bool(view.watching).is_false()
+	assert_bool(Pause.blocks(host)).is_true()
+	assert_float(host.game_speed).is_equal(0.0)
 
 func test_ruined_list_illustrations_keep_triangulable_silhouettes()->void:
 	var plate:Control=preload("res://scripts/hud/great_work_plate.gd").new()
