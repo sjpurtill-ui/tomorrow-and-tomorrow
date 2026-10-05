@@ -8,6 +8,7 @@ const DockPanelScript:=preload("res://scripts/hud/dock_panel.gd")
 const NavIcon:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Folio:=preload("res://scripts/hud/reference_folio.gd")
+const TopbarInk:=preload("res://scripts/hud/topbar_ink.gd")
 
 signal section_requested(section:String,sub:int)
 signal menu_requested
@@ -650,6 +651,7 @@ func _build_time_pill()->void:
 	time_text.add_theme_font_override("bold_font",Tokens.font("ui_strong"))
 	time_text.add_theme_font_override("normal_font",Tokens.font("voice"))
 	time_text.add_theme_color_override("default_color",Folio.RAIL_TEXT)
+	TopbarInk.apply(time_text)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
 	speed_row.add_theme_constant_override("separation",2)
@@ -724,7 +726,10 @@ func _style_speed_controls(selected:int)->void:
 		button.add_theme_stylebox_override("hover",hover)
 		button.add_theme_stylebox_override("pressed",normal)
 		button.add_theme_color_override("font_color",Folio.GOLD if active else Folio.RAIL_TEXT)
-		button.add_theme_color_override("font_hover_color",Tokens.INK)
+		button.add_theme_color_override("font_hover_color",Folio.RAIL_TEXT)
+		button.add_theme_color_override("font_focus_color",Folio.RAIL_TEXT)
+		button.add_theme_color_override("font_pressed_color",Folio.GOLD)
+		TopbarInk.apply(button)
 
 # --- KPI strip --------------------------------------------------------------
 
@@ -1035,6 +1040,7 @@ func _build_toolbar()->void:
 	city_selector.add_theme_font_override("font",Tokens.font("voice"))
 	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 	city_selector.add_theme_font_size_override("font_size",19)
+	TopbarInk.apply(city_selector)
 	for color_key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		city_selector.add_theme_color_override(color_key,Folio.RAIL_TEXT)
 	city_selector.add_theme_color_override("icon_normal_color",Folio.RAIL_TEXT)

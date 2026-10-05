@@ -1,3 +1,18 @@
+## October 5, 2026 — Compact Food page and legible transparent top bar
+
+Approved sources `0062bac8` (Food) and `c88fdac4` (top bar) are delivered in
+runtime `51042ca8f719a51a9c2e24ae14926c2f87a96977`, including concurrent main
+through `7f623669`. Food now groups the useful daily figures and local stores,
+removes the redundant single-town source breakdown, and keeps common-store
+allocation controls in an expandable report. Text edging improves the existing
+transparent bar over pale terrain. Data authorities and save schemas are unchanged.
+
+The combined 18-case regression suite passes; the combined private GPU capture
+is clean and its process exited. Origin/main was freshly verified before
+advancing the canonical checkout. All 4,739 existing local files were hash-checked
+unchanged. Player/editor sessions were not restarted; generated evidence remains
+local. The separate Builders preview is not part of this delivery.
+
 ## October 4, 2026 — User-approved Overview paintings and typography
 
 Integrated runtime `62dbf2ed6b9a050aa29075fc7f84841399777558` replaces the
