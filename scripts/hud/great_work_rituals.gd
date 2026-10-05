@@ -151,7 +151,7 @@ static func build(ritual:Dictionary)->Dictionary:
 			_box(fixed,Vector3(1.5,.14,1.25),Vector3(0,.07,0),stone);var sky:=Node3D.new();fixed.add_child(sky);sky.position=Vector3(0,1.2,0);sky.rotation.x=PI*.5;_ring(sky,.53,.045,accent)
 			token.position=Vector3(0,.95,0);_box(token,Vector3(1.45,.07,.07),Vector3.ZERO,wood)
 		"gate_arch":
-			_arch(fixed,1.65,2.0,stone);_box(fixed,Vector3(1.8,.08,1.65),Vector3(0,.04,0),clay)
+			_arch(fixed,1.65,2.8,stone);_box(fixed,Vector3(1.8,.08,1.65),Vector3(0,.04,0),clay)
 			token.position=Vector3(-.75,.1,.45);_box(token,Vector3(.24,.04,.4),Vector3.ZERO,accent)
 		"canal_channels":
 			for side in [-1.0,1.0]:_bowl(fixed,Vector3(side*.9,0,0),.43,stone)

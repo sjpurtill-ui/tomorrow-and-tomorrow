@@ -113,22 +113,41 @@ func test_every_ritual_moves_only_after_dedication_and_retains_its_scene()->void
 func test_crossing_uses_an_actual_bounded_figure_and_finishes_its_walk()->void:
 	for form:String in ["gate","bridge"]:
 		var id:=Concept.make_id(form,"welcome_strangers","grand","stone",1,"crossing")
-		var scene:Control=Stage.make({"work_id":id,"status":"functioning","fraction":1.0},{"key":"crossing","architect":{},"official":{"person_id":23,"name":"Recorded keeper","age":40,"sex":"male"},"attendees":[]})
+		var guests:Array[Dictionary]=[]
+		for index in 4:guests.append({"civ_id":"crossing_guest_%d" % index,"name":"Recorded guest %d" % index})
+		var scene:Control=Stage.make({"work_id":id,"status":"functioning","fraction":1.0},{"key":"crossing","architect":{"id":"recorded_crossing_builder","name":"Recorded builder","age":40,"sex":"male"},"official":{"person_id":23,"name":"Recorded keeper","age":40,"sex":"male"},"attendees":guests})
 		scene.size=Vector2(760,360);add_child(scene)
 		await get_tree().process_frame
-		var body:Node3D=scene.bodies.official
+		var body:Node3D=scene.bodies.architect
 		var origin:=body.position
-		scene.dedication();scene.settle()
+		scene.dedication()
+		var active_seconds:float=scene._remaining
+		scene.settle()
 		assert_float(body.position.distance_to(origin)).is_greater(3.0)
-		assert_int(scene.diagnostics().body_count).is_equal(1)
+		assert_float(active_seconds).is_greater(body.position.distance_to(origin)/1.18+.6)
+		assert_int(scene.diagnostics().body_count).is_equal(6)
 		assert_str(String(body.clip)).is_equal("stand")
+		for guest:Node3D in scene.bodies.values():
+			if guest==body:continue
+			for sample in 41:
+				var point:=origin.lerp(body.position,float(sample)/40)
+				assert_float(point.distance_to(guest.position)).is_greater(.65)
 		if form=="gate":
 			# Project the witness's face and both posts through the actual final
 			# lens. The witness must not finish hidden behind either gatepost.
 			var face:Vector2=scene.lens.unproject_position(body.position+Vector3(0,1.5,0))
 			for side in [-1.0,1.0]:
-				var post:Vector2=scene.lens.unproject_position(Vector3(side*.875,1.5,scene._front+.8))
+				var post:Vector2=scene.lens.unproject_position(Vector3(side*.825,1.5,scene._front+.8))
 				assert_float(absf(face.x-post.x)).is_greater(18.0)
+			var overhead:MeshInstance3D
+			for mesh:MeshInstance3D in scene._specific.root.find_children("*","MeshInstance3D",true,false):
+				if mesh.position.y>2.0 and mesh.mesh.get_aabb().size.x>1.0:overhead=mesh
+			assert_object(overhead).is_not_null()
+			var underside:Vector3=overhead.global_position+Vector3(0,-overhead.mesh.get_aabb().size.y*.5,0)
+			assert_float(underside.y).is_greater(2.1)
+			var beam:Vector2=scene.lens.unproject_position(underside)
+			var head:Vector2=scene.lens.unproject_position(body.position+Vector3(0,1.85,0))
+			assert_float(head.y-beam.y).is_greater(10.0)
 		scene.queue_free();await get_tree().process_frame
 
 func test_all_six_guest_formations_clear_the_purpose_pedestal()->void:
