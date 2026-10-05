@@ -5,14 +5,10 @@ extends RefCounted
 ## never victory conditions: when one resolves, the people soon want another.
 ##
 ## Where aims come from
-## - The court and the people propose them out of real state: hunger at the
-##   fires, a rival's slight, a practice half learned, a river no one can cross,
-##   the memory of someone lost, a shrinking or growing band. Only envoys come
-##   unbidden, so a proposal waits as a court matter (held by an official)
-##   until the god summons them. If the god stays silent until the matter
-##   lapses, the people take up the favoured aim themselves.
-## - The god may set one. Online, typed words are mapped onto a measurable
-##   target (from_words); offline, the god chooses among the proposals.
+## - Only the god sets them, by word in the court ("our aim for this
+##   generation is to grow", court_order): the words are mapped onto the
+##   nearest measurable target (from_words). The court and the people propose
+##   none of their own.
 ## - Each aim belongs to one of the century ambitions (PeopleDirection
 ##   AMBITIONS): taking it up records a cultural action for that ambition, so
 ##   research and scouting inclinations follow it through the existing focus
@@ -345,8 +341,8 @@ static func daily(day:int)->void:
 	if has_active(): stats.active_days=int(stats.active_days)+span
 	_watch_conditions(day)
 	if has_active(): _track(day,span)
-	_watch_matter(day)
-	if day%10==0 or not has_active(): _maybe_propose(day)
+	# The god sets every aim (court_order); the court and the people propose
+	# none, and none is taken up without the god's word.
 	if day%30==0: _rivals(day)
 
 static func _watch_conditions(day:int)->void:
@@ -1319,6 +1315,35 @@ static func is_order(text:String)->bool:
 	# them build our walls") is an order, not a hope for a generation.
 	var measure:=preload("res://scripts/occupation_measures.gd").read(text)
 	return not measure.is_empty() and not (measure.measures as Array).is_empty() and (bool(measure.people) or bool(measure.pronoun))
+
+## The god's word in the court: an aim for a generation, set from the words
+## themselves (from_words). An aim already held is set down first, with the
+## smaller grief of letting it go.
+static func court_order(text:String)->Dictionary:
+	var cand:=from_words(_aim_words(text))
+	if cand.is_empty():
+		return {"ok":false,"kind":"aim","count":0,"says":"Say what the people should strive for over a generation: to grow, to eat well, to learn a craft, to be feared, to make a friend of a neighbour, to build something great.","outcome":"No aim was set."}
+	var day:=_day()
+	var before:=""
+	if has_active():
+		before=String((state().active as Dictionary).title)
+		release("set aside for the god's new aim")
+	cand["proposed_day"]=day
+	_store_candidate(cand)
+	var aim:=adopt(cand,"god",day)
+	var said:="From today the people strive for this: %s. They have %s." % [String(aim.title).to_lower(),winters(int(aim.years))]
+	if before!="":said="%s is set aside. %s" % [before,said]
+	return {"ok":true,"kind":"aim","count":1,"says":said,"outcome":"Aim set: %s." % String(aim.title)}
+
+## The aim itself, without the words that announce it ("our aim for this
+## generation is to grow" -> "to grow").
+static func _aim_words(text:String)->String:
+	var cut:=RegEx.create_from_string("(?i)^\\W*(?:(?:our|the|a|an|my|new) )?(?:generational )?(?:aim|goal|purpose)(?: for (?:this|the|a|our) generation| for (?:the|our) people)?(?: (?:is|shall be|will be|now is|from now on is|:))?\\s*").search(text)
+	var words:=text.substr(cut.get_end()) if cut!=null else text
+	cut=RegEx.create_from_string("(?i)^\\W*(?:set|make|give|declare|adopt|take up)(?: (?:the people|our people|them|us))? (?:(?:a|an|the|our|this) )?(?:new )?(?:aim|goal|purpose)(?: for (?:this|a|the) generation)?\\s*(?::|of|to be|as)?\\s*").search(words)
+	if cut!=null:words=words.substr(cut.get_end())
+	words=words.strip_edges()
+	return words if words.length()>=3 else text
 
 static func from_words(text:String)->Dictionary:
 	## Any aim the god speaks is accepted and mapped onto the nearest

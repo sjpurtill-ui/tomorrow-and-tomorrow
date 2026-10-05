@@ -325,7 +325,8 @@ static func advance_all(day:int)->void:
 					for r:Dictionary in city.undertakings:advance_record(WorldSimulation.state,r,covered,city)
 				for r:Dictionary in city.undertakings:_resolve_waiting(r,city,day,owner)
 				Effects.advance_city(WorldSimulation.state,city,day,WorldSimulation.span)))
-	if owner=="player":detect_pitch(WorldSimulation.state,day)
+	# No official pitches a wonder of their own: the god orders great works
+	# (order_great_work.gd); detect_pitch stays for the rules that read it.
 
 # --- Pitches: what moves officials to propose a wonder -------------------------
 ## Player-side triggers use G2's kinds (victory, death, famine survived,

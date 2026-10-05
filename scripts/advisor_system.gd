@@ -110,6 +110,10 @@ func generate_council_item(office: String, topic: String, urgency := 0.5) -> Dic
 	return item
 
 func generate_consequence_item(event: Dictionary) -> Dictionary:
+	# The council proposes nothing of its own: the ruler gives every order.
+	# A consequence is told in its own log, never raised as a recommendation
+	# to approve (COUNCIL_PROPOSES false; the rest stays for the rules' tests).
+	if not COUNCIL_PROPOSES: return {}
 	# Sickness and disasters are written in their own log (hardship_log.gd),
 	# not raised as council decisions; only an extreme one is told, once.
 	if bool(event.get("hardship",false)): return {}
@@ -177,7 +181,12 @@ func _council_severity_rank(severity:String)->int:
 func _council_severity_urgency(severity:String)->float:
 	return {"notice":0.42,"warning":0.68,"danger":0.84,"critical":0.96}.get(severity.to_lower(),0.68)
 
+## Whether the council raises its own recommended orders for the ruler to
+## approve. It does not: the ruler makes every proposal.
+const COUNCIL_PROPOSES:=false
+
 func council_decision_items(limit:=12,include_history:=true)->Array[Dictionary]:
+	if not COUNCIL_PROPOSES: return []
 	var unread:Array[Dictionary]=[]
 	var history:Array[Dictionary]=[]
 	for item_variant in WorldSimulation.state.council_inbox:

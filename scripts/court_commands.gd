@@ -590,7 +590,8 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# auto_founding.gd), set here before the words can be taken for a law, an
 	# act held back or a town's measure. The one spoken to answers.
 	if String(cls.act)!="question" and not bool(cls.insist) and String(audience.get("origin",""))!="foreign" and not is_harm(clean):
-		var founding:=HomeOrders.found_reading(clean)
+		var founding:=HomeOrders.aim_reading(clean)
+		if founding.is_empty(): founding=HomeOrders.found_reading(clean)
 		# So is who sets the daily work, and people moved between tasks
 		# ("put 10 more on building": manual_work.gd), never a law or a measure.
 		if founding.is_empty(): founding=HomeOrders.work_reading(clean)

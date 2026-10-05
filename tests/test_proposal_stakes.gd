@@ -98,12 +98,13 @@ func _ledger()->String:
 	return JSON.stringify([GameState.active_modifiers.size(),GameState.resource_stockpiles,FoodSystem.total_stored(),GameState.simulation_metrics.get("cohesion"),GameState.simulation_metrics.get("legitimacy"),
 		(leader.get("relationships",{}) as Dictionary).get("sovereign",{}),GameState.sovereign_orders.size(),Hall.state().get("queue",[]).size()])
 
-func _petition(decree_kind:String="ambition")->String:
+func _petition()->String:
+	## An official reports on the food (officials bring reports, never a
+	## decree of their own: the ruler gives the orders).
 	var person:Dictionary=Hall._officials()[0]
-	Hall._court_direct=true
-	var audience:=Hall.debug_situation(decree_kind,str(int(person.person_id)))
-	Hall._court_direct=false
-	assert_bool(audience.is_empty()).override_failure_message("no %s petition could be raised" % decree_kind).is_false()
+	var day:=int(GameState.elapsed_days)
+	var audience:=Hall._court_audience(person,{"topic":"food","summary":"Food stores would last about 9 days.","decree":"","ask":"food:band2","situation_type":"crisis_petition"},{"type":"debug","key":"debug","data":{}},day)
+	Hall._enqueue(audience,day)
 	return String(audience.get("id",""))
 
 # --------------------------------------------------------------------------
@@ -237,17 +238,6 @@ func test_pressing_an_aim_says_the_decree_it_sends_and_the_strain()->void:
 	assert_str(String(press.get("stakes_tip",""))).contains("It orders:").contains(decree).contains("fear your eye more").contains("Letting it go:")
 	assert_str(String(press.get("stakes_short",""))).is_not_empty()
 
-func test_a_hungry_petition_says_what_saying_no_leaves_standing()->void:
-	var person:Dictionary=Hall._officials()[0]
-	var day:=int(GameState.elapsed_days)
-	var audience:=Hall._court_audience(person,{"topic":"food","summary":"Food stores would last about 9 days.","decree":"Send gatherers to find food","ask":"food:band2","situation_type":"crisis_petition"},{"type":"debug","key":"debug","data":{}},day)
-	Hall._enqueue(audience,day)
-	var s:=Hall.stakes(String(audience.id))
-	var days:=roundi(float(Hall.conditions().food_days))
-	assert_str(String(s.refusal)).contains("trusts you less").contains("The stores still last about %d days." % days)
-	assert_str(String(s.refusal_spoken)).contains("trust your word a little less")
-	assert_str(_texts(s.gains)).contains("more food a day from gathering, hunting and fishing")
-
 func test_a_great_work_says_what_it_gives_what_it_needs_and_its_odds()->void:
 	var audience:=Hall.debug_force("wonder_proposal")
 	assert_bool(audience.is_empty()).is_false()
@@ -267,35 +257,6 @@ func test_a_great_work_says_what_it_gives_what_it_needs_and_its_odds()->void:
 # the court: cards, the block, the voice
 # --------------------------------------------------------------------------
 
-func test_the_decree_card_and_the_block_carry_the_stakes()->void:
-	var id:=_petition()
-	var weighed:=Hall.stakes(id)
-	assert_bool(weighed.is_empty()).is_false()
-	var decree:=String((Hall.find(id).petition as Dictionary).suggested_decree)
-	var card:Dictionary={}
-	for option in Hall.options(id):
-		if String(option.id)=="decree": card=option
-	assert_str(String(card.get("stakes_short",""))).is_equal(String(weighed.short))
-	assert_str(String(card.get("stakes_tip",""))).contains("You gain:").contains("How likely:").contains("If you say no:")
-	var modal:Control=auto_free(Modal.new())
-	modal.audience_id=id
-	add_child(modal)
-	await await_idle_frame()
-	var button:Button=modal.find_child("Option_decree",true,false)
-	assert_object(button).is_not_null()
-	var sub:Label=button.find_child("OptionSub",true,false)
-	assert_str(sub.text).is_equal(String(weighed.short))
-	assert_str(button.tooltip_text).contains(decree).contains("You gain:")
-	var panel:=modal.find_child("StakesPanel",true,false)
-	assert_object(panel).is_not_null()
-	var said:=PackedStringArray()
-	for label in panel.find_children("*","Label",true,false): said.append((label as Label).text)
-	var block:=" / ".join(said)
-	assert_str(block).contains("WHAT YOU STAND TO GAIN").contains("You gain").contains("If you say no")
-	# Once answered, the block goes with the answers.
-	modal.choose("promise")
-	assert_bool((modal.find_child("Stakes",true,false) as Control).visible).is_false()
-
 func test_a_crisis_answer_shows_its_cost_on_the_court_card()->void:
 	assert_str(Stakes.cost_tag_words("labour")).is_equal("hands taken from other work")
 	assert_str(Stakes.cost_tag_words("String: their anger")).is_equal("their anger")
@@ -311,87 +272,5 @@ func test_a_crisis_answer_shows_its_cost_on_the_court_card()->void:
 	assert_str(cost.text).is_equal("Costs: hands taken from other work")
 	assert_str(button.tooltip_text).contains("Costs: hands taken from other work")
 
-func test_the_voice_is_told_the_stakes_and_answers_from_them_offline()->void:
-	var id:=_petition()
-	var context:=Hall.voice_context(id)
-	var facts:Dictionary=context.get("stakes",{})
-	assert_str(String(facts.get("you_gain",""))).contains("Logistics up about")
-	assert_int(int(facts.get("lasts_days",0))).is_equal(240)
-	var voice:Node=auto_free(Voice.new())
-	voice.force_offline=true
-	add_child(voice)
-	var s:Dictionary=voice.scene(id)
-	var prompt:String=voice.build_prompt(s,"speak",{"player_text":"What do we gain from this?"})
-	assert_str(prompt).contains("WHAT THE RULER STANDS TO GAIN").contains("Logistics up about").contains("in WHAT THE RULER STANDS TO GAIN")
-	# The facts line keeps its old shape: the stakes are their own section.
-	var facts_line:=prompt.get_slice("FACTS YOU MAY USE (nothing else is true): ",1).get_slice("\n",0)
-	assert_str(facts_line).not_contains("you_gain")
-	# The numbers the stakes give are numbers a live line may say.
-	var allowed:Dictionary=voice.allowed_numbers(s,{"player_text":"What do we gain?"})
-	assert_bool(allowed.has("240")).is_true()
-	assert_bool(allowed.has("8")).is_true()
-	# Offline: asked what we gain, what refusing costs and how long.
-	for asked in [["What's in it for us?","If you order it: Logistics up about"],["What if we refuse?","trust your word a little less"],["How long would it take?","It would run eight moons"]]:
-		var before:=(Hall.find(id).lines as Array).size()
-		voice.player_speaks(id,String(asked[0]))
-		var lines:Array=(Hall.find(id).lines as Array).slice(before)
-		var reply:=" ".join(PackedStringArray(lines.map(func(l:Dictionary)->String: return String(l.text))))
-		assert_str(reply).override_failure_message("asked '%s', heard: %s" % [asked[0],reply]).contains(String(asked[1]))
-	# "What do you want?" is still the petitioner's need, not the stakes.
-	assert_bool(voice.stakes_gain_question("What do you want?")).is_false()
-	assert_bool(voice.stakes_gain_question("is it worth it?")).is_true()
-	assert_bool(voice.stakes_gain_question("How does this help us?")).is_true()
-
-func _petition_for(decree:String,words:String)->String:
-	## An official brings this decree to court, as their ambition would.
-	var person:Dictionary=Hall._officials()[0]
-	var day:=int(GameState.elapsed_days)
-	var audience:=Hall._court_audience(person,{"topic":"ambition","summary":words % String(person.name),"decree":decree,"ask":"ambition:"+decree,"situation_type":"ambition"},{"type":"debug","key":"debug","data":{}},day)
-	Hall._enqueue(audience,day)
-	return String(audience.id)
-
 static func _rows(stakes:Dictionary)->String:
 	return "\n    ".join(PackedStringArray(Stakes.lines(stakes).map(func(r:Dictionary)->String: return "%s: %s" % [r.key,r.text])))
-
-func test_the_texts_for_the_handoff()->void:
-	## The exact card and block texts in this early world, for the record.
-	for pair in [[ROADS,"%s wants the roads improved and hauling organized."],[HEALERS,"%s wants healers organized before the next sickness, not during it."],[SCHOLARS,"%s wants more hands set to inquiry, under their eye."]]:
-		var id:=_petition_for(String(pair[0]),String(pair[1]))
-		var card:Dictionary={}
-		for option in Hall.options(id):
-			if String(option.id)=="decree": card=option
-		print("DECREE \"%s\"\n  card: %s | %s\n  tooltip:\n    %s\n  block:\n    %s" % [pair[0],card.get("label",""),card.get("stakes_short",""),String(card.get("stakes_tip","")).replace("\n","\n    "),_rows(Hall.stakes(id))])
-		assert_str(String(card.get("stakes_short",""))).is_not_empty()
-		Hall.conclude(id,"heard")
-	var day:=int(GameState.elapsed_days)
-	var cands:=Aims.propose(day)
-	for cand in cands: cand["proposed_day"]=day
-	var matter:=Aims.file_proposal(day,cands)
-	var aim:=Hall.open_matter(String(matter.get("id","")))
-	for option in Hall.options(String(aim.id)):
-		print("AIM card: %s | %s" % [option.label,option.get("stakes_short",option.sub)])
-		if option.has("stakes_tip"): print("  tooltip:\n    "+String(option.stakes_tip).replace("\n","\n    "))
-	print("AIM block:\n    "+_rows(Hall.stakes(String(aim.id))))
-	var work:=Hall.debug_force("wonder_proposal")
-	for option in Hall.options(String(work.id)):
-		print("WORK card: %s | %s" % [option.label,option.get("stakes_short",option.sub)])
-	print("WORK block:\n    "+_rows(Hall.stakes(String(work.id))))
-
-func test_the_block_takes_its_room_from_the_transcript_not_the_card()->void:
-	## Under the conversation, above the answers: the card keeps its height,
-	## the transcript gives up the room (a full-size court, 1920 by 1080).
-	get_tree().root.size=Vector2i(1920,1080)
-	var modal:Control=auto_free(Modal.new())
-	modal.audience_id=_petition()
-	add_child(modal)
-	await await_idle_frame()
-	await await_idle_frame()
-	var card:Control=modal.card
-	var stakes:Control=modal.find_child("Stakes",true,false)
-	assert_bool(stakes.visible).is_true()
-	assert_object(stakes.get_parent()).is_equal(modal.find_child("Transcript",true,false).get_parent().get_parent().get_parent())
-	var with_block:=card.get_combined_minimum_size().y
-	stakes.visible=false
-	await await_idle_frame()
-	assert_float(card.get_combined_minimum_size().y).is_equal_approx(with_block,0.5)
-	assert_float(with_block).is_less_equal(float(Modal.DESIGN_SIZE.y))
