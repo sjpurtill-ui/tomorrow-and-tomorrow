@@ -104,16 +104,37 @@ func test_purpose_ornament_covers_all_twelve_purposes_without_claiming_productio
 	var kilns:=Architecture.pieces(Design.describe({"id":"kiln_court"}))
 	assert_bool(kilns.any(func(piece:Dictionary)->bool:return piece.get("emission",false))).is_false()
 
-func test_colossus_shoulders_start_inside_the_actual_tapered_torso()->void:
+func test_colossus_is_a_proportioned_human_with_connected_segmented_arms()->void:
 	for ambition:String in Concept.AMBITIONS:
 		var parts:=Architecture.pieces(Design.describe(work("colossus",2,ambition)))
-		var torso:Dictionary=parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")=="torso")[0]
-		for arm:Dictionary in parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","") in ["left_arm","right_arm"]):
-			var local:Vector3=arm.position-torso.position
-			var taper:=lerpf(1.0,.68,local.y/torso.size.y)
-			var section:=PackedVector2Array()
-			for i in 12:section.append(Vector2(cos(TAU*i/12)*torso.size.x*.5*taper,sin(TAU*i/12)*torso.size.z*.5*taper))
-			assert_bool(Geometry2D.is_point_in_polygon(Vector2(local.x,local.z),section)).is_true()
+		var feature:=func(name:String)->Dictionary:return parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")==name)[0]
+		var torso:Dictionary=feature.call("torso");var head:Dictionary=feature.call("head")
+		assert_float(head.size.x/torso.size.x).is_between(.3,.45)
+		assert_float(head.size.y/Architecture.extent(parts).end.y).is_between(.12,.18)
+		assert_str(feature.call("robe").kind).is_equal("guardian_robe")
+		assert_str(feature.call("hair").kind).is_equal("guardian_hair")
+		assert_int(parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")=="foot").size()).is_equal(2)
+		assert_int(parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")=="finger").size()).is_equal(8)
+		for side:String in ["left","right"]:
+			var upper:Dictionary=feature.call(side+"_upper_arm");var forearm:Dictionary=feature.call(side+"_forearm")
+			assert_str(upper.kind).is_equal("guardian_limb")
+			assert_vector(upper.position+upper.basis*Vector3(0,upper.size.y,0)).is_equal_approx(forearm.position,Vector3.ONE*.000001)
+			var shoulder:Dictionary=parts.filter(func(piece:Dictionary)->bool:return piece.get("feature","")=="shoulder" and signf(piece.position.x)==signf(upper.position.x))[0]
+			var local:Vector3=(upper.position-shoulder.position)/shoulder.size-Vector3(0,.5,0)
+			assert_float(local.length()).is_less(.5)
+			assert_bool(parts.any(func(piece:Dictionary)->bool:return piece.get("feature","")==side+"_hand")).is_true()
+
+func test_colossus_curved_anatomy_clips_every_course_without_inventing_finished_parts()->void:
+	for course in range(0,41):
+		var record:=work("colossus");record.status="building";record.progress=float(course)/40.0
+		var built:=Model.build(record,{"scaffolds":false});var root:Node3D=built.root
+		var points:PackedVector3Array=(root.get_node("Masonry") as MeshInstance3D).mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		var limit:=Architecture.extent(Architecture.pieces(built.description.design)).end.y*float(course)/40.0+.0012 if course>0 else 0.0
+		for point:Vector3 in points:
+			assert_bool(point.is_finite()).is_true()
+			assert_float(point.y).is_less_equal(limit+.000001)
+		assert_int(points.size()).is_less(50000)
+		root.free()
 
 func test_canal_water_waits_for_standing_and_is_absent_from_ruins()->void:
 	for status:String in ["building","stalled","ruined","abandoned","functioning"]:
