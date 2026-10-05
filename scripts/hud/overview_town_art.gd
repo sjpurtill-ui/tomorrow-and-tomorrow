@@ -1,7 +1,10 @@
 extends RefCounted
 ## Representative painted architecture, not a second map or a building ledger.
-const PATH := "res://assets/ui/overview/town-portraits-v1.png"
-static var atlas: Texture2D
+const PATHS := [
+	"res://assets/ui/overview/camp-v2.png",
+	"res://assets/ui/overview/village-v2.png",
+	"res://assets/ui/overview/town-v2.png",
+	"res://assets/ui/overview/mature-v2.png"]
 static var plates: Dictionary = {}
 
 static func plate(drawing: Dictionary) -> int:
@@ -12,15 +15,9 @@ static func plate(drawing: Dictionary) -> int:
 	return 3
 
 static func texture(drawing: Dictionary) -> Texture2D:
-	if atlas == null:
-		if not ResourceLoader.exists(PATH): return null
-		atlas = load(PATH) as Texture2D
 	var index := plate(drawing)
 	if plates.has(index): return plates[index]
-	var cell := atlas.get_size() / Vector2(2, 2)
-	var image := AtlasTexture.new()
-	image.atlas = atlas
-	image.region = Rect2(Vector2(index % 2, index / 2) * cell, cell)
-	image.filter_clip = true
+	if not ResourceLoader.exists(PATHS[index]): return null
+	var image := load(PATHS[index]) as Texture2D
 	plates[index] = image
 	return image

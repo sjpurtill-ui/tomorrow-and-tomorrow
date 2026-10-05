@@ -1,5 +1,28 @@
 # Overview folio — held for visual approval
 
+## Current revision: individual town paintings
+
+The user's follow-up, "Better pictures", replaces the atlas rendering with four
+individual 1536 × 1024 RGBA paintings generated with built-in imagegen. Active
+assets are `assets/ui/overview/camp-v2.png`, `village-v2.png`, `town-v2.png` and
+`mature-v2.png`. Their actual alpha is preserved; the old paper-removal shader is
+no longer applied. The picture occupies its own larger area above the leader,
+whose existing portrait, words and controls remain below it. Architecture-tier
+selection is unchanged. These remain representative scenes, not exact maps.
+
+All four images were visually inspected. The camp was corrected to remove a
+metal cauldron and use wooden fish spits and a flint implement. The common
+generation prompt, four subjects and correction are recorded in
+`OVERVIEW_ART_V2_PROMPTS.json`. Source images remain in the generated-images
+directory; earlier atlas files are retained as prior preview material.
+
+The ten Overview regression cases pass again (report 23), including the leader
+actions after the layout change. Private GPU captures check the larger artwork
+in both page themes and at compact width. This revision starts from `62a2cbeb`
+on the same isolated `codex/overview-folio` branch. It is still HELD for review.
+
+## Initial preview record
+
 Status: HELD. The user requested a replacement for the Overview's diagram-like
 town and repeated meters, with a rendered example before integration.
 

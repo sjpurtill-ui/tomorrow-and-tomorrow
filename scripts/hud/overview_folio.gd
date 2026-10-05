@@ -3,15 +3,32 @@ extends "res://scripts/hud/settlement_overview.gd"
 const Base := preload("res://scripts/hud/settlement_overview.gd")
 const TownArt := preload("res://scripts/hud/overview_town_art.gd")
 var comparing := false
+var leader_spread: BoxContainer
 
 func _sketch(drawing: Dictionary, parent: Node) -> void:
 	sketch = PaintedTown.new()
 	sketch.name = "TownSketch"
 	sketch.data = drawing
-	sketch.custom_minimum_size = Vector2(280, 290)
+	sketch.custom_minimum_size = Vector2(280, 420)
 	sketch.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sketch.size_flags_stretch_ratio = 1.4
 	parent.add_child(sketch)
+
+func _leader(block: Dictionary, parent: Node) -> void:
+	super._leader(block, parent)
+	var column := parent.get_child(parent.get_child_count() - 1) as VBoxContainer
+	var pieces := column.get_children()
+	leader_spread = BoxContainer.new()
+	leader_spread.add_theme_constant_override("separation", 26)
+	column.add_child(leader_spread)
+	var head := pieces[0] as Control
+	head.custom_minimum_size.x = 280
+	head.reparent(leader_spread)
+	var words := VBoxContainer.new()
+	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	words.add_theme_constant_override("separation", 8)
+	leader_spread.add_child(words)
+	for index in range(1, pieces.size()): pieces[index].reparent(words)
 
 func _groups(groups: Array, legend: Array, _own_name: String) -> void:
 	_rule(self)
@@ -101,7 +118,9 @@ func restore_view_state(state: Dictionary) -> void:
 	if button != null: button.button_pressed = bool(state.get("comparing", false))
 
 func _layout() -> void:
-	if spread: spread.vertical = size.x < 690
+	if spread: spread.vertical = true
+	if leader_spread: leader_spread.vertical = size.x < 620
+	if sketch: sketch.custom_minimum_size.y = 420 if size.x >= 690 else 310
 	if grid: grid.columns = 2 if size.x >= 540 else 1
 
 class PaintedTown extends Base.OwnSketch:
@@ -111,9 +130,6 @@ class PaintedTown extends Base.OwnSketch:
 		painting.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		painting.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		painting.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var ink := ShaderMaterial.new()
-		ink.shader = preload("res://scripts/hud/overview_paper_art.gdshader")
-		painting.material = ink
 		add_child(painting)
 	func _draw() -> void:
 		var art := TownArt.texture(data)

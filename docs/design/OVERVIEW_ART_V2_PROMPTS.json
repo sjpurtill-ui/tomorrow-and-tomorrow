@@ -1,0 +1,24 @@
+{
+  "tool": "built-in imagegen",
+  "transparent_background": true,
+  "style": "Create a premium historical strategy game town illustration, one single expansive scene, landscape 3:2 composition at the highest available resolution. Visually stunning hand-painted realism, rich oil-and-gouache brushwork, crisp architectural craftsmanship, atmospheric depth, warm late-afternoon light with cool blue-green shadows, lush nuanced earthy colors. Confident color and form, NOT sepia, NOT faded parchment, NOT a diagram or an isometric icon. Camera moderately elevated, close enough to clearly see ordinary people going about daily life in the foreground; architecture recedes into a believable environment. Compelling composition with a curved path guiding the eye through the settlement, a strong beautiful foreground focal point, layered midground buildings and soft distant landscape. Buildings and human activities must remain legible when scaled to an 800 pixel wide game panel. Fill almost the entire canvas with the scene. The scene's irregular painted outer edge gently gives way to REAL TRANSPARENCY along a narrow margin, with no opaque paper rectangle, no frame, no text, no UI, no labels. This is one representative town portrait, not an exact map.",
+  "specs": [
+    [
+      "camp",
+      "A small early prehistoric settlement: beautifully constructed hide tents and reed lean-tos, one intimate communal hearth, adults preparing food, a person carrying firewood and another weaving a basket, children nearby, carefully rendered hides and woven fibers, riverbank stones and wild grasses, distant woodland. No farming fields, no domesticated draft animals, no masonry, no fortifications, no metal tools, no monumental hall. Small warm human community rather than rows of identical tents."
+    ],
+    [
+      "village",
+      "An established early village: varied timber and earth dwellings with lovingly detailed thatched roofs, an open communal timber shelter, a few people weaving baskets and shaping wood under the awnings, grain vessels and woven fences, a small central gathering space, gardens and trees. Beautiful close view of a thatched house and its residents in the foreground. No fortifications, castles, churches, paved roads, or modern features. Everyday life is vivid and the architecture feels substantial and inhabited."
+    ],
+    [
+      "town",
+      "A developed preindustrial town of timber, earth and modest stone foundations: varied houses and artisan workshops, a warm lively market square with cloth awnings, skilled carpenters working outside a workshop, several people walking with baskets, an ox cart farther down the lane, layered rooftops receding toward trees and low hills. Fine joinery, irregular beautiful rooflines, realistic rich thatch and timber. Not a fantasy city; no castles, churches, defensive walls, or grand monuments. The scene should feel like a place one longs to explore."
+    ],
+    [
+      "mature",
+      "A mature preindustrial town with handsome modest masonry, plaster and timber houses, warm terracotta and slate roofs, intimate courtyards and varied workshops around a sunlit market street, linen awnings, merchants and shoppers, a few flowering plants, fine believable architectural craftsmanship, intricate balconies and doors, distant neighborhoods softening into atmospheric hills. Strongly composed, beautiful human-scale everyday life. No castles, fortifications, churches, towering monuments, skyscrapers or modern machines."
+    ]
+  ],
+  "camp_correction": "Keep this beautiful painting, composition, people, landscape, lighting, color, dimensions and transparent outer margins exactly the same. Correct only the anachronistic metal cooking equipment in the lower-left foreground: REMOVE the hanging metal cauldron, its iron handle, hook, and metal stand. In the same hearth area put fish roasting directly on plain wooden spits over the stone-ringed fire, with a simple wooden crossbar and forked wooden uprights, completely plausible before pottery or metalworking. The woman tends a wooden spit. The man's small cutting implement must clearly be a chipped flint blade, never a modern metal knife. No other changes. Preserve the real alpha transparency."
+}
