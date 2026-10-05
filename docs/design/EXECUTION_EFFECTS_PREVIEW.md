@@ -1,6 +1,7 @@
 # Execution effects preview — October 5, 2026
 
-Status: user-approved October 5; integration validation in progress against main 5740f208.
+Status: user-approved October 5; integrated with main 5740f208 in runtime 182af02e.
+Combined validation: 40/40 tests pass, zero errors/failures/skips/orphans (report 12).
 Branch: codex/execution-effects. Base: 0b0f6c5b5b992867091d5fad7edc7ab0c937007a.
 Worktree: C:/Users/sjpur/.codex/worktrees/food-folio/TomorrowandTomorrow.
 

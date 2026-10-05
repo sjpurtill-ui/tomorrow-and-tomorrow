@@ -1,4 +1,4 @@
-## October 5 — Execution effects: approved integration
+## October 5 — Execution effects: INTEGRATED
 
 Prepared on `codex/execution-effects` from `0b0f6c5b`. Beheading uses the
 visible moving stump with falling pressure and runoff; burning has sustained
@@ -9,6 +9,14 @@ for the fire act. Recorded audio examples have been approved;
 17/17 sound tests pass, but do not establish perceived quality. Original 37/37 regression cases and both private
 GPU previews pass. No adjudication,
 ledger or save changes. See `docs/design/EXECUTION_EFFECTS_PREVIEW.md`.
+
+Combined runtime `182af02e` merges approved source `206408a7` with main
+`5740f208`. All 40/40 execution-stage, sound and figure-gore tests pass with
+zero errors, failures, skips or orphans (report 12). Only the delivery notes
+needed conflict resolution; existing field-growth and soundtrack work is retained.
+Delivery follows remote-first push and canonical fast-forward. No save-schema
+change; local imports and capture artifacts remain excluded. The updated source
+is available on the next normal canonical launch; no player restart is claimed.
 
 ## October 5 — Compact organic field growth: INTEGRATED
 
