@@ -12,6 +12,7 @@ signal closed(work_id:String)
 const Bridge:=preload("res://scripts/great_works_audience.gd")
 const Plate:=preload("res://scripts/hud/great_work_plate.gd")
 const CeremonyStage:=preload("res://scripts/hud/great_work_ceremony_stage.gd")
+const Rituals:=preload("res://scripts/hud/great_work_rituals.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
@@ -29,6 +30,7 @@ var city_id:=""
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 var record:Dictionary={}
 var voice_ctx:Dictionary={}
+var ritual_profile:Dictionary={}
 var result:Dictionary={}
 var allure_before:=0.0
 ## Our works' renown before the dedication (great_works.gd renown), to state
@@ -158,7 +160,7 @@ func _build()->void:
 	stage.add_theme_stylebox_override("panel",P.sheet_style(16));add_child(stage)
 	var shell:=VBoxContainer.new();shell.add_theme_constant_override("separation",8);stage.add_child(shell)
 	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);shell.add_child(controls)
-	var heading:=_label(String(CeremonyStage.ritual_spec(GameState.known_discoveries,preload("res://scripts/hud/court_presentation.gd").for_owner()).label),14,Tokens.INK_MUTED);heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_child(heading)
+	var heading:=_label(String(ritual_profile.get("title","The dedication")),14,Tokens.INK_MUTED);heading.name="RitualTitle";heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.add_child(heading)
 	var skip:=P.button(controls,"Skip reveal",skip_reveal);skip.name="SkipCeremony";skip.autowrap_mode=TextServer.AUTOWRAP_OFF;skip.size_flags_horizontal=Control.SIZE_SHRINK_END
 	var leave:=P.button(controls,"Close",close);leave.name="CloseCeremonyTop";leave.autowrap_mode=TextServer.AUTOWRAP_OFF;leave.size_flags_horizontal=Control.SIZE_SHRINK_END
 	var scroll:=ScrollContainer.new();_details_scroll=scroll;scroll.name="CeremonyScroll";scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -185,6 +187,8 @@ func _build()->void:
 	plate=CeremonyStage.make(work_view,voice_ctx,340);plate.name="WorkPlate";plate.size_flags_horizontal=Control.SIZE_EXPAND_FILL;plate.size_flags_vertical=Control.SIZE_EXPAND_FILL;frame.add_child(plate)
 	var lore:=_label(_lore(),17,Tokens.BODY);lore.name="Lore";lore.add_theme_font_override("font",_italic);lore.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lore.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(lore)
+	if not ritual_profile.is_empty():
+		var rite:=_label(String(ritual_profile.before)+" "+String(ritual_profile.purpose_caption),14,Tokens.BODY);rite.name="RitualDescription";rite.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(rite)
 	var architect:Dictionary=record.get("architect",{}) if record.get("architect") is Dictionary else {}
 	if not String(architect.get("name","")).is_empty():
 		var builder:=_label("Raised by the master builder %s%s" % [String(architect.name),(", in the %s style" % String(architect.get("style",""))) if not String(architect.get("style","")).is_empty() else ""],13,Tokens.INK_MUTED,.04)
@@ -295,7 +299,8 @@ func _prepare_voice_context()->void:
 		"architect":(record.get("architect",{}) as Dictionary).duplicate() if record.get("architect") is Dictionary else {},"official":official,"attendees":(ceremony.get("attendees",[]) as Array).duplicate(true)}
 	var actual:Dictionary=HistoricalFigures.by_id(String((voice_ctx.architect as Dictionary).get("id","")))
 	if not actual.is_empty() and (String(actual.get("status","living"))=="dead" or int(actual.get("death_day",-1))>=0):voice_ctx.architect={}
-	voice_ctx["ritual"]=CeremonyStage.ritual_spec(GameState.known_discoveries,preload("res://scripts/hud/court_presentation.gd").for_owner())
+	ritual_profile=Rituals.describe(record,GameState.known_discoveries,preload("res://scripts/hud/court_presentation.gd").for_owner())
+	voice_ctx["ritual"]=Rituals.voice_facts(ritual_profile)
 
 func _start_voice()->void:
 	if is_instance_valid(voice) and voice.has_method("ceremony_speeches"):
@@ -380,6 +385,7 @@ func dedicate_with(text:String)->Dictionary:
 	skip_reveal()
 	_show_result(chosen)
 	if is_instance_valid(plate) and plate.has_method("dedication"):plate.call("dedication")
+	voice_ctx["ritual"]=Rituals.voice_facts(ritual_profile,true)
 	if is_instance_valid(voice) and voice.has_method("ceremony_named"):voice.call("ceremony_named",voice_ctx,chosen)
 	return result
 
