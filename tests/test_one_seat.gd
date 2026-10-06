@@ -189,3 +189,18 @@ func test_folded_towns_leave_their_land_with_the_seat()->void:
 	_town("Rivermeet",HOME+Vector2(-30,4),80.0)
 	OneSeat.fold_towns(300)
 	assert_int(int(OneSeat.seat_record().get("land_claims",0))).is_equal(2)
+
+## Homesteads produce where they stand: a site out in the homestead country
+## hauls only from the town's edge; the town's own ground and the land past
+## the homesteads keep their real distance.
+func test_homesteads_haul_from_the_town_edge()->void:
+	assert_float(OneSeat.haul_km(60.0,90.0,15.0)).is_equal(15.0)
+	assert_float(OneSeat.haul_km(8.0,90.0,15.0)).is_equal(8.0)
+	assert_float(OneSeat.haul_km(1800.0,90.0,15.0)).is_equal(1800.0)
+	# No homesteads yet (the worked ground is the town's own): nothing changes.
+	assert_float(OneSeat.haul_km(12.0,9.0,9.0)).is_equal(12.0)
+	_seat()
+	GameState.population_exact=4000.0
+	GameState.ensure_population_total(4000)
+	assert_float(OneSeat.core_km()).is_equal(15.0)
+	assert_float(OneSeat.reach_km()).is_greater_equal(OneSeat.core_km())

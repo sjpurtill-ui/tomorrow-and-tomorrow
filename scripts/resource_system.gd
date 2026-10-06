@@ -741,6 +741,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	var material_deposits:Array[Dictionary]=[]
 	var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
+	# Homesteads produce where they stand (one_seat.gd haul_km): read once.
+	var OneSeat:=preload("res://scripts/one_seat.gd")
+	var homestead_reach:=OneSeat.reach_km()
+	var town_core:=OneSeat.core_km()
 	for deposit in WorldSimulation.state.resource_deposits:
 		if WorldSimulation.enabled:preload("res://scripts/civilization_resources.gd").available(deposit)
 		deposit.extracted_today=0.0
@@ -748,6 +752,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if String(deposit.stage) not in ["accessible","developed"]: continue
 		if not _is_material_resource(String(deposit.resource)): continue
 		deposit.distance_km=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
+		deposit["haul_km"]=OneSeat.haul_km(float(deposit.distance_km),homestead_reach,town_core)
 		material_deposits.append(deposit)
 	stamp=trace.mark("flow_available",stamp)
 	var extractors:=WorldSimulation.state.effective_workers("Extraction")
@@ -875,13 +880,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var assigned_carriers:=carriers*share
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
-		var distance_factor:=1.0+float(deposit.distance_km)/10.0
+		var distance_factor:=1.0+float(deposit.get("haul_km",deposit.distance_km))/10.0
 		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor*span
 		var dispatched:=minf(waiting,haul_capacity)
 		if dispatched>0.0:
 			deposit.stock_at_source=waiting-dispatched
 			var speed_km_day:=maxf(1.0,8.0*route_factor*travel_effect)
-			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
+			deposit.travel_days=maxi(1,ceili(float(deposit.get("haul_km",deposit.distance_km))/speed_km_day))
 			_add_shipment(deposit,today+int(deposit.travel_days),dispatched)
 		_update_deposit_bottleneck(deposit,carriers,events)
 	stamp=trace.mark("flow_hauling",stamp)
@@ -1106,7 +1111,7 @@ func _deposit_priority(deposit:Dictionary,storage_priorities:Dictionary={},pass_
 	# overflowing materials while essential timber had no stock at all.
 	var working_stock:=maxf(20.0,WorldSimulation.state.population_exact*.08)
 	var scarcity:=2.0/(1.0+maxf(0.0,stored)/working_stock)
-	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.distance_km)/45.0))*float(storage_priorities.get(resource_name,1.0))
+	return maxf(0.05,named*scarcity*float(deposit.quality)/(1.0+float(deposit.get("haul_km",deposit.distance_km))/45.0))*float(storage_priorities.get(resource_name,1.0))
 
 func _extraction_priority(deposit:Dictionary,storage_priorities:Dictionary={},pass_inputs:Dictionary={})->float:
 	var reserve:=float(deposit.get("remaining",0.0))
