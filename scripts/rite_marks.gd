@@ -6,6 +6,7 @@ extends Node3D
 
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const FIGURES:=preload("res://scripts/living_map.gd")
+const PeoplePolicy:=preload("res://scripts/map_people_policy.gd")
 const NODE_NAME:="RiteMarks"
 const UNIT:=0.001            ## one metre in map units
 const RING:=0.03             ## rites stand about 30 m from the camp centre
@@ -136,6 +137,7 @@ func _procession(root:Node3D)->void:
 	_fire(torch,0.7)
 
 func _walkers(root:Node3D,count:int,radius_m:float,mourning:bool)->void:
+	if not PeoplePolicy.show_people():return
 	## The people walk the circle: the living map's animated figures (one
 	## draw call), bowed and dark-clad when they mourn.
 	var ring:=Node3D.new(); ring.name="Walkers"; root.add_child(ring)

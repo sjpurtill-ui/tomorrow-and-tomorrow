@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
-## The living map (fun audit #6): a bounded crowd that shows the real labour
-## mix, hearth smoke that grows with the people, births, burials and scouts
-## marked on the map, and the seasonal shader told the year's direction.
+## The living map retains smoke, birth marks and seasons while the explicit
+## no-people map policy suppresses workers, children and event walkers.
+## Labour-allocation arithmetic remains independent of that presentation policy.
 const Living:=preload("res://scripts/living_map.gd")
 
 class Host extends Node3D:
@@ -67,22 +67,21 @@ func test_smoke_grows_with_the_people_but_is_capped()->void:
 	assert_int(Living.plume_count(120)).is_equal(5)
 	assert_int(Living.plume_count(9000000)).is_equal(Living.MAX_PLUMES)
 
-func test_layer_shows_the_workers_and_reports_them_against_labour()->void:
+func test_layer_retains_hearth_smoke_without_worker_figures()->void:
 	var host:=_host()
 	Living.refresh(host)
 	var layer:=host.get_node_or_null(Living.NODE_NAME)
 	assert_object(layer).is_not_null()
 	var report:Dictionary=layer.activity_report()
-	assert_int(int(report.workers)).is_equal(24)
-	assert_float(float(report.max_share_error)).is_less_equal(1.0/24.0+0.001)
+	assert_int(int(report.workers)).is_equal(0)
 	# No recorded homes/chimneys in this fixture: only its camp hearth smokes.
 	assert_int(int(report.plumes)).is_equal(1)
-	# One draw call per batch; never more instances than the cap.
+	# The user requested no people at any map zoom or population.
 	var workers:MultiMeshInstance3D=layer.get("worker_mm")
-	assert_int(workers.multimesh.instance_count).is_equal(Living.MAX_WORKERS)
-	assert_int(workers.multimesh.visible_instance_count).is_equal(24)
+	assert_int(workers.multimesh.instance_count).is_equal(0)
+	assert_int(workers.multimesh.visible_instance_count).is_equal(0)
 
-func test_births_burials_and_scouts_leave_marks_on_the_map()->void:
+func test_birth_marks_remain_without_burial_or_scout_walkers()->void:
 	var host:=_host()
 	Living.refresh(host)
 	var layer:=host.get_node(Living.NODE_NAME)
@@ -90,18 +89,14 @@ func test_births_burials_and_scouts_leave_marks_on_the_map()->void:
 	Living.refresh(host)
 	var report:Dictionary=layer.activity_report()
 	assert_int(int(report.flares)).is_equal(1)
-	assert_int(int(report.event_walkers)).is_greater_equal(5)
+	assert_int(int(report.event_walkers)).is_equal(0)
 	# A new season's tally counts from zero again.
 	GameState.hearth_season={"start_day":91,"born":1,"buried":0}
 	Living.refresh(host)
 	assert_int(int(layer.activity_report().flares)).is_equal(2)
 	CivilizationSystem.scout_report_returned.emit({"personnel":4,"lost_personnel":1,"return_route":[{"x":13.0,"z":-8.0},{"x":12.2,"z":-8.0},{"x":12.0,"z":-8.0}]})
 	var walkers:Array=layer.get("events")
-	var party:=walkers.filter(func(w:Dictionary)->bool:return String(w.kind)=="party")
-	assert_int(party.size()).is_equal(3)
-	# The party comes in from the side its road leads (east here).
-	assert_float((party[0].points[0] as Vector2).x).is_greater(0.2)
-	assert_int(walkers.size()).is_less_equal(Living.MAX_EVENT_FIGURES)
+	assert_int(walkers.size()).is_equal(0)
 
 func test_marks_stay_bounded_under_a_flood_of_deaths()->void:
 	var host:=_host()
@@ -126,18 +121,17 @@ func test_seasonal_shader_learns_the_direction_of_the_year()->void:
 	Living.refresh(host)
 	assert_float(float(material.get_shader_parameter("season_turn"))).is_less(-0.9)
 
-func test_a_few_children_play_about_the_homes_bounded_by_the_real_count()->void:
-	# codex/beauty-3: about one visible child per fourteen real children.
+func test_population_growth_does_not_add_children_or_workers()->void:
+	# The map policy has no exception for growing child cohorts.
 	GameState.population_cohorts={"children":56.0,"youth":20.0,"early_adults":20.0,"established_adults":14.0,"mature_adults":8.0,"elders":2.0}
 	var host:=_host()
 	Living.refresh(host)
 	var layer:=host.get_node_or_null(Living.NODE_NAME)
 	var report:Dictionary=layer.activity_report()
-	assert_int(int(report.children)).is_equal(4)
+	assert_int(int(report.children)).is_equal(0)
 	var batch:MultiMeshInstance3D=layer.get("child_mm")
-	assert_int(batch.multimesh.instance_count).is_equal(Living.MAX_CHILDREN)
+	assert_int(batch.multimesh.instance_count).is_equal(0)
 	GameState.population_cohorts["children"]=4000.0
 	layer.call("_refresh_children")
-	assert_int(int(layer.activity_report().children)).is_equal(Living.MAX_CHILDREN)
-	# Children never add to the working figures.
-	assert_int(int(layer.activity_report().workers)).is_equal(24)
+	assert_int(int(layer.activity_report().children)).is_equal(0)
+	assert_int(int(layer.activity_report().workers)).is_equal(0)

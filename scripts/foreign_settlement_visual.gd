@@ -7,6 +7,8 @@ var footprint_radius:=.065
 var ground:Callable
 var origin:=Vector2.ZERO
 var surfaces:Dictionary={}
+var _country_visual:Node3D
+var _country_style:Dictionary={}
 static func display_population(report:Dictionary)->int:
 	var estimate:Dictionary=report.get("fields",{}).get("population",{})
 	return roundi((float(estimate.low)+float(estimate.high))*.5) if not estimate.is_empty() else -1
@@ -19,7 +21,7 @@ static func stable_population(report:Dictionary,previous:int)->int:
 static func framing_size(report:Dictionary)->float:
 	var population:=display_population(report)
 	return clampf(.22+sqrt(maxf(0,population))*.0015,.22,.8)
-func build(report:Dictionary,height_at:Callable)->void:
+func build(report:Dictionary,height_at:Callable,country_snapshot:Dictionary={})->void:
 	ground=height_at;origin=Vector2(float(report.position.x),float(report.position.z))
 	position=Vector3(origin.x,0,origin.y)
 	set_meta("city_id",String(report.city_id));set_meta("details_confirmed",not report.get("fields",{}).is_empty())
@@ -35,6 +37,7 @@ func build(report:Dictionary,height_at:Callable)->void:
 	# houses, packed mud brick, or a camp of painted hides), in its own
 	# colours. Representative households only: nothing here is a census.
 	var style:=style_for(report)
+	_country_style=style
 	people_style=String(style.name)
 	var heading:=rng.randf_range(-PI,PI)
 	var plan:Dictionary={"buildings":[],"replaced":{}}
@@ -124,6 +127,44 @@ func build(report:Dictionary,height_at:Callable)->void:
 		material.roughness=.94;material.cull_mode=BaseMaterial3D.CULL_DISABLED
 		instance.material_override=material;add_child(instance)
 	set_meta("building_count",building_count)
+	if not country_snapshot.is_empty():update_country(country_snapshot)
+
+## The map supplies a read-only snapshot of revealed country. This renderer
+## never looks up a hidden census, a rival's stores or unreported work sites.
+## The shared layer retains its patches between snapshots and draws the same
+## fields, farmsteads and worked-ground history in this people's house forms.
+func update_country(snapshot:Dictionary,land_at:Callable=Callable())->void:
+	if snapshot.is_empty():
+		if is_instance_valid(_country_visual):_country_visual.hide()
+		set_process(false)
+		return
+	if not is_instance_valid(_country_visual):
+		_country_visual=preload("res://scripts/settlement_country_visual.gd").new()
+		_country_visual.name="ForeignWorkedCountry"
+		# Country patches use world coordinates; the town is already anchored
+		# at its reported origin, either directly or by its containing marker.
+		_country_visual.position=Vector3(-origin.x,0.0,-origin.y)
+		add_child(_country_visual)
+	_country_visual.configure(func(at:Vector2)->float:return float(ground.call(at.x,at.y)),land_at)
+	_country_visual.request(snapshot,_country_style)
+	_country_visual.show()
+	set_process(true)
+
+func country_stats()->Dictionary:
+	return _country_visual.stats() if is_instance_valid(_country_visual) else {}
+
+func _ready()->void:
+	set_process(is_instance_valid(_country_visual))
+
+func _process(_delta:float)->void:
+	if not is_instance_valid(_country_visual):
+		set_process(false)
+		return
+	if not is_visible_in_tree():return
+	# One bounded retained patch per frame, only while a changed snapshot
+	# has work queued. An unchanged foreign town has no frame/day rebuild.
+	_country_visual.process_jobs(1000,1)
+	if int(_country_visual.stats().get("pending",0))==0:set_process(false)
 ## How a people builds, from who they are (their identity is what the report
 ## gives; nothing hidden is read): house form, colours, how closely they
 ## build and whether kin share yards. Era-true for the early world.

@@ -187,7 +187,7 @@ class WorksHost extends Host:
 		super._init()
 		add_child(undertaking_visual_root)
 
-func test_builders_work_only_at_rising_works_and_are_bounded()->void:
+func test_rising_works_do_not_add_builder_figures_at_any_zoom()->void:
 	var host:WorksHost=auto_free(WorksHost.new())
 	add_child(host)
 	host.camera.position=GameState.settlement_founded_at+Vector3(0,0.3,0.1)
@@ -201,15 +201,16 @@ func test_builders_work_only_at_rising_works_and_are_bounded()->void:
 	var layer:Node=host.get_node("MapAmbience")
 	layer.day_tick()
 	var count:int=layer.builders.multimesh.visible_instance_count
-	assert_int(count).is_less_equal(Ambience.MAX_BUILDERS)
-	assert_int(count).is_equal(Ambience.MAX_BUILDERS)  # three rising works shown, four hands each
+	# Explicit no-people policy also applies to active construction sites.
+	assert_int(count).is_equal(0)
+	assert_int(layer.builders.multimesh.instance_count).is_equal(0)
 	host.camera.size=1.0
 	layer._frame(1.0/60.0)
-	assert_bool(layer.builders.visible).is_true()
+	assert_bool(layer.builders.visible).is_false()
 	host.camera.size=40.0
 	layer._frame(1.0/60.0)
 	assert_bool(layer.builders.visible).is_false()
-	# A day with nothing changed keeps the same people at the same places.
+	# A day with nothing changed does not allocate a builder layout.
 	var signature:String=layer.builder_signature
 	layer.day_tick()
 	assert_str(layer.builder_signature).is_equal(signature)

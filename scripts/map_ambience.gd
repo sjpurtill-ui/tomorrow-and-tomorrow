@@ -23,6 +23,7 @@ extends Node3D
 
 const MapWeather:=preload("res://scripts/map_weather.gd")
 const MapMotion:=preload("res://scripts/map_motion.gd")
+const PeoplePolicy:=preload("res://scripts/map_people_policy.gd")
 const Ink:=preload("res://scripts/map_life_ink.gd")
 const NODE_NAME:="MapAmbience"
 const UNIT:=0.001                 ## one metre in map units (km)
@@ -128,7 +129,7 @@ func _ready()->void:
 	boats=_batch("Boats",Ink.quad(),boat_material(),MAX_BOATS,true)
 	# Builders at rising great works share the living map's people.
 	var living_script:=preload("res://scripts/living_map.gd")
-	builders=_batch("GreatWorkBuilders",living_script.figure_mesh(),living_script.figure_material(),MAX_BUILDERS,true)
+	builders=_batch("GreatWorkBuilders",living_script.figure_mesh(),living_script.figure_material(),PeoplePolicy.representative_count(MAX_BUILDERS),true)
 	# Placed in world coordinates at any work: shown only near one, never culled.
 	builders.custom_aabb=AABB(Vector3(-40000,-100,-40000),Vector3(80000,200,80000))
 	_seed_drops()
@@ -242,7 +243,7 @@ func _frame(delta:float)->void:
 	var life:=size<=LIFE_MAX_VIEW and near_home
 	var legible:=clampf(size/0.55,1.0,2.6)
 	birds.visible=life and not reduced and birds.multimesh.visible_instance_count>0
-	builders.visible=size<=BUILDER_MAX_VIEW and builders.multimesh.visible_instance_count>0 and _near_any(builder_sites,target,maxf(2.0,size*2.0))
+	builders.visible=PeoplePolicy.show_people() and size<=BUILDER_MAX_VIEW and builders.multimesh.visible_instance_count>0 and _near_any(builder_sites,target,maxf(2.0,size*2.0))
 	herd.visible=life and herd.multimesh.visible_instance_count>0
 	boats.visible=life and boats.multimesh.visible_instance_count>0
 	if birds.visible or herd.visible or boats.visible:
@@ -483,6 +484,10 @@ static func _near_any(points:Array[Vector3],target:Vector3,reach:float)->bool:
 ## People at work around each rising great work: a few hammering at the
 ## courses, one bent to the stone heap. Bounded; re-read once a day.
 func _refresh_builders()->void:
+	if not PeoplePolicy.show_people():
+		builder_sites.clear();builders.multimesh.visible_instance_count=0;builders.hide()
+		last_report["builders"]=0
+		return
 	var root:Node=terrain.get("undertaking_visual_root") if "undertaking_visual_root" in terrain else null
 	var sites:Array[Dictionary]=[]
 	if is_instance_valid(root):

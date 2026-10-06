@@ -1,0 +1,252 @@
+extends Node
+## Isolated, explicitly labelled review evidence. Reads a COPY of a campaign
+## save; never saves it. Only --pace-seconds advances the in-memory copy.
+## --population makes a labelled specimen,
+## never a campaign checkpoint. Run GPU mode on run_isolated_gpu_probe.ps1.
+## --people-grown-land --save=<copy> --out=<dir> --prefix=before|after
+## --sizes=.75,240,1800 [--population=N] [--reveal] [--census=<paths.txt>]
+## Without --save: --seed=N reconstructs a labelled founding, not a checkpoint.
+## --site-detail adds a close view of a recorded worked site; --pace-seconds=N
+## then measures rendered playback on the private desktop after captures.
+const Seat = preload("res://scripts/one_seat.gd")
+const Realm = preload("res://scripts/realm_reach.gd")
+const Lod = preload("res://scripts/terrain_lod.gd")
+
+class Snapshot extends "res://scripts/save_system.gd":
+	var source := ""
+	func slot_path(_slot: String) -> String: return source
+
+var terrain: Node3D
+var report: Dictionary = {}
+
+func _ready() -> void: call_deferred("_run")
+
+func _arg(name: String, fallback := "") -> String:
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--" + name + "="): return arg.substr(name.length() + 3)
+	return fallback
+
+func _run() -> void:
+	if not "--people-grown-land" in OS.get_cmdline_user_args():
+		get_tree().quit(2)
+		return
+	if not ProjectSettings.globalize_path("user://").contains("TomorrowPeopleGrownLandQA"):
+		push_error("Requires private TomorrowPeopleGrownLandQA userdata override.")
+		get_tree().quit(2)
+		return
+	var saves := Snapshot.new()
+	add_child(saves)
+	if _arg("census") != "":
+		var rows: Array = []
+		for path in FileAccess.get_file_as_string(_arg("census")).split("\n", false):
+			saves.source = path.strip_edges()
+			var payload: Dictionary = saves._read_payload("copy")
+			var metadata: Dictionary = payload.get("metadata", {}).duplicate()
+			metadata["source"] = saves.source
+			rows.append(metadata)
+			print("CAMPAIGN_METADATA ", JSON.stringify(metadata))
+		_write(_arg("out", "res://artifacts/people-grown-land").path_join("census.json"), rows)
+		get_tree().quit(0)
+		return
+	AudioServer.set_bus_mute(0, true)
+	var source := _arg("save")
+	if source != "":
+		saves.source = source
+		var loaded: Dictionary = saves.load_game("copy")
+		if loaded.has("error"):
+			push_error(str(loaded))
+			get_tree().quit(1)
+			return
+		print("PEOPLE_GROWN_LAND_LOADED ", GameState.population_total, " day=", GameState.elapsed_days)
+	else:
+		WorldSimulation.clear()
+		GameState.reset_for_new_world(int(_arg("seed", "184271")))
+		GameState.select_founding_focus("provision")
+		PeopleDirection.choose("makers")
+	GameState.civic_api_enabled = false
+	for node in get_tree().root.get_children():
+		if node != self:
+			node.set_process(false)
+			node.set_physics_process(false)
+	if _arg("population") != "":
+		GameState.ensure_population_total(int(_arg("population")))
+	terrain = load("res://local_terrain.tscn").instantiate()
+	print("PEOPLE_GROWN_LAND_SCENE_LOADED")
+	add_child(terrain)
+	print("PEOPLE_GROWN_LAND_TERRAIN_READY")
+	terrain._set_game_speed(0)
+	await get_tree().process_frame
+	if source == "":
+		GameState.settlement_site_committed = true
+		GameState.settlement_founded_at = terrain.settler_marker.position
+		if not "Hearth Circle" in GameState.settlement_completed: GameState.settlement_completed.append("Hearth Circle")
+		SettlementModel.ensure_founded()
+		terrain._refresh_settlement_footprint(true)
+	var realm: Dictionary = Realm.ours()
+	var core := Seat.core_km()
+	var reach := Seat.reach_km()
+	var evidence := "Exact saved campaign" if source != "" else "Reconstructed founding - not original campaign checkpoint"
+	if _arg("population") != "": evidence = "Population specimen - not a campaign checkpoint"
+	report = {"evidence": evidence, "source_copy": source, "source_sha256": FileAccess.get_sha256(source) if source != "" else "", "population_override": _arg("population"), "seed": GameState.world_seed, "population": GameState.population_total, "day": GameState.elapsed_days, "name": GameState.settlement_name, "core_km": core, "worked_km": reach, "realm_km": realm.get("reach", 0.0), "deposits": GameState.resource_deposits.size(), "revealed_for_review": "--reveal" in OS.get_cmdline_user_args(), "captures": []}
+	var target: Vector3 = GameState.settlement_founded_at
+	if "--reveal" in OS.get_cmdline_user_args(): CivilizationSystem._add_revealed_area(Vector2(target.x, target.z), float(realm.get("reach", reach)) * 1.3, "isolated review visibility")
+	var deadline := Time.get_ticks_msec() + 120000
+	while not terrain.macro_render.ready() and Time.get_ticks_msec() < deadline: await get_tree().process_frame
+	print("PEOPLE_GROWN_LAND_MACRO_READY ", terrain.macro_render.ready())
+	terrain.set_camera_distance_level(0)
+	terrain.zoom_target_size = -1.0
+	terrain.zoom_preset_active = false
+	var sizes := _arg("sizes", ".75,%s,%s" % [maxf(reach * 2.5, 30.0), float(realm.get("reach", 30.0)) * 2.5]).split(",")
+	var labels := _arg("labels", "town,homesteads,realm").split(",")
+	var targets: Array[Vector3] = []
+	for index in sizes.size(): targets.append(target)
+	if "--site-detail" in OS.get_cmdline_user_args():
+		var picked: Dictionary = {}
+		var largest_distance := -1.0
+		for site: Dictionary in GameState.resource_deposits:
+			if String(site.get("stage", "")) not in ["accessible", "developed"]: continue
+			if float(site.get("workers", 0)) <= 0: continue
+			var place: Variant = site.get("position")
+			if not place is Vector3: continue
+			var distance := Vector2(place.x - target.x, place.z - target.z).length()
+			if distance > largest_distance and distance <= reach:
+				picked = site
+				largest_distance = distance
+		if not picked.is_empty():
+			sizes.append("6")
+			labels.append("worked-site")
+			targets.append(picked.position)
+			report["detail_site"] = {"id": picked.get("id"), "resource": picked.get("resource"), "workers": picked.get("workers"), "distance_km": largest_distance, "remaining": picked.get("remaining"), "position": str(picked.position)}
+	if "--homestead-detail" in OS.get_cmdline_user_args():
+		var country := terrain.get_node_or_null("CountryLand")
+		if country:
+			country.call("refresh", terrain)
+			var owners: Dictionary = country.get("layers")
+			if owners.has("player"):
+				var plan: Dictionary = owners.player.node.get("plan")
+				for farm: Dictionary in plan.get("homesteads", []):
+					var point: Vector2 = farm.position
+					if not terrain._settlement_stage_land_at(point): continue
+					sizes.append(_arg("homestead-span", ".8"))
+					labels.append("homestead-detail")
+					targets.append(Vector3(point.x, terrain._height_at(point.x, point.y), point.y))
+					report["detail_homestead"] = {"id": farm.id, "position": str(point), "distance_km": farm.distance_km, "representative": true}
+					break
+	var directory := _arg("out", "res://artifacts/people-grown-land")
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
+	var title_layer := CanvasLayer.new()
+	title_layer.layer = 100
+	add_child(title_layer)
+	var title := Label.new()
+	title.position = Vector2(22, 15)
+	title.add_theme_color_override("font_color", Color("efe6d4"))
+	title.add_theme_color_override("font_shadow_color", Color("1f1a14"))
+	title.add_theme_constant_override("shadow_offset_x", 2)
+	title.add_theme_constant_override("shadow_offset_y", 2)
+	title.add_theme_font_size_override("font_size", 18)
+	title_layer.add_child(title)
+	for index in sizes.size():
+		var span := float(sizes[index])
+		var label: String = labels[index] if index < labels.size() else "detail%d" % index
+		title.text = "TEST REVIEW | %s | %d people | day %d | %s | %.2f km span" % [evidence, GameState.population_total, int(GameState.elapsed_days), label, span]
+		title.text += "\nCore %.0f km | Worked %.0f km | Realm %.0f km" % [core, reach, float(realm.get("reach", 0))]
+		title.text += " | Revealed for review" if "--reveal" in OS.get_cmdline_user_args() else ""
+		var shot_target: Vector3 = targets[index]
+		_set_camera(span, shot_target)
+		var frames := 0
+		deadline = Time.get_ticks_msec() + 30000
+		while Time.get_ticks_msec() < deadline and (frames < 65 or terrain.terrain_patch_job != null or terrain.regional_patch_resolution != Lod.resolution_for(terrain.regional_patch_span)):
+			await get_tree().process_frame
+			frames += 1
+		for layer in get_tree().root.find_children("*", "CanvasLayer", true, false):
+			if layer != title_layer: (layer as CanvasLayer).visible = false
+		for frame in 60: await get_tree().process_frame
+		var country := terrain.get_node_or_null("CountryLand")
+		deadline = Time.get_ticks_msec() + 30000
+		while country and country.has_method("stats") and int(country.call("stats").get("pending", 0)) > 0 and Time.get_ticks_msec() < deadline:
+			await get_tree().process_frame
+		RenderingServer.force_sync()
+		RenderingServer.force_draw(true, 0.0)
+		var path := directory.path_join("%s_%s.png" % [_arg("prefix", "review"), label])
+		if DisplayServer.get_name() != "headless":
+			get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
+		var entry := {"path": path, "span_km": span, "target": str(shot_target), "frames": frames}
+		if country and country.has_method("stats"): entry["country_land"] = country.call("stats")
+		entry["map_people"] = _map_people_audit()
+		entry["farm_scale"] = _farm_scale_audit()
+		report.captures.append(entry)
+		print("PEOPLE_GROWN_LAND_CAPTURE ", path, " span=", span, " frames=", frames)
+	if float(_arg("pace-seconds", "0")) > 0.0:
+		report["rendered_playback"] = await _measure_playback(float(_arg("pace-seconds")))
+	_write(directory.path_join(_arg("prefix", "review") + ".json"), report)
+	print("PEOPLE_GROWN_LAND_DONE ", directory, " prefix=", _arg("prefix", "review"), " population=", GameState.population_total)
+	get_tree().quit(0)
+
+func _set_camera(span: float, target: Vector3) -> void:
+	terrain.camera.size = span
+	terrain.zoom_target_size = -1.0
+	terrain.camera_target = target
+	terrain._update_camera()
+
+func _map_people_audit() -> Dictionary:
+	var batches := {}
+	var clear := true
+	for path: String in ["LivingMap/Workers", "LivingMap/Children", "LivingMap/Processions", "MapAmbience/GreatWorkBuilders"]:
+		var node := terrain.get_node_or_null(path) as MultiMeshInstance3D
+		var count := node.multimesh.instance_count if node and node.multimesh else 0
+		var visible_count := node.multimesh.visible_instance_count if node and node.multimesh else 0
+		var visible := node.is_visible_in_tree() if node else false
+		batches[path] = {"exists": node != null, "instances": count, "visible_instances": visible_count, "visible_in_tree": visible}
+		if count > 0 or visible_count > 0: clear = false
+	var rite_walkers: Array[String] = []
+	for node: Node in terrain.find_children("Walkers", "", true, false):
+		rite_walkers.append(str(node.get_path()))
+	if not rite_walkers.is_empty(): clear = false
+	return {"zero_people_batches": clear, "batches": batches, "rite_walkers": rite_walkers}
+
+func _farm_scale_audit() -> Dictionary:
+	var count := 0
+	var largest_metres := 0.0
+	var samples: Array = []
+	var country := terrain.get_node_or_null("CountryLand")
+	if country:
+		for node: Node in country.find_children("ScatteredHomes", "MultiMeshInstance3D", true, false):
+			var homes := node as MultiMeshInstance3D
+			var batch: MultiMesh = homes.multimesh
+			if not batch or not batch.mesh: continue
+			for index in batch.instance_count:
+				var transform := batch.get_instance_transform(index)
+				var bounds: AABB = Transform3D(transform.basis, Vector3.ZERO) * batch.mesh.get_aabb()
+				var metres := bounds.size * 1000.0
+				largest_metres = maxf(largest_metres, maxf(metres.x, maxf(metres.y, metres.z)))
+				count += 1
+				if samples.size() < 4: samples.append({"metres": str(metres), "basis_scale": str(transform.basis.get_scale())})
+	return {"instances": count, "largest_dimension_metres": largest_metres, "samples": samples}
+
+func _measure_playback(seconds: float) -> Dictionary:
+	# Measures the actual isolated GPU scene scheduler, after camera warm-up.
+	# This opts into advancing the in-memory copy only; no save is written.
+	terrain._set_game_speed(5)
+	var first_day := float(GameState.elapsed_days)
+	var start := Time.get_ticks_usec()
+	var last := start
+	var frames: Array[float] = []
+	while Time.get_ticks_usec() - start < int(seconds * 1000000.0):
+		await get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		frames.append(float(now - last) / 1000.0)
+		last = now
+	var duration := float(last - start) / 1000000.0
+	var days := float(GameState.elapsed_days) - first_day
+	frames.sort()
+	terrain._set_game_speed(0)
+	WorldSimulation.flush_day()
+	var reading := {"seconds": duration, "start_day": first_day, "days": days, "days_per_second": days / duration, "frames_per_second": frames.size() / duration, "p50_ms": frames[frames.size() / 2], "p95_ms": frames[int(frames.size() * .95)], "max_ms": frames[-1], "rivals": WorldSimulation.actors.size(), "scope": "Actual private-desktop GPU map frame loop, speed 5; HUD hidden; current camera fixed; after warm-up."}
+	print("PEOPLE_GROWN_LAND_PLAYBACK ", JSON.stringify(reading))
+	return reading
+
+func _write(path: String, value: Variant) -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(JSON.stringify(value, "  "))
+	file.close()

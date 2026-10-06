@@ -25,6 +25,7 @@ extends Node3D
 ## costs a frame when the camera is too far away to see it.
 
 const NODE_NAME:="LivingMap"
+const PeoplePolicy:=preload("res://scripts/map_people_policy.gd")
 const Placement:=preload("res://scripts/settlement_life_placement.gd")
 const UNIT:=0.001                  ## one metre in map units (km)
 const FIGURE_SCALE:=1.6            ## people read at 200 m without looking like giants
@@ -441,6 +442,10 @@ static func allocate(shares:Dictionary,budget:int)->Dictionary:
 	return result
 
 func _refresh_workers()->void:
+	if not PeoplePolicy.show_people():
+		workers.clear();worker_mm.multimesh.visible_instance_count=0;worker_mm.hide()
+		last_report={"population":GameState.population_total,"budget":0,"figures":{},"labor":{}}
+		return
 	var shares:=activity_shares()
 	var budget:=0 if settled and homes.is_empty() else figure_budget(GameState.population_total)
 	var counts:=allocate(shares,budget)
@@ -645,7 +650,7 @@ func _frame(delta:float)->void:
 	var camera:Camera3D=terrain.get("camera")
 	var size:=camera.size if camera else 999.0
 	var near:=camera!=null and Vector2(camera.position.x-anchor.x,camera.position.z-anchor.z).length()<maxf(3.0,size*3.0)
-	figures_visible=size<=FIGURE_MAX_VIEW and near
+	figures_visible=PeoplePolicy.show_people() and size<=FIGURE_MAX_VIEW and near
 	worker_mm.visible=figures_visible
 	child_mm.visible=figures_visible and not children.is_empty()
 	event_mm.visible=figures_visible and not events.is_empty()
@@ -702,6 +707,9 @@ func _reconcile_children()->void:
 			child.from=current;child.to=current;child.t=0.0;child.dur=.1;child["still"]=true
 
 func _refresh_children()->void:
+	if not PeoplePolicy.show_people():
+		children.clear();child_mm.multimesh.visible_instance_count=0;child_mm.hide()
+		return
 	var real:=float(GameState.population_cohorts.get("children",0.0)) if GameState.population_cohorts is Dictionary else 0.0
 	var wanted:=clampi(roundi(real/14.0),0,MAX_CHILDREN) if settled and not homes.is_empty() else 0
 	while children.size()>wanted: children.pop_back()
@@ -890,6 +898,7 @@ func _procession(dead:int)->void:
 
 func _on_scout_returned(report:Dictionary)->void:
 	## Returning scouts are seen on the last stretch of their road home.
+	if not PeoplePolicy.show_people():return
 	if not settled or _count_events("party")>=MAX_PARTIES: return
 	var walkers:=clampi(int(report.get("personnel",3))-int(report.get("lost_personnel",0)),1,6)
 	var heading:=Vector2(1,0).rotated(rng.randf()*TAU)
@@ -911,6 +920,9 @@ func _count_events(kind:String)->int:
 	return groups.size()
 
 func _add_group(kind:String,count:int,path:Array[Vector2],pose:int,pace:float,linger:float,bier:bool,carry:bool=false)->void:
+	if not PeoplePolicy.show_people():
+		events.clear();event_mm.multimesh.visible_instance_count=0;event_mm.hide()
+		return
 	var group:=rng.randi()
 	for i in count:
 		if events.size()>=MAX_EVENT_FIGURES: break
@@ -1019,7 +1031,7 @@ func _figure_batch(label:String,count:int)->MultiMeshInstance3D:
 	multimesh.use_custom_data=true
 	multimesh.use_colors=true
 	multimesh.mesh=figure_mesh()
-	multimesh.instance_count=count
+	multimesh.instance_count=PeoplePolicy.representative_count(count)
 	multimesh.visible_instance_count=0
 	var node:=MultiMeshInstance3D.new(); node.name=label
 	node.multimesh=multimesh; node.material_override=figure_material()

@@ -14,6 +14,7 @@ var organic_town_plans: Dictionary = {}
 var organic_town_jobs:Dictionary={}
 const SettlementVisualKeys=preload("res://scripts/settlement_visual_keys.gd")
 var settlement_patches
+var country_land:Node3D
 var settlement_patch_input_revision:=""
 var settlement_layout_builds:=0
 var settlement_layout_steps:=0
@@ -396,6 +397,7 @@ var seasonal_snow:=0.0
 const LANDSCAPE_VISUALS:=preload("res://scripts/landscape_resource_visuals.gd")
 const WORLD_BEAUTY:=preload("res://scripts/world_beauty.gd")
 var woodland_visual_areas:=PackedVector4Array()
+var woodland_canopy_areas:=PackedVector4Array()
 var woodland_visual_key:=""
 var woodland_harvest_detail:MultiMeshInstance3D
 var vegetation_fog_materials=preload("res://scripts/fog_material_registry.gd").new()
@@ -1015,6 +1017,13 @@ func _process(delta: float) -> void:
 	_advance_terrain_patch()
 	stamp=trace.mark("frame_terrain_patch",stamp)
 	_process_settlement_visual_jobs()
+	# Read-only outward growth: bounded country patches share retained builders.
+	if country_land==null:
+		country_land=preload("res://scripts/settlement_country_layer.gd").new()
+		country_land.name="CountryLand"
+		add_child(country_land)
+	country_land.refresh(self)
+	country_land.process_jobs(1500 if _camera_in_motion() else 2500,2)
 	stamp=trace.mark("frame_settlement_patches",stamp)
 	# Scale visibility follows the camera every frame it moves; otherwise only
 	# state changes matter, which ten checks a second keep up with.
@@ -3458,30 +3467,40 @@ func _survey_ground_at(position:Vector2)->Dictionary:
 
 func _register_woodland_material(material:ShaderMaterial)->void:
 	woodland_visual_materials.append(weakref(material))
-	material.set_shader_parameter("woodland_area_count",woodland_visual_areas.size())
-	var padded:=woodland_visual_areas.duplicate()
+	material.set_shader_parameter("woodland_area_count",woodland_canopy_areas.size())
+	var padded:=woodland_canopy_areas.duplicate()
 	padded.resize(LANDSCAPE_VISUALS.MAX_AREAS)
 	material.set_shader_parameter("woodland_areas",padded)
 
 func _refresh_woodland_visuals(force:bool=false)->void:
-	var key:="%d:%d:%d" % [int(GameState.elapsed_days),floori(camera_target.x/8.0),floori(camera_target.z/8.0)]
+	var key:="%d:%d:%d:%d" % [int(GameState.elapsed_days),floori(camera_target.x/8.0),floori(camera_target.z/8.0),country_land.clearing_revision if country_land!=null else 0]
 	if not force and key==woodland_visual_key:
 		_refresh_woodland_harvest_detail(false)
 		return
 	woodland_visual_key=key
 	var ledgers:Array=[GameState.resource_deposits]
+	if country_land!=null:ledgers.append_array(country_land.woodland_ledgers())
 	for city in GameState.player_settlements:
 		if bool(city.get("primary",false)): continue
 		ledgers.append(city.get("local_resources",{}).get("resource_deposits",[]))
 	woodland_visual_areas=LANDSCAPE_VISUALS.areas_from_ledgers(ledgers,Vector2(camera_target.x,camera_target.z))
 	var padded:=woodland_visual_areas.duplicate()
+	if country_land!=null:
+		var center:=Vector2(camera_target.x,camera_target.z)
+		var combined:Array[Vector4]=[];combined.assign(padded)
+		combined.append_array(country_land.canopy_clearings(center))
+		combined.sort_custom(func(a:Vector4,b:Vector4)->bool:return Vector2(a.x,a.y).distance_squared_to(center)<Vector2(b.x,b.y).distance_squared_to(center))
+		if combined.size()>LANDSCAPE_VISUALS.MAX_AREAS:combined.resize(LANDSCAPE_VISUALS.MAX_AREAS)
+		padded=PackedVector4Array(combined)
+	woodland_canopy_areas=padded.duplicate()
+	var canopy_count:=padded.size()
 	padded.resize(LANDSCAPE_VISUALS.MAX_AREAS)
 	var living:Array[WeakRef]=[]
 	for reference in woodland_visual_materials:
 		var material:=reference.get_ref() as ShaderMaterial
 		if material==null: continue
 		living.append(reference)
-		material.set_shader_parameter("woodland_area_count",woodland_visual_areas.size())
+		material.set_shader_parameter("woodland_area_count",canopy_count)
 		material.set_shader_parameter("woodland_areas",padded)
 	woodland_visual_materials=living
 	_refresh_woodland_harvest_detail(true)
@@ -14036,8 +14055,8 @@ const ScoutChartStroke:=preload("res://scripts/scout_chart_stroke.gd")
 func _refresh_player_scout_route_markers()->void:
 	# Scout routes read as an explorer's chart: parties still out are issued
 	# plans in solid ink; the last few returned charts are dotted, fading with
-	# age. The walker stands at the plan's reckoned position, never the party's
-	# true one. Geometry rebuilds only when a route or the zoom step changes.
+	# age. Plans reveal no live party position or human figure. Geometry
+	# rebuilds only when a route or the zoom step changes.
 	var visual_zoom:=maxf(0.035,camera.size if camera else 190.0)
 	var band:=WarfareMapPresentation.scale_band(visual_zoom)
 	# Stroke widths follow the zoom in the ink shader (scout_chart_ink.gdshader);
@@ -14208,14 +14227,6 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 		marks_root.add_child(sighting)
 		placed.append([sighting,"Sighting · met the %s, %s" % [String(contact.get("name","strangers")),preload("res://scripts/calendar_date.gd").words(int(contact.get("day",0)))]])
 	for entry in placed: hover_marks.append({"position":(entry[0] as Node3D).position,"caption":entry[1]})
-	if active:
-		var walker:=_scout_chart_mark("walker",ink,chart[0],clearance*1.4,mark_size*1.2)
-		walker.name="ScoutChartWalker"
-		var base_pixel_size:=walker.pixel_size
-		walker.set_script(preload("res://scripts/scout_chart_walker.gd"))
-		walker.set("chart",chart); walker.set("heights",heights); walker.set("arcs",ScoutChartStroke.arc_lengths(chart)); walker.set("lift",clearance*0.4)
-		walker.set("start_day",float(mission.get("start_day",GameState.elapsed_days))); walker.set("return_day",float(mission.get("return_day",GameState.elapsed_days+1.0))); walker.set("base_pixel_size",base_pixel_size); walker.set("mission",mission)
-		marks_root.add_child(walker)
 	var hover_layer:=CanvasLayer.new()
 	hover_layer.layer=0
 	root.add_child(hover_layer)
@@ -14228,7 +14239,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	hover.points.append(Vector3(chart[chart.size()-1].x,heights[heights.size()-1],chart[chart.size()-1].y))
 	hover.marks=hover_marks
 	if active:
-		hover.caption="%s · planned route · due %s · the walker marks the reckoned position" % [first_line.capitalize(),preload("res://scripts/calendar_date.gd").words(int(mission.get("return_day",0)))]
+		hover.caption="%s · planned route · due %s" % [first_line.capitalize(),preload("res://scripts/calendar_date.gd").words(int(mission.get("return_day",0)))]
 	else:
 		hover.caption="Returned chart · %s · %s" % [preload("res://scripts/calendar_date.gd").words(int(mission.get("day",0))),String(mission.get("target_label","open exploration")).capitalize()]
 	hover_layer.add_child(hover)

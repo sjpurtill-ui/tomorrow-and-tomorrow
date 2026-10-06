@@ -13,6 +13,7 @@ extends RefCounted
 ## (living_map.gd, map_ambience.gd, rite_marks.gd).
 
 const QUAD_EXTENT:=Vector2(1.0,1.0)
+const PeoplePolicy:=preload("res://scripts/map_people_policy.gd")
 
 static var _quad:QuadMesh
 static var _materials:Dictionary={}
@@ -31,6 +32,7 @@ static func material(kind:String)->ShaderMaterial:
 	shader.code=shader_code(kind)
 	var m:=ShaderMaterial.new()
 	m.shader=shader
+	m.set_shader_parameter("map_people_visible",PeoplePolicy.show_people())
 	_materials[kind]=m
 	return m
 
@@ -53,6 +55,8 @@ uniform float anim_clock = 0.0;
 uniform float clock = 0.0;
 // Figure metres per model unit (the caller's instance scale is read too).
 uniform float figure_unit = 0.0;
+// The map never draws human figures, even if an old caller retains a batch.
+uniform bool map_people_visible = false;
 // The figure is never drawn smaller than this many pixels tall, nor more
 // than max_swell times its true size.
 uniform float min_px = 10.0;
@@ -133,6 +137,7 @@ void vertex() {
 	v_time = anim_clock*max(INSTANCE_CUSTOM.w, 0.2)+INSTANCE_CUSTOM.x*6.2831;
 }
 void fragment() {
+	if (!map_people_visible) { discard; }
 	vec2 p = vec2(v_p.x*v_flip, v_p.y);
 	float px = max(fwidth(v_p.y), 1e-5);
 	float code = v_custom.y;
@@ -350,10 +355,12 @@ void fragment() {
 	vec2 blade = hands+rot2(vec2(0.0, -1.35), stroke*0.55-0.25);
 	vec3 cloth = vec3(0.52, 0.40, 0.30);
 	// Paddler: a seated body and head above the gunwale.
+	if (map_people_visible) {
 	ink_layer(acc, sd_seg2(p, vec2(-0.55, 0.28), vec2(-0.48, 0.86), 0.20, 0.15), cloth, px);
 	ink_layer(acc, sd_circle(p, vec2(-0.44, 1.06), 0.14), vec3(0.62, 0.46, 0.34), px);
 	ink_line(acc, sd_seg(p, hands+vec2(0.0, 0.25), blade, 0.03), px);
 	ink_layer(acc, sd_ellipse(p, blade, vec2(0.07, 0.16)), vec3(0.36, 0.27, 0.18), px);
+	}
 	// The hull: a log hollowed out, bow and stern turned up a little.
 	float hull = sd_seg2(p, vec2(-2.05, 0.20), vec2(2.05, 0.16), 0.24, 0.20);
 	hull = max(hull, p.y-0.34-0.10*smoothstep(1.4, 2.1, abs(p.x)));
