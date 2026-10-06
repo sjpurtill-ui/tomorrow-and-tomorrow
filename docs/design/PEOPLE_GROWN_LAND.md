@@ -38,6 +38,11 @@ timber, earthen and stone forms. Rivals use their existing forms and colours.
 Ground is softly painted, irregular, terrain-draped and clipped to revealed,
 buildable land. There is no new lighting or day/night system.
 
+The nearest 16 eligible farm clearings may also enter the existing 32-area
+canopy mask, after the actual woodland sites. This is a presentation-only
+clearing list; it does not add harvested sites or alter resource records.
+The shared mask budget can leave more distant sampled fields under canopy.
+
 The user's later instruction is absolute: **no people walking around**.
 `map_people_policy.gd` suppresses all human map figures, including workers,
 children, returned scouts, mourners, rite processions, great-work builders and
@@ -66,6 +71,49 @@ Measurements and screenshots are in the task's local
 saves are intentionally excluded from Git. `REVIEW.md` there is the visual
 review index; JSON records carry source-save hashes, exact population/day,
 camera spans, renderer counts and figure audits.
+
+## Verification and measured performance
+
+74 unique tests pass with no failures, errors or orphan nodes: 30 country
+plan/renderer/manager cases, 35 human-figure and existing map cases, four new
+day-cost/height-sampling regressions, and five existing frame-budget cases.
+Reports 12, 13, 14 (manager rerun) and 15 are retained locally.
+
+The real year-100 campaign has 636 people, 104 deposits and 12 rival actors.
+The final private-desktop GPU sample, at speed 5 with a fixed 100-km camera
+and HUD hidden, advances **120 days in 20.003186 seconds: 5.999044 days/s**
+(about 6, the configured calendar rate). Two simulation days warm up before
+measurement. It draws 41.39 frames/s, with median 20.091 ms, p95 47.165 ms and
+maximum 78.115 ms frame intervals. Country patch builds rise only from 130 to
+132 over those 120 days; no pending jobs remain, and the human batches stay
+at zero. This short sample near year 100 is **not a continuous validation
+through the first 100 years** and does not establish a strict lower bound of
+6 days/s. Source: `year100-final.json`.
+
+Before the final timing/height fixes, the equivalent country-enabled sample
+was 5.136 days/s; a country-disabled ablation was 5.038 days/s. These are single
+samples, not a statistically controlled comparison. The local terrain fix
+counts the final simulation pump and its presentation before estimating the
+next day's frame budget, and avoids procedural height work that cached ground
+immediately replaces. No speed constants or simulation rules were changed.
+
+| Measurement | Year-100 save | 4,554-person save |
+|---|---:|---:|
+| Unchanged country frame check | 3.296 microseconds | 3.255 microseconds |
+| Integer-day country refresh | 1.687 ms/day | 2.776 ms/day |
+| Initial country snapshot/plan request | 5.521 ms | 19.598 ms |
+| Patch builds before/after 200 unchanged day checks | 57 / 57 | 100 / 100 |
+
+Those manager measurements use the actual frozen states and real fog with
+flat draw geometry; they advance the day gate only, not the simulation. State
+hashes remain unchanged. Separately, a 30-day headless simulation sample near
+year 100 costs 99.692 ms/day (10.03 days/s), after two warm-up days. It excludes
+GPU rendering. Sources: `country-layer-perf.json` and `year100-pace.json`.
+
+Cold terrain-draped patch creation remains a hitch risk: the final detail
+retest peaks at **94.469 ms for one patch** (earlier full captures: 95.486 ms).
+The two-job cooperative limit cannot preempt a single build. A 2-ms processing
+budget is not a guaranteed frame-time ceiling.
 
 ## Evidence and limits
 
@@ -99,8 +147,10 @@ resolution remain limits of the map's surface rendering.
 ## Integration surface
 
 Shared hotspot changed: `scripts/local_terrain.gd` only — create/process the
-country layer, include admitted rival woodland ledgers, and remove scout walker
-creation/copy. `project.godot`, `save_system.gd`, `game_state.gd`, all population,
+country layer, include admitted rival woodland ledgers and presentation-only
+farm canopy clearings, remove scout walker creation/copy, and correct measured
+day-cost accounting plus redundant ground sampling. `project.godot`,
+`save_system.gd`, `game_state.gd`, all population,
 production and site-opening authorities are unchanged. There are **no new saved
 fields** and no save migration. Local `override.cfg` isolates capture userdata
 and is excluded from the branch. The canonical checkout was not edited or

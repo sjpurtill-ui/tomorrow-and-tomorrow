@@ -1095,9 +1095,7 @@ func _process(delta: float) -> void:
 	if WorldSimulation.day_in_progress():
 		var pumped:=Time.get_ticks_usec()
 		WorldSimulation.pump_day(_day_step_budget_usec())
-		_frame_sim_usec+=Time.get_ticks_usec()-pumped
-		_day_spent_usec+=Time.get_ticks_usec()-pumped
-		PerfMeter.sim(Time.get_ticks_usec()-pumped)
+		_record_world_day_slice(pumped)
 		stamp=trace.mark("frame_world_day",stamp)
 	if GameState.founding_focus!="" and PeopleDirection.needs_century_choice():
 		if game_speed>0.0: _set_game_speed(0.0)
@@ -1200,14 +1198,22 @@ func _schedule_world_time(days_advanced:float)->void:
 	begin_stamp=preload("res://scripts/performance_trace.gd").mark("schedule_begin_day",begin_stamp)
 	# A frame that already ran the simulation leaves the new day for the next.
 	if _frame_sim_usec<_day_step_budget_usec():WorldSimulation.pump_day(_day_step_budget_usec())
-	_frame_sim_usec+=Time.get_ticks_usec()-began
-	_day_spent_usec+=Time.get_ticks_usec()-began
-	PerfMeter.sim(Time.get_ticks_usec()-began)
+	_record_world_day_slice(began)
 	preload("res://scripts/performance_trace.gd").mark("schedule_first_pump",begin_stamp)
+
+## Completion runs inside pump_day(), before its caller can count that slice.
+## Sample only after the final pump and its presentation have both returned.
+## External save/load flushes are unmeasured here and keep the prior estimate.
+func _record_world_day_slice(started_usec:int)->void:
+	var elapsed:=Time.get_ticks_usec()-started_usec
+	_frame_sim_usec+=elapsed
+	_day_spent_usec+=elapsed
+	PerfMeter.sim(elapsed)
+	if not WorldSimulation.day_in_progress():
+		_day_cost_usec=float(_day_spent_usec) if _day_cost_usec<=0.0 else lerpf(_day_cost_usec,float(_day_spent_usec),0.3)
 
 func _finish_scheduled_day(day_result:Dictionary,day:int)->void:
 	var trace=preload("res://scripts/performance_trace.gd")
-	_day_cost_usec=float(_day_spent_usec) if _day_cost_usec<=0.0 else lerpf(_day_cost_usec,float(_day_spent_usec),0.3)
 	var stamp:int=trace.start()
 	last_discovery_day=day
 	_commit_world_day(day_result)
@@ -3513,9 +3519,7 @@ func _rendered_ground_height_at(point:Vector2)->float:
 	return _height_at(point.x,point.y)
 
 func _harvest_ground_height_at(point:Vector2)->float:
-	var result:=_height_at(point.x,point.y)
-	if RENDERED_SURFACE.contains(point,river_terrain_grid) and not rendered_regional_heights.is_empty():
-		result=RENDERED_SURFACE.sample(point,river_terrain_grid,func(cell:Vector2i)->float: return rendered_regional_heights[cell.y*int(river_terrain_grid.w)+cell.x])
+	var result:=_rendered_ground_height_at(point)
 	var detail_grid:=Vector4(detail_surface_center.x,detail_surface_center.y,0.42,112.0)
 	if detail_terrain_patch and detail_terrain_patch.visible and RENDERED_SURFACE.contains(point,detail_grid):
 		var detail_height:=RENDERED_SURFACE.sample(point,detail_grid,func(cell:Vector2i)->float:

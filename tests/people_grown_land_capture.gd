@@ -16,6 +16,16 @@ class Snapshot extends "res://scripts/save_system.gd":
 	var source := ""
 	func slot_path(_slot: String) -> String: return source
 
+class NoCountry extends Node3D:
+	## Capture-only ablation: same map/scheduler, country drawing work disabled.
+	var clearing_revision := 0
+	var layers: Dictionary = {}
+	func refresh(_owner: Node3D) -> void: pass
+	func process_jobs(_budget: int, _jobs: int) -> void: pass
+	func woodland_ledgers() -> Array: return []
+	func canopy_clearings(_center: Vector2) -> Array[Vector4]: return []
+	func stats() -> Dictionary: return {"owners": {}, "pending": 0, "disabled_for_comparison": true}
+
 var terrain: Node3D
 var report: Dictionary = {}
 
@@ -71,6 +81,11 @@ func _run() -> void:
 	if _arg("population") != "":
 		GameState.ensure_population_total(int(_arg("population")))
 	terrain = load("res://local_terrain.tscn").instantiate()
+	if "--without-country" in OS.get_cmdline_user_args():
+		var country := NoCountry.new()
+		country.name = "CountryLand"
+		terrain.country_land = country
+		terrain.add_child(country)
 	print("PEOPLE_GROWN_LAND_SCENE_LOADED")
 	add_child(terrain)
 	print("PEOPLE_GROWN_LAND_TERRAIN_READY")
@@ -88,6 +103,9 @@ func _run() -> void:
 	var evidence := "Exact saved campaign" if source != "" else "Reconstructed founding - not original campaign checkpoint"
 	if _arg("population") != "": evidence = "Population specimen - not a campaign checkpoint"
 	report = {"evidence": evidence, "source_copy": source, "source_sha256": FileAccess.get_sha256(source) if source != "" else "", "population_override": _arg("population"), "seed": GameState.world_seed, "population": GameState.population_total, "day": GameState.elapsed_days, "name": GameState.settlement_name, "core_km": core, "worked_km": reach, "realm_km": realm.get("reach", 0.0), "deposits": GameState.resource_deposits.size(), "revealed_for_review": "--reveal" in OS.get_cmdline_user_args(), "captures": []}
+	report["stage"] = Seat.stage()
+	report["settlements"] = GameState.player_settlements.size()
+	report["country_disabled_for_comparison"] = "--without-country" in OS.get_cmdline_user_args()
 	var target: Vector3 = GameState.settlement_founded_at
 	if "--reveal" in OS.get_cmdline_user_args(): CivilizationSystem._add_revealed_area(Vector2(target.x, target.z), float(realm.get("reach", reach)) * 1.3, "isolated review visibility")
 	var deadline := Time.get_ticks_msec() + 120000
@@ -98,6 +116,9 @@ func _run() -> void:
 	terrain.zoom_preset_active = false
 	var sizes := _arg("sizes", ".75,%s,%s" % [maxf(reach * 2.5, 30.0), float(realm.get("reach", 30.0)) * 2.5]).split(",")
 	var labels := _arg("labels", "town,homesteads,realm").split(",")
+	if "--details-only" in OS.get_cmdline_user_args():
+		sizes = PackedStringArray()
+		labels = PackedStringArray()
 	var targets: Array[Vector3] = []
 	for index in sizes.size(): targets.append(target)
 	if "--site-detail" in OS.get_cmdline_user_args():
@@ -227,7 +248,14 @@ func _measure_playback(seconds: float) -> Dictionary:
 	# Measures the actual isolated GPU scene scheduler, after camera warm-up.
 	# This opts into advancing the in-memory copy only; no save is written.
 	terrain._set_game_speed(5)
+	var warmup_start := Time.get_ticks_usec()
+	var warmup_target := floori(float(GameState.elapsed_days)) + 2
+	while floori(float(GameState.elapsed_days)) < warmup_target and Time.get_ticks_usec() - warmup_start < 30000000:
+		await get_tree().process_frame
+	var warmup_seconds := float(Time.get_ticks_usec() - warmup_start) / 1000000.0
+	var warmup_completed := floori(float(GameState.elapsed_days)) >= warmup_target
 	var first_day := float(GameState.elapsed_days)
+	var before_cost := _playback_cost_snapshot()
 	var start := Time.get_ticks_usec()
 	var last := start
 	var frames: Array[float] = []
@@ -239,11 +267,28 @@ func _measure_playback(seconds: float) -> Dictionary:
 	var duration := float(last - start) / 1000000.0
 	var days := float(GameState.elapsed_days) - first_day
 	frames.sort()
+	var after_cost := _playback_cost_snapshot()
 	terrain._set_game_speed(0)
 	WorldSimulation.flush_day()
-	var reading := {"seconds": duration, "start_day": first_day, "days": days, "days_per_second": days / duration, "frames_per_second": frames.size() / duration, "p50_ms": frames[frames.size() / 2], "p95_ms": frames[int(frames.size() * .95)], "max_ms": frames[-1], "rivals": WorldSimulation.actors.size(), "scope": "Actual private-desktop GPU map frame loop, speed 5; HUD hidden; current camera fixed; after warm-up."}
+	var reading := {"seconds": duration, "start_day": first_day, "days": days, "days_per_second": days / duration, "frames_per_second": frames.size() / duration, "p50_ms": frames[frames.size() / 2], "p95_ms": frames[int(frames.size() * .95)], "max_ms": frames[-1], "rivals": WorldSimulation.actors.size(), "warmup_days": 2, "warmup_completed": warmup_completed, "warmup_seconds": warmup_seconds, "scope": "Actual private-desktop GPU map frame loop, speed 5; HUD hidden; current camera fixed; two simulation days warm-up."}
+	reading["before_cost"] = before_cost
+	reading["after_cost"] = after_cost
+	reading["map_people_after"] = _map_people_audit()
 	print("PEOPLE_GROWN_LAND_PLAYBACK ", JSON.stringify(reading))
 	return reading
+
+func _playback_cost_snapshot() -> Dictionary:
+	var country := terrain.get_node_or_null("CountryLand")
+	var builds := 0
+	var requests := 0
+	var pending := 0
+	if country:
+		var stats: Dictionary = country.call("stats")
+		pending = int(stats.get("pending", 0))
+		for owner: Dictionary in stats.get("owners", {}).values():
+			builds += int(owner.get("builds", 0))
+			requests += int(owner.get("requests", 0))
+	return {"country_builds": builds, "country_requests": requests, "country_pending": pending, "day_cost_usec": terrain.get("_day_cost_usec"), "frame_other_usec": terrain.get("_frame_other_usec"), "frame_sim_usec": terrain.get("_frame_sim_usec")}
 
 func _write(path: String, value: Variant) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path.get_base_dir()))
