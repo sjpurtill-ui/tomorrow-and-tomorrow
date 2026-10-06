@@ -1,3 +1,15 @@
+## October 5 — Town map legibility: HELD for visual review
+
+`codex/town-map-legibility`, based on `1fd8ad8b`, follows the user's rejection
+of the Year-201 map repair. The latest isolated quicksave is Year 206, population
+3,665. Detailed plot coverage extends through ID 512 while preserving the
+512-building bound; extra fields no longer disable inherited ground styling.
+Architecture uses its painted key light once and a lighter weathering tint.
+56/56 regression tests pass. Same-save, same-zoom private GPU comparison increases
+detailed architecture instances from 167 to 243 and makes the roofs legible.
+This is a preview branch, not an integrated player change. Await visual review.
+See `docs/design/TOWN_MAP_LEGIBILITY.md`. No player/editor restart.
+
 ## October 5 — Year 201 expansion-map repair: INTEGRATED
 
 `codex/year201-expansion`, based on `1df22772`, reproduces Ashleyfire at Year 201

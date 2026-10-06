@@ -144,7 +144,7 @@ func test_layout_search_only_advances_changed_parcels_and_keeps_saved_sites()->v
 	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_false()
 	assert_int(terrain.settlement_patch_stats().pending).is_equal(0)
 	assert_array(var_to_bytes(GameState.settlement_plots[0].get("visual_building_sites",[]))).is_equal(old_sites)
-	GameState.settlement_plots.append(fixture.plot(129,Vector2(.30,.02)))
+	GameState.settlement_plots.append(fixture.plot(preload("res://scripts/organic_town_visual.gd").MAX_PLOTS+1,Vector2(.30,.02)))
 	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_false()
 	assert_int(terrain.settlement_layout_steps).is_equal(2)
 

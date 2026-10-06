@@ -46,7 +46,9 @@ static func architecture_material()->ShaderMaterial:
 	# Only the new marked glazing receives a restrained sky reflection. The
 	# early kit's paint and shared shader resource stay exactly as authored.
 	var architecture_shader:=Shader.new()
-	architecture_shader.code=SHADER.replace("specular_disabled, ","")
+	# Use the map's painted key light once. Applying scene lighting over that
+	# shade made small, weathered roofs disappear into the terrain at town zoom.
+	architecture_shader.code=SHADER.replace("diffuse_burley, specular_disabled,", "unshaded,")
 	_architecture_material.shader=architecture_shader
 	_architecture_material.set_shader_parameter("architecture_surfaces",true)
 	var outline:=outline_material().duplicate() as ShaderMaterial

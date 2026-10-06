@@ -299,3 +299,11 @@ func test_late_house_fits_small_expansion_lot_without_losing_recorded_storey_hei
 		for corner in 8:
 			var point:Vector3=transform*kit.mesh_for_plot(record.plot).get_aabb().get_endpoint(corner)
 			assert_bool(Geometry2D.is_point_in_polygon(Vector2(point.x,point.z),plot.polygon)).is_true()
+
+func test_extra_fields_do_not_switch_off_existing_town_ground_presentation()->void:
+	var data:=fixture("earthen_household","earth","courtyard_flat")
+	assert_bool(EARLY.enabled(data.plots)).is_true()
+	for index in TOWN.MAX_PLOTS+1:
+		data.plots.append({"id":index+2,"land_use":"field","form":"cultivated_field"})
+	assert_bool(EARLY.enabled(data.plots)).is_true()
+	assert_bool(EARLY.has_kit(data.plots)).is_true()

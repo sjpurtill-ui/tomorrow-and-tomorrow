@@ -1,11 +1,12 @@
 extends GdUnitTestSuite
 const Fixture=preload("res://tests/city_evolution_visual_fixture.gd")
+const Town=preload("res://scripts/organic_town_visual.gd")
 const Kit=preload("res://scripts/settlement_architecture_kit.gd")
 func before_test()->void:Fixture.initialize()
 
 func test_supported_parcel_after_detailed_budget_still_has_roofs()->void:
 	var snapshot:=Fixture.snapshot(3000)
-	var p:Dictionary=snapshot.plots[-1].duplicate(true);p.id=129
+	var p:Dictionary=snapshot.plots[-1].duplicate(true);p.id=Town.MAX_PLOTS+1
 	snapshot.plots.assign([p]);GameState.settlement_plots=snapshot.plots
 	var renderer:=Fixture.FlatRenderer.new();var parent:Node3D=auto_free(Node3D.new())
 	var result:=Fixture.render(renderer,snapshot,parent)
@@ -42,7 +43,7 @@ func test_modern_roofs_close_each_volume_without_pitched_gables_or_extra_storeys
 func test_mixed_placed_overbudget_and_no_fit_parcels_preserve_placement_rejection()->void:
 	var snapshot:=Fixture.snapshot(3000)
 	var placed:Dictionary=snapshot.plots[0]
-	var overbudget:Dictionary=snapshot.plots[1];overbudget.id=129
+	var overbudget:Dictionary=snapshot.plots[1];overbudget.id=Town.MAX_PLOTS+1
 	var no_fit:Dictionary=snapshot.plots[2];no_fit.frontage_route_id=999
 	snapshot.plots.assign([placed,overbudget,no_fit])
 	var renderer:=Fixture.FlatRenderer.new();var parent:Node3D=auto_free(Node3D.new())
@@ -71,7 +72,7 @@ func test_two_hundred_year_snapshots_keep_capacity_and_visible_roofs_through_yea
 		var covered:Dictionary=plan.replaced.duplicate()
 		# Each legal prepared lot outside the detailed budget survives in fallback.
 		for p:Dictionary in snapshot.plots:
-			if int(p.id)>128:
+			if int(p.id)>Town.MAX_PLOTS:
 				var roofs:=SurfaceTool.new();roofs.begin(Mesh.PRIMITIVE_TRIANGLES)
 				var walls:=SurfaceTool.new();walls.begin(Mesh.PRIMITIVE_TRIANGLES)
 				var count:Dictionary=renderer._append_satellite_roof_fabric(roofs,walls,p,Vector3.ZERO,0,true)
@@ -137,7 +138,7 @@ func test_overbudget_roofs_stay_inside_parcel_and_off_streets_and_unsafe_ground(
 	assert_bool(placement.fits(safe,parcel,routes,func(p:Vector2)->bool:return p.x<.004,flat)).is_false()
 	assert_bool(placement.fits(safe,parcel,routes,dry,func(p:Vector2)->float:return p.x)).is_false()
 	var snapshot:=Fixture.snapshot(3000)
-	var p:Dictionary=snapshot.plots[-1].duplicate(true);p.id=129;p.polygon=parcel;p.centroid=Vector2.ZERO;p.frontage_route_id=1
+	var p:Dictionary=snapshot.plots[-1].duplicate(true);p.id=Town.MAX_PLOTS+1;p.polygon=parcel;p.centroid=Vector2.ZERO;p.frontage_route_id=1
 	GameState.settlement_routes=[{"id":1,"active":true,"points":PackedVector2Array([Vector2(-.02,-.019),Vector2(.02,-.019)]),"width_m":2.0}]
 	var renderer:=Fixture.FlatRenderer.new()
 	var roofs:=SurfaceTool.new();roofs.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -154,7 +155,7 @@ func test_overbudget_roofs_stay_inside_parcel_and_off_streets_and_unsafe_ground(
 func test_one_storey_expansion_roofs_remain_above_yards_after_detail_budget()->void:
 	var snapshot:=Fixture.snapshot(200)
 	var p:Dictionary=snapshot.plots[0].duplicate(true)
-	p.id=129;p.storeys=1;p.status="stressed";p.condition=.05
+	p.id=Town.MAX_PLOTS+1;p.storeys=1;p.status="stressed";p.condition=.05
 	snapshot.plots.assign([p]);GameState.settlement_plots=snapshot.plots
 	var renderer:=Fixture.FlatRenderer.new();var parent:Node3D=auto_free(Node3D.new())
 	var result:=Fixture.render(renderer,snapshot,parent)
@@ -166,4 +167,14 @@ func test_one_storey_expansion_roofs_remain_above_yards_after_detail_budget()->v
 			var ground:=parent.get_node_or_null(name) as MeshInstance3D
 			if ground!=null:
 				assert_float(ground.mesh.get_aabb().end.y).override_failure_message(name+" buries an occupied roof").is_less(roof.mesh.get_aabb().position.y)
+	renderer.settlement_fabric_shader=null;renderer.free()
+
+func test_expansion_parcel_after_old_128_limit_has_detailed_buildings()->void:
+	var snapshot:=Fixture.snapshot(3000)
+	var p:Dictionary=snapshot.plots[0].duplicate(true);p.id=129
+	snapshot.plots.assign([p]);GameState.settlement_plots=snapshot.plots
+	var renderer:=Fixture.FlatRenderer.new();var parent:Node3D=auto_free(Node3D.new())
+	var result:=Fixture.render(renderer,snapshot,parent)
+	assert_int(result.detailed_buildings).is_greater(0)
+	assert_int(result.fallback_roof_vertices).is_equal(0)
 	renderer.settlement_fabric_shader=null;renderer.free()

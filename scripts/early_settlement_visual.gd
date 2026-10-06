@@ -45,9 +45,8 @@ static func supports(plot: Dictionary) -> bool:
 	return eligible and TOWN.supports(plot)
 
 static func enabled(plots: Array[Dictionary]) -> bool:
-	# Representation budget, not a population/era style gate. Larger fabrics keep
-	# their inherited kit; additional unsupported plots retain the legacy renderer.
-	if plots.size() > TOWN.MAX_PLOTS: return false
+	# Detail admission is bounded per plot; extra fields must not change the
+	# ground presentation beneath homes already admitted to the kit.
 	for plot in plots:
 		if int(plot.get("id",0)) <= TOWN.MAX_PLOTS and supports(plot): return true
 	return false

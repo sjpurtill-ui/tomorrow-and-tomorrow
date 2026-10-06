@@ -2,7 +2,7 @@ extends RefCounted
 ## A bounded visual interpretation of recorded plots; never a population authority.
 ## All dimensions here are kilometres. GLB geometry is in metres.
 const MAX_BUILDINGS := 512
-const MAX_PLOTS := 128
+const MAX_PLOTS := 512
 const MAX_POPULATION := 5000
 const KIT := ["house_narrow", "house_compact", "house_medium", "house_wide", "market_hall", "house_small"]
 static var meshes: Dictionary = {}
