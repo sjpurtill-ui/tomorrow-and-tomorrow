@@ -482,3 +482,31 @@ func test_role_effect_reads_the_named_towns_land_with_its_own_people()->void:
 		assert_dict(ResourceSystem.role_effect("Survey",primary)).is_empty()
 		assert_float(float(ResourceSystem.role_effect("Survey","dawngate").numbers.cover)).is_equal(0.2)
 	)
+
+
+# --- More finds on wider land -------------------------------------------------------------------
+
+## The month's count: no find above the stated odds of one, one just under
+## them, more from lower rolls, never past the land's cap.
+func test_find_count_follows_the_stated_odds_and_the_cap()->void:
+	var expected:=3.7
+	var p:=1.0-exp(-expected)
+	assert_int(ResourceSystem.land_find_count(p+0.001,expected,4)).is_equal(0)
+	assert_int(ResourceSystem.land_find_count(p-0.001,expected,4)).is_equal(1)
+	assert_int(ResourceSystem.land_find_count(0.0,expected,4)).is_equal(4)
+	assert_int(ResourceSystem.land_find_count(0.0,expected,1)).is_equal(1)
+	assert_int(ResourceSystem.land_find_count(0.5,0.0,4)).is_equal(0)
+	# On average the count is near the expected number when the cap is wide.
+	var total:=0
+	for i in 1000: total+=ResourceSystem.land_find_count((float(i)+0.5)/1000.0,expected,40)
+	assert_float(float(total)/1000.0).is_equal_approx(expected,0.05)
+
+## A young town's land holds one find a month; a land worked out to 90 km
+## holds four.
+func test_the_worked_land_sets_the_months_cap()->void:
+	assert_int(ResourceSystem.land_find_cap()).is_equal(1)
+	GameState.population_exact=4000.0
+	GameState.ensure_population_total(4000)
+	var reach:=preload("res://scripts/one_seat.gd").reach_km()
+	assert_int(ResourceSystem.land_find_cap()).is_equal(maxi(1,floori(reach/ResourceSystem.LAND_FIND_CAP_KM)))
+	assert_int(ResourceSystem.land_find_cap()).is_greater(1)
