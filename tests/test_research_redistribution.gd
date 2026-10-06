@@ -21,6 +21,8 @@ func test_exhausted_lines_send_their_teams_on_and_conserve_emphasis()->void:
 		state.active_investigations.clear()
 		state.research_subcategory_allocations={"nutrition":{"Old question":3,"New question":0},"health":{"Old question":2,"New question":0},"culture":{"Continuing question":4}}
 		state.research_allocations={"nutrition":3,"health":2,"culture":4}
+		# Only these questions exist here: no foundation work from the catalog.
+		research.technology_catalog.clear();research._research_600_foundation_cache.clear()
 		research.catalog_by_channel={
 			"nutrition::New question":[_question("new_food","nutrition","New question")],
 			"health::New question":[_question("new_health","health","New question")],
@@ -48,6 +50,7 @@ func test_waiting_emphasis_stays_put_and_later_evidence_wakes_it()->void:
 		var gated:=_question("new_food","nutrition","New question",101)
 		gated.requires=["food_drying"]
 		state.known_discoveries.erase("food_drying")
+		research.technology_catalog.clear();research._research_600_foundation_cache.clear()
 		research.catalog_by_channel={"nutrition::New question":[gated],"culture::Continuing question":[_question("continuing_culture","culture","Continuing question")]}
 		var waiting:=state.research_subcategory_allocations.duplicate(true)
 		for day in [100,101]:

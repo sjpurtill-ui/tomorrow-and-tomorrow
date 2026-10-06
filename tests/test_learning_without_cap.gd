@@ -116,7 +116,11 @@ func test_learners_take_their_goods_and_a_shortage_halves_learning_at_most()->vo
 	DiscoverySystem.process_day({})
 	assert_float(before-float(GameState.resource_stockpiles[R.GOODS_KEY])).is_equal_approx(learners/20.0,0.0001)
 	assert_float(DiscoverySystem.learning_goods_cover()).is_equal_approx(1.0,0.0001)
+	# A team on a question whose age has come (teams take the quickest
+	# question, which may stand a little ahead of its age).
 	var channel:=String(GameState.active_investigations.keys()[0])
+	for desk:Variant in GameState.active_investigations:
+		if DiscoverySystem.age_bucket(DiscoverySystem.discovery_definition(String(GameState.active_investigations[desk])))==0:channel=String(desk);break
 	var home:=channel.split("::")
 	var full:=float(DiscoverySystem.research_capacity_for(home[0],home[1]).progress_multiplier)
 	# Empty stores: the learners work at half pace, never less.
