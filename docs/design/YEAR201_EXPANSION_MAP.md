@@ -1,9 +1,13 @@
 # Year 201 expansion map repair
 
-READY for preview review on `codex/year201-expansion`, based on
+Approved for integration on October 5. Source `5ec724a2` on
+`codex/year201-expansion`, based on
 `1df2277270556b175377fbe6933dbccbc25ec8b5`.
 Worktree: `C:/Users/sjpur/.codex/worktrees/food-folio/TomorrowandTomorrow`.
-No canonical checkout integration or player restart has occurred.
+Both origin/main and canonical main `1df22772` are ancestors of the approved
+source. All 54/54 combined checks passed again (report 34). Delivery uses a
+verified remote-first main push followed by canonical fast-forward. No player
+restart is performed; the fix loads on the next normal game launch.
 
 ## Reproduction and causes
 

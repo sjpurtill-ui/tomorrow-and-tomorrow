@@ -1,4 +1,4 @@
-## October 5 — Year 201 expansion-map repair: READY
+## October 5 — Year 201 expansion-map repair: INTEGRATED
 
 `codex/year201-expansion`, based on `1df22772`, reproduces Ashleyfire at Year 201
 with 3,422 people. Surface-tier inflation had turned 0.72 m field tracks into
@@ -10,7 +10,10 @@ models, storey heights survive footprint fitting, and yards stay below roofs.
 representatives versus 95 before; final PID 62960 exited 0. Existing saves need no
 schema migration; simulation and population are unchanged. No player restart.
 See `docs/design/YEAR201_EXPANSION_MAP.md` for before/after evidence and limits.
-Prepared for the user's requested preview review; not integrated into main.
+The user approved integration on October 5. Source `5ec724a2` contains latest
+main `1df22772`; the combined 54/54 checks pass again (report 34). Delivery
+follows a verified remote-first main push, then canonical fast-forward. No
+running player/editor is stopped or restarted.
 Pending progression, brighter type and figure-removal previews remain separate.
 
 ## October 5 — Living village Overview: INTEGRATED

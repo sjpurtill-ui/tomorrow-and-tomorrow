@@ -1,3 +1,18 @@
+## October 5, 2026 — Year 201 expansion map
+
+The user approved integration of source `5ec724a2`, based on canonical and remote
+main `1df22772`. The renderer now uses recorded road widths instead of inflating
+field tracks with surface tier, fits later buildings into small expansion lots,
+preserves storey heights, and keeps yard layers below aggregate roofs.
+
+All 54/54 combined checks pass (report 34), with no errors, failures, skips or
+orphans. The approved exact-save GPU preview renders 164 detailed representatives
+versus 95 before in Ashleyfire at Year 201, population 3,422. No save-schema or
+simulation change. Delivery follows a verified remote-first push of main and a
+canonical fast-forward. Existing local files are preserved and no player/editor
+is restarted. Other pending preview branches are excluded.
+See `docs/design/YEAR201_EXPANSION_MAP.md` for evidence and reproduction.
+
 ## October 5, 2026 — Actual village Overview and dated album
 
 The approved living-village source `b8854408` is combined with main `ee1a2a99`
