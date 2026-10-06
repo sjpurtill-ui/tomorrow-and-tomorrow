@@ -342,6 +342,7 @@ func _blocked_words(why:String)->String:
 		"war":return "At war: no trader crosses"
 		"feud":return "Feuding: no trader crosses"
 		"hostile":return "They will not meet our traders"
+		"unlocated":return "We do not know where they live: find their home first"
 	return "Embargoed: nothing passes" if why.begins_with("embargo") else why
 
 

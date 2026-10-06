@@ -37,7 +37,7 @@ func before_test()->void:
 		var c:Dictionary=CivilizationSystem.civilizations[i]
 		c["world_position"]=Vector2(150.0*float(i+1),0.0)
 		c["alive"]=true
-		(c.player_relation as Dictionary)["contact_level"]=2
+		(c.player_relation as Dictionary)["contact_level"]=2; (c.player_relation as Dictionary)["home_location_known"]=true
 		(c.player_relation as Dictionary)["opinion"]=0.1
 		for other:String in (c.get("relations",{}) as Dictionary): ((c.relations as Dictionary)[other] as Dictionary)["opinion"]=0.1
 	# Every simulated people knows the others and us.
@@ -115,6 +115,23 @@ func test_gift_and_barter_move_real_goods_before_money()->void:
 	assert_float(minf(vab,vba)).is_greater(0.0)
 	assert_float(maxf(vab,vba)/minf(vab,vba)).is_less_equal(1.0+Ledger.BARTER_SLACK+0.01)
 
+
+
+## Met but not found: a people whose home is not on our map gets no goods
+## from us and sends none, until its home is found.
+func test_no_trade_with_a_people_whose_home_we_have_not_found()->void:
+	var a:=String(ids[0])
+	(Ledger.civ(a).player_relation as Dictionary)["home_location_known"]=false
+	assert_str(Ledger.blocked("player",a)).is_equal("unlocated")
+	var our_flint:=_stock("player","Flint")
+	var their_salt:=_stock(a,"Salt")
+	var p:=_settle("player",a)
+	assert_float(_stock("player","Flint")).is_equal_approx(our_flint,0.0001)
+	assert_float(_stock(a,"Salt")).is_equal_approx(their_salt,0.0001)
+	assert_float(float(p.total.ab)+float(p.total.ba)).is_equal(0.0)
+	# Found: the road opens.
+	(Ledger.civ(a).player_relation as Dictionary)["home_location_known"]=true
+	assert_str(Ledger.blocked("player",a)).is_equal("")
 
 ## The pair's direction from `from` to `to` ("ab" or "ba").
 func _dir(p:Dictionary,from:String)->String:

@@ -261,6 +261,9 @@ static func blocked(a:String,b:String,day:int=-1)->String:
 	if bool(rel.get("at_war",false)): return "war"
 	if a=="player" or b=="player":
 		var other:=b if a=="player" else a
+		# Our carriers need a road to walk: no goods go to a people whose home
+		# is not on our map, however we first met them.
+		if not bool(rel.get("home_location_known",false)): return "unlocated"
 		var war:=load(WAR_PATH) as GDScript
 		if war!=null and bool(war.call("hot",other,day)): return "feud"
 	elif CivilizationSystem.has_method("rival_feud_hot") and bool(CivilizationSystem.rival_feud_hot(rel,day)): return "feud"
@@ -1019,7 +1022,7 @@ static func deal_terms(buyer:String,seller:String,what:String,count:float)->Dict
 		return out
 	var why:=blocked(buyer,seller)
 	if why!="" and not (what=="captives" and why=="feud"):
-		out.why=String({"war":"We are at war: no trader crosses.","feud":"We are feuding: no trader crosses.","hostile":"They will not meet our traders."}.get(why,"Nothing passes between us now."))
+		out.why=String({"war":"We are at war: no trader crosses.","feud":"We are feuding: no trader crosses.","hostile":"They will not meet our traders.","unlocated":"We do not know where they live; our traders have no road to them."}.get(why,"Nothing passes between us now."))
 		return out
 	var form:=form_of(p,report(buyer),report(seller))
 	out.form=form
