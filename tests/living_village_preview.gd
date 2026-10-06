@@ -27,7 +27,17 @@ func run() -> void:
 	var id := String(GameState.selected_player_settlement_id)
 	while preload("res://scripts/hud/village_view_record.gd").views(GameState.settlement_portrait_history, id).is_empty() and Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
-	var output := "res://artifacts/living-village"
+	# Decorative people are absent from both the map and shared Overview world.
+	var life:=terrain.get_node("LivingMap")
+	for batch in [life.worker_mm,life.child_mm,life.event_mm,terrain.get_node("MapAmbience").builders]:
+		if batch.visible:push_error("Decorative settlement figure batch is visible");get_tree().quit(1);return
+	var rites:=preload("res://scripts/rite_marks.gd").new()
+	var rite_root:=Node3D.new()
+	terrain.add_child(rites);rites.add_child(rite_root)
+	rites._walkers(rite_root,6,7.0,true)
+	if rite_root.get_node("Walkers").visible:push_error("Settlement rite figures are visible");get_tree().quit(1);return
+	rites.queue_free()
+	var output := "res://artifacts/settlement-without-figures"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output))
 	await _capture(output + "/overview.png")
 	get_window().size=Vector2i(1024,900)

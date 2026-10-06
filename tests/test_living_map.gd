@@ -67,7 +67,7 @@ func test_smoke_grows_with_the_people_but_is_capped()->void:
 	assert_int(Living.plume_count(120)).is_equal(5)
 	assert_int(Living.plume_count(9000000)).is_equal(Living.MAX_PLUMES)
 
-func test_layer_shows_the_workers_and_reports_them_against_labour()->void:
+func test_settled_layer_retains_labour_but_hides_decorative_figures()->void:
 	var host:=_host()
 	Living.refresh(host)
 	var layer:=host.get_node_or_null(Living.NODE_NAME)
@@ -81,6 +81,16 @@ func test_layer_shows_the_workers_and_reports_them_against_labour()->void:
 	var workers:MultiMeshInstance3D=layer.get("worker_mm")
 	assert_int(workers.multimesh.instance_count).is_equal(Living.MAX_WORKERS)
 	assert_int(workers.multimesh.visible_instance_count).is_equal(24)
+	layer._frame(0.0)
+	for batch in [layer.worker_mm,layer.child_mm,layer.event_mm]:
+		assert_bool(batch.visible).is_false()
+	assert_bool(layer.smoke_mm.visible).is_true()
+	assert_bool(layer.hearth_root.visible).is_true()
+	assert_int(GameState.population_total).is_equal(120)
+	# The travelling founding group remains visible before settlement.
+	GameState.settlement_site_committed=false
+	layer._frame(0.0)
+	assert_bool(workers.visible).is_true()
 
 func test_births_burials_and_scouts_leave_marks_on_the_map()->void:
 	var host:=_host()

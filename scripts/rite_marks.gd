@@ -139,6 +139,7 @@ func _walkers(root:Node3D,count:int,radius_m:float,mourning:bool)->void:
 	## The people walk the circle: the living map's animated figures (one
 	## draw call), bowed and dark-clad when they mourn.
 	var ring:=Node3D.new(); ring.name="Walkers"; root.add_child(ring)
+	ring.visible=not GameState.settlement_site_committed
 	var multimesh:=MultiMesh.new()
 	multimesh.transform_format=MultiMesh.TRANSFORM_3D
 	multimesh.use_custom_data=true
@@ -172,4 +173,6 @@ func _process(delta:float)->void:
 	for i in _glows.size():
 		if is_instance_valid(_glows[i]): _glows[i].scale=Vector3.ONE*(1.0+0.06*sin(_clock*11.0+float(i)*2.1))
 	for ring in _rings:
-		if is_instance_valid(ring): ring.rotation.y+=delta*(0.05 if String(ring.get_parent().name).begins_with("Rite_pyre") else 0.08)
+		if is_instance_valid(ring):
+			ring.visible=not GameState.settlement_site_committed
+			if ring.visible: ring.rotation.y+=delta*(0.05 if String(ring.get_parent().name).begins_with("Rite_pyre") else 0.08)

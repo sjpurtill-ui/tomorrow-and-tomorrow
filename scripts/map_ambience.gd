@@ -242,7 +242,7 @@ func _frame(delta:float)->void:
 	var life:=size<=LIFE_MAX_VIEW and near_home
 	var legible:=clampf(size/0.55,1.0,2.6)
 	birds.visible=life and not reduced and birds.multimesh.visible_instance_count>0
-	builders.visible=size<=BUILDER_MAX_VIEW and builders.multimesh.visible_instance_count>0 and _near_any(builder_sites,target,maxf(2.0,size*2.0))
+	builders.visible=not GameState.settlement_site_committed and size<=BUILDER_MAX_VIEW and builders.multimesh.visible_instance_count>0 and _near_any(builder_sites,target,maxf(2.0,size*2.0))
 	herd.visible=life and herd.multimesh.visible_instance_count>0
 	boats.visible=life and boats.multimesh.visible_instance_count>0
 	if birds.visible or herd.visible or boats.visible:

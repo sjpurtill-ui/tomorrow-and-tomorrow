@@ -205,7 +205,7 @@ func test_builders_work_only_at_rising_works_and_are_bounded()->void:
 	assert_int(count).is_equal(Ambience.MAX_BUILDERS)  # three rising works shown, four hands each
 	host.camera.size=1.0
 	layer._frame(1.0/60.0)
-	assert_bool(layer.builders.visible).is_true()
+	assert_bool(layer.builders.visible).is_false()
 	host.camera.size=40.0
 	layer._frame(1.0/60.0)
 	assert_bool(layer.builders.visible).is_false()

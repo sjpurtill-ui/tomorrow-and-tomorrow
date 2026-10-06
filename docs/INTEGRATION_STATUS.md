@@ -1,3 +1,14 @@
+## October 5 — Settlement views without decorative people: HELD for review
+
+`codex/settlement-without-figures`, based on `1df22772`, removes the oversized
+map people from settled town/city views and their live Overview: workers,
+children, scout/procession walkers, rite walkers and great-work builders.
+Population/labor ledgers, court scenes and simulation stay unchanged; buildings,
+smoke, weather and wildlife remain. No save migration is needed.
+All 22/22 focused living-map and ambience tests pass (report 25).
+See `docs/design/SETTLEMENT_WITHOUT_FIGURES.md` for scope and visual evidence.
+The separate brighter-top-bar preview `f23e0b0c` remains held for approval.
+
 ## October 5 — Living village Overview: INTEGRATED
 
 `codex/living-village-overview`, based on `5d8994b3`, replaces the generated

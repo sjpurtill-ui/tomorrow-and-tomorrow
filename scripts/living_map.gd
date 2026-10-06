@@ -645,7 +645,8 @@ func _frame(delta:float)->void:
 	var camera:Camera3D=terrain.get("camera")
 	var size:=camera.size if camera else 999.0
 	var near:=camera!=null and Vector2(camera.position.x-anchor.x,camera.position.z-anchor.z).length()<maxf(3.0,size*3.0)
-	figures_visible=size<=FIGURE_MAX_VIEW and near
+	# Settled views show the town fabric without decorative human stand-ins.
+	figures_visible=not GameState.settlement_site_committed and size<=FIGURE_MAX_VIEW and near
 	worker_mm.visible=figures_visible
 	child_mm.visible=figures_visible and not children.is_empty()
 	event_mm.visible=figures_visible and not events.is_empty()
