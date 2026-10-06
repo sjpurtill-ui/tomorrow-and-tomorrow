@@ -1289,9 +1289,13 @@ func _local_survey_inputs()->Dictionary:
 ##   sagging : above the target it loses a twentieth a year (paths overgrow,
 ##             finds are forgotten), never below the target (land_step).
 ## Cutters and diggers yield × (0.75 + 0.5 × cover) (land_yield, applied in
-## _process_material_flow). Once a month one seeded roll at the stated odds,
-## p = 1 − e^(−0.016 × searchers × (1 + survey speed)) (land_find_odds), makes
-## a find: a deposit of the land the people can recognise but have not
+## _process_material_flow). Once a month one seeded roll decides how many
+## finds the searchers make: each searcher finds at 0.016 a month × (1 +
+## survey speed), λ in all (land_finds_expected), so the chance of at least
+## one is p = 1 − e^(−λ) (land_find_odds) and the count follows Poisson(λ),
+## at most land_find_cap() a month: one for every 20 km the worked ground
+## reaches (one_seat.gd reach_km), so a wider land yields more finds. Each
+## find is: a deposit of the land the people can recognise but have not
 ## measured; else new ground 4 to 20 km out, on land and in no other people's
 ## hold (a deposit the world's geology really holds there, or, where the world
 ## keeps none, the registration an expedition's find uses); else a richer part
@@ -1321,6 +1325,8 @@ const LAND_QUALITY_CAP:=1.5
 ## New ground lies this far from the town (km).
 const LAND_FIND_NEAR_KM:=4.0
 const LAND_FIND_FAR_KM:=20.0
+## Finds a month are capped at one for every this many km of worked reach.
+const LAND_FIND_CAP_KM:=20.0
 ## Spots of new ground looked at for one find before the searchers give up.
 const LAND_FIND_TRIES:=3
 ## The least promise of the ground (its potential) where new ground is opened,
@@ -1373,9 +1379,35 @@ func _land_people()->float:
 ## The month's chance of a find with these searchers (-1: those at work now):
 ## the odds every screen states and the roll is made against.
 func land_find_odds(searchers:float=-1.0)->float:
+	return 1.0-exp(-land_finds_expected(searchers))
+
+## Finds the searchers make in a month, on average, before the land's cap
+## (-1: those at work now).
+func land_finds_expected(searchers:float=-1.0)->float:
 	var n:=_land_searchers() if searchers<0.0 else maxf(0.0,searchers)
 	var speed:=maxf(-0.5,WorldSimulation.discovery.effect("survey_speed"))
-	return 1.0-exp(-LAND_FIND_RATE*n*(1.0+speed))
+	return LAND_FIND_RATE*n*(1.0+speed)
+
+## The most finds one month can bring: one for every LAND_FIND_CAP_KM the
+## worked ground reaches (one_seat.gd reach_km), at least one.
+func land_find_cap()->int:
+	return maxi(1,floori(preload("res://scripts/one_seat.gd").reach_km()/LAND_FIND_CAP_KM))
+
+## How many finds a month's roll makes: the Poisson count for `expected`
+## finds whose chance of none is the roll's complement, so a roll under the
+## stated odds of at least one (1 − e^(−expected)) always finds, and higher
+## counts come from lower rolls; at most `cap`.
+static func land_find_count(roll:float,expected:float,cap:int)->int:
+	if expected<=0.0 or cap<=0:return 0
+	var beyond:=1.0-clampf(roll,0.0,1.0)
+	var chance:=exp(-expected)
+	var below:=chance
+	var count:=0
+	while beyond>below and count<cap:
+		count+=1
+		chance*=expected/float(count)
+		below+=chance
+	return count
 
 ## Water of every kind (surface water, deep aquifers) is found by other work,
 ## never by the searchers.
@@ -1469,26 +1501,33 @@ func _advance_land(context:Dictionary)->void:
 	land.find_month=month
 	# A step over several months (a calm rival, a load) rolls once for them all.
 	var months:=mini(12,month-last)
-	var p:=1.0-pow(1.0-land_find_odds(),float(months))
+	var expected:=land_finds_expected()*float(months)
+	var p:=1.0-exp(-expected)
 	var roll:=_land_rng(month,"roll").randf() if forced_land_roll<0.0 else forced_land_roll
-	land.last_roll={"day":day,"p":p,"roll":roll,"months":months,"searchers":_land_searchers()}
-	if roll>=p:return
+	var count:=land_find_count(roll,expected,land_find_cap()*months)
+	land.last_roll={"day":day,"p":p,"roll":roll,"months":months,"searchers":_land_searchers(),"expected":expected,"count":count}
+	if count<=0:return
 	var origin:=_land_origin(context)
-	# What is found is picked by its own seed, never the roll's.
-	var find:=_land_find(origin,_land_rng(month,"pick"))
-	if find.is_empty():
+	var finds:Array=land.get("finds",[])
+	var kinds:Array=[]
+	for index in count:
+		# What is found is picked by its own seed, never the roll's.
+		var find:=_land_find(origin,_land_rng(month,"pick" if index==0 else "pick%d" % index))
+		if find.is_empty():break
+		var deposit:Dictionary=find.deposit
+		var entry:={"day":day,"kind":String(find.kind),"resource":String(deposit.get("resource","")),"deposit_id":String(deposit.get("id","")),"km":snappedf(_land_km(deposit,origin),0.1),"way":_land_way(origin,deposit),"told":false}
+		if String(find.kind)=="richer":entry.merge({"quality_before":float(find.before),"quality":float(deposit.get("quality",1.0))},true)
+		if bool(find.get("seen",false)):entry["seen"]=true
+		kinds.append(String(find.kind))
+		finds.push_front(entry)
+		_tell_land_find(entry)
+	if kinds.is_empty():
 		land.last_roll["found"]="nothing new"
 		return
-	var deposit:Dictionary=find.deposit
-	var entry:={"day":day,"kind":String(find.kind),"resource":String(deposit.get("resource","")),"deposit_id":String(deposit.get("id","")),"km":snappedf(_land_km(deposit,origin),0.1),"way":_land_way(origin,deposit),"told":false}
-	if String(find.kind)=="richer":entry.merge({"quality_before":float(find.before),"quality":float(deposit.get("quality",1.0))},true)
-	if bool(find.get("seen",false)):entry["seen"]=true
-	land.last_roll["found"]=String(find.kind)
-	var finds:Array=land.get("finds",[])
-	finds.push_front(entry)
+	land.last_roll["found"]=String(kinds[0])
+	land.last_roll["finds"]=kinds
 	if finds.size()>LAND_FINDS_KEPT:finds.resize(LAND_FINDS_KEPT)
 	land.finds=finds
-	_tell_land_find(entry)
 
 ## A month's roll ("roll") or the pick of what is found ("pick"), each its own
 ## seed: reproducible from the world's seed, the land's place and the month,
@@ -1595,17 +1634,23 @@ func _foreign_land(point:Vector2)->bool:
 ## find.
 ##   1. A deposit of this land they can recognise but have not measured (the
 ##      nearer the likelier): it is found and measured at once.
-##   2. New ground 4 to 20 km out, on land and in no other people's hold.
+##   2. New ground 4 km out to the worked reach, on land and in no other
+##      people's hold.
 ##   3. A richer part of a deposit being worked (never a worked front of
 ##      woods, stone or fibre): a tenth more from each cutter there, at most
 ##      twice for each deposit and never past 1.5.
+## Searchers walk only the land the people work (one_seat.gd reach_km, at
+## least LAND_FIND_FAR_KM): a deposit left behind at a far older home is
+## never a find.
 func _land_find(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
 	var state=WorldSimulation.state
 	var waiting:Array=[];var nearness:Array=[]
 	var ready:Dictionary={}
+	var reach:=maxf(LAND_FIND_FAR_KM,preload("res://scripts/one_seat.gd").reach_km())
 	for deposit_variant in state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
 		if not _land_kind(deposit):continue
+		if _land_km(deposit,origin)>reach:continue
 		var stage:=String(deposit.get("stage",""))
 		if stage not in ["unknown","recognized"]:continue
 		var resource:=String(deposit.resource)
@@ -1628,7 +1673,7 @@ func _land_find(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
 	var worked:Array=[]
 	for deposit_variant in state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
-		if not _land_kind(deposit):continue
+		if not _land_kind(deposit) or _land_km(deposit,origin)>reach:continue
 		if String(deposit.get("stage","")) not in ["accessible","developed"] or deposit_exhausted(deposit):continue
 		if int(deposit.get("richer_finds",0))>=LAND_RICHER_TIMES or float(deposit.get("quality",1.0))>=LAND_QUALITY_CAP:continue
 		worked.append(deposit)
@@ -1755,8 +1800,8 @@ func _land_reading(extra:float=10.0)->Dictionary:
 	return {"settled":settled,"cover":cover,"target":land_target(searchers,people),"searchers":searchers,"people":people,
 		"yield":land_yield(cover),"applied":_land_applied(land,day) if settled else 1.0,
 		"blend_days_left":maxi(0,ceili(LAND_BLEND_DAYS-float(day-from))) if from>=0 else 0,
-		"find_month":land_find_odds(searchers),"finds":(land.get("finds",[]) as Array).duplicate(true),
-		"plus_ten":{"searchers":more,"target":plus,"yield":land_yield(plus),"find_month":land_find_odds(more)}}
+		"find_month":land_find_odds(searchers),"finds_month":minf(land_finds_expected(searchers),float(land_find_cap())),"find_cap":land_find_cap(),"finds":(land.get("finds",[]) as Array).duplicate(true),
+		"plus_ten":{"searchers":more,"target":plus,"yield":land_yield(plus),"find_month":land_find_odds(more),"finds_month":minf(land_finds_expected(more),float(land_find_cap()))}}
 
 ## The searched land of the whole people, as the People screen reads every
 ## task: each lived-in town read in its own scope, its cover, target and
@@ -1788,9 +1833,13 @@ func realm_land_reading()->Dictionary:
 		more_target+=land_target(more,float(r.people))*share
 		none*=1.0-float(r.find_month);more_none*=1.0-land_find_odds(more)
 		blend=maxi(blend,int(r.blend_days_left))
+	var finds_month:=0.0;var more_finds:=0.0;var cap:=0
+	for r:Dictionary in settled:
+		finds_month+=float(r.get("finds_month",0.0));cap+=int(r.get("find_cap",1))
+		more_finds+=minf(land_finds_expected(float(r.searchers)+10.0*float(r.people)/maxf(1.0,people)),float(r.get("find_cap",1)))
 	return {"settled":true,"towns":settled.size(),"cover":cover,"target":target,"searchers":searchers,"people":people,
-		"yield":land_yield(cover),"applied":applied,"blend_days_left":blend,"find_month":1.0-none,"finds":[],
-		"plus_ten":{"searchers":searchers+10.0,"target":more_target,"yield":land_yield(more_target),"find_month":1.0-more_none}}
+		"yield":land_yield(cover),"applied":applied,"blend_days_left":blend,"find_month":1.0-none,"finds_month":finds_month,"find_cap":cap,"finds":[],
+		"plus_ten":{"searchers":searchers+10.0,"target":more_target,"yield":land_yield(more_target),"find_month":1.0-more_none,"finds_month":more_finds}}
 
 ## A month's odds in plain words: "about 1 in 7", "about 6 in 10".
 static func odds_words(p:float)->String:

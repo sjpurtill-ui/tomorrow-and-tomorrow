@@ -256,8 +256,18 @@ static func _land_lines(lines:Array)->void:
 	lines.append(_line("Searched land","%d in 100" % cover,
 		"Cutters and diggers get %s from it (×0.75 unsearched, up to ×1.25). One searcher for every 60 people holds it near 60; it is %s. Ten more searching would take it toward %d (×%s)." % [String(R.land_yield_words(land)),String(R.land_heading(land)),roundi(float(plus.target)*100.0),_two(float(plus.yield))],"good" if cover>=50 else "plain"))
 	var odds:=String(R.odds_words(float(land.find_month)))
-	lines.append(_line("Finds","%s a month" % odds,
-		"A find in the next month: %s. A find is a deposit not yet measured, new ground, or a richer part of one being worked. Ten more searching: %s." % [odds,String(R.odds_words(float(plus.find_month)))],"good" if float(land.find_month)>0.0 else "plain"))
+	var each:=float(land.get("finds_month",0.0))
+	var cap:=int(land.get("find_cap",1))
+	# Once the searchers expect a find most months, say how many.
+	var value:="%s a month" % odds if each<0.95 else "about %s a month" % _finds_words(each)
+	lines.append(_line("Finds",value,
+		"A find in the next month: %s. About %s a month on average, at most %d while the worked land reaches as far as it does now (one for every 20 km). A find is a deposit not yet measured, new ground, or a richer part of one being worked. Ten more searching: about %s a month." % [odds,_finds_words(each),cap,_finds_words(float(plus.get("finds_month",0.0)))],"good" if float(land.find_month)>0.0 else "plain"))
+
+## A number of finds a month in plain words: "1", "2.5", "under 1 in 10".
+static func _finds_words(count:float)->String:
+	if count<0.1:return "under 1 in 10"
+	if count<0.95:return "%d in 10" % roundi(count*10.0)
+	return str(roundi(count)) if absf(count-roundf(count))<0.25 else str(snappedf(count,0.5))
 
 ## The deposits by what searchers can still do: hidden ones the people could
 ## recognise, and found ones waiting to be measured.
