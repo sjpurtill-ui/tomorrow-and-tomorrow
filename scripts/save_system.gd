@@ -21,7 +21,10 @@ const REFLECT_SKIP:Dictionary={
 	"GameState":["resource_settlement_id"],
 	"SettlementModel":["_local_population_scope","_claim_shape_cache"],
 	"FoodSystem":["_access_cache","_lever_cache"],
-	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context","era_by_id"],
+	"DiscoverySystem":["catalog","catalog_by_id","catalog_by_channel","technology_catalog","technology_limits","initialized","latest_context","era_by_id","_placement_memo","_work_memo","_idle_look_key"],
+	# Day caches rebuilt on first use (never world state; some hold live objects).
+	"GovernmentPeopleSystem":["_read_key"],
+	"CivilizationSystem":["_scout_land_cache","_scout_land_cache_owner"],
 	# In-flight HTTP requests contain transient nodes and authorization headers.
 	# They are neither world state nor safe save-file content; the matching civic
 	# order is persisted and reopened as an interrupted conversation on load.
@@ -145,7 +148,7 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	# Lazy initialization on the next day would reseed research after loading.
 	DiscoverySystem.initialize()
 	for system_name in REFLECTED_SYSTEMS:
-		_apply_reflected(get_node("/root/"+system_name),payload.get("reflected_%s" % system_name,{}))
+		_apply_reflected(get_node("/root/"+system_name),payload.get("reflected_%s" % system_name,{}),REFLECT_SKIP.get(system_name,[]))
 	_apply_reflected(DiscoverySystem.society_model,payload.get("reflected_society_model",{}),SOCIETY_REFLECT_SKIP)
 	var errors:Array[String]=[]
 	for system_name in CURATED_SYSTEMS:
@@ -293,7 +296,7 @@ func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	var result:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:
 		for name in REFLECTED_SYSTEMS:
 			if name not in WorldSimulation.OWNED_SYSTEMS:continue
-			_apply_reflected(WorldSimulation.system(name),payload.get("reflected_"+name,{}))
+			_apply_reflected(WorldSimulation.system(name),payload.get("reflected_"+name,{}),REFLECT_SKIP.get(name,[]))
 		_apply_reflected(WorldSimulation.discovery.society_model,payload.get("reflected_society_model",{}),SOCIETY_REFLECT_SKIP)
 		for name in CURATED_SYSTEMS:
 			if name=="WorldSimulation":continue

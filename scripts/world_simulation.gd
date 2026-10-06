@@ -542,7 +542,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]}
+const RETIRED_FIELDS:={"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:
@@ -681,7 +681,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 					for key in fields.keys():
 						if String(key).begins_with("rng_state:"):
 							instance.get(String(key).trim_prefix("rng_state:")).state=int(fields[key]);fields.erase(key)
-					SNAPSHOT._apply_reflected(instance,fields)
+					SNAPSHOT._apply_reflected(instance,fields,SNAPSHOT.REFLECT_SKIP.get(name,[])+RETIRED_FIELDS.get(name,[]))
 			SNAPSHOT._apply_reflected(discovery.society_model,saved.state.get("society_model",{}),SNAPSHOT.SOCIETY_REFLECT_SKIP)
 			world.city_intelligence.records=saved.state.get("city_intelligence",{}).duplicate(true)
 			world.rumor_network.books=saved.state.get("rumor_books",{}).duplicate(true)
