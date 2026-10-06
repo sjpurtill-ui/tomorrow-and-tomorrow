@@ -276,3 +276,26 @@ func test_vacant_intact_buildings_stay_visible_and_saved_sites_survive_road_chan
 	var parent:Node3D=auto_free(Node3D.new())
 	EARLY.render(next,Vector3.ZERO,func(_x:float,_z:float)->float:return 0.0,parent)
 	assert_int(parent.get_child_count()).is_greater(0)
+
+func test_late_house_fits_small_expansion_lot_without_losing_recorded_storey_height()->void:
+	var data:=fixture("dense_mixed_frontage","earth","courtyard_flat")
+	var plot:Dictionary=data.plots[0]
+	plot.fabric_generation=5;plot.storeys=2;plot.seed=93
+	plot.polygon=PackedVector2Array([Vector2(-.012,-.012),Vector2(.012,-.012),Vector2(.012,.012),Vector2(-.012,.012)])
+	plot.area_ha=.0576
+	var before:Dictionary=data.duplicate(true)
+	var plan:=EARLY.layout(data.plots,data.routes,dry)
+	assert_int(plan.buildings.size()).is_greater(0)
+	assert_dict(data).is_equal(before)
+	for record:Dictionary in plan.buildings:
+		assert_bool(record.get("fit_inherited_site",false)).is_true()
+		assert_array(Geometry2D.clip_polygons(record.footprint,plot.polygon)).is_empty()
+	var kit:=preload("res://scripts/settlement_architecture_kit.gd")
+	for record:Dictionary in plan.buildings:
+		var basis:Basis=kit.site_basis(record)
+		assert_float(basis.y.length()).is_equal_approx(.001,.000001)
+		assert_float(basis.x.length()).is_less(.001)
+		var transform:=Transform3D(basis,Vector3(record.position.x,0,record.position.y))
+		for corner in 8:
+			var point:Vector3=transform*kit.mesh_for_plot(record.plot).get_aabb().get_endpoint(corner)
+			assert_bool(Geometry2D.is_point_in_polygon(Vector2(point.x,point.z),plot.polygon)).is_true()

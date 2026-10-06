@@ -4899,7 +4899,7 @@ func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],r
 	var frontage_keys:Dictionary={}
 	var inherited_frontages:Dictionary={}
 	for plot:Dictionary in GameState.settlement_plots:
-		if int(plot.get("id",0))<=OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot):inherited_frontages[int(plot.get("frontage_route_id",-1))]=true
+		if EarlySettlementVisual.supports(plot):inherited_frontages[int(plot.get("frontage_route_id",-1))]=true
 	for route:Dictionary in GameState.settlement_routes:
 		frontage_keys[int(route.get("id",0))]=hash([SettlementVisualKeys.route(route),roundi(float(route.get("traffic",0.0))*5.0)])
 	for key:String in groups:
@@ -10783,7 +10783,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		if polygon.size() < 3:
 			continue
 		var uses_kit: bool = organic_plan.replaced.has(int(plot.get("id", -1)))
-		var ground_lift := 0.0002 if organic_town or uses_kit else 0.0018
+		# Yard layers stay below even one-storey aggregate roofs. The detail
+		# budget must never raise ground through the buildings it replaces.
+		var ground_lift := 0.0002
 		var plot_has_detail:=bool(patch_context.detail_ids.get(int(plot.get("id",0)),false)) if patch_context.has("detail_ids") else _settlement_plot_has_detail(plot,plot_index,plots.size(),lod)
 		var plot_color := _settlement_plot_color(plot)
 		var status := String(plot.get("status", "active"))
@@ -10808,7 +10810,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			# access alter land cover continuously. This is deliberately plot-derived:
 			# dense late fabric becomes a satellite-readable urban tone without drawing
 			# an arbitrary circular city decal beneath it.
-			_append_textured_ground_patch(density_surface,density_world,density_radius,density_color,0.00165,Vector2i(1,0),int(plot.get("seed",1))^0x512f9a)
+			_append_textured_ground_patch(density_surface,density_world,density_radius,density_color,0.00012,Vector2i(1,0),int(plot.get("seed",1))^0x512f9a)
 			density_count+=1
 		if land_use=="field" and status not in ["ruin","reclaimed"]:
 			var field_ground_color:=plot_color
@@ -10840,9 +10842,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		var feature_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 		var feature_world:=Vector3(center.x+feature_center.x,0.0,center.z+feature_center.y)
 		if lod<=1 and not temporary_camp:
-			boundary_count+=_append_plot_boundary(boundary_surface,plot,center,0.00035 if organic_town or uses_kit else 0.0030)
+			boundary_count+=_append_plot_boundary(boundary_surface,plot,center,0.00035)
 			if plot_has_detail and land_use not in ["water","waste","field"]:
-				variation_count+=_append_yard_variation(variation_surface,plot,center,0.0003 if organic_town or uses_kit else 0.0027)
+				variation_count+=_append_yard_variation(variation_surface,plot,center,0.0003)
 		if lod<=1 and not organic_plan.replaced.has(int(plot.get("id", -1))) and not temporary_camp and land_use in ["communal","civic","sacred","market"]:
 			var architecture:=_settlement_visual_architecture_profile(_settlement_architecture_profile())
 			var civic_space:=clampf(float(architecture.get("civic_space",0.5)),0.0,1.0)
@@ -10925,14 +10927,12 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 	var inherited_frontages: Dictionary = patch_context.get("inherited_frontages",{})
 	if not patch_context.has("inherited_frontages"):
 		for plot in GameState.settlement_plots:
-			if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
+			if EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count := 0
 	var architecture:=_settlement_visual_architecture_profile(_settlement_architecture_profile())
-	var axiality:=clampf(float(architecture.get("axiality",0.5)),0.0,1.0)
 	var civic_space:=clampf(float(architecture.get("civic_space",0.5)),0.0,1.0)
-	var permeability:=clampf(float(architecture.get("permeability",0.5)),0.0,1.0)
 	for route in routes:
 		var route_lift := 0.0004 if early_town or inherited_frontages.has(int(route.get("id", -2))) else 0.0027
 		if not bool(route.get("active", true)):
@@ -10950,24 +10950,12 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 		var hierarchy:=String(route.get("hierarchy","field_track" if route_kind=="field_track" else ("camp_path" if route_kind=="camp_path" else "path")))
 		# Agricultural access is a faint inherited track; inhabited lanes remain
 		# readable but no longer turn every outlying field into a map-diagram spoke.
-		var minimum_half_width:=0.00034 if route_kind=="field_track" else (0.00014 if route_kind=="camp_path" else 0.00058)
-		if hierarchy=="farm_lane": minimum_half_width=0.00058
-		elif hierarchy=="lane": minimum_half_width=0.00082
-		elif hierarchy=="main_approach": minimum_half_width=0.00128
-		var width := maxf(minimum_half_width, float(route.get("width_m", 1.2)) / 2000.0)
+		var width := OrganicTownVisual.route_half_width(route)
 		var condition := clampf(float(route.get("condition", 0.5)), 0.0, 1.0)
 		var route_color := (Color("#41402e") if route_kind=="field_track" else (Color("#5e5948") if route_kind=="camp_path" else Color("#6f6248"))).lerp(Color("#897654"), condition * 0.24)
 		var surface_tier:=clampi(int(route.get("surface_tier",0)),0,5)
-		if route_kind!="camp_path" and surface_tier>=3:
-			# Drained, paved and engineered roads occupy real width. Keeping a
-			# metropolitan route at the founding 1.2 m made a mature network vanish.
-			width=maxf(width,[0.0,0.0,0.0,0.00165,0.00235,0.00320][surface_tier])
-			if hierarchy=="main_approach": width*=1.34
-		if route_kind not in ["camp_path","field_track"]:
-			width*=lerpf(0.94,1.08,permeability)
-			if hierarchy=="main_approach": width*=lerpf(0.96,1.10,axiality)
 		var surface_palette:=[Color("#5f5540"),Color("#746044"),Color("#806b4c"),Color("#766952"),Color("#817d72"),Color("#707477")]
-		if route_kind!="camp_path":
+		if route_kind not in ["camp_path","field_track"]:
 			route_color=route_color.lerp(surface_palette[surface_tier],clampf(float(surface_tier)*0.14,0.0,0.66))
 		route_color.a = 0.12 if route_kind=="field_track" else (0.19 if route_kind=="camp_path" else 0.18)
 		if hierarchy=="farm_lane": route_color.a=0.22
@@ -10975,7 +10963,7 @@ func _create_persistent_settlement_routes(center: Vector3, routes: Array[Diction
 		elif hierarchy=="main_approach": route_color.a=0.54
 		if hierarchy in ["lane","main_approach"]:
 			route_color=route_color.lerp(Color("#94866d"),civic_space*0.10)
-		if surface_tier>=3 and route_kind!="camp_path":
+		if surface_tier>=3 and route_kind not in ["camp_path","field_track"]:
 			# Roads are the organizing skeleton visible in real aerial imagery. Mature
 			# drained/paved routes must survive the close-map LOD instead of becoming
 			# fainter precisely when their roof fabric appears.

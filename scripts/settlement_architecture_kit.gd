@@ -468,7 +468,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var placed:Array[Transform3D]=[]
 		for i in group.size():
 			var record:Dictionary=group[i];var point:Vector2=record.position+Vector2(center.x,center.z)
-			var placement:=Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001*inherited_site_scale(record)),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
+			var placement:=Transform3D(site_basis(record),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
 			placed.append(placement)
 			batch.set_instance_transform(i,placement)
 			var wear:=1-clampf(float(record.plot.get("condition",1)),0,1)
@@ -477,6 +477,11 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+key.replace(":","_"),placed,batch.mesh.get_aabb())
+
+static func site_basis(record:Dictionary)->Basis:
+	# Fit the plan to its lot without shrinking recorded storey heights.
+	var fit:=inherited_site_scale(record)
+	return Basis(Vector3.UP,float(record.angle)).scaled(Vector3(fit,1.0,fit)*.001)
 
 static func inherited_site_scale(record:Dictionary)->float:
 	if not bool(record.get("fit_inherited_site",false)):return 1.0

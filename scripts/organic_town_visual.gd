@@ -32,13 +32,9 @@ static func route_half_width(route: Dictionary) -> float:
 	elif hierarchy == "lane": minimum = 0.00082
 	elif hierarchy == "main_approach": minimum = 0.00128
 	var width := maxf(minimum, float(route.get("width_m", 1.2)) * 0.0005)
-	var tier := clampi(int(route.get("surface_tier", 0)), 0, 5)
-	if kind != "camp_path" and tier >= 3:
-		width = maxf(width, [0.0, 0.0, 0.0, 0.00165, 0.00235, 0.00320][tier])
-		if hierarchy == "main_approach": width *= 1.34
-	if kind not in ["camp_path", "field_track"]:
-		width *= 1.08
-		if hierarchy == "main_approach": width *= 1.10
+	# Paving changes the surface, not a recorded lane's physical width. The
+	# old surface-tier multiplier turned 0.72 m field tracks into 6.4 m roads,
+	# also reserving that invented width against neighboring house placement.
 	return width
 
 static func bounds(polygon: PackedVector2Array) -> Rect2:

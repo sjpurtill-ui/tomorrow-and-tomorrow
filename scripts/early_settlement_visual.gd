@@ -104,6 +104,18 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 				envelope=envelope.merge(LATE.early_detail_mesh(envelope,kind(plot),LATE.installed_features(plot)).get_aabb())
 			var extent := envelope.position.abs().max(envelope.end.abs())
 			plot["placement_half_extent"] = Vector2(extent.x, extent.z) * .001
+			if LATE.kind(plot)!="":
+				# A late prototype describes a whole block, while many real lots are
+				# still household sized. Reserve a compact version through the same
+				# road/parcel/land solver instead of silently omitting the building.
+				var parcel:PackedVector2Array=plot.get("polygon",PackedVector2Array())
+				if parcel.size()>=3:
+					var size:=TOWN.bounds(parcel).size
+					var limit:=maxf(.0018,minf(size.x,size.y)*.15)
+					var half:Vector2=plot.placement_half_extent
+					if maxf(half.x,half.y)>limit:
+						plot.placement_half_extent=half*(limit/maxf(half.x,half.y))
+						plot["fit_compact_site"]=true
 		# Reuse the checked footprint/road/water solver, retaining plot identity and
 		# reserved future household sites. This is a display copy, not a conversion.
 		plot.storeys=1
@@ -119,6 +131,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			var c: Variant = plot.get("centroid",Vector2.ZERO)
 			if c is Vector2: hearth = c; break
 	for record in plan.buildings:
+		if bool(record.plot.get("fit_compact_site",false)):record["fit_inherited_site"]=true
 		var original: Dictionary = originals[int(record.plot_id)]
 		record.plot = original.duplicate(false)
 		record["early_kind"] = kind(original)

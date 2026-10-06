@@ -1,13 +1,18 @@
 extends Node
 ## Private GPU acceptance using the actual map, loaded from an isolated save.
 var terrain: Node
+var save_slot:="village-preview"
+var output_directory:="res://artifacts/living-village"
 func _ready() -> void:
 	if not OS.get_user_data_dir().to_lower().contains("acceptance"):
 		get_tree().quit(2); return
+	for argument:String in OS.get_cmdline_user_args():
+		if argument.begins_with("--save-slot="):save_slot=argument.trim_prefix("--save-slot=")
+		elif argument.begins_with("--output="):output_directory=argument.trim_prefix("--output=")
 	call_deferred("run")
 
 func run() -> void:
-	var loaded := SaveSystem.load_game("village-preview")
+	var loaded := SaveSystem.load_game(save_slot)
 	if loaded.has("error"):
 		push_error("An isolated copy of a campaign is required for this preview.")
 		get_tree().quit(2); return
@@ -27,7 +32,7 @@ func run() -> void:
 	var id := String(GameState.selected_player_settlement_id)
 	while preload("res://scripts/hud/village_view_record.gd").views(GameState.settlement_portrait_history, id).is_empty() and Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
-	var output := "res://artifacts/living-village"
+	var output := output_directory
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output))
 	await _capture(output + "/overview.png")
 	get_window().size=Vector2i(1024,900)

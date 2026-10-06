@@ -150,3 +150,20 @@ func test_overbudget_roofs_stay_inside_parcel_and_off_streets_and_unsafe_ground(
 		if not Geometry2D.is_point_in_polygon(Vector2(vertex.x,vertex.z),parcel):all_inside=false;break
 	assert_bool(all_inside).is_true()
 	renderer.free()
+
+func test_one_storey_expansion_roofs_remain_above_yards_after_detail_budget()->void:
+	var snapshot:=Fixture.snapshot(200)
+	var p:Dictionary=snapshot.plots[0].duplicate(true)
+	p.id=129;p.storeys=1;p.status="stressed";p.condition=.05
+	snapshot.plots.assign([p]);GameState.settlement_plots=snapshot.plots
+	var renderer:=Fixture.FlatRenderer.new();var parent:Node3D=auto_free(Node3D.new())
+	var result:=Fixture.render(renderer,snapshot,parent)
+	assert_int(result.fallback_roof_vertices).is_greater(0)
+	var roof:=parent.get_node_or_null("PersistentRoofFabric") as MeshInstance3D
+	assert_object(roof).is_not_null()
+	if roof!=null:
+		for name in ["PersistentPlotGround","PersistentYardVariation","PersistentSettlementDensity"]:
+			var ground:=parent.get_node_or_null(name) as MeshInstance3D
+			if ground!=null:
+				assert_float(ground.mesh.get_aabb().end.y).override_failure_message(name+" buries an occupied roof").is_less(roof.mesh.get_aabb().position.y)
+	renderer.settlement_fabric_shader=null;renderer.free()

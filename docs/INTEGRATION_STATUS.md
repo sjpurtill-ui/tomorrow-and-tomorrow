@@ -1,3 +1,18 @@
+## October 5 — Year 201 expansion-map repair: READY
+
+`codex/year201-expansion`, based on `1df22772`, reproduces Ashleyfire at Year 201
+with 3,422 people. Surface-tier inflation had turned 0.72 m field tracks into
+6.4 m gray strips and blocked building placement. Small later lots also failed
+the full-size model solver; aggregate roofs could sit below raised ground layers.
+Road drawing/clearance now share recorded widths, small lots use checked compact
+models, storey heights survive footprint fitting, and yards stay below roofs.
+54/54 regression tests pass. Exact-save private GPU preview renders 164 detailed
+representatives versus 95 before; final PID 62960 exited 0. Existing saves need no
+schema migration; simulation and population are unchanged. No player restart.
+See `docs/design/YEAR201_EXPANSION_MAP.md` for before/after evidence and limits.
+Prepared for the user's requested preview review; not integrated into main.
+Pending progression, brighter type and figure-removal previews remain separate.
+
 ## October 5 — Living village Overview: INTEGRATED
 
 `codex/living-village-overview`, based on `5d8994b3`, replaces the generated

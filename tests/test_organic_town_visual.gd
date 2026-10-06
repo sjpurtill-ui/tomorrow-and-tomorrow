@@ -225,3 +225,12 @@ func test_gardens_use_clear_leftover_ground_and_market_gets_hall() -> void:
 		for other in plan.buildings: assert_array(Geometry2D.intersect_polygons(record.garden, other.footprint)).is_empty()
 	assert_int(halls).is_equal(1)
 	assert_int(gardens).is_greater(0)
+
+func test_paving_cannot_widen_saved_lanes_or_field_tracks()->void:
+	for kind in ["field_track","desire_path","street"]:
+		var route:={"kind":kind,"width_m":.72 if kind=="field_track" else 2.4,"surface_tier":0}
+		var dirt:=TOWN.route_half_width(route)
+		route.surface_tier=5
+		assert_float(TOWN.route_half_width(route)).is_equal(dirt)
+		route.width_m=8.0
+		assert_float(TOWN.route_half_width(route)).is_equal(.004)
