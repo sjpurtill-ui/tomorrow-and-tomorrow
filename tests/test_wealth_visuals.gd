@@ -32,7 +32,8 @@ func test_graphical_readings_use_real_goods_and_equal_household_groups()->void:
 	var fifths:Control=board.find_child("Fifths",true,false)
 	assert_array(fifths.values).is_equal(Array(GameState.wealth_shares))
 	assert_str((board.find_child("GoodsValue",true,false) as Label).text).is_equal("Worth 400 rations")
-	assert_object(board.find_child("StoreAnswer",true,false)).is_null()
+	# The common store is on Wealth, counted in goods.
+	assert_str((board.find_child("StoreAnswer",true,false) as Label).text).ends_with(" goods")
 
 func test_material_price_change_refreshes_buying_power_without_rebuilding_neighbors()->void:
 	var board:=_board()
@@ -58,8 +59,11 @@ func test_unchanged_refresh_retains_visual_nodes_and_navigation_works()->void:
 	board.refresh()
 	assert_int(board.find_child("GoodsHeld",true,false).get_instance_id()).is_equal(ids[0])
 	assert_int(board.find_child("GoodsAvailability",true,false).get_instance_id()).is_equal(ids[1])
-	for key:String in ["SeeArms","SeeMaterials","SeeTrade","SeeStore"]:(board.find_child(key,true,false) as Button).emit_signal("pressed")
-	assert_array(destinations).is_equal([["production",2],["economy",1],["economy",3],["economy",0]])
+	for key:String in ["SeeArms","SeeMaterials","SeeTrade"]:(board.find_child(key,true,false) as Button).emit_signal("pressed")
+	assert_array(destinations).is_equal([["production",2],["economy",1],["economy",3]])
+	# The common store is on Wealth itself, in goods: no link away to Food & water.
+	assert_object(board.find_child("SeeStore",true,false)).is_null()
+	assert_object(board.find_child("Balance",true,false)).is_not_null()
 
 func test_scroll_width_reflows_existing_cards_without_stale_wide_minimum()->void:
 	var scroll:ScrollContainer=auto_free(ScrollContainer.new())

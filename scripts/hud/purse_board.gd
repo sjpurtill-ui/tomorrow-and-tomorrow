@@ -12,20 +12,12 @@ extends VBoxContainer
 ##   what we make goods a day and their worth; arms point to Production;
 ##   treasures    the pieces held and their appraisal;
 ##   materials    timber, stone, clay and fibre in store, a secondary line;
-##   the treasury after coinage: the purse's sections below, in coin;
+##   the store    the common store (the treasury after coinage) as one card:
+##                what it holds and who gives it, the levy as three choices,
+##                what it pays for with a switch each;
 ##   trade and business  barter at home, then the business rung and stance;
 ##   the wealth   who holds it by fifths, and the pressure it puts on trust;
-##   the store    before coinage, one line and a link to Food & water.
-## The Food & water tab ("store") holds the common store while it is food:
-##   the store    how long it lasts and whether it grows; what comes in and
-##                goes out a season, two labelled bars;
-##   where from   each town's levy, and what never came in;
-##   the levy     light, usual or heavy: a button each with what it takes,
-##                brings in and costs in trust;
-##   pays for     the soldiers' pay, the scholars' keep, hired crews and food
-##                for hungry towns: a switch each, its cost and its effect.
-## The purse's sections live where its money is: with the food until coinage,
-## then with the wealth (the treasury, in coin).
+## "store" draws the store's card alone.
 
 signal close_wanted
 
@@ -46,7 +38,7 @@ const ArtifactArt:=preload("res://scripts/hud/artifact_visuals.gd")
 const Emblem:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const REFRESH_SECONDS:=1.0
-const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Rot"}
+const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Wear"}
 ## Business does "hardly anything yet" below this much added to all work;
 ## its stance is then tucked behind one button.
 const BUSINESS_MATTERS:=0.01
@@ -61,10 +53,10 @@ var goods_box:VBoxContainer
 var own_box:VBoxContainer
 var treasures_box:VBoxContainer
 var materials_box:VBoxContainer
-var store_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
-var ledger_box:VBoxContainer
+## The store card's own title, named by the age (the common store, the treasury).
+var store_kicker:Label
 var feedback:Label
 ## "wealth" (the Wealth tab) or "store" (the common store on Food & water).
 var mode:="wealth"
@@ -108,25 +100,33 @@ func setup(block:Dictionary={})->void:
 		treasures_box=_visual_section("Treasures",cards,"TreasuresCard","")
 		materials_box=_visual_section("Materials in store",cards,"MaterialsCard","materials")
 	if _purse_here():
-		head_box=_section(Purse.account_name())
+		# The common store (the treasury after coinage): one card, its parts
+		# one under another.
+		var card:=_section(Purse.account_name())
+		store_kicker=card.get_meta("section_kicker",null) as Label if card.has_meta("section_kicker") else get_child(card.get_index()-1) as Label
+		card.add_theme_constant_override("separation",14)
+		head_box=_part(card)
 		if mode=="store":add_child(feedback)
-		sources_box=_section("Where it comes from")
-		levy_box=_section("The levy")
-		lines_box=_section("What it pays for")
+		sources_box=_part(card)
+		levy_box=_part(card)
+		lines_box=_part(card)
 	if mode=="wealth":
 		var society:=_grid(self,"WealthSociety",2,820)
 		business_box=_visual_section("Trade and business",society,"BusinessCard","trade")
 		wealth_box=_visual_section("Who holds the wealth",society,"DistributionCard","overview")
-		if kind_at_setup:store_box=_section(Purse.account_name())
-	if _purse_here():ledger_box=_section("Lately")
 	resized.connect(_responsive)
 	refresh(true)
 	_responsive()
 
-## Whether this board holds the purse's own sections: the store's on Food &
-## water while it is food, the treasury's on Wealth once it is coin.
+## A part of the store's card.
+func _part(card:VBoxContainer)->VBoxContainer:
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_child(box)
+	return box
+
+## Whether this board holds the purse's own sections: always. The common
+## store holds goods and the treasury coin; both live on Wealth.
 func _purse_here()->bool:
-	return (mode=="store")==kind_at_setup
+	return true
 
 
 func _process(delta:float)->void:
@@ -153,12 +153,11 @@ func refresh(force:=false)->void:
 		var forecast:=Purse.forecast()
 		var purse:=Purse.state()
 		var season:=Purse.season()
-		_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),roundi(Purse.days_of_food()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
+		_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
 		var sources:=Purse.sources()
-		_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
+		_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
 		_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
-		_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
-		_rebuild("ledger",ledger_box,str((purse.ledger as Array).slice(0,5)),force,func()->void:_build_ledger(purse))
+		_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open(),_town_count()]),force,func()->void:_build_lines(forecast,purse))
 	if mode!="wealth":return
 	var held:=Standing.wealth_held()
 	var cards:=Production.household_cards()
@@ -175,7 +174,6 @@ func refresh(force:=false)->void:
 	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices().map(func(id:String)->Array:var q:=Business.quote(id);return [id,Purse.number(float(q.purse_now)),Purse.number(float(q.purse_season))]),Business.next_needs(),Purse.unit_word(),stances_open,String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01)]),force,func()->void:_build_business())
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
 	_rebuild("wealth",wealth_box,str([WorldSimulation.state.wealth_shares,parts,String(WorldSimulation.state.economy_stage)]),force,func()->void:_build_wealth())
-	if store_box!=null:_rebuild("store",store_box,str([roundi(Purse.balance()),roundi(Purse.days_of_food())]),force,func()->void:_build_store_pointer())
 	_responsive()
 
 
@@ -189,61 +187,31 @@ func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->voi
 
 # --- The store ----------------------------------------------------------------------
 
-## How long the store lasts (food) or what it holds (coin), and whether it is
-## growing, in one big line; what it holds, then what comes in and goes out a
-## season as two labelled bars. Last season's actual sums are in the bars'
-## tooltip.
+## The common store as one quiet card: what it holds, in large serif words,
+## who gives it and whether it grows; the levy as three plain choices and one
+## sentence; what it pays for, a switch each. Every number is the engine's;
+## the reckoning behind it is in the tooltips.
 func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	_clear(head_box)
-	# The account's own name heads it, by the age: the common store, the treasury.
-	var kicker:=head_box.get_meta("section_kicker",null) as Label if mode=="wealth" else get_child(head_box.get_index()-1) as Label
-	if kicker!=null:kicker.text=Purse.account_name().to_upper()
-	var panel:=_panel(head_box,"Purse")
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
-	panel.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Food the levy took from every town's stores, kept for all. The god's to spend: it pays the soldiers, feeds the hungry, keeps scholars and crews. It rots slowly, as stored food does."
-	var net:=float(forecast.net)
-	var trend:=_trend(net,float(forecast.seasons_left))
-	var head:=HBoxContainer.new();head.name="Headline";head.add_theme_constant_override("separation",12);column.add_child(head)
-	var big:=_answer(_store_words(forecast));big.name="StoreAnswer";big.autowrap_mode=TextServer.AUTOWRAP_OFF;head.add_child(big)
-	var moving:=_line(String(trend.text),16,trend.color);moving.name="Verdict";moving.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	moving.add_theme_font_override("font",T.font("ui_strong"))
-	moving.tooltip_text="A season: %s in, %s out: %s %s." % [Purse.number(float(forecast["in"])),Purse.number(float(forecast.out)),Purse.number(absf(net)),"left over" if net>=0.0 else "short"]
-	head.add_child(moving)
-	var held:=_line(_held_words(forecast),13,T.INK_MUTED,true);held.name="Balance"
-	held.tooltip_text="What %s holds now, in %s." % [Purse.account_name(),Purse.unit_word()]
-	column.add_child(held)
-	# HOI4's budget: what comes in against what goes out, a season, on one scale.
-	var ins:Array=[["Levy",float(forecast.levy),T.GREEN]]
-	if float(forecast.rich)>0.0:ins.append(["The rich",float(forecast.rich),T.GREEN.darkened(0.2)])
-	if float(forecast.get("charter",0.0))>0.0:ins.append([Business.purse_name(),float(forecast.charter),T.GREEN.lightened(0.25)])
-	var outs:Array=[]
-	for line:String in Purse.LINES:
-		var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
-		if bool(entry.get("on",false)) and float(entry.get("per_season",0.0))>0.0:outs.append([String(LINE_LABELS[line]),float(entry.per_season),_ink(line)])
-	if float(forecast.get("rot",0.0))>=0.5:outs.append([String(LINE_LABELS.spoiled),float(forecast.rot),T.INK_MUTED])
-	var scale:=maxf(0.001,maxf(float(forecast["in"]),float(forecast.out)))
-	var budget:=VBoxContainer.new();budget.name="Budget";budget.add_theme_constant_override("separation",4);column.add_child(budget)
-	budget.tooltip_text="Last season: %s came in, %s went out." % [Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
-	budget.mouse_filter=Control.MOUSE_FILTER_PASS
-	budget.add_child(_flow_row("ComingIn","Comes in","+"+Purse.number(float(forecast["in"]))+" a season",ins,scale,T.GREEN_TEXT))
-	budget.add_child(_flow_row("GoingOut","Goes out","−"+Purse.number(float(forecast.out))+" a season",outs,scale,T.RED_TEXT if net<-0.01 else T.INK))
-	if float(forecast.debt)>0.5:column.add_child(_line("Old debts owed: %s, repaid from it monthly." % Purse.number(float(forecast.debt)),13,T.INK_MUTED,true))
-
-
-## "408 days of food", or "1,200 coin" after coinage.
-func _store_words(forecast:Dictionary)->String:
-	if Purse.in_kind():return "%s days of food" % EraWords.grouped(roundi(Purse.days_of_food()))
-	return Purse.amount_text(float(forecast.balance))
-
-## The small line under the answer: what it holds, and before coinage who it
-## feeds; after, what it buys.
-func _held_words(forecast:Dictionary)->String:
-	if Purse.in_kind():return "%s rations held: enough to feed everyone that long." % Purse.number(Purse.balance())
+	if store_kicker!=null:store_kicker.text=Purse.account_name().to_upper()
+	var row:=HBoxContainer.new();row.name="Headline";row.add_theme_constant_override("separation",20);head_box.add_child(row)
+	row.add_child(_store_picture())
+	var reading:=VBoxContainer.new();reading.add_theme_constant_override("separation",2)
+	reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(reading)
+	var big:=_line(Purse.amount_text(float(forecast.balance)),44,T.INK);big.name="StoreAnswer"
+	big.add_theme_font_override("font",T.font("voice"))
+	big.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from the households' spare: tools, cord, baskets, pots. The god's to spend. Goods wear out slowly here, as they do in the homes."
 	var rations:=Purse.buys_rations()
-	if rations>=0.0:return "It buys %s rations at today's market price." % EraWords.grouped(roundi(rations))
-	var army:=float(((forecast.lines as Dictionary).get("army",{}) as Dictionary).get("per_season",0.0))
-	if army>0.5:return "It pays the soldiers for %s seasons." % Purse.number(Purse.balance()/army)
-	return "What %s holds now." % Purse.account_name()
+	if rations>=0.0:big.tooltip_text+="\nAt today's prices it would buy %s rations." % EraWords.grouped(roundi(rations))
+	reading.add_child(big)
+	var given:=_line(_given_words(),18,T.INK_MUTED,true);given.name="Balance"
+	given.add_theme_font_override("font",T.voice_font(true))
+	reading.add_child(given)
+	var trend:=_trend(float(forecast.net),float(forecast.seasons_left))
+	var verdict:=_line(_trend_words(float(forecast.net),String(trend.text)),15,trend.color,true);verdict.name="Verdict"
+	verdict.tooltip_text=_season_words(forecast,season)
+	reading.add_child(verdict)
+	if float(forecast.debt)>0.5:reading.add_child(_line("Old debts owed: %s, repaid monthly." % Purse.number(float(forecast.debt)),14,T.INK_MUTED,true))
 
 ## Growing, steady, shrinking slowly, or running out: {text, color}.
 static func _trend(net:float,seasons_left:float)->Dictionary:
@@ -252,84 +220,107 @@ static func _trend(net:float,seasons_left:float)->Dictionary:
 	if seasons_left<0.0 or seasons_left>=SLOW_SEASONS:return {"text":"shrinking slowly","color":T.AMBER_TEXT}
 	return {"text":"runs out in about %s %s" % [Purse.number(seasons_left),"season" if seasons_left<1.5 else "seasons"],"color":T.RED_TEXT}
 
-## One labelled row of the budget: a word, a bar of its parts on the shared
-## scale, and the season's sum. The tooltip names each part.
-func _flow_row(node_name:String,word:String,amount:String,parts:Array,scale:float,color:Color)->Control:
-	var row:=HBoxContainer.new();row.name=node_name;row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_PASS
-	var label:=_line(word,13,T.INK);label.custom_minimum_size=Vector2(78,0);row.add_child(label)
-	var bar:=PartsBar.new();bar.name="Bar";bar.parts=parts;bar.scale_to=scale;bar.custom_minimum_size=Vector2(80,12)
-	bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(bar)
-	var sum:=_line(amount,13,color);sum.custom_minimum_size=Vector2(132,0);sum.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(sum)
-	var said:PackedStringArray=[]
-	for entry:Array in parts:said.append("%s %s" % [String(entry[0]),Purse.number(float(entry[1]))])
-	row.tooltip_text="%s a season, in %s: %s." % [word,Purse.unit_word(),", ".join(said)] if not said.is_empty() else "%s: nothing a season." % word
-	return row
+## Who gives it: "Given by the households of Ashleyfire."
+func _given_words()->String:
+	var towns:=_town_count()
+	if towns<=1:return "Given by the households of %s." % String(WorldSimulation.state.settlement_name)
+	return "Given by the households of our %d towns." % towns
+
+func _town_count()->int:
+	return Purse.food_places().size()
+
+## "Growing by about 260 a season."
+static func _trend_words(net:float,trend:String)->String:
+	if trend=="growing":return "Growing by about %s a season." % Purse.number(net)
+	if trend=="steady":return "Steady: what comes in goes out."
+	if trend=="shrinking slowly":return "Shrinking by about %s a season." % Purse.number(-net)
+	return _cap(trend)+"."
+
+## The season's reckoning, for the tooltip: what comes in and what goes out.
+func _season_words(forecast:Dictionary,season:Dictionary)->String:
+	var ins:PackedStringArray=["the levy %s" % Purse.number(float(forecast.levy))]
+	if float(forecast.rich)>0.0:ins.append("the rich %s" % Purse.number(float(forecast.rich)))
+	if float(forecast.get("charter",0.0))>0.0:ins.append("%s %s" % [Business.purse_name().to_lower(),Purse.number(float(forecast.charter))])
+	var outs:PackedStringArray=[]
+	for line:String in Purse.LINES:
+		var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
+		if bool(entry.get("on",false)) and float(entry.get("per_season",0.0))>=0.5:outs.append("%s %s" % [String(LINE_LABELS[line]).to_lower(),Purse.number(float(entry.per_season))])
+	if float(forecast.get("rot",0.0))>=0.5:outs.append("wear %s" % Purse.number(float(forecast.rot)))
+	return "A season at today's settings, in %s.\nIn: %s.\nOut: %s.\nLast season %s came in and %s went out." % [Purse.unit_word(),", ".join(ins),", ".join(outs) if not outs.is_empty() else "nothing",Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
+
+## The goods in store, painted as the page's other pictures are: pots.
+func _store_picture()->Control:
+	var picture:=ProductArt.picture(1,104,92);picture.name="StoreIllustration"
+	picture.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	return picture
+
+## A hairline between the card's parts.
+func _rule()->Control:
+	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size=Vector2(0,1);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	return rule
+
+## A part's own small title: "The levy", "It pays for".
+func _part_title(text:String)->Label:
+	var title:=_line(text,20,T.INK);title.add_theme_font_override("font",T.font("voice"))
+	return title
 
 
 # --- Where it comes from ------------------------------------------------------------
 
-## Each town's levy on what its people make, a season at the pace of the last
-## months; the rich's levy; what other systems paid in; and what never came:
-## hidden by households, or beyond the keepers' reach.
+## Only with several towns: who gives most, in one line each. One town gives
+## it all, and the card already says so.
 func _build_sources(sources:Dictionary)->void:
 	_clear(sources_box)
 	var towns:Array=sources.towns
-	if towns.is_empty() and float(sources.rich)<=0.0 and float(sources.deposits)<=0.0 and float(sources.get("charter",0.0))<=0.0:
-		sources_box.add_child(_line("Nothing has come in yet.",13,T.INK_MUTED,true));return
-	var total:=float(sources.rich)+float(sources.deposits)+float(sources.get("charter",0.0))
-	for t:Dictionary in towns: total+=float(t.levy)
-	var rows:Array=[]
-	for t:Dictionary in towns: rows.append([String(t.name),float(t.levy),"the levy on what %s people make" % EraWords.grouped(int(t.people)),"%s %s hidden by households" % [Purse.number(float(t.evaded)),Purse.unit_word()] if float(t.evaded)>=0.5 else ""])
-	if float(sources.rich)>0.0: rows.append(["The rich",float(sources.rich),"the levy on the richest fifth (while the wealth levy holds)",""])
-	if float(sources.get("charter",0.0))>0.0: rows.append([Business.purse_name(),float(sources.charter),"the purse's part of what the business sector makes, taken with the levy",""])
-	if float(sources.deposits)>0.0: rows.append(["Other",float(sources.deposits),"tolls, spoils and fees paid in",""])
-	var top:Array=rows[0]
-	for r:Array in rows:if float(r[1])>float(top[1]):top=r
-	# The answer names the biggest giver; the sums are on the rows (a season at
-	# the pace of the last months, which the store's forecast need not match).
-	var answer:=_answer("Most from %s: %d in 100" % [String(top[0]),roundi(float(top[1])/maxf(0.001,total)*100.0)] if rows.size()>1 else "All from %s" % String(top[0]),17)
-	answer.name="SourcesAnswer";sources_box.add_child(answer)
-	answer.tooltip_text="A season at the pace of the last months: %s in all." % Purse.amount_text(total)
-	for r:Array in rows:
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_PASS
-		var who:=_line(String(r[0]),13,T.INK);who.custom_minimum_size=Vector2(140,0);row.add_child(who)
-		var bar:=PartsBar.new();bar.parts=[[String(r[0]),float(r[1]),T.GREEN]];bar.scale_to=maxf(1.0,total);bar.custom_minimum_size=Vector2(80,10)
-		bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(bar)
-		var amount:=_line("+%s · %d%%" % [Purse.number(float(r[1])),roundi(float(r[1])/maxf(0.001,total)*100.0)],13,T.GREEN_TEXT);amount.custom_minimum_size=Vector2(132,0);amount.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(amount)
-		row.tooltip_text=_cap(String(r[2]))+(". "+_cap(String(r[3]))+"." if String(r[3])!="" else ".")
+	sources_box.visible=towns.size()>1
+	if not sources_box.visible:return
+	sources_box.add_child(_rule())
+	for t:Dictionary in towns:
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10)
+		var who:=_line(String(t.name),16,T.INK);who.add_theme_font_override("font",T.font("voice"));who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(who)
+		row.add_child(_line("%s a season" % Purse.number(float(t.levy)),14,T.INK_MUTED))
+		row.tooltip_text="The levy on what %s people make; %s hidden by households." % [EraWords.grouped(int(t.people)),Purse.number(float(t.evaded))]
 		sources_box.add_child(row)
-	var lost:PackedStringArray=[]
-	if float(sources.evaded)>=0.5: lost.append("%s hidden by households" % Purse.number(float(sources.evaded)))
-	if float(sources.unreached)>=0.5: lost.append("%s beyond the keepers' reach" % Purse.number(float(sources.unreached)))
-	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with towns that had none to spare" % Purse.number(float(sources.short)))
-	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
-	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
 
 
 # --- The levy -----------------------------------------------------------------------
 
-## One button a level: what it takes, what it brings in a season and what it
-## costs in trust. The one line under them: how many hide their dues.
+## Three plain choices, the chosen one underlined; one sentence of what it
+## brings in, one of what it costs. Each choice's full reckoning is its tooltip.
 func _build_levy(current:String)->void:
 	_clear(levy_box)
+	levy_box.add_child(_rule())
 	var q:=Purse.quote(current)
-	var now:=_answer("We take %s of %s" % [String(q.words),Purse.harvest_word()],17);now.name="LevyNow"
-	now.tooltip_text="%s a season, in %s, at today's work after what is hidden." % [Purse.number(float(q.per_season)),Purse.unit_word()]
-	levy_box.add_child(now)
-	var pick:=HFlowContainer.new();pick.name="Levels";pick.add_theme_constant_override("h_separation",8);pick.add_theme_constant_override("v_separation",8);levy_box.add_child(pick)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);levy_box.add_child(head)
+	var title:=_part_title("The levy");title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(title)
+	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",4);head.add_child(pick)
 	for level:String in Purse.LEVELS:
 		var lq:=Purse.quote(level)
-		var button:=Button.new();button.name="Level_%s" % level;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		var cost:="no cost to trust" if roundi(float(lq.trust))<=0 else "trust −%d" % roundi(float(lq.trust))
-		button.text="%s: %s\n+%s a season · %s" % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.number(float(lq.per_season)),cost]
-		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		button.set_pressed_no_signal(level==current)
+		var button:=_choice(String(Purse.LEVEL_NAMES[level]),level==current);button.name="Level_%s" % level
 		button.tooltip_text="%s: %s of %s.\nBrings about %s a season.\nAbout 1 in %d hide what they owe.\nTrust in you −%d, holding together −%d." % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.harvest_word(),Purse.amount_text(float(lq.per_season)),int(lq.hidden_one_in),roundi(float(lq.trust)),roundi(float(lq.cohesion))]
 		button.pressed.connect(func()->void:_choose_levy(level))
 		pick.add_child(button)
-	var cost:=_line("1 in %d hide their dues; holding together −%d." % [int(q.hidden_one_in),roundi(float(q.cohesion))],13,T.INK_MUTED,true);cost.name="LevyCost"
-	cost.tooltip_text="A light levy is what custom expects. Heavier ones are resented: trust in you and how well the people hold together fall while it lasts, and more is hidden.\nOur hands reach %d in 100 of what is owed: helpers and clerks, tallies and registers find it." % roundi(float(q.reach)*100.0)
+	var now:=_line("%s: about %s a season." % [_cap(String(q.words)),Purse.amount_text(float(q.per_season))],15,T.INK,true);now.name="LevyNow"
+	now.tooltip_text="%s of %s, at today's work, after what is hidden." % [_cap(String(q.words)),Purse.harvest_word()]
+	levy_box.add_child(now)
+	var trust:=roundi(float(q.trust))
+	var cost:=_line(("Custom expects it; " if trust<=0 else "Trust in you −%d; " % trust)+"about 1 in %d hide their dues." % int(q.hidden_one_in),14,T.INK_MUTED,true);cost.name="LevyCost"
+	cost.tooltip_text="A light levy is what custom expects. Heavier ones are resented: trust in you and how well the people hold together (−%d now) fall while it lasts, and more is hidden.\nOur hands reach %d in 100 of what is owed: helpers and clerks, tallies and registers find it." % [roundi(float(q.cohesion)),roundi(float(q.reach)*100.0)]
 	levy_box.add_child(cost)
+
+## A word to choose, underlined in gold when chosen (as the page's tabs are).
+func _choice(text:String,chosen:bool)->Button:
+	var button:=Button.new();button.text=text;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+	button.set_pressed_no_signal(chosen);button.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	button.add_theme_font_override("font",T.font("voice"));button.add_theme_font_size_override("font_size",17)
+	for state:String in ["normal","hover","pressed","hover_pressed"]:
+		var style:=StyleBoxFlat.new();style.bg_color=Color(0,0,0,0);style.content_margin_left=10;style.content_margin_right=10;style.content_margin_top=4;style.content_margin_bottom=4
+		if state.contains("pressed"):style.border_width_bottom=2;style.border_color=T.GOLD
+		elif state=="hover":style.border_width_bottom=1;style.border_color=T.RULE_STRONG
+		button.add_theme_stylebox_override(state,style)
+	for key:String in ["font_color","font_hover_color"]:button.add_theme_color_override(key,T.INK_MUTED)
+	for key:String in ["font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(key,T.INK)
+	return button
 
 
 func _choose_levy(level:String)->void:
@@ -345,75 +336,66 @@ func _choose_levy(level:String)->void:
 
 func _build_lines(forecast:Dictionary,purse:Dictionary)->void:
 	_clear(lines_box)
-	var paid:PackedStringArray=[]
+	lines_box.add_child(_rule())
+	var title:=_part_title("It pays for");title.name="PaysAnswer";lines_box.add_child(title)
 	for line:String in Purse.LINES:
-		if bool(((forecast.lines as Dictionary).get(line,{}) as Dictionary).get("on",false)):paid.append(String(LINE_LABELS[line]).to_lower())
-	var answer:=_answer("Pays for "+_and_list(paid) if not paid.is_empty() else "Pays for nothing yet",17);answer.name="PaysAnswer"
-	lines_box.add_child(answer)
-	for line:String in Purse.LINES:lines_box.add_child(_line_row(line,forecast,purse))
+		# Food is bought for a hungry town from another of ours: never with one town.
+		if line=="relief" and _town_count()<=1 and not Purse.line_on("relief"):continue
+		lines_box.add_child(_line_row(line,forecast,purse))
 	var army:Dictionary=purse.get("last_army",{}) if purse.get("last_army") is Dictionary else {}
 	if int(purse.get("unpaid_months",0))>0:
-		var warn:=_line("Soldiers unpaid %d %s: will −%d, %d went home." % [int(purse.unpaid_months),"month" if int(purse.unpaid_months)==1 else "months",roundi(float(army.get("will_lost",0.0))*100.0),int(army.get("deserted",0))],13,T.RED_TEXT,true)
+		var warn:=_line("Soldiers unpaid %d %s: will −%d, %d went home." % [int(purse.unpaid_months),"month" if int(purse.unpaid_months)==1 else "months",roundi(float(army.get("will_lost",0.0))*100.0),int(army.get("deserted",0))],14,T.RED_TEXT,true)
 		warn.name="Unpaid";lines_box.add_child(warn)
 
 
-static func _and_list(words:PackedStringArray)->String:
-	if words.size()<=1:return "".join(words)
-	return ", ".join(words.slice(0,words.size()-1))+" and "+words[words.size()-1]
-
-
+## One line of spending: its name and what it does, what it costs a season,
+## and a switch.
 func _line_row(line:String,forecast:Dictionary,purse:Dictionary)->Control:
 	var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
 	var on:=bool(entry.get("on",false))
-	var panel:=PanelContainer.new();panel.name="Line_%s" % line
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER,T.RULE,8,4 if on else 0,_ink(line) if on else T.RULE))
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);panel.add_child(row)
-	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);words.add_child(top)
-	var title:=_line(String(Purse.LINE_NAMES[line]),14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));top.add_child(title)
-	if line!="relief":
-		var cost:=_line("%s a season" % Purse.number(float(entry.get("per_season",0.0))),14,T.INK if on else T.INK_MUTED);cost.name="Cost";top.add_child(cost)
+	var row:=HBoxContainer.new();row.name="Line_%s" % line;row.add_theme_constant_override("separation",14)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
+	var title:=_line(String(Purse.LINE_NAMES[line]),17,T.INK if on else T.INK_MUTED);title.add_theme_font_override("font",T.font("voice"));words.add_child(title)
 	var effect:=_line(_effect_words(line,on,entry,purse),13,T.INK_MUTED,true);effect.name="Effect";words.add_child(effect)
 	effect.tooltip_text=_effect_tip(line)
-	var toggle:=Button.new();toggle.name="Toggle";toggle.toggle_mode=true;toggle.focus_mode=Control.FOCUS_NONE
-	toggle.text="On" if on else "Off";toggle.custom_minimum_size=Vector2(56,0);toggle.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	if line!="relief":
+		var cost:=_line("%s a season" % Purse.amount_text(float(entry.get("per_season",0.0))),14,T.INK if on else T.INK_MUTED);cost.name="Cost"
+		cost.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(cost)
+	else:
+		var now:=Button.new();now.name="BuyNow";now.text="Send now";now.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		_style_link(now)
+		now.tooltip_text="Send up to a quarter of %s to hungry towns today." % Purse.account_name()
+		now.pressed.connect(_buy_now)
+		row.add_child(now)
+	var toggle:=Switch.new();toggle.name="Toggle"
 	toggle.set_pressed_no_signal(on)
 	toggle.tooltip_text="%s: %s." % [String(Purse.LINE_NAMES[line]),"switch it off" if on else "switch it on"]
 	toggle.pressed.connect(func()->void:_toggle(line,not on))
 	row.add_child(toggle)
-	if line=="relief":
-		var now:=Button.new();now.name="BuyNow";now.text="Send now";now.focus_mode=Control.FOCUS_NONE;now.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		now.tooltip_text="Send up to a quarter of %s to hungry towns today." % Purse.account_name()
-		now.pressed.connect(_buy_now)
-		row.add_child(now)
-	return panel
+	return row
 
 
-## What a line does now, in the engine's numbers (twelve words or fewer).
+## What a line does now, in the engine's numbers, in a few words.
 func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->String:
 	match line:
 		"army":
-			if on and int(purse.get("unpaid_months",0))==0:return "%s · will and readiness kept" % String(entry.get("who",""))
-			return "Unpaid: will −%d a month, 1 in 50 go home" % roundi(100.0*0.06)
-		"scholars":return ("%s · research %d%% faster: a 100-day discovery in %d days" if on else "%s · would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
-		"crews":return ("%s · building %d%% faster: a 100-day work in %d days" if on else "%s · would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
+			if on and int(purse.get("unpaid_months",0))==0:return "%s · their will holds" % String(entry.get("who",""))
+			return "Unpaid: their will falls and some go home"
+		"scholars":return "%s · research %d%% faster" % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0)]
+		"crews":return "%s · building %d%% faster" % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0)]
 		"relief":
-			var towns:=Purse.food_places()
-			var hungry:=towns.filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
-			if Purse.in_kind():return "%d hungry %s now" % [hungry,"town" if hungry==1 else "towns"]
-			if not Purse.market_open():return "%d hungry %s · no market to buy more" % [hungry,"town" if hungry==1 else "towns"]
-			return "%d hungry %s · food about %s a ration" % [hungry,"town" if hungry==1 else "towns",Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))]
+			var hungry:=Purse.food_places().filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
+			if hungry==0:return "No town is hungry"
+			return "%d hungry %s" % [hungry,"town" if hungry==1 else "towns"]
 	return ""
 
 func _effect_tip(line:String)->String:
 	match line:
-		"army":return "Pay on top of rations: %s. Unpaid soldiers lose will each month, are slower to muster, and some go home; more after three months." % Purse.pay_word()
-		"scholars":return "A keep for those at research, a seventh of a day's work each. While it is paid, research goes faster."
-		"crews":return "Wages for those at building, a seventh of a day's work each. While they are paid, building goes faster."
+		"army":return "Pay on top of rations, in %s. Unpaid soldiers lose will each month (−%d at most), are slower to muster, and 1 in 50 go home; more after three months." % [Purse.pay_word(),roundi(100.0*0.06)]
+		"scholars":return "A keep for those at research, a seventh of a day's work each. While it is paid, research goes %d%% faster: a 100-day discovery takes %d days." % [roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
+		"crews":return "Wages for those at building, a seventh of a day's work each. While they are paid, building goes %d%% faster: a 100-day work takes %d days." % [roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
 		"relief":
-			var tip:="Each month, food goes from the store to towns under %d days of it, up to a quarter of the store." % int(Purse.HUNGRY_DAYS)
-			if not Purse.in_kind():tip+=" With coin, more is bought at the market price from towns with more than %d days of it." % int(Purse.SELLER_DAYS)
-			return tip
+			return "Each month, up to a quarter of %s buys food for towns under %d days of it, from our towns with more than %d days, at their own price. The goods (or coin) go to the sellers." % [Purse.account_name(),int(Purse.HUNGRY_DAYS),int(Purse.SELLER_DAYS)]
 	return ""
 
 func _toggle(line:String,on:bool)->void:
@@ -557,15 +539,6 @@ func _build_materials(held:Dictionary)->void:
 
 ## Before coinage the common store is food: it lives on Food & water. One
 ## line and a way there.
-func _build_store_pointer()->void:
-	_clear(store_box)
-	var row:=HBoxContainer.new();row.name="StorePointer";row.add_theme_constant_override("separation",10);store_box.add_child(row)
-	var said:=_line("%s rations, %s days of food; kept with Food & water." % [EraWords.grouped(roundi(Purse.balance())),EraWords.grouped(roundi(Purse.days_of_food()))],13,T.INK_MUTED,true)
-	said.name="StoreLine";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(said)
-	said.tooltip_text="Food the levy took from every town's stores, kept for all. It pays the soldiers, feeds the hungry, keeps scholars and crews. It is food, so it lives with the food; with coin it becomes the treasury, here."
-	row.add_child(_go("SeeStore","See the store","Open Food & water: the common store, the levy and what it pays for.","economy",0))
-
-
 ## A button that opens another screen (the dock's provider).
 func _go(node_name:String,text:String,tip:String,section:String,sub:int)->Button:
 	var go:=Button.new();go.name=node_name;go.text=text;go.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -702,23 +675,6 @@ func _build_wealth()->void:
 	pressure.name="Pressure"
 	pressure.tooltip_text="Points a day's reckoning takes from trust in you; holding together loses about half as much.\nIn this age the richest fifth's part settles near %d in 100 and cannot pass %d. Sharing out, feasts and the purse's pay pull it down; want, rising prices and failed debts push it up." % [roundi(float(bounds[2])*100.0),roundi(float(bounds[1])*100.0)]
 	wealth_box.add_child(pressure)
-
-
-# --- Lately -------------------------------------------------------------------------------
-
-func _build_ledger(purse:Dictionary)->void:
-	_clear(ledger_box)
-	var entries:Array=(purse.ledger as Array).slice(0,5)
-	if entries.is_empty():
-		ledger_box.add_child(_line("Nothing yet: the first reckoning comes at the month's end.",13,T.INK_MUTED,true));return
-	for entry:Dictionary in entries:
-		var amount:=float(entry.get("amount",0.0))
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10)
-		var when:=_line(EraWords.when(int(entry.get("day",0))),13,T.INK_MUTED);when.custom_minimum_size=Vector2(118,0);row.add_child(when)
-		var what:=_line(Tracker.short(String(entry.get("why","")),9),13,T.INK,true);what.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(what)
-		what.tooltip_text=String(entry.get("why",""))
-		if absf(amount)>=0.05:row.add_child(_line(("+" if amount>0.0 else "−")+Purse.number(absf(amount)),13,T.GREEN_TEXT if amount>0.0 else T.RED_TEXT))
-		ledger_box.add_child(row)
 
 
 # --- Pieces ---------------------------------------------------------------------------------
@@ -858,17 +814,19 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	return label
 
 
-## One bar of parts on a shared scale (HOI4's budget): each part its own
-## colour, left to right; the empty rest is the paper's.
-class PartsBar extends Control:
+## A small switch, gold when on (a spending line's).
+class Switch extends Button:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var parts:Array=[]
-	var scale_to:=1.0
-	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
+	func _init()->void:
+		toggle_mode=true;flat=true;focus_mode=Control.FOCUS_NONE
+		custom_minimum_size=Vector2(46,28);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	func _draw()->void:
-		draw_rect(Rect2(Vector2.ZERO,size),T.PAPER_SUNK)
-		var x:=0.0
-		for entry:Array in parts:
-			var width:=size.x*float(entry[1])/maxf(0.001,scale_to)
-			if width>0.5:draw_rect(Rect2(x,0.0,minf(width,size.x-x),size.y),entry[2]);x+=width
-		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
+		var on:=button_pressed
+		var track:=Rect2((size.x-38.0)/2.0,(size.y-20.0)/2.0,38.0,20.0)
+		var style:=StyleBoxFlat.new();style.set_corner_radius_all(10);style.set_border_width_all(1)
+		style.bg_color=T.GOLD if on else T.PAPER_SUNK;style.border_color=T.GOLD if on else T.RULE_STRONG
+		draw_style_box(style,track)
+		var knob:=Vector2(track.end.x-10.0 if on else track.position.x+10.0,track.get_center().y)
+		draw_circle(knob,7.0,T.PAPER_RAISED)
+		draw_arc(knob,7.0,0.0,TAU,24,T.RULE_STRONG,1.0,true)

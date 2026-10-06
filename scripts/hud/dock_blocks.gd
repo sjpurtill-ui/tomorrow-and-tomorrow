@@ -54,7 +54,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
 			"purse_board":
-				var board = preload("res://scripts/hud/food_common_store.gd").new() if bool(block.get("compact_food",false)) else preload("res://scripts/hud/purse_board.gd").new();section.add_child(board);board.setup(block)
+				var board = preload("res://scripts/hud/purse_board.gd").new();section.add_child(board);board.setup(block)
 			"wealth_ledger":
 				var panel:=preload("res://scripts/hud/wealth_ledger.gd").new()
 				section.add_child(panel);panel.setup(block)

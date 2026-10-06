@@ -1,7 +1,5 @@
 extends GdUnitTestSuite
 const FoodPanel = preload("res://scripts/hud/food_folio.gd")
-const Reserve = preload("res://scripts/hud/food_common_store.gd")
-const Probe = preload("res://tests/trade_visual_acceptance_probe.gd")
 
 static func prepared_food() -> Dictionary:
 	return {"city":"Ashfire", "leader_name":"Koki", "managed":true, "focus":"", "can_direct":true,
@@ -43,24 +41,6 @@ func test_delivery_link_only_appears_when_there_are_records() -> void:
 	var with_delivery = auto_free(FoodPanel.new())
 	with_delivery.setup(block)
 	assert_bool(_has_button(with_delivery, "Deliveries")).is_true()
-
-func test_reserve_disclosure_retains_spending_controls_and_open_state() -> void:
-	Probe.prepare_fixture("barter")
-	var board = auto_free(Reserve.new())
-	add_child(board)
-	board.setup({"mode":"store"})
-	assert_bool(board.details.visible).is_false()
-	assert_object(board.find_child("Level_heavy", true, false)).is_not_null()
-	board.disclosure.button_pressed = true
-	assert_bool(board.details.visible).is_true()
-	assert_bool(board.update_block({"mode":"store"})).is_true()
-	assert_bool(board.details.visible).is_true()
-	assert_bool(board.view_state().reserve_open).is_true()
-	board.restore_view_state({"reserve_open":false})
-	assert_bool(board.details.visible).is_false()
-	board._build_sources({"towns":[{"name":"Ashfire"}], "rich":0.0, "deposits":0.0, "evaded":0.0})
-	assert_bool(board.sources_box.visible).is_false()
-	Probe.cleanup_fixture()
 
 func _has_button(node: Node, words: String) -> bool:
 	for button: Node in node.find_children("*", "Button", true, false):

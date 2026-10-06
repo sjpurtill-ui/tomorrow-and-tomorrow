@@ -88,14 +88,12 @@ func test_food_security_counts_a_lean_buffer_of_twenty_days()->void:
 	for days:float in [5.0,10.0,45.0,200.0]:
 		assert_float(float(at[days].fed)).is_equal_approx(float(at[20.0].fed),0.000001)
 
-func test_the_levy_leaves_every_town_its_lean_buffer()->void:
-	assert_float(Purse.LEVY_KEEP_DAYS).is_equal(FoodCare.LEAN_DAYS)
+func test_relief_brings_a_town_to_its_lean_buffer()->void:
+	assert_float(Purse.RELIEF_TARGET).is_equal(FoodCare.LEAN_DAYS)
 	assert_float(FoodCare.LEAN_DAYS).is_equal(20.0)
-	# Relief never lifts a town past what the levy leaves it, so the levy
-	# never takes relief back, and no seller is left hungry.
+	# No seller is left hungry.
 	assert_float(Purse.HUNGRY_DAYS).is_less(Purse.RELIEF_TARGET)
-	assert_float(Purse.RELIEF_TARGET).is_less_equal(Purse.LEVY_KEEP_DAYS)
-	assert_float(Purse.LEVY_KEEP_DAYS).is_less(Purse.SELLER_KEEP)
+	assert_float(Purse.RELIEF_TARGET).is_less(Purse.SELLER_KEEP)
 	assert_float(Purse.SELLER_KEEP).is_less(Purse.SELLER_DAYS)
 	# The planners aim a little past the buffer, for the season.
 	assert_float(GovernmentPeopleSystem.RESERVE_TARGET_DAYS).is_equal_approx(FoodCare.LEAN_DAYS*1.5,0.0001)

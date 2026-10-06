@@ -223,7 +223,7 @@ func _case(spec: Dictionary) -> void:
 	_check(is_equal_approx(made, float(GameState.civilian_goods.report.made)), String(spec.id) + " prepared production is current")
 	var made_label := board.find_child("GoodsMade", true, false) as Label
 	_check(made_label != null and made_label.text == "%s goods" % board._amount(made), String(spec.id) + " displays the current made goods")
-	_check(board.find_child("Balance", true, false) != null if spec.state == "coin" else board.find_child("StorePointer", true, false) != null, String(spec.id) + " places the treasury or food-store link correctly")
+	_check(board.find_child("Balance", true, false) != null and board.find_child("StorePointer", true, false) == null, String(spec.id) + " shows the common store or treasury on Wealth")
 	var bounds := Rect2(Vector2.ZERO, Vector2(spec.size))
 	_check(bounds.encloses(hud.dock.get_global_rect()), String(spec.id) + " dock fits the viewport")
 	var requested_width := float(spec.get("width", minf(hud._work_queue_width(float(Vector2i(spec.size).x)), float(Vector2i(spec.size).x) - T.DOCK_X - 12.0)))
@@ -254,9 +254,8 @@ func _case(spec: Dictionary) -> void:
 			var path := output.path_join(String(spec.id) + "-" + String(position[0]) + ".png")
 			_check(get_viewport().get_texture().get_image().save_png(path) == OK, "Capture saves " + path.get_file())
 			row.images.append(path)
-	for route in [["SeeArms","production",2], ["SeeMaterials","economy",1], ["SeeStore","economy",0]]:
+	for route in [["SeeArms","production",2], ["SeeMaterials","economy",1]]:
 		var button := board.find_child(String(route[0]), true, false) as Button
-		if button == null and route[0] == "SeeStore" and spec.state == "coin": continue
 		_check(button != null and not button.disabled, String(spec.id) + " enables " + String(route[0]))
 		if button != null:
 			last_destination.clear()
