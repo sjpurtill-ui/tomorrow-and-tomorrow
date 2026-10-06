@@ -1,3 +1,19 @@
+## October 6, 2026 — Expanded town visibility
+
+Approved source `42a5ff21` includes both canonical and remote main `1fd8ad8b`.
+The renderer now admits detailed plots through ID 512, keeps inherited ground
+styling as fields accumulate, avoids duplicate scene lighting on painted
+architecture and lightens wear tint. The 512-building bound, recorded geometry,
+placement checks, population and simulation remain unchanged.
+
+All 56/56 combined regression tests pass (report 36), with no errors, failures,
+skips or orphans. The approved exact-save GPU capture shows Ashleyfire at Year
+206, population 3,665, with 243 detailed models versus 167 at the same zoom.
+No save migration is required. Delivery follows verified remote-first main push
+and canonical fast-forward. No player/editor is stopped or restarted. Pending
+progression, brighter-type and figure-removal work remains separate.
+See `docs/design/TOWN_MAP_LEGIBILITY.md` for the visual evidence and limitations.
+
 ## October 5, 2026 — Year 201 expansion map
 
 The user approved integration of source `5ec724a2`, based on canonical and remote

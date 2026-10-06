@@ -1,6 +1,9 @@
 # Expansion-map legibility preview
 
-Status: HELD for user visual review, not integrated into the player checkout.
+Status: approved for integration by the user on October 6, 2026.
+Source `42a5ff21`; canonical and remote main `1fd8ad8b` are included.
+Combined checks pass again: 56/56, report 36. Delivery is remote-first, then
+canonical fast-forward; no running player/editor is restarted.
 Branch: `codex/town-map-legibility`; base `1fd8ad8b70e6812d771152982be5852aa0b49ab2`.
 Worktree: `C:/Users/sjpur/.codex/worktrees/food-folio/TomorrowandTomorrow`.
 
@@ -70,4 +73,4 @@ figure-removal and brighter-topbar branches are excluded.
 Owned runtime files: `early_settlement_visual.gd`, `organic_town_visual.gd`,
 `settlement_architecture_kit.gd`, `settlement_ink.gd`. No shared simulation hotspot
 was edited. Concurrent architecture/placement changes can conflict in these
-files; integrate deliberately after the user has seen the preview.
+files; unrelated preview branches remain excluded from this integration.

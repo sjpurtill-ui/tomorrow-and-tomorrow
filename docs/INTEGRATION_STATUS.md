@@ -1,14 +1,17 @@
-## October 5 — Town map legibility: HELD for visual review
+## October 6 — Town map legibility: INTEGRATED
 
-`codex/town-map-legibility`, based on `1fd8ad8b`, follows the user's rejection
-of the Year-201 map repair. The latest isolated quicksave is Year 206, population
-3,665. Detailed plot coverage extends through ID 512 while preserving the
+The user approved source `42a5ff21` from `codex/town-map-legibility`, based on
+canonical and remote main `1fd8ad8b`. Both main refs are included without
+conflicts. Detailed plot coverage extends through ID 512 while preserving the
 512-building bound; extra fields no longer disable inherited ground styling.
 Architecture uses its painted key light once and a lighter weathering tint.
-56/56 regression tests pass. Same-save, same-zoom private GPU comparison increases
-detailed architecture instances from 167 to 243 and makes the roofs legible.
-This is a preview branch, not an integrated player change. Await visual review.
-See `docs/design/TOWN_MAP_LEGIBILITY.md`. No player/editor restart.
+The combined five-suite regression run passes 56/56 tests (report 36), with no
+errors, failures, skips or orphans. The approved private GPU preview uses the
+Year 206 save, population 3,665, at the same 0.75 km camera span: 243 detailed
+architecture instances versus 167 before. No simulation or save-schema change.
+Delivery follows verified remote-first main push, then canonical fast-forward.
+No player/editor is restarted. Other pending preview branches remain excluded.
+See `docs/design/TOWN_MAP_LEGIBILITY.md` for evidence and limits.
 
 ## October 5 — Year 201 expansion-map repair: INTEGRATED
 
