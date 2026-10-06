@@ -200,6 +200,13 @@ static func perform(reading:Dictionary)->Dictionary:
 		out.says="The %s are known to us only by word: no trader of ours reaches them, so nothing moves yet. When we meet them, it will be as you say." % name
 		out.outcome="Nothing is set in motion yet: the %s are known only by word." % name
 		return out
+	if act!="free" and Ledger.blocked("player",civ_id)=="unlocated":
+		# Met, but their home is not on our map: the word stands until we find it.
+		Stances.set_stance("player",civ_id,act,good,amount,"god")
+		out.ok=true
+		out.says="We do not know where the %s live: our carriers have no road to them, so nothing moves yet. Once their home is found, it will be as you say." % name
+		out.outcome="Nothing is set in motion yet: we do not know where the %s live." % name
+		return out
 	if act!="free" and Ledger.blocked("player",civ_id) in ["war","feud"]:
 		out.says="We are fighting the %s: no trader goes to them now, and no word of trade would be heard." % name
 		out.outcome="Nothing is set in motion: we are fighting the %s." % name
