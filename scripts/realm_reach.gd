@@ -12,7 +12,7 @@ extends RefCounted
 ## where world reach (0..1) is the people's own measure of how far its routes,
 ## travel and knowledge of the world extend (civilization_system world_reach;
 ## ours progression_reach_snapshot().combined). A village of 400 ranges about
-## 60 km about its hearth; a people of 25,000 with good roads 500 to 800 km.
+## 72 km about its hearth; a people of 25,000 with good roads 600 to 950 km.
 ## With the peoples of a continent about 1,100 km apart (civilization_start),
 ## lands come to meet in the middle centuries, as they did on Earth's
 ## continents.
@@ -23,7 +23,7 @@ extends RefCounted
 ## nothing else, for the country a people holds. Pure and static; nothing
 ## here is saved.
 
-const REACH_PER_ROOT:=3.0
+const REACH_PER_ROOT:=3.6
 const REACH_GOVERN:=2.0
 ## Never smaller than the settlement's own fields, never wider than half a continent.
 const MIN_KM:=4.0

@@ -117,6 +117,8 @@ func test_the_court_is_told_the_seat_grows_instead()->void:
 
 func test_reach_grows_with_the_people()->void:
 	_seat()
+	# Before the home is settled, only the people count.
+	GameState.settlement_site_committed=false
 	GameState.population_exact=500.0
 	assert_int(OneSeat.reach_rings()).is_equal(3)
 	GameState.population_exact=10000.0
@@ -126,6 +128,20 @@ func test_reach_grows_with_the_people()->void:
 	GameState.population_exact=1.0e9
 	assert_int(OneSeat.reach_rings()).is_equal(OneSeat.MAX_REACH_RINGS)
 	assert_int(WorldSimulation.resources.max_surface_front_ring()).is_equal(OneSeat.MAX_REACH_RINGS)
+
+## Homesteaders work out through the realm's country: the worked ground
+## follows the borders, not a fixed few rings about the hearth.
+func test_homesteads_work_out_with_the_borders()->void:
+	_seat()
+	GameState.population_exact=4000.0
+	GameState.ensure_population_total(4000)
+	var realm:=preload("res://scripts/realm_reach.gd").ours()
+	assert_bool(realm.is_empty()).is_false()
+	var homestead:=floori(float(realm.reach)*OneSeat.HOMESTEAD_SHARE/3.0)
+	assert_int(OneSeat.homestead_rings()).is_equal(homestead)
+	assert_int(OneSeat.reach_rings()).is_equal(clampi(maxi(5,homestead),OneSeat.BASE_REACH_RINGS,OneSeat.MAX_REACH_RINGS))
+	# 4,000 people work far more than the 15 km a head count alone gave.
+	assert_float(OneSeat.reach_km()).is_greater(50.0)
 
 func test_stages_need_both_people_and_districts()->void:
 	_seat()

@@ -10,6 +10,9 @@ const MAX_SURFACE_FRONT_RING:=3
 ## Carriers at work for each ring of new ground searched past the first.
 const SURFACE_SEARCH_CARRIERS:=6.0
 const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
+## Wider ground holds more woods and quarries: this many more fronts per ring
+## the carriers search (worked-out fronts stay on the list and regrow).
+const SURFACE_FRONTS_PER_RING:=6
 
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
@@ -612,7 +615,7 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 			# front and its recovery, but seek another real front when its reserve
 			# is below the same working threshold used by extraction allocation.
 			if float(deposit.remaining)>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):return
-	if existing_fronts.size()>=MAX_SURFACE_FRONTS_PER_RESOURCE:return
+	if existing_fronts.size()>=maxi(MAX_SURFACE_FRONTS_PER_RESOURCE,surface_search_rings()*SURFACE_FRONTS_PER_RING):return
 	if not existing_fronts.is_empty() or density<minimum_density:
 		field=_next_surface_front(resource,source,context,minimum_density)
 		if field.is_empty():return
@@ -1520,7 +1523,8 @@ static func _weighted(pick:RandomNumberGenerator,weights:Array)->int:
 ## A seeded spot 4 to 20 km out from the town.
 static func _land_spot(origin:Vector3,pick:RandomNumberGenerator)->Vector2:
 	var angle:=pick.randf()*TAU
-	var km:=pick.randf_range(LAND_FIND_NEAR_KM,LAND_FIND_FAR_KM)
+	# Searchers range over the ground the homesteads work (one_seat.gd), at least 20 km.
+	var km:=pick.randf_range(LAND_FIND_NEAR_KM,maxf(LAND_FIND_FAR_KM,preload("res://scripts/one_seat.gd").reach_km()))
 	return Vector2(origin.x,origin.z)+Vector2(cos(angle),sin(angle))*km
 
 ## The ground's own profile at a spot: the map's reading where it gives one,
