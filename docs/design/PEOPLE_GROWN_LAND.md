@@ -1,6 +1,6 @@
 # One people, worked country — visual review branch
 
-Status: **Integration authorized by the user; basic rendering fix under final verification.**
+Status: **Basics validated for authorized integration; late-era improvements continue.**
 Worker checkout: `C:/Users/sjpur/tt-people-grown-land`.
 Branch: `codex/people-grown-land`.
 Base: `a3579bb51c3960cc43a6357268af73eb4353294a` (`origin/main` at task start).
@@ -12,7 +12,26 @@ slices, with the old complete patch retained until replacement is ready. Work
 near the camera has priority. A fine-grid stress check preserves all 150,831
 vertices with zero clipping skips; its longest call is 17.268 ms, versus a
 3.039-second synchronous build. Total work is spread out, not eliminated.
-GPU verification and canonical integration are recorded below when complete.
+Private GPU checks of source `6c3782d4` complete without errors: the farm drains
+all pending work, all worked sites finish in the site view, and the remaining
+26 queued holdings are outside that view (nearest farm more than 29 km away).
+Worst preparation slices are 5.297 ms in the detailed views and 5.935 ms in the
+year-100 view; no terrain-budget skips or human figures occur. This resolves
+the single-patch freeze. The cooperative limit is not a hard frame-time cap.
+
+Current year-100 playback advances 101 days in 20.061361 s (5.035 days/s,
+19.69 fps). A subsequent country-disabled comparison advances 110 days in
+20.000297 s (5.500 days/s, 24.55 fps). Both are single short samples, not a
+controlled performance guarantee. The six-day target is still unmet and is
+an explicit remaining limitation; earlier six-day results do not validate
+this build. Both runs exit 0 with zero human figures. Evidence prefixes:
+`basics-ready`, `basics-year100`, and `basics-year100-baseline`.
+
+Integration checks: 17 renderer and nine clipping cases pass; 37 combined
+no-people, living-map, ambience, day-cost and manager cases pass. The imported
+main survey suite separately reproduces its existing new-ground failure
+(25/26 pass when run alone; relevant files match `origin/main`). No unrelated
+resource/simulation repair is included. No save migration is required.
 
 ## What the map draws
 

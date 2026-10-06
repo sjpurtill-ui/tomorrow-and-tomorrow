@@ -1,3 +1,24 @@
+## October 6 — Worked country basics: authorized integration
+
+The user explicitly authorized merging the basics and continuing visual
+improvements through year 3000. Source `6c3782d4` includes current main
+`b8043e15`. It adds bounded farm and real worked-site visuals, tree clearings,
+regional chart marks, and the absolute removal of human map figures.
+The previously rejected blank farm views now show separate cultivated plots.
+Incremental terrain preparation replaces the 1.356-second single-patch stall;
+private GPU checks measure worst slices of 5.297–5.935 ms with zero terrain
+budget skips, errors or people. The viewed farms/sites finish before capture;
+remote holdings can continue preparing in the background.
+
+63 focused integration checks pass (17 renderer, nine clipping, 37 combined).
+The upstream survey suite has an independently reproduced existing failure;
+no resource authority change is part of this delivery. Year-100 playback is
+5.035 days/s versus a subsequent country-disabled sample at 5.500 days/s;
+the six-day target remains unmet. Late-era fabric and large-core holdings
+are a separate next batch. No new saved fields. Delivery follows verified
+remote-first main push and canonical fast-forward, preserving local files.
+See `docs/design/PEOPLE_GROWN_LAND.md` for evidence and remaining limits.
+
 ## October 6, 2026 — Expanded town visibility
 
 Approved source `42a5ff21` includes both canonical and remote main `1fd8ad8b`.
