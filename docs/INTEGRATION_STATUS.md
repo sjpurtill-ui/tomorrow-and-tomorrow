@@ -1,3 +1,18 @@
+## October 5 — Brighter transparent top-bar type: HELD for visual approval
+
+`codex/topbar-brighter-type`, based on `1df22772`, responds to the user's
+report that the transparent bar remains hard to read. Near-white ivory,
+larger semibold readings, stronger captions/clock/town/speed lettering,
+and a finer dark edge improve legibility over pale terrain. Familiar units
+shorten at compact widths; full readings remain available on hover.
+Transparency, bar height, warning colors and simulation are retained.
+
+Private GPU examples show the actual HUD over supplied terrain with prepared
+values at 1920px and 1280px, with pale/dark contrast comparisons. Canonical
+main and player sessions remain untouched pending the user's requested review.
+All 4/4 HUD tests pass (report 24); the private GPU probe exited 0 without
+script/engine errors. See `docs/design/TOPBAR_BRIGHTER_TYPE.md` for details.
+
 ## October 5 — Living village Overview: INTEGRATED
 
 `codex/living-village-overview`, based on `5d8994b3`, replaces the generated

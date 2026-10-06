@@ -33,7 +33,7 @@ func _assert_parity() -> void:
 		var entry: Dictionary=hud.top_readings.entries[reading.id]
 		assert_bool(entry.button.visible).is_true()
 		assert_str(entry.caption.text).is_equal(String(reading.caption))
-		assert_str(entry.value.text).is_equal(String(reading.value))
+		assert_str(entry.full_value).is_equal(String(reading.value))
 		assert_str(entry.note).is_equal(String(reading.note))
 		assert_str(entry.button.accessibility_name).contains(String(reading.note))
 
@@ -98,6 +98,8 @@ func test_era_changes_and_narrow_layout_keep_live_values_inside_top_bar() -> voi
 		for entry: Dictionary in hud.top_readings.entries.values():
 			if not entry.button.visible:continue
 			assert_float(entry.button.get_global_rect().end.x).is_less_equal(hud.top_frame.get_global_rect().end.x-19.0)
+			var label: Label = entry.value
+			assert_float(label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x).is_less_equal(entry.button.size.x)
 	hud.open_dock("economy",2)
 	for i in 3: await get_tree().process_frame
 	assert_bool(hud.top_readings.is_visible_in_tree()).is_true()

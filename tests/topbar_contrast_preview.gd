@@ -57,13 +57,19 @@ func _preview() -> void:
 	label.add_theme_color_override("font_color", Color("eee4c9"))
 	preload("res://scripts/hud/topbar_ink.gd").apply(label)
 	add_child(label)
-	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://artifacts/topbar-contrast"))
-	for dark: bool in [false, true]:
-		background.modulate = Color(0.22, 0.28, 0.23) if dark else Color.WHITE
-		label.text = "PREVIEW · " + ("Dark terrain" if dark else "Pale terrain from your screenshot")
-		for frame in 8: await get_tree().process_frame
-		await RenderingServer.frame_post_draw
-		var path := "res://artifacts/topbar-contrast/" + ("dark.png" if dark else "pale.png")
-		get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://artifacts/topbar-brighter"))
+	for width: int in [1920, 1280]:
+		get_window().size = Vector2i(width, 320)
+		hud._layout()
+		for dark: bool in [false, true]:
+			background.modulate = Color(0.22, 0.28, 0.23) if dark else Color.WHITE
+			label.text = "PREVIEW · " + ("Dark terrain" if dark else "Pale terrain from your screenshot")
+			for frame in 8: await get_tree().process_frame
+			hud.top_readings.show_readings(readings)
+			hud.toolbar.hide()
+			for frame in 2: await get_tree().process_frame
+			await RenderingServer.frame_post_draw
+			var path := "res://artifacts/topbar-brighter/" + ("dark-%d.png" % width if dark else "pale-%d.png" % width)
+			get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
 	print("TOPBAR_CONTRAST_PREVIEW_OK: pale and dark, actual HUD controls, prepared values")
 	get_tree().quit(0)

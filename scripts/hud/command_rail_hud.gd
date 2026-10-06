@@ -646,11 +646,11 @@ func _build_time_pill()->void:
 	time_text.scroll_active=false
 	time_text.custom_minimum_size=Vector2(175,28)
 	time_text.mouse_filter=Control.MOUSE_FILTER_PASS
-	time_text.add_theme_font_size_override("normal_font_size",17)
-	time_text.add_theme_font_size_override("bold_font_size",17)
+	time_text.add_theme_font_size_override("normal_font_size",18)
+	time_text.add_theme_font_size_override("bold_font_size",18)
 	time_text.add_theme_font_override("bold_font",Tokens.font("ui_strong"))
-	time_text.add_theme_font_override("normal_font",Tokens.font("voice"))
-	time_text.add_theme_color_override("default_color",Folio.RAIL_TEXT)
+	time_text.add_theme_font_override("normal_font",Tokens.font("ui_strong"))
+	time_text.add_theme_color_override("default_color",TopbarInk.TEXT)
 	TopbarInk.apply(time_text)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
@@ -659,7 +659,7 @@ func _build_time_pill()->void:
 	pause_button=Button.new()
 	pause_button.name="PauseResume"
 	pause_button.custom_minimum_size=Vector2(26,28)
-	pause_button.add_theme_font_size_override("font_size",12)
+	pause_button.add_theme_font_size_override("font_size",16)
 	pause_button.pressed.connect(func()->void:
 		_on_speed_pressed(last_running_speed if terrain and int(terrain.game_speed)==0 else 0))
 	speed_row.add_child(pause_button)
@@ -725,10 +725,11 @@ func _style_speed_controls(selected:int)->void:
 		button.add_theme_stylebox_override("normal",normal)
 		button.add_theme_stylebox_override("hover",hover)
 		button.add_theme_stylebox_override("pressed",normal)
-		button.add_theme_color_override("font_color",Folio.GOLD if active else Folio.RAIL_TEXT)
-		button.add_theme_color_override("font_hover_color",Folio.RAIL_TEXT)
-		button.add_theme_color_override("font_focus_color",Folio.RAIL_TEXT)
-		button.add_theme_color_override("font_pressed_color",Folio.GOLD)
+		button.add_theme_color_override("font_color",TopbarInk.ACTIVE if active else TopbarInk.TEXT)
+		button.add_theme_color_override("font_hover_color",TopbarInk.TEXT)
+		button.add_theme_color_override("font_focus_color",TopbarInk.TEXT)
+		button.add_theme_color_override("font_pressed_color",TopbarInk.ACTIVE)
+		button.add_theme_font_override("font",Tokens.font("ui_strong"))
 		TopbarInk.apply(button)
 
 # --- KPI strip --------------------------------------------------------------
@@ -1037,14 +1038,14 @@ func _build_toolbar()->void:
 	city_selector.name="CitySelector"
 	city_selector.custom_minimum_size=Vector2(150,30)
 	city_selector.fit_to_longest_item=false
-	city_selector.add_theme_font_override("font",Tokens.font("voice"))
+	city_selector.add_theme_font_override("font",Tokens.font("voice_bold"))
 	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
-	city_selector.add_theme_font_size_override("font_size",19)
+	city_selector.add_theme_font_size_override("font_size",22)
 	TopbarInk.apply(city_selector)
 	for color_key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
-		city_selector.add_theme_color_override(color_key,Folio.RAIL_TEXT)
-	city_selector.add_theme_color_override("icon_normal_color",Folio.RAIL_TEXT)
-	city_selector.add_theme_color_override("icon_hover_color",Folio.RAIL_TEXT)
+		city_selector.add_theme_color_override(color_key,TopbarInk.TEXT)
+	city_selector.add_theme_color_override("icon_normal_color",TopbarInk.TEXT)
+	city_selector.add_theme_color_override("icon_hover_color",TopbarInk.TEXT)
 	city_selector.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
 	city_selector.add_theme_stylebox_override("pressed",Folio.rail_style(false,true))
 	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
@@ -1402,7 +1403,7 @@ func _refresh_time()->void:
 	var signature:="%s|%d|%s" % [date,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [Folio.RAIL_TEXT.to_html(false),date,Folio.RAIL_TEXT.to_html(false),temperature_text]
+	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [TopbarInk.TEXT.to_html(false),date,TopbarInk.TEXT.to_html(false),temperature_text]
 	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()
