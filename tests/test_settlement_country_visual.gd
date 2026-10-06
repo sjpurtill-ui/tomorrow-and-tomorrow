@@ -224,3 +224,79 @@ func test_off_view_ground_can_be_empty_without_a_null_surface_cast()->void:
 	assert_object(root.get_node_or_null("ScatteredHomes")).is_not_null()
 	assert_object(root.get_node_or_null("CountryChart_field")).is_not_null()
 	assert_int(visual.drape_budget_skips).is_equal(0)
+
+func test_incremental_ground_keeps_old_patch_until_complete_and_matches_sync_geometry()->void:
+	var snapshot:=_snapshot();snapshot.deposits=[_wood("center",Vector3.ZERO)]
+	var visual=_visual();visual.ground_grid=Vector4(0,0,3,65)
+	visual.request(snapshot);_flush(visual)
+	var key:="sites:site:player:center"
+	var old_id:int=visual.stats().keys[key].node_id
+	visual.invalidate(true);visual.request(snapshot)
+	visual.process_jobs(1,1)
+	assert_int(visual.stats().pending).is_equal(1)
+	assert_int(visual.stats().keys[key].node_id).is_equal(old_id)
+	assert_str(visual.stats().preparing).is_equal(key)
+	assert_object(visual._job.node.get_node_or_null("WorkedEarth")).is_null()
+	# A one-microsecond budget advances one bounded operation; it cannot drain
+	# the whole patch behind the retained renderer's nominal frame budget.
+	visual.process_jobs(1,1)
+	assert_int(visual.stats().keys[key].node_id).is_equal(old_id)
+	_flush(visual)
+	var actual:MeshInstance3D=instance_from_id(visual.stats().keys[key].node_id).get_node("WorkedEarth")
+	var synchronous=_visual();synchronous.ground_grid=visual.ground_grid
+	var expected_root:Node3D=auto_free(Node3D.new())
+	var arguments:Array=visual.retained.desired[key].build.get_bound_arguments()
+	synchronous._build_patch(expected_root,arguments[0],arguments[1])
+	var expected:MeshInstance3D=expected_root.get_node("WorkedEarth")
+	var actual_arrays:Array=actual.mesh.surface_get_arrays(0)
+	var expected_arrays:Array=expected.mesh.surface_get_arrays(0)
+	assert_array(actual_arrays[Mesh.ARRAY_VERTEX]).is_equal(expected_arrays[Mesh.ARRAY_VERTEX])
+	assert_array(actual_arrays[Mesh.ARRAY_COLOR]).is_equal(expected_arrays[Mesh.ARRAY_COLOR])
+	assert_int(visual.drape_budget_skips).is_equal(0)
+
+func test_obsolete_partial_patch_is_discarded_before_new_facts_install()->void:
+	var visual=_visual();visual.ground_grid=Vector4(0,0,3,65)
+	var snapshot:=_snapshot();snapshot.deposits=[_wood("center",Vector3.ZERO)]
+	visual.request(snapshot);visual.process_jobs(1,1)
+	var stale:Node=visual._job.node
+	var stale_signature:int=visual._job.signature
+	snapshot.deposits[0].remaining=0.0;snapshot.deposits[0].workers=0
+	visual.request(snapshot);visual.process_jobs(1,1)
+	assert_bool(is_instance_valid(stale)).is_false()
+	assert_int(visual._job.signature).is_not_equal(stale_signature)
+	assert_int(visual.stats().installed).is_equal(0)
+	_flush(visual)
+	assert_int(visual.stats().installed).is_equal(1)
+	assert_int(visual.stats().prepared_patches).is_equal(1)
+
+func test_camera_priority_changes_pending_order_without_invalidating_finished_meshes()->void:
+	var visual=_visual();var snapshot:=_snapshot()
+	visual.view_center=Vector2(-1,0);visual.request(snapshot)
+	assert_str(visual.retained.pending[0]).is_equal("sites:site:player:west")
+	visual.view_center=Vector2(1,0);visual.request(snapshot)
+	assert_str(visual.retained.pending[0]).is_equal("sites:site:player:east")
+	_flush(visual)
+	var before:Dictionary=visual.stats().keys
+	visual.view_center=Vector2(-1,0);visual.request(snapshot)
+	assert_int(visual.stats().pending).is_equal(0)
+	assert_dict(visual.stats().keys).is_equal(before)
+
+func test_reveal_change_restarts_a_clipped_incomplete_replacement()->void:
+	var cover:={"wide":false}
+	var revealed:=func(at:Vector2)->bool:return at.x<0.15 or bool(cover.wide)
+	var visual=auto_free(Visual.new());visual.ground_grid=Vector4(0,0,3,65)
+	visual.configure(func(_at:Vector2)->float:return 0.0,revealed,revealed)
+	var snapshot:=_snapshot();snapshot.deposits=[_wood("center",Vector3.ZERO)]
+	visual.request(snapshot)
+	var steps:=0
+	while not visual._fog_clipped and steps<2000:
+		visual.process_jobs(1,1);steps+=1
+	assert_bool(visual._fog_clipped).is_true()
+	assert_bool(visual._job.is_empty()).is_false()
+	var stale:Node=visual._job.node
+	cover.wide=true;visual.invalidate(false);visual.request(snapshot)
+	visual.process_jobs(1,1)
+	assert_bool(is_instance_valid(stale)).is_false()
+	_flush(visual)
+	var finished:Node=instance_from_id(visual.stats().keys["sites:site:player:center"].node_id)
+	assert_bool(finished.get_meta("fog_clipped")).is_false()

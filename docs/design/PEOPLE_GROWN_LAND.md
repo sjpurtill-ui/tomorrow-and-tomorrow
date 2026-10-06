@@ -1,13 +1,18 @@
 # One people, worked country — visual review branch
 
-Status: **HELD: unresolved rendering stall, no visual approval, and incomplete campaign evidence.**
+Status: **Integration authorized by the user; basic rendering fix under final verification.**
 Worker checkout: `C:/Users/sjpur/tt-people-grown-land`.
 Branch: `codex/people-grown-land`.
 Base: `a3579bb51c3960cc43a6357268af73eb4353294a` (`origin/main` at task start).
-This work is not integrated into the player build.
-The follow-up repair produces readable farm plots in actual GPU captures, but
-a cold site patch takes **1,356.197 ms**. It is not ready for integration.
-No fresh rendered-speed measurement was run for this repair.
+The user has now authorized merging the basics and continuing visual progression
+through year 3000. The original visual-review hold is superseded by that request.
+The previous checkpoint's 1,356.197-ms cold site build is replaced by incremental
+preparation: terrain clipping and vertex emission run in cooperative frame
+slices, with the old complete patch retained until replacement is ready. Work
+near the camera has priority. A fine-grid stress check preserves all 150,831
+vertices with zero clipping skips; its longest call is 17.268 ms, versus a
+3.039-second synchronous build. Total work is spread out, not eliminated.
+GPU verification and canonical integration are recorded below when complete.
 
 ## What the map draws
 

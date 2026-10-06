@@ -12,6 +12,7 @@ const CHART = preload("res://scripts/settlement_country_chart.gd")
 const DRAPE = preload("res://scripts/settlement_country_drape.gd")
 const GROUND_LIFT_KM:=0.0002
 var ground_grid:=Vector4.ZERO
+var view_center:=Vector2.ZERO
 var drape_budget_skips:=0
 var height_at:Callable
 var land_at:Callable
@@ -27,7 +28,19 @@ var fog_revision:int=0
 var last_plan_signature:int=-1
 var _land_cache:Dictionary={}
 var _height_cache:Dictionary={}
+var _visibility_cache:Dictionary={}
 var _fog_clipped:=false
+# Only one replacement is prepared at a time. Its old complete patch stays
+# installed until all bounded clipping and vertex batches have finished.
+var _job:Dictionary={}
+var _collecting:=false
+var _commands:Array[Array]=[]
+var _collected_surface:SurfaceTool
+var max_prepare_slice_usec:=0
+var last_prepare_slice_usec:=0
+var max_patch_work_usec:=0
+var prepared_patches:=0
+const MAX_PREPARE_STEPS:=512
 
 func invalidate(drape:bool=true)->void:
 	# Rendered terrain and discovery masks can change without a simulation day.
@@ -45,7 +58,7 @@ func configure(height:Callable,land:Callable=Callable(),revealed:Callable=Callab
 func request(snapshot:Dictionary,style:Dictionary={})->void:
 	var began:=Time.get_ticks_usec()
 	var plan_key:=PLAN.signature(snapshot)
-	var key:=hash([plan_key,style])
+	var key:=hash([plan_key,style,view_center])
 	if key==last_signature:return
 	last_signature=key;requests+=1
 	if plan_key!=last_plan_signature:
@@ -80,13 +93,89 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 			var start_seen:=not visibility_at.is_valid() or bool(visibility_at.call(nearest))
 			var clipped_revision:=0
 			if retained.installed.has(id) and bool(retained.installed[id].node.get_meta("fog_clipped",false)):clipped_revision=fog_revision
+			if not _job.is_empty() and _job.key==id and _fog_clipped:clipped_revision=fog_revision
 			var appearance:=[point,record.get("category",""),record.get("age",""),record.get("resource",""),record.get("field_radius_km",0.0),record.get("radius_km",0.0),record.get("buildings",2),nearest,admitted,start_seen,clipped_revision]
-			entries.append({"key":id,"signature":hash([appearance,context,surface_revision]),"priority":point.distance_squared_to(anchors[0]),"build":_build_patch.bind(record,context)})
+			entries.append({"key":id,"signature":hash([appearance,context,surface_revision]),"priority":point.distance_squared_to(view_center),"build":_build_patch.bind(record,context)})
 	retained.request(entries)
 	request_usec=Time.get_ticks_usec()-began
 
 func process_jobs(budget_usec:int=2000,max_jobs:int=2)->void:
-	if retained!=null:retained.process(budget_usec,max_jobs)
+	if retained==null:return
+	retained.last_jobs=0
+	if max_jobs<=0:return
+	var began:=Time.get_ticks_usec()
+	var completed:=0
+	var steps:=0
+	while completed<max_jobs and steps<MAX_PREPARE_STEPS:
+		if steps>0 and Time.get_ticks_usec()-began>=maxi(1,budget_usec):break
+		steps+=1
+		if not _job.is_empty() and (not retained.desired.has(_job.key) or retained.desired[_job.key].signature!=_job.signature or (not retained.pending.is_empty() and retained.pending[0]!=_job.key)):
+			_discard_job()
+		if _job.is_empty():
+			if retained.pending.is_empty():break
+			_start_job(retained.pending[0])
+			continue
+		var started:=Time.get_ticks_usec()
+		if _advance_job():
+			_job.work_usec+=Time.get_ticks_usec()-started
+			max_patch_work_usec=maxi(max_patch_work_usec,int(_job.work_usec))
+			var key:String=_job.key
+			var source:Dictionary=retained.desired[key]
+			var original:Callable=source.build
+			source.build=_install_prepared.bind(_job.node)
+			retained.pending.erase(key);retained.pending.push_front(key)
+			retained.process(1,1)
+			source.build=original
+			_job={};completed+=1;prepared_patches+=1
+		else:_job.work_usec+=Time.get_ticks_usec()-started
+	retained.last_jobs=completed
+	last_prepare_slice_usec=Time.get_ticks_usec()-began
+	max_prepare_slice_usec=maxi(max_prepare_slice_usec,last_prepare_slice_usec)
+	retained.last_slice_usec=last_prepare_slice_usec
+
+func _start_job(key:String)->void:
+	var began:=Time.get_ticks_usec()
+	var source:Dictionary=retained.desired[key]
+	var staging:=Node3D.new()
+	_commands=[];_collected_surface=null;_collecting=true
+	(source.build as Callable).call(staging)
+	_collecting=false
+	_commands.reverse()
+	_job={"key":key,"signature":source.signature,"node":staging,"surface":_collected_surface,"commands":_commands,"pieces":[],"piece_index":0,"lift":GROUND_LIFT_KM,"center_check":false,"work_usec":Time.get_ticks_usec()-began}
+	_commands=[];_collected_surface=null
+
+func _advance_job()->bool:
+	var pieces:Array=_job.pieces
+	if int(_job.piece_index)<pieces.size():
+		var triangle:Array=pieces[int(_job.piece_index)]
+		_job.piece_index+=1
+		_emit_triangle(_job.surface,triangle,float(_job.lift),bool(_job.center_check))
+		return false
+	var commands:Array=_job.commands
+	if not commands.is_empty():
+		var command:Array=commands.pop_back()
+		var work:=_triangle_work(command)
+		_job.pieces=work.pieces;_job.piece_index=0
+		_job.lift=command[6];_job.center_check=work.center_check
+		var children:Array=work.children
+		for index in range(children.size()-1,-1,-1):commands.append(children[index])
+		return false
+	_job.node.set_meta("fog_clipped",_fog_clipped)
+	if _job.surface!=null:_finish_surface(_job.node,_job.surface)
+	return true
+
+func _install_prepared(parent:Node3D,staging:Node3D)->void:
+	for key:StringName in staging.get_meta_list():parent.set_meta(key,staging.get_meta(key))
+	for child:Node in staging.get_children():
+		staging.remove_child(child);parent.add_child(child)
+	staging.free()
+
+func _discard_job()->void:
+	if not _job.is_empty() and is_instance_valid(_job.node):_job.node.free()
+	_job={}
+
+func _notification(what:int)->void:
+	if what==NOTIFICATION_PREDELETE:_discard_job()
 
 func stats()->Dictionary:
 	var result:Dictionary=retained.stats() if retained!=null else {}
@@ -95,10 +184,16 @@ func stats()->Dictionary:
 	result["herders"]=plan.get("herders",[]).size()
 	result["sites"]=plan.get("sites",[]).size()
 	result["drape_budget_skips"]=drape_budget_skips
+	result["preparing"]=_job.get("key","")
+	result["last_prepare_slice_usec"]=last_prepare_slice_usec
+	result["max_prepare_slice_usec"]=max_prepare_slice_usec
+	result["max_patch_work_usec"]=max_patch_work_usec
+	result["prepared_patches"]=prepared_patches
 	return result
 
 func _valid(point:Vector2)->bool:
-	if visibility_at.is_valid() and not bool(visibility_at.call(point)):_fog_clipped=true
+	if not _visibility_cache.has(point):_visibility_cache[point]=not visibility_at.is_valid() or bool(visibility_at.call(point))
+	if not bool(_visibility_cache[point]):_fog_clipped=true
 	if not _land_cache.has(point):_land_cache[point]=not land_at.is_valid() or bool(land_at.call(point))
 	return bool(_land_cache[point])
 
@@ -110,45 +205,61 @@ func _tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,color:Color,lift:flo
 	_graded_tri(surface,a,b,c,color,color,color,lift)
 
 func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,lift:float=GROUND_LIFT_KM,depth:int=0)->void:
-	if ground_grid.w>=2.0 and ground_grid.z>0.0:
-		# Exact regional facets avoid both terrain intersections and unbounded
-		# recursive height/land probes. Off-view portions await the next drape.
-		var pieces:=DRAPE.split_triangle(a,b,c,ca,cb,cc,ground_grid)
-		if pieces.is_empty():
-			if DRAPE.triangle_status(a,b,c,ground_grid).status=="budget_exceeded":
-				# Bisect the longest edge only; thin tracks do not explode into
-				# four-way subdivisions across their metre-wide cross-section.
-				if depth<6:
-					var ab:=a.distance_squared_to(b);var bc:=b.distance_squared_to(c);var ac:=a.distance_squared_to(c)
-					if ab>=bc and ab>=ac:
-						var middle:=(a+b)*0.5;var color:=ca.lerp(cb,0.5)
-						_graded_tri(surface,a,middle,c,ca,color,cc,lift,depth+1);_graded_tri(surface,middle,b,c,color,cb,cc,lift,depth+1)
-					elif bc>=ac:
-						var middle:=(b+c)*0.5;var color:=cb.lerp(cc,0.5)
-						_graded_tri(surface,a,b,middle,ca,cb,color,lift,depth+1);_graded_tri(surface,a,middle,c,ca,color,cc,lift,depth+1)
-					else:
-						var middle:=(a+c)*0.5;var color:=ca.lerp(cc,0.5)
-						_graded_tri(surface,a,b,middle,ca,cb,color,lift,depth+1);_graded_tri(surface,middle,b,c,color,cb,cc,lift,depth+1)
-				else:drape_budget_skips+=1
-			return
-		for triangle:Array in pieces:
-			if not _valid(triangle[0].point) or not _valid(triangle[1].point) or not _valid(triangle[2].point):continue
-			for vertex:Dictionary in triangle:
-				surface.set_color((vertex.color as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(vertex.point,lift))
+	if not _ground_rect_visible(a.min(b).min(c),a.max(b).max(c)):return
+	var command:Array=[a,b,c,ca,cb,cc,lift,depth]
+	if _collecting:
+		_commands.append(command)
 		return
-	# Pure-test and off-grid fallback stays bounded as before.
+	var work:=_triangle_work(command)
+	for child:Array in work.children:
+		_graded_tri(surface,child[0],child[1],child[2],child[3],child[4],child[5],child[6],child[7])
+	for triangle:Array in work.pieces:_emit_triangle(surface,triangle,lift,bool(work.center_check))
+
+func _triangle_work(command:Array)->Dictionary:
+	var a:Vector2=command[0];var b:Vector2=command[1];var c:Vector2=command[2]
+	var ca:Color=command[3];var cb:Color=command[4];var cc:Color=command[5]
+	var lift:float=command[6];var depth:int=command[7]
+	var work:={"pieces":[],"children":[],"center_check":false}
+	if not _ground_rect_visible(a.min(b).min(c),a.max(b).max(c)):return work
+	if ground_grid.w>=2.0 and ground_grid.z>0.0:
+		var clipped:=DRAPE.split_triangle_result(a,b,c,ca,cb,cc,ground_grid)
+		work.pieces=clipped.triangles
+		if clipped.status=="budget_exceeded":
+			# These children are queued, never recursively completed in one frame.
+			if depth<6:
+				var ab:=a.distance_squared_to(b);var bc:=b.distance_squared_to(c);var ac:=a.distance_squared_to(c)
+				if ab>=bc and ab>=ac:
+					var middle:=(a+b)*0.5;var color:=ca.lerp(cb,0.5)
+					work.children=[[a,middle,c,ca,color,cc,lift,depth+1],[middle,b,c,color,cb,cc,lift,depth+1]]
+				elif bc>=ac:
+					var middle:=(b+c)*0.5;var color:=cb.lerp(cc,0.5)
+					work.children=[[a,b,middle,ca,cb,color,lift,depth+1],[a,middle,c,ca,color,cc,lift,depth+1]]
+				else:
+					var middle:=(a+c)*0.5;var color:=ca.lerp(cc,0.5)
+					work.children=[[a,b,middle,ca,cb,color,lift,depth+1],[middle,b,c,color,cb,cc,lift,depth+1]]
+			else:drape_budget_skips+=1
+		return work
 	if depth<2 and maxf(a.distance_squared_to(b),maxf(b.distance_squared_to(c),c.distance_squared_to(a)))>0.16:
 		var ab:=(a+b)*0.5;var bc:=(b+c)*0.5;var ac:=(a+c)*0.5
 		var cab:=ca.lerp(cb,0.5);var cbc:=cb.lerp(cc,0.5);var cac:=ca.lerp(cc,0.5)
-		_graded_tri(surface,a,ab,ac,ca,cab,cac,lift,depth+1)
-		_graded_tri(surface,ab,b,bc,cab,cb,cbc,lift,depth+1)
-		_graded_tri(surface,ac,bc,c,cac,cbc,cc,lift,depth+1)
-		_graded_tri(surface,ab,bc,ac,cab,cbc,cac,lift,depth+1)
-		return
-	if not _valid(a) or not _valid(b) or not _valid(c) or not _valid((a+b+c)/3.0):return
-	var points:=[a,b,c];var colors:=[ca,cb,cc]
-	for i in 3:
-		surface.set_color((colors[i] as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(points[i],lift))
+		work.children=[[a,ab,ac,ca,cab,cac,lift,depth+1],[ab,b,bc,cab,cb,cbc,lift,depth+1],[ac,bc,c,cac,cbc,cc,lift,depth+1],[ab,bc,ac,cab,cbc,cac,lift,depth+1]]
+		return work
+	work.pieces=[[{"point":a,"color":ca},{"point":b,"color":cb},{"point":c,"color":cc}]]
+	work.center_check=true
+	return work
+
+func _emit_triangle(surface:SurfaceTool,triangle:Array,lift:float,center_check:bool)->void:
+	var a:Vector2=triangle[0].point;var b:Vector2=triangle[1].point;var c:Vector2=triangle[2].point
+	if not _valid(a) or not _valid(b) or not _valid(c):return
+	if center_check and not _valid(a+((b-a)+(c-a))/3.0):return
+	for vertex:Dictionary in triangle:
+		surface.set_color((vertex.color as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(vertex.point,lift))
+
+func _ground_rect_visible(low:Vector2,high:Vector2)->bool:
+	if ground_grid.w<2.0 or ground_grid.z<=0.0:return true
+	var corner:=Vector2(ground_grid.x,ground_grid.y)-Vector2.ONE*ground_grid.z*0.5
+	var end:=corner+Vector2.ONE*ground_grid.z
+	return high.x>=corner.x and high.y>=corner.y and low.x<=end.x and low.y<=end.y
 
 func _wash(surface:SurfaceTool,center:Vector2,radius:float,color:Color,seed_value:int,stretch:float=1.0)->void:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
@@ -188,6 +299,8 @@ func _ribbon(surface:SurfaceTool,start:Vector2,finish:Vector2,width:float,color:
 func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier:int)->void:
 	var length:=start.distance_to(finish)
 	if length<0.01:return
+	var margin:=Vector2.ONE*(0.07*minf(length,10.0)+0.025*minf(length,3.0)+0.004)
+	if not _ground_rect_visible(start.min(finish)-margin,start.max(finish)+margin):return
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
 	var cross:=(finish-start).normalized().orthogonal()
 	var pieces:=clampi(ceili(length/0.12),4,256)
@@ -205,7 +318,7 @@ func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier
 		previous=point
 
 func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
-	_land_cache.clear();_height_cache.clear()
+	_land_cache.clear();_height_cache.clear();_visibility_cache.clear()
 	_fog_clipped=false
 	var at:Vector2=record.position
 	if not _valid(at):
@@ -239,6 +352,12 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 		if group!="sites":finish=at.move_toward(Vector2(record.track_from),float(PLAN.homestead_layout(record).yard_radius_km)*0.78)
 		_track(surface,Vector2(record.track_from),finish,seed_value,int(record.get("road_tier",context.road_tier)))
 	parent.set_meta("fog_clipped",_fog_clipped)
+	if _collecting:
+		_collected_surface=surface
+		return
+	_finish_surface(parent,surface)
+
+func _finish_surface(parent:Node3D,surface:SurfaceTool)->void:
 	var arrays:=surface.commit_to_arrays()
 	if arrays.is_empty() or not arrays[Mesh.ARRAY_VERTEX] is PackedVector3Array:return
 	if (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():return
@@ -253,6 +372,8 @@ func _draw_site(surface:SurfaceTool,record:Dictionary,seed_value:int)->void:
 	var age:=String(record.get("age",""))
 	var resource:=String(record.get("resource",""))
 	var radius:=float(record.get("radius_km",record.get("field_radius_km",0.48)))
+	var extent:=Vector2.ONE*(1.18+radius*1.4)
+	if not _ground_rect_visible(at-extent,at+extent):return
 	var color:=Color("#a89468")
 	if "wood" in age or resource=="Timber":color=Color("#8c9b65") if category=="regrowing" else Color("#8c7958")
 	elif "quarry" in age or resource=="Stone":color=Color("#aaa18d") if category=="depleted" else Color("#b6a58b")

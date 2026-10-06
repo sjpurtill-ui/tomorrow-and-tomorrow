@@ -12,8 +12,13 @@ const EPSILON:=0.000001
 ## or over budget; triangle_status distinguishes these cases. Every returned
 ## triangle is inside one of the grid's alternating terrain facets.
 static func split_triangle(a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,grid:Vector4)->Array:
+	return split_triangle_result(a,b,c,ca,cb,cc,grid).triangles
+
+## Renderer work queues need the reason for an empty result without preparing
+## and clipping the same over-budget triangle a second time.
+static func split_triangle_result(a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,grid:Vector4)->Dictionary:
 	var prepared:=_prepare(a,b,c,ca,cb,cc,grid)
-	if prepared.status not in ["inside","clipped"]:return []
+	if prepared.status not in ["inside","clipped"]:return {"status":prepared.status,"triangles":[]}
 	var source:Array=prepared.source
 	var triangles:Array=[]
 	for span:Vector3i in prepared.row_spans:
@@ -34,7 +39,7 @@ static func split_triangle(a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Co
 						triangle.append({"point":_world(vertex.point,grid),"color":vertex.color})
 					triangles.append(triangle)
 	assert(triangles.size()<=MAX_OUTPUT_TRIANGLES)
-	return triangles
+	return {"status":prepared.status,"triangles":triangles}
 
 
 ## Bounded preparation: clip to the grid, then at most MAX_ROWS row slabs.

@@ -86,6 +86,7 @@ func refresh(owner_terrain:Node3D)->void:
 		if drape_changed:entry.node.invalidate(true)
 		elif fog_changed:entry.node.invalidate(false)
 		entry.node.ground_grid=terrain.river_terrain_grid
+		entry.node.view_center=center
 		var old_plan_key:int=entry.node.last_plan_signature
 		entry.node.request(entry.snapshot,entry.style)
 		if old_plan_key!=entry.node.last_plan_signature:clearing_revision+=1

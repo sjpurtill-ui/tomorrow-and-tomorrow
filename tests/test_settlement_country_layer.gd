@@ -77,6 +77,7 @@ func test_unchanged_refresh_reuses_owner_and_never_changes_engine_state()->void:
 	f.layer.refresh(f.terrain)
 	assert_int(f.layer.layers.size()).is_equal(1)
 	var node:Node3D=f.layer.layers.player.node
+	assert_vector(node.view_center).is_equal(Vector2(20,20))
 	var captures:=int(f.layer.captures)
 	# The main clock advances fractionally every frame; only its completed
 	# integer day should trigger a new factual deposit scan.
