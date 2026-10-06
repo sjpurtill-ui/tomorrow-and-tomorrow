@@ -1172,8 +1172,20 @@ func remove_central_officeholder(office_key:String,action:String="dismiss")->Dic
 	return {"ok":true,"action":normalized,"former":previous,"successor":appointed,"event":event,"message":event.description}
 
 
-func officeholder(office_key:String)->Dictionary:
+## The reconciliation officeholder() and has_officeholder() need, once per
+## day and change: read many times a day, they run the whole of initialize()
+## only when the day, the roster's revision, the people, the government's
+## stage or the settlements have moved since it last ran.
+var _read_key:Array=[]
+func _initialize_for_reading()->void:
+	var key:=[int(WorldSimulation.state.elapsed_days),revision,people.size(),government_stage,WorldSimulation.state.player_settlements.size(),WorldSimulation.state]
+	if key==_read_key: return
 	initialize()
+	_read_key=[int(WorldSimulation.state.elapsed_days),revision,people.size(),government_stage,WorldSimulation.state.player_settlements.size(),WorldSimulation.state]
+
+
+func officeholder(office_key:String)->Dictionary:
+	_initialize_for_reading()
 	var holder:Dictionary=WorldSimulation.state.leadership_positions.get(office_key,{})
 	if holder.is_empty(): return {}
 	var person:=person_snapshot(int(holder.get("person_id",0)))
@@ -1186,7 +1198,7 @@ func officeholder(office_key:String)->Dictionary:
 ## reconciliation and record upkeep (person_snapshot's art indices), without
 ## copying the person or listing the offices for a title.
 func has_officeholder(office_key:String)->bool:
-	initialize()
+	_initialize_for_reading()
 	var holder:Dictionary=WorldSimulation.state.leadership_positions.get(office_key,{})
 	if holder.is_empty(): return false
 	var person:=_person_record(int(holder.get("person_id",0)))
