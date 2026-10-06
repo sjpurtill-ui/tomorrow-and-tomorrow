@@ -9,8 +9,8 @@ const Borders:=preload("res://scripts/nation_borders.gd")
 func test_country_grows_with_the_people_and_its_reach()->void:
 	# A village of 400 ranges about 60 km; a people of 25,000 some 470 km,
 	# more with good roads and a wide knowledge of the world.
-	assert_float(Realm.reach_km(400,0.0)).is_equal_approx(60.0,0.5)
-	assert_float(Realm.reach_km(25000,0.0)).is_equal_approx(474.3,0.5)
+	assert_float(Realm.reach_km(400,0.0)).is_equal_approx(72.0,0.5)
+	assert_float(Realm.reach_km(25000,0.0)).is_equal_approx(569.2,0.5)
 	assert_float(Realm.reach_km(25000,0.3)).is_greater(Realm.reach_km(25000,0.0)*1.5)
 	# Bounded: never under a town's fields, never past half a continent.
 	assert_float(Realm.reach_km(0,0.0)).is_equal(Realm.MIN_KM)

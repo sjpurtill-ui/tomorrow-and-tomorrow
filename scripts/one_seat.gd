@@ -26,10 +26,15 @@ const NO_NEW_TOWNS:="Our people do not leave to found separate towns: the seat g
 ## ground 3 km apart (resource_system.gd SURFACE_FRONT_SPACING_KM). A seat
 ## reaches BASE_REACH_RINGS rings, one more for every REACH_PEOPLE_STEP
 ## people under the square root (1,000 people: 4; 10,000: 6; 100,000: 13;
-## 1,000,000: 34), never past MAX_REACH_RINGS (about 120 km).
+## 1,000,000: 34), never past MAX_REACH_RINGS (about 120 km). Homesteaders
+## spread through the country the people hold, so the worked ground also
+## reaches HOMESTEAD_SHARE of the realm's reach (realm_reach.gd), whichever
+## is farther: a people of 4,000 holding 300 km works out to 90 km, not 15.
 const BASE_REACH_RINGS:=3
 const REACH_PEOPLE_STEP:=1000.0
 const MAX_REACH_RINGS:=40
+const HOMESTEAD_SHARE:=0.3
+const RealmReach:=preload("res://scripts/realm_reach.gd")
 
 ## The seat's stages, by its people and its districts (active local
 ## centres: settlement_model.gd settlement_nuclei). A stage is reached when
@@ -125,7 +130,20 @@ static func fold_towns(day:int)->Array[Dictionary]:
 ## Rings of ground the seat's carriers may search (see BASE_REACH_RINGS).
 static func reach_rings()->int:
 	var people:=maxf(0.0,float(WorldSimulation.state.population_exact))
-	return clampi(BASE_REACH_RINGS+floori(sqrt(people/REACH_PEOPLE_STEP)),BASE_REACH_RINGS,MAX_REACH_RINGS)
+	var rings:=BASE_REACH_RINGS+floori(sqrt(people/REACH_PEOPLE_STEP))
+	return clampi(maxi(rings,homestead_rings()),BASE_REACH_RINGS,MAX_REACH_RINGS)
+
+## Rings of the realm's country the homesteaders work (0 before a home, and
+## for the other peoples, whose realms are not read here).
+static func homestead_rings()->int:
+	if WorldSimulation.actor_id!="player": return 0
+	var realm:=RealmReach.ours()
+	if realm.is_empty(): return 0
+	return floori(float(realm.reach)*HOMESTEAD_SHARE/3.0)
+
+## How far out the worked ground reaches, in km.
+static func reach_km()->float:
+	return float(reach_rings())*3.0
 
 ## Districts of the seat: its active local centres.
 static func districts()->int:
