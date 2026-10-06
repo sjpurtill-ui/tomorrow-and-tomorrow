@@ -13,3 +13,26 @@ static func ceiling()->int:
 	if adopted("reinforced_concrete") and adopted("safety_lifts"):return 12
 	if adopted("structural_steel"):return 11
 	return 10
+
+## Adopted practices for each physical form, independent of a town's age.
+## Alternatives allow timber, earth and masonry traditions to develop.
+const FABRIC_PRACTICES:={
+	2:[["framed_construction","timber_post_beam_connections","central_hall_houses"]],
+	3:[["adobe_wall_construction","mould_made_mudbricks","dry_stone_walls","timber_post_beam_connections"]],
+	4:[["graded_roads","stone_lined_drains","urban_street_plans"]],
+	5:[["shared_party_walls","standard_lot_grid_towns","urban_street_plans"]],
+	6:[["stone_lined_drains","street_gutter_gratings","building_drainage_coordination"]],
+	7:[["dressed_stone_masonry","kiln_fired_bricks","ashlar_masonry"]],
+	8:[["urban_street_plans","standard_lot_grid_towns"]],
+	9:[["stone_merchant_houses","jettied_timber_houses","stone_party_walls"]],
+	10:[["vaulted_brick_sewers","street_utility_ducts"]],
+	11:[["structural_steel"],["rotative_steam_engine","central_power_stations"]],
+	12:[["reinforced_concrete"],["safety_lifts"]]
+}
+
+static func fabric_checks(tier:int)->Array[Dictionary]:
+	var checks:Array[Dictionary]=[]
+	for group:Array in FABRIC_PRACTICES.get(tier,[]):
+		var met:=group.any(func(id:Variant)->bool:return adopted(String(id)))
+		checks.append({"what":"practice","have":1 if met else 0,"need":1,"met":met,"practices":group.duplicate()})
+	return checks

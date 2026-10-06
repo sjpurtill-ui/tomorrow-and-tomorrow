@@ -31,12 +31,19 @@ static func plot(id:int,at:Vector2=Vector2.ZERO)->Dictionary:
 static func snapshot(year:int)->Dictionary:
 	GameState.elapsed_days=year*365.0
 	GameState.known_discoveries.clear();GameState.discovery_adoption.clear()
-	for id:String in ["clay_shaping","stone_selection","structural_steel","reinforced_concrete","safety_lifts"]:
-		var entry:Dictionary=DiscoverySystem.discovery_definition(id)
-		if not entry.is_empty() and float(entry.get("earliest_year",INF))<=year:
-			GameState.known_discoveries.append(id);GameState.discovery_adoption[id]=1.0
+	# Dates select a prepared knowledge sample only; runtime appearance is then
+	# derived from that actual sample, never from a settlement-age threshold.
+	for entry:Dictionary in DiscoverySystem.catalog:
+		if float(entry.get("earliest_year",INF))<=year:
+			GameState.known_discoveries.append(String(entry.id));GameState.discovery_adoption[String(entry.id)]=1.0
+	DiscoverySystem.refresh_operating_effects()
+	GameState.ensure_population_total(12000)
+	for role in ["Construction","Crafting","Logistics","Administration"]:GameState.population_allocations[role]=1000
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area"]
+	GameState.settlement_nuclei=[{"id":1,"active":true},{"id":2,"active":true}]
+	GameState.simulation_metrics={"labor_efficiency":.9,"logistics":.9}
 	GameState.resource_stockpiles={"Clay":10000.0,"Stone":10000.0}
-	var tier:=mini(SettlementModel._age_fabric_ceiling(year),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
+	var tier:=SettlementModel._supported_fabric_tier(int(GameState.elapsed_days))
 	var plots:Array[Dictionary]=[];var routes:Array[Dictionary]=[]
 	var count:=4+year/100
 	for row in ceili(count/6.0):

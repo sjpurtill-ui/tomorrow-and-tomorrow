@@ -299,7 +299,7 @@ func _condition_row()->Dictionary:
 		"meter":{"ratio":condition,"tick":float(Upkeep.FAILING_BELOW),"color":color,"text":"failing below %d%%" % roundi(float(Upkeep.FAILING_BELOW)*100.0)}}
 
 ## The era the town builds in, whether it is rising, and what the next era
-## still needs (SettlementModel.fabric_era_checks and the age thresholds).
+## still needs (SettlementModel.fabric_era_checks, including adopted practices).
 func _era_row(crews:Dictionary)->Dictionary:
 	var form:Dictionary=SettlementModel.city_form()
 	var level:=float(form.get("tier",0.0))
@@ -321,17 +321,20 @@ func _era_row(crews:Dictionary)->Dictionary:
 	return {"key":"era","icon":"era","name":"Building era","value":ERAS[tier],"sub":sub,"detail":needs+meaning,"accent":Tokens.GOLD,"state":"plain","notes":notes,
 		"meter":{"ratio":clampf(level/float(ERAS.size()-1),0.0,1.0),"text":"%s next" % ERAS[tier+1],"color":Tokens.GOLD,"tip":"%d of %d eras" % [tier+1,ERAS.size()]}}
 
-## What an era still needs, in plain words: the town's age, its crews and
+## What an era still needs, in plain words: adopted practices, its crews and
 ## works, and building knowledge.
-func _era_needs(next:int,day:int)->Array:
+func _era_needs(next:int,_day:int)->Array:
 	var needs:Array=[]
-	var age:=float(SettlementModel._settlement_age_years(day))
-	var need_age:=float(SettlementModel.FABRIC_ERA_AGE_YEARS[next])
-	if age<need_age:needs.append("the town to be %s old (%s to go)" % [_years_words(need_age),Plain.span_text((need_age-age)*365.0)])
 	for check:Dictionary in SettlementModel.fabric_era_checks(next):
 		if bool(check.met):continue
 		var have:=int(check.have);var need:=int(check.need)
 		match String(check.what):
+			"practice":
+				var names:Array[String]=[]
+				for id:String in check.practices:
+					var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+					names.append(String(definition.get("name",id.replace("_"," "))))
+				needs.append("adoption of "+" or ".join(names))
 			"lean_to_shelters":needs.append("the Lean-to Shelters built")
 			"builders":needs.append("%d builders (%d now)" % [need,have])
 			"works":needs.append("%d finished works (%d now)" % [need,have])
@@ -341,7 +344,6 @@ func _era_needs(next:int,day:int)->Array:
 			"districts":needs.append("a second district")
 			"labor":needs.append("work going at %d%% (%d%% now)" % [roundi(float(check.need)*100.0),roundi(float(check.have)*100.0)])
 			_:needs.append("more knowledge of building, roads and crafts")
-	if next>preload("res://scripts/settlement_architecture_knowledge.gd").ceiling():needs.append("new building knowledge")
 	return needs
 
 ## The workshops and stores the town's buildings hold, how fully staffed they

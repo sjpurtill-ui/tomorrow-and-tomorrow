@@ -691,7 +691,7 @@ func test_supported_fabric_evolves_in_place_and_records_route_surface()->void:
 			surfaced=String(route.get("surface",""))=="cleared_earth"
 	assert_bool(surfaced).is_true()
 
-func test_later_functional_districts_require_matching_roles_age_and_materials()->void:
+func test_functional_districts_follow_roles_and_materials_even_on_founding_day()->void:
 	GameState.settlement_founded_day=0
 	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Open Work Area"]
 	GameState.population_allocations["Construction"]=18
@@ -699,7 +699,7 @@ func test_later_functional_districts_require_matching_roles_age_and_materials()-
 	GameState.population_allocations["Logistics"]=100
 	GameState.resource_stockpiles={"Timber":80.0,"Fiber Plants":50.0}
 	var events:Array[Dictionary]=[]
-	model._attempt_functional_growth(5475,events)
+	model._attempt_functional_growth(0,events)
 	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("market")
 
 	_reset_fixture(TEST_SEED+1)
@@ -709,7 +709,7 @@ func test_later_functional_districts_require_matching_roles_age_and_materials()-
 	GameState.population_allocations["Administration"]=100
 	GameState.resource_stockpiles={"Timber":80.0,"Fiber Plants":50.0}
 	events.clear()
-	model._attempt_functional_growth(10950,events)
+	model._attempt_functional_growth(0,events)
 	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("civic")
 
 	_reset_fixture(TEST_SEED+2)
@@ -720,7 +720,7 @@ func test_later_functional_districts_require_matching_roles_age_and_materials()-
 	GameState.population_allocations["Extraction"]=100
 	GameState.resource_stockpiles={"Stone":80.0,"Timber":50.0}
 	events.clear()
-	model._attempt_functional_growth(18250,events)
+	model._attempt_functional_growth(0,events)
 	assert_str(String(GameState.settlement_plots.back().land_use)).is_equal("dirty_industry")
 
 func test_growth_rejects_submerged_ground_before_scoring_access()->void:
@@ -752,8 +752,8 @@ func test_later_material_transition_is_seeded_and_drawn_without_payment()->void:
 	assert_int(int(candidate_plot.fabric_generation)).is_equal(7)
 	assert_array(events).has_size(1)
 
-func test_mature_population_founds_connected_quarter_beyond_inherited_core()->void:
-	GameState.settlement_founded_day=0
+func test_mature_population_founds_connected_quarter_without_minimum_settlement_age()->void:
+	GameState.settlement_founded_day=1800
 	GameState.ensure_population_total(6200)
 	GameState.population_allocations["Construction"]=80
 	GameState.population_allocations["Logistics"]=45
@@ -885,8 +885,8 @@ func test_new_households_cover_all_supported_eras_without_changing_inherited_gro
 	assert_int(int(founding.fabric_generation)).is_equal(0)
 	assert_int(int(founding.storeys)).is_equal(1)
 	assert_str(String(founding.material_family)).is_equal("organic")
-	for tier in model.FABRIC_ERA_AGE_YEARS.size():
-		_growth_capability(float(model.FABRIC_ERA_AGE_YEARS[tier]),12.0)
+	for tier in model.FABRIC_ERA_NAMES.size():
+		_growth_capability(0.0,float(tier))
 		var day:=ceili(GameState.elapsed_days)
 		var recipe:Dictionary=model._available_household_recipe()
 		var stocks:=GameState.resource_stockpiles.duplicate(true)
@@ -1023,3 +1023,21 @@ func test_new_quarter_reserves_complete_plot_route_and_nucleus_budgets()->void:
 	model._attempt_mature_district_expansion(14400,events,_growth_flat_context())
 	assert_array(events).is_empty()
 	assert_int(GameState.settlement_nuclei.size()).is_equal(model.MAX_SIMULATED_NUCLEI)
+
+func test_appearance_support_tracks_adopted_practices_not_settlement_age()->void:
+	_growth_capability(0.0,12.0)
+	assert_int(model._supported_fabric_tier(0)).is_equal(12)
+	assert_int(model._supported_fabric_tier(365*10000)).is_equal(12)
+	var architecture:=preload("res://scripts/settlement_architecture_knowledge.gd")
+	for groups:Array in architecture.FABRIC_PRACTICES.values():
+		for group:Array in groups:
+			for id:String in group:
+				assert_bool(DiscoverySystem.catalog_by_id.has(id)).override_failure_message(id).is_true()
+	GameState.known_discoveries.clear();GameState.discovery_adoption.clear()
+	DiscoverySystem.refresh_operating_effects()
+	assert_int(model._supported_fabric_tier(0)).is_equal(1)
+	assert_int(model._supported_fabric_tier(365*10000)).is_equal(1)
+	GameState.known_discoveries.append("framed_construction")
+	assert_int(model._supported_fabric_tier(0)).is_equal(1)
+	GameState.discovery_adoption["framed_construction"]=0.2
+	assert_int(model._supported_fabric_tier(0)).is_equal(2)

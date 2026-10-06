@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Imported room geometry, furnishing gates, and circulation across the timeline.
+## Imported room geometry, furnishing gates, and circulation across progression milestones.
 
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Chapters:=preload("res://scripts/hud/court_chapters.gd")
@@ -87,14 +87,14 @@ func test_every_room_has_a_clear_arrival_and_seat_approach()->void:
 				var seated:=Paths.route_with_seats(made,room,Vector2(door.x,door.z),Vector2(mark.position.x,mark.position.z))
 				assert_int(seated.size()).override_failure_message("%s has no complete chair route to %s" % [made.kind,key]).is_greater_equal(3)
 
-func test_lagging_societies_renovate_without_new_materials_or_losing_routes()->void:
+func test_time_alone_preserves_room_geometry_and_routes()->void:
 	var first:=_room(0,{"chapter":Chapters.derive(200.0*365.0,[])})
 	var next:=_room(0,{"chapter":Chapters.derive(400.0*365.0,[])})
 	assert_str(String(first.kind)).is_equal("chapter_00")
 	assert_str(String(next.kind)).is_equal("chapter_00")
-	assert_float(first.model.scale.x).is_less(0.0)
+	assert_float(first.model.scale.x).is_equal(next.model.scale.x)
 	assert_float(next.model.scale.x).is_greater(0.0)
-	assert_str(Paths.room_of(first).key).is_not_equal(Paths.room_of(next).key)
+	assert_str(Paths.room_of(first).key).is_equal(Paths.room_of(next).key)
 	for made in [first,next]:
 		var start:Vector3=made.mark("door_out").position
 		var end:Vector3=made.mark("petitioner").position

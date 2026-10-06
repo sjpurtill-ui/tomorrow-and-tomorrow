@@ -1,3 +1,17 @@
+## October 5 — Appearance tied to discoveries and development: READY
+
+`codex/appearance-progression`, base `1df22772`, removes calendar-based city
+architecture ceilings, court chapters and functional-district minimum ages.
+City forms require adopted building practices and existing real capacity/paid work.
+Court rooms follow each host's actual construction and civic discoveries; equipment
+and political lean remain independent. Buildings explains the missing practices.
+107 distinct regression checks pass; private GPU court milestones 1/8/15 render at
+the same day zero with different knowledge (PASS 3, PID 58472 exited 0).
+No save-schema changes or player launch. Existing plot forms are retained.
+See `docs/design/APPEARANCE_PROGRESSION.md` for full validation and limits.
+Prepared for the user's preview review; not integrated. The separately pushed
+brighter top bar and settlement-figure removal remain excluded from this branch.
+
 ## October 5 — Living village Overview: INTEGRATED
 
 `codex/living-village-overview`, based on `5d8994b3`, replaces the generated

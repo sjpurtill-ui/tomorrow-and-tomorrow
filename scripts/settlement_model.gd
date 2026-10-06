@@ -1794,7 +1794,7 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 	# deliberately separate from ordinary housing pressure: it founds a connected
 	# satellite only when real coordination, route knowledge, labour and delivered
 	# material can support another daily centre.
-	if day%360!=0 or _settlement_age_years(day)<4.0: return
+	if day%360!=0: return
 	var population:=_primary_population()
 	if population<1800: return
 	var builders:=int(WorldSimulation.state.effective_workers("Construction"))
@@ -2843,18 +2843,8 @@ func _settlement_age_years(day:int)->float:
 	if founded_day<0: founded_day=day
 	return maxf(0.0,float(day-founded_day)/365.0)
 
-## Years a town must have stood before each construction era (index = era).
-const FABRIC_ERA_AGE_YEARS:=[0.0,0.25,1.0,3.0,10.0,25.0,40.0,80.0,125.0,175.0,300.0,700.0,1500.0]
+## Construction milestones; advancement follows adopted practices and paid work.
 const FABRIC_ERA_NAMES:=["founding","foothold","hamlet","village","local_centre","town","mature_town","urban_system","city_consolidation","historic_landscape","regional_system","industrial_age","metropolitan_age"]
-
-func _age_fabric_ceiling(age_years:float)->int:
-	# These are opportunity thresholds from the morphology specification, not free
-	# upgrades. `_supported_fabric_tier` applies the material, labour, knowledge and
-	# institutional ceiling that decides whether an old plot can actually change.
-	var ceiling:=0
-	for tier in range(1,FABRIC_ERA_AGE_YEARS.size()):
-		if age_years>=float(FABRIC_ERA_AGE_YEARS[tier]): ceiling=tier
-	return ceiling
 
 ## What the town's crews, works and knowledge are now, as the era checks read them.
 func fabric_era_inputs()->Dictionary:
@@ -2867,8 +2857,7 @@ func fabric_era_inputs()->Dictionary:
 		"construction":discovery.effect("construction_rate"),"route":discovery.effect("route_speed"),"craft":discovery.effect("craft_output"),
 		"standardization":discovery.effect("standardization"),"tools":discovery.effect("tool_quality"),"state_capacity":discovery.effect("state_capacity")}
 
-## What a town needs for a construction era besides its age
-## (FABRIC_ERA_AGE_YEARS) and what its people know of building
+## What a town needs for a construction milestone, including adopted practices
 ## (settlement_architecture_knowledge.gd). Each check is {"what","have","need",
 ## "met"}; the era is supported when every check is met. _supported_fabric_tier
 ## and the Buildings page read these same checks.
@@ -2892,18 +2881,18 @@ func fabric_era_checks(tier:int,inputs:Dictionary={})->Array[Dictionary]:
 		10: result=crews.call(200,120,60);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization),0.22))
 		11: result=crews.call(350,220,120);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization)+float(x.tools),0.34))
 		12: result=crews.call(600,400,250);result.append(_era_check("knowledge",float(x.construction)+float(x.route)+float(x.craft)+float(x.standardization)+float(x.tools)+float(x.state_capacity),0.50))
+	result.append_array(preload("res://scripts/settlement_architecture_knowledge.gd").fabric_checks(tier))
 	return result
 
 static func _era_check(what:String,have:Variant,need:Variant)->Dictionary:
 	return {"what":what,"have":have,"need":need,"met":float(have)>=float(need)}
 
-func _supported_fabric_tier(day:int)->int:
-	var age_ceiling:=_age_fabric_ceiling(_settlement_age_years(day))
+func _supported_fabric_tier(_day:int)->int:
 	var inputs:=fabric_era_inputs()
 	var support:=0
-	for tier in range(1,FABRIC_ERA_AGE_YEARS.size()):
+	for tier in range(1,FABRIC_ERA_NAMES.size()):
 		if fabric_era_checks(tier,inputs).all(func(check:Dictionary)->bool:return bool(check.met)): support=tier
-	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
+	return mini(support,preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
 
 func _new_fabric_tier(day:int)->int:
 	# Knowledge offers possibilities; the city's paid construction/renewal has
@@ -3135,23 +3124,22 @@ func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Diction
 		var existing_storage:=_functional_plot_count("storage")
 		if existing_storage<desired_storage:
 			candidates.append({"use":"storage","pressure":float(desired_storage-existing_storage)+stored_bulk/maxf(1.0,capacity)})
-	var settlement_age:=_settlement_age_years(day)
 	var logistics_workers:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var administration_workers:=int(WorldSimulation.state.population_allocations.get("Administration",0))
 	var extraction_workers:=int(WorldSimulation.state.population_allocations.get("Extraction",0))
-	if settlement_age>=10.0 and logistics_workers>=12:
+	if logistics_workers>=12:
 		var desired_markets:=clampi(1+floori(float(logistics_workers)/90.0),1,10)
 		var existing_markets:=_functional_plot_count("market")
 		if existing_markets<desired_markets: candidates.append({"use":"market","pressure":float(desired_markets-existing_markets)+float(logistics_workers)/120.0})
-	if settlement_age>=15.0 and logistics_workers>=20:
+	if logistics_workers>=20:
 		var desired_hospitality:=clampi(1+floori(float(logistics_workers)/140.0),1,8)
 		var existing_hospitality:=_functional_plot_count("hospitality")
 		if existing_hospitality<desired_hospitality: candidates.append({"use":"hospitality","pressure":float(desired_hospitality-existing_hospitality)+float(logistics_workers)/180.0})
-	if settlement_age>=25.0 and administration_workers>=8:
+	if administration_workers>=8:
 		var desired_civic:=clampi(1+floori(float(administration_workers)/110.0),1,8)
 		var existing_civic:=_functional_plot_count("civic")
 		if existing_civic<desired_civic: candidates.append({"use":"civic","pressure":float(desired_civic-existing_civic)+float(administration_workers)/160.0})
-	if settlement_age>=40.0 and extraction_workers>=18 and "stone_selection" in WorldSimulation.state.known_discoveries:
+	if extraction_workers>=18 and "stone_selection" in WorldSimulation.state.known_discoveries:
 		var desired_industry:=clampi(1+floori(float(extraction_workers)/70.0),1,12)
 		var existing_industry:=_functional_plot_count("dirty_industry")
 		if existing_industry<desired_industry: candidates.append({"use":"dirty_industry","pressure":float(desired_industry-existing_industry)+float(extraction_workers)/100.0})

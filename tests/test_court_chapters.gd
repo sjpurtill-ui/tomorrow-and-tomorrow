@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Calendar renewal is presentation only. Construction, equipment and political
+## Calendar-independent milestones. Construction, equipment and political
 ## form still come from the host society's actual knowledge and institutions.
 
 const Chapters:=preload("res://scripts/hud/court_chapters.gd")
@@ -17,63 +17,21 @@ func after_test()->void:
 	Backdrop.tier_override=-1
 	Voice.knowledge_override.clear();Stages.stage_override="";Stages.reload()
 
-func test_all_sixteen_chapters_change_at_the_exact_two_hundred_year_boundary()->void:
-	var names:Array[String]=[]
-	for index in 16:
-		var boundary:=float(index*200)*YEAR
-		var profile:=Chapters.derive(boundary,["precast_panel_housing"])
-		assert_int(Chapters.index_for_days(boundary)).is_equal(index)
-		assert_int(int(profile.index)).is_equal(index)
-		assert_int(int(profile.design)).is_equal(index)
-		assert_int(int(profile.start_year)).is_equal(index*200)
-		assert_int(int(profile.renewal)).is_equal(index)
-		assert_str(String(profile.set_kind)).is_equal("chapter_%02d" % index)
-		assert_bool(profile.limited).is_false()
-		assert_str(String(profile.name)).is_not_empty()
-		assert_bool(String(profile.name) in names).is_false()
-		names.append(String(profile.name))
-		if index>0:
-			assert_int(Chapters.index_for_days(boundary-0.001)).is_equal(index-1)
-			assert_int(int(Chapters.derive(boundary-0.001,["precast_panel_housing"]).design)).is_equal(index-1)
-		if index<15:
-			assert_int(Chapters.index_for_days(boundary+200.0*YEAR-0.001)).is_equal(index)
-	assert_int(names.size()).is_equal(16)
+func test_every_room_milestone_is_reachable_without_waiting_for_a_year()->void:
+	for index:int in Chapters.CONSTRUCTION:
+		for id:String in Chapters.CONSTRUCTION[index]:
+			var young:=Chapters.derive(0.0,[id])
+			assert_int(int(young.design)).override_failure_message(id).is_equal(index)
+			for day in [-1.0,200.0*YEAR,3000.0*YEAR,1000000.0*YEAR]:
+				assert_dict(Chapters.derive(day,[id])).is_equal(young)
+			assert_str(String(young.set_kind)).is_equal("chapter_%02d" % index)
 
-func test_negative_days_and_years_after_three_thousand_are_bounded()->void:
-	for days:float in [-10000.0*YEAR,-1.0,0.0]:
-		assert_int(Chapters.index_for_days(days)).is_equal(0)
-		assert_int(int(Chapters.derive(days,["precast_panel_housing"]).design)).is_equal(0)
-	for days:float in [3000.0*YEAR,3000.0*YEAR+0.001,1000000.0*YEAR]:
-		var profile:=Chapters.derive(days,["precast_panel_housing"])
-		assert_int(int(profile.index)).is_equal(15)
-		assert_int(int(profile.start_year)).is_equal(3000)
-		assert_str(String(profile.set_kind)).is_equal("chapter_15")
-
-func test_aging_without_knowledge_renews_the_early_room_without_modernizing_it()->void:
-	var known:Array=[]
-	for index in 16:
-		var profile:=Chapters.derive(float(index*200)*YEAR,known)
-		assert_int(int(profile.design)).is_equal(0)
-		assert_int(int(profile.renewal)).is_equal(index)
-		assert_bool(profile.limited).is_equal(index>0)
-		assert_str(String(profile.set_kind)).is_equal("chapter_00")
-		for enabled in (profile.capabilities as Dictionary).values():
-			assert_bool(bool(enabled)).is_false()
-	assert_array(known).is_empty()
-
-func test_construction_knowledge_limits_the_room_independently_of_elapsed_time()->void:
-	var cases:=[
-		["central_hall_houses",1],["lime_plastered_floors",2],
-		["ashlar_masonry",3],["long_span_timber_halls",6],["plank_walled_timber_halls",7],
-		["great_hall_of_justice",8],["fixed_capital_archives",9],
-		["privy_council_minutes",11],["ministry_office_block",13],
-		["reinforced_concrete",15]]
-	for row:Array in cases:
-		var profile:=Chapters.derive(3000.0*YEAR,[row[0]])
-		assert_int(int(profile.design)).override_failure_message(str(row[0],": ",profile)).is_equal(int(row[1]))
-		assert_bool(profile.limited).is_equal(int(row[1])<15)
-	var early:=Chapters.derive(200.0*YEAR,["reinforced_concrete"])
-	assert_int(int(early.design)).is_equal(1)
+func test_aging_without_knowledge_cannot_change_even_the_room_layout()->void:
+	var first:=Chapters.derive(0.0,[])
+	for year in [1,199,200,201,700,1500,3000,1000000]:
+		assert_dict(Chapters.derive(float(year)*YEAR,[])).is_equal(first)
+	assert_int(int(first.design)).is_equal(0)
+	assert_bool(first.limited).is_false()
 
 func test_acquiring_construction_never_removes_an_existing_room_capability()->void:
 	var known:Array=["central_hall_houses","paper_making","telephone_circuits"]
@@ -86,23 +44,23 @@ func test_acquiring_construction_never_removes_an_existing_room_capability()->vo
 		assert_bool(profile.capabilities.telephone).is_true()
 		previous=int(profile.design)
 
-func test_home_and_foreign_hosts_share_calendar_but_keep_their_own_knowledge()->void:
+func test_home_and_foreign_hosts_keep_their_own_progression_regardless_of_calendar()->void:
 	Voice.knowledge_override["player"]=["ashlar_masonry","paper_making"]
 	Voice.knowledge_override["neighbours"]=["precast_panel_housing","telephone_circuits"]
 	GameState.elapsed_days=2600.0*YEAR
 	var home:=Chapters.for_owner()
 	var foreign:=Chapters.for_owner("neighbours")
-	assert_int(int(home.index)).is_equal(13)
-	assert_int(int(foreign.index)).is_equal(13)
+	assert_int(int(home.index)).is_equal(3)
+	assert_int(int(foreign.index)).is_equal(15)
 	assert_int(int(home.design)).is_equal(3)
-	assert_int(int(foreign.design)).is_equal(13)
+	assert_int(int(foreign.design)).is_equal(15)
 	assert_bool(home.capabilities.paper).is_true()
 	assert_bool(foreign.capabilities.paper).is_false()
 	assert_bool(home.capabilities.telephone).is_false()
 	assert_bool(foreign.capabilities.telephone).is_true()
 	GameState.elapsed_days=2800.0*YEAR
-	assert_int(int(Chapters.for_owner().renewal)).is_equal(14)
-	assert_int(int(Chapters.for_owner("neighbours").renewal)).is_equal(14)
+	assert_dict(Chapters.for_owner()).is_equal(home)
+	assert_dict(Chapters.for_owner("neighbours")).is_equal(foreign)
 
 func test_calendar_reads_do_not_grant_discoveries_or_change_government_state()->void:
 	GameState.known_discoveries.assign(["kingship","dynastic_succession","formal_archives","written_law_code"])
@@ -131,11 +89,11 @@ func test_modern_rooms_keep_actual_monarchical_and_assembly_institutions_distinc
 	assert_str(String(monarchy.lean)).is_equal("throne")
 	assert_str(String(assembly.lean)).is_equal("assembly")
 
-func test_existing_civic_rooms_remain_valid_without_new_construction_save_fields()->void:
+func test_civic_titles_alone_do_not_invent_building_knowledge()->void:
 	for row:Array in [["citizen_assembly",6],["chancery_court",9],["privy_state_council",11],["ministerial_cabinet",13],["executive_council",15]]:
 		var record:=Stages.stage(String(row[0]))
 		var profile:=Chapters.derive(3000.0*YEAR,[],record)
-		assert_int(int(profile.design)).is_equal(int(row[1]))
+		assert_int(int(profile.design)).is_equal(0)
 		assert_bool(profile.capabilities.computer).is_false()
 		assert_bool(profile.capabilities.electricity).is_false()
 
@@ -146,8 +104,6 @@ func test_every_construction_hardware_and_stage_anchor_exists_in_the_live_catalo
 	for group:Array in Chapters.CAPABILITIES.values():anchors.append_array(group)
 	for id in anchors:
 		assert_bool(DiscoverySystem.catalog_by_id.has(String(id))).override_failure_message("Unknown court chapter discovery: %s" % id).is_true()
-	for id in Chapters.STAGE_CEILINGS:
-		assert_bool(String(id) in Stages.ids()).override_failure_message("Unknown court chapter civic stage: %s" % id).is_true()
 
 func test_isolated_future_equipment_does_not_upgrade_the_building()->void:
 	for id in ["typewriter","telephone_circuits","filament_lamp_works","fluorescent_lighting","refrigerated_air_conditioning","stored_program_computer","desk_computers","flat_panel_displays","radio_broadcasting"]:
@@ -230,7 +186,7 @@ func test_default_overview_uses_the_chapter_but_explicit_civic_fixtures_stay_exa
 	Voice.knowledge_override["player"]=["reinforced_concrete","national_income_accounts","labor_ministry"]
 	var actual:Control=auto_free(Backdrop.new());actual.configure(4,false)
 	assert_str(String(actual.scene)).is_equal("government")
-	assert_int(int(actual.chapter.design)).is_equal(15)
+	assert_int(int(actual.chapter.design)).is_equal(14)
 	assert_str(Backdrop.stage_place_name()).is_equal(String(Chapters.for_owner().name))
 	var pinned:Control=auto_free(Backdrop.new());pinned.configure(4,false,"feudal_hall")
 	assert_str(String(pinned.scene)).is_equal("great_hall")
@@ -239,7 +195,7 @@ func test_default_overview_uses_the_chapter_but_explicit_civic_fixtures_stay_exa
 
 func test_medieval_assembly_overview_does_not_introduce_a_throne()->void:
 	GameState.elapsed_days=1800.0*YEAR
-	Voice.knowledge_override["player"]=["reinforced_concrete","free_adult_assembly","annual_elected_magistrates"]
+	Voice.knowledge_override["player"]=["chancery_enrolment_rolls","free_adult_assembly","annual_elected_magistrates"]
 	var actual:Control=auto_free(Backdrop.new());actual.configure(3,false)
 	assert_str(String(actual.chapter.lean)).is_equal("assembly")
 	assert_str(String(actual.scene)).is_equal("commune_hall")

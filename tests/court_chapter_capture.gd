@@ -1,5 +1,5 @@
 extends "res://tests/audience_modal_probe.gd"
-## Private-desktop diagnostic of the real room/actor renderer at all boundaries.
+## Private-desktop diagnostic of the real room/actor renderer at all knowledge milestones.
 
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
@@ -18,10 +18,10 @@ const ADDITIONS:=[[],["central_hall_houses","plain_weaving"],
 	["great_hall_of_justice"],["chancery_enrolment_rolls","belfry_town_halls"],
 	["secretaries_of_state","privy_council_minutes","screw_press_printing"],
 	["sash_windows","cabinet_first_minister"],
-	["ministry_office_block","single_minister_departments","appointed_department_prefects"],
-	["typewriter","radiator_central_heating"],
+	["single_minister_departments","appointed_department_prefects"],
+	["ministry_office_block","typewriter","radiator_central_heating"],
 	["national_income_accounts","labor_ministry","telephone_circuits","electric_street_lighting","fluorescent_lighting","reinforced_concrete"],
-	["desk_computers","flat_panel_displays","refrigerated_air_conditioning"]]
+	["precast_panel_housing","desk_computers","flat_panel_displays","refrigerated_air_conditioning"]]
 
 func _ready()->void:
 	capture=DisplayServer.get_name()!="headless"
@@ -47,15 +47,15 @@ func _ready()->void:
 		known.append_array(ADDITIONS[index])
 		if not selected.is_empty() and not index in selected:continue
 		if reference:known=Reference.known_at(index*200)
-		GameState.elapsed_days=float(index*200)*365.0
-		# A dated capability reference is still not a simulated campaign. Use
-		# one actual knowledge snapshot throughout its court presentation.
+		GameState.elapsed_days=float(index*200)*365.0 if reference else 0.0
+		# Default specimens share day zero and differ only in known practices.
+		# Optional dated references are prepared snapshots, not simulated campaigns.
 		GameState.known_discoveries.assign(known)
 		Voice.knowledge_override.clear()
 		var chapter:=Chapters.for_owner()
 		if not reference and int(chapter.design)!=index:_fail("wrong chapter "+str(chapter))
 		var profile:=Presentation.for_owner()
-		print("COURT_CAPTURE_REFERENCE year=%d room=%s outfit=%s known=%d reference=%s" % [index*200,chapter.set_kind,profile.outfit,known.size(),reference])
+		print("COURT_CAPTURE_REFERENCE year=%d room=%s outfit=%s known=%d reference=%s" % [int(GameState.elapsed_days/365.0),chapter.set_kind,profile.outfit,known.size(),reference])
 		var stage:=Stage.new()
 		stage.facts={"chapter":chapter,"presentation":profile,"presentations":{"player":profile},"layout":"home"}
 		var set_facts:=CourtSet.facts_from_game()
@@ -74,7 +74,7 @@ func _ready()->void:
 		if not stage.court_set.has_hearth():
 			if stage.court_set.fire_light!=null or stage.court_set.shimmer!=null:_fail("phantom hearth in "+str(chapter.set_kind))
 		if stage.court_set.indoors() and (stage.court_set.snowfall!=null or not stage.court_set.breaths.is_empty()):_fail("indoor winter particles in "+str(chapter.set_kind))
-		await _capture_stage(stage,"%02d-year-%04d-audience" % [index,index*200])
+		await _capture_stage(stage,"%02d-year-%04d-audience" % [index,int(GameState.elapsed_days/365.0)])
 		if atmosphere_review:await _review_atmosphere(stage,index)
 		if acting_review and index in [0,7,9,12,15]:
 			await _review_actions(stage,index)
@@ -83,7 +83,7 @@ func _ready()->void:
 		stage.camera.look_at(Vector3(0,1,-1),Vector3.UP)
 		stage.camera.fov=54
 		await _frames(3)
-		await _capture_stage(stage,"%02d-year-%04d-room" % [index,index*200])
+		await _capture_stage(stage,"%02d-year-%04d-room" % [index,int(GameState.elapsed_days/365.0)])
 		if index in [7,9,12,15]:
 			stage.frame_cast(0.0);stage.arrive(["main"])
 			await get_tree().create_timer(0.8).timeout

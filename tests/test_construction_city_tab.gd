@@ -283,11 +283,14 @@ func test_era_says_what_the_next_era_still_needs()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
 	var era:Dictionary=_rows(_page())["Building era"]
 	assert_str(String(era.value)).is_equal("Foothold")
-	# Hamlet needs a year's age, three finished works and four makers.
-	assert_str(String(era.detail)).contains("Hamlet needs the town to be a year old")
+	# Hamlet needs adopted framing, finished works and makers.
+	assert_str(String(era.detail)).contains("adoption of")
+	assert_bool(String(era.detail).contains("old (")).is_false()
 	assert_str(String(era.detail)).contains("3 finished works (2 now)")
 	assert_str(String(era.detail)).contains("4 makers (3 now)")
-	GameState.elapsed_days=400;GameState.population_allocations.Crafting=5
+	GameState.elapsed_days=1;GameState.population_allocations.Crafting=5
+	GameState.known_discoveries.append("framed_construction")
+	GameState.discovery_adoption["framed_construction"]=0.2
 	GameState.settlement_completed.append("Storage Pits")
 	assert_str(String(_rows(_page())["Building era"].sub)).is_equal("Rising toward Hamlet")
 
@@ -326,67 +329,14 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 	body.queue_free()
 
 # --------------------------------------------------------------------------
-# The era checks are the rule they replaced
+# Changing the calendar alone cannot change the displayed milestone requirements.
 # --------------------------------------------------------------------------
 
-func test_era_checks_match_the_rule_they_replaced()->void:
+func test_era_support_and_missing_practices_do_not_depend_on_calendar()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
-	var rng:=RandomNumberGenerator.new();rng.seed=4242
-	var works:=["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area"]
-	for trial in 400:
-		GameState.population_allocations={"Food":20,"Construction":rng.randi_range(0,12),"Crafting":rng.randi_range(0,800)*(1 if rng.randf()<0.5 else 0)+rng.randi_range(0,30),
-			"Logistics":rng.randi_range(0,500)*(1 if rng.randf()<0.5 else 0)+rng.randi_range(0,20),"Administration":rng.randi_range(0,300)*(1 if rng.randf()<0.5 else 0)+rng.randi_range(0,10)}
-		GameState.settlement_completed.assign(works.slice(0,rng.randi_range(1,works.size())) if rng.randf()<0.8 else ["Hearth Circle"])
-		GameState.simulation_metrics["labor_efficiency"]=rng.randf_range(0.3,0.7)
-		GameState.simulation_metrics["logistics"]=rng.randf_range(0.0,0.4)
-		var nuclei:Array[Dictionary]=[]
-		for index in rng.randi_range(1,3):nuclei.append({"id":index+1,"active":rng.randf()<0.7})
-		GameState.settlement_nuclei=nuclei
-		var day:=rng.randi_range(0,365*1600) if rng.randf()<0.5 else rng.randi_range(0,365*12)
-		assert_int(SettlementModel._supported_fabric_tier(day)).override_failure_message("trial %d" % trial).is_equal(_old_supported(day))
-
-static func _old_age_ceiling(age_years:float)->int:
-	if age_years<0.25: return 0
-	if age_years<1.0: return 1
-	if age_years<3.0: return 2
-	if age_years<10.0: return 3
-	if age_years<25.0: return 4
-	if age_years<40.0: return 5
-	if age_years<80.0: return 6
-	if age_years<125.0: return 7
-	if age_years<175.0: return 8
-	if age_years<300.0: return 9
-	if age_years<700.0: return 10
-	if age_years<1500.0: return 11
-	return 12
-
-## SettlementModel._supported_fabric_tier as it was written before the era
-## checks, kept here as the oracle.
-static func _old_supported(day:int)->int:
-	var age_ceiling:=_old_age_ceiling(SettlementModel._settlement_age_years(day))
-	var builders:=int(WorldSimulation.state.effective_workers("Construction"))
-	var craftspeople:=int(WorldSimulation.state.population_allocations.get("Crafting",0))
-	var logisticians:=int(WorldSimulation.state.population_allocations.get("Logistics",0))
-	var administrators:=int(WorldSimulation.state.population_allocations.get("Administration",0))
-	var support:=0
-	if "Lean-to Shelters" in WorldSimulation.state.settlement_completed and builders>=4: support=1
-	if WorldSimulation.state.settlement_completed.size()>=3 and craftspeople>=4: support=2
-	if craftspeople>=8 and logisticians>=4: support=3
-	if craftspeople>=14 and logisticians>=8 and SettlementModel._active_nuclei()>=2: support=4
-	var logistics_metric:=float(WorldSimulation.state.simulation_metrics.get("logistics",0.0))
-	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.0))
-	var construction_effect:=WorldSimulation.discovery.effect("construction_rate")
-	var route_effect:=WorldSimulation.discovery.effect("route_speed")
-	var craft_effect:=WorldSimulation.discovery.effect("craft_output")
-	if craftspeople>=24 and logisticians>=12 and labor_efficiency>=0.48: support=5
-	if craftspeople>=36 and logisticians>=20 and administrators>=4 and logistics_metric+route_effect>=0.24: support=6
-	if craftspeople>=54 and logisticians>=30 and administrators>=8 and construction_effect+craft_effect>=0.035: support=7
-	if craftspeople>=80 and logisticians>=48 and administrators>=16 and construction_effect+route_effect+craft_effect>=0.075: support=8
-	if craftspeople>=120 and logisticians>=72 and administrators>=28 and construction_effect+route_effect+craft_effect>=0.13: support=9
-	var standardization:=WorldSimulation.discovery.effect("standardization")
-	var state_capacity:=WorldSimulation.discovery.effect("state_capacity")
-	var tool_quality:=WorldSimulation.discovery.effect("tool_quality")
-	if craftspeople>=200 and logisticians>=120 and administrators>=60 and construction_effect+route_effect+craft_effect+standardization>=0.22: support=10
-	if craftspeople>=350 and logisticians>=220 and administrators>=120 and construction_effect+route_effect+craft_effect+standardization+tool_quality>=0.34: support=11
-	if craftspeople>=600 and logisticians>=400 and administrators>=250 and construction_effect+route_effect+craft_effect+standardization+tool_quality+state_capacity>=0.50: support=12
-	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
+	var before:Dictionary=_rows(_page())["Building era"]
+	var supported:=SettlementModel._supported_fabric_tier(1)
+	for years in [0,1,200,700,1500,10000]:
+		GameState.elapsed_days=years*365.0
+		assert_int(SettlementModel._supported_fabric_tier(int(GameState.elapsed_days))).is_equal(supported)
+		assert_str(String(_rows(_page())["Building era"].detail)).is_equal(String(before.detail))

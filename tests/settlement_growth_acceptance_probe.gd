@@ -230,10 +230,8 @@ func _stress_growth() -> void:
 	await _sample_frames("stress-129-steady", false)
 
 func _era_matrix() -> void:
-	# Independent capability specimens spanning the entire supported history.
-	# Time alone is insufficient: all inputs to the model's actual selector are
-	# supplied and recorded, and knowledge is limited to eligible catalogue dates.
-	var years := [0, 1, 3, 10, 25, 40, 80, 125, 175, 300, 600, 2600, 3000]
+	# Independent completed-building specimens at the same date. Adopted
+	# practices and paid city development select each form, never elapsed years.
 	var rows: Array = []
 	GameState.settlement_nuclei = [{"id": 1, "position": Vector2.ZERO, "active": true}, {"id": 2, "position": Vector2(.27, .02), "active": true}]
 	GameState.population_allocations["Construction"] = 100
@@ -242,17 +240,16 @@ func _era_matrix() -> void:
 	GameState.population_allocations["Administration"] = 400
 	GameState.simulation_metrics["labor_efficiency"] = .9
 	GameState.simulation_metrics["logistics"] = .9
-	for generation in years.size():
+	for generation in SettlementModel.FABRIC_ERA_NAMES.size():
 		# These are independent specimens, unlike the persistent main sequence.
 		Ground.clear()
-		var year: int = years[generation]
+		var year: int = 0
 		GameState.elapsed_days = year * 365.0
 		GameState.settlement_completed.assign(["Hearth Circle"] if generation == 0 else ["Hearth Circle", "Lean-to Shelters", "Storage Pits"])
 		GameState.city_form = {"tier": float(generation), "condition": .9}
 		GameState.known_discoveries.clear()
 		GameState.discovery_adoption.clear()
 		for entry: Dictionary in DiscoverySystem.catalog:
-			if float(entry.get("earliest_year", INF)) > year: continue
 			var id := String(entry.get("id", ""))
 			if id.is_empty(): continue
 			GameState.known_discoveries.append(id)
@@ -278,7 +275,7 @@ func _era_matrix() -> void:
 		_check(int(plot.get("fabric_generation", -1)) == chosen, "Era %d construction preserves the model-selected generation" % generation)
 		_check(not stats.get("plot_geometry", {}).is_empty(), "Era %d has actual live plot geometry" % generation)
 		_check(int(stats.get("building_instances", 0)) + int(stats.get("fallback_roof_vertices", 0)) > 0, "Era %d renders a building or roof, beyond parcel ground alone" % generation)
-		rows.append({"year": year, "requested_generation": generation, "selected_generation": chosen, "form": plot.get("form", ""), "kit_kind": Fixture.Kit.kind(plot), "style": Fixture.Kit.style_for(plot), "storeys": plot.get("storeys", 1), "building_instances": stats.get("building_instances", 0), "fallback_roof_vertices": stats.get("fallback_roof_vertices", 0), "eligible_known_discoveries": GameState.known_discoveries.size(), "capability_inputs": SettlementModel.fabric_era_inputs(), "rendered_plot_patches": stats.get("plot_geometry", {})})
+		rows.append({"year": year, "requested_generation": generation, "selected_generation": chosen, "form": plot.get("form", ""), "kit_kind": Fixture.Kit.kind(plot), "style": Fixture.Kit.style_for(plot), "storeys": plot.get("storeys", 1), "building_instances": stats.get("building_instances", 0), "fallback_roof_vertices": stats.get("fallback_roof_vertices", 0), "adopted_discoveries": GameState.known_discoveries.size(), "capability_inputs": SettlementModel.fabric_era_inputs(), "rendered_plot_patches": stats.get("plot_geometry", {})})
 	report["era_matrix"] = rows
 
 func _setup_scene() -> void:
