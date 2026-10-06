@@ -1008,11 +1008,25 @@ func set_scout_geography_authority(land_query:Callable)->void:
 	_audit_active_scout_land_route()
 
 
+## Land answers already asked, by the exact point (the ground never changes
+## under a world; routes quoted again sample the same points). Never saved;
+## cleared when the authority changes or the cache grows past its bound.
+var _scout_land_cache:Dictionary={}
+var _scout_land_cache_owner:=0
+const SCOUT_LAND_CACHE_LIMIT:=200000
+
 func _scout_land_at(position:Vector2)->bool:
 	if absf(position.x)>CIVILIZATION_WORLD_RADIUS_X_KM or absf(position.y)>CIVILIZATION_WORLD_RADIUS_Z_KM:
 		return false
 	if not scout_land_authority.is_valid(): return false
-	return bool(scout_land_authority.call(position))
+	var owner:=hash([scout_land_authority.get_object_id(),scout_land_authority.get_method(),int(WorldSimulation.state.world_seed)])
+	if owner!=_scout_land_cache_owner or _scout_land_cache.size()>=SCOUT_LAND_CACHE_LIMIT:
+		_scout_land_cache.clear();_scout_land_cache_owner=owner
+	var known:Variant=_scout_land_cache.get(position)
+	if known!=null: return bool(known)
+	var land:=bool(scout_land_authority.call(position))
+	_scout_land_cache[position]=land
+	return land
 
 
 func _scout_segment_is_land(start:Vector2,finish:Vector2,sample_step_km:float=SCOUT_LAND_SAMPLE_KM)->bool:

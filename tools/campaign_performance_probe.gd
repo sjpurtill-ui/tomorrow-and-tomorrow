@@ -20,6 +20,8 @@ func _ready() -> void:
 	for node in get_tree().root.get_children():
 		if node!=self:node.set_process(false);node.set_physics_process(false)
 	await get_tree().process_frame
+	var Trace:=preload("res://scripts/performance_trace.gd")
+	Trace.enabled=true
 	var start_day := int(GameState.elapsed_days)
 	var elapsed: Array[float] = []
 	for index in DAYS:
@@ -30,6 +32,11 @@ func _ready() -> void:
 		for id: String in WorldSimulation.actors:
 			if int(WorldSimulation.actors[id].last_day)!=day:failures.append("Missing opponent day "+id)
 		await get_tree().process_frame
+	Trace.enabled=false
+	var rows:Array=[]
+	for key in Trace.totals: rows.append([float(Trace.totals[key].microseconds)/1000.0/DAYS,int(Trace.totals[key].calls)/DAYS,String(key)])
+	rows.sort_custom(func(a,b):return a[0]>b[0])
+	for row in rows.slice(0,90): print("PROFILE %8.2f ms/day %7d calls/day %s" % row)
 	var saved := SaveSystem.save_game("daily_cost_"+mode)
 	if not bool(saved.get("ok",false)):failures.append("Could not save replay outcome")
 	if mode=="optimized":

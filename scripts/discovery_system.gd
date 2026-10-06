@@ -12,7 +12,7 @@ const SocietyModelScript = preload("res://scripts/society_model.gd")
 const TechnologyEras=preload("res://scripts/technology_eras.gd")
 const Research600=preload("res://scripts/research_600_catalog.gd")
 ## The last day free teams read questions far ahead of their age
-## (_place_free_teams, at most once in each block of SWITCH_CHECK_DAYS days).
+## (_place_free_teams, at most once in each block of FAR_LOOK_DAYS days).
 ## The name is older: saves hold it.
 var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
@@ -1030,7 +1030,12 @@ func _line_placements(line:String,current_day:int,busy:Dictionary,tier:int,lendi
 		var channel:=_channel_key(line,String(sub_variant))
 		if active.has(channel) and channel!=also: continue
 		free.append(channel)
-		var candidate:=_best_free_candidate(channel,current_day,busy,tier)
+		var memo_key:="%s|%d" % [channel,mini(tier,2)]
+		var candidate:Dictionary
+		if _placement_memo.has(memo_key): candidate=_placement_memo[memo_key]
+		else:
+			candidate=_best_free_candidate(channel,current_day,busy,tier)
+			_placement_memo[memo_key]=candidate
 		if candidate.is_empty(): continue
 		own=true
 		if team_tier(candidate)!=tier: continue
@@ -1069,6 +1074,10 @@ func _lines_by_turn(lines:Dictionary,turn_keys:Dictionary)->Array:
 ## order, so a scan reads a band further ahead only when nothing nearer is open
 ## anywhere. No further than `max_rank`; {} when nothing is open.
 func _next_team_placement(lines:Dictionary,turns:Dictionary,held:Dictionary,current_day:int,busy:Dictionary,also:String="",max_rank:int=TEAM_TIER_LAST,skip_channels:Dictionary={})->Dictionary:
+	# Within one placement nothing a channel's best question depends on moves
+	# (the day, the busy questions, what is known): each channel is read once
+	# per band and each line's foundation once, not again for every rank.
+	_placement_memo.clear()
 	var turn_keys:=_turn_keys(lines,turns,held,current_day)
 	var groups:=_lines_by_turn(lines,turn_keys)
 	var lending:=_lending_lines(also)
@@ -1082,6 +1091,10 @@ func _next_team_placement(lines:Dictionary,turns:Dictionary,held:Dictionary,curr
 						if best.is_empty() or float(row.score)>float(best.score) or (is_equal_approx(float(row.score),float(best.score)) and String(row.channel)<String(best.channel)): best=row
 			if not best.is_empty(): return best
 	return {}
+
+## A channel's best free question per band, kept for one placement
+## (_next_team_placement): {"channel|band": candidate}. Never saved.
+var _placement_memo:Dictionary={}
 
 func _placement(line:String,channel:String,discovery:Dictionary)->Dictionary:
 	return {"line":line,"channel":channel,"id":String(discovery.get("id","")),"tier":team_tier(discovery),"score":_candidate_score(discovery)}
@@ -1114,7 +1127,7 @@ func _release_extra_teams(count:int)->void:
 ## Free teams take up questions (see the section's notes). A question the player
 ## chose is taken up first and may hold a team beyond the count. Questions of
 ## their age and near it are read every day; free teams read further ahead once
-## in each block of SWITCH_CHECK_DAYS days, on a day a question is proven, or
+## in each block of FAR_LOOK_DAYS days, on a day a question is proven, or
 ## when `full` asks: such a look reads every line's questions, and on the days
 ## between it would find nothing new. The rule reads only the saved state and
 ## the calendar, so a loaded game places its teams as the saved one would have.
@@ -1139,29 +1152,46 @@ func _place_free_teams(current_day:int,count:int,full:=false)->void:
 	var log:Array=WorldSimulation.state.discovery_log
 	var proved_today:=not log.is_empty() and log[0] is Dictionary and int((log[0] as Dictionary).get("day",-1))==current_day
 	var reach:=1
-	if full or proved_today or floori(float(current_day)/SWITCH_CHECK_DAYS)!=floori(float(_research_600_return_day)/SWITCH_CHECK_DAYS):
+	if full or proved_today or floori(float(current_day)/FAR_LOOK_DAYS)!=floori(float(_research_600_return_day)/FAR_LOOK_DAYS):
 		reach=TEAM_TIER_LAST
 		_research_600_return_day=current_day
+	# A free team that found no work keeps looking only when something it
+	# reads has moved: a question proven or held, the plan, a chosen target,
+	# the band it may reach, or a new week (questions come of age with time).
+	var idle_key:=hash([WorldSimulation.state.known_discoveries.size(),active.duplicate(),WorldSimulation.state.research_subcategory_allocations,WorldSimulation.state.research_targets,reach,capacity,floori(float(current_day)/IDLE_LOOK_DAYS)])
+	if not full and idle_key==_idle_look_key: return
 	var busy:=_busy_ids()
 	var held:=_teams_by_line()
 	var turns:=_team_turns(lines,held,current_day)
 	while active.size()<capacity:
 		var pick:=_next_team_placement(lines,turns,held,current_day,busy,"",reach)
-		if pick.is_empty(): break
+		if pick.is_empty():
+			_idle_look_key=idle_key
+			break
 		active[String(pick.channel)]=String(pick.id)
 		busy[String(pick.id)]=true
 		_count_turn(held,turns,String(pick.line),1)
 
-## Once a month each team working ahead of its age looks again: a question of
+## A free team that found nothing looks again at most this often (days), or
+## at once when anything it reads moves (_place_free_teams). Never saved: a
+## loaded game looks on its first day.
+const IDLE_LOOK_DAYS:=7
+## Free teams read work further ahead once in each block of this many days
+## (or on a day a question is proven).
+const FAR_LOOK_DAYS:=30
+var _idle_look_key:=0
+
+## Once a season each team working ahead of its age looks again: a question of
 ## its age on any followed line takes the team; failing that, for a team more
 ## than FAR_BANDS[1] years ahead, the work a free team would take when it
 ## stands two bands nearer its age or more and is SWITCH_MARGIN less work;
 ## failing that, a much quicker question (SWITCH_MARGIN less work) in its own
 ## channel. The progress made stays with the question for later. A question the
-## player chose keeps its team. The teams look together on the first day of each
-## block of SWITCH_CHECK_DAYS days, so the month's reading of every line is done
-## once; a team placed during a block first looks in the next.
-const SWITCH_CHECK_DAYS:=30
+## player chose keeps its team. Each team looks once a season, on its own day
+## of the block of SWITCH_CHECK_DAYS days (the looks were a monthly stall when
+## every team looked on one day); a team placed during a block first looks in
+## the next.
+const SWITCH_CHECK_DAYS:=90
 const SWITCH_MARGIN:=1.5
 ## The day each desk's team last looked again ({channel: day}).
 var _switch_checked:Dictionary={}
@@ -1175,10 +1205,12 @@ func _switch_to_quicker_questions(current_day:int)->void:
 	var ahead:Array=[]
 	for channel_variant in active:
 		var channel:=String(channel_variant)
-		# Once in each block of SWITCH_CHECK_DAYS days; a desk new to the record
-		# first looks in the next block.
+		# Once in each block of SWITCH_CHECK_DAYS days, each desk on its own
+		# day of the block (spread by the desk, so a people's teams do not all
+		# look on one day); a desk new to the record first looks in the next.
+		var offset:=absi(hash(channel))%SWITCH_CHECK_DAYS
 		if not _switch_checked.has(channel): _switch_checked[channel]=current_day
-		if floori(float(current_day)/SWITCH_CHECK_DAYS)==floori(float(int(_switch_checked[channel]))/SWITCH_CHECK_DAYS): continue
+		if floori(float(current_day+offset)/SWITCH_CHECK_DAYS)==floori(float(int(_switch_checked[channel])+offset)/SWITCH_CHECK_DAYS): continue
 		_switch_checked[channel]=current_day
 		var current:=discovery_definition(String(active[channel]))
 		if current.is_empty() or _pinned(channel): continue
