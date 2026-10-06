@@ -21,6 +21,8 @@ var last_refresh_usec:=0
 var last_process_usec:=0
 var max_refresh_usec:=0
 var clearing_revision:=0
+var _clearing_cache_revision:=-1
+var _clearing_candidates:Array[Dictionary]=[]
 
 func refresh(owner_terrain:Node3D)->void:
 	terrain=owner_terrain
@@ -83,6 +85,7 @@ func refresh(owner_terrain:Node3D)->void:
 			entry.snapshot=snapshot;entry.source_key=source_key;captures+=1
 		if drape_changed:entry.node.invalidate(true)
 		elif fog_changed:entry.node.invalidate(false)
+		entry.node.ground_grid=terrain.river_terrain_grid
 		var old_plan_key:int=entry.node.last_plan_signature
 		entry.node.request(entry.snapshot,entry.style)
 		if old_plan_key!=entry.node.last_plan_signature:clearing_revision+=1
@@ -147,16 +150,42 @@ func woodland_ledgers()->Array:
 ## Presentation clearings for sampled farm ground, never harvested sites.
 ## They share the existing canopy budget and stay out of the stump/detail layer.
 func canopy_clearings(center:Vector2,limit:int=16)->PackedVector4Array:
-	var points:Array[Vector4]=[]
-	for entry:Dictionary in layers.values():
-		for home:Dictionary in entry.node.plan.get("homesteads",[]):
-			var at:Vector2=home.position
-			points.append(Vector4(at.x,at.y,float(home.field_radius_km)*1.2,0.08))
-	points.sort_custom(func(a:Vector4,b:Vector4)->bool:return Vector2(a.x,a.y).distance_squared_to(center)<Vector2(b.x,b.y).distance_squared_to(center))
+	if _clearing_cache_revision!=clearing_revision:
+		_clearing_cache_revision=clearing_revision
+		_clearing_candidates.clear()
+		for entry:Dictionary in layers.values():
+			for kind:String in ["homesteads","herders"]:
+				for home:Dictionary in entry.node.plan.get(kind,[]):
+					var layout:=PLAN.homestead_layout(home)
+					var at:Vector2=layout.yard_center
+					_clearing_candidates.append({"anchor":at,"area":Vector4(at.x,at.y,float(layout.yard_radius_km),0.01)})
+					for field:Dictionary in layout.fields:
+						var along:=Vector2.from_angle(float(field.angle))
+						var across:=along.orthogonal()
+						var segment_half:=float(field.half_length_km)/3.0
+						var half_width:=float(field.half_width_km)
+						var radius:=maxf(half_width,segment_half)*1.15
+						# Cover each rotated segment through the mask's fully
+						# cleared interior, including its scalloped feather edge.
+						# L4 <= .65 leaves room for the maximum .15 scallop.
+						for side in [-1.0,1.0]:
+							var corner:Vector2=(along*segment_half+across*half_width*side).abs()
+							var squared:=corner*corner
+							radius=maxf(radius,sqrt(sqrt(squared.dot(squared)))/0.65)
+						for cell in 3:
+							var point:Vector2=field.center+along*segment_half*float((cell-1)*2)
+							_clearing_candidates.append({"anchor":at,"area":Vector4(point.x,point.y,radius,0.0)})
+	var points:=_clearing_candidates.duplicate()
+	points.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Vector2(a.area.x,a.area.y).distance_squared_to(center)<Vector2(b.area.x,b.area.y).distance_squared_to(center))
 	var accepted:=PackedVector4Array()
-	for point:Vector4 in points:
+	var land:Dictionary={}
+	for candidate:Dictionary in points:
 		if accepted.size()>=maxi(0,limit):break
-		if terrain!=null and not _drawn_land(Vector2(point.x,point.y)):continue
+		var point:Vector4=candidate.area
+		if terrain!=null:
+			var anchor:Vector2=candidate.anchor
+			if not land.has(anchor):land[anchor]=_drawn_land(anchor)
+			if not bool(land[anchor]) or not _drawn_land(Vector2(point.x,point.y)):continue
 		accepted.append(point)
 	return accepted
 

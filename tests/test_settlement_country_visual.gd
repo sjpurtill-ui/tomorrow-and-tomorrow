@@ -193,3 +193,34 @@ func test_bounded_country_planning_cost_reports_real_scan_size()->void:
 	for iteration in 10:Plan.build(snapshot)
 	var builds:=Time.get_ticks_usec()-started
 	print("COUNTRY_480_DEPOSITS_SIGNATURE_USEC=%.2f BUILD_USEC=%.2f" % [float(signatures)/100.0,float(builds)/10.0])
+
+func test_compact_farm_ground_does_not_veil_the_house_walls()->void:
+	var visual=_visual()
+	var root:Node3D=auto_free(Node3D.new())
+	var record:={"id":"farm:repair","position":Vector2(40,60),"group":"homesteads","kind":"homestead","field_radius_km":0.14,"rotation":0.3,"buildings":2,"track_from":Vector2(39.8,60)}
+	visual._build_patch(root,record,{"known":[],"style":{},"fabric":{},"road_tier":0})
+	var ground:MeshInstance3D=root.get_node("WorkedEarth")
+	var vertices:PackedVector3Array=ground.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var highest:=0.0
+	for point:Vector3 in vertices:highest=maxf(highest,point.y)
+	var homes:MultiMeshInstance3D=root.get_node("ScatteredHomes")
+	for transform:Transform3D in homes.get_meta("source_transforms"):
+		assert_float(highest).is_less(transform.origin.y)
+		assert_float(Vector2(transform.origin.x,transform.origin.z).distance_to(record.position)).is_less(0.025)
+	assert_object(root.get_node_or_null("SettlementGroundShadows/FarmhouseShadow")).is_not_null()
+	assert_object(root.get_node_or_null("Farm_woodpile")).is_not_null()
+	assert_object(root.get_node_or_null("CountryChart_field")).is_not_null()
+	var layout:Dictionary=root.get_meta("country_layout")
+	assert_int(layout.fields.size()).is_equal(4)
+	assert_float(layout.envelope_radius_km).is_less_equal(0.18)
+
+func test_off_view_ground_can_be_empty_without_a_null_surface_cast()->void:
+	var visual=_visual()
+	visual.ground_grid=Vector4(0,0,1,9)
+	var root:Node3D=auto_free(Node3D.new())
+	var record:={"id":"farm:outside","position":Vector2(40,60),"group":"homesteads","kind":"homestead","field_radius_km":0.14,"rotation":0.3,"buildings":1,"track_from":Vector2(39.8,60)}
+	visual._build_patch(root,record,{"known":[],"style":{},"fabric":{},"road_tier":0})
+	assert_object(root.get_node_or_null("WorkedEarth")).is_null()
+	assert_object(root.get_node_or_null("ScatteredHomes")).is_not_null()
+	assert_object(root.get_node_or_null("CountryChart_field")).is_not_null()
+	assert_int(visual.drape_budget_skips).is_equal(0)

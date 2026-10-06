@@ -138,7 +138,7 @@ static func _homesteads(snapshot:Dictionary,core:float,worked:float,people:float
 			if selection>=probability*weight:continue
 			records.append({"id":id,"category":"homestead","kind":"homestead",
 				"position":origin+at,"offset":at,"distance_km":distance,
-				"field_radius_km":lerpf(0.22,0.68,_unit(id+":field")),
+				"field_radius_km":lerpf(0.10,0.18,_unit(id+":field")),
 				"rotation":_unit(id+":angle")*TAU,"buildings":1+(1 if _unit(id+":kin")<0.18 else 0),
 				"road_tier":_country_road_tier(snapshot,t),"rank":selection/maxf(0.001,weight)})
 	records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.rank)<float(b.rank))
@@ -161,12 +161,35 @@ static func _herders(snapshot:Dictionary,worked:float,realm:float,people:float)-
 		var at:=Vector2.from_angle(_unit(id+":angle")*TAU)*distance
 		records.append({"id":id,"category":"herder","kind":"herder",
 			"position":origin+at,"offset":at,"distance_km":distance,
-			"field_radius_km":lerpf(0.12,0.28,_unit(id+":field")),
+			"field_radius_km":lerpf(0.055,0.085,_unit(id+":field")),
 			"rotation":_unit(id+":turn")*TAU,"buildings":1,"road_tier":0,"rank":_unit(id+":take")})
 	records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.rank)<float(b.rank))
 	if records.size()>allowance:records.resize(allowance)
 	records.sort_custom(_nearer)
 	return records
+
+
+## Physical household ground, shared by the field renderer and canopy mask.
+## Four tangential plots leave the central yard and gaps between neighbours
+## open for paths. The envelope is not itself a cleared or cultivated disc.
+## Its seed and dimensions do not depend on population, camera or elapsed day.
+static func homestead_layout(record:Dictionary)->Dictionary:
+	var at:Vector2=record.get("position",Vector2.ZERO)
+	var sparse:=String(record.get("kind",record.get("category",record.get("group","")))) in ["herder","herders"]
+	var id:=String(record.get("id",str(at)))
+	var envelope:=clampf(float(record.get("field_radius_km",0.07 if sparse else 0.14)),0.055 if sparse else 0.10,0.085 if sparse else 0.18)
+	var turn:=float(record.get("rotation",_unit(id+":layout_turn")*TAU))
+	var yard_radius:=0.014 if sparse else 0.025
+	var fields:Array[Dictionary]=[]
+	for index in (1 if sparse else 4):
+		var field_id:="%s:field:%d" % [id,index]
+		var bearing:=turn+float(index)*PI*0.5+lerpf(-0.18,0.18,_unit(field_id+":bearing"))
+		var radial:=envelope*lerpf(0.55,0.75,_unit(field_id+":offset"))
+		fields.append({"id":field_id,"center":at+Vector2.from_angle(bearing)*radial,
+			"half_length_km":maxf(0.012 if sparse else 0.025,radial*lerpf(0.40,0.47,_unit(field_id+":length"))),
+			"half_width_km":maxf(0.006 if sparse else 0.012,radial*lerpf(0.18,0.20,_unit(field_id+":width"))),
+			"angle":bearing+PI*0.5})
+	return {"yard_center":at,"yard_radius_km":yard_radius,"envelope_radius_km":envelope,"fields":fields}
 
 
 static func _country_road_tier(snapshot:Dictionary,outward:float)->int:

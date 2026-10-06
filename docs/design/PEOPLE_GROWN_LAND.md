@@ -1,10 +1,13 @@
 # One people, worked country — visual review branch
 
-Status: **HELD for the user's visual review and incomplete campaign evidence.**
+Status: **HELD: unresolved rendering stall, no visual approval, and incomplete campaign evidence.**
 Worker checkout: `C:/Users/sjpur/tt-people-grown-land`.
 Branch: `codex/people-grown-land`.
 Base: `a3579bb51c3960cc43a6357268af73eb4353294a` (`origin/main` at task start).
 This work is not integrated into the player build.
+The follow-up repair produces readable farm plots in actual GPU captures, but
+a cold site patch takes **1,356.197 ms**. It is not ready for integration.
+No fresh rendered-speed measurement was run for this repair.
 
 ## What the map draws
 
@@ -38,10 +41,13 @@ timber, earthen and stone forms. Rivals use their existing forms and colours.
 Ground is softly painted, irregular, terrain-draped and clipped to revealed,
 buildable land. There is no new lighting or day/night system.
 
-The nearest 16 eligible farm clearings may also enter the existing 32-area
-canopy mask, after the actual woodland sites. This is a presentation-only
-clearing list; it does not add harvested sites or alter resource records.
-The shared mask budget can leave more distant sampled fields under canopy.
+The nearest 16 eligible household clearing cells may also enter the existing
+32-area canopy mask. A farm uses 13 cells: one yard and three along each of its
+four plots. Those cells and the actual woodland sites are sorted together by
+distance before the combined 32-area cap. This is a presentation-only clearing
+list; it does not add harvested sites or alter resource records. The shared
+budget can leave more distant sampled fields under canopy. HUD resource
+descriptions and harvested-site stumps continue to use actual woodland records.
 
 The user's later instruction is absolute: **no people walking around**.
 `map_people_policy.gd` suppresses all human map figures, including workers,
@@ -49,6 +55,53 @@ children, returned scouts, mourners, rite processions, great-work builders and
 boat paddlers. Scout walker icons are removed. Fire, smoke, wildlife, wagons,
 boat hulls and abstract military/chart symbols remain. Population and labour
 simulation continue normally. Court scenes are outside this task.
+
+## Follow-up visual repair
+
+The user rejected the nearly blank 0.8-km homestead view and featureless worked
+site. The initial homestead clearing was roughly **0.53–1.63 km across** around
+one or two metre-sized roofs. The repaired layout has four separate plots and
+a **25-m-radius yard inside a 100–180-m-radius envelope**. Seeded angle and
+distance variation leaves paths and gaps between the plots; surviving
+representatives keep their positions and counts. Herder layouts remain smaller,
+with one plot. Household shadows, woodpiles and knowledge-gated querns provide
+close detail without adding people or new simulation entities.
+
+Country ground ink is now **0.20 m above the sampled terrain**, reduced from
+2.5 m, so it no longer covers the lower parts of the houses. Field strips and
+short yard paths replace the large overlapping washes. Real worked sites now
+have bounded irregular cutting or quarry marks inside their recorded catchment;
+their positions, depletion categories and resource amounts are unchanged.
+Ground triangles are clipped along the actual regional mesh's cell edges and
+alternating diagonals. Each clipping call visits at most 64 intersecting cells
+and scans at most 128 row slabs; large triangles use at most six levels of
+longest-edge bisection. A thin diagonal track counts its intersected row spans,
+not its much larger bounding rectangle. Off-view paint is omitted until the
+next settled camera update. This replaces the recursive height-probe approach
+from an intermediate, rejected repair, but the current cold build still stalls.
+The 20-cm lift covers the measured 11.8-cm planetary-coordinate rounding error;
+house bases remain above the paint. An empty clipped surface is handled safely.
+
+The close-crown shader also had a planetary-coordinate precision bug: its hash
+multiplied large world coordinates before taking fractional parts, collapsing
+the result to zero at the reviewed farm. It therefore retained every crown,
+even where the ground canopy mask showed a clearing. The shader now bounds the
+hash input first and treats zero retention as zero crowns. Complete plot
+footprints, including rotated ends and corners, are covered by the clearing
+cells, with feathered margins outside. Existing crown materials receive mask
+updates without rebuilding tree chunks. Close panning refreshes the nearest
+mask cells every 160 m; broad views retain the 8-km refresh grid. These changes
+do not record fictional felling or change timber availability.
+
+A retained chart layer adds a few field, pasture, woodland or quarry strokes
+at the same admitted records for regional views. Its mesh topology stays fixed;
+the shader sizes the ink from the camera, while houses retain their physical
+metre scale. The implementation uses a nominal 14-pixel diameter with a 4-km
+cap. Actual same-frame chart-on/off GPU comparisons show farm marks 8–12
+pixels wide at 100 km and 7–10 pixels at 300 km. The marks use the map's muted
+brown ink; no town circles, labels or people are added. The shader fades them
+out again at continental spans. Coincident resource records can still overlay
+their different glyphs near the core; visual approval remains the user's.
 
 ## Retention and cost
 
@@ -69,18 +122,40 @@ because the population advances another day inside its visual bucket.
 Measurements and screenshots are in the task's local
 `artifacts/people-grown-land/` directory. Generated images, caches and private
 saves are intentionally excluded from Git. `REVIEW.md` there is the visual
-review index; JSON records carry source-save hashes, exact population/day,
+review index for the original checkpoint; `REPAIR_REVIEW.md` supersedes its
+rejected farm/site images. JSON records carry source-save hashes, exact population/day,
 camera spans, renderer counts and figure audits.
 
-## Verification and measured performance
+## Repair verification and prior-checkpoint performance
 
-74 unique tests pass with no failures, errors or orphan nodes: 30 country
-plan/renderer/manager cases, 35 human-figure and existing map cases, four new
-day-cost/height-sampling regressions, and five existing frame-budget cases.
-Reports 12, 13, 14 (manager rerun) and 15 are retained locally.
+The focused repair checks comprise **60 passing cases**: 17 plan, seven manager,
+13 renderer, four chart, two canopy integration, four close-woods, four
+harvest-detail and nine terrain-clipping cases. They cover stable compact layouts, plot separation,
+land/fog admission, the canopy budget, live crown-material updates and unchanged
+resource records. Canopy coverage checks sample 12,320 points across 40 layouts,
+including plot ends and corners. These tests do not establish final GPU
+approval or rendered playback speed.
+
+The final private GPU run (`repair-ground-final.json`) exited successfully,
+with no runtime or shader errors. All four captures have zero human figures,
+zero pending jobs and zero terrain-clipping budget skips. The farm has four
+fully painted plots. Its cold patch peak is **1,356.197 ms**, attributed to
+`sites:site:player:stone_51`. This exceeds an acceptable interactive frame and
+remains unresolved. Regional chart visibility was separately verified at
+30, 100 and 300 km. No fresh year-100 speed test was started. Work stopped at
+this held checkpoint; the player game remains unchanged.
+
+At the prior checkpoint `42f55e05175302393c946e690925bec980f4899c`, 74 unique
+tests passed: 30 country plan/renderer/manager cases, 35 human-figure and existing
+map cases, and nine day-cost/height-sampling/frame-budget cases. The latter 35
+and nine are unchanged by this repair; their earlier results are not presented
+as a new rerun. Reports 12, 13, 14 (manager rerun) and 15 are retained locally.
+
+**All performance figures below belong to that prior checkpoint, before this
+visual repair. They do not validate the current repair's performance.**
 
 The real year-100 campaign has 636 people, 104 deposits and 12 rival actors.
-The final private-desktop GPU sample, at speed 5 with a fixed 100-km camera
+The prior checkpoint's last private-desktop GPU sample, at speed 5 with a fixed 100-km camera
 and HUD hidden, advances **120 days in 20.003186 seconds: 5.999044 days/s**
 (about 6, the configured calendar rate). Two simulation days warm up before
 measurement. It draws 41.39 frames/s, with median 20.091 ms, p95 47.165 ms and
@@ -90,7 +165,7 @@ at zero. This short sample near year 100 is **not a continuous validation
 through the first 100 years** and does not establish a strict lower bound of
 6 days/s. Source: `year100-final.json`.
 
-Before the final timing/height fixes, the equivalent country-enabled sample
+Before that checkpoint's timing/height fixes, the equivalent country-enabled sample
 was 5.136 days/s; a country-disabled ablation was 5.038 days/s. These are single
 samples, not a statistically controlled comparison. The local terrain fix
 counts the final simulation pump and its presentation before estimating the
@@ -110,8 +185,8 @@ hashes remain unchanged. Separately, a 30-day headless simulation sample near
 year 100 costs 99.692 ms/day (10.03 days/s), after two warm-up days. It excludes
 GPU rendering. Sources: `country-layer-perf.json` and `year100-pace.json`.
 
-Cold terrain-draped patch creation remains a hitch risk: the final detail
-retest peaks at **94.469 ms for one patch** (earlier full captures: 95.486 ms).
+Cold terrain-draped patch creation remains a hitch risk: the prior detail
+retest peaked at **94.469 ms for one patch** (earlier full captures: 95.486 ms).
 The two-job cooperative limit cannot preempt a single build. A 2-ms processing
 budget is not a guaranteed frame-time ceiling.
 
@@ -149,7 +224,8 @@ resolution remain limits of the map's surface rendering.
 Shared hotspot changed: `scripts/local_terrain.gd` only — create/process the
 country layer, include admitted rival woodland ledgers and presentation-only
 farm canopy clearings, remove scout walker creation/copy, and correct measured
-day-cost accounting plus redundant ground sampling. `project.godot`,
+day-cost accounting plus redundant ground sampling. The follow-up also fixes
+the crown-mask hash and close-camera mask refresh cadence. `project.godot`,
 `save_system.gd`, `game_state.gd`, all population,
 production and site-opening authorities are unchanged. There are **no new saved
 fields** and no save migration. Local `override.cfg` isolates capture userdata
@@ -158,6 +234,7 @@ launched, and no player's editor/game was stopped.
 
 Other changed map presentation files: `foreign_settlement_visual.gd`,
 `living_map.gd`, `map_ambience.gd`, `map_life_ink.gd`, `rite_marks.gd`; new country
-plan/manager/renderer/ground shader and map-people policy; focused tests and
+plan/manager/renderer, ground and chart shaders, chart strokes and map-people
+policy; focused tests and
 the private capture harness. Reconcile those files deliberately if other map
 work is integrated before this branch.

@@ -1,5 +1,7 @@
 extends GdUnitTestSuite
 const Layer=preload("res://scripts/settlement_country_layer.gd")
+const Plan=preload("res://scripts/settlement_country_plan.gd")
+const Woodland=preload("res://scripts/landscape_resource_visuals.gd")
 var _civilization_was_processing:=false
 
 class FakeTerrain extends Node3D:
@@ -141,33 +143,65 @@ func test_canopy_clearings_are_nearest_bounded_fields_without_ledger_edits()->vo
 	var second:=preload("res://scripts/settlement_country_visual.gd").new()
 	f.layer.add_child(first);f.layer.add_child(second)
 	first.plan={"homesteads":[
-		{"position":Vector2(9,0),"field_radius_km":0.2},
-		{"position":Vector2(1,0),"field_radius_km":0.3},
-		{"position":Vector2(5,0),"field_radius_km":0.4}],
-		"herders":[{"position":Vector2(0.1,0),"field_radius_km":0.2}],
+		{"id":"far","position":Vector2(9,0),"field_radius_km":0.12},
+		{"id":"near","position":Vector2(1,0),"field_radius_km":0.14},
+		{"id":"middle","position":Vector2(5,0),"field_radius_km":0.16}],
+		"herders":[{"id":"grazer","kind":"herder","position":Vector2(0.1,0),"field_radius_km":0.07,"rotation":0.0}],
 		"sites":[{"position":Vector2.ZERO,"field_radius_km":0.7}]}
 	second.plan={"homesteads":[
-		{"position":Vector2(3,0),"field_radius_km":0.2},
-		{"position":Vector2(7,0),"field_radius_km":0.3}],"herders":[],"sites":[]}
+		{"id":"rival_near","position":Vector2(3,0),"field_radius_km":0.12},
+		{"id":"rival_far","position":Vector2(7,0),"field_radius_km":0.14}],"herders":[],"sites":[]}
 	f.layer.layers={"player":{"node":first},"known":{"node":second}}
 	var first_before:=first.plan.duplicate(true)
 	var second_before:=second.plan.duplicate(true)
 	var deposits_before:=GameState.resource_deposits.duplicate(true)
 	var people_before:=GameState.population_exact
+	var all_clearings:PackedVector4Array=f.layer.canopy_clearings(Vector2.ZERO,128)
+	# Each farm has a yard and three clearing cells for each of four plots;
+	# the herder has a yard and three cells for its one plot.
+	# The real site remains the responsibility of the real woodland ledger.
+	assert_int(all_clearings.size()).is_equal(69)
+	assert_int(f.layer.canopy_clearings(Vector2.ZERO).size()).is_equal(16)
+	var previous_distance:=-1.0
+	for clearing:Vector4 in all_clearings:
+		var point:=Vector2(clearing.x,clearing.y)
+		assert_bool(point!=Vector2.ZERO).is_true()
+		assert_float(point.length_squared()).is_greater_equal(previous_distance)
+		previous_distance=point.length_squared()
+		assert_float(clearing.z).is_less(0.065)
+		var matching_footprint:=false
+		for source:Dictionary in [first.plan,second.plan]:
+			for group:String in ["homesteads","herders"]:
+				for home:Dictionary in source.get(group,[]):
+					var layout:=Plan.homestead_layout(home)
+					if point==layout.yard_center:
+						matching_footprint=true
+						assert_float(clearing.z).is_equal_approx(float(layout.yard_radius_km),0.000001)
+						assert_float(clearing.w).is_equal_approx(0.01,0.000001)
+					for field:Dictionary in layout.fields:
+						var along:=Vector2.from_angle(float(field.angle))
+						for cell in 3:
+							var expected:Vector2=field.center+along*float(field.half_length_km)/3.0*float((cell-1)*2)
+							if point.is_equal_approx(expected):
+								matching_footprint=true
+								assert_float(clearing.w).is_equal(0.0)
+		assert_bool(matching_footprint).is_true()
 	var clearings:PackedVector4Array=f.layer.canopy_clearings(Vector2.ZERO,3)
 	assert_int(clearings.size()).is_equal(3)
-	assert_float(clearings[0].x).is_equal(1.0)
-	assert_float(clearings[1].x).is_equal(3.0)
-	assert_float(clearings[2].x).is_equal(5.0)
-	assert_float(clearings[0].z).is_equal_approx(0.36,0.00001)
-	# A rejected nearer candidate must not consume an admission slot or cut
-	# canopy where its representative home cannot actually stand.
-	f.terrain.rejected_land.append(Vector2(1,0))
+	for index in 3:assert_vector(clearings[index]).is_equal(all_clearings[index])
+	# The grazer's plot is second, after its yard. Rejecting this one field
+	# must leave the valid yard, then fill the budget with the next candidates.
+	f.terrain.rejected_land.append(Vector2(all_clearings[1].x,all_clearings[1].y))
 	clearings=f.layer.canopy_clearings(Vector2.ZERO,3)
 	assert_int(clearings.size()).is_equal(3)
-	assert_float(clearings[0].x).is_equal(3.0)
-	assert_float(clearings[1].x).is_equal(5.0)
-	assert_float(clearings[2].x).is_equal(7.0)
+	assert_vector(clearings[0]).is_equal(all_clearings[0])
+	assert_vector(clearings[1]).is_equal(all_clearings[2])
+	assert_vector(clearings[2]).is_equal(all_clearings[3])
+	# A whole rejected household must not leave orphan clearings around it.
+	f.terrain.rejected_land.append(Vector2(0.1,0))
+	clearings=f.layer.canopy_clearings(Vector2.ZERO,3)
+	assert_int(clearings.size()).is_equal(3)
+	for clearing:Vector4 in clearings:assert_float(Vector2(clearing.x,clearing.y).length()).is_greater(0.8)
 	f.terrain.revealed=false
 	assert_int(f.layer.canopy_clearings(Vector2.ZERO,3).size()).is_equal(0)
 	assert_int(f.layer.canopy_clearings(Vector2.ZERO,0).size()).is_equal(0)
@@ -175,3 +209,34 @@ func test_canopy_clearings_are_nearest_bounded_fields_without_ledger_edits()->vo
 	assert_dict(second.plan).is_equal(second_before)
 	assert_array(GameState.resource_deposits).is_equal(deposits_before)
 	assert_float(GameState.population_exact).is_equal(people_before)
+
+func test_cached_clearings_follow_plan_revisions_and_owner_removal()->void:
+	var f:=_fixture();f.layer.terrain=f.terrain
+	var visual:=preload("res://scripts/settlement_country_visual.gd").new();f.layer.add_child(visual)
+	visual.plan={"homesteads":[{"id":"home","position":Vector2(1,0),"field_radius_km":0.12}],"herders":[],"sites":[]}
+	f.layer.layers={"player":{"node":visual}}
+	var first:PackedVector4Array=f.layer.canopy_clearings(Vector2.ZERO)
+	assert_int(first.size()).is_equal(13)
+	assert_bool(first==f.layer.canopy_clearings(Vector2.ZERO)).is_true()
+	visual.plan.homesteads[0].position=Vector2(3,0);f.layer.clearing_revision+=1
+	var changed:PackedVector4Array=f.layer.canopy_clearings(Vector2.ZERO)
+	assert_bool(changed!=first).is_true()
+	for clearing:Vector4 in changed:assert_float(clearing.x).is_greater(2.8)
+	f.layer.layers.clear();f.layer.clearing_revision+=1
+	assert_int(f.layer.canopy_clearings(Vector2.ZERO).size()).is_equal(0)
+
+func test_all_rotated_plot_ends_and_corners_fit_inside_clear_canopy()->void:
+	var f:=_fixture();f.layer.terrain=f.terrain
+	var visual:=preload("res://scripts/settlement_country_visual.gd").new();f.layer.add_child(visual)
+	f.layer.layers={"player":{"node":visual}}
+	for index in 40:
+		var home:={"id":"covered_%d" % index,"position":Vector2(14034,-2892),"field_radius_km":lerpf(0.10,0.18,float(index)/39.0)}
+		visual.plan={"homesteads":[home],"herders":[],"sites":[]};f.layer.clearing_revision+=1
+		var masks:PackedVector4Array=f.layer.canopy_clearings(home.position)
+		assert_int(masks.size()).is_equal(13)
+		for field:Dictionary in Plan.homestead_layout(home).fields:
+			var along:=Vector2.from_angle(float(field.angle));var across:=along.orthogonal()
+			for x in range(-5,6):
+				for y in range(-3,4):
+					var point:Vector2=field.center+along*float(field.half_length_km)*float(x)/5.0+across*float(field.half_width_km)*float(y)/3.0
+					assert_float(Woodland.retained_at(point,masks)).is_less_equal(0.001)

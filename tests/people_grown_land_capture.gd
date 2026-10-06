@@ -146,13 +146,20 @@ func _run() -> void:
 			if owners.has("player"):
 				var plan: Dictionary = owners.player.node.get("plan")
 				for farm: Dictionary in plan.get("homesteads", []):
+					if _arg("homestead-id") != "" and String(farm.id) != _arg("homestead-id"): continue
 					var point: Vector2 = farm.position
 					if not terrain._settlement_stage_land_at(point): continue
-					sizes.append(_arg("homestead-span", ".8"))
-					labels.append("homestead-detail")
-					targets.append(Vector3(point.x, terrain._height_at(point.x, point.y), point.y))
+					var farm_spans := _arg("homestead-span", ".8").split(",")
+					for farm_index in farm_spans.size():
+						sizes.append(farm_spans[farm_index])
+						labels.append("homestead-detail" if farm_spans.size() == 1 else "homestead-detail-%d" % farm_index)
+						targets.append(Vector3(point.x, terrain._height_at(point.x, point.y), point.y))
 					report["detail_homestead"] = {"id": farm.id, "position": str(point), "distance_km": farm.distance_km, "representative": true}
 					break
+	if _arg("homestead-id") != "" and not report.has("detail_homestead"):
+		push_error("Requested diagnostic homestead was not found on admitted land: " + _arg("homestead-id"))
+		get_tree().quit(2)
+		return
 	var directory := _arg("out", "res://artifacts/people-grown-land")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(directory))
 	var title_layer := CanvasLayer.new()
@@ -189,12 +196,19 @@ func _run() -> void:
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true, 0.0)
 		var path := directory.path_join("%s_%s.png" % [_arg("prefix", "review"), label])
+		var png_size := Vector2i.ZERO
 		if DisplayServer.get_name() != "headless":
-			get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
-		var entry := {"path": path, "span_km": span, "target": str(shot_target), "frames": frames}
+			var captured_image: Image = get_viewport().get_texture().get_image()
+			png_size = captured_image.get_size()
+			captured_image.save_png(ProjectSettings.globalize_path(path))
+		var entry := {"path": path, "png_size": str(png_size), "span_km": span, "actual_camera_span_km": terrain.camera.size, "target": str(shot_target), "frames": frames}
 		if country and country.has_method("stats"): entry["country_land"] = country.call("stats")
 		entry["map_people"] = _map_people_audit()
 		entry["farm_scale"] = _farm_scale_audit()
+		if "--ground-audit" in OS.get_cmdline_user_args() and span <= 2.0: entry["farm_ground"] = _farm_ground_audit(shot_target, span)
+		if "--chart-compare" in OS.get_cmdline_user_args() and span >= 10.0:
+			entry["country_charts"] = _country_chart_audit()
+			entry["charts_hidden_capture"] = await _capture_charts_hidden(path.replace(".png", "_charts-hidden.png"))
 		report.captures.append(entry)
 		print("PEOPLE_GROWN_LAND_CAPTURE ", path, " span=", span, " frames=", frames)
 	if float(_arg("pace-seconds", "0")) > 0.0:
@@ -243,6 +257,104 @@ func _farm_scale_audit() -> Dictionary:
 				count += 1
 				if samples.size() < 4: samples.append({"metres": str(metres), "basis_scale": str(transform.basis.get_scale())})
 	return {"instances": count, "largest_dimension_metres": largest_metres, "samples": samples}
+
+func _country_chart_audit() -> Dictionary:
+	var country := terrain.get_node_or_null("CountryLand")
+	var rows: Array = []
+	var onscreen := 0
+	var visible := 0
+	var total := 0
+	if country:
+		for node: Node in country.find_children("CountryChart_*", "MeshInstance3D", true, false):
+			var chart := node as MeshInstance3D
+			if not chart.mesh: continue
+			total += 1
+			if chart.is_visible_in_tree(): visible += 1
+			var anchor := chart.global_transform * chart.mesh.get_aabb().get_center()
+			var projected: Vector2 = terrain.camera.unproject_position(anchor)
+			var behind: bool = terrain.camera.is_position_behind(anchor)
+			var in_view: bool = not behind and get_viewport().get_visible_rect().has_point(projected)
+			if in_view: onscreen += 1
+			if in_view:
+				var material := chart.material_override as ShaderMaterial
+				rows.append({"node": str(chart.get_path()), "record": chart.get_meta("country_chart_record", ""), "visible": chart.is_visible_in_tree(),
+					"anchor": str(anchor), "behind_camera": behind, "screen_viewport_units": str(projected), "mesh_aabb": str(chart.mesh.get_aabb()),
+					"node_custom_aabb": str(chart.custom_aabb), "shader": material.shader.resource_path if material and material.shader else ""})
+	return {"nodes": total, "visible_nodes": visible, "onscreen_anchors": onscreen, "onscreen_samples": rows,
+		"viewport_rect": str(get_viewport().get_visible_rect()), "reported_texture_size": str(get_viewport().get_texture().get_size())}
+
+func _capture_charts_hidden(path: String) -> Dictionary:
+	var states: Array = []
+	var country := terrain.get_node_or_null("CountryLand")
+	if country:
+		for node: Node in country.find_children("CountryChart_*", "MeshInstance3D", true, false):
+			states.append({"node": node, "visible": node.visible})
+			node.visible = false
+	# Apply the visibility toggle in this same process frame so unrelated
+	# map animation uniforms do not advance between the comparison images.
+	RenderingServer.force_sync()
+	RenderingServer.force_draw(true, 0.0)
+	if DisplayServer.get_name() != "headless": get_viewport().get_texture().get_image().save_png(ProjectSettings.globalize_path(path))
+	var hidden_audit := _country_chart_audit()
+	for state: Dictionary in states:
+		if is_instance_valid(state.node): state.node.visible = state.visible
+	for frame in 2: await get_tree().process_frame
+	return {"path": path, "toggled_nodes": states.size(), "visible_while_hidden": hidden_audit.visible_nodes}
+
+func _farm_ground_audit(target: Vector3, span: float) -> Array:
+	var rows: Array = []
+	var country := terrain.get_node_or_null("CountryLand")
+	if not country: return rows
+	for node: Node in country.find_children("ScatteredHomes", "MultiMeshInstance3D", true, false):
+		var homes := node as MultiMeshInstance3D
+		var batch: MultiMesh = homes.multimesh
+		if not batch or not batch.mesh: continue
+		for index in batch.instance_count:
+			var transform := homes.global_transform * batch.get_instance_transform(index)
+			var at := Vector2(transform.origin.x, transform.origin.z)
+			if at.distance_to(Vector2(target.x, target.z)) > maxf(span, 0.05): continue
+			var bounds: AABB = transform * batch.mesh.get_aabb()
+			var ground_center := float(terrain._harvest_ground_height_at(at))
+			var corners: Array = []
+			var screen_bounds := Rect2(terrain.camera.unproject_position(bounds.position), Vector2.ZERO)
+			for corner in 8:
+				var vertex := bounds.get_endpoint(corner)
+				screen_bounds = screen_bounds.expand(terrain.camera.unproject_position(vertex))
+				if corner < 4:
+					var point := Vector2(bounds.position.x if corner % 2 == 0 else bounds.end.x, bounds.position.z if corner < 2 else bounds.end.z)
+					corners.append({"xz": str(point), "drawn_ground_metres": float(terrain._harvest_ground_height_at(point)) * 1000.0})
+			var earth := homes.get_parent().get_node_or_null("WorkedEarth") as MeshInstance3D
+			var ink_height := _triangle_height_at(earth, at)
+			rows.append({"node": str(homes.get_path()), "instance": index, "origin": str(transform.origin), "ground_center_metres": ground_center * 1000.0,
+				"base_above_ground_metres": (bounds.position.y - ground_center) * 1000.0, "roof_above_ground_metres": (bounds.end.y - ground_center) * 1000.0,
+				"roof_world_metres": bounds.end.y * 1000.0, "mesh_dimensions_metres": str(bounds.size * 1000.0), "screen_bounds_viewport_units": str(screen_bounds),
+				"footprint_corners": corners, "worked_earth_at_origin": ink_height, "visible": homes.is_visible_in_tree()})
+	return rows
+
+func _triangle_height_at(node: MeshInstance3D, point: Vector2) -> Dictionary:
+	if not node or not node.mesh: return {"hit": false}
+	var highest := -INF
+	var hits := 0
+	for surface in node.mesh.get_surface_count():
+		var arrays := node.mesh.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+		var count := indices.size() if not indices.is_empty() else vertices.size()
+		for triangle in range(0, count - 2, 3):
+			var a: Vector3 = node.global_transform * vertices[indices[triangle] if not indices.is_empty() else triangle]
+			var b: Vector3 = node.global_transform * vertices[indices[triangle + 1] if not indices.is_empty() else triangle + 1]
+			var c: Vector3 = node.global_transform * vertices[indices[triangle + 2] if not indices.is_empty() else triangle + 2]
+			var ab := Vector2(b.x - a.x, b.z - a.z)
+			var ac := Vector2(c.x - a.x, c.z - a.z)
+			var ap := point - Vector2(a.x, a.z)
+			var area := ab.cross(ac)
+			if absf(area) < 0.000000001: continue
+			var u := ap.cross(ac) / area
+			var v := ab.cross(ap) / area
+			if u < -0.00001 or v < -0.00001 or u + v > 1.00001: continue
+			highest = maxf(highest, a.y + u * (b.y - a.y) + v * (c.y - a.y))
+			hits += 1
+	return {"hit": hits > 0, "overlapping_triangles": hits, "highest_metres": highest * 1000.0 if hits > 0 else 0.0}
 
 func _measure_playback(seconds: float) -> Dictionary:
 	# Measures the actual isolated GPU scene scheduler, after camera warm-up.

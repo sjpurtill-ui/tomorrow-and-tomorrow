@@ -7,6 +7,12 @@ const PATCHES = preload("res://scripts/settlement_patch_renderer.gd")
 const EARLY = preload("res://scripts/early_settlement_visual.gd")
 const TOWN = preload("res://scripts/organic_town_visual.gd")
 const INK = preload("res://scripts/settlement_ink.gd")
+const SHAPES = preload("res://scripts/settlement_kit_shapes.gd")
+const CHART = preload("res://scripts/settlement_country_chart.gd")
+const DRAPE = preload("res://scripts/settlement_country_drape.gd")
+const GROUND_LIFT_KM:=0.0002
+var ground_grid:=Vector4.ZERO
+var drape_budget_skips:=0
 var height_at:Callable
 var land_at:Callable
 var visibility_at:Callable
@@ -47,7 +53,7 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 	var entries:Array[Dictionary]=[]
 	var anchors:Array[Vector2]=[Vector2(snapshot.get("origin",Vector2.ZERO))]
 	var known:Array=[]
-	for id:String in ["thatched_roofing","joinery","dry_stone_walls","dressed_stone_masonry","kiln_fired_bricks","adobe_wall_construction","mould_made_mudbricks","framed_construction","timber_post_beam_connections"]:
+	for id:String in ["thatched_roofing","joinery","dry_stone_walls","dressed_stone_masonry","kiln_fired_bricks","adobe_wall_construction","mould_made_mudbricks","framed_construction","timber_post_beam_connections","grain_grinding","saddle_quern"]:
 		if id in snapshot.get("knowledge",[]):known.append(id)
 	var homes:Array=[]
 	for share in snapshot.get("built_fabric",{}).get("homes",[]):homes.append(roundf(float(share)*10.0)/10.0)
@@ -88,6 +94,7 @@ func stats()->Dictionary:
 	result["homesteads"]=plan.get("homesteads",[]).size()
 	result["herders"]=plan.get("herders",[]).size()
 	result["sites"]=plan.get("sites",[]).size()
+	result["drape_budget_skips"]=drape_budget_skips
 	return result
 
 func _valid(point:Vector2)->bool:
@@ -95,15 +102,41 @@ func _valid(point:Vector2)->bool:
 	if not _land_cache.has(point):_land_cache[point]=not land_at.is_valid() or bool(land_at.call(point))
 	return bool(_land_cache[point])
 
-func _point(point:Vector2,lift:float=0.0015)->Vector3:
+func _point(point:Vector2,lift:float=GROUND_LIFT_KM)->Vector3:
 	if not _height_cache.has(point):_height_cache[point]=float(height_at.call(point))
 	return Vector3(point.x,float(_height_cache[point])+lift,point.y)
 
-func _tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,color:Color,lift:float=0.0015)->void:
+func _tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,color:Color,lift:float=GROUND_LIFT_KM)->void:
 	_graded_tri(surface,a,b,c,color,color,color,lift)
 
-func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,lift:float=0.0025,depth:int=0)->void:
-	# Smaller ground facets follow relief rather than making a flat polygon lid.
+func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,lift:float=GROUND_LIFT_KM,depth:int=0)->void:
+	if ground_grid.w>=2.0 and ground_grid.z>0.0:
+		# Exact regional facets avoid both terrain intersections and unbounded
+		# recursive height/land probes. Off-view portions await the next drape.
+		var pieces:=DRAPE.split_triangle(a,b,c,ca,cb,cc,ground_grid)
+		if pieces.is_empty():
+			if DRAPE.triangle_status(a,b,c,ground_grid).status=="budget_exceeded":
+				# Bisect the longest edge only; thin tracks do not explode into
+				# four-way subdivisions across their metre-wide cross-section.
+				if depth<6:
+					var ab:=a.distance_squared_to(b);var bc:=b.distance_squared_to(c);var ac:=a.distance_squared_to(c)
+					if ab>=bc and ab>=ac:
+						var middle:=(a+b)*0.5;var color:=ca.lerp(cb,0.5)
+						_graded_tri(surface,a,middle,c,ca,color,cc,lift,depth+1);_graded_tri(surface,middle,b,c,color,cb,cc,lift,depth+1)
+					elif bc>=ac:
+						var middle:=(b+c)*0.5;var color:=cb.lerp(cc,0.5)
+						_graded_tri(surface,a,b,middle,ca,cb,color,lift,depth+1);_graded_tri(surface,a,middle,c,ca,color,cc,lift,depth+1)
+					else:
+						var middle:=(a+c)*0.5;var color:=ca.lerp(cc,0.5)
+						_graded_tri(surface,a,b,middle,ca,cb,color,lift,depth+1);_graded_tri(surface,middle,b,c,color,cb,cc,lift,depth+1)
+				else:drape_budget_skips+=1
+			return
+		for triangle:Array in pieces:
+			if not _valid(triangle[0].point) or not _valid(triangle[1].point) or not _valid(triangle[2].point):continue
+			for vertex:Dictionary in triangle:
+				surface.set_color((vertex.color as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(vertex.point,lift))
+		return
+	# Pure-test and off-grid fallback stays bounded as before.
 	if depth<2 and maxf(a.distance_squared_to(b),maxf(b.distance_squared_to(c),c.distance_squared_to(a)))>0.16:
 		var ab:=(a+b)*0.5;var bc:=(b+c)*0.5;var ac:=(a+c)*0.5
 		var cab:=ca.lerp(cb,0.5);var cbc:=cb.lerp(cc,0.5);var cac:=ca.lerp(cc,0.5)
@@ -115,7 +148,7 @@ func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:C
 	if not _valid(a) or not _valid(b) or not _valid(c) or not _valid((a+b+c)/3.0):return
 	var points:=[a,b,c];var colors:=[ca,cb,cc]
 	for i in 3:
-		surface.set_color(colors[i]);surface.set_normal(Vector3.UP);surface.add_vertex(_point(points[i],lift))
+		surface.set_color((colors[i] as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(points[i],lift))
 
 func _wash(surface:SurfaceTool,center:Vector2,radius:float,color:Color,seed_value:int,stretch:float=1.0)->void:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
@@ -129,19 +162,35 @@ func _wash(surface:SurfaceTool,center:Vector2,radius:float,color:Color,seed_valu
 		var edge:=color;edge.a=0.0
 		_graded_tri(surface,center,a,b,color,edge,edge)
 
-func _field(surface:SurfaceTool,center:Vector2,radius:float,color:Color,angle:float)->void:
-	var along:=Vector2.from_angle(angle)*radius
-	var across:=along.orthogonal()*0.38
-	var corners:=[center-along-across,center+along*0.83-across*0.92,center+along+across*0.85,center-along*0.92+across]
-	var edge:=color;edge.a=0.0
-	for i in 4:_graded_tri(surface,center,corners[i],corners[(i+1)%4],color,edge,edge)
+func _field(surface:SurfaceTool,field:Dictionary,color:Color)->void:
+	var center:Vector2=field.center
+	var along:=Vector2.from_angle(float(field.angle))*float(field.half_length_km)
+	var across:=along.normalized().orthogonal()*float(field.half_width_km)
+	var corners:=[center-along-across,center+along*0.94-across*0.92,center+along+across*0.92,center-along*0.91+across]
+	# Separate narrow strips, not four overlapping kilometre-wide washes.
+	# Painted loam and stubble remain legible while the irregular rim softens.
+	for row in 10:
+		var start:=float(row)/10.0;var finish:=float(row+1)/10.0
+		var a:Vector2=corners[0].lerp(corners[3],start)
+		var b:Vector2=corners[1].lerp(corners[2],start)
+		var c:Vector2=corners[1].lerp(corners[2],finish)
+		var d:Vector2=corners[0].lerp(corners[3],finish)
+		var ink:=color.lerp(Color("#705b3e"),0.22 if row%2==0 else 0.0)
+		ink.a=0.83 if row%2==0 else 0.69
+		_tri(surface,a,b,c,ink);_tri(surface,a,c,d,ink)
+	for i in 4:_ribbon(surface,corners[i],corners[(i+1)%4],0.0011,Color(0.38,0.36,0.22,0.44))
+
+func _ribbon(surface:SurfaceTool,start:Vector2,finish:Vector2,width:float,color:Color)->void:
+	var side:=(finish-start).normalized().orthogonal()*width*0.5
+	_tri(surface,start-side,start+side,finish+side,color)
+	_tri(surface,start-side,finish+side,finish-side,color)
 
 func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier:int)->void:
 	var length:=start.distance_to(finish)
 	if length<0.01:return
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
 	var cross:=(finish-start).normalized().orthogonal()
-	var pieces:=clampi(ceili(length/0.65),4,64)
+	var pieces:=clampi(ceili(length/0.12),4,256)
 	var previous:=start
 	var bend:=rng.randf_range(-0.07,0.07)*minf(length,10.0)
 	for i in range(1,pieces+1):
@@ -150,9 +199,9 @@ func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier
 		var width:=lerpf(0.006 if tier==2 else 0.003,0.0012,t)
 		var side:=(point-previous).normalized().orthogonal()*width*0.5
 		var color:=Color("#978465") if tier<2 else Color("#a3987c")
-		color.a=0.45
-		_tri(surface,previous-side,previous+side,point+side,color,0.002)
-		_tri(surface,previous-side,point+side,point-side,color,0.002)
+		color.a=0.67
+		_tri(surface,previous-side,previous+side,point+side,color)
+		_tri(surface,previous-side,point+side,point-side,color)
 		previous=point
 
 func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
@@ -166,26 +215,33 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var group:=String(record.group)
+	var chart:=CHART.create(record,height_at)
+	if chart!=null:parent.add_child(chart)
 	if group=="sites":
 		_draw_site(surface,record,seed_value)
 	else:
 		var sparse:=group=="herders"
-		var radius:=float(record.get("field_radius_km",0.19))*(0.35 if sparse else 1.0)
-		var fields:=1 if sparse else 4
-		for i in fields:
-			var center:=at+Vector2.from_angle(rng.randf()*TAU)*radius*rng.randf_range(0.12,0.8)
-			var color:=Color("#a89468").lerp(Color("#7e8150"),rng.randf())
-			color.a=0.28 if sparse else 0.82
-			_field(surface,center,radius*rng.randf_range(0.65,1.0),color,float(record.get("rotation",0.0))+rng.randf_range(-0.22,0.22))
+		var layout:=PLAN.homestead_layout(record)
+		parent.set_meta("country_layout",layout)
+		_wash(surface,at,float(layout.yard_radius_km),Color(0.58,0.49,0.34,0.86),seed_value)
+		for field:Dictionary in layout.fields:
+			var color:=Color("#b09a67").lerp(Color("#7d8150"),rng.randf()*0.65)
+			_field(surface,field,color)
+			var to_field:Vector2=(Vector2(field.center)-at).normalized()
+			var entry:Vector2=Vector2(field.center)-to_field*float(field.half_width_km)
+			_track(surface,at+to_field*float(layout.yard_radius_km)*0.78,entry,seed_value+17,0)
 		_add_homes(parent,at,1 if sparse else int(record.get("buildings",2)),seed_value,context)
 	# Exposed rock exhausted long ago has no new busy track; living woods and
 	# staffed workplaces retain access. Thin ground-coloured paths disappear
 	# naturally at realm zoom, rather than becoming chart-wide spokes.
 	if group!="sites" or String(record.get("category",""))!="depleted":
-		_track(surface,Vector2(record.track_from),at,seed_value,int(record.get("road_tier",context.road_tier)))
+		var finish:=at
+		if group!="sites":finish=at.move_toward(Vector2(record.track_from),float(PLAN.homestead_layout(record).yard_radius_km)*0.78)
+		_track(surface,Vector2(record.track_from),finish,seed_value,int(record.get("road_tier",context.road_tier)))
 	parent.set_meta("fog_clipped",_fog_clipped)
 	var arrays:=surface.commit_to_arrays()
-	if arrays.is_empty() or (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():return
+	if arrays.is_empty() or not arrays[Mesh.ARRAY_VERTEX] is PackedVector3Array:return
+	if (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).is_empty():return
 	var mesh:=ArrayMesh.new();mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
 	var node:=MeshInstance3D.new();node.name="WorkedEarth";node.mesh=mesh
 	node.material_override=material;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -198,17 +254,25 @@ func _draw_site(surface:SurfaceTool,record:Dictionary,seed_value:int)->void:
 	var resource:=String(record.get("resource",""))
 	var radius:=float(record.get("radius_km",record.get("field_radius_km",0.48)))
 	var color:=Color("#a89468")
-	if "wood" in age or resource=="Timber":color=Color("#929669") if category=="regrowing" else Color("#9e946f")
+	if "wood" in age or resource=="Timber":color=Color("#8c9b65") if category=="regrowing" else Color("#8c7958")
 	elif "quarry" in age or resource=="Stone":color=Color("#aaa18d") if category=="depleted" else Color("#b6a58b")
 	elif resource in ["Plant Fiber","Fiber Plants"]:color=Color("#989464")
-	color.a=0.78 if category=="depleted" else 0.52
-	_wash(surface,at,radius,color,seed_value,1.2)
+	color.a=0.68 if category=="depleted" else 0.40
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value+41
-	for i in 5:
-		var patch:=at+Vector2.from_angle(rng.randf()*TAU)*radius*rng.randf_range(0.15,0.85)
-		var tint:=color.darkened(rng.randf_range(0.12,0.32));tint.a=0.30
-		if category=="regrowing":tint=Color(0.48,0.55,0.32,0.38)
-		_wash(surface,patch,radius*rng.randf_range(0.05,0.18),tint,seed_value+71+i)
+	# Marks stay inside the real 3km catchment. Distinct irregular cuts and
+	# strips communicate work history instead of one almost invisible haze.
+	var spread:=1.18 if float(record.get("tile_area_km2",0.0))>0.0 else radius*0.7
+	for i in 7:
+		var patch:=at+Vector2.from_angle(rng.randf()*TAU)*spread*rng.randf_range(0.10,0.82)
+		var size:=radius*rng.randf_range(0.20,0.37)
+		var tint:=color.darkened(rng.randf_range(0.02,0.16));tint.a=0.68
+		if category=="regrowing":tint=Color(0.53,0.59,0.35,0.66)
+		_wash(surface,patch,size,tint,seed_value+71+i,1.15)
+		if "quarry" in age or resource=="Stone":
+			var direction:=Vector2.from_angle(float(record.get("rotation",0.0))+0.4)
+			for row in 3:
+				var line:=patch+direction.orthogonal()*size*(float(row)-1.0)*0.38
+				_ribbon(surface,line-direction*size*0.65,line+direction*size*0.5,size*0.075,Color(0.40,0.37,0.32,0.62))
 
 func _add_homes(parent:Node3D,at:Vector2,count:int,seed_value:int,context:Dictionary)->void:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
@@ -231,14 +295,29 @@ func _add_homes(parent:Node3D,at:Vector2,count:int,seed_value:int,context:Dictio
 	batch.instance_count=clampi(count,1,3)
 	var transforms:Array[Transform3D]=[]
 	for i in batch.instance_count:
-		var offset:=Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.0,0.026)
+		var offset:=Vector2.from_angle(float(seed_value%628)*0.01+float(i)*PI)*rng.randf_range(0.006,0.014)
 		var point:=at+offset
 		if not _valid(point):point=at
 		# The shared kit is authored in metres; the map is in kilometres.
 		var basis:=preload("res://scripts/settlement_kit_shapes.gd").lived_basis(rng.randf()*TAU,seed_value+i)
-		var transform:=Transform3D(basis,_point(point,0.0003))
+		var transform:=Transform3D(basis,_point(point,0.0004))
 		transforms.append(transform);batch.set_instance_transform(i,transform)
 		batch.set_instance_color(i,Color(style.get("tint",Color(0.94,0.89,0.78))).lerp(Color(0.8,0.76,0.67),rng.randf()*0.15))
-	var node:=MultiMeshInstance3D.new();node.name="ScatteredHomes";node.multimesh=batch;node.material_override=INK.material()
+	var node:=MultiMeshInstance3D.new();node.name="ScatteredHomes";node.multimesh=batch;node.material_override=INK.architecture_material()
 	node.set_meta("source_transforms",transforms)
 	parent.add_child(node)
+	INK.add_ground_shadows(parent,"FarmhouseShadow",transforms,mesh.get_aabb())
+	# Quiet household objects establish a compound at close zoom; never figures.
+	for i in transforms.size():
+		var origin:Vector3=transforms[i].origin
+		var home:=Vector2(origin.x,origin.z)
+		_add_prop(parent,"woodpile",home+Vector2(0.005,0.001),float(seed_value%31))
+		if "grain_grinding" in known or "saddle_quern" in known:
+			_add_prop(parent,"quern",home+Vector2(-0.004,0.003),0.0)
+
+func _add_prop(parent:Node3D,kind:String,point:Vector2,angle:float)->void:
+	if not _valid(point):return
+	var prop:=MeshInstance3D.new();prop.name="Farm_"+kind
+	prop.mesh=SHAPES.prop(kind);prop.material_override=INK.architecture_material()
+	prop.transform=Transform3D(Basis(Vector3.UP,angle).scaled(Vector3.ONE*0.001),_point(point,0.0003))
+	parent.add_child(prop)

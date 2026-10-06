@@ -45,7 +45,7 @@ func test_homes_stand_only_between_engine_rings_and_herders_beyond()->void:
 	for record:Dictionary in plan.homesteads:
 		var distance:float=(record.position as Vector2).distance_to(data.origin)
 		assert_bool(distance>15.0 and distance<90.0).is_true()
-		assert_bool(float(record.field_radius_km)>=0.15 and float(record.field_radius_km)<=0.9).is_true()
+		assert_bool(float(record.field_radius_km)>=0.10 and float(record.field_radius_km)<=0.18).is_true()
 	for record:Dictionary in plan.herders:
 		var distance:float=(record.position as Vector2).distance_to(data.origin)
 		assert_bool(distance>90.0 and distance<300.0).is_true()
@@ -71,6 +71,55 @@ func test_growth_never_moves_a_surviving_representative()->void:
 			shared+=1
 			assert_vector(record.position).is_equal(previous[String(record.id)])
 	assert_bool(shared>0).is_true()
+
+func test_household_layout_is_stable_and_keeps_the_source_record_unchanged()->void:
+	var record:Dictionary=Plan.build(_snapshot()).homesteads[0]
+	var before:=record.duplicate(true)
+	var layout:=Plan.homestead_layout(record)
+	assert_dict(record).is_equal(before)
+	assert_dict(Plan.homestead_layout(record)).is_equal(layout)
+	assert_vector(layout.yard_center).is_equal(record.position)
+	assert_float(layout.yard_radius_km).is_equal(0.025)
+	assert_int(layout.fields.size()).is_equal(4)
+	record["population"]=25000.0;record["day"]=120000
+	assert_dict(Plan.homestead_layout(record)).is_equal(layout)
+
+func test_compact_field_slots_leave_the_yard_and_neighbours_clear()->void:
+	# Planetary coordinates also exercise metre-scale float precision.
+	for index in 160:
+		var record:={"id":"layout_%d" % index,"kind":"homestead","position":Vector2(14034,-2892),"field_radius_km":lerpf(0.10,0.18,float(index)/159.0)}
+		var layout:=Plan.homestead_layout(record)
+		for field:Dictionary in layout.fields:
+			var along:=Vector2.from_angle(float(field.angle))
+			var across:=along.orthogonal()
+			assert_float(float(field.half_length_km)).is_between(0.025,0.071)
+			assert_float(float(field.half_width_km)).is_between(0.012,0.035)
+			assert_float((field.center as Vector2).distance_to(layout.yard_center)-float(field.half_width_km)).is_greater(float(layout.yard_radius_km)+0.008)
+			for long_sign in [-1,1]:
+				for cross_sign in [-1,1]:
+					var corner:Vector2=field.center+along*float(field.half_length_km)*long_sign+across*float(field.half_width_km)*cross_sign
+					assert_float(corner.distance_to(layout.yard_center)).is_less_equal(float(layout.envelope_radius_km)+0.001)
+		for first in layout.fields.size():
+			for second in range(first+1,layout.fields.size()):
+				assert_bool(_field_slots_separated(layout.fields[first],layout.fields[second],0.005)).is_true()
+
+func _field_slots_separated(first:Dictionary,second:Dictionary,gap:float)->bool:
+	var first_along:=Vector2.from_angle(float(first.angle));var first_across:=first_along.orthogonal()
+	var second_along:=Vector2.from_angle(float(second.angle));var second_across:=second_along.orthogonal()
+	var distance:Vector2=second.center-first.center
+	for axis:Vector2 in [first_along,first_across,second_along,second_across]:
+		var first_radius:=absf(axis.dot(first_along))*float(first.half_length_km)+absf(axis.dot(first_across))*float(first.half_width_km)
+		var second_radius:=absf(axis.dot(second_along))*float(second.half_length_km)+absf(axis.dot(second_across))*float(second.half_width_km)
+		if absf(distance.dot(axis))>first_radius+second_radius+gap:return true
+	return false
+
+func test_herder_has_only_one_smaller_plot_and_yard()->void:
+	var record:={"id":"herd_small","kind":"herder","position":Vector2(18,-5),"field_radius_km":0.07}
+	var layout:=Plan.homestead_layout(record)
+	assert_int(layout.fields.size()).is_equal(1)
+	assert_float(layout.yard_radius_km).is_equal(0.014)
+	assert_float(layout.envelope_radius_km).is_equal(0.07)
+	assert_float(float(layout.fields[0].half_length_km)).is_less(0.033)
 
 func test_density_follows_people_per_band_area()->void:
 	var near:=Plan.build(_snapshot(4000.0,15.0,45.0))

@@ -12,5 +12,7 @@ void fragment(){
 	float brush=mix(noise_at(ground*29.0),0.5,smoothstep(0.008,0.08,footprint));
 	float broad=noise_at(ground*5.0);
 	ALBEDO=COLOR.rgb*(0.87+brush*0.15);
-	ALPHA=COLOR.a*smoothstep(0.18,0.8,broad*0.55+brush*0.45)*0.65;
+	// Preserve the painted form. Grain modulates its surface rather than
+	// erasing most of a field or scar into the ordinary grass texture.
+	ALPHA=COLOR.a*(0.76+0.24*smoothstep(0.12,0.88,broad*0.55+brush*0.45));
 }

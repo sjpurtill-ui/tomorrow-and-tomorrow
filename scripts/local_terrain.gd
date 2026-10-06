@@ -3479,7 +3479,10 @@ func _register_woodland_material(material:ShaderMaterial)->void:
 	material.set_shader_parameter("woodland_areas",padded)
 
 func _refresh_woodland_visuals(force:bool=false)->void:
-	var key:="%d:%d:%d:%d" % [int(GameState.elapsed_days),floori(camera_target.x/8.0),floori(camera_target.z/8.0),country_land.clearing_revision if country_land!=null else 0]
+	# Compact fields need their nearest mask slots as the close camera pans.
+	# At broad zoom retain the existing coarse refresh cadence.
+	var mask_cell_km:=0.16 if camera!=null and camera.size<8.0 else 8.0
+	var key:="%d:%d:%d:%s:%d" % [int(GameState.elapsed_days),floori(camera_target.x/mask_cell_km),floori(camera_target.z/mask_cell_km),mask_cell_km,country_land.clearing_revision if country_land!=null else 0]
 	if not force and key==woodland_visual_key:
 		_refresh_woodland_harvest_detail(false)
 		return
@@ -3543,6 +3546,8 @@ func _refresh_woodland_harvest_detail(force:bool=false)->void:
 		func(point:Vector2)->float: return _harvest_ground_height_at(point),force)
 
 func _woodland_density_at(x:float,z:float)->float:
+	# Survey/HUD resource descriptions follow actual cutting; presentation-only
+	# household clearings affect the rendered canopy, never timber availability.
 	return float(_biome_at(x,z).woodland)*LANDSCAPE_VISUALS.retained_at(Vector2(x,z),woodland_visual_areas)
 
 
@@ -4682,7 +4687,12 @@ void vertex() {
 		VERTEX+=inverse(mat3(MODEL_MATRIX))*push;
 	}
 	plant_normal=normalize((MODEL_MATRIX*vec4(NORMAL,0.0)).xyz);
-	plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy; tree_keep=step(vh(MODEL_MATRIX[3].xz*120.0),woodland_retained(MODEL_MATRIX[3].xz)); }
+	plant_climate=INSTANCE_CUSTOM.b>0.0?INSTANCE_CUSTOM:fallback_climate; world_position=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; patch_position=world_position.xz-close_patch.xy;
+	// Bound the hash input before multiplication: at planetary coordinates
+	// the old x120 hash lost every fractional bit and kept all crowns.
+	float crown_sample=vh(mod(MODEL_MATRIX[3].xz,vec2(17.0,19.0)));
+	tree_keep=crown_sample<woodland_retained(MODEL_MATRIX[3].xz)?1.0:0.0;
+}
 void fragment() {
 	vec2 fog_uv=clamp(world_position.xz/fog_world_size+vec2(0.5),vec2(0.0),vec2(1.0));
 	float revealed=max(texture(discovery_mask,fog_uv).r,1.0-smoothstep(30.0,38.0,distance(world_position.xz,fog_current_origin)));
