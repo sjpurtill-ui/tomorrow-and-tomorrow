@@ -510,3 +510,19 @@ func test_the_worked_land_sets_the_months_cap()->void:
 	var reach:=preload("res://scripts/one_seat.gd").reach_km()
 	assert_int(ResourceSystem.land_find_cap()).is_equal(maxi(1,floori(reach/ResourceSystem.LAND_FIND_CAP_KM)))
 	assert_int(ResourceSystem.land_find_cap()).is_greater(1)
+
+## Searchers walk only the land the people work: a deposit left at a far
+## older home is never found again nor made richer; one in the worked land is.
+func test_finds_stay_in_the_worked_land()->void:
+	var far_seen:=_deposit("Clay",Vector3(2000,0,0),"recognized",0)
+	var far_worked:=_deposit("Flint",Vector3(0,0,1990),"developed",1)
+	GameState.resource_deposits=[far_seen,far_worked]
+	var pick:=RandomNumberGenerator.new();pick.seed=7
+	assert_bool(ResourceSystem._land_find(Vector3.ZERO,pick).is_empty()).is_true()
+	assert_str(String(far_seen.stage)).is_equal("recognized")
+	assert_float(float(far_worked.quality)).is_equal(1.0)
+	var near_worked:=_deposit("Flint",Vector3(6,0,0),"developed",2)
+	GameState.resource_deposits=[far_seen,far_worked,near_worked]
+	var find:=ResourceSystem._land_find(Vector3.ZERO,pick)
+	assert_str(String(find.get("kind",""))).is_equal("richer")
+	assert_str(String((find.deposit as Dictionary).id)).is_equal(String(near_worked.id))

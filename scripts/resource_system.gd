@@ -1634,17 +1634,23 @@ func _foreign_land(point:Vector2)->bool:
 ## find.
 ##   1. A deposit of this land they can recognise but have not measured (the
 ##      nearer the likelier): it is found and measured at once.
-##   2. New ground 4 to 20 km out, on land and in no other people's hold.
+##   2. New ground 4 km out to the worked reach, on land and in no other
+##      people's hold.
 ##   3. A richer part of a deposit being worked (never a worked front of
 ##      woods, stone or fibre): a tenth more from each cutter there, at most
 ##      twice for each deposit and never past 1.5.
+## Searchers walk only the land the people work (one_seat.gd reach_km, at
+## least LAND_FIND_FAR_KM): a deposit left behind at a far older home is
+## never a find.
 func _land_find(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
 	var state=WorldSimulation.state
 	var waiting:Array=[];var nearness:Array=[]
 	var ready:Dictionary={}
+	var reach:=maxf(LAND_FIND_FAR_KM,preload("res://scripts/one_seat.gd").reach_km())
 	for deposit_variant in state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
 		if not _land_kind(deposit):continue
+		if _land_km(deposit,origin)>reach:continue
 		var stage:=String(deposit.get("stage",""))
 		if stage not in ["unknown","recognized"]:continue
 		var resource:=String(deposit.resource)
@@ -1667,7 +1673,7 @@ func _land_find(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
 	var worked:Array=[]
 	for deposit_variant in state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
-		if not _land_kind(deposit):continue
+		if not _land_kind(deposit) or _land_km(deposit,origin)>reach:continue
 		if String(deposit.get("stage","")) not in ["accessible","developed"] or deposit_exhausted(deposit):continue
 		if int(deposit.get("richer_finds",0))>=LAND_RICHER_TIMES or float(deposit.get("quality",1.0))>=LAND_QUALITY_CAP:continue
 		worked.append(deposit)
