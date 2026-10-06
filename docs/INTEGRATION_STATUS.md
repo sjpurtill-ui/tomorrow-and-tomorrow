@@ -1,3 +1,29 @@
+## October 6 — Clustered expansion and era appearance: authorized integration
+
+The expansion correction follows the user's explicit direction: neighboring
+settlement clusters grow into one another. Stable 180 m cells contain 4–12 homes
+around shared yards and short lanes, using the existing settlement building kits.
+Their cultivated edges can meet; the growing dense town absorbs reached ground.
+Clusters replace country field-line glyphs. Oversized quarry ribbons are removed:
+local scar washes are capped at 60 m radius and loose rubble stays metre-scale.
+The absolute no-human-map-figures requirement remains in force.
+
+Completed, recorded construction now supplies later masonry, industrial and
+modern country homes, including same-day player/rival refresh. Year-1000/2000/3000
+specimens exercise those appearances; they are prepared construction fixtures,
+not a continuous campaign. No saved fields, simulation authority or population
+rules change. Existing main 413381fb adds only a music asset and has no code overlap.
+
+Validation: 78/78 combined country tests, followed by 22/22 renderer tests adding
+the final quarry-size regression (79 distinct cases). Final private GPU captures
+of the exact 4,554-person save show neighboring seven-home compounds, zero human
+figures, zero drape skips and no runtime/shader errors. Worst preparation slice:
+6.943 ms. The worked-site queue drained; close views retained finite background
+replacements. The earlier six-day playback target remains unverified for this
+clustered build. Remote-first delivery preserves local files and the running
+player session; loading these scripts requires the player's normal restart.
+See `docs/design/PEOPLE_GROWN_LAND.md` for evidence and limits.
+
 ## October 6 — Worked country basics: authorized integration
 
 The user explicitly authorized merging the basics and continuing visual

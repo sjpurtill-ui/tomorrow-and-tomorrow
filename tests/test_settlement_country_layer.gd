@@ -109,6 +109,22 @@ func test_camera_motion_defers_new_drape_and_fog_keeps_unchanged_patch_signature
 	assert_int(f.layer.captures).is_equal(captures)
 	assert_bool(node.retained.desired.values()[0].signature!=before.values()[0].signature).is_true()
 
+func test_same_day_completed_fabric_refreshes_ours_and_admitted_rivals()->void:
+	_rival("known",Vector2(40,20))
+	var f:=_fixture();f.layer.refresh(f.terrain)
+	# Let admission enter the constant-size frame key before measuring changes.
+	f.layer.refresh(f.terrain)
+	for owner:String in ["player","known"]:
+		var state:Object=GameState if owner=="player" else WorldSimulation.actors[owner].systems.GameState
+		var before_captures:int=f.layer.captures
+		var unchanged_day:float=state.elapsed_days
+		state.settlement_plots.append({"id":3,"land_use":"mixed_household","status":"active","fabric_generation":12,"storeys":2,"material_family":"stone"})
+		state.morphology_revision+=1
+		f.layer.refresh(f.terrain)
+		assert_int(f.layer.captures).is_equal(before_captures+1)
+		assert_float(state.elapsed_days).is_equal(unchanged_day)
+		assert_float(f.layer.layers[owner].snapshot.country_appearance.late_share).is_equal(1.0)
+
 func test_only_known_identified_people_with_estimate_and_real_ledger_are_admitted()->void:
 	_rival("unreported",Vector2(25,20),false)
 	_rival("location_only",Vector2(30,20),true,false)
@@ -241,3 +257,22 @@ func test_all_rotated_plot_ends_and_corners_fit_inside_clear_canopy()->void:
 				for y in range(-3,4):
 					var point:Vector2=field.center+along*float(field.half_length_km)*float(x)/5.0+across*float(field.half_width_km)*float(y)/3.0
 					assert_float(Woodland.retained_at(point,masks)).is_less_equal(0.001)
+
+func test_cluster_clearing_budget_covers_neighboring_compounds()->void:
+	var f:=_fixture()
+	var visual:=preload("res://scripts/settlement_country_visual.gd").new()
+	f.layer.add_child(visual)
+	var clusters:Array=[]
+	for index in 16:
+		clusters.append({"id":"cluster_%d" % index,"kind":"cluster","position":Vector2(float(index%4)*0.18,float(index/4)*0.18),"field_radius_km":0.14})
+	visual.plan={"homesteads":clusters,"herders":[]}
+	f.layer.layers={"player":{"node":visual}}
+	var areas:PackedVector4Array=f.layer.canopy_clearings(Vector2.ZERO)
+	assert_int(areas.size()).is_equal(16)
+	for record:Dictionary in clusters:
+		var found:=false
+		for area:Vector4 in areas:
+			if Vector2(area.x,area.y)==record.position:
+				found=true
+				assert_float(area.z*0.65).is_greater_equal(0.1399)
+		assert_bool(found).is_true()

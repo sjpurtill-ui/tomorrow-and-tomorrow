@@ -39,7 +39,13 @@ func refresh(owner_terrain:Node3D)->void:
 	var step:=maxf(1.0,pow(1.6,float(level))*0.2)
 	var detail_visible:bool=terrain.detail_terrain_patch!=null and terrain.detail_terrain_patch.visible
 	var surface:Array=[terrain.river_terrain_grid,terrain.detail_surface_center,detail_visible]
-	var key:Array=[GameState.world_seed,int(GameState.elapsed_days),GameState.population_total,GameState.settlement_site_committed,GameState.settlement_founded_at,GameState.resource_deposits.size(),GameState.known_discoveries.size(),center.snapped(Vector2.ONE*step),level,surface,CivilizationSystem.fog_revision]
+	# Same-day construction can complete while the clock is paused. Poll only
+	# the bounded admitted owners' scalar revisions, never their plot arrays.
+	var fabric_revisions:Array=[GameState.morphology_revision]
+	for id:String in layers:
+		if id!="player" and WorldSimulation.actors.has(id):
+			fabric_revisions.append([id,WorldSimulation.actors[id].systems.GameState.morphology_revision])
+	var key:Array=[GameState.world_seed,int(GameState.elapsed_days),GameState.population_total,GameState.settlement_site_committed,GameState.settlement_founded_at,GameState.resource_deposits.size(),GameState.known_discoveries.size(),fabric_revisions,center.snapped(Vector2.ONE*step),level,surface,CivilizationSystem.fog_revision]
 	if key==_refresh_key:return
 	_refresh_key=key
 	var began:=Time.get_ticks_usec()
@@ -71,7 +77,7 @@ func refresh(owner_terrain:Node3D)->void:
 			add_child(node)
 			entry={"node":node,"source_key":[],"snapshot":{},"style":candidate.style,"population":-1}
 		var state:Object=GameState if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.GameState
-		var source_key:Array=[int(state.get("elapsed_days")),int(state.get("population_total")),(state.get("resource_deposits") as Array).size(),(state.get("known_discoveries") as Array).size(),candidate.get("observation_day",-1),candidate.get("estimate",{})]
+		var source_key:Array=[int(state.get("elapsed_days")),int(state.get("population_total")),int(state.get("morphology_revision")),(state.get("resource_deposits") as Array).size(),(state.get("known_discoveries") as Array).size(),candidate.get("observation_day",-1),candidate.get("estimate",{})]
 		if source_key!=entry.source_key:
 			var realm:Dictionary=candidate.realm
 			var snapshot:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:return PLAN.capture_current(realm))
@@ -159,7 +165,12 @@ func canopy_clearings(center:Vector2,limit:int=16)->PackedVector4Array:
 				for home:Dictionary in entry.node.plan.get(kind,[]):
 					var layout:=PLAN.homestead_layout(home)
 					var at:Vector2=layout.yard_center
-					_clearing_candidates.append({"anchor":at,"area":Vector4(at.x,at.y,float(layout.yard_radius_km),0.01)})
+					if bool(layout.get("is_cluster",false)):
+						# A compact inhabited compound shares one clearing. Adjacent
+						# compounds can join without spending seven mask slots each.
+						_clearing_candidates.append({"anchor":at,"area":Vector4(at.x,at.y,float(layout.envelope_radius_km)/0.65,0.0)})
+						continue
+					_clearing_candidates.append({"anchor":at,"area":Vector4(at.x,at.y,float(layout.get("canopy_yard_radius_km",layout.yard_radius_km)),0.01)})
 					for field:Dictionary in layout.fields:
 						var along:=Vector2.from_angle(float(field.angle))
 						var across:=along.orthogonal()

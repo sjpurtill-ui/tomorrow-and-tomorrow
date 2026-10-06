@@ -126,18 +126,16 @@ func test_partial_reveal_refreshes_clipped_patch_when_center_remains_visible()->
 	_flush(visual)
 	assert_int(visual.stats().keys["sites:site:player:center"].node_id).is_not_equal(before["sites:site:player:center"].node_id)
 
-func test_hut_offsets_stay_on_admitted_land_beside_a_shoreline()->void:
+func test_unavailable_house_slots_are_skipped_without_stacking_at_the_center()->void:
 	var at:=Vector2(10,10)
 	var placed:Array[Vector2]=[]
 	var visual=auto_free(Visual.new())
 	visual.configure(func(point:Vector2)->float:placed.append(point);return 0.0,func(point:Vector2)->bool:return point.distance_to(at)<0.001)
 	var root:Node3D=auto_free(Node3D.new())
 	visual._add_homes(root,at,3,317,{"known":[],"style":{},"fabric":{}})
-	# The dummy headless RenderingServer does not retain MultiMesh transform
-	# readback. Height samples are the exact final positions sent to transforms.
-	assert_bool(placed.is_empty()).is_false()
-	for point:Vector2 in placed:
-		assert_bool(point.distance_to(at)<0.001).is_true()
+	assert_bool(placed.is_empty()).is_true()
+	assert_int(root.get_meta("country_home_count")).is_equal(0)
+	assert_int(root.get_child_count()).is_equal(0)
 
 func test_shared_house_kits_keep_metre_scale_in_world_kilometres()->void:
 	var visual=_visual()
@@ -163,6 +161,78 @@ func test_shared_house_kits_keep_metre_scale_in_world_kilometres()->void:
 				assert_bool(component>0.0007 and component<0.0012).is_true()
 			var world_bounds:AABB=transform*bounds
 			assert_float(world_bounds.size.length()).is_less(0.05)
+
+func test_completed_late_country_homes_use_recorded_low_rise_kit_and_bounded_props()->void:
+	var visual=_visual()
+	var era=preload("res://scripts/settlement_country_era.gd")
+	var plot:={"id":11,"land_use":"mixed_household","status":"active","fabric_generation":12,"storeys":10,"material_family":"stone","roof_plan":"concrete_roof"}
+	var appearance:Dictionary=era.capture([],{},[plot])
+	var root:Node3D=auto_free(Node3D.new())
+	visual._add_homes(root,Vector2(40,60),3,157,{"country_appearance":era.render_profile(appearance),"style":{}})
+	var homes:MultiMeshInstance3D=root.get_node("ScatteredHomes")
+	var descriptor:Dictionary=homes.get_meta("country_home")
+	assert_str(descriptor.kind).is_equal("modern_villa")
+	assert_int(descriptor.storeys).is_equal(2)
+	assert_str(descriptor.material).is_equal("stone|slab")
+	assert_int(homes.multimesh.instance_count).is_equal(3)
+	var props:=0
+	for child:Node in root.get_children():
+		if child.has_meta("country_prop"):props+=1
+	assert_int(props).is_equal(3)
+	for transform:Transform3D in homes.get_meta("source_transforms"):
+		assert_float((transform*homes.multimesh.mesh.get_aabb()).size.length()).is_less(0.025)
+
+func test_cluster_slots_stay_compact_separated_and_stable_as_roofs_fill_in()->void:
+	for seed_value in range(100,140):
+		var at:=Vector2(14034,-2892)
+		var full:=Visual._cluster_home_slots(at,12,seed_value)
+		assert_int(full.size()).is_equal(12)
+		for count in [4,6,9,12]:
+			var partial:=Visual._cluster_home_slots(at,count,seed_value)
+			for index in count:assert_vector(partial[index]).is_equal(full[index])
+		for index in full.size():
+			assert_float(full[index].distance_to(at)).is_less(0.065)
+			for other in range(index):assert_float(full[index].distance_to(full[other])).is_greater(0.016)
+
+func test_clusters_render_six_to_twelve_roofs_with_fixed_transforms_and_three_props()->void:
+	var visual=_visual()
+	var era=preload("res://scripts/settlement_country_era.gd")
+	var appearance:Dictionary=era.capture([],{},[{"id":9,"land_use":"mixed_household","status":"active","fabric_generation":12,"storeys":8}])
+	var context:={"country_appearance":era.render_profile(appearance),"style":{}}
+	var prior:Dictionary={}
+	for count in [4,6,12]:
+		var root:Node3D=auto_free(Node3D.new())
+		visual._add_homes(root,Vector2(40,60),count,157,context)
+		assert_int(root.get_meta("country_home_count")).is_equal(count)
+		var groups:=0;var props:=0;var rendered:=0
+		var now:Dictionary={}
+		for child:Node in root.get_children():
+			if child.has_meta("country_prop"):props+=1
+			if not child.has_meta("country_home"):continue
+			groups+=1;rendered+=(child as MultiMeshInstance3D).multimesh.instance_count
+			var slots:Array=child.get_meta("country_home_slots")
+			var transforms:Array=child.get_meta("source_transforms")
+			for index in slots.size():now[slots[index]]={"transform":transforms[index],"descriptor":child.get_meta("country_home")}
+		assert_int(rendered).is_equal(count)
+		assert_int(groups).is_less_equal(3)
+		assert_int(props).is_equal(3)
+		for slot in prior:assert_dict(now[slot]).is_equal(prior[slot])
+		prior=now
+
+func test_shoreline_leaves_holes_in_cluster_without_moving_dry_homes()->void:
+	var at:=Vector2(40,60)
+	var visual=auto_free(Visual.new())
+	visual.configure(func(_point:Vector2)->float:return 0.0,func(point:Vector2)->bool:return point.x>=at.x)
+	var root:Node3D=auto_free(Node3D.new())
+	visual._add_homes(root,at,12,157,{"style":{},"known":[],"fabric":{}})
+	var kept:Array=root.get_meta("country_home_positions")
+	var all_slots:=Visual._cluster_home_slots(at,12,157)
+	assert_int(kept.size()).is_greater(0)
+	assert_int(kept.size()).is_less(12)
+	for point:Vector2 in kept:
+		assert_bool(point in all_slots).is_true()
+		assert_float(point.x).is_greater_equal(at.x)
+		assert_float(point.distance_to(at)).is_greater(0.01)
 
 func test_herders_have_local_grazing_tracks_even_in_a_wide_realm()->void:
 	var visual=_visual()
@@ -300,3 +370,14 @@ func test_reveal_change_restarts_a_clipped_incomplete_replacement()->void:
 	_flush(visual)
 	var finished:Node=instance_from_id(visual.stats().keys["sites:site:player:center"].node_id)
 	assert_bool(finished.get_meta("fog_clipped")).is_false()
+
+func test_quarry_catchments_do_not_become_hundred_metre_ribbons()->void:
+	var visual:Node3D=auto_free(Visual.new())
+	visual.configure(func(_point:Vector2)->float:return 0.0)
+	visual._collecting=true
+	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._draw_site(surface,{"position":Vector2.ZERO,"resource":"Stone","age":"worked_quarry","radius_km":0.72,"tile_area_km2":9.0},44)
+	assert_int(visual._commands.size()).is_greater(0)
+	for triangle:Array in visual._commands:
+		for index in 3:
+			assert_float((triangle[index] as Vector2).distance_to(triangle[(index+1)%3])).is_less(0.16)

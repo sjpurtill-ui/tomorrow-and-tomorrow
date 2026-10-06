@@ -4,8 +4,7 @@ extends Node3D
 ## implementation and are replaced only when their own visible facts change.
 const PLAN = preload("res://scripts/settlement_country_plan.gd")
 const PATCHES = preload("res://scripts/settlement_patch_renderer.gd")
-const EARLY = preload("res://scripts/early_settlement_visual.gd")
-const TOWN = preload("res://scripts/organic_town_visual.gd")
+const ERA = preload("res://scripts/settlement_country_era.gd")
 const INK = preload("res://scripts/settlement_ink.gd")
 const SHAPES = preload("res://scripts/settlement_kit_shapes.gd")
 const CHART = preload("res://scripts/settlement_country_chart.gd")
@@ -65,12 +64,9 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 		plan=PLAN.build(snapshot);last_plan_signature=plan_key
 	var entries:Array[Dictionary]=[]
 	var anchors:Array[Vector2]=[Vector2(snapshot.get("origin",Vector2.ZERO))]
-	var known:Array=[]
-	for id:String in ["thatched_roofing","joinery","dry_stone_walls","dressed_stone_masonry","kiln_fired_bricks","adobe_wall_construction","mould_made_mudbricks","framed_construction","timber_post_beam_connections","grain_grinding","saddle_quern"]:
-		if id in snapshot.get("knowledge",[]):known.append(id)
-	var homes:Array=[]
-	for share in snapshot.get("built_fabric",{}).get("homes",[]):homes.append(roundf(float(share)*10.0)/10.0)
-	var context:Dictionary={"origin":snapshot.get("origin",Vector2.ZERO),"road_tier":snapshot.get("road_tier",0),"known":known,"fabric":{"homes":homes},"style":style.duplicate(true)}
+	var country_appearance:Dictionary=plan.get("country_appearance",{})
+	if country_appearance.is_empty():country_appearance=ERA.capture(snapshot.get("knowledge",[]),snapshot.get("built_fabric",{}))
+	var context:Dictionary={"origin":snapshot.get("origin",Vector2.ZERO),"road_tier":snapshot.get("road_tier",0),"country_appearance":ERA.render_profile(country_appearance),"style":style.duplicate(true)}
 	for kind:String in ["homesteads","herders","sites"]:
 		for source:Dictionary in plan.get(kind,[]):
 			var record:=source.duplicate(true)
@@ -328,7 +324,8 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var group:=String(record.group)
-	var chart:=CHART.create(record,height_at)
+	# Inhabited expansion is read through roofs and yards, not field-line glyphs.
+	var chart:Node3D=null if String(record.get("kind",""))=="cluster" else CHART.create(record,height_at)
 	if chart!=null:parent.add_child(chart)
 	if group=="sites":
 		_draw_site(surface,record,seed_value)
@@ -344,6 +341,12 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 			var entry:Vector2=Vector2(field.center)-to_field*float(field.half_width_km)
 			_track(surface,at+to_field*float(layout.yard_radius_km)*0.78,entry,seed_value+17,0)
 		_add_homes(parent,at,1 if sparse else int(record.get("buildings",2)),seed_value,context)
+		if bool(layout.get("is_cluster",false)):
+			# Short worn lanes belong to the compound; avoid survey-like spokes
+			# stretching across the surrounding landscape.
+			for home:Vector2 in parent.get_meta("country_home_positions",[]):
+				var toward:Vector2=at.move_toward(home,0.010)
+				_track(surface,toward,home.move_toward(at,0.005),seed_value+int(home.x*1000.0),0)
 	# Exposed rock exhausted long ago has no new busy track; living woods and
 	# staffed workplaces retain access. Thin ground-coloured paths disappear
 	# naturally at realm zoom, rather than becoming chart-wide spokes.
@@ -385,60 +388,93 @@ func _draw_site(surface:SurfaceTool,record:Dictionary,seed_value:int)->void:
 	var spread:=1.18 if float(record.get("tile_area_km2",0.0))>0.0 else radius*0.7
 	for i in 7:
 		var patch:=at+Vector2.from_angle(rng.randf()*TAU)*spread*rng.randf_range(0.10,0.82)
-		var size:=radius*rng.randf_range(0.20,0.37)
+		# The ledger bounds the catchment, not a solid excavated surface. Keep
+		# representative scars local instead of tessellating square kilometres
+		# of faint paint whenever the camera moves in for a house.
+		var size:=minf(radius*rng.randf_range(0.20,0.37),0.060)
 		var tint:=color.darkened(rng.randf_range(0.02,0.16));tint.a=0.68
 		if category=="regrowing":tint=Color(0.53,0.59,0.35,0.66)
 		_wash(surface,patch,size,tint,seed_value+71+i,1.15)
 		if "quarry" in age or resource=="Stone":
-			var direction:=Vector2.from_angle(float(record.get("rotation",0.0))+0.4)
-			for row in 3:
-				var line:=patch+direction.orthogonal()*size*(float(row)-1.0)*0.38
-				_ribbon(surface,line-direction*size*0.65,line+direction*size*0.5,size*0.075,Color(0.40,0.37,0.32,0.62))
+			# Small exposed rubble patches, in metres. A 3km catchment is not a
+			# quarry face: scaling benches by it produced 300m dark bars.
+			for chip in 3:
+				var place:=patch+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.005,0.025)
+				_wash(surface,place,rng.randf_range(0.002,0.006),Color(0.59,0.57,0.50,0.45),seed_value+201+i*3+chip)
 
 func _add_homes(parent:Node3D,at:Vector2,count:int,seed_value:int,context:Dictionary)->void:
-	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
-	var known:Array=context.known
 	var style:Dictionary=context.style
-	var kinds:Array=style.get("kinds",["rooted_lean_to"])
-	var homes:Array=(context.fabric as Dictionary).get("homes",[])
-	var roll:=rng.randf();var grade:=0
-	for i in homes.size():
-		roll-=float(homes[i])
-		if roll<=0.0:grade=i;break
-	var kind:String=kinds[seed_value%kinds.size()]
-	if style.is_empty():
-		kind="round_household" if "thatched_roofing" in known or "joinery" in known else "rooted_lean_to"
-	if grade>=4 and ("dry_stone_walls" in known or "dressed_stone_masonry" in known or "kiln_fired_bricks" in known):kind="rubble_household"
-	elif grade>=3 and ("adobe_wall_construction" in known or "mould_made_mudbricks" in known):kind="earthen_household"
-	elif grade>=2 and ("framed_construction" in known or "timber_post_beam_connections" in known):kind="house_small"
-	var mesh:Mesh=TOWN.kit_mesh(TOWN.KIT.find(kind)) if kind in TOWN.KIT else EARLY.kit_mesh(kind)
-	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.mesh=mesh
-	batch.instance_count=clampi(count,1,3)
-	var transforms:Array[Transform3D]=[]
-	for i in batch.instance_count:
-		var offset:=Vector2.from_angle(float(seed_value%628)*0.01+float(i)*PI)*rng.randf_range(0.006,0.014)
-		var point:=at+offset
-		if not _valid(point):point=at
-		# The shared kit is authored in metres; the map is in kilometres.
-		var basis:=preload("res://scripts/settlement_kit_shapes.gd").lived_basis(rng.randf()*TAU,seed_value+i)
+	var profile:Dictionary=context.get("country_appearance",{})
+	if profile.is_empty():profile=ERA.capture(context.get("known",[]),context.get("fabric",{}))
+	var slots:=_cluster_home_slots(at,count,seed_value)
+	var groups:Dictionary={}
+	var admitted:Array[Vector2]=[]
+	var palette:Array[Dictionary]=[]
+	# Three inherited types are enough to break repetition while keeping each
+	# cluster's draw calls bounded. Palette and slot identity never depend on size.
+	for index in (3 if count>=4 else 1):
+		palette.append(ERA.home(profile,str(seed_value)+(":"+str(index) if index>0 else ""),style))
+	for index in slots.size():
+		var point:Vector2=slots[index]
+		var descriptor:Dictionary=palette[index%palette.size()]
+		var mesh:Mesh=ERA.mesh(descriptor)
+		var rng:=RandomNumberGenerator.new();rng.seed=seed_value+index*7919
+		var inward:Vector2=(at-point).normalized()
+		var heading:=atan2(inward.x,inward.y)+rng.randf_range(-0.18,0.18)
+		var basis:=SHAPES.lived_basis(heading,seed_value+index)
+		if not _home_ground_valid(point,basis,mesh.get_aabb()):continue
+		# Missing shore/fog slots stay empty. Never collapse their roofs onto the
+		# cluster center, and never move the remaining roofs to close that gap.
 		var transform:=Transform3D(basis,_point(point,0.0004))
-		transforms.append(transform);batch.set_instance_transform(i,transform)
-		batch.set_instance_color(i,Color(style.get("tint",Color(0.94,0.89,0.78))).lerp(Color(0.8,0.76,0.67),rng.randf()*0.15))
-	var node:=MultiMeshInstance3D.new();node.name="ScatteredHomes";node.multimesh=batch;node.material_override=INK.architecture_material()
-	node.set_meta("source_transforms",transforms)
-	parent.add_child(node)
-	INK.add_ground_shadows(parent,"FarmhouseShadow",transforms,mesh.get_aabb())
-	# Quiet household objects establish a compound at close zoom; never figures.
-	for i in transforms.size():
-		var origin:Vector3=transforms[i].origin
-		var home:=Vector2(origin.x,origin.z)
-		_add_prop(parent,"woodpile",home+Vector2(0.005,0.001),float(seed_value%31))
-		if "grain_grinding" in known or "saddle_quern" in known:
-			_add_prop(parent,"quern",home+Vector2(-0.004,0.003),0.0)
+		var key:=str(descriptor)
+		if not groups.has(key):groups[key]={"descriptor":descriptor,"mesh":mesh,"transforms":[],"colors":[],"slots":[]}
+		groups[key].transforms.append(transform)
+		groups[key].colors.append(Color(style.get("tint",Color(0.94,0.89,0.78))).lerp(Color(0.8,0.76,0.67),rng.randf()*0.15))
+		groups[key].slots.append(index);admitted.append(point)
+	for key:String in groups:
+		var group:Dictionary=groups[key]
+		var transforms:Array[Transform3D]=[];transforms.assign(group.transforms)
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.mesh=group.mesh
+		batch.instance_count=transforms.size()
+		for index in transforms.size():
+			batch.set_instance_transform(index,transforms[index]);batch.set_instance_color(index,group.colors[index])
+		var node:=MultiMeshInstance3D.new();node.name="ScatteredHomes";node.multimesh=batch;node.material_override=INK.architecture_material()
+		node.set_meta("source_transforms",transforms);node.set_meta("country_home",group.descriptor);node.set_meta("country_home_slots",group.slots)
+		parent.add_child(node)
+		INK.add_ground_shadows(parent,"FarmhouseShadow",transforms,(group.mesh as Mesh).get_aabb())
+	parent.set_meta("country_home_count",admitted.size())
+	parent.set_meta("country_home_positions",admitted)
+	if admitted.is_empty():return
+	# Shared objects sit around the yard, at most three for the whole cluster.
+	var offsets:=[Vector2(0.007,0.002),Vector2(-0.006,0.004),Vector2(0.002,-0.007)]
+	for index in mini(palette[0].props.size(),ERA.MAX_PROPS):
+		_add_prop(parent,String(palette[0].props[index]),at+offsets[index],float(seed_value%31))
+
+static func _cluster_home_slots(at:Vector2,count:int,seed_value:int)->Array[Vector2]:
+	# Infill around an irregular yard and its short lanes, not a ring or a grid.
+	# A fixed prefix preserves old roofs when a four-house knot grows to twelve.
+	const OFFSETS:=[Vector2(-17,-12),Vector2(8,-18),Vector2(24,3),Vector2(-9,18),Vector2(-35,8),Vector2(13,33),Vector2(37,-22),Vector2(-20,-36),Vector2(-43,-19),Vector2(38,29),Vector2(-20,45),Vector2(4,-48)]
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+	var angle:=rng.randf()*TAU
+	var slots:Array[Vector2]=[]
+	for index in clampi(count,0,12):
+		var offset:Vector2=OFFSETS[index]*0.001+Vector2(rng.randf_range(-0.002,0.002),rng.randf_range(-0.002,0.002))
+		slots.append(at+offset.rotated(angle))
+	return slots
+
+func _home_ground_valid(point:Vector2,basis:Basis,bounds:AABB)->bool:
+	if not _valid(point) or not bool(_visibility_cache.get(point,true)):return false
+	for x:float in [bounds.position.x,bounds.end.x]:
+		for z:float in [bounds.position.z,bounds.end.z]:
+			var offset:=basis*Vector3(x,0,z)
+			var corner:=point+Vector2(offset.x,offset.z)
+			if not _valid(corner) or not bool(_visibility_cache.get(corner,true)):return false
+	return true
 
 func _add_prop(parent:Node3D,kind:String,point:Vector2,angle:float)->void:
 	if not _valid(point):return
 	var prop:=MeshInstance3D.new();prop.name="Farm_"+kind
+	prop.set_meta("country_prop",kind)
 	prop.mesh=SHAPES.prop(kind);prop.material_override=INK.architecture_material()
 	prop.transform=Transform3D(Basis(Vector3.UP,angle).scaled(Vector3.ONE*0.001),_point(point,0.0003))
 	parent.add_child(prop)

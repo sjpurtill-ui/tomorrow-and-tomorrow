@@ -80,6 +80,12 @@ func _run() -> void:
 			node.set_physics_process(false)
 	if _arg("population") != "":
 		GameState.ensure_population_total(int(_arg("population")))
+	var fabric_specimen: Dictionary = {}
+	if _arg("fabric-year") != "":
+		# Explicit visual specimen, using the live construction conversion.
+		# This does not claim the copied campaign reached this date or fabric.
+		var prepared := preload("res://tests/city_evolution_visual_fixture.gd").snapshot(int(_arg("fabric-year")))
+		fabric_specimen = {"year": prepared.year, "tier": prepared.tier, "plots": prepared.plots.size(), "scope": "Prepared construction specimen, not a simulated campaign"}
 	terrain = load("res://local_terrain.tscn").instantiate()
 	if "--without-country" in OS.get_cmdline_user_args():
 		var country := NoCountry.new()
@@ -102,8 +108,10 @@ func _run() -> void:
 	var reach := Seat.reach_km()
 	var evidence := "Exact saved campaign" if source != "" else "Reconstructed founding - not original campaign checkpoint"
 	if _arg("population") != "": evidence = "Population specimen - not a campaign checkpoint"
+	if not fabric_specimen.is_empty(): evidence = "Prepared construction year %d, tier %d - not campaign history" % [fabric_specimen.year, fabric_specimen.tier]
 	report = {"evidence": evidence, "source_copy": source, "source_sha256": FileAccess.get_sha256(source) if source != "" else "", "population_override": _arg("population"), "seed": GameState.world_seed, "population": GameState.population_total, "day": GameState.elapsed_days, "name": GameState.settlement_name, "core_km": core, "worked_km": reach, "realm_km": realm.get("reach", 0.0), "deposits": GameState.resource_deposits.size(), "revealed_for_review": "--reveal" in OS.get_cmdline_user_args(), "captures": []}
 	report["stage"] = Seat.stage()
+	if not fabric_specimen.is_empty(): report["fabric_specimen"] = fabric_specimen
 	report["settlements"] = GameState.player_settlements.size()
 	report["country_disabled_for_comparison"] = "--without-country" in OS.get_cmdline_user_args()
 	var target: Vector3 = GameState.settlement_founded_at
@@ -147,6 +155,7 @@ func _run() -> void:
 				var plan: Dictionary = owners.player.node.get("plan")
 				for farm: Dictionary in plan.get("homesteads", []):
 					if _arg("homestead-id") != "" and String(farm.id) != _arg("homestead-id"): continue
+					if _arg("homestead-kind") != "" and String(farm.get("kind","")) != _arg("homestead-kind"): continue
 					var point: Vector2 = farm.position
 					if not terrain._settlement_stage_land_at(point): continue
 					var farm_spans := _arg("homestead-span", ".8").split(",")
@@ -154,7 +163,7 @@ func _run() -> void:
 						sizes.append(farm_spans[farm_index])
 						labels.append("homestead-detail" if farm_spans.size() == 1 else "homestead-detail-%d" % farm_index)
 						targets.append(Vector3(point.x, terrain._height_at(point.x, point.y), point.y))
-					report["detail_homestead"] = {"id": farm.id, "position": str(point), "distance_km": farm.distance_km, "representative": true}
+						report["detail_homestead"] = {"id": farm.id, "kind": farm.get("kind","homestead"), "houses": farm.get("buildings",1), "position": str(point), "distance_km": farm.distance_km, "representative": true}
 					break
 	if _arg("homestead-id") != "" and not report.has("detail_homestead"):
 		push_error("Requested diagnostic homestead was not found on admitted land: " + _arg("homestead-id"))

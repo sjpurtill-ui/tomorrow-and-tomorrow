@@ -6,7 +6,14 @@ const OneSeat:=preload("res://scripts/one_seat.gd")
 const RealmReach:=preload("res://scripts/realm_reach.gd")
 const Extent:=preload("res://scripts/settlement_visual_extent.gd")
 const Roads:=preload("res://scripts/settlement_roads.gd")
+const Era:=preload("res://scripts/settlement_country_era.gd")
 const MAX_HOMESTEADS:=144
+const MAX_CLUSTERS:=96
+const MAX_FAR_HOLDINGS:=48
+const CLUSTER_CELL_KM:=0.18
+const CLUSTER_SHELL_KM:=0.36
+const CLUSTER_FRINGE_KM:=0.84
+const MAX_CLUSTER_SHELLS:=7
 const MAX_HERDERS:=10
 const MAX_SITES:=96
 const CELL_KM:=6.0
@@ -34,13 +41,16 @@ static func capture_current(realm:Dictionary={})->Dictionary:
 			var id:=String(entry.get("id",""))
 			if not id.is_empty() and id not in knowledge:knowledge.append(id)
 	var fabric:Dictionary=state.built_fabric.duplicate(true)
+	var appearance:=Era.capture(knowledge,fabric,state.settlement_plots)
+	var population:=maxf(0.0,float(state.population_exact))
 	var stage:=OneSeat.stage()
-	return {"owner":owner,"origin":origin,"population":maxf(0.0,float(state.population_exact)),
+	return {"owner":owner,"origin":origin,"population":population,
 		"core_km":OneSeat.core_km(),"worked_km":OneSeat.reach_km(),
+		"dense_radius_km":dense_radius(roundi(population),float(appearance.plot_radius_km)),
 		"realm_km":float(realm.get("reach",0.0)),"stage":String(stage.id),
 		"seed":int(state.world_seed),"knowledge":knowledge,"built_fabric":fabric,
 		"road_tier":Roads.known_tier(state),"deposits":state.resource_deposits,
-		"appearance_signature":appearance_signature(knowledge,fabric),
+		"country_appearance":appearance,"appearance_signature":appearance_signature(knowledge,fabric,appearance),
 		"founded":bool(state.settlement_site_committed)}
 
 
@@ -48,10 +58,11 @@ static func capture_current(realm:Dictionary={})->Dictionary:
 ## changes are immediate; in-place work/depletion changes require signature().
 ## Population bins change at about 4%, leaving old geometry attached in between.
 static func quick_signature(snapshot:Dictionary)->int:
-	var appearance:=int(snapshot.appearance_signature) if snapshot.has("appearance_signature") else appearance_signature(snapshot.get("knowledge",[]),snapshot.get("built_fabric",{}))
+	var appearance:=int(snapshot.appearance_signature) if snapshot.has("appearance_signature") else appearance_signature(snapshot.get("knowledge",[]),snapshot.get("built_fabric",{}),snapshot.get("country_appearance",{}))
 	return hash([String(snapshot.get("owner","player")),snapshot.get("origin",Vector2.ZERO),
 		int(snapshot.get("seed",0)),bool(snapshot.get("founded",true)),
 		float(snapshot.get("core_km",0.0)),float(snapshot.get("worked_km",0.0)),
+		floori(_snapshot_dense_radius(snapshot)/0.025),
 		floori(float(snapshot.get("realm_km",0.0))/3.0),String(snapshot.get("stage","settlement")),
 		population_bucket(float(snapshot.get("population",0.0))),
 		int(snapshot.get("road_tier",0)),appearance,
@@ -79,10 +90,20 @@ static func population_bucket(people:float)->int:
 	return floori(log(maxf(1.0,people))*24.0)*2+(1 if people>=400.0 else 0)
 
 
-static func appearance_signature(knowledge:Array,fabric:Dictionary)->int:
-	var grades:Array=[]
-	for share:Variant in fabric.get("homes",[]):grades.append(roundi(float(share)*10.0))
-	return hash([knowledge,grades,floori(float((fabric.get("effects",{}) as Dictionary).get("roads",0.0))*12.0)])
+static func appearance_signature(knowledge:Array,fabric:Dictionary,profile:Dictionary={})->int:
+	var rendered_profile:=profile if not profile.is_empty() else Era.capture(knowledge,fabric)
+	return Era.signature(rendered_profile)
+
+
+## OneSeat.core_km is a carrier's worked radius, not the dense built footprint.
+## Match the town renderer's population and recorded-polygon extent instead.
+static func dense_radius(population:int,plot_radius_km:float=0.0)->float:
+	return clampf(maxf(Extent.radius(population),plot_radius_km*1.05),0.12,340.0)
+
+
+static func _snapshot_dense_radius(snapshot:Dictionary)->float:
+	if snapshot.has("dense_radius_km"):return clampf(float(snapshot.dense_radius_km),0.12,340.0)
+	return dense_radius(roundi(float(snapshot.get("population",0.0))),float((snapshot.get("country_appearance",{}) as Dictionary).get("plot_radius_km",0.0)))
 
 
 static func build(snapshot:Dictionary)->Dictionary:
@@ -91,44 +112,99 @@ static func build(snapshot:Dictionary)->Dictionary:
 	var worked:=maxf(core,float(snapshot.get("worked_km",core)))
 	var realm:=maxf(0.0,float(snapshot.get("realm_km",0.0)))
 	var area:=PI*maxf(0.0,worked*worked-core*core)
+	var dense:=_snapshot_dense_radius(snapshot)
+	var holdings_area:=PI*maxf(0.0,worked*worked-dense*dense)
+	var appearance:Dictionary=snapshot.get("country_appearance",{})
+	if appearance.is_empty():appearance=Era.capture(snapshot.get("knowledge",[]),snapshot.get("built_fabric",{}))
 	var out:={"owner":String(snapshot.get("owner","player")),
 		"origin":snapshot.get("origin",Vector2.ZERO),"population":population,
 		"rings":{"core_km":core,"worked_km":worked,"realm_km":realm,
 			"band_area_km2":area,"density":population/maxf(1.0,area)},
-		"visual_core_km":Extent.radius(roundi(population)),
+		"visual_core_km":dense,"holdings_area_km2":holdings_area,
+		"holdings_density":population/maxf(1.0,holdings_area),
 		"stage":String(snapshot.get("stage","settlement")),"road_tier":int(snapshot.get("road_tier",0)),
 		"knowledge":(snapshot.get("knowledge",[]) as Array).duplicate(),
 		"built_fabric":(snapshot.get("built_fabric",{}) as Dictionary).duplicate(true),
+		"country_appearance":Era.render_profile(appearance),
 		"homesteads":[],"herders":[],"sites":[],"bounded":true}
 	if population<=0.0 or not bool(snapshot.get("founded",true)):return out
-	if population>=400.0 and worked>core+0.001:
-		out.homesteads=_homesteads(snapshot,core,worked,population,area)
+	if population>=400.0 and worked>dense+0.001:
+		out.homesteads=_clusters(snapshot,dense,core,worked,population)
+		out.homesteads.append_array(_homesteads(snapshot,dense,core,worked,population,holdings_area))
+		out.homesteads.sort_custom(_nearer)
 	if population>=400.0 and realm>worked+6.0:
 		out.herders=_herders(snapshot,worked,realm,population)
 	out.sites=_sites(snapshot)
 	return out
 
 
-## Fixed, jittered world cells keep surviving representatives on precisely the
-## same ground when rings or population change. Acceptance uses people per band
-## area and falls toward the soft outer edge. No candidate is snapped to a ring.
-## At most 41*41 candidate cells are considered, irrespective of population.
-static func _homesteads(snapshot:Dictionary,core:float,worked:float,people:float,area:float)->Array:
+## Close groups grow out of the town's actual edge. Fixed 180m cells and fixed
+## shell neighbourhoods provide adjacent sites without moving any surviving
+## centre. Population fills the nearest sites and adds roofs to stable slots.
+## At most 7*16*9 candidate cells are evaluated, even at the largest work radius.
+static func _clusters(snapshot:Dictionary,dense:float,core:float,worked:float,people:float)->Array:
 	var origin:Vector2=snapshot.get("origin",Vector2.ZERO)
 	var seed_text:="%s:%d" % [String(snapshot.get("owner","player")),int(snapshot.get("seed",0))]
-	var target:=minf(float(MAX_HOMESTEADS),people/PEOPLE_PER_REPRESENTATIVE)
+	var outer:=minf(worked,dense+CLUSTER_FRINGE_KM)
+	# Include the complete neighbourhood on either side of each fixed shell.
+	# The margin covers cell snapping and jitter, so dropping an inner shell
+	# cannot discard centres that still stand beyond the dense footprint.
+	var margin:=0.42
+	var first:=maxi(0,floori((dense-margin)/CLUSTER_SHELL_KM))
+	var last:=mini(first+MAX_CLUSTER_SHELLS-1,ceili((outer+margin)/CLUSTER_SHELL_KM))
+	var seen:Dictionary={}
+	var records:Array=[]
+	var roofs:=clampi(4+floori(maxf(0.0,log(maxf(400.0,people)/400.0))*1.6),4,12)
+	for shell in range(first,last+1):
+		for sector in 16:
+			var bearing:=TAU*(float(sector)+_unit(seed_text+":fringe_turn")+lerpf(-0.16,0.16,_unit(seed_text+":sector:%d" % sector)))/16.0
+			var along:=Vector2.from_angle(bearing)
+			var anchor:=along*float(shell)*CLUSTER_SHELL_KM
+			for row in range(-1,2):
+				for column in range(-1,2):
+					var candidate:=anchor+(along*row+along.orthogonal()*column)*CLUSTER_CELL_KM
+					var cell:=Vector2i(roundi(candidate.x/CLUSTER_CELL_KM),roundi(candidate.y/CLUSTER_CELL_KM))
+					if seen.has(cell):continue
+					seen[cell]=true
+					var id:="cluster:%s:%d:%d" % [seed_text,cell.x,cell.y]
+					var at:=Vector2(cell)*CLUSTER_CELL_KM+Vector2(_unit(id+":x")-0.5,_unit(id+":z")-0.5)*0.036
+					var distance:=at.length()
+					if distance<=dense or distance>=outer:continue
+					records.append({"id":id,"category":"homestead","kind":"cluster",
+						"location_class":"worked_core" if distance<=core else "homestead_band",
+						"position":origin+at,"offset":at,"distance_km":distance,
+						"field_radius_km":lerpf(0.13,0.15,_unit(id+":field")),
+						"rotation":_unit(id+":angle")*TAU,"buildings":roofs,
+						"road_tier":_country_road_tier(snapshot,0.0),"rank":distance+_unit(id+":rank")*0.025})
+	records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.rank)<float(b.rank))
+	var allowance:=clampi(floori(people/125.0),3,MAX_CLUSTERS)
+	if records.size()>allowance:records.resize(allowance)
+	return records
+
+
+## Fixed, jittered world cells keep surviving representatives on precisely the
+## same ground when rings or population change. Acceptance uses people per worked
+## area and falls toward the soft outer edge. No candidate is snapped to a ring.
+## A fixed third of the 41*41 lattice supplies at most 561 outer candidates.
+static func _homesteads(snapshot:Dictionary,dense:float,core:float,worked:float,people:float,area:float)->Array:
+	var origin:Vector2=snapshot.get("origin",Vector2.ZERO)
+	var seed_text:="%s:%d" % [String(snapshot.get("owner","player")),int(snapshot.get("seed",0))]
+	var target:=minf(float(MAX_FAR_HOLDINGS),people/PEOPLE_PER_REPRESENTATIVE)
 	# The taper's area-weighted mean is about .32. Normalizing the candidate
-	# acceptance by band area makes equal populations visibly sparser on more land.
+	# acceptance by holdings area makes equal populations visibly sparser on more land.
 	var probability:=target*CELL_KM*CELL_KM/maxf(1.0,area)/0.32
 	var limit:=mini(20,ceili(minf(worked,MAX_WORKED_KM)/CELL_KM))
 	var records:Array=[]
 	for x in range(-limit,limit+1):
 		for z in range(-limit,limit+1):
+			if posmod(x+z,3)!=0:continue
 			var id:="farm:%s:%d:%d" % [seed_text,x,z]
 			var at:=Vector2(float(x)+_unit(id+":x")*0.76-0.38,float(z)+_unit(id+":z")*0.76-0.38)*CELL_KM
 			var distance:=at.length()
-			if distance<=core or distance>=worked:continue
-			var t:=clampf((distance-core)/maxf(0.001,worked-core),0.0,1.0)
+			if distance<=dense or distance>=worked:continue
+			# Carrier-core growth only reclassifies a holding. It never relocates
+			# or removes one; only the actual dense fabric absorbs its ground.
+			var t:=clampf(distance/maxf(0.001,worked),0.0,1.0)
 			var taper:=pow(1.0-t,1.35)*0.92+0.025
 			# Angular variation leaves open meadows and wooded fingers, not an
 			# even circular fringe. It is fixed to this people's original ground.
@@ -137,12 +213,13 @@ static func _homesteads(snapshot:Dictionary,core:float,worked:float,people:float
 			var selection:=_unit(id+":take")
 			if selection>=probability*weight:continue
 			records.append({"id":id,"category":"homestead","kind":"homestead",
+				"location_class":"worked_core" if distance<=core else "homestead_band",
 				"position":origin+at,"offset":at,"distance_km":distance,
 				"field_radius_km":lerpf(0.10,0.18,_unit(id+":field")),
 				"rotation":_unit(id+":angle")*TAU,"buildings":1+(1 if _unit(id+":kin")<0.18 else 0),
 				"road_tier":_country_road_tier(snapshot,t),"rank":selection/maxf(0.001,weight)})
 	records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.rank)<float(b.rank))
-	if records.size()>MAX_HOMESTEADS:records.resize(MAX_HOMESTEADS)
+	if records.size()>MAX_FAR_HOLDINGS:records.resize(MAX_FAR_HOLDINGS)
 	records.sort_custom(_nearer)
 	return records
 
@@ -175,6 +252,7 @@ static func _herders(snapshot:Dictionary,worked:float,realm:float,people:float)-
 ## Its seed and dimensions do not depend on population, camera or elapsed day.
 static func homestead_layout(record:Dictionary)->Dictionary:
 	var at:Vector2=record.get("position",Vector2.ZERO)
+	if String(record.get("kind",""))=="cluster":return _cluster_layout(record)
 	var sparse:=String(record.get("kind",record.get("category",record.get("group","")))) in ["herder","herders"]
 	var id:=String(record.get("id",str(at)))
 	var envelope:=clampf(float(record.get("field_radius_km",0.07 if sparse else 0.14)),0.055 if sparse else 0.10,0.085 if sparse else 0.18)
@@ -190,6 +268,21 @@ static func homestead_layout(record:Dictionary)->Dictionary:
 			"half_width_km":maxf(0.006 if sparse else 0.012,radial*lerpf(0.18,0.20,_unit(field_id+":width"))),
 			"angle":bearing+PI*0.5})
 	return {"yard_center":at,"yard_radius_km":yard_radius,"envelope_radius_km":envelope,"fields":fields}
+
+
+static func _cluster_layout(record:Dictionary)->Dictionary:
+	var at:Vector2=record.get("position",Vector2.ZERO)
+	var id:=String(record.get("id",str(at)))
+	var envelope:=clampf(float(record.get("field_radius_km",0.14)),0.13,0.15)
+	var turn:=float(record.get("rotation",_unit(id+":layout_turn")*TAU))
+	var fields:Array[Dictionary]=[]
+	for index in 2:
+		var field_id:="%s:field:%d" % [id,index]
+		var bearing:=turn+float(index)*PI+lerpf(-0.22,0.22,_unit(field_id+":bearing"))
+		fields.append({"id":field_id,"center":at+Vector2.from_angle(bearing)*envelope*0.80,
+			"half_length_km":0.030,"half_width_km":0.012,"angle":bearing+PI*0.5})
+	return {"is_cluster":true,"yard_center":at,"yard_radius_km":0.078,
+		"canopy_yard_radius_km":0.125,"envelope_radius_km":envelope,"fields":fields}
 
 
 static func _country_road_tier(snapshot:Dictionary,outward:float)->int:
