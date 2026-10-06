@@ -35,7 +35,7 @@ func before_test()->void:
 
 func _foreign()->String:
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
-	civ.player_relation.contact_level=2
+	civ.player_relation.contact_level=2; civ.player_relation.home_location_known=true
 	civ.player_relation.home_location_known=true
 	civ.player_relation.home_position={"x":CivilizationSystem.player_world_origin.x+1,"z":CivilizationSystem.player_world_origin.y}
 	civ.player_relation.opinion=0.2

@@ -41,7 +41,7 @@ func before_test()->void:
 		var c:Dictionary=CivilizationSystem.civilizations[i]
 		c["world_position"]=Vector2(150.0*float(i+1),0.0)
 		c["alive"]=true
-		(c.player_relation as Dictionary)["contact_level"]=2
+		(c.player_relation as Dictionary)["contact_level"]=2; (c.player_relation as Dictionary)["home_location_known"]=true
 		(c.player_relation as Dictionary)["opinion"]=0.1
 		for other:String in (c.get("relations",{}) as Dictionary): ((c.relations as Dictionary)[other] as Dictionary)["opinion"]=0.1
 	for id:String in ids:
