@@ -420,9 +420,11 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	var board:=Board.new()
 	add_child(board)
 	board.setup({"mode":"store"})
-	for part in ["Balance","ComingIn","GoingOut","Budget","Levels","LevyNow","LevyCost","Line_army","Line_scholars","Line_crews","Line_relief"]:
+	for part in ["StoreAnswer","Balance","Verdict","Levels","LevyNow","LevyCost","Line_army","Line_scholars","Line_crews"]:
 		assert_object(board.find_child(part,true,false)).override_failure_message("the store board has no %s" % part).is_not_null()
-	for gone in ["GoodsHeld","Fifths","SeeArms"]:assert_object(board.find_child(gone,true,false)).override_failure_message("the store board shows %s" % gone).is_null()
+	# One town: no food to buy from another of ours, no tally of where it came
+	# from, no stat bars.
+	for gone in ["GoodsHeld","Fifths","SeeArms","Line_relief","SourcesAnswer","ComingIn","GoingOut","Budget"]:assert_object(board.find_child(gone,true,false)).override_failure_message("the store board shows %s" % gone).is_null()
 	# Wealth is what we own: goods first, then making, treasures, materials,
 	# then the common store with its levy and what it pays for.
 	var wealth:=Board.new()
@@ -445,11 +447,8 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	# What we own is the engine's count: every town's goods, at our own prices.
 	var held:=preload("res://scripts/standing.gd").wealth_held()
 	assert_str((wealth.find_child("GoodsHeld",true,false) as Label).text).contains("%s goods" % preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
-	# Every budget bar carries its word and its sum.
-	for row in ["ComingIn","GoingOut"]:
-		var texts:=PackedStringArray()
-		for label in board.find_child(row,true,false).find_children("*","Label",true,false):texts.append((label as Label).text)
-		assert_str(" ".join(texts)).contains("a season")
+	# Each line of spending says what it costs a season.
+	assert_str((board.find_child("Line_army",true,false).find_child("Cost",true,false) as Label).text).contains("a season")
 	# The store's answer comes first, with whether it grows.
 	assert_str((board.find_child("Verdict",true,false) as Label).text).is_not_empty()
 	var long:=PackedStringArray()
@@ -648,7 +647,8 @@ func test_the_purse_settles_monthly_and_costs_no_more_a_day()->void:
 
 
 ## "Need to see where the silver is coming from": each town's levy is kept as
-## it is taken, and the board says it town by town, with what was hidden.
+## it is taken. With one town the board says who gives it in one line, and
+## what is hidden with the levy.
 func test_the_board_says_where_the_silver_comes_from()->void:
 	GameState.economy_stage="subsistence"
 	_stock_goods(5000.0)
@@ -666,11 +666,11 @@ func test_the_board_says_where_the_silver_comes_from()->void:
 	var said:=PackedStringArray()
 	for node in board.find_children("*","Label",true,false): said.append((node as Label).text)
 	var text:=" | ".join(said)
-	assert_str(text).contains("WHERE IT COMES FROM")
-	assert_str(text).contains(String(GameState.settlement_name))
+	assert_str(text).contains("Given by the households of %s" % String(GameState.settlement_name))
+	assert_str(text).not_contains("WHERE IT COMES FROM")
 	# A season at the pace of the days levied: about three months of it.
 	assert_float(float(home.levy)).is_greater(25.0*float(Purse.quote("heavy").rate)*150.0/Purse.goods_price())
-	assert_str(text).contains("hidden by households")
+	assert_str(text).contains("hide their dues")
 	await await_idle_frame()
 	remove_child(board)
 	board.free()
