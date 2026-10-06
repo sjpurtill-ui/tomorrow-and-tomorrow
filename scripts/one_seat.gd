@@ -129,9 +129,16 @@ static func fold_towns(day:int)->Array[Dictionary]:
 
 ## Rings of ground the seat's carriers may search (see BASE_REACH_RINGS).
 static func reach_rings()->int:
+	return clampi(maxi(_core_rings(),homestead_rings()),BASE_REACH_RINGS,MAX_REACH_RINGS)
+
+## Rings the town itself works, by its people alone.
+static func _core_rings()->int:
 	var people:=maxf(0.0,float(WorldSimulation.state.population_exact))
-	var rings:=BASE_REACH_RINGS+floori(sqrt(people/REACH_PEOPLE_STEP))
-	return clampi(maxi(rings,homestead_rings()),BASE_REACH_RINGS,MAX_REACH_RINGS)
+	return clampi(BASE_REACH_RINGS+floori(sqrt(people/REACH_PEOPLE_STEP)),BASE_REACH_RINGS,MAX_REACH_RINGS)
+
+## How far out the town proper works, in km (its people alone, no homesteads).
+static func core_km()->float:
+	return float(_core_rings())*3.0
 
 ## Rings of the realm's country the homesteaders work (0 before a home, and
 ## for the other peoples, whose realms are not read here).
@@ -144,6 +151,16 @@ static func homestead_rings()->int:
 ## How far out the worked ground reaches, in km.
 static func reach_km()->float:
 	return float(reach_rings())*3.0
+
+## Homesteads produce where they stand: a site out in the homestead country
+## is worked and its goods kept by the homesteaders living by it, so its
+## load travels only as far as the town's own edge (core_km), not the whole
+## way in. A site within the town's own ground, or beyond the homesteads,
+## keeps its real distance. `reach` and `core` are reach_km() and core_km(),
+## read once by the caller.
+static func haul_km(distance:float,reach:float,core:float)->float:
+	if distance<=core or distance>reach: return distance
+	return core
 
 ## Districts of the seat: its active local centres.
 static func districts()->int:
