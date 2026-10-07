@@ -1,3 +1,20 @@
+## October 7 — Banishment and envoy expulsion
+
+Successful exile now shows confrontation, a clear gesture toward the actual
+court exit, a turn and an unbound escort. The named supporter directs from the
+exit side so the target cannot hide their pointing arm. Typed orders, known
+people, the official Cast out menu and foreign-envoy expulsion use their exact
+successful engine results. Prior restraints are removed; no extra population,
+office, injury or death changes are applied by the animation.
+
+Source checkpoints `4bcfee6a` and `1a7c8252`, branch `codex/court-banishment`,
+based on current main `7fa6016e`. All 36 distinct focused checks passed; final
+private GPU review passed actual official exile, envoy expulsion and skipping.
+The arm and all three unbound figures are visible, paths stay clear, natural
+completion uses no fallback, and supporters restore. No runtime errors or save
+migration. The live player remains untouched; restart normally to load it.
+Evidence and validation scope: `docs/design/COURT_BANISHMENT.md`.
+
 ## October 7 — Physical arrest and detention
 
 Successful arrests now show two eligible adults taking hold of the correct

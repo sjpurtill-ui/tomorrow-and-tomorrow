@@ -22,6 +22,7 @@ age eligibility applies to all participants. No save fields or migration change.
 
 Worktree: `C:/Users/sjpur/tt-people-grown-land`, branch
 `codex/court-banishment`, base `7fa6016e` (including the integrated arrest batch).
+Source checkpoints: `4bcfee6a` and `1a7c8252`.
 Owned production files are `court_custody_stage.gd`, `court_stage.gd` and
 `audience_modal.gd`. Tests exercise actual result routes, presentation cleanup,
 unbound choreography and the imported pointing hand's direction in transformed
@@ -32,9 +33,31 @@ prepared adult court fixtures; no live player process is interrupted.
 Probe: `tests/court_banishment_preview.tscn`. Generated evidence belongs under
 `artifacts/court-banishment/`, outside source commits.
 
-All 35 distinct headless checks passed: banishment routes (10), choreography (4),
+All 36 distinct headless checks passed: banishment routes (10), choreography (5),
 existing custody routes (12), custody rig/spacing (8), and initialized preview
-parser (1). Reports 81 and 82 verify the same production source, with zero runtime
-errors or orphan nodes. The route test waits for queued old restraints to be
-deleted after release, while immediately rejecting any newly allocated restraint
-in the banishment scene. No production change was needed for that test correction.
+parser (1). Reports 81–83 recorded zero runtime errors or orphan nodes in the
+passing checks. The last 16-check run covers the final exile staging, named-actor
+routing, default detention behavior and transformed-court pointing alignment.
+
+Rendered review identified a correctly aimed arm hidden behind the target. The
+first, explicitly named supporter now approaches on the exit side of the target,
+keeping the indicating arm directed away from them. The second supporter takes
+the opposite checked position; detention retains its original formation.
+
+Final private GPU review passed on `1a7c8252`: actual typed official exile,
+foreign-envoy menu expulsion and known-person exile skipped during the door
+gesture. The outstretched arm is visible, points toward the actual exit and
+remains separate from the target. The rendered pointing direction's worst
+horizontal alignment was 0.9836; the indicated door matched exactly. All three
+figures stay framed and separated on the checked paths. There were no binding
+objects, blocked-floor samples, natural-completion fallbacks, fatal outcomes or
+extra population changes after the engine's judgment. Both supporters restored
+their prior positions and all scene ownership cleared. Natural fixture sequences
+took 27.19 s and 24.43 s; the skipped case finished in 5.79 s.
+
+Evidence: `audit.json`, `confront.png`, `door-gesture.png`, `escort.png`,
+`envoy-escort.png`, and `skip-cleanup.png` under the artifact directory above.
+Private PID 25988 exited 0 with no runtime errors. This verifies prepared adult
+chapter-03 fixtures and the offline command/menu paths, not live-model narration
+or every era. The live player was left running; a normal restart through the
+canonical launcher loads the integrated scripts.
