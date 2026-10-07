@@ -160,9 +160,23 @@ func toggle_task(role:String)->void:
 ## The labor part is drawn from the tasks and, for the one task opened, what
 ## that work does with today's numbers: asked of the provider for that task
 ## alone (labor.impact_of), so the eight closed tasks cost nothing.
+## People each drawn figure stands for. It rises at once but falls only when
+## the busiest task is clearly under the line, so a head count hovering at a
+## threshold does not redraw every row each day.
+var _per_held:=1
+func _steady_per_figure(labor:Dictionary)->int:
+	var wanted:=maxi(1,int(labor.get("per_figure",1)))
+	var most:=0
+	for task:Dictionary in labor.get("tasks",[]):most=maxi(most,int(task.get("count",0)))
+	if wanted>_per_held:_per_held=wanted
+	elif wanted<_per_held and float(most)*1.2<=float(12*(_per_held-1)):_per_held=wanted
+	return _per_held
+
+
 var open_impact:Dictionary={}
 func _rebuild_labor()->void:
-	var labor:Dictionary=data.get("labor",{})
+	var labor:Dictionary=data.get("labor",{}).duplicate()
+	labor["per_figure"]=_steady_per_figure(labor)
 	open_impact={}
 	if open_task!="":
 		for task:Dictionary in labor.get("tasks",[]):
@@ -174,9 +188,12 @@ func _rebuild_labor()->void:
 	var head_print:=_print(head)
 	var tasks:Array=labor.get("tasks",[])
 	var row_prints:Array[String]=[]
+	var row_shapes:Array[String]=[]
 	for task:Dictionary in tasks:
 		var role:=String(task.get("id",""))
-		row_prints.append(_print([task,int(labor.get("per_figure",1)),bool(labor.get("manual",false)),labor.get("on_move") is Callable,open_task==role,open_impact if open_task==role else {}]))
+		var context:Array=[int(labor.get("per_figure",1)),bool(labor.get("manual",false)),labor.get("on_move") is Callable,open_task==role,open_impact if open_task==role else {}]
+		row_prints.append(_print([task]+context))
+		row_shapes.append(_print([_row_shape(task,int(labor.get("per_figure",1)))]+context))
 	var box:Control=parts.labor
 	# The whole part is drawn afresh when its rows are not the ones drawn;
 	# otherwise only the header or the task rows whose print moved.
@@ -185,6 +202,7 @@ func _rebuild_labor()->void:
 		_fill_labor(box,labor)
 		prints["labor"]=head_print
 		_labor_row_prints=row_prints
+		_labor_row_shapes=row_shapes
 		rebuilds+=1
 		return
 	if String(prints.get("labor",""))!=head_print:
@@ -196,6 +214,9 @@ func _rebuild_labor()->void:
 	for index in tasks.size():
 		if row_prints[index]==_labor_row_prints[index]:continue
 		var stale:Control=_labor_rows[index]
+		# Only the day's numbers moved: the words and the count are written
+		# into the row drawn, so nothing is torn down and redrawn each day.
+		if row_shapes[index]==_labor_row_shapes[index] and _write_row_numbers(stale,tasks[index]):continue
 		var at:=stale.get_index()
 		box.remove_child(stale);stale.queue_free()
 		var fresh:=_labor_row(labor,tasks[index])
@@ -203,10 +224,12 @@ func _rebuild_labor()->void:
 		_labor_rows[index]=fresh
 		rebuilds+=1
 	_labor_row_prints=row_prints
+	_labor_row_shapes=row_shapes
 
 var _labor_head:Control
 var _labor_rows:Array[Control]=[]
 var _labor_row_prints:Array[String]=[]
+var _labor_row_shapes:Array[String]=[]
 
 
 # ---------------------------------------------------------------------------
@@ -486,6 +509,45 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 
 ## One task: its row of figures and count (with −/+ and ×5 for the ruler)
 ## and, when it is the task opened, what that work does right under it.
+## What a task row is built from, apart from the numbers written into it: the
+## figures drawn and which effect lines exist.
+func _row_shape(task:Dictionary,per:int)->Array:
+	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
+	var lines:Array=[]
+	for key in ["now","plus_ten","genius"]:lines.append(String(effect.get(key,""))!="")
+	return [String(task.get("label","")),_row_kinds(task,per),lines,task.get("can_take"),task.get("can_add"),task.get("take_tip"),task.get("add_tip"),task.get("five_tip"),task.get("impact")]
+
+
+func _row_kinds(task:Dictionary,per:int)->Array:
+	var kinds:Array=[]
+	var role:=String(task.get("id",""))
+	for pair in task.get("mix",[]):
+		for index in clampi(ceili(float(pair[1])/float(per)),0,FIGURES_PER_ROW):kinds.append(String(pair[0]))
+	if kinds.is_empty():
+		var count:=int(task.get("count",0))
+		for index in (clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW) if count>0 else 0):kinds.append(String(task.get("icon",role)))
+	return kinds.slice(0,FIGURES_PER_ROW)
+
+
+## Writes a task's count, effect words and tooltip into the row drawn.
+func _write_row_numbers(row:Control,task:Dictionary)->bool:
+	var role:=String(task.get("id",""))
+	var line:=row.get_node_or_null("TaskHead/Task_%s" % role) as HBoxContainer
+	var number:=line.get_node_or_null("Count") as Label if line!=null else null
+	if number==null:return false
+	number.text=str(int(task.get("count",0)))
+	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
+	for part:Array in [["now","Effect"],["plus_ten","TenMore"],["genius","Gifted"]]:
+		var label:=row.get_node_or_null("TaskHead/%s" % String(part[1])) as Label
+		if label!=null:label.text=String(effect.get(String(part[0]),""))
+	var parts:PackedStringArray=[]
+	for pair in task.get("mix",[]):parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
+	if not parts.is_empty():
+		var words:=", ".join(parts)
+		line.tooltip_text=words.left(1).to_upper()+words.substr(1)+"."
+	return true
+
+
 func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	var parent:=VBoxContainer.new();parent.add_theme_constant_override("separation",7)
 	var per:=maxi(1,int(labor.get("per_figure",1)))
@@ -507,12 +569,8 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
 	var count:=int(task.get("count",0))
 	# The food getters by what they got (plants, game, fish, fields).
-	var kinds:Array=[]
-	for pair in task.get("mix",[]):
-		for index in clampi(ceili(float(pair[1])/float(per)),0,FIGURES_PER_ROW):kinds.append(String(pair[0]))
-	if kinds.is_empty():
-		for index in (clampi(ceili(float(count)/float(per)),1,FIGURES_PER_ROW) if count>0 else 0):kinds.append(String(task.get("icon",role)))
-	for kind:String in kinds.slice(0,FIGURES_PER_ROW):
+	var kinds:=_row_kinds(task,per)
+	for kind:String in kinds:
 		var figure:=TextureRect.new();figure.texture=Icons.people_texture(kind,T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
 		figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
