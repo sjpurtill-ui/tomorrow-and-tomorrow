@@ -153,9 +153,6 @@ func _probe_three_centuries_of_emergent_search()->void:
 	var first_contact_day:=-1
 	for day in range(30,302*365+1,30):
 		CivilizationSystem.last_turn_day=day
-		for index in CivilizationSystem.civilizations.size():
-			var civ:Dictionary=CivilizationSystem.civilizations[index]
-			if bool(civ.get("alive",true)): CivilizationSystem.civilizations[index]=CivilizationSystem._advance_civilization(civ)
 		CivilizationSystem._process_foreign_player_rumors(day)
 		CivilizationSystem._process_foreign_scout_reports(day)
 		for civ in CivilizationSystem.civilizations:

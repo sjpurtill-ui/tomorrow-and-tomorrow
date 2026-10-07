@@ -287,34 +287,6 @@ func test_known_discoveries_in_a_legacy_save_stay_known()->void:
 	# Known entries keep contributing their effects.
 	assert_float(DiscoverySystem.adoption("place_value")).is_greater(0.0)
 
-func test_rival_civilizations_use_the_same_gate_and_conditions()->void:
-	var civ:={"production":1.0,"logistics":1.0,"population":500.0,"institutions":0.6,"settlement_count":3,
-		"environment_profile":{"resource_potentials":{"Copper Ore":0.9,"Clay":0.9},"coastal":true,"biome":"floodplain"},
-		"relations":{},"player_relation":{"rival_contact_level":0},
-		"discovery_profile":{"seed":7,"technologies":["cordage","fiber_grading","ore_assaying","kiln_control","charcoal","native_copper_working"]}}
-	GameState.elapsed_days=_day(16)
-	var ids:Array[String]=[]
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"knowledge"):ids.append(String(entry.id))
-	assert_bool("bookbinding_assemblies" in ids).is_false()
-	GameState.elapsed_days=_day(DiscoverySystem.research_600_earliest_year(_entry("copper_smelting")))
-	ids.clear()
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"production"):ids.append(String(entry.id))
-	assert_bool("copper_smelting" in ids).is_true()
-	civ.environment_profile.resource_potentials.erase("Copper Ore")
-	ids.clear()
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"production"):ids.append(String(entry.id))
-	assert_bool("copper_smelting" in ids).is_false()
-	# A player society in the same circumstances gets the same answers.
-	civ.environment_profile.resource_potentials["Copper Ore"]=0.9
-	var rival:=DiscoverySystem.research_600_rival_society(civ)
-	GameState.population_total=500;GameState.society_capacities["institutions"]=0.6
-	GameState.resource_deposits=[{"resource":"Copper Ore","stage":"recognized"},{"resource":"Clay","stage":"recognized"}]
-	GameState.resource_stockpiles.clear()
-	for id:String in ["copper_smelting","clay_shaping","salt_shell_routes","part_time_specialists","temple_common_storehouse","megalith_raising"]:
-		assert_bool(DiscoverySystem.research_600_open(_entry(id))).override_failure_message(id).is_equal(DiscoverySystem.research_600_open(_entry(id),rival))
-	assert_bool(bool(rival.contact)).is_false()
-	civ.relations={"civ_b":{"trade":0.2}}
-	assert_bool(bool(DiscoverySystem.research_600_rival_society(civ).contact)).is_true()
 
 func test_known_precedents_make_research_quicker_but_are_not_required()->void:
 	var id:=""

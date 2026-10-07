@@ -151,16 +151,6 @@ func test_service_training_recovers_low_condition_instead_of_deadlocking()->void
 	MilitaryCampaign.training_staff.service_training(unit,base,8)
 	assert_bool(bool(unit.repairing)).is_true()
 
-func test_rival_training_uses_shared_duration_cost_and_target()->void:
-	var civ:Dictionary={"id":"training_test","population":400.0,"military_population":120.0,"military_readiness":.25,"military_proficiency":.25,"command_readiness":.5,"food_days":100.0,"logistics":.7,"institutions":.7,"production":.5,"military_stockpile":1000.0,"strategy":"sustenance","player_relation":{"at_war":false},"discovery_profile":{"technologies":[]}}
-	var after:=CivilizationSystem._advance_rival_military_training(civ,{"military":.2},0)
-	var maximum_gain:float=MilitaryCampaign.TRAINING_PROGRAMS.camp_drill.training_gain/84.0*30*.25*1.2
-	assert_float(float(after.military_proficiency)-.25).is_between(0.0,maximum_gain)
-	assert_float(float(after.food_days)).is_less(100.0)
-	assert_int(int(after.get("training_cycles",0))).is_equal(0)
-	civ.food_days=1.0;var before:=float(civ.military_proficiency)
-	CivilizationSystem._advance_rival_military_training(civ,{"military":.2},0)
-	assert_float(float(civ.military_proficiency)).is_equal(before)
 
 func test_large_roster_and_policy_controls_update_without_training_buttons()->void:
 	_home()

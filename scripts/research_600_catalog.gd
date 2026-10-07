@@ -48,9 +48,6 @@ const ERA_BAND_FRACTION:=0.9
 const OPEN_JITTER:=0.10
 const OPEN_JITTER_MAX:=5.0
 const AHEAD_STEP_YEARS:=5.0
-## Rival peoples look at most this many years past a question's age: their
-## research keeps to their age, and their daily search stays small.
-const RIVAL_AHEAD_YEARS:=15.0
 
 ## This world's opening year for a question authored at `earliest` (`draw` is
 ## the world's stable 0..1 draw for it).

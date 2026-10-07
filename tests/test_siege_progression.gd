@@ -162,19 +162,6 @@ func test_assault_uses_pressure_and_fatigue_without_resolving_twice()->void:
 	assert_int(MilitaryCampaign.threats_resolved).is_equal(resolved)
 	assert_bool(MilitaryCampaign.validate_state().is_empty()).is_true()
 
-func test_stores_buffer_civilian_starvation_and_real_monthly_reserves_decline()->void:
-	var fixture:=_offensive_fixture()
-	MilitaryCampaign.start_offensive_siege(fixture.civ,fixture.region)
-	MilitaryCampaign.active_siege["blockade"]=.9
-	var original:Dictionary=CivilizationSystem.civilizations[0].duplicate(true)
-	original["food_capacity"]=float(original.population)*.9
-	original["food_days"]=40.0
-	var buffered:=CivilizationSystem._advance_civilization(original.duplicate(true))
-	assert_float(float(buffered.food_days)).is_less(40.0)
-	original["food_days"]=0.0
-	var hungry:=CivilizationSystem._advance_civilization(original.duplicate(true))
-	assert_float(float(hungry.deaths_last_turn)).is_greater(float(buffered.deaths_last_turn))
-	assert_float(float(MilitaryCampaign.siege_effects_for_civilization(String(CivilizationSystem.civilizations[1].id)).food_output_multiplier)).is_equal(1.0)
 
 func test_fortified_deadline_begins_siege_and_same_day_new_siege_has_new_identity()->void:
 	_begin_home()

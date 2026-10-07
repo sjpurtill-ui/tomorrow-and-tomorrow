@@ -215,29 +215,6 @@ func _build_player_discovery_profile()->Dictionary:
 	return profile
 
 
-func advance_rival(civ:Dictionary)->Dictionary:
-	var result:=_advance_rival_discoveries(civ.duplicate(true))
-	var tiers:Dictionary=result.get("progression_tiers",{})
-	for domain in Catalog.DOMAINS:
-		if not tiers.has(domain): tiers[domain]=0
-	var population:=maxf(1.0,float(result.get("population",1.0)))
-	var settlement_count:=maxi(1,int(result.get("settlement_count",1)))
-	if float(result.get("production",0.0))>=0.16 and float(result.get("institutions",0.0))>=0.16:
-		settlement_count=OneSeat.places(population,settlement_count,1)
-	result["settlement_count"]=settlement_count
-	var context:=_rival_context(result)
-	for _pass in Catalog.ERA_NAMES.size():
-		var changed:=false
-		for domain in Catalog.DOMAINS:
-			var tier:=clampi(int(tiers.get(domain,0)),0,Catalog.ERA_NAMES.size()-1)
-			if tier>=Catalog.ERA_NAMES.size()-1: continue
-			var status:=_scale_status(Catalog.node(domain,tier+1),context,tiers)
-			if (status.blockers as Array).is_empty(): tiers[domain]=tier+1; changed=true
-		if not changed: break
-	result["progression_tiers"]=tiers
-	return result
-
-
 func initial_rival_discovery_profile(civ_id:String,founding_focus:String,strategy:String)->Dictionary:
 	var domain_records:Dictionary={}
 	var momentum:Dictionary={}
@@ -250,65 +227,6 @@ func initial_rival_discovery_profile(civ_id:String,founding_focus:String,strateg
 		domain_records[domain]={"count":0,"maturity":0,"breadth":0,"lens_count":0,"adoption":0.0,"specialty":specialty,"tradition":lens}
 		momentum[domain]=0.0
 	return {"technologies":[],"seed":seed_value,"cycle":0,"domains":domain_records,"momentum":momentum,"emphasis":emphasis,"research_workforce":0.0,"research_capacity":0.0,"research_slots":2}
-
-
-func _advance_rival_discoveries(civ:Dictionary)->Dictionary:
-	var profile:Dictionary=civ.get("discovery_profile",{})
-	if profile.is_empty(): profile=initial_rival_discovery_profile(String(civ.get("id","rival")),String(civ.get("founding_focus","provision")),String(civ.get("strategy","sustenance")))
-	civ["discovery_profile"]=profile
-	var cycle:=int(profile.get("cycle",0))+1
-	profile["cycle"]=cycle
-	var domains_profile:Dictionary=profile.get("domains",{})
-	var momentum:Dictionary=profile.get("momentum",{})
-	var emphasis:=_rival_emphasis(civ)
-	profile["emphasis"]=emphasis
-	var allocations:Dictionary=civ.get("allocations",{})
-	var population:=maxf(1.0,float(civ.get("population",1.0)))
-	var research_share:=clampf(float(allocations.get("knowledge",0.1)),0.0,1.0)
-	var research_workforce:=population*research_share*0.58
-	var workforce_scale:=1.0+log(maxf(1.0,research_workforce))/log(10.0)*0.62
-	var food_support:=clampf(float(civ.get("food_capacity",population))/population,0.25,1.25)
-	var physical_support:=0.46+food_support*0.16+clampf(float(civ.get("production",0.1)),0.0,1.0)*0.15+clampf(float(civ.get("logistics",0.1)),0.0,1.0)*0.10+clampf(float(civ.get("institutions",0.1)),0.0,1.0)*0.13
-	var points:=(0.18+clampf(float(civ.get("knowledge",0.1)),0.0,1.0)*0.74+research_share*1.35+clampf(float(civ.get("adaptability",0.5)),0.0,1.0)*0.22)*workforce_scale*physical_support
-	var research_slots:=clampi(2+floori(log(maxf(1.0,research_workforce))/log(10.0)/2.0),2,Catalog.DOMAINS.size())
-	profile["research_workforce"]=research_workforce
-	profile["research_capacity"]=points
-	profile["research_slots"]=research_slots
-	var seed_value:=int(profile.get("seed",WorldSimulation.state.world_seed))
-	for slot in research_slots:
-		var domain:=_weighted_domain(seed_value,cycle,slot,emphasis)
-		momentum[domain]=float(momentum.get(domain,0.0))+points*(1.0 if slot==0 else 0.62)
-		var candidates:=WorldSimulation.discovery.rival_research_candidates(civ,domain)
-		if candidates.is_empty():
-			momentum[domain]=minf(float(momentum[domain]),1.0)
-			continue
-		var technology:Dictionary=candidates[0]
-		var research_cost:=clampf(1.0/maxf(0.001,float(technology.get("chance",0.001))*50.0),2.0,40.0)*WorldSimulation.discovery.research_difficulty(technology,seed_value,float(WorldSimulation.state.elapsed_days)/365.0,profile.get("technologies",[]))
-		if float(momentum[domain])<research_cost: continue
-		momentum[domain]=float(momentum[domain])-research_cost
-		var known:Array=profile.get("technologies",[])
-		known.append(String(technology.id))
-		profile["technologies"]=known
-		profile["latest_technology"]=String(technology.name)
-		civ["discovery_profile"]=profile
-		var record:Dictionary=domains_profile.get(domain,{})
-		var count:=mini(384,int(record.get("count",0))+1)
-		record["count"]=count
-		record["maturity"]=maxi(int(record.get("maturity",0)),WorldSimulation.discovery.technology_depth(String(technology.id)))
-		record.merge(WorldSimulation.discovery.domain_technology_limits(domain),true)
-		var learned_conditions:Dictionary={}
-		for learned_id in known:
-			var learned:=WorldSimulation.discovery.discovery_definition(String(learned_id))
-			if String(learned.get("dynamic",""))==domain: learned_conditions[String(learned.get("subcategory",""))]=true
-		record["breadth"]=maxi(int(record.get("breadth",0)),learned_conditions.size())
-		record["lens_count"]=maxi(1,int(record.get("lens_count",0)))
-		var capacity:=float((_rival_capacities(civ) as Dictionary).get(domain,0.0))
-		record["adoption"]=clampf(float(record.get("adoption",0.0))*0.96+(float(civ.get("knowledge",0.1))*0.55+capacity*0.45)*0.04,0.02,1.0)
-		domains_profile[domain]=record
-	profile["domains"]=domains_profile
-	profile["momentum"]=momentum
-	civ["discovery_profile"]=profile
-	return civ
 
 
 func _rival_emphasis(civ:Dictionary)->Dictionary:
@@ -353,57 +271,6 @@ func _rival_emphasis(civ:Dictionary)->Dictionary:
 	weights["logistics"]=float(weights.logistics)+float(environment.get("route_potential",0.0))*0.46+(0.38 if bool(environment.get("coastal",false)) else 0.0)
 	weights["security"]=float(weights.security)+relief*0.20+mineral*0.12
 	return weights
-
-
-func _weighted_domain(seed_value:int,cycle:int,slot:int,weights:Dictionary)->String:
-	var total:=0.0
-	for domain in Catalog.DOMAINS: total+=maxf(0.01,float(weights.get(domain,0.01)))
-	var roll:=float(posmod(hash("%s:%s:%s" % [seed_value,cycle,slot]),1_000_000))/1_000_000.0*total
-	for domain in Catalog.DOMAINS:
-		roll-=maxf(0.01,float(weights.get(domain,0.01)))
-		if roll<=0.0: return domain
-	return Catalog.DOMAINS[-1]
-
-
-func rival_effect(civ:Dictionary,effect_id:String)->float:
-	var tiers:Dictionary=civ.get("progression_tiers",{})
-	var total:=0.0
-	for domain in EFFECTS_PER_TIER:
-		var effects:Dictionary=EFFECTS_PER_TIER[domain]
-		if effects.has(effect_id): total+=float(effects[effect_id])*float(tiers.get(domain,0))
-	# research_600 balance: rivals share the player's era ceiling (elapsed calendar).
-	var ceiling:Vector2=preload("res://scripts/society_model.gd").era_ceiling_for(effect_id,float(WorldSimulation.state.elapsed_days)/365.0)
-	return clampf(total,maxf(-0.45,ceiling.x),minf(0.80,ceiling.y))
-
-
-func _rival_context(civ:Dictionary)->Dictionary:
-	var profile:Dictionary=civ.get("discovery_profile",{})
-	return {
-		"population":maxf(1.0,float(civ.get("population",1.0))),"settlements":int(civ.get("settlement_count",1)),
-		"capacities":_rival_capacities(civ),"discovery_profile":profile.get("domains",{}),
-		"reach":clampf(float(civ.get("world_reach",0.0)),0.0,1.0)
-	}
-
-
-func _rival_capacities(civ:Dictionary)->Dictionary:
-	if bool(civ.get("shared_rules",false)):return civ.get("local_capacities",{}).duplicate(true)
-	var population:=maxf(1.0,float(civ.get("population",1.0)))
-	var food_ratio:=clampf(float(civ.get("food_capacity",population))/population,0.0,1.25)
-	var health:=clampf(float(civ.get("health",0.5)),0.0,1.0)
-	var cohesion:=clampf(float(civ.get("cohesion",0.5)),0.0,1.0)
-	var knowledge:=clampf(float(civ.get("knowledge",0.1)),0.0,1.0)
-	var production:=clampf(float(civ.get("production",0.1)),0.0,1.0)
-	var logistics:=clampf(float(civ.get("logistics",0.1)),0.0,1.0)
-	var institutions:=clampf(float(civ.get("institutions",0.1)),0.0,1.0)
-	var ecology:=clampf(float(civ.get("ecology",0.7)),0.0,1.0)
-	var security:=clampf(float(civ.get("military_readiness",0.3)),0.0,1.0)
-	return {
-		"demography":health*0.45+food_ratio*0.35+cohesion*0.20,
-		"nutrition":food_ratio*0.70+clampf(float(civ.get("food_days",0.0))/90.0,0.0,1.0)*0.30,
-		"health":health,"labor":health*0.40+cohesion*0.30+production*0.30,"knowledge":knowledge,"production":production,
-		"infrastructure":production*0.38+logistics*0.27+institutions*0.20+minf(0.15,float(civ.get("territory",0.0))/8.0),
-		"logistics":logistics,"ecology":ecology,"institutions":institutions,"security":security,"culture":cohesion*0.62+institutions*0.38
-	}
 
 
 func _scale_status(definition:Dictionary,context:Dictionary,levels:Dictionary)->Dictionary:

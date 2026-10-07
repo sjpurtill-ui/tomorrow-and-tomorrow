@@ -104,13 +104,6 @@ func test_live_catalog_has_reachable_causal_foundations()->void:
 	graph=dormant.factor_common(graph,DiscoverySystem.technology_catalog)
 	assert_array(R.validate(graph,dormant.pending(graph))).is_empty()
 
-func test_legacy_opponent_candidates_use_the_same_alternative_foundations()->void:
-	var civ:={"production":1.0,"logistics":1.0,"environment_profile":{"resource_potentials":{}},"discovery_profile":{"seed":42,"technologies":library_foundations()}}
-	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("public_libraries"))*365.0)
-	var found:=false
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):
-		if entry.id=="public_libraries":found=true
-	assert_bool(found).is_true()
 
 ## research_600: ready foundations never wait for the entry's era; before its
 ## age the work is only proportionally larger (research_early_factor). The
@@ -132,20 +125,6 @@ func test_ready_foundations_never_wait_for_the_era()->void:
 	GameState.known_discoveries.erase("formal_archives")
 	assert_bool(P.ready(entry,2000000)).is_false()
 
-## research_600: rivals share the player's foundations and era gate.
-func test_rivals_use_the_same_foundations_and_era_gate()->void:
-	GameState.elapsed_days=1
-	var civ:={"discovery_profile":{"technologies":library_foundations()},"environment_profile":{},"production":1.0,"logistics":1.0}
-	var candidates:Array[String]=[]
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
-	assert_bool("public_libraries" in candidates).is_false()
-	GameState.elapsed_days=ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("public_libraries"))*365.0)
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
-	assert_bool("public_libraries" in candidates).is_true()
-	civ.discovery_profile.technologies.erase("formal_archives")
-	candidates.clear()
-	for entry:Dictionary in DiscoverySystem.rival_research_candidates(civ,"culture"):candidates.append(entry.id)
-	assert_bool("public_libraries" in candidates).is_false()
 
 func test_legacy_ordering_day_cannot_change_route_readiness_or_rate()->void:
 	GameState.known_discoveries.assign(library_foundations())

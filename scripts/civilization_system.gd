@@ -671,14 +671,8 @@ func owned_day_steps(target_day:int)->Array:
 
 func _process_strategic_turn(day:int)->void:
 	turn_index+=1
-	for index in civilizations.size():
-		var civ:Dictionary=civilizations[index]
-		if not bool(civ.get("alive",true)): continue
-		civ["strategy"]=_choose_strategy(civ)
-		civ["allocations"]=_allocation_for(String(civ.strategy))
-		civ["allocations"]=WorldSimulation.diplomacy.commitments.policy_allocations(String(civ.id),civ.allocations)
-		civ=_advance_civilization(civ)
-		civilizations[index]=civ
+	# Every people is a full simulation of its own (WorldSimulation actors) on
+	# the player's own rules; this turn only keeps contact and word moving.
 	if WorldSimulation.campaign.active:
 		world_changed.emit(competition_snapshot())
 		return
@@ -3472,47 +3466,6 @@ func _process_player_contact(day:int)->void:
 	_complete_due_scout_missions(day)
 
 
-func _choose_strategy(civ:Dictionary)->String:
-	var population:=maxf(1.0,float(civ.population))
-	var cohorts:Dictionary=civ.cohorts
-	var dependent_share:=(float(cohorts.get("children",0.0))+float(cohorts.get("elders",0.0)))/population
-	var occupation:=_player_occupation_status(civ)
-	if float(civ.food_days)<16.0 or float(civ.food_capacity)<population*0.90: return "sustenance"
-	if dependent_share>0.46 and float(civ.food_days)<38.0: return "sustenance"
-	# Losing the capital or several strategic regions changes what the rival does;
-	# conquest is not merely a score modifier layered over an unchanged AI plan.
-	if bool(occupation.capital_occupied) or int(occupation.region_count)>=2: return "fortification"
-	if _war_count(civ)>0 or float(civ.military_readiness)<0.34: return "fortification"
-	if _external_threat(civ)>0.64: return "fortification"
-	var environment:Dictionary=civ.get("environment_profile",{})
-	var hazards:Dictionary=environment.get("hazards",{})
-	if float(hazards.get("drought",0.0))>0.68 and float(civ.food_days)<54.0: return "sustenance"
-	# Founding identity is durable without making the AI rigid. Two turns out of
-	# three favor its inherited comparative advantage; crises above always override.
-	var focus_strategy:Dictionary={"provision":"sustenance","generations":"growth","inquiry":"inquiry","industry":"commerce","defense":"fortification","exchange":"commerce"}
-	var inherited:=String(focus_strategy.get(String(civ.get("founding_focus","")),""))
-	var civ_number:=int(String(civ.id).trim_prefix("civ_"))
-	if inherited!="" and (turn_index+civ_number)%3!=0: return inherited
-	var personality=preload("res://scripts/leader_personality.gd")
-	var goals:Array[Dictionary]=personality.agenda(civ,personality.foreign(last_world_seed,String(civ.id)))
-	var resources:Dictionary=environment.get("resource_potentials",{})
-	if float(environment.get("food_potential",0.5))<0.36 and float(civ.food_days)<72.0: return "sustenance"
-	if float(environment.get("construction_potential",0.5))>0.72 and maxf(float(resources.get("Copper Ore",0.0)),float(resources.get("Iron Ore",0.0)))>0.62: return "commerce"
-	if float(environment.get("route_potential",0.5))>0.78 and float(civ.diplomacy)>0.44: return "commerce"
-	if float(environment.get("food_potential",0.5))<0.30 and float(civ.aggression)>0.48: return "expansion"
-	var values:Dictionary=SOCIETAL_VALUES_MODEL.normalize_state(civ.get("societal_values",{})).lived
-	# Once immediate survival is secure, a civilization's actual values influence
-	# its strategic choices. Values bias action but never override material crises.
-	if float(values.get("experimentation",0.5))>0.66 and float(civ.knowledge)<0.72: return "inquiry"
-	if float(values.get("openness",0.5))+float(values.get("pluralism",0.5))>1.34 and float(civ.diplomacy)>0.40: return "commerce"
-	if float(values.get("centralization",0.5))+float(values.get("hierarchy",0.5))>1.38 and float(civ.aggression)>0.56: return "expansion"
-	if float(civ.knowledge)<0.24+float(turn_index)*0.0005: return "inquiry"
-	if float(civ.food_capacity)<population*1.06: return "growth"
-	if _friendly_relation_count(civ)>=2 and float(civ.diplomacy)>0.48: return "commerce"
-	if float(civ.aggression)+float(civ.adaptability)*0.35>0.78: return "expansion"
-	return String(goals[0].strategy)
-
-
 func _external_threat(civ:Dictionary) -> float:
 	var highest:=0.0
 	var own_power:=_military_power(civ)
@@ -3539,192 +3492,6 @@ func _allocation_for(strategy:String)->Dictionary:
 		"fortification": allocation={"sustenance":0.28,"growth":0.09,"knowledge":0.09,"production":0.18,"military":0.29,"diplomacy":0.07}
 		"expansion": allocation={"sustenance":0.27,"growth":0.14,"knowledge":0.08,"production":0.17,"military":0.25,"diplomacy":0.09}
 	return allocation
-
-
-func _advance_civilization(civ:Dictionary)->Dictionary:
-	var population:=maxf(1.0,float(civ.population))
-	var allocations:Dictionary=civ.allocations
-	var cohorts:Dictionary=civ.cohorts
-	var control_effects:=_region_control_effects(civ)
-	var working_age:=_working_age_population(cohorts)
-	var labor_share:=clampf(working_age/population,0.0,1.0)
-	var reproductive_population:=float(cohorts.get("youth",0.0))*0.45+float(cohorts.get("early_adults",0.0))*0.50+float(cohorts.get("established_adults",0.0))*0.45+float(cohorts.get("mature_adults",0.0))*0.16
-	var reproductive_factor:=clampf((reproductive_population/population)/0.285,0.45,1.35)
-	var siege_access:=WorldSimulation.military.siege_effects_for_civilization(String(civ.id))
-	var siege_output:=float(siege_access.food_output_multiplier)
-	var food_ratio:=float(civ.food_capacity)/population
-	if siege_output<1.0:
-		# Existing reserves bridge lost production before starvation affects cohorts.
-		food_ratio=minf(food_ratio,food_ratio*siege_output+maxf(0,float(civ.food_days))/30.0)
-	var health:=clampf(float(civ.health),0.05,0.98)
-	var war_pressure:=clampf(float(_war_count(civ))*0.22,0.0,0.70)
-	var environment:Dictionary=civ.get("environment_profile",{})
-	if environment.is_empty():
-		environment=PlanetEnvironment.profile_at(_civilization_world_position(civ))
-		civ["environment_profile"]=environment
-		civ["resource_endowment"]=environment.get("resource_potentials",{})
-	var environmental_food:=clampf(float(environment.get("food_potential",0.5)),0.0,1.0)
-	var environmental_construction:=clampf(float(environment.get("construction_potential",0.5)),0.0,1.0)
-	var environmental_routes:=clampf(float(environment.get("route_potential",0.5)),0.0,1.0)
-	var environmental_health_pressure:=clampf(float(environment.get("health_pressure",0.25)),0.0,1.0)
-	var environmental_resilience:=clampf(float(environment.get("ecological_resilience",0.5)),0.0,1.0)
-	var founding_effects:Dictionary=WorldSimulation.state.founding_focus_definition(String(civ.get("founding_focus","provision"))).get("effects",{})
-	var progression_conception:=WorldSimulation.progression.rival_effect(civ,"conception_support")
-	var progression_health:=WorldSimulation.progression.rival_effect(civ,"health_protection")
-	var annual_birth_rate:=clampf((0.020+float(allocations.growth)*0.055+maxf(0.0,food_ratio-0.92)*0.018+health*0.008)*reproductive_factor*(1.0+float(founding_effects.get("conception_support",0.0))*0.45+progression_conception),0.004,0.082)
-	var annual_death_rate:=clampf((0.010+(1.0-health)*0.030+maxf(0.0,0.92-food_ratio)*0.16+war_pressure*0.018+environmental_health_pressure*0.006)*(1.0-progression_health*0.45),0.006,0.20)
-	var births:=population*annual_birth_rate/12.0
-	var deaths:=population*annual_death_rate/12.0
-	var next_population:=maxf(1.0,population+births-deaths)
-	var capacity_change:=population*(0.0015+float(allocations.sustenance)*0.010+float(civ.production)*0.0025)*(0.70+float(civ.ecology)*0.30)*(0.55+labor_share*0.72)*float(control_effects.food_factor)*lerpf(0.62,1.34,environmental_food)*(1.0+float(founding_effects.get("food_yield",0.0))+WorldSimulation.progression.rival_effect(civ,"food_output"))
-	civ["food_capacity"]=maxf(1.0,float(civ.food_capacity)+capacity_change-float(civ.food_capacity)*0.0006)
-	var monthly_balance:=float(civ.food_capacity)*float(siege_access.food_output_multiplier)/maxf(1.0,next_population)-1.0
-	civ["food_days"]=clampf(float(civ.food_days)+monthly_balance*(30.0 if siege_output<1.0 else 7.5),0.0,180.0)
-	civ["health"]=clampf(health+(monthly_balance*0.0025)+(0.0012 if float(civ.food_days)>20.0 else 0.0)-war_pressure*0.0018-environmental_health_pressure*0.00035,0.05,0.98)
-	civ["cohesion"]=clampf(float(civ.cohesion)+float(civ.institutions)*0.0012-float(civ.aggression)*war_pressure*0.0018+float(allocations.diplomacy)*0.0010,0.05,0.98)
-	civ["knowledge"]=clampf(float(civ.knowledge)+(0.00045+float(allocations.knowledge)*0.0045)*(0.55+float(civ.cohesion)*0.45)*float(control_effects.knowledge_factor)*(1.0+float(founding_effects.get("knowledge_gain",0.0))+WorldSimulation.progression.rival_effect(civ,"knowledge_rate")),0.02,1.0)
-	civ["production"]=clampf(float(civ.production)+(0.00035+float(allocations.production)*0.0038)*(0.55+float(civ.knowledge)*0.45)*float(control_effects.production_factor)*lerpf(0.72,1.24,environmental_construction)*(1.0+float(founding_effects.get("resource_output",0.0))+float(founding_effects.get("material_target",0.0))+WorldSimulation.progression.rival_effect(civ,"craft_output")),0.02,1.0)
-	civ["logistics"]=clampf(float(civ.logistics)+(float(allocations.production)*0.0015+float(allocations.diplomacy)*0.0012)*float(control_effects.logistics_factor)*lerpf(0.72,1.22,environmental_routes)*(1.0+float(founding_effects.get("logistics_target",0.0))+float(founding_effects.get("trade_access",0.0))*0.35+WorldSimulation.progression.rival_effect(civ,"route_speed")),0.02,1.0)
-	civ["institutions"]=clampf(float(civ.institutions)+(float(allocations.diplomacy)*0.0015+float(civ.knowledge)*0.0004)*float(control_effects.institutions_factor)*(1.0+float(founding_effects.get("diplomacy",0.0))*0.5+WorldSimulation.progression.rival_effect(civ,"state_capacity"))-war_pressure*0.0007,0.02,1.0)
-	civ["ecology"]=clampf(float(civ.ecology)+0.00025+(environmental_resilience-float(civ.ecology))*0.00055-float(allocations.growth)*0.0010-maxf(0.0,1.0-food_ratio)*0.0007+float(founding_effects.get("ecology_delta",0.0))*30.0+WorldSimulation.progression.rival_effect(civ,"ecology_recovery")*0.0015,0.08,1.0)
-	var target_military_share:=clampf(0.018+float(allocations.military)*0.30+war_pressure*0.08,0.015,0.38)
-	civ["military_share"]=move_toward(float(civ.military_share),target_military_share,0.006)
-	var next_cohorts:=_advance_cohorts(cohorts,births,deaths,maxf(0.0,1.0-food_ratio))
-	var military_ceiling:=_working_age_population(next_cohorts)*0.55
-	civ["military_population"]=minf(military_ceiling,maxf(0.0,float(civ.military_population)*0.985+next_population*float(civ.military_share)*0.015))
-	civ=_advance_rival_military_training(civ,allocations,war_pressure)
-	civ["territory"]=maxf(0.08,float(civ.territory)+float(allocations.military)*float(allocations.growth)*0.0025*float(control_effects.home_control))
-	civ["population"]=next_population
-	civ["cohorts"]=_scaled_cohorts(next_cohorts,next_population)
-	civ["strategic_regions"]=_advance_strategic_regions(civ,next_population/population)
-	civ["births_last_turn"]=births
-	civ["deaths_last_turn"]=deaths
-	var reach_gain:=(0.00035+float(civ.knowledge)*0.00035+float(civ.logistics)*0.00035+float(allocations.diplomacy)*0.00045)*lerpf(0.72,1.20,environmental_routes)*clampf(log(population+10.0)/log(1_000_000_000.0),0.25,1.25)
-	civ["world_reach"]=clampf(float(civ.get("world_reach",0.0))+reach_gain,0.0,1.0)
-	civ=WorldSimulation.progression.advance_rival(civ)
-	var organizations:=SOCIETAL_VALUES_MODEL.organizational_discoveries_for_rival(civ)
-	civ["societal_values"]=SOCIETAL_VALUES_MODEL.advance(
-		civ.get("societal_values",SOCIETAL_VALUES_MODEL.initial_state(String(civ.get("founding_focus","provision")),last_world_seed,String(civ.get("id","rival")))),
-		organizations.known,organizations.adoption,
-		{"food":clampf(float(civ.food_days)/45.0,0.0,1.0),"health":float(civ.health),"security":float(civ.military_readiness),"ecology":float(civ.ecology),"knowledge":float(civ.knowledge),"trade":clampf(float(civ.trade_total)/maxf(1.0,float(civ.population))*20.0,0.0,1.0),"war_pressure":war_pressure,"inequality":0.34+float(civ.aggression)*0.12,"adaptability":float(civ.adaptability)},
-		maxi(0,last_turn_day)
-	)
-	civ["cohesion"]=clampf(float(civ.cohesion)+SOCIETAL_VALUES_MODEL.simulation_effect(civ.societal_values,"cohesion")*0.025,0.05,0.98)
-	civ["institutions"]=clampf(float(civ.institutions)+SOCIETAL_VALUES_MODEL.simulation_effect(civ.societal_values,"institutions")*0.025,0.02,1.0)
-	civ["knowledge"]=clampf(float(civ.knowledge)+SOCIETAL_VALUES_MODEL.simulation_effect(civ.societal_values,"knowledge")*0.015,0.02,1.0)
-	civ["ecology"]=clampf(float(civ.ecology)+SOCIETAL_VALUES_MODEL.simulation_effect(civ.societal_values,"ecology")*0.012,0.08,1.0)
-	civ["military_readiness"]=clampf(float(civ.military_readiness)+SOCIETAL_VALUES_MODEL.simulation_effect(civ.societal_values,"security")*0.012,0.08,1.0)
-	return civ
-
-
-func _advance_rival_military_training(civ:Dictionary,allocations:Dictionary,war_pressure:float)->Dictionary:
-	# Rival forces pay the same strategic opportunity costs as the player: a
-	# military allocation, food consumed by exercises, production wear, and time.
-	# This remains one fixed record per civilization, never an officer or unit list.
-	var focus:=_rival_training_focus(civ)
-	var military_allocation:=clampf(float(allocations.get("military",0.0)),0.0,1.0)
-	var logistics:=clampf(float(civ.get("logistics",0.2)),0.0,1.0)
-	var institutions:=clampf(float(civ.get("institutions",0.2)),0.0,1.0)
-	var tiers:Dictionary=civ.get("progression_tiers",{})
-	var era:Dictionary=MILITARY_DEVELOPMENT.era_for_tiers(int(tiers.get("security",0)),int(tiers.get("production",0)),int(tiers.get("logistics",0)),int(tiers.get("institutions",0)))
-	var production_lines:=int(era.get("production_lines",1))
-	var military_output:=float(civ.get("population",1.0))*military_allocation*float(civ.get("production",0.1))*(0.00035+float(era.get("tier",0))*0.00010)*float(production_lines)
-	var replacement_demand:=float(civ.get("military_population",0.0))*(0.0025+war_pressure*0.0035)
-	var stockpile:=maxf(0.0,float(civ.get("military_stockpile",0.0))+military_output-replacement_demand)
-	var equipment_coverage:=clampf((military_output+stockpile*0.08)/maxf(1.0,replacement_demand+float(civ.get("military_population",0.0))*0.0015),0.0,1.0)
-	# Both sides use the same standing-policy share, course duration, gain and
-	# resource rates. Rival economy is aggregate, so food is charged in days of
-	# civilian consumption and equipment wear against its military stores.
-	var staff=WorldSimulation.military.training_staff
-	var policy_id:=String(staff.rival_policy(civ))
-	var policy:Dictionary=staff.POLICIES[policy_id]
-	var definition:Dictionary=MilitaryCampaign.TRAINING_PROGRAMS.get(focus,MilitaryCampaign.TRAINING_PROGRAMS.camp_drill)
-	var known:Array=civ.get("discovery_profile",{}).get("technologies",[])
-	if String(definition.get("required_discovery",""))!="" and String(definition.required_discovery) not in known:
-		focus="camp_drill";definition=MilitaryCampaign.TRAINING_PROGRAMS.camp_drill
-	var proficiency:=float(civ.get("military_proficiency",civ.get("military_readiness",.38)))
-	var participants:=land_military_population(civ)*float(policy.share)
-	if proficiency>=float(policy.target):participants=0
-	var food_bill:=participants*float(definition.food_per_participant)*STRATEGIC_TURN_DAYS/maxf(1,float(civ.population)*.9)
-	var wear_bill:=participants*float(definition.wear_rate)*STRATEGIC_TURN_DAYS
-	var instruction:=clampf((.48+float(civ.get("command_readiness",.35))*.22+institutions*.20)*(.45+logistics*.55),0,1.2)
-	var funded:bool=participants>0 and float(civ.get("food_days",0))-food_bill>=staff.RESERVE_DAYS and stockpile>=wear_bill
-	if funded:
-		var progress:=STRATEGIC_TURN_DAYS*instruction/float(definition.duration_days)
-		var gain:=float(definition.training_gain)*progress*float(policy.share)
-		proficiency=minf(float(policy.target),proficiency+gain)
-		civ["food_days"]=float(civ.food_days)-food_bill
-		stockpile-=wear_bill
-		civ["training_progress"]=float(civ.get("training_progress",0))+STRATEGIC_TURN_DAYS*instruction
-		var duration:=float(definition.duration_days)
-		if float(civ.training_progress)>=duration:
-			civ["training_cycles"]=int(civ.get("training_cycles",0))+1
-			civ.training_progress=fmod(float(civ.training_progress),duration)
-		var command_gain:=float(definition.get("command_gain",{}).get("command",0))*progress
-		civ["command_readiness"]=clampf(float(civ.get("command_readiness",.35))+command_gain,0.08,1.0)
-	civ["military_proficiency"]=proficiency
-	civ["military_readiness"]=clampf(move_toward(float(civ.get("military_readiness",.38)),proficiency*equipment_coverage,.005)-war_pressure*.002,0.08,1.0)
-	civ["training_policy"]=policy_id
-	civ["training_focus"]=focus
-	civ["military_era"]=String(era.get("id","founding"))
-	civ["military_era_tier"]=int(era.get("tier",0))
-	civ["military_production_lines"]=production_lines
-	civ["military_stockpile"]=stockpile
-	civ["military_replacement_coverage"]=equipment_coverage
-	return civ
-
-
-func _rival_training_focus(civ:Dictionary)->String:
-	var strategy:=String(civ.get("strategy","sustenance"))
-	var command:=float(civ.get("command_readiness",0.35))
-	var knowledge:=float(civ.get("knowledge",0.15))
-	var institutions:=float(civ.get("institutions",0.20))
-	if _war_count(civ)>0 or strategy=="expansion":
-		return "war_games" if knowledge>=0.46 and institutions>=0.38 else "field_exercise"
-	if command<0.48 and institutions>=0.30: return "staff_exercise"
-	if strategy=="fortification": return "field_exercise"
-	return "camp_drill"
-
-
-func _advance_strategic_regions(civ:Dictionary,population_factor:float)->Array[Dictionary]:
-	var advanced:Array[Dictionary]=[]
-	var relation:Dictionary=civ.get("player_relation",{})
-	for region_variant in civ.get("strategic_regions",[]):
-		var region:Dictionary=(region_variant as Dictionary).duplicate(true)
-		region["population"]=maxf(0.0,float(region.get("population",0.0))*population_factor)
-		var controller:=String(region.get("controller",String(civ.id)))
-		if controller=="player":
-			region["occupation_turns"]=int(region.get("occupation_turns",0))+1
-			var required:=occupation_requirement(civ,region)
-			var committed:=0.0
-			if MilitaryCampaign!=null and WorldSimulation.military.has_method("occupation_force_for_region"):
-				committed=float(WorldSimulation.military.occupation_force_for_region(String(civ.id),String(region.id)).get("troops",0))
-			var coverage:=clampf(committed/maxf(1.0,required),0.0,1.5)
-			var supply:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))*0.62+float(WorldSimulation.state.society_capacities.get("institutions",0.25))*0.23+minf(0.15,coverage*0.10),0.05,1.0)
-			region=OCCUPATION_GOVERNANCE.advance(region,coverage,supply,not bool(relation.get("at_war",false)))
-		elif controller!=String(civ.id):
-			region["occupation_turns"]=int(region.get("occupation_turns",0))+1
-			var controller_index:=_civilization_index(controller)
-			var controller_civ:Dictionary=civilizations[controller_index] if controller_index>=0 else {}
-			var occupation_capacity:=float(controller_civ.get("military_population",0.0))*float(region.get("strategic_weight",0.1))*0.35
-			var required:=occupation_requirement(civ,region)
-			var coverage:=clampf(occupation_capacity/maxf(1.0,required),0.0,1.5)
-			var supply:=clampf(float(controller_civ.get("logistics",.2))*.6+float(controller_civ.get("institutions",.2))*.4,.05,1)
-			region=OCCUPATION_GOVERNANCE.advance(region,coverage,supply,_war_count(controller_civ)==0)
-		else:
-			region["resistance"]=0.0
-			region["integration"]=1.0
-			region["occupation_turns"]=0
-			if region.has("governance"):
-				# Liberation does not erase damaged institutions or inherited harm.
-				var local_governance:=OCCUPATION_GOVERNANCE.state(region)
-				local_governance.policy="equal_citizenship"
-				region.governance=local_governance
-				var liberated:=OCCUPATION_GOVERNANCE.advance(region,1.0,float(civ.get("logistics",.2)),true)
-				region.governance=liberated.governance
-				if bool(region.governance.ruined): region.damage=liberated.damage
-		advanced.append(region)
-	return advanced
 
 
 func _scale_strategic_region_populations(civ:Dictionary,population_factor:float)->Dictionary:
@@ -5349,7 +5116,6 @@ func _chronicle_facts(crisis:bool=false,strong:bool=false)->Dictionary:
 	return {"population":int(WorldSimulation.state.population_exact),"contacts":contacts,"discoveries":discoveries,"crisis":crisis,"healthy":WorldSimulation.state.population_health>=.65 and WorldSimulation.state.food_security>=.7,"dominant":strong,"settlement":not WorldSimulation.state.settlement_completed.is_empty(),"exchange":trading,"learning":discoveries>=12,"institutions":float(WorldSimulation.state.society_capacities.get("institutions",0))>=.6,"communities":WorldSimulation.state.settlement_nuclei.size()>1}
 
 
-
 func _player_profile()->Dictionary:
 	var effects:=player_effects()
 	var military_count:=0.0
@@ -5592,20 +5358,6 @@ func _scaled_cohorts(source:Dictionary,population:float)->Dictionary:
 
 func _working_age_population(cohorts:Dictionary)->float:
 	return maxf(0.0,float(cohorts.get("youth",0.0)))+maxf(0.0,float(cohorts.get("early_adults",0.0)))+maxf(0.0,float(cohorts.get("established_adults",0.0)))+maxf(0.0,float(cohorts.get("mature_adults",0.0)))
-
-
-func _advance_cohorts(source:Dictionary,births:float,deaths:float,hardship:float)->Dictionary:
-	var original:=source.duplicate(true)
-	var result:=source.duplicate(true)
-	for transition in [["children","youth"],["youth","early_adults"],["early_adults","established_adults"],["established_adults","mature_adults"],["mature_adults","elders"]]:
-		var from:=String(transition[0])
-		var into:=String(transition[1])
-		var moving:=maxf(0.0,float(original.get(from,0.0)))/float(COHORT_DURATION_TURNS[from])
-		result[from]=maxf(0.0,float(result.get(from,0.0))-moving)
-		result[into]=maxf(0.0,float(result.get(into,0.0))+moving)
-	result["children"]=maxf(0.0,float(result.get("children",0.0))+maxf(0.0,births))
-	var mortality_weights:={"children":1.05+hardship*1.25,"youth":0.45,"early_adults":0.42,"established_adults":0.58,"mature_adults":1.10,"elders":2.65+hardship*0.65}
-	return _remove_weighted_cohort_population(result,deaths,mortality_weights)
 
 
 func _remove_weighted_cohort_population(source:Dictionary,amount:float,weights:Dictionary)->Dictionary:

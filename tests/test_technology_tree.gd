@@ -52,17 +52,6 @@ func test_randomness_cannot_bypass_metallurgy_prerequisites_or_materials()->void
 	GameState.known_discoveries.append("copper_casting")
 	GameState.resource_deposits=[]
 	assert_bool(DiscoverySystem._discovery_is_eligible(tech,100000)).is_false()
-func test_rival_paths_differ_but_only_choose_viable_technologies()->void:
-	GameState.elapsed_days=100000.0
-	var choices:Dictionary={}
-	for seed_value in 24:
-		var civ:={"production":1.0,"logistics":1.0,"environment_profile":{"resource_potentials":{}},"discovery_profile":{"seed":seed_value,"technologies":[]}}
-		var options:=DiscoverySystem.rival_research_candidates(civ,"knowledge")
-		assert_int(options.size()).is_greater(0)
-		choices[String(options[0].id)]=true
-		for entry in options: assert_array(entry.requires).is_empty()
-		for entry in DiscoverySystem.rival_research_candidates(civ,"production"): assert_bool(String(entry.id)=="bronze_alloying").is_false()
-	assert_int(choices.size()).is_greater(1)
 func test_explicit_target_preserves_unfinished_progress()->void:
 	# Once tallies' design age has come (research_600 era gate).
 	GameState.elapsed_days=maxf(1000.0,ceil(DiscoverySystem.research_600_earliest_year(DiscoverySystem.discovery_definition("tallies"))*365.0))

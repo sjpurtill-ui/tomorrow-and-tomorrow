@@ -63,18 +63,6 @@ func test_modern_aggregate_equipment_has_real_crew_and_ammunition_requirements()
 	assert_int((rifles.formations as Array).size()).is_equal(1)
 
 
-func test_rival_military_industry_uses_the_same_supporting_domain_cap()->void:
-	var civ:Dictionary=system.civilizations[0]
-	for domain in civ.progression_tiers: civ.progression_tiers[domain]=2
-	civ.progression_tiers["security"]=7
-	civ=system._advance_rival_military_training(civ,civ.allocations,0.0)
-	assert_int(int(civ.military_era_tier)).is_equal(3)
-	for domain in ["production","logistics","institutions"]: civ.progression_tiers[domain]=6
-	civ=system._advance_rival_military_training(civ,civ.allocations,0.0)
-	assert_int(int(civ.military_era_tier)).is_equal(7)
-	assert_int(int(civ.military_production_lines)).is_equal(10)
-
-
 func test_industrial_production_lines_run_in_parallel_and_remain_bounded()->void:
 	for domain in ["security","production","logistics","institutions"]: ProgressionSystem.domain_levels[domain]=6
 	GameState.known_discoveries.append("metallic_cartridges");GameState.discovery_adoption["metallic_cartridges"]=1.0

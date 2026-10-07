@@ -2445,33 +2445,6 @@ func research_affinity(discovery:Dictionary,civilization_seed:int,environment:Di
 	for requirement in discovery.get("resource_requirements",[]): score+=float((environment.get("resource_potentials",{}) as Dictionary).get(String(requirement.get("resource","")),0.0))*15.0
 	return score
 
-func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
-	initialize()
-	var profile:Dictionary=civ.get("discovery_profile",{})
-	var known:Array=profile.get("technologies",[])
-	var environment:Dictionary=civ.get("environment_profile",{})
-	var resources:Dictionary=environment.get("resource_potentials",{})
-	var candidates:Array[Dictionary]=[]
-	var society:=research_600_rival_society(civ) # research_600: same gate as the player
-	for entry in technology_catalog:
-		if bool(entry.get("frontier",false)) or String(entry.dynamic)!=domain or String(entry.id) in known: continue
-		if not research_600_open(entry,society,-1,Research600.RIVAL_AHEAD_YEARS): continue
-		var viable:=false
-		for route:Dictionary in Pathways.routes_for(entry,known,{}):
-			if route.ready:viable=true;break
-		if not viable: continue
-		for requirement in entry.get("resource_requirements",[]):
-			if Research600.potential(resources,String(requirement.get("resource","")))<0.16: viable=false; break
-			var access:=String(requirement.get("stage","recognized"))
-			var capacity_floor:=0.12 if access=="recognized" else (0.20 if access=="surveyed" else (0.35 if access=="accessible" else 0.55))
-			if minf(float(civ.get("production",0.0)),float(civ.get("logistics",0.0)))<capacity_floor: viable=false; break
-		if viable: candidates.append(entry)
-	var seed_value:=int(profile.get("seed",WorldSimulation.state.world_seed))
-	# Rivals too take up the questions of their age first.
-	var year:=float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
-	var rank:=func(entry:Dictionary)->float: return research_affinity(entry,seed_value,environment)-(research_early_factor(entry,year)-1.0)*EARLY_SCORE_PER_WORK
-	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(rank.call(a))>float(rank.call(b)))
-	return candidates
 
 func technology_depth(id:String,visiting:Dictionary={})->int:
 	if visiting.has(id): return 0
@@ -2696,7 +2669,7 @@ func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
 ## True when the entry's design conditions hold for `society` (default: the
 ## acting player-side society). Its age is never a wall (research_early_factor
 ## makes early work proportionally slower); `horizon_years` >= 0 limits how far
-## ahead of its age a question may be (rival peoples keep to their age).
+## ahead of its age a question may be (the foundations scan's horizon).
 ## `day` (>=0) evaluates the calendar at that simulated day instead of today.
 func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1,horizon_years:float=-1.0)->bool:
 	if horizon_years>=0.0:
@@ -2738,23 +2711,6 @@ func research_600_player_society()->Dictionary:
 	Research600.add_stand_ins(resources)
 	return {"year":float(state.elapsed_days)/365.0,"population":float(state.population_total),"settlements":maxi(1,state.player_settlements.size()),
 		"resources":resources,"environment":environment,"institutions":float(state.society_capacities.get("institutions",0.0)),"contact":contact}
-
-
-## A projected rival civilization as the design conditions see it. Materials are
-## landscape potentials at the floor rival research already uses.
-func research_600_rival_society(civ:Dictionary)->Dictionary:
-	var profile:Dictionary=civ.get("environment_profile",{})
-	var potentials:Dictionary=profile.get("resource_potentials",civ.get("resource_endowment",{}))
-	var resources:Dictionary={}
-	for resource_name:Variant in potentials:
-		if float(potentials[resource_name])>=Research600.RIVAL_RESOURCE_FLOOR: resources[String(resource_name)]=true
-	Research600.add_stand_ins(resources)
-	var contact:=int((civ.get("player_relation",{}) as Dictionary).get("rival_contact_level",0))>=Research600.CONTACT_MET_LEVEL
-	for relation_variant:Variant in (civ.get("relations",{}) as Dictionary).values():
-		var relation:Dictionary=relation_variant
-		if float(relation.get("trade",0.0))>0.0 or bool(relation.get("at_war",false)) or String(relation.get("treaty","none"))!="none": contact=true;break
-	return {"year":float(WorldSimulation.state.elapsed_days)/365.0,"population":float(civ.get("population",0.0)),"settlements":maxi(1,int(civ.get("settlement_count",1))),
-		"resources":resources,"environment":Research600.environment_tags(profile,{}),"institutions":float(civ.get("institutions",0.0)),"contact":contact}
 
 
 ## A line whose domain has no open question of its own does foundation work:

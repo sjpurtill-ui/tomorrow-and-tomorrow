@@ -173,9 +173,8 @@ static func districts()->int:
 ## settlement floors (civilization_progression_catalog.gd SETTLEMENT_FLOORS).
 ## Under one seat the register holds a single town, so the seat counts as
 ## the places its people would once have spread over: its districts, or one
-## place per PLACE_PEOPLE under the square root, whichever is more. This is
-## the rule the aggregate rivals already use (progression_system.gd
-## advance_rival), so no people is held back by having one seat.
+## place per PLACE_PEOPLE under the square root, whichever is more, so no
+## people is held back by having one seat.
 const PLACE_PEOPLE:=250.0
 const MAX_PLACES:=256
 static func places(people:float,registered:int,district_count:int)->int:

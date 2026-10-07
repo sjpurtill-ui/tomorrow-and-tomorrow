@@ -1078,14 +1078,14 @@ func test_same_seed_produces_the_same_competitors()->void:
 	assert_array(system.export_state().civilizations).is_equal(first)
 
 
-func test_strategic_turn_changes_population_strategy_and_power_without_growing_state_shape()->void:
+## Peoples grow in their own full simulations (WorldSimulation actors); the
+## strategic turn only keeps contact and word moving, and never grows the state.
+func test_strategic_turn_keeps_the_state_shape()->void:
 	var records:int=system.civilizations.size()
 	var relations:int=(system.civilizations[0].relations as Dictionary).size()
-	var before_population:=float(system.civilizations[0].population)
 	system.advance_to_day(3650)
 	assert_int(system.civilizations.size()).is_equal(records)
 	assert_int((system.civilizations[0].relations as Dictionary).size()).is_equal(relations)
-	assert_float(float(system.civilizations[0].population)).is_not_equal(before_population)
 	assert_bool(system.STRATEGIES.has(String(system.civilizations[0].strategy))).is_true()
 	assert_array(system.validate_state()).is_empty()
 
@@ -1266,7 +1266,6 @@ func test_total_urban_control_changes_strategy_status_and_peace_leverage()->void
 	var occupied:Dictionary=system._player_occupation_status(system.civilizations[0])
 	assert_int(int(occupied.region_count)).is_equal(system.STRATEGIC_REGIONS_PER_CIV)
 	assert_bool(bool(occupied.capital_occupied)).is_true()
-	assert_str(system._choose_strategy(system.civilizations[0])).is_equal("fortification")
 	var profile:Dictionary=system._public_profile(system.civilizations[0])
 	assert_int(int(profile.home_regions_controlled)).is_equal(0)
 	assert_str(String(profile.strategic_status)).is_equal("CAPITAL LOST")
@@ -1334,15 +1333,6 @@ func test_export_survives_a_real_json_round_trip()->void:
 	assert_str(String(system.region_snapshot(String(civ.id),String(target.id)).controller)).is_equal("player")
 	assert_array(system.validate_state()).is_empty()
 	assert_int(JSON.stringify(system.export_state()).length()).is_less(600_000)
-
-
-func test_age_cohorts_change_over_time_and_continue_to_conserve_population()->void:
-	var before:Dictionary=system.civilizations[0].cohorts.duplicate(true)
-	var before_population:=float(system.civilizations[0].population)
-	system.advance_to_day(3650)
-	var after:Dictionary=system.civilizations[0].cohorts
-	assert_float(float(after.children)/float(system.civilizations[0].population)).is_not_equal(float(before.children)/before_population)
-	assert_array(system.validate_state()).is_empty()
 
 
 func test_comparative_strength_is_only_chronicled_without_ending_history()->void:
@@ -1465,29 +1455,6 @@ func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:
 	# Long-run validation enforces each history/formation/region collection's
 	# own bound, independent of the current breadth of the serialized schema.
 	assert_array(system.validate_state()).is_empty()
-
-
-func test_rival_training_obeys_unlock_costs_and_long_course_duration()->void:
-	var rival:Dictionary=system.civilizations[0].duplicate(true)
-	rival.merge({"strategy":"expansion","knowledge":.70,"institutions":.65,"logistics":.70,"food_days":80.0,"command_readiness":.40,"military_readiness":.45,"military_proficiency":.20,"military_stockpile":1000.0},true)
-	var locked:Dictionary=system._advance_rival_military_training(rival.duplicate(true),{"military":.30},0.0)
-	assert_str(String(locked.training_focus)).is_equal("camp_drill")
-	rival.discovery_profile.technologies.append("professional_corps")
-	var advanced:Dictionary=system._advance_rival_military_training(rival,{"military":.30},0.0)
-	assert_str(String(advanced.training_focus)).is_equal("war_games")
-	assert_float(float(advanced.food_days)).is_less(80.0)
-	assert_float(float(advanced.military_stockpile)).is_less(1000.0)
-	assert_float(float(advanced.command_readiness)).is_greater(.40)
-	assert_int(int(advanced.training_cycles)).is_equal(0)
-	var turns:=1
-	while int(advanced.training_cycles)==0 and turns<36:
-		# External resupply keeps this course funded across monthly updates.
-		advanced.food_days=80.0
-		advanced=system._advance_rival_military_training(advanced,{"military":.30},0.0)
-		turns+=1
-	assert_int(turns).is_greater(1)
-	assert_int(int(advanced.training_cycles)).is_equal(1)
-	assert_float(float(advanced.military_proficiency)).is_greater(.20)
 
 
 func test_every_rival_automatically_chooses_the_same_kind_of_founding_focus()->void:
