@@ -677,7 +677,8 @@ static func _begin_arming(civ_id:String,day:int,o:Dictionary)->void:
 	# Whether our watchers hear of it now (standing.gd forewarn_odds, by our
 	# cunning), or only in the last month before they march (_late_word).
 	var standing:=load(STANDING_PATH) as GDScript
-	var odds:=float(standing.call("forewarn_odds",float(standing.call("art_of","player","cunning")))) if standing!=null else 1.0
+	# A network of ours among them hears the spears gathered (cunning_toward).
+	var odds:=float(standing.call("forewarn_odds",float(standing.call("cunning_toward",civ_id)))) if standing!=null else 1.0
 	var heard:=_rng("arm_heard:%s:%d" % [civ_id,day]).randf()<odds
 	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160),"heard":heard,"heard_odds":snappedf(odds,0.01)}
 	_mark(civ_id,"all_in",day)

@@ -126,3 +126,24 @@ func test_a_kept_boast_shows_beside_our_reading_and_is_flagged_when_stretched()-
 				assert_str(String(row.said)).contains("claimed")
 				assert_str(String(row.said)).contains("stretched")
 	assert_bool(found).is_true()
+
+func test_our_eyes_name_themselves_as_the_source_and_judge_a_boast_by_the_truth()->void:
+	var id:=_met(0,0.6)
+	var Covert:=preload("res://scripts/covert_ops.gd")
+	Covert.forget()
+	CV_override()
+	var op:=Covert.launch("plant",id,"","trader",Covert.volunteer())
+	op["stage"]="in_place"
+	op["settled_day"]=int(GameState.elapsed_days)-12*365
+	var truth:=float(Races.their_measures(id).get("people",0.0))
+	Races.remember_boast(id,{"race":"people","claimed":truth*3.0+50.0,"day":75*365-30,"text":"x"})
+	var row:Dictionary={}
+	for r:Dictionary in Races.races(Standing.strengths(),_names())[0].rows:
+		if String(r.civ_id)==id: row=r
+	assert_str(String(row.get("source",""))).contains("12 years")
+	assert_str(String(row.get("said",""))).contains("Our eyes among them say it is stretched")
+	Covert.forget()
+	(preload("res://scripts/character_voice.gd") as GDScript).knowledge_override.clear()
+
+func CV_override()->void:
+	(preload("res://scripts/character_voice.gd") as GDScript).knowledge_override["player"]=["phonetic_notation","copper_smelting","seed_selection"]

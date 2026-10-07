@@ -589,7 +589,8 @@ static func _schedule(civ_id:String,due:int,cause:String,ref:String)->void:
 ## keeps the approaches from the warning until the raiders come, and meets
 ## them on ground of our choosing (_raid's guard).
 static func _foresee(civ_id:String,pending:Dictionary)->void:
-	var cunning:=Standing.art_of("player","cunning")
+	# Our network among them hears the raiders gather (Standing.cunning_toward).
+	var cunning:=Standing.cunning_toward(civ_id)
 	var odds:=Standing.forewarn_odds(cunning)
 	var due:=int(pending.get("day",_day()))
 	pending["seen_odds"]=snappedf(odds,0.01)

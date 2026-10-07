@@ -132,6 +132,15 @@ static func sections()->Array:
 		for a:Dictionary in abroad:
 			rows.append("%s · %s · %s · %s · risk %s" % [String(a.name),_cover_words(String(a.cover),String(a.kind)),String(a.civ_name),String(a.last_word),_risk_words(float(a.risk))])
 		out.append({"kind":"abroad","title":"Our %s abroad" % eyes,"rows":rows})
+	# Our networks: eyes and won locals in each people, how long, how strong.
+	var nets:=Covert.networks()
+	if not nets.is_empty():
+		var rows_n:Array=[]
+		for n:Dictionary in nets:
+			rows_n.append("%s · %d %s, %d won over · %s · strength %d in 100 · %s · each meeting %s" % [String(n.civ_name),int(n.eyes),Corps.word("eye") if int(n.eyes)==1 else eyes,int(n.recruits),
+				"under a year" if float(n.years)<1.0 else ("%d years" % roundi(float(n.years))),roundi(float(n.strength)*100.0),
+				"no word yet" if int(n.last_word_days)<0 else "last word %s" % _age(int(n.last_word_days)),_risk_words(float(n.risk))])
+		out.append({"kind":"networks","title":"Our networks","rows":rows_n})
 	var learned:=Covert.learned(6)
 	if not learned.is_empty():
 		var rows2:Array=[]

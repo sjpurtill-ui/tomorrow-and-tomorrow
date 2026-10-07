@@ -539,6 +539,14 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 			# almost never comes home; a quiet strike has a slim chance.
 			out["escape"]=clampf(stealth*0.3+nerve*0.15+(0.0 if cover=="envoy" else 0.15)-reach*0.0,0.02,0.45)
 			out["caught"]=clampf(out.success*0.0+0.0,0.0,0.0)  # fate is rolled on the strike, not a separate catch
+	# A network among them knows the doors and the hours: theft and sabotage
+	# go better, and are caught less.
+	if kind in ["steal","sabotage"]:
+		var net:=network_strength(civ_id)
+		if net>0.0:
+			out["success"]=clampf(float(out.success)+net*0.25,0.0,0.95)
+			out["caught"]=clampf(float(out.caught)-net*0.1,0.02,1.0)
+			out["network"]=net
 	return out
 
 ## The odds a newcomer of ours is found out while moving in among them: a
@@ -624,6 +632,61 @@ static func entrenched_years(civ_id:String)->float:
 
 ## Years at which an eye's word is as good as it gets.
 const ENTRENCHED_YEARS:=20.0
+
+# --------------------------------------------------------------------------
+# Networks: our eyes in one people and the locals they have won over
+# --------------------------------------------------------------------------
+
+## Locals one eye can win over to pass word (each meeting may win one).
+const RECRUITS_PER_EYE:=4
+## The odds a meeting wins a local: a base, and the eye's stealth and tongue.
+const RECRUIT_BASE:=0.08
+const RECRUIT_SKILL:=0.22
+## When an eye is caught, the odds each other eye in that people is exposed
+## too: they talked, or they kept silent.
+const EXPOSED_IF_TALKS:=0.5
+const EXPOSED_IF_SILENT:=0.12
+
+## Our network among a people: {civ_id, eyes, recruits, years, strength
+## (0..1), last_word_days (-1 none), risk (each meeting, the mean)}.
+## Strength: how many eyes (up to 3), how many locals (up to 8) and above all
+## how long they have lived there (up to ENTRENCHED_YEARS).
+static func network(civ_id:String)->Dictionary:
+	var day:=_day()
+	var eyes:=0
+	var recruits:=0
+	var years:=0.0
+	var risk:=0.0
+	for op in state().ops:
+		var o:Dictionary=op
+		if String(o.get("civ_id",""))!=civ_id or String(o.get("stage",""))!="in_place" or String(o.get("kind",""))!="plant": continue
+		eyes+=1
+		recruits+=int(o.get("recruits",0))
+		years=maxf(years,float(day-int(o.get("settled_day",day)))/365.0)
+		risk+=float((o.get("odds",{}) as Dictionary).get("caught",0.05))
+	var last:=-1
+	for f in state().learned:
+		if String((f as Dictionary).get("civ_id",""))==civ_id: last=maxi(0,day-int((f as Dictionary).day)); break
+	var strength:=0.0
+	if eyes>0: strength=clampf(0.55*minf(years,ENTRENCHED_YEARS)/ENTRENCHED_YEARS+0.25*minf(float(eyes),3.0)/3.0+0.2*minf(float(recruits),8.0)/8.0,0.0,1.0)
+	return {"civ_id":civ_id,"civ_name":_name(civ_id),"eyes":eyes,"recruits":recruits,"years":years,"strength":strength,"last_word_days":last,"risk":risk/maxf(1.0,float(eyes))}
+
+## Every people we have a network among, strongest first.
+static func networks()->Array:
+	var seen:={}
+	var out:Array=[]
+	for op in state().ops:
+		var id:=String((op as Dictionary).get("civ_id",""))
+		if id=="" or seen.has(id): continue
+		seen[id]=true
+		var n:=network(id)
+		if int(n.eyes)>0: out.append(n)
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.strength)>float(b.strength))
+	return out
+
+## How strong our network among them is (0..1); the other systems read this.
+static func network_strength(civ_id:String)->float:
+	return float(network(civ_id).strength)
 
 static func _cover_word(cover:String)->String:
 	return {"envoy":"envoy","trader":"trader","pilgrim":"pilgrim","refugee":"refugee","none":"no"}.get(cover,"no")
@@ -712,6 +775,13 @@ static func _plant_report(op:Dictionary,day:int)->void:
 		op["next_report"]=day+PLANT_REPORT_DAYS
 		_stat("double_false_reports")
 		return
+	# A local won over at the meeting passes word too (up to RECRUITS_PER_EYE
+	# for each eye): the network grows, and so does what it hears.
+	var agent:=_op_agent(op)
+	var won:=clampf(RECRUIT_BASE+RECRUIT_SKILL*(float(agent.get("stealth",0.5))*0.5+float(agent.get("tongue",0.5))*0.5),0.0,0.5)
+	if int(op.get("recruits",0))<RECRUITS_PER_EYE and _rng(String(op.seed)+":recruit:%d" % day).randf()<won:
+		op["recruits"]=int(op.get("recruits",0))+1
+		_stat("recruits_won")
 	# Our scout met them unseen and carries the word home: it reaches us
 	# after the road (an eye never leaves its place to report).
 	op["courier_due"]=day+travel_days(String(op.civ_id),String(op.city_id))
@@ -1064,6 +1134,7 @@ static func _agent_caught_ours(op:Dictionary,day:int,doing:String)->void:
 	record_agent(_op_agent(op),String(op.kind),String(op.civ_id),"caught")
 	_agent_deed(String(op.agent),"Caught %s among %s%s." % [doing,_the(String(op.civ_id)),"; broke and named us" if talks else "; gave nothing up"])
 	_raise_suspicion(String(op.civ_id),0.3)
+	if String(op.kind)=="plant": _network_damaged(op,day,talks)
 	if talks: _feud_or_war(op,day,false)
 	# Their ruler decides what becomes of them, as we decide for theirs.
 	var judged:Dictionary=_captives().call("judge_ours",op,day,doing)
@@ -1072,6 +1143,19 @@ static func _agent_caught_ours(op:Dictionary,day:int,doing:String)->void:
 	_credit(op,"%s Caught%s" % [String(op.agent_name),(" — and Talked" if talks else "")],
 		"%s was caught %s among %s%s. %s" % [String(op.agent_name),doing,_the(String(op.civ_id)),"; under their hands they named us, and the blood is on our road now" if talks else "; they gave nothing away",String(judged.get("told",""))],"notice")
 	_stat("ours_caught")
+
+## One eye of a network taken: the locals they won scatter, and each other
+## eye among that people may be exposed (more so if the taken one talked).
+## The network is hurt, not ended.
+static func _network_damaged(caught:Dictionary,day:int,talks:bool)->void:
+	caught["recruits"]=0
+	var exposed:Array=[]
+	for op in state().ops:
+		var o:Dictionary=op
+		if int(o.get("id",-1))==int(caught.get("id",-2)) or String(o.get("civ_id",""))!=String(caught.civ_id) or String(o.get("stage",""))!="in_place" or String(o.get("kind",""))!="plant": continue
+		o["recruits"]=int(int(o.get("recruits",0))/2)
+		if _rng(String(o.seed)+":exposed:%d" % day).randf()<(EXPOSED_IF_TALKS if talks else EXPOSED_IF_SILENT): exposed.append(o)
+	for o in exposed: _agent_caught_ours(o,day,"named by one taken before them" if talks else "found by those who found the first")
 
 static func _op_agent(op:Dictionary)->Dictionary:
 	var kept:=stored_agent(String(op.agent))

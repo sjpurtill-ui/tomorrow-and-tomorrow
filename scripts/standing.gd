@@ -1287,6 +1287,16 @@ static func certainty(civ_id:String)->float:
 		if years>0.0: read=maxf(read,clampf(EYES_CERTAINTY+(0.97-EYES_CERTAINTY)*years/20.0,EYES_CERTAINTY,0.97))
 	return read
 
+## Our network among them (covert_ops.gd network), 0..1: our cunning reads
+## them as if this much sharper, for warnings and for their envoys' bluffs.
+static func network_edge(civ_id:String)->float:
+	if _owner()!="player" or Engine.get_main_loop()==null or civ_id=="": return 0.0
+	return float(preload("res://scripts/covert_ops.gd").network_strength(civ_id))
+
+## Our cunning as it bears on one people: our own, sharpened by a network.
+static func cunning_toward(civ_id:String)->float:
+	return clampf(art_of("player","cunning")+network_edge(civ_id)*0.45,0.0,1.0)
+
 ## Our agents among them now (the god's covert ops on watch or a source);
 ## for another people, its spies among us.
 static func _eyes_among(civ_id:String)->int:
