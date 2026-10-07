@@ -26,28 +26,29 @@ const WorkPaths:=preload("res://scripts/work_paths.gd")
 const Culture:=preload("res://scripts/artifact_culture.gd")
 const Exchange:=preload("res://scripts/society_exchange.gd")
 
-## The ledger's rows: [id, words, course lever, values effect]. A course lever
-## or a values effect of "" has no part in that row.
+## The ledger's rows: [id, short word, what it is, course lever, values effect,
+## icon (resource_icons domain)]. A course lever or a values effect of "" has
+## no part in that row.
 const LEDGER:=[
-	["cohesion","How close our people hold","cohesion_target","cohesion"],
-	["legitimacy","Trust in those who rule","","legitimacy"],
-	["institutions","How well our institutions work","","institutions"],
-	["knowledge","Learning","knowledge_gain","knowledge"],
-	["adoption","How fast new ways spread","adoption_rate","adoption"],
-	["trade","Trade","trade_access","trade"],
-	["security","Safety at home","security_target","security"],
-	["food","Food from every field and hunt","food_yield",""],
-	["health","Health","health_target",""],
-	["births","Births","conception_support",""],
-	["building","Building","construction_output",""],
-	["resources","Stone, ore and timber won","resource_output",""],
-	["work","Work done","labor_multiplier",""],
-	["carrying","Carrying and roads","logistics_target",""],
-	["drill","Drill","training_rate",""],
-	["command","Our leaders' command","command_development",""],
-	["surveying","Surveying","survey_output",""],
-	["reach","How far our land reaches","realm_reach",""],
-	["scouting","How fast our known country grows","scout_reach",""],
+	["cohesion","Cohesion","How close our people hold","cohesion_target","cohesion","demography"],
+	["legitimacy","Legitimacy","Trust in those who rule","","legitimacy","institutions"],
+	["institutions","Institutions","How well our institutions work","","institutions","institutions"],
+	["knowledge","Learning","How fast we learn","knowledge_gain","knowledge","knowledge"],
+	["adoption","New ways","How fast new ways spread","adoption_rate","adoption","culture"],
+	["trade","Trade","Trade with other peoples","trade_access","trade","wealth"],
+	["security","Safety","Safety at home","security_target","security","security"],
+	["food","Food","Food from every field and hunt","food_yield","","nutrition"],
+	["health","Health","Health","health_target","","health"],
+	["births","Births","Births","conception_support","","demography"],
+	["building","Building","Building","construction_output","","infrastructure"],
+	["resources","Materials","Stone, ore and timber won","resource_output","","production"],
+	["work","Work","Work done","labor_multiplier","","labor"],
+	["carrying","Roads","Carrying and roads","logistics_target","","logistics"],
+	["drill","Drill","Drill","training_rate","","security"],
+	["command","Command","Our leaders' command","command_development","","security"],
+	["surveying","Surveying","Surveying","survey_output","","ecology"],
+	["reach","Reach","How far our land reaches","realm_reach","","logistics"],
+	["scouting","Scouting","How fast our known country grows","scout_reach","","ecology"],
 ]
 
 ## The five sides of the people's tendency, and what each makes our leaders do.
@@ -90,12 +91,18 @@ static func course()->Dictionary:
 static func ledger(values:Dictionary)->Array:
 	var out:Array=[]
 	for row:Array in LEDGER:
-		var from_course:=Ambition.effect(String(row[2])) if String(row[2])!="" else 0.0
-		var from_values:=ValuesModel.simulation_effect(values,String(row[3])) if String(row[3])!="" else 0.0
+		var from_course:=Ambition.effect(String(row[3])) if String(row[3])!="" else 0.0
+		var from_values:=ValuesModel.simulation_effect(values,String(row[4])) if String(row[4])!="" else 0.0
 		if absf(from_course)<0.004 and absf(from_values)<0.004: continue
-		out.append({"id":String(row[0]),"label":String(row[1]),"course":from_course,"values":from_values,"total":from_course+from_values})
+		out.append({"id":String(row[0]),"short":String(row[1]),"label":String(row[2]),"icon":String(row[5]),"course":from_course,"values":from_values,"total":from_course+from_values})
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(float(a.total))>absf(float(b.total)))
 	return out
+
+## One short word for each end of each value, for the slim lines.
+const POLES:={"hierarchy":["Equal","Ranked"],"collective_obligation":["Autonomy","Duty"],"centralization":["Local","Central"],
+	"experimentation":["Custom","Novelty"],"pluralism":["Conformity","Pluralism"],"common_stewardship":["Private","Common"],
+	"restorative_justice":["Punishment","Restoration"],"openness":["Exclusion","Openness"],"ecological_restraint":["Extraction","Restraint"],
+	"achieved_status":["Birth","Merit"]}
 
 ## The ten values, lived and official, with how far apart they stand.
 static func value_rows(values:Dictionary)->Array:
@@ -106,7 +113,8 @@ static func value_rows(values:Dictionary)->Array:
 		var d:Dictionary=ValuesModel.VALUE_DEFINITIONS[axis]
 		var l:=clampf(float(lived.get(axis,0.5)),0.0,1.0)
 		var o:=clampf(float(official.get(axis,l)),0.0,1.0)
-		out.append({"axis":axis,"name":String(d.name).capitalize(),"low":String(d.low).capitalize(),"high":String(d.high).capitalize(),"meaning":String(d.meaning),
+		var poles:Array=POLES.get(axis,[String(d.low).capitalize(),String(d.high).capitalize()])
+		out.append({"axis":axis,"name":String(d.name).capitalize(),"low":String(d.low).capitalize(),"high":String(d.high).capitalize(),"low_word":String(poles[0]),"high_word":String(poles[1]),"meaning":String(d.meaning),
 			"lived":l,"official":o,"gap":absf(l-o)})
 	return out
 
