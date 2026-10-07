@@ -407,8 +407,7 @@ func _rival_war_rate()->void:
 	var pairs:=0
 	for i in civs.size():
 		for j in range(i+1,civs.size()):
-			var a:Vector2=civs[i].get("position",Vector2.ZERO); var b:Vector2=civs[j].get("position",Vector2.ZERO)
-			if a.distance_to(b)>WAR.NEIGHBOUR_RANGE: continue
+			if not WAR.neighbours(civs[i],civs[j]): continue
 			var relation:Dictionary=(civs[i].relations as Dictionary).get(String(civs[j].id),{})
 			if relation.is_empty(): continue
 			pairs+=1

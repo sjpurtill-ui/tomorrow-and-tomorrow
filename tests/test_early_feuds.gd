@@ -55,7 +55,16 @@ func before_test()->void:
 	probe._fill_court()
 	GameState.elapsed_days=10
 	civ_id=String(CivilizationSystem.civilizations[0].id)
+	_bring_near(CivilizationSystem.civilizations[0])
 	Hall.envoys_only=false
+
+## Raiders walk only a neighbour's road (war_loop.gd near_us): the feuding
+## people lives a few days from us, not a continent away.
+func _bring_near(civ:Dictionary)->void:
+	var home:Vector2=CivilizationSystem.player_world_origin+Vector2(250.0,0.0)
+	civ["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=home
 
 func after_test()->void:
 	Hall.envoys_only=false
@@ -723,3 +732,19 @@ func test_whoever_comes_to_us_shows_the_way_home()->void:
 	WAR._envoys_from_before(20)
 	assert_bool(WAR.home_known(other)).is_true()
 	assert_str(String(_civ(other).player_relation.get("home_location_source",""))).is_equal("their envoy's road home")
+
+func test_a_people_far_from_our_country_sends_no_raiders()->void:
+	var far:Dictionary=CivilizationSystem.civilizations[1]
+	var far_id:=String(far.id)
+	var home:Vector2=CivilizationSystem.player_world_origin+Vector2(5000.0,0.0)
+	far["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in far.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=home
+	assert_bool(WAR.near_us(far_id)).is_false()
+	assert_bool(WAR.near_us(civ_id)).is_true()
+	var before:=int(GameState.population_exact)
+	assert_dict(WAR._raid(far_id,int(GameState.elapsed_days),"test",false)).is_empty()
+	assert_int(int(GameState.population_exact)).is_equal(before)
+	var kinds:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==far_id).map(func(e:Dictionary)->String:return String(e.kind))
+	assert_array(kinds).contains(["stood_down"])
+	assert_array(kinds).not_contains(["raid"])

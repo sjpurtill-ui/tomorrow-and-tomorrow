@@ -717,6 +717,13 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		_stat("raids_marched")
 		came_to_us(civ_id,day,"raiders")
 		return {}
+	# Raiders who cannot march a real band to us walk no farther than a
+	# neighbour's road: a people whose country is nowhere near ours, or across
+	# the sea, sends no raiders out of nowhere.
+	if not near_us(civ_id):
+		_log(civ_id,"stood_down","No raiders came from %s: their country lies too far from ours." % _name(civ_id),{"cause":cause})
+		_stat("raids_too_far")
+		return {}
 	var f:=front(civ_id)
 	var name:=_name(civ_id)
 	var key:="raid:%s:%d" % [civ_id,day]
@@ -2235,7 +2242,32 @@ static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
 ## multipliers of its condition.
 const RIVAL_WAR_BASE:=0.0018
 const RIVAL_WAR_CAP:=0.012
-const NEIGHBOUR_RANGE:=1.55
+## Two peoples are neighbours when their countries (realm_reach.gd) come
+## within NEIGHBOUR_MARGIN_KM of meeting: about a month's march, the distance
+## bulk goods are still worth carrying (envoy_requests.gd BULK_KM). Peoples
+## founded 1,100 km apart (civilization_start.gd) become neighbours as their
+## lands grow toward each other; a people across the sea never is.
+const NEIGHBOUR_MARGIN_KM:=450.0
+const RealmReach:=preload("res://scripts/realm_reach.gd")
+
+## Whether a people's country comes within NEIGHBOUR_MARGIN_KM of ours (the
+## same rule as neighbours, with our realm as one side). True before we have
+## a home, when there is no country of ours to measure from.
+static func near_us(civ_id:String)->bool:
+	var ours:=RealmReach.ours()
+	if ours.is_empty(): return true
+	var civ:=_civ(civ_id)
+	if civ.is_empty(): return false
+	var theirs:=RealmReach.of(civ)
+	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
+	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
+	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+NEIGHBOUR_MARGIN_KM
+
+static func neighbours(first:Dictionary,second:Dictionary)->bool:
+	var world=WorldSimulation.world
+	var a:Vector2=world._civilization_world_position(first); var b:Vector2=world._civilization_world_position(second)
+	var reach:=RealmReach.reach_km(float(first.get("population",0.0)),float(first.get("world_reach",0.0)))+RealmReach.reach_km(float(second.get("population",0.0)),float(second.get("world_reach",0.0)))
+	return a.distance_to(b)<=reach+NEIGHBOUR_MARGIN_KM
 
 static func rival_war_hazard(first:Dictionary,second:Dictionary,relation:Dictionary,neighbours:float=1.0)->float:
 	## Annual chance that these two neighbours go to war, from their condition.
@@ -2257,8 +2289,7 @@ static func neighbour_counts()->Dictionary:
 	for i in civs.size():
 		for j in range(i+1,civs.size()):
 			if not bool(civs[i].get("alive",true)) or not bool(civs[j].get("alive",true)): continue
-			var a:Vector2=civs[i].get("position",Vector2.ZERO); var b:Vector2=civs[j].get("position",Vector2.ZERO)
-			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
+			if not neighbours(civs[i],civs[j]): continue
 			counts[String(civs[i].id)]=int(counts.get(String(civs[i].id),0))+1
 			counts[String(civs[j].id)]=int(counts.get(String(civs[j].id),0))+1
 	return counts
@@ -2274,8 +2305,7 @@ static func _rival_wars(day:int)->void:
 			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
 			# A people down to a handful starts no quarrel and is worth none.
 			if minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<BROKEN_PEOPLE: continue
-			var a:Vector2=first.get("position",Vector2.ZERO); var b:Vector2=second.get("position",Vector2.ZERO)
-			if a.distance_to(b)>NEIGHBOUR_RANGE: continue
+			if not neighbours(first,second): continue
 			var relation:Dictionary=(first.get("relations",{}) as Dictionary).get(String(second.id),{})
 			if relation.is_empty() or bool(relation.get("at_war",false)) or String(relation.get("pending_message",""))!="" or String(relation.get("treaty","none")) in ["non_aggression","truce","trade"]: continue
 			# Already feuding: the feud runs its own course (CivilizationSystem).
