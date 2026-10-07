@@ -130,12 +130,20 @@ static func _standing(rows:Array)->String:
 		else: close+=1
 	if rivals==0: return "We have no one to measure ourselves against yet."
 	if behind==0 and close==0: return "We lead every people we can measure."
-	if behind==0: return "We lead, but %s %s close behind or level." % [_count_word(close),"is" if close==1 else "are"]
+	# Too close to call, but their best guess is above ours: name them.
+	var likely:PackedStringArray=[]
+	for row:Dictionary in rows:
+		if not bool(row.ours) and not bool(row.unknown) and float(row.value)>float(ours.value) and float(ours.value)>=float(row.low): likely.append(String(row.name))
+	if behind==0 and not likely.is_empty(): return "%s probably %s ahead of us, though our watchers cannot be sure." % [" and ".join(likely),"is" if likely.size()==1 else "are"]
+	if behind==0: return "We are probably ahead, but %s too close to call." % _peoples(close,"is","are")
 	if ahead==0 and close==0: return "We trail every people we can measure."
-	return "%s %s ahead of us." % [_count_word(behind),"is" if behind==1 else "are"]
+	return "%s clearly ahead of us." % _cap(_peoples(behind,"is","are"))
 
-static func _count_word(n:int)->String:
-	return {1:"One people",2:"Two peoples",3:"Three peoples"}.get(n,"%d peoples" % n)
+static func _peoples(n:int,one:String,many:String)->String:
+	return "%s %s" % [{1:"one people",2:"two peoples",3:"three peoples"}.get(n,"%d peoples" % n),one if n==1 else many]
+
+static func _cap(text:String)->String:
+	return text.left(1).to_upper()+text.substr(1)
 
 
 # ----------------------------------------------------------------- boasts
