@@ -1,3 +1,20 @@
+## October 6 — Ruler portrait resolution and framing: authorized integration
+
+The reported foreign ruler card was enlarging a 112 x 128 roster still and
+cropping its crown. Large cards now render at 444 x 392 or 444 x 300 with
+matching mipmaps, a portrait pose, three-quarter turn and head-relative framing.
+Small roster stills retain their budget. Ruler age, sex and rank come from the
+existing record; the appearance cache preserves those facts without reseeding
+identity. No saved fields, simulation, live-stage lighting or models change.
+
+Thirteen focused identity/appearance/wardrobe checks pass. The exact reported
+Zatkumad ruler is reviewed from a copied save at 1600 x 900 and 1280 x 720;
+both show the whole face above the regard strip. Elderly seated and young
+specimens also pass; no GPU errors or remaining test processes. Source starts
+at `90865c14`; concurrent envoy dialogue changes in `9159e25f` have no file
+overlap. Delivery follows remote-first push and canonical fast-forward while
+preserving the player. See `docs/design/RULER_PORTRAIT_QUALITY.md`.
+
 ## October 6 — Death by hounds: authorized integration
 
 The user explicitly requested finishing and merging the dogs execution with a

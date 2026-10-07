@@ -311,7 +311,7 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={},presenta
 	if screen_registry!=null:
 		var taken:Dictionary=screen_registry.get("_look_of",{})
 		# A court can be reopened after discovery without changing the person.
-		var dressed_identity:=identity+"|"+outfit+"|"+String(era.get("stage_id",""))+"|"+str(era.get("dye_level",0))
+		var dressed_identity:=identity+"|"+outfit+"|"+String(era.get("stage_id",""))+"|"+str(era.get("dye_level",0))+"|%d|%s|%s" % [years,sex,title]
 		if taken.has(dressed_identity):return taken[dressed_identity]
 		var used:Dictionary=screen_registry.get("_looks",{})
 		var turn:=0
@@ -342,7 +342,9 @@ static func picture_rect(person:Dictionary,screen_registry:Dictionary,width:floa
 	var picture:=figure_picture(person,screen_registry)
 	var image:=TextureRect.new();image.name="Portrait";image.flip_h=bool(picture.flip)
 	if Studio.available():
-		image.texture=Studio.still(figure_look(person,screen_registry),"bust",picture.texture);image.flip_h=false
+		var framing:=Studio.portrait_framing(width,height)
+		image.texture=Studio.still(figure_look(person,screen_registry),framing,picture.texture);image.flip_h=false
+		image.set_meta("portrait_framing",framing)
 	else:image.texture=picture.texture
 	image.custom_minimum_size=Vector2(width,height);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE

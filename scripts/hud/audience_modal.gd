@@ -3727,10 +3727,16 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 	return banner
 
 func _foreign_leader_person(civ_id:String,leader:Dictionary)->Dictionary:
-	var person:={"name":String(leader.get("name","")),"person_id":0}
-	# The same picture for a ruler's whole life (rival_rulers.gd).
-	var portrait:Dictionary=Rivals.portrait_person(civ_id)
-	if portrait.has("early_art_index"):person["early_art_index"]=int(portrait.early_art_index)
+	var title:=String(leader.get("office_title",leader.get("title","ruler")))
+	if title.is_empty():title="ruler"
+	var person:={"name":String(leader.get("name","")),"person_id":0,"civilization_id":civ_id,"office_title":title}
+	# Read the existing ruler only. Opening a portrait must not initialize a
+	# character, roll a new identity, or replace recorded sex/years with a hash.
+	var character:Dictionary=leader.get("character",{}) if leader.get("character") is Dictionary else {}
+	if character.has("portrait"):person["early_art_index"]=int(character.portrait)
+	if character.get("woman") is bool:person["sex"]="female" if bool(character.woman) else "male"
+	if character.get("born") is int or character.get("born") is float:
+		person["age"]=maxi(16,floori(float(int(GameState.elapsed_days)-int(character.born))/365.0))
 	EarlyArt.bind_foreign_identity(person,civ_id,int(GameState.world_seed))
 	return person
 
