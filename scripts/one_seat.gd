@@ -169,6 +169,19 @@ static func districts()->int:
 		if nucleus is Dictionary and bool((nucleus as Dictionary).get("active",true)):count+=1
 	return maxi(1,count)
 
+## How many places a people lives in, for the capability scales'
+## settlement floors (civilization_progression_catalog.gd SETTLEMENT_FLOORS).
+## Under one seat the register holds a single town, so the seat counts as
+## the places its people would once have spread over: its districts, or one
+## place per PLACE_PEOPLE under the square root, whichever is more. This is
+## the rule the aggregate rivals already use (progression_system.gd
+## advance_rival), so no people is held back by having one seat.
+const PLACE_PEOPLE:=250.0
+const MAX_PLACES:=256
+static func places(people:float,registered:int,district_count:int)->int:
+	var spread:=ceili(sqrt(maxf(0.0,people)/PLACE_PEOPLE))
+	return mini(MAX_PLACES,maxi(maxi(registered,district_count),spread))
+
 ## {id, name, people, districts, next: {id, name, people, districts} or {}}.
 static func stage()->Dictionary:
 	var people:=roundi(maxf(0.0,float(WorldSimulation.state.population_exact)))

@@ -785,8 +785,12 @@ func progression_reach_snapshot()->Dictionary:
 	for civ in civilizations:
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: contacts+=1
 	var contact_ratio:=clampf(float(contacts)/maxf(1.0,float(civilizations.size())),0.0,1.0)
-	var settlement_ratio:=clampf(float(WorldSimulation.state.player_settlements.size())/64.0,0.0,1.0)
-	if WorldSimulation.state.player_settlements.is_empty() and WorldSimulation.state.settlement_site_committed: settlement_ratio=1.0/64.0
+	# One seat per people: the seat counts as the places its people fill
+	# (one_seat.gd places), as the capability scales count it.
+	var towns:=WorldSimulation.state.player_settlements.size()
+	if towns==0 and WorldSimulation.state.settlement_site_committed: towns=1
+	if towns>0: towns=preload("res://scripts/one_seat.gd").places(WorldSimulation.state.population_exact,towns,preload("res://scripts/one_seat.gd").districts())
+	var settlement_ratio:=clampf(float(towns)/64.0,0.0,1.0)
 	var territory_ratio:=clampf(_player_territory()/4.0,0.0,1.0)
 	var combined:=charted*0.30+contact_ratio*0.20+settlement_ratio*0.25+territory_ratio*0.25
 	return {"combined":clampf(combined,0.0,1.0),"charted":charted,"contacts":contact_ratio,"settlements":settlement_ratio,"territory":territory_ratio,"contacted_civilizations":contacts}

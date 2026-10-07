@@ -4,6 +4,7 @@ signal milestone_unlocked(event:Dictionary)
 
 const Catalog=preload("res://scripts/civilization_progression_catalog.gd")
 const FrontierCatalog=preload("res://scripts/discovery_frontier_catalog.gd")
+const OneSeat=preload("res://scripts/one_seat.gd")
 const MAX_TRANSITION_LOG:=192
 const MAX_UNLOCK_LOG:=MAX_TRANSITION_LOG
 
@@ -162,6 +163,8 @@ func player_context()->Dictionary:
 	if cached_player_profile.is_empty(): cached_player_profile=_build_player_discovery_profile()
 	var settlement_count:=WorldSimulation.state.player_settlements.size()
 	if settlement_count==0 and WorldSimulation.state.settlement_site_committed: settlement_count=1
+	# One seat per people: the seat counts as the places its people fill.
+	if settlement_count>0: settlement_count=OneSeat.places(WorldSimulation.state.population_exact,settlement_count,OneSeat.districts())
 	var reach:=0.0
 	var reach_snapshot:Dictionary={}
 	var civilization_system:=WorldSimulation.system("CivilizationSystem")
@@ -220,7 +223,7 @@ func advance_rival(civ:Dictionary)->Dictionary:
 	var population:=maxf(1.0,float(result.get("population",1.0)))
 	var settlement_count:=maxi(1,int(result.get("settlement_count",1)))
 	if float(result.get("production",0.0))>=0.16 and float(result.get("institutions",0.0))>=0.16:
-		settlement_count=maxi(settlement_count,mini(256,ceili(sqrt(population/250.0))))
+		settlement_count=OneSeat.places(population,settlement_count,1)
 	result["settlement_count"]=settlement_count
 	var context:=_rival_context(result)
 	for _pass in Catalog.ERA_NAMES.size():

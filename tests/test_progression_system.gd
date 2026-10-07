@@ -58,8 +58,10 @@ func test_population_alone_never_creates_civilizational_capability()->void:
 func test_player_can_reach_planetary_scale_from_broad_mature_discovery_bodies()->void:
 	GameState.ensure_population_total(12_000_000_000)
 	GameState.settlement_site_committed=true
+	# One seat, as every people now has: the seat counts as the places its
+	# people fill (one_seat.gd places), never a wall at the regional scale.
 	GameState.player_settlements.clear()
-	for index in 64: GameState.player_settlements.append({"id":index+1,"population":187_500_000.0})
+	GameState.player_settlements.append({"id":"seat","primary":true})
 	for domain in CATALOG.DOMAINS: GameState.society_capacities[domain]=0.96
 	var selected_counts:Dictionary={}
 	for domain in CATALOG.DOMAINS: selected_counts[domain]=0
@@ -87,6 +89,17 @@ func test_player_can_reach_planetary_scale_from_broad_mature_discovery_bodies()-
 	assert_int(ProgressionSystem.domain_levels.size()).is_equal(12)
 	assert_int(ProgressionSystem.unlock_log.size()).is_less_equal(ProgressionSystem.MAX_TRANSITION_LOG)
 	assert_array(ProgressionSystem.validate_state()).is_empty()
+
+
+func test_one_seat_counts_as_the_places_its_people_fill()->void:
+	var OneSeat:=preload("res://scripts/one_seat.gd")
+	assert_int(OneSeat.places(120.0,1,1)).is_equal(1)
+	assert_int(OneSeat.places(50_000.0,1,1)).is_greater_equal(CATALOG.SETTLEMENT_FLOORS[3])
+	assert_int(OneSeat.places(500_000.0,1,2)).is_greater_equal(CATALOG.SETTLEMENT_FLOORS[4])
+	assert_int(OneSeat.places(12_000_000_000.0,1,8)).is_equal(OneSeat.MAX_PLACES)
+	assert_int(OneSeat.places(100.0,1,5)).is_equal(5)
+	for tier in CATALOG.POPULATION_FLOORS.size():
+		assert_int(OneSeat.places(CATALOG.POPULATION_FLOORS[tier],1,1)).is_greater_equal(CATALOG.SETTLEMENT_FLOORS[tier])
 
 
 func _planetary_rival_profile(civ_id:String)->Dictionary:
