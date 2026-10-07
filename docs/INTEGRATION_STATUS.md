@@ -1,3 +1,17 @@
+## October 7 — Connected, grounded settlement walls
+
+Replaces the completed stage-4 renderer's three disconnected interior loops
+and unrelated tower circle with one enclosure around actual occupied plots.
+Shared joints, physical gate intervals and attached towers use the same line.
+Stage-4 walls are 6 m high, towers 8 m, gates 4.5 m; bounded ground sampling and
+normal depth testing remove elevated panels showing through other objects.
+Construction and breach state still determine incomplete sections. No saves
+or simulation rules change. Base `28896916`, branch `codex/settlement-wall-scale`.
+18/18 checks and same-save GPU comparison passed (Ashfire, 3,670 people,
+day 93,035, undamaged completed stage 4); zero human map batches. Current player
+session remains untouched and needs a normal restart. Evidence and exact scope:
+`docs/design/SETTLEMENT_WALL_RENDERING.md`.
+
 ## October 7 — Requested dog execution in later courts
 
 Fixes an integrated animation choosing the wrong method: the modal treated
