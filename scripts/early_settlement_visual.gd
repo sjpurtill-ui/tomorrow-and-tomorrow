@@ -1,8 +1,10 @@
 extends RefCounted
-## Built-form adapter: observes completed plot records, never unlocks construction.
+## Built-form adapter: observes recorded plot work, never unlocks construction.
 ## No population, calendar, stockpile, or research lookup can restyle an old house.
 const LATE := preload("res://scripts/settlement_architecture_kit.gd")
 const TOWN := preload("res://scripts/organic_town_visual.gd")
+const CONSTRUCTION := preload("res://scripts/settlement_construction_state.gd")
+const CONSTRUCTION_MESH := preload("res://scripts/settlement_construction_mesh.gd")
 const KIT := ["carried_ridge", "carried_round", "rooted_lean_to", "round_household", "earthen_household", "rubble_household", "raised_store", "covered_workshop"]
 # Only recorded early forms belong in this adapter. Later/unknown forms retain
 # legacy coverage even if their inherited roof/material resembles an early house.
@@ -195,18 +197,30 @@ static func _imported_mesh(name: String) -> Mesh:
 	return imported_meshes[name]
 
 static func render(plan: Dictionary, center: Vector3, height: Callable, parent: Node3D) -> void:
+	var complete:Array=[]
+	var work:Array[Dictionary]=[]
+	var states:Dictionary={}
+	for record:Dictionary in plan.buildings:
+		var plot:Dictionary=record.plot
+		var id:=int(record.plot_id)
+		if not states.has(id):states[id]=CONSTRUCTION.state(plot)
+		var current:Dictionary=states[id]
+		if current.mode!="" and String(plot.get("status","active")) not in ["ruin","reclaimed"] and float(plot.get("damage",{}).get("structural",0))<=.65:
+			work.append({"record":record,"state":current})
+		if current.mode!="new":complete.append(record)
+	var completed_plan:={"buildings":complete,"replaced":plan.replaced}
 	var inherited := {"buildings":[],"replaced":plan.replaced}
-	for record in plan.buildings:
+	for record in complete:
 		if String(record.get("early_kind","")) not in KIT and LATE.kind(record.plot)=="": inherited.buildings.append(record)
 	TOWN.render(inherited,center,height,parent)
-	LATE.render(plan,center,height,parent)
-	_render_installed_early_details(plan,center,height,parent)
+	LATE.render(completed_plan,center,height,parent)
+	_render_installed_early_details(completed_plan,center,height,parent)
 	if material == null:
 		# Painted in the map's ink (scripts/settlement_ink.gd), vertex colours kept.
 		material = preload("res://scripts/settlement_ink.gd").material()
 	for name in KIT:
 		var visible: Array[Dictionary] = []
-		for record in plan.buildings:
+		for record in complete:
 			if String(record.get("early_kind","")) != name: continue
 			var plot: Dictionary = record.plot
 			if String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"]: continue
@@ -231,6 +245,51 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		node.set_meta("source_transforms",transforms); parent.add_child(node)
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+name,transforms,kit_mesh(name).get_aabb())
+	_render_construction(work,center,height,parent)
+
+static func _render_construction(work:Array[Dictionary],center:Vector3,height:Callable,parent:Node3D)->void:
+	var groups:Dictionary={}
+	for entry:Dictionary in work:
+		var record:Dictionary=entry.record;var plot:Dictionary=record.plot
+		var name:=String(record.get("early_kind",""))
+		var late:=LATE.kind(plot)!=""
+		var town:=not late and name not in KIT and TOWN.supports(plot)
+		var source:Mesh
+		if late:source=LATE.mesh_for_plot(plot)
+		elif name in KIT:source=kit_mesh(name)
+		elif town:source=TOWN.kit_mesh(clampi(int(record.get("variant",0)),0,TOWN.KIT.size()-1))
+		else:continue
+		var retrofit:=String(entry.state.mode)=="retrofit"
+		var stage:=int(entry.state.stage)
+		var key:=CONSTRUCTION_MESH.cache_key(source,plot,stage,retrofit)
+		if not groups.has(key):
+			var mesh:Mesh=CONSTRUCTION_MESH.retrofit_mesh(source,plot,stage) if retrofit else CONSTRUCTION_MESH.mesh(source,plot,stage)
+			if mesh==null:continue
+			groups[key]={"mesh":mesh,"records":[],"state":entry.state,"late":late,"town":town}
+		groups[key].records.append(record)
+	for key:String in groups:
+		var group:Dictionary=groups[key]
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
+		batch.mesh=group.mesh;batch.instance_count=group.records.size()
+		var transforms:Array[Transform3D]=[]
+		for index in group.records.size():
+			var record:Dictionary=group.records[index];var plot:Dictionary=record.plot
+			var point:Vector2=record.position+Vector2(center.x,center.z)
+			var basis:Basis=LATE.site_basis(record) if bool(group.late) else preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle),hash(Vector2(record.position)))
+			var transform:=Transform3D(basis,Vector3(point.x,float(height.call(point.x,point.y))+(.0004 if bool(group.town) else .0001),point.y))
+			transforms.append(transform);batch.set_instance_transform(index,transform)
+			var wear:=1-clampf(float(plot.get("condition",1)),0,1)
+			var tint:=Color.WHITE
+			if bool(group.late):
+				tint=[Color("fff7e8"),Color("e8eee6"),Color("e7e1d9"),Color("eedbd0")][posmod(int(plot.get("seed",1)),4)]
+				tint=tint.lerp(Color("b2a38a"),wear*.3)
+			else:tint=tint.lerp(Color(.70,.66,.60),wear*.35).lerp(Color(.3,.27,.23),clampf(float(plot.get("damage",{}).get("fire",0)),0,1))
+			batch.set_instance_color(index,tint)
+		var node:=MultiMeshInstance3D.new();node.name="Construction_"+str(hash(key));node.multimesh=batch
+		node.material_override=preload("res://scripts/settlement_ink.gd").architecture_material() if bool(group.late) else material
+		node.set_meta("source_transforms",transforms);node.set_meta("construction_mode",group.state.mode);node.set_meta("construction_stage",group.state.stage)
+		parent.add_child(node)
+		if String(group.state.mode)=="new":preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadowConstruction_"+str(hash(key)),transforms,batch.mesh.get_aabb())
 
 static func _render_installed_early_details(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)->void:
 	var groups:Dictionary={}

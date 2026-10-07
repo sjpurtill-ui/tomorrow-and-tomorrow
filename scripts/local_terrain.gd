@@ -316,6 +316,7 @@ var rendered_morphology_visual_signature := ""
 ## Visual signatures per city (keyed by resource settlement id), so drawing
 ## several towns in one pass does not recompute each town's plot hash.
 var cached_morphology_visual_signatures:Dictionary={}
+var cached_construction_visual_signatures:Dictionary={}
 var active_architecture_profile:Dictionary={}
 var rendered_settlement_aerial_lod:=-1.0
 var rendered_settlement_stage_radius:=0.0
@@ -4997,7 +4998,7 @@ func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],r
 func _settlement_patch_state_token()->int:
 	# Deferred builders still call existing read-only map helpers. Never stamp an
 	# old snapshot's signature onto geometry built against a newer city's state.
-	return hash([GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,int(GameState.elapsed_days/365.0),GameState.known_discoveries,GameState.societal_values])
+	return hash([GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,_settlement_construction_visual_signature(),int(GameState.elapsed_days/365.0),GameState.known_discoveries,GameState.societal_values])
 
 func _build_settlement_plot_patch(parent:Node3D,center:Vector3,plots:Array[Dictionary],lod:int,context:Dictionary)->void:
 	_create_plot_fabric(center,plots,lod,parent,context)
@@ -8634,7 +8635,7 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	SettlementModel.with_city_resources(String(record.id),func()->void:
 		var stamp:int=trace.start()
 		var lod:=_settlement_morphology_lod()
-		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
+		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_construction_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
 		stamp=trace.mark("city_design_signature",stamp)
 		var fabric:Node3D=null
 		for child in parent.get_children():
@@ -8828,6 +8829,20 @@ func _settlement_architecture_signature(profile:Dictionary)->String:
 		parts.append(str(roundi(clampf(float(profile.get(key,0.5)),0.0,1.0)*20.0)))
 	return ":".join(parts)
 
+
+func _settlement_construction_visual_signature()->int:
+	# Daily authority advances fractions without changing parcel morphology.
+	# Only milestone changes invalidate meshes, never placement or tree clearing.
+	var cache_key:=[GameState.world_seed,GameState.resource_settlement_id,int(GameState.elapsed_days),GameState.morphology_revision,GameState.settlement_plots.size()]
+	var cached:Array=cached_construction_visual_signatures.get(GameState.resource_settlement_id,[])
+	if not cached.is_empty() and cached[0]==cache_key:return int(cached[1])
+	var records:Array=[]
+	for plot:Dictionary in GameState.settlement_plots:
+		if String(plot.get("status","active"))!="under_construction" and plot.get("fabric_job",{}).is_empty():continue
+		records.append([int(plot.get("id",0)),preload("res://scripts/settlement_construction_state.gd").signature(plot)])
+	var signature:=hash(records)
+	cached_construction_visual_signatures[GameState.resource_settlement_id]=[cache_key,signature]
+	return signature
 
 func _settlement_morphology_visual_signature()->String:
 	# Simulation records legitimately change more often than their aerial appearance.
@@ -9819,10 +9834,6 @@ func _append_shelter_roof(surface: SurfaceTool, plot: Dictionary, center: Vector
 	elif land_use=="storage":
 		half_width*=1.14
 		half_depth*=0.88
-	if String(plot.get("status", "active")) == "under_construction":
-		var construction_scale := lerpf(0.44, 1.0, clampf(float(plot.get("construction_progress", 0.0)), 0.0, 1.0))
-		half_width *= construction_scale
-		half_depth *= construction_scale
 	var right := Vector2.from_angle(base_angle) * half_width
 	var forward := Vector2(-right.y, right.x).normalized() * half_depth
 	var left_back := roof_center - right - forward
@@ -10195,8 +10206,8 @@ func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vec
 		var first_ground:=_close_surface_height_at(center.x+first.x,center.z+first.y)
 		var second_ground:=_close_surface_height_at(center.x+second.x,center.z+second.y)
 		var vertices:=[
-			Vector3(center.x+first.x,first_ground+0.0016,center.z+first.y),
-			Vector3(center.x+second.x,second_ground+0.0016,center.z+second.y),
+			Vector3(center.x+first.x,first_ground+0.00024,center.z+first.y),
+			Vector3(center.x+second.x,second_ground+0.00024,center.z+second.y),
 			Vector3(center.x+second.x,second_ground+roof_lift-0.00008,center.z+second.y),
 			Vector3(center.x+first.x,first_ground+roof_lift-0.00008,center.z+first.y)
 		]
@@ -10205,6 +10216,43 @@ func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vec
 			surface.add_vertex(vertices[vertex_index])
 		sides+=1
 	return sides
+
+func _append_construction_member(surface:SurfaceTool,center:Vector3,a:Vector2,b:Vector2,half_width:float,bottom:float,top:float,color:Color)->int:
+	var along:=b-a
+	if along.length_squared()<0.000000000001:return 0
+	var side:=Vector2(-along.y,along.x).normalized()*half_width
+	var points:Array[Vector3]=[]
+	for lift:float in [bottom,top]:
+		for local:Vector2 in [a-side,b-side,b+side,a+side]:
+			points.append(Vector3(center.x+local.x,center.y+lift,center.z+local.y))
+	for face:Array in [[0,3,2,1],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]]:
+		for index:int in [face[0],face[1],face[2],face[0],face[2],face[3]]:
+			surface.set_color(color);surface.add_vertex(points[index])
+	return 1
+
+func _append_construction_mass(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,plot:Dictionary,roof_lift:float,stage:int)->int:
+	# Cheap aggregate fallback, inside the same final wall footprint. No new RNG
+	# calls: all later roof centres retain the exact completed placement sequence.
+	var corners:Array[Vector2]=[local_center-right-forward,local_center+right-forward,local_center+right+forward,local_center-right+forward]
+	var tone:=Color("786d58");tone.a=.9
+	var frame:=Color("69503a");frame.a=.9
+	var width:=minf(.00008,minf(right.length(),forward.length())*.08)
+	var top:=maxf(.00065,roof_lift-.00008)
+	var count:=0
+	if stage==2:return _append_roof_wall_skirt(surface,center,local_center,right,forward,plot,roof_lift)
+	# A house frame has one level footing like the shared metre kits. Sampling
+	# once also bounds terrain work independently of its twelve simple members.
+	var ground_center:=Vector3(center.x,_close_surface_height_at(center.x+local_center.x,center.z+local_center.y),center.z)
+	for index in 4:
+		var a:Vector2=corners[index];var b:Vector2=corners[(index+1)%4]
+		# Slight inset keeps beams and posts inside the final source envelope.
+		a=a.move_toward(local_center,width*1.5);b=b.move_toward(local_center,width*1.5)
+		count+=_append_construction_member(surface,ground_center,a,b,width,.00024,.00046,tone)
+		if stage==1:
+			var tangent:Vector2=(b-a).normalized()*width
+			count+=_append_construction_member(surface,ground_center,a-tangent,a+tangent,width,.00024,top,frame)
+			count+=_append_construction_member(surface,ground_center,a,b,width,top-.00012,top,frame)
+	return count
 
 func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,plot:Dictionary,center:Vector3,lod:int=0,validate_placement:=false)->Dictionary:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
@@ -10278,6 +10326,8 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	var lod_coverage_scale:=clampf(sqrt(float(source_mass_count)/float(maxi(1,mass_count)))*0.86,1.0,2.35) if lod>=1 else 1.0
 	var appended:=0
 	var walls_appended:=0
+	var work:Dictionary=preload("res://scripts/settlement_construction_state.gd").state(plot)
+	var work_stage:=int(work.stage) if String(work.mode)=="new" else 3
 	var placed_envelopes:Array[PackedVector2Array]=[]
 	for mass_index in mass_count:
 		var mass_roof_plan:=roof_plan
@@ -10406,9 +10456,11 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		tone.a=rng.randf_range(0.58,0.76) if emergency_camp else (rng.randf_range(0.80,0.93) if temporary_camp else rng.randf_range(0.91,0.99))
 		# Camera-dependent contrast and opacity belong to the live fabric shader.
 		# Baking them here caused a sharp fade at 0.42 km and stale colors on zoom.
-		if not temporary_camp:
+		if work_stage<3:
+			walls_appended+=_append_construction_mass(wall_surface,center,local_center,side_axis*half_width,depth_axis*half_depth,plot,roof_lift,work_stage)
+		elif not temporary_camp:
 			walls_appended+=_append_roof_wall_skirt(wall_surface,center,local_center,side_axis*half_width,depth_axis*half_depth,plot,roof_lift)
-		_append_roof_footprint(surface,center,local_center,side_axis*half_width,depth_axis*half_depth,tone,roof_lift,roof_atlas_cell,mass_index,mass_roof_plan,int(plot.get("seed",1)),supports_late_roof)
+		if work_stage>=3:_append_roof_footprint(surface,center,local_center,side_axis*half_width,depth_axis*half_depth,tone,roof_lift,roof_atlas_cell,mass_index,mass_roof_plan,int(plot.get("seed",1)),supports_late_roof)
 		# Roof-scale fibre courses, boards and repairs survive as texture at the
 		# playable aerial zoom. They share the physical footprint; no giant prop is
 		# introduced just to make a building readable.
@@ -10426,8 +10478,10 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 			var repair_cell:=Vector2i(roof_atlas_cell.x,3) if supports_late_roof else _roof_repair_atlas_cell(plot,roof_atlas_cell,mass_index)
 			var patch_color:Color=(_late_roof_material_tone(repair_cell,int(plot.get("seed",1))+mass_index*47+11) if supports_late_roof else _roof_material_tone(repair_cell,int(plot.get("seed",1))+mass_index*47+11)).lerp(Color("#4d4637"),rng.randf_range(0.05,0.20))
 			patch_color.a=0.44 if repair_cell!=roof_atlas_cell else 0.28
-			_append_irregular_roof_patch(surface,center,patch_center,side_axis*half_width*rng.randf_range(0.16,0.34),depth_axis*half_depth*rng.randf_range(0.14,0.31),patch_color,roof_lift+0.00006,repair_cell,int(plot.get("seed",1))+mass_index*71+19,supports_late_roof)
-		appended+=1
+			var patch_right:=side_axis*half_width*rng.randf_range(0.16,0.34)
+			var patch_forward:=depth_axis*half_depth*rng.randf_range(0.14,0.31)
+			if work_stage>=3:_append_irregular_roof_patch(surface,center,patch_center,patch_right,patch_forward,patch_color,roof_lift+0.00006,repair_cell,int(plot.get("seed",1))+mass_index*71+19,supports_late_roof)
+		if work_stage>=3:appended+=1
 	return {"roofs":appended,"walls":walls_appended}
 
 func _append_plot_boundary(surface:SurfaceTool,plot:Dictionary,center:Vector3,lift:=0.0030)->int:
@@ -10884,8 +10938,6 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			field_count+=1
 		var open_ground_form:=form in ["open_hearth_yard","open_work_yard","guarded_cache","carried_water_point","refuse_and_latrine_ground"]
 		if lod <= 1 and plot_has_detail and status not in ["vacant", "reclaimed"] and not open_ground_form and land_use not in ["water", "waste", "field", "pasture"]:
-			if status == "under_construction" and float(plot.get("construction_progress", 0.0)) < 0.26:
-				continue
 			var mass_counts: Dictionary = {"roofs": 0, "walls": 0}
 			# Overbudget parcels still need roofs. A failed placement within the
 			# kit budget stays rejected: fallback must not bypass its land/road checks.

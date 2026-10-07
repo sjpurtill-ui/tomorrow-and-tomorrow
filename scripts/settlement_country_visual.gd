@@ -509,7 +509,7 @@ func _finish_seed(parent:Node3D,work:Dictionary)->void:
 	var positions:Array[Vector2]=[]
 	for building:Dictionary in work.plan.buildings:
 		var plot:Dictionary=building.plot
-		if String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"] or float((plot.get("damage",{}) as Dictionary).get("structural",0.0))>0.65:continue
+		if String(plot.get("status","active")) in ["ruin","reclaimed"] or float((plot.get("damage",{}) as Dictionary).get("structural",0.0))>0.65:continue
 		var footprint:PackedVector2Array=building.get("footprint",PackedVector2Array())
 		var clear:=_seed_visible(Vector2(building.position),work.origin,work.ownership) and _seed_footprint_unoccupied(footprint,work.ownership)
 		for index in footprint.size():

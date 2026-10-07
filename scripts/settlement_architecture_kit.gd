@@ -475,6 +475,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 			var tint:Color=[Color("fff7e8"),Color("e8eee6"),Color("e7e1d9"),Color("eedbd0")][posmod(int(record.plot.get("seed",1)),4)]
 			batch.set_instance_color(i,tint.lerp(Color("b2a38a"),wear*.3))
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
+		node.set_meta("source_transforms",placed)
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+key.replace(":","_"),placed,batch.mesh.get_aabb())
 

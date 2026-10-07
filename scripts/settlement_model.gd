@@ -1538,6 +1538,20 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 		connected_centers.append(plot_center)
 		route_id+=1
 
+func _advance_plot_construction_progress(day:float)->void:
+	# Expose the existing one-month drawing interval during ordinary daily play.
+	# Only process_month completes buildings; this spends no stock or crew work
+	# and does not invalidate the town layout or vegetation on fractional changes.
+	if not is_finite(day):return
+	for plot:Dictionary in WorldSimulation.state.settlement_plots:
+		if String(plot.get("status",""))!="under_construction":continue
+		var started:=float(plot.get("construction_started_day",plot.get("last_update_day",plot.get("created_day",floor(day/30.0)*30.0))))
+		if not is_finite(started):started=floor(day/30.0)*30.0
+		var completion_day:float=(floor(started/30.0)+1.0)*30.0
+		var progress:=float(plot.get("construction_progress",0.0))
+		if not is_finite(progress):progress=0.0
+		plot["construction_progress"]=clampf(maxf(progress,(day-started)/maxf(1.0,completion_day-started)),0.0,.999)
+
 func process_local_month(context:Dictionary={})->Array[Dictionary]:
 	_repair_legacy_field_geometry(context)
 	# Keep registry refresh even when morphology is idle. Founding or summary
@@ -1545,6 +1559,7 @@ func process_local_month(context:Dictionary={})->Array[Dictionary]:
 	var state:=WorldSimulation.state
 	var month_day:=int(floor(state.elapsed_days/30.0))*30
 	if not state.settlement_plots.is_empty() and not state.settlement_morphology.is_empty() and month_day<=state.last_morphology_day:
+		_advance_plot_construction_progress(state.elapsed_days)
 		_ensure_primary_settlement_record()
 		return []
 	return with_local_population(func()->Array[Dictionary]:return process_month(context))
@@ -1553,6 +1568,7 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	ensure_founded()
 	_repair_legacy_field_geometry(context)
 	if WorldSimulation.state.settlement_plots.is_empty(): return []
+	_advance_plot_construction_progress(WorldSimulation.state.elapsed_days)
 	var month_day:=int(floor(WorldSimulation.state.elapsed_days/30.0))*30
 	if month_day<=WorldSimulation.state.last_morphology_day: return []
 	WorldSimulation.state.last_morphology_day=month_day
@@ -2563,7 +2579,7 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		# years on average, as bombed and burned towns were rebuilt.
 		if status=="ruin" and String(plot.get("pre_damage_use",""))!="" and int(plot.get("damaged_day",-1))>=0 and day-int(plot.damaged_day)>=365 and builders>=1.0 and ruins_rebuilt<2 and rng.randf()<1.0/24.0:
 			ruins_rebuilt+=1
-			plot["status"]="under_construction";plot["construction_progress"]=0.0;plot["condition"]=0.0;plot["repair_state"]="rebuilding"
+			plot["status"]="under_construction";plot["construction_progress"]=0.0;plot["construction_started_day"]=day;plot["condition"]=0.0;plot["repair_state"]="rebuilding"
 			plot["land_use"]=String(plot.pre_damage_use);plot["growth_cause"]="rebuilding what was destroyed"
 			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"rebuilding","new_state":"under_construction","cause":"builders cleared the ruin and began again"})
 			WorldSimulation.state.morphology_revision+=1

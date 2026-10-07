@@ -1,10 +1,10 @@
 extends RefCounted
-## Placement excludes economics and weathering. Appearance reads completed facts;
+## Placement excludes economics and weathering. Appearance reads recorded facts;
 ## neither key changes the simulation. All samples use stable recorded identity.
 const CELL_KM:=0.256
 const ID_SHARD:=16
 const PLACEMENT_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","visual_building_sites","visual_sites_form"]
-const APPEARANCE_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","status","damage","field_pattern","crop_family","visual_material_mix","material_mix","building_materials","field_rotation","construction_progress","created_day","converted_day","infill_units","crop_cover","cultivation_phase","supply_provenance"]
+const APPEARANCE_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","status","damage","field_pattern","crop_family","visual_material_mix","material_mix","building_materials","field_rotation","created_day","converted_day","infill_units","crop_cover","cultivation_phase","supply_provenance"]
 const TONE_FIELDS:=["condition","prosperity","service_access","maintenance_debt","reclamation"]
 const ROUTE_FIELDS:=["id","points","active","kind","hierarchy","width_m","surface_tier","status"]
 
@@ -40,6 +40,7 @@ static func layout_inputs(plots:Array[Dictionary],routes:Array[Dictionary])->Dic
 
 static func appearance(plot:Dictionary)->int:
 	var values:=project(plot,APPEARANCE_FIELDS)
+	values.append(preload("res://scripts/settlement_construction_state.gd").signature(plot))
 	for field:String in TONE_FIELDS:values.append(roundi(float(plot.get(field,1.0 if field=="condition" else 0.0))*5.0))
 	# Occupied pressure only changes the legacy roof count in broad steps.
 	values.append(roundi(float(plot.get("resident_count",0.0))/4.0))
