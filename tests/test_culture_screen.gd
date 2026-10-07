@@ -66,7 +66,7 @@ func test_the_page_draws_what_culture_does_and_holds_still_between_days()->void:
 	panel.setup(block)
 	var text:=""
 	for label in panel.find_children("*","Label",true,false): text+=(label as Label).text+"\n"
-	for heading in ["WHO WE ARE","WHAT OUR WAYS DO TO THE REALM","THE COURSE WE FOLLOW","WHAT WE LIVE BY","HOW OUR LEADERS BEHAVE","HOW OTHERS SEE OUR WAYS"]:
+	for heading in ["WHAT OUR WAYS DO","OUR COURSE","WHAT WE LIVE BY","OUR LEADERS' TEMPER","HOW OTHERS SEE US"]:
 		assert_str(text).contains(heading)
 	assert_str(text).not_contains("REPUTATION FROM OUR CONDUCT")
 	assert_object(panel.find_child("Ledger",true,false)).is_not_null()

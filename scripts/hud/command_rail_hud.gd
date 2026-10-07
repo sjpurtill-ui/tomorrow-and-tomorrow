@@ -225,6 +225,9 @@ func force_dock_layout()->void:
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture-dock-scroll=") and dock!=null:
 			dock.body_scroll.set_deferred("scroll_vertical",int(argument.trim_prefix("--capture-dock-scroll=")))
+			# Again once the page has laid out (a short page clamps an early scroll).
+			var later:=int(argument.trim_prefix("--capture-dock-scroll="))
+			get_tree().create_timer(0.6).timeout.connect(func()->void: if is_instance_valid(dock): dock.body_scroll.scroll_vertical=later)
 			if detail_dock!=null and detail_dock.visible:detail_dock.body_scroll.set_deferred("scroll_vertical",int(argument.trim_prefix("--capture-dock-scroll=")))
 
 func _position_toolbar()->void:
