@@ -20,7 +20,8 @@ extends RefCounted
 ##     among us leaves the people asking who else might be one. Distrust is
 ##     taken from the people's cohesion (consequence_engine.gd).
 ##
-## Kept on the court's saved record (ForeignDiplomacy.audiences["eyes"]).
+## Kept on each people's own court record (WorldSimulation.diplomacy.audiences
+## ["eyes"]): every people runs these same rules in its own scope.
 
 const KEY:="eyes"
 const VERSION:=1
@@ -72,11 +73,18 @@ static func an_eye()->String:
 	return ("an " if w.left(1) in ["a","e","i","o","u"] else "a ")+w
 
 static func _day()->int:
-	return int(GameState.elapsed_days)
+	return int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else int(GameState.elapsed_days)
+
+## The people in scope's own court record and state.
+static func _court()->Node:
+	return WorldSimulation.diplomacy if WorldSimulation.diplomacy!=null else ForeignDiplomacy
+
+static func _people()->Node:
+	return WorldSimulation.state if WorldSimulation.state!=null else GameState
 
 static func state()->Dictionary:
-	ForeignDiplomacy.ensure()
-	var holder:Dictionary=ForeignDiplomacy.audiences
+	_court().ensure()
+	var holder:Dictionary=_court().audiences
 	var s:Variant=holder.get(KEY)
 	if not s is Dictionary or int((s as Dictionary).get("version",0))!=VERSION:
 		s={"version":VERSION,"distrust":0.0,"last_day":_day(),"carry":{}}
@@ -119,7 +127,7 @@ static func in_training(corps:String)->float:
 
 ## How much of our people the wary can watch (0..1).
 static func coverage()->float:
-	var people:=maxf(1.0,float(GameState.population_exact))
+	var people:=maxf(1.0,float(_people().population_exact))
 	return clampf(members("wary")/(people/1000.0*FULL_WATCH_PER_K),0.0,1.0)
 
 static func distrust()->float:
@@ -127,8 +135,8 @@ static func distrust()->float:
 
 ## What distrust takes from the people's cohesion target (consequence_engine).
 static func cohesion_cost()->float:
-	if Engine.get_main_loop()==null or String(WorldSimulation.actor_id)!="player": return 0.0
-	var s:Variant=ForeignDiplomacy.audiences.get(KEY) if ForeignDiplomacy.audiences is Dictionary else null
+	if Engine.get_main_loop()==null: return 0.0
+	var s:Variant=_court().audiences.get(KEY) if _court().audiences is Dictionary else null
 	if not s is Dictionary: return 0.0
 	return clampf(float((s as Dictionary).get("distrust",0.0)),0.0,1.0)*COHESION_COST
 
@@ -142,13 +150,12 @@ static func found_among_us()->void:
 # --------------------------------------------------------------------------
 
 static func daily(day:int)->void:
-	if String(WorldSimulation.actor_id)!="player": return
 	var s:=state()
 	var span:=maxi(1,day-int(s.get("last_day",day)))
 	if day<=int(s.get("last_day",-1)): return
 	s["last_day"]=day
 	var course:Dictionary=COURSE.get(stage(),COURSE.hearth)
-	var people:=maxf(1.0,float(GameState.population_exact))
+	var people:=maxf(1.0,float(_people().population_exact))
 	var food_need:=0.0
 	for corps in CORPS:
 		var c:Dictionary=s[corps]
@@ -267,7 +274,7 @@ static func secrecy(choice:String,civ_id:String,day:int,seed:String)->Dictionary
 			var found:Array=preload("res://scripts/covert_ops.gd").sweep_incoming(day,clampf(0.35+coverage()*craft("wary")*0.5,0.2,0.85))
 			out.found=found
 			var accused:=0
-			var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
+			var cohesion:=clampf(float(_people().simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 			if cohesion<0.5 and rng.randf()<(0.5-cohesion)*2.0:
 				if not accuse(day,civ_id,"the search").is_empty(): accused=1
 			out.outcome="%s question everyone the stranger touched. %s Distrust surges.%s" % [word("Wary"),("They found %d more of theirs among us." % found.size()) if not found.is_empty() else "No other of theirs was found.",(" A neighbour has been accused in the fear: they wait to be questioned.") if accused>0 else ""]
@@ -304,12 +311,16 @@ const ACCUSE_BELOW:=0.45
 const ACCUSE_YEARLY:=4.0
 
 static func _accusations(day:int,span:int)->void:
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
+	# Only the god's own people stand before the god to be questioned; a
+	# rival's people accuse their own out of sight (their distrust only).
+	var cohesion:=clampf(float(_people().simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 	if cohesion>=ACCUSE_BELOW: return
 	var depth:=(ACCUSE_BELOW-cohesion)/ACCUSE_BELOW
 	var chance:=ACCUSE_YEARLY*depth*(0.5+distrust())*float(span)/365.0
 	var rng:=RandomNumberGenerator.new(); rng.seed=hash("%d:accuse:%d" % [int(GameState.world_seed),day])
-	if rng.randf()<chance: accuse(day,"","fear")
+	if rng.randf()<chance:
+		if String(WorldSimulation.actor_id)=="player": accuse(day,"","fear")
+		else: s_distrust_bump(0.02)
 
 ## One of ours accused of being an eye of a people we know. Most are
 ## innocent; one may truly be theirs (an eye of theirs among us now). The

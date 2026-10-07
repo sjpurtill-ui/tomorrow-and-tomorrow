@@ -1282,7 +1282,7 @@ static func certainty(civ_id:String)->float:
 	var read:=clampf(sure+(own_art("cunning")-0.5)*2.0*CUNNING_CERTAINTY,0.0,1.0)
 	# An eye long settled among them: what they are is known nearly to the
 	# head, whatever our cunning (covert_ops.gd entrenched_years; 20 years: 0.97).
-	if _owner()=="player" and Engine.get_main_loop()!=null:
+	if Engine.get_main_loop()!=null:
 		var years:=float(preload("res://scripts/covert_ops.gd").entrenched_years(civ_id))
 		if years>0.0: read=maxf(read,clampf(EYES_CERTAINTY+(0.97-EYES_CERTAINTY)*years/20.0,EYES_CERTAINTY,0.97))
 	return read
@@ -1290,25 +1290,22 @@ static func certainty(civ_id:String)->float:
 ## Our network among them (covert_ops.gd network), 0..1: our cunning reads
 ## them as if this much sharper, for warnings and for their envoys' bluffs.
 static func network_edge(civ_id:String)->float:
-	if _owner()!="player" or Engine.get_main_loop()==null or civ_id=="": return 0.0
+	if Engine.get_main_loop()==null or civ_id=="": return 0.0
 	return float(preload("res://scripts/covert_ops.gd").network_strength(civ_id))
 
 ## Our cunning as it bears on one people: our own, sharpened by a network.
 static func cunning_toward(civ_id:String)->float:
-	return clampf(art_of("player","cunning")+network_edge(civ_id)*0.45,0.0,1.0)
+	return clampf(own_art("cunning")+network_edge(civ_id)*0.45,0.0,1.0)
 
 ## Our agents among them now (the god's covert ops on watch or a source);
 ## for another people, its spies among us.
 static func _eyes_among(civ_id:String)->int:
-	var covert:Variant=ForeignDiplomacy.audiences.get("covert",{})
-	if not covert is Dictionary: return 0
+	## The people in scope's eyes living among `civ_id` (its own covert record:
+	## every people the same).
+	if Engine.get_main_loop()==null: return 0
 	var n:=0
-	if _owner()=="player":
-		for op in (covert as Dictionary).get("ops",[]):
-			if op is Dictionary and String((op as Dictionary).get("civ_id",""))==civ_id and String((op as Dictionary).get("stage",""))=="in_place" and String((op as Dictionary).get("kind","")) in ["watch","plant"]: n+=1
-	elif Exchange.owner_id(civ_id)=="player":
-		for spy in (covert as Dictionary).get("incoming",[]):
-			if spy is Dictionary and String((spy as Dictionary).get("civ_id",""))==_owner(): n+=1
+	for op in (preload("res://scripts/covert_ops.gd").state().ops as Array):
+		if op is Dictionary and String((op as Dictionary).get("civ_id",""))==civ_id and String((op as Dictionary).get("stage",""))=="in_place" and String((op as Dictionary).get("kind","")) in ["watch","plant"]: n+=1
 	return n
 
 ## Our estimate of one of their readings: {value, low, high, exact, spread,

@@ -100,7 +100,21 @@ const WATCH_STAY_MAX:=45
 # --------------------------------------------------------------------------
 
 static func _day()->int:
-	return int(GameState.elapsed_days)
+	return int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else int(GameState.elapsed_days)
+
+static func _people()->Node:
+	return WorldSimulation.state if WorldSimulation.state!=null else GameState
+
+## A people's id as the whole world knows it ("human" in a rival's view is
+## the god's people, "player").
+static func _global(view_id:String)->String:
+	return "player" if view_id=="human" else view_id
+
+## How a people in scope names `global_id` ("human" for the god's people
+## inside a rival's view).
+static func _view_of(global_id:String)->String:
+	if global_id=="player" and String(WorldSimulation.actor_id)!="player": return "human"
+	return global_id
 
 static func _rng(key:String)->RandomNumberGenerator:
 	var rng:=RandomNumberGenerator.new()
@@ -108,8 +122,9 @@ static func _rng(key:String)->RandomNumberGenerator:
 	return rng
 
 static func state()->Dictionary:
-	ForeignDiplomacy.ensure()
-	var holder:Dictionary=ForeignDiplomacy.audiences
+	var court:Node=WorldSimulation.diplomacy if WorldSimulation.diplomacy!=null else ForeignDiplomacy
+	court.ensure()
+	var holder:Dictionary=court.audiences
 	var s:Variant=holder.get(KEY)
 	if not s is Dictionary or int((s as Dictionary).get("version",0))!=VERSION or int((s as Dictionary).get("world_seed",GameState.world_seed))!=int(GameState.world_seed):
 		s={"version":VERSION,"world_seed":int(GameState.world_seed),"serial":0,"ops":[],"learned":[],"agents":{},"caught":[],"incoming":[],"next_rival":_day()+RIVAL_TICK,"sanctity_until":-1,"stats":{}}
@@ -317,6 +332,8 @@ static func volunteer_for(kind:String)->Dictionary:
 		agent["stealth"]=clampf(k,0.1,0.95); agent["tongue"]=clampf(k*0.9+0.05,0.1,0.95); agent["nerve"]=clampf(k*0.85+0.1,0.1,0.95)
 		agent["source"]="trained"; agent["trained"]=true
 		return agent
+	# A rival ruler's errand goes with one of its people, not the god's officials.
+	if String(WorldSimulation.actor_id)!="player": return _generate_agent()
 	return volunteer()
 
 static func volunteer()->Dictionary:
@@ -493,7 +510,7 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 	# theirs against ours its odds of being caught or traced. The same rule
 	# their spies meet among us (_catch_chance).
 	var Standing:=preload("res://scripts/standing.gd")
-	var ours:=Standing.art_of("player","cunning")
+	var ours:=Standing.own_art("cunning")
 	var theirs:=Standing.art_of(civ_id,"cunning")
 	var art:=Standing.covert_edge(ours,theirs)
 	var watched:=Standing.catch_edge(theirs,ours)
@@ -515,7 +532,7 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 			# found mostly when our scout comes to carry the word home: the
 			# odds of that each time ("caught"), small for a skilled eye.
 			out["settle"]=settle_risk(civ_id,cover,stealth,wary,watched,edge)
-			out["caught"]=clampf(0.005+wary*0.04+pow(1.0-stealth,2.0)*0.06+watched*0.3-edge,0.003,0.15)
+			out["caught"]=clampf(0.005+wary*0.04+pow(1.0-stealth,2.0)*0.06+watched*0.3+target_watch(civ_id)*0.04-edge,0.003,0.15)
 		"steal":
 			out["success"]=clampf(access*0.35+stealth*0.3+know*0.2+edge*0.3+float(tier)*0.05-wary*0.3+art,0.12,0.85)
 			out["caught"]=clampf(0.12+wary*0.3+(1.0-stealth)*0.2-edge+watched,0.04,0.65)
@@ -559,8 +576,8 @@ static func settle_risk(civ_id:String,cover:String,stealth:float,wary:float,watc
 	var crowd:=clampf((log(people)-log(BLEND_FEW))/(log(BLEND_MANY)-log(BLEND_FEW)),0.0,1.0)
 	var reason:=float({"refugee":0.08,"trader":0.06,"pilgrim":0.05}.get(cover,0.0))
 	# Their cunning against ours counts in full here, as ours does on theirs
-	# arriving among us (_catch_chance): one rule both ways.
-	return clampf(0.88-crowd*0.82-(stealth-0.5)*0.3-reason+wary*0.1+watched-edge,0.02,0.95)
+	# arriving among us (_catch_chance): one rule both ways. So do their wary.
+	return clampf(0.88-crowd*0.82-(stealth-0.5)*0.3-reason+wary*0.1+watched+target_watch(civ_id)*0.45-edge,0.02,0.95)
 
 # --------------------------------------------------------------------------
 # A plain reckoning of the odds, for the official's answer
@@ -696,17 +713,79 @@ static func _cover_word(cover:String)->String:
 # --------------------------------------------------------------------------
 
 static func daily(day:int)->void:
-	if WorldSimulation.actor_id!="player": return
+	# Every people runs this in its own scope: its eyes, its wary, its errands.
 	var s:=state()
 	EyesCorps.daily(day)
 	for op in (s.ops as Array).duplicate():
 		_advance(op as Dictionary,day)
+	if String(WorldSimulation.actor_id)!="player":
+		# A ruler weighs eyes and the wary at a monthly review, by temperament.
+		if day>=int(s.get("next_review",0)):
+			s["next_review"]=day+RULER_REVIEW_DAYS
+			_ruler_review(day)
+		return
 	_catch_incoming(day)
 	# Prisoners held, tended, sent home or won over; ours held abroad.
 	_captives().call("daily",day)
-	if day>=int(s.get("next_rival",day)):
+	# Without simulated peoples (an older world, a test), their errands
+	# against us are rolled here; simulated peoples send their own eyes.
+	if day>=int(s.get("next_rival",day)) and not _peoples_simulated():
 		s["next_rival"]=day+RIVAL_TICK
 		_rivals_scheme(day)
+
+static func _peoples_simulated()->bool:
+	return WorldSimulation.enabled and not WorldSimulation.actors.is_empty()
+
+# --------------------------------------------------------------------------
+# A ruler's own eyes: the same rules, chosen by temperament
+# --------------------------------------------------------------------------
+
+const RULER_REVIEW_DAYS:=30
+
+## How much a ruler wants eyes abroad (0..1): bold and cold rulers more, a
+## grudge or a feared neighbour more still.
+static func ruler_inclination(owner:String)->float:
+	var p:Dictionary=preload("res://scripts/leader_personality.gd").of_owner(owner)
+	var lean:=0.3*float(p.get("assertiveness",0.5))+0.25*(1.0-float(p.get("empathy",0.5)))+0.15*float(p.get("risk_tolerance",0.5))+0.1*(1.0-float(p.get("openness",0.5)))
+	var threat:=0.0
+	for civ in WorldSimulation.world.civilizations:
+		var rel:Dictionary=(civ as Dictionary).get("player_relation",{})
+		if int(rel.get("contact_level",0))<2: continue
+		var near:=float(preload("res://scripts/war_loop.gd").proximity(String((civ as Dictionary).id)))
+		threat=maxf(threat,near*maxf(0.0,-float(rel.get("opinion",0.0))))
+	return clampf(lean+threat*0.4,0.0,1.0)
+
+static func _ruler_review(day:int)->void:
+	var me:=String(WorldSimulation.actor_id)
+	var lean:=ruler_inclination(me)
+	# Eyes are taught only while some people we know lives within reach.
+	var reachable:=0
+	for civ in WorldSimulation.world.civilizations:
+		if int(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("contact_level",0))>=2 and float(preload("res://scripts/war_loop.gd").proximity(String((civ as Dictionary).id)))>0.0: reachable+=1
+	var eyes_lean:=lean if reachable>0 else 0.0
+	EyesCorps.set_policy("eyes","none" if eyes_lean<0.38 else ("few" if eyes_lean<0.5 else ("steady" if eyes_lean<0.65 else "many")))
+	var found:=int((state().stats as Dictionary).get("found_theirs",0))
+	EyesCorps.set_policy("wary","steady" if found>0 or lean>=0.6 else ("few" if lean>=0.4 else "none"))
+	# Plant an eye where it matters: a people within reach, the more feared or
+	# disliked the better; the god's people as much as any other.
+	var want:=int(floor(lean*4.0))
+	var placed:=0
+	for op in state().ops:
+		if String((op as Dictionary).get("kind",""))=="plant" and String((op as Dictionary).get("stage","")) in ["travelling","in_place"]: placed+=1
+	if placed>=want or EyesCorps.members("eyes")<1.0: return
+	var best:=""
+	var best_score:=0.0
+	for civ in WorldSimulation.world.civilizations:
+		var id:=String((civ as Dictionary).get("id",""))
+		var rel:Dictionary=(civ as Dictionary).get("player_relation",{})
+		if int(rel.get("contact_level",0))<2: continue
+		var near:=float(preload("res://scripts/war_loop.gd").proximity(id))
+		if near<=0.0 or int(network(id).eyes)>=2: continue
+		var score:=near+maxf(0.0,-float(rel.get("opinion",0.0)))+0.1
+		if score>best_score: best_score=score; best=id
+	if best=="": return
+	var op:=launch("plant",best,"","trader",volunteer_for("plant"))
+	if not op.has("error"): _stat("ruler_planted")
 
 static func _advance(op:Dictionary,day:int)->void:
 	match String(op.get("stage","")):
@@ -951,7 +1030,7 @@ static func _steal_secret(civ_id:String,rng:RandomNumberGenerator)->String:
 		var technologies:Variant=profile.get("technologies",[])
 		if technologies is Array: theirs=(technologies as Array).duplicate()
 	var ours:={}
-	for id in GameState.known_discoveries: ours[String(id)]=true
+	for id in _people().known_discoveries: ours[String(id)]=true
 	var candidates:Array=[]
 	for id in theirs:
 		if ours.has(String(id)): continue
@@ -962,9 +1041,9 @@ static func _steal_secret(civ_id:String,rng:RandomNumberGenerator)->String:
 	var pick:Dictionary=candidates[rng.randi_range(0,candidates.size()-1)]
 	# Bounded: the secret moves forward, it is not simply ours overnight.
 	var id:=String(pick.id)
-	var before:=float(GameState.discovery_progress.get(id,0.0))
-	GameState.discovery_progress[id]=clampf(maxf(before,0.0)+rng.randf_range(0.45,0.72),0.0,0.98)
-	if not id in GameState.research_targets.values():
+	var before:=float(_people().discovery_progress.get(id,0.0))
+	_people().discovery_progress[id]=clampf(maxf(before,0.0)+rng.randf_range(0.45,0.72),0.0,0.98)
+	if not id in _people().research_targets.values():
 		DiscoverySystem.select_research_target(id)
 	return String(pick.name)
 
@@ -1135,6 +1214,16 @@ static func _agent_caught_ours(op:Dictionary,day:int,doing:String)->void:
 	_agent_deed(String(op.agent),"Caught %s among %s%s." % [doing,_the(String(op.civ_id)),"; broke and named us" if talks else "; gave nothing up"])
 	_raise_suspicion(String(op.civ_id),0.3)
 	if String(op.kind)=="plant": _network_damaged(op,day,talks)
+	# The people who found them learn one lived among them (their distrust).
+	_found_by_target(op,day)
+	if String(WorldSimulation.actor_id)!="player":
+		# A rival's eye taken: among the god's people the god decides their
+		# fate (_found_by_target); among another people their ruler does,
+		# out of our sight. Their regard for the sender falls either way.
+		var rel:=_relation(String(op.civ_id))
+		if not rel.is_empty(): rel["opinion"]=clampf(float(rel.get("opinion",0.0))-(0.12 if talks else 0.04),-1.0,1.0)
+		_stat("ours_caught")
+		return
 	if talks: _feud_or_war(op,day,false)
 	# Their ruler decides what becomes of them, as we decide for theirs.
 	var judged:Dictionary=_captives().call("judge_ours",op,day,doing)
@@ -1157,6 +1246,36 @@ static func _network_damaged(caught:Dictionary,day:int,talks:bool)->void:
 		if _rng(String(o.seed)+":exposed:%d" % day).randf()<(EXPOSED_IF_TALKS if talks else EXPOSED_IF_SILENT): exposed.append(o)
 	for o in exposed: _agent_caught_ours(o,day,"named by one taken before them" if talks else "found by those who found the first")
 
+## The people an eye was found among learns of it, in its own scope: its
+## distrust rises; the god's people take the eye as a prisoner and the god
+## decides what is done with the news and with them.
+static func _found_by_target(op:Dictionary,day:int)->void:
+	var sender:=_global(String(WorldSimulation.actor_id))
+	var target:=_global(String(op.civ_id))
+	if target==sender or (target!="player" and not WorldSimulation.actors.has(target)): return
+	var kind:=String(op.kind)
+	WorldSimulation.scoped(target,func()->void:
+		EyesCorps.found_among_us()
+		var s:=state()
+		(s.stats as Dictionary)["found_theirs"]=int((s.stats as Dictionary).get("found_theirs",0))+1
+		if target!="player": return
+		var spy:={"civ_id":sender,"civ_name":_name(sender),"kind":kind,"start_day":day,"arrive_day":day,"seed":"found:%s:%d" % [String(op.seed),day]}
+		var held:Dictionary=_captives().call("take",spy,day)
+		(s.caught as Array).push_front({"day":day,"civ_id":sender,"civ_name":_name(sender),"kind":kind,"fate":"","prisoner_id":String(held.get("id","")),"name":String(held.get("name",""))})
+		while (s.caught as Array).size()>CAUGHT_MAX: (s.caught as Array).pop_back()
+		_stat("caught_theirs")
+		Chronicle.record({"key":"covert:%d:found:%s" % [day,String(held.get("id",""))],"title":"%s of %s Found Among Us" % [EyesCorps.an_eye().capitalize(),_the(sender)],
+			"text":"%s, %s of %s, was found living among our people. %s is held under guard." % [String(held.get("name","one of theirs")),EyesCorps.an_eye(),_the(sender),"She" if String(held.get("sex",""))=="female" else "He"],
+			"tier":"notice","kind":"court","domain":"security","action":{"kind":"prisoner","prisoner_id":String(held.get("id",""))}}))
+
+## The target's own watch against a newcomer of ours (read in their scope):
+## their wary's coverage and craft, and a year of vigilance after a find.
+static func target_watch(civ_id:String)->float:
+	var target:=_global(civ_id)
+	if target==_global(String(WorldSimulation.actor_id)) or (target!="player" and not WorldSimulation.actors.has(target)): return 0.0
+	var read:Variant=WorldSimulation.scoped(target,func()->float: return EyesCorps.coverage()*maxf(0.3,EyesCorps.craft("wary"))+EyesCorps.vigilance())
+	return clampf(float(read),0.0,1.5)
+
 static func _op_agent(op:Dictionary)->Dictionary:
 	var kept:=stored_agent(String(op.agent))
 	if not kept.is_empty(): return kept
@@ -1167,7 +1286,7 @@ static func _op_agent(op:Dictionary)->Dictionary:
 # --------------------------------------------------------------------------
 
 static func _credit(op:Dictionary,title:String,text:String,tier:String)->void:
-	if bool(op.get("credited",false)): return
+	if bool(op.get("credited",false)) or String(WorldSimulation.actor_id)!="player": return
 	op["credited"]=true
 	_credit_plain(title,text,tier,_day())
 
@@ -1273,11 +1392,11 @@ static func _catch_chance(sender:String="")->float:
 	# The wary (eyes_corps.gd): how much of our people they watch, and how well.
 	var wary:=EyesCorps.coverage()*maxf(0.3,EyesCorps.craft("wary"))
 	# Without them only the watch's ordinary vigilance notices a stranger.
-	var watch:=clampf(float(GameState.population_allocations.get("Defense",0))/maxf(1.0,float(GameState.population_exact)*0.08),0.0,1.0)
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
+	var watch:=clampf(float(_people().population_allocations.get("Defense",0))/maxf(1.0,float(_people().population_exact)*0.08),0.0,1.0)
+	var cohesion:=clampf(float(_people().simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 	var Standing:=preload("res://scripts/standing.gd")
 	var theirs:=Standing.art_of(sender,"cunning") if sender!="" else 0.5
-	return clampf(0.25+edge*2.0+wary*0.45+EyesCorps.vigilance()+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.art_of("player","cunning"),theirs),0.1,0.95)
+	return clampf(0.25+edge*2.0+wary*0.45+EyesCorps.vigilance()+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.own_art("cunning"),theirs),0.1,0.95)
 
 ## Their eyes now among us or on the road (the first of `civ_id`'s, any
 ## people's when ""), {} when none.

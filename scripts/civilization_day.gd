@@ -164,10 +164,10 @@ static func _war_day(day:int)->void:
 	if WorldSimulation.actor_id=="player":
 		if _war_loop_script==null:_war_loop_script=load(WAR_LOOP_PATH)
 		_war_loop_script.call("daily",day)
-		# Spies and assassins advance on their own schedule (covert_ops.gd):
-		# arrivals, reports, strikes, the rivals' own acts and our watch.
-		if _covert_script==null:_covert_script=load(COVERT_PATH)
-		_covert_script.call("daily",day)
+	# Eyes, the wary and errands abroad (covert_ops.gd): every people, in its
+	# own scope, on the same rules.
+	if _covert_script==null:_covert_script=load(COVERT_PATH)
+	_covert_script.call("daily",day)
 	if _council_script==null:_council_script=load(COUNCIL_PATH)
 	_council_script.call("day",day)
 
