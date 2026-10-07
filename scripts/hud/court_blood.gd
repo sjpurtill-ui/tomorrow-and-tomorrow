@@ -337,7 +337,7 @@ func _land(at:Vector3,dir:Vector3,spread_deg:float,v_min:float,v_max:float,count
 
 ## Blood on someone: stickers on their chest and face (the rig's chest and
 ## head bones), reused from a pool; they ride the body as it moves.
-func stain_figure(body:Node3D,count:=2)->void:
+func stain_figure(body:Node3D,count:=2,rendered_bone_frames:Dictionary={})->void:
 	if body==null or not is_instance_valid(body):return
 	var skels:=body.find_children("*","Skeleton3D",true,false)
 	if skels.is_empty():return
@@ -346,7 +346,7 @@ func stain_figure(body:Node3D,count:=2)->void:
 		var bone:="chest" if k%2==0 else "head"
 		if skel.find_bone(bone)<0:bone="spine"
 		if skel.find_bone(bone)<0:continue
-		var holder:=_holder(skel,bone)
+		var holder:=_holder(skel,bone,rendered_bone_frames.get(bone))
 		var s:=_sticker()
 		if s.get_parent()!=null:s.get_parent().remove_child(s)
 		holder.add_child(s)
@@ -358,13 +358,21 @@ func stain_figure(body:Node3D,count:=2)->void:
 		s.set_instance_shader_parameter("sticker",Color(rng.randf(),1.0,0.0,0.6))
 		s.visible=true
 
-func _holder(skel:Skeleton3D,bone:String)->BoneAttachment3D:
+func _holder(skel:Skeleton3D,bone:String,rendered_frame:Variant=null)->BoneAttachment3D:
 	var key:="Blood_"+bone
 	var found:=skel.get_node_or_null(key) as BoneAttachment3D
-	if found!=null:return found
-	var made:=BoneAttachment3D.new();made.name=key;made.bone_name=bone
-	skel.add_child(made)
-	return made
+	if found==null:
+		found=BoneAttachment3D.new();found.name=key;found.bone_name=bone
+		skel.add_child(found)
+	# Contacts can create a holder during a skeleton modifier. Seed the current
+	# pose before the first visible sticker, rather than waiting for next update.
+	var index:=skel.find_bone(bone)
+	if index>=0:
+		var frame:Transform3D=rendered_frame if rendered_frame is Transform3D else skel.global_transform*skel.get_bone_global_pose(index)
+		found.global_transform=frame
+		found.set_meta("blood_initial_bone_world",frame.origin)
+		found.set_meta("blood_initial_holder_gap",found.global_position.distance_to(frame.origin))
+	return found
 
 func _sticker()->MeshInstance3D:
 	if _stickers.size()<STICKERS:
