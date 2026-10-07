@@ -79,6 +79,15 @@ func test_nobody_met_means_no_one_to_measure_against()->void:
 	assert_str(String(races[0].standing)).contains("no one")
 	assert_int((races[0].rows as Array).size()).is_equal(1)
 
+func test_every_race_is_a_plain_count_never_a_percentage()->void:
+	_met(0,0.9)
+	for race:Dictionary in Races.races(Standing.strengths(),_names()):
+		for row:Dictionary in race.rows:
+			assert_str(String(row.text)).not_contains("%")
+	assert_str(Races._amount("learning",640.0,true)).is_equal("640 practices known")
+	assert_str(Races._amount("works",0.0)).is_equal("no great work yet")
+	assert_str(Races._words("wealth",12345.0,9000.0,15000.0,false)).is_equal("about 12,000 goods (9,000 to 15,000)")
+
 func test_head_counts_are_said_in_two_figures_so_a_day_does_not_redraw_them()->void:
 	assert_int(Races._round_count(1234.0)).is_equal(1200)
 	assert_int(Races._round_count(87.0)).is_equal(87)
@@ -93,7 +102,7 @@ func test_a_ruler_boasts_beyond_the_truth_by_their_bent_and_a_load_never_rerolls
 	var again:=Races.boast_facts(id,day)
 	assert_array(first).is_not_empty()
 	assert_str(str(first)).is_equal(str(again))
-	var truth_pop:=float(ForeignDiplomacy.civilization(id).get("population",0.0))
+	var truth_pop:=float(Races.their_measures(id).get("people",0.0))
 	for entry:Dictionary in first:
 		var boast:Dictionary=entry.f.boast
 		assert_str(String(entry.f.fact_kind)).starts_with("boast_")
@@ -105,8 +114,8 @@ func test_a_ruler_boasts_beyond_the_truth_by_their_bent_and_a_load_never_rerolls
 
 func test_a_kept_boast_shows_beside_our_reading_and_is_flagged_when_stretched()->void:
 	var id:=_met(0,0.9)
-	var truth:=float(Standing.their_true(id).get("wealth",0.5))
-	Races.remember_boast(id,{"race":"wealth","claimed":minf(1.0,truth*3.0+0.5),"day":75*365-40,"text":"x"})
+	var truth:=float(Races.their_measures(id).get("wealth",0.0))
+	Races.remember_boast(id,{"race":"wealth","claimed":truth*3.0+100.0,"day":75*365-40,"text":"x"})
 	var races:=Races.races(Standing.strengths(),_names())
 	var found:=false
 	for race:Dictionary in races:
