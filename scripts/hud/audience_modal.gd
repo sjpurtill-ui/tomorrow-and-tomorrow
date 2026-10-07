@@ -269,7 +269,9 @@ func _fold_stakes_if_cramped()->void:
 func _reset_card(next_mode:String)->void:
 	## Clear the stage for another view of the court.
 	if is_instance_valid(court_stage):court_stage.cancel_beating()
+	if is_instance_valid(court_stage):court_stage.clear_custody()
 	_beating_results.clear()
+	_custody_results.clear()
 	for tween in reveal_tweens:if tween and tween.is_valid():tween.kill()
 	reveal_tweens.clear();revealing=false;rendered_lines=0;resolved_result={};_last_line={};_history_rows.clear();_pending_toasts.clear()
 	# "What you stand to gain" opens folded to one line: the hall comes first.
@@ -1096,6 +1098,7 @@ func _after_persons(result:Dictionary)->void:
 		return
 	if mode!="audience":return
 	show_beating(result,true)
+	show_custody(result,true)
 	_refresh_regard()
 	var audience:=Hall.find(audience_id)
 	_update_mood(audience)
@@ -1345,6 +1348,7 @@ func _on_lines_ready(id:String)->void:
 
 func _speak()->void:
 	if not is_instance_valid(speech_input):return
+	if is_instance_valid(court_stage) and court_stage.custody():return
 	var text:=speech_input.text.strip_edges()
 	if text.is_empty() or (is_instance_valid(speak_button) and speak_button.disabled):return
 	if mode=="rest":
@@ -1626,6 +1630,58 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 ## false, and the old sober exit plays at the leave-taking, as before.
 var _executed:=false
 var _beating_results:Array[Dictionary]=[]
+var _custody_results:Array[Dictionary]=[]
+
+## Custody must honor IDs before a generic speaker hint. A result for an
+## absent named person never becomes an arrest of the one standing here.
+func _custody_person_key(entry:Dictionary)->String:
+	var pid:=int(entry.get("person_id",entry.get("pid",0)))
+	var known:=String(entry.get("known_id",entry.get("id",""))) if String(entry.get("kind",""))=="known" or entry.has("known_id") else ""
+	var figure_id:=String(entry.get("figure_id",""))
+	if pid>0 or known!="" or figure_id!="":
+		for key:String in court_stage.cast_order:
+			var person:Variant=court_stage.figure(key)
+			if person==null:continue
+			if pid>0 and int(person.person.get("person_id",0))==pid:return key
+			if pid<=0 and known!="" and String(person.person.get("known_id",""))==known:return key
+			if pid<=0 and known=="" and figure_id!="" and String(person.person.get("figure_id",""))==figure_id:return key
+		return ""
+	return _beating_person_key(entry)
+
+func show_custody(result:Dictionary,persons_judgment:=false)->bool:
+	if not is_instance_valid(court_stage):return false
+	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
+	var depart:=bool(result.get("terminal",false)) or bool(result.get("removed",false))
+	if persons_judgment:
+		if not bool(result.get("ok",false)) or String(result.get("action","")) not in ["bind","free"]:return false
+		var params:Dictionary=result.get("params",{}) if result.get("params") is Dictionary else {}
+		target=params.get("target",{}) if params.get("target") is Dictionary else {}
+		if target.is_empty():target=Persons.speaker_ref(audience_id)
+		if String(result.action)=="free":
+			var released:=_custody_person_key(target)
+			if released=="":return false
+			court_stage.release_custody_binding(released)
+			return true
+		depart=depart or bool(result.get("conclude",false))
+	else:
+		if not bool(result.get("executed",false)) or String(result.get("verb",""))!="detain":return false
+		var obedience:Dictionary=result.get("obedience",{}) if result.get("obedience") is Dictionary else {}
+		if String(obedience.get("id","")) in ["refuse","hesitate"]:return false
+	if court_stage.custody() or court_stage.beating() or court_stage.executing():return false
+	for seen:Dictionary in _custody_results:
+		if is_same(seen,result):return false
+	var victim_key:=_custody_person_key(target)
+	var actor_key:=_custody_person_key(actor)
+	var unnamed_hand:=actor.is_empty() or (int(actor.get("person_id",0))<=0 and String(actor.get("kind","")) in ["god","guards"])
+	if victim_key=="" or (not unnamed_hand and actor_key==""):return false
+	if not court_stage.detain(victim_key,actor_key,depart):return false
+	for tween in reveal_tweens:
+		if tween and tween.is_valid():tween.kill()
+	reveal_tweens.clear();revealing=false;_reveal_label=null
+	_custody_results.append(result)
+	if _custody_results.size()>16:_custody_results.pop_front()
+	return true
 
 ## Resolve the adjudicated person against this exact cast. An absent named
 ## actor/target is never silently replaced with the person in front of us.
@@ -1645,7 +1701,7 @@ func _beating_person_key(entry:Dictionary)->String:
 	return ""
 
 func show_beating(result:Dictionary,persons_judgment:=false)->bool:
-	if not is_instance_valid(court_stage) or court_stage.beating() or court_stage.executing():return false
+	if not is_instance_valid(court_stage) or court_stage.beating() or court_stage.executing() or court_stage.custody():return false
 	for seen:Dictionary in _beating_results:
 		if is_same(seen,result):return false
 	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
@@ -1711,6 +1767,7 @@ func _after_command(result:Dictionary)->void:
 	_settle_card(result)
 	if is_instance_valid(court_stage):court_stage.event("command",{"result":result})
 	show_beating(result)
+	show_custody(result)
 	_maybe_execute(result,String(result.get("text",_last_words)))
 	# A law laid down before the court: the decree card says it and what the
 	# engine made of it (its measured result follows as a receipt).
@@ -2015,6 +2072,7 @@ func _next_waiting_id()->String:
 func _close()->void:
 	if is_queued_for_deletion():return
 	if is_instance_valid(court_stage):court_stage.cancel_beating()
+	if is_instance_valid(court_stage):court_stage.clear_custody()
 	closed.emit(audience_id)
 	queue_free()
 
@@ -2034,7 +2092,7 @@ func _refresh_footer()->void:
 	if speech_input.editable!=open:
 		speech_input.editable=open
 		if not open:speech_input.placeholder_text="The audience is concluded. They are taking their leave."
-	speak_button.disabled=not open or (_voice_ok() and voice.busy(audience_id))
+	speak_button.disabled=not open or (_voice_ok() and voice.busy(audience_id)) or (is_instance_valid(court_stage) and court_stage.custody())
 	_refresh_voice_indicator()
 
 func _show_toast(text:String)->void:
@@ -2065,6 +2123,9 @@ func _unhandled_input(event:InputEvent)->void:
 ## A click on the stage: the words being said appear at once; a second click
 ## (or a click once they are all shown) brings the next line.
 func advance()->void:
+	if is_instance_valid(court_stage) and court_stage.custody():
+		court_stage.skip_custody()
+		return
 	if is_instance_valid(court_stage) and court_stage.beating():
 		court_stage.skip_beating()
 		return
@@ -2125,7 +2186,7 @@ func _process(delta:float)->void:
 		_civic_clock=.25
 		_sync_civic()
 	_pump()
-	if _leave_when_quiet and not revealing and is_instance_valid(court_stage) and not court_stage.beating() and (not _executed or bool(court_stage.exec_done)):
+	if _leave_when_quiet and not revealing and is_instance_valid(court_stage) and not court_stage.beating() and not court_stage.custody() and (not _executed or bool(court_stage.exec_done)):
 		# Concluded: once everything has been said, they take their leave.
 		var said:Array=Hall.find(audience_id).get("lines",[])
 		_sync_rendered(said)
@@ -2143,7 +2204,7 @@ func _process(delta:float)->void:
 			var audience:=Hall.find(audience_id)
 			var who:=String((audience.get("speaker",{}) as Dictionary).get("name","The envoy"))
 			thinking.text="%s weighs their words%s" % [who,".".repeat(1+int(clock*2.5)%3)] if resolved_result.is_empty() or rendered_lines==0 else "The room stirs%s" % ".".repeat(1+int(clock*2.5)%3)
-	if is_instance_valid(speak_button):speak_button.disabled=not resolved_result.is_empty() or busy
+	if is_instance_valid(speak_button):speak_button.disabled=not resolved_result.is_empty() or busy or (is_instance_valid(court_stage) and court_stage.custody())
 	if follow_scroll>0.0 and is_instance_valid(transcript_scroll):
 		follow_scroll-=delta
 		transcript_scroll.scroll_vertical=int(transcript_scroll.get_v_scroll_bar().max_value)
@@ -2155,6 +2216,7 @@ func _process(delta:float)->void:
 
 func _pump()->void:
 	if is_instance_valid(court_stage) and court_stage.beating():return
+	if is_instance_valid(court_stage) and court_stage.custody():return
 	if revealing or not is_instance_valid(transcript):return
 	var lines:Array=Hall.find(audience_id).get("lines",[])
 	_sync_rendered(lines)

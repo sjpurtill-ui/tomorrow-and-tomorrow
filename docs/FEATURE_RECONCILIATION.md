@@ -1,3 +1,20 @@
+## October 7 — Physical arrest and detention
+
+Successful arrests now show two eligible adults taking hold of the correct
+person, binding their wrists and escorting them through the court's exit.
+Binding for questioning keeps the living person visible; release removes the
+restraints. Equal movement speeds and clearance checks keep the escort apart,
+and guards return separately. Skip, reduced motion, cancellation and stalled
+routes release presentation ownership without changing the engine's judgment.
+
+Source checkpoint `c963e4ab`, branch `codex/court-arrest`, combined with current
+main `73e15df0` at `01324831`. All 32 combined checks passed (report 80). Final
+private GPU review passed actual typed arrest, bind/free and skip/free, with
+correct identity, contact, full framing, visible escort spacing and restoration.
+No runtime errors, save migration or simulation changes. Player session remains
+untouched; a normal restart loads the change. Evidence and exact validation
+scope: `docs/design/COURT_CUSTODY.md`.
+
 ## October 7 — Physical court flogging
 
 Successful flogging orders now show three adult court supporters approaching,
