@@ -13000,6 +13000,7 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	hud.register_provider("economy",preload("res://scripts/hud/content/dock_content_economy.gd").new(self,hud))
 	hud.register_provider("civ",preload("res://scripts/hud/content/dock_content_civilization.gd").new(self,hud))
 	hud.register_provider("standing",preload("res://scripts/hud/content/dock_content_standing.gd").new(self,hud))
+	hud.register_provider("eyes",preload("res://scripts/hud/content/dock_content_eyes.gd").new(self,hud))
 	hud.register_provider("inquiry",preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud))
 	hud.register_provider("world",preload("res://scripts/hud/content/dock_content_world.gd").new(self,hud))
 	hud.register_provider("military",preload("res://scripts/hud/content/dock_content_military.gd").new(self,hud))
