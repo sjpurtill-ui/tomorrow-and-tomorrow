@@ -32,8 +32,8 @@ func _ready()->void:
 				var panel=hud.dock.find_child("CulturePanel",true,false)
 				check(panel!=null,"Illustrated Culture is wired")
 				if panel:
-					check(panel.values_grid.get_child_count()==3,"Three lived values")
-					check(panel.memory_grid.get_child_count()>0,"Recorded traditions appear")
+					check(panel.find_child("Ledger",true,false)!=null,"What our ways do is shown")
+					check((panel.data.culture.values as Array).size()==10,"All ten values")
 			else:check(hud.dock.find_child("CivicConversationMessages",true,false)!=null,"Council dialogue retained")
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("res://artifacts/culture-"+str(sub)+"-"+str(canvas.x)+".png")
