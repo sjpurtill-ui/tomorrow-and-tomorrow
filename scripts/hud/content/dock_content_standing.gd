@@ -5,6 +5,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## from standing.gd, which reads the one ledger; nothing here is stored.
 ## docs/STANDING_DESIGN.md.
 
+const Races:=preload("res://scripts/standing_races.gd")
 const Standing:=preload("res://scripts/standing.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const History:=preload("res://scripts/strategic_history.gd")
@@ -93,7 +94,9 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	for p:Dictionary in peoples: found=found or String(p.civ_id)==compare
 	if not found: view_state["compare"]=""
 	var home:=_home(our,seen)
-	return {"type":"standing","people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
+	var names:={}
+	for p:Dictionary in peoples: names[String(p.civ_id)]=String(p.name)
+	return {"type":"standing","races":Races.races(our,names),"people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
 		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,"arts":Standing.arts_at_work(),
 		"on_raise":func(section:String,sub:int)->void: jump(section,sub).call(),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),

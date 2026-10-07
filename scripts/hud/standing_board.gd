@@ -240,6 +240,7 @@ var strength_list:VBoxContainer
 var strength_rows:Array[Control]=[]
 var compare_row:HFlowContainer
 var dangers:VBoxContainer
+var races:VBoxContainer
 var arts:VBoxContainer
 var peoples_heading:Label
 var peoples:GridContainer
@@ -249,6 +250,7 @@ func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	add_theme_constant_override("separation",18)
 	_build_hero()
+	races=VBoxContainer.new();races.name="WhoLeads";races.add_theme_constant_override("separation",10);add_child(races)
 	arts=VBoxContainer.new();arts.name="ArtsAtWork";arts.add_theme_constant_override("separation",8);add_child(arts)
 	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",8);add_child(dangers)
 	var peoples_box:=VBoxContainer.new();peoples_box.name="Peoples";peoples_box.add_theme_constant_override("separation",10);add_child(peoples_box)
@@ -275,6 +277,7 @@ func apply(block:Dictionary)->void:
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
+	_refill("races",_races_print(block.get("races",[])),_fill_races)
 	_refill("arts",block.get("arts",{}),_fill_arts)
 	_refill("dangers",block.get("warnings",[]),_fill_dangers)
 	_refill("peoples",block.get("peoples",[]),_fill_peoples)
@@ -393,6 +396,49 @@ func _build_hero()->void:
 ## into them. Otherwise the list is drawn again.
 var _strength_shape:Array=[]
 var _strength_refs:Array=[]
+## WHO LEADS: the four plain races between peoples, each laid in order. Ours
+## is exact; theirs carry the band our watchers' knowledge allows, and a people
+## we know too little of is unknown, never guessed (standing_races.gd).
+## What the races draw, so a day's small moves in a value redraw nothing.
+static func _races_print(list:Array)->Array:
+	var out:Array=[]
+	for race:Dictionary in list:
+		var rows:Array=[]
+		for row:Dictionary in race.rows:rows.append([String(row.name),String(row.text),bool(row.unknown),roundi(float(row.value)*20.0) if float(row.value)<=1.0 else roundi(log(maxf(1.0,float(row.value)))*8.0)])
+		out.append([String(race.id),String(race.standing),rows])
+	return out
+
+func _fill_races()->void:
+	_clear(races)
+	var list:Array=data.get("races",[])
+	if list.is_empty(): return
+	Kit.label(races,"Who leads","kicker")
+	Kit.label(races,"Each people as our watchers read it. Envoys, scouts and years narrow the bands; what we have not learned stays unknown.","note")
+	var grid:=GridContainer.new();grid.name="RaceCards";grid.columns=2 if size.x>=TWO_CARDS_AT else 1
+	grid.add_theme_constant_override("h_separation",14);grid.add_theme_constant_override("v_separation",14)
+	races.add_child(grid)
+	for race:Dictionary in list:
+		var card:=_card()
+		card.name="Race_"+String(race.id)
+		grid.add_child(card)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
+		Kit.label(column,String(race.race),"heading")
+		Kit.label(column,String(race.standing),"note")
+		var top:=0.0
+		for row:Dictionary in race.rows:
+			if not bool(row.unknown): top=maxf(top,float(row.high))
+		for row:Dictionary in race.rows:
+			var line:=VBoxContainer.new();line.add_theme_constant_override("separation",2);column.add_child(line)
+			var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);line.add_child(head)
+			var who:=Kit.label(head,String(row.name),"heading",Color(0,0,0,0),false);who.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			if bool(row.ours): who.add_theme_color_override("font_color",T.GOLD_TEXT)
+			var words:=Kit.label(head,String(row.text),"note",Color(0,0,0,0),false)
+			words.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+			if not bool(row.unknown) and top>0.0:
+				var meter:=Meter.new();line.add_child(meter)
+				meter.set_value(float(row.value)/top,T.GOLD if bool(row.ours) else T.TEAL)
+		Kit.label(column,"Asks: %s." % String(race.ask),"note")
+
 func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
 	rose.configure(items,data.get("year_ago",{}))
