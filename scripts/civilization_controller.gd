@@ -698,7 +698,11 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		var other:=GREAT_WORKS.global_owner(String(civ.id),id)
 		# Lasting grievances over seized, looted or sabotaged works; known deterrence.
 		relationship.opinion=clampf(float(relationship.opinion)-GREAT_WORKS.grievance(id,other),-1,1)
-		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other)+preload("res://scripts/standing.gd").war_deterrence(civ))
+		# Proximity drives war (war_loop.gd proximity): no war with a people no
+		# band can reach, and the farther they live, the angrier a ruler must be.
+		var near:=float(preload("res://scripts/war_loop.gd").proximity(String(civ.id)))
+		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other)+preload("res://scripts/standing.gd").war_deterrence(civ)+(1.0-near)*0.3)
+		if action=="declare_war" and near<=0.0:continue
 		if action=="":continue
 		var order:={"kind":"diplomacy","target":String(civ.id),"action":action}
 		if action=="goodwill":

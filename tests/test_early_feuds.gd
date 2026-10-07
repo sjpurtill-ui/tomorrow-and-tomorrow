@@ -748,3 +748,29 @@ func test_a_people_far_from_our_country_sends_no_raiders()->void:
 	var kinds:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==far_id).map(func(e:Dictionary)->String:return String(e.kind))
 	assert_array(kinds).contains(["stood_down"])
 	assert_array(kinds).not_contains(["raid"])
+
+## No war, feud or threat with a people no band can reach (war_loop.gd
+## near_us): the grudge is kept, nothing marches, and a war already open
+## across the distance ends.
+func test_a_people_too_far_to_reach_can_neither_fight_nor_feud_with_us()->void:
+	var far:Dictionary=CivilizationSystem.civilizations[1]
+	var far_id:=String(far.id)
+	var home:Vector2=CivilizationSystem.player_world_origin+Vector2(5000.0,0.0)
+	far["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in far.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=home
+	assert_bool(WAR.near_us(far_id)).is_false()
+	var day:=WAR.TICK*40
+	GameState.elapsed_days=day
+	var told:=WAR.blood_feud(far_id,day,"the killing of their envoy")
+	assert_str(told).contains("km")
+	assert_int(int(WAR.front(far_id).level)).is_equal(0)
+	assert_dict(WAR.front(far_id).pending as Dictionary).is_empty()
+	assert_bool(WAR.declare(far_id,day,"old wrongs")).is_false()
+	assert_bool(bool(_civ(far_id).player_relation.get("at_war",false))).is_false()
+	# A war opened before the rule ends at the next look.
+	_civ(far_id).player_relation["at_war"]=true
+	WAR.daily(day)
+	assert_bool(bool(_civ(far_id).player_relation.get("at_war",false))).is_false()
+	# The near people still can.
+	assert_bool(WAR.near_us(civ_id)).is_true()

@@ -1645,6 +1645,8 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			# A beaten people never demands; nor does one bound to peace with us
 			# (a feud they paid to end, a truce, kin by marriage).
 			if bool(_aftermath().call("defeated",civ_id)) or bool(_war().call("keeps_peace",civ_id,day)): return {}
+			# A threat needs a road: a people no band of theirs can bring to us has nothing to back it.
+			if rng.randf()>float(_war().call("proximity",civ_id)): return {}
 			var scale:=1.4 if situation_type=="emboldened_demand" else (0.7 if situation_type=="test_of_resolve" else 1.0)
 			var avoid:=String(previous.get("resource","")) if situation_type=="emboldened_demand" else ""
 			var threat:=_threat_terms(civ,rng,used,scale,avoid)

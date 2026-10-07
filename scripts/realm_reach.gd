@@ -39,11 +39,14 @@ static func reach_km(people:float,world_reach:float)->float:
 static func ours()->Dictionary:
 	if Engine.get_main_loop()==null or WorldSimulation.state==null: return {}
 	if not bool(WorldSimulation.state.get("settlement_site_committed")): return {}
-	var center:Vector2=CivilizationSystem.player_world_origin
+	# The people in scope: its own world's origin (WorldSimulation.world is
+	# that people's CivilizationSystem in a rival's scope).
+	var world:Variant=WorldSimulation.world if WorldSimulation.world!=null else CivilizationSystem
+	var center:Vector2=world.player_world_origin
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) and city.get("position") is Vector2 and String(city.get("occupied_by","")) in ["","human","player"]:
 			center=city.position
-	var world_reach:=float((CivilizationSystem.progression_reach_snapshot() as Dictionary).get("combined",0.0)) if CivilizationSystem.has_method("progression_reach_snapshot") else 0.0
+	var world_reach:=float((world.progression_reach_snapshot() as Dictionary).get("combined",0.0)) if world.has_method("progression_reach_snapshot") else 0.0
 	# A people set on spreading its land reaches further (ambition_effects.gd).
 	var course:=1.0+preload("res://scripts/ambition_effects.gd").effect("realm_reach")
 	return {"owner":"player","center":center,"reach":clampf(reach_km(float(WorldSimulation.state.population_total),world_reach)*course,MIN_KM,MAX_KM)}

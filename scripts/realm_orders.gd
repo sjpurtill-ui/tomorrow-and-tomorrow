@@ -823,6 +823,8 @@ static func _declare(reading:Dictionary)->Dictionary:
 	if index<0: return _no("declare_war","Nobody knows that people.")
 	var civ:Dictionary=world.civilizations[index]
 	var name:=String(civ.get("name","them"))
+	var War:=preload("res://scripts/war_loop.gd")
+	if not War.near_us(civ_id): return _no("declare_war","No band of ours can reach the %s: %s." % [name,War.far_words(civ_id)])
 	if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): return {"ok":true,"kind":"declare_war","count":0,"says":"We are already at war with the %s. Say where to strike." % name,"outcome":"The war with the %s goes on." % name}
 	var can:Dictionary=world.player_action_availability(civ_id,"declare_war")
 	if String(can.get("error","")).begins_with("Choose"):

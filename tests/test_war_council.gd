@@ -54,6 +54,7 @@ func before_test()->void:
 	city=CivilizationSystem.player_world_origin+Vector2(-20.0,8.0)
 	_place_town(city)
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_land"))
+	_bring_near(CivilizationSystem.civilizations[0])
 
 ## Tsaren stands here, in the world and on our chart alike (a battle's report
 ## charts the town again where it truly stands).
@@ -896,3 +897,10 @@ func test_the_zone_staff_read_the_one_lines_and_the_one_supply_number()->void:
 	actual["supply_level"]=0.9
 	land._move(actual,CivilizationSystem.player_world_origin+Vector2(12.0,0.0),{"mission":"defend"},int(GameState.elapsed_days))
 	assert_float(float(actual.supply_level)).is_equal(0.9)
+
+## The enemy lives a few days from us (war_loop.gd near_us): a war needs a road.
+func _bring_near(civ:Dictionary)->void:
+	var home:Vector2=CivilizationSystem.player_world_origin+Vector2(250.0,0.0)
+	civ["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=home
