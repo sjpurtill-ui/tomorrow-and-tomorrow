@@ -43,6 +43,9 @@ func _world()->void:
 	for index in 3:
 		var civ:Dictionary=civs[index]
 		civ.player_relation.contact_level=2; civ.player_relation.met_day=0; civ.player_relation.home_location_known=true
+		# Neighbours whose country touches ours: shared ground and carried help
+		# are theirs to ask (envoy_requests.gd plausible).
+		civ["world_position"]=CivilizationSystem.player_world_origin+Vector2(30.0*float(index+1),0.0)
 		met.append(String(civ.id))
 	GameState.elapsed_days=400
 
@@ -438,3 +441,27 @@ func _hunger_occasions(days:Array,food:Array)->Array:
 func test_hunger_pleads_once_then_lean_seasons_bring_other_business_until_true_famine()->void:
 	var seen:=_hunger_occasions([401,411,421,431,441,451],[60.0,16.0,60.0,16.0,60.0,8.0])
 	assert_array(seen).contains(["their_famine@411","lean_season@431","their_famine@451"])
+
+
+## A people 2,000 km away asks only what the distance allows: no border, no
+## hunting in our country, no holy place in it, no food or workers walked
+## across; a teacher, a marriage or the god's blessing it may still seek.
+## Neighbours may ask all of it, about the ground that truly faces them.
+func test_far_peoples_ask_only_what_the_distance_allows()->void:
+	var civ:=_civ(0)
+	civ["world_position"]=CivilizationSystem.player_world_origin+Vector2(-2000.0,0.0)
+	for kind in ER.NEIGHBOUR_ONLY+ER.NEAR_ONLY:
+		assert_bool(ER.plausible(String(kind),civ,int(GameState.elapsed_days))).override_failure_message("%s asked from 2,000 km" % kind).is_false()
+	for kind in ["craft_teaching","marriage_request","blessing_rite","rite_keeper","mediation","captive_scouts"]:
+		assert_bool(ER.plausible(String(kind),civ,int(GameState.elapsed_days))).is_true()
+	# Next door, the border request is about the ground that faces them (west).
+	civ["world_position"]=CivilizationSystem.player_world_origin+Vector2(-30.0,0.0)
+	assert_bool(ER.plausible("border_line",civ,int(GameState.elapsed_days))).is_true()
+	var rng:=RandomNumberGenerator.new();rng.seed=3
+	assert_array(["west hills","far meadows"]).contains([ER._facing_place(civ,rng)])
+	# A holy place in our land only after ten years of knowing it.
+	GameState.elapsed_days=5000
+	civ.player_relation.met_day=int(GameState.elapsed_days)-30
+	assert_bool(ER.plausible("sacred_site",civ,int(GameState.elapsed_days))).is_false()
+	civ.player_relation.met_day=int(GameState.elapsed_days)-ER.SACRED_YEARS*365
+	assert_bool(ER.plausible("sacred_site",civ,int(GameState.elapsed_days))).is_true()
