@@ -249,7 +249,7 @@ func seed_ground_records()->Array[Dictionary]:
 		var node:Node3D=retained.installed[key].node
 		if not node.has_meta("country_seed_id"):continue
 		records.append({"id":String(node.get_meta("country_seed_id")),"origin":node.get_meta("country_seed_origin"),
-			"plots":node.get_meta("country_seed_plots"),"routes":node.get_meta("country_seed_routes")})
+			"plots":node.get_meta("country_seed_plots"),"routes":node.get_meta("country_seed_routes"),"plan":node.get_meta("country_seed_plan")})
 	return records
 
 func _valid(point:Vector2)->bool:
@@ -657,6 +657,8 @@ func _home_ground_valid(point:Vector2,basis:Basis,bounds:AABB)->bool:
 	return true
 
 func _add_prop(parent:Node3D,kind:String,point:Vector2,angle:float)->void:
+	# These static household details share one close-view map budget.
+	if kind in ["woodpile","pots","drying_rack","stored_grain","fishing_net"]:return
 	if not _valid(point):return
 	var prop:=MeshInstance3D.new();prop.name="Farm_"+kind
 	prop.set_meta("country_prop",kind)

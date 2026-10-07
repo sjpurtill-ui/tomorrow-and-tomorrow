@@ -7,9 +7,8 @@ extends RefCounted
 ## ground, worked fields and kitchen gardens) is painted into the land by
 ## settlement_grounds.gd. This file places the furniture of daily life on it,
 ## as instanced low-poly props in the settlement ink (settlement_kit_shapes.gd):
-## - at every lived-in home: a woodpile, pots and a quern at the door, and a
-##   drying rack or a hide frame where the people know food drying, smoking or
-##   hide curing;
+## Household wood, pottery, racks, grain and nets are owned by the global
+## close-view settlement_yard_details layer. They are never duplicated here.
 ## - at the hearth: the fire ring and log benches round it, and a woodpile;
 ## - at work yards: a kiln, pots, a loom or a hide frame, by what is known;
 ## - at the water point: a well once wells are known, water jars before;
@@ -72,6 +71,7 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		blocked.append(Vector3(position.x, position.y, maxf(float(record.get("radius", .003)), .0018)))
 	var total := [0]
 	var put := func(name: String, at: Vector2, yaw: float, radius: float) -> bool:
+		if name in ["woodpile","pots","drying_rack","stored_grain","fishing_net"]:return false
 		if total[0] >= MAX_PROPS: return false
 		if not bool(land.call(at)): return false
 		for other in blocked:
@@ -83,7 +83,8 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 		placed[name].append(Transform3D(basis, Vector3(world.x, float(height.call(world.x, world.y)) + .00002, world.y)))
 		total[0] += 1
 		return true
-	# Homes: a woodpile beside, pots and a quern at the door, a rack behind.
+	# Household furniture belongs to the one near-camera yard budget. Public
+	# service furniture and construction equipment stay in this existing layer.
 	for record in plan.buildings:
 		var plot: Dictionary = record.plot
 		var status := String(plot.get("status", "active"))
@@ -103,11 +104,7 @@ static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dic
 			continue
 		if status in ["vacant", "ruin", "reclaimed"]: continue
 		if use in ["residential_compound", "mixed_household"]:
-			if roll % 3 != 0: put.call("woodpile", position + side * (radius + .0012) * (1.0 if roll % 2 == 0 else -1.0) - forward * .0006, angle, .0011)
-			if roll % 2 == 0: put.call("pots", position + forward * (radius + .0010) + side * .0011, angle, .0006)
-			elif crafts.grinding: put.call("quern", position + forward * (radius + .0011) - side * .0010, angle, .0006)
-			if crafts.drying and roll % 3 == 1: put.call("drying_rack", position - forward * (radius + .0022) + side * .0008, angle, .0014)
-			elif crafts.hides and roll % 5 == 2: put.call("hide_frame", position - forward * (radius + .0018), angle, .0011)
+			continue
 		elif use == "workshop":
 			if crafts.kiln and roll % 2 == 0: put.call("kiln", position + side * (radius + .0022), angle, .0014)
 			if crafts.pottery: put.call("pots", position + forward * (radius + .0012), angle, .0007)

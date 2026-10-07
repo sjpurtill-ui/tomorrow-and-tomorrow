@@ -411,8 +411,12 @@ func test_completed_late_country_homes_use_recorded_low_rise_kit_and_bounded_pro
 	assert_int(homes.multimesh.instance_count).is_equal(3)
 	var props:=0
 	for child:Node in root.get_children():
-		if child.has_meta("country_prop"):props+=1
-	assert_int(props).is_equal(3)
+		if child.has_meta("country_prop"):
+			assert_bool(String(child.get_meta("country_prop")) in ["woodpile","pots","drying_rack","stored_grain","fishing_net"]).is_false()
+			props+=1
+	# Wood now belongs exclusively to the global close-view yard layer. These
+	# late fixtures retain their separate timber stack and basket equipment.
+	assert_int(props).is_equal(2)
 	for transform:Transform3D in homes.get_meta("source_transforms"):
 		assert_float((transform*homes.multimesh.mesh.get_aabb()).size.length()).is_less(0.025)
 
@@ -428,7 +432,7 @@ func test_cluster_slots_stay_compact_separated_and_stable_as_roofs_fill_in()->vo
 			assert_float(full[index].distance_to(at)).is_less(0.065)
 			for other in range(index):assert_float(full[index].distance_to(full[other])).is_greater(0.016)
 
-func test_clusters_render_six_to_twelve_roofs_with_fixed_transforms_and_three_props()->void:
+func test_clusters_keep_fixed_roofs_and_only_unrelated_equipment_outside_global_yards()->void:
 	var visual=_visual()
 	var era=preload("res://scripts/settlement_country_era.gd")
 	var appearance:Dictionary=era.capture([],{},[{"id":9,"land_use":"mixed_household","status":"active","fabric_generation":12,"storeys":8}])
@@ -441,7 +445,9 @@ func test_clusters_render_six_to_twelve_roofs_with_fixed_transforms_and_three_pr
 		var groups:=0;var props:=0;var rendered:=0
 		var now:Dictionary={}
 		for child:Node in root.get_children():
-			if child.has_meta("country_prop"):props+=1
+			if child.has_meta("country_prop"):
+				assert_bool(String(child.get_meta("country_prop")) in ["woodpile","pots","drying_rack","stored_grain","fishing_net"]).is_false()
+				props+=1
 			if not child.has_meta("country_home"):continue
 			groups+=1;rendered+=(child as MultiMeshInstance3D).multimesh.instance_count
 			var slots:Array=child.get_meta("country_home_slots")
@@ -449,7 +455,7 @@ func test_clusters_render_six_to_twelve_roofs_with_fixed_transforms_and_three_pr
 			for index in slots.size():now[slots[index]]={"transform":transforms[index],"descriptor":child.get_meta("country_home")}
 		assert_int(rendered).is_equal(count)
 		assert_int(groups).is_less_equal(3)
-		assert_int(props).is_equal(3)
+		assert_int(props).is_equal(2)
 		for slot in prior:assert_dict(now[slot]).is_equal(prior[slot])
 		prior=now
 
@@ -512,7 +518,8 @@ func test_compact_farm_ground_does_not_veil_the_house_walls()->void:
 		assert_float(highest).is_less(transform.origin.y)
 		assert_float(Vector2(transform.origin.x,transform.origin.z).distance_to(record.position)).is_less(0.025)
 	assert_object(root.get_node_or_null("SettlementGroundShadows/FarmhouseShadow")).is_not_null()
-	assert_object(root.get_node_or_null("Farm_woodpile")).is_not_null()
+	# Static wood is owned by the one near-camera yard budget.
+	assert_object(root.get_node_or_null("Farm_woodpile")).is_null()
 	assert_object(root.get_node_or_null("CountryChart_field")).is_not_null()
 	var layout:Dictionary=root.get_meta("country_layout")
 	assert_int(layout.fields.size()).is_equal(4)

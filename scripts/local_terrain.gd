@@ -16,6 +16,10 @@ var organic_town_jobs:Dictionary={}
 const SettlementVisualKeys=preload("res://scripts/settlement_visual_keys.gd")
 var settlement_patches
 var country_land:Node3D
+const SettlementYards=preload("res://scripts/settlement_yard_details.gd")
+var settlement_yards:Node3D
+var settlement_yard_source_key:Array=[]
+var settlement_yard_fabric_revision:=0
 var settlement_patch_input_revision:=""
 var settlement_layout_builds:=0
 var settlement_layout_steps:=0
@@ -1027,6 +1031,7 @@ func _process(delta: float) -> void:
 		add_child(country_land)
 	country_land.refresh(self)
 	country_land.process_jobs(1500 if _camera_in_motion() else 2500,2)
+	_process_settlement_yards()
 	stamp=trace.mark("frame_settlement_patches",stamp)
 	# Scale visibility follows the camera every frame it moves; otherwise only
 	# state changes matter, which ten checks a second keep up with.
@@ -5003,6 +5008,7 @@ func _settlement_patch_state_token()->int:
 
 func _build_settlement_plot_patch(parent:Node3D,center:Vector3,plots:Array[Dictionary],lod:int,context:Dictionary)->void:
 	_create_plot_fabric(center,plots,lod,parent,context)
+	parent.set_meta("yard_plan",context.get("plan",{}))
 
 func _build_settlement_route_patch(parent:Node3D,center:Vector3,route:Dictionary,context:Dictionary)->void:
 	var routes:Array[Dictionary]=[route]
@@ -5039,6 +5045,73 @@ func settlement_patch_stats()->Dictionary:
 	result["layout_pending"]=pending_layout
 	result["pending"]=int(result.pending)+pending_layout
 	return result
+
+## One global close-view budget reuses installed house plans. No new settlement
+## layout, inventory simulation, moving actors or per-house scene nodes.
+func _process_settlement_yards()->void:
+	if camera==null or WorldSimulation.actor_id!="player":return
+	if settlement_yards==null:
+		settlement_yards=SettlementYards.new();settlement_yards.name="SettlementYards"
+		settlement_yards.configure(_harvest_ground_height_at,_settlement_stage_land_at,
+			func(point:Vector2)->bool:return _world_position_is_revealed(Vector3(point.x,0,point.y)),
+			_settlement_yard_water_at)
+		add_child(settlement_yards)
+	settlement_yards.set_view(Vector2(camera_target.x,camera_target.z),camera.size)
+	if camera.size>SettlementYards.MAX_SPAN_KM:return
+	var key:Array=[settlement_yard_fabric_revision,GameState.world_seed,GameState.resource_settlement_id,
+		GameState.last_morphology_day,GameState.known_discoveries.size(),GameState.discovery_log.size(),CivilizationSystem.fog_revision,
+		river_terrain_grid,detail_surface_center,detail_terrain_patch!=null and detail_terrain_patch.visible]
+	if settlement_patches!=null:key.append([settlement_patches.request_serial,settlement_patches.builds,settlement_patches.retired])
+	if country_land!=null:
+		key.append(country_land.clearing_revision)
+		for id:String in country_land.layers:
+			var entry:Dictionary=country_land.layers[id]
+			key.append([id,entry.node.seed_ground_revision,entry.node.retained.builds,entry.snapshot.get("knowledge",[]).size()])
+	if key!=settlement_yard_source_key:
+		settlement_yard_source_key=key
+		var sources:Array[Dictionary]=[]
+		var buildings:Array=[]
+		if settlement_patches!=null:
+			for patch:String in settlement_patches.installed:
+				if not settlement_patches.desired.has(patch):continue
+				var node:Node3D=settlement_patches.installed[patch].node
+				buildings.append_array(node.get_meta("yard_plan",{}).get("buildings",[]))
+		if not buildings.is_empty():
+			var center:=settlement_request_ground_center
+			sources.append({"id":"root:"+GameState.resource_settlement_id,"origin":Vector2(center.x,center.z),
+				"plan":{"buildings":buildings},"plots":GameState.settlement_plots,"routes":GameState.settlement_routes,
+				"knowledge":_settlement_yard_knowledge()})
+		var secondary:Node3D=settlement_network_fabric_root if settlement_network_fabric_root!=null else settlement_network_marker_root
+		if secondary!=null:
+			for node:Node in secondary.get_children():
+				if node.has_meta("yard_source"):
+					var source:Dictionary=node.get_meta("yard_source").duplicate()
+					source["knowledge"]=_settlement_yard_knowledge()
+					var city:Dictionary=SettlementModel.settlement_record(String(node.get_meta("city_id","")))
+					if city.get("local_resources",{}).has("settlement_plots"):
+						source["plots"]=city.local_resources.settlement_plots
+					sources.append(source)
+		if country_land!=null:
+			for id:String in country_land.layers:
+				var entry:Dictionary=country_land.layers[id]
+				for seed:Dictionary in entry.node.seed_ground_records():
+					seed["id"]="country:"+id+":"+String(seed.id)
+					seed["knowledge"]=entry.snapshot.get("knowledge",[])
+					seed["representative_occupied"]=true
+					sources.append(seed)
+		settlement_yards.request(sources,hash(key))
+	settlement_yards.process_jobs(1000,4)
+
+func _settlement_yard_knowledge()->Array:
+	var known:Array=GameState.known_discoveries.duplicate()
+	for discovery:Dictionary in GameState.discovery_log:
+		var id:=String(discovery.get("id",""))
+		if not id.is_empty() and id not in known:known.append(id)
+	return known
+
+func _settlement_yard_water_at(point:Vector2)->bool:
+	if absf(point.x)>world_width*.5 or absf(point.y)>world_depth*.5:return false
+	return _height_at(point.x,point.y)<=SEA_LEVEL or _main_river_distance_at(point.x,point.y)<=MAIN_RIVER_WATER_HALF_WIDTH_KM or _nearest_tributary_distance_at(point)<=TRIBUTARY_WATER_HALF_WIDTH_KM
 
 func _update_settlement_patch_visibility(parent:Node,stage_max_zoom:float)->void:
 	for child in parent.get_children():
@@ -8656,6 +8729,10 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 		var plots:Array[Dictionary]=SettlementModel.plots_for_lod(lod)
 		stamp=trace.mark("city_design_plots_for_lod",stamp)
 		_create_plot_fabric(center,plots,lod,fabric)
+		fabric.set_meta("yard_source",{"id":"city:"+String(record.id),"origin":Vector2(center.x,center.z),
+			"plan":fabric.get_meta("yard_plan",{}),"plots":GameState.settlement_plots.duplicate(true),
+			"routes":GameState.settlement_routes.duplicate(true),"knowledge":_settlement_yard_knowledge()})
+		settlement_yard_fabric_revision+=1
 		stamp=trace.mark("city_design_plot_fabric",stamp)
 		_create_persistent_settlement_routes(center,GameState.settlement_routes,fabric)
 		trace.mark("city_design_routes",stamp)
@@ -8679,6 +8756,7 @@ func _create_secondary_settlement_footprints(settlements:Array[Dictionary],force
 	for child in parent.get_children():
 		if child.has_meta("city_id") and not visible_ids.has(String(child.get_meta("city_id",""))):
 			parent.remove_child(child);child.queue_free()
+			settlement_yard_fabric_revision+=1
 
 ## Secondary towns still to check or redraw; see _advance_pending_city_designs.
 var pending_city_designs:Array=[]
@@ -10830,6 +10908,7 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		organic_plan = patch_context.plan if patch_context.has("plan") else _organic_town_plan(center, samples.land_at)
 		pstamp=ptrace.mark("plot_fabric_layout",pstamp)
 		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
+		parent.set_meta("yard_plan",organic_plan)
 		pstamp=ptrace.mark("plot_fabric_kit_render",pstamp)
 	if organic_town:
 		if bool(patch_context.get("shared_props",true)):
