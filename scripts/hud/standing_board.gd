@@ -404,7 +404,7 @@ static func _races_print(list:Array)->Array:
 	var out:Array=[]
 	for race:Dictionary in list:
 		var rows:Array=[]
-		for row:Dictionary in race.rows:rows.append([String(row.name),String(row.text),bool(row.unknown),roundi(float(row.value)*20.0) if float(row.value)<=1.0 else roundi(log(maxf(1.0,float(row.value)))*8.0)])
+		for row:Dictionary in race.rows:rows.append([String(row.name),String(row.text),String(row.get("said","")),bool(row.unknown),roundi(float(row.value)*20.0) if float(row.value)<=1.0 else roundi(log(maxf(1.0,float(row.value)))*8.0)])
 		out.append([String(race.id),String(race.standing),rows])
 	return out
 
@@ -437,6 +437,7 @@ func _fill_races()->void:
 			if not bool(row.unknown) and top>0.0:
 				var meter:=Meter.new();line.add_child(meter)
 				meter.set_value(float(row.value)/top,T.GOLD if bool(row.ours) else T.TEAL)
+			if String(row.get("said",""))!="": Kit.label(line,String(row.said),"note")
 		Kit.label(column,"Asks: %s." % String(race.ask),"note")
 
 func _fill_strengths()->void:

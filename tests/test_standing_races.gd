@@ -83,3 +83,37 @@ func test_head_counts_are_said_in_two_figures_so_a_day_does_not_redraw_them()->v
 	assert_int(Races._round_count(1234.0)).is_equal(1200)
 	assert_int(Races._round_count(87.0)).is_equal(87)
 	assert_str(Races._grouped(12000)).is_equal("12,000")
+
+func test_a_ruler_boasts_beyond_the_truth_by_their_bent_and_a_load_never_rerolls_it()->void:
+	var id:=_met(0,0.9)
+	var leader:=ForeignDiplomacy.leader(id)
+	leader["temperament"]="Proud guardian"
+	var day:=75*365
+	var first:=Races.boast_facts(id,day)
+	var again:=Races.boast_facts(id,day)
+	assert_array(first).is_not_empty()
+	assert_str(str(first)).is_equal(str(again))
+	var truth_pop:=float(ForeignDiplomacy.civilization(id).get("population",0.0))
+	for entry:Dictionary in first:
+		var boast:Dictionary=entry.f.boast
+		assert_str(String(entry.f.fact_kind)).starts_with("boast_")
+		if String(boast.race)=="people": assert_float(float(boast.claimed)).is_greater_equal(truth_pop)
+	# A modest ruler holds back or tells it straight.
+	leader["temperament"]="Bridge-builder"
+	for entry:Dictionary in Races.boast_facts(id,day):
+		if String(entry.f.boast.race)=="people": assert_float(float(entry.f.boast.claimed)).is_less_equal(truth_pop*1.06)
+
+func test_a_kept_boast_shows_beside_our_reading_and_is_flagged_when_stretched()->void:
+	var id:=_met(0,0.9)
+	var truth:=float(Standing.their_true(id).get("wealth",0.5))
+	Races.remember_boast(id,{"race":"wealth","claimed":minf(1.0,truth*3.0+0.5),"day":75*365-40,"text":"x"})
+	var races:=Races.races(Standing.strengths(),_names())
+	var found:=false
+	for race:Dictionary in races:
+		if String(race.id)!="wealth": continue
+		for row:Dictionary in race.rows:
+			if String(row.civ_id)==id:
+				found=true
+				assert_str(String(row.said)).contains("claimed")
+				assert_str(String(row.said)).contains("stretched")
+	assert_bool(found).is_true()

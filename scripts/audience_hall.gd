@@ -2149,6 +2149,9 @@ static func _news_fact(civ_id:String,rng:RandomNumberGenerator,used:Dictionary={
 			var comparison:="about as many as yours" if ratio>0.8 and ratio<1.25 else ("more than twice your number" if ratio>=2.0 else ("more than yours" if ratio>=1.25 else ("fewer than half yours" if ratio<=0.5 else "fewer than yours")))
 			var rounded:=maxi(10,roundi(pop/10.0)*10) if pop<500 else roundi(pop/50.0)*50
 			facts.append({"w":0.7,"f":{"subject_civ_id":first_id,"subject_civ_name":name,"fact_kind":"size","fact":"%s numbers roughly %d people, %s." % [name,rounded,comparison]}})
+	# The envoy's own boasts: their words about their own rank, not the truth
+	# (standing_races.gd), laid beside our watchers' reading on the Standing page.
+	facts.append_array(preload("res://scripts/standing_races.gd").boast_facts(civ_id,_day()))
 	var open:Array=[]
 	for entry in facts:
 		var f:Dictionary=entry.f
@@ -2819,6 +2822,7 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 			var learned:=_take_news(audience)
 			reaction="pleased"
 			outcome="You thanked %s's messenger for news of %s.%s" % [audience.civ_name,String(audience.news.get("subject_civ_name","a neighbor")),learned]
+			if (audience.news.get("boast",{}) as Dictionary).size()>0: outcome="You heard %s's messenger out.%s" % [audience.civ_name,learned]
 			memory="Our messenger brought the ruler news and was thanked."
 		"news:reward":
 			var reward:=_reward_terms()
@@ -2826,7 +2830,7 @@ static func _resolve_foreign(audience:Dictionary,option_id:String)->Dictionary:
 			_credit_civ(civ_id,String(reward.resource),sent2)
 			_shift_relation(civ_id,0.04+mood,0.0)
 			_leader_trust(civ_id,0.03)
-			var learned2:=_take_news(audience) if _situation_type(audience)!="news_report" else ""
+			var learned2:=_take_news(audience) if _situation_type(audience)!="news_report" or (audience.news.get("boast",{}) as Dictionary).size()>0 else ""
 			reaction="delighted"
 			outcome="You rewarded %s's messenger with %d %s.%s" % [audience.civ_name,roundi(sent2),String(reward.resource),learned2]
 			memory="Our messenger came home with %d %s from the ruler's hand." % [roundi(sent2),String(reward.resource)]
@@ -2858,6 +2862,10 @@ static func _take_news(audience:Dictionary)->String:
 			copy["source"]="shared by %s" % String(audience.civ_name)
 			intel.publish("player",copy,day)
 			return " Their observation of %s (%s) is now in your city reports." % [String(record.get("name","the city")),preload("res://scripts/calendar_date.gd").words(int(record.get("observed_day",0)))]
+	# A boast is kept as they said it; it teaches us what they say, not who they are.
+	if (audience.news.get("boast",{}) as Dictionary).size()>0:
+		preload("res://scripts/standing_races.gd").remember_boast(civ_id,audience.news.boast)
+		return " You have their word on it; the Standing page sets it beside what our watchers see."
 	var subject_id:=String(audience.news.get("subject_civ_id",""))
 	var subject_index:=_civ_index(subject_id)
 	if subject_index>=0 and not ForeignDiplomacy.civilization(subject_id).is_empty():

@@ -63,7 +63,26 @@ static func _theirs(race:Array,civ_id:String,name:String)->Dictionary:
 	var row:={"civ_id":civ_id,"name":name,"ours":false,"value":value,"low":low,"high":high,"unknown":unknown,"exact":bool(est.get("exact",false)),
 		"sure":Standing.certainty(civ_id)}
 	row["text"]="unknown: we have not learned enough of them" if unknown else _words(counted,value,low,high,bool(est.get("exact",false)))
+	var said:=boast_of(civ_id,String(race[0]))
+	if not said.is_empty(): row["said"]=_said_words(said,row,counted)
 	return row
+
+## Their claim beside our reading: said plainly, never judged unless our own
+## reading clears the whole claim (a known stretch) or falls short of it.
+static func _said_words(said:Dictionary,row:Dictionary,counted:bool)->String:
+	var when:=_when(int(said.days_ago))
+	var claimed:=float(said.claimed)
+	var verdict:=""
+	if not bool(row.unknown):
+		if claimed>float(row.high)*1.15: verdict=" Our watchers think it stretched."
+		elif claimed<float(row.low)*0.85: verdict=" Our watchers think it modest."
+	return "Their envoy claimed %s, %s.%s" % ["about %s" % _grouped(_round_count(claimed)) if counted else "%d%%" % roundi(claimed*100.0),when,verdict]
+
+static func _when(days:int)->String:
+	if days<30: return "this month"
+	if days<365: return "%d months ago" % roundi(days/30.0)
+	var years:=roundi(days/365.0)
+	return "a year ago" if years<=1 else "%d years ago" % years
 
 static func _words(counted:bool,value:float,low:float,high:float,exact:bool)->String:
 	if counted:
@@ -117,3 +136,76 @@ static func _standing(rows:Array)->String:
 
 static func _count_word(n:int)->String:
 	return {1:"One people",2:"Two peoples",3:"Three peoples"}.get(n,"%d peoples" % n)
+
+
+# ----------------------------------------------------------------- boasts
+# What a ruler's envoy says of their own people's rank. The words are theirs,
+# not the truth: the claim is stretched by the ruler's bent (a proud one
+# stretches, a modest one holds back), and our watchers' reading sits beside
+# it on the board. Kept in the ruler's own record (ForeignDiplomacy.leader).
+
+const BOAST_KEEP:=6
+## How much each bent stretches what is said.
+const VANITY:={"Proud guardian":0.5,"Restless visionary":0.35,"Practical organizer":0.1,"Bridge-builder":0.05}
+const BLUFFER_VANITY:=0.7
+
+## The boasts an envoy of `civ_id` might make today, as news facts:
+## [{w, f:{subject_civ_id, subject_civ_name, fact_kind, fact, boast:{race, claimed, day}}}].
+## Seeded from the world, the people and the day, so a load never rerolls them.
+static func boast_facts(civ_id:String,day:int)->Array:
+	var civ:=ForeignDiplomacy.civilization(civ_id)
+	if civ.is_empty(): return []
+	var name:=String(civ.get("name",civ_id))
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|boast|%s|%d" % [int(WorldSimulation.state.world_seed),civ_id,day/ESTIMATE_DAYS])
+	var vanity:=_vanity(civ_id)
+	var stretch:=1.0+vanity*rng.randf_range(0.2,1.0) if vanity>=0.15 else rng.randf_range(0.85,1.0)
+	var truth:=Standing.their_true(civ_id)
+	var out:Array=[]
+	var pop:=maxf(0.0,float(civ.get("population",0.0)))
+	if pop>0.0:
+		var said:=_round_count(pop*stretch)
+		out.append(_boast(civ_id,name,"people","%s's envoy says their people number about %s." % [name,_grouped(said)],pop*stretch,day))
+	for race:Array in RACES:
+		var key:=String(race[2])
+		if key=="" or not truth.has(key): continue
+		var claimed:=clampf(float(truth[key])*stretch,0.0,1.0)
+		var words:String={"genius":"say they know more than most peoples; that their elders keep more lore than they can tell",
+			"splendor":"say they have raised works that travellers cross hills to see",
+			"wealth":"say their stores and goods are the envy of the peoples near them"}.get(key,"")
+		if words=="" or claimed<0.35: continue
+		out.append(_boast(civ_id,name,String(race[0]),"%s's envoy %s." % [name,words],claimed,day))
+	return out
+
+static func _boast(civ_id:String,name:String,race:String,text:String,claimed:float,day:int)->Dictionary:
+	return {"w":0.9,"f":{"subject_civ_id":civ_id,"subject_civ_name":name,"fact_kind":"boast_"+race,"fact":text,"boast":{"race":race,"claimed":claimed,"day":day,"text":text}}}
+
+static func _vanity(civ_id:String)->float:
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	var base:float=float(VANITY.get(String(leader.get("temperament","")),0.1))
+	var character:Variant=leader.get("character",{})
+	if character is Dictionary and String((character as Dictionary).get("trait",""))=="bluffer": base=maxf(base,BLUFFER_VANITY)
+	return base
+
+const ESTIMATE_DAYS:=91
+
+## Keeps a boast the envoy made, newest per race (the ruler's own record).
+static func remember_boast(civ_id:String,boast:Dictionary)->void:
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	if leader.is_empty() or boast.is_empty(): return
+	var kept:Array=leader.get("boasts",[])
+	kept=kept.filter(func(b:Dictionary)->bool:return String(b.get("race",""))!=String(boast.get("race","")))
+	kept.append(boast.duplicate())
+	while kept.size()>BOAST_KEEP: kept.pop_front()
+	leader["boasts"]=kept
+
+## The newest thing their envoy said of one race, {} when nothing: {text,
+## claimed, day, years_ago}.
+static func boast_of(civ_id:String,race:String)->Dictionary:
+	var leader:=ForeignDiplomacy.leader(civ_id)
+	for b in leader.get("boasts",[]):
+		if b is Dictionary and String((b as Dictionary).get("race",""))==race:
+			var out:=(b as Dictionary).duplicate()
+			out["days_ago"]=maxi(0,int(WorldSimulation.state.elapsed_days)-int(out.get("day",0)))
+			return out
+	return {}
