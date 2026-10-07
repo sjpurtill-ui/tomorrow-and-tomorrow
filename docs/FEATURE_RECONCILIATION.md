@@ -1,3 +1,20 @@
+## October 7 — Distinct cultural building finishes
+
+Roof registers, compatible plaster, doorway patterns and restrained decoration
+now reflect lived culture, known crafts and actual emblem identity. Existing
+buildings adopt a finish once; new buildings and actual renewal can add later
+styles while older neighbourhoods retain theirs. Root and clustered expansion
+buildings reuse identical meshes, placement and shared materials. Construction
+stages inherit finishes when walls and roofs appear; no walking figures are added.
+
+Source `c6a56d54`, branch `codex/cultural-architecture`, combined with culture-screen
+update `9a859c08` at `2aeb0b91`. All 68 distinct feature/integration checks pass
+(reports 89–92). Final private GPU review passed with exact per-entry geometry
+and transform equality: no added draw calls, and controlled frames stayed near
+the existing 20 ms cap. Shared shader cost and distant-detail limits are recorded
+in `docs/design/CULTURAL_ARCHITECTURE.md`. Saved finishes survive loading; no live
+player restart was performed. Save and restart normally to load the delivery.
+
 ## October 7 — Buildings visibly take shape
 
 New buildings show foundations, frames, unroofed walls and their recorded roofs
