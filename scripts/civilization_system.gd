@@ -1918,6 +1918,58 @@ func _player_settlement_signal_radius(day:int)->float:
 	return clampf(10.0+population_trace+network_trace+activity_trace+inherited_trace,10.0,320.0)
 
 
+## Another people's settlement signal radius, by the rule that sets ours
+## (_player_settlement_signal_radius): its people, its roads and work, and
+## its years. Their scouts read our smoke, fields and tracks from this far;
+## ours read theirs the same.
+func _civ_settlement_signal_radius(civ:Dictionary,day:int)->float:
+	var population:=maxf(1.0,float(civ.get("population",1.0)))
+	var population_trace:=maxf(0.0,log(population/120.0)/log(10.0))*22.0
+	var activity_trace:=(clampf(float(civ.get("logistics",0.15)),0.0,1.0)*0.58+clampf(float(civ.get("production",0.15)),0.0,1.0)*0.42)*36.0
+	var inherited_trace:=log(1.0+maxf(0.0,float(day)/365.0))/log(2.0)*4.0
+	return clampf(10.0+population_trace+activity_trace+inherited_trace,10.0,320.0)
+
+## What our returning scouts read of other peoples' homes, by the rule their
+## scouts read ours (_process_foreign_scouts' return): a route within a
+## people's direct-contact radius of its home (8 + a fifth of its signal
+## radius, 10 to 58 km) saw the place itself, so its home is on our map; a
+## route within its signal radius brought back signs (smoke, fields, tracks)
+## and the Map of Rumors gets a circle where it should lie.
+func _scouts_read_their_signs(route:Array,day:int)->void:
+	if route.size()<2: return
+	for index in civilizations.size():
+		var civ:Dictionary=civilizations[index]
+		if not bool(civ.get("alive",true)): continue
+		var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
+		if bool(relation.get("home_location_known",false)): continue
+		var home:=_civilization_world_position(civ)
+		var distance:=_route_distance_to_point(route,home)
+		var signal_radius:=_civ_settlement_signal_radius(civ,day)
+		if distance>signal_radius: continue
+		var direct:=clampf(8.0+signal_radius*0.20,10.0,58.0)
+		if distance<=direct:
+			relation["contact_level"]=2
+			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
+			if int(relation.get("met_day",-1))<0: relation["met_day"]=day
+			relation["home_location_known"]=true
+			relation["home_position"]={"x":home.x,"z":home.y}
+			relation["home_location_source"]="returned scouts saw it"
+			relation["last_observed_day"]=day
+			civ["player_relation"]=relation
+			civilizations[index]=civ
+			_add_revealed_area(home,72.0,"foreign settlement observed")
+			_publish_observed_event("Home found — %s" % String(civ.name),"Returning scouts came within sight of the %s home settlement. It is on our map now." % String(civ.name),day,{"kind":"home_found","civ_id":String(civ.id),"identified":true,"position":{"x":home.x,"z":home.y}})
+			continue
+		var quality:=clampf(1.0-distance/maxf(1.0,signal_radius),0.0,1.0)
+		var uncertainty:=clampf(maxf(18.0,distance*1.15),18.0,maxf(24.0,signal_radius*0.90))
+		var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*15485863^String(civ.get("id","")).hash()
+		var center:=_bounded_world_point(home+Vector2.from_angle(rng.randf_range(-PI,PI))*uncertainty*rng.randf_range(0.12,0.55))
+		var known_name:=String(civ.name) if int(relation.get("contact_level",0))>=2 else "a settled people"
+		var lead:Dictionary=rumor_network.observation("player",String(civ.id),known_name,center,uncertainty,day,"signs of a settlement our scouts saw")
+		lead.confidence=0.38+quality*0.30
+		rumor_network.receive("player",lead,day)
+
+
 func _foreign_scout_direct_contact_radius(day:int)->float:
 	# Dense settlement networks put more inhabitants, farms, and routine traffic
 	# beyond the central marker, but direct contact remains much tighter than the
@@ -2788,6 +2840,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
 	_add_revealed_trail(route,18.0,"returned scout trail",day)
+	_scouts_read_their_signs(route,day)
 	var contacts:Array[String]=[]
 	var contact_records:Array[Dictionary]=[]
 	for index in civilizations.size():

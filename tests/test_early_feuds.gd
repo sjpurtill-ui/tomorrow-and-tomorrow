@@ -707,3 +707,19 @@ func test_a_rival_feud_ends_when_one_people_is_down_to_a_handful()->void:
 	var rel:Dictionary=(CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)]
 	assert_int(int(rel.get("feud_since",-1))).is_equal(-1)
 	assert_int(int(rel.get("feud_ended_day",-1))).is_equal(WAR.TICK)
+
+
+## They came to us, so we know the way to them: their envoy or their raiders
+## reaching our town put their home on our map, once, with a Chronicle line;
+## an envoy remembered from before the rule does the same on the next look.
+func test_whoever_comes_to_us_shows_the_way_home()->void:
+	assert_bool(WAR.home_known(civ_id)).is_false()
+	WAR.came_to_us(civ_id,10,"raiders")
+	assert_bool(WAR.home_known(civ_id)).is_true()
+	assert_str(String(_civ(civ_id).player_relation.get("home_location_source",""))).is_equal("their raiders' trail home")
+	var other:=String(CivilizationSystem.civilizations[1].id)
+	assert_bool(WAR.home_known(other)).is_false()
+	Hall.state().ledger.append({"day":5,"audience_id":"test-envoy","speaker":"civ:"+other,"civ_id":other})
+	WAR._envoys_from_before(20)
+	assert_bool(WAR.home_known(other)).is_true()
+	assert_str(String(_civ(other).player_relation.get("home_location_source",""))).is_equal("their envoy's road home")

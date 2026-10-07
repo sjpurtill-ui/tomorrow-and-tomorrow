@@ -715,6 +715,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	if not ambush and _their_council_marches(civ_id,day,cause):
 		_log(civ_id,"raid_called","%s's war leader calls a raid on us, by the land road." % _name(civ_id),{"cause":cause})
 		_stat("raids_marched")
+		came_to_us(civ_id,day,"raiders")
 		return {}
 	var f:=front(civ_id)
 	var name:=_name(civ_id)
@@ -735,6 +736,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		_log(civ_id,"stood_down","No raiders came from %s: they have too few under arms to send." % name,{"cause":cause})
 		_stat("raids_unmanned")
 		return {}
+	came_to_us(civ_id,day,"raiders")
 	var general:=_general()
 	var mc:Variant=WorldSimulation.military
 	# Ours: the watch at the approaches (our real soldiers at home) while the
@@ -1459,16 +1461,49 @@ static func _find_home(civ_id:String,day:int,source:String,reference:String)->St
 
 ## A band of ours has been to their home already (a raid on their stores or a
 ## strike at their chief, from before the way had to be known): it knows the
-## way, so the map shows it. Once per people.
+## way, so the map shows it. Their raiders who came to us (THEIR_VISITS) and
+## their envoys who stood in our hall (audience_hall.gd ledger) showed the
+## way too (came_to_us). Once per people.
 static func _knows_the_way_from_before(civ_id:String,day:int)->void:
 	if home_known(civ_id): return
 	for entry in state().log:
 		if not entry is Dictionary or String((entry as Dictionary).get("civ",""))!=civ_id: continue
-		if not String((entry as Dictionary).get("kind","")) in ["op_burn","op_chief"]: continue
+		var kind:=String((entry as Dictionary).get("kind",""))
+		if kind in THEIR_VISITS:
+			came_to_us(civ_id,day,"raiders")
+			return
+		if not kind in ["op_burn","op_chief"]: continue
 		var name:=_name(civ_id)
 		var way:=_find_home(civ_id,day,"a band that went there","struck:"+civ_id)
 		_chronicle("way:%s" % civ_id,"The Way to %s" % name,"Our band that went to %s's home knows the way there%s. It is on our map now." % [name,(", "+way) if way!="" else ""],"notice",civ_id)
 		return
+
+## Every people whose envoy the hall's ledger remembers (audience_hall.gd),
+## whose home we still do not know: came_to_us, once each.
+static func _envoys_from_before(day:int)->void:
+	var hall:=load("res://scripts/audience_hall.gd") as GDScript
+	if hall==null: return
+	for entry in (hall.call("state") as Dictionary).get("ledger",[]):
+		if not entry is Dictionary: continue
+		var key:=String((entry as Dictionary).get("speaker",""))
+		if key.begins_with("civ:"): came_to_us(key.trim_prefix("civ:"),day,"envoy")
+
+## The war ledger's kinds for their raiders reaching us (_raid, by the land
+## road or at once).
+const THEIR_VISITS:=["raid","skirmish","ambush","raid_called","seen_coming"]
+
+## They came to us, so we know the way to them: whoever reaches our town
+## (their envoy, their raiders) comes from somewhere and goes home by a road
+## our people can follow. Every people learns the other's home by the same
+## rule; their councils already chart ours before they send anyone. `how`
+## is "envoy" or "raiders". Once per people; nothing when already known.
+static func came_to_us(civ_id:String,day:int,how:String)->void:
+	if civ_id=="" or home_known(civ_id) or _civ(civ_id).is_empty(): return
+	var name:=_name(civ_id)
+	var source:="their envoy's road home" if how=="envoy" else "their raiders' trail home"
+	var way:=_find_home(civ_id,day,source,"came:%s:%s" % [how,civ_id])
+	var who:="Their envoy came to us and went home by the road" if how=="envoy" else "Their raiders came to us and left a trail home"
+	_chronicle("way:%s" % civ_id,"The Way to %s" % name,"%s. Our people followed it: %s live%s. It is on our map now." % [who,name,(" "+way) if way!="" else ""],"notice",civ_id)
 
 static func _march_days(civ_id:String,rng:RandomNumberGenerator)->int:
 	var civ:=_civ(civ_id)
@@ -1784,6 +1819,8 @@ static func daily(day:int)->void:
 	# The authored General Campaign runs its own war; leave it alone.
 	if WorldSimulation.system("GeneralCampaign")!=null and bool(WorldSimulation.campaign.active): return
 	var s:=state()
+	# Envoys who stood in our hall before the rule showed us the way home too.
+	_envoys_from_before(day)
 	# The real fights since the last look (ours and, in a world of simulated
 	# peoples, theirs against us) go into the feud's and the war's ledger.
 	from_battles(day)
