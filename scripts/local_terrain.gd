@@ -3,6 +3,7 @@ extends Node3D
 const OrganicTownVisual := preload("res://scripts/organic_town_visual.gd")
 const EarlySettlementVisual := preload("res://scripts/early_settlement_visual.gd")
 const EarlySettlementGround = preload("res://scripts/early_settlement_ground.gd")
+const SettlementDefenseGeometry=preload("res://scripts/settlement_defense_geometry.gd")
 # Common surface assets load with the map, not when growth first exceeds the
 # detailed-kit budget. Strategic sheets are only bound by their own material.
 const SETTLEMENT_GROUND_ATLAS=preload("res://assets/textures/settlement_material_atlas_v2.png")
@@ -6204,29 +6205,33 @@ func _settlement_defense_visual_signature(snapshot:Dictionary)->String:
 	]
 
 
-func _append_settlement_defense_wall_segment(surface:SurfaceTool,center:Vector3,local_a:Vector2,local_b:Vector2,half_width:float,height:float,color:Color)->int:
+func _append_settlement_defense_wall_segment(surface:SurfaceTool,center:Vector3,local_a:Vector2,local_b:Vector2,half_width:float,height:float,color:Color,side_a:Vector2=Vector2.ZERO,side_b:Vector2=Vector2.ZERO)->int:
 	var direction:=local_b-local_a
-	if direction.length_squared()<0.0000001: return 0
+	if direction.length_squared()<0.0000000001:return 0
 	var side:=Vector2(-direction.y,direction.x).normalized()*half_width
-	var local_corners:=[local_a-side,local_b-side,local_b+side,local_a+side]
-	var base_points:Array[Vector3]=[]
-	var top_points:Array[Vector3]=[]
-	for local_point:Vector2 in local_corners:
-		var world_point:=Vector3(center.x+local_point.x,0.0,center.z+local_point.y)
-		world_point.y=_close_surface_height_at(world_point.x,world_point.z)+0.0028
-		base_points.append(world_point)
-		top_points.append(world_point+Vector3.UP*height)
-	var top_color:=color.lightened(0.055)
-	for index in [0,1,2,0,2,3]:
-		surface.set_color(top_color)
-		surface.add_vertex(top_points[index])
-	for side_pair in [[0,1],[2,3]]:
-		var a:int=side_pair[0]
-		var b:int=side_pair[1]
-		var wall_color:=color.darkened(0.08 if a==0 else 0.16)
-		for vertex:Vector3 in [base_points[a],base_points[b],top_points[b],base_points[a],top_points[b],top_points[a]]:
-			surface.set_color(wall_color)
-			surface.add_vertex(vertex)
+	if side_a==Vector2.ZERO:side_a=side
+	if side_b==Vector2.ZERO:side_b=side
+	# Short grounded bays, shared mitres, and closed gate/breach ends.
+	var bays:=clampi(ceili(direction.length()/0.004),1,32)
+	for bay in bays:
+		var a:=local_a.lerp(local_b,float(bay)/float(bays))
+		var b:=local_a.lerp(local_b,float(bay+1)/float(bays))
+		var a_side:=side_a if bay==0 else side
+		var b_side:=side_b if bay==bays-1 else side
+		var corners:=[a-a_side,b-b_side,b+b_side,a+a_side]
+		var base:Array[Vector3]=[];var top:Array[Vector3]=[]
+		for corner:Vector2 in corners:
+			var point:=Vector3(center.x+corner.x,0.0,center.z+corner.y)
+			point.y=_close_surface_height_at(point.x,point.z)+0.00008
+			base.append(point);top.append(point+Vector3.UP*height)
+		for index in [0,1,2,0,2,3]:
+			surface.set_color(color.lightened(0.08));surface.add_vertex(top[index])
+		for edge in 4:
+			if edge==1 and bay<bays-1:continue
+			if edge==3 and bay>0:continue
+			var next:=(edge+1)%4
+			for vertex:Vector3 in [base[edge],base[next],top[next],base[edge],top[next],top[edge]]:
+				surface.set_color(color.darkened(0.04 if edge%2==0 else 0.08));surface.add_vertex(vertex)
 	return 1
 
 
@@ -6299,59 +6304,66 @@ func _settlement_defense_segment_breached(index:int,segments:int,integrity:float
 
 
 func _append_settlement_defense_ring(flat_surface:SurfaceTool,mass_surface:SurfaceTool,center:Vector3,local_origin:Vector2,radius:float,axis:float,defense_stage:int,integrity:float,completion:float,constructing:bool,color:Color,layout_seed:int,segments:int,gate_angles:Array[float]=[],angular_form:=false,envelope:=PackedFloat32Array())->Dictionary:
-	var flat_count:=0
-	var mass_count:=0
+	var dimensions:=SettlementDefenseGeometry.dimensions(defense_stage,integrity)
+	var outline:=PackedVector2Array()
+	var active:=PackedByteArray();active.resize(segments)
 	var ellipse:=0.76+0.045*float((absi(layout_seed)+defense_stage*7)%4)
-	var build_front_span:=maxi(1,ceili(float(segments)/3.0))
-	var built_per_front:=clampi(ceili(float(build_front_span)*completion),0,build_front_span)
-	var gate_half_gap:=TAU/float(maxi(6,segments))*(0.48 if defense_stage==3 else 0.54)
+	var front_span:=maxi(1,ceili(float(segments)/3.0))
+	var built_per_front:=clampi(ceili(float(front_span)*completion),0,front_span)
+	var seed_phase:=float(layout_seed%91)*0.05
 	for index in segments:
-		# Three coherent work fronts lengthen from separate approaches. Construction no
-		# longer manifests as unrelated pieces appearing around the entire perimeter.
-		if constructing and index%build_front_span>=built_per_front: continue
-		if not constructing and _settlement_defense_segment_breached(index,segments,integrity,layout_seed): continue
-		var local_angle_a:=TAU*float(index)/float(segments)
-		var local_angle_b:=TAU*float(index+1)/float(segments)
-		var middle_world_angle:=axis+(local_angle_a+local_angle_b)*0.5
-		if _settlement_defense_angle_near_gate(middle_world_angle,gate_angles,gate_half_gap): continue
-		var seed_phase:=float(layout_seed%91)*0.05
-		var wobble_a:=1.0+0.092*sin(local_angle_a*3.0+seed_phase)+0.041*sin(local_angle_a*5.0-seed_phase*0.63)
-		var wobble_b:=1.0+0.092*sin(local_angle_b*3.0+seed_phase)+0.041*sin(local_angle_b*5.0-seed_phase*0.63)
-		if angular_form:
-			# Fewer sides and restrained alternating depth give masonry districts a built,
-			# surveyed perimeter rather than the smooth geometry of a map-range marker.
-			wobble_a*=1.0+(0.045 if index%2==0 else -0.025)
-			wobble_b*=1.0+(0.045 if (index+1)%2==0 else -0.025)
-		var point_a:=local_origin+Vector2(cos(local_angle_a)*radius*wobble_a,sin(local_angle_a)*radius*ellipse*wobble_a).rotated(axis)
-		var point_b:=local_origin+Vector2(cos(local_angle_b)*radius*wobble_b,sin(local_angle_b)*radius*ellipse*wobble_b).rotated(axis)
-		if envelope.size()==segments:
-			# The wall follows the real edge of the built town (codex/beauty-4),
-			# wandering a little as a line of stakes set by hand does.
-			var jitter_a:=1.0+0.018*sin(local_angle_a*7.0+seed_phase)
-			var jitter_b:=1.0+0.018*sin(local_angle_b*7.0+seed_phase)
-			point_a=local_origin+Vector2.from_angle(axis+local_angle_a)*envelope[index]*jitter_a
-			point_b=local_origin+Vector2.from_angle(axis+local_angle_b)*envelope[(index+1)%segments]*jitter_b
-		var world_middle:=Vector2(center.x,center.z)+(point_a+point_b)*0.5
-		if not _settlement_stage_land_at(world_middle): continue
+		var angle:=TAU*float(index)/float(segments)
+		var wobble:=1.0+0.092*sin(angle*3.0+seed_phase)+0.041*sin(angle*5.0-seed_phase*0.63)
+		if angular_form:wobble*=1.0+(0.045 if index%2==0 else -0.025)
+		var point:=local_origin+Vector2(cos(angle)*radius*wobble,sin(angle)*radius*ellipse*wobble).rotated(axis)
+		if envelope.size()==segments:point=local_origin+Vector2.from_angle(axis+angle)*envelope[index]
+		outline.append(point)
+		active[index]=1
+		if constructing and index%front_span>=built_per_front:active[index]=0
+		elif not constructing and _settlement_defense_segment_breached(index,segments,integrity,layout_seed):active[index]=0
+	var geometry:=SettlementDefenseGeometry.outline_layout(outline,gate_angles,float(dimensions.gate_clear_width),active,local_origin)
+	geometry["dimensions"]=dimensions
+	geometry["flat"]=0;geometry["mass"]=0;geometry["towers"]=[]
+	var drawn:Array=[]
+	for segment:Dictionary in geometry.segments:
+		var a:Vector2=segment.a;var b:Vector2=segment.b
+		if not _settlement_stage_land_at(Vector2(center.x,center.z)+(a+b)*0.5):continue
+		drawn.append(segment)
 		if defense_stage<=2:
-			# Early ditches and berms are visible landscape works, not a selection ring.
-			# Keep them subordinate to the inhabited footprint at Google-Earth scale.
-			var earthwork_width:=clampf(radius*0.010,0.0016,0.022)
-			# A dark cut and narrower sunlit berm read as moved earth. One bright line did
-			# not communicate the physical depth or direction of an earthwork.
-			var ditch_color:=color.darkened(0.38)
-			ditch_color.a=0.72
-			flat_count+=_append_settlement_system_ribbon(flat_surface,center,PackedVector2Array([point_a,point_b]),earthwork_width*1.25,ditch_color,0.00265,1)
-			var berm_color:=color
-			berm_color.a=0.82
-			flat_count+=_append_settlement_system_ribbon(flat_surface,center,PackedVector2Array([point_a,point_b]),earthwork_width*0.54,berm_color,0.00342,1)
+			var width:=clampf(radius*0.010,0.0016,0.022)
+			var ditch:=color.darkened(0.38);ditch.a=0.72
+			geometry.flat+=_append_settlement_system_ribbon(flat_surface,center,PackedVector2Array([a,b]),width*1.25,ditch,0.00008,1)
+			var berm:=color;berm.a=0.82
+			geometry.flat+=_append_settlement_system_ribbon(flat_surface,center,PackedVector2Array([a,b]),width*0.54,berm,0.00016,1)
+		elif defense_stage==3:
+			geometry.mass+=_append_settlement_palisade_segment(mass_surface,center,a,b,float(dimensions.height),color)
 		else:
-			# A palisade is a line of stakes a few metres high, not a rampart.
-			var wall_width:=clampf(radius*0.0082,0.0018,0.020) if defense_stage>3 else clampf(radius*0.0020,0.00045,0.0008)
-			var wall_height:=clampf((0.0032 if defense_stage==3 else (0.014 if defense_stage==4 else 0.020))*lerpf(0.78,1.0,integrity),0.003,0.028)
-			if defense_stage==3:mass_count+=_append_settlement_palisade_segment(mass_surface,center,point_a,point_b,wall_height,color)
-			else:mass_count+=_append_settlement_defense_wall_segment(mass_surface,center,point_a,point_b,wall_width,wall_height,color)
-	return {"flat":flat_count,"mass":mass_count}
+			var a_side:=SettlementDefenseGeometry.side_at(outline,float(segment.start),float(dimensions.half_width))
+			var b_side:=SettlementDefenseGeometry.side_at(outline,float(segment.end),float(dimensions.half_width))
+			geometry.mass+=_append_settlement_defense_wall_segment(mass_surface,center,a,b,float(dimensions.half_width),float(dimensions.height),color,a_side,b_side)
+	geometry.segments=drawn
+	# Gate towers stand on solid wall, set back by their own half-width so
+	# their inner faces leave the physical passage fully clear.
+	var candidates:Array[float]=[]
+	var half_width:=float(dimensions.tower_half_width)
+	for gate:Dictionary in geometry.gates:
+		candidates.append(float(gate.start)-half_width)
+		candidates.append(float(gate.end)+half_width)
+	var length:=float(geometry.length)
+	for index in 6:candidates.append(length*(float(index)+0.16)/6.0)
+	var budget:int=[0,5,6,6,7,7][clampi(defense_stage,0,5)]
+	for distance:float in candidates:
+		if geometry.towers.size()>=budget:break
+		if not SettlementDefenseGeometry.solid_at(geometry,distance-half_width) or not SettlementDefenseGeometry.solid_at(geometry,distance+half_width):continue
+		var point:=SettlementDefenseGeometry.point_at(outline,distance)
+		var near:=false
+		for prior:Dictionary in geometry.towers:
+			if point.distance_to(prior.position)<half_width*4.0:near=true;break
+		if near or not _settlement_stage_land_at(Vector2(center.x,center.z)+point):continue
+		var tangent:=SettlementDefenseGeometry.tangent_at(outline,distance)
+		geometry.mass+=_append_settlement_defense_wall_segment(mass_surface,center,point-tangent*half_width,point+tangent*half_width,half_width,float(dimensions.tower_height),color.lightened(0.035))
+		geometry.towers.append({"position":point,"angle":tangent.angle(),"distance":fposmod(distance,maxf(0.00001,length)),"half_width":half_width,"height":float(dimensions.tower_height)})
+	return geometry
 
 
 ## The built town's edge, as a radius (settlement km) at each of `segments`
@@ -6425,6 +6437,16 @@ func _settlement_wall_envelope(plots:Array[Dictionary],segments:int,axis:float,f
 		if at.length()-reach<line+0.004 and at.length()+reach>line-0.004:
 			var clear:=minf(at.length()+reach+0.007,maxf(fallback*1.8,0.05))
 			out[k0]=maxf(out[k0],clear);out[k1]=maxf(out[k1],clear)
+	var half_step:=PI/float(segments)
+	for plot:Dictionary in plots:
+		if String(plot.get("land_use","")) in ["","field","pasture","water","waste","vacant","temporary_encampment","woodland"]:continue
+		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
+		for point:Vector2 in plot.get("polygon",PackedVector2Array()):
+			var bearing:=fposmod(point.angle()-axis,TAU)/TAU*float(segments)
+			var k0:=int(bearing)%segments;var k1:=(k0+1)%segments
+			# The chord clears real polygon corners, not just a proxy radius.
+			var required:=(point.length()+0.007)/cos(half_step)
+			out[k0]=maxf(out[k0],required);out[k1]=maxf(out[k1],required)
 	return _settlement_wall_hull(out,axis)
 
 ## A defensive line is laid out to be held (codex/beauty-5): it runs straight
@@ -6518,90 +6540,44 @@ func _append_settlement_modern_defense_network(flat_surface:SurfaceTool,mass_sur
 
 
 func _append_settlement_defense_visuals(flat_surface:SurfaceTool,mass_surface:SurfaceTool,center:Vector3,layout:Dictionary,population:int,defense_stage:int,integrity:float,completion:float,constructing:bool,plots:Array[Dictionary]=[])->Dictionary:
-	if defense_stage<=0 or completion<=0.0: return {"flat":0,"mass":0}
-	var radius:=float(layout.radius)
-	var axis:=float(layout.axis)
+	var out:={"flat":0,"mass":0,"enclosures":[]}
+	if defense_stage<=0 or completion<=0.0:return out
+	var radius:=float(layout.radius);var axis:=float(layout.axis)
 	var layout_seed:=int(layout.seed)^0x5de71
-	var cores:Array=layout.cores
-	var flat_count:=0
-	var mass_count:=0
-	# Weathered timber for a palisade and pale dressed stone for walls, in the
-	# settlement's painted palette rather than near-black slabs (codex/beauty-3).
-	var colors:=[Color("#000000"),Color("#55472f"),Color("#675138"),Color("#806a4c"),Color("#8e897d"),Color("#85857d")]
-	var color:Color=colors[defense_stage]
-	if constructing: color=color.lightened(0.12)
-	else: color=color.lerp(Color("#363331"),1.0-integrity)
-	# Early perimeter technologies defend the historical inhabited core, not every
-	# suburb represented by the population-derived strategic footprint.
+	var color:Color=[Color("#000000"),Color("#55472f"),Color("#675138"),Color("#806a4c"),Color("#a29887"),Color("#97958b")][clampi(defense_stage,0,5)]
+	if constructing:color=color.lightened(0.12)
+	else:color=color.lerp(Color("#363331"),1.0-integrity)
 	var population_order:=log(maxf(10.0,float(population)))/log(10.0)
-	var primary_radius:=minf(radius*0.22,0.10+population_order*0.14)
-	primary_radius=maxf(0.09,primary_radius)
-	var gate_angles:=_settlement_defense_gate_angles(layout,3)
-	var ring_specs:Array[Dictionary]=[]
-	# Ditches and palisades enclose the built town as it really lies: the
-	# wall runs just outside its houses, yards and stores, and its gates open
-	# where the main streets leave (codex/beauty-4). The legacy circle stays
-	# for fabric too thin to trace.
-	var traced:=PackedFloat32Array()
-	if defense_stage in [2,3]:
-		traced=_settlement_wall_envelope(plots,30 if defense_stage==2 else 36,float(layout.axis),primary_radius)
-		if not traced.is_empty():
-			var street_gates:=_settlement_wall_gates(traced,float(layout.axis))
-			if not street_gates.is_empty():gate_angles=street_gates
-			primary_radius=0.0
-			for r in traced:primary_radius=maxf(primary_radius,r)
-	match defense_stage:
-		2: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius*0.90,"segments":30,"gates":gate_angles,"angular":false,"envelope":traced})
-		3: ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius,"segments":36 if not traced.is_empty() else 24,"gates":gate_angles,"angular":false,"envelope":traced})
-		4:
-			var district_anchors:=_settlement_stage_function_anchors(plots,["communal","civic","sacred","market","storage"],3)
-			if district_anchors.is_empty():
-				for core in cores: district_anchors.append(Vector2(core))
-			var district_count:=mini(3,district_anchors.size())
-			for core_index in district_count:
-				ring_specs.append({"origin":Vector2(district_anchors[core_index]),"radius":maxf(0.065,minf(primary_radius*0.32,radius*0.075)),"segments":10,"gates":gate_angles,"angular":true})
-		5:
-			var infrastructure_tier:=clampi(int(ProgressionSystem.domain_tier("infrastructure")),0,8)
-			var security_tier:=clampi(int(ProgressionSystem.domain_tier("security")),0,8)
-			if maxi(infrastructure_tier,security_tier)>=5:
-				var network_counts:=_append_settlement_modern_defense_network(flat_surface,mass_surface,center,layout,minf(radius*0.52,maxf(primary_radius*1.7,0.38)),integrity,completion,constructing,color,layout_seed)
-				flat_count+=int(network_counts.flat)
-				mass_count+=int(network_counts.mass)
-			else:
-				# Premodern bastions form one compact angular stronghold with detached
-				# district redoubts. The metropolitan footprint remains visibly outside it.
-				ring_specs.append({"origin":Vector2.ZERO,"radius":primary_radius,"segments":12,"gates":gate_angles,"angular":true})
-				var district_count:=mini(2,cores.size())
-				for core_index in district_count:
-					ring_specs.append({"origin":Vector2(cores[core_index]),"radius":maxf(0.075,minf(primary_radius*0.27,radius*0.065)),"segments":8,"gates":gate_angles,"angular":true})
-	for ring_index in ring_specs.size():
-		var spec:Dictionary=ring_specs[ring_index]
-		var ring_envelope:PackedFloat32Array=spec.get("envelope",PackedFloat32Array())
-		var counts:=_append_settlement_defense_ring(flat_surface,mass_surface,center,Vector2(spec.origin),float(spec.radius),axis+(float(ring_index)*0.07 if ring_envelope.is_empty() else 0.0),defense_stage,integrity,completion,constructing,color,layout_seed+ring_index*131,int(spec.segments),spec.get("gates",[]),bool(spec.get("angular",false)),ring_envelope)
-		flat_count+=int(counts.flat)
-		mass_count+=int(counts.mass)
-	# Watch posts, gate towers and bastions are strategic proxies, never one object
-	# per soldier. Their fixed cap makes the strongest world-city defense inexpensive.
-	var post_budget:int=[0,5,6,6,7,0][defense_stage]
-	var visible_posts:=clampi(roundi(float(post_budget)*completion),0,post_budget)
-	for post_index in visible_posts:
-		# Start with road-facing entries, then fill remaining lookout sectors using the
-		# golden angle. Uniform compass dots were indistinguishable from UI handles.
-		var angle:float
-		if post_index<gate_angles.size(): angle=float(gate_angles[post_index])
-		else: angle=axis+2.39996323*float(post_index)+0.17*sin(float(layout_seed%41)+float(post_index))
-		var post_radius:=primary_radius*(0.78 if defense_stage<=2 else 1.01)
-		if not traced.is_empty():
-			var local_angle:=fposmod(angle-float(layout.axis),TAU)
-			post_radius=traced[int(local_angle/TAU*float(traced.size()))%traced.size()]*(0.97 if defense_stage<=2 else 1.0)
-		var post_offset:=_settlement_stage_resolve_land_offset(center,Vector2.from_angle(angle)*post_radius)
-		if post_offset==Vector2.ZERO and not _settlement_stage_land_at(Vector2(center.x,center.z)): continue
-		var post_width:=clampf(primary_radius*0.014,0.0022,0.014)
-		# A palisade's gate towers are timber platforms, not keeps.
-		var post_height:float=[0.0,0.010,0.011,0.0065,0.022,0.031][defense_stage]*lerpf(0.76,1.0,integrity)
-		_append_settlement_urban_mass(mass_surface,center,post_offset,post_width,post_width*(1.0 if defense_stage<5 else 1.35),post_height,angle,color)
-		mass_count+=1
-	return {"flat":flat_count,"mass":mass_count}
+	var primary_radius:=maxf(0.09,minf(radius*0.22,0.10+population_order*0.14))
+	if defense_stage==5:
+		var infrastructure:=clampi(int(ProgressionSystem.domain_tier("infrastructure")),0,8)
+		var security:=clampi(int(ProgressionSystem.domain_tier("security")),0,8)
+		if maxi(infrastructure,security)>=5:
+			var network:=_append_settlement_modern_defense_network(flat_surface,mass_surface,center,layout,minf(radius*0.52,maxf(primary_radius*1.7,0.38)),integrity,completion,constructing,color,layout_seed)
+			out.flat=network.flat;out.mass=network.mass
+			return out
+	var dimensions:=SettlementDefenseGeometry.dimensions(defense_stage,integrity)
+	if defense_stage==1:
+		# Standalone lookouts precede a wall. Later posts use wall anchors below.
+		for index in clampi(roundi(5.0*completion),0,5):
+			var angle:=axis+2.39996323*float(index)
+			var point:=_settlement_stage_resolve_land_offset(center,Vector2.from_angle(angle)*primary_radius*0.78)
+			if point==Vector2.ZERO and not _settlement_stage_land_at(Vector2(center.x,center.z)):continue
+			var along:=Vector2.from_angle(angle)*float(dimensions.tower_half_width)
+			out.mass+=_append_settlement_defense_wall_segment(mass_surface,center,point-along,point+along,float(dimensions.tower_half_width),float(dimensions.tower_height),color)
+		return out
+	var segment_count:=30 if defense_stage==2 else (36 if defense_stage==3 else 48)
+	var traced:=_settlement_wall_envelope(plots,segment_count,axis,primary_radius)
+	var gates:=_settlement_defense_gate_angles(layout,3)
+	if not traced.is_empty():
+		var streets:=_settlement_wall_gates(traced,axis)
+		if not streets.is_empty():gates=streets
+		primary_radius=0.0
+		for reach in traced:primary_radius=maxf(primary_radius,reach)
+	var enclosure:=_append_settlement_defense_ring(flat_surface,mass_surface,center,Vector2.ZERO,primary_radius,axis,defense_stage,integrity,completion,constructing,color,layout_seed,segment_count,gates,false,traced)
+	out.flat=enclosure.flat;out.mass=enclosure.mass
+	out.enclosures.append(enclosure)
+	return out
 
 
 func _settlement_district_clipmap_candidates(center:Vector3,layout:Dictionary,stage:int,architecture:Dictionary)->Array[Dictionary]:
@@ -9178,7 +9154,7 @@ func _commit_settlement_surface(surface: SurfaceTool, node_name: String, parent:
 		standard.cull_mode = BaseMaterial3D.CULL_DISABLED
 		# Wall skirts are real oblique geometry and should be occluded normally.
 		# Terrain drapes retain depth bypass to avoid LOD interpolation burying them.
-		standard.no_depth_test = node_name not in ["PersistentWallFabric","PersistentUrbanMassing"]
+		standard.no_depth_test = node_name not in ["PersistentWallFabric","PersistentUrbanMassing","PersistentSettlementDefenseMassing"]
 		if transparent:
 			standard.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 			if node_name in ["PersistentDesirePaths","PersistentPlotBoundaries"]:
