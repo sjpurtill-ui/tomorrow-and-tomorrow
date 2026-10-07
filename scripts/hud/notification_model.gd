@@ -80,6 +80,14 @@ const WORD_CATEGORY:=[
 	["order","court"],["council","court"],["official","court"],["heir","court"],
 	["born","people"],["died","people"],["buried","people"],["people","people"],
 ]
+## The primary notices: the only routine lines that pop up. War, strangers
+## and envoys, hunger and thirst, weather and sickness, spies, what came of the
+## god's orders, a great work, a death in the court, a first in learning. Every
+## other told line (a town built, a birth, a scout's sighting, a road report)
+## goes to the log.
+const PRIMARY_CATEGORIES:=["war","neighbours","food","health","weather","spies","court"]
+const PRIMARY_KINDS:=["fire","ceremony","death","founding"]
+const PRIMARY_KEYS:=["great_work","court:","crisis:","town_fate:"]
 ## Told lines that ask the god to act: urgent.
 const URGENT_KEYS:=["crisis:","war:declared:","war:raid:","war:battle:","town_fate:","court_war:","split_food:"]
 
@@ -239,9 +247,18 @@ static func tier_of(entry:Dictionary,category:String,mode:String="milestones")->
 	# "milestones" pops up only the firsts and turnings (the Chronicle's card
 	# tells those), so a season's tally of what was learned stays in the log.
 	if category=="learning" and (mode=="quiet" or (mode=="milestones" and not bool(entry.get("first",false)))):return "minor"
-	# A line folded from routine news that the Chronicle crowded out of the
-	# moment cards is still worth a look.
-	return "notable"
+	return "notable" if is_primary(entry,category) else "minor"
+
+
+## True for the few told lines that pop up (see PRIMARY_CATEGORIES). A first in
+## learning is primary: tier_of has already put the season's tally in the log.
+static func is_primary(entry:Dictionary,category:String)->bool:
+	if category=="learning":return true
+	if category in PRIMARY_CATEGORIES or String(entry.get("kind","")) in PRIMARY_KINDS:return true
+	var key:=String(entry.get("key",""))
+	for prefix in PRIMARY_KEYS:
+		if key.begins_with(prefix):return true
+	return false
 
 
 ## The one sentence a notice shows: the first sentence of `text`, cut at a

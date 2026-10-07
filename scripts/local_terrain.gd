@@ -11861,7 +11861,7 @@ func _show_caravan_notice(entry:Dictionary)->void:
 	var danger:=String(entry.get("severity",""))=="danger" or String(entry.get("severity",""))=="warning"
 	var leader:=String(entry.get("leader","The caravan leader"))
 	var title:=PaperKit.sentence(String(entry.get("title",""))).trim_suffix(".")
-	Notices.push({"category":"travel","tier":"urgent" if danger else "notable","title":"%s: %s" % [leader,title] if title!="" else "Word from the road, from %s" % leader,
+	Notices.push({"category":"travel","tier":"urgent" if danger else "minor","title":"%s: %s" % [leader,title] if title!="" else "Word from the road, from %s" % leader,
 		"text":String(entry.get("text","")),"group":"travel|caravan|%s|%s" % [leader,title],"action":{"kind":"court","focus":{}}})
 
 ## One plain line in answer to something the player just did, told in the
@@ -12405,7 +12405,7 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 	# Notifications (codex/notifications): the road report is a Travel notice in the stack.
 	var who:=String(item.get("advisor","")).strip_edges()
 	var stage_words:={"quarter":"A quarter of the way","half":"Halfway there","three_quarters":"Three quarters of the way","halt":"The travellers have stopped"}
-	Notices.push({"category":"travel","tier":"urgent" if urgency>0.7 else "notable","title":"%s: word from %s" % [String(stage_words.get(stage,"On the road")),who if who!="" else "the road"],
+	Notices.push({"category":"travel","tier":"urgent" if urgency>0.7 else "minor","title":"%s: word from %s" % [String(stage_words.get(stage,"On the road")),who if who!="" else "the road"],
 		"text":String(item.get("text","")),"action":{"kind":"court","focus":{}}})
 
 ## Sizes the road notice to its words and keeps it clear of the Chronicle's

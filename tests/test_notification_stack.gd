@@ -75,10 +75,10 @@ func test_a_notice_is_one_plain_sentence()->void:
 # --- The Chronicle feeds the stack ------------------------------------------------
 
 func test_the_chronicle_queues_what_it_tells_and_a_folded_repeat_counts_on_it()->void:
-	var first:=Chronicle.record({"key":"t:1","title":"A cairn of stones","text":"For the dead of the dry year.","tier":"notice","kind":"work","day":10,"fold_as":"cairn"})
+	var first:=Chronicle.record({"key":"t:1","title":"The wells run low","text":"For the dead of the dry year.","tier":"notice","kind":"drought","day":10,"fold_as":"wells"})
 	assert_str(String(first.tier)).is_equal("notice")
 	assert_int(Chronicle.pending_notes.size()).is_equal(1)
-	var again:=Chronicle.record({"key":"t:2","title":"A cairn of stones","text":"Another for the dead.","tier":"notice","kind":"work","day":40,"fold_as":"cairn"})
+	var again:=Chronicle.record({"key":"t:2","title":"The wells run low","text":"Another for the dead.","tier":"notice","kind":"drought","day":40,"fold_as":"wells"})
 	assert_str(String(again.get("same_as",""))).is_equal("t:1")
 	assert_int(Chronicle.pending_notes.size()).is_equal(2)
 	var parts:Array=await _stack()
@@ -91,6 +91,17 @@ func test_the_chronicle_queues_what_it_tells_and_a_folded_repeat_counts_on_it()-
 	Chronicle.record({"key":"t:3","title":"The season's tally","tier":"whisper","kind":"hearth_count","day":41})
 	await get_tree().process_frame
 	assert_int(stack.rows.size()).is_equal(1)
+
+
+func test_only_the_primary_lines_pop_up()->void:
+	# Routine news goes to the log; war, strangers, thirst, the court's answers,
+	# a great work and a first in learning are the primary notices.
+	for routine:Dictionary in [{"key":"work_done:3","title":"A hall is raised","kind":"settlement"},{"key":"demo|1","title":"Three were born","kind":"birth"},{"key":"scout:4","title":"Scouts came home","kind":"scout"},{"key":"land_find:2","title":"Ochre found","kind":"work"},{"key":"annal:9","title":"The year's tale","kind":"annal"}]:
+		var routine_entry:=routine.duplicate();routine_entry["tier"]="notice"
+		assert_str(Model.from_chronicle(routine_entry).tier).is_equal("minor")
+	for primary:Dictionary in [{"key":"contact:2","title":"Strangers come","kind":"contact"},{"key":"great_work:1","title":"The stone ring is raised","kind":"ceremony"},{"key":"court:callback:o1","title":"What came of your order","kind":"court"},{"key":"d:1","title":"A dry year","kind":"drought"},{"key":"discovery:5","title":"Fire is tamed","kind":"discovery","first":true}]:
+		var primary_entry:=primary.duplicate();primary_entry["tier"]="notice"
+		assert_str(Model.from_chronicle(primary_entry).tier).is_equal("notable")
 
 
 # --- The stack -------------------------------------------------------------------
