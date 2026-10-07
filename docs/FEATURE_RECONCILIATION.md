@@ -16,6 +16,11 @@ Ashfire save (2,485 people, day 77,329) supplies graphical review. Base `adea08b
 branch `codex/organic-settlement-seeds`; delivery is remote-first then canonical
 fast-forward. See `docs/design/ORGANIC_SETTLEMENT_SEEDS.md` for scope/evidence.
 
+Final GPU review passed: all five active seeds installed, the ring is gone,
+root/expansion architecture matches, and no human map figures are present.
+The probe exited 0; maximum preparation slice was 29.691 ms. Three final views
+and readiness evidence are in `artifacts/organic-settlement-seeds/after*`.
+
 ## October 6 — Ruler portrait resolution and framing: authorized integration
 
 The reported foreign ruler card was enlarging a 112 x 128 roster still and

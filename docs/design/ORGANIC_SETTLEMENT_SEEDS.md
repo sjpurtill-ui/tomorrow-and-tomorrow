@@ -61,3 +61,17 @@ Baseline evidence is under `artifacts/organic-settlement-seeds/before*` and the
 capture source is `tests/organic_settlement_capture.tscn`. Generated evidence,
 save copies and import caches remain outside source delivery. The canonical
 player is preserved; its normal relaunch loads the integrated scripts.
+
+Final GPU capture succeeded on the copied Ashfire save. All five active seeds
+were installed with current geometry signatures before each of the three views.
+They contain 24/20/17/15/13 parcels and 34/32/29/23/20 homes. Visual inspection
+confirms the old ring is gone: branching lanes and irregular roof groups now
+sit against the root's fringe, with one smaller separate growth focus. The
+equal-scale root and expansion views use the same architecture. Human batches
+remain zero, drape skips are zero, and the probe exited 0 without engine errors.
+Evidence: `after_overview.png`, `after_root.png`, `after_expansion.png` and
+`after.json` under the same artifact directory. Maximum measured preparation
+slice was 29.691 ms; individual parcel solves are not a hard 2 ms bound. The
+unrelated far-worksite queue (100-102 entries) was not awaited for these local
+seed views. The first attempt was stopped by Windows input-desktop verification;
+the same approved runner succeeded on one retry without a bypass.

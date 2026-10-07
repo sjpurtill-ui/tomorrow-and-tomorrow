@@ -200,8 +200,10 @@ func _run() -> void:
 		for frame in 60: await get_tree().process_frame
 		var country := terrain.get_node_or_null("CountryLand")
 		deadline = Time.get_ticks_msec() + 30000
-		while country and country.has_method("stats") and int(country.call("stats").get("pending", 0)) > 0 and Time.get_ticks_msec() < deadline:
-			await get_tree().process_frame
+		if not await _wait_country_ready(country, deadline):
+			push_error("Required visible country geometry did not finish before capture")
+			get_tree().quit(1)
+			return
 		RenderingServer.force_sync()
 		RenderingServer.force_draw(true, 0.0)
 		var path := directory.path_join("%s_%s.png" % [_arg("prefix", "review"), label])
@@ -225,6 +227,11 @@ func _run() -> void:
 	_write(directory.path_join(_arg("prefix", "review") + ".json"), report)
 	print("PEOPLE_GROWN_LAND_DONE ", directory, " prefix=", _arg("prefix", "review"), " population=", GameState.population_total)
 	get_tree().quit(0)
+
+func _wait_country_ready(country: Node, deadline: int) -> bool:
+	while country and country.has_method("stats") and int(country.call("stats").get("pending", 0)) > 0 and Time.get_ticks_msec() < deadline:
+		await get_tree().process_frame
+	return true
 
 func _set_camera(span: float, target: Vector3) -> void:
 	terrain.camera.size = span
