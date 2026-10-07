@@ -274,6 +274,77 @@ static func temperament(situation_type:String,civ_id:String)->float:
 static func _civ_ok(civ:Dictionary)->bool:
 	return not civ.is_empty() and bool(civ.get("alive",true))
 
+# --------------------------------------------------------------------------
+# Distance: what a people can ask from where it lives
+# --------------------------------------------------------------------------
+
+## Requests about shared ground (hunting in our country, the border, a
+## cairn on it, a great drive, a holy place in our land, a fugitive who fled
+## across it): only from a people whose country touches ours.
+const NEIGHBOUR_ONLY:=["forage_leave","border_line","boundary_cairn","joint_hunt","sacred_site","fugitive_return"]
+## Help that has to be carried or walked over (food, workers, families,
+## healers, war stores): only from a people within BULK_KM.
+const NEAR_ONLY:=["food_loan","work_for_food","refuge","healer_plea","war_supplies"]
+## About 25 days' walk at 18 km a day (war_loop.gd _way_words).
+const BULK_KM:=450.0
+## Goods too heavy for their worth to carry farther than BULK_KM in barter.
+const BULK_GOODS:=["Food","Timber","Stone","Clay","Fiber Plants","Fertile Soil"]
+## A holy place in our land is theirs to visit only after this many years of
+## knowing our country.
+const SACRED_YEARS:=10
+
+## How far they live from us (km) and whether our countries touch (their
+## reach and ours, realm_reach.gd, meet across the ground between).
+static func _apart(civ:Dictionary)->Dictionary:
+	var world=WorldSimulation.world
+	if world==null or not world.has_method("_civilization_world_position"): return {"km":0.0,"touch":true,"there":Vector2.ZERO,"here":Vector2.ZERO}
+	# Where they live as the trade ledger reads it (trade_ledger.gd position).
+	var at:Variant=civ.get("world_position")
+	var there:Vector2=at if at is Vector2 else world._civilization_world_position(civ)
+	var here:Vector2=world.player_world_origin
+	var Realm:=preload("res://scripts/realm_reach.gd")
+	var ours:=Realm.ours()
+	var theirs:=Realm.of(civ)
+	var our_reach:=float(ours.get("reach",Realm.reach_km(float(GameState.population_total),0.0)))
+	var their_reach:=float(theirs.get("reach",Realm.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
+	var km:=here.distance_to(there)
+	return {"km":km,"touch":km<=our_reach+their_reach,"there":there,"here":here}
+
+## Whether a people living where it does could truly ask this (NEIGHBOUR_ONLY,
+## NEAR_ONLY, SACRED_YEARS).
+static func plausible(situation_type:String,civ:Dictionary,day:int)->bool:
+	if not (situation_type in NEIGHBOUR_ONLY or situation_type in NEAR_ONLY): return true
+	var apart:=_apart(civ)
+	if situation_type in NEIGHBOUR_ONLY and not bool(apart.touch): return false
+	if situation_type in NEAR_ONLY and float(apart.km)>BULK_KM: return false
+	if situation_type=="sacred_site":
+		var met:=int((civ.get("player_relation",{}) as Dictionary).get("met_day",-1))
+		if met<0 or day-met<SACRED_YEARS*365: return false
+	return true
+
+## Whether our country lies across their road to `dest_id`: the straight
+## way from their home to that people's passes within our reach of our home.
+static func _on_their_road(civ:Dictionary,dest_id:String)->bool:
+	var world=WorldSimulation.world
+	var index:=Hall._civ_index(dest_id)
+	if world==null or index<0 or not world.has_method("_civilization_world_position"): return false
+	var apart:=_apart(civ)
+	var dest:Dictionary=world.civilizations[index]
+	var to:Vector2=dest.world_position if dest.get("world_position") is Vector2 else world._civilization_world_position(dest)
+	var on_road:=Geometry2D.get_closest_point_to_segment(apart.here as Vector2,apart.there as Vector2,to)
+	var Realm:=preload("res://scripts/realm_reach.gd")
+	return (apart.here as Vector2).distance_to(on_road)<=float(Realm.ours().get("reach",Realm.MIN_KM))
+
+## The named stretch of our country that faces them ("west hills" for a
+## people to our west), for requests about shared ground.
+static func _facing_place(civ:Dictionary,rng:RandomNumberGenerator)->String:
+	var apart:=_apart(civ)
+	var d:Vector2=(apart.there as Vector2)-(apart.here as Vector2)
+	if d.length()<0.5: return _pick(PLACES,rng)
+	# Map east is +x, south is +z (war_loop.gd _way_words).
+	var facing:Array=[["east ridge","river bend"],["south marsh","old ford"],["west hills","far meadows"],["north woods","upper valley"]][posmod(roundi(rad_to_deg(d.angle())/90.0),4)]
+	return _pick(facing,rng)
+
 static func _at_war(civ:Dictionary)->bool:
 	## At war with us, or in a hot feud (war_loop.gd): no loans repaid, no
 	## carriers crossing, no business while their raiders are out.
@@ -381,6 +452,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 	if not enabled or not TYPES.has(situation_type): return {}
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	if not _civ_ok(civ) or _at_war(civ): return {}
+	if not plausible(situation_type,civ,day): return {}
 	var relation:Dictionary=civ.get("player_relation",{})
 	var name:=String(civ.get("name",civ_id))
 	var who:=_given(civ_id)
@@ -429,14 +501,18 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			terms={"resource":"Food","amount":food}
 			s.summary="%s offers %d of its young people to work your %s for two months, bringing in about %d %s, for %d Food now to feed their families." % [name,workers,String(req.where),roundi(amount0),goods,roundi(food)]
 		"barter":
+			# A far people carries home only what is worth its weight (BULK_GOODS stay near).
+			var far:=float(_apart(civ).km)>BULK_KM
 			var want:=""
-			if Hall._hungry(civ): want="Food"
+			if Hall._hungry(civ) and not far: want="Food"
 			else:
 				for res in Hall.STRATEGY_WANTS.get(String(civ.get("strategy","")),[]):
+					if far and String(res) in BULK_GOODS: continue
 					if Hall.player_stock(String(res))>=30.0: want=String(res); break
 			if want=="":
 				var best:=0.0
 				for res in Hall.RESOURCES:
+					if far and String(res) in BULK_GOODS: continue
 					var mine:=Hall.player_stock(String(res))
 					var theirs:=maxf(1.0,Hall.foreign_stock(civ_id,String(res)))
 					if mine>=30.0 and mine/theirs>best: best=mine/theirs; want=String(res)
@@ -445,7 +521,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if give<8.0: return {}
 			# They pay in what we lack most against what it costs them, about
 			# even for both sides (Deals.offer), from no more than a third of a stock.
-			var offer:=Deals.offer(civ_id,"player",DV.worth_out("player",want,give),DV.worth_in(civ_id,want,give),Deals.temper(civ_id,Deals.need("barter",civ_id)),[want],[],0.35,40.0)
+			var offer:=Deals.offer(civ_id,"player",DV.worth_out("player",want,give),DV.worth_in(civ_id,want,give),Deals.temper(civ_id,Deals.need("barter",civ_id)),[want]+(BULK_GOODS if far else []),[],0.35,40.0)
 			if offer.is_empty(): return {}
 			var receive:=float(offer.amt)
 			if receive<5.0: return {}
@@ -467,7 +543,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 		"forage_leave":
 			if not (Hall._hungry(civ) or String(civ.get("strategy","")) in ["expansion","growth","sustenance"]): return {}
 			if r!=null and not (r.call("has_bond",civ_id,["hunting"]) as Dictionary).is_empty(): return {}
-			var place:=_pick(PLACES,rng)
+			var place:=_facing_place(civ,rng)
 			var monthly:=Hall._nice(clampf(pop*0.02,2.0,maxf(2.0,player_pop*0.03)))
 			var taken:=monthly*6.0
 			var pay:=Deals.offer(civ_id,"player",DV.worth_out("player","Food",taken),DV.worth_in(civ_id,"Food",taken),Deals.temper(civ_id,Deals.need("forage_leave",civ_id)),["Food"],[],0.2,20.0)
@@ -520,7 +596,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			s.summary="%s's %s %s is of age. %s asks for a young %s of your people to marry into its ruling house." % [who,"daughter" if woman else "son",heir,who,"man" if woman else "woman"]
 		"border_line":
 			if float(relation.get("border_tension",0.0))<0.35: return {}
-			var place3:=_pick(PLACES,rng)
+			var place3:=_facing_place(civ,rng)
 			var timber:=Hall._nice(clampf(player_pop*0.1,5.0,40.0))
 			s.ask="er:border:"+place3
 			req={"place":place3,"timber":timber,"monthly":Hall._nice(clampf(pop*0.01,1.0,6.0))}
@@ -584,7 +660,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 		"sacred_site":
 			if r!=null and not (r.call("has_bond",civ_id,["pilgrimage"]) as Dictionary).is_empty(): return {}
 			var what2:=_pick(["the graves of its ancestors","a spring its healers hold sacred","a standing stone where its elders are named"],rng)
-			var place4:=_pick(PLACES,rng)
+			var place4:=_facing_place(civ,rng)
 			var toll:=_lacked(civ_id,clampf(pop*0.08,5.0,30.0)*_value("Food"),0.15)
 			s.ask="er:sacred:"+place4
 			req={"what":what2,"place":place4}
@@ -629,7 +705,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var place5:=""
 			for place_name in PLACES:
 				if String(earlier.get("text","")).contains(String(place_name)): place5=String(place_name)
-			if place5=="": place5=_pick(PLACES,rng)
+			if place5=="": place5=_facing_place(civ,rng)
 			var stone:=Hall._nice(clampf(player_pop*0.06,5.0,30.0))
 			s.ask="er:cairn:"+place5
 			req={"place":place5,"stone":stone}
@@ -638,7 +714,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if opinion<-0.05 or pop<40.0 or player_pop<30.0: return {}
 			if r!=null and not (r.call("has_bond",civ_id,["hunt_partner"]) as Dictionary).is_empty(): return {}
 			var hunters:=clampi(roundi(player_pop*0.04),3,15)
-			var place6:=_pick(PLACES,rng)
+			var place6:=_facing_place(civ,rng)
 			s.ask="er:hunt:%d" % floori(day/365.0)
 			req={"hunters":hunters,"meat":Hall._nice(float(hunters)*rng.randf_range(6.0,10.0)),"place":place6,"days":20,"risk":rng.randf()<Deals.HUNT_RISK}
 			# A people with meat to spare is offered our share's worth in what it
@@ -656,7 +732,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if r!=null and not (r.call("has_bond",civ_id,["passage"]) as Dictionary).is_empty(): return {}
 			if not (float(relation.get("trade",0.0))>0.03 or String(civ.get("strategy",""))=="commerce" or opinion>=0.15): return {}
 			var dest:=_destination(civ)
-			if dest.is_empty(): return {}
+			if dest.is_empty() or not _on_their_road(civ,String(dest.id)): return {}
 			# The shortcut is worth its saved days to them; the crossing gifts, in
 			# what we lack, share that about evenly (nothing leaves our stores).
 			var seasons:=8
