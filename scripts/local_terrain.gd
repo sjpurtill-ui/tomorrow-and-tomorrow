@@ -317,6 +317,7 @@ var rendered_morphology_visual_signature := ""
 ## several towns in one pass does not recompute each town's plot hash.
 var cached_morphology_visual_signatures:Dictionary={}
 var cached_construction_visual_signatures:Dictionary={}
+var cached_cultural_visual_signatures:Dictionary={}
 var active_architecture_profile:Dictionary={}
 var rendered_settlement_aerial_lod:=-1.0
 var rendered_settlement_stage_radius:=0.0
@@ -4998,7 +4999,7 @@ func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],r
 func _settlement_patch_state_token()->int:
 	# Deferred builders still call existing read-only map helpers. Never stamp an
 	# old snapshot's signature onto geometry built against a newer city's state.
-	return hash([GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,_settlement_construction_visual_signature(),int(GameState.elapsed_days/365.0),GameState.known_discoveries,GameState.societal_values])
+	return hash([GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,_settlement_construction_visual_signature(),_settlement_cultural_visual_signature(),int(GameState.elapsed_days/365.0),GameState.known_discoveries,GameState.societal_values])
 
 func _build_settlement_plot_patch(parent:Node3D,center:Vector3,plots:Array[Dictionary],lod:int,context:Dictionary)->void:
 	_create_plot_fabric(center,plots,lod,parent,context)
@@ -8635,7 +8636,7 @@ func _create_secondary_city_design(settlement:Dictionary,parent:Node3D,force:=fa
 	SettlementModel.with_city_resources(String(record.id),func()->void:
 		var stamp:int=trace.start()
 		var lod:=_settlement_morphology_lod()
-		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_construction_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
+		var signature:=str([center,lod,_settlement_morphology_view_signature(lod),_settlement_morphology_visual_signature(),_settlement_construction_visual_signature(),_settlement_cultural_visual_signature(),_settlement_architecture_signature(_settlement_architecture_profile())])
 		stamp=trace.mark("city_design_signature",stamp)
 		var fabric:Node3D=null
 		for child in parent.get_children():
@@ -8829,6 +8830,19 @@ func _settlement_architecture_signature(profile:Dictionary)->String:
 		parts.append(str(roundi(clampf(float(profile.get(key,0.5)),0.0,1.0)*20.0)))
 	return ":".join(parts)
 
+
+func _settlement_cultural_visual_signature()->int:
+	# Recorded finishes change on adoption/renewal, not every value drift. Keep
+	# their invalidation separate from the parcel/vegetation morphology hash.
+	var key:=[GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,GameState.settlement_plots.size()]
+	var cached:Array=cached_cultural_visual_signatures.get(GameState.resource_settlement_id,[])
+	if not cached.is_empty() and cached[0]==key:return int(cached[1])
+	var records:Array=[]
+	for plot:Dictionary in GameState.settlement_plots:
+		if plot.has("cultural_appearance"):records.append([plot.get("id",0),preload("res://scripts/settlement_culture_visual.gd").for_plot(plot)])
+	var signature:=hash(records)
+	cached_cultural_visual_signatures[GameState.resource_settlement_id]=[key,signature]
+	return signature
 
 func _settlement_construction_visual_signature()->int:
 	# Daily authority advances fractions without changing parcel morphology.
@@ -10185,6 +10199,20 @@ func _append_roof_footprint(surface:SurfaceTool,center:Vector3,local_center:Vect
 			surface.set_uv2(texture_coordinates)
 			surface.add_vertex(world_point)
 
+func _cultural_surface_tone(source:Color,plot:Dictionary,wall:=false)->Color:
+	# Aggregate fallback has no doorway faces. Reuse the same finish palette
+	# in its existing vertex colours, preserving atlas alpha and weathering.
+	var culture:=preload("res://scripts/settlement_culture_visual.gd")
+	var profile:=culture.for_plot(plot)
+	var code:=int(profile.plaster if wall else profile.roof)
+	if code==0:return source
+	var palette:Array=culture.PLASTER_COLORS if wall else culture.ROOF_COLORS
+	var finish:Color=palette[code-1]
+	var luma:=source.r*.2126+source.g*.7152+source.b*.0722
+	var brightness:=clampf(luma/(.60 if wall else .52),0.0,1.30 if wall else 1.45)
+	finish=Color(finish.r*brightness,finish.g*brightness,finish.b*brightness,source.a)
+	return source.lerp(finish,culture.PLASTER_MIX if wall else culture.ROOF_MIX)
+
 func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vector2,right:Vector2,forward:Vector2,plot:Dictionary,roof_lift:float)->int:
 	var family:=String(plot.get("material_family","organic"))
 	var use:=String(plot.get("land_use",""))
@@ -10195,6 +10223,7 @@ func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vec
 	if use=="dirty_industry": wall_color=wall_color.lerp(Color("#454844"),0.58)
 	elif use in ["civic","sacred"]: wall_color=wall_color.lerp(Color("#aaa398"),0.34)
 	wall_color=wall_color.darkened((1.0-condition)*0.22)
+	wall_color=_cultural_surface_tone(wall_color,plot,true)
 	wall_color.a=0.46
 	var corners:=[local_center-right-forward,local_center+right-forward,local_center+right+forward,local_center-right+forward]
 	var sides:=0
@@ -10453,6 +10482,7 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		tone=tone.lerp(Color("#625f4d"),exposure*0.10)
 		tone=tone.lightened(rng.randf_range(-0.05,0.055))
 		# At this LOD these are density flecks, not individually modelled houses.
+		tone=_cultural_surface_tone(tone,plot)
 		tone.a=rng.randf_range(0.58,0.76) if emergency_camp else (rng.randf_range(0.80,0.93) if temporary_camp else rng.randf_range(0.91,0.99))
 		# Camera-dependent contrast and opacity belong to the live fabric shader.
 		# Baking them here caused a sharp fade at 0.42 km and stale colors on zoom.

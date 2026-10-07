@@ -463,7 +463,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		groups[key].append(record)
 	for key:String in groups:
 		var group:Array=groups[key];var first:Dictionary=group[0]
-		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true
 		batch.mesh=mesh_for_plot(first.plot);batch.instance_count=group.size()
 		var placed:Array[Transform3D]=[]
 		for i in group.size():
@@ -476,6 +476,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 			batch.set_instance_color(i,tint.lerp(Color("b2a38a"),wear*.3))
 		var node:=MultiMeshInstance3D.new();node.name="SettlementArchitecture_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
 		node.set_meta("source_transforms",placed)
+		node.set_meta("cultural_codes",preload("res://scripts/settlement_ink.gd").apply_culture(batch,group))
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+key.replace(":","_"),placed,batch.mesh.get_aabb())
 

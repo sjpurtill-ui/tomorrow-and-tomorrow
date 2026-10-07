@@ -241,6 +241,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		var batch := MultiMesh.new()
 		batch.transform_format = MultiMesh.TRANSFORM_3D
 		batch.use_colors = true
+		batch.use_custom_data = true
 		batch.mesh = kit_mesh(variant)
 		batch.instance_count = visible.size()
 		var transforms: Array[Transform3D] = []
@@ -260,6 +261,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		var node := MultiMeshInstance3D.new()
 		node.name = "OrganicTown_%s" % KIT[variant]
 		node.set_meta("source_transforms", transforms)
+		node.set_meta("cultural_codes",preload("res://scripts/settlement_ink.gd").apply_culture(batch,visible))
 		node.multimesh = batch
 		node.material_override = material
 		parent.add_child(node)

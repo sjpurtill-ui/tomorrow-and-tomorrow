@@ -184,6 +184,9 @@ static func _root_fabric(plots:Array)->Dictionary:
 		for key:String in ["form","roof_plan","material_family","material_mix","storeys","fabric_generation","building_materials","installed_components","construction_recipe"]:
 			if plot.has(key):sample[key]=plot[key].duplicate(true) if plot[key] is Array or plot[key] is Dictionary else plot[key]
 		var key:=hash(sample)
+		# Finish follows the root household but must not add a new geometry
+		# template or reshuffle the deterministic mix of expansion buildings.
+		if plot.has("cultural_appearance"):sample["cultural_appearance"]=(plot.cultural_appearance as Dictionary).duplicate(true) if plot.cultural_appearance is Dictionary else {}
 		if not seen.has(key):templates.append(sample);seen[key]=true
 	return {"claims":claims,"templates":templates}
 

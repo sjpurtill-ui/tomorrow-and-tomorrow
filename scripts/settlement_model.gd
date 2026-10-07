@@ -1,6 +1,7 @@
 extends Node
 
 const PlotGeometry:=preload("res://scripts/settlement_plot_geometry.gd")
+const CulturalFinish:=preload("res://scripts/settlement_culture_visual.gd")
 
 const VALID_STATUSES:= ["active","under_construction","stressed","damaged","vacant","ruin","reclaimed"]
 const VALID_REPAIR_STATES:= ["maintained","emergency_stabilization","awaiting_assessment","awaiting_materials","repairing","rebuilding","salvaging","unrepairable"]
@@ -602,6 +603,7 @@ func _autoload_node(node_name:String)->Node:
 func ensure_founded()->void:
 	_ensure_primary_settlement_record()
 	if not WorldSimulation.state.settlement_plots.is_empty():
+		_ensure_cultural_appearance()
 		if WorldSimulation.state.settlement_morphology.is_empty(): rebuild_summary()
 		return
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed: return
@@ -654,7 +656,35 @@ func _primary_settlement_id()->String:
 	return ""
 
 
+func _current_cultural_appearance()->Dictionary:
+	var state=WorldSimulation.state
+	var identity:Dictionary={}
+	if WorldSimulation.actor_id=="player":
+		var banner:=clampi(int(state.founding_banner_index),0,9)
+		identity={"field":preload("res://scripts/city_map_identity.gd").CREST_FIELDS[banner],"pattern":banner}
+	else:
+		identity=preload("res://scripts/civilization_identity.gd").identity(state.world_seed,WorldSimulation.actor_id)
+	return CulturalFinish.capture(state.societal_values,state.known_discoveries,identity)
+
+func _stamp_cultural_appearance(plot:Dictionary,profile:Dictionary={})->bool:
+	if String(plot.get("land_use","")) not in ["residential_compound","mixed_household","temporary_encampment","communal","civic","sacred","market","workshop","dirty_industry","storage","hospitality","defense","transport"]:return false
+	plot["cultural_appearance"]=(_current_cultural_appearance() if profile.is_empty() else profile).duplicate(true)
+	return true
+
+func _ensure_cultural_appearance()->void:
+	# Adopt today's finish once for legacy drawings; this does not invent a
+	# historical construction event or alter their recorded building materials.
+	# Thereafter only new construction and actual renewal select a new finish.
+	var profile:Dictionary={}
+	var changed:=false
+	for plot:Dictionary in WorldSimulation.state.settlement_plots:
+		if plot.has("cultural_appearance") or String(plot.get("status","active")) in ["ruin","reclaimed"]:continue
+		if profile.is_empty():profile=_current_cultural_appearance()
+		if _stamp_cultural_appearance(plot,profile):changed=true
+	if changed:WorldSimulation.state.morphology_revision+=1
+
 func _record_plot_building_event(plot:Dictionary,event_name:String,day:int,materials:Dictionary={},counts_materials:=false,note:String="")->void:
+	if event_name in ["founded","started","converted","rebuilt"]:_stamp_cultural_appearance(plot)
 	# Individual buildings are drawing records, not construction; the building
 	# ledger keeps civic works, landmarks and infrastructure only.
 	if not bool(plot.get("record_in_ledger",false)):return
@@ -1500,6 +1530,7 @@ func _create_founding_plots(city:Dictionary={})->void:
 			"displaced_households":0,"returning_households":0,"claim_pressure":0.0,
 			"created_day":created_day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":created_day
 		}
+		_stamp_cultural_appearance(plot)
 		target.append(plot)
 		if not secondary:
 			WorldSimulation.state.settlement_plot_history.append({"day":created_day,"plot_id":plot_id,"event":"founded","new_state":"active","cause":"Initial settlement fabric established"})
@@ -2003,6 +2034,7 @@ func _attempt_overflow_encampment(day:int,events:Array[Dictionary],context:Dicti
 	if camp_labor<4: return
 	var plot:=_create_overflow_encampment(day,unrepresented,context)
 	if plot.is_empty(): return
+	_stamp_cultural_appearance(plot)
 	_create_growth_route(plot,day,"camp_path")
 	WorldSimulation.state.settlement_plots.append(plot)
 	WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"overflow_camp_formed","new_state":"active","cause":"population exceeded durable household capacity; families occupied temporary ground using carried and salvaged cover"})
@@ -2581,6 +2613,7 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			ruins_rebuilt+=1
 			plot["status"]="under_construction";plot["construction_progress"]=0.0;plot["construction_started_day"]=day;plot["condition"]=0.0;plot["repair_state"]="rebuilding"
 			plot["land_use"]=String(plot.pre_damage_use);plot["growth_cause"]="rebuilding what was destroyed"
+			_stamp_cultural_appearance(plot)
 			WorldSimulation.state.settlement_plot_history.append({"day":day,"plot_id":int(plot.id),"event":"rebuilding","new_state":"under_construction","cause":"builders cleared the ruin and began again"})
 			WorldSimulation.state.morphology_revision+=1
 			continue
@@ -2903,6 +2936,7 @@ func _stamp_new_fabric(plot:Dictionary,tier:int)->void:
 	# Only new drawings call this. Keep the recipe's recorded roof/materials and
 	# the existing capacity authority; these are bounded visual representatives.
 	var use:=String(plot.get("land_use",""))
+	_stamp_cultural_appearance(plot)
 	plot["fabric_generation"]=tier
 	plot["morphology_era"]=FABRIC_ERA_NAMES[tier]
 	plot["form"]=_fabric_form_for(use,tier,String(plot.get("form","inherited_plot")))
