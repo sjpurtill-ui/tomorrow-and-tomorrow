@@ -43,6 +43,7 @@ const Prewarm:=preload("res://scripts/hud/court_prewarm.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const ExecStage:=preload("res://scripts/hud/court_exec_stage.gd")
 const BeatingStage:=preload("res://scripts/hud/court_beating_stage.gd")
+const CustodyStage:=preload("res://scripts/hud/court_custody_stage.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -528,6 +529,9 @@ func _track_all()->void:
 ## onlookers are seen over their shoulders), clear of the UI laid over it.
 func frame_cast(time:=0.0)->void:
 	if court_set==null or camera==null or not camera.is_inside_tree():return
+	if custody():
+		frame_custody()
+		return
 	if beating():
 		frame_beating()
 		return
@@ -546,6 +550,9 @@ func _where_now(f:Figure)->Node3D:
 
 ## Everyone standing before the god, the one before the god leading.
 func _frame_all(time:float)->void:
+	if custody():
+		frame_custody()
+		return
 	if beating():
 		frame_beating()
 		return
@@ -640,6 +647,10 @@ func _layer(layer_name:String)->Control:
 
 func _gui_input(event:InputEvent)->void:
 	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
+		if custody():
+			skip_custody()
+			accept_event()
+			return
 		if beating():
 			skip_beating()
 			accept_event()
@@ -668,7 +679,7 @@ func _beating_controls(key:String)->bool:
 	return beating() and (key==_beating_victim or key in _beating.get_meta("participant_keys",[]))
 
 func beat(victim_key:=MAIN,actor_key:="",how:="")->bool:
-	if beating() or executing():return false
+	if beating() or executing() or custody():return false
 	var victim:=figure(victim_key)
 	if victim==null or victim.leaving or victim.body3d==null or court_set==null:return false
 	var style:=Executions.style(victim.person)
@@ -719,9 +730,12 @@ func _begin_beating(scene:Node,victim_key:String,actor_key:String,style:String)-
 ## needs the entire group and the floor beneath them clear of the lower UI.
 ## Called once at approach, once at contact, and after a viewport resize.
 func frame_beating()->void:
-	if not beating() or rig==null or court_set==null or not rig.has_method("frame_points"):return
+	if beating():_frame_physical_scene(_beating,_beating_victim)
+
+func _frame_physical_scene(scene:Node,victim_key:String)->void:
+	if rig==null or court_set==null or not rig.has_method("frame_points"):return
 	var points:=PackedVector3Array()
-	var keys:Array=_beating.get_meta("participant_keys",[_beating_victim])
+	var keys:Array=scene.get_meta("participant_keys",[victim_key])
 	for key:String in keys:
 		var person:=figure(key)
 		if person==null or person.body3d==null or not person.body3d.is_inside_tree():continue
@@ -729,17 +743,20 @@ func frame_beating()->void:
 		var foot:=body.global_position
 		var local_floor:=court_set.to_local(foot);local_floor.y=0.0
 		var floor:=court_set.to_global(local_floor)
-		var margin:=0.9 if key==_beating_victim else 0.45
+		var margin:=0.9 if key==victim_key else 0.45
 		points.append(body.head_top()+Vector3.UP*0.15)
 		points.append(foot+Vector3(0.48,0.9,0));points.append(foot+Vector3(-0.48,0.9,0))
 		for corner:Vector2 in [Vector2(-1,-1),Vector2(1,-1),Vector2(1,1),Vector2(-1,1)]:
 			points.append(floor+Vector3(corner.x*margin,-0.10,corner.y*margin))
+	var extra:Variant=scene.get_meta("frame_points",PackedVector3Array())
+	if extra is PackedVector3Array:
+		for point:Vector3 in (extra as PackedVector3Array).slice(0,24):points.append(point)
 	if points.is_empty():return
-	_shot_name="frame";_focus_key=_beating_victim;_dramatic_shot=false
+	_shot_name="frame";_focus_key=victim_key;_dramatic_shot=false
 	_shot_weight=5;_shot_until=INF
 	rig.call("set_insets",top_inset+10.0,maxf(FOOT_ROOM*0.7,24.0),12.0,right_reserve+12.0)
 	rig.call("frame_points",points)
-	_beating.set_meta("frame_revision",int(_beating.get_meta("frame_revision",0))+1)
+	scene.set_meta("frame_revision",int(scene.get_meta("frame_revision",0))+1)
 	_place_caption();_reclear_bubbles()
 
 func skip_beating()->void:
@@ -765,6 +782,92 @@ func cancel_beating()->void:
 
 func _exit_tree()->void:
 	cancel_beating()
+	clear_custody()
+
+## Custody follows the engine's nonfatal judgment. The helper owns the
+## approach/restraint/escort; the stage owns retained bindings and UI holds.
+var _custody:Node
+var _custody_victim:=""
+var _custody_start:Tween
+var _custody_args:Dictionary={}
+var _custody_departure:Dictionary={}
+
+func custody()->bool:
+	return is_instance_valid(_custody)
+
+func _custody_controls(key:String)->bool:
+	return custody() and (key==_custody_victim or key in _custody.get_meta("participant_keys",[]))
+
+func detain(victim_key:=MAIN,actor_key:="",depart:=true)->bool:
+	if custody() or beating() or executing():return false
+	var victim:=figure(victim_key)
+	if victim==null or victim.leaving or victim.body3d==null or court_set==null or Executions.is_child(victim.person):return false
+	if bool(victim.body3d.get_meta("custody_bound",false)):return false
+	var scene:Node=CustodyStage.new();scene.name="Custody";add_child(scene)
+	_custody=scene;_custody_victim=victim_key
+	_custody_args={"victim":victim_key,"actor":actor_key,"depart":depart}
+	scene.finished.connect(func()->void:
+		if _custody!=scene:return
+		if _custody_start and _custody_start.is_valid():_custody_start.kill()
+		_custody_start=null;_custody=null;_custody_victim="";_custody_args.clear()
+		_hush_until=_now();_event_end=_now();_event_weight=0
+		_release_beating_frame()
+		if not _custody_departure.is_empty() and is_inside_tree() and not is_queued_for_deletion():
+			var departure:=_custody_departure;_custody_departure={}
+			conclude.call_deferred(float(departure.delay),String(departure.style),String(departure.reaction)))
+	for child in bubble_layer.get_children():
+		if child is Bubble and String(child.speaker)==victim_key:_drop(child,false)
+	var arrivals:Array=[]
+	for key:String in cast_order:arrivals.append({"who":key})
+	var wait:=_still_arriving(arrivals,victim_key)
+	if wait>0.0:
+		scene.set_meta("custody_state","waiting_for_arrivals")
+		_custody_start=create_tween();_custody_start.tween_interval(wait)
+		_custody_start.tween_callback(_begin_custody.bind(scene))
+		return true
+	return _begin_custody(scene)
+
+func _begin_custody(scene:Node)->bool:
+	if not is_instance_valid(scene) or _custody!=scene:return false
+	_custody_start=null
+	if not bool(scene.call("begin",self,String(_custody_args.victim),String(_custody_args.actor),bool(_custody_args.depart))):
+		cancel_custody()
+		if is_instance_valid(scene) and not scene.is_queued_for_deletion():scene.queue_free()
+		return false
+	for child in bubble_layer.get_children():
+		if child is Bubble and _custody_controls(String(child.speaker)):_drop(child,false)
+	frame_custody()
+	return true
+
+func frame_custody()->void:
+	if custody():_frame_physical_scene(_custody,_custody_victim)
+
+func skip_custody()->void:
+	if not custody():return
+	if _custody_start!=null:
+		if _custody_start.is_valid():_custody_start.kill()
+		_custody_start=null
+		settle()
+		if not _begin_custody(_custody):return
+	if custody():_custody.call("skip")
+
+func cancel_custody()->void:
+	_custody_departure.clear()
+	if _custody_start and _custody_start.is_valid():_custody_start.kill()
+	_custody_start=null;_custody_args.clear()
+	if not custody():return
+	var scene:=_custody;_custody=null;_custody_victim=""
+	scene.call("cancel")
+	_release_beating_frame()
+
+func release_custody_binding(key:String)->void:
+	if custody() and key==_custody_victim:cancel_custody()
+	var person:=figure(key)
+	if person!=null and is_instance_valid(person.body3d):CustodyStage.release_binding(person.body3d)
+
+func clear_custody()->void:
+	cancel_custody()
+	for key:String in cast_order:release_custody_binding(key)
 
 ## The execution playing now (court_exec_stage.gd), if any.
 var _exec:Node
@@ -786,11 +889,12 @@ func executing()->bool:
 func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")->bool:
 	if not Executions.is_staged(method_id):return false
 	var f:=figure(victim_key)
-	if f==null or f.leaving or f.body3d==null or court_set==null or executing() or beating():return false
+	if f==null or f.leaving or f.body3d==null or court_set==null or executing() or beating() or custody():return false
 	var person:=f.person.duplicate()
 	person["kind"]=String(person.get("kind",""))
 	var style:=how if how!="" else Executions.style(person)
 	if style=="off" or Executions.is_child(person):return false
+	release_custody_binding(victim_key)
 	var who:=name_text if name_text!="" else String(person.get("name",""))
 	var data:={"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)}
 	var scene:=ExecStage.new();scene.stage=self;scene.method=method_id;scene.victim=victim_key
@@ -1647,6 +1751,7 @@ func _beat(beat:Dictionary)->void:
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
 	if _beating_controls(who) and act in ["play","mood","look_at"]:return
+	if _custody_controls(who) and act not in ["shot","sound","hush"]:return
 	if who=="exec" and act=="soundtrack":
 		if executing() and is_instance_valid(_sound):_sound.call("play_act",int(args.number),args.roles,args.opts)
 		return
@@ -1810,7 +1915,7 @@ func hush(seconds:float,dim:=false)->void:
 func shot(name:String,args:Dictionary={})->void:
 	# This scene supplies its own full-body frame. Queued conversation and
 	# reaction shots cannot crop away its contact or aftermath.
-	if beating():return
+	if beating() or custody():return
 	if args.has("staging_epoch") and int(args.staging_epoch)!=_staging_epoch:return
 	if args.has("subject") and _addressed({"target":args.subject})==null:return
 	if court_set==null or rig==null:
@@ -1889,6 +1994,7 @@ func shot(name:String,args:Dictionary={})->void:
 
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
+	if _custody_controls(key):return
 	var f:=figure(key)
 	if f!=null:f.own_mood=mood
 	if f!=null and f.body3d!=null:f.body3d.set_mood(mood)
@@ -2004,6 +2110,9 @@ var _next_arrival_at:=0.0
 ##  "fall"  put to death: they sink and are gone where they stood;
 ##  "stay"  nobody leaves.
 func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
+	if custody():
+		_custody_departure={"delay":delay,"style":style,"reaction":reaction}
+		return
 	if style=="stay":return
 	if beating():
 		_beating_departure={"delay":delay,"style":style,"reaction":reaction}
@@ -2063,6 +2172,7 @@ func _on_resized()->void:
 	# (a push-in or a reaction shot keeps going: the next wide takes the new size).
 	if court_set!=null and _wide_now():call_deferred("frame_cast",0.0)
 	if beating():call_deferred("frame_beating")
+	if custody():call_deferred("frame_custody")
 	layout(false)
 	var first:=not _laid_out
 	_laid_out=true
@@ -2181,7 +2291,7 @@ func _usable_width()->float:
 ## Words from someone already on their way out are told as a caption, not a
 ## bubble over the place where they stood.
 func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
-	if _beating_controls(key):return null
+	if _beating_controls(key) or _custody_controls(key):return null
 	var f:=figure(key)
 	if f==null or f.leaving:
 		var who:=String(f.person.get("name","")).get_slice(" ",0) if f!=null else ""
