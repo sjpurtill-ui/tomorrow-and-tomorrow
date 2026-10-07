@@ -222,8 +222,12 @@ func test_foreign_leader_rejects_tutorial_language_but_keeps_diegetic_demands()-
 	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
 	assert_bool(ForeignDialogue.accept(id,{"reply":broken,"accord":"","tone":"firm","generous":false})).is_false()
 	assert_bool(ForeignDialogue.accept(id,{"reply":in_character,"accord":"","tone":"firm","generous":false})).is_true()
-	assert_bool(ForeignDialogue._envoy_uses_own_words("Tell her to muster her armies and meet our might.","My ruler says: tell her to muster her armies and meet our might.")).is_false()
-	assert_bool(ForeignDialogue._envoy_uses_own_words("Tell her to muster her armies and meet our might.","My ruler threatens war, though I ask whether bloodshed can still be avoided.")).is_true()
+	# The envoy carries the god's words as said: quoting them is right.
+	assert_bool(ForeignDialogue._valid_response({"envoy_words":"The god says: I will eat your family.","reply":in_character,"accord":"","tone":"firm","generous":false,"reaction":"warn"},true,"I will eat your family.")).is_true()
+	# And every leader speaks in one literary manner for life, unnamed.
+	var voice:Dictionary=ForeignDialogue.leader_voice(id,ForeignDiplomacy.leaders[id])
+	assert_str(String(voice.get("style",""))).is_not_empty()
+	assert_dict(ForeignDialogue.leader_voice(id,ForeignDiplomacy.leaders[id])).is_equal(voice)
 
 func test_threatened_leader_decides_posture_independently_of_requested_bluff()->void:
 	var id:=_foreign();ForeignDiplomacy.send_audience(id);_return_envoys()
