@@ -469,8 +469,11 @@ func test_the_dog_pack_stays_with_both_drags_and_releases_at_the_windbreak()->vo
 	for step:float in [1.0,0.0,1.4]:
 		f.nudge+=f.spot.global_basis.inverse()*(-exec._plan_frame.basis.z*step)
 		f._sync();follow.custom_step(0.6)
-		for dog:Node3D in exec._pack:
-			assert_float(dog.global_position.distance_to(f.body3d.global_position)).is_between(0.8,1.1)
+		for i in exec._pack.size():
+			var dog:Node3D=exec._pack[i]
+			# Contact follows the posed ankle rather than an arbitrary root radius.
+			assert_object(dog._bite_pose).is_not_null()
+			assert_vector(dog._bite_pose.target).is_equal_approx(exec._dog_attack.target_for(i),Vector3.ONE*0.001)
 			assert_bool(dog._moving).is_false()
 	exec.call("_pack_crunch",{"seconds":2.4})
 	assert_bool(follow.is_valid()).is_false()

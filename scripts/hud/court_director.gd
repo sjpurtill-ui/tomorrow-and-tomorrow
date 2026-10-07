@@ -2328,8 +2328,8 @@ static func _agree(out:Array,ctx:Dictionary)->Array:
 # =============================================================================
 # Executions: the engine has put someone to death; how the hall sees it
 # (court_executions.gd chose the method; court_exec_stage.gd plays the "exec"
-# beats). Comic gore, Monty Python and the cartoons, perfectly timed, the
-# whole room reacting. Gore "mild": the blow lands off screen (the camera on
+# beats). Each selected method has its own tone and timed room reactions.
+# Gore "mild": the blow lands off screen (the camera on
 # the room's faces), no blood and no parts. A child, or gore "off", never
 # comes here: the stage keeps the old sober kneel and sink.
 
@@ -2407,7 +2407,7 @@ static func _exec_before(ctx:Dictionary,out:Array,victim:String,roles:Dictionary
 	var rng:RandomNumberGenerator=ctx.rng
 	var busy:=_exec_busy(victim,roles)
 	_beat(out,0.0,"room","hush",{"dur":length,"bubbles":"dim"},"anticipation")
-	_snd(out,0.0,"drum_roll",0.8)
+	if String(ctx.event.get("method",""))!="dogs":_snd(out,0.0,"drum_roll",0.8)
 	for m:Dictionary in _people(ctx,busy):
 		if rng.randf()<0.55:_beat(out,0.1+rng.randf()*0.4,String(m.key),"freeze",{"dur":1.6},"anticipation")
 	if people_dread(ctx.facts)>=DREAD_HIGH:
@@ -2479,7 +2479,7 @@ static func _plan_cue(plan:Dictionary,name:String,otherwise:float)->float:
 static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionary,method:String,plan:Dictionary)->float:
 	var ex:=String(roles.ex);var cook:=String(roles.cook)
 	var act:=String(PLAN_OF.get(method,""))
-	var start:=1.3
+	var start:=2.2 if method=="dogs" else 1.3
 	var length:=start+float(plan.get("length",10.0))+0.6
 	var impact:=start+_plan_cue(plan,"impact",_plan_cue(plan,"grab",0.0))
 	var has_ex:=(plan.get("roles",{}) as Dictionary).has("executioner")
@@ -2516,15 +2516,36 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 		"dogs":
 			var gone:=start+_plan_cue(plan,"out_of_sight",6.6)
 			_exec(out,0.0,"pack_come",{"more":2})
-			_exec(out,gone-0.05,"vanish",{"who":victim})
+			_beat(out,0.25,victim,"plead",{"dur":1.5,"sound":""},"anticipation")
+			_shot(out,start+0.45,"frame",{"on":[victim,"front:"+victim+":1.6","windbreak"],"time":0.65})
+			_shot(out,start+1.3,"shake",{"strength":0.13})
+			_shot(out,start+5.05,"frame",{"on":[victim,"front:"+victim+":1.5","windbreak"],"time":0.65})
+			# The pack stays at the completed drag endpoint. There is no competing
+			# fetch route to cancel its last movement or reset the scene's tone.
+			_exec(out,gone,"vanish",{"who":victim})
 			_exec(out,gone,"pack_crunch",{"seconds":2.4})
-			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-4.0,"pack_fetch",{"to":"god_feet"})
-			_shot(out,gone+0.4,"shake",{"strength":0.1})
-			_shot(out,start+_plan_cue(plan,"bone_dropped",10.6)-1.2,"frame",{"on":["god_feet","windbreak"],"time":0.8})
-			for m:Dictionary in _people(ctx,[victim]+roles.get("busy",[])):
-				if float(m.courage)<0.7:_beat(out,gone+0.4,String(m.key),"wince_crunch",{},"reaction")
-			_exec_after(ctx,out,gone+0.2,victim,roles,false,{"faint":start+_plan_cue(plan,"grab",0.0)+0.8,"retch":gone+1.6,"clap":start+_plan_cue(plan,"after",11.0)})
+			_exec_dog_witnesses(ctx,out,victim,start,gone,length)
+			_shot(out,gone+3.0,"frame",{"on":["windbreak","front:"+victim+":1.5"],"time":1.1})
 	return length
+
+
+## The witnesses cannot make a spectacle of this act. Adults recoil and then
+## stay stricken; children keep their eyes covered through the entire scene.
+static func _exec_dog_witnesses(ctx:Dictionary,out:Array,victim:String,start:float,gone:float,end:float)->void:
+	var witnesses:=_people(ctx,[victim])
+	var reaction:=""
+	for i in witnesses.size():
+		var person:Dictionary=witnesses[i]
+		var key:=String(person.key)
+		if String(person.kind)=="child":
+			_beat(out,0.4,key,"hide_eyes",{"dur":end-0.4,"sound":""},"reaction")
+			continue
+		var lag:=0.08+0.12*float(i%4)
+		_beat(out,start+0.6+lag,key,"flinch",{"dur":0.7,"sound":""},"reaction")
+		_beat(out,gone+0.2+lag,key,"stricken",{"dur":end-gone,"sound":""},"reaction")
+		if reaction.is_empty() and float(person.courage)<0.7:reaction=key
+	if not reaction.is_empty():_shot(out,gone+0.6,"reaction",{"target":reaction,"time":0.8})
+
 
 ## Mild: the blow lands off screen. The camera turns to the room's faces at
 ## the moment; no blood, no parts; they are simply gone when it turns back.
@@ -2646,10 +2667,8 @@ static func _exec_behead(ctx:Dictionary,out:Array,victim:String,roles:Dictionary
 	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,blow+6.6,String(dog.key),"sniff",{"at":victim},"reaction")
 	return length
 
-## 4. Dog dinner: the camp dogs drag them behind the windbreak; loud
-## crunching; a dog trots back with a thighbone, drops it at the god's feet
-## and wags. (Timed to the sound's track: the snarl at `blow`, the drag 0.2,
-## the crunching from 2.0, the bone dropped 7.6.)
+## Legacy fallback if the authored dog plan is unavailable: a drag behind
+## the windbreak and a stricken court, with no returning-bone punchline.
 static func _exec_dogs(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
 	var blow:=2.2
 	var length:=blow+8.8
@@ -2667,9 +2686,8 @@ static func _exec_dogs(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)-
 	_exec(out,blow+2.0,"vanish",{"who":victim})
 	_snd(out,blow+2.0,"crunch_loop",1.0,"crunch")
 	_shot(out,blow+2.0,"shake",{"strength":0.12})
-	_exec_after(ctx,out,blow+2.4,victim,roles,false,{"faint":blow+2.8,"retch":blow+3.6,"clap":blow+8.6})
-	_exec(out,blow+5.0,"fetch",{"to":"god_feet"})
-	_shot(out,blow+5.4,"frame",{"on":["god_feet","windbreak"],"time":0.8})
+	_exec_dog_witnesses(ctx,out,victim,blow,blow+2.0,length)
+	_shot(out,blow+5.4,"frame",{"on":["windbreak"],"time":0.8})
 	return length
 
 ## Sustained body fire, progressive scorching and a heavy collapse.

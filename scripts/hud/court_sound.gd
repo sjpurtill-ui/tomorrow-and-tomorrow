@@ -617,6 +617,7 @@ func steps_at_pace(body:Node3D,pace:String,db:=0.0)->void:
 ## "off": nothing, the sober exit is the stage's own), db (added to all),
 ## dread (0..1, else the fact sheet's): at 0.7 and over the hall is too
 ## frightened to gasp, groan, laugh or clap; it swallows and its knees knock.
+## Dogs omit those crowd overlays too; fire and dogs use a recorded adult victim.
 ## act may also be the act's number (1..25, EXECUTIONS.md).
 ## The roll and the punchline are what the people can play: hands on a log
 ## before any drum, a drum, and small cymbals only in a temple age.
@@ -644,15 +645,17 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 	rrng.seed=hash("%s|%s|%d|react" % [String(stage.get("audience_key")) if stage!=null and stage.get("audience_key")!=null else "court",String(act),_act_n])
 	var jobs:Array=[]
 	last_reactions=[]
-	if String(act)=="into_the_fire":
+	var recorded_victim:=String(act) in ["into_the_fire","dog_dinner"]
+	if recorded_victim:
 		var victim_voice:=_victim_voice(roles)
-		if not victim_voice.is_empty():_job(jobs,victim_voice,"burn_scream",now+lead+0.1,rrng)
+		var scream_kind:="dog_scream" if String(act)=="dog_dinner" else "burn_scream"
+		if not victim_voice.is_empty():_job(jobs,victim_voice,scream_kind,now+lead+0.1,rrng)
 	for item:Dictionary in track:
 		var cond:=String(item.get("if",""))
 		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
 		var cue_name:=String(item.cue)
 		# Let the recorded victim carry this scene; no overlapping airy crowd or cough.
-		if String(act)=="into_the_fire" and (cue_name in Gore.ROOM_NOISE or cue_name=="cough"):continue
+		if recorded_victim and (cue_name in Gore.ROOM_NOISE or cue_name=="cough"):continue
 		if cue_name=="punch":punch_at=float(item.t)
 		if frightened and cue_name in Gore.ROOM_NOISE:continue
 		# the room's noises come from the people present, each in their own voice
@@ -668,13 +671,13 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 		if v>=0:o["variant"]=v
 		if who=="musician":o["pan"]=_music_pan()
 		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o,"act":_act_epoch})
-	if String(act)!="into_the_fire" and not frightened and not people.is_empty() and rrng.randf()<0.75:
+	if not recorded_victim and not frightened and not people.is_empty() and rrng.randf()<0.75:
 		# and someone mutters an aside, in their own tongue, under their breath
 		var who:Dictionary=people[rrng.randi_range(0,people.size()-1)]
 		_job(jobs,who,"mutter",now+lead+punch_at+rrng.randf_range(0.9,1.6),rrng)
 	for job:Dictionary in jobs:job["act"]=_act_epoch
 	_render_reactions(jobs)
-	if frightened:
+	if frightened and String(act)!="dog_dinner":
 		# a terrified hall: someone swallows, knees knock, nobody laughs
 		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1},"act":_act_epoch})
 		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0},"act":_act_epoch})
@@ -777,18 +780,23 @@ func _job(jobs:Array,who:Dictionary,kind:String,at:float,rng:RandomNumberGenerat
 		"temper":Reactions.temper_of(person,who.entry,String(who.role))})
 	last_reactions.append({"who":String(who.key),"kind":kind,"temper":Reactions.temper_of(person,who.entry,String(who.role)),"at":at})
 
+## Reuse the existing adult performances without mislabelling the dog's cue
+## as a fire event. This alias applies equally to worker and synchronous audio.
+static func _reaction_source(kind:String)->String:
+	return "burn_scream" if kind=="dog_scream" else kind
+
 ## The reactions made (on a worker thread, or here when exact) and queued at
 ## their times, each at its person.
 func _render_reactions(jobs:Array)->void:
 	if jobs.is_empty():return
 	if exact():
-		for job:Dictionary in jobs:job["stream"]=Synth.to_stream(Reactions.make(String(job.kind),job.spec,int(job.seed)))
+		for job:Dictionary in jobs:job["stream"]=Synth.to_stream(Reactions.make(_reaction_source(String(job.kind)),job.spec,int(job.seed)))
 		_reactions_ready(jobs)
 		return
 	var work:=jobs.duplicate(true)
 	var me:WeakRef=weakref(self)
 	_track(WorkerThreadPool.add_task(func()->void:
-		for job:Dictionary in work:job["stream"]=Synth.to_stream(Reactions.make(String(job.kind),job.spec,int(job.seed)))
+		for job:Dictionary in work:job["stream"]=Synth.to_stream(Reactions.make(_reaction_source(String(job.kind)),job.spec,int(job.seed)))
 		var still:Object=me.get_ref()
 		if still!=null:still.call_deferred("_reactions_ready",work)
 	,false,"court reactions"))
@@ -800,7 +808,7 @@ func _reactions_ready(jobs:Array)->void:
 		if not job.get("stream") is AudioStreamWAV:continue
 		if float(job.at)<now-0.3:continue
 		_queue.append({"at":maxf(float(job.at),now),"stream":job.stream,"body_id":int(job.body_id),
-			"db":float(Reactions.LEVELS.get(String(job.kind),-12.0)),"label":"react_"+String(job.kind),"act":int(job.get("act",_act_epoch))})
+			"db":float(Reactions.LEVELS.get(_reaction_source(String(job.kind)),-12.0)),"label":"react_"+String(job.kind),"act":int(job.get("act",_act_epoch))})
 	_ensure_timer()
 
 ## Whether a sound name (the director's or a cue's) is one this court can make.

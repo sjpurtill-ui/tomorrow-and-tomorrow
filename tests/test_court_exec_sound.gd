@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 ## THE COURT'S EXECUTION SOUNDS (scripts/hud/court_gore_foley.gd, played by
-## court_sound.gd): every comic gore sound is made, in range, without a click,
+## court_sound.gd): every gore sound is made, in range, without a click,
 ## the same each time; each act's track names only sounds that exist; an act
 ## plays with the drum roll first and the punchline on what the people can
 ## play (hands on a log, a drum, small cymbals only in a temple age); with the
@@ -8,6 +8,8 @@ extends GdUnitTestSuite
 ## people standing there, each in their own voice and as their temper has it,
 ## drawn afresh for each act; a terrified hall makes none. Headless; no files,
 ## no save.
+## Fire and dogs instead use recorded adult performances without a comic
+## soundtrack; dogs fall silent after feeding and every cue cancels on skip.
 
 const Sound:=preload("res://scripts/hud/court_sound.gd")
 const Gore:=preload("res://scripts/hud/court_gore_foley.gd")
@@ -47,7 +49,7 @@ func test_each_acts_track_names_sounds_that_exist()->void:
 			if name=="punch":punch=true;continue
 			if name=="roll":roll=true;assert_float(float(item.t)).is_less(0.0);continue
 			assert_bool(Gore.has(name) or Foley.CUES.has(name)).override_failure_message("%s: %s is not a sound" % [act,name]).is_true()
-		assert_bool((not punch and not roll) if act=="into_the_fire" else (punch and roll)).override_failure_message("%s lacks the roll or the punchline" % act).is_true()
+		assert_bool((not punch and not roll) if act in ["into_the_fire","dog_dinner"] else (punch and roll)).override_failure_message("%s has the wrong musician treatment" % act).is_true()
 
 func _court(known:Array)->Node:
 	var stage:=Control.new()
@@ -81,7 +83,8 @@ func test_an_act_plays_its_roll_and_its_punchline_by_the_age()->void:
 	assert_array(_queued(temple)).contains(["punch_cymbal","axe_thunk","axe_clang","gore_chop","blood_patter"])
 	var early:=_court([])
 	early.call("play_act","dog_dinner",{},{})
-	assert_array(_queued(early)).contains(["log_roll","punch_log","tug","slip","crunch","bone_drop"])
+	assert_array(_queued(early)).contains(["dog_snarl","faint_thump","tug","drag","crunch"])
+	assert_array(_queued(early)).not_contains(["log_roll","punch_log","slip","bone_drop"])
 
 func test_with_gore_off_nothing_plays_and_mild_keeps_the_sounds()->void:
 	var sound:=_court(["bone_flutes_drums"])
@@ -111,8 +114,8 @@ func test_all_twenty_five_acts_have_a_track()->void:
 		for item:Dictionary in track:
 			if absf(float(item.t))<0.3 and String(item.cue) not in ["roll","punch"]:at_blow=true
 			if String(item.cue)=="punch" and float(item.t)>0.5:punch_after=true
-		assert_bool(at_blow and (not punch_after if act=="into_the_fire" else punch_after)).override_failure_message("act %d lacks a blow or a late punchline" % n).is_true()
-		# 2.5-11.5 s from the blow to the room's last word (the dog's walk back is long)
+		assert_bool(at_blow and (not punch_after if act in ["into_the_fire","dog_dinner"] else punch_after)).override_failure_message("act %d has the wrong blow or musician treatment" % n).is_true()
+		# Each authored track ends within its execution plan.
 		var last:=0.0
 		for item:Dictionary in track:last=maxf(last,float(item.t))
 		assert_float(last).override_failure_message("act %d runs %.1f s after the blow" % [n,last]).is_between(2.5,11.5)
@@ -340,3 +343,92 @@ func test_recorded_assets_are_decodable_pcm_and_fire_has_no_synthetic_crowd_over
 	assert_int(reactions.size()).is_equal(1)
 	assert_str(reactions[0].kind).is_equal("burn_scream")
 	assert_array(_queued(sound)).not_contains(["cough","room_gasp","react_mutter"])
+
+func test_dog_track_matches_the_struggle_then_leaves_a_quiet_aftermath()->void:
+	var sound:=_court([])
+	var start:float=sound.call("_now")
+	assert_float(float(sound.call("play_act","dog_dinner",{},{}))).is_equal(0.0)
+	var times:={}
+	for item:Dictionary in sound.get("_queue"):
+		var name:=String(item.name)
+		if not times.has(name):times[name]=[]
+		(times[name] as Array).append(float(item.at)-start)
+		var duration:float=Sound.stream_for(name,int(item.opts.get("variant",0))).get_length()
+		# Include the full sample tail, not just its scheduled onset.
+		assert_float(float(item.at)-start+duration).override_failure_message(name+" intrudes on aftermath").is_less(9.0)
+	var expected:={"dog_snarl":[0.0,2.45,5.1],"faint_thump":[0.58,4.08],"drag":[1.2,4.1,5.0],"crunch":[6.8,7.35,8.0]}
+	for name:String in expected:
+		var actual:Array=times.get(name,[])
+		assert_int(actual.size()).override_failure_message(name).is_equal(expected[name].size())
+		for index:int in mini(actual.size(),expected[name].size()):
+			assert_float(float(actual[index])).override_failure_message(name).is_equal_approx(float(expected[name][index]),0.01)
+	assert_array(_queued(sound)).not_contains(["log_roll","drum_roll","punch_log","punch_drum","punch_cymbal","bone_drop","paws","dog_thump","swallow","knees_knock"])
+
+func test_dog_victim_uses_the_recorded_adult_voice_without_crowd_at_either_dread()->void:
+	var previous:=PackedByteArray()
+	for sex:String in ["male","female"]:
+		var setup:=_hall();var sound:Node=setup[0];var roles:Dictionary=setup[1]
+		var stage:FakeStage=sound.get("stage")
+		(stage.figs.victim as FakeFigure).person["sex"]=sex
+		for dread:float in [0.0,1.0]:
+			var start:float=sound.call("_now")
+			sound.call("play_act","dog_dinner",roles,{"dread":dread})
+			var voices:Array=(sound.get("_queue") as Array).filter(func(q:Dictionary)->bool:return q.get("label","")=="react_dog_scream")
+			assert_int(voices.size()).is_equal(1)
+			if voices.is_empty():continue
+			var voice:Dictionary=voices[0]
+			assert_int(voice.body_id).is_equal(roles.victim.get_instance_id())
+			assert_float(float(voice.at)-start).is_equal_approx(0.1,0.01)
+			assert_float(float(voice.db)).is_equal(float(Reactions.LEVELS.burn_scream))
+			var stream:AudioStreamWAV=voice.stream
+			if sex=="male":assert_float(stream.get_length()).is_between(3.0,3.7)
+			else:assert_float(stream.get_length()).is_between(1.0,1.3)
+			assert_int(stream.loop_mode).is_equal(AudioStreamWAV.LOOP_DISABLED)
+			if sex=="female":assert_bool(stream.data==previous).is_false()
+			else:previous=stream.data
+			var reactions:Array=sound.get("last_reactions")
+			assert_int(reactions.size()).is_equal(1)
+			assert_str(reactions[0].kind).is_equal("dog_scream")
+			assert_array(_queued(sound)).not_contains(["react_burn_scream","react_mutter","room_gasp","crowd_groan","swallow","knees_knock","lone_clap"])
+
+func test_dog_recording_respects_child_and_gore_gates()->void:
+	var setup:=_hall();var sound:Node=setup[0];var roles:Dictionary=setup[1]
+	for style:String in ["full","mild"]:
+		sound.call("play_act","dog_dinner",roles,{"gore":style})
+		assert_array(_queued(sound)).contains(["react_dog_scream","crunch"])
+	sound.call("stop_act")
+	sound.call("play_act","dog_dinner",roles,{"gore":"off"})
+	assert_array(_queued(sound)).is_empty()
+	var stage:FakeStage=sound.get("stage")
+	(stage.figs.victim as FakeFigure).person["age"]=8
+	sound.call("play_act","dog_dinner",roles,{})
+	assert_array(_queued(sound)).not_contains(["react_dog_scream"])
+	assert_array(sound.get("last_reactions")).is_empty()
+	# Explicit child casting suppresses the adult performance even without an age.
+	(stage.figs.victim as FakeFigure).person.erase("age")
+	stage.extras["victim"]={"kind":"child"}
+	sound.call("play_act","dog_dinner",roles,{})
+	assert_array(_queued(sound)).not_contains(["react_dog_scream"])
+
+func test_skipping_dogs_stops_active_and_queued_audio_and_rejects_late_work()->void:
+	var setup:=_hall();var sound:Node=setup[0];var roles:Dictionary=setup[1]
+	var start:float=sound.call("_now")
+	sound.call("play_act","dog_dinner",roles,{})
+	var voices:Array=(sound.get("_queue") as Array).filter(func(q:Dictionary)->bool:return q.get("label","")=="react_dog_scream")
+	assert_int(voices.size()).is_equal(1)
+	if voices.is_empty():return
+	var voice:Dictionary=voices[0]
+	sound.call("cue","creak",null,{"delay":30.0})
+	sound.set("_clock",start+0.2)
+	sound.call("_tick")
+	var active:Array[AudioStreamPlayer]=[]
+	for player:AudioStreamPlayer in sound.get("_pool"):
+		if int(player.get_meta("court_act",0))==int(voice.act):active.append(player)
+	assert_int(active.size()).is_greater(0)
+	sound.call("stop_act")
+	for player:AudioStreamPlayer in active:
+		assert_int(int(player.get_meta("court_act",0))).is_equal(0)
+		assert_bool(player.playing).is_false()
+	assert_array(_queued(sound)).is_equal(["creak"])
+	sound.call("_reactions_ready",[{"at":start+10,"stream":voice.stream,"body_id":roles.victim.get_instance_id(),"kind":"dog_scream","act":voice.act}])
+	assert_array(_queued(sound)).is_equal(["creak"])

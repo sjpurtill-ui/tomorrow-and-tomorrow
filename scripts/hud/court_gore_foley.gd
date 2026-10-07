@@ -8,10 +8,12 @@ extends RefCounted
 ## patter on the front row, the retching, the groan, the lone clap, and the
 ## musician's drum roll before and the hit on the punchline.
 ##
-## The sounds must carry the joke on their own: with the gore setting "mild"
+## Most legacy acts carry the joke on their own: with the gore setting "mild"
 ## the picture cuts away and only these are heard. So each is a little larger
 ## than life, and each act's timeline (ACTS) leaves the beat of silence where
 ## the laugh goes.
+## Fire and dogs use sober tracks instead: the recorded victim, physical
+## struggle and a quiet aftermath, without the musician or comic crowd.
 ##
 ## make(name, variant) -> samples; stream(name, variant) -> AudioStreamWAV.
 ## CUES: every name L can cue ({variants, db, kind}). ACTS: the sound track of
@@ -187,32 +189,23 @@ const ACTS:={
 		{"t":2.42,"cue":"punch","who":"musician"},
 		{"t":2.6,"cue":"retch","who":"front_row","variant":0},
 	],
-	# 4. Dog dinner: dragged behind the windbreak, snarls, loud crunching; the
-	# dog trots back, drops a thighbone at the god's feet, wags.
+	# 4. Dogs: down, dragged, holding on, then pulled behind the windbreak.
+	# Times are relative to EXEC_PLANS (absolute court time 2.2 s). The victim's
+	# recorded voice is scheduled by court_sound; feeding ends before the quiet aftermath.
 	"dog_dinner":[
-		# timed to K's clip (EXEC_PLANS): the grab is t = 0
-		{"t":-2.2,"cue":"roll","who":"musician"},
 		{"t":0.0,"cue":"dog_snarl","who":"dog","variant":0},
-		{"t":0.6,"cue":"faint_thump","who":"victim","variant":1},
-		{"t":2.6,"cue":"dog_snarl","who":"dog","variant":1,"db":-3.0},
-		{"t":2.7,"cue":"tug","who":"victim","variant":0},
-		{"t":3.12,"cue":"tug","who":"victim","variant":1},
-		{"t":3.52,"cue":"tug","who":"victim","variant":2},
-		{"t":3.8,"cue":"slip","who":"victim","variant":0},
-		{"t":4.0,"cue":"slip","who":"victim","variant":1},
-		{"t":4.15,"cue":"slip","who":"victim","variant":2},
-		{"t":4.35,"cue":"drag","who":"victim","variant":0},
-		{"t":5.4,"cue":"drag","who":"victim","variant":1,"db":-6.0},
+		{"t":0.58,"cue":"faint_thump","who":"victim","variant":1},
+		{"t":1.2,"cue":"drag","who":"victim","variant":0,"db":-3.0},
+		{"t":2.45,"cue":"dog_snarl","who":"dog","variant":1,"db":-3.0},
+		{"t":2.7,"cue":"tug","who":"victim","variant":0,"db":-4.0},
+		{"t":3.25,"cue":"tug","who":"victim","variant":2,"db":-5.0},
+		{"t":4.08,"cue":"faint_thump","who":"victim","variant":0,"db":-3.0},
+		{"t":4.1,"cue":"drag","who":"victim","variant":1,"db":-5.0},
+		{"t":5.0,"cue":"drag","who":"victim","variant":0,"db":-6.0},
+		{"t":5.1,"cue":"dog_snarl","who":"dog","variant":0,"db":-5.0},
 		{"t":6.8,"cue":"crunch","who":"dog","variant":1,"db":-5.0},
-		{"t":7.0,"cue":"crunch","who":"dog","variant":0},
-		{"t":7.25,"cue":"crowd_groan","who":"room","variant":0},
-		{"t":7.6,"cue":"crunch","who":"dog","variant":1},
-		{"t":8.2,"cue":"crunch","who":"dog","variant":2},
-		{"t":8.75,"cue":"crunch","who":"dog","variant":0,"db":-5.0},
-		{"t":9.6,"cue":"paws","who":"dog"},
-		{"t":10.6,"cue":"bone_drop","who":"dog","variant":0},
-		{"t":10.85,"cue":"dog_thump","who":"dog"},
-		{"t":11.0,"cue":"punch","who":"musician"},
+		{"t":7.35,"cue":"crunch","who":"dog","variant":2,"db":-7.0},
+		{"t":8.0,"cue":"crunch","who":"dog","variant":0,"db":-9.0},
 	],
 	# 1. Boulder drop: tipped off the log, SPLAT; a feeble wave; rolled off, the
 	# person peeled off the floor like a hide, rolled up and carried out.

@@ -142,11 +142,11 @@ func test_every_staged_method_plays_as_a_scene()->void:
 			if not String(beat.who) in ["exec","room","camera"]:
 				assert_bool(Director.ACTS.has(String(beat.act))).override_failure_message("%s: no acting entry for %s" % [id,beat.act]).is_true()
 		assert_bool(hushed).override_failure_message(id+": no hush").is_true()
-		assert_bool(drum).override_failure_message(id+": no drum roll").is_true()
+		assert_bool(drum==(id!="dogs")).override_failure_message(id+": musical cue differs from scene tone").is_true()
 		assert_bool(caption).override_failure_message(id+": no caption").is_true()
 		assert_float(end).override_failure_message(id+": no end").is_greater(5.0)
-		# the design's 6-12 s, the acting's longest plan (the dogs, 12 s) and the walk up
-		assert_float(end).override_failure_message(id+": too long").is_less_equal(14.5)
+		# Includes the dogs' longer approach before the 12-second authored act.
+		assert_float(end).override_failure_message(id+": too long").is_less_equal(15.0 if id=="dogs" else 14.5)
 		assert_bool(ops.has("vanish") or ops.has("behead") or ops.has("crumble") or ops.has("fall") or ops.has("plan")).override_failure_message(id+": nobody dies on stage").is_true()
 		if id in ["club","behead","dogs"]:assert_bool(ops.has("blow")).override_failure_message(id+": no blow for the sound to land on").is_true()
 
@@ -198,3 +198,29 @@ func test_fire_has_an_impact_and_its_sound_matches_the_visible_collapse()->void:
 	for cue:Dictionary in track:
 		assert_float(impact+float(cue.t)).is_between(0.0,end)
 		if String(cue.cue)=="crumble":assert_float(impact+float(cue.t)).is_equal_approx(collapse,0.01)
+
+func test_dog_attack_has_anticipation_completed_aftermath_and_no_comic_return()->void:
+	var cast:=DirectorTests.home_cast()
+	for dread:int in [0,100]:
+		var facts:=DirectorTests.full_facts(dread)
+		var beats:=Director.beats_for({"kind":"execution","method":"dogs","victim":"main","style":"full"},cast,facts,3)
+		var at:={};var crunch_seconds:=0.0
+		for beat:Dictionary in beats:
+			var op:=String(beat.act)
+			assert_bool(op in ["pack_fetch","fetch","applaud_alone","cover_eyes_peek","double_take"]).override_failure_message(op).is_false()
+			if String(beat.who)=="exec":
+				at[op]=float(beat.t)
+				if op=="pack_crunch":crunch_seconds=float(beat.args.seconds)
+			if beat.get("sound") is Dictionary:
+				assert_bool(String(beat.sound.get("name","")) in ["drum_roll","punch_drum","bone_drop"]).is_false()
+		assert_float(float(at.plan)-float(at.pack_come)).is_greater_equal(2.0)
+		assert_float(float(at.pack_crunch)).is_equal_approx(float(at.plan)+6.6,0.01)
+		assert_float(float(at.caption)).is_greater(float(at.pack_crunch)+crunch_seconds)
+		assert_float(float(at.end)).is_equal_approx(14.8,0.01)
+	var plan:=preload("res://scripts/hud/court_acting.gd").exec_plan("dog_dinner")
+	assert_bool(plan.things.has("bone")).is_false()
+	for cue:Dictionary in plan.cues:assert_bool(String(cue.cue) in ["wave_goodbye","bone_dropped"]).is_false()
+	var interrupted_wave:=false
+	for clip:Dictionary in plan.roles.victim.clips:
+		if String(clip.clip)=="exec_dog_claw" and float(clip.t)>2.2 and float(clip.t)<4.35:interrupted_wave=true
+	assert_bool(interrupted_wave).is_true()

@@ -106,6 +106,85 @@ var _think:=2.0
 ## Seconds the director still holds it (it does nothing of its own meanwhile).
 var _held:=0.0
 var _after_hold:Callable=Callable()
+var _action_tweens:Array[Tween]=[]
+var _bite_pose:BitePose
+var _bite_skeleton:Skeleton3D
+const MOUTH_SOCKET:=Vector3(0.0,0.06,0.02)
+
+## Applied after the authored animation, so the jaws keep their purchase while
+## the braced shoulders and hind legs still perform the animal's own tug clip.
+class BitePose extends SkeletonModifier3D:
+	var beast:Node3D
+	var target:=Vector3.ZERO
+	var latched:=false
+	func _process_modification()->void:
+		if is_instance_valid(beast):beast._apply_bite_pose(get_skeleton(),target,latched)
+
+func _action_tween()->Tween:
+	for i in range(_action_tweens.size()-1,-1,-1):
+		if not _action_tweens[i].is_valid():_action_tweens.remove_at(i)
+	var made:=create_tween();_action_tweens.append(made)
+	return made
+
+func _mouth_skeleton()->Skeleton3D:
+	if is_instance_valid(_bite_skeleton):return _bite_skeleton
+	if model==null:return null
+	var found:=model.find_children("*","Skeleton3D",true,false)
+	_bite_skeleton=found[0] as Skeleton3D if not found.is_empty() else null
+	return _bite_skeleton
+
+func mouth_world()->Vector3:
+	var sk:=_mouth_skeleton()
+	if sk==null:return global_position+global_basis*Vector3(0,0.3,0.55)
+	var jaw:=sk.find_bone("jaw")
+	return sk.global_transform*sk.get_bone_global_pose(jaw)*MOUTH_SOCKET if jaw>=0 else global_position
+
+func bite_at(world:Vector3,latched:bool)->void:
+	var sk:=_mouth_skeleton()
+	if sk==null:return
+	if not is_instance_valid(_bite_pose):
+		_bite_pose=BitePose.new();_bite_pose.name="ExecutionBite";_bite_pose.beast=self
+		sk.add_child(_bite_pose)
+	_bite_pose.target=world;_bite_pose.latched=latched;_bite_pose.active=true
+	set_meta("execution_bite_target",world)
+
+func release_bite()->void:
+	if is_instance_valid(_bite_pose):_bite_pose.active=false;_bite_pose.latched=false
+	set_meta("execution_contact",false)
+
+func _apply_bite_pose(sk:Skeleton3D,target:Vector3,latched:bool)->void:
+	if sk==null:return
+	var court:=court_set()
+	var up:=court.global_basis.y.normalized() if court!=null else Vector3.UP
+	# Lower the long shoulder-to-mouth chain before refining neck and head.
+	# Folding the neck first shortens the remaining chest lever enough to leave
+	# the jaws above a floor-level ankle. Every joint turns at most 60 degrees;
+	# the authored braced legs and floor root are never translated or stretched.
+	for bone_name:String in ["chest","neck","head"]:
+		var bone:=sk.find_bone(bone_name)
+		if bone<0:continue
+		var pose:=sk.get_bone_global_pose(bone)
+		var pivot:=sk.global_transform*pose.origin
+		var from:=mouth_world()-pivot
+		var length:=from.length()
+		if length<0.001:continue
+		var y:=clampf((target-pivot).dot(up),-length*0.98,length*0.98)
+		var flat:=from-up*from.dot(up)
+		if flat.length_squared()<0.00001:continue
+		var toward:=flat.normalized()*sqrt(maxf(length*length-y*y,0.0))+up*y
+		var turn:=Quaternion(from.normalized(),toward.normalized())
+		var angle:=turn.get_angle()
+		if angle>1.05:turn=Quaternion.IDENTITY.slerp(turn,1.05/angle)
+		var local_turn:=sk.global_basis.inverse()*Basis(turn)*sk.global_basis
+		pose.basis=local_turn*pose.basis
+		sk.set_bone_global_pose(bone,pose)
+		sk.force_update_all_bone_transforms()
+		if absf((mouth_world()-target).dot(up))<0.012:break
+	if latched:
+		var correction:=target-mouth_world()
+		global_position+=correction-up*correction.dot(up)
+		set_meta("execution_contact_gap",mouth_world().distance_to(target))
+		set_meta("execution_mouth_world",mouth_world())
 
 static func manifest()->Dictionary:
 	if _manifest.is_empty():
@@ -265,7 +344,7 @@ func go_to(point:Vector3,gait:="walk",then:=Callable())->void:
 	if is_down():
 		# up first, then off
 		play("stand_up",0.2)
-		var wait:=create_tween();wait.tween_interval(clip_length("stand_up")*0.8)
+		var wait:=_action_tween();wait.tween_interval(clip_length("stand_up")*0.8)
 		wait.tween_callback(func()->void:if epoch==_move_epoch:_set_off())
 	else:
 		_set_off()
@@ -278,6 +357,10 @@ func _set_off()->void:
 ## Let an interrupted scene release its dog without leaving fetch/drag callbacks.
 func cancel_action(home:Variant=null)->void:
 	_move_epoch+=1
+	for action:Tween in _action_tweens:
+		if action.is_valid():action.kill()
+	_action_tweens.clear()
+	release_bite()
 	if home is Transform3D:transform=home
 	_yaw=rotation.y;_yaw_goal=_yaw
 	_moving=false;_path.clear();_arrive=Callable()
@@ -382,7 +465,7 @@ func _decide()->void:
 	elif roll<0.68:
 		play("sit",0.3);_think=rng.randf_range(5.0,10.0)
 		if rng.randf()<0.5:
-			var later:=create_tween();later.tween_interval(rng.randf_range(2.0,4.0))
+			var later:=_action_tween();later.tween_interval(rng.randf_range(2.0,4.0))
 			later.tween_callback(_maybe_scratch)
 	elif roll<0.84:
 		var fire_spot:Marker3D=cs.call("mark","animal_0")
@@ -409,7 +492,7 @@ func _idle_here()->void:
 func _maybe_scratch()->void:
 	if clip=="sit_idle" and _held<=0.0:
 		play("scratch",0.2)
-		var stop:=create_tween();stop.tween_interval(rng.randf_range(1.3,2.2))
+		var stop:=_action_tween();stop.tween_interval(rng.randf_range(1.3,2.2))
 		stop.tween_callback(_end_scratch)
 
 func _end_scratch()->void:
@@ -433,7 +516,7 @@ func scratch(seconds:=1.8)->void:
 	if not is_down():
 		play("sit",0.2);wait=clip_length("sit")
 	hold(wait+seconds+0.4)
-	var later:=create_tween();later.tween_interval(wait)
+	var later:=_action_tween();later.tween_interval(wait)
 	later.tween_callback(_start_scratch)
 	later.tween_interval(seconds)
 	later.tween_callback(_end_scratch)
@@ -443,7 +526,7 @@ func _start_scratch()->void:
 
 func bark(times:=1)->void:
 	hold(0.55*times+0.4)
-	var seq:=create_tween()
+	var seq:=_action_tween()
 	for i in times:
 		seq.tween_callback(_bark_once)
 		seq.tween_interval(0.5)

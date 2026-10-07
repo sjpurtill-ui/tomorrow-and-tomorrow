@@ -18,6 +18,7 @@ const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Effects:=preload("res://scripts/hud/court_execution_effects.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
 const Director:=preload("res://scripts/hud/court_director.gd")
+const DogAttack:=preload("res://scripts/hud/court_dog_attack.gd")
 ## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
 const GORE_PATH:="res://scripts/hud/court_figure_gore.gd"
 static var _gore:Script
@@ -47,6 +48,9 @@ var _court_dog:Node3D
 var _dog_home:=Transform3D.IDENTITY
 var _skipped:=false
 var _pack_follow:Tween
+var _pack_aftermath:Tween
+var _dog_attack:Node
+var _dog_state:Dictionary={}
 var _temporary_fire:=false
 
 const BLOOD:=Color("9c1a12")
@@ -882,6 +886,9 @@ func _plan_start(args:Dictionary)->void:
 	if cook_body!=null:
 		var cook_actor:=Acting.of(cook_body)
 		if cook_actor!=null and cook_actor.has_signal("cue"):cook_actor.connect("cue",_on_cook_cue)
+	# Take purchase during the initial fall. Both later drag bursts reuse this
+	# same contact controller and clock, including the intervening struggle.
+	if act=="dog_dinner" and not _pack.is_empty():_follow_dragged_victim()
 
 func _on_cook_cue(_fig:Node3D,event:Dictionary)->void:
 	if _ended or String(event.get("name",""))!="lid":return
@@ -966,13 +973,17 @@ func _point_node(at:Vector3)->Node3D:
 	return n
 
 ## The dogs (M's pack): to the victim's ankles; along as they are dragged off;
-## crunching behind the windbreak; one back with the thighbone.
+## crunching only where the drag finishes, then released with the execution.
 func _pack_come(args:Dictionary)->void:
+	if not _pack.is_empty():return
 	var court:=_court()
 	if court==null:return
 	_clear_drag_lane()
 	_court_dog=court.call("animal","dog") if court.has_method("animal") else null
-	if is_instance_valid(_court_dog):_dog_home=_court_dog.transform
+	if is_instance_valid(_court_dog):
+		_dog_home=_court_dog.transform
+		_dog_state={"clip":_court_dog.get("clip"),"mood":_court_dog.get("mood"),"visible":_court_dog.visible,
+			"time":_court_dog.player.current_animation_position if _court_dog.get("player")!=null else 0.0}
 	if court.has_method("dog_pack"):_pack=court.call("dog_pack",int(args.get("more",2)))
 	else:_dogs(args);return
 	var v:=_body(victim)
@@ -981,8 +992,15 @@ func _pack_come(args:Dictionary)->void:
 	for i in _pack.size():
 		var dog:Node3D=_pack[i]
 		if is_instance_valid(dog) and v!=null:
+			# dog_pack's door mark is global; new arrivals must be placed in the
+			# court's frame before they begin their visible approach.
+			if dog!=_court_dog and court.has_method("mark"):
+				var door:Node3D=court.call("mark","door")
+				if door!=null:dog.global_position=door.global_position+court.global_basis*Vector3((float(i)-1.0)*0.45,0,float(i%2)*0.5)
+			dog.call("cancel_action")
 			dog.call("hold",30.0)
 			dog.call("go_to",court.to_local(v.global_position+forward*0.85+side*(float(i)-1.0)*0.35),"trot")
+	set_meta("dog_pack_count",_pack.size());set_meta("dog_attack_state","approach")
 
 ## Only those in the drag corridor move aside, onto open floor. Remembered
 ## nudges let a skip or natural end return them without changing their marks.
@@ -1027,32 +1045,46 @@ func _clear_drag_lane()->void:
 ## the original mark until the final crunch beat.
 func _follow_dragged_victim()->void:
 	if _pack_follow!=null and _pack_follow.is_valid():return
+	if is_instance_valid(_dog_attack):return
 	var v:=_body(victim)
 	if v==null:return
-	var forward:=-_plan_frame.basis.z;var side:=forward.cross(Vector3.UP)
-	var starts:Array[Vector3]=[]
-	for dog:Node3D in _pack:
-		starts.append(dog.global_position-v.global_position)
-		dog.call("cancel_action");dog.call("hold",30.0)
-		dog.call("play","tug",0.2)
-		dog.call("face_toward",dog.get_parent_node_3d().to_local(dog.global_position-forward*2.0))
+	_dog_attack=DogAttack.new();_dog_attack.name="DogAttack";add_child(_dog_attack)
+	_dog_attack.setup(_pack,v,_court(),-_plan_frame.basis.z,_dog_drag_trace if style=="full" else Callable())
 	_pack_follow=_tween()
 	_pack_follow.tween_method(func(elapsed:float)->void:
-		if not is_instance_valid(v):return
-		for i in _pack.size():
-			var dog:Node3D=_pack[i]
-			if not is_instance_valid(dog):continue
-			var offset:=forward*0.85+side*(float(i)-1.0)*0.35
-			dog.global_position=v.global_position+starts[i].lerp(offset,clampf(elapsed/0.5,0.0,1.0)),0.0,30.0,30.0)
+		if not is_instance_valid(_dog_attack):return
+		_dog_attack.advance(elapsed)
+		set_meta("dog_attack_state",_dog_attack.state)
+		set_meta("dog_contact_count",_dog_attack.contacts),0.0,30.0,30.0)
 
 func _pack_crunch(args:Dictionary)->void:
 	if _pack_follow!=null and _pack_follow.is_valid():_pack_follow.kill()
+	if _pack_aftermath!=null and _pack_aftermath.is_valid():_pack_aftermath.kill()
+	var seconds:=maxf(float(args.get("seconds",3.0)),0.0)
+	if not is_instance_valid(_dog_attack):
+		_follow_dragged_victim()
+		if _pack_follow!=null and _pack_follow.is_valid():_pack_follow.kill()
+	if not is_instance_valid(_dog_attack):return
+	# The victim is already at the door. Do not restart the set's drag route.
+	_dog_attack.settle(seconds);set_meta("dog_attack_state","aftermath")
+	_pack_aftermath=_tween();_pack_aftermath.tween_interval(seconds)
+	_pack_aftermath.tween_callback(func()->void:
+		if is_instance_valid(_dog_attack):_dog_attack.finish_aftermath()
+		set_meta("dog_attack_state","settled"))
+
+func _dog_drag_trace(from:Vector3,to:Vector3,index:int)->void:
+	if style!="full" or _ended:return
 	var court:=_court()
-	var route:Array=court.call("drag_route") if court!=null and court.has_method("drag_route") else []
-	for dog in _pack:
-		if not is_instance_valid(dog):continue
-		if not route.is_empty() and dog.has_method("drag_off"):dog.call("drag_off",route)
-		elif dog.has_method("crunch"):dog.call("crunch",float(args.get("seconds",3.0)))
+	if court==null:return
+	var a:=court.to_local(from);var b:=court.to_local(to)
+	var distance:=Vector2(b.x-a.x,b.z-a.z).length()
+	if distance<0.04:return
+	var mesh:=BoxMesh.new();mesh.size=Vector3(0.045+float(index%3)*0.012,0.003,minf(distance,0.32))
+	var mark:=MeshInstance3D.new();mark.name="DogDragTrace";mark.mesh=mesh
+	mark.material_override=_mat(BLOOD_DARK);mark.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	court.add_child(mark);_made.append(mark)
+	mark.position=Vector3((a.x+b.x)*0.5,0.008,(a.z+b.z)*0.5)
+	mark.rotation.y=atan2(b.x-a.x,b.z-a.z)
 
 func _pack_fetch(args:Dictionary)->void:
 	if _pack.is_empty():return
@@ -1417,15 +1449,20 @@ func finish()->void:
 	for t in _tweens:
 		if t is Tween and (t as Tween).is_valid():(t as Tween).kill()
 	_tweens.clear()
+	if is_instance_valid(_dog_attack):_dog_attack.cancel()
+	set_meta("dog_attack_state","ended");set_meta("dog_contact_count",0)
 	_restore_survivors()
 	var court:=_court()
 	if _temporary_fire and court!=null and court.has_method("execution_fire"):
 		court.call("execution_fire",point("fire"),false);_temporary_fire=false
 	for dog in _pack:
 		if not is_instance_valid(dog):continue
-		if dog.has_method("cancel_action"):dog.call("cancel_action",_dog_home if _skipped and dog==_court_dog else null)
+		if dog.has_method("cancel_action"):dog.call("cancel_action",_dog_home if dog==_court_dog else null)
 		if dog==_court_dog:
-			if not _skipped:dog.call("go_to",_dog_home.origin,"walk")
+			dog.visible=bool(_dog_state.get("visible",true))
+			dog.set("mood",_dog_state.get("mood","calm"))
+			dog.call("play",String(_dog_state.get("clip","idle")),0.0,float(_dog_state.get("time",0.0)))
+			dog.set_meta("execution_restored",true)
 		else:
 			if court!=null and court.get("animals") is Array:(court.get("animals") as Array).erase(dog)
 			dog.queue_free()

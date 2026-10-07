@@ -172,16 +172,15 @@ const EXEC_PLANS:={
 	"dog_dinner":{"length":12.0,"needs":["dogs"],
 		"roles":{
 			"victim":{"clips":[{"clip":"exec_dog_down","t":0.0},{"clip":"exec_dog_claw","t":1.2,"move":[0.0,0.0,-1.2],"until":2.2},
-				{"clip":"exec_dog_grip","t":2.2},{"clip":"exec_dog_claw","t":5.0,"move":[0.0,0.0,-1.2],"until":6.6}],"at":[0.0,0.0,0.0],"yaw":0.0}},
+				{"clip":"exec_dog_grip","t":2.2},{"clip":"exec_dog_claw","t":4.05},{"clip":"exec_dog_claw","t":5.0,"move":[0.0,0.0,-1.2],"until":6.6}],"at":[0.0,0.0,0.0],"yaw":0.0}},
 		"things":{"grip":{"at":[0.0,0.1,1.12],"note":"what the hands clamp on at 2.2 s: a post's foot, the hearth stone, or nothing"},
 			"windbreak":{"at":[0.0,0.0,-1.6],"note":"the victim is behind it by 6.6 s (dragged 3.1 m feet first)"},
-			"dogs":{"pull_from":[0.0,0.0,-0.55],"note":"the dogs face the victim and hold the ankles (0.52 m behind the victim's place as it lies), walking backwards"},
-			"bone":{"drop_at":[0.0,0.0,1.6],"t":10.6}},
+			"dogs":{"pull_from":[0.0,0.0,-0.55],"note":"the dogs face the victim and hold the ankles (0.52 m behind the victim's place as it lies), walking backwards"}},
 		"parts":[],
-		"cues":[{"t":0.0,"cue":"grab"},{"t":0.6,"cue":"thud"},{"t":2.95,"cue":"tug"},{"t":3.8,"cue":"slip"},{"t":4.35,"cue":"wave_goodbye"},
-			{"t":6.6,"cue":"out_of_sight"},{"t":7.0,"cue":"crunch"},{"t":7.6,"cue":"crunch"},{"t":8.2,"cue":"crunch"},{"t":10.6,"cue":"bone_dropped"},{"t":11.0,"cue":"after"}],
-		"room":{"grab":["gasp"],"out_of_sight":["look_at:windbreak"],"crunch":["wince_crunch"],"bone_dropped":["look_at:bone","look_at:god"],
-			"after":["applaud_alone","vomit","gulp"]},
+		"cues":[{"t":0.0,"cue":"grab"},{"t":0.6,"cue":"thud"},{"t":2.95,"cue":"tug"},{"t":3.8,"cue":"slip"},{"t":4.05,"cue":"lost_grip"},
+			{"t":6.6,"cue":"out_of_sight"},{"t":7.0,"cue":"crunch"},{"t":7.6,"cue":"crunch"},{"t":8.2,"cue":"crunch"},{"t":11.0,"cue":"after"}],
+		"room":{"grab":["gasp"],"out_of_sight":["look_at:windbreak"],"crunch":["wince_crunch"],
+			"after":["stricken","hide_eyes"]},
 		"camera":{"from":[0.0,2.0,6.4],"at":[0.0,0.7,-0.4]}},
 }
 ## The beats in a clip for the stage (time order): court_anims.json "events".

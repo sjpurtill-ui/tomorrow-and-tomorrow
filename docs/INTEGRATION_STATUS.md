@@ -1,3 +1,25 @@
+## October 6 — Death by hounds: authorized integration
+
+The user explicitly requested finishing and merging the dogs execution with a
+frightening tone. `codex/dog-execution`, based on canonical/remote `75806bff`,
+adds three posed ankle contacts, staggered tugs, two victim drag bursts and a
+completed 2.4-second feeding aftermath. The 14.8-second sequence uses the existing
+recorded adult scream, stricken witnesses and a quiet final hold. The goodbye
+wave, returning-bone gag, applause and musical punchline are removed. The menu
+now says "Death by hounds". No simulation, adjudication or save fields change.
+
+Validation: 78/78 combined checks; five corrected single-pass rig tests pass
+after GPU review exposed a jaw-height issue. Final private GPU runs in both
+early court settings show three contacts with at most 2.342 cm rendered jaw gap.
+Natural completion and skip both remove all added dogs and restore the resident
+dog exactly, with no surviving movement tweens. Contact, drag, witness reaction
+and final-hold frames reviewed. The actual court order also passes end to end:
+engine removal, dogs method, execution start and natural finish. Generated
+evidence and imports are excluded.
+Delivery follows a verified remote-first main push and canonical fast-forward;
+the running player is preserved and needs its normal restart to load scripts.
+See `docs/design/DOG_EXECUTION.md` for evidence, bounds and diagnostic limits.
+
 ## October 6 — Clustered expansion and era appearance: authorized integration
 
 The expansion correction follows the user's explicit direction: neighboring

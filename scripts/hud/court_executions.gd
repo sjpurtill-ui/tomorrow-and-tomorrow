@@ -50,7 +50,7 @@ const METHODS:=[
 	{"id":"buried","n":7,"name":"Buried to the neck","words":"bury|buried|to the neck|in the ground","needs_all":["farming","dairy"],"done":"buried to the neck and trodden by an ox","seconds":11.0},
 	{"id":"stoning","n":6,"name":"Stoned by the whole court","words":"stone (him|her|them)|stoned|stoning|stones at|rocks at","done":"stoned by the whole court","seconds":10.0},
 	{"id":"spears","n":5,"name":"Spear pincushion","words":"spear|spears|run (him|her|them) through","done":"speared by the watch","seconds":9.0},
-	{"id":"dogs","n":4,"name":"Dog dinner","words":"dog|dogs|hounds|wolves","needs_set":"dogs","done":"fed to the camp dogs","seconds":10.0},
+	{"id":"dogs","n":4,"name":"Death by hounds","words":"dog|dogs|hounds|wolves","needs_set":"dogs","done":"fed to the camp dogs","seconds":10.0},
 	{"id":"fire","n":3,"name":"Into the fire","words":"burn|burned|burnt|into the fire|fire|flames|pyre|roast","done":"thrown into the fire","seconds":9.0},
 	{"id":"club","n":2,"name":"Club home run","words":"club|clubbed|cudgel|bludgeon|brain (him|her|them)|knock (his|her|their) head","done":"clubbed, head and all, into the cooking pot","seconds":9.0},
 	{"id":"boulder","n":1,"name":"Boulder drop","words":"boulder|crush|crushed|flatten|a rock on","done":"flattened under a boulder","seconds":10.0},
