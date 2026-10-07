@@ -1,5 +1,7 @@
 extends Node
 
+const PlotGeometry:=preload("res://scripts/settlement_plot_geometry.gd")
+
 const VALID_STATUSES:= ["active","under_construction","stressed","damaged","vacant","ruin","reclaimed"]
 const VALID_REPAIR_STATES:= ["maintained","emergency_stabilization","awaiting_assessment","awaiting_materials","repairing","rebuilding","salvaging","unrepairable"]
 const VALID_REOCCUPATION_STATES:= ["occupied","evacuating","displaced","unsafe_return","temporary_use","returning","partially_reoccupied","reoccupied","contested_claim","permanently_abandoned"]
@@ -1505,44 +1507,10 @@ func _create_founding_plots(city:Dictionary={})->void:
 	if secondary: city.local_resources["settlement_plots"]=target
 
 func _founding_plot_center(index:int,total_count:int,land_use:String,rng:RandomNumberGenerator,attempt:int)->Vector2:
-	var seed_angle:=float(abs(WorldSimulation.state.world_seed)%6283)*0.001
-	if land_use=="communal":
-		return Vector2.ZERO
-	if land_use=="water":
-		return Vector2.from_angle(seed_angle+PI*0.82+attempt*0.17)*rng.randf_range(0.066,0.084)
-	if land_use=="waste":
-		return Vector2.from_angle(seed_angle-PI*0.32+attempt*0.19)*rng.randf_range(0.080,0.105)
-	var cluster_count:=3
-	var cluster_index:int=(index*7+absi(WorldSimulation.state.world_seed))%cluster_count
-	var cluster_angle:=seed_angle+float(cluster_index)*TAU/float(cluster_count)+sin(float(cluster_index*19+WorldSimulation.state.world_seed))*0.34
-	var cluster_distance:=0.014+float(cluster_index%2)*0.008+rng.randf_range(-0.002,0.003)
-	var cluster_center:=Vector2.from_angle(cluster_angle)*cluster_distance
-	var local_angle:=seed_angle+float(index)*2.399963229728653+float(attempt)*1.37
-	var local_radius:=rng.randf_range(0.004,0.016)+float(attempt)*0.0012
-	if land_use=="storage":
-		cluster_center*=0.45
-		local_radius*=0.48
-	elif land_use=="workshop":
-		cluster_center*=0.74
-		local_radius*=0.72
-	var position:=cluster_center+Vector2.from_angle(local_angle)*local_radius
-	# Preserve the founding hearth as a real nucleus. Household claims begin beyond
-	# its shared working/meeting clearance instead of accidentally occupying it first.
-	if land_use in ["residential_compound","mixed_household"] and position.length()<0.014:
-		position=position.normalized()*0.014 if position.length()>0.0001 else Vector2.from_angle(local_angle)*0.014
-	return position
+	return PlotGeometry.founding_center(WorldSimulation.state.world_seed,index,total_count,land_use,rng,attempt)
 
 func _irregular_polygon(center:Vector2,radius:float,plot_seed:int)->PackedVector2Array:
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=plot_seed^0x5f3759df
-	var vertices:=rng.randi_range(5,8)
-	var rotation:=rng.randf_range(0.0,TAU)
-	var polygon:=PackedVector2Array()
-	for vertex_index in vertices:
-		var angle:=rotation+TAU*float(vertex_index)/float(vertices)+rng.randf_range(-0.11,0.11)
-		var vertex_radius:=radius*rng.randf_range(0.72,1.18)
-		polygon.append(center+Vector2(cos(angle),sin(angle))*vertex_radius)
-	return polygon
+	return PlotGeometry.irregular_polygon(center,radius,plot_seed)
 
 func _founding_function_form(land_use:String)->String:
 	return {"communal":"open_hearth_yard","storage":"guarded_cache","workshop":"open_work_yard","water":"carried_water_point","waste":"refuse_and_latrine_ground"}.get(land_use,"open_ground")
@@ -1564,12 +1532,7 @@ func _create_founding_routes_for(plots:Array[Dictionary],routes:Array[Dictionary
 			if distance<nearest_distance:
 				nearest=candidate
 				nearest_distance=distance
-		var direction:=nearest-plot_center
-		var side:=Vector2(-direction.y,direction.x).normalized()
-		var bend_strength:=minf(0.005,nearest_distance*0.16)
-		var bend_a:=plot_center.lerp(nearest,0.34)+side*sin(float(int(plot.id)*37+WorldSimulation.state.world_seed))*bend_strength
-		var bend_b:=plot_center.lerp(nearest,0.69)-side*sin(float(int(plot.id)*19+WorldSimulation.state.world_seed)*0.73)*bend_strength*0.68
-		var route:Dictionary={"id":route_id,"kind":"desire_path","points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.38+float(int(plot.id)%5)*0.025,"width_m":0.62+float(int(plot.id)%4)*0.11,"created_day":day,"active":true}
+		var route:Dictionary={"id":route_id,"kind":"desire_path","points":PlotGeometry.route_points(plot_center,nearest,int(plot.id),WorldSimulation.state.world_seed,true,nearest_distance),"condition":0.38+float(int(plot.id)%5)*0.025,"width_m":0.62+float(int(plot.id)%4)*0.11,"created_day":day,"active":true}
 		routes.append(route)
 		plot["frontage_route_id"]=route_id
 		connected_centers.append(plot_center)
@@ -3172,58 +3135,16 @@ func _attempt_functional_growth(day:int,events:Array[Dictionary],context:Diction
 		return
 
 func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:Dictionary)->float:
-	# Reject occupied ground first. The remaining terms make settlement growth
-	# follow inherited lanes, useful nuclei, water and buildable terrain instead of
-	# adding rings around an abstract population centre.
-	for existing in WorldSimulation.state.settlement_plots:
-		var existing_radius:=sqrt(_polygon_area_km2(existing.get("polygon",PackedVector2Array()))/PI)
-		if candidate.distance_to(Vector2(existing.get("centroid",Vector2.ZERO)))<(radius+existing_radius)*1.18:
-			return -10000.0
-	var nearest_route:=INF
-	for route in WorldSimulation.state.settlement_routes:
-		if not bool(route.get("active",true)): continue
-		var points:PackedVector2Array=route.get("points",PackedVector2Array())
-		for point_index in points.size()-1:
-			nearest_route=minf(nearest_route,Geometry2D.get_closest_point_to_segment(candidate,points[point_index],points[point_index+1]).distance_to(candidate))
-	var route_access:=exp(-nearest_route/0.018) if nearest_route<INF else 0.0
-	var nucleus_pull:=0.0
-	var nearest_nucleus_distance:=INF
-	for nucleus in WorldSimulation.state.settlement_nuclei:
-		if not bool(nucleus.get("active",true)): continue
-		var distance:=candidate.distance_to(Vector2(nucleus.get("position",Vector2.ZERO)))
-		nearest_nucleus_distance=minf(nearest_nucleus_distance,distance)
-		nucleus_pull=maxf(nucleus_pull,float(nucleus.get("pull",1.0))*exp(-distance/0.14))
-	var core_distance:=candidate.length()
-	var compactness:=exp(-nearest_nucleus_distance/0.22) if nearest_nucleus_distance<INF else exp(-core_distance/0.22)
-	var edge_preference:=exp(-absf(nearest_nucleus_distance-0.095)/0.065) if nearest_nucleus_distance<INF else exp(-absf(core_distance-0.095)/0.065)
-	var score:=route_access*2.8+nucleus_pull*0.72
-	if land_use=="storage": score+=compactness*1.25
-	elif land_use in ["workshop","dirty_industry"]: score+=edge_preference*1.12-route_access*0.10
-	else: score+=compactness*0.86
-	var terrain_score:=_growth_terrain_score(candidate,context)
-	return terrain_score if terrain_score<=-9000.0 else score+terrain_score
+	return PlotGeometry.site_score(candidate,radius,land_use,WorldSimulation.state.settlement_plots,WorldSimulation.state.settlement_routes,WorldSimulation.state.settlement_nuclei,_geometry_context(context))
 
 func _growth_terrain_score(candidate:Vector2,context:Dictionary)->float:
-	var score:=0.0
-	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
-	var world_x:=origin.x+candidate.x
-	var world_z:=origin.z+candidate.y
-	var buildable_callable:Callable=context.get("buildable_land_at",Callable())
-	if buildable_callable.is_valid() and not bool(buildable_callable.call(world_x,world_z)): return -10000.0
-	var height_callable:Callable=context.get("terrain_height_at",Callable())
-	if height_callable.is_valid():
-		var sample:=0.012
-		var east_west:=absf(float(height_callable.call(world_x+sample,world_z))-float(height_callable.call(world_x-sample,world_z)))
-		var north_south:=absf(float(height_callable.call(world_x,world_z+sample))-float(height_callable.call(world_x,world_z-sample)))
-		var slope:=maxf(east_west,north_south)/(sample*2.0)
-		if slope>0.34: return -10000.0
-		score-=slope*3.2
-	var river_callable:Callable=context.get("river_distance_at",Callable())
-	if river_callable.is_valid():
-		var river_distance:=float(river_callable.call(world_x,world_z))
-		if river_distance<0.025: return -10000.0
-		score+=exp(-absf(river_distance-0.16)/0.20)*0.24
-	return score
+	return PlotGeometry.terrain_score(candidate,_geometry_context(context))
+
+func _geometry_context(context:Dictionary)->Dictionary:
+	if context.has("settlement_origin"): return context
+	var result:=context.duplicate(false)
+	result["settlement_origin"]=WorldSimulation.state.settlement_founded_at
+	return result
 
 func _nearest_nucleus_id(position:Vector2)->int:
 	var nearest_id:=1
@@ -3374,12 +3295,7 @@ func _create_growth_route(plot:Dictionary,day:int,route_kind:String="desire_path
 			nearest_distance=distance
 	var route_id:=1
 	for route in WorldSimulation.state.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
-	var direction:=nearest-plot_center
-	var side:=Vector2(-direction.y,direction.x).normalized()
-	var bend_strength:=minf(0.004,nearest_distance*0.16)
-	var bend_a:=plot_center.lerp(nearest,0.36)+side*sin(float(int(plot.id)*29+WorldSimulation.state.world_seed))*bend_strength
-	var bend_b:=plot_center.lerp(nearest,0.72)-side*sin(float(int(plot.id)*17+WorldSimulation.state.world_seed)*0.67)*bend_strength*0.62
-	WorldSimulation.state.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PackedVector2Array([plot_center,bend_a,bend_b,nearest]),"condition":0.10 if route_kind=="camp_path" else (0.16 if route_kind=="field_track" else 0.22),"width_m":0.34 if route_kind=="camp_path" else (0.72 if route_kind=="field_track" else 0.58),"created_day":day,"active":true})
+	WorldSimulation.state.settlement_routes.append({"id":route_id,"kind":route_kind,"points":PlotGeometry.route_points(plot_center,nearest,int(plot.id),WorldSimulation.state.world_seed,false,nearest_distance),"condition":0.10 if route_kind=="camp_path" else (0.16 if route_kind=="field_track" else 0.22),"width_m":0.34 if route_kind=="camp_path" else (0.72 if route_kind=="field_track" else 0.58),"created_day":day,"active":true})
 	plot["frontage_route_id"]=route_id
 
 func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary={})->Dictionary:
@@ -3387,53 +3303,11 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 	var plot_seed:=hash("%d:settlement_growth:%d" % [WorldSimulation.state.world_seed,plot_id])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=plot_seed
-	var radius:=rng.randf_range(0.007,0.010)
-	var center:=Vector2.ZERO
-	var best_center:=Vector2.ZERO
-	var best_score:=-INF
-	var anchors:Array[Dictionary]=[]
-	for existing in WorldSimulation.state.settlement_plots:
-		if String(existing.get("land_use","")) in ["residential_compound","mixed_household","communal","workshop"] and String(existing.get("status","")) not in ["ruin","reclaimed"]:
-			anchors.append(existing)
-	if anchors.is_empty(): return {}
-	var active_nuclei:Array[Dictionary]=[]
-	for nucleus in WorldSimulation.state.settlement_nuclei:
-		if bool(nucleus.get("active",true)): active_nuclei.append(nucleus)
-	var target_nucleus:Dictionary=active_nuclei[absi(plot_seed)%active_nuclei.size()] if not active_nuclei.is_empty() else {"id":1,"position":Vector2.ZERO}
-	var target_nucleus_position:=Vector2(target_nucleus.get("position",Vector2.ZERO))
-	anchors.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
-		return Vector2(a.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position)<Vector2(b.get("centroid",Vector2.ZERO)).distance_to(target_nucleus_position))
-	var cluster_growth:=anchors.size()>=34 and plot_id%10 in [0,1,2]
-	var cluster_phase:=floori(float(plot_id)/10.0)
-	var cluster_angle:=fmod(float(hash("%d:outer_cluster:%d" % [WorldSimulation.state.world_seed,cluster_phase]))*0.000001,TAU)
-	var cluster_target:=target_nucleus_position+Vector2.from_angle(cluster_angle)*((0.090+float(cluster_phase%4)*0.014) if cluster_growth else 0.0)
-	for attempt in 72:
-		var anchor_index:=mini(anchors.size()-1,floori(pow(rng.randf(),2.15)*float(anchors.size())))
-		if cluster_growth:
-			var outer_start:=clampi(floori(float(anchors.size())*0.62),0,anchors.size()-1)
-			anchor_index=rng.randi_range(outer_start,anchors.size()-1)
-		var anchor:Dictionary=anchors[anchor_index]
-		var anchor_center:=Vector2(anchor.get("centroid",Vector2.ZERO))
-		var anchor_polygon:PackedVector2Array=anchor.get("polygon",PackedVector2Array())
-		var anchor_radius:=sqrt(_polygon_area_km2(anchor_polygon)/PI)
-		var nucleus_outward:=anchor_center-target_nucleus_position
-		var outward:=nucleus_outward.normalized() if nucleus_outward.length()>0.004 else Vector2.from_angle(rng.randf()*TAU)
-		var angle:=rng.randf()*TAU
-		if rng.randf()<0.28:
-			angle=outward.angle()+rng.randf_range(-0.92,0.92)
-		center=anchor_center+Vector2.from_angle(angle)*(anchor_radius+radius+rng.randf_range(0.0022,0.0065))
-		var score:=_growth_site_score(center,radius,"residential_compound",context)
-		# Most households infill, but a stable seeded minority follows the outer
-		# frontage so a settlement develops irregular arms rather than a disk.
-		if (plot_id+WorldSimulation.state.world_seed)%5==0: score+=exp(-absf(center.distance_to(target_nucleus_position)-0.11)/0.075)*0.82
-		if cluster_growth: score+=exp(-center.distance_to(cluster_target)/0.075)*1.48
-		if score>best_score:
-			best_score=score
-			best_center=center
-	if best_score<=-9000.0: return {}
-	center=best_center
+	var geometry:=PlotGeometry.household(WorldSimulation.state.world_seed,plot_id,WorldSimulation.state.settlement_plots,WorldSimulation.state.settlement_routes,WorldSimulation.state.settlement_nuclei,_geometry_context(context),rng)
+	if geometry.is_empty(): return {}
+	var center:Vector2=geometry.center
+	var polygon:PackedVector2Array=geometry.polygon
 	WorldSimulation.state.next_settlement_plot_id+=1
-	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	var plot:Dictionary={
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"roof_plan":preload("res://scripts/building_material_operations.gd").roof_plan(recipe.get("building_materials",{}),_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form))),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"visual_material_mix":preload("res://scripts/building_material_operations.gd").visual_mix(recipe.cost) if not recipe.get("building_materials",{}).is_empty() else recipe.mix.duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
@@ -3740,18 +3614,10 @@ func validate_settlement_network()->PackedStringArray:
 	return errors
 
 func _polygon_area_km2(polygon:PackedVector2Array)->float:
-	if polygon.size()<3: return 0.0
-	var twice_area:=0.0
-	for index in polygon.size():
-		var next:=(index+1)%polygon.size()
-		twice_area+=polygon[index].x*polygon[next].y-polygon[next].x*polygon[index].y
-	return absf(twice_area)*0.5
+	return PlotGeometry.polygon_area_km2(polygon)
 
 func _polygon_centroid(polygon:PackedVector2Array)->Vector2:
-	if polygon.is_empty(): return Vector2.ZERO
-	var sum:=Vector2.ZERO
-	for point in polygon: sum+=point
-	return sum/float(polygon.size())
+	return PlotGeometry.polygon_centroid(polygon)
 
 func _active_nuclei()->int:
 	var count:=0

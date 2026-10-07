@@ -1,3 +1,21 @@
+## October 6 — Organic expansion through the root settlement solver
+
+The user rejected the ring of repeated compounds. This supersedes the prior
+cluster-fringe design: expansion now uses the root's shared founding/household
+geometry and exact EarlySettlementVisual placement/rendering. There are no
+radial shells or population-sized exclusion circle for local seeds. Inherited
+parcels, routes and building sites grow in place; actual occupied root polygons
+absorb overlaps individually. No simulation, saved fields or human-map policy
+changes. Root geometry extraction matches the original records and RNG results.
+
+Bounded preparation advances one claim or one changed parcel per step, retaining
+old visible patches; canopy clearing follows installed parcels immediately.
+79 distinct checks pass, including adjacent footprints, growth stability,
+fog-independent siting, root absorption and canopy refresh. The exact current
+Ashfire save (2,485 people, day 77,329) supplies graphical review. Base `adea08b5`,
+branch `codex/organic-settlement-seeds`; delivery is remote-first then canonical
+fast-forward. See `docs/design/ORGANIC_SETTLEMENT_SEEDS.md` for scope/evidence.
+
 ## October 6 — Ruler portrait resolution and framing: authorized integration
 
 The reported foreign ruler card was enlarging a 112 x 128 roster still and

@@ -25,6 +25,240 @@ func _flush(visual)->void:
 		guard+=1
 	assert_int(int(visual.stats().pending)).is_equal(0)
 
+func _organic_seed(count:int=3)->Dictionary:
+	var plots:Array[Dictionary]=[]
+	var routes:Array[Dictionary]=[]
+	for index in count:
+		var at:=Vector2(float(index)*0.04,0.0)
+		plots.append({"id":index+1,"seed":177+index*31,"centroid":at,
+			"polygon":PackedVector2Array([at+Vector2(-0.017,-0.020),at+Vector2(0.018,-0.019),at+Vector2(0.018,0.020),at+Vector2(-0.018,0.019)]),
+			"frontage_route_id":index+1,"area_ha":0.14,"roof_coverage":0.30,
+			"material_family":"organic","land_use":"residential_compound","form":"timber_household",
+			"roof_plan":"timber_ridge","storeys":1,"condition":0.9,"status":"active","construction_progress":1.0})
+		routes.append({"id":index+1,"active":true,"width_m":0.8,"points":PackedVector2Array([at+Vector2(-0.019,0),at+Vector2(0.021,0.005)])})
+	return {"id":"organic_fixture","kind":"cluster","group":"homesteads","position":Vector2(40,60),
+		"settlement_plots":plots,"settlement_routes":routes,"geometry_signature":count,"track_from":Vector2.ZERO}
+
+func _seed_context()->Dictionary:
+	return {"style":{},"road_tier":0}
+
+func _request_seed(visual,record:Dictionary,key:String,signature:int)->void:
+	var entries:Array[Dictionary]=[{"key":key,"signature":signature,"build":visual._build_patch.bind(record,_seed_context())}]
+	visual.retained.request(entries)
+
+func _seed_identities(plan:Dictionary)->Dictionary:
+	var result:Dictionary={}
+	for building:Dictionary in plan.buildings:
+		result[building.id]=[building.position,building.angle,building.footprint,building.variant]
+	return result
+
+func test_organic_seed_uses_exact_root_parcel_solver_and_world_transforms()->void:
+	var visual=_visual()
+	var record:=_organic_seed()
+	var before:=var_to_bytes(record)
+	var root_plan:=preload("res://scripts/early_settlement_visual.gd").layout(record.settlement_plots,record.settlement_routes,func(_point:Vector2)->bool:return true)
+	var drawn:Node3D=auto_free(Node3D.new())
+	visual._build_patch(drawn,record,_seed_context())
+	var seed_plan:Dictionary=drawn.get_meta("country_seed_plan")
+	assert_int(seed_plan.buildings.size()).is_greater(0)
+	assert_dict(_seed_identities(seed_plan)).is_equal(_seed_identities(root_plan))
+	assert_array(var_to_bytes(record)).is_equal(before)
+	var expected:Node3D=auto_free(Node3D.new())
+	preload("res://scripts/early_settlement_visual.gd").render(root_plan,Vector3(40,0,60),func(_x:float,_z:float)->float:return 0.0,expected)
+	var actual_transforms:Array=[];var expected_transforms:Array=[]
+	for child:Node in drawn.get_children():
+		if child.has_meta("source_transforms"):actual_transforms.append_array(child.get_meta("source_transforms"))
+	for child:Node in expected.get_children():
+		if child.has_meta("source_transforms"):expected_transforms.append_array(child.get_meta("source_transforms"))
+	assert_array(actual_transforms).is_equal(expected_transforms)
+	assert_bool(drawn.has_node("ScatteredHomes")).is_false()
+
+func test_organic_seed_growth_keeps_existing_sites_and_reuses_unchanged_layout()->void:
+	var visual=_visual()
+	var first:Node3D=auto_free(Node3D.new())
+	visual._build_patch(first,_organic_seed(2),_seed_context())
+	var before:=_seed_identities(first.get_meta("country_seed_plan"))
+	var steps:int=visual.seed_layout_steps
+	var repeated:Node3D=auto_free(Node3D.new())
+	visual._build_patch(repeated,_organic_seed(2),_seed_context())
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+	var grown:Node3D=auto_free(Node3D.new())
+	visual._build_patch(grown,_organic_seed(3),_seed_context())
+	var after:=_seed_identities(grown.get_meta("country_seed_plan"))
+	assert_int(after.size()).is_greater(before.size())
+	assert_int(visual.seed_layout_steps).is_equal(steps+1)
+	for id:String in before:assert_array(after.get(id,[])).is_equal(before[id])
+
+func test_organic_layout_advances_one_parcel_and_keeps_old_patch_until_ready()->void:
+	var visual=_visual()
+	var record:=_organic_seed(2)
+	_request_seed(visual,record,"organic",1)
+	_flush(visual)
+	var old_id:int=visual.retained.installed.organic.node.get_instance_id()
+	var canopy_revision:int=visual.seed_ground_revision
+	assert_int(visual.seed_ground_records().size()).is_equal(1)
+	assert_int(visual.seed_ground_records()[0].plots.size()).is_equal(2)
+	var steps:int=visual.seed_layout_steps
+	record=_organic_seed(4)
+	_request_seed(visual,record,"organic",2)
+	visual.process_jobs(1,1)
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+	visual.process_jobs(1,1)
+	assert_int(visual.seed_layout_steps).is_equal(steps+1)
+	assert_int(visual.retained.installed.organic.node.get_instance_id()).is_equal(old_id)
+	assert_int(visual.seed_ground_revision).is_equal(canopy_revision)
+	_flush(visual)
+	assert_int(visual.seed_layout_steps).is_equal(steps+2)
+	assert_int(visual.retained.installed.organic.node.get_instance_id()).is_not_equal(old_id)
+	assert_int(visual.seed_ground_revision).is_greater(canopy_revision)
+	assert_int(visual.seed_ground_records()[0].plots.size()).is_equal(4)
+
+func test_seed_generation_is_incremental_and_keeps_previous_claims_private()->void:
+	var visual=_visual()
+	var record:={"id":"growing_seed","kind":"cluster","group":"homesteads","position":Vector2(40,60),"geometry_signature":3,
+		"settlement_growth":{"seed":4177,"parcels":3,"templates":[{"form":"timber_household","roof_plan":"timber_ridge","material_family":"organic","storeys":1}],"obstacles":[]}}
+	var source:=var_to_bytes(record)
+	_request_seed(visual,record,"grown",3)
+	visual.process_jobs(1,1)
+	assert_int(visual.seed_growth_steps).is_equal(0)
+	visual.process_jobs(1,1)
+	assert_int(visual.seed_growth_steps).is_equal(1)
+	assert_int(int(visual._job.growth.state.next)).is_equal(1)
+	assert_int(visual.retained.installed.size()).is_equal(0)
+	_flush(visual)
+	assert_array(var_to_bytes(record)).is_equal(source)
+	var before:Dictionary=visual._growth_states.growing_seed.duplicate(true)
+	assert_int(before.plots.size()).is_greater(0)
+	var homes:=_seed_identities(visual.retained.installed.grown.node.get_meta("country_seed_plan"))
+	record.settlement_growth.parcels=5;record.geometry_signature=5
+	_request_seed(visual,record,"grown",5)
+	visual.process_jobs(1,1);visual.process_jobs(1,1)
+	# Partial work cannot write through the retained growth state or its arrays.
+	assert_dict(visual._growth_states.growing_seed).is_equal(before)
+	_flush(visual)
+	var after:Dictionary=visual._growth_states.growing_seed
+	assert_int(int(after.next)).is_equal(5)
+	for index in before.plots.size():assert_dict(after.plots[index]).is_equal(before.plots[index])
+	for index in before.routes.size():assert_dict(after.routes[index]).is_equal(before.routes[index])
+	var now:=_seed_identities(visual.retained.installed.grown.node.get_meta("country_seed_plan"))
+	for id:String in homes:assert_array(now.get(id,[])).is_equal(homes[id])
+
+func test_completed_seed_refreshes_canopy_revision_without_day_or_camera_change()->void:
+	var layer=auto_free(preload("res://scripts/settlement_country_layer.gd").new())
+	var visual=Visual.new();layer.add_child(visual)
+	visual.configure(func(_point:Vector2)->float:return 0.0,func(_point:Vector2)->bool:return true)
+	layer.layers={"player":{"node":visual}}
+	_request_seed(visual,_organic_seed(2),"canopy_seed",1)
+	var revision:int=layer.clearing_revision
+	assert_int(layer.canopy_clearings(Vector2(40,60)).size()).is_equal(0)
+	var guard:=0
+	while not visual.retained.pending.is_empty() and guard<100:
+		layer.process_jobs(100000,8);guard+=1
+	assert_int(visual.retained.pending.size()).is_equal(0)
+	assert_int(layer.clearing_revision).is_greater(revision)
+	assert_int(layer.canopy_clearings(Vector2(40,60)).size()).is_equal(2)
+	var stable:int=layer.clearing_revision
+	for index in 4:layer.process_jobs(100000,8)
+	assert_int(layer.clearing_revision).is_equal(stable)
+
+func test_organic_seed_fog_clips_saved_footprints_without_changing_placement()->void:
+	var visual=_visual()
+	var record:=_organic_seed(3)
+	var whole:Node3D=auto_free(Node3D.new())
+	visual._build_patch(whole,record,_seed_context())
+	var before:=_seed_identities(whole.get_meta("country_seed_plan"))
+	var steps:int=visual.seed_layout_steps
+	visual.configure(func(_at:Vector2)->float:return 0.0,func(_at:Vector2)->bool:return true,
+		func(at:Vector2)->bool:return at.x<40.045,func(_at:Vector2)->bool:return true)
+	var partial:Node3D=auto_free(Node3D.new())
+	visual._build_patch(partial,record,_seed_context())
+	var shown:Dictionary=partial.get_meta("country_seed_plan")
+	assert_int(shown.buildings.size()).is_between(1,before.size()-1)
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+	assert_bool(partial.get_meta("fog_clipped")).is_true()
+	for building:Dictionary in shown.buildings:
+		assert_array(_seed_identities(shown)[building.id]).is_equal(before[building.id])
+		for corner:Vector2 in building.footprint:assert_float(corner.x+40.0).is_less(40.045)
+	visual.configure(func(_at:Vector2)->float:return 0.0,func(_at:Vector2)->bool:return true)
+	var revealed:Node3D=auto_free(Node3D.new())
+	visual._build_patch(revealed,record,_seed_context())
+	assert_dict(_seed_identities(revealed.get_meta("country_seed_plan"))).is_equal(before)
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+
+func test_adjacent_organic_seeds_reserve_nonoverlapping_roof_footprints()->void:
+	var visual=_visual()
+	var footprints:Array=[]
+	for side in 2:
+		var origin:=Vector2(40.0+float(side)*0.08,60.0)
+		var neighbour:=Vector2(0.08 if side==0 else -0.08,0.0)
+		var record:={"id":"adjacent_"+str(side),"kind":"cluster","group":"homesteads","position":origin,
+			"settlement_growth":{"seed":4177+side,"parcels":12,"neighbours":[neighbour],"templates":[{"form":"timber_household","roof_plan":"timber_ridge","material_family":"organic","storeys":1}],"obstacles":[]}}
+		var parent:Node3D=auto_free(Node3D.new())
+		visual._build_patch(parent,record,_seed_context())
+		var plan:Dictionary=parent.get_meta("country_seed_plan")
+		assert_int(plan.buildings.size()).is_greater(0)
+		for building:Dictionary in plan.buildings:
+			var world:=PackedVector2Array()
+			for corner:Vector2 in building.footprint:
+				assert_bool(preload("res://scripts/settlement_country_growth.gd").owns(record.settlement_growth,corner)).is_true()
+				world.append(corner+origin)
+			for previous:PackedVector2Array in footprints:assert_array(Geometry2D.intersect_polygons(world,previous)).is_empty()
+			footprints.append(world)
+
+func test_actual_root_growth_absorbs_overlapping_saved_roofs_without_rerolling()->void:
+	var visual=_visual()
+	var record:={"id":"absorbed_seed","kind":"cluster","group":"homesteads","position":Vector2(40,60),
+		"settlement_growth":{"seed":4177,"parcels":12,"templates":[{"form":"timber_household","roof_plan":"timber_ridge","material_family":"organic","storeys":1}],"obstacles":[]}}
+	var first:Node3D=auto_free(Node3D.new())
+	visual._build_patch(first,record,_seed_context())
+	var old_plan:Dictionary=first.get_meta("country_seed_plan")
+	assert_int(old_plan.buildings.size()).is_greater(1)
+	if old_plan.buildings.is_empty():return
+	var before:=_seed_identities(old_plan)
+	var absorbed:Dictionary=old_plan.buildings[0]
+	var claim:=PackedVector2Array()
+	# A small claimed polygon inside the roof proves exact polygon absorption,
+	# not only nine sampled land points around the footprint.
+	for corner:Vector2 in absorbed.footprint:claim.append(Vector2(absorbed.position).lerp(corner,0.25))
+	record.settlement_growth.obstacles=[{"polygon":claim}]
+	var steps:int=visual.seed_layout_steps
+	var after:Node3D=auto_free(Node3D.new())
+	visual._build_patch(after,record,_seed_context())
+	var remaining:=_seed_identities(after.get_meta("country_seed_plan"))
+	assert_int(remaining.size()).is_equal(before.size()-1)
+	assert_bool(remaining.has(absorbed.id)).is_false()
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+	for id:String in remaining:assert_array(remaining[id]).is_equal(before[id])
+	record.settlement_growth.obstacles=[]
+	var restored:Node3D=auto_free(Node3D.new())
+	visual._build_patch(restored,record,_seed_context())
+	assert_dict(_seed_identities(restored.get_meta("country_seed_plan"))).is_equal(before)
+	assert_int(visual.seed_layout_steps).is_equal(steps)
+
+func test_organic_seed_ground_stays_in_real_parcels_and_recorded_lanes()->void:
+	var visual=_visual()
+	var record:=_organic_seed(2)
+	var parent:Node3D=auto_free(Node3D.new())
+	visual._build_patch(parent,record,_seed_context())
+	var ground:MeshInstance3D=parent.get_node("WorkedEarth")
+	var arrays:Array=ground.mesh.surface_get_arrays(0)
+	var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+	assert_int(vertices.size()).is_greater(0)
+	for vertex:Vector3 in vertices:
+		var local:=Vector2(vertex.x,vertex.z)-Vector2(record.position)
+		var inside:=false
+		for plot:Dictionary in record.settlement_plots:
+			if _parcel_bounds(plot.polygon).grow(0.00002).has_point(local):inside=true;break
+		if not inside:
+			for route:Dictionary in record.settlement_routes:
+				for index in range(1,route.points.size()):
+					if local.distance_to(Geometry2D.get_closest_point_to_segment(local,route.points[index-1],route.points[index]))<0.001:inside=true
+		assert_bool(inside).override_failure_message("Ground must not invent a circular yard or long nearest-origin track").is_true()
+		assert_float(vertex.y).is_less(0.0001)
+
+func _parcel_bounds(polygon:PackedVector2Array)->Rect2:
+	return preload("res://scripts/organic_town_visual.gd").bounds(polygon)
+
 func test_daily_idle_keeps_retained_meshes_without_new_builds()->void:
 	var visual=_visual()
 	var snapshot:=_snapshot()

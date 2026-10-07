@@ -9,13 +9,19 @@ const INK = preload("res://scripts/settlement_ink.gd")
 const SHAPES = preload("res://scripts/settlement_kit_shapes.gd")
 const CHART = preload("res://scripts/settlement_country_chart.gd")
 const DRAPE = preload("res://scripts/settlement_country_drape.gd")
+const EARLY = preload("res://scripts/early_settlement_visual.gd")
+const TOWN = preload("res://scripts/organic_town_visual.gd")
+const VISUAL_KEYS = preload("res://scripts/settlement_visual_keys.gd")
+const GROWTH = preload("res://scripts/settlement_country_growth.gd")
 const GROUND_LIFT_KM:=0.0002
+const SEED_GROUND_LIFT_KM:=0.000035
 var ground_grid:=Vector4.ZERO
 var view_center:=Vector2.ZERO
 var drape_budget_skips:=0
 var height_at:Callable
 var land_at:Callable
 var visibility_at:Callable
+var placement_land_at:Callable
 var retained:RefCounted
 var last_signature:int = -1
 var plan:Dictionary = {}
@@ -26,6 +32,7 @@ var surface_revision:int=0
 var fog_revision:int=0
 var last_plan_signature:int=-1
 var _land_cache:Dictionary={}
+var _physical_land_cache:Dictionary={}
 var _height_cache:Dictionary={}
 var _visibility_cache:Dictionary={}
 var _fog_clipped:=false
@@ -39,6 +46,14 @@ var max_prepare_slice_usec:=0
 var last_prepare_slice_usec:=0
 var max_patch_work_usec:=0
 var prepared_patches:=0
+var seed_layout_steps:=0
+var seed_growth_steps:=0
+var _seed_layouts:Dictionary={}
+var _pending_seed:Dictionary={}
+var _pending_growth:Dictionary={}
+var _growth_states:Dictionary={}
+var seed_ground_revision:=0
+var _seed_ground_keys:Dictionary={}
 const MAX_PREPARE_STEPS:=512
 
 func invalidate(drape:bool=true)->void:
@@ -47,8 +62,8 @@ func invalidate(drape:bool=true)->void:
 	else:fog_revision+=1
 	last_signature=-1
 
-func configure(height:Callable,land:Callable=Callable(),revealed:Callable=Callable())->void:
-	height_at=height;land_at=land;visibility_at=revealed
+func configure(height:Callable,land:Callable=Callable(),revealed:Callable=Callable(),physical_land:Callable=Callable())->void:
+	height_at=height;land_at=land;visibility_at=revealed;placement_land_at=physical_land if physical_land.is_valid() else land
 	if retained==null:retained=PATCHES.new(self)
 	if material==null:
 		material=ShaderMaterial.new()
@@ -63,6 +78,7 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 	if plan_key!=last_plan_signature:
 		plan=PLAN.build(snapshot);last_plan_signature=plan_key
 	var entries:Array[Dictionary]=[]
+	var seed_ids:Dictionary={}
 	var anchors:Array[Vector2]=[Vector2(snapshot.get("origin",Vector2.ZERO))]
 	var country_appearance:Dictionary=plan.get("country_appearance",{})
 	if country_appearance.is_empty():country_appearance=ERA.capture(snapshot.get("knowledge",[]),snapshot.get("built_fabric",{}))
@@ -72,6 +88,7 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 			var record:=source.duplicate(true)
 			record["group"]=kind
 			var point:Vector2=record.position
+			if record.has("settlement_plots") or record.has("settlement_growth"):seed_ids[String(record.id)]=true
 			var nearest:Vector2=anchors[0]
 			var distance:=point.distance_squared_to(nearest)
 			for anchor:Vector2 in anchors:
@@ -90,8 +107,14 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 			var clipped_revision:=0
 			if retained.installed.has(id) and bool(retained.installed[id].node.get_meta("fog_clipped",false)):clipped_revision=fog_revision
 			if not _job.is_empty() and _job.key==id and _fog_clipped:clipped_revision=fog_revision
-			var appearance:=[point,record.get("category",""),record.get("age",""),record.get("resource",""),record.get("field_radius_km",0.0),record.get("radius_km",0.0),record.get("buildings",2),nearest,admitted,start_seen,clipped_revision]
+			var appearance:=[point,record.get("category",""),record.get("age",""),record.get("resource",""),record.get("field_radius_km",0.0),record.get("radius_km",0.0),record.get("buildings",2),record.get("geometry_signature",record.get("settlement_growth",{})),nearest,admitted,start_seen,clipped_revision]
 			entries.append({"key":id,"signature":hash([appearance,context,surface_revision]),"priority":point.distance_squared_to(view_center),"build":_build_patch.bind(record,context)})
+	for id:String in _seed_layouts.keys():
+		if not seed_ids.has(id):_seed_layouts.erase(id)
+	for id:String in _growth_states.keys():
+		if not seed_ids.has(id):_growth_states.erase(id)
+	for id:String in _seed_ground_keys.keys():
+		if not seed_ids.has(id):_seed_ground_keys.erase(id);seed_ground_revision+=1
 	retained.request(entries)
 	request_usec=Time.get_ticks_usec()-began
 
@@ -133,14 +156,34 @@ func _start_job(key:String)->void:
 	var began:=Time.get_ticks_usec()
 	var source:Dictionary=retained.desired[key]
 	var staging:=Node3D.new()
-	_commands=[];_collected_surface=null;_collecting=true
+	_commands=[];_collected_surface=null;_pending_seed={};_pending_growth={};_collecting=true
 	(source.build as Callable).call(staging)
 	_collecting=false
 	_commands.reverse()
-	_job={"key":key,"signature":source.signature,"node":staging,"surface":_collected_surface,"commands":_commands,"pieces":[],"piece_index":0,"lift":GROUND_LIFT_KM,"center_check":false,"work_usec":Time.get_ticks_usec()-began}
-	_commands=[];_collected_surface=null
+	_job={"key":key,"signature":source.signature,"node":staging,"surface":_collected_surface,"commands":_commands,"pieces":[],"piece_index":0,"lift":GROUND_LIFT_KM,"center_check":false,"seed":_pending_seed,"growth":_pending_growth,"work_usec":Time.get_ticks_usec()-began}
+	_commands=[];_collected_surface=null;_pending_seed={};_pending_growth={}
 
 func _advance_job()->bool:
+	var growth:Dictionary=_job.get("growth",{})
+	if not growth.is_empty():
+		seed_growth_steps+=1
+		if not GROWTH.advance(growth.state,_placement_land,height_at):return false
+		var work:=_begin_seed_layout(_grown_record(growth.record,growth.state))
+		work["growth_state"]=growth.state
+		_collecting=true;_commands=[]
+		_draw_seed_ground(_job.surface,work)
+		_collecting=false
+		_commands.reverse();(_job.commands as Array).append_array(_commands);_commands=[]
+		_job.seed=work;_job.growth={}
+		return false
+	var seed_work:Dictionary=_job.get("seed",{})
+	if not seed_work.is_empty():
+		if not (seed_work.pending as Array).is_empty():
+			_advance_seed_layout(seed_work)
+			return false
+		_finish_seed(_job.node,seed_work)
+		_job.seed={}
+		return false
 	var pieces:Array=_job.pieces
 	if int(_job.piece_index)<pieces.size():
 		var triangle:Array=pieces[int(_job.piece_index)]
@@ -161,6 +204,11 @@ func _advance_job()->bool:
 	return true
 
 func _install_prepared(parent:Node3D,staging:Node3D)->void:
+	if staging.has_meta("country_seed_id"):
+		var id:=String(staging.get_meta("country_seed_id"))
+		var key:int=staging.get_meta("country_seed_geometry")
+		if int(_seed_ground_keys.get(id,-1))!=key:seed_ground_revision+=1
+		_seed_ground_keys[id]=key
 	for key:StringName in staging.get_meta_list():parent.set_meta(key,staging.get_meta(key))
 	for child:Node in staging.get_children():
 		staging.remove_child(child);parent.add_child(child)
@@ -185,7 +233,24 @@ func stats()->Dictionary:
 	result["max_prepare_slice_usec"]=max_prepare_slice_usec
 	result["max_patch_work_usec"]=max_patch_work_usec
 	result["prepared_patches"]=prepared_patches
+	result["seed_layout_steps"]=seed_layout_steps
+	result["seed_growth_steps"]=seed_growth_steps
+	result["seed_layouts"]=_seed_layouts.size()
+	result["seed_ground_revision"]=seed_ground_revision
 	return result
+
+## Actual installed parcels for the shared canopy mask. The manager can retain
+## its bounded clearing list until seed_ground_revision changes.
+func seed_ground_records()->Array[Dictionary]:
+	var records:Array[Dictionary]=[]
+	if retained==null:return records
+	for key:String in retained.installed:
+		if not retained.desired.has(key):continue
+		var node:Node3D=retained.installed[key].node
+		if not node.has_meta("country_seed_id"):continue
+		records.append({"id":String(node.get_meta("country_seed_id")),"origin":node.get_meta("country_seed_origin"),
+			"plots":node.get_meta("country_seed_plots"),"routes":node.get_meta("country_seed_routes")})
+	return records
 
 func _valid(point:Vector2)->bool:
 	if not _visibility_cache.has(point):_visibility_cache[point]=not visibility_at.is_valid() or bool(visibility_at.call(point))
@@ -287,10 +352,10 @@ func _field(surface:SurfaceTool,field:Dictionary,color:Color)->void:
 		_tri(surface,a,b,c,ink);_tri(surface,a,c,d,ink)
 	for i in 4:_ribbon(surface,corners[i],corners[(i+1)%4],0.0011,Color(0.38,0.36,0.22,0.44))
 
-func _ribbon(surface:SurfaceTool,start:Vector2,finish:Vector2,width:float,color:Color)->void:
+func _ribbon(surface:SurfaceTool,start:Vector2,finish:Vector2,width:float,color:Color,lift:float=GROUND_LIFT_KM)->void:
 	var side:=(finish-start).normalized().orthogonal()*width*0.5
-	_tri(surface,start-side,start+side,finish+side,color)
-	_tri(surface,start-side,finish+side,finish-side,color)
+	_tri(surface,start-side,start+side,finish+side,color,lift)
+	_tri(surface,start-side,finish+side,finish-side,color,lift)
 
 func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier:int)->void:
 	var length:=start.distance_to(finish)
@@ -314,10 +379,11 @@ func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier
 		previous=point
 
 func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
-	_land_cache.clear();_height_cache.clear();_visibility_cache.clear()
+	_land_cache.clear();_physical_land_cache.clear();_height_cache.clear();_visibility_cache.clear()
 	_fog_clipped=false
 	var at:Vector2=record.position
-	if not _valid(at):
+	var is_seed:=record.has("settlement_plots") or record.has("settlement_growth")
+	if not _valid(at) and not is_seed:
 		parent.set_meta("fog_clipped",_fog_clipped)
 		return
 	var seed_value:=absi(hash(record.get("id",at)))
@@ -325,10 +391,28 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var group:=String(record.group)
 	# Inhabited expansion is read through roofs and yards, not field-line glyphs.
-	var chart:Node3D=null if String(record.get("kind",""))=="cluster" else CHART.create(record,height_at)
+	var chart:Node3D=null if is_seed or String(record.get("kind",""))=="cluster" else CHART.create(record,height_at)
 	if chart!=null:parent.add_child(chart)
 	if group=="sites":
 		_draw_site(surface,record,seed_value)
+	elif is_seed:
+		if record.has("settlement_growth"):
+			var state:=GROWTH.begin(record,_growth_states.get(String(record.id),{}))
+			if _collecting:_pending_growth={"record":record,"state":state}
+			else:
+				seed_growth_steps+=1
+				while not GROWTH.advance(state,_placement_land,height_at):seed_growth_steps+=1
+				var work:=_begin_seed_layout(_grown_record(record,state));work["growth_state"]=state
+				_draw_seed_ground(surface,work)
+				while not (work.pending as Array).is_empty():_advance_seed_layout(work)
+				_finish_seed(parent,work)
+		else:
+			var work:=_begin_seed_layout(record)
+			_draw_seed_ground(surface,work)
+			if _collecting:_pending_seed=work
+			else:
+				while not (work.pending as Array).is_empty():_advance_seed_layout(work)
+				_finish_seed(parent,work)
 	else:
 		var sparse:=group=="herders"
 		var layout:=PLAN.homestead_layout(record)
@@ -350,7 +434,7 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 	# Exposed rock exhausted long ago has no new busy track; living woods and
 	# staffed workplaces retain access. Thin ground-coloured paths disappear
 	# naturally at realm zoom, rather than becoming chart-wide spokes.
-	if group!="sites" or String(record.get("category",""))!="depleted":
+	if not is_seed and (group!="sites" or String(record.get("category",""))!="depleted"):
 		var finish:=at
 		if group!="sites":finish=at.move_toward(Vector2(record.track_from),float(PLAN.homestead_layout(record).yard_radius_km)*0.78)
 		_track(surface,Vector2(record.track_from),finish,seed_value,int(record.get("road_tier",context.road_tier)))
@@ -359,6 +443,107 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 		_collected_surface=surface
 		return
 	_finish_surface(parent,surface)
+
+## Every organic seed uses the root settlement's parcel/frontage solver. Saved
+## sites belong only to these bounded display copies, never to the engine ledger.
+func _grown_record(record:Dictionary,state:Dictionary)->Dictionary:
+	var grown:=record.duplicate(false)
+	grown["settlement_plots"]=state.plots;grown["settlement_routes"]=state.routes
+	return grown
+
+func _placement_land(world:Vector2)->bool:
+	if not _physical_land_cache.has(world):_physical_land_cache[world]=not placement_land_at.is_valid() or bool(placement_land_at.call(world))
+	return bool(_physical_land_cache[world])
+
+func _begin_seed_layout(record:Dictionary)->Dictionary:
+	var id:=String(record.id)
+	var plots:Array[Dictionary]=[];plots.assign((record.settlement_plots as Array).duplicate(true))
+	var routes:Array[Dictionary]=[];routes.assign((record.get("settlement_routes",[]) as Array).duplicate(true))
+	var inputs:=VISUAL_KEYS.layout_inputs(plots,routes)
+	var cached:Dictionary=_seed_layouts.get(id,{})
+	var saved:Dictionary={}
+	for plot:Dictionary in cached.get("plots",[]):saved[int(plot.id)]=plot
+	for plot:Dictionary in plots:
+		if not saved.has(int(plot.id)):continue
+		var prior:Dictionary=saved[int(plot.id)]
+		if prior.has("visual_building_sites"):
+			plot["visual_building_sites"]=(prior.visual_building_sites as Array).duplicate(true)
+			plot["visual_sites_form"]=prior.get("visual_sites_form","")
+	var pending:Array[int]=[]
+	for plot_id:int in inputs:
+		if inputs[plot_id]!=(cached.get("inputs",{}) as Dictionary).get(plot_id,-1):pending.append(plot_id)
+	pending.sort()
+	var prior_plan:Dictionary=cached.get("plan",{"buildings":[],"replaced":{}})
+	return {"id":id,"origin":Vector2(record.position),"plots":plots,"routes":routes,
+		"ownership":record.get("settlement_growth",{}),"inputs":inputs,"pending":pending,"plan":VISUAL_KEYS.refresh_plan(prior_plan,plots)}
+
+func _seed_visible(local:Vector2,origin:Vector2,ownership:Dictionary={})->bool:
+	var world:=origin+local
+	return GROWTH.owns(ownership,local) and _valid(world) and bool(_visibility_cache.get(world,true))
+
+func _seed_footprint_unoccupied(footprint:PackedVector2Array,ownership:Dictionary)->bool:
+	# The actual town can absorb a saved representative without relocating its
+	# neighbours. Polygon intersection also catches a small new claim entirely
+	# inside a footprint, where centre/corner terrain samples could miss it.
+	if footprint.size()<3:return true
+	var bounds:=TOWN.bounds(footprint)
+	for claim:Dictionary in ownership.get("obstacles",[]):
+		var polygon:PackedVector2Array=claim.get("polygon",PackedVector2Array())
+		if polygon.size()<3 or not bounds.intersects(TOWN.bounds(polygon)):continue
+		if not Geometry2D.intersect_polygons(footprint,polygon).is_empty():return false
+	return true
+
+func _advance_seed_layout(work:Dictionary)->void:
+	var plot_id:int=work.pending.pop_front()
+	# Fog cannot change parcel placement or reserve a different future house.
+	var land:=func(point:Vector2)->bool:return GROWTH.owns(work.ownership,point) and _placement_land(Vector2(work.origin)+point)
+	work.plan=EARLY.layout(work.plots,work.routes,land,{plot_id:true})
+	# The same reserved-site mechanism as the root renderer, on display copies.
+	EARLY.remember_layout(work.plan,work.plots)
+	seed_layout_steps+=1
+
+func _finish_seed(parent:Node3D,work:Dictionary)->void:
+	_seed_layouts[String(work.id)]={"inputs":work.inputs,"plots":work.plots,"plan":work.plan}
+	if work.has("growth_state"):_growth_states[String(work.id)]=work.growth_state
+	var visible:Array=[]
+	var positions:Array[Vector2]=[]
+	for building:Dictionary in work.plan.buildings:
+		var plot:Dictionary=building.plot
+		if String(plot.get("status","active")) in ["ruin","reclaimed","under_construction"] or float((plot.get("damage",{}) as Dictionary).get("structural",0.0))>0.65:continue
+		var footprint:PackedVector2Array=building.get("footprint",PackedVector2Array())
+		var clear:=_seed_visible(Vector2(building.position),work.origin,work.ownership) and _seed_footprint_unoccupied(footprint,work.ownership)
+		for index in footprint.size():
+			if not _seed_visible(footprint[index],work.origin,work.ownership) or not _seed_visible(footprint[index].lerp(footprint[(index+1)%footprint.size()],0.5),work.origin,work.ownership):clear=false;break
+		if not clear:continue
+		visible.append(building);positions.append(Vector2(work.origin)+Vector2(building.position))
+	var shown:={"buildings":visible,"replaced":work.plan.replaced}
+	var origin:Vector2=work.origin
+	EARLY.render(shown,Vector3(origin.x,0.0,origin.y),func(x:float,z:float)->float:return _point(Vector2(x,z),0.0).y,parent)
+	parent.set_meta("country_home_count",visible.size())
+	parent.set_meta("country_home_positions",positions)
+	parent.set_meta("country_seed_plan",shown)
+	parent.set_meta("country_seed_plots",work.plots)
+	parent.set_meta("country_seed_routes",work.routes)
+	parent.set_meta("country_seed_id",work.id)
+	parent.set_meta("country_seed_origin",work.origin)
+	parent.set_meta("country_seed_geometry",hash([work.origin,work.inputs]))
+
+func _draw_seed_ground(surface:SurfaceTool,work:Dictionary)->void:
+	var origin:Vector2=work.origin
+	for plot:Dictionary in work.plots:
+		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
+		if polygon.size()<3 or String(plot.get("land_use","")) in ["water","vacant","waste"]:continue
+		var triangles:=Geometry2D.triangulate_polygon(polygon)
+		var field:=String(plot.get("land_use","")) in ["field","pasture"]
+		var color:=Color(0.55,0.50,0.32,0.43) if field else Color(0.58,0.49,0.34,0.26)
+		for index in range(0,triangles.size(),3):
+			_tri(surface,origin+polygon[triangles[index]],origin+polygon[triangles[index+1]],origin+polygon[triangles[index+2]],color,SEED_GROUND_LIFT_KM)
+	for route:Dictionary in work.routes:
+		if not bool(route.get("active",true)):continue
+		var points:PackedVector2Array=route.get("points",PackedVector2Array())
+		var width:=TOWN.route_half_width(route)*2.0
+		for index in range(1,points.size()):
+			_ribbon(surface,origin+points[index-1],origin+points[index],width,Color(0.58,0.50,0.38,0.62),SEED_GROUND_LIFT_KM)
 
 func _finish_surface(parent:Node3D,surface:SurfaceTool)->void:
 	var arrays:=surface.commit_to_arrays()

@@ -2,6 +2,7 @@ extends GdUnitTestSuite
 ## Country presentation cannot change people, sites or the worked reach.
 const Plan:=preload("res://scripts/settlement_country_plan.gd")
 const OneSeat:=preload("res://scripts/one_seat.gd")
+const Growth:=preload("res://scripts/settlement_country_growth.gd")
 
 func _snapshot(people:float=4000.0,core:float=15.0,worked:float=90.0)->Dictionary:
 	return {"owner":"player","origin":Vector2(19.0,-41.0),"population":people,
@@ -15,7 +16,7 @@ func _deposit(id:String,source:String,remaining:float,workers:int=0)->Dictionary
 		"remaining":remaining,"initial_amount":100.0,"workers":workers,
 		"stage":"accessible","lifetime_extracted":100.0-remaining}
 
-func test_young_people_keep_one_cluster_without_country_homes()->void:
+func test_under_four_hundred_people_keep_only_the_root_settlement()->void:
 	var data:=_snapshot(120.0,9.0,18.0)
 	var plan:=Plan.build(data)
 	assert_int(plan.homesteads.size()).is_equal(0)
@@ -40,13 +41,15 @@ func test_plan_is_deterministic_and_does_not_write_into_source()->void:
 	first.country_appearance.homes[1]=0.0
 	assert_dict(data).is_equal(before)
 
-func test_homes_stand_outside_dense_buildings_inside_worked_land_and_herders_beyond()->void:
+func test_far_holdings_stand_outside_dense_buildings_inside_worked_land_and_herders_beyond()->void:
 	var data:=_snapshot()
 	var plan:=Plan.build(data)
 	assert_bool(plan.homesteads.is_empty()).is_false()
 	for record:Dictionary in plan.homesteads:
 		var distance:float=(record.position as Vector2).distance_to(data.origin)
-		assert_bool(distance>float(plan.visual_core_km) and distance<90.0).is_true()
+		assert_float(distance).is_less(90.0)
+		if record.kind=="cluster":continue # Persistent seed parcels can join root fabric.
+		assert_float(distance).is_greater(float(plan.visual_core_km))
 		assert_str(record.location_class).is_equal("worked_core" if distance<=15.0 else "homestead_band")
 		assert_bool(float(record.field_radius_km)>=0.10 and float(record.field_radius_km)<=0.18).is_true()
 	for record:Dictionary in plan.herders:
@@ -243,7 +246,8 @@ func test_same_scope_api_reads_rival_core_only_without_inventing_worked_land()->
 	assert_int(plan.homesteads.size()).is_greater(0)
 	for record:Dictionary in plan.homesteads:
 		assert_str(record.location_class).is_equal("worked_core")
-		assert_float(float(record.distance_km)).is_between(8.4,engine_worked)
+		assert_float(float(record.distance_km)).is_less(engine_worked)
+		if record.kind!="cluster":assert_float(float(record.distance_km)).is_greater(8.4)
 	assert_int(plan.sites.size()).is_equal(1)
 
 func test_million_person_core_keeps_worked_holdings_outside_actual_built_extent()->void:
@@ -256,7 +260,7 @@ func test_million_person_core_keeps_worked_holdings_outside_actual_built_extent(
 	assert_float(float(plan.rings.band_area_km2)).is_equal(0.0)
 	assert_int(plan.homesteads.size()).is_between(1,Plan.MAX_HOMESTEADS)
 	for record:Dictionary in plan.homesteads:
-		assert_float(float(record.distance_km)).is_greater(dense)
+		if record.kind!="cluster":assert_float(float(record.distance_km)).is_greater(dense)
 		assert_float(float(record.distance_km)).is_less(120.0)
 		assert_str(record.location_class).is_equal("worked_core")
 
@@ -272,26 +276,39 @@ func test_carrier_core_growth_reclassifies_holdings_without_removing_or_moving_t
 		assert_vector(after.homesteads[index].position).is_equal(before.homesteads[index].position)
 		assert_str(after.homesteads[index].location_class).is_equal("worked_core")
 
-func test_only_the_expanding_dense_footprint_absorbs_existing_holdings()->void:
+func test_dense_extent_filters_far_holdings_but_never_absorbs_organic_seeds()->void:
 	var data:=_snapshot(25000.0,120.0,120.0)
 	data.dense_radius_km=3.0
 	var before:=Plan.build(data)
-	data.dense_radius_km=25.0
+	var far:Array=(before.homesteads as Array).filter(func(record:Dictionary)->bool:return record.kind!="cluster")
+	assert_array(far).is_not_empty()
+	if far.is_empty():return
+	# Put a sampled far holding inside the new dense diagnostic extent instead
+	# of depending on a random farm happening to fall inside a fixed 25km disc.
+	var absorbing_radius:=maxf(25.0,float(far[0].distance_km)+0.01)
+	data.dense_radius_km=absorbing_radius
 	var after:=Plan.build(data)
 	var surviving:={}
 	for record:Dictionary in after.homesteads:
-		assert_float(float(record.distance_km)).is_greater(25.0)
-		surviving[record.id]=record.position
+		if record.kind!="cluster":assert_float(float(record.distance_km)).is_greater(absorbing_radius)
+		surviving[record.id]=record
 	var absorbed:=0
+	var seeds:=0
 	for record:Dictionary in before.homesteads:
-		if float(record.distance_km)<=25.0:
+		if record.kind!="cluster" and float(record.distance_km)<=absorbing_radius:
 			assert_bool(surviving.has(record.id)).is_false();absorbed+=1
 		else:
 			assert_bool(surviving.has(record.id)).is_true()
-			assert_vector(surviving[record.id]).is_equal(record.position)
+			assert_vector(surviving[record.id].position).is_equal(record.position)
+			if record.kind=="cluster":seeds+=1
 	assert_int(absorbed).is_greater(0)
+	assert_int(seeds).is_greater(0)
 	data.dense_radius_km=120.0
-	assert_int(Plan.build(data).homesteads.size()).is_equal(0)
+	var fully_dense:=Plan.build(data)
+	assert_int(fully_dense.homesteads.size()).is_equal(seeds)
+	for record:Dictionary in fully_dense.homesteads:
+		assert_str(record.kind).is_equal("cluster")
+		assert_vector(record.position).is_equal(surviving[record.id].position)
 
 func test_dense_extent_uses_the_same_recorded_polygon_radius_rule()->void:
 	assert_float(Plan.dense_radius(4000,5.0)).is_equal_approx(5.25,0.000001)
@@ -319,30 +336,23 @@ func test_completed_appearance_changes_key_but_profile_diagnostics_do_not()->voi
 	data.country_appearance.late_share=0.25
 	assert_int(Plan.quick_signature(data)).is_not_equal(key)
 
-func test_compact_clusters_dominate_the_actual_built_fringe_and_join_neighbours()->void:
+func test_seed_specs_use_bounded_shared_parcel_growth_instead_of_compounds()->void:
 	var data:=_snapshot(25000.0,24.0,120.0)
 	data.dense_radius_km=1.0
 	var plan:=Plan.build(data)
-	var clusters:Array=[]
-	var farms:=0
+	var seeds:=0
 	for record:Dictionary in plan.homesteads:
-		if record.kind!="cluster":farms+=1;continue
-		clusters.append(record)
-		assert_float(float(record.distance_km)).is_between(1.0,1.0+Plan.CLUSTER_FRINGE_KM)
-		assert_int(int(record.buildings)).is_between(4,12)
-	assert_int(clusters.size()).is_greater(farms)
-	assert_int(clusters.size()).is_less_equal(Plan.MAX_CLUSTERS)
-	var adjoining:=0
-	for record:Dictionary in clusters:
-		for neighbour:Dictionary in clusters:
-			if record.id==neighbour.id:continue
-			var distance:float=(record.position as Vector2).distance_to(neighbour.position)
-			if distance<0.25:
-				assert_float(distance).is_greater(0.12)
-				adjoining+=1;break
-	assert_int(adjoining).is_greater(clusters.size()/2)
+		if record.kind!="cluster":continue
+		seeds+=1
+		assert_bool(record.has("settlement_growth")).is_true()
+		var spec:Dictionary=record.settlement_growth
+		assert_int(int(spec.parcels)).is_between(6,24)
+		assert_bool(spec.has("seed")).is_true()
+		assert_bool(spec.get("templates",[]) is Array).is_true()
+		assert_float(float(record.distance_km)).is_less(120.0)
+	assert_int(seeds).is_between(2,24)
 
-func test_cluster_roofs_and_centres_grow_without_rerolling_existing_sites()->void:
+func test_seed_centres_and_parcels_grow_without_rerolling_existing_sites()->void:
 	var data:=_snapshot(1000.0,12.0,90.0)
 	data.dense_radius_km=1.0
 	var before:=Plan.build(data)
@@ -350,27 +360,75 @@ func test_cluster_roofs_and_centres_grow_without_rerolling_existing_sites()->voi
 	var after:=Plan.build(data)
 	var later:Dictionary={}
 	for record:Dictionary in after.homesteads:later[record.id]=record
+	var shared:=0
 	for record:Dictionary in before.homesteads:
 		if record.kind!="cluster":continue
+		shared+=1
 		assert_bool(later.has(record.id)).is_true()
 		assert_vector(later[record.id].position).is_equal(record.position)
-		assert_int(int(later[record.id].buildings)).is_greater(int(record.buildings))
+		assert_int(int(later[record.id].settlement_growth.seed)).is_equal(int(record.settlement_growth.seed))
+		assert_int(int(later[record.id].settlement_growth.parcels)).is_greater(int(record.settlement_growth.parcels))
+	assert_int(shared).is_greater_equal(2)
 
-func test_cluster_layout_keeps_roofs_clear_and_fields_within_one_hundred_fifty_metres()->void:
-	var record:={"id":"cluster_layout","kind":"cluster","position":Vector2(14034,-2892),"field_radius_km":0.15,"buildings":12}
-	var before:=record.duplicate(true)
-	var layout:=Plan.homestead_layout(record)
-	assert_dict(record).is_equal(before)
-	assert_bool(layout.is_cluster).is_true()
-	assert_int(layout.fields.size()).is_equal(2)
-	assert_float(float(layout.yard_radius_km)).is_between(0.075,0.085)
-	assert_float(float(layout.canopy_yard_radius_km)*0.65).is_greater(0.075)
-	for field:Dictionary in layout.fields:
-		var along:=Vector2.from_angle(float(field.angle))*float(field.half_length_km)
-		var across:=along.normalized().orthogonal()*float(field.half_width_km)
-		for a in [-1,1]:
-			for b in [-1,1]:
-				var corner:Vector2=field.center+along*a+across*b
-				assert_float(corner.distance_to(record.position)).is_less_equal(0.15)
-	record.buildings=4
-	assert_dict(Plan.homestead_layout(record)).is_equal(layout)
+func _seed_records(plan:Dictionary)->Array:
+	return (plan.homesteads as Array).filter(func(record:Dictionary)->bool:return record.kind=="cluster")
+
+func test_actual_root_claims_become_local_obstacles_without_moving_seed_centres()->void:
+	var data:=_snapshot(4000.0,15.0,90.0)
+	var earlier:=_seed_records(Plan.build(data))
+	assert_array(earlier).is_not_empty()
+	if earlier.is_empty():return
+	var selected:Dictionary=earlier[0]
+	var center:Vector2=selected.offset
+	var polygon:=PackedVector2Array([center+Vector2(-.025,-.02),center+Vector2(.025,-.02),center+Vector2(.025,.02),center+Vector2(-.025,.02)])
+	data.root_fabric={"claims":[{"centroid":center,"polygon":polygon},{"centroid":Vector2(4,0),"polygon":PackedVector2Array([Vector2(3.9,0),Vector2(4.1,0),Vector2(4,.1)])}],"templates":[]}
+	data.root_geometry_signature=hash(data.root_fabric)
+	var source:=data.duplicate(true)
+	var later:=_seed_records(Plan.build(data))
+	assert_int(later.size()).is_equal(earlier.size())
+	for index in earlier.size():
+		assert_str(later[index].id).is_equal(earlier[index].id)
+		assert_vector(later[index].position).is_equal(earlier[index].position)
+	var obstacles:Array=later[0].settlement_growth.obstacles
+	assert_int(obstacles.size()).is_equal(1)
+	assert_vector(obstacles[0].centroid).is_equal(Vector2.ZERO)
+	for index in polygon.size():
+		assert_vector(obstacles[0].polygon[index]).is_equal(polygon[index]-center)
+	# Grow through the same root selector against the actual occupied claim.
+	var state:=Growth.begin(later[0])
+	for step in Growth.MAX_PARCELS:Growth.advance(state,Callable(),Callable())
+	assert_array(state.plots).is_not_empty()
+	for plot:Dictionary in state.plots:
+		assert_bool(Geometry2D.is_point_in_polygon(plot.centroid,obstacles[0].polygon)).is_false()
+	assert_dict(data).is_equal(source)
+
+func test_seed_specs_own_their_copied_fabric_and_obstacles()->void:
+	var data:=_snapshot()
+	data.root_fabric={"claims":[{"centroid":Vector2.ZERO,"polygon":PackedVector2Array([Vector2(-.03,-.03),Vector2(.03,-.03),Vector2(.03,.03),Vector2(-.03,.03)])}],
+		"templates":[{"form":"durable_household_cluster","material_family":"organic","material_mix":{"Timber":.8}}]}
+	data.root_geometry_signature=hash(data.root_fabric)
+	var before:=data.duplicate(true)
+	var seeds:=_seed_records(Plan.build(data))
+	assert_array(seeds).is_not_empty()
+	if seeds.is_empty():return
+	var spec:Dictionary=seeds[0].settlement_growth
+	spec.templates[0].material_mix.Timber=0.0
+	if not spec.obstacles.is_empty():spec.obstacles[0].polygon[0]=Vector2(900,900)
+	assert_dict(data).is_equal(before)
+
+func test_root_fabric_captures_only_occupied_claims_and_completed_forms()->void:
+	var polygon:=PackedVector2Array([Vector2(-.01,-.01),Vector2(.01,-.01),Vector2(.01,.01),Vector2(-.01,.01)])
+	var plots:Array=[]
+	for item:Dictionary in [{"land_use":"residential_compound","construction_progress":1.0,"form":"durable_household_cluster"},
+		{"land_use":"residential_compound","construction_progress":.3,"form":"unfinished"},
+		{"land_use":"field","construction_progress":1.0,"form":"field"},
+		{"land_use":"residential_compound","construction_progress":1.0,"form":"ruin","status":"ruin"}]:
+		item.merge({"centroid":Vector2.ZERO,"polygon":polygon.duplicate(),"material_family":"organic"})
+		plots.append(item)
+	var before:=plots.duplicate(true)
+	var fabric:=Plan._root_fabric(plots)
+	assert_int(fabric.claims.size()).is_equal(2)
+	assert_int(fabric.templates.size()).is_equal(1)
+	assert_str(fabric.templates[0].form).is_equal("durable_household_cluster")
+	fabric.claims[0].polygon[0]=Vector2(100,100)
+	assert_array(plots).is_equal(before)

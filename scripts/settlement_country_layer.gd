@@ -73,7 +73,7 @@ func refresh(owner_terrain:Node3D)->void:
 		if entry.is_empty():
 			var node:=VISUAL.new()
 			node.name="WorkedCountry_"+id.validate_node_name()
-			node.configure(Callable(terrain,"_harvest_ground_height_at"),_drawn_land,_revealed)
+			node.configure(Callable(terrain,"_harvest_ground_height_at"),_drawn_land,_revealed,_physical_land)
 			add_child(node)
 			entry={"node":node,"source_key":[],"snapshot":{},"style":candidate.style,"population":-1}
 		var state:Object=GameState if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.GameState
@@ -140,6 +140,9 @@ func _candidates(center:Vector2,radius:float)->Array[Dictionary]:
 func _drawn_land(point:Vector2)->bool:
 	return _revealed(point) and terrain._settlement_stage_land_at(point)
 
+func _physical_land(point:Vector2)->bool:
+	return terrain._settlement_stage_land_at(point)
+
 func _revealed(point:Vector2)->bool:
 	return terrain._world_position_is_revealed(Vector3(point.x,0.0,point.y))
 
@@ -157,12 +160,21 @@ func woodland_ledgers()->Array:
 ## Presentation clearings for sampled farm ground, never harvested sites.
 ## They share the existing canopy budget and stay out of the stump/detail layer.
 func canopy_clearings(center:Vector2,limit:int=16)->PackedVector4Array:
-	if _clearing_cache_revision!=clearing_revision:
-		_clearing_cache_revision=clearing_revision
+	var geometry_key:=clearing_revision
+	for entry:Dictionary in layers.values():geometry_key=hash([geometry_key,entry.node.seed_ground_revision])
+	if _clearing_cache_revision!=geometry_key:
+		_clearing_cache_revision=geometry_key
 		_clearing_candidates.clear()
 		for entry:Dictionary in layers.values():
+			for seed:Dictionary in entry.node.seed_ground_records():
+				for plot:Dictionary in seed.plots:
+					var at:Vector2=seed.origin+Vector2(plot.centroid)
+					var radius:=0.0
+					for point:Vector2 in plot.get("polygon",[]):radius=maxf(radius,point.distance_to(Vector2(plot.centroid)))
+					if radius>0.0:_clearing_candidates.append({"anchor":at,"area":Vector4(at.x,at.y,radius/0.65,0.0)})
 			for kind:String in ["homesteads","herders"]:
 				for home:Dictionary in entry.node.plan.get(kind,[]):
+					if home.has("settlement_growth"):continue
 					var layout:=PLAN.homestead_layout(home)
 					var at:Vector2=layout.yard_center
 					if bool(layout.get("is_cluster",false)):
@@ -212,7 +224,9 @@ func process_jobs(budget_usec:int=2000,max_jobs:int=2)->void:
 		var node:Node3D=layers[ids[_cursor]].node
 		_cursor+=1;checked+=1
 		if not node.visible:continue
+		var previous_ground:int=node.seed_ground_revision
 		node.process_jobs(maxi(1,budget_usec-int(Time.get_ticks_usec()-began)),1)
+		if node.seed_ground_revision!=previous_ground:clearing_revision+=1
 		built+=int(node.retained.last_jobs)
 	last_process_usec=Time.get_ticks_usec()-began
 
