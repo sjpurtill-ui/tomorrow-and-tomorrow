@@ -54,5 +54,21 @@ The attackers step within 0.50 m and use a target-height-dependent spine lean
 capped at 0.83 radians; limb lengths stay unchanged. A separate preview script
 parse check also passed before the GPU run.
 
+Final private GPU review passed on the combined source. An actual offline typed
+`Flog him.` order against a 45-year-old summoned official produced three
+attackers with four landed blows each and 12 floor splats. Sampled fists stayed
+within 1 mm of the victim's independently captured rendered chest target; the
+first visible blood holders matched the rendered chest and head. Heads, feet
+and floor remained in frame during repeated contact and aftermath. A second
+fresh office-order case skipped after four hits. Both preserved person identity,
+population and the engine's nonfatal outcome, released every transient modifier
+and tween, and restored cast positions. The private process exited 0 with no
+runtime errors and was confirmed closed.
+
+Evidence: `artifacts/court-beating/audit.json`, `preview-reach-final.log`,
+`contact.png`, `repeated.png`, `aftermath.png`, `end.png` and `skip-restored.png`.
+Source checkpoints are `bb0d58e8` and `e66c7e83`; latest main `d8bf9bcf` was
+merged before final combined tests and GPU verification.
+
 No save migration is required. A running player needs a normal save, exit and
 restart through the canonical launcher to load the new scripts.

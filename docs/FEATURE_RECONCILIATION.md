@@ -1,3 +1,20 @@
+## October 7 — Physical court flogging
+
+Successful flogging orders now show three adult court supporters approaching,
+landing repeated blows, and leaving the victim slumped and bloodied under the
+full gore setting. Typed, envoy-menu and known-person judgment paths preserve
+the exact adjudicated identities and the existing nonfatal injury outcome.
+The camera includes the whole group and floor. Skip, close and audience reset
+restore participants and release the camera; no save migration is needed.
+
+Source checkpoints `bb0d58e8` and `e66c7e83`, branch `codex/court-flogging`,
+merged with current main `d8bf9bcf` before final validation. All 20 combined
+checks passed. Private GPU review of the real typed “Flog him.” order produced
+12 landed blows (four per attacker), 12 blood splats, correct posed-body contact,
+full framing and clean natural/skip restoration, exit 0. Live player session
+remains untouched; a normal restart loads the change. Evidence and scope:
+`docs/design/COURT_FLOGGING.md`.
+
 ## October 7 — Connected, grounded settlement walls
 
 Replaces the completed stage-4 renderer's three disconnected interior loops
