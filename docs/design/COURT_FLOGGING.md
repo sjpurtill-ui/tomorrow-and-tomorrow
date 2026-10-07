@@ -45,11 +45,14 @@ a normal chapter-03 room using isolated QA data and the private GPU runner.
 Generated images and audit data remain under `artifacts/court-beating/` and are
 not source assets. Live player processes are never restarted by this review.
 
-Final headless validation passed 20/20 checks: 11 actual-route/lifecycle/camera
-cases, eight imported-rig/eligibility/blood cases and the GPU probe parse check.
-Report 70 and `artifacts/court-flogging/camera-contact-rerun.log` contain the
-results, with zero errors, failures, skips or orphans. The transformed-rig
-contact cases measured at most 3.8 cm, including victim recoil and collapse.
+Final combined-source headless validation passed 20/20 checks: 11 actual-route,
+lifecycle and camera cases plus nine imported-rig, eligibility, blood and reach
+cases. Report 74 and `artifacts/court-beating/route-attack-final.log` contain the
+results, with zero errors, failures, skips or orphans. All 108 late-slump samples
+passed the unchanged 5 cm gate across three attack angles and different bodies.
+The attackers step within 0.50 m and use a target-height-dependent spine lean
+capped at 0.83 radians; limb lengths stay unchanged. A separate preview script
+parse check also passed before the GPU run.
 
 No save migration is required. A running player needs a normal save, exit and
 restart through the canonical launcher to load the new scripts.

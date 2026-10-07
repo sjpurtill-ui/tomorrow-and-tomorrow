@@ -255,7 +255,7 @@ func test_typed_explicit_official_remains_the_actual_beating_actor()->void:
 	var movement:=Stage.ExecStage.new();movement.stage=stage;movement.victim=Stage.MAIN
 	var front:Vector3=stage.camera.global_position-victim.body3d.global_position
 	front.y=0.0;front=front.normalized()
-	var destination:Vector3=victim.body3d.global_position+front.rotated(Vector3.UP,deg_to_rad(78.0))*0.62
+	var destination:Vector3=victim.body3d.global_position+front.rotated(Vector3.UP,deg_to_rad(78.0))*Stage.BeatingStage.APPROACH_RADIUS
 	for key:String in stage.cast_order:
 		var person:Variant=stage.figure(key)
 		var pid:=int(person.person.get("person_id",0))

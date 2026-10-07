@@ -5,6 +5,7 @@ const Attack:=preload("res://scripts/hud/court_beating_attack.gd")
 const Movement:=preload("res://scripts/hud/court_exec_stage.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Director:=preload("res://scripts/hud/court_director.gd")
+const APPROACH_RADIUS:=0.50
 signal finished
 var stage:Control
 var victim:=""
@@ -52,7 +53,7 @@ func begin(on_stage:Control,victim_key:String,actor_key:String,how:String)->bool
 	front.y=0.0;front=front.normalized()
 	for key:String in candidates:
 		if attackers.size()>=3:break
-		var destination:=body.global_position+front.rotated(Vector3.UP,deg_to_rad([78.0,180.0,282.0][attackers.size()]))*0.62
+		var destination:=body.global_position+front.rotated(Vector3.UP,deg_to_rad([78.0,180.0,282.0][attackers.size()]))*APPROACH_RADIUS
 		destination.y=body.global_position.y
 		var route:PackedVector3Array=_movement.call("_walk_path",key,destination)
 		if route.size()<2:

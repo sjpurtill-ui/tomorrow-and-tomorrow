@@ -13,21 +13,21 @@ func _body(parent:Node3D,variant:String)->Node3D:
 	Acting.of(body).active=false
 	return body
 
-func _fixture(rotated:=false)->Dictionary:
+func _fixture(rotated:=false,actor_variant:="female_adult",victim_variant:="male_adult")->Dictionary:
 	var court:Node3D=auto_free(Node3D.new());add_child(court)
 	if rotated:court.transform=Transform3D(Basis(Vector3.UP,1.13),Vector3(7,1.2,-4))
-	var victim:=_body(court,"male_adult")
-	var actor:=_body(court,"female_adult");actor.position=Vector3(0.62,0,0);actor.rotation.y=-PI*0.5
+	var victim:=_body(court,victim_variant)
+	var actor:=_body(court,actor_variant);actor.position=Vector3(0.62,0,0);actor.rotation.y=-PI*0.5
 	var attack:=Attack.new();attack.configure(actor,victim,0);actor.skeleton.add_child(attack);attack.active=false
 	var reaction:=Attack.new();reaction.configure(victim,victim,0,true);victim.skeleton.add_child(reaction);reaction.active=false
 	return {"court":court,"victim":victim,"actor":actor,"attack":attack,"reaction":reaction}
 
-func _pose(f:Dictionary,time:float)->void:
+func _pose(f:Dictionary,time:float,recoil:=0.65)->void:
 	var victim:Node3D=f.victim;var actor:Node3D=f.actor
 	victim.skeleton.reset_bone_poses();victim.player.advance(0.0)
 	Acting.play(victim,"kneel_bound",{"blend":0.0,"hold":true})
 	Acting.of(victim)._a.t=2.35;Acting.of(victim).step(0.0)
-	f.reaction.clock=time;f.reaction.recoil=0.65;f.reaction.apply_pose(0.0)
+	f.reaction.clock=time;f.reaction.recoil=recoil;f.reaction.apply_pose(0.0)
 	actor.skeleton.reset_bone_poses();actor.player.advance(0.0)
 	f.attack.clock=time;f.attack.apply_pose(0.0)
 
@@ -133,3 +133,21 @@ func test_other_skeleton_contact_and_blood_use_rendered_pose_after_victim_restor
 			var expected:Transform3D=frames[bone_name]
 			assert_float(holder.global_position.distance_to(expected.origin)).is_less(0.0001)
 			assert_float(holder.global_basis.get_rotation_quaternion().angle_to(expected.basis.get_rotation_quaternion())).is_less(0.002)
+
+func test_late_slump_contact_at_all_three_approaches_with_adult_body_heights()->void:
+	var maximum:=0.0
+	for victim_variant:String in ["male_adult","female_adult"]:
+		for actor_variant:String in ["male_adult","female_adult","male_old"]:
+			for slot in 3:
+				var f:=_fixture(true,actor_variant,victim_variant)
+				var position:=Vector3.BACK.rotated(Vector3.UP,deg_to_rad([78.0,180.0,282.0][slot]))*Beating.APPROACH_RADIUS
+				f.actor.position=position;f.actor.rotation.y=atan2(-position.x,-position.z)
+				f.attack.index=slot
+				for recoil:float in [0.0,1.0]:
+					for phase:float in [0.40,0.45,0.50]:
+						_pose(f,Attack.PERIOD*3.0+float(slot)*0.48+phase,recoil)
+						var gap:=float(f.attack.get_meta("contact_gap",INF))
+						maximum=maxf(maximum,gap)
+						assert_float(gap).override_failure_message("%s vs %s slot %d phase %.2f recoil %.1f gap %.5f" % [actor_variant,victim_variant,slot,phase,recoil,gap]).is_less_equal(0.05)
+						assert_float(float(f.attack.get_meta("strike_lean",INF))).is_less_equal(0.830001)
+	print("BEATING_LATE_CONTACT max_gap_m=",maximum)

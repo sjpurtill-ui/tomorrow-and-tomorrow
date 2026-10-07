@@ -71,10 +71,15 @@ func apply_pose(delta:float)->void:
 	if not frames.get("chest") is Transform3D:
 		set_meta("contact_phase",false)
 		return
-	_rotate(sk,"spine",Vector3.RIGHT,0.28*attack_weight)
+	var target:=target_point()
+	var target_height:=(target-body.global_position).dot(body.global_basis.y.normalized())
+	# As the victim slumps, bend into the same planted stance rather than
+	# asking the arms to reach beyond their unchanged anatomical lengths.
+	var lean:=0.28+clampf((1.10*scale-target_height)*2.0/maxf(scale,0.1),0.0,0.55)
+	_rotate(sk,"spine",Vector3.RIGHT,lean*attack_weight)
+	set_meta("strike_lean",lean*attack_weight)
 	_rotate(sk,"chest",Vector3.UP,(1.0 if side==1 else -1.0)*0.20*attack_weight)
 	_clench(sk,side,attack_weight)
-	var target:=target_point()
 	var actor:=Acting.of(body)
 	if actor==null:return
 	var at:Vector3=actor.fist_frame(side).origin
