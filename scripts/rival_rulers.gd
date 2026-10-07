@@ -713,7 +713,8 @@ static func _bluff(civ_id:String,audience:Dictionary,rng:RandomNumberGenerator)-
 	# How well our watchers read their herald (standing.gd bluff_reading, by
 	# our cunning; a typical people keeps 0.85, 0.7 and 0.15).
 	var Standing:=preload("res://scripts/standing.gd")
-	var reading:=Standing.bluff_reading(Standing.art_of("player","cunning"))
+	# Our eyes among them know whether the spears are there (cunning_toward).
+	var reading:=Standing.bluff_reading(Standing.cunning_toward(civ_id))
 	if bluff:
 		var pool:Array=["%s's herald names no day and no place, and will not meet your eye." % name]
 		if size_ratio<0.9: pool.append("The herald boasts of more spears than %s has grown hunters." % name)

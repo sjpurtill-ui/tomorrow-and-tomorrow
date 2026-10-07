@@ -81,15 +81,32 @@ static func _theirs(id:String,civ_id:String,name:String)->Dictionary:
 	var row:={"civ_id":civ_id,"name":name,"ours":false,"value":value,"low":low,"high":high,"unknown":unknown,"exact":bool(est.get("exact",false)),
 		"sure":Standing.certainty(civ_id)}
 	row["text"]="unknown: we have not learned enough of them" if unknown else _words(id,value,low,high,bool(est.get("exact",false)))
+	# Where the reading comes from: our eyes among them, and for how long.
+	var net:Dictionary=preload("res://scripts/covert_ops.gd").network(civ_id)
+	if int(net.eyes)>0 and not unknown:
+		row["source"]="from our %s among them, %s" % [preload("res://scripts/eyes_corps.gd").word("eyes"),_years_words(float(net.years))]
+		row["network"]=float(net.strength)
 	var said:=boast_of(civ_id,id)
 	if not said.is_empty(): row["said"]=_said_words(id,said,row)
 	return row
+
+static func _years_words(years:float)->String:
+	if years<1.0: return "under a year"
+	var n:=roundi(years)
+	return "a year" if n==1 else "%d years" % n
 
 ## Their claim beside our reading: said plainly, never judged unless our own
 ## reading clears the whole claim (a known stretch) or falls short of it.
 static func _said_words(id:String,said:Dictionary,row:Dictionary)->String:
 	var claimed:=float(said.claimed)
 	var verdict:=""
+	# Our eyes among them know the truth of the boast, not only our estimate.
+	if float(row.get("network",0.0))>=0.25:
+		var truth:=float(their_measures(String(row.civ_id)).get(id,-1.0))
+		if truth>0.0:
+			if claimed>truth*1.15+0.5: return "Their envoy claimed %s, %s. Our eyes among them say it is stretched: the truth is nearer %s." % [_amount(id,claimed),_when(int(said.days_ago)),_amount(id,truth)]
+			if claimed<truth*0.85-0.5: return "Their envoy claimed %s, %s. Our eyes among them say they hold back: the truth is nearer %s." % [_amount(id,claimed),_when(int(said.days_ago)),_amount(id,truth)]
+			return "Their envoy claimed %s, %s. Our eyes among them say it is true." % [_amount(id,claimed),_when(int(said.days_ago))]
 	if not bool(row.unknown):
 		if claimed>float(row.high)*1.15+0.5: verdict=" Our watchers think it stretched."
 		elif claimed<float(row.low)*0.85-0.5: verdict=" Our watchers think it modest."
