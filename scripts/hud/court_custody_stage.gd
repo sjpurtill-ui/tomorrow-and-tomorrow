@@ -64,9 +64,15 @@ func begin(on_stage:Control,victim_key:String,actor_key:String,should_depart:boo
 	var routes:Array[PackedVector3Array]=[]
 	var destinations:Array[Vector3]=[]
 	var body:Node3D=f.body3d
+	var exit_point:=Vector3.ZERO
+	if depart:
+		if not _court.has_method("door_points"):return _reject("This court has no checked exit.")
+		var doors:Array=_court.call("door_points")
+		if doors.size()<2:return _reject("This court has no checked exit.")
+		exit_point=doors[1]
 	for key:String in candidates:
 		if support_keys.size()==2:break
-		var to:=approach_point(body,support_keys.size())
+		var to:=exile_approach_point(body,exit_point,support_keys.size()) if presentation_mode=="exile" else approach_point(body,support_keys.size())
 		var path:PackedVector3Array=_movement.call("_walk_path",key,to)
 		if path.size()<2:
 			if key==actor_key:return _reject("The adjudicated actor cannot reach the victim.")
@@ -74,12 +80,9 @@ func begin(on_stage:Control,victim_key:String,actor_key:String,should_depart:boo
 		support_keys.append(key);routes.append(path);destinations.append(to)
 	if support_keys.size()!=2:return _reject("Two reachable adult court supporters are required.")
 	if depart:
-		if not _court.has_method("door_points"):return _reject("This court has no checked exit.")
-		var doors:Array=_court.call("door_points")
-		if doors.size()<2:return _reject("This court has no checked exit.")
 		var ignored:Array[String]=[victim];ignored.append_array(support_keys)
-		_out_paths[victim]=_path_from(body.global_position,doors[1],ignored)
-		for i in support_keys.size():_out_paths[support_keys[i]]=_path_from(destinations[i],doors[1],ignored)
+		_out_paths[victim]=_path_from(body.global_position,exit_point,ignored)
+		for i in support_keys.size():_out_paths[support_keys[i]]=_path_from(destinations[i],exit_point,ignored)
 		for path:PackedVector3Array in _out_paths.values():
 			if path.size()<2:return _reject("The custody party cannot reach the actual court door.")
 	_begun=true
@@ -107,6 +110,12 @@ static func approach_point(body:Node3D,slot:int)->Vector3:
 	var point:=body.global_position+body.global_basis.x.normalized()*(APPROACH_RADIUS if slot==0 else -APPROACH_RADIUS)
 	point.y=body.global_position.y
 	return point
+
+static func exile_approach_point(body:Node3D,door:Vector3,slot:int)->Vector3:
+	# The named actor indicates the exit from its side of the target, so the
+	# target cannot hide an arm extended through them toward the doorway.
+	var first:=0 if approach_point(body,0).distance_squared_to(door)<=approach_point(body,1).distance_squared_to(door) else 1
+	return approach_point(body,first if slot==0 else 1-first)
 
 static func eligible_support(entry:Dictionary,person:Dictionary)->bool:
 	return not Executions.is_child(person) and Beating.eligible_attacker(entry)

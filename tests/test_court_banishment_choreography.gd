@@ -103,6 +103,20 @@ func test_authored_pointing_hand_indicates_actual_door_in_translated_rotated_cou
 		assert_float(alignment).override_failure_message("Actual rendered index must indicate the exit, including rotated court coordinates.").is_greater(0.85)
 		f.scene.cancel()
 
+func test_named_exile_actor_stands_on_exit_side_and_points_away_from_target()->void:
+	for rotated:bool in [false,true]:
+		var f:=_fixture(rotated);_arrive(f);f.scene._process(0.61)
+		assert_str(String(f.scene.get_meta("gesture_actor"))).is_equal("named")
+		var actor:Node3D=f.stage.figures.named.body3d
+		var target:Node3D=f.body
+		var door:Vector3=f.scene.get_meta("gesture_target")
+		var toward_door:Vector3=(door-actor.global_position).normalized()
+		var toward_target:Vector3=(target.global_position-actor.global_position).normalized()
+		assert_float(toward_door.dot(toward_target)).override_failure_message("The target must be behind the pointing actor, not between their arm and the door.").is_less(-0.5)
+		assert_float(actor.global_position.distance_to(target.global_position)).is_between(0.499,0.501)
+		assert_float(actor.global_position.distance_to(Custody.exile_approach_point(target,door,0))).is_less(0.0001)
+		f.scene.cancel()
+
 func test_exile_skip_and_cancel_restore_supporters_without_persistent_bonds()->void:
 	for skip:bool in [false,true]:
 		var f:=_fixture();_arrive(f);f.scene._process(0.61)

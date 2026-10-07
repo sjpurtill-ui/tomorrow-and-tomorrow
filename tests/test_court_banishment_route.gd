@@ -200,7 +200,7 @@ func test_named_official_remains_the_actual_banishment_actor()->void:
 	var modal:Control=await _marshal();var stage:Control=modal.court_stage
 	var victim:Variant=stage.figure(Stage.MAIN)
 	var movement:=Stage.ExecStage.new();movement.stage=stage;movement.victim=Stage.MAIN
-	var destination:Vector3=Stage.CustodyStage.approach_point(victim.body3d,0)
+	var destination:Vector3=Stage.CustodyStage.exile_approach_point(victim.body3d,stage.court_set.door_points()[1],0)
 	var actor_key:=""
 	for key:String in stage.cast_order:
 		var person:Variant=stage.figure(key);var pid:=int(person.person.get("person_id",0))
