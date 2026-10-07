@@ -32,6 +32,7 @@ func before_test()->void:
 	GameState.elapsed_days=10
 	civ_id=String(CivilizationSystem.civilizations[0].id)
 	MilitaryCampaign.reset_for_new_world()
+	_bring_near(CivilizationSystem.civilizations[0])
 
 func after_test()->void:
 	GameState.elapsed_days=0
@@ -113,3 +114,10 @@ func test_the_board_draws_peace_or_a_card_with_its_meters()->void:
 	assert_bool(words.has("Their raids 2")).is_true()
 	assert_bool(words.has("Our strikes 1")).is_true()
 	assert_str((shown.ends as Label).text).contains("blood price")
+
+## The enemy lives a few days from us (war_loop.gd near_us): a war needs a road.
+func _bring_near(civ:Dictionary)->void:
+	var home:Vector2=CivilizationSystem.player_world_origin+Vector2(250.0,0.0)
+	civ["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=home

@@ -659,6 +659,11 @@ static func _execute(civ_id:String,day:int)->void:
 	if broken(civ_id):
 		_log(civ_id,"stood_down","No raiders came from %s: no town of theirs is left, and too few of them live." % _name(civ_id),{"ref":String(pending.get("ref",""))})
 		return
+	# The farther their country, the longer the road: often nobody comes.
+	if _rng("road:%s:%d" % [civ_id,day]).randf()>lerpf(0.25,1.0,proximity(civ_id)):
+		_log(civ_id,"stood_down","No raiders came from %s: the road from their country is long." % _name(civ_id),{"ref":String(pending.get("ref",""))})
+		_stat("raids_long_road")
+		return
 	# A people worn out by the feud keeps its raiders home.
 	if not formal and float(f.get("their_exh",0.0))>=ENEMY_SPENT:
 		_log(civ_id,"stood_down","%s has buried too many of its own; no raiders came." % _name(civ_id),{"ref":String(pending.get("ref",""))})
@@ -976,6 +981,10 @@ static func declare(civ_id:String,day:int,cause:String,ally:String="")->bool:
 	## declared: the feud flares instead (blood_feud) and false is returned.
 	var index:=Hall._civ_index(civ_id)
 	if index<0: return false
+	# No war with a people no band can reach, either way.
+	if not near_us(civ_id):
+		_too_far(civ_id,day,"would make war on us over %s" % cause)
+		return false
 	if not Scale.formal(civ_id):
 		blood_feud(civ_id,day,cause,ally)
 		return false
@@ -1200,6 +1209,10 @@ static func _feud_cause(civ_id:String)->String:
 static func blood_feud(civ_id:String,day:int,cause:String,ally:String="",source:String="")->String:
 	var index:=Hall._civ_index(civ_id)
 	if index<0: return ""
+	# Vengeance needs a road: a people too far to reach us keeps the grudge.
+	if not near_us(civ_id):
+		_rivals().call("grudge",civ_id,cause,0.3,"far:%s:%d" % [civ_id,day])
+		return _too_far(civ_id,day,"swears vengeance for %s" % cause)
 	var f:=front(civ_id)
 	var fresh:=int(f.level)<1 or int(f.get("feud_since",-1))<0 or day-int(f.last_harm)>FEUD_COLD_DAYS
 	if fresh: _begin_feud(f,day)
@@ -1359,6 +1372,18 @@ static func _feud_cold(civ_id:String,day:int)->void:
 	_chronicle("feud_cold:%s:%d" % [civ_id,day],"The Feud With %s Goes Cold" % name,text,"notice",civ_id)
 	_log(civ_id,"feud_cold",text,{"our_dead":int(f.get("our_dead",0)),"their_dead":int(f.get("their_dead",0))})
 	_stat("feuds_cold")
+	_drop_matters(civ_id)
+
+## The feud with a people too far to reach ends: nothing can cross the
+## distance either way. The grudge stays.
+static func _feud_far(civ_id:String,day:int)->void:
+	var f:=front(civ_id)
+	var name:=_name(civ_id)
+	f["level"]=0; f["pending"]={}; f["cold_day"]=day; f["op"]={}
+	var text:="The feud with %s is over: %s. Nobody made peace, and nobody has forgotten." % [name,far_words(civ_id)]
+	_chronicle("feud_far:%s:%d" % [civ_id,day],"The Feud With %s Cannot Be Fought" % name,text,"notice",civ_id)
+	_log(civ_id,"feud_far",text)
+	_stat("feuds_far")
 	_drop_matters(civ_id)
 
 ## The blood price we would pay them: Food for each life of theirs we took in
@@ -1840,6 +1865,10 @@ static func daily(day:int)->void:
 		var relation:Dictionary=civ.get("player_relation",{})
 		if not bool(relation.get("at_war",false)) or not bool(civ.get("alive",true)) or bool(civ.get("general_campaign_owned",false)) or int(relation.get("contact_level",0))<1: continue
 		var cid:=String(civ.id)
+		# A war no band can march to ends: neither side can reach the other.
+		if not near_us(cid):
+			_close_war(cid,day,"too far","No band of theirs or ours can cross the distance: %s. The war is over." % far_words(cid))
+			continue
 		if Scale.formal(cid):
 			if (front(cid).war as Dictionary).is_empty(): _adopt(cid,day)
 		else: _open_fight(cid,relation,day)
@@ -1856,6 +1885,10 @@ static func daily(day:int)->void:
 			if not (f.war as Dictionary).is_empty(): f["war"]={}
 			continue
 		_knows_the_way_from_before(id,day)
+		# A feud with a people too far to reach goes cold at once.
+		if int(f.get("level",0))>=1 and (f.war as Dictionary).is_empty() and not near_us(id):
+			_feud_far(id,day)
+			continue
 		var war:Dictionary=f.war
 		if war.is_empty():
 			var pending:Dictionary=f.pending
@@ -2263,6 +2296,53 @@ static func near_us(civ_id:String)->bool:
 	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
 	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+NEIGHBOUR_MARGIN_KM
 
+## How close a people's country lies to ours, 0..1: 1 where the two meet,
+## falling to 0 at NEIGHBOUR_MARGIN_KM apart (no band can march farther). The
+## same for every people, read in its own scope (RealmReach.ours is the
+## people in scope). Proximity drives the potential for war: raids, feuds,
+## declarations and threats all come more often the closer two peoples live.
+static func proximity(civ_id:String)->float:
+	if RealmReach.ours().is_empty(): return 1.0
+	if _civ(civ_id).is_empty(): return 0.0
+	return clampf(1.0-gap_km(civ_id)/NEIGHBOUR_MARGIN_KM,0.0,1.0)
+
+## Two peoples' proximity from their records alone (rival against rival).
+static func proximity_between(first:Dictionary,second:Dictionary)->float:
+	var world=WorldSimulation.world
+	var a:Vector2=world._civilization_world_position(first); var b:Vector2=world._civilization_world_position(second)
+	var reach:=RealmReach.reach_km(float(first.get("population",0.0)),float(first.get("world_reach",0.0)))+RealmReach.reach_km(float(second.get("population",0.0)),float(second.get("world_reach",0.0)))
+	return clampf(1.0-maxf(0.0,a.distance_to(b)-reach)/NEIGHBOUR_MARGIN_KM,0.0,1.0)
+
+## Kilometres between our country's edge and theirs (0 when they meet or we
+## have no country yet).
+static func gap_km(civ_id:String)->float:
+	var ours:=RealmReach.ours()
+	var civ:=_civ(civ_id)
+	if ours.is_empty() or civ.is_empty(): return 0.0
+	var theirs:=RealmReach.of(civ)
+	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
+	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
+	return maxf(0.0,(ours.center as Vector2).distance_to(center)-float(ours.reach)-reach)
+
+## "their country lies about 1,800 km from ours".
+static func far_words(civ_id:String)->String:
+	var km:=roundi(gap_km(civ_id)+NEIGHBOUR_MARGIN_KM)
+	return "their country lies about %s km from ours, farther than any band can march" % preload("res://scripts/hud/era_words.gd").grouped(roundi(km/50.0)*50)
+
+## A people too far to reach us swears what it likes: the grudge is kept,
+## nothing marches. Told once a year at most.
+static func _too_far(civ_id:String,day:int,what:String)->String:
+	var name:=_name(civ_id)
+	var text:="%s %s, but %s." % [name,what,far_words(civ_id)]
+	ForeignDiplomacy.remember(civ_id,"We swore %s against the god's people, but they live too far to reach." % what.trim_prefix("swears ").trim_prefix("would "))
+	_log(civ_id,"too_far",text)
+	_stat("too_far")
+	var f:=front(civ_id)
+	if day-int(f.get("too_far_told",-99999))>=365:
+		f["too_far_told"]=day
+		_chronicle("too_far:%s:%d" % [civ_id,day],"%s Cannot Reach Us" % name,text,"notice",civ_id)
+	return text
+
 static func neighbours(first:Dictionary,second:Dictionary)->bool:
 	var world=WorldSimulation.world
 	var a:Vector2=world._civilization_world_position(first); var b:Vector2=world._civilization_world_position(second)
@@ -2312,7 +2392,7 @@ static func _rival_wars(day:int)->void:
 			if world.has_method("rival_feud_hot") and bool(world.rival_feud_hot(relation,day)): continue
 			# One bowed to the other lately and pays it tribute (rival_feuds.gd).
 			if not preload("res://scripts/rival_feuds.gd").bowed(relation,day).is_empty(): continue
-			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0
+			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0*proximity_between(first,second)
 			if _rng("rivalwar:%s:%s:%d" % [String(first.id),String(second.id),day]).randf()>=monthly: continue
 			# Two small peoples do not declare war: the same quarrel is a feud,
 			# fought by raiders (conflict_scale.gd). The benchmark hazard is the
