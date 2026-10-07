@@ -1168,7 +1168,7 @@ static func _catch_incoming(day:int)->void:
 			_stat("caught_theirs")
 			# One of them lived among us: the people wonder who else does.
 			EyesCorps.found_among_us()
-			var what:="an assassin" if String(sp.kind)=="assassinate" else "a spy"
+			var what:="an assassin" if String(sp.kind)=="assassinate" else EyesCorps.an_eye()
 			var where:=String(GameState.settlement_name).strip_edges()
 			Chronicle.record({"key":"covert:%d:caught:%s" % [day,String(held.get("id",""))],"title":"%s of %s Caught" % [what.capitalize(),_the(String(sp.civ_id))],
 				"text":"Our watch took %s, %s of %s, in %s. %s is held under guard." % [String(held.get("name","one of theirs")),what,_the(String(sp.civ_id)),where if where!="" else "our town","She" if String(held.get("sex",""))=="female" else "He"],
@@ -1395,7 +1395,7 @@ static func answer(text:String)->String:
 	# Caught spies of theirs.
 	if RegEx.create_from_string("(?i)\\b(caught|catch|taken|found|took)\\b").search(lower)!=null and RegEx.create_from_string("(?i)\\b(spy|spies|agent|assassin|their|them|theirs)\\b").search(lower)!=null:
 		var caught:=caught_spies(6)
-		if caught.is_empty(): return "We have caught no spies of theirs in our towns."
+		if caught.is_empty(): return "We have found no %s of theirs among us." % EyesCorps.word("eyes")
 		var bits:PackedStringArray=PackedStringArray()
 		for c:Dictionary in caught: bits.append("%s%s of %s%s, %s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else "a spy"),c.civ_name,(" (%s)" % c.fate) if String(c.fate)!="" else "",_since(int(c.age_days))])
 		return "Our watch has taken %s." % _join(bits)
@@ -1403,7 +1403,7 @@ static func answer(text:String)->String:
 	var abroad:=agents_abroad()
 	var facts:=learned(5)
 	if abroad.is_empty() and facts.is_empty():
-		return "No one of ours is abroad in secret, and our spies have brought back nothing yet."
+		return "No one of ours lives among another people yet, and our %s have sent nothing home." % EyesCorps.word("eyes")
 	var parts:PackedStringArray=PackedStringArray()
 	if not abroad.is_empty():
 		var who:PackedStringArray=PackedStringArray()

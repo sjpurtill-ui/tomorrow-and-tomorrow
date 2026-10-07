@@ -66,6 +66,11 @@ static func stage()->String:
 static func word(key:String)->String:
 	return String((WORDS.get(stage(),WORDS.hearth) as Dictionary).get(key,key))
 
+## "an eye", "a watcher", "a spy": the word of the age with its article.
+static func an_eye()->String:
+	var w:=word("eye")
+	return ("an " if w.left(1) in ["a","e","i","o","u"] else "a ")+w
+
 static func _day()->int:
 	return int(GameState.elapsed_days)
 

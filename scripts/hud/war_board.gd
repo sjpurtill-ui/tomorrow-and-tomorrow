@@ -85,6 +85,7 @@ var covert_toggle:Button
 var clock:=0.0
 ## Capture only ("--capture-war-scroll=<px>"): the column shown further down.
 var _capture_scroll:=-1
+var _capture_covert:=false
 var _strip_room:=-1.0
 ## The chips in the order they give way, the quiet ones first.
 var _shed:Array=SHED_ORDER.duplicate()
@@ -130,7 +131,7 @@ func setup(_block:Dictionary={})->void:
 	_spies_words()
 	for argument in OS.get_cmdline_user_args():
 		if String(argument).begins_with("--capture-war-scroll="):_capture_scroll=int(String(argument).trim_prefix("--capture-war-scroll="))
-		if String(argument)=="--capture-covert":covert.visible=true;_spies_words()
+		if String(argument)=="--capture-covert":covert.visible=true;_spies_words();_capture_covert=true
 		# A capture-only sample of trained corps (never saved: isolated captures).
 		if String(argument)=="--capture-covert-sample":
 			var corps:Dictionary=preload("res://scripts/eyes_corps.gd").state()
@@ -142,6 +143,7 @@ func setup(_block:Dictionary={})->void:
 
 func _process(delta:float)->void:
 	_place_strip()
+	if _capture_covert and is_instance_valid(covert):_capture_scroll=maxi(0,int(covert.position.y)-12)
 	if _capture_scroll>=0:
 		var holder:=get_parent()
 		while holder!=null and not holder is ScrollContainer:holder=holder.get_parent()

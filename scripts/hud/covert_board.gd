@@ -145,7 +145,7 @@ static func sections()->Array:
 	var caught:=Covert.caught_spies(6)
 	if not caught.is_empty():
 		var rows4:Array=[]
-		for c:Dictionary in caught: rows4.append("%s%s of %s, %s%s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else "one of their %s" % eyes),String(c.civ_name),_age(int(c.age_days)),(" · "+String(c.fate)) if String(c.fate)!="" else ""])
+		for c:Dictionary in caught: rows4.append("%s%s of %s, %s%s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else Corps.an_eye()),String(c.civ_name),_age(int(c.age_days)),(" · "+String(c.fate)) if String(c.fate)!="" else ""])
 		out.append({"kind":"caught","title":"Theirs we found among us","rows":rows4})
 	# Those we hold, what they said (a word our own eyes showed false is
 	# marked), and ours judged abroad (captured_agents.gd).

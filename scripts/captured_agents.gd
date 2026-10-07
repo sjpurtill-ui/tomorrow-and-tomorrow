@@ -733,7 +733,8 @@ static func said_rows(p:Dictionary)->Array:
 # --------------------------------------------------------------------------
 
 static func title_of(p:Dictionary)->String:
-	var who:="an assassin" if String(p.get("kind",""))=="assassinate" else "a spy"
+	var who:="an assassin" if String(p.get("kind",""))=="assassinate" else preload("res://scripts/eyes_corps.gd").an_eye()
+	if bool(p.get("accused",false)): return "one of our people, accused of being %s of %s" % [who,_the(String(p.civ_id))]
 	match String(p.get("status","")):
 		"turning": return "%s of %s, in the carers' keeping" % [who,_the(String(p.civ_id))]
 		"joined": return "once %s of %s, now one of us" % [who,_the(String(p.civ_id))]
@@ -1043,7 +1044,7 @@ static func message_words(kind:String,civ_id:String)->String:
 		"warning": return "Tell %s: send no more of your people to creep about our fires. The next one dies." % given
 		"threat": return "Tell %s: if another of yours comes in secret, the god's people will come to your hearths in force." % given
 		"peace": return "Tell %s: the god sends you back your man alive. Let there be peace between our peoples." % given
-		"demand": return "Tell %s to keep %s spies at home, and to send the god a gift for this insult." % [given,"her" if _ruler_she(civ_id) else "his"]
+		"demand": return "Tell %s to keep %s %s at home, and to send the god a gift for this insult." % [given,"her" if _ruler_she(civ_id) else "his",preload("res://scripts/eyes_corps.gd").word("eyes")]
 	return ""
 
 static func message_label(kind:String)->String:
