@@ -55,6 +55,7 @@ func _draw()->void:
 		"court":_court()
 		"population","overview":_people()
 		"standing":_standing()
+		"eyes":_eye()
 		"world":_world()
 		"military":_military()
 		"chronicle":_chronicle()
@@ -100,6 +101,16 @@ func _standing()->void:
 	_fill([13,5,15,7.5,15.5,17,13,17])
 	_line([3,21,21,21])
 	if _detail:_line([9,8,8.8,12],1.1)
+
+func _eye()->void:
+	_bezier([2.5,12,7,5,17,5,21.5,12])
+	_bezier([2.5,12,7,19,17,19,21.5,12])
+	_oval(12,12,3.6,3.6)
+	_oval(12,12,1.5,1.5,true)
+	if _detail:
+		_line([12,2,12,4.2],1.2)
+		_line([5.5,3.8,6.8,5.6],1.2)
+		_line([18.5,3.8,17.2,5.6],1.2)
 
 func _world()->void:
 	_oval(12,12,8.5,8.5)

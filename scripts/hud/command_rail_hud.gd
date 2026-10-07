@@ -26,6 +26,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"production","label":"Production","tooltip":"Crafts, tools and weapons in the making · F9"},
 	{"id":"civ","label":"Culture","tooltip":"Society and civic dialogue · F4"},
 	{"id":"military","label":"Security","tooltip":"War: how many serve, our enemies and our leaders · F8"},
+	{"id":"eyes","label":"Eyes","tooltip":"Our eyes among other peoples and the wary watching for theirs: how many to teach, where to send them, what came back · F3"},
 	{"id":"trade","label":"Trade","section":"economy","sub":3,"tooltip":"Trade with other peoples: what passes, who leans on whom, and pressure"},
 	{"id":"inquiry","label":"Research","tooltip":"What the people know and are learning · F5"},
 	{"id":"world","label":"World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
@@ -552,6 +553,9 @@ func _refresh_words()->void:
 	for spec in SECTIONS:
 		var label:Label=rail_labels.get(String(spec.id))
 		if label:label.text=String(spec.label)
+	# The eyes go by the age's word: Eyes, Watchers, Spies (eyes_corps.gd).
+	var eyes_label:Label=rail_labels.get("eyes")
+	if eyes_label:eyes_label.text=preload("res://scripts/eyes_corps.gd").word("Eyes")
 	_style_drawer_label()
 	var military:Button=rail_buttons.get("military")
 	if military:
@@ -1333,7 +1337,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()
 
-const HOTKEYS:={KEY_F1:"overview",KEY_F2:"economy",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F7:"construction",KEY_F8:"military",KEY_F9:"production",KEY_F11:"chronicle"}
+const HOTKEYS:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"eyes",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F7:"construction",KEY_F8:"military",KEY_F9:"production",KEY_F11:"chronicle"}
 
 func _dock_interaction_active(panel:Control)->bool:
 	## Hovering must not freeze progress. Protect an active click or text edit only.

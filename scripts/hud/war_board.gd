@@ -124,7 +124,7 @@ func setup(_block:Dictionary={})->void:
 	covert_toggle=Button.new();covert_toggle.name="CovertToggle";covert_toggle.flat=true;covert_toggle.focus_mode=Control.FOCUS_NONE
 	covert_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;covert_toggle.add_theme_font_override("font",T.font("ui_strong"));covert_toggle.add_theme_font_size_override("font_size",12)
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:covert_toggle.add_theme_color_override(state,T.INK_MUTED)
-	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Orders are given at court through the Pathfinder."
+	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Their own page on the rail (F3) sets how many are taught and sends them out."
 	add_child(covert_toggle)
 	covert=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup();covert.visible=false
 	covert_toggle.pressed.connect(func()->void:covert.visible=not covert.visible;_spies_words())

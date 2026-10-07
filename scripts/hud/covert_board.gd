@@ -9,15 +9,26 @@ extends VBoxContainer
 ## many learn, their craft as a row of marks and the course; the wary carry
 ## the distrust they cost at home. Below: our eyes abroad, what they sent
 ## home, how our errands ended, theirs we caught, and those we hold
-## (covert_ops.gd, captured_agents.gd). It only informs: the god gives the
-## orders at court (the Pathfinder).
+## (covert_ops.gd, captured_agents.gd).
 ##
-## sections() and corps_view() are the data (also read by tests).
+## It is also where the god gives the orders, in plain buttons: how many to
+## teach for each corps (the same policy the Pathfinder carries at court,
+## court_eyes_orders.gd), and an errand among each people we know (watch,
+## live among them, steal a craft) with the engine's odds on the button. A
+## killing or a burning stays a word at court: the war leader answers for it.
+##
+## sections(), corps_view(), level_rows() and errand_rows() are the data
+## (also read by tests).
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Covert:=preload("res://scripts/covert_ops.gd")
 const Corps:=preload("res://scripts/eyes_corps.gd")
+const Orders:=preload("res://scripts/covert_orders.gd")
 const REFRESH_SECONDS:=1.5
+## The errands a button can send (the eyes' own work, carried by the
+## Pathfinder); the peoples shown at most.
+const ERRANDS:=["watch","plant","steal"]
+const MAX_PEOPLES:=8
 
 ## The folio's inks by age: [page, raised, rule, leaf (titles and seals),
 ## text, muted text, danger].
@@ -36,6 +47,8 @@ const MOTTO:={
 var box:VBoxContainer
 var clock:=0.0
 var signature:=""
+## The last answer to a button, shown under the buttons until the next press.
+var answer:=""
 
 
 ## The eye sigil: an almond eye, its iris and pupil, a ring of rays and an
@@ -161,7 +174,7 @@ static func sections()->Array:
 	var held:=preload("res://scripts/captured_agents.gd").board_rows(6)
 	if not held.is_empty(): out.append({"kind":"prisoners","title":"Those we hold, and what they said","rows":held})
 	if out.is_empty():
-		out.append({"kind":"empty","title":"","rows":["No one of ours lives among another people yet. Teach %s through the Pathfinder at court." % eyes]})
+		out.append({"kind":"empty","title":"","rows":["No one of ours lives among another people yet."]})
 	return out
 
 
@@ -187,10 +200,96 @@ static func _age(days:int)->String:
 	return "%d months ago" % maxi(1,roundi(days/30.0))
 
 
+## The four teaching levels for one corps, with what each means in the
+## engine's numbers: [{id, label, active, yearly, words}].
+static func level_rows(corps:String)->Array:
+	var people:=maxf(1.0,float(GameState.population_exact))
+	var sum:=Corps.summary()
+	var out:Array=[]
+	for id:String in Corps.POLICY_ORDER:
+		var row:Array=Corps.POLICIES[id]
+		var yearly:=float(row[1])*people/1000.0
+		var words:=""
+		if id=="none": words="No one starts the course. Those we have keep serving until the years thin them."
+		else: words="About %s a year start a %d-day course at %s food a day each, and leave other work while they learn and serve." % [_count(yearly),int(sum.course_days),_n(float(sum.course_food))]
+		out.append({"id":id,"label":String(row[0]),"active":Corps.policy(corps)==id,"yearly":yearly,"words":words})
+	return out
+
+
+## Every people we know, with the odds of each errand our eyes can run among
+## them: [{civ_id, name, errands:[{kind, label, success, caught, days, barred}]}].
+## The odds are for whoever would go now: a trained eye of ours when one is
+## ready, else an untried volunteer (covert_ops.gd volunteer_for).
+static func errand_rows()->Array:
+	var out:Array=[]
+	if WorldSimulation.world==null: return out
+	for c in WorldSimulation.world.civilizations:
+		if not c is Dictionary: continue
+		var civ:Dictionary=c
+		var id:=String(civ.get("id",""))
+		if id=="" or id=="player" or not bool(civ.get("alive",true)): continue
+		var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+		if int(rel.get("contact_level",0))<1: continue
+		var errands:Array=[]
+		for kind:String in ERRANDS:
+			var barred:=Covert.method_barred(kind)
+			var e:={"kind":kind,"label":_errand_label(kind),"barred":barred}
+			if barred=="":
+				var o:=Covert.odds(kind,id,"","none",_likely_agent(kind))
+				e["success"]=float(o.get("success",0.0))
+				e["caught"]=float(o.get("settle",0.0))+float(o.get("caught",0.0)) if kind=="plant" else float(o.get("caught",0.0))
+				e["days"]=int(o.get("days",0))
+			errands.append(e)
+		out.append({"civ_id":id,"name":String(civ.get("name",id)),"errands":errands})
+		if out.size()>=MAX_PEOPLES: break
+	return out
+
+
+## Who would go, for the odds shown (nothing is drawn or spent): a trained
+## eye at the corps' craft, else a volunteer of middling hand.
+static func _likely_agent(kind:String)->Dictionary:
+	if kind in ["watch","plant"] and Corps.members("eyes")>=1.0:
+		var k:=Corps.craft("eyes")
+		return {"stealth":clampf(k,0.1,0.95),"tongue":clampf(k*0.9+0.05,0.1,0.95),"nerve":clampf(k*0.85+0.1,0.1,0.95),"blade":0.4,"poison":0.35,"trained":true}
+	return {"stealth":0.55,"tongue":0.5,"nerve":0.5,"blade":0.45,"poison":0.4}
+
+
+static func _errand_label(kind:String)->String:
+	return String({"watch":"Watch them","plant":"Live among them","steal":"Steal a craft"}.get(kind,kind))
+
+
+## Sets one corps' teaching, as the Pathfinder's order would. Returns the words.
+func set_level(corps:String,level:String)->String:
+	var done:=preload("res://scripts/court_eyes_orders.gd").perform({"corps":corps,"policy":level})
+	answer=String(done.get("says",""))
+	refresh(true)
+	return answer
+
+
+## Sends one errand among a people, as the Pathfinder's order would, on the
+## odds the button showed. Returns the official's answer.
+func send(kind:String,civ_id:String)->String:
+	var done:=Orders.perform({"kind":kind,"civ_id":civ_id,"city_id":"","cover":"none","target_desc":_errand_label(kind)},true)
+	answer=String(done.get("says",""))
+	if String(done.get("outcome",""))!="": answer+=" "+String(done.outcome)
+	refresh(true)
+	return answer
+
+
+static func _count(n:float)->String:
+	if n<1.0: return "one every %d years" % maxi(2,roundi(1.0/maxf(0.01,n)))
+	return str(roundi(n))
+
+
+static func _n(v:float)->String:
+	return ("%.2f" % v).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+
+
 func refresh(force:=false)->void:
 	var data:=sections()
 	var view:=corps_view()
-	var sig:=str([data,_rounded(view)])
+	var errands:=errand_rows()
+	var sig:=str([data,_rounded(view),answer,_errand_sig(errands)])
 	if not force and sig==signature: return
 	# Do not rebuild under the pointer (a click is informing).
 	if not force and is_instance_valid(box) and box.get_global_rect().has_point(box.get_global_mouse_position()): return
@@ -209,12 +308,24 @@ func refresh(force:=false)->void:
 	var seals:=HBoxContainer.new(); seals.add_theme_constant_override("separation",12); column.add_child(seals)
 	seals.add_child(_seal("eyes",view,ink))
 	seals.add_child(_seal("wary",view,ink))
+	if answer!="":
+		var said:=_line(answer,13,ink[4],true,"voice_italic"); said.name="Answer"; column.add_child(said)
+	column.add_child(_send_panel(errands,ink))
 	column.add_child(_cipher_rule(ink))
 	for section:Dictionary in data:
 		if String(section.kind)=="empty":
 			column.add_child(_line(String((section.rows as Array)[0]),14,ink[5],true,"voice_italic"))
 			continue
 		column.add_child(_panel(section,ink))
+
+
+static func _errand_sig(rows:Array)->Array:
+	var out:Array=[]
+	for r:Dictionary in rows:
+		var e:Array=[String(r.civ_id)]
+		for x:Dictionary in r.errands: e.append(roundi(float(x.get("success",0.0))*100.0))
+		out.append(e)
+	return out
 
 
 static func _rounded(view:Dictionary)->Array:
@@ -257,12 +368,66 @@ func _seal(corps:String,view:Dictionary,ink:Array)->Control:
 	col.add_child(_line("%s · %d learning" % [serving,roundi(float(c.training))],13,ink[5],true))
 	var marks:=Marks.new(); marks.value=float(c.craft); marks.cap=float(view.cap); marks.leaf=ink[3]; col.add_child(marks)
 	marks.tooltip_text="Craft %d in 100; the most this age can teach is %d." % [roundi(float(c.craft)*100.0),roundi(float(view.cap)*100.0)]
-	col.add_child(_line("Teaching: %s · a course of %d days" % [String(c.policy_label).to_lower(),int(view.course_days)],13,ink[5],true))
+	col.add_child(_line("%s how many a year?" % Corps.word("train").capitalize(),12,ink[3],false,"ui_strong"))
+	var levels:=HBoxContainer.new(); levels.name="Levels_"+corps; levels.add_theme_constant_override("separation",4); col.add_child(levels)
+	for row:Dictionary in level_rows(corps):
+		var b:=_ink_button(String(row.label),bool(row.active),ink)
+		b.name="Level_%s_%s" % [corps,String(row.id)]; b.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		b.tooltip_text=String(row.words)
+		var level:=String(row.id)
+		b.pressed.connect(func()->void: set_level(corps,level))
+		levels.add_child(b)
+	for row:Dictionary in level_rows(corps):
+		if bool(row.active): col.add_child(_line(String(row.words),12,ink[5],true))
 	if corps=="wary":
 		var cost:=roundi(float(view.cohesion_cost)*100.0)
 		col.add_child(_line("Watching %d in 100 of our people · distrust costs %d in 100 of their trust in one another" % [roundi(float(view.coverage)*100.0),cost],13,ink[6] if cost>=2 else ink[5],true))
-	panel.tooltip_text="Set at court: the Pathfinder's \"%s %s\" and \"%s\"." % [Corps.word("train").capitalize(),Corps.word("eyes"),Corps.word("Wary")]
+	panel.tooltip_text=("Ours who live unseen among other peoples. A taught one blends in far better than a volunteer." if corps=="eyes" else "Ours who watch for theirs among us. More of them catch more, but the people start wondering who reports on whom.")
 	return panel
+
+
+## Send our eyes: a row for each people we know, a button for each errand
+## with its odds, and who would go.
+func _send_panel(rows:Array,ink:Array)->Control:
+	var panel:=PanelContainer.new(); panel.name="Send"
+	var style:=StyleBoxFlat.new(); style.bg_color=ink[1]; style.border_color=ink[2]; style.set_border_width_all(1)
+	style.set_corner_radius_all(T.RADIUS_CARD); style.set_content_margin_all(12)
+	panel.add_theme_stylebox_override("panel",style)
+	var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",6); panel.add_child(col)
+	col.add_child(_line(("Send our %s" % Corps.word("eyes")).to_upper(),12,ink[3],false,"ui_strong"))
+	var ready:=floori(Corps.members("eyes"))
+	col.add_child(_line(("%d taught %s ready: one of them goes." % [ready,Corps.word("eye") if ready==1 else Corps.word("eyes")]) if ready>=1 else "None taught yet: an untried volunteer goes. Teach some above to raise the odds.",13,ink[5],true))
+	if rows.is_empty():
+		col.add_child(_line("We know no other people yet. Our scouts must find them first.",13,ink[5],true,"voice_italic"))
+		return panel
+	for r:Dictionary in rows:
+		var line:=HBoxContainer.new(); line.name="People_"+String(r.civ_id); line.add_theme_constant_override("separation",6); col.add_child(line)
+		var who:=_line(String(r.name),14,ink[4],false,"ui_strong"); who.custom_minimum_size=Vector2(110,0); who.size_flags_horizontal=Control.SIZE_EXPAND_FILL; who.clip_text=true; line.add_child(who)
+		for e:Dictionary in r.errands:
+			if String(e.barred)!="": continue
+			var b:=_ink_button("%s · %d%%" % [String(e.label),roundi(float(e.success)*100.0)],false,ink)
+			b.name="Send_%s_%s" % [String(e.kind),String(r.civ_id)]
+			b.tooltip_text="%s: about %d in 100 it works · about %d in 100 ours is caught · %d days to reach them." % [String(e.label),roundi(float(e.success)*100.0),roundi(float(e.caught)*100.0),int(e.days)]
+			var kind:=String(e.kind); var civ_id:=String(r.civ_id)
+			b.pressed.connect(func()->void: send(kind,civ_id))
+			line.add_child(b)
+	col.add_child(_line("A killing or a burning among them is a word at court: the war leader answers for it.",12,ink[5],true,"voice_italic"))
+	return panel
+
+
+## A button in the folio's inks; a lit one is the choice in force.
+static func _ink_button(text:String,lit:bool,ink:Array)->Button:
+	var b:=Button.new(); b.text=text; b.focus_mode=Control.FOCUS_NONE
+	b.add_theme_font_override("font",T.font("ui_strong")); b.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,13))
+	for state:String in ["normal","hover","pressed"]:
+		var st:=StyleBoxFlat.new(); st.set_corner_radius_all(4); st.set_border_width_all(1)
+		st.content_margin_left=8; st.content_margin_right=8; st.content_margin_top=4; st.content_margin_bottom=4
+		st.bg_color=Color(ink[3]) if lit else (Color(ink[2],0.55) if state=="hover" else Color(ink[0]))
+		st.border_color=Color(ink[3]) if lit or state=="hover" else Color(ink[2])
+		b.add_theme_stylebox_override(state,st)
+	var fg:Color=ink[0] if lit else ink[4]
+	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]: b.add_theme_color_override(state,fg)
+	return b
 
 
 func _panel(section:Dictionary,ink:Array)->Control:
