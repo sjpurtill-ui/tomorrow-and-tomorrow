@@ -1185,6 +1185,7 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)) and Stage.director==null:
 		court_stage.react(Stage.MAIN,Stage.divine_mood(action,String(result.get("response",""))))
 	if is_instance_valid(court_stage):court_stage.event("divine",{"result":result,"action":action,"response":String(result.get("response",""))})
+	show_custody(result)
 	_maybe_execute(result,words)
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
@@ -1653,8 +1654,9 @@ func show_custody(result:Dictionary,persons_judgment:=false)->bool:
 	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
 	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
 	var depart:=bool(result.get("terminal",false)) or bool(result.get("removed",false))
+	var presentation:="detain"
 	if persons_judgment:
-		if not bool(result.get("ok",false)) or String(result.get("action","")) not in ["bind","free"]:return false
+		if not bool(result.get("ok",false)) or String(result.get("action","")) not in ["bind","free","exile"]:return false
 		var params:Dictionary=result.get("params",{}) if result.get("params") is Dictionary else {}
 		target=params.get("target",{}) if params.get("target") is Dictionary else {}
 		if target.is_empty():target=Persons.speaker_ref(audience_id)
@@ -1663,11 +1665,22 @@ func show_custody(result:Dictionary,persons_judgment:=false)->bool:
 			if released=="":return false
 			court_stage.release_custody_binding(released)
 			return true
+		if String(result.action)=="exile":presentation="exile"
 		depart=depart or bool(result.get("conclude",false))
+	elif String(result.get("action",""))=="cast_out":
+		# The official WRATH menu returns this exact adjudicated schema.
+		if not bool(result.get("ok",false)) or not bool(result.get("removed",false)):return false
+		target={"person_id":int(result.get("person_id",0))}
+		if int(target.person_id)<=0:return false
+		var actor_pid:=int(result.get("agent_pid",0))
+		actor={"person_id":actor_pid} if actor_pid>0 else {}
+		presentation="exile"
 	else:
-		if not bool(result.get("executed",false)) or String(result.get("verb",""))!="detain":return false
+		if not bool(result.get("executed",false)) or String(result.get("verb","")) not in ["detain","exile"]:return false
+		if String(result.get("stage",""))=="none":return false
 		var obedience:Dictionary=result.get("obedience",{}) if result.get("obedience") is Dictionary else {}
 		if String(obedience.get("id","")) in ["refuse","hesitate"]:return false
+		if String(result.verb)=="exile":presentation="exile"
 	if court_stage.custody() or court_stage.beating() or court_stage.executing():return false
 	for seen:Dictionary in _custody_results:
 		if is_same(seen,result):return false
@@ -1675,7 +1688,8 @@ func show_custody(result:Dictionary,persons_judgment:=false)->bool:
 	var actor_key:=_custody_person_key(actor)
 	var unnamed_hand:=actor.is_empty() or (int(actor.get("person_id",0))<=0 and String(actor.get("kind","")) in ["god","guards"])
 	if victim_key=="" or (not unnamed_hand and actor_key==""):return false
-	if not court_stage.detain(victim_key,actor_key,depart):return false
+	var staged:bool=court_stage.banish(victim_key,actor_key) if presentation=="exile" else court_stage.detain(victim_key,actor_key,depart)
+	if not staged:return false
 	for tween in reveal_tweens:
 		if tween and tween.is_valid():tween.kill()
 	reveal_tweens.clear();revealing=false;_reveal_label=null

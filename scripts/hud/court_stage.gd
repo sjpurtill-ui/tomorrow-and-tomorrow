@@ -799,13 +799,20 @@ func _custody_controls(key:String)->bool:
 	return custody() and (key==_custody_victim or key in _custody.get_meta("participant_keys",[]))
 
 func detain(victim_key:=MAIN,actor_key:="",depart:=true)->bool:
+	return _start_custody(victim_key,actor_key,depart,"detain")
+
+func banish(victim_key:=MAIN,actor_key:="")->bool:
+	return _start_custody(victim_key,actor_key,true,"exile")
+
+func _start_custody(victim_key:String,actor_key:String,depart:bool,presentation:String)->bool:
 	if custody() or beating() or executing():return false
 	var victim:=figure(victim_key)
 	if victim==null or victim.leaving or victim.body3d==null or court_set==null or Executions.is_child(victim.person):return false
-	if bool(victim.body3d.get_meta("custody_bound",false)):return false
+	if presentation=="exile":release_custody_binding(victim_key)
+	elif bool(victim.body3d.get_meta("custody_bound",false)):return false
 	var scene:Node=CustodyStage.new();scene.name="Custody";add_child(scene)
 	_custody=scene;_custody_victim=victim_key
-	_custody_args={"victim":victim_key,"actor":actor_key,"depart":depart}
+	_custody_args={"victim":victim_key,"actor":actor_key,"depart":depart,"presentation":presentation}
 	scene.finished.connect(func()->void:
 		if _custody!=scene:return
 		if _custody_start and _custody_start.is_valid():_custody_start.kill()
@@ -830,7 +837,7 @@ func detain(victim_key:=MAIN,actor_key:="",depart:=true)->bool:
 func _begin_custody(scene:Node)->bool:
 	if not is_instance_valid(scene) or _custody!=scene:return false
 	_custody_start=null
-	if not bool(scene.call("begin",self,String(_custody_args.victim),String(_custody_args.actor),bool(_custody_args.depart))):
+	if not bool(scene.call("begin",self,String(_custody_args.victim),String(_custody_args.actor),bool(_custody_args.depart),String(_custody_args.presentation))):
 		cancel_custody()
 		if is_instance_valid(scene) and not scene.is_queued_for_deletion():scene.queue_free()
 		return false

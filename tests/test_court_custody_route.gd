@@ -130,7 +130,7 @@ func test_rejected_order_and_absent_explicit_ids_do_not_arrest_the_speaker()->vo
 	var pid:=int(stage.figure(Stage.MAIN).person.person_id)
 	var result:={"executed":false,"verb":"detain","target":{"person_id":pid},"actor":{}}
 	assert_bool(modal.show_custody(result)).is_false()
-	result.executed=true;result.verb="exile"
+	result.executed=true;result.verb="demote"
 	assert_bool(modal.show_custody(result)).is_false()
 	result.verb="detain";result.obedience={"id":"refuse"}
 	assert_bool(modal.show_custody(result)).is_false()

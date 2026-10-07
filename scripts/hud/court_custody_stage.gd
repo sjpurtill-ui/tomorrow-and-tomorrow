@@ -17,6 +17,7 @@ signal finished
 var stage:Control
 var victim:=""
 var depart:=false
+var presentation_mode:="detain"
 var support_keys:Array[String]=[]
 var elapsed:=0.0
 var grip_contacts:=0
@@ -38,11 +39,13 @@ var _ended:=false
 var _walkers:Array[Dictionary]=[]
 var _return_queue:Array[String]=[]
 var _escort_stalled_for:=0.0
+var _phase_at:=0.0
 
 func _init()->void:name="CustodyStage";set_process(false)
 
-func begin(on_stage:Control,victim_key:String,actor_key:String,should_depart:bool)->bool:
-	stage=on_stage;victim=victim_key;depart=should_depart
+func begin(on_stage:Control,victim_key:String,actor_key:String,should_depart:bool,presentation:="detain")->bool:
+	stage=on_stage;victim=victim_key;depart=should_depart;presentation_mode=presentation
+	if presentation_mode not in ["detain","exile"] or (presentation_mode=="exile" and not depart):return false
 	var f:Variant=_figure(victim)
 	if f==null or f.body3d==null or f.leaving or Executions.is_child(f.person):return false
 	_court=stage.get("court_set") as Node3D
@@ -81,9 +84,12 @@ func begin(on_stage:Control,victim_key:String,actor_key:String,should_depart:boo
 			if path.size()<2:return _reject("The custody party cannot reach the actual court door.")
 	_begun=true
 	_save(victim)
-	Acting.stop(body,0.0);body.play("stand",0.15);Acting.set_mood(body,{"fear":0.6,"tired":0.25})
-	_receiver=Grip.new();_receiver.configure(body,body,0,true);body.skeleton.add_child(_receiver)
-	_cord=Grip.make_cord(body);_receiver.cord=_cord
+	Acting.stop(body,0.0);body.play("stand",0.15)
+	if presentation_mode=="detain":
+		Acting.set_mood(body,{"fear":0.6,"tired":0.25})
+		_receiver=Grip.new();_receiver.configure(body,body,0,true);body.skeleton.add_child(_receiver)
+		_cord=Grip.make_cord(body);_receiver.cord=_cord
+	else:Acting.set_mood(body,{"fear":0.15,"tired":0.15})
 	_start=0.4
 	for i in support_keys.size():
 		var key:=support_keys[i];_save(key)
@@ -134,6 +140,10 @@ func _ready_support(key:String,slot:int)->void:
 	var f:Variant=_figure(key);var v:Variant=_figure(victim)
 	if f==null or v==null:return
 	var body:Node3D=f.body3d;body.set_locomotion_rate(1.0);body.play("stand",0.15)
+	if presentation_mode=="exile":
+		_face_toward(body,v.body3d.global_position,0.25)
+		Acting.look_toward(body,v.body3d,0.8)
+		return
 	body.face(rad_to_deg(v.body3d.global_rotation.y-body.get_parent_node_3d().global_rotation.y),0.15)
 	Acting.play(body,"grab_r" if slot==0 else "grab_l",{"blend":0.15,"hold":true})
 	var modifier:=Grip.new();modifier.configure(body,v.body3d,slot);body.skeleton.add_child(modifier)
@@ -143,7 +153,12 @@ func _process(delta:float)->void:
 	if _ended:return
 	elapsed+=delta
 	if _state=="approach" and elapsed>=_start:
-		_publish("grip")
+		if presentation_mode=="exile":
+			_phase_at=elapsed;_publish("confront")
+			var body:Node3D=_figure(victim).body3d
+			Acting.gesture(body,"freeze",0.45)
+			Acting.look_toward(body,_figure(support_keys[0]).body3d,0.7)
+		else:_publish("grip")
 		if stage.has_method("frame_custody"):stage.call("frame_custody")
 	if _state=="grip":
 		for modifier:SkeletonModifier3D in _grips:modifier.weight=smoothstep(0.0,0.65,elapsed-_start)
@@ -157,9 +172,41 @@ func _process(delta:float)->void:
 			_figure(victim).body3d.set_meta("custody_bound",true)
 			if depart:_escort()
 			else:_return_supports()
+	elif _state=="confront" and elapsed>=_phase_at+0.6:
+		_point_to_exit()
+	elif _state=="door_gesture" and elapsed>=_phase_at+1.2:
+		_phase_at=elapsed;_publish("turn")
+		var body:Node3D=_figure(victim).body3d
+		var path:PackedVector3Array=_out_paths[victim]
+		_face_toward(body,path_point(path,0.6),0.4)
+		Acting.look_toward(body,path[-1]+Vector3.UP*1.3,0.6)
+		Acting.gesture(body,"deflate",0.55)
+	elif _state=="turn" and elapsed>=_phase_at+0.45:
+		_escort()
 	if _state=="escort":_advance_escort(delta)
 	elif _state=="returning":_advance_return(delta)
 	set_meta("elapsed",elapsed)
+
+func _point_to_exit()->void:
+	_phase_at=elapsed;_publish("door_gesture")
+	var key:=support_keys[0];var body:Node3D=_figure(key).body3d
+	var path:PackedVector3Array=_out_paths[key];var door:=path[-1]
+	var side:=1.0 if body.to_local(door).x>=0.0 else -1.0
+	var clip:="point_l" if side>0.0 else "point_r"
+	var direction:=door-body.global_position
+	# The authored index points sideways and forward (.6, .78), not straight
+	# ahead. Turn that actual pointing direction toward the court's exit.
+	var yaw:=atan2(direction.x,direction.z)-atan2(side*0.6,0.78)
+	body.face(rad_to_deg(yaw-body.get_parent_node_3d().global_rotation.y),0.25)
+	Acting.play(body,clip,{"blend":0.12})
+	Acting.look_toward(body,door+Vector3.UP*1.3,0.6)
+	set_meta("gesture_actor",key);set_meta("gesture_clip",clip);set_meta("gesture_target",door)
+
+static func _face_toward(body:Node3D,point:Vector3,seconds:float)->void:
+	var direction:=point-body.global_position
+	if Vector2(direction.x,direction.z).length_squared()<0.000001:return
+	var yaw:=atan2(direction.x,direction.z)-body.get_parent_node_3d().global_rotation.y
+	body.face(rad_to_deg(yaw),seconds)
 
 func _gripped(_slot:int,gap:float)->void:
 	grip_contacts+=1;max_grip_gap=maxf(max_grip_gap,gap)
@@ -224,7 +271,7 @@ func _move_walker(walker:Dictionary,distance:float,speed:float,delta:float)->voi
 	if not bool(walker.started):
 		walker.started=true;body.visible=true
 		Acting.stop(body,0.1);body.play("walk_out" if String(walker.key)==victim else "walk_in",0.15)
-		if String(walker.key)==victim:Acting.play(body,"walk_led",{"blend":0.15,"loop":true})
+		if String(walker.key)==victim:Acting.play(body,"walk_sober" if presentation_mode=="exile" else "walk_led",{"blend":0.15,"loop":true})
 		var pace:=float(Movement.Figure3D.WALK_SPEED.walk_in)*float(body.body_height)/Movement.Figure3D.REFERENCE_HEIGHT
 		body.set_locomotion_rate(speed/maxf(pace,0.1))
 	walker.distance=distance
@@ -312,6 +359,7 @@ func _path_from(from:Vector3,to:Vector3,ignored:Array[String])->PackedVector3Arr
 
 func _publish(state:String)->void:
 	_state=state;set_meta("custody_state",state);set_meta("victim",victim);set_meta("depart",depart);set_meta("escorted",escorted)
+	set_meta("presentation",presentation_mode)
 	set_meta("support_keys",support_keys.duplicate());set_meta("attackers",support_keys.duplicate())
 	var keys:Array[String]=[victim];keys.append_array(support_keys);set_meta("participant_keys",keys)
 	set_meta("grip_contacts",grip_contacts);set_meta("max_grip_gap",max_grip_gap)
@@ -345,7 +393,8 @@ func _finish(complete:bool)->void:
 				if not path.is_empty():f.nudge=f.spot.to_local(path[-1])-f._path_at(f.stroll)
 			_departed()
 		else:
-			_restore(body,_saved[victim]);body.set_meta("custody_bound",false)
+			_restore(body,_saved[victim])
+			if presentation_mode=="detain":body.set_meta("custody_bound",false)
 	if is_instance_valid(_receiver):_receiver.call("cancel");_receiver.queue_free()
 	if is_instance_valid(_cord):_cord.queue_free()
 	_receiver=null;_cord=null;_saved.clear();_dispose_movement()
