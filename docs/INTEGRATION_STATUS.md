@@ -1,3 +1,21 @@
+## October 7 — Buildings visibly take shape
+
+New buildings show foundations, frames, unroofed walls and their recorded roofs
+through the existing construction month. Normal daily settlement updates record
+progress; the original monthly completion, economy and organic placement remain
+intact. Real unfinished expansion records share the root renderer. Fractional
+progress reuses meshes; only milestones invalidate affected visual patches,
+without rebuilding vegetation. No walking map figures are added.
+
+Source `cbfc5fd0`, branch `codex/building-construction-stages`, combined with
+current culture update `e08fdba9` at `1ef466df`. All 68 distinct focused and
+integration checks passed across reports 86–88. Private GPU review passed both
+root and expansion stages, retained-node reuse, and zero human batches. The
+controlled specimen stayed near its existing 20 ms frame cap; added drawing
+has a measurable cold-build/draw-call cost, documented with the full evidence
+in `docs/design/BUILDING_CONSTRUCTION_STAGES.md`. No save migration. A running
+player session remains untouched and needs a normal save/restart to load it.
+
 ## October 7 — Banishment and envoy expulsion
 
 Successful exile now shows confrontation, a clear gesture toward the actual
