@@ -1,3 +1,16 @@
+## October 7 — Requested dog execution in later courts
+
+Fixes an integrated animation choosing the wrong method: the modal treated
+missing ambient dogs in later-era rooms as missing execution capability.
+Menu and selection now check staged model availability; halls without a
+resident dog summon three temporary dogs and clean up all three afterward.
+Base `fb7898e7`, branch `codex/dogs-order-fix`. Three failing regressions now
+pass; all 16 focused checks pass. Private GPU review of the actual typed
+“Feed him to the dogs.” path in ancient chapter_03 passed method selection,
+engine adjudication, three contacts, aftermath and cleanup, exit 0. No save
+changes. The running player must be restarted normally to load this fix.
+See `docs/design/DOG_EXECUTION.md` for evidence and validation scope.
+
 ## October 6 — Organic expansion through the root settlement solver
 
 The user rejected the ring of repeated compounds. This supersedes the prior

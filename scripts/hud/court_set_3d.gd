@@ -1666,6 +1666,10 @@ func beasts(species:String,count:=1,coats:Array=[])->Array:
 		out.append(beast)
 	return out
 
+## Staged animals can enter even when the era omits ambient court pets.
+func can_stage_dogs()->bool:
+	return Animal.available("dog")
+
 ## The camp dogs come running (act 4): the dog of the court and `count`
 ## more, each its own coat, in at the door. Returns them all (the court's own
 ## dog first); they are held for the director, and stay until the set goes.

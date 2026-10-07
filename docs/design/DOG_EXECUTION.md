@@ -1,5 +1,33 @@
 # Death by hounds
 
+## October 7: explicit orders in later courts
+
+The animation was integrated, but the actual modal rejected a requested dog
+execution after the early era: those rooms hide ambient animals, and both the
+menu and method selector incorrectly equated a missing resident dog with an
+unavailable staged pack. The selector silently chose another execution.
+
+The modal now shares one capability check for its menu and selection:
+`CourtSet.can_stage_dogs()` checks the available dog model independently of
+ambient decoration. When there is no resident dog to borrow, the execution
+brings in all three temporary dogs; completion and skip remove them again.
+The existing off/mild preferences, age gate, adjudication and save format are
+unchanged. No permanent ambient animals are added to later courts.
+
+The normal ancient chapter_03 fixture reproduced all three failures before
+the fix (missing menu option, explicit dogs selecting fire, only two dogs).
+Afterward, the three new route checks and thirteen existing execution checks
+passed (16/16, report 64). The private GPU probe entered “Feed him to the dogs.”
+through the actual speech box and `_speak()`, with offline reading, rather than
+calling `stage.execute()` directly. Engine execution/removal were true, the
+selected method was dogs, all three contacts and the aftermath were observed,
+and cleanup left no staged dogs. Maximum measured contact gap was 2.27 cm.
+The probe exited 0 with no engine/script errors. Evidence remains ignored under
+`artifacts/dogs-order-fix/typed-later/` (contact/aftermath/end images and audit).
+This verifies the typed offline route; no live AI request was made by the probe.
+
+## Original integration
+
 October 6, 2026. Authorized task: finish and integrate the existing "feed them
 to the dogs" animation with a frightening tone. Branch `codex/dog-execution`,
 based on canonical and remote main `75806bff`.

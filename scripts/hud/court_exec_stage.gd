@@ -984,7 +984,10 @@ func _pack_come(args:Dictionary)->void:
 		_dog_home=_court_dog.transform
 		_dog_state={"clip":_court_dog.get("clip"),"mood":_court_dog.get("mood"),"visible":_court_dog.visible,
 			"time":_court_dog.player.current_animation_position if _court_dog.get("player")!=null else 0.0}
-	if court.has_method("dog_pack"):_pack=court.call("dog_pack",int(args.get("more",2)))
+	# Later halls have no resident dog. Bring that member in too, keeping the
+	# same bounded three-dog performance without adding a permanent court pet.
+	var arrivals:=clampi(int(args.get("more",2)),0,2)+(0 if is_instance_valid(_court_dog) else 1)
+	if court.has_method("dog_pack"):_pack=court.call("dog_pack",arrivals)
 	else:_dogs(args);return
 	var v:=_body(victim)
 	var forward:=(point("windbreak")-v.global_position).normalized() if v!=null else Vector3.FORWARD
@@ -1325,7 +1328,7 @@ func _dogs(args:Dictionary)->void:
 	_pack.clear()
 	var own:Variant=court.call("animal","dog") if court.has_method("animal") else null
 	if own is Node3D:_pack.append(own)
-	var more:=int(args.get("more",2))
+	var more:=clampi(int(args.get("more",2)),0,2)+(0 if own is Node3D else 1)
 	var Animal:Script=court.get_script().get("Animal") if court.get_script()!=null else null
 	for i in more:
 		if Animal==null:break

@@ -927,8 +927,7 @@ func _build_orders_row()->void:
 	# (the engine decides whether it is done, as with the typed words).
 	var deaths:Array=[]
 	if open and is_instance_valid(court_stage) and court_stage.court_set!=null:
-		var facts:=Executions.facts_from_game(String(court_stage.court_set.get("kind")))
-		facts["dogs"]=court_stage.court_set.has_method("animal") and court_stage.court_set.call("animal","dog")!=null
+		var facts:=_execution_facts()
 		for item:Dictionary in Executions.menu(facts,_speaker_name()):deaths.append({"label":String(item.label),"text":String(item.order)})
 	if not deaths.is_empty():menus.append({"label":"Put to death ▾","name":"PutToDeath","items":deaths})
 	orders_row.visible=not menus.is_empty()
@@ -1623,6 +1622,15 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 ## prisoner flow) and vouches for it. Off, a child, or no modelled hall:
 ## false, and the old sober exit plays at the leave-taking, as before.
 var _executed:=false
+
+## Ambient animals follow the room's era. An ordered pack can enter a hall
+## without a resident dog; menu and selection use the same stage capability.
+func _execution_facts()->Dictionary:
+	var court:Node3D=court_stage.court_set
+	var facts:=Executions.facts_from_game(String(court.get("kind")))
+	facts["dogs"]=court.has_method("can_stage_dogs") and bool(court.call("can_stage_dogs"))
+	return facts
+
 func show_execution(words:String,result:Dictionary={})->bool:
 	if _executed or not is_instance_valid(court_stage) or court_stage.court_set==null:return false
 	if not result.is_empty() and exit_style_for(result)!="fall":return false
@@ -1631,8 +1639,7 @@ func show_execution(words:String,result:Dictionary={})->bool:
 	var person:Dictionary=victim.person
 	if Executions.style(person)=="off":return false
 	_executed=true
-	var facts:=Executions.facts_from_game(String(court_stage.court_set.get("kind")))
-	facts["dogs"]=court_stage.court_set.has_method("animal") and court_stage.court_set.call("animal","dog")!=null
+	var facts:=_execution_facts()
 	var name:=String(person.get("name",_speaker_name()))
 	var method:=Executions.pick(words,facts,hash("%s|%d|%d" % [name,int(person.get("person_id",0)),int(GameState.elapsed_days)]),Executions.last_used)
 	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
