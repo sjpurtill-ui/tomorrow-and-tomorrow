@@ -17,7 +17,7 @@ const CapacityWords:=preload("res://scripts/hud/capacity_words.gd")
 
 func meta()->Dictionary:
 	return {
-		"eyebrow":"What our people value",
+		"eyebrow":"What our ways do",
 		"title":"Culture",
 		"subtabs":["Culture","Council"],
 	}
@@ -233,22 +233,9 @@ func _directive_state_color(state:String)->Color:
 	return Civic.state_color(state)
 
 func _society_overview()->Array:
-	var identity:=ValuesModel.identity_snapshot(GameState.societal_values)
-	var values:Array=[]
-	var art_domains:={"hierarchy":"institutions","collective_obligation":"health","centralization":"institutions","experimentation":"knowledge","pluralism":"culture","common_stewardship":"ecology","restorative_justice":"health","openness":"logistics","ecological_restraint":"ecology","achieved_status":"labor"}
-	for value_trait:Dictionary in identity.get("traits",[]):
-		var definition:Dictionary=ValuesModel.VALUE_DEFINITIONS[String(value_trait.axis)]
-		values.append({"label":value_trait.label,"value":value_trait.value,"meaning":definition.meaning,"low":definition.low,"high":definition.high,"art":art_domains.get(String(value_trait.axis),"culture")})
-	var memories:Array=[]
-	for item:Dictionary in WorldSimulation.direction.cultural_tendencies():
-		var inherited:=preload("res://scripts/hud/culture_presenter.gd").tendency(item.inheritance)
-		if inherited.is_empty():continue
-		memories.append({"domain":item.domain,"inherited":inherited,"current":preload("res://scripts/hud/culture_presenter.gd").tendency(item.current)})
-	var research:Dictionary={}
-	for domain in DYNAMIC_ORDER:research[domain]=WorldSimulation.direction.research_multiplier(domain)
-	var presenter=preload("res://scripts/hud/culture_presenter.gd")
-	var effects:=presenter.effects(WorldSimulation.direction.cultural_memory,int(GameState.elapsed_days),research,WorldSimulation.direction.auto_scouting,float(GameState.simulation_metrics.get("food_intake_ratio",1)))
-	return [{"type":"culture","lived_values":GameState.societal_values.get("lived",{}).duplicate(),"view_state":culture_view_state,"effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
+	## What our culture does, in the engine's numbers (hud/culture_model.gd,
+	## drawn by hud/culture_panel.gd).
+	return [{"type":"culture","culture":preload("res://scripts/hud/culture_model.gd").snapshot(),"lived_values":GameState.societal_values.get("lived",{}).duplicate(),
 		"on_direction":func():PeopleDirection.open_direction(),"on_council":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))}),
 		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}.merged(_artifact_showcase())]
 
