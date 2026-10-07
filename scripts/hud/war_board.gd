@@ -123,13 +123,20 @@ func setup(_block:Dictionary={})->void:
 	covert_toggle=Button.new();covert_toggle.name="CovertToggle";covert_toggle.flat=true;covert_toggle.focus_mode=Control.FOCUS_NONE
 	covert_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;covert_toggle.add_theme_font_override("font",T.font("ui_strong"));covert_toggle.add_theme_font_size_override("font_size",12)
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:covert_toggle.add_theme_color_override(state,T.INK_MUTED)
-	covert_toggle.tooltip_text="Our agents abroad, what they have learned and the spies of theirs we caught. Covert orders are given at court."
+	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Orders are given at court through the Pathfinder."
 	add_child(covert_toggle)
 	covert=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup();covert.visible=false
 	covert_toggle.pressed.connect(func()->void:covert.visible=not covert.visible;_spies_words())
 	_spies_words()
 	for argument in OS.get_cmdline_user_args():
 		if String(argument).begins_with("--capture-war-scroll="):_capture_scroll=int(String(argument).trim_prefix("--capture-war-scroll="))
+		if String(argument)=="--capture-covert":covert.visible=true;_spies_words()
+		# A capture-only sample of trained corps (never saved: isolated captures).
+		if String(argument)=="--capture-covert-sample":
+			var corps:Dictionary=preload("res://scripts/eyes_corps.gd").state()
+			corps.eyes.merge({"policy":"steady","members":6.0,"craft":0.62,"training":[{"count":2.0,"done":int(GameState.elapsed_days)+60}]},true)
+			corps.wary.merge({"policy":"few","members":9.0,"craft":0.55},true)
+			corps["distrust"]=0.12
 	refresh(true)
 
 
@@ -1079,7 +1086,8 @@ static func leader_doing(c:Dictionary)->String:
 func _spies_words()->void:
 	if covert_toggle==null:return
 	var abroad:=Covert.agents_abroad().size()
-	covert_toggle.text="SPIES%s  %s" % [(" · %d abroad" % abroad) if abroad>0 else "","▾" if covert!=null and covert.visible else "›"]
+	# The society's name by age (covert_board.gd): never "spies" early.
+	covert_toggle.text="%s%s  %s" % [preload("res://scripts/eyes_corps.gd").word("Eyes").to_upper(),(" · %d abroad" % abroad) if abroad>0 else "","▾" if covert!=null and covert.visible else "›"]
 
 
 # --- Pieces ---------------------------------------------------------------

@@ -183,6 +183,11 @@ func base(at_war:bool=true)->Dictionary:
 		var other:Dictionary=CivilizationSystem.civilizations[1]
 		other["name"]="Varesh"
 		(other.player_relation as Dictionary).contact_level=1
+		# Near enough to quarrel with (war_loop.gd near_us): a few days' walk.
+		var near:Vector2=home+Vector2(220.0,40.0)
+		other["position"]=Vector2(near.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,near.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+		for region:Dictionary in other.get("strategic_regions",[]):
+			if String(region.get("role",""))=="capital": region["position"]=near
 		info["varesh_id"]=String(other.id)
 	# Their stores, for ransoms and prices.
 	for res in ["Food","Timber"]: Hall.EXCHANGE.receive(civ_id,res,400.0)

@@ -45,6 +45,7 @@ const Measures:=preload("res://scripts/occupation_measures.gd")
 const HomeOrders:=preload("res://scripts/home_orders.gd")
 const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
 const BusinessOrders:=preload("res://scripts/court_business_orders.gd")
+const EyesOrders:=preload("res://scripts/court_eyes_orders.gd")
 const Realm:=preload("res://scripts/court_realm_acts.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 const GraveHome:=preload("res://scripts/grave_home.gd")
@@ -578,6 +579,10 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		# grant charters, open the markets to all, let the state run the works.
 		var business:=BusinessOrders.read(clean)
 		if not business.is_empty(): return BusinessOrders.carry(_result("order",_speaker_entry(list),{},clean,false),business)
+		# The eyes and the wary (court_eyes_orders.gd): "teach a few eyes",
+		# "keep the wary steady". Read before a covert act ("send spies").
+		var eyes:=EyesOrders.read(clean)
+		if not eyes.is_empty(): return EyesOrders.carry(_result("order",_speaker_entry(list),{},clean,false),eyes)
 	var cls:=classify(clean)
 	# Spies and assassins (covert_orders.gd): a covert cue ("send a spy",
 	# "sabotage their well", "an assassin disguised as an envoy") turns the

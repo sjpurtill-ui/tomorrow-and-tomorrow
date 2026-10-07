@@ -817,6 +817,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
 	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+_standing_cohesion()+CIVIC.effect("cohesion")+FABRIC.civic("cohesion")-_levy_burden()*0.6+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
+	# Watching our own people, and eyes of theirs found among us, breed distrust (eyes_corps.gd).
+	cohesion_target=maxf(.08,cohesion_target-preload("res://scripts/eyes_corps.gd").cohesion_cost())
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
 

@@ -60,6 +60,8 @@ const SCALE_PATH:="res://scripts/conflict_scale.gd"
 ## A caught agent of theirs becomes a person held under guard; ours taken
 ## abroad are judged by their ruler the same way (captured_agents.gd).
 const CAPTIVES_PATH:="res://scripts/captured_agents.gd"
+## Our trained eyes and our wary at home (eyes_corps.gd).
+const EyesCorps:=preload("res://scripts/eyes_corps.gd")
 
 const KEY:="covert"
 const VERSION:=1
@@ -81,6 +83,10 @@ const SANCTITY_DAYS:=540
 const RIVAL_TICK:=20
 ## A standing source (plant) sends word about this often (days).
 const PLANT_REPORT_DAYS:=90
+## The peoples a newcomer blends into (moving in): among this few a stranger is
+## noticed by all, among this many by nobody (log scale between).
+const BLEND_FEW:=150.0
+const BLEND_MANY:=2200.0
 ## Runner days a watch report takes to come back once the agent is in place,
 ## on top of the travel there.
 const RUNNER_DAYS_MIN:=6
@@ -188,7 +194,7 @@ static func methods(owner:String="player")->Dictionary:
 	var tier:=int(CV.era_tier(CV.era_tags(owner)))
 	return {
 		"watch":true,                 # a trusted kinsman can always be sent to watch
-		"plant":tier>=1,              # a standing source needs their town to be settled
+		"plant":true,                 # one of ours living among them; blending in is the danger (settle_risk)
 		"steal":tier>=1,              # a secret worth stealing needs a craft to steal it from
 		"sabotage":true,              # fire and a fouled well need nothing
 		"assassinate":true,           # a knife and known poison need nothing
@@ -200,7 +206,6 @@ static func method_barred(kind:String,owner:String="player")->String:
 	var m:=methods(owner)
 	if not bool(m.get(kind,false)):
 		match kind:
-			"plant": return "Our people have no one who could live unseen among a settled people yet."
 			"steal": return "There is no craft of theirs we know how to carry off by stealth yet."
 	return ""
 
@@ -302,6 +307,17 @@ static func resolve_named(given:String)->Dictionary:
 			if p is Dictionary and String((p as Dictionary).get("status",""))=="living" and String((p as Dictionary).get("given","")).to_lower()==want:
 				return agent_from_known(p)
 	return {}
+
+## For an errand among them: a trained eye of ours when one is ready
+## (eyes_corps.gd), else a volunteer. Nothing leaves the corps until launch.
+static func volunteer_for(kind:String)->Dictionary:
+	if kind in ["watch","plant"] and EyesCorps.members("eyes")>=1.0:
+		var k:=EyesCorps.craft("eyes")
+		var agent:=_generate_agent()
+		agent["stealth"]=clampf(k,0.1,0.95); agent["tongue"]=clampf(k*0.9+0.05,0.1,0.95); agent["nerve"]=clampf(k*0.85+0.1,0.1,0.95)
+		agent["source"]="trained"; agent["trained"]=true
+		return agent
+	return volunteer()
 
 static func volunteer()->Dictionary:
 	## The court finds a willing one: the ablest free of office, else a new
@@ -489,11 +505,17 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 			# Getting eyes on them and getting word home: cover and stealth
 			# against their guard; the networks of a later people help.
 			out["success"]=clampf(access*0.5+stealth*0.3+edge*0.4+float(tier)*0.04-wary*0.35+art,0.2,0.95)
-			out["caught"]=clampf((wary*0.4+(1.0-stealth)*0.25)*(1.0-edge*2.0)+watched,0.02,0.5)
+			# A watcher lingers at the edges rather than moving in: half the
+			# newcomer's risk, then the meeting that carries the word home.
+			out["settle"]=settle_risk(civ_id,cover,stealth,wary,watched,edge)*0.5
+			out["caught"]=clampf(0.01+wary*0.12+pow(1.0-stealth,2.0)*0.15+watched*0.5-edge*2.0,0.01,0.3)
 		"plant":
 			out["success"]=clampf(access*0.4+stealth*0.35+edge*0.4+float(tier)*0.05-wary*0.4+art,0.15,0.9)
-			# A standing source is found in time; wary people find it sooner.
-			out["caught"]=clampf(0.08+wary*0.25+(1.0-stealth)*0.15-edge+watched,0.03,0.6)
+			# Moving in is the danger (settle_risk); once one of them, an eye is
+			# found mostly when our scout comes to carry the word home: the
+			# odds of that each time ("caught"), small for a skilled eye.
+			out["settle"]=settle_risk(civ_id,cover,stealth,wary,watched,edge)
+			out["caught"]=clampf(0.005+wary*0.04+pow(1.0-stealth,2.0)*0.06+watched*0.3-edge,0.003,0.15)
 		"steal":
 			out["success"]=clampf(access*0.35+stealth*0.3+know*0.2+edge*0.3+float(tier)*0.05-wary*0.3+art,0.12,0.85)
 			out["caught"]=clampf(0.12+wary*0.3+(1.0-stealth)*0.2-edge+watched,0.04,0.65)
@@ -518,6 +540,19 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 			out["escape"]=clampf(stealth*0.3+nerve*0.15+(0.0 if cover=="envoy" else 0.15)-reach*0.0,0.02,0.45)
 			out["caught"]=clampf(out.success*0.0+0.0,0.0,0.0)  # fate is rolled on the strike, not a separate catch
 	return out
+
+## The odds a newcomer of ours is found out while moving in among them: a
+## stranger among a few hundred is a question everyone asks; among thousands
+## nobody notices. A refugee or trader has a reason to arrive; a skilled eye
+## settles better; a wary people, their watchers and our Pathfinder's hand
+## move it.
+static func settle_risk(civ_id:String,cover:String,stealth:float,wary:float,watched:float,edge:float)->float:
+	var people:=maxf(1.0,float(_civ(civ_id).get("population",500.0)))
+	var crowd:=clampf((log(people)-log(BLEND_FEW))/(log(BLEND_MANY)-log(BLEND_FEW)),0.0,1.0)
+	var reason:=float({"refugee":0.08,"trader":0.06,"pilgrim":0.05}.get(cover,0.0))
+	# Their cunning against ours counts in full here, as ours does on theirs
+	# arriving among us (_catch_chance): one rule both ways.
+	return clampf(0.88-crowd*0.82-(stealth-0.5)*0.3-reason+wary*0.1+watched-edge,0.02,0.95)
 
 # --------------------------------------------------------------------------
 # A plain reckoning of the odds, for the official's answer
@@ -548,7 +583,8 @@ static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:D
 	# (captured_agents.gd send_double): no craft of ours is needed for that.
 	var barred:=method_barred(kind) if not their_own else ""
 	if barred!="": return {"error":barred}
-	if agent.is_empty(): agent=volunteer()
+	if agent.is_empty(): agent=volunteer_for(kind)
+	if bool(agent.get("trained",false)): EyesCorps.take_eye()
 	var s:=state()
 	s.serial=int(s.serial)+1
 	var serial:=int(s.serial)
@@ -557,15 +593,37 @@ static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:D
 		"agent":String(agent.get("key","")),"agent_name":String(agent.get("name","")),"agent_given":String(agent.get("given","")),
 		"stage":"travelling","start_day":_day(),"arrive_day":_day()+travel_days(civ_id,city_id),
 		"target_desc":target_desc.substr(0,80),"seed":"op:%d:%s" % [serial,civ_id],"traced":false,"credited":false,
-		"odds":odds(kind,civ_id,city_id,cover,agent),"outcome":{},
+		"odds":odds(kind,civ_id,city_id,cover,agent),"outcome":{},"trained":bool(agent.get("trained",false)),
 	}
 	o["report_day"]=int(o.start_day)+int((o.odds as Dictionary).report_days)
 	(s.ops as Array).push_front(o)
-	while (s.ops as Array).size()>OPS_MAX: (s.ops as Array).pop_back()
+	_trim_ops(s)
 	record_agent(agent,kind,civ_id)
 	_agent_deed(String(agent.key),"Set out for %s under a %s's cover." % [_the(civ_id),_cover_word(cover)])
 	_stat("launched_"+kind)
 	return o
+
+## Keeps the ledger to OPS_MAX, dropping the oldest finished errands first: an
+## eye still living among them is never forgotten.
+static func _trim_ops(s:Dictionary)->void:
+	var ops:Array=s.ops
+	var i:=ops.size()-1
+	while ops.size()>OPS_MAX and i>=0:
+		if not String((ops[i] as Dictionary).get("stage","")) in ["travelling","in_place","struck"]: ops.remove_at(i)
+		i-=1
+
+## Years our longest-settled eye has lived among them (0 when none).
+static func entrenched_years(civ_id:String)->float:
+	var day:=_day()
+	var best:=0.0
+	for op in state().ops:
+		var o:Dictionary=op
+		if String(o.get("civ_id",""))!=civ_id or String(o.get("stage",""))!="in_place" or String(o.get("kind",""))!="plant": continue
+		best=maxf(best,float(day-int(o.get("settled_day",day)))/365.0)
+	return best
+
+## Years at which an eye's word is as good as it gets.
+const ENTRENCHED_YEARS:=20.0
 
 static func _cover_word(cover:String)->String:
 	return {"envoy":"envoy","trader":"trader","pilgrim":"pilgrim","refugee":"refugee","none":"no"}.get(cover,"no")
@@ -577,6 +635,7 @@ static func _cover_word(cover:String)->String:
 static func daily(day:int)->void:
 	if WorldSimulation.actor_id!="player": return
 	var s:=state()
+	EyesCorps.daily(day)
 	for op in (s.ops as Array).duplicate():
 		_advance(op as Dictionary,day)
 	_catch_incoming(day)
@@ -592,7 +651,9 @@ static func _advance(op:Dictionary,day:int)->void:
 			if day>=int(op.arrive_day): _arrive(op,day)
 		"in_place":
 			if String(op.kind)=="watch" and day>=int(op.report_day): _watch_report(op,day)
-			elif String(op.kind)=="plant" and day>=int(op.get("next_report",op.report_day)): _plant_report(op,day)
+			elif String(op.kind)=="plant":
+				if op.has("courier_due") and day>=int(op.courier_due): _plant_delivered(op,day)
+				if String(op.get("stage",""))=="in_place" and day>=int(op.get("next_report",op.report_day)): _plant_report(op,day)
 
 static func _arrive(op:Dictionary,day:int)->void:
 	## The agent reached them. A strike happens on arrival; eyes settle in.
@@ -601,7 +662,13 @@ static func _arrive(op:Dictionary,day:int)->void:
 		op["stage"]="struck"
 		_resolve(op,day)
 	else:
+		# Moving in among them: the riskiest moment (settle_risk).
+		var settle:=float((op.odds as Dictionary).get("settle",0.0))
+		if settle>0.0 and not bool(op.get("double_feigned",false)) and not bool(op.get("double",false)) and _rng(String(op.seed)+":settle").randf()<settle:
+			_agent_caught_ours(op,day,"a stranger newly come among them")
+			return
 		op["stage"]="in_place"
+		op["settled_day"]=day
 		if kind=="watch": op["report_day"]=day+int((op.odds as Dictionary).get("report_days",10))-int(op.odds.days)
 		elif kind=="plant": op["next_report"]=day+PLANT_REPORT_DAYS
 		_agent_deed(String(op.agent),"In place among %s." % _the(String(op.civ_id)))
@@ -624,6 +691,7 @@ static func _watch_report(op:Dictionary,day:int)->void:
 	op["stage"]="done"
 	op["outcome"]={"kind":"watched","traced":false}
 	record_agent(_op_agent(op),"watch",String(op.civ_id),"home")
+	if bool(op.get("trained",false)): EyesCorps.eye_home({"trained":true})
 	_agent_deed(String(op.agent),"Came home from %s with word." % _the(String(op.civ_id)))
 	_stat("watched")
 
@@ -634,7 +702,7 @@ static func _plant_report(op:Dictionary,day:int)->void:
 	# by them (captured_agents.gd), though the stated odds stay on the card.
 	var found:=rng.randf()<float(odds.get("caught",0.1))
 	if found and not bool(op.get("double_feigned",false)):
-		_agent_caught_ours(op,day,"a source in their town")
+		_agent_caught_ours(op,day,"meeting our scout to pass on what they had seen")
 		return
 	if bool(op.get("double_feigned",false)):
 		# Won over only in seeming: they serve their own ruler, and the word
@@ -644,12 +712,23 @@ static func _plant_report(op:Dictionary,day:int)->void:
 		op["next_report"]=day+PLANT_REPORT_DAYS
 		_stat("double_false_reports")
 		return
-	_sharpen(String(op.civ_id),String(op.city_id),0.86,day,"our source")
+	# Our scout met them unseen and carries the word home: it reaches us
+	# after the road (an eye never leaves its place to report).
+	op["courier_due"]=day+travel_days(String(op.civ_id),String(op.city_id))
+	op["next_report"]=day+PLANT_REPORT_DAYS
+	_stat("plant_meetings")
+
+## The word an eye gave our scout reaches home.
+static func _plant_delivered(op:Dictionary,day:int)->void:
+	op.erase("courier_due")
+	# The longer they have lived among them, the truer their word: a new eye
+	# hears the market's talk; one of twenty years sits at their fires.
+	var years:=float(day-int(op.get("settled_day",day)))/365.0
+	_sharpen(String(op.civ_id),String(op.city_id),clampf(0.7+0.27*years/ENTRENCHED_YEARS,0.7,0.97),day,"our %s" % EyesCorps.word("eye"))
 	var fact:=_watch_fact(String(op.civ_id),String(op.city_id))
 	if fact!="": _learn(String(op.civ_id),fact,day,String(op.agent_name))
 	# A true double agent also feeds their ruler false word of us.
 	if bool(op.get("double",false)): _raise_intel_of_us(String(op.civ_id),-0.08)
-	op["next_report"]=day+PLANT_REPORT_DAYS
 	_stat("plant_reports")
 
 ## What a double agent who was only pretending sends us: their numbers
@@ -1087,6 +1166,8 @@ static func _catch_incoming(day:int)->void:
 			(s.caught as Array).push_front({"day":day,"civ_id":String(sp.civ_id),"civ_name":String(sp.civ_name),"kind":String(sp.kind),"fate":"","prisoner_id":String(held.get("id","")),"name":String(held.get("name",""))})
 			while (s.caught as Array).size()>CAUGHT_MAX: (s.caught as Array).pop_back()
 			_stat("caught_theirs")
+			# One of them lived among us: the people wonder who else does.
+			EyesCorps.found_among_us()
 			var what:="an assassin" if String(sp.kind)=="assassinate" else "a spy"
 			var where:=String(GameState.settlement_name).strip_edges()
 			Chronicle.record({"key":"covert:%d:caught:%s" % [day,String(held.get("id",""))],"title":"%s of %s Caught" % [what.capitalize(),_the(String(sp.civ_id))],
@@ -1105,11 +1186,45 @@ static func _catch_chance(sender:String="")->float:
 	## cunning against theirs (standing.gd catch_edge: the same rule our own
 	## agents meet among them; a sender not named counts as typical).
 	var edge:=OfficeLevers.intrigue_edge("ChiefScout")
+	# The wary (eyes_corps.gd): how much of our people they watch, and how well.
+	var wary:=EyesCorps.coverage()*maxf(0.3,EyesCorps.craft("wary"))
+	# Without them only the watch's ordinary vigilance notices a stranger.
 	var watch:=clampf(float(GameState.population_allocations.get("Defense",0))/maxf(1.0,float(GameState.population_exact)*0.08),0.0,1.0)
 	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 	var Standing:=preload("res://scripts/standing.gd")
 	var theirs:=Standing.art_of(sender,"cunning") if sender!="" else 0.5
-	return clampf(0.25+edge*2.0+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.art_of("player","cunning"),theirs),0.1,0.9)
+	return clampf(0.25+edge*2.0+wary*0.45+EyesCorps.vigilance()+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.art_of("player","cunning"),theirs),0.1,0.95)
+
+## Their eyes now among us or on the road (the first of `civ_id`'s, any
+## people's when ""), {} when none.
+static func incoming_one(civ_id:String="")->Dictionary:
+	for spy in state().incoming:
+		if spy is Dictionary and (civ_id=="" or String((spy as Dictionary).get("civ_id",""))==civ_id): return spy
+	return {}
+
+static func remove_incoming(spy:Dictionary)->void:
+	(state().incoming as Array).erase(spy)
+
+## A people we know well enough for neighbours to name in an accusation.
+static func a_known_people(day:int)->String:
+	var ids:Array=[]
+	for civ in WorldSimulation.world.civilizations:
+		if civ is Dictionary and int(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: ids.append(String((civ as Dictionary).id))
+	if ids.is_empty(): return ""
+	return String(ids[posmod(hash("%d:who:%d" % [int(GameState.world_seed),day]),ids.size())])
+
+## A search for their eyes among us: each of theirs now here is found at
+## `odds` (seeded). Returns the prisoners taken.
+static func sweep_incoming(day:int,odds:float)->Array:
+	var out:Array=[]
+	for spy in (state().incoming as Array).duplicate():
+		var sp:Dictionary=spy
+		if day<int(sp.arrive_day): continue
+		if _rng(String(sp.seed)+":sweep").randf()>=odds: continue
+		(state().incoming as Array).erase(spy)
+		out.append(_captives().call("take",sp,day))
+		_stat("swept_theirs")
+	return out
 
 static func set_caught_fate(index:int,fate:String)->void:
 	var caught:Array=state().caught

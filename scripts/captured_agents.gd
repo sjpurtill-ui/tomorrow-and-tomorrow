@@ -140,7 +140,7 @@ static func valid_state(data:Variant)->bool:
 	if not d.get("deterred",{}) is Dictionary or not d.get("stats",{}) is Dictionary: return false
 	for p in d.get("prisoners",[]):
 		if not p is Dictionary or not (p as Dictionary).get("id","") is String or not (p as Dictionary).get("name","") is String: return false
-		if not String((p as Dictionary).get("status","")) in ["held","turning","joined","executed","sent_home","escaped","fled","double","dead"]: return false
+		if not String((p as Dictionary).get("status","")) in ["held","turning","joined","executed","sent_home","escaped","fled","double","dead","freed"]: return false
 		if not (p as Dictionary).get("facts",[]) is Array or not (p as Dictionary).get("said",[]) is Array: return false
 		if JSON.stringify(p).length()>16000: return false
 	for a in d.get("abroad",[]):
@@ -589,6 +589,20 @@ static func ask(audience_id:String,topic:String,manner:String,echo:String="")->D
 	var odds:Dictionary=d.odds
 	var talked:=bool(d.talked)
 	var lied:=bool(d.lied)
+	# One of ours, accused: they tell the truth of their life gently; under
+	# terror an innocent may confess to anything to make it stop.
+	if bool(p.get("accused",false)) and bool(p.get("innocent",false)):
+		var broke:=manner=="terror" and _rng("confess|%s|%d" % [String(p.seed),int((p.said as Array).size())]).randf()<0.45
+		var plain:="I am %s of this people. My neighbour wants my field; that is all this is." % given
+		var false_words:="Yes... I am theirs. I told them everything. Only make it stop."
+		var said_entry:={"day":_day(),"topic":topic,"manner":manner,"p_talk":1.0,"p_lie":0.45 if manner=="terror" else 0.0,"r_talk":0.0,"r_lie":0.0,
+			"talked":true,"lied":broke,"text":false_words if broke else plain,"truth":plain if broke else "","found_false":false,"found_by":""}
+		_say(audience_id,p,String(said_entry.text))
+		(p.said as Array).append(said_entry)
+		if not broke: p["truth_known"]=true
+		_narrate(audience_id,"(Under terror an innocent confesses %d in 100 times; asked gently, the truth comes out.)" % 45)
+		return {"ok":true,"handled":true,"action":"prisoner_ask","talked":true,"lied":broke,"said":said_entry,"odds":odds,"outcome":"",
+			"beat":{"beat":"lies" if broke else "talks","topic":topic,"manner":manner,"talked":true,"lied":broke}}
 	var entry:={"day":_day(),"topic":topic,"manner":manner,"p_talk":float(odds.talk),"p_lie":float(odds.lie),"r_talk":snappedf(float(d.r_talk),0.0001),"r_lie":snappedf(float(d.r_lie),0.0001),
 		"talked":talked,"lied":lied,"text":"","truth":"","found_false":false,"found_by":""}
 	# Manner first: the room acts it out, and their love, dread and how they
@@ -1057,6 +1071,16 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 		out.append(Hall._option("pr_double","Send them back as our eyes","%s goes home to %s and sends us word every %d days (true word: their numbers and plans sharpen ours) while feeding them false word of us. Found out %s each time word comes; then %s judges them." % [given,_the(civ_id),DOUBLE_REPORT_DAYS,pct(float(dbl.found)),ruler],"neutral"))
 		out.append(Hall._option("pr_dismiss","That will be all","%s goes back to work among our people." % given,"neutral"))
 		return out
+	var Corps:=preload("res://scripts/eyes_corps.gd")
+	# Accused by neighbours: the truth is found by questioning (ask). They can
+	# be set free; putting an innocent to death is ours to answer for.
+	if bool(p.get("accused",false)):
+		out.append(Hall._option("pr_free","Set them free","%s goes home to their hearth. If they were innocent, their neighbours' trust mends a little; if not, one of theirs walks free among us." % given,"warm"))
+	# One of theirs found among us, first brought in: what is done with the
+	# news comes before their fate (eyes_corps.gd secrecy).
+	elif String(p.get("secrecy",""))=="" and String(p.status)=="held":
+		for c:Dictionary in Corps.secrecy_options(): out.append(Hall._option("pr_secrecy:"+String(c.id),String(c.label),String(c.sub),"neutral"))
+		return out
 	var t:Dictionary=o.turn
 	out.append(Hall._option("pr_execute","Put them to death","Our people's dread of you rises a little. %s hear of it %s: then %s holds a grudge and their view of us falls. Either way they send fewer agents for about a year (half as many if they hear, a fifth fewer if not)." % [_upper_first(_the(civ_id)),pct(float(o.learn)),ruler],"hostile"))
 	out.append(Hall._option("pr_send","Send them home with a message","%d days' walk to %s; they carry your words and what they saw of us. %s's answer: a warning heeded %s, a threat bows %s %s, peace taken %s, a demand met %s." % [int(o.days),ruler,ruler,pct(float(msgs.warning)),"her" if _ruler_she(civ_id) else "him",pct(float(msgs.threat)),pct(float(msgs.peace)),pct(float(msgs.demand))],"neutral"))
@@ -1110,6 +1134,14 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 				result=send_double(p,id)
 			"pr_dismiss":
 				result={"outcome":"%s went back to work among our people." % String(p.given),"reaction":"neutral","action":"dismiss"}
+			"pr_free":
+				result=free_accused(p)
+			_ when option_id.begins_with("pr_secrecy:"):
+				var choice:=option_id.trim_prefix("pr_secrecy:")
+				p["secrecy"]=choice
+				var done:Dictionary=preload("res://scripts/eyes_corps.gd").secrecy(choice,String(p.civ_id),_day(),String(p.seed))
+				result={"ok":true,"action":"secrecy","verb":"keep","terminal":true,"reaction":"neutral",
+					"outcome":"%s Bring %s before you again to decide their fate." % [String(done.outcome),String(p.given)]}
 			_: return {"ok":false,"outcome":"That answer is not open to you here.","reaction":"neutral"}
 	if not bool(result.get("ok",true)): return result
 	_narrate(id,String(result.get("outcome","")))
@@ -1137,6 +1169,9 @@ static func execute(p:Dictionary,words:String,audience_id:String="")->Dictionary
 	# One counted among us now (won over, or seeming so): a death of our people.
 	if ours: _leaves_our_count(p,"%s, once of %s, was put to death at the god's word." % [String(p.name),_name(civ_id)],true)
 	DIVINE.record_people_act("harsh_law")
+	if bool(p.get("accused",false)) and bool(p.get("innocent",false)):
+		# An innocent put to death: every neighbour wonders if they are next.
+		preload("res://scripts/eyes_corps.gd").s_distrust_bump(0.08)
 	var ruler:=_ruler_given(civ_id)
 	var tail:=""
 	if heard:
@@ -1187,6 +1222,27 @@ static func keep(p:Dictionary,_audience_id:String="")->Dictionary:
 		return {"ok":true,"action":"keep","verb":"keep","terminal":true,"reaction":"neutral","outcome":"%s goes back to the carers." % String(p.given)}
 	return {"ok":true,"action":"keep","verb":"keep","terminal":true,"reaction":"neutral",
 		"outcome":"%s is taken back under guard: %d Food a day; the odds of an escape are %s a month." % [String(p.given),roundi(RATION),pct(escape_odds(p))]}
+
+## An accused one set free: innocent, they go home and trust mends a little;
+## truly theirs, they walk free among us (an eye of theirs again).
+static func free_accused(p:Dictionary)->Dictionary:
+	p["status"]="freed"; p["status_day"]=_day()
+	var Corps:=preload("res://scripts/eyes_corps.gd")
+	if bool(p.get("innocent",false)):
+		Corps.s_distrust_bump(-0.03)
+		return {"ok":true,"action":"free","verb":"free","terminal":true,"removed":true,"reaction":"warm","outcome":"%s goes home to their hearth, cleared. Their neighbours look at one another a little more kindly." % String(p.given)}
+	var Covert:=_covert()
+	(Covert.call("state").incoming as Array).push_front({"civ_id":String(p.civ_id),"civ_name":_name(String(p.civ_id)),"kind":"watch","start_day":_day(),"arrive_day":_day(),"seed":"freed:%s" % String(p.id)})
+	return {"ok":true,"action":"free","verb":"free","terminal":true,"removed":true,"reaction":"neutral","outcome":"%s goes home to their hearth." % String(p.given)}
+
+## An accused one of our own people: our names, our look, one of us.
+static func make_one_of_ours(p:Dictionary,day:int)->void:
+	var identity:Dictionary=EraNames.make(int(GameState.world_seed),80000+int(p.serial),String(p.sex)=="female","player",{})
+	if String(identity.get("name",""))!="":
+		p["name"]=String(identity.name)
+		p["given"]=String(identity.get("given",String(identity.name).get_slice(" ",0)))
+	p["civ_name"]="our people"
+	p["facts"]=[]
 
 static func ransom_terms(_p:Dictionary)->Dictionary:
 	## Hook: an exchange or ransom for a held prisoner (envoy_requests.gd

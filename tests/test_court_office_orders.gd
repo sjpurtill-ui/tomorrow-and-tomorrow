@@ -53,7 +53,9 @@ func test_every_choice_reaches_a_real_mechanic()->void:
 		var heard:=CC.classify(String(text))
 		# Our people's name is the realm's own act (court_realm_acts.gd nation).
 		var named:=not preload("res://scripts/court_realm_acts.gd").nation(String(text)).is_empty()
-		var engine:=not home.is_empty() or not war.is_empty() or not covert.is_empty() or named or String(heard.get("verb","")) in ["send","war"]
+		# Teaching our eyes and our wary (court_eyes_orders.gd).
+		var eyes:=preload("res://scripts/court_eyes_orders.gd").read(String(text))
+		var engine:=not home.is_empty() or not war.is_empty() or not covert.is_empty() or not eyes.is_empty() or named or String(heard.get("verb","")) in ["send","war"]
 		assert_bool(engine).override_failure_message("'%s' reaches no mechanic: home %s, war %s, covert %s, verb %s" % [text,str(home),str(war),str(covert),String(heard.get("verb",""))]).is_true()
 
 

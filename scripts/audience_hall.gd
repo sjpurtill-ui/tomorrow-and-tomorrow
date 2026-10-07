@@ -3906,6 +3906,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
 	if data.has("covert") and not bool((load("res://scripts/covert_ops.gd") as GDScript).call("valid_state",data.covert)): return false
 	if data.has("captives") and not bool(_captives().call("valid_state",data.captives)): return false
+	if data.has("eyes") and not bool((load("res://scripts/eyes_corps.gd") as GDScript).call("valid_state",data.eyes)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false

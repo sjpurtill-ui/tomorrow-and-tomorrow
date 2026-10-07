@@ -1279,7 +1279,13 @@ static func certainty(civ_id:String)->float:
 	if relation.is_empty() or int(relation.get("contact_level",0))<2: return 0.0
 	var sure:=clampf(float(relation.get("contact_intelligence",0.2)),0.0,0.95)
 	if _eyes_among(civ_id)>0: sure=maxf(sure,EYES_CERTAINTY)
-	return clampf(sure+(own_art("cunning")-0.5)*2.0*CUNNING_CERTAINTY,0.0,1.0)
+	var read:=clampf(sure+(own_art("cunning")-0.5)*2.0*CUNNING_CERTAINTY,0.0,1.0)
+	# An eye long settled among them: what they are is known nearly to the
+	# head, whatever our cunning (covert_ops.gd entrenched_years; 20 years: 0.97).
+	if _owner()=="player" and Engine.get_main_loop()!=null:
+		var years:=float(preload("res://scripts/covert_ops.gd").entrenched_years(civ_id))
+		if years>0.0: read=maxf(read,clampf(EYES_CERTAINTY+(0.97-EYES_CERTAINTY)*years/20.0,EYES_CERTAINTY,0.97))
+	return read
 
 ## Our agents among them now (the god's covert ops on watch or a source);
 ## for another people, its spies among us.

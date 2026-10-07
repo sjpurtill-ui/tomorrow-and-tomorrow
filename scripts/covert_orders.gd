@@ -191,7 +191,7 @@ static func perform(reading:Dictionary,insist:bool,ctx:Dictionary={})->Dictionar
 	# Build an agent: the god's named one, or a volunteer the court finds.
 	var agent:Dictionary=Covert.resolve_named(String(reading.get("agent",""))) if String(reading.get("agent",""))!="" else {}
 	var named_missing:=String(reading.get("agent",""))!="" and agent.is_empty()
-	if agent.is_empty(): agent=Covert.volunteer()
+	if agent.is_empty(): agent=Covert.volunteer_for(kind)
 	var odds:=Covert.odds(kind,civ_id,city_id,cover,agent)
 	# The official states the odds and the cost, and may object on the facts.
 	var object:=_objection(kind,civ_id,cover,odds)

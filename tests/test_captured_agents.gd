@@ -66,6 +66,9 @@ func _catch(kind:String="assassinate",civ_id:String="")->Dictionary:
 	var pid:=String(((s.caught as Array)[0] as Dictionary).get("prisoner_id",""))
 	var p:=Captives.by_id(pid)
 	assert_bool(p.is_empty()).override_failure_message("a caught agent should be a person held").is_false()
+	# What is done with the news is its own choice (test_eyes_corps.gd); these
+	# tests begin at the prisoner's fate.
+	p["secrecy"]="seal"
 	return p
 
 

@@ -313,13 +313,16 @@ func test_cunning_against_cunning_is_one_rule_both_ways()->void:
 	assert_float(float(sharp.caught)).is_greater(float(even.caught))
 	# ...and for their spies among us: fewer caught, by the same 12 points.
 	assert_float(sharp_catch).is_less(even_catch)
-	assert_float(float(sharp.caught)-float(even.caught)).is_equal_approx(even_catch-sharp_catch,0.0001)
-	assert_float(float(sharp.caught)-float(even.caught)).is_equal_approx(0.4*Standing.CATCH_EDGE,0.0001)
+	# Moving in among them is the counterpart of theirs arriving among us
+	# (covert_ops.gd settle_risk): the same 12 points either way. (A people
+	# with few strangers is used so neither roll sits at its bound.)
+	assert_float(float(sharp.settle)-float(even.settle)).is_equal_approx(even_catch-sharp_catch,0.0001)
+	assert_float(float(sharp.settle)-float(even.settle)).is_equal_approx(0.4*Standing.CATCH_EDGE,0.0001)
 	# The roles swapped (ours 0.9, theirs 0.5) give us exactly what they had.
 	_arts(0.9,0.5)
 	_their_cunning(id,0.5)
 	var ours_sharp:=Covert.odds("plant",id,"","trader",agent)
-	assert_float(float(even.caught)-float(ours_sharp.caught)).is_equal_approx(float(sharp.caught)-float(even.caught),0.0001)
+	assert_float(float(even.settle)-float(ours_sharp.settle)).is_equal_approx(float(sharp.settle)-float(even.settle),0.0001)
 	assert_float(Covert._catch_chance(id)-even_catch).is_equal_approx(even_catch-sharp_catch,0.0001)
 	# A sender not named counts as typical.
 	_arts(0.5,0.5)

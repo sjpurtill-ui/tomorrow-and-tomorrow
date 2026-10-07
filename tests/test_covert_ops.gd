@@ -83,6 +83,7 @@ func test_a_watch_report_sharpens_our_estimates_and_brings_a_fact()->void:
 	var op:=Covert.launch("watch",_civ_id(),_tsaren(),"trader",agent)
 	assert_bool(op.has("error")).override_failure_message(String(op.get("error",""))).is_false()
 	(op.odds as Dictionary)["caught"]=0.0   # this watcher is not caught
+	(op.odds as Dictionary)["settle"]=0.0   # nor found out moving in
 	var chart:Variant=CivilizationSystem.city_intelligence
 	var before:=float(chart.known("player",_tsaren()).get("quality",0.0))
 	Covert._arrive(op,int(op.arrive_day))
@@ -98,6 +99,7 @@ func test_a_watch_report_sharpens_our_estimates_and_brings_a_fact()->void:
 func test_eyes_on_reports_to_the_war_screen()->void:
 	var agent:=Covert.volunteer()
 	var op:=Covert.launch("watch",_civ_id(),_tsaren(),"trader",agent)
+	(op.odds as Dictionary)["settle"]=0.0   # not found out moving in
 	Covert._arrive(op,int(op.arrive_day))   # now in place
 	var eyes:=Covert.eyes_on(_civ_id())
 	assert_int(int(eyes.count)).is_greater(0)
@@ -264,7 +266,8 @@ func test_early_peoples_have_only_plain_methods()->void:
 	assert_bool(bool(m.watch)).is_true()
 	assert_bool(bool(m.sabotage)).is_true()
 	assert_bool(bool(m.assassinate)).is_true()
-	assert_bool(bool(m.plant)).is_false()
+	# One of ours can live among any people; moving in is the danger.
+	assert_bool(bool(m.plant)).is_true()
 	assert_bool(bool(m.steal)).is_false()
 	assert_bool(bool(m.networks)).is_false()
 

@@ -300,9 +300,19 @@ static func _scouting()->Array:
 	for p:Dictionary in _covert_peoples():
 		var bare:=String(p.name)
 		spy.append(_item("Watch %s" % bare,"Send spies to %s" % bare))
+		spy.append(_item("Live among %s" % bare,"Plant a spy among the %s" % bare))
 		spy.append(_item("Steal %s's craft" % bare,"Steal %s's secrets" % bare))
 		if spy.size()>=10: break
-	if not spy.is_empty(): out.append(_menu("Spies","Spies",spy))
+	var Corps:=preload("res://scripts/eyes_corps.gd")
+	if not spy.is_empty(): out.append(_menu(Corps.word("Eyes"),"Spies",spy))
+	# Teaching our eyes and our wary (eyes_corps.gd, court_eyes_orders.gd).
+	var levels:=[["A few","few"],["Steady","steady"],["Many","many"],["None","none"]]
+	var teach:Array=[]
+	for l:Array in levels: teach.append(_item(String(l[0]),"%s %s %s" % [Corps.word("train").capitalize(),String({"few":"a few","steady":"steady","many":"many","none":"no more"}[l[1]]),Corps.word("eyes")]))
+	out.append(_menu("%s %s" % [Corps.word("train").capitalize(),Corps.word("eyes")],"TeachEyes",teach))
+	var wary:Array=[]
+	for l:Array in levels: wary.append(_item(String(l[0]),"Keep %s %s" % [Corps.word("wary"),String({"few":"few","steady":"steady","many":"many","none":"none, stop"}[l[1]])]))
+	out.append(_menu(Corps.word("Wary"),"TheWary",wary))
 	return out
 
 
