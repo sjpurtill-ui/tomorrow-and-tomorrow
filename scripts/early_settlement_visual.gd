@@ -228,7 +228,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 			visible.append(record)
 		if visible.is_empty(): continue
 		var batch := MultiMesh.new(); batch.transform_format = MultiMesh.TRANSFORM_3D
-		batch.use_colors = true; batch.mesh = kit_mesh(name); batch.instance_count = visible.size()
+		batch.use_colors = true; batch.use_custom_data=true; batch.mesh = kit_mesh(name); batch.instance_count = visible.size()
 		var transforms: Array[Transform3D] = []
 		for i in visible.size():
 			var record := visible[i]; var point: Vector2 = record.position + Vector2(center.x,center.z)
@@ -242,6 +242,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 			batch.set_instance_color(i,Color.WHITE.lerp(Color(.70,.66,.60),wear*.35).lerp(Color(.3,.27,.23),fire))
 		var node := MultiMeshInstance3D.new(); node.name = "EarlySettlement_"+name
 		node.multimesh = batch; node.material_override = material
+		node.set_meta("cultural_codes",preload("res://scripts/settlement_ink.gd").apply_culture(batch,visible))
 		node.set_meta("source_transforms",transforms); parent.add_child(node)
 		# Soft shadows where each building stands (settlement_ink.gd).
 		preload("res://scripts/settlement_ink.gd").add_ground_shadows(parent,"GroundShadow_"+name,transforms,kit_mesh(name).get_aabb())
@@ -269,7 +270,7 @@ static func _render_construction(work:Array[Dictionary],center:Vector3,height:Ca
 		groups[key].records.append(record)
 	for key:String in groups:
 		var group:Dictionary=groups[key]
-		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true
 		batch.mesh=group.mesh;batch.instance_count=group.records.size()
 		var transforms:Array[Transform3D]=[]
 		for index in group.records.size():
@@ -286,6 +287,7 @@ static func _render_construction(work:Array[Dictionary],center:Vector3,height:Ca
 			else:tint=tint.lerp(Color(.70,.66,.60),wear*.35).lerp(Color(.3,.27,.23),clampf(float(plot.get("damage",{}).get("fire",0)),0,1))
 			batch.set_instance_color(index,tint)
 		var node:=MultiMeshInstance3D.new();node.name="Construction_"+str(hash(key));node.multimesh=batch
+		node.set_meta("cultural_codes",preload("res://scripts/settlement_ink.gd").apply_culture(batch,group.records,int(group.state.stage)))
 		node.material_override=preload("res://scripts/settlement_ink.gd").architecture_material() if bool(group.late) else material
 		node.set_meta("source_transforms",transforms);node.set_meta("construction_mode",group.state.mode);node.set_meta("construction_stage",group.state.stage)
 		parent.add_child(node)

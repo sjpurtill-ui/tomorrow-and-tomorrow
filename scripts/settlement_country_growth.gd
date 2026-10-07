@@ -40,10 +40,31 @@ static func begin(record:Dictionary,previous:Dictionary={})->Dictionary:
 	state["target"]=clampi(int(spec.get("parcels",6)),1,MAX_PARCELS)
 	state["origin"]=record.get("position",Vector2.ZERO)
 	state["templates"]=spec.get("templates",[])
+	# A retained display seed may predate the owner's one-time cosmetic
+	# adoption. Fill missing finishes only, from the same recorded building
+	# form; preserve every existing finish and all parcel/roof geometry.
+	for index in mini((state.plots as Array).size(),MAX_PARCELS):
+		_adopt_missing_finish(state.plots[index],state.templates)
 	state["obstacles"]=spec.get("obstacles",[])
 	state["neighbours"]=spec.get("neighbours",[])
 	state["nuclei"]=[{"id":1,"position":Vector2.ZERO,"pull":1.0,"active":true}]
 	return state
+
+static func _adopt_missing_finish(plot:Dictionary,templates:Array)->void:
+	if plot.has("cultural_appearance") or templates.is_empty():return
+	var count:=mini(templates.size(),32)
+	# Try the original selector first, then match geometry if later template
+	# ordering changed. Never repaint an old form using an unrelated new form.
+	var selected:=posmod(hash(str(int(plot.get("seed",0)))+":form"),count)
+	for offset in count:
+		var candidate:Dictionary=templates[(selected+offset)%count]
+		if not candidate.get("cultural_appearance") is Dictionary:continue
+		var same:=true
+		for key:String in ["form","roof_plan","material_family","material_mix","storeys","fabric_generation","building_materials","installed_components","construction_recipe"]:
+			if candidate.has(key) and plot.get(key)!=candidate[key]:same=false;break
+		if not same:continue
+		plot["cultural_appearance"]=(candidate.cultural_appearance as Dictionary).duplicate(true)
+		return
 
 ## Stable neighboring claims prevent two independently prepared seeds sharing
 ## a roof footprint. These edges are constraints only, never drawn as cells.

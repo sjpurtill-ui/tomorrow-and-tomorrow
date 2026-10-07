@@ -41,6 +41,7 @@ static func layout_inputs(plots:Array[Dictionary],routes:Array[Dictionary])->Dic
 static func appearance(plot:Dictionary)->int:
 	var values:=project(plot,APPEARANCE_FIELDS)
 	values.append(preload("res://scripts/settlement_construction_state.gd").signature(plot))
+	values.append(preload("res://scripts/settlement_culture_visual.gd").signature(preload("res://scripts/settlement_culture_visual.gd").for_plot(plot)))
 	for field:String in TONE_FIELDS:values.append(roundi(float(plot.get(field,1.0 if field=="condition" else 0.0))*5.0))
 	# Occupied pressure only changes the legacy roof count in broad steps.
 	values.append(roundi(float(plot.get("resident_count",0.0))/4.0))

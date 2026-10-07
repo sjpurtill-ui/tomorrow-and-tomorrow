@@ -25,6 +25,25 @@ static var _shadow_material:ShaderMaterial
 static var _shadow_quad:QuadMesh
 ## Away from the low north-west sun, in the ground plane (world x, z).
 const SHADOW_FALL:=Vector2(0.7385,0.6743)
+const Culture:=preload("res://scripts/settlement_culture_visual.gd")
+
+static func cultural_data(plot:Dictionary)->Color:
+	var stamp:Variant=plot.get("cultural_appearance",{})
+	if not stamp is Dictionary or stamp.is_empty():return Color(0,0,0,0)
+	var profile:Dictionary=Culture.for_plot(plot)
+	var roof:=int(profile.get("roof",0));var plaster:=int(profile.get("plaster",0))
+	var door:=int(profile.get("door",0));var decor:=int(profile.get("decor",0))
+	if roof==0 and plaster==0 and door==0 and decor==0:return Color(0,0,0,0)
+	# R=0 disables the shared shader for unstamped buildings and all map props.
+	return Color(float(roof+1),float(plaster),float(door),float(decor))
+
+static func apply_culture(batch:MultiMesh,records:Array,construction_stage:int=-1)->Array[Color]:
+	var codes:Array[Color]=[]
+	for index in records.size():
+		# Bare foundation/frame and access scaffolds have no finished decoration.
+		var value:=cultural_data(records[index].plot) if construction_stage<0 or construction_stage>=2 else Color(0,0,0,0)
+		batch.set_instance_custom_data(index,value);codes.append(value)
+	return codes
 
 static func material()->ShaderMaterial:
 	if _material and is_instance_valid(_material):return _material
@@ -32,6 +51,13 @@ static func material()->ShaderMaterial:
 	shader.code=SHADER
 	_material=ShaderMaterial.new()
 	_material.shader=shader
+	var roofs:=PackedVector3Array();var plasters:=PackedVector3Array()
+	for tone:Color in Culture.ROOF_COLORS:roofs.append(Vector3(tone.r,tone.g,tone.b))
+	for tone:Color in Culture.PLASTER_COLORS:plasters.append(Vector3(tone.r,tone.g,tone.b))
+	_material.set_shader_parameter("culture_roofs",roofs)
+	_material.set_shader_parameter("culture_plasters",plasters)
+	_material.set_shader_parameter("culture_roof_mix",Culture.ROOF_MIX)
+	_material.set_shader_parameter("culture_plaster_mix",Culture.PLASTER_MIX)
 	_material.next_pass=outline_material()
 	# Cloud shadows and the live wind reach it like any other map material.
 	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_material)
@@ -167,11 +193,16 @@ uniform float anim_clock = 0.0;
 uniform bool vertex_srgb = false;
 uniform float ink_strength = 1.0;
 uniform bool architecture_surfaces = false;
+uniform vec3 culture_roofs[4];
+uniform vec3 culture_plasters[4];
+uniform float culture_roof_mix = 0.35;
+uniform float culture_plaster_mix = 0.55;
 uniform vec4 map_wind = vec4(1.0, 0.0, 0.0, 0.0);
 varying vec3 world_position;
 varying vec3 world_normal;
 varying vec3 kit_vertex;
 varying vec3 kit_normal;
+varying flat vec4 culture_codes;
 const vec3 SUN = vec3(-0.573, 0.515, -0.637);
 
 void vertex() {
@@ -180,6 +211,7 @@ void vertex() {
 	// The kit's own mesh space (metres), precise at any world position.
 	kit_vertex = VERTEX;
 	kit_normal = NORMAL;
+	culture_codes = INSTANCE_CUSTOM;
 }
 
 void fragment() {
@@ -232,6 +264,48 @@ void fragment() {
 		} else {
 			base *= mix(1.0, (1.0-lap*0.28)*(1.0-joint*0.20)*(0.92+0.16*piece_tone), visible*roof);
 		}
+	}
+	if (culture_codes.x > 0.5) {
+		// Four recorded integer finishes, carried per instance. Material alpha
+		// remains the existing roof/glass code; no geometry or material copies.
+		int roof_code = int(round(culture_codes.x))-1;
+		int plaster_code = int(round(culture_codes.y));
+		int door_code = int(round(culture_codes.z));
+		int decor_code = int(round(culture_codes.w));
+		float glass_mask = architecture_surfaces ? step(0.84,COLOR.a)*(1.0-step(0.88,COLOR.a)) : 0.0;
+		float vertical = 1.0-smoothstep(0.12,0.36,abs(kit_normal.y));
+		float roof_mask = max(laid,roof)*step(0.40,kit_vertex.y)*(1.0-glass_mask);
+		// Existing doors are authored dark faces; timber posts/roof beams are
+		// brighter. Restrict patterns to low vertical surfaces, never glazing.
+		float raw_luma = dot(COLOR.rgb,vec3(0.2126,0.7152,0.0722));
+		float door_mask = (1.0-smoothstep(0.18,0.24,raw_luma))*vertical*(1.0-laid)*(1.0-glass_mask);
+		door_mask *= smoothstep(0.06,0.18,kit_vertex.y)*(1.0-smoothstep(2.3,3.3,kit_vertex.y));
+		float wall_mask = vertical*(1.0-roof_mask)*(1.0-door_mask)*(1.0-glass_mask)*smoothstep(0.13,0.27,raw_luma);
+		if (roof_code > 0 && roof_code <= 4) {
+			vec3 finish = culture_roofs[roof_code-1]*clamp(raw_luma/0.52,0.0,1.45);
+			base = mix(base,finish,roof_mask*culture_roof_mix);
+		}
+		if (plaster_code > 0 && plaster_code <= 4) {
+			vec3 finish = culture_plasters[plaster_code-1]*clamp(raw_luma/0.60,0.0,1.30);
+			base = mix(base,finish,wall_mask*culture_plaster_mix);
+		}
+		// Door rhythms have physical spacing and fade below two pixels. Their scale
+		// belongs to the actual door, not the camera or a settlement-wide decal.
+		float across = abs(kit_normal.z)>abs(kit_normal.x) ? kit_vertex.x : kit_vertex.z;
+		vec2 motif = vec2(across,kit_vertex.y)*3.6;
+		float visible = 1.0-smoothstep(0.25,0.65,max(fwidth(motif.x),fwidth(motif.y)));
+		float mark = 0.0;
+		if (door_code==1) mark = 1.0-smoothstep(0.17,0.28,abs(fract(motif.y)-0.5));
+		if (door_code==2) mark = 1.0-smoothstep(0.10,0.22,abs(fract(motif.y+abs(fract(motif.x)-0.5))-0.5));
+		if (door_code==3) mark = 1.0-smoothstep(0.14,0.25,length(fract(motif)-vec2(0.5)));
+		// Without recorded pigment decoration these are light/dark timber and
+		// earth marks. Bright applied accents require that separate craft finish.
+		vec3 accent = decor_code>0 && plaster_code>0 ? culture_plasters[clamp(plaster_code-1,0,3)] : vec3(0.50,0.35,0.21);
+		accent *= clamp(raw_luma/0.13,0.0,1.0);
+		base = mix(base,accent,door_mask*mark*visible*0.72);
+		float frieze = smoothstep(1.35,1.48,kit_vertex.y)*(1.0-smoothstep(1.75,1.88,kit_vertex.y));
+		float ornament = decor_code==1 ? (1.0-smoothstep(0.12,0.25,abs(fract(motif.x)-0.5))) : (1.0-smoothstep(0.12,0.24,abs(fract(motif.x+motif.y)-0.5)));
+		if (decor_code>0) base = mix(base,base*vec3(0.63,0.57,0.48),wall_mask*frieze*ornament*visible*0.55);
 	}
 	// Warm light, cool shade: the painted key light shared with the land.
 	float ndl = dot(n, SUN);
