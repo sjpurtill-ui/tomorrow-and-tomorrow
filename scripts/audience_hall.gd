@@ -928,6 +928,8 @@ static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
 	elif key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
 	if String(audience.get("origin",""))=="foreign": _requests().call("note_arrival",audience)
 	_ledger_add(audience)
+	# Their envoy stood in our hall: the road home is known (war_loop.gd came_to_us).
+	if key.begins_with("civ:"): (load("res://scripts/war_loop.gd") as GDScript).call("came_to_us",key.trim_prefix("civ:"),day,"envoy")
 
 static func _gift_recent(civ_id:String,day:int)->bool:
 	## Whether this people sent a pure goodwill gift within the decade.
