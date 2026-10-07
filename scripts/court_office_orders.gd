@@ -246,7 +246,6 @@ const TASKS:=[["food","food"],["building","building"],["making","making"],["carr
 static func _town()->Array:
 	var out:Array=[]
 	out.append(_menu("Build","Build",[_item("Homes","Build more homes"),_item("A granary","Build a granary"),_item("A wall","Build a wall around the town"),_item("A hall","Build a hall"),_item("A work area","Build a work area")]))
-	out.append(_menu("Found a town","FoundTown",[_item("Where our leaders think best","Found a new town"),_item("By the river","Found a new town by the river")]))
 	var moves:Array=[]
 	for task in TASKS: moves.append(_item("5 more on %s" % String(task[0]),"Put 5 more on %s" % String(task[1])))
 	moves.append(_item("Let our leaders set the work","Let the headman decide the work again"))
@@ -271,8 +270,8 @@ static func _town()->Array:
 			else: envoys.append(_item("%s: declare war" % people,"Declare war on %s" % the))
 			if envoys.size()>=16: break
 	if not envoys.is_empty(): out.append(_menu("Envoys","Envoys",envoys))
-	# All our towns together take a name (nation_name.gd), once there are two;
-	# the names the people might take, as the god would say them.
+	# Our people take a name (nation_name.gd); the names they might take, as
+	# the god would say them.
 	var NationName:GDScript=load("res://scripts/nation_name.gd")
 	if bool(NationName.call("can_name")):
 		var names:Array=[]

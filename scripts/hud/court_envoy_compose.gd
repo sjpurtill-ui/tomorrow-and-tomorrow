@@ -339,6 +339,9 @@ func _fill_options()->void:
 		"declare_war":
 			_fill_tokens()
 			_note("War begins the day they hear it. Your generals choose how it is fought.")
+		"open_trade","non_aggression":
+			var chance:float=WorldSimulation.world.compact_odds_for(civ_id,purpose) if WorldSimulation.world.has_method("compact_odds_for") else -1.0
+			if chance>=0.0:_note("They decide for themselves: about %d in 10 would agree as things stand. A gift, a better messenger and a quiet border raise it." % clampi(roundi(chance*10.0),1,9))
 		_:
 			if purpose in Messages.HOSTILE:typed=_fill_menace()
 			elif purpose in PACT_ACTIONS:_fill_pact()

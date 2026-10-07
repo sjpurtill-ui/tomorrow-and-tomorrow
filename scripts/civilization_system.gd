@@ -785,8 +785,12 @@ func progression_reach_snapshot()->Dictionary:
 	for civ in civilizations:
 		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: contacts+=1
 	var contact_ratio:=clampf(float(contacts)/maxf(1.0,float(civilizations.size())),0.0,1.0)
-	var settlement_ratio:=clampf(float(WorldSimulation.state.player_settlements.size())/64.0,0.0,1.0)
-	if WorldSimulation.state.player_settlements.is_empty() and WorldSimulation.state.settlement_site_committed: settlement_ratio=1.0/64.0
+	# One seat per people: the seat counts as the places its people fill
+	# (one_seat.gd places), as the capability scales count it.
+	var towns:=WorldSimulation.state.player_settlements.size()
+	if towns==0 and WorldSimulation.state.settlement_site_committed: towns=1
+	if towns>0: towns=preload("res://scripts/one_seat.gd").places(WorldSimulation.state.population_exact,towns,preload("res://scripts/one_seat.gd").districts())
+	var settlement_ratio:=clampf(float(towns)/64.0,0.0,1.0)
 	var territory_ratio:=clampf(_player_territory()/4.0,0.0,1.0)
 	var combined:=charted*0.30+contact_ratio*0.20+settlement_ratio*0.25+territory_ratio*0.25
 	return {"combined":clampf(combined,0.0,1.0),"charted":charted,"contacts":contact_ratio,"settlements":settlement_ratio,"territory":territory_ratio,"contacted_civilizations":contacts}
@@ -1797,7 +1801,15 @@ func _process_diplomatic_mission(day:int)->void:
 		var purpose:=String(diplomatic_mission.get("purpose","goodwill"))
 		if purpose in HOSTILE_DIPLOMATIC_ACTIONS: load(ENVOY_MESSAGES_PATH).call("homecoming",diplomatic_mission,day)
 		var proposal_result:Dictionary={"ok":bool(diplomatic_mission.get("accepted",true)),"message":String(diplomatic_mission.get("outcome","The goodwill delegation was received."))}
-		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)): proposal_result=conduct_player_action(civ_id,purpose,true)
+		if purpose in CARRIED_DIPLOMATIC_ACTIONS and purpose!="send_aid" and not bool(diplomatic_mission.get("proposal_resolved",false)):
+			# A compact is their choice: stated odds and a seeded roll decide it.
+			var answer:=compact_answer(civ,relation,purpose,int(diplomatic_mission.get("depart_day",day)))
+			if answer.is_empty() or bool(answer.accepted): proposal_result=conduct_player_action(civ_id,purpose,true)
+			else:
+				relation["opinion"]=clampf(float(relation.get("opinion",0.0))-0.02,-1.0,1.0)
+				civ["player_relation"]=relation; civilizations[index]=civ
+				proposal_result={"ok":false,"message":String(answer.words)}
+			if not answer.is_empty() and bool(proposal_result.get("ok",false)): proposal_result["message"]="%s %s" % [String(answer.words),String(proposal_result.get("message",""))]
 		elif purpose=="send_aid": proposal_result={"ok":gift_resource=="Food" and gift_amount>0.0,"message":"The food aid reached %s and improved its reserves." % String(civ.name) if gift_resource=="Food" and gift_amount>0.0 else "The aid proposal arrived without food and was refused."}
 		if bool(proposal_result.get("pending_reply",false)):
 			# Physical return and observations must not wait for a network response.
@@ -4650,6 +4662,46 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 		_:
 			return {"error":"Unknown diplomatic action."}
 	return {"ok":true,"action":normalized}
+
+
+## The odds a people accepts a compact our envoys carry: a trade compact or a
+## non-aggression compact. Their regard for us (with the messenger's skill),
+## their ruler's bent for talk or for war, and the tension on the border set
+## the chance; the roll is seeded from the world, the people, the compact and
+## the day the envoys left, so a load never rolls it again.
+## Returns {chance, accepted, words}, or {} for any other purpose.
+const COMPACT_ODDS:={
+	"open_trade":{"base":0.50,"opinion":0.55,"diplomacy":0.25,"aggression":0.0,"tension":0.20,"low":0.10,"high":0.92},
+	"non_aggression":{"base":0.40,"opinion":0.60,"diplomacy":0.25,"aggression":0.25,"tension":0.20,"low":0.08,"high":0.90},
+}
+func compact_odds(civ:Dictionary,relation:Dictionary,action:String)->float:
+	if not COMPACT_ODDS.has(action): return 1.0
+	var w:Dictionary=COMPACT_ODDS[action]
+	var opinion:=float(relation.get("opinion",0.0))+preload("res://scripts/office_levers.gd").value("Envoy")
+	var chance:=float(w.base)+float(w.opinion)*opinion+float(w.diplomacy)*(float(civ.get("diplomacy",0.5))-0.5)*2.0-float(w.aggression)*(float(civ.get("aggression",0.5))-0.5)*2.0-float(w.tension)*clampf(float(relation.get("border_tension",0.0)),0.0,1.0)
+	return clampf(chance,float(w.low),float(w.high))
+
+## The chance a known people would accept `action` today, before any gift
+## (the envoy screen's stated odds); -1 when it does not apply.
+func compact_odds_for(civ_id:String,action:String)->float:
+	var index:=_civilization_index(civ_id)
+	if index<0 or not COMPACT_ODDS.has(action): return -1.0
+	var civ:Dictionary=civilizations[index]
+	return compact_odds(civ,_relation_with_strategy_defaults(civ.get("player_relation",{}),civ),action)
+
+func compact_answer(civ:Dictionary,relation:Dictionary,action:String,depart_day:int)->Dictionary:
+	if not COMPACT_ODDS.has(action): return {}
+	var chance:=compact_odds(civ,relation,action)
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|compact|%s|%s|%d" % [last_world_seed,String(civ.get("id","")),action,depart_day])
+	var accepted:=rng.randf()<chance
+	var tenths:=clampi(roundi(chance*10.0),1,9)
+	var what:="a trade compact" if action=="open_trade" else "a non-aggression compact"
+	var odds:="about %d in 10" % tenths
+	var words:=""
+	if accepted: words="%s weighed %s and agreed (%s they would)." % [String(civ.get("name","They")),what,odds]
+	else: words="%s turned down %s. The chance they would agree was %s; they would rather keep their hands free." % [String(civ.get("name","They")),what,odds]
+	return {"chance":chance,"accepted":accepted,"words":words}
 
 
 func conduct_player_action(civ_id:String,action:String,arrived_via_envoy:bool=false)->Dictionary:

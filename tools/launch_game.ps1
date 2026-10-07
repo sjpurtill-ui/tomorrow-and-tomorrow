@@ -78,7 +78,7 @@ $launchLogDirectory = Join-Path $projectRoot 'artifacts'
 $launchLog = Join-Path $launchLogDirectory ('player-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.log')
 $arguments = @('--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + $launchLog + '"'))
 if ($Editor) {
-    $arguments += @('--editor', 'res://main.tscn')
+    $arguments += @('--editor')
 } elseif ($Fullscreen) {
     $arguments += '--fullscreen'
 }

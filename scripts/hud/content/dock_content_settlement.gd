@@ -5,7 +5,6 @@ const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Words:=preload("res://scripts/hud/home_plain.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Works:=preload("res://scripts/hud/water_conveyance_controls.gd")
-const AutoFounding:=preload("res://scripts/auto_founding.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
 const VillageRecord:=preload("res://scripts/hud/village_view_record.gd")
 ## SETTLEMENT section: our town's own page (Overview) and its History.
@@ -53,10 +52,6 @@ var _towns:Array=[]
 func founding_block()->Dictionary:
 	var OneSeat:=preload("res://scripts/one_seat.gd")
 	return {"title":"How our seat grows","words":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS,"options":[],"on":false}
-
-func _set_founding(enabled:bool)->void:
-	AutoFounding.set_on(enabled)
-	if is_instance_valid(hud):hud.request_immediate_dock_refresh()
 
 func _city_tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()

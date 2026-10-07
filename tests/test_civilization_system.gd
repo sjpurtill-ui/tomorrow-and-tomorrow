@@ -518,9 +518,39 @@ func test_treaties_require_a_physical_round_trip_and_distance_changes_the_delay(
 	GameState.elapsed_days=float(near_quote.total_days)
 	system.advance_to_day(int(near_quote.total_days))
 	assert_bool(bool(system.diplomatic_mission_status().active)).is_false()
-	assert_str(String(system.civilizations[0].player_relation.treaty)).is_equal("trade")
-	assert_bool(bool(system.diplomatic_history[0].accepted)).is_true()
+	# They decide on stated odds with a seeded roll; the record matches the roll.
+	var accepted:=bool(system.diplomatic_history[0].accepted)
+	assert_str(String(system.civilizations[0].player_relation.treaty)).is_equal("trade" if accepted else "none")
+	assert_str(String(system.diplomatic_history[0].outcome)).contains("in 10")
 	assert_array(system.validate_state()).is_empty()
+
+
+func test_a_carried_compact_is_their_choice_on_stated_odds()->void:
+	var civ:Dictionary=system.civilizations[0]
+	var relation:Dictionary=civ.player_relation.duplicate(true)
+	relation["border_tension"]=0.0
+	civ["diplomacy"]=0.5; civ["aggression"]=0.5
+	relation["opinion"]=0.9
+	var warm:float=system.compact_odds(civ,relation,"open_trade")
+	relation["opinion"]=-0.4
+	var cold:float=system.compact_odds(civ,relation,"open_trade")
+	assert_float(warm).is_greater(cold)
+	assert_float(warm).is_less_equal(0.92)
+	assert_float(cold).is_greater_equal(0.10)
+	civ["aggression"]=0.95
+	assert_float(system.compact_odds(civ,relation,"non_aggression")).is_less(system.compact_odds(civ,relation,"open_trade"))
+	# The roll is reproducible and, over many missions, lands near the odds.
+	civ["aggression"]=0.5
+	relation["opinion"]=0.0
+	var chance:float=system.compact_odds(civ,relation,"open_trade")
+	var yes:=0
+	for day in 400:
+		var answer:Dictionary=system.compact_answer(civ,relation,"open_trade",day)
+		assert_bool(bool(answer.accepted)).is_equal(bool(system.compact_answer(civ,relation,"open_trade",day).accepted))
+		assert_str(String(answer.words)).contains("in 10")
+		if bool(answer.accepted): yes+=1
+	assert_float(float(yes)/400.0).is_between(chance-0.08,chance+0.08)
+	assert_bool(system.compact_answer(civ,relation,"goodwill",0).is_empty()).is_true()
 
 
 func test_computer_civilizations_also_wait_for_carried_treaty_messages()->void:
