@@ -103,21 +103,41 @@ static func exhibit(id:String)->Dictionary:
 	item.exhibited=not bool(item.get("exhibited",false))
 	return {"ok":true}
 
+## Days the collection's bonuses are kept while the collection is unchanged,
+## and when each people's were last read (never saved).
+const SUMMARY_DAYS:=30
+static var _summary_kept:Dictionary={}
+
 static func advance(elapsed:int)->void:
 	var state:=WorldSimulation.state
 	var attraction:=0.0
 	var unstudied:=0
+	var studied:=0
+	var exhibited:=0
+	var museum:=museum_ready()
 	for item:Dictionary in state.society_exchange.collections.values():
 		if item.kind!="artifact":continue
 		item["held_days"]=float(item.get("held_days",0))+elapsed
-		if role_studied(item) and float(item.study)<1:unstudied+=1
-		if item.get("exhibited",false) and museum_ready() and float(item.study)>=1:attraction+=prestige(item)*(.6+float(channels(item).economic))
+		if float(item.study)>=1:studied+=1
+		elif role_studied(item):unstudied+=1
+		if item.get("exhibited",false):
+			exhibited+=1
+			if museum and float(item.study)>=1:attraction+=prestige(item)*(.6+float(channels(item).economic))
 	# Other rulers staff the same role through their own research budget.
 	if WorldSimulation.actor_id!="player" and String(WorldSimulation.actors.get(WorldSimulation.actor_id,{}).get("controller",""))=="ai":
 		var role:Dictionary=study_role()
 		if int(role.weight)!=(1 if unstudied>0 else 0):role.weight=1 if unstudied>0 else 0;state.society_exchange["artifact_study"]=role
 	study(elapsed,int(state.elapsed_days))
-	state.society_exchange["artifact_bonuses"]=summary()
+	# The collection's bonuses move only as pieces come, are studied or shown,
+	# and slowly with the years held: read again when the collection changes
+	# or a month has passed, not every day.
+	var day:=int(state.elapsed_days)
+	var shape:=[state.get_instance_id(),state.society_exchange.collections.size(),studied,exhibited,museum]
+	var kept:Array=_summary_kept.get(state.get_instance_id(),[])
+	if kept.size()!=2 or kept[0]!=shape or day>=int(kept[1]) or not state.society_exchange.has("artifact_bonuses"):
+		state.society_exchange["artifact_bonuses"]=summary()
+		if _summary_kept.size()>64:_summary_kept.clear()
+		_summary_kept[state.get_instance_id()]=[shape,day+SUMMARY_DAYS]
 	# Visitors pay from existing household money; exhibitions never mint currency.
 	var revenue:=0.0
 	if state.economy_stage=="currency" and attraction>0:

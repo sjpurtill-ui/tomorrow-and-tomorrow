@@ -2171,11 +2171,26 @@ static func _news_fact(civ_id:String,rng:RandomNumberGenerator,used:Dictionary={
 # Court petitions
 # --------------------------------------------------------------------------
 
+## The roll as last read, for the day and the government's revision it was
+## read at (never saved): the court asks for it several times a day and each
+## reading reconciles every officeholder. Callers get their own copies.
+static var _officials_key:Array=[]
+static var _officials_roll:Array[Dictionary]=[]
+
 static func _officials()->Array[Dictionary]:
+	if WorldSimulation.actor_id!="player": return []
+	var key:=[int(GameState.elapsed_days),GovernmentPeopleSystem.revision,GameState.leadership_positions.hash(),GameState.player_settlements.size(),GameState.get_instance_id()]
+	if key!=_officials_key:
+		_officials_roll=_read_officials()
+		_officials_key=key
+	var copies:Array[Dictionary]=[]
+	for person:Dictionary in _officials_roll:copies.append(person.duplicate())
+	return copies
+
+static func _read_officials()->Array[Dictionary]:
 	## Central officeholders first, then settlement leaders; unique by person.
 	var result:Array[Dictionary]=[]
 	var seen:Dictionary={}
-	if WorldSimulation.actor_id!="player": return result
 	# The roll is reconciled once for the whole list, as GovernmentPeopleSystem's
 	# own day does for its lookups; each officeholder lookup below would
 	# otherwise reconcile it again (a few ms each, many times a day).
