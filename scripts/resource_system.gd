@@ -1031,7 +1031,11 @@ func in_transit_for(deposit:Dictionary)->float:
 func deposit_exhausted(deposit:Dictionary)->bool:
 	if String(deposit.get("stage","")) not in ["accessible","developed"]:return false
 	if not deposit.has("remaining"):return false
-	return float(deposit.get("remaining",0.0))<=0.001 and float(deposit.get("stock_at_source",0.0))<=0.001 and in_transit_for(deposit)<=0.001
+	if float(deposit.get("remaining",0.0))>0.001 or float(deposit.get("stock_at_source",0.0))>0.001:return false
+	# Normalized loads carry their total (_normalized_shipments); older forms are summed.
+	var moving:Array=deposit.get("shipments",[])
+	if deposit.has("in_transit") and (moving.is_empty() or not moving[0] is Dictionary):return float(deposit.in_transit)<=0.001
+	return in_transit_for(deposit)<=0.001
 
 static var gathering_recipe_reserves:Dictionary={}
 

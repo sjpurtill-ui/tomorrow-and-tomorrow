@@ -2,6 +2,8 @@ extends RefCounted
 ## Standing allocation controls physical parties, never fog or population directly.
 const EXCHANGE=preload("res://scripts/society_exchange.gd")
 const SURVIVAL=preload("res://scripts/scout_survival.gd")
+## Days our staff wait after a search that found only charted ground.
+const FRUITLESS_WAIT_DAYS:=28
 const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic tribes","prospecting":"Resource prospecting"}
 var host:Node
 var data:Dictionary={}
@@ -218,6 +220,10 @@ func advance_steps(day:int)->Array:
 			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
 			# fruitless search instead of repeating every route plan each week.
 			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)
+			# Ours too, when every trip found only charted ground: the four route
+			# plans cost a frame's worth of work and the near country changes
+			# slowly. Any other wait (food, people) is checked again next week.
+			elif String(shared.last_reason).begins_with("No useful uncharted"):data.next_review=maxi(int(data.next_review),day+FRUITLESS_WAIT_DAYS)
 	])
 	return parts
 
