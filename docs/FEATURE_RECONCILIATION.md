@@ -1,3 +1,21 @@
+## October 8 — Detailed foreign city report views
+
+Foreign city reports now show a large 3D town view using existing map building
+meshes, public terrain, paths and yards. Town center opens close; Whole town
+shows the wider settlement. Reported figures, scout/spy accounts, freshness,
+ownership and map actions remain. Views use the original observed population
+bounds and keep their scene through daily text updates, with no walking people
+or idle redraws.
+
+Source `9ab70469`, branch `codex/foreign-city-report-view`, combined with scouts
+and organic places main `b04c1bb2` at `9ef806a7`. All 60 distinct relevant cases
+and initialized probe parsing passed. Private GPU review passed three sizes,
+readable buildings, both framing controls and unchanged geometry under unseen
+rival changes. This is a representative report view using existing assets;
+current reports do not contain an exact foreign building inventory. Evidence
+and limits: `docs/design/FOREIGN_CITY_REPORT_VIEW.md`. No save migration or live
+player restart; save and restart normally to load the change.
+
 ## October 8 — Stable settlement positions as time advances
 
 Established expansion clusters now retain their visible plots and layout history

@@ -6,6 +6,8 @@ foreign settlement layout and identity styles, public terrain heights, and
 terrain-following paths and yards. Reported figures, comparisons with home,
 source, freshness, ownership and actions remain below the image. Show on map
 uses the existing reported-city navigation action.
+Town center opens at a closer, legible framing; Whole town shows the entire
+bounded layout. Switching modes redraws once without changing house geometry.
 
 ## Evidence and rendering
 
@@ -50,3 +52,30 @@ campaign capture. Logs and captures stay in ignored
 The first GPU review caught undrawn wide viewports and a culled terrain surface;
 those captures were rejected and retained separately for diagnosis. Final test
 and capture results are recorded at delivery below.
+
+## Delivery evidence
+
+Source `9ab70469`, branch `codex/foreign-city-report-view`, based on `e7118388`.
+Combined with scouts/organic-places main `b04c1bb2` at `9ef806a7` without conflicts.
+Across reports 103–104, all 60 distinct behavioral cases passed, plus initialized
+probe parsing. The suite counts are reported view 8, intelligence 21, held town
+6, roads/foreign renderer 8, own live view 3, own page 11 and foreign map labels 3.
+All 25 combined own/foreign/held report cases also pass (reports 105–106).
+Integration updated one old own-page assertion to the new upstream heading,
+"How our people spread"; its existing district-growth and action checks remain.
+A fixture-only failure in the initial daily-update test was resolved by using a
+realistic fixed panel width; it now explicitly verifies stable dimensions and
+render counts through text updates.
+
+Final private GPU review passed all three sizes, actual mode switching, report
+isolation and no-people checks, with exit 0 and no runtime/shader errors. Houses
+have median on-screen widths of 23 pixels in wide/medium reports and 12 pixels
+in the narrow report. All 12 sampled central houses are visible by default;
+Whole town fits all 128. Each portrait builds once, samples 1,090 public heights,
+and has 6,144 terrain vertices. It draws once initially and once per mode change,
+with unchanged geometry and no idle redraws. This establishes bounded work,
+not a player-session frame-rate benchmark. Texturing remains the existing asset
+style; no new architecture asset pack or exact observed-building census is added.
+
+The live player was not restarted. Save and restart through the canonical
+launcher to load the integrated report view.
