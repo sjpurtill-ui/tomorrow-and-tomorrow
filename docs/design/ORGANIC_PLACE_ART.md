@@ -31,9 +31,11 @@ of actual river distance; unbuildable dry slopes are never treated as water.
 Coastal places have hulls, drying racks and, at open-water exposure >=0.4, salt
 pans. Lake places have reeds and a short jetty only when actual water is found.
 River places have bank frontage and a crossing track. Inland places have fields.
-A bounded shoreline search places shore details near the measured water edge,
+A bounded, sliced shoreline search places shore details near the measured water edge,
 with an access path from the inherited town centre. Tracks to the seat use the
 existing road tier, prefer dry detours and clip impossible crossings.
+Low dry banks use a shore predicate independent of the house elevation buffer;
+unverified shores do not receive invented boats, reeds or river crossings.
 
 Growing places show an edge building site. Declining places show a bounded
 subset of fallen roofs. Floods wash the water-facing side. Ruins retain their
@@ -61,18 +63,29 @@ six batches but receives five; `test_strategic_city_field_feathers_real_river_ed
 receives an empty mesh and then indexes its missing surface. These unrelated
 terrain systems are outside this change.
 
-Combined headless validation: **161/161 passed across 13 suites**, with zero
+Combined headless validation: **165/165 passed across 13 suites**, with zero
 errors, failures, skips or orphan nodes. This includes all 11 engine cases,
 the new place plan/growth/visual suites, country plan/layer/visual/retention/
 era/drape/chart, and early/organic town rendering. Evidence is local and private:
-`artifacts/combined-tests.log`, `reports/report_3/results.xml`.
+`artifacts/final-combined-tests.log`, `reports/report_4/results.xml`.
 
 The separate broader architecture suite ran 83 cases: 81 pass and the two
 baseline failures described above reproduce without this task's geometry or
 renderer changes. Baseline evidence is in the plan worker's
 `artifacts/architecture-baseline-final.log`.
 
-Private GPU capture results remain pending.
+Private GPU acceptance-3 passed all automatic invariants in ten captures:
+unchanged exact population/day, central stockpiles and completed construction;
+no human batches; at most 24 parcels; fixed founding roofs through growth;
+flood damage and roofless ruins. The four requested states and root comparison
+use a 0.3 km camera span. The private probe exited successfully.
+
+Visual acceptance is still pending. This saved coast currently admits no shore
+props, which is under diagnosis. Exact-camera country-hidden and nation-wash
+ablations leave a large beige terrain ribbon visible. A plain regional water
+material fills the missing dark sea, isolating that gap to the existing water
+rendering path. These underlying terrain defects are not concealed in review
+captures. Evidence: `artifacts/organic-places/acceptance-3/`.
 
 ## Reproduction
 
@@ -87,6 +100,6 @@ config/custom_user_dir_name="TomorrowOrganicPlacesQA"
 Run Godot headless with an explicit worktree `--path` and GdUnit suites for
 settlement places, place plan/growth/visual, country plan/layer/visual/retention,
 and existing early/organic town rendering. For GPU review, provide the private
-runner with `res://tests/organic_places_capture.tscn`, `--span=.9`, `--frames=90`,
+runner with `res://tests/organic_places_capture.tscn`, `--span=.3`, `--frames=90`,
 the copied save path, and a 600-second timeout. Do not launch this scene as the
 player game or change the canonical project settings.

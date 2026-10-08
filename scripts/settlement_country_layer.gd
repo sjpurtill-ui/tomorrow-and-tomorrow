@@ -78,6 +78,10 @@ func refresh(owner_terrain:Node3D)->void:
 			# actual water and channel facts separately from parcel suitability.
 			if terrain.has_method("_settlement_yard_water_at"):
 				node.set("water_at",Callable(terrain,"_settlement_yard_water_at"))
+				if terrain.has_method("_terrain_slope_at"):
+					node.set("shore_land_at",func(point:Vector2)->bool:
+						if absf(point.x)>terrain.world_width*0.5 or absf(point.y)>terrain.world_depth*0.5:return false
+						return not terrain._settlement_yard_water_at(point) and terrain._terrain_slope_at(point.x,point.y,0.012)<=0.55)
 			if terrain.has_method("_river_distance_at"):
 				node.set("river_distance_at",func(point:Vector2)->float:return terrain._river_distance_at(point.x,point.y))
 			add_child(node)
