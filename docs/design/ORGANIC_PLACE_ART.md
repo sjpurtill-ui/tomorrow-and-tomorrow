@@ -3,9 +3,9 @@
 October 8, 2026. Task branch `codex/organic-place-art`, based on integrated
 `b04c1bb27e710b7da0156adbb391870a175290e9`.
 
-Status: tested draft ready for visual review; acceptance requires the user's
-review of the private GPU captures. This branch has not been integrated into
-the canonical player checkout.
+Status: user approved the merge after the private capture review. Source
+`ca8e2481` is combined with main `3369dbf9` at `5c96c273` for PR #182.
+The player session was not restarted; load the integrated scripts normally.
 
 ## Read-only map contract
 
@@ -84,7 +84,7 @@ flood damage and roofless ruins. Visible home instances are 9 at founding,
 states and root comparison use a 0.3 km camera span. The private probe exited
 successfully (PID 64940); the player's input desktop remained Default.
 
-User visual acceptance remains pending. A diagnostic found the real beach 828 metres
+The user approved integration after reviewing the captures. A diagnostic found the real beach 828 metres
 from the fixed town centre, beyond the initial 640-metre search. Extending the
 sliced search to match the engine's shore survey now admits two hulls, a drying
 rack, two salt pans and the access path, without moving the town. The bank's
@@ -108,7 +108,14 @@ shader, simulation, or canonical checkout source was changed for this task.
 Private evidence: `artifacts/organic-places/acceptance-5/` (four states, root,
 shore, chart and layer ablations), and `shore-1/` (physical
 shore diagnostics). These generated files and the copied save remain local,
-outside Git. User visual approval is pending; this PR stays draft.
+outside Git.
+
+Integration against main `3369dbf9` ran 274 cases: 273 passed, including all
+228 feature checks. The extra owned-simulation determinism test fails at
+line 37 with "Different owned state in GameState" identically on exact main
+`3369dbf9`. Integration evidence: `artifacts/merge-validation.log`,
+`reports/report_7/results.xml`; baseline evidence in the plan worktree:
+`artifacts/owned-determinism-main3369.log`. This baseline failure is unchanged.
 
 ## Reproduction
 

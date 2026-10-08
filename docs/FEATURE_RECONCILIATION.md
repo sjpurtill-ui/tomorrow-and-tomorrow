@@ -1,3 +1,22 @@
+## October 8 — Organic places on the map (INTEGRATED)
+
+User approved PR #182 after the private capture review. Source `ca8e2481`
+from `codex/organic-place-art` is combined with main `3369dbf9` at
+`5c96c273`. Named places retain fixed roofs, share the root architecture,
+show working shores, tracks, flood damage and ruins, and preserve one ledger.
+The rendering-only shore lift correction leaves supply and border sampling
+compatible. No save migration or live player restart.
+
+Integration validation ran 274 cases: 273 passed, including all 228 feature
+checks. The extra owned-simulation determinism case fails identically on
+unchanged main `3369dbf9` (line 37, Different owned state in GameState).
+Evidence: task worktree `artifacts/merge-validation.log` and `reports/report_7`;
+main baseline in the plan worktree `artifacts/owned-determinism-main3369.log`.
+Private GPU acceptance-5 previously passed all twelve captures and ledger/
+roof/parcel/no-human invariants. Wider terrain ribbon/background defects remain
+as reviewed. Details: `docs/design/ORGANIC_PLACE_ART.md`.
+
+
 ## October 8 — Detailed foreign city report views
 
 Foreign city reports now show a large 3D town view using existing map building
