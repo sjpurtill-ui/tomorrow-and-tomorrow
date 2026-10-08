@@ -72,7 +72,7 @@ static func details(work:Dictionary,land:Callable,water:Callable=Callable(),shor
 	if bool(edge.found):out.lines.append({"start":origin,"finish":bank,"width":0.0012,"kind":"shore_access","shoreline":true})
 	var kind:=String(place.get("kind","inland"))
 	if kind!="inland" and toward==Vector2.ZERO:kind="unknown_bearing"
-	if kind in ["coast","lake"] and not bool(edge.found):kind="unverified_shore"
+	if kind in ["coast","lake","river"] and not bool(edge.found):kind="unverified_shore"
 	match kind:
 		"coast":
 			for index in 2:
