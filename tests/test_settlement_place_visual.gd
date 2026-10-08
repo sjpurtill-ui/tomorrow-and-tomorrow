@@ -128,6 +128,26 @@ func test_lake_jetty_ends_in_narrow_channel_before_opposite_bank()->void:
 	var tip:Vector2=jetty.position+Vector2.RIGHT*0.0081*float(jetty.length_scale)
 	assert_bool(bool(water.call(tip))).is_true()
 
+func test_verified_river_bank_track_uses_dry_shore_without_relaxing_home_buffer()->void:
+	var visual=_visual()
+	visual.configure(func(_at:Vector2)->float:return 0.0,func(at:Vector2)->bool:return at.x<1.285)
+	visual.shore_land_at=func(at:Vector2)->bool:return at.x<1.3
+	var record:=_record("river")
+	var detail:=ART.details({"origin":record.position,"place":record.place,"plots":[]},visual.placement_land_at,visual.water_at,visual.shore_land_at)
+	assert_bool(detail.shore_found).is_true()
+	var bank:Dictionary=detail.lines[1]
+	assert_str(bank.kind).is_equal("bank_track")
+	assert_bool(bank.shoreline).is_true()
+	assert_bool(detail.lines[2].shoreline).is_true()
+	var regular:=SurfaceTool.new();regular.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._ribbon(regular,bank.start,bank.finish,bank.width,Color.WHITE)
+	assert_bool(regular.commit_to_arrays()[Mesh.ARRAY_VERTEX]==null).is_true()
+	var shore:=SurfaceTool.new();shore.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._collecting_shore=bool(bank.shoreline)
+	visual._ribbon(shore,bank.start,bank.finish,bank.width,Color.WHITE)
+	visual._collecting_shore=false
+	assert_int((shore.commit_to_arrays()[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()).is_equal(6)
+
 func test_named_place_uses_unchanged_root_plan_and_smaller_ink_name()->void:
 	var visual=_visual();var record:=_record()
 	var before:=var_to_bytes(record)
