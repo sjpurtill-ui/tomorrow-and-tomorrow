@@ -288,9 +288,11 @@ func _span_waits(id:String,day:int,gap:int)->bool:
 	# give every owner the same phase modulo 3.
 	var limit:=_span_limit_for(id)
 	# A step never covers more than a share of the food any town has stored.
-	actors[id]["food_span"]=DaySpan.food_span()
+	actors[id]["food_span"]=DaySpan.food_span(DaySpan.UNCONTACTED_FOOD_SHARE if limit>span_limit else DaySpan.FOOD_SHARE)
 	if gap>=mini(limit,int(actors[id].food_span)):return false
-	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return false
+	# A people we have not met keeps no phase day of its own: its monthly
+	# review already brings it in, so it is not brought in twice a month.
+	if limit<=span_limit and posmod(day+posmod(hash("span:"+id),limit),limit)==0:return false
 	if preload("res://scripts/civilization_controller.gd").review_due(id,day):return false
 	return DaySpan.calm()
 
@@ -312,7 +314,7 @@ func _advances_on(id:String,day:int)->bool:
 	if int(actor.get("last_gap",1))==1:return true
 	var limit:=_span_limit_for(id)
 	if day-int(actor.last_day)>=mini(limit,int(actor.get("food_span",limit))):return true
-	if posmod(day+posmod(hash("span:"+id),limit),limit)==0:return true
+	if limit<=span_limit and posmod(day+posmod(hash("span:"+id),limit),limit)==0:return true
 	return preload("res://scripts/civilization_controller.gd").review_due(id,day)
 
 func refresh_projections()->void:

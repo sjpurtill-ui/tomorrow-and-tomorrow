@@ -14,6 +14,10 @@ const MAX_SPAN:=5
 const UNCONTACTED_SPAN:=30
 ## A step covers at most this share of the days of food any town has stored.
 const FOOD_SHARE:=0.5
+## A people the player has not met may cover more of its stores in one step:
+## nothing of it is seen, and its harvests are still counted for every day of
+## the step (12 rivals at year 342 were held to 4 to 22 day steps by food).
+const UNCONTACTED_FOOD_SHARE:=0.8
 ## A remnant this small has no food reserve worth protecting with daily steps.
 const REMNANT_POPULATION:=10
 
@@ -67,13 +71,13 @@ static func calm()->bool:
 
 ## Longest step the owner's food stores allow: a share of the fewest days of
 ## food held by its capital or any of its towns. Runs in the owner's scope.
-static func food_span()->int:
+static func food_span(share:float=FOOD_SHARE)->int:
 	if WorldSimulation.state.population_total<REMNANT_POPULATION:return UNCONTACTED_SPAN
 	var days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		days=minf(days,float((city.get("resource_metrics",{}) as Dictionary).get("food_days",0.0)))
-	return maxi(1,floori(days*FOOD_SHARE))
+	return maxi(1,floori(days*share))
 
 ## Owner steps a calm secondary town may sit out before covering them at once.
 const TOWN_STRIDE:=2
