@@ -11,7 +11,7 @@ const STABILITY_BASELINE := "res://artifacts/settlement-position-stability/basel
 func _run() -> void:
 	if "--position-stability" not in OS.get_cmdline_user_args() or not ProjectSettings.globalize_path("user://").contains("TomorrowPeopleGrownLandQA"):
 		_setup_error("Requires --position-stability and private TomorrowPeopleGrownLandQA userdata."); return
-	var versions: Array[String] = ["after"] if "--after-only" in OS.get_cmdline_user_args() else ["before", "after"]
+	var versions: Array = ["after"] if "--after-only" in OS.get_cmdline_user_args() else ["before", "after"]
 	if "--metadata-only" not in OS.get_cmdline_user_args() and "before" in versions:
 		for filename: String in ["settlement_country_plan.gd", "settlement_country_visual.gd"]:
 			if not FileAccess.file_exists(STABILITY_BASELINE + filename):

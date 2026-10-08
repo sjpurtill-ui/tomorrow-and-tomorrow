@@ -1,3 +1,20 @@
+## October 8 — Stable settlement positions as time advances
+
+Established expansion clusters now retain their visible plots and layout history
+when population crosses an admission threshold. Root display budgets retain
+existing plot IDs; fallback roofs use stable slots, and early building upgrades
+keep their saved sites. Actual construction and overlapping root growth can
+still change the fabric. No walking people or population-sized visual counts.
+
+Source `0c00ce11`, branch `codex/settlement-position-stability`, combined with
+main `5fcd9a97` at `93d2f55d`. All 120 distinct relevant checks passed across
+reports 98–100. The combined saved-map replay keeps 27 roofs visible and exactly
+stationary across controlled 10,566 → 11,500 → 10,566 → 11,500 snapshots. This
+reproduces the disappearing cluster; it does not claim a full live-time replay
+of every reported relocation. Details and regression coverage are in
+`docs/design/SETTLEMENT_POSITION_STABILITY.md`. No save migration or player
+restart. Save and restart normally to load the integrated scripts.
+
 ## October 7 — Static lived-in yards
 
 Woodpiles, pottery, drying racks, grain stores and fishing nets use recorded
