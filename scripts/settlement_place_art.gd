@@ -87,8 +87,8 @@ static func details(work:Dictionary,land:Callable,water:Callable=Callable(),shor
 			var reach:=jetty_reach(edge.position,toward,water)
 			if reach>0.0005:out.props.append({"kind":"jetty","position":Vector2(edge.position)-toward*0.001,"angle":atan2(toward.x,toward.y),"over_water":true,"shoreline":true,"length_scale":(reach+0.001)/0.0082})
 		"river":
-			out.lines.append({"start":bank-along*0.038,"finish":bank+along*0.038,"width":0.0014,"kind":"bank_track"})
-			out.lines.append({"start":bank-toward*0.018,"finish":bank+toward*0.008,"width":0.0020,"kind":"crossing_track"})
+			out.lines.append({"start":bank-along*0.038,"finish":bank+along*0.038,"width":0.0014,"kind":"bank_track","shoreline":true})
+			out.lines.append({"start":bank-toward*0.018,"finish":bank+toward*0.008,"width":0.0020,"kind":"crossing_track","shoreline":true})
 		"inland":
 			for index in 2:
 				out.fields.append({"center":origin+Vector2.from_angle(0.7+float(index)*2.1)*(radius+0.015),"angle":0.3+float(index)*0.6,"half_length_km":0.012,"half_width_km":0.005,"color":Color(0.57,0.55,0.33,0.58),"kind":"field_plot"})
