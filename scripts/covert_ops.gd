@@ -827,8 +827,7 @@ static func _watch_report(op:Dictionary,day:int)->void:
 		_agent_caught_ours(op,day,"watching")
 		return
 	_sharpen(String(op.civ_id),String(op.city_id),0.82,day,"our watcher")
-	var fact:=_watch_fact(String(op.civ_id),String(op.city_id))
-	if fact!="": _learn(String(op.civ_id),fact,day,String(op.agent_name))
+	_report_home(op,0.0,day)
 	# The watcher comes home after a short stay.
 	op["stage"]="done"
 	op["outcome"]={"kind":"watched","traced":false}
@@ -874,8 +873,8 @@ static func _plant_delivered(op:Dictionary,day:int)->void:
 	# hears the market's talk; one of twenty years sits at their fires.
 	var years:=float(day-int(op.get("settled_day",day)))/365.0
 	_sharpen(String(op.civ_id),String(op.city_id),clampf(0.7+0.27*years/ENTRENCHED_YEARS,0.7,0.97),day,"our %s" % EyesCorps.word("eye"))
-	var fact:=_watch_fact(String(op.civ_id),String(op.city_id))
-	if fact!="": _learn(String(op.civ_id),fact,day,String(op.agent_name))
+	# Each local won over carries word from another hearth: half a year deeper.
+	_report_home(op,years+0.5*float(int(op.get("recruits",0))),day)
 	# A true double agent also feeds their ruler false word of us.
 	if bool(op.get("double",false)): _raise_intel_of_us(String(op.civ_id),-0.08)
 	_stat("plant_reports")
@@ -912,6 +911,15 @@ static func _sharpen(civ_id:String,city_id:String,quality:float,day:int,source:S
 		var observation:Dictionary=chart.capture("player",String(id),quality,day,source,"covert:"+String(id),3)
 		if not observation.is_empty(): chart.publish("player",observation,day)
 
+## Our own eyes send a dispatch (send_dispatch); a ruler's eyes, in their own
+## scope, keep to the one count they read from the chart.
+static func _report_home(op:Dictionary,depth:float,day:int)->void:
+	if String(WorldSimulation.actor_id) in ["player",""]:
+		send_dispatch(String(op.civ_id),String(op.city_id),depth,day,String(op.agent_name))
+		return
+	var fact:=_watch_fact(String(op.civ_id),String(op.city_id))
+	if fact!="": _learn(String(op.civ_id),fact,day,String(op.agent_name))
+
 static func _watch_fact(civ_id:String,city_id:String)->String:
 	## A concrete fact the report brings, read from the chart we just sharpened.
 	var chart:Variant=_chart()
@@ -934,6 +942,152 @@ static func _learn(civ_id:String,fact:String,day:int,who:String)->void:
 	var s:=state()
 	(s.learned as Array).push_front({"day":day,"civ_id":civ_id,"civ_name":_name(civ_id),"fact":fact.substr(0,160),"who":who})
 	while (s.learned as Array).size()>LEARNED_MAX: (s.learned as Array).pop_back()
+
+# --------------------------------------------------------------------------
+# The dispatch: what an eye sends home, read from the one ledger
+# --------------------------------------------------------------------------
+
+## Items in one dispatch at most, the weightiest first.
+const DISPATCH_MAX:=3
+## Depth (years among them, and half a year for each local won over) at which
+## an eye hears the ruler's hall, not only the market.
+const HALL_DEPTH:=1.0
+## A thing already told is told again only when it changed, or after this long.
+const RETELL_DAYS:=730
+## A count is news when it moved by this share since it was last told.
+const COUNT_NEWS:=0.1
+## How their market speaks of us, by the regard's reading (divine_regard.gd).
+const REGARD_WORDS:={"war":"count us their enemy","awe":"hold us in awe","fear":"fear our wrath","honor":"honour us","scorn":"think little of us","wary":"watch us warily","undecided":"are undecided about us"}
+const FOOD_WORDS:={"hungry":"%s are going hungry: their stores hold about %d days.","short":"%s are short of food: their stores hold about %d days.","fed":"%s are fed: their stores hold about %d days.","full":"%s are well provisioned: their stores hold about %d days."}
+
+## What an eye among them would send home now: [{key, sig|count, fact,
+## weight}], every item true to the ledger. Depth 0 is the market (their
+## numbers, their stores, their quarrels, what they say of us); HALL_DEPTH and
+## over is the ruler's hall too (who rules, what they hold against us, what
+## they make ready, the crafts they keep).
+static func dispatch_items(civ_id:String,city_id:String,depth:float)->Array:
+	var out:Array=[]
+	var civ:=_civ(civ_id)
+	if civ.is_empty(): return out
+	var name:=_name(civ_id)
+	var day:=_day()
+	# Their counts, from the chart our eyes just sharpened (city_intelligence.gd).
+	var chart:Variant=_chart()
+	var id:=city_id
+	if id=="" and chart!=null: id=String(chart.primary_id(civ_id))
+	var known:Dictionary=chart.known("player",id) if chart!=null and id!="" else {}
+	if not known.is_empty():
+		var town:=String(known.get("name","their town")).trim_prefix("Reported home of ")
+		var fields:Dictionary=known.get("fields",{}) if known.get("fields") is Dictionary else {}
+		for key:String in ["garrison","population"]:
+			var f:Dictionary=fields.get(key,{}) if fields.get(key) is Dictionary else {}
+			if f.is_empty(): continue
+			var n:=roundi((float(f.low)+float(f.high))*0.5)
+			var fact:=("%s is held by about %d fighters." % [town,n]) if key=="garrison" else ("About %d people live in %s." % [n,town])
+			out.append({"key":key+":"+id,"count":n,"fact":fact,"weight":4.0 if key=="garrison" else 3.0})
+	# Their stores: hunger is worth knowing first.
+	var food:=float(civ.get("food_days",30.0))
+	var band:="hungry" if food<12.0 else ("short" if food<22.0 else ("fed" if food<60.0 else "full"))
+	out.append({"key":"food","sig":band,"fact":String(FOOD_WORDS[band]) % [name,roundi(food)],"weight":6.0 if band in ["hungry","short"] else 2.0})
+	# Their quarrels with other peoples.
+	var foes:PackedStringArray=PackedStringArray()
+	for other in (civ.get("relations",{}) as Dictionary):
+		if String(other) in ["player",civ_id] or Hall._civ_index(String(other))<0: continue
+		var rel:Variant=(civ.relations as Dictionary)[other]
+		if bool(_rivals().call("_fighting",rel)): foes.append("%s %s" % ["at war with" if bool((rel as Dictionary).get("at_war",false)) else "feuding with",_name(String(other))])
+	if not foes.is_empty(): out.append({"key":"foes","sig":",".join(foes),"fact":"%s are %s." % [name,_join(foes)],"weight":5.0})
+	# What their people say of us.
+	var regard:Dictionary=DIVINE.foreign_regard(civ_id)
+	if not regard.is_empty():
+		out.append({"key":"regard","sig":String(regard.id),"fact":"In their market they %s." % String(REGARD_WORDS.get(String(regard.id),"are undecided about us")),"weight":3.0})
+	if depth<HALL_DEPTH: return out
+	# The ruler: who, how old, and their way; and the wrong they hold.
+	var c:=_ruler_record(civ_id)
+	var view:Dictionary=_rivals().call("rival_character",civ_id) if not c.is_empty() else {}
+	if not view.is_empty():
+		out.append({"key":"ruler","sig":String(view.name),"fact":"%s rules them, %d years old, one who %s." % [String(view.name),int(view.age),String(view.trait_words)],"weight":4.0})
+		var top:Dictionary={}
+		for g:Dictionary in view.grudges:
+			if top.is_empty() or float(g.weight)>float(top.weight): top=g
+		if not top.is_empty():
+			out.append({"key":"grudge","sig":String(top.text),"fact":"%s still holds against us %s." % [String(view.name).get_slice(" ",0),String(_rivals().call("narrate",String(top.text)))],"weight":5.0+float(top.weight)*2.0})
+	# What they make ready against us.
+	if c.has("war_due_day") and int(c.war_due_day)>day:
+		out.append({"key":"war_prep","sig":str(int(c.war_due_day)),"fact":"%s are gathering fighters against us: their ruler means to march within about %d days." % [name,int(c.war_due_day)-day],"weight":10.0})
+	var front:Dictionary=_war().call("_peek",civ_id)
+	var pending:Dictionary=front.get("pending",{}) if front.get("pending") is Dictionary else {}
+	if not pending.is_empty() and int(pending.get("day",-1))>day:
+		out.append({"key":"raid","sig":str(int(pending.day)),"fact":"Their raiders are gathering to fall on us within about %d days." % (int(pending.day)-day),"weight":9.0,"raid":pending})
+	# A craft of theirs we do not have: something an eye could steal.
+	var craft:=_their_craft(civ_id)
+	if not craft.is_empty():
+		out.append({"key":"craft","sig":String(craft.id),"fact":"%s know %s, which we do not. An eye could carry it home." % [name,String(craft.name)],"weight":4.0})
+	return out
+
+## Their ruler's character record, read only (asking never makes one).
+static func _ruler_record(civ_id:String)->Dictionary:
+	var known:Variant=ForeignDiplomacy.leaders.get(civ_id,{})
+	var c:Variant=(known as Dictionary).get("character") if known is Dictionary else null
+	return c if c is Dictionary else {}
+
+## A practice they know that we do not ({} when none).
+static func _their_craft(civ_id:String)->Dictionary:
+	if WorldSimulation.discovery==null: return {}
+	var ours:={}
+	for id in CV.known_ids("player"): ours[String(id)]=true
+	var theirs:Array=CV.known_ids(civ_id)
+	for index in range(theirs.size()-1,-1,-1):
+		var id:=String(theirs[index])
+		if ours.has(id): continue
+		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+		var craft_name:=String(definition.get("name",""))
+		if craft_name.is_empty() or bool(definition.get("frontier",false)): continue
+		return {"id":id,"name":craft_name.to_lower()}
+	return {}
+
+## Sends a dispatch home: its news goes to what they sent home, the weightiest
+## on top; a thing told before comes again only changed (or after
+## RETELL_DAYS). When nothing is new, one quiet word says so, not repeated.
+## Returns the facts told.
+static func send_dispatch(civ_id:String,city_id:String,depth:float,day:int,who:String)->Array:
+	var s:=state()
+	if not s.get("told") is Dictionary: s["told"]={}
+	var told_all:Dictionary=s.told
+	if not told_all.get(civ_id) is Dictionary: told_all[civ_id]={}
+	var told:Dictionary=told_all[civ_id]
+	var news:Array=[]
+	for item:Dictionary in dispatch_items(civ_id,city_id,depth):
+		var key:=String(item.key)
+		var before:Dictionary=told.get(key,{}) if told.get(key) is Dictionary else {}
+		var stale:=before.is_empty() or day-int(before.get("day",0))>=RETELL_DAYS
+		if item.has("count"):
+			var was:=int(before.get("count",-1))
+			var moved:=was>=0 and absf(float(int(item.count)-was))>=maxf(2.0,float(was)*COUNT_NEWS)
+			if not moved and not stale: continue
+			if moved: item["fact"]=String(item.fact).trim_suffix(".")+", %s from about %d." % ["up" if int(item.count)>was else "down",was]
+			elif was>=0: item["weight"]=float(item.weight)*0.3
+		elif String(before.get("sig",""))==String(item.sig) and not stale: continue
+		news.append(item)
+	news.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.weight)>float(b.weight))
+	news=news.slice(0,DISPATCH_MAX)
+	var facts:Array=[]
+	# Learned in reverse so the weightiest sits on top of what they sent home.
+	for i in range(news.size()-1,-1,-1):
+		var item:Dictionary=news[i]
+		told[String(item.key)]={"sig":String(item.get("sig","")),"count":int(item.get("count",-1)),"day":day}
+		_learn(civ_id,String(item.fact),day,who)
+		facts.push_front(String(item.fact))
+		# Our network heard the raiders gather: the watch is warned and keeps
+		# the approaches from today until they come (war_loop.gd _forewarn).
+		if item.has("raid") and not bool((item.raid as Dictionary).get("seen",false)):
+			item.raid["seen"]=true
+			item.raid["warn_day"]=day
+	if facts.is_empty():
+		var quiet:="Nothing has changed among %s since our last word." % _name(civ_id)
+		var top:Dictionary=(s.learned as Array)[0] if not (s.learned as Array).is_empty() else {}
+		if String(top.get("fact",""))==quiet: top["day"]=day
+		else: _learn(civ_id,quiet,day,who)
+	return facts
 
 # --------------------------------------------------------------------------
 # The adjudicated strike: steal, sabotage, assassinate
@@ -1628,4 +1782,5 @@ static func _since(age_days:int)->String:
 	if age_days==1: return "yesterday"
 	if age_days<14: return "%d days ago" % age_days
 	if age_days<60: return "%d weeks ago" % maxi(1,roundi(age_days/7.0))
-	return "%d months ago" % maxi(1,roundi(age_days/30.0))
+	if age_days<548: return "%d months ago" % maxi(1,roundi(age_days/30.0))
+	return "%d years ago" % roundi(age_days/365.0)
