@@ -108,6 +108,9 @@ const BASE_SICKNESS:=0.40
 const BASE_FIRE:=0.14
 const BASE_FLOOD_WET:=0.35
 const BASE_FLOOD_DRY:=0.03
+## A place by the water holding this share of the people loses as much to a
+## flood as the seat's river camp would (settlement_places.gd).
+const PLACE_FLOOD_FULL_SHARE:=0.15
 const BASE_STRANGER:=0.55
 ## The reference state (x_ref in the catalog hazard form): an ordinary band
 ## of this game in its first centuries, housed at about twice its numbers,
@@ -621,10 +624,12 @@ static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	fire*=exp(-preload("res://scripts/built_fabric.gd").HOME_FIRE*float(x.get("homes_q",0.0)))
 	if day<int((s.until as Dictionary).get("burn",-1)): fire*=2.0
 	out["fire"]=clampf(fire,0.0,2.0)
-	# Flood: river camps, wet years.
+	# Flood: river camps, wet years; and the people's places by a river, a
+	# lake or the sea (settlement_places.gd flood_exposure).
 	var flood:=0.0
-	if bool(x.river):
-		flood=BASE_FLOOD_WET if float(x.weather_season)>1.03 else BASE_FLOOD_DRY
+	var wet_ground:=maxf(1.0 if bool(x.river) else 0.0,preload("res://scripts/settlement_places.gd").flood_exposure())
+	if wet_ground>0.0:
+		flood=(BASE_FLOOD_WET if float(x.weather_season)>1.03 else BASE_FLOOD_DRY)*wet_ground
 		if bool(flags.get("moved_up",false)): flood*=0.5
 		if bool(flags.get("mounds",false)) or _knows(["flood_house_mounds"]): flood*=0.4
 	out["flood"]=flood
@@ -1066,6 +1071,12 @@ static func _open_flood(day:int,x:Dictionary)->void:
 	var rng:=_rng("flood:%d" % day)
 	var food_share:=rng.randf_range(0.10,0.35)
 	var house_share:=rng.randf_range(0.08,0.30)
+	# Where the water comes in: the seat's river camp, or one of the people's
+	# places by the water, which loses what its share of the people holds.
+	var place:=preload("res://scripts/settlement_places.gd").flood_place(rng,1.0 if bool(x.river) else 0.0,day)
+	var reach:=1.0 if place.is_empty() else clampf(float(place.get("share",0.0))/PLACE_FLOOD_FULL_SHARE,0.25,1.0)
+	food_share*=reach
+	house_share*=reach
 	var stock:=Hall.player_stock("Food")
 	var lost:=Hall._debit_player("Food",stock*food_share)
 	var cap_before:=int(GameState.housing_capacity)
@@ -1073,11 +1084,26 @@ static func _open_flood(day:int,x:Dictionary)->void:
 	GameState.housing_capacity=maxi(int(float(x.pop)*0.5),cap_before-house_lost)
 	var c:=_new("flood","flood","the High Water of %s" % _year_words(day),day,x,{"food_lost":lost,"house_lost":cap_before-int(GameState.housing_capacity),
 		"loss_share":_loss_share(lost,stock,cap_before-int(GameState.housing_capacity),cap_before),"mid_day":day+rng.randi_range(20,30),"end_day":day+rng.randi_range(55,80)})
-	_plan_deaths(c,_lognormal(rng,0.003,1.0,0.0,0.04))
+	_plan_deaths(c,_lognormal(rng,0.003,1.0,0.0,0.04)*reach)
 	if food_share>=0.25: c["severe"]=true; _stat("flood","severe")
-	var summary:="The river came over its banks in the night. It took %s of food from the pits and the water stands in the lowest huts; %s families have no roof." % [_food_words(lost),_count(clampi(roundi(float(c.house_lost)/5.0),1,12))]
+	var families:=_count(clampi(roundi(float(c.house_lost)/5.0),1,12))
+	var summary:="The river came over its banks in the night. It took %s of food from the pits and the water stands in the lowest huts; %s families have no roof." % [_food_words(lost),families]
+	var title:="The River Comes In"
+	if not place.is_empty():
+		c["place"]=String(place.get("id",""))
+		var at:=String(place.get("name",""))
+		match String(place.get("kind","")):
+			"coast":
+				title="The Sea Comes In at %s" % at
+				summary="A storm drove the sea over the shore at %s. It took %s of food from the pits and the boats and huts nearest the water; %s families have no roof." % [at,_food_words(lost),families]
+			"lake":
+				title="The Lake Rises at %s" % at
+				summary="The lake rose over its banks at %s. It took %s of food from the pits and the water stands in the lowest huts; %s families have no roof." % [at,_food_words(lost),families]
+			_:
+				title="The River Comes In at %s" % at
+				summary="The river came over its banks at %s in the night. It took %s of food from the pits and the water stands in the lowest huts; %s families have no roof." % [at,_food_words(lost),families]
 	_file(c,"open",summary,"comes about the flood",int(c.decide_by))
-	_announce(c,"The River Comes In",summary)
+	_announce(c,title,summary)
 
 static func _open_fire(day:int,x:Dictionary)->void:
 	var rng:=_rng("fire:%d" % day)
