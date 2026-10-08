@@ -37,6 +37,8 @@ loading the corrected renderer.
 
 Source checkpoint: `0c00ce11`, branch `codex/settlement-position-stability`, based
 on `a83a0a7f`. Combined with main `5fcd9a97` at `93d2f55d` without conflicts.
+The subsequent spy-report update `ce7be622` was combined at `b78a3e5c`, also
+without conflicts; all ten new regressions passed again (report 102).
 
 The new regressions failed against the previous implementation (report 97).
 Across reports 98–100, all 120 distinct relevant cases subsequently passed:
