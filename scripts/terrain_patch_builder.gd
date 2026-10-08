@@ -10,6 +10,14 @@ extends RefCounted
 ## Nothing on the worker touches the scene; `advance()` polls, `cancel()`
 ## abandons (the static registry below keeps an abandoned build alive until
 ## its threads have stopped), and `drain()` waits for every build to stop.
+const PATCH_LIFT:=0.0006
+
+## Keep the depth bias on uplands, but never lift shallow water into land.
+## Physical heights and the zero shoreline stay untouched through the first
+## dry metre; the existing bias returns smoothly between one and four metres.
+static func surface_height(raw:float)->float:
+	return raw+PATCH_LIFT*smoothstep(0.001,0.004,raw)
+
 var resolution:int
 var span:float
 var center:Vector2
@@ -175,7 +183,7 @@ func _sample_raster(x:float,z:float)->void:
 	var row:=clampi(floori(v),0,_raster_rows-2)
 	var fx:=clampf(u-float(column),0.0,1.0);var fy:=clampf(v-float(row),0.0,1.0)
 	var a:=row*_raster_columns+column;var b:=a+1;var c:=a+_raster_columns;var d:=c+1
-	var height:=lerpf(lerpf(_raster_heights[a],_raster_heights[b],fx),lerpf(_raster_heights[c],_raster_heights[d],fx),fy)+0.0006
+	var height:=surface_height(lerpf(lerpf(_raster_heights[a],_raster_heights[b],fx),lerpf(_raster_heights[c],_raster_heights[d],fx),fy))
 	vertices[cursor]=Vector3(x,height,z)
 	heights[cursor]=height
 	colors[cursor]=Color.hex(_raster_colors[a]).lerp(Color.hex(_raster_colors[b]),fx).lerp(Color.hex(_raster_colors[c]).lerp(Color.hex(_raster_colors[d]),fx),fy)
@@ -216,7 +224,7 @@ func advance(budget_usec:int=2500)->bool:
 				continue
 			var shared_node:=reuse_resolution>0 and (reuse_stride==1 or ((x_index-reuse_offset.x)%reuse_stride==0 and (z_index-reuse_offset.y)%reuse_stride==0))
 			if not shared_node or not _copy_shared_sample(x,z):
-				var height:float=sample_height.call(x,z)+0.0006
+				var height:=surface_height(float(sample_height.call(x,z)))
 				vertices[cursor]=Vector3(x,height,z)
 				heights[cursor]=height
 				colors[cursor]=sample_color.call(x,z,height)
@@ -318,7 +326,7 @@ func _run_band(band:int)->void:
 	if not cancelled:
 		var first:=band*BAND_ROWS
 		var count:=mini(BAND_ROWS,resolution-first)
-		_bands[band]=_sample_raster_band(first,count) if macro_raster!=null else sampler.sample_rows(self,first,count)
+		_bands[band]=_sample_raster_band(first,count) if macro_raster!=null else sampler.sample_rows(self,first,count,true)
 	_mutex.lock()
 	_bands_done+=1
 	var last:=_bands_done==_band_count
@@ -402,7 +410,7 @@ func _sample_raster_band(first_row:int,row_count:int)->Array:
 			var row:=clampi(floori(v),0,_raster_rows-2)
 			var fx:=clampf(u-float(column),0.0,1.0);var fy:=clampf(v-float(row),0.0,1.0)
 			var a:=row*_raster_columns+column;var b:=a+1;var c:=a+_raster_columns;var d:=c+1
-			var height:=lerpf(lerpf(_raster_heights[a],_raster_heights[b],fx),lerpf(_raster_heights[c],_raster_heights[d],fx),fy)+0.0006
+			var height:=surface_height(lerpf(lerpf(_raster_heights[a],_raster_heights[b],fx),lerpf(_raster_heights[c],_raster_heights[d],fx),fy))
 			band_vertices[index]=Vector3(x,height,z)
 			band_heights[index]=height
 			band_colors[index]=Color.hex(_raster_colors[a]).lerp(Color.hex(_raster_colors[b]),fx).lerp(Color.hex(_raster_colors[c]).lerp(Color.hex(_raster_colors[d]),fx),fy)

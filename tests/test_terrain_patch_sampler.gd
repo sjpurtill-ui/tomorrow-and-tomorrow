@@ -54,7 +54,7 @@ func test_fused_sampler_is_the_sliced_sampler_chain_bit_for_bit()->void:
 	# land, open ocean and the shore beside it.
 	for at:Vector2 in [Vector2(5733.6,1043.4),Vector2.ZERO,Vector2(-18.0,300.0),Vector2(9000.0,-4000.0),Vector2(-15000.0,7000.0),Vector2(3000.0,2500.0)]:
 		var sliced:=_finish(_job(terrain,33,REGION_SPAN,at))
-		var fused:Array=sampler.sample_rows(_job(terrain,33,REGION_SPAN,at),0,33)
+		var fused:Array=sampler.sample_rows(_job(terrain,33,REGION_SPAN,at),0,33,true)
 		assert_bool(fused[0]==sliced.heights).override_failure_message("heights at %s" % at).is_true()
 		assert_bool(fused[1]==sliced.vertices).is_true()
 		assert_bool(fused[2]==sliced.colors).override_failure_message("colours at %s" % at).is_true()
@@ -122,6 +122,52 @@ func test_raster_bands_on_workers_are_the_sliced_raster_patch()->void:
 	worker.start(SAMPLER.from_terrain(terrain))
 	_same_patch(_finish(worker),sliced)
 	assert_int(int(worker.completed_samples().macro_level)).is_equal(1)
+
+func test_macro_sliced_and_worker_paths_preserve_shallow_water_and_upland_bias()->void:
+	var terrain:=_world()
+	var raw:=PackedFloat32Array([-0.00027,-0.000004,0.0,0.0005,0.001,0.0025,0.004,0.5])
+	var raster:=RENDER.Raster.new()
+	raster.level=1;raster.origin=Vector2.ZERO;raster.cell=Vector2.ONE;raster.columns=8;raster.rows=8
+	for z in 8:
+		for x in 8:
+			raster.heights.append(raw[x]);raster.seasons.append(10.0)
+			raster.colors.append(Color.WHITE.to_rgba32());raster.fields.append(Color(0.5,0.5,0.3,0.2).to_rgba32())
+	var sliced:=_job(terrain,8,7.0,Vector2(3.5,3.5));sliced.macro_raster=raster
+	var worker:=_job(terrain,8,7.0,Vector2(3.5,3.5));worker.macro_raster=raster
+	worker.start(SAMPLER.from_terrain(terrain))
+	_same_patch(_finish(worker),_finish(sliced))
+	for index in sliced.heights.size():
+		var physical:float=raw[index%8]
+		if physical<=0.001:assert_float(sliced.heights[index]).is_equal(physical)
+		elif physical>=0.004:assert_float(sliced.heights[index]).is_equal(Vector3(0,physical+0.0006,0).y)
+		assert_int(sliced.cover[index*4+3]).is_equal(255 if physical>0.0 else 0)
+
+func test_fused_actual_coast_matches_sliced_without_emerging_shallow_seabed()->void:
+	GameState.reset_for_new_world(1762710074)
+	PlanetEnvironment.reset_for_new_world()
+	var terrain:=_world()
+	var at:=Vector2(-2868.64,2040.915)
+	var sliced:=_finish(_job(terrain,33,2.0,at))
+	var sampler:=SAMPLER.from_terrain(terrain)
+	var fused:Array=sampler.sample_rows(_job(terrain,33,2.0,at),0,33,true)
+	var legacy:Array=sampler.sample_rows(_job(terrain,33,2.0,at),0,33)
+	assert_bool(fused[0]==sliced.heights).is_true()
+	assert_bool(fused[1]==sliced.vertices).is_true()
+	var shallows:=0;var dry:=0
+	for index in sliced.vertices.size():
+		var point:Vector3=sliced.vertices[index]
+		var physical:float=terrain._height_at(point.x,point.z)
+		# The readers in supply_state and nation_border_partition still remove
+		# the old constant, so their default sampling contract must not change.
+		assert_float(legacy[0][index]).is_equal(Vector3(0,physical+0.0006,0).y)
+		if physical<=0.0:
+			assert_float(point.y).is_less_equal(0.0)
+			if physical>=-0.0006:shallows+=1
+		elif physical>=0.004:
+			assert_float(point.y).is_equal(Vector3(0,physical+0.0006,0).y)
+			dry+=1
+	assert_int(shallows).is_greater(0)
+	assert_int(dry).is_greater(0)
 
 
 func test_cancelled_worker_build_stops_and_drains()->void:
