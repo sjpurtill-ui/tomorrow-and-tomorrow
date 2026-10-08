@@ -263,6 +263,8 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 	# cleared at each such point.
 	var literacy:Dictionary={}
 	for deposit in WorldSimulation.state.resource_deposits:
+		# A spent deposit (_mark_spent) has nothing left to find or survey.
+		if deposit.get("spent",false):continue
 		_ensure_deposit_fields(deposit)
 		var resource_name: String = deposit.resource
 		if not catalog.has(resource_name):
@@ -993,8 +995,10 @@ func _add_shipment(deposit:Dictionary,arrival:int,quantity:float)->void:
 func _mark_spent(deposit:Dictionary)->void:
 	if String(deposit.get("landscape_source","")) in ["woodland_catchment","plant_fiber_catchment"]:return
 	if bool((catalog.get(String(deposit.get("resource","")),{}) as Dictionary).get("renewable",false)):return
-	if float(deposit.get("remaining",0.0))>0.001 or float(deposit.get("stock_at_source",0.0))>0.0:return
-	if not (deposit.get("shipments",[]) as Array).is_empty():return
+	# The same measure of empty as deposit_exhausted: a worked-out pit keeps
+	# a sliver of stock or an emptied load record, and was walked every day
+	# for ever (770 of 1,410 deposits on a year-342 save).
+	if not deposit_exhausted(deposit):return
 	deposit["spent"]=true
 
 ## Days between looks at a resting stand of woods or fibre.

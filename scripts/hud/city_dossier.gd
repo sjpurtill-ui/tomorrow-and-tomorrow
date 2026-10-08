@@ -1,11 +1,12 @@
 extends VBoxContainer
-## A foreign city as the scouts brought it home: an inked sketch drawn only
+## A foreign city as the scouts brought it home: a three-dimensional view drawn only
 ## from returned estimates, their account in plain words, and each estimate
 ## drawn as an uncertainty band against the player's own settlement.
 ## Never reads the hidden city ledger; everything comes from the block.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const V:=preload("res://scripts/hud/city_report_visuals.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
+const ReportedView:=preload("res://scripts/hud/reported_city_view.gd")
 const GROUPS:=[["THE PEOPLE",["population","life_expectancy","infant_mortality","education"]],["STRENGTH",["garrison","fortification","damage"]],["LIVELIHOOD",["gdp","science_capacity","production","logistics","supply"]]]
 const CAPACITY:=["fortification","production","logistics","damage","science","health","education"]
 const WORDS:=["no","one","two","three","four","five","six","seven","eight","nine","ten"]
@@ -13,19 +14,28 @@ const WORDS:=["no","one","two","three","four","five","six","seven","eight","nine
 static var last_revealed:=""
 var data:Dictionary
 var sketch:Sketch
+var portrait:Control
+var report_body:VBoxContainer
 
 func setup(block:Dictionary)->void:
 	data=block;name="CityDossier";add_theme_constant_override("separation",16)
-	sketch=Sketch.new();sketch.data=block;add_child(sketch)
-	if String(block.get("city_id",""))!=last_revealed:
-		last_revealed=String(block.get("city_id",""))
-		sketch.reveal=0.0
-		if sketch.is_inside_tree():sketch.ink_in()
-		else:sketch.ready.connect(sketch.ink_in,CONNECT_ONE_SHOT)
+	portrait=ReportedView.new();add_child(portrait);portrait.setup(block)
+	_build_report_body(block)
+
+func update_block(block:Dictionary)->bool:
+	if not is_instance_valid(portrait) or not portrait.update_block(block):return false
+	data=block
+	if is_instance_valid(report_body):remove_child(report_body);report_body.queue_free()
+	_build_report_body(block)
+	return true
+
+func _build_report_body(block:Dictionary)->void:
+	report_body=VBoxContainer.new();report_body.name="ReportFigures"
+	report_body.add_theme_constant_override("separation",16);add_child(report_body)
 	if String(block.get("account",""))!="":
 		var quote:=PanelContainer.new()
 		var rule:=StyleBoxFlat.new();rule.bg_color=Color.TRANSPARENT;rule.border_color=T.GOLD;rule.border_width_left=2;rule.content_margin_left=14;rule.content_margin_top=2;rule.content_margin_bottom=2
-		quote.add_theme_stylebox_override("panel",rule);add_child(quote)
+		quote.add_theme_stylebox_override("panel",rule);report_body.add_child(quote)
 		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);quote.add_child(stack)
 		var words:=Label.new();words.text=String(block.account);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		T.text(words,"voice_small",T.BODY);words.add_theme_font_override("font",T.voice_font(true));stack.add_child(words)
@@ -43,17 +53,17 @@ func setup(block:Dictionary)->void:
 			if Dictionary(item.field).is_empty():unknown.append(String(item.name).get_slice(" · ",0));continue
 			shown.append(item)
 		if shown.is_empty():continue
-		var head:=HBoxContainer.new();add_child(head)
+		var head:=HBoxContainer.new();report_body.add_child(head)
 		var kicker:=T.text(Label.new(),"kicker",T.INK_MUTED) as Label;kicker.text=String(group[0]);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 		if String(block.get("home_name",""))!="" and not legend_shown:
 			legend_shown=true
 			var legend:=T.text(Label.new(),"small",T.INK_MUTED) as Label;legend.text="Gold mark: "+String(block.home_name);head.add_child(legend)
-		var rows:=VBoxContainer.new();rows.add_theme_constant_override("separation",2);add_child(rows)
+		var rows:=VBoxContainer.new();rows.add_theme_constant_override("separation",2);report_body.add_child(rows)
 		for item:Dictionary in shown:rows.add_child(_row(item))
 	if not unknown.is_empty():
 		var note:=Label.new();note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		note.text="Not yet seen: %s. Scouts who watch longer or come closer can learn these." % ", ".join(PackedStringArray(unknown))
-		T.text(note,"small",T.INK_MUTED);add_child(note)
+		T.text(note,"small",T.INK_MUTED);report_body.add_child(note)
 
 func _item(key:String)->Dictionary:
 	for item:Dictionary in data.get("items",[]):
@@ -66,8 +76,8 @@ func _row(item:Dictionary)->Control:
 	var lit:StyleBoxFlat=idle.duplicate();lit.bg_color=T.GOLD_WASH
 	row.add_theme_stylebox_override("panel",idle)
 	var key:=String(item.key)
-	row.mouse_entered.connect(func()->void:row.add_theme_stylebox_override("panel",lit);sketch.highlight=key;sketch.queue_redraw())
-	row.mouse_exited.connect(func()->void:row.add_theme_stylebox_override("panel",idle);if sketch.highlight==key:sketch.highlight="";sketch.queue_redraw())
+	row.mouse_entered.connect(func()->void:row.add_theme_stylebox_override("panel",lit))
+	row.mouse_exited.connect(func()->void:row.add_theme_stylebox_override("panel",idle))
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",12);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(line)
 	var icon:=TextureRect.new();icon.texture=V.icon(key);icon.custom_minimum_size=Vector2(24,24);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",4);body.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(body)

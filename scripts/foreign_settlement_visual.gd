@@ -21,7 +21,7 @@ static func stable_population(report:Dictionary,previous:int)->int:
 static func framing_size(report:Dictionary)->float:
 	var population:=display_population(report)
 	return clampf(.22+sqrt(maxf(0,population))*.0015,.22,.8)
-func build(report:Dictionary,height_at:Callable,country_snapshot:Dictionary={})->void:
+func build(report:Dictionary,height_at:Callable,country_snapshot:Dictionary={},publish_ground:bool=true)->void:
 	ground=height_at;origin=Vector2(float(report.position.x),float(report.position.z))
 	position=Vector3(origin.x,0,origin.y)
 	set_meta("city_id",String(report.city_id));set_meta("details_confirmed",not report.get("fields",{}).is_empty())
@@ -117,7 +117,11 @@ func build(report:Dictionary,height_at:Callable,country_snapshot:Dictionary={})-
 	for index in lanes_drawn.size():
 		ground_routes.append({"id":index+1,"active":true,"points":lanes_drawn[index],"width_m":1.6,"traffic":0.55,"hierarchy":"path","kind":"street"})
 	var ground_plots:Array[Dictionary]=[{"id":1,"form":"maintained_gathering_ground","land_use":"communal","status":"active","centroid":Vector2.ZERO,"area_ha":0.05}]
-	preload("res://scripts/settlement_grounds.gd").request("foreign:"+String(report.city_id),plan,ground_plots,ground_routes,Vector3(origin.x,0.0,origin.y))
+	# A report portrait owns its private ground; it must not replace the live
+	# map's retained ground entry merely because somebody opened the report.
+	if publish_ground:
+		preload("res://scripts/settlement_grounds.gd").request("foreign:"+String(report.city_id),plan,ground_plots,ground_routes,Vector3(origin.x,0.0,origin.y))
+	else:set_meta("report_ground",{"plan":plan,"plots":ground_plots,"routes":ground_routes})
 	# Buildings and earth are batched, with no per-resident nodes or gameplay state.
 	for key:String in surfaces:
 		var surface:SurfaceTool=surfaces[key];surface.generate_normals()

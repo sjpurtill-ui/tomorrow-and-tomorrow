@@ -327,7 +327,7 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var id:=_primary_id()
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
-	assert_str(text).contains("How our seat grows").contains("district by district")
+	assert_str(text).contains("How our people spread").contains("district by district")
 	assert_object(page.find_child("Choice_Ruler",true,false)).is_null()
 	# The one way to ask for more hands.
 	var ask:=page.find_child("AskForHands",true,false)
