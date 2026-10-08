@@ -72,10 +72,30 @@ func test_dry_cliff_and_unknown_river_bearing_never_create_false_water_features(
 	# facing does not imply that the village fringe is the actual river bank.
 	record.place.facing=Vector2.RIGHT
 	var distant_river:=ART.details({"origin":record.position,"place":record.place,"plots":[]},
-		func(at:Vector2)->bool:return at.x<1.925,func(at:Vector2)->bool:return at.x>=1.925)
+		func(at:Vector2)->bool:return at.x<2.7,func(at:Vector2)->bool:return at.x>=2.7)
 	assert_bool(distant_river.shore_found).is_false()
 	assert_array(distant_river.lines).is_empty()
 	assert_array(distant_river.props).is_empty()
+
+func test_shore_828_metres_away_is_found_with_bounded_cooperative_queries()->void:
+	var reads:=[0]
+	var water:=func(at:Vector2)->bool:
+		reads[0]+=1
+		return at.x>=1.828
+	var state:=ART.begin_shore(Vector2(1,1),Vector2.RIGHT)
+	var steps:=0
+	var complete:=false
+	while not complete and steps<=ART.MAX_SHORE_SAMPLES:
+		var before:int=reads[0]
+		complete=ART.advance_shore(state,func(at:Vector2)->bool:return at.x<1.828,water)
+		# One probe normally; a hit uses only five extra binary refinements.
+		assert_int(int(reads[0])-before).is_between(1,6)
+		steps+=1
+	assert_bool(complete).is_true()
+	assert_bool(state.result.found).is_true()
+	assert_float(float(state.result.position.x)).is_between(1.8278,1.8281)
+	assert_int(steps).is_between(414,416)
+	assert_int(ART.MAX_SHORE_SAMPLES).is_equal(800)
 
 func test_real_shore_props_survive_home_elevation_buffer_and_keep_homes_inland()->void:
 	var visual=_visual()
