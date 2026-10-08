@@ -792,7 +792,11 @@ func names_in_use()->Dictionary:
 		var people:Variant=(actor.get("systems",{}) as Dictionary).get("GameState")
 		if people!=null:registers.append(people.player_settlements)
 	for register:Array in registers:
-		for town:Dictionary in register:used[String(town.get("name","")).to_lower()]=true
+		for town:Dictionary in register:
+			used[String(town.get("name","")).to_lower()]=true
+			# The places a seat's families have settled (settlement_places.gd).
+			for place:Variant in town.get("places",[]):
+				if place is Dictionary:used[String((place as Dictionary).get("name","")).to_lower()]=true
 	for world:Variant in [WorldSimulation.world,CivilizationSystem]:
 		if world==null:continue
 		for civ:Dictionary in world.civilizations:
@@ -903,6 +907,10 @@ func coastal_site_profile(record_or_context:Dictionary={})->Dictionary:
 	# Immediate benefits represent shoreline gathering and near-shore food. Movement
 	# and trade remain locked behind broad, research-driven civilization capacities.
 	var context:Dictionary=record_or_context.get("territory_context",record_or_context)
+	# The seat works the coast of its best shore place for the whole people
+	# (settlement_places.gd coast_context).
+	if bool(record_or_context.get("primary",false)) and record_or_context.has("places"):
+		context=preload("res://scripts/settlement_places.gd").coast_context(context,record_or_context.get("places",[]))
 	var shoreline:=clampf(float(context.get("shoreline_access",0.0)),0.0,1.0)
 	var marine:=clampf(float(context.get("marine_opportunity",0.0)),0.0,1.0)*shoreline
 	var salt:=clampf(float(context.get("salt_opportunity",0.0)),0.0,1.0)*shoreline

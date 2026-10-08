@@ -48,10 +48,12 @@ var _towns:Array=[]
 
 ## How the seat grows (one_seat.gd): one seat that spreads outward into
 ## districts, then a county, a state and a country, with the numbers that
-## take it to its next stage. No people founds separate towns.
+## take it to its next stage; and the places its families have settled
+## (settlement_places.gd), each with its people and its water.
 func founding_block()->Dictionary:
 	var OneSeat:=preload("res://scripts/one_seat.gd")
-	return {"title":"How our seat grows","words":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS,"options":[],"on":false}
+	var Places:=preload("res://scripts/settlement_places.gd")
+	return {"title":"How our people spread","words":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS+"\n"+Places.words(),"options":[],"on":false}
 
 func _city_tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()

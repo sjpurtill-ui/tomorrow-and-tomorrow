@@ -20,7 +20,7 @@ const DryTowns:=preload("res://scripts/dry_towns.gd")
 
 ## Why no caravan leaves to found a separate town (the court's and the map's
 ## answer).
-const NO_NEW_TOWNS:="Our people do not leave to found separate towns: the seat grows outward, district by district, as its people grow."
+const NO_NEW_TOWNS:="Our people do not leave to found towns of their own. The seat grows outward district by district, and some families settle apart in places that stay part of it and share its stores, by the sea or a lake first, then by the rivers."
 
 ## The ground the carriers search for timber, stone and fibre: rings of new
 ## ground 3 km apart (resource_system.gd SURFACE_FRONT_SPACING_KM). A seat
