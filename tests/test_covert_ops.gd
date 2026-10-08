@@ -306,3 +306,38 @@ func test_no_second_agent_while_one_of_theirs_is_on_the_road()->void:
 	for day in range(int(GameState.elapsed_days),int(GameState.elapsed_days)+3*365,Covert.RIVAL_TICK):
 		Covert._rivals_scheme(day)
 	assert_int(int((s.stats as Dictionary).get("rival_sent",0))).is_equal(before)
+
+
+# --------------------------------------------------------------------------
+# The dispatch: many kinds of news, nothing told twice unchanged
+# --------------------------------------------------------------------------
+
+func test_a_settled_eye_sends_varied_news_and_never_repeats_an_unchanged_count()->void:
+	var day:=int(GameState.elapsed_days)
+	# A new eye hears only the market: no ruler, no grudge, no plans.
+	var market:=Covert.dispatch_items(_civ_id(),_tsaren(),0.0)
+	for item:Dictionary in market: assert_bool(String(item.key) in ["ruler","grudge","war_prep","raid","craft"]).override_failure_message("market eye heard the hall: %s" % item.key).is_false()
+	# One settled two years hears the hall too: who rules them, and how.
+	preload("res://scripts/rival_rulers.gd").character(_civ_id())
+	var keys:=[]
+	for item:Dictionary in Covert.dispatch_items(_civ_id(),_tsaren(),2.0): keys.append(String(item.key))
+	assert_bool("ruler" in keys).override_failure_message("hall keys %s" % [keys]).is_true()
+	# And sends several kinds of news at once.
+	Covert._sharpen(_civ_id(),_tsaren(),0.9,day,"test")
+	var first:=Covert.send_dispatch(_civ_id(),_tsaren(),2.0,day,"Test Eye")
+	assert_int(first.size()).override_failure_message("first dispatch: %s" % [first]).is_greater(1)
+	assert_int(first.size()).is_less_equal(Covert.DISPATCH_MAX)
+	# The next dispatch brings what the first left out, never the same line.
+	var second:=Covert.send_dispatch(_civ_id(),_tsaren(),2.0,day+90,"Test Eye")
+	for fact in second: assert_bool(fact in first).override_failure_message("told again unchanged: %s" % fact).is_false()
+	# Once all is told and nothing moves, one quiet word, not a stack of them.
+	for i in 6: Covert.send_dispatch(_civ_id(),_tsaren(),2.0,day+180+i*90,"Test Eye")
+	var quiet:=0
+	for f:Dictionary in Covert.learned(40):
+		if String(f.fact).begins_with("Nothing has changed"): quiet+=1
+	assert_int(quiet).is_less_equal(1)
+
+
+func test_old_word_reads_in_years()->void:
+	assert_str(Covert._since(800)).is_equal("2 years ago")
+	assert_str(preload("res://scripts/hud/covert_board.gd")._age(65640)).is_equal("180 years ago")

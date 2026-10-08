@@ -9,9 +9,9 @@ extends RefCounted
 ## the daily formula when the span is 1, so ordinary days are unchanged.
 
 ## Longest interval a calm rival may cover in one step.
-const MAX_SPAN:=3
+const MAX_SPAN:=5
 ## Longest interval for a calm rival the player has not yet met.
-const UNCONTACTED_SPAN:=10
+const UNCONTACTED_SPAN:=30
 ## A step covers at most this share of the days of food any town has stored.
 const FOOD_SHARE:=0.5
 ## A remnant this small has no food reserve worth protecting with daily steps.

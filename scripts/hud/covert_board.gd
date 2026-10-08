@@ -154,7 +154,7 @@ static func sections()->Array:
 				"under a year" if float(n.years)<1.0 else ("%d years" % roundi(float(n.years))),roundi(float(n.strength)*100.0),
 				"no word yet" if int(n.last_word_days)<0 else "last word %s" % _age(int(n.last_word_days)),_risk_words(float(n.risk))])
 		out.append({"kind":"networks","title":"Our networks","rows":rows_n})
-	var learned:=Covert.learned(6)
+	var learned:=Covert.learned(10)
 	if not learned.is_empty():
 		var rows2:Array=[]
 		for f:Dictionary in learned: rows2.append("%s — %s%s" % [String(f.fact),_age(int(f.age_days)),(" · FALSE: "+String(f.get("found_by",""))) if bool(f.get("found_false",false)) else ""])
@@ -197,7 +197,8 @@ static func _age(days:int)->String:
 	if days==1: return "yesterday"
 	if days<14: return "%d days ago" % days
 	if days<60: return "%d weeks ago" % maxi(1,roundi(days/7.0))
-	return "%d months ago" % maxi(1,roundi(days/30.0))
+	if days<548: return "%d months ago" % maxi(1,roundi(days/30.0))
+	return "%d years ago" % roundi(days/365.0)
 
 
 ## The four teaching levels for one corps, with what each means in the
