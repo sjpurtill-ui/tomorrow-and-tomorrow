@@ -1,3 +1,20 @@
+## October 7 — Static lived-in yards
+
+Woodpiles, pottery, drying racks, grain stores and fishing nets use recorded
+house sites in the root settlement and organic expansion clusters. One global
+limit admits 32 nearby occupied homes / 96 prop groups, with five shared meshes
+and a hard 0.30 km close-view cutoff. Crafts and actual dry/revealed ground govern
+placement; no walking people, inventory simulation or new settlement layout.
+
+Source `7e3acaf2`, branch `codex/lived-in-yards`, combined with Eyes rail update
+`135edcb6` at `8c38c677`. All 82 distinct code checks and initialized probe parsing
+passed. Final private GPU review passed: 21 groups in the saved-map view, zero
+detected building/route/water intersections, stable pan/re-entry and zero human
+batches. Frames stayed near the existing 20 ms cap; four visible batches added
+eight draw calls, and cold placement has a bounded cooperative cost. Full
+measurements and limitations are in `docs/design/LIVED_IN_YARDS.md`. No save
+migration or live player restart; save and restart normally to load the delivery.
+
 ## October 7 — Distinct cultural building finishes
 
 Roof registers, compatible plaster, doorway patterns and restrained decoration
