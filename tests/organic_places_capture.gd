@@ -4,7 +4,7 @@ extends "res://tests/building_construction_capture.gd"
 ## The four states are labelled specimens, never fabricated campaign history.
 ## Use ignored override.cfg: custom user dir TomorrowOrganicPlacesQA, and run
 ## tools/run_isolated_gpu_probe.ps1 --organic-places-capture --save=<copy>.
-## Optional --span=.6, --frames=90, --out=res://artifacts/organic-places.
+## Optional --span=.3, --frames=90, --out=res://artifacts/organic-places.
 ## --parse-only is an initialized headless parser check, not GPU acceptance.
 const Places := preload("res://scripts/settlement_places.gd")
 const Growth := preload("res://scripts/settlement_country_growth.gd")
@@ -17,7 +17,7 @@ var register_count_before := 0
 var stockpiles_before := 0
 var completed_before := 0
 var day_before := 0
-var detail_span := .6
+var detail_span := .3
 var baseline_roofs: Dictionary = {}
 var fixed_point := Vector2.ZERO
 var fixture_days: Array[int] = []
@@ -42,6 +42,9 @@ func _run() -> void:
 		if node != self: node.set_process(false); node.set_physics_process(false)
 	var loaded: Dictionary = saves.load_game("copy")
 	if loaded.has("error"): _fail_setup(str(loaded)); return
+	# Loading resets some systems' processing flags; freeze after restoration.
+	for node in get_tree().root.get_children():
+		if node != self: node.set_process(false); node.set_physics_process(false)
 	GameState.civic_api_enabled = false
 	population_before = float(GameState.population_exact)
 	register_count_before = GameState.player_settlements.size()
@@ -54,18 +57,22 @@ func _run() -> void:
 	origin = GameState.settlement_founded_at
 	get_window().size = Vector2i(1600, 900)
 	get_window().content_scale_size = Vector2i(1600, 900)
-	var deadline := Time.get_ticks_msec() + 90000
+	# A cold raster bake is documented to exceed 90 seconds before GPU work.
+	var deadline := Time.get_ticks_msec() + 240000
 	while not terrain.macro_render.ready() and Time.get_ticks_msec() < deadline: await get_tree().process_frame
 	if not terrain.macro_render.ready(): _fail_setup("Saved-world terrain did not become ready."); return
 	country = terrain.get_node_or_null("CountryLand")
 	if country == null: _fail_setup("Ordinary terrain did not install CountryLand."); return
 	if not _prepare_place(saved_places): _fail_setup("No real coastal founding site found in the copied world's bounded site search."); return
 	fixed_point = place.position
+	if "--shore-diagnostics-only" in OS.get_cmdline_user_args():
+		await _shore_diagnostics()
+		return
 	CivilizationSystem._add_revealed_area(fixed_point, 2.0, "private organic-place review")
 	CivilizationSystem._add_revealed_area(Vector2(origin.x, origin.z), 1.5, "private root comparison")
 	terrain.set_camera_distance_level(0); terrain.zoom_target_size = -1.0; terrain.zoom_preset_active = false
 	terrain.camera_yaw = PI * .5; terrain.camera_pitch = deg_to_rad(-45.0)
-	detail_span = clampf(float(_arg("span", ".6")), .08, 2.0)
+	detail_span = clampf(float(_arg("span", ".3")), .08, 2.0)
 	label_layer = CanvasLayer.new(); label_layer.layer = 100; add_child(label_layer)
 	title = Label.new(); title.position = Vector2(22, 16)
 	title.add_theme_font_size_override("font_size", 19)
@@ -74,6 +81,7 @@ func _run() -> void:
 	title.add_theme_constant_override("shadow_offset_x", 2); title.add_theme_constant_override("shadow_offset_y", 2)
 	label_layer.add_child(title)
 	report = {"scope": "Four staged place states on actual copied-save terrain using the production country layer; not historical campaign checkpoints", "source_copy": source_path, "source_sha256": source_hash, "user_data": OS.get_user_data_dir(), "population": population_before, "saved_day": day_before, "world_seed": GameState.world_seed, "original_places": saved_places, "place_id": place.id, "place_name": place.name, "position": str(fixed_point), "root": str(origin), "fixed_span_km": detail_span, "revealed_for_review": true, "captures": [], "failures": failures}
+	report["population_after_scene_setup"] = float(GameState.population_exact)
 	RenderingServer.viewport_set_measure_render_time(get_viewport().get_viewport_rid(), true)
 	await _capture("root_same_scale", "Saved root — identical camera scale", origin, detail_span, false)
 	for phase: String in ["founding", "mature", "flood", "ruin"]:
@@ -83,7 +91,15 @@ func _run() -> void:
 		var target := Vector3(framed.x, terrain._height_at(framed.x, framed.y), framed.y)
 		await _capture(phase, String({"founding": "First coastal place — founding families", "mature": "Mature coastal place — same root scale", "flood": "Flood setback — damaged water side", "ruin": "Abandoned place — roofless remains"}[phase]), target, detail_span, true)
 		if phase == "mature":
+			# Keep an exact-camera ablation to attribute pre-existing terrain marks.
+			country.visible = false
+			await _capture("mature_without_country", "Country layer hidden — diagnostic ablation", target, detail_span, false)
+			country.visible = true
 			var shore_target := _shore_target()
+			var coast_center := (fixed_point + Vector2(shore_target.x, shore_target.z)) * .5 if shore_target != Vector3.INF else fixed_point + facing * .12
+			await _capture("mature_coast_context", "Town and actual shoreline — wider context", Vector3(coast_center.x, terrain._height_at(coast_center.x, coast_center.y), coast_center.y), 1.8, true)
+			if "--coast-diagnostics" in OS.get_cmdline_user_args():
+				await _coast_diagnostics(Vector3(coast_center.x, terrain._height_at(coast_center.x, coast_center.y), coast_center.y))
 			if shore_target != Vector3.INF:
 				await _capture("mature_shore_detail", "Drawn-up hulls and working shore — close detail", shore_target, .16, true)
 			var center := (fixed_point + Vector2(origin.x, origin.z)) * .5
@@ -103,12 +119,107 @@ func _run() -> void:
 	report["passed"] = failures.is_empty(); report["failures"] = failures
 	_write(output.path_join("capture-audit.json"), report)
 	print("ORGANIC_PLACES_CAPTURE_DONE ", "PASS" if failures.is_empty() else "FAIL", " ", JSON.stringify(failures))
+	_stop_bakes()
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 func _fail_setup(message: String) -> void:
 	_check(false, message)
 	_write(output.path_join("capture-audit.json"), {"passed": false, "failures": failures})
+	_stop_bakes()
 	get_tree().quit(2)
+
+func _stop_bakes() -> void:
+	if is_instance_valid(terrain): terrain.macro_render.cancel()
+	PlanetEnvironment.set_macro_bake_enabled(false)
+
+func _shore_diagnostics() -> void:
+	# Diagnostic reads only: no terrain, production material or place correction.
+	var facing: Vector2 = place.get("facing", Vector2.ZERO)
+	facing = facing.normalized()
+	var readings: Array[Dictionary] = []
+	for step in range(101):
+		var distance := float(step) * .020
+		var row := _shore_reading(fixed_point + facing * distance)
+		row["distance_km"] = distance
+		readings.append(row)
+		if step % 10 == 0: await get_tree().process_frame
+	var first_water: Dictionary = {"found": false, "probe_limit_km": 2.0}
+	var dry := fixed_point
+	for step in range(1, 1001):
+		var test := fixed_point + facing * float(step) * .002
+		if not terrain._settlement_yard_water_at(test):
+			dry = test
+			if step % 20 == 0: await get_tree().process_frame
+			continue
+		var wet := test
+		for refinement in 5:
+			var middle := (dry + wet) * .5
+			if terrain._settlement_yard_water_at(middle): wet = middle
+			else: dry = middle
+		first_water = {"found": true, "first_wet_step": step, "first_wet_distance_km": float(step) * .002, "within_production_limit": step <= 320, "bank": _shore_reading(dry), "wet": _shore_reading(wet), "along_bank": []}
+		for offset: float in [-.012, -.006, 0.0, .006, .012]:
+			var bank_row := _shore_reading(dry + facing.orthogonal() * offset)
+			bank_row["along_km"] = offset
+			first_water.along_bank.append(bank_row)
+		break
+	var art := preload("res://scripts/settlement_place_art.gd")
+	var production_state: Dictionary = art.begin_shore(fixed_point, facing)
+	var shoreline := func(point: Vector2) -> bool: return bool(_shore_reading(point).shore_land)
+	var water := Callable(terrain, "_settlement_yard_water_at")
+	while not art.advance_shore(production_state, shoreline, water):
+		if int(production_state.next) % 20 == 0: await get_tree().process_frame
+	_check(float(GameState.population_exact) == population_before, "Shore diagnostics changed aggregate population")
+	_check(int(GameState.elapsed_days) == day_before, "Shore diagnostics advanced the day")
+	_check(GameState.player_settlements.size() == register_count_before, "Shore diagnostics changed daily settlements")
+	_check(hash(var_to_bytes(GameState.resource_stockpiles)) == stockpiles_before, "Shore diagnostics changed stockpiles")
+	_check(hash(var_to_bytes(GameState.settlement_completed)) == completed_before, "Shore diagnostics changed construction")
+	_check(FileAccess.get_sha256(source_path) == source_hash, "Shore diagnostics changed source copy")
+	var diagnostic := {"scope": "Bounded read-only shore sampling on actual copied-save terrain", "passed": failures.is_empty(), "failures": failures, "source_sha256": source_hash, "source_unchanged": FileAccess.get_sha256(source_path) == source_hash, "user_data": OS.get_user_data_dir(), "place": place, "population": population_before, "population_after": GameState.population_exact, "elapsed_days": GameState.elapsed_days, "first_water": first_water, "production_state": production_state, "readings": readings}
+	_write(output.path_join("shore-diagnostic.json"), diagnostic)
+	print("ORGANIC_PLACES_SHORE_DIAGNOSTIC ", JSON.stringify({"passed": diagnostic.passed, "origin": str(fixed_point), "facing": str(facing), "first_water": first_water, "production_state": production_state}))
+	_stop_bakes()
+	get_tree().quit(0 if failures.is_empty() else 1)
+
+func _shore_reading(point: Vector2) -> Dictionary:
+	var height: float = terrain._height_at(point.x, point.y)
+	var water: bool = terrain._settlement_yard_water_at(point)
+	var slope: float = terrain._terrain_slope_at(point.x, point.y, .012)
+	var in_bounds: bool = absf(point.x) <= terrain.world_width * .5 and absf(point.y) <= terrain.world_depth * .5
+	return {"point": str(point), "height_km": height, "water": water, "slope_12m": slope, "in_bounds": in_bounds, "shore_land": in_bounds and not water and slope <= .55, "house_land": terrain._settlement_stage_land_at(point)}
+
+func _coast_diagnostics(target: Vector3) -> void:
+	var details: Dictionary = {"terrain_grid": str(terrain.river_terrain_grid), "water": []}
+	for surface: MeshInstance3D in [terrain.ocean_surface, terrain.coastal_water_surface]:
+		if not is_instance_valid(surface): continue
+		var row: Dictionary = {"name": surface.name, "visible": surface.is_visible_in_tree(), "position": str(surface.global_position), "bounds": str(surface.mesh.get_aabb()) if surface.mesh != null else "none", "shader": {}}
+		var material := surface.material_override as ShaderMaterial
+		if material != null:
+			for parameter: String in ["regional_surface", "sea_level", "surface_origin", "terrain_grid"]:
+				row.shader[parameter] = str(material.get_shader_parameter(parameter))
+		details.water.append(row)
+	report["coast_diagnostics"] = details
+	var coarse: MeshInstance3D = terrain.province_terrain_mesh
+	if is_instance_valid(coarse):
+		var coarse_visible := coarse.visible
+		coarse.visible = false
+		await _capture("coast_without_coarse_terrain", "Coarse terrain hidden — diagnostic ablation", target, 1.8, true)
+		coarse.visible = coarse_visible
+	var borders: Node3D = terrain.nation_border_layer
+	if is_instance_valid(borders) and is_instance_valid(borders.wash):
+		var was_visible: bool = borders.wash.visible
+		borders.wash.visible = false
+		await _capture("coast_without_nation_wash", "Nation colour wash hidden — diagnostic ablation", target, 1.8, true)
+		borders.wash.visible = was_visible
+	var water: MeshInstance3D = terrain.coastal_water_surface
+	if is_instance_valid(water):
+		var original: Material = water.material_override
+		var plain := StandardMaterial3D.new()
+		plain.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		plain.cull_mode = BaseMaterial3D.CULL_DISABLED
+		plain.albedo_color = Color("4b9aa4")
+		water.material_override = plain
+		await _capture("coast_plain_water", "Plain regional water material — diagnostic ablation", target, 1.8, true)
+		water.material_override = original
 
 func _prepare_place(saved: Array) -> bool:
 	# Reuse the first actual coast record if possible, retaining its measured
@@ -138,9 +249,8 @@ func _prepare_place(saved: Array) -> bool:
 	return true
 
 func _stage(phase: String) -> void:
-	# All changes below are explicit specimen data in the private loaded copy.
-	# A 30-day key change uses the ordinary visual refresh cadence.
-	GameState.elapsed_days += 30
+	# Explicit specimen dates are relative to the frozen saved day. Advancing
+	# the calendar would legitimately trigger the terrain's daily catch-up.
 	var today := int(GameState.elapsed_days)
 	fixture_days.append(today)
 	place.status = "ruin" if phase == "ruin" else "living"
@@ -151,7 +261,7 @@ func _stage(phase: String) -> void:
 	place["left_day"] = today - 365 * 4 if phase == "ruin" else -1
 	if phase == "flood": place.target = float(place.share) * .6
 	if phase == "ruin": place.share = 0.0; place.target = 0.0
-	if phase in ["founding", "ruin"]: GameState.settlement_network_revision += 1
+	GameState.settlement_network_revision += 1
 
 func _capture(key: String, description: String, target: Vector3, span: float, require_place: bool) -> void:
 	title.text = "TEST COPIED SAVE | %s | %.2f km span\nStaged place state on actual world terrain; %s; aggregate %d people." % [description, span, place.name, roundi(population_before)]
@@ -162,6 +272,10 @@ func _capture(key: String, description: String, target: Vector3, span: float, re
 		if layer != label_layer: layer.visible = false
 	for frame in 30: await get_tree().process_frame
 	var entry: Dictionary = {"key": key, "description": description, "path": output.path_join(key + ".png"), "span_km": span, "actual_span_km": terrain.camera.size, "target": str(target), "camera_yaw": terrain.camera_yaw, "camera_pitch": terrain.camera_pitch, "place_snapshot": Places.snapshot(), "country": country.call("stats"), "map_people": _map_people_audit(), "settled": settled}
+	entry["population_exact"] = float(GameState.population_exact)
+	entry["elapsed_days"] = GameState.elapsed_days
+	entry["world_day_in_progress"] = WorldSimulation.day_in_progress()
+	entry["general_campaign_active"] = GeneralCampaign.active
 	_check(bool(entry.map_people.zero_people_batches), key + ": map contains human batches")
 	_check(is_equal_approx(float(terrain.camera.size), span), key + ": camera span changed")
 	if require_place:
@@ -177,6 +291,9 @@ func _capture(key: String, description: String, target: Vector3, span: float, re
 				baseline_roofs = roofs.duplicate(true)
 				_check(not roofs.is_empty(), "Founding place has no visible roofs")
 			elif key == "mature":
+				if String(place.get("kind", "")) == "coast":
+					_check(bool(entry.place_art.shore_found), "Mature coast has no verified working shore")
+					_check("dugout" in entry.place_art.details and "drying_rack" in entry.place_art.details, "Mature coastal shore props are missing")
 				var lost: Array[String] = []
 				for id: String in baseline_roofs:
 					if not roofs.has(id) or roofs[id] != baseline_roofs[id]: lost.append(id)
@@ -191,6 +308,8 @@ func _capture(key: String, description: String, target: Vector3, span: float, re
 	entry["timing"] = await _measure_frames(maxi(1, int(_arg("frames", "90"))))
 	await RenderingServer.frame_post_draw
 	images[key] = get_viewport().get_texture().get_image()
+	var image_path := ProjectSettings.globalize_path(output.path_join(key + ".png"))
+	_check((images[key] as Image).save_png(image_path) == OK, "Could not write " + image_path)
 	report.captures.append(entry)
 	print("ORGANIC_PLACES_CAPTURE ", key, " ", JSON.stringify({"ready": settled, "country": entry.country, "place": entry.get("place_art", {}), "timing": entry.timing}))
 
@@ -201,6 +320,8 @@ func _settle_place(require_place: bool) -> bool:
 		await get_tree().process_frame; frames += 1
 		if frames < 100 or terrain.terrain_patch_job != null: continue
 		if terrain.regional_patch_resolution != Lod.resolution_for(terrain.regional_patch_span): continue
+		# Country tint preparation is asynchronous too; compare settled layers.
+		if is_instance_valid(terrain.nation_border_layer) and terrain.nation_border_layer.get("_job") != null: continue
 		if not require_place: return true
 		var layer := _player_layer()
 		if layer == null: continue
@@ -247,6 +368,7 @@ func _shore_target() -> Vector3:
 
 func _place_audit(patch: Node3D) -> Dictionary:
 	var row: Dictionary = {"parcels": (patch.get_meta("country_seed_plots", []) as Array).size(), "homes": int(patch.get_meta("country_home_count", 0)), "visible": patch.is_visible_in_tree(), "details": patch.get_meta("place_detail_kinds", []), "detail_positions": patch.get_meta("place_detail_positions", []), "track_points": patch.get_meta("place_track_points", []), "damaged_roofs": patch.get_meta("place_damaged_roofs", 0), "label": {}, "geometry": _geometry(patch)}
+	row["shore_found"] = bool(patch.get_meta("place_shore_found", false))
 	for field: String in ["id", "name", "kind", "status", "trend", "flooded", "fade"]:
 		row[field] = patch.get_meta("country_place_" + field, null)
 	var label := patch.find_child("PlaceChartName", true, false) as Label3D
