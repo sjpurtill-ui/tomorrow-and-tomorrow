@@ -37,7 +37,10 @@ func tab(_sub:int)->Dictionary:
 		var value:=V.words(key,field)
 		var mine:=float(own_values.get(key,-1.0))
 		var own_text:=""
-		if mine>=0 and not field.is_empty():own_text="%s: %s" % [home_name,V.words(key,{"low":mine,"high":mine})]
+		if mine>=0 and not field.is_empty():
+			own_text="%s: %s" % [home_name,V.words(key,{"low":mine,"high":mine})]
+			# Eyes inside the town can say how it stands against home.
+			if V.inside(field) and key in Dossier.CAPACITY:value+=" · "+V.versus(key,field,mine,home_name)
 		var seen:=int(field.get("observed_day",-1))
 		rows.append({"key":key,"name":V.label(key),"value":value,"field":field,"own":mine if not field.is_empty() else -1.0,"own_text":own_text,"tip":"Seen %s. Only returned observations are shown." % Dossier.ago(today-seen) if seen>=0 else "Only returned observations are shown."})
 	var fresh:=V.freshness(city,today)

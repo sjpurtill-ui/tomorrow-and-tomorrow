@@ -110,7 +110,10 @@ func _civic_observation(city_id:String)->Dictionary:
 			var health:=CivilizationIndicators.health(state,WorldSimulation.discovery)
 			return {"gdp":CivilizationIndicators.economy(state).gdp,"science_capacity":science.capacity,"education":science.education,"life_expectancy":health.life_expectancy,"infant_mortality":health.infant_mortality_per_1000}))
 
-func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1)->Dictionary:
+## insider (0..1): how far inside the town the eyes sat. A scout glancing from
+## the hills is 0; a watcher living among them some days is about .5; an eye
+## settled for years nears 1. Insiders count what passers-by can only guess.
+func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1,insider:float=0.0)->Dictionary:
 	var actual:=truth(city_id)
 	if actual.is_empty() or actual.civ_id==observer: return {}
 	# The observer's cunning sharpens every look (standing.gd intel_quality_edge,
@@ -127,14 +130,16 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		# Repeated days of physically present observation improve counting, not
 		# days spent travelling. Stores remain harder to assess than inhabitants.
 		var days:=clampi(observation_days,1,366)
-		var error:=(maxf(.035,lerpf(.65,.16,quality)/sqrt(float(days))) if key=="population" else maxf(.10,lerpf(.65,.16,quality)/pow(float(days),.25)))*sharper
+		var inside:=clampf(insider,0.0,1.0)
+		var looked:=lerpf(.65,.16,quality)*lerpf(1.0,.2,inside)
+		var error:=(maxf(lerpf(.035,.012,inside),looked/sqrt(float(days))) if key=="population" else maxf(lerpf(.10,.03,inside),looked/pow(float(days),.25)))*sharper
 		var quantum:=.025 if FIELDS[key].unit=="capacity" else .1 if key=="science_capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-2))
 		var width:=maxf(quantum,value*error)
 		var center:=value+rng.randf_range(-.3,.3)*width
 		var low:=maxf(0,floor((center-width)/quantum)*quantum)
 		var high:float=ceil((center+width)/quantum)*quantum
 		if FIELDS[key].unit=="capacity": high=minf(1,high)
-		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366)}
+		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366),"insider":snappedf(clampf(insider,0.0,1.0),0.01)}
 		# Who of them carry no drill (the watch and the townsfolk who rise), as
 		# a share in tenths: the stated odds arm them as a levy (war_odds.gd).
 		if key=="garrison" and actual.values.has("garrison_untrained"):fields[key]["untrained_share"]=snappedf(clampf(float(actual.values.garrison_untrained)/maxf(1.0,value),0.0,1.0),0.1)

@@ -87,7 +87,8 @@ static func account(city:Dictionary,own:Dictionary,home:String,today:int)->Strin
 	if not pop.is_empty():
 		var range:=V.bounds(pop)
 		var count:="about %d people" % roundi(range.x) if roundi(range.x)==roundi(range.y) else "between %d and %d people" % [roundi(range.x),roundi(range.y)]
-		var sentence:="Our scouts counted "+count
+		var who:=String(city.get("source",""))
+		var sentence:=(who.left(1).to_upper()+who.substr(1) if who.begins_with("our ") else "Our scouts")+" counted "+count
 		var mine:=float(own.get("population",-1))
 		if home!="" and mine>0:
 			var middle:=(range.x+range.y)*.5
@@ -105,7 +106,7 @@ static func account(city:Dictionary,own:Dictionary,home:String,today:int)->Strin
 		var high:=V.bounds(walls).y
 		lines.append("They have no wall worth the name." if high<=.1 else "A low palisade rings the houses." if high<=.4 else "Their walls are high and kept in good repair.")
 	var armed:Dictionary=fields.get("garrison",{})
-	if not armed.is_empty():lines.append("Perhaps %s of them carry arms." % V.estimate("garrison",armed))
+	if not armed.is_empty():lines.append("%s %s of them carry arms." % ["About" if V.inside(armed) else "Perhaps",V.estimate("garrison",armed)])
 	var damage:Dictionary=fields.get("damage",{})
 	if not damage.is_empty() and V.bounds(damage).y>=.2:lines.append("Some houses stood burned or broken.")
 	var fresh:=V.freshness(city,today)

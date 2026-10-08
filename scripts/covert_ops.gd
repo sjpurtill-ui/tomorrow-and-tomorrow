@@ -826,7 +826,8 @@ static func _watch_report(op:Dictionary,day:int)->void:
 	if caught:
 		_agent_caught_ours(op,day,"watching")
 		return
-	_sharpen(String(op.civ_id),String(op.city_id),0.82,day,"our watcher")
+	# They lived among them from settling until the runner left with word.
+	_sharpen(String(op.civ_id),String(op.city_id),0.82,day,"our watcher",maxi(3,day-int(op.get("settled_day",day))),0.5)
 	_report_home(op,0.0,day)
 	# The watcher comes home after a short stay.
 	op["stage"]="done"
@@ -872,7 +873,7 @@ static func _plant_delivered(op:Dictionary,day:int)->void:
 	# The longer they have lived among them, the truer their word: a new eye
 	# hears the market's talk; one of twenty years sits at their fires.
 	var years:=float(day-int(op.get("settled_day",day)))/365.0
-	_sharpen(String(op.civ_id),String(op.city_id),clampf(0.7+0.27*years/ENTRENCHED_YEARS,0.7,0.97),day,"our %s" % EyesCorps.word("eye"))
+	_sharpen(String(op.civ_id),String(op.city_id),clampf(0.7+0.27*years/ENTRENCHED_YEARS,0.7,0.97),day,"our %s" % EyesCorps.word("eye"),maxi(PLANT_REPORT_DAYS,day-int(op.get("settled_day",day))),clampf(0.6+0.4*years/ENTRENCHED_YEARS,0.6,1.0))
 	# Each local won over carries word from another hearth: half a year deeper.
 	_report_home(op,years+0.5*float(int(op.get("recruits",0))),day)
 	# A true double agent also feeds their ruler false word of us.
@@ -895,7 +896,7 @@ static func _raise_intel_of_us(civ_id:String,amount:float)->void:
 	if rel.is_empty(): return
 	rel["rival_player_intelligence"]=clampf(float(rel.get("rival_player_intelligence",0.0))+amount,0.0,1.0)
 
-static func _sharpen(civ_id:String,city_id:String,quality:float,day:int,source:String)->void:
+static func _sharpen(civ_id:String,city_id:String,quality:float,day:int,source:String,stay_days:int=3,insider:float=0.0)->void:
 	## Our knowledge of them gets better estimates, through the same chart the
 	## War screen and the city dossiers read (city_intelligence.gd).
 	var chart:Variant=_chart()
@@ -908,7 +909,7 @@ static func _sharpen(civ_id:String,city_id:String,quality:float,day:int,source:S
 			var primary:=String(chart.primary_id(civ_id))
 			if primary!="": ids.append(primary)
 	for id in ids:
-		var observation:Dictionary=chart.capture("player",String(id),quality,day,source,"covert:"+String(id),3)
+		var observation:Dictionary=chart.capture("player",String(id),quality,day,source,"covert:"+String(id),stay_days,insider)
 		if not observation.is_empty(): chart.publish("player",observation,day)
 
 ## Our own eyes send a dispatch (send_dispatch); a ruler's eyes, in their own
