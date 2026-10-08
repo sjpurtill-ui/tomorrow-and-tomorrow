@@ -155,6 +155,9 @@ func test_economy_dock_titles_follow_the_rail()->void:
 	assert_array(economy.meta().subtabs).contains_exactly(["Food & water","Materials","Wealth","Trade"])
 	var dock:=SubHolder.new();auto_free(dock);dock.sub=2;hud.dock=dock
 	assert_str(String(economy.meta().title)).is_equal("Wealth")
+	# The rail's Trade entry opens the economy section's fourth tab.
+	dock.sub=3
+	assert_str(String(economy.meta().title)).is_equal("Trade")
 
 func test_a_shipment_on_the_way_reads_across_the_row()->void:
 	# Regression: the shipment's words folded to one letter a line.
