@@ -74,6 +74,12 @@ func refresh(owner_terrain:Node3D)->void:
 			var node:=VISUAL.new()
 			node.name="WorkedCountry_"+id.validate_node_name()
 			node.configure(Callable(terrain,"_harvest_ground_height_at"),_drawn_land,_revealed,_physical_land)
+			# A dry cliff is unbuildable but is not a shore. Supply the terrain's
+			# actual water and channel facts separately from parcel suitability.
+			if terrain.has_method("_settlement_yard_water_at"):
+				node.set("water_at",Callable(terrain,"_settlement_yard_water_at"))
+			if terrain.has_method("_river_distance_at"):
+				node.set("river_distance_at",func(point:Vector2)->float:return terrain._river_distance_at(point.x,point.y))
 			add_child(node)
 			entry={"node":node,"source_key":[],"snapshot":{},"style":candidate.style,"population":-1}
 		var state:Object=GameState if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.GameState
