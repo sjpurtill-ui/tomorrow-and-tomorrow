@@ -53,9 +53,10 @@ func test_lake_jetty_needs_physical_water_and_other_places_have_distinct_ground(
 	var lake:=_details("lake",func(point:Vector2)->bool:return point.x<1.3)
 	assert_int(lake.props.size()).is_equal(6)
 	assert_str(lake.props[-1].kind).is_equal("jetty")
-	var river:=_details("river",func(_point:Vector2)->bool:return true)
-	assert_str(river.lines[0].kind).is_equal("bank_track")
-	assert_str(river.lines[1].kind).is_equal("crossing_track")
+	var river:=_details("river",func(point:Vector2)->bool:return point.x<1.3)
+	assert_str(river.lines[0].kind).is_equal("shore_access")
+	assert_str(river.lines[1].kind).is_equal("bank_track")
+	assert_str(river.lines[2].kind).is_equal("crossing_track")
 	var inland:=_details("inland",func(_point:Vector2)->bool:return true)
 	assert_int(inland.fields.size()).is_equal(2)
 	assert_str(inland.fields[0].kind).is_equal("field_plot")
@@ -67,6 +68,14 @@ func test_dry_cliff_and_unknown_river_bearing_never_create_false_water_features(
 	var detail:=ART.details({"origin":record.position,"place":record.place,"plots":[]},func(_at:Vector2)->bool:return true)
 	assert_array(detail.lines).is_empty()
 	assert_array(detail.props).is_empty()
+	# The engine may name a river place up to1.5km from water. Its measured
+	# facing does not imply that the village fringe is the actual river bank.
+	record.place.facing=Vector2.RIGHT
+	var distant_river:=ART.details({"origin":record.position,"place":record.place,"plots":[]},
+		func(at:Vector2)->bool:return at.x<1.925,func(at:Vector2)->bool:return at.x>=1.925)
+	assert_bool(distant_river.shore_found).is_false()
+	assert_array(distant_river.lines).is_empty()
+	assert_array(distant_river.props).is_empty()
 
 func test_real_shore_props_survive_home_elevation_buffer_and_keep_homes_inland()->void:
 	var visual=_visual()
