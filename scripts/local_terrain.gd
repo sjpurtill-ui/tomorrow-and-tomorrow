@@ -1285,7 +1285,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 			AdvisorSystem.generate_consequence_item({"description":String(resource_event.get("description","")),"domain":"materials","severity":"warning" if String(resource_event.get("title",""))!="Resource Accessible" else "notice"})
 	preload("res://scripts/strategic_history.gd").sample()
 	_refresh_discovered_resource_overlays()
-	_refresh_settlement_footprint()
+	if _footprint_refresh_due():_refresh_settlement_footprint()
 	preload("res://scripts/rite_marks.gd").refresh(self)
 	preload("res://scripts/living_map.gd").refresh(self)
 	# Notifications (codex/notifications): the day's news is told by the Chronicle's notices, not over the map.
@@ -4044,7 +4044,7 @@ func _update_scale_lod() -> void:
 		map_selection_marker.scale=Vector3.ONE*selection_radius
 	_update_resource_overlay_lod()
 	_update_scale_bar()
-	if settler_marker and "Hearth Circle" in GameState.settlement_completed and not _camera_in_motion():
+	if settler_marker and "Hearth Circle" in GameState.settlement_completed and not _camera_in_motion() and _footprint_refresh_due():
 		_refresh_settlement_footprint()
 
 	_normalize_aerial_labels()
@@ -4826,6 +4826,20 @@ func _process_population_day(context := {}) -> Array[Dictionary]:
 	_refresh_population_allocations()
 	return events
 
+## At the fast speeds a town at year 300+ changes every day, and re-planning
+## its footprint ten times a second cost ~40 ms a frame (year-342 save): the
+## town is redrawn at most once a second of play there. Paused, at the slower
+## speeds and when the camera moves it follows at once, as before.
+const FOOTPRINT_FAST_REFRESH_MSEC:=1000
+var footprint_refreshed_msec:=-FOOTPRINT_FAST_REFRESH_MSEC
+
+func _footprint_refresh_due()->bool:
+	if game_speed<=0.0 or _speed_hours_per_second()<float(SPEED_HOURS_PER_REAL_SECOND[4]):return true
+	var now:=Time.get_ticks_msec()
+	if now-footprint_refreshed_msec<FOOTPRINT_FAST_REFRESH_MSEC:return false
+	footprint_refreshed_msec=now
+	return true
+
 func _refresh_settlement_footprint(force := false) -> void:
 	if settler_marker == null:
 		return
@@ -5024,7 +5038,7 @@ func _build_settlement_stage_patch(parent:Node3D,center:Vector3,profile:Dictiona
 func _process_settlement_visual_jobs()->void:
 	if settlement_patches==null:return
 	if not settlement_patches.pending.is_empty() and settlement_patch_source_token!=_settlement_patch_state_token():
-		_refresh_settlement_footprint()
+		if _footprint_refresh_due():_refresh_settlement_footprint()
 		# Layout priming can defer the new request until the next frame. Its old
 		# installed geometry remains visible, but stale pending work must wait.
 		if settlement_patch_source_token!=_settlement_patch_state_token():return
