@@ -150,6 +150,22 @@ static func words(key:String,field:Dictionary,stage:String="")->String:
 		"gdp":return text+" worker-days"
 	return text
 
+## Whether this figure came from eyes inside the town (a watcher or a
+## settled eye), close enough to set beside home's own number.
+static func inside(field:Dictionary)->bool:return float(field.get("insider",0.0))>=0.5
+
+## A spy's figure set beside home's: how much more or less, in plain words.
+static func versus(key:String,field:Dictionary,mine:float,home:String)->String:
+	var range:=bounds(field);var mid:=(range.x+range.y)*0.5
+	if key=="damage":
+		return "about as much as %s" % home if absf(mid-mine)<0.05 else ("more than %s" % home if mid>mine else "less than %s" % home)
+	var ratio:=mid/maxf(0.01,mine)
+	if ratio<0.6:return "well short of %s" % home
+	if ratio<0.9:return "a little short of %s" % home
+	if ratio<=1.1:return "much like %s" % home
+	if ratio<=1.6:return "a little ahead of %s" % home
+	return "well ahead of %s" % home
+
 static func _rounded(low:float,high:float)->String:
 	var a:=_nice(low);var b:=maxi(a,_nice(high))
 	return "about %d" % a if a==b else "%d–%d" % [a,b]

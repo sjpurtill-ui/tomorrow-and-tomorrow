@@ -291,3 +291,25 @@ func test_dossier_account_speaks_plainly_and_measures_against_home()->void:
 	assert_str(text).contains("no wall worth the name")
 	assert_str(text).contains("about a year ago; much may have changed since.")
 	assert_str(dossier.account(city,{},"",120)).not_contains("Home")
+
+func test_eyes_inside_the_town_count_far_closer_than_a_passing_scout()->void:
+	civ().strategic_regions[0].population=5300.0
+	civ().strategic_regions[0].fortification=.5;civ().strategic_regions[0].damage=0.0
+	var width:=func(report:Dictionary,key:String)->float:
+		var field:Dictionary=report.fields[key];return (float(field.high)-float(field.low))/maxf(0.01,(float(field.high)+float(field.low))*.5)
+	var scout:Dictionary=intel().capture("player",region(),.82,10,"test","glance",3)
+	var watcher:Dictionary=intel().capture("player",region(),.82,10,"our watcher","watch",10,.5)
+	var eye:Dictionary=intel().capture("player",region(),.75,10,"our eye","eye",365,.62)
+	assert_float(width.call(watcher,"population")).is_less(width.call(scout,"population")*.5)
+	assert_float(width.call(eye,"population")).is_less_equal(.06)
+	assert_float(width.call(watcher,"fortification")).is_less(width.call(scout,"fortification")*.75)
+	assert_float(width.call(eye,"fortification")).is_less_equal(.16)
+	assert_float(float(eye.fields.population.insider)).is_equal(.62)
+	var V=preload("res://scripts/hud/city_report_visuals.gd")
+	assert_bool(V.inside(eye.fields.population)).is_true()
+	assert_bool(V.inside(scout.fields.population)).is_false()
+	assert_str(V.versus("production",{"low":.5,"high":.54},.8,"Home")).is_equal("a little short of Home")
+	var city:={"observed_day":10,"reported_day":10,"source":"our watcher","fields":{"population":watcher.fields.population,"garrison":watcher.fields.garrison}}
+	var text:String=preload("res://scripts/hud/city_dossier.gd").account(city,{},"",12)
+	assert_str(text).starts_with("Our watcher counted")
+	assert_str(text).contains("About ")
