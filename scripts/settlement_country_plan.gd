@@ -153,13 +153,7 @@ static func _clusters(snapshot:Dictionary,_dense:float,core:float,worked:float,p
 		if offset.length()>=worked:continue
 		var id:="seed:%s:%d:%d" % [owner,int(snapshot.get("seed",0)),index]
 		var count:=clampi(6+floori(log(maxf(1.0,people/(160.0*float(index+1))))*7.0),6,Growth.MAX_PARCELS)
-		var obstacles:Array=[]
-		for claim:Dictionary in root.get("claims",[]):
-			if Vector2(claim.centroid).distance_to(offset)>0.32:continue
-			var polygon:=PackedVector2Array()
-			for point:Vector2 in claim.polygon:polygon.append(point-offset)
-			obstacles.append({"id":-1-obstacles.size(),"centroid":Vector2(claim.centroid)-offset,"polygon":polygon,"land_use":"occupied","status":"active"})
-			if obstacles.size()>=Growth.MAX_OBSTACLES:break
+		var obstacles:=seed_obstacles(root,offset)
 		var neighbours:Array[Vector2]=[]
 		for other in centres.size():
 			if other!=index:neighbours.append(centres[other]-offset)
@@ -169,6 +163,18 @@ static func _clusters(snapshot:Dictionary,_dense:float,core:float,worked:float,p
 			"field_radius_km":0.10,"rotation":0.0,"buildings":count,"road_tier":_country_road_tier(snapshot,0.0),
 			"settlement_growth":spec,"geometry_signature":hash(spec)})
 	return records
+
+## Current root claims in the fixed seed's own coordinates. Established seeds
+## use the same mask even when a population sampling allowance temporarily falls.
+static func seed_obstacles(root:Dictionary,offset:Vector2)->Array:
+	var obstacles:Array=[]
+	for claim:Dictionary in root.get("claims",[]):
+		if Vector2(claim.centroid).distance_to(offset)>0.32:continue
+		var polygon:=PackedVector2Array()
+		for point:Vector2 in claim.polygon:polygon.append(point-offset)
+		obstacles.append({"id":-1-obstacles.size(),"centroid":Vector2(claim.centroid)-offset,"polygon":polygon,"land_use":"occupied","status":"active"})
+		if obstacles.size()>=Growth.MAX_OBSTACLES:break
+	return obstacles
 
 ## Copy only bounded geometry and completed residential appearances. Fields do
 ## not erase whole circles of possible settlement. No ledger objects are retained.

@@ -4929,6 +4929,7 @@ func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],r
 		plan=_organic_town_plan(center,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 		plan=SettlementVisualKeys.refresh_plan(plan,all_plots)
 	var records:Array[Dictionary]=[]
+	var admission:=_settlement_plot_admission(center,plots,lod)
 	var groups:Dictionary={}
 	for plot:Dictionary in plots:
 		var key:=SettlementVisualKeys.patch_key(plot,center)
@@ -4955,17 +4956,16 @@ func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],r
 			var id:=int(plot.get("id",0))
 			var uses_kit:bool=patch_plan.replaced.has(id)
 			signatures.append([SettlementVisualKeys.appearance(plot),frontage_keys.get(int(plot.get("frontage_route_id",-1)),0),SettlementVisualKeys.age(plot,GameState.elapsed_days,uses_kit),SettlementVisualKeys.knowledge(plot,uses_kit)])
-			detail_ids[id]=_settlement_plot_has_detail(plot,id,plots.size(),lod)
-			density_ids[id]=_settlement_plot_has_aggregate_density(plot,id,plots.size(),lod)
+			detail_ids[id]=admission.detail.has(id)
+			density_ids[id]=admission.density.has(id)
 		var sites:Array=[]
 		for record:Dictionary in patch_plan.buildings:sites.append([record.get("id"),record.position,record.angle,record.get("variant"),record.get("early_kind")])
-		# ID-based thinning uses the full view count, never a chunk's smaller count.
-		var detail_stride:=maxi(1,ceili(float(plots.size())/maxi(1,_settlement_detail_plot_budget(lod))))
-		var density_stride:=maxi(1,ceili(float(plots.size())/(384 if lod<=1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET)))
-		var signature:=hash([center,lod,patch_organic,signatures,sites,architecture,detail_stride,density_stride])
+		# Membership changes only when a visible slot is vacated or the view changes.
+		# A new plot elsewhere cannot invalidate every existing district's sample.
+		var signature:=hash([center,lod,patch_organic,signatures,sites,architecture,detail_ids,density_ids])
 		var context:={"plan":patch_plan,"total_plots":plots.size(),"shared_props":false,"organic":patch_organic,"detail_ids":detail_ids,"density_ids":density_ids}
 		var priority:=Vector2(patch_plots[0].get("centroid",Vector2.ZERO)).distance_squared_to(Vector2(camera_target.x-center.x,camera_target.z-center.z))
-		records.append({"key":key,"signature":signature,"parts":{"plots":hash(signatures),"sites":hash(sites),"architecture":architecture,"lod":lod,"organic":patch_organic,"detail_stride":detail_stride,"density_stride":density_stride},"priority":priority,"build":_build_settlement_plot_patch.bind(center,patch_plots,lod,context)})
+		records.append({"key":key,"signature":signature,"parts":{"plots":hash(signatures),"sites":hash(sites),"architecture":architecture,"lod":lod,"organic":patch_organic,"detail_members":hash(detail_ids),"density_members":hash(density_ids)},"priority":priority,"build":_build_settlement_plot_patch.bind(center,patch_plots,lod,context)})
 	for route:Dictionary in routes:
 		var key:="route:%s" % str(route.get("id",0))
 		var inherited:=inherited_frontages.has(int(route.get("id",-2)))
@@ -8839,25 +8839,57 @@ func _settlement_detail_plot_budget(lod:int)->int:
 	if camera.size<=6.0: return 512
 	return 320
 
-func _settlement_plot_has_detail(plot:Dictionary,plot_index:int,total_plots:int,lod:int)->bool:
+var settlement_plot_admissions:Dictionary={}
+var settlement_plot_admission_world:=-1
+
+func _settlement_plot_admission(center:Vector3,plots:Array[Dictionary],lod:int)->Dictionary:
+	if settlement_plot_admission_world!=GameState.world_seed:
+		settlement_plot_admissions.clear();settlement_plot_admission_world=GameState.world_seed
+	var detail_budget:=_settlement_detail_plot_budget(lod)
+	var density_budget:=384 if lod<=1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET
+	var key:=str([GameState.world_seed,GameState.resource_settlement_id,center,lod,detail_budget,density_budget])
+	var previous:Dictionary=settlement_plot_admissions.get(key,{})
+	var eligible_detail:Dictionary={};var eligible_density:Dictionary={}
+	for plot:Dictionary in plots:
+		var id:=int(plot.get("id",0))
+		eligible_detail[id]=true
+		if _settlement_plot_density_eligible(plot,lod):eligible_density[id]=true
+	var result:={"detail":_retain_settlement_plot_ids(previous.get("detail",{}),eligible_detail,detail_budget),
+		"density":_retain_settlement_plot_ids(previous.get("density",{}),eligible_density,density_budget)}
+	if not settlement_plot_admissions.has(key) and settlement_plot_admissions.size()>=64:
+		settlement_plot_admissions.erase(settlement_plot_admissions.keys()[0])
+	settlement_plot_admissions[key]=result
+	return result
+
+func _retain_settlement_plot_ids(previous:Dictionary,eligible:Dictionary,budget:int)->Dictionary:
+	var admitted:Dictionary={}
+	if budget<=0:return admitted
+	for id:int in previous:
+		if eligible.has(id) and admitted.size()<budget:admitted[id]=true
+	if admitted.size()>=budget:return admitted
+	var ids:Array=eligible.keys();ids.sort()
+	for id:int in ids:
+		if admitted.size()>=budget:break
+		admitted[id]=true
+	return admitted
+
+func _settlement_plot_has_detail(plot:Dictionary,plot_index:int,_total_plots:int,lod:int)->bool:
 	var budget:=_settlement_detail_plot_budget(lod)
 	if budget<=0: return false
-	if total_plots<=budget: return true
-	var stride:=maxi(1,ceili(float(total_plots)/float(budget)))
-	# Plot IDs are persistent and dense enough that modulo sampling remains stable
-	# when the renderer rebuilds; no visible roof twinkles into another plot.
-	return absi(int(plot.get("id",plot_index+1)))%stride==0
+	# Standalone callers have no view set to retain. Persistent ID order still
+	# supplies a fixed prefix; production batches use the retained admission above.
+	return absi(int(plot.get("id",plot_index+1)))<=budget
 
-func _settlement_plot_has_aggregate_density(plot:Dictionary,plot_index:int,total_plots:int,lod:int)->bool:
+func _settlement_plot_density_eligible(plot:Dictionary,lod:int)->bool:
 	if lod<0: return false
 	if String(plot.get("status","active")) not in ["active","stressed","damaged","under_construction"]: return false
 	if String(plot.get("land_use","")) in ["field","pasture","water","waste","temporary_encampment","vacant","ruin"]: return false
+	return true
+
+func _settlement_plot_has_aggregate_density(plot:Dictionary,plot_index:int,_total_plots:int,lod:int)->bool:
+	if not _settlement_plot_density_eligible(plot,lod):return false
 	var budget:=384 if lod<=1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET
-	if total_plots<=budget: return true
-	var stride:=maxi(1,ceili(float(total_plots)/float(budget)))
-	# Persistent plot ids make this thinning deterministic across rebuilds and camera
-	# movement; strategic urban mass never sparkles or changes because population rose.
-	return absi(int(plot.get("id",plot_index+1))*17+5)%stride==0
+	return absi(int(plot.get("id",plot_index+1)))<=budget
 
 
 func _settlement_aggregate_density_color(plot:Dictionary,lod:int)->Color:
@@ -10366,7 +10398,6 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	if polygon.size()<3: return {"roofs":0,"walls":0}
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
 	var coverage:=clampf(float(plot.get("roof_coverage",0.18)),0.04,0.72)
-	var residents:=maxi(0,int(plot.get("resident_count",0)))
 	var use:=String(plot.get("land_use",""))
 	var emergency_camp:=String(plot.get("form",""))=="emergency_open_encampment"
 	var temporary_camp:=String(plot.get("form","")) in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment"]
@@ -10374,7 +10405,10 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=int(plot.get("seed",1))^0x6d2b79f5
 	var base_angle:=rng.randf_range(0.0,TAU)
-	var architecture:=_settlement_visual_architecture_profile(_settlement_architecture_profile())
+	# Occupancy and today's lived values are not a rebuilding event. Legacy
+	# parcels without a recorded planning snapshot keep the neutral grammar.
+	var recorded_architecture:Variant=plot.get("architecture_snapshot",{})
+	var architecture:=_settlement_visual_architecture_profile(recorded_architecture if recorded_architecture is Dictionary else {})
 	var axiality:=clampf(float(architecture.get("axiality",0.5)),0.0,1.0)
 	var monumentality:=clampf(float(architecture.get("monumentality",0.5)),0.0,1.0)
 	var civic_space:=clampf(float(architecture.get("civic_space",0.5)),0.0,1.0)
@@ -10385,14 +10419,18 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	if validate_placement and not GameState.settlement_routes.any(func(route:Dictionary)->bool:
 		return int(route.get("id",-2))==route_id and bool(route.get("active",true)) and (route.get("points",PackedVector2Array()) as PackedVector2Array).size()>=2):
 		return {"roofs":0,"walls":0}
-	var route_maturity:=0.0
+	var frontage_segments:Array[Dictionary]=[]
 	for route in GameState.settlement_routes:
 		if int(route.get("id",-2))!=route_id: continue
 		var points:PackedVector2Array=route.get("points",PackedVector2Array())
 		if points.size()>=2:
 			var route_span:=points[1]-points[0]
 			if route_span.length_squared()>0.0000001: base_angle=route_span.angle()
-			route_maturity=clampf(float(route.get("traffic",0.0))*0.62+float(route.get("condition",0.0))*0.38,0.0,1.0)
+			if validate_placement:
+				for index in range(1,points.size()):
+					var along:=points[index]-points[index-1]
+					if along.length_squared()<.0000000001:continue
+					frontage_segments.append({"a":points[index-1],"b":points[index],"normal":Vector2(-along.y,along.x).normalized(),"width":OrganicTownVisual.route_half_width(route)})
 		break
 	var plot_world_center:=Vector2(center.x+plot_center.x,center.z+plot_center.y)
 	var contour_angle:=_terrain_contour_angle(plot_world_center,base_angle)
@@ -10401,20 +10439,17 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	# operations only change the batched representation of the authoritative plots.
 	base_angle=_lerp_undirected_angle(base_angle,contour_angle,terrain_conformity*0.72)
 	base_angle=_lerp_undirected_angle(base_angle,_settlement_civic_axis(),axiality*axiality*0.82)
-	var occupied_pressure:=clampf(float(residents)/34.0,0.0,1.0)
 	var fabric_generation:=clampi(int(plot.get("fabric_generation",0)),0,12)
 	var storeys:=clampi(int(plot.get("storeys",1)),1,5)
-	var density_bonus:=roundi(route_maturity*occupied_pressure*2.2)+int(plot.get("infill_units",0))+floori(float(fabric_generation)*0.72)+maxi(0,storeys-1)*2
+	var density_bonus:=int(plot.get("infill_units",0))+floori(float(fabric_generation)*0.72)+maxi(0,storeys-1)*2
 	var household_variation:=rng.randi_range(-1,2)
-	var mass_count:=clampi(ceili(coverage*3.2)+ceili(float(residents)/22.0)+density_bonus+household_variation,1,14)
+	var covered_area:=maxf(0.0,float(plot.get("area_ha",0.02)))*10000.0*coverage
+	var mass_count:=clampi(ceili(covered_area/70.0)+density_bonus+household_variation,1,14)
 	var plot_radius:=sqrt(maxf(0.0000001,float(plot.get("area_ha",0.02))/100.0)/PI)
-	if emergency_camp: mass_count=clampi(ceili(float(residents)/11.0),4,14)
+	if emergency_camp: mass_count=clampi(ceili(covered_area/16.0),4,14)
 	elif temporary_camp:
-		# A founding plot is a household cluster, not one implausibly tiny tent.
-		# Derive its visible covers from actual residents while keeping the number
-		# bounded enough to read as an organic camp from aerial inspection height.
-		mass_count=clampi(ceili(float(maxi(residents,1))/3.2),1,4)
-	if use in ["communal","civic","sacred","market","workshop","storage","hospitality","dirty_industry"]: mass_count=clampi(1+roundi(coverage*3.0)+roundi(route_maturity)+floori(float(fabric_generation)*0.48),1,8)
+		mass_count=clampi(ceili(covered_area/12.0),1,4)
+	if use in ["communal","civic","sacred","market","workshop","storage","hospitality","dirty_industry"]: mass_count=clampi(1+roundi(coverage*3.0)+floori(float(fabric_generation)*0.48),1,8)
 	if use in ["communal","civic","sacred","market"] and civic_space>0.52:
 		# Public life appears as actual breathing room rather than another icon: fewer,
 		# larger aggregate masses preserve a readable court inside the same plot.
@@ -10424,26 +10459,28 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		# Fourteen tiny huts inside a metropolitan lot is physically wrong and
 		# becomes visual noise at the playable aerial camera height.
 		mass_count=clampi(2+storeys+(1 if use in ["civic","market","workshop","storage"] else 0),2,6)
-	var source_mass_count:=mass_count
 	if lod>=1:
 		# Intermediate aerial views need occupied roof coverage, not every represented
 		# household mass and repair. Collapse them into at most four larger masses while
 		# retaining the same authoritative plot, material, age, use, and population.
 		mass_count=clampi(ceili(sqrt(float(mass_count))),1,4)
-	var lod_coverage_scale:=clampf(sqrt(float(source_mass_count)/float(maxi(1,mass_count)))*0.86,1.0,2.35) if lod>=1 else 1.0
+	var lod_coverage_scale:=1.48 if lod>=1 else 1.0
 	var appended:=0
 	var walls_appended:=0
 	var work:Dictionary=preload("res://scripts/settlement_construction_state.gd").state(plot)
 	var work_stage:=int(work.stage) if String(work.mode)=="new" else 3
 	var placed_envelopes:Array[PackedVector2Array]=[]
 	for mass_index in mass_count:
+		# Each physical slot owns its random stream and location. Appending a
+		# recorded infill mass cannot recenter or reroll any preceding roof.
+		rng.seed=hash([int(plot.get("seed",1)),mass_index,"fallback_roof"])
 		var mass_roof_plan:=roof_plan
 		if emergency_camp:
 			mass_roof_plan=["round_light_shelter","tapered_light_shelter","ridge_light_shelter"][(absi(int(plot.get("seed",1)))+mass_index*5)%3]
 		elif roof_plan in ["round_thatch","round_light_shelter"] and mass_index>0:
 			mass_roof_plan="tapered_light_shelter" if temporary_camp else ("tapered_thatch" if mass_index%2==1 else "timber_ridge")
-		var turn_across_courtyard:=mass_count>=3 and mass_index%3==2
-		if fabric_generation>=6 and mass_count>=6:
+		var turn_across_courtyard:=mass_index%3==2
+		if fabric_generation>=6:
 			# Mature inherited plots read as perimeter/courtyard fabric rather than a
 			# longer line of detached huts. The persistent polygon remains unchanged.
 			turn_across_courtyard=mass_index%4 in [2,3]
@@ -10451,18 +10488,17 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		var mass_angle:=rng.randf()*TAU if emergency_camp else base_angle+(PI*0.5 if turn_across_courtyard else rng.randf_range(-orientation_jitter,orientation_jitter))
 		var side_axis:=Vector2.from_angle(mass_angle)
 		var depth_axis:=Vector2(-side_axis.y,side_axis.x)
-		var rank:=float(mass_index)-float(mass_count-1)*0.5
+		var rank:=float(floori(float(mass_index+1)*.5))*(1.0 if mass_index%2==1 else -1.0)
 		var row_spacing:=rng.randf_range(0.0032,0.0051)*lerpf(0.84,1.20,permeability)
 		var row_offset:=rank*row_spacing
 		var court_scale:=lerpf(0.72,1.42,civic_space)*lerpf(0.92,1.12,permeability)
-		var courtyard_depth:=((0.0032 if mass_index%2==0 else -0.0022)*court_scale) if mass_count>=4 else rng.randf_range(-0.0022,0.0022)*court_scale
+		var courtyard_depth:=(0.0032 if mass_index%2==0 else -0.0022)*court_scale
 		var local_center:=plot_center+Vector2.from_angle(base_angle)*row_offset+Vector2.from_angle(base_angle+PI*0.5)*courtyard_depth
 		if fabric_generation>=4 and not temporary_camp:
 			# Mature fabric occupies inherited parcel edges and leaves an irregular
 			# internal court. From altitude this becomes a connected town texture,
 			# while the plot polygon and old frontage still determine its exact form.
-			var perimeter_t:=float(mass_index)/float(maxi(1,mass_count))
-			var perimeter_angle:=base_angle+perimeter_t*TAU+rng.randf_range(-0.09,0.09)
+			var perimeter_angle:=base_angle+float(mass_index)*2.39996323+rng.randf_range(-0.09,0.09)
 			var perimeter_pressure:=maxf(defensive_depth,civic_space if use in ["communal","civic","sacred","market"] else 0.0)
 			var outer_ring:=lerpf(0.36,0.54,perimeter_pressure)
 			var inner_ring:=lerpf(0.18,0.29,civic_space)
@@ -10471,7 +10507,7 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		if emergency_camp:
 			local_center=plot_center+Vector2.from_angle(rng.randf()*TAU)*sqrt(rng.randf())*plot_radius*rng.randf_range(0.30,0.78)
 		if not Geometry2D.is_point_in_polygon(local_center,polygon): local_center=plot_center.lerp(local_center,0.42)
-		var density_scale:=lerpf(1.0,0.72,clampf(float(mass_count-3)/9.0,0.0,1.0))
+		var density_scale:=lerpf(1.0,0.72,clampf(float(mass_index-2)/9.0,0.0,1.0))
 		var half_width:=rng.randf_range(0.0012,0.0025)*density_scale
 		var half_depth:=rng.randf_range(0.0017,0.0035)*density_scale
 		if fabric_generation>=10 and not temporary_camp:
@@ -10510,6 +10546,25 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 			var radius:=sqrt(half_width*half_depth)*.91 if mass_roof_plan in ["round_thatch","round_light_shelter"] else 0.0
 			var right:=side_axis*(maxf(half_width,radius)*1.1+.0005)
 			var forward:=depth_axis*(maxf(half_depth,radius)*1.1+.0005)
+			# The fixed slot must stand beside its frontage, not straddle the lane.
+			# Use this roof's support extent so small roadside parcels remain useful
+			# without bypassing the existing polygon/road/water checks below.
+			var frontage_point:=local_center
+			var frontage_normal:=Vector2.ZERO
+			var frontage_width:=0.0
+			var frontage_distance:=INF
+			for segment:Dictionary in frontage_segments:
+				var nearest:=Geometry2D.get_closest_point_to_segment(local_center,segment.a,segment.b)
+				var distance:=local_center.distance_squared_to(nearest)
+				if distance>=frontage_distance:continue
+				frontage_distance=distance;frontage_point=nearest
+				frontage_normal=segment.normal;frontage_width=segment.width
+			if frontage_normal!=Vector2.ZERO:
+				var signed_distance:float=(local_center-frontage_point).dot(frontage_normal)
+				var setback:=absf(right.dot(frontage_normal))+absf(forward.dot(frontage_normal))+frontage_width+.0005
+				if absf(signed_distance)<setback:
+					var side:=signf(signed_distance) if absf(signed_distance)>.000001 else (1.0 if mass_index%2==0 else -1.0)
+					local_center=frontage_point+frontage_normal*setback*side
 			var legal:=preload("res://scripts/settlement_fallback_placement.gd").place(local_center,plot_center,right,forward,polygon,GameState.settlement_routes,
 				func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)),
 				func(point:Vector2)->float:return _close_surface_height_at(point.x+center.x,point.y+center.z),placed_envelopes)
@@ -10899,6 +10954,11 @@ func _prime_organic_town_plan(center: Vector3) -> bool:
 func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D, patch_context:Dictionary={}) -> void:
 	if plots.is_empty():
 		return
+	if not patch_context.has("detail_ids"):
+		var admission:=_settlement_plot_admission(center,plots,lod)
+		patch_context=patch_context.duplicate(false)
+		patch_context["detail_ids"]=admission.detail
+		patch_context["density_ids"]=admission.density
 	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
 	var organic_town := bool(patch_context.get("organic",_organic_town_enabled()))

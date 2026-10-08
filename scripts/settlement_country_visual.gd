@@ -52,6 +52,8 @@ var _seed_layouts:Dictionary={}
 var _pending_seed:Dictionary={}
 var _pending_growth:Dictionary={}
 var _growth_states:Dictionary={}
+var _seed_identity:Array=[]
+var _established_seeds:Dictionary={}
 var seed_ground_revision:=0
 var _seed_ground_keys:Dictionary={}
 const MAX_PREPARE_STEPS:=512
@@ -74,9 +76,39 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 	var plan_key:=PLAN.signature(snapshot)
 	var key:=hash([plan_key,style,view_center])
 	if key==last_signature:return
+	var identity:Array=[String(snapshot.get("owner","player")),int(snapshot.get("seed",0)),snapshot.get("origin",Vector2.ZERO)]
+	if identity!=_seed_identity or not bool(snapshot.get("founded",true)):
+		_seed_identity=identity
+		_seed_layouts.clear();_growth_states.clear();_established_seeds.clear()
+		if not _seed_ground_keys.is_empty():seed_ground_revision+=1
+		_seed_ground_keys.clear()
+	else:
+		# Sampling head-count is not an abandonment event. Remember only seeds
+		# whose physical patch has actually installed, never queued candidates.
+		for record:Dictionary in plan.get("homesteads",[]):
+			if not record.has("settlement_growth"):continue
+			var id:=String(record.id)
+			var patch_id:="homesteads:"+id
+			if not retained.installed.has(patch_id):continue
+			var node:Node3D=retained.installed[patch_id].node
+			if String(node.get_meta("country_seed_id",""))!=id:continue
+			if _established_seeds.has(id) or _established_seeds.size()<GROWTH.MAX_SEEDS:
+				_established_seeds[id]=record.duplicate(true)
 	last_signature=key;requests+=1
 	if plan_key!=last_plan_signature:
 		plan=PLAN.build(snapshot);last_plan_signature=plan_key
+		if bool(snapshot.get("founded",true)):
+			var active_seeds:Dictionary={}
+			for record:Dictionary in plan.get("homesteads",[]):active_seeds[String(record.id)]=true
+			for id:String in _established_seeds:
+				if active_seeds.has(id):continue
+				var record:Dictionary=_established_seeds[id].duplicate(true)
+				# Real root growth may absorb individual roofs, but cannot reroll
+				# the other inherited parcels of this already established seed.
+				record.settlement_growth.obstacles=PLAN.seed_obstacles(snapshot.get("root_fabric",{}),record.offset)
+				record.geometry_signature=hash(record.settlement_growth)
+				plan.homesteads.append(record)
+			plan.homesteads.sort_custom(PLAN._nearer)
 	var entries:Array[Dictionary]=[]
 	var seed_ids:Dictionary={}
 	var anchors:Array[Vector2]=[Vector2(snapshot.get("origin",Vector2.ZERO))]
@@ -109,10 +141,16 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 			if not _job.is_empty() and _job.key==id and _fog_clipped:clipped_revision=fog_revision
 			var appearance:=[point,record.get("category",""),record.get("age",""),record.get("resource",""),record.get("field_radius_km",0.0),record.get("radius_km",0.0),record.get("buildings",2),record.get("geometry_signature",record.get("settlement_growth",{})),nearest,admitted,start_seen,clipped_revision]
 			entries.append({"key":id,"signature":hash([appearance,context,surface_revision]),"priority":point.distance_squared_to(view_center),"build":_build_patch.bind(record,context)})
-	for id:String in _seed_layouts.keys():
-		if not seed_ids.has(id):_seed_layouts.erase(id)
-	for id:String in _growth_states.keys():
-		if not seed_ids.has(id):_growth_states.erase(id)
+	# Active and remembered seeds share one fixed24-slot budget. Keep inactive
+	# layout history within spare slots; changing settlement identity clears all.
+	var remembered:Array=_seed_layouts.keys()
+	for id:String in _growth_states:
+		if id not in remembered:remembered.append(id)
+	var spare:=maxi(0,GROWTH.MAX_SEEDS-seed_ids.size())
+	for id:String in remembered:
+		if seed_ids.has(id):continue
+		if spare>0:spare-=1
+		else:_seed_layouts.erase(id);_growth_states.erase(id)
 	for id:String in _seed_ground_keys.keys():
 		if not seed_ids.has(id):_seed_ground_keys.erase(id);seed_ground_revision+=1
 	retained.request(entries)

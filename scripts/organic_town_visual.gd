@@ -250,7 +250,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 			var point: Vector2 = record.position + Vector2(center.x, center.z)
 			var base: float = height.call(point.x, point.y)
 			# Each house a little its own size and lean (settlement_kit_shapes.gd).
-			var transform := Transform3D(preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle), hash(Vector2(record.position))), Vector3(point.x, base + 0.0004, point.y))
+			var transform := Transform3D(record.get("site_basis",preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle), hash(Vector2(record.position)))), Vector3(point.x, base + 0.0004, point.y))
 			transforms.append(transform)
 			batch.set_instance_transform(index, transform)
 			var plot: Dictionary = record.plot

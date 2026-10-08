@@ -74,9 +74,9 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			continue
 		plot["visual_form"]=kind(plot) if not kind(plot).is_empty() else String(plot.get("form",""))
 		# A completed upgrade changes architecture, not the location of an existing
-		# home. Later kit envelopes can exceed founding parcels; retain recorded
-		# sites and fit the new mesh inside their already reserved footprint.
-		if LATE.kind(plot)!="" and String(plot.get("visual_sites_form",""))!=String(plot.visual_form):
+		# home. This also applies to early tents, timber and earth replacements.
+		# Fit the new kit inside its already reserved physical footprint.
+		if String(plot.get("visual_sites_form",""))!=String(plot.visual_form):
 			var inherited:Array=[]
 			var parcel:PackedVector2Array=plot.get("polygon",PackedVector2Array())
 			for saved:Dictionary in plot.get("visual_building_sites",[]):
@@ -141,7 +141,30 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		if String(record.early_kind) in ["round_household","carried_round"]:
 			var to_hearth: Vector2 = hearth-Vector2(record.position)
 			if to_hearth.length() > .004: record.angle = atan2(to_hearth.x,to_hearth.y)
+		if bool(record.get("fit_inherited_site",false)):record["site_basis"]=site_basis(record)
 	return plan
+
+static func site_basis(record:Dictionary)->Basis:
+	if LATE.kind(record.plot)!="":return LATE.site_basis(record)
+	var basis:=preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle),hash(Vector2(record.position)))
+	if not bool(record.get("fit_inherited_site",false)):return basis
+	var footprint:PackedVector2Array=record.get("footprint",PackedVector2Array())
+	var origin:Vector2=record.position
+	if footprint.size()<3 or not Geometry2D.is_point_in_polygon(origin,footprint):return basis.scaled(Vector3(0,1,0))
+	var radius:=INF
+	for index in footprint.size():
+		radius=minf(radius,origin.distance_to(Geometry2D.get_closest_point_to_segment(origin,footprint[index],footprint[(index+1)%footprint.size()])))
+	var name:=String(record.get("early_kind",kind(record.plot)))
+	var source:Mesh=kit_mesh(name) if name in KIT else TOWN.kit_mesh(clampi(int(record.get("variant",0)),0,TOWN.KIT.size()-1))
+	var bounds:=source.get_aabb()
+	var flags:=LATE.installed_features(record.plot)
+	if flags>0:bounds=bounds.merge(LATE.early_detail_mesh(bounds,name,flags).get_aabb())
+	var reach:=0.0
+	for corner in 8:
+		var point:=basis*bounds.get_endpoint(corner)
+		reach=maxf(reach,Vector2(point.x,point.z).length())
+	var fit:=clampf(radius*.98/maxf(.00001,reach),0.0,1.0)
+	return basis.scaled(Vector3(fit,1.0,fit))
 
 static func remember_layout(plan:Dictionary,plots:Array[Dictionary])->void:
 	# Called explicitly by the live renderer. Saved plot geometry owns these sites;
@@ -233,7 +256,7 @@ static func render(plan: Dictionary, center: Vector3, height: Callable, parent: 
 		for i in visible.size():
 			var record := visible[i]; var point: Vector2 = record.position + Vector2(center.x,center.z)
 			# Each dwelling a little its own size and lean (settlement_kit_shapes.gd).
-			var transform := Transform3D(preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle),hash(Vector2(record.position))),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
+			var transform := Transform3D(site_basis(record),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y))
 			transforms.append(transform); batch.set_instance_transform(i,transform)
 			var plot: Dictionary = record.plot
 			var wear := 1-clampf(float(plot.get("condition",1)),0,1)
@@ -276,7 +299,7 @@ static func _render_construction(work:Array[Dictionary],center:Vector3,height:Ca
 		for index in group.records.size():
 			var record:Dictionary=group.records[index];var plot:Dictionary=record.plot
 			var point:Vector2=record.position+Vector2(center.x,center.z)
-			var basis:Basis=LATE.site_basis(record) if bool(group.late) else preload("res://scripts/settlement_kit_shapes.gd").lived_basis(float(record.angle),hash(Vector2(record.position)))
+			var basis:Basis=site_basis(record)
 			var transform:=Transform3D(basis,Vector3(point.x,float(height.call(point.x,point.y))+(.0004 if bool(group.town) else .0001),point.y))
 			transforms.append(transform);batch.set_instance_transform(index,transform)
 			var wear:=1-clampf(float(plot.get("condition",1)),0,1)
@@ -319,5 +342,6 @@ static func _render_installed_early_details(plan:Dictionary,center:Vector3,heigh
 		for i in group.records.size():
 			var record:Dictionary=group.records[i]
 			var point:Vector2=record.position+Vector2(center.x,center.z)
-			batch.set_instance_transform(i,Transform3D(Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001),Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y)))
+			var basis:=site_basis(record) if bool(record.get("fit_inherited_site",false)) else Basis(Vector3.UP,float(record.angle)).scaled(Vector3.ONE*.001)
+			batch.set_instance_transform(i,Transform3D(basis,Vector3(point.x,float(height.call(point.x,point.y))+.0001,point.y)))
 		var node:=MultiMeshInstance3D.new();node.name="InstalledEarlyDetails_"+key;node.multimesh=batch;node.material_override=material;parent.add_child(node)
