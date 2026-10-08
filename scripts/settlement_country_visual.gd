@@ -25,6 +25,7 @@ var visibility_at:Callable
 var placement_land_at:Callable
 var water_at:Callable
 var river_distance_at:Callable
+var shore_land_at:Callable
 var retained:RefCounted
 var last_signature:int = -1
 var plan:Dictionary = {}
@@ -36,6 +37,7 @@ var fog_revision:int=0
 var last_plan_signature:int=-1
 var _land_cache:Dictionary={}
 var _physical_land_cache:Dictionary={}
+var _shore_land_cache:Dictionary={}
 var _height_cache:Dictionary={}
 var _visibility_cache:Dictionary={}
 var _fog_clipped:=false
@@ -43,6 +45,7 @@ var _fog_clipped:=false
 # installed until all bounded clipping and vertex batches have finished.
 var _job:Dictionary={}
 var _collecting:=false
+var _collecting_shore:=false
 var _commands:Array[Array]=[]
 var _collected_surface:SurfaceTool
 var max_prepare_slice_usec:=0
@@ -229,6 +232,15 @@ func _advance_job()->bool:
 		return false
 	var seed_work:Dictionary=_job.get("seed",{})
 	if not seed_work.is_empty():
+		if seed_work.has("place_shore_job"):
+			var physical_shore:Callable=shore_land_at if shore_land_at.is_valid() else _placement_land
+			if not PLACE_ART.advance_shore(seed_work.place_shore_job,physical_shore,water_at):return false
+			_collecting=true;_commands=[]
+			_draw_place_details(_job.surface,seed_work,seed_work.place_shore_job.result)
+			seed_work.erase("place_shore_job")
+			_collecting=false
+			_commands.reverse();(_job.commands as Array).append_array(_commands);_commands=[]
+			return false
 		if seed_work.has("place_track_job"):
 			if not PLACE_ART.advance_track(seed_work.place_track_job,_placement_land):return false
 			_collecting=true;_commands=[]
@@ -246,7 +258,7 @@ func _advance_job()->bool:
 	if int(_job.piece_index)<pieces.size():
 		var triangle:Array=pieces[int(_job.piece_index)]
 		_job.piece_index+=1
-		_emit_triangle(_job.surface,triangle,float(_job.lift),bool(_job.center_check))
+		_emit_triangle(_job.surface,triangle,float(_job.lift),bool(_job.center_check),bool(_job.get("shoreline",false)))
 		return false
 	var commands:Array=_job.commands
 	if not commands.is_empty():
@@ -254,6 +266,7 @@ func _advance_job()->bool:
 		var work:=_triangle_work(command)
 		_job.pieces=work.pieces;_job.piece_index=0
 		_job.lift=command[6];_job.center_check=work.center_check
+		_job.shoreline=bool(command[8]) if command.size()>8 else false
 		var children:Array=work.children
 		for index in range(children.size()-1,-1,-1):commands.append(children[index])
 		return false
@@ -320,24 +333,32 @@ func _point(point:Vector2,lift:float=GROUND_LIFT_KM)->Vector3:
 	if not _height_cache.has(point):_height_cache[point]=float(height_at.call(point))
 	return Vector3(point.x,float(_height_cache[point])+lift,point.y)
 
+func _shore_valid(point:Vector2)->bool:
+	if not _visibility_cache.has(point):_visibility_cache[point]=not visibility_at.is_valid() or bool(visibility_at.call(point))
+	if not bool(_visibility_cache[point]):_fog_clipped=true;return false
+	if not _shore_land_cache.has(point):
+		_shore_land_cache[point]=bool(shore_land_at.call(point)) if shore_land_at.is_valid() else _placement_land(point)
+	return bool(_shore_land_cache[point])
+
 func _tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,color:Color,lift:float=GROUND_LIFT_KM)->void:
 	_graded_tri(surface,a,b,c,color,color,color,lift)
 
-func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,lift:float=GROUND_LIFT_KM,depth:int=0)->void:
+func _graded_tri(surface:SurfaceTool,a:Vector2,b:Vector2,c:Vector2,ca:Color,cb:Color,cc:Color,lift:float=GROUND_LIFT_KM,depth:int=0,shoreline:bool=false)->void:
 	if not _ground_rect_visible(a.min(b).min(c),a.max(b).max(c)):return
-	var command:Array=[a,b,c,ca,cb,cc,lift,depth]
+	var command:Array=[a,b,c,ca,cb,cc,lift,depth,shoreline or _collecting_shore]
 	if _collecting:
 		_commands.append(command)
 		return
 	var work:=_triangle_work(command)
 	for child:Array in work.children:
-		_graded_tri(surface,child[0],child[1],child[2],child[3],child[4],child[5],child[6],child[7])
-	for triangle:Array in work.pieces:_emit_triangle(surface,triangle,lift,bool(work.center_check))
+		_graded_tri(surface,child[0],child[1],child[2],child[3],child[4],child[5],child[6],child[7],bool(child[8]))
+	for triangle:Array in work.pieces:_emit_triangle(surface,triangle,lift,bool(work.center_check),bool(command[8]))
 
 func _triangle_work(command:Array)->Dictionary:
 	var a:Vector2=command[0];var b:Vector2=command[1];var c:Vector2=command[2]
 	var ca:Color=command[3];var cb:Color=command[4];var cc:Color=command[5]
 	var lift:float=command[6];var depth:int=command[7]
+	var shoreline:bool=bool(command[8]) if command.size()>8 else false
 	var work:={"pieces":[],"children":[],"center_check":false}
 	if not _ground_rect_visible(a.min(b).min(c),a.max(b).max(c)):return work
 	if ground_grid.w>=2.0 and ground_grid.z>0.0:
@@ -357,20 +378,23 @@ func _triangle_work(command:Array)->Dictionary:
 					var middle:=(a+c)*0.5;var color:=ca.lerp(cc,0.5)
 					work.children=[[a,b,middle,ca,cb,color,lift,depth+1],[middle,b,c,color,cb,cc,lift,depth+1]]
 			else:drape_budget_skips+=1
+		for child:Array in work.children:child.append(shoreline)
 		return work
 	if depth<2 and maxf(a.distance_squared_to(b),maxf(b.distance_squared_to(c),c.distance_squared_to(a)))>0.16:
 		var ab:=(a+b)*0.5;var bc:=(b+c)*0.5;var ac:=(a+c)*0.5
 		var cab:=ca.lerp(cb,0.5);var cbc:=cb.lerp(cc,0.5);var cac:=ca.lerp(cc,0.5)
 		work.children=[[a,ab,ac,ca,cab,cac,lift,depth+1],[ab,b,bc,cab,cb,cbc,lift,depth+1],[ac,bc,c,cac,cbc,cc,lift,depth+1],[ab,bc,ac,cab,cbc,cac,lift,depth+1]]
+		for child:Array in work.children:child.append(shoreline)
 		return work
 	work.pieces=[[{"point":a,"color":ca},{"point":b,"color":cb},{"point":c,"color":cc}]]
 	work.center_check=true
 	return work
 
-func _emit_triangle(surface:SurfaceTool,triangle:Array,lift:float,center_check:bool)->void:
+func _emit_triangle(surface:SurfaceTool,triangle:Array,lift:float,center_check:bool,shoreline:bool=false)->void:
 	var a:Vector2=triangle[0].point;var b:Vector2=triangle[1].point;var c:Vector2=triangle[2].point
-	if not _valid(a) or not _valid(b) or not _valid(c):return
-	if center_check and not _valid(a+((b-a)+(c-a))/3.0):return
+	var valid:Callable=_shore_valid if shoreline else _valid
+	if not bool(valid.call(a)) or not bool(valid.call(b)) or not bool(valid.call(c)):return
+	if center_check and not bool(valid.call(a+((b-a)+(c-a))/3.0)):return
 	for vertex:Dictionary in triangle:
 		surface.set_color((vertex.color as Color).srgb_to_linear());surface.set_normal(Vector3.UP);surface.add_vertex(_point(vertex.point,lift))
 
@@ -437,7 +461,7 @@ func _track(surface:SurfaceTool,start:Vector2,finish:Vector2,seed_value:int,tier
 		previous=point
 
 func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
-	_land_cache.clear();_physical_land_cache.clear();_height_cache.clear();_visibility_cache.clear()
+	_land_cache.clear();_physical_land_cache.clear();_shore_land_cache.clear();_height_cache.clear();_visibility_cache.clear()
 	_fog_clipped=false
 	var at:Vector2=record.position
 	var is_seed:=record.has("settlement_plots") or record.has("settlement_growth")
@@ -601,7 +625,7 @@ func _finish_seed(parent:Node3D,work:Dictionary)->void:
 		if _seed_visible(Vector2.ZERO,origin):
 			parent.add_child(PLACE_ART.label(place,origin,func(point:Vector2)->float:return _point(point,0.0).y))
 		PLACE_ART.render_props(parent,work.get("place_details",{}),func(point:Vector2)->float:return _point(point,0.0).y,
-			func(point:Vector2)->bool:return _valid(point) and bool(_visibility_cache.get(point,true)),visibility_at)
+			func(point:Vector2)->bool:return _valid(point) and bool(_visibility_cache.get(point,true)),visibility_at,_shore_valid)
 
 func _draw_seed_ground(surface:SurfaceTool,work:Dictionary)->void:
 	var origin:Vector2=work.origin
@@ -621,15 +645,22 @@ func _draw_seed_ground(surface:SurfaceTool,work:Dictionary)->void:
 			_ribbon(surface,origin+points[index-1],origin+points[index],width,Color(0.58,0.50,0.38,0.62),SEED_GROUND_LIFT_KM)
 	var place:Dictionary=work.get("place",{})
 	if place.is_empty():return
-	var detail:=PLACE_ART.details(work,_placement_land,water_at)
-	work["place_details"]=detail
-	for wash:Dictionary in detail.get("washes",[]):_wash(surface,wash.position,wash.radius,wash.color,hash([work.id,wash.position]))
-	for field:Dictionary in detail.get("fields",[]):_field(surface,field,field.color)
-	for line:Dictionary in detail.get("lines",[]):_ribbon(surface,line.start,line.finish,line.width,Color(0.58,0.50,0.38,0.62))
+	if _collecting:work["place_shore_job"]=PLACE_ART.begin_shore(origin,PLACE_ART.facing(place))
+	else:_draw_place_details(surface,work)
 	work["place_track_job"]=PLACE_ART.begin_track(Vector2(work.track_from),origin,place)
 	if not _collecting:
 		while not PLACE_ART.advance_track(work.place_track_job,_placement_land):pass
 		_draw_place_track(surface,work)
+
+func _draw_place_details(surface:SurfaceTool,work:Dictionary,edge:Dictionary={})->void:
+	var detail:=PLACE_ART.details(work,_placement_land,water_at,shore_land_at,edge)
+	work["place_details"]=detail
+	for wash:Dictionary in detail.get("washes",[]):_wash(surface,wash.position,wash.radius,wash.color,hash([work.id,wash.position]))
+	for field:Dictionary in detail.get("fields",[]):
+		_collecting_shore=bool(field.get("shoreline",false));_field(surface,field,field.color)
+	for line:Dictionary in detail.get("lines",[]):
+		_collecting_shore=bool(line.get("shoreline",false));_ribbon(surface,line.start,line.finish,line.width,Color(0.58,0.50,0.38,0.62))
+	_collecting_shore=false
 
 func _draw_place_track(surface:SurfaceTool,work:Dictionary)->void:
 	var track:PackedVector2Array=work.place_track_job.points

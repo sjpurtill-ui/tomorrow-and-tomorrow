@@ -49,7 +49,7 @@ func test_coast_details_find_true_bank_and_high_open_water_salt()->void:
 func test_lake_jetty_needs_physical_water_and_other_places_have_distinct_ground()->void:
 	var dry:=_details("lake",func(_point:Vector2)->bool:return true)
 	assert_bool(dry.shore_found).is_false()
-	assert_int(dry.props.size()).is_equal(5)
+	assert_array(dry.props).is_empty()
 	var lake:=_details("lake",func(point:Vector2)->bool:return point.x<1.3)
 	assert_int(lake.props.size()).is_equal(6)
 	assert_str(lake.props[-1].kind).is_equal("jetty")
@@ -67,6 +67,57 @@ func test_dry_cliff_and_unknown_river_bearing_never_create_false_water_features(
 	var detail:=ART.details({"origin":record.position,"place":record.place,"plots":[]},func(_at:Vector2)->bool:return true)
 	assert_array(detail.lines).is_empty()
 	assert_array(detail.props).is_empty()
+
+func test_real_shore_props_survive_home_elevation_buffer_and_keep_homes_inland()->void:
+	var visual=_visual()
+	# The home predicate deliberately excludes the final fifteen metres of
+	# dry beach; the shore predicate admits that beach but never actual water.
+	visual.configure(func(_at:Vector2)->float:return 0.0,func(at:Vector2)->bool:return at.x<1.285)
+	visual.shore_land_at=func(at:Vector2)->bool:return at.x<1.3
+	var coast:=_draw(visual,_record())
+	assert_bool(coast.get_meta("place_shore_found")).is_true()
+	assert_bool(coast.get_meta("place_detail_kinds").has("dugout")).is_true()
+	for point:Vector2 in coast.get_meta("place_detail_positions"):
+		assert_float(point.x).is_between(1.285,1.3)
+	for point:Vector2 in coast.get_meta("country_home_positions"):assert_float(point.x).is_less(1.285)
+	var label:=coast.get_node("PlaceChartName") as Label3D
+	assert_float(label.pixel_size).is_equal_approx(0.005,0.000001)
+	visual.visibility_at=func(at:Vector2)->bool:return at.x<1.285
+	var hidden:=_draw(visual,_record())
+	assert_array(hidden.get_meta("place_detail_positions")).is_empty()
+
+func test_tagged_shore_triangles_do_not_relax_ordinary_ground_or_cliffs()->void:
+	var visual=_visual()
+	visual.configure(func(_at:Vector2)->float:return 0.0,func(at:Vector2)->bool:return at.x<1.285)
+	visual.shore_land_at=func(at:Vector2)->bool:return at.x<1.3
+	var triangle:Array=[{"point":Vector2(1.29,1),"color":Color.WHITE},{"point":Vector2(1.295,1),"color":Color.WHITE},{"point":Vector2(1.29,1.01),"color":Color.WHITE}]
+	var ordinary:=SurfaceTool.new();ordinary.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._emit_triangle(ordinary,triangle,0.0,true)
+	assert_bool(ordinary.commit_to_arrays()[Mesh.ARRAY_VERTEX]==null).is_true()
+	var beach:=SurfaceTool.new();beach.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._emit_triangle(beach,triangle,0.0,true,true)
+	assert_int((beach.commit_to_arrays()[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()).is_equal(3)
+	visual.shore_land_at=func(_at:Vector2)->bool:return false
+	visual._shore_land_cache.clear()
+	var cliff:=SurfaceTool.new();cliff.begin(Mesh.PRIMITIVE_TRIANGLES)
+	visual._emit_triangle(cliff,triangle,0.0,true,true)
+	assert_bool(cliff.commit_to_arrays()[Mesh.ARRAY_VERTEX]==null).is_true()
+	var split:Dictionary=visual._triangle_work([Vector2.ZERO,Vector2(1,0),Vector2(0,1),Color.WHITE,Color.WHITE,Color.WHITE,0.0,0,true])
+	assert_array(split.children).is_not_empty()
+	for command:Array in split.children:assert_bool(command[8]).is_true()
+
+func test_lake_jetty_ends_in_narrow_channel_before_opposite_bank()->void:
+	var record:=_record("lake")
+	var water:=func(at:Vector2)->bool:return at.x>=1.3 and at.x<1.304
+	var shore_land:=func(at:Vector2)->bool:return not bool(water.call(at))
+	var detail:=ART.details({"origin":record.position,"place":record.place,"plots":[]},func(at:Vector2)->bool:return at.x<1.285,water,shore_land)
+	assert_bool(detail.shore_found).is_true()
+	if detail.props.is_empty():return
+	assert_str(detail.props[-1].kind).is_equal("jetty")
+	var jetty:Dictionary=detail.props[-1]
+	assert_float(float(jetty.length_scale)).is_less(1.0)
+	var tip:Vector2=jetty.position+Vector2.RIGHT*0.0081*float(jetty.length_scale)
+	assert_bool(bool(water.call(tip))).is_true()
 
 func test_named_place_uses_unchanged_root_plan_and_smaller_ink_name()->void:
 	var visual=_visual();var record:=_record()
