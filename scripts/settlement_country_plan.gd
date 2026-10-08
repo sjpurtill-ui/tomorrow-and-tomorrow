@@ -8,6 +8,7 @@ const Extent:=preload("res://scripts/settlement_visual_extent.gd")
 const Roads:=preload("res://scripts/settlement_roads.gd")
 const Era:=preload("res://scripts/settlement_country_era.gd")
 const Growth:=preload("res://scripts/settlement_country_growth.gd")
+const Places:=preload("res://scripts/settlement_places.gd")
 const MAX_HOMESTEADS:=144
 const MAX_CLUSTERS:=Growth.MAX_SEEDS
 const MAX_FAR_HOLDINGS:=48
@@ -50,6 +51,7 @@ static func capture_current(realm:Dictionary={})->Dictionary:
 		"road_tier":Roads.known_tier(state),"deposits":state.resource_deposits,
 		"country_appearance":appearance,"appearance_signature":appearance_signature(knowledge,fabric,appearance),
 		"root_fabric":root,"root_geometry_signature":hash(root),
+		"places_view":Places.snapshot(),
 		"founded":bool(state.settlement_site_committed)}
 
 
@@ -65,6 +67,8 @@ static func quick_signature(snapshot:Dictionary)->int:
 		floori(float(snapshot.get("realm_km",0.0))/3.0),String(snapshot.get("stage","settlement")),
 		population_bucket(float(snapshot.get("population",0.0))),
 		int(snapshot.get("road_tier",0)),appearance,int(snapshot.get("root_geometry_signature",0)),
+		int((snapshot.get("places_view",{}) as Dictionary).get("revision",0)),
+		(snapshot.get("places_view",{}) as Dictionary).get("seat_position",snapshot.get("origin",Vector2.ZERO)),
 		(snapshot.get("deposits",[]) as Array).size()])
 
 
@@ -74,6 +78,11 @@ static func quick_signature(snapshot:Dictionary)->int:
 ## visible depletion/regrowth state, not by the daily load removed.
 static func signature(snapshot:Dictionary)->int:
 	var key:=quick_signature(snapshot)
+	# At most twelve living places and four remembered ruins. These copied
+	# facts are refreshed by the country layer's existing integer-day cadence.
+	# Neither daily share drift inside a population bucket nor daily ruin age
+	# rebuilds a patch; abandonment/founding revision changes are immediate.
+	for place:Dictionary in _admitted_places(snapshot):key=hash([key,place_signature(place)])
 	for item:Variant in snapshot.get("deposits",[]):
 		if not item is Dictionary:continue
 		var deposit:Dictionary=item
@@ -83,6 +92,41 @@ static func signature(snapshot:Dictionary)->int:
 			String(deposit.get("resource","")),String(deposit.get("landscape_source","")),
 			state.category,state.age])
 	return key
+
+
+static func place_signature(place:Dictionary)->int:
+	var day:=int(place.get("founded_day",0))+int(place.get("age_days",0))
+	var ruin_years:=floori(float(maxi(0,day-int(place.get("left_day",day))))/365.0) if String(place.get("status","living"))=="ruin" else 0
+	return hash([String(place.get("id","")),String(place.get("name","")),place.get("position",Vector2.ZERO),
+		String(place.get("kind","inland")),String(place.get("status","living")),
+		population_bucket(float(place.get("people",0))),int(place.get("trend",0)),bool(place.get("flooded",false)),
+		place.get("facing",Vector2.ZERO),float(place.get("shoreline",0.0)),float(place.get("open_water",0.0)),ruin_years])
+
+
+## The engine snapshot owns admission. Art never restores forgotten ruins or
+## infers named places from population, worked radius or a remembered seed.
+static func _admitted_places(snapshot:Dictionary)->Array[Dictionary]:
+	var view:Dictionary=snapshot.get("places_view",{})
+	var out:Array[Dictionary]=[]
+	if String(view.get("owner",snapshot.get("owner","player")))!=String(snapshot.get("owner","player")):return out
+	var living:=0;var ruins:=0;var seen:Dictionary={}
+	for value:Variant in view.get("places",[]):
+		if not value is Dictionary:continue
+		var place:Dictionary=value
+		var id:=String(place.get("id",""))
+		if id.is_empty() or seen.has(id) or not place.get("position") is Vector2:continue
+		if not (place.position as Vector2).is_finite():continue
+		var status:=String(place.get("status","living"))
+		if status=="living":
+			if living>=Places.MAX_PLACES:continue
+			living+=1
+		elif status=="ruin":
+			if ruins>=Places.MAX_RUINS:continue
+			ruins+=1
+		else:continue
+		seen[id]=true;out.append(place)
+		if out.size()>=Places.MAX_PLACES+Places.MAX_RUINS:break
+	return out
 
 
 static func population_bucket(people:float)->int:
@@ -126,25 +170,55 @@ static func build(snapshot:Dictionary)->Dictionary:
 		"built_fabric":(snapshot.get("built_fabric",{}) as Dictionary).duplicate(true),
 		"country_appearance":Era.render_profile(appearance),
 		"homesteads":[],"herders":[],"sites":[],"bounded":true}
-	if population<=0.0 or not bool(snapshot.get("founded",true)):return out
+	if not bool(snapshot.get("founded",true)):return out
+	out.homesteads=_places(snapshot,core)
+	if population<=0.0:return out
 	if population>=400.0 and worked>0.15:
-		out.homesteads=_clusters(snapshot,dense,core,worked,population)
+		out.homesteads.append_array(_clusters(snapshot,dense,core,worked,population,MAX_CLUSTERS-out.homesteads.size()))
 		out.homesteads.append_array(_homesteads(snapshot,dense,core,worked,population,holdings_area))
-		out.homesteads.sort_custom(_nearer)
+		out.homesteads.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+			if a.has("place")!=b.has("place"):return a.has("place")
+			return _nearer(a,b))
 	if population>=400.0 and realm>worked+6.0:
 		out.herders=_herders(snapshot,worked,realm,population)
 	out.sites=_sites(snapshot)
 	return out
 
 
+## A named place is a fixed nucleus for the same root parcel solver, even
+## beyond the seat's worked radius. All population is read from its share;
+## this record has no population, inventory, labour or simulation authority.
+static func _places(snapshot:Dictionary,core:float)->Array:
+	var origin:Vector2=snapshot.get("origin",Vector2.ZERO)
+	var seat:Vector2=(snapshot.get("places_view",{}) as Dictionary).get("seat_position",origin)
+	var owner:=String(snapshot.get("owner","player"))
+	var root:Dictionary=snapshot.get("root_fabric",{})
+	var records:Array=[]
+	for source:Dictionary in _admitted_places(snapshot):
+		var place:=source.duplicate(true)
+		place["day"]=int(place.get("founded_day",0))+int(place.get("age_days",0))
+		var id:="place:"+String(place.id)
+		var position:Vector2=place.position
+		var offset:=position-origin
+		var count:=6 if String(place.get("status","living"))=="ruin" else clampi(1+ceili(sqrt(maxf(0.0,float(place.get("people",0))))*0.7),2,Growth.MAX_PARCELS)
+		var spec:={"seed":hash("%s:%d:%s" % [owner,int(snapshot.get("seed",0)),id]),"parcels":count,
+			"templates":(root.get("templates",[]) as Array).duplicate(true),"obstacles":seed_obstacles(root,offset),"neighbours":[],
+			"facing":place.get("facing",Vector2.ZERO),"place_kind":String(place.get("kind","inland"))}
+		records.append({"id":id,"category":"homestead","group":"homesteads","kind":"cluster","position":position,"offset":offset,
+			"distance_km":offset.length(),"location_class":"worked_core" if offset.length()<=core else "named_place",
+			"field_radius_km":0.10,"rotation":0.0,"buildings":count,"road_tier":clampi(int(snapshot.get("road_tier",0)),0,2),"track_from":seat,
+			"place":place,"settlement_growth":spec,"geometry_signature":hash([spec,place_signature(place)])})
+	return records
+
+
 ## New local nuclei accrete from inherited claims with the root's own selector.
 ## Their positions do not depend on the population radius or a distant field.
 ## Parcel growth is deferred one claim per renderer step, not built in this scan.
-static func _clusters(snapshot:Dictionary,_dense:float,core:float,worked:float,people:float)->Array:
+static func _clusters(snapshot:Dictionary,_dense:float,core:float,worked:float,people:float,limit:int=MAX_CLUSTERS)->Array:
 	var origin:Vector2=snapshot.get("origin",Vector2.ZERO)
 	var owner:=String(snapshot.get("owner","player"))
 	var seed_value:=hash("%s:%d:root_growth" % [owner,int(snapshot.get("seed",0))])
-	var allowance:=clampi(1+floori(sqrt(people/400.0)*1.7),2,MAX_CLUSTERS)
+	var allowance:=mini(maxi(0,limit),clampi(1+floori(sqrt(people/400.0)*1.7),2,MAX_CLUSTERS))
 	var centres:=Growth.centres(seed_value,MAX_CLUSTERS,0.085)
 	var root:Dictionary=snapshot.get("root_fabric",{})
 	var records:Array=[]

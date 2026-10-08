@@ -41,10 +41,10 @@ func refresh(owner_terrain:Node3D)->void:
 	var surface:Array=[terrain.river_terrain_grid,terrain.detail_surface_center,detail_visible]
 	# Same-day construction can complete while the clock is paused. Poll only
 	# the bounded admitted owners' scalar revisions, never their plot arrays.
-	var fabric_revisions:Array=[GameState.morphology_revision]
+	var fabric_revisions:Array=[[GameState.morphology_revision,GameState.settlement_network_revision]]
 	for id:String in layers:
 		if id!="player" and WorldSimulation.actors.has(id):
-			fabric_revisions.append([id,WorldSimulation.actors[id].systems.GameState.morphology_revision])
+			fabric_revisions.append([id,WorldSimulation.actors[id].systems.GameState.morphology_revision,WorldSimulation.actors[id].systems.GameState.settlement_network_revision])
 	var key:Array=[GameState.world_seed,int(GameState.elapsed_days),GameState.population_total,GameState.settlement_site_committed,GameState.settlement_founded_at,GameState.resource_deposits.size(),GameState.known_discoveries.size(),fabric_revisions,center.snapped(Vector2.ONE*step),level,surface,CivilizationSystem.fog_revision]
 	if key==_refresh_key:return
 	_refresh_key=key
@@ -77,7 +77,7 @@ func refresh(owner_terrain:Node3D)->void:
 			add_child(node)
 			entry={"node":node,"source_key":[],"snapshot":{},"style":candidate.style,"population":-1}
 		var state:Object=GameState if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.GameState
-		var source_key:Array=[int(state.get("elapsed_days")),int(state.get("population_total")),int(state.get("morphology_revision")),(state.get("resource_deposits") as Array).size(),(state.get("known_discoveries") as Array).size(),candidate.get("observation_day",-1),candidate.get("estimate",{})]
+		var source_key:Array=[int(state.get("elapsed_days")),int(state.get("population_total")),int(state.get("morphology_revision")),int(state.get("settlement_network_revision")),(state.get("resource_deposits") as Array).size(),(state.get("known_discoveries") as Array).size(),candidate.get("observation_day",-1),candidate.get("estimate",{})]
 		if source_key!=entry.source_key:
 			var realm:Dictionary=candidate.realm
 			var snapshot:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:return PLAN.capture_current(realm))
