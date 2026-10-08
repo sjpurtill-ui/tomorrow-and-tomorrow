@@ -34,6 +34,16 @@ func score(plan:Dictionary)->float:
 	for i in range(1,17):fresh+=novelty(world.city_intelligence.route_position(route,float(i)/16.0))
 	return fresh/16.0*.8+minf(1,length/maxf(1,budget))*.2
 
+## Kilometres of the route over ground no returned chart covers. An old people
+## must cross its own charted country to reach new land; that crossing should
+## not make a trip that ends in real exploration look worthless.
+func fresh_km(plan:Dictionary)->float:
+	if not bool(plan.get("ok",false)):return 0.0
+	var route:Array=plan.route
+	var fresh:=0
+	for i in range(1,33):if novelty(world.city_intelligence.route_position(route,float(i)/32.0))>=1.0:fresh+=1
+	return float(fresh)/32.0*world._scout_route_distance(route)
+
 func refine(fallback:Dictionary)->Dictionary:
 	var best:=fallback
 	var best_score:=score(best)

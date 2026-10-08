@@ -359,3 +359,15 @@ func test_exploration_cannot_invent_clay_on_unsuitable_ground()->void:
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
 	assert_array(mission.discoveries).is_empty()
 
+
+func test_a_long_crossing_of_charted_country_to_new_land_is_worth_sending()->void:
+	system.initialize()
+	# The year-326 save: everything within about 1,500 km charted, new land
+	# beyond. The route's average newness is low, but it reaches real new ground.
+	system._add_revealed_area(Vector2.ZERO,1000.0,"three centuries of expeditions")
+	var walker=preload("res://scripts/scout_frontier.gd").new(system,3000.0,0.0,Vector2.ZERO)
+	var plan:={"ok":true,"route":system._scout_route_dictionaries([Vector2.ZERO,Vector2(1200,0)] as Array[Vector2])}
+	assert_float(walker.score(plan)).is_less(.38)
+	assert_float(walker.fresh_km(plan)).is_greater_equal(preload("res://scripts/scouting_staff.gd").USEFUL_FRESH_KM)
+	var charted:={"ok":true,"route":system._scout_route_dictionaries([Vector2.ZERO,Vector2(900,0)] as Array[Vector2])}
+	assert_float(walker.fresh_km(charted)).is_less(preload("res://scripts/scouting_staff.gd").USEFUL_FRESH_KM)

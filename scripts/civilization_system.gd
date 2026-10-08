@@ -1486,6 +1486,7 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 				walker.budget=one_way_range
 				route_plan=walker.wander(route_plan,quote_seed)
 				route_plan["novelty"]=walker.score(route_plan)
+				route_plan["fresh_km"]=walker.fresh_km(route_plan)
 			else:route_plan["reason"]="No connected walking route found. Staff will review the departure later."
 		else:route_plan=_quoted_open_scout_route(one_way_range,quote_seed,ordered_heading,origin)
 	elif not directional_search and target_position.has("x") and target_position.has("z"):

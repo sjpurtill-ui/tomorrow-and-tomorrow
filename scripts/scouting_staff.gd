@@ -4,6 +4,9 @@ const EXCHANGE=preload("res://scripts/society_exchange.gd")
 const SURVIVAL=preload("res://scripts/scout_survival.gd")
 ## Days our staff wait after a search that found only charted ground.
 const FRUITLESS_WAIT_DAYS:=28
+## New ground a trip must reach to be worth sending, however much charted
+## country it crosses first.
+const USEFUL_FRESH_KM:=60.0
 const FOCI:={"exploration":"Exploration & discovery","recruitment":"Seek nomadic tribes","prospecting":"Resource prospecting"}
 var host:Node
 var data:Dictionary={}
@@ -189,7 +192,7 @@ func advance_steps(day:int)->Array:
 				shared.last_reason=String(quote.get("blocker",quote.get("error",shared.last_reason)));return
 			if float(quote.provisions)>spendable:
 				shared.last_reason="Waiting for provisions: this route needs %.0f food; %.0f is available after the home reserve." % [float(quote.provisions),spendable];return
-			if search and float(quote.route_plan.get("novelty",0))<.38:
+			if search and float(quote.route_plan.get("novelty",0))<.38 and float(quote.route_plan.get("fresh_km",0))<USEFUL_FRESH_KM:
 				shared.last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent.";return
 			# The Chief Scout weighs the standing toll against the people's growth.
 			var field:Dictionary=quote.get("field_risk",{})
