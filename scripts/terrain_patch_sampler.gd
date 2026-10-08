@@ -16,6 +16,7 @@ extends RefCounted
 ## drops any patch sampled for another seed. Nothing here touches the scene.
 
 const COAST_SHAPE:=preload("res://scripts/coast_shape.gd")
+const PATCH_BUILDER:=preload("res://scripts/terrain_patch_builder.gd")
 const PATCH_LIFT:=0.0006
 const SEA_LEVEL:=0.0
 
@@ -100,7 +101,9 @@ func _prepare_constants()->void:
 ## [heights, vertices, colors, climate, geology, seasons, sampled, reused]
 ## covering just those rows. A node the job's earlier patch holds at the
 ## identical coordinate is copied from it, never resampled.
-func sample_rows(job:Object,first_row:int,row_count:int)->Array:
+## Borders and supply readers subtract the historic fixed lift. Preserve their
+## default output exactly; only streamed rendering opts into the dry-land bias.
+func sample_rows(job:Object,first_row:int,row_count:int,shore_safe:bool=false)->Array:
 	var resolution:int=job.resolution
 	var center:Vector2=job.center
 	var spacing:float=float(job.span)/float(resolution-1)
@@ -211,7 +214,7 @@ func sample_rows(job:Object,first_row:int,row_count:int)->Array:
 					if main_distance<0.34:
 						height-=pow(1.0-main_distance/0.34,2.0)*0.0065
 				raw=height
-			var lifted:=raw+PATCH_LIFT
+			var lifted:=PATCH_BUILDER.surface_height(raw) if shore_safe else raw+PATCH_LIFT
 			heights[index]=lifted
 			vertices[index]=Vector3(x,lifted,z)
 			# --- LocalTerrain._climate_at, at the lifted height ---

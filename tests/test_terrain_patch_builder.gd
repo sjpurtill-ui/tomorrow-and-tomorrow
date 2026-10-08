@@ -38,7 +38,7 @@ func test_close_ridge_shading_is_smoothed_without_flattening_geometry()->void:
 	var row:=32*65
 	for index in range(1,64):
 		assert_float(builder.normals[row+index].distance_to(builder.normals[row+index-1])).is_less(0.035)
-		assert_float(builder.vertices[row+index].y).is_equal_approx(-absf(builder.vertices[row+index].x)*0.2+0.0006,0.000001)
+		assert_float(builder.vertices[row+index].y).is_equal_approx(-absf(builder.vertices[row+index].x)*0.2,0.000001)
 	assert_float(builder.normals[row+8].x).is_less(-0.15)
 	assert_float(builder.normals[row+56].x).is_greater(0.15)
 
@@ -61,3 +61,20 @@ func test_cover_records_woodland_climate_and_the_shore_in_grid_order()->void:
 	# Grid order: x runs fastest, so the west column is water and the east land.
 	assert_int(builder.cover[3]).is_equal(0)
 	assert_int(builder.cover[8*4+3]).is_equal(255)
+
+func test_shallows_and_zero_shore_remain_water_while_upland_keeps_depth_bias()->void:
+	for raw:float in [-0.000004,-0.00027,0.0,0.0005,0.001,0.0025,0.004,0.5]:
+		var builder:=BUILDER.new(3,0.02,Vector2.ZERO,func(_x:float,_z:float)->float:return raw,func(_x:float,_z:float,_h:float)->Color:return Color.WHITE)
+		while not builder.advance(100000):pass
+		var expected:=raw if raw<=0.001 else (raw+0.0003 if raw==0.0025 else raw+0.0006)
+		for index in builder.heights.size():
+			assert_float(builder.heights[index]).is_equal(Vector3(0,expected,0).y)
+			assert_int(builder.cover[index*4+3]).is_equal(255 if raw>0.0 else 0)
+			if raw<=0.0:assert_float(builder.vertices[index].y).is_less_equal(0.0)
+
+func test_streamed_shore_intersection_retains_the_physical_zero_contour()->void:
+	var builder:=BUILDER.new(3,0.02,Vector2.ZERO,func(x:float,_z:float)->float:return (x-0.002)*0.04,func(_x:float,_z:float,_h:float)->Color:return Color.WHITE)
+	while not builder.advance(100000):pass
+	var a:Vector3=builder.vertices[4];var b:Vector3=builder.vertices[5]
+	var crossing:=a.lerp(b,-a.y/(b.y-a.y))
+	assert_float(crossing.x).is_equal_approx(0.002,0.0000001)
