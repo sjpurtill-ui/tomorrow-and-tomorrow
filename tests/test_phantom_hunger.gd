@@ -7,6 +7,7 @@ extends GdUnitTestSuite
 ## band's shortfall stays with the band; the held town feeds its garrison.
 
 const Rations:=preload("res://scripts/field_rations.gd")
+const Supply:=preload("res://scripts/supply_state.gd")
 const Kpi:=preload("res://scripts/hud/civilization_kpi_model.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 
@@ -49,7 +50,11 @@ func after_test()->void:
 
 func _band_out(troops:int=30,km:float=25.0)->Dictionary:
 	var origin:=CivilizationSystem.player_world_origin
-	var band:={"army_id":7,"name":"LEVY BAND 1","troops":troops,"status":"stationed","location_id":"field","position":{"x":origin.x+km,"z":origin.y},
+	var at:={"x":origin.x+km,"z":origin.y}
+	# Camped there long enough to eat out the country round it. On fresh
+	# ground a band this small lives off the land in full (supply_state.gd).
+	var band:={"army_id":7,"name":"LEVY BAND 1","troops":troops,"status":"stationed","location_id":"field","position":at,
+		"camp_at":at.duplicate(),"forage_eaten":Supply.FORAGE_FEEDS*Supply.CAMP_FORAGE_DAYS,
 		"formations":[],"supply_level":1.0,"commander":{"name":"Rovik Ashdown","logistics":0.3}}
 	MilitaryCampaign.field_armies.assign([band])
 	return band
