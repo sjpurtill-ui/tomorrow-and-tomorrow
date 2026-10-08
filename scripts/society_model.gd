@@ -273,81 +273,94 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		adoption=adoption.merged(trials,true)
 		practices=practices.duplicate()
 		practices.append_array(trials.keys())
-	# The sums read only the practices, their adoption, the tools, works and
-	# goods they need, and the lines' focus: when all of these stand as at the
-	# last rebuild, so do the sums (the same additions in the same order).
-	var means:=PackedFloat64Array()
-	for special:String in Goods.FACTOR_SPECIAL:
-		if practices.has(special): means.append(Goods.factor(special))
-	var reading:=[practices,adoption,means,Goods.coverage() if _has_technique(practices) else -1.0,line_focus,neglect,definitions_by_id.size()]
-	if _sums_memo.reading.size()==reading.size() and _sums_memo.reading==reading:
-		effect_totals.merge(_sums_memo.totals)
-		_clamp_and_upkeep(neglect)
-		return
+	# The sums split in two. Most practices read only the practices, their
+	# adoption and the lines' focus, which move when a question is answered,
+	# a month's adoption is counted or the focus changes: their part is kept
+	# (_sums_memo). The few techniques household goods and special means carry
+	# (civilian_goods.gd) move with those goods every day and are added fresh.
+	var reading:=[practices,adoption,line_focus,neglect,definitions_by_id.size()]
+	if _lower_keys.is_empty(): _build_key_sets()
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
-	if _lower_keys.is_empty(): _build_key_sets()
+	if not (_sums_memo.reading.size()==reading.size() and _sums_memo.reading==reading):
+		var base_sums:=PackedFloat64Array()
+		base_sums.resize(_effect_slots.size())
+		var base_seen:=PackedByteArray()
+		base_seen.resize(_effect_slots.size())
+		var base_order:=PackedInt32Array()
+		var means_ids:=PackedStringArray()
+		for id in practices:
+			var row:Variant=_row_for(String(id))
+			if row==null: continue
+			if bool(row[2]):
+				means_ids.append(String(id))
+				continue
+			_add_practice(String(id),row,clampf(float(adoption.get(id,0.025)),0.0,1.0),base_sums,base_seen,base_order,scales,neglect)
+		_sums_memo.reading=[practices.duplicate(),adoption.duplicate(),line_focus.duplicate(),neglect,definitions_by_id.size()]
+		_sums_memo.sums=base_sums
+		_sums_memo.seen=base_seen
+		_sums_memo.order=base_order
+		_sums_memo.means_ids=means_ids
+	var sums:PackedFloat64Array=_sums_memo.sums.duplicate()
+	var seen:PackedByteArray=_sums_memo.seen.duplicate()
+	var order:PackedInt32Array=_sums_memo.order.duplicate()
 	var goods_coverage:=-1.0
-	# Sums by effect slot (see _row_extras), in the order each effect is first
-	# met: the same additions in the same order as summing into the totals.
-	var sums:=PackedFloat64Array()
-	sums.resize(_effect_slots.size())
-	var seen:=PackedByteArray()
-	seen.resize(_effect_slots.size())
-	var order:PackedInt32Array=PackedInt32Array()
-	for id in practices:
-		var row:Variant=_effect_rows.get(id)
-		if row==null or (row as Array).is_empty():
-			var discovery:Dictionary=definitions_by_id.get(id,{})
-			if discovery.is_empty(): continue
-			var effects:Dictionary=discovery.get("effects",{})
-			var values:=PackedFloat64Array()
-			for effect_name in effects:values.append(float(effects[effect_name]))
-			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
-			_effect_rows[id]=row
-		# _row_extras and _practice_level, inlined: this loop reads every
-		# practice several times a town's day.
-		var extras:Variant=_extras_by_id.get(id)
-		if extras==null or (extras[0] as PackedInt32Array).size()!=(row[0] as Array).size():extras=_row_extras(id,row)
+	for id:String in _sums_memo.means_ids:
+		var row:Variant=_row_for(id)
+		if row==null: continue
 		var adoption_level:=clampf(float(adoption.get(id,0.025)),0.0,1.0)
-		if bool(row[2]):
-			if not Goods.FACTOR_SPECIAL.has(id):
-				# A technique works as far as household goods cover it
-				# (civilian_goods.gd factor); nothing in this pass changes that cover.
-				if goods_coverage<0.0:goods_coverage=Goods.coverage()
-				adoption_level*=goods_coverage
-			else:adoption_level*=Goods.factor(String(id))
-		var values:PackedFloat64Array=row[1]
-		var line:String=extras[2]
-		var known_scale:Variant=scales.get(line)
-		var scale:float=practice_scale(line,line_focus,neglect) if known_scale==null else float(known_scale)
-		scales[line]=scale
-		var slots:PackedInt32Array=extras[0]
-		var lower:PackedByteArray=extras[1]
-		if sums.size()<_effect_slots.size():
-			sums.resize(_effect_slots.size());seen.resize(_effect_slots.size())
-		for i in slots.size():
-			var value:=values[i]
-			if scale!=1.0 and (value<0.0)==(lower[i]==1): value=value*scale
-			var slot:=slots[i]
-			if seen[slot]==0:seen[slot]=1;order.append(slot)
-			sums[slot]+=value*adoption_level
+		if not Goods.FACTOR_SPECIAL.has(id):
+			# A technique works as far as household goods cover it
+			# (civilian_goods.gd factor); nothing in this pass changes that cover.
+			if goods_coverage<0.0:goods_coverage=Goods.coverage()
+			adoption_level*=goods_coverage
+		else:adoption_level*=Goods.factor(id)
+		_add_practice(id,row,adoption_level,sums,seen,order,scales,neglect)
 	for slot in order:effect_totals[_effect_names[slot]]=sums[slot]
-	_sums_memo.reading=[practices.duplicate(),adoption.duplicate(),means,reading[3],line_focus.duplicate(),neglect,definitions_by_id.size()]
-	_sums_memo.totals=effect_totals.duplicate()
 	_clamp_and_upkeep(neglect)
 
-## Whether any of `practices` is a technique household goods carry
-## (civilian_goods.gd TECHNIQUES, other than FACTOR_SPECIAL).
-static func _has_technique(practices:Array)->bool:
-	for id:String in Goods.TECHNIQUES:
-		if not Goods.FACTOR_SPECIAL.has(id) and practices.has(id): return true
-	return false
+## A practice's effect row: [effect names, values, carried by goods or means],
+## made once from its definition; null when it has no definition.
+func _row_for(id:String)->Variant:
+	var row:Variant=_effect_rows.get(id)
+	if row!=null and not (row as Array).is_empty(): return row
+	var discovery:Dictionary=definitions_by_id.get(id,{})
+	if discovery.is_empty(): return null
+	var effects:Dictionary=discovery.get("effects",{})
+	var values:=PackedFloat64Array()
+	for effect_name in effects:values.append(float(effects[effect_name]))
+	row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
+	_effect_rows[id]=row
+	return row
+
+## Adds one practice's effects at `adoption_level` into the slot sums, in the
+## order each effect is first met (_row_extras).
+func _add_practice(id:String,row:Array,adoption_level:float,sums:PackedFloat64Array,seen:PackedByteArray,order:PackedInt32Array,scales:Dictionary,neglect:float)->void:
+	var extras:Variant=_extras_by_id.get(id)
+	if extras==null or (extras[0] as PackedInt32Array).size()!=(row[0] as Array).size():extras=_row_extras(id,row)
+	var values:PackedFloat64Array=row[1]
+	var line:String=extras[2]
+	var known_scale:Variant=scales.get(line)
+	var scale:float=practice_scale(line,line_focus,neglect) if known_scale==null else float(known_scale)
+	scales[line]=scale
+	var slots:PackedInt32Array=extras[0]
+	var lower:PackedByteArray=extras[1]
+	if sums.size()<_effect_slots.size():
+		sums.resize(_effect_slots.size());seen.resize(_effect_slots.size())
+	for i in slots.size():
+		var value:=values[i]
+		if scale!=1.0 and (value<0.0)==(lower[i]==1): value=value*scale
+		var slot:=slots[i]
+		if seen[slot]==0:seen[slot]=1;order.append(slot)
+		sums[slot]+=value*adoption_level
 
 ## The last rebuild's sums and what they were read from (never saved).
 class SumsMemo extends RefCounted:
 	var reading:Array=[]
-	var totals:Dictionary={}
+	var sums:=PackedFloat64Array()
+	var seen:=PackedByteArray()
+	var order:=PackedInt32Array()
+	var means_ids:=PackedStringArray()
 var _sums_memo:=SumsMemo.new()
 
 ## The rebuild's last part: the era's ceilings and the specialists' upkeep.

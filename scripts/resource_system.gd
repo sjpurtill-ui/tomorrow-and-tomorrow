@@ -745,7 +745,22 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var OneSeat:=preload("res://scripts/one_seat.gd")
 	var homestead_reach:=OneSeat.reach_km()
 	var town_core:=OneSeat.core_km()
+	var today_day:=int(WorldSimulation.state.elapsed_days)
+	var resting_workable:=0
+	# Resting stands whose last loads are still on the road: delivered as usual.
+	var delivering:Array[Dictionary]=[]
 	for deposit in WorldSimulation.state.resource_deposits:
+		# A spent deposit (_mark_spent) can never yield, hold or send again; a
+		# resting one (_mark_resting) regrows by itself and is looked at again
+		# once a month (_rest_wakes).
+		if deposit.get("spent",false) or (deposit.has("resting") and not _rest_wakes(deposit,today_day)):
+			deposit.extracted_today=0.0
+			deposit.delivered_today=0.0
+			if deposit.has("resting"):
+				if float(deposit.get("remaining",0.0))>0.001:resting_workable+=1
+				if not (deposit.get("shipments",[]) as Array).is_empty():delivering.append(deposit)
+			continue
+		if deposit.has("resting"):_wake(deposit,today_day)
 		if WorldSimulation.enabled:preload("res://scripts/civilization_resources.gd").available(deposit)
 		deposit.extracted_today=0.0
 		deposit.delivered_today=0.0
@@ -841,7 +856,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var delivered_total:=0.0
 	var today:=int(WorldSimulation.state.elapsed_days)
 	var stockpiles:Dictionary=WorldSimulation.state.resource_stockpiles
-	for deposit in material_deposits:
+	var receiving:=material_deposits.duplicate()
+	receiving.append_array(delivering)
+	for deposit in receiving:
 		# Loads on the road are kept in order of arrival (_add_shipment), so the
 		# loads due today are the first ones; the rest are not touched.
 		var moving:=_normalized_shipments(deposit)
@@ -902,6 +919,12 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		in_transit+=float(deposit.in_transit)
 		active_shipments+=(deposit.shipments as Array).size()
 		if not deposit_exhausted(deposit):workable_occurrences+=1
+		else:_mark_spent(deposit)
+		_mark_resting(deposit)
+	workable_occurrences+=resting_workable
+	for deposit in delivering:
+		in_transit+=float(deposit.in_transit)
+		active_shipments+=(deposit.shipments as Array).size()
 	var capacities:=_storage_capacities()
 	var stored_bulk:=_stored_bulk()
 	var capacity_total:=0.0
@@ -962,6 +985,50 @@ func _add_shipment(deposit:Dictionary,arrival:int,quantity:float)->void:
 	if at==moving.size():moving.append([arrival,quantity])
 	else:moving.insert(at,[arrival,quantity])
 	deposit.in_transit=float(deposit.in_transit)+quantity
+
+## A worked-out deposit nothing can refill is left out of the daily flow: its
+## reserve is gone (world geography is only ever drawn down, renewable kinds
+## regrow only while worked), nothing waits at the source and nothing is on the
+## road. Woods and fibre regrow on their own and are never spent.
+func _mark_spent(deposit:Dictionary)->void:
+	if String(deposit.get("landscape_source","")) in ["woodland_catchment","plant_fiber_catchment"]:return
+	if bool((catalog.get(String(deposit.get("resource","")),{}) as Dictionary).get("renewable",false)):return
+	if float(deposit.get("remaining",0.0))>0.001 or float(deposit.get("stock_at_source",0.0))>0.0:return
+	if not (deposit.get("shipments",[]) as Array).is_empty():return
+	deposit["spent"]=true
+
+## Days between looks at a resting stand of woods or fibre.
+const REST_LOOK_DAYS:=30
+
+## A stand of woods or fibre cut below the working share (the threshold
+## _ensure_surface_supply opens a new front at), with nothing waiting at it,
+## rests: it regrows by itself and its cutters go to the stands still worth
+## working; loads already on the road still arrive. It is looked at once a
+## month and works again once regrown past that share.
+func _mark_resting(deposit:Dictionary)->void:
+	if String(deposit.get("landscape_source","")) not in ["woodland_catchment","plant_fiber_catchment"]:return
+	if float(deposit.get("remaining",0.0))>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):return
+	if float(deposit.get("stock_at_source",0.0))>0.0001:return
+	if not deposit.has("resting"):deposit["resting"]=int(WorldSimulation.state.elapsed_days)
+
+## A resting stand looked at again. One the world's stock keeps regrew there
+## (available reads the days since); one of an older campaign's own regrows
+## here by the days it sat out, as the daily flow would have regrown it.
+func _wake(deposit:Dictionary,day:int)->void:
+	var since:=int(deposit.get("resting",day))
+	deposit.erase("resting")
+	if deposit.has("world_key"):return
+	# The step that wakes it regrows its own span (the daily flow).
+	var days:=maxi(0,day-since-maxi(1,int(WorldSimulation.span)))
+	if days<=0:return
+	var capacity:=float(deposit.initial_amount)
+	var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
+	deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery*days)
+
+## Whether a resting stand is looked at today: once every REST_LOOK_DAYS,
+## staggered by the stand so they do not all wake together.
+static func _rest_wakes(deposit:Dictionary,day:int)->bool:
+	return posmod(day+posmod(hash(String(deposit.get("id",""))),REST_LOOK_DAYS),REST_LOOK_DAYS)<maxi(1,int(WorldSimulation.span))
 
 func _is_material_resource(resource_name:String)->bool:
 	# Civilian Goods are maintained household things in use. CivilianGoods applies
