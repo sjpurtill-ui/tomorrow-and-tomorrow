@@ -9,7 +9,7 @@ const WALLS=preload("res://scripts/settlement_construction_mesh.gd")
 const INK=preload("res://scripts/settlement_ink.gd")
 const MAX_DETAILS:=12
 const MAX_TRACK_POINTS:=129
-const MAX_SHORE_SAMPLES:=320
+const MAX_SHORE_SAMPLES:=800
 
 static func ruin_fade(place:Dictionary)->float:
 	if String(place.get("status","living"))!="ruin":return 1.0
@@ -26,7 +26,7 @@ static func extent(plots:Array)->float:
 		for point:Vector2 in plot.get("polygon",PackedVector2Array()):radius=maxf(radius,point.length())
 	return minf(radius,0.22)
 
-## Find an actual dry bank within 640 metres of the inherited anchor. A broad
+## Find an actual dry bank within 1.6 km of the inherited anchor. A broad
 ## founding water survey is not permission to place a jetty on a dry hillside.
 static func shore(at:Vector2,toward:Vector2,land:Callable,water:Callable=Callable())->Dictionary:
 	var state:=begin_shore(at,toward)
