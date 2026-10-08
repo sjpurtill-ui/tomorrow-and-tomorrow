@@ -16,6 +16,8 @@ var remember:CheckBox
 var advanced:VBoxContainer
 var advanced_toggle:Button
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
+## The models offered in "Who answers": [id, words].
+const VOICE_MODELS:=[["gpt-6-luna","GPT-6 Luna (OpenAI)"],["claude-haiku-5-5","Claude Haiku 5.5 (Anthropic)"]]
 
 func _ready()->void:
 	layer=100
@@ -44,6 +46,16 @@ func _ready()->void:
 	modes.item_selected.connect(func(index:int):ai_mode.set_mode(ai_mode.MODES[index]);status.text="People now talk this way: %s." % ai_mode.label())
 	var off:=P.button(mode_row,"Turn AI off",func():PronouncementInterpreter.set_api_enabled(false);_show_status(PronouncementInterpreter.connection_problem()))
 	off.size_flags_horizontal=Control.SIZE_SHRINK_END;off.custom_minimum_size.x=140
+	# Who answers: the model behind the voices, one choice (ai_wire.gd sends a
+	# Claude model to Anthropic with ANTHROPIC_API_KEY).
+	P.kicker(root,"Who answers")
+	var voices:=OptionButton.new();voices.name="VoiceModelSelector";voices.custom_minimum_size.y=38;T.text(voices,"small",T.INK);root.add_child(voices)
+	var current:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
+	if current.is_empty():current=PronouncementInterpreter.DEFAULT_API_MODEL
+	for index in VOICE_MODELS.size():
+		voices.add_item(String(VOICE_MODELS[index][1]),index)
+		if String(VOICE_MODELS[index][0])==current:voices.select(index)
+	voices.item_selected.connect(func(index:int)->void:_choose_voice(String(VOICE_MODELS[index][0])))
 	# Advanced: the developer settings, closed by default.
 	advanced_toggle=P.button(root,"Show advanced settings",_toggle_advanced);advanced_toggle.name="AdvancedToggle"
 	advanced=VBoxContainer.new();advanced.name="Advanced";advanced.add_theme_constant_override("separation",8);advanced.visible=false;root.add_child(advanced)
@@ -85,6 +97,13 @@ func _field(root:Node,title:String,value:String)->LineEdit:
 func _fit()->void:
 	var extent:=get_viewport().get_visible_rect().size;shade.size=extent
 	card.size=Vector2(minf(600,extent.x-40),0);card.position=(extent-card.size)*.5
+## Uses `id` for the voices with the key already set for its service.
+func _choose_voice(id:String)->void:
+	var address:=preload("res://scripts/ai_wire.gd").ANTHROPIC_ENDPOINT if preload("res://scripts/ai_wire.gd").is_anthropic(id) else "https://api.openai.com/v1/chat/completions"
+	model.text=id;endpoint.text=address;reader_model.placeholder_text=id
+	var result:=PronouncementInterpreter.configure_connection("",id,address,false)
+	_show_status(String(result.get("error",result.get("message",""))));_fit.call_deferred()
+
 func _apply()->void:
 	var result:=PronouncementInterpreter.configure_connection(key.text,model.text,endpoint.text,remember.button_pressed)
 	if not result.has("error"):preload("res://scripts/ai_mode.gd").set_reader_model(reader_model.text)

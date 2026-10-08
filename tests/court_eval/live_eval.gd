@@ -951,6 +951,8 @@ func _check_untracked(also_ours:Array=[])->void:
 		if not n is HTTPRequest: continue
 		var parent:=n.get_parent()
 		if parent is LiveVoice or parent in also_ours: continue
+		# The wire to Anthropic sends from a child of the caller's request (ai_wire.gd).
+		if parent is HTTPRequest and (parent.get_parent() is LiveVoice or parent.get_parent() in also_ours): continue
 		if (n as HTTPRequest).get_http_client_status()==HTTPClient.STATUS_DISCONNECTED: continue
 		if _seen_http.has(n.get_instance_id()): continue
 		_seen_http[n.get_instance_id()]=true

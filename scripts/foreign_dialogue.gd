@@ -1,4 +1,5 @@
 extends Node
+const AiWire:=preload("res://scripts/ai_wire.gd")
 signal changed(id:String)
 const MAX_MESSAGES:=40
 const REACTIONS:=["unchanged","conciliate","counteroffer","warn","harden_border","mobilize","call_bluff"]
@@ -209,7 +210,7 @@ func _request(id:String,extra_system:String="",repairing:bool=false,traveling:bo
 	http.request_completed.connect(_response.bind(id,http,repairing,traveling))
 	var payload:Dictionary={"model":config.model,"messages":messages,"max_completion_tokens":2800}
 	if bool(config.get("structured_output",false)):payload.response_format=response_format(id)
-	var error:=http.request(String(config.endpoint),PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),HTTPClient.METHOD_POST,JSON.stringify(payload))
+	var error:=AiWire.send(http,config,PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),payload)
 	if error!=OK: _response.call_deferred(HTTPRequest.RESULT_CANT_CONNECT,0,PackedStringArray(),PackedByteArray(),id,http,repairing,traveling)
 	changed.emit(id)
 
