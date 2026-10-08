@@ -102,6 +102,9 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			# from it comes home before the towns' days are planned.
 			preload("res://scripts/one_seat.gd").fold_towns(day)
 			preload("res://scripts/one_seat.gd").claim_land(day)
+			# Its families settle apart in named places, shares of the one
+			# ledger, never towns with days of their own (settlement_places.gd).
+			preload("res://scripts/settlement_places.gd").monthly(day)
 			return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")
 	),
 		# A town that has had no water within reach for a week is left: its
