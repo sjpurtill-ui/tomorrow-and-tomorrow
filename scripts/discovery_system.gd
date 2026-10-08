@@ -360,6 +360,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	for known_id:String in WorldSimulation.state.known_discoveries: known_set[known_id]=true
 	# Questions that reached a step to proof today (first cases, repeated).
 	var stepped:Array[Dictionary]=[]
+	# The day's common factors, read once for every line and again after a
+	# proof (which can move them): whether a find is under study walks the
+	# whole collection, about 550 pieces by year 342.
+	var common:=_inquiry_common()
 	for channel_variant in WorldSimulation.state.active_investigations.keys().duplicate():
 		var channel:=String(channel_variant)
 		var discovery_id:=String(WorldSimulation.state.active_investigations.get(channel,""))
@@ -379,8 +383,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# Catalog chances describe relative discoverability. The global time scale keeps
 		# knowledge unfolding across generations instead of exhausting an era in months.
 		var material_evidence:=_resource_evidence(discovery.get("resource_requirements",[]))
-		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
-		probability*=Pathways.multiplier(discovery,known_set)*(.85 if Exchange.studying() else 1.0)
+		if common.is_empty():common=_inquiry_common()
+		var probability: float = discovery.chance / research_difficulty(discovery,WorldSimulation.state.world_seed) * attention * activity * material_evidence * leader_factor*float(common.multiplier)*(1.0+float(common.rate))*0.12
+		probability*=Pathways.multiplier(discovery,known_set)*(.85 if bool(common.studying) else 1.0)
 		var progress:=float(WorldSimulation.state.discovery_progress.get(discovery_id,0.0))
 		var before:=progress
 		# A multi-day step (day_span.gd) covers `span` days of inquiry.
@@ -392,6 +397,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		if progress>=1.0:
 			leader_factors.clear()
 			executing_offices.clear()
+			common.clear()
 			Pathways.remember(discovery,current_day)
 			WorldSimulation.state.known_discoveries.append(discovery.id)
 			known_set[String(discovery.id)]=true
@@ -415,6 +421,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		_refresh_active_investigations()
 		_note_freed_teams(results,held)
 	return results
+
+## The factors every line's day of inquiry shares (process_day).
+func _inquiry_common()->Dictionary:
+	return {"multiplier":WorldSimulation.consequences.discovery_multiplier(),"rate":WorldSimulation.progression.effect("knowledge_rate"),"studying":Exchange.studying()}
 
 ## Settles the teams now, reading every line's questions (a request from outside
 ## the day's step).
@@ -2595,12 +2605,24 @@ func _discovery_effect_summary_base(entry:Dictionary)->String:
 
 
 func military_training_multiplier(unit:String)->float:
+	# Only the few discoveries with a training profile shorten training: read
+	# those, not every known discovery (about 900 by year 342).
+	if _training_catalog_size!=catalog_by_id.size():
+		_training_catalog_size=catalog_by_id.size()
+		_training_ids=[]
+		for id:String in catalog_by_id:
+			if not ((catalog_by_id[id] as Dictionary).get("training_profile",{}) as Dictionary).is_empty():_training_ids.append(id)
 	var result:=1.0
-	for id:String in WorldSimulation.state.known_discoveries:
-		var definition:Dictionary=catalog_by_id.get(id,{})
-		var reduction:=clampf(float(definition.get("training_profile",{}).get(unit,0)),0,.25)
+	var known:Array=WorldSimulation.state.known_discoveries
+	for id:String in _training_ids:
+		if not known.has(id):continue
+		var reduction:=clampf(float((catalog_by_id[id] as Dictionary).get("training_profile",{}).get(unit,0)),0,.25)
 		result*=1.0-reduction*adoption(id)
 	return maxf(.7,result)
+
+## The ids with a training profile, built once per catalog (by its size).
+var _training_ids:Array[String]=[]
+var _training_catalog_size:=-1
 
 
 # --- research_600 (begin) -----------------------------------------------------
