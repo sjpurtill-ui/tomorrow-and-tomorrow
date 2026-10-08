@@ -13,6 +13,7 @@ const EARLY = preload("res://scripts/early_settlement_visual.gd")
 const TOWN = preload("res://scripts/organic_town_visual.gd")
 const VISUAL_KEYS = preload("res://scripts/settlement_visual_keys.gd")
 const GROWTH = preload("res://scripts/settlement_country_growth.gd")
+const PLACE_ART = preload("res://scripts/settlement_place_art.gd")
 const GROUND_LIFT_KM:=0.0002
 const SEED_GROUND_LIFT_KM:=0.000035
 var ground_grid:=Vector4.ZERO
@@ -22,6 +23,8 @@ var height_at:Callable
 var land_at:Callable
 var visibility_at:Callable
 var placement_land_at:Callable
+var water_at:Callable
+var river_distance_at:Callable
 var retained:RefCounted
 var last_signature:int = -1
 var plan:Dictionary = {}
@@ -87,6 +90,9 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 		# whose physical patch has actually installed, never queued candidates.
 		for record:Dictionary in plan.get("homesteads",[]):
 			if not record.has("settlement_growth"):continue
+			# Named places have real abandonment and a four-ruin retention cap.
+			# Only anonymous display seeds need this head-count continuity fallback.
+			if record.has("place") or String(record.get("id","")).begins_with("place:"):continue
 			var id:=String(record.id)
 			var patch_id:="homesteads:"+id
 			if not retained.installed.has(patch_id):continue
@@ -99,15 +105,18 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 		plan=PLAN.build(snapshot);last_plan_signature=plan_key
 		if bool(snapshot.get("founded",true)):
 			var active_seeds:Dictionary={}
-			for record:Dictionary in plan.get("homesteads",[]):active_seeds[String(record.id)]=true
+			for record:Dictionary in plan.get("homesteads",[]):
+				if record.has("settlement_growth") or record.has("settlement_plots"):active_seeds[String(record.id)]=true
 			for id:String in _established_seeds:
 				if active_seeds.has(id):continue
+				if id.begins_with("place:") or active_seeds.size()>=GROWTH.MAX_SEEDS:continue
 				var record:Dictionary=_established_seeds[id].duplicate(true)
 				# Real root growth may absorb individual roofs, but cannot reroll
 				# the other inherited parcels of this already established seed.
 				record.settlement_growth.obstacles=PLAN.seed_obstacles(snapshot.get("root_fabric",{}),record.offset)
 				record.geometry_signature=hash(record.settlement_growth)
 				plan.homesteads.append(record)
+				active_seeds[id]=true
 			plan.homesteads.sort_custom(PLAN._nearer)
 	var entries:Array[Dictionary]=[]
 	var seed_ids:Dictionary={}
@@ -127,6 +136,7 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 				var test:=point.distance_squared_to(anchor)
 				if test<distance:nearest=anchor;distance=test
 			if kind=="herders":nearest=point.move_toward(anchors[0],minf(2.0,point.distance_to(anchors[0])))
+			if record.has("place"):nearest=Vector2(record.get("track_from",anchors[0]))
 			# Long work hauls end at a local farmstead. These are worn tracks,
 			# never new supply lines or another named settlement.
 			record["track_from"]=nearest
@@ -149,6 +159,9 @@ func request(snapshot:Dictionary,style:Dictionary={})->void:
 	var spare:=maxi(0,GROWTH.MAX_SEEDS-seed_ids.size())
 	for id:String in remembered:
 		if seed_ids.has(id):continue
+		if id.begins_with("place:"):
+			_seed_layouts.erase(id);_growth_states.erase(id)
+			continue
 		if spare>0:spare-=1
 		else:_seed_layouts.erase(id);_growth_states.erase(id)
 	for id:String in _seed_ground_keys.keys():
@@ -205,7 +218,7 @@ func _advance_job()->bool:
 	var growth:Dictionary=_job.get("growth",{})
 	if not growth.is_empty():
 		seed_growth_steps+=1
-		if not GROWTH.advance(growth.state,_placement_land,height_at):return false
+		if not GROWTH.advance(growth.state,_placement_land,height_at,river_distance_at):return false
 		var work:=_begin_seed_layout(_grown_record(growth.record,growth.state))
 		work["growth_state"]=growth.state
 		_collecting=true;_commands=[]
@@ -216,6 +229,13 @@ func _advance_job()->bool:
 		return false
 	var seed_work:Dictionary=_job.get("seed",{})
 	if not seed_work.is_empty():
+		if seed_work.has("place_track_job"):
+			if not PLACE_ART.advance_track(seed_work.place_track_job,_placement_land):return false
+			_collecting=true;_commands=[]
+			_draw_place_track(_job.surface,seed_work)
+			_collecting=false
+			_commands.reverse();(_job.commands as Array).append_array(_commands);_commands=[]
+			return false
 		if not (seed_work.pending as Array).is_empty():
 			_advance_seed_layout(seed_work)
 			return false
@@ -439,7 +459,7 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 			if _collecting:_pending_growth={"record":record,"state":state}
 			else:
 				seed_growth_steps+=1
-				while not GROWTH.advance(state,_placement_land,height_at):seed_growth_steps+=1
+				while not GROWTH.advance(state,_placement_land,height_at,river_distance_at):seed_growth_steps+=1
 				var work:=_begin_seed_layout(_grown_record(record,state));work["growth_state"]=state
 				_draw_seed_ground(surface,work)
 				while not (work.pending as Array).is_empty():_advance_seed_layout(work)
@@ -487,6 +507,9 @@ func _build_patch(parent:Node3D,record:Dictionary,context:Dictionary)->void:
 func _grown_record(record:Dictionary,state:Dictionary)->Dictionary:
 	var grown:=record.duplicate(false)
 	grown["settlement_plots"]=state.plots;grown["settlement_routes"]=state.routes
+	if record.has("place") and Vector2(record.place.get("facing",Vector2.ZERO))==Vector2.ZERO and Vector2(state.get("facing",Vector2.ZERO))!=Vector2.ZERO:
+		grown["place"]=(record.place as Dictionary).duplicate(true)
+		grown.place["facing"]=state.facing
 	return grown
 
 func _placement_land(world:Vector2)->bool:
@@ -513,6 +536,7 @@ func _begin_seed_layout(record:Dictionary)->Dictionary:
 	pending.sort()
 	var prior_plan:Dictionary=cached.get("plan",{"buildings":[],"replaced":{}})
 	return {"id":id,"origin":Vector2(record.position),"plots":plots,"routes":routes,
+		"place":record.get("place",{}),"track_from":record.get("track_from",record.position),"road_tier":record.get("road_tier",0),
 		"ownership":record.get("settlement_growth",{}),"inputs":inputs,"pending":pending,"plan":VISUAL_KEYS.refresh_plan(prior_plan,plots)}
 
 func _seed_visible(local:Vector2,origin:Vector2,ownership:Dictionary={})->bool:
@@ -556,15 +580,28 @@ func _finish_seed(parent:Node3D,work:Dictionary)->void:
 		visible.append(building);positions.append(Vector2(work.origin)+Vector2(building.position))
 	var shown:={"buildings":visible,"replaced":work.plan.replaced}
 	var origin:Vector2=work.origin
-	EARLY.render(shown,Vector3(origin.x,0.0,origin.y),func(x:float,z:float)->float:return _point(Vector2(x,z),0.0).y,parent)
-	parent.set_meta("country_home_count",visible.size())
+	var place:Dictionary=work.get("place",{})
+	var occupied:=PLACE_ART.render_damage(parent,shown,place,origin,func(point:Vector2)->float:return _point(point,0.0).y)
+	EARLY.render(occupied,Vector3(origin.x,0.0,origin.y),func(x:float,z:float)->float:return _point(Vector2(x,z),0.0).y,parent)
+	if not place.is_empty():
+		positions.clear()
+		for building:Dictionary in occupied.buildings:positions.append(origin+Vector2(building.position))
+	parent.set_meta("country_home_count",occupied.buildings.size())
 	parent.set_meta("country_home_positions",positions)
-	parent.set_meta("country_seed_plan",shown)
+	parent.set_meta("country_seed_plan",occupied)
 	parent.set_meta("country_seed_plots",work.plots)
 	parent.set_meta("country_seed_routes",work.routes)
 	parent.set_meta("country_seed_id",work.id)
 	parent.set_meta("country_seed_origin",work.origin)
 	parent.set_meta("country_seed_geometry",hash([work.origin,work.inputs]))
+	if not place.is_empty():
+		for key:String in ["id","name","kind","status","trend","flooded"]:parent.set_meta("country_place_"+key,place.get(key,""))
+		parent.set_meta("country_place_fade",PLACE_ART.ruin_fade(place))
+		parent.set_meta("place_track_points",work.get("place_track_points",PackedVector2Array()))
+		if _seed_visible(Vector2.ZERO,origin):
+			parent.add_child(PLACE_ART.label(place,origin,func(point:Vector2)->float:return _point(point,0.0).y))
+		PLACE_ART.render_props(parent,work.get("place_details",{}),func(point:Vector2)->float:return _point(point,0.0).y,
+			func(point:Vector2)->bool:return _valid(point) and bool(_visibility_cache.get(point,true)),visibility_at)
 
 func _draw_seed_ground(surface:SurfaceTool,work:Dictionary)->void:
 	var origin:Vector2=work.origin
@@ -582,6 +619,27 @@ func _draw_seed_ground(surface:SurfaceTool,work:Dictionary)->void:
 		var width:=TOWN.route_half_width(route)*2.0
 		for index in range(1,points.size()):
 			_ribbon(surface,origin+points[index-1],origin+points[index],width,Color(0.58,0.50,0.38,0.62),SEED_GROUND_LIFT_KM)
+	var place:Dictionary=work.get("place",{})
+	if place.is_empty():return
+	var detail:=PLACE_ART.details(work,_placement_land,water_at)
+	work["place_details"]=detail
+	for wash:Dictionary in detail.get("washes",[]):_wash(surface,wash.position,wash.radius,wash.color,hash([work.id,wash.position]))
+	for field:Dictionary in detail.get("fields",[]):_field(surface,field,field.color)
+	for line:Dictionary in detail.get("lines",[]):_ribbon(surface,line.start,line.finish,line.width,Color(0.58,0.50,0.38,0.62))
+	work["place_track_job"]=PLACE_ART.begin_track(Vector2(work.track_from),origin,place)
+	if not _collecting:
+		while not PLACE_ART.advance_track(work.place_track_job,_placement_land):pass
+		_draw_place_track(surface,work)
+
+func _draw_place_track(surface:SurfaceTool,work:Dictionary)->void:
+	var track:PackedVector2Array=work.place_track_job.points
+	work["place_track_points"]=track;work.erase("place_track_job")
+	var place:Dictionary=work.place
+	var tier:=int(work.get("road_tier",0))
+	var width:=0.006 if tier>=2 else (0.0026 if tier==1 else 0.0012)
+	var tint:=Color(0.58,0.51,0.40,0.52) if tier<2 else Color(0.66,0.62,0.52,0.64)
+	if String(place.get("status","living"))=="ruin":tint.a*=PLACE_ART.ruin_fade(place)*0.5
+	for index in range(1,track.size()):_ribbon(surface,track[index-1],track[index],width,tint)
 
 func _finish_surface(parent:Node3D,surface:SurfaceTool)->void:
 	var arrays:=surface.commit_to_arrays()
