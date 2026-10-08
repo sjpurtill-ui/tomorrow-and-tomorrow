@@ -3,7 +3,7 @@ extends RefCounted
 ## neither key changes the simulation. All samples use stable recorded identity.
 const CELL_KM:=0.256
 const ID_SHARD:=16
-const PLACEMENT_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","visual_building_sites","visual_sites_form"]
+const PLACEMENT_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","water_facing","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","visual_building_sites","visual_sites_form"]
 const APPEARANCE_FIELDS:=["id","seed","centroid","polygon","frontage_route_id","area_ha","roof_coverage","land_use","form","material_family","roof_plan","storeys","fabric_generation","fabric_components","status","damage","field_pattern","crop_family","visual_material_mix","material_mix","building_materials","field_rotation","created_day","converted_day","infill_units","crop_cover","cultivation_phase","supply_provenance"]
 const TONE_FIELDS:=["condition","prosperity","service_access","maintenance_debt","reclamation"]
 const ROUTE_FIELDS:=["id","points","active","kind","hierarchy","width_m","surface_tier","status"]

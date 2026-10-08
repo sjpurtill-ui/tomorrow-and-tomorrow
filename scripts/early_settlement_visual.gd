@@ -138,7 +138,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		record["early_kind"] = kind(original)
 		if String(record.early_kind) in KIT:
 			record.erase("garden")
-		if String(record.early_kind) in ["round_household","carried_round"]:
+		if String(record.early_kind) in ["round_household","carried_round"] and Vector2(original.get("water_facing",Vector2.ZERO))==Vector2.ZERO:
 			var to_hearth: Vector2 = hearth-Vector2(record.position)
 			if to_hearth.length() > .004: record.angle = atan2(to_hearth.x,to_hearth.y)
 		if bool(record.get("fit_inherited_site",false)):record["site_basis"]=site_basis(record)

@@ -135,6 +135,12 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 				normal = Vector2.from_angle(heading + float(slot)*TAU/6)
 				along = Vector2(-normal.y, normal.x)
 				position = court + normal * (.0045 + float(ring)*.00055)
+			# Named shore places supply this read-only display input. Orient before
+			# the normal footprint checks so a water-facing roof still fits its lot.
+			var water_facing:Vector2=plot.get("water_facing",Vector2.ZERO)
+			if water_facing.length_squared()>0.001:
+				normal=-water_facing.normalized()
+				along=Vector2(-normal.y,normal.x)
 			var footprint := PackedVector2Array()
 			for corner in [Vector2(-1,-1), Vector2(1,-1), Vector2(1,1), Vector2(-1,1)]:
 				footprint.append(position + along * corner.x * dimensions.x + normal * corner.y * dimensions.y)
