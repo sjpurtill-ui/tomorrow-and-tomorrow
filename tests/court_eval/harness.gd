@@ -490,6 +490,8 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 		# How each holds the god (divine_regard.gd): love and dread, x100.
 		m["love_"+role]=roundi(Divine.love_of(snap)*100.0) if not snap.is_empty() else 0
 		m["dread_"+role]=roundi(Divine.dread_of(snap)*100.0) if not snap.is_empty() else 0
+	# Who keeps the stores now, from the office ledger (a successor's name).
+	m["keeper"]=String(GovernmentPeopleSystem.officeholder("Quartermaster").get("name",""))
 	# The people as a whole: love and dread of the god; legitimacy, cohesion.
 	var people:=Divine.people_regard(Hall._officials())
 	m["people_love_x100"]=roundi(float(people.get("love",0.0))*100.0)
@@ -592,7 +594,10 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	# lines, what our thinkers study, the scouting, strangers, a great work.
 	m["training_policy"]=String((MilitaryCampaign.training_staff.policy("army") as Dictionary).get("id",""))
 	# The army size the war leader keeps (army_levy_law.gd): "none" keeps no army.
-	m["army_level"]=String(MilitaryCampaign.get("army_levy_level"))
+	# Keeping watch is the military (watch_military.gd): the level is the watch
+	# share itself; "none" when nobody keeps watch.
+	var Levy:=load("res://scripts/army_levy_law.gd")
+	m["army_level"]="none" if int(load("res://scripts/watch_military.gd").call("manpower",MilitaryCampaign))<=0 else String(Levy.call("reading",MilitaryCampaign).level)
 	m["drill_program"]=0 if (MilitaryCampaign.training_program as Dictionary).is_empty() else 1
 	var lines:=0; var line_target:=0
 	for job in MilitaryCampaign.equipment_queue:
