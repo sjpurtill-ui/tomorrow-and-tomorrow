@@ -270,6 +270,18 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 				_: title="%s may move against us" % String(p.name)
 			var fix:=_fix_for(String(c.id),our)
 			warnings.append({"tone":"danger","title":title,"words":String(c.words)+". "+String(fix.words),"civ_id":String(p.civ_id),"section":String(fix.section),"sub":int(fix.sub),"action":String(fix.action),"rank":_rank(String(c.id))})
+	# Households leaving us on their own for a people whose life looks better
+	# (society_exchange.gd drawn_households), with why and what would hold them.
+	var Exchange:=preload("res://scripts/society_exchange.gd")
+	for row:Dictionary in Exchange.leaving_this_year():
+		var reasons:PackedStringArray=[];var fixes:PackedStringArray=[]
+		for key:String in (row.gaps as Dictionary):
+			var lines:Array=Exchange.LEAVING_WORDS.get(key,[])
+			if lines.is_empty() or reasons.size()>=2:continue
+			reasons.append(String(lines[0]));fixes.append(String(lines[1]))
+		var words:="Life there looks better than here by %d in 100; under %d they would stay" % [roundi(float(row.advantage)*100.0),roundi(Exchange.MINIMUM_ATTRACTION_ADVANTAGE*100.0)]
+		if not reasons.is_empty():words="%s: %s. %s" % [words," and ".join(reasons),". ".join(fixes)]
+		warnings.append({"tone":"danger","title":"%s of our people left for %s this year" % [EraWords.grouped(int(row.count)),String(row.to)],"words":words+".","section":"overview","sub":0,"action":"People","rank":2})
 	if bool(posture.get("lopsided",false)):
 		var low:Dictionary=posture.low
 		for row:Array in Standing.STRENGTHS:

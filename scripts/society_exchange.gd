@@ -44,6 +44,10 @@ static func valid(value:Variant)->bool:
 		if not value.artifact_bonuses is Dictionary:return false
 		for amount:Variant in value.artifact_bonuses.values():
 			if not number(amount) or amount<0:return false
+	if value.has("emigration"):
+		if not value.emigration is Array or value.emigration.size()>24:return false
+		for entry:Variant in value.emigration:
+			if not entry is Dictionary or not number(entry.get("day")) or not short_text(entry.get("to")) or not number(entry.get("count")) or not entry.get("gaps",{}) is Dictionary:return false
 	if value.has("museum_revenue") and (not number(value.museum_revenue) or value.museum_revenue<0):return false
 	if value.has("artifact_study"):
 		var role:Variant=value.artifact_study
@@ -241,15 +245,23 @@ static func reception_capacity()->int:
 	return int(reception_snapshot().capacity)
 
 static func attraction()->float:
+	var total:=0.0
+	for part:float in attraction_parts().values():total+=part
+	return clampf(total,0,1)
+
+## What makes life here look good to households, part by part, as weighted
+## shares of attraction() (each people its own: its own health, never ours).
+static func attraction_parts()->Dictionary:
 	var s:=WorldSimulation.state;var m:=s.simulation_metrics
-	var health:=preload("res://scripts/civilization_indicators.gd").health()
+	var health:=preload("res://scripts/civilization_indicators.gd").health(s,WorldSimulation.discovery)
 	var longevity:=clampf((float(health.life_expectancy)-15.0)/55.0,0.0,1.0)
 	var infant_survival:=1.0-clampf((float(health.infant_mortality_per_1000)-60.0)/240.0,0.0,1.0)
 	var health_quality:=longevity*.58+infant_survival*.42
-	var base:=s.food_security*.28+minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18+health_quality*.24+float(m.get("security",.4))*.15+float(m.get("cohesion",.5))*.15+preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction")+preload("res://scripts/artifact_culture.gd").migration_bonus()
-	# standing.gd: warbands menace newcomers; pride keeps a people's own.
-	base+=preload("res://scripts/standing.gd").attraction_shift()
-	return clampf(base,0,1)
+	return {"food":s.food_security*.28,"homes":minf(1,float(s.housing_capacity)/maxf(1,s.population_exact))*.18,"health":health_quality*.24,
+		"security":float(m.get("security",.4))*.15,"cohesion":float(m.get("cohesion",.5))*.15,
+		"works":preload("res://scripts/undertaking_rewards.gd").local_bonus(s,"attraction"),"artifacts":preload("res://scripts/artifact_culture.gd").migration_bonus(),
+		# standing.gd: warbands menace newcomers; pride keeps a people's own.
+		"standing":preload("res://scripts/standing.gd").attraction_shift()}
 
 static func connection(id:String)->Dictionary:
 	id=owner_id(id)
@@ -584,6 +596,7 @@ static func drawn_households(day:int)->int:
 	var room:=reception_capacity()
 	if room<2:return 0
 	var rivalry:=load("res://scripts/great_works_rivalry.gd") as GDScript
+	var ours_parts:=attraction_parts()
 	var ours:=attraction()
 	var arrived:=0
 	for civ:Dictionary in WorldSimulation.world.civilizations:
@@ -593,6 +606,7 @@ static func drawn_households(day:int)->int:
 		if source==recipient or owner_state(source)==null or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)):continue
 		if day<int(known_relation(source).get("recruitment_truce_until",0)):continue
 		if float(rivalry.call("known_traffic",source,recipient))<=0.0:continue
+		var theirs_parts:Dictionary=WorldSimulation.scoped(source,func()->Dictionary:return attraction_parts())
 		var theirs:float=WorldSimulation.scoped(source,func()->float:return attraction())
 		var advantage:=ours-theirs
 		if advantage<MINIMUM_ATTRACTION_ADVANTAGE:continue
@@ -601,14 +615,14 @@ static func drawn_households(day:int)->int:
 		var rng:=RandomNumberGenerator.new()
 		rng.seed=hash("%d:drawn:%s:%s:%d" % [int(WorldSimulation.state.world_seed),source,recipient,day])
 		var count:=mini(room-arrived,floori(expected+rng.randf()))
-		if count>=1:arrived+=_drawn_arrival(source,String(civ.get("name",source)),count,day)
+		if count>=1:arrived+=_drawn_arrival(source,String(civ.get("name",source)),count,day,{"advantage":advantage,"gaps":_gaps(ours_parts,theirs_parts)})
 	return arrived
 
 ## Moves `count` households that chose to come from `source` into the people in
 ## scope: they leave that people's own count (never its last free hands) and
 ## join ours, to be settled like any newcomers; their rulers resent the loss as
 ## they resent households invited away (arrive).
-static func _drawn_arrival(source:String,source_name:String,count:int,_day:int)->int:
+static func _drawn_arrival(source:String,source_name:String,count:int,_day:int,why:Dictionary={})->int:
 	var recipient:=WorldSimulation.actor_id
 	var rivalry:=load("res://scripts/great_works_rivalry.gd") as GDScript
 	var departure:Dictionary=WorldSimulation.scoped(source,func()->Dictionary:
@@ -622,6 +636,7 @@ static func _drawn_arrival(source:String,source_name:String,count:int,_day:int)-
 		ties.departures+=int(gone.get("count",0))
 		ties.resentment=minf(.4,float(ties.resentment)+float(gone.get("count",0))/maxf(1,WorldSimulation.state.population_exact)*.2)
 		log_event("%d people left us on their own for %s, drawn by what they heard of its works." % [int(gone.get("count",0)),there])
+		if WorldSimulation.actor_id=="player":_tell_leaving(there,int(gone.get("count",0)),why)
 		return gone)
 	var moved:=int(departure.get("count",0))
 	if moved<=0:return 0
@@ -633,6 +648,55 @@ static func _drawn_arrival(source:String,source_name:String,count:int,_day:int)-
 	connection(source).arrivals+=moved
 	log_event("%d people came from %s on their own, drawn by what they heard of our works; reception and integration are under way." % [moved,source_name])
 	return moved
+
+## Where `there` beats `here`, part by part: {part: their share - ours} for
+## every part at least 0.01 ahead, largest first.
+static func _gaps(there:Dictionary,here:Dictionary)->Dictionary:
+	var keys:Array=[]
+	for key:String in there:
+		if float(there[key])-float(here.get(key,0.0))>=0.01:keys.append(key)
+	keys.sort_custom(func(a:String,b:String)->bool:return float(there[a])-float(here.get(a,0.0))>float(there[b])-float(here.get(b,0.0)))
+	var out:={}
+	for key:String in keys:out[key]=float(there[key])-float(here.get(key,0.0))
+	return out
+
+## The god's people only: households that left on their own this month are
+## told, with why life there looks better and what would hold them; kept a
+## year for the Standing tab (leaving_this_year).
+const LEAVING_WORDS:={"security":["they are safer there","Put people on keeping watch"],"works":["its great works draw them","Great works of our own that welcome strangers would hold them"],
+	"food":["they eat better there","More on getting food"],"homes":["they are housed better there","Build more homes"],"health":["they live longer there","Better care and healing"],
+	"cohesion":["they live more at one there","More on keeping and caring"],"artifacts":["its treasures draw them","Treasures of our own to show"],"standing":["it stands higher in their eyes","Raise our standing"]}
+static func _tell_leaving(there:String,count:int,why:Dictionary)->void:
+	if count<=0:return
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var log:Array=data().get_or_add("emigration",[])
+	log.append({"day":day,"to":there,"count":count,"advantage":float(why.get("advantage",0.0)),"gaps":(why.get("gaps",{}) as Dictionary).duplicate()})
+	while not log.is_empty() and (int((log[0] as Dictionary).day)<day-365 or log.size()>24):log.pop_front()
+	var reasons:PackedStringArray=[];var fixes:PackedStringArray=[]
+	for key:String in (why.get("gaps",{}) as Dictionary):
+		if reasons.size()>=2:break
+		var words:Array=LEAVING_WORDS.get(key,[])
+		if words.is_empty():continue
+		reasons.append(String(words[0]));fixes.append(String(words[1]))
+	var text:="%d of our people left for %s this month" % [count,there]
+	if not reasons.is_empty():text+=": "+" and ".join(reasons)
+	text+=". They keep going while life there looks clearly better than here (by %d in 100; under %d they stay)." % [roundi(float(why.get("advantage",0.0))*100.0),roundi(MINIMUM_ATTRACTION_ADVANTAGE*100.0)]
+	if not fixes.is_empty():text+=" "+". ".join(fixes)+"."
+	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"PEOPLE LEAVE FOR %s" % there.to_upper(),"description":text,"domain":"population","severity":"major"})
+	if WorldSimulation.state.simulation_events.size()>80:WorldSimulation.state.simulation_events.resize(80)
+
+## The past year's leaving, for the Standing tab: [{to, count, gaps}] by
+## people, most first (the latest month's reasons).
+static func leaving_this_year()->Array:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var by:={}
+	for entry:Dictionary in data().get("emigration",[]):
+		if int(entry.day)<day-365:continue
+		var row:Dictionary=by.get_or_add(String(entry.to),{"to":String(entry.to),"count":0,"gaps":{},"advantage":0.0})
+		row.count=int(row.count)+int(entry.count);row.gaps=entry.gaps;row.advantage=float(entry.advantage)
+	var rows:=by.values()
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.count)>int(b.count))
+	return rows
 
 static func advance(day:int)->void:
 	if day<=int(data().last_day):return
