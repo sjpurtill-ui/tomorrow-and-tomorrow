@@ -130,3 +130,11 @@ func test_the_border_panel_shows_each_stretch_the_forts_and_the_sites()->void:
 	preload("res://scripts/hud/dock_blocks.gd").render(box,blocks)
 	assert_int(box.get_child_count()).is_greater(0)
 	box.queue_free()
+
+func test_the_line_facing_a_people_is_what_stops_crossings_toward_it()->void:
+	_standing(Vector2(80,0));_standing(Vector2(0,80))
+	Forts.ledger(GameState).border_share=1.0
+	# A point straight through the linked stretch, and one through open ground.
+	var through:=Forts.at(Vector2(60,60),GameState)
+	var open:=Forts.at(Vector2(-60,-60),GameState)
+	assert_float(float(through.strength)).is_greater(float(open.strength)*5.0)

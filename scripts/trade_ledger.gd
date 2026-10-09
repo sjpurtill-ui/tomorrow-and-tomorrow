@@ -388,7 +388,11 @@ static func _settle(p:Dictionary,day:int)->void:
 			if share<=0.0: continue
 			var levier:=a if side=="a" else b
 			var payer2:=b if side=="a" else a
-			tolls[side]=_levy(payer2,levier,share*(float(value.ab)+float(value.ba)),form)
+			# Smugglers carry goods round a thinly watched border: the toll is
+			# taken in full only where the levier's line facing them holds
+			# (half at an open border, fort_border.gd facing).
+			var collected:=0.5+0.5*preload("res://scripts/fort_border.gd").facing(owner_of(levier),owner_of(payer2),0.0)
+			tolls[side]=_levy(payer2,levier,share*collected*(float(value.ab)+float(value.ba)),form)
 		# Gifts beyond trade, from a stance (trade_stances.gd "gifts").
 		for dir in ["ab","ba"]:
 			var size:=float((mods.gift as Dictionary).get(dir,0.0))*float(period)/30.0
