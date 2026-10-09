@@ -27,8 +27,13 @@ static func supplied_work_days()->float:
 		work+=units*float(job.work_per_item)/maxf(.1,float(job.efficiency))
 	return work/rate
 
+## Held once loaded: a script nothing holds is freed and compiled again (with
+## everything it preloads) on its next load, a stall on that review's day.
+static var _hammer:Script=null
+
 static func recommendation()->Dictionary:
-	var hammer:Dictionary=load("res://scripts/water_hammer_investment.gd").recommendation()
+	if _hammer==null:_hammer=load("res://scripts/water_hammer_investment.gd")
+	var hammer:Dictionary=_hammer.recommendation()
 	if not hammer.is_empty():return hammer
 	var state=WorldSimulation.state
 	if not state.settlement_site_committed or state.convoy_traveling or not state.resource_settlement_id.is_empty():return {}
