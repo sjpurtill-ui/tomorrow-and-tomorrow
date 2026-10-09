@@ -30,6 +30,14 @@ static func areas_from_ledgers(ledgers:Array,center:Vector2)->PackedVector4Array
 			if String(deposit.get("landscape_source",""))!="woodland_catchment": continue
 			var capacity:=float(deposit.get("initial_amount",0.0))
 			if capacity<=0.0: continue
+			if bool(deposit.get("pool",false)):
+				# A seat's timber pool (material_pools.gd) remembers where its woods
+				# were opened; each is drawn at the pool's standing share.
+				var ratio:=clampf(float(deposit.get("remaining",capacity))/capacity,0.0,1.0)
+				if ratio>0.999: continue
+				for cell:Variant in deposit.get("cells",[]):
+					if cell is Array and (cell as Array).size()>=2:candidates.append(Vector4(float(cell[0]),float(cell[1]),1.5,ratio))
+				continue
 			var remaining:=clampf(float(deposit.get("remaining",capacity))/capacity,0.0,1.0)
 			if remaining>0.999: continue
 			var point:Vector3=deposit.get("position",Vector3.ZERO)

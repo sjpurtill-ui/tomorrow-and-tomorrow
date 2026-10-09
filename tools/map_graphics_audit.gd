@@ -126,7 +126,7 @@ func _ready()->void:
 	if "--surface-supplies" in OS.get_cmdline_user_args():
 		var fields:Dictionary=terrain._surface_material_catchments(terrain.camera_target)
 		GameState.resource_deposits=[]
-		ResourceSystem._ensure_surface_material_supplies({"settled":true,"origin":terrain.camera_target,"surface_material_catchments":fields})
+		ResourceSystem.ensure_pools({"settled":true,"origin":terrain.camera_target,"surface_material_catchments":fields})
 		for resource in ["Stone","Fiber Plants"]:
 			if float(fields[resource].density)<(0.03 if resource=="Stone" else 0.08): continue
 			var found:=false

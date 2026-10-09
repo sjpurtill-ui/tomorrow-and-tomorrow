@@ -187,7 +187,7 @@ func test_food_trade_uses_the_food_ledger_and_records_transit_loss()->void:
 func test_secondary_woodland_supply_is_local_and_does_not_duplicate_capital()->void:
 	var before:=GameState.resource_deposits.duplicate(true)
 	var context:={"settled":true,"origin":Vector3(10,0,0),"woodland_catchment":{"density":0.65,"area_km2":9.0,"position":Vector3(10,0,0)}}
-	SettlementModel.with_city_resources("dawngate",func()->void: ResourceSystem._ensure_woodland_supply(context))
+	SettlementModel.with_city_resources("dawngate",func()->void: ResourceSystem.ensure_pools(context))
 	assert_array(GameState.resource_deposits).is_equal(before)
 	var deposits:Array=SettlementModel.city_resource_snapshot("dawngate").get("deposits",[])
 	assert_int(deposits.size()).is_equal(1)
@@ -197,7 +197,7 @@ func test_stone_and_fiber_catchments_belong_to_their_own_city()->void:
 	var before:=GameState.resource_deposits.duplicate(true)
 	var stores:=GameState.resource_stockpiles.duplicate(true)
 	var context:={"settled":true,"origin":Vector3(10,0,0),"surface_material_catchments":{"Stone":{"density":0.5,"position":Vector3(10,0,0)},"Fiber Plants":{"density":0.6,"position":Vector3(11,0,0)}}}
-	SettlementModel.with_city_resources("dawngate",func()->void: ResourceSystem._ensure_surface_material_supplies(context))
+	SettlementModel.with_city_resources("dawngate",func()->void: ResourceSystem.ensure_pools(context))
 	assert_array(GameState.resource_deposits).is_equal(before)
 	assert_dict(GameState.resource_stockpiles).is_equal(stores)
 	assert_int(SettlementModel.city_resource_snapshot("dawngate").deposits.size()).is_equal(2)

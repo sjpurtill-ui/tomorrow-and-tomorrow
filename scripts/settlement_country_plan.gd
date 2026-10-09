@@ -422,6 +422,8 @@ static func _sites(snapshot:Dictionary)->Array:
 
 
 static func _eligible(deposit:Dictionary)->bool:
+	# A seat's pool of common material is drawn as its worked land, not a site.
+	if bool(deposit.get("pool",false)):return false
 	if String(deposit.get("landscape_source","")) not in SURFACE_SOURCES and String(deposit.get("found_by",""))!="searchers":return false
 	return String(deposit.get("stage","")) in ["accessible","developed"] or float(deposit.get("lifetime_extracted",0.0))>0.0
 

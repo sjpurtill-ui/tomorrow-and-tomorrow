@@ -1,5 +1,6 @@
 extends GdUnitTestSuite
 const Terrain:=preload("res://scripts/local_terrain.gd")
+const Pools:=preload("res://scripts/material_pools.gd")
 func before_test()->void:
 	GameState.reset_for_new_world(864209)
 	MilitaryCampaign.reset_for_new_world()
@@ -9,55 +10,65 @@ func before_test()->void:
 
 func after_test()->void:
 	WorldSimulation.context_provider=Callable()
+	WorldSimulation.surface_material_provider=Callable()
 
 func _context(density:float)->Dictionary:
 	return {"settled":true,"origin":Vector3.ZERO,"woodland_catchment":{"density":density,"area_km2":9.0,"position":Vector3(0.5,0,0.5)}}
 
-func test_visible_woodland_supplies_timber_without_a_random_occurrence()->void:
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
+func test_visible_woodland_supplies_timber_as_the_seats_pool()->void:
+	ResourceSystem.ensure_pools(_context(0.7))
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
-	var supply:Dictionary=GameState.resource_deposits[0]
-	assert_str(String(supply.resource)).is_equal("Timber")
-	assert_str(String(supply.stage)).is_equal("accessible")
-	assert_float(float(supply.remaining)).is_greater(0.0)
+	var pool:Dictionary=GameState.resource_deposits[0]
+	assert_bool(Pools.is_pool(pool)).is_true()
+	assert_str(String(pool.resource)).is_equal("Timber")
+	assert_str(String(pool.stage)).is_equal("developed")
+	assert_float(float(pool.remaining)).is_equal_approx(9.0*0.7*600.0,0.001)
+	assert_float(float(pool.area_km2)).is_equal(9.0)
 
 func test_repeat_sampling_does_not_duplicate_or_refill_cut_woodland()->void:
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
+	ResourceSystem.ensure_pools(_context(0.7))
 	GameState.resource_deposits[0].remaining=12.0
-	ResourceSystem._ensure_woodland_supply(_context(0.9))
+	ResourceSystem.ensure_pools(_context(0.9))
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
 	assert_float(float(GameState.resource_deposits[0].remaining)).is_equal(12.0)
 
-func test_exhausted_surface_front_moves_to_real_nearby_cover()->void:
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	var first:Dictionary=GameState.resource_deposits[0]
-	first.remaining=0.0
+func test_a_cut_pool_opens_the_next_ring_of_real_cover()->void:
+	ResourceSystem.ensure_pools(_context(0.7))
+	var pool:Dictionary=GameState.resource_deposits[0]
+	var first:=float(pool.initial_amount)
+	pool.remaining=0.0
 	GameState.population_allocations.Logistics=12
-	WorldSimulation.context_provider=func(point:Vector2)->Dictionary:
-		return {"woodland_catchment":{"density":0.8,"area_km2":9.0,"position":Vector3(point.x,0,point.y)},"surface_material_catchments":{}}
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	assert_int(GameState.resource_deposits.size()).is_equal(2)
-	var next:Dictionary=GameState.resource_deposits[1]
-	assert_str(String(next.landscape_source)).is_equal("woodland_catchment")
-	assert_float(float(next.remaining)).is_greater(0.0)
-	assert_float((next.position as Vector3).distance_to(first.position)).is_greater_equal(2.5)
-
-func test_existing_local_source_keeps_its_inventory_and_shipments()->void:
-	var old:=ResourceSystem._deposit("Timber",Vector3.ZERO,0.7,10.0,0)
-	old["stock_at_source"]=3.0
-	old["shipments"]=[{"quantity":2.0,"arrival_day":5}]
-	GameState.resource_deposits.append(old)
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
+	WorldSimulation.surface_material_provider=func(point:Vector2)->Dictionary:
+		return {"Timber":{"density":0.8,"area_km2":9.0,"position":Vector3(point.x,0,point.y)}}
+	ResourceSystem.ensure_pools(_context(0.7))
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
-	assert_float(float(old.remaining)).is_equal(10.0)
-	assert_float(float(old.stock_at_source)).is_equal(3.0)
-	assert_int(old.shipments.size()).is_equal(1)
+	assert_int(int(pool.ring)).is_equal(1)
+	assert_float(float(pool.remaining)).is_equal_approx(8.0*9.0*0.8*600.0,0.001)
+	assert_float(float(pool.initial_amount)).is_equal_approx(first+8.0*9.0*0.8*600.0,0.001)
+	assert_float(Pools.reach_km(pool)).is_equal(4.5)
+
+func test_older_woods_fold_into_the_pool_with_their_cut_stock_and_loads()->void:
+	var old:=ResourceSystem._deposit("Timber",Vector3(0.5,0,0.5),0.7,50.0,0)
+	old.landscape_source="woodland_catchment";old.stage="developed";old.remaining=40.0
+	old["stock_at_source"]=3.0
+	old["shipments"]=[[5,2.0]];old["in_transit"]=2.0
+	GameState.resource_deposits.append(old)
+	GameState.resource_stockpiles["Timber"]=0.0
+	ResourceSystem.ensure_pools(_context(0.7))
+	assert_int(GameState.resource_deposits.size()).is_equal(1)
+	var pool:Dictionary=GameState.resource_deposits[0]
+	assert_bool(Pools.is_pool(pool)).is_true()
+	assert_float(float(pool.remaining)).is_equal(40.0)
+	assert_float(float(pool.initial_amount)).is_equal(50.0)
+	assert_float(float(pool.stock_at_source)).is_equal(3.0)
+	# The load already on the road reaches the stores.
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(2.0)
 
 func test_treeless_land_and_unfounded_convoy_do_not_create_woodland_supply()->void:
-	ResourceSystem._ensure_woodland_supply(_context(0.01))
+	ResourceSystem.ensure_pools(_context(0.01))
 	var context:=_context(0.8)
 	context["settled"]=false
-	ResourceSystem._ensure_woodland_supply(context)
+	ResourceSystem.ensure_pools(context)
 	assert_array(GameState.resource_deposits).is_empty()
 
 func test_trees_are_not_free_delivered_stock_without_workers()->void:
@@ -71,44 +82,46 @@ func test_trees_are_not_free_delivered_stock_without_workers()->void:
 func test_idle_woodland_regrows_at_source_with_a_capacity_limit()->void:
 	GameState.population_allocations["Extraction"]=0
 	GameState.population_allocations["Logistics"]=0
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	var source:Dictionary=GameState.resource_deposits[0]
-	source.remaining=0.0
 	ResourceSystem._process_material_flow(_context(0.7))
-	assert_float(float(source.remaining)).is_greater(0.0)
-	assert_float(float(source.stock_at_source)).is_equal(0.0)
-	source.remaining=source.initial_amount
+	var pool:=Pools.pool_of("Timber")
+	pool.remaining=0.0
 	ResourceSystem._process_material_flow(_context(0.7))
-	assert_float(float(source.remaining)).is_equal(float(source.initial_amount))
+	assert_float(float(pool.remaining)).is_greater(0.0)
+	assert_float(float(pool.stock_at_source)).is_equal(0.0)
+	pool.remaining=pool.initial_amount
+	ResourceSystem._process_material_flow(_context(0.7))
+	assert_float(float(pool.remaining)).is_equal(float(pool.initial_amount))
 
 func _surface_context()->Dictionary:
 	return {"settled":true,"origin":Vector3.ZERO,"surface_material_catchments":{"Stone":{"density":0.5,"position":Vector3.ZERO,"area_km2":9.0},"Fiber Plants":{"density":0.6,"position":Vector3(1,0,0),"area_km2":9.0}}}
 
-func test_stone_and_fiber_do_not_need_random_deposits()->void:
-	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+func test_stone_and_fiber_are_seat_pools_without_random_deposits()->void:
+	ResourceSystem.ensure_pools(_surface_context())
 	assert_int(GameState.resource_deposits.size()).is_equal(2)
 	for source in GameState.resource_deposits:
-		assert_str(String(source.stage)).is_equal("accessible")
+		assert_bool(Pools.is_pool(source)).is_true()
 		assert_float(float(source.remaining)).is_greater(0.0)
-	ResourceSystem._ensure_surface_material_supplies(_surface_context())
+	ResourceSystem.ensure_pools(_surface_context())
 	assert_int(GameState.resource_deposits.size()).is_equal(2)
 
-func test_surface_source_adoption_preserves_depletion_and_shipments()->void:
-	var old:=ResourceSystem._deposit("Stone",Vector3.ZERO,0.7,10.0,0)
-	old.remaining=0.0
+func test_found_stone_waits_until_workable_then_joins_the_pool()->void:
+	var old:=ResourceSystem._deposit("Stone",Vector3(4,0,0),0.7,10.0,0)
+	old.remaining=6.0
 	old.stock_at_source=4.0
-	old.shipments=[{"quantity":2.0,"arrival_day":5}]
 	GameState.resource_deposits.append(old)
-	ResourceSystem._ensure_surface_material_supplies(_surface_context())
-	assert_float(float(old.remaining)).is_equal(0.0)
-	assert_float(float(old.stock_at_source)).is_equal(4.0)
-	assert_int(old.shipments.size()).is_equal(1)
-	assert_int(GameState.resource_deposits.size()).is_equal(2)
+	ResourceSystem.ensure_pools(_surface_context())
+	assert_bool(GameState.resource_deposits.has(old)).is_true()
+	old.stage="accessible"
+	ResourceSystem.ensure_pools(_surface_context())
+	assert_bool(GameState.resource_deposits.has(old)).is_false()
+	var stone:=Pools.pool_of("Stone")
+	assert_float(float(stone.stock_at_source)).is_equal(4.0)
+	assert_float(float(stone.remaining)).is_equal_approx(9.0*0.5*1000.0+6.0,0.001)
 
 func test_only_fiber_regrows_and_empty_stone_receives_no_cutting_labor()->void:
-	ResourceSystem._ensure_surface_material_supplies(_surface_context())
-	var stone:Dictionary=GameState.resource_deposits[0]
-	var fiber:Dictionary=GameState.resource_deposits[1]
+	ResourceSystem.ensure_pools(_surface_context())
+	var stone:=Pools.pool_of("Stone")
+	var fiber:=Pools.pool_of("Fiber Plants")
 	stone.remaining=0.0
 	fiber.remaining=1.0
 	GameState.population_allocations["Extraction"]=6
@@ -126,23 +139,18 @@ func test_barren_and_unfounded_ground_add_no_surface_stocks()->void:
 	var context:=_surface_context()
 	context.surface_material_catchments.Stone.density=0.01
 	context.surface_material_catchments["Fiber Plants"].density=0.0
-	ResourceSystem._ensure_surface_material_supplies(context)
+	ResourceSystem.ensure_pools(context)
 	assert_array(GameState.resource_deposits).is_empty()
 	context=_surface_context()
 	context.settled=false
-	ResourceSystem._ensure_surface_material_supplies(context)
+	ResourceSystem.ensure_pools(context)
 	assert_array(GameState.resource_deposits).is_empty()
 
 func test_sparse_surface_stone_is_available_without_a_point_occurrence()->void:
 	var context:=_surface_context()
 	context.surface_material_catchments.Stone.density=0.05
-	ResourceSystem._ensure_surface_material_supplies(context)
-	var found:=false
-	for deposit in GameState.resource_deposits:
-		if String(deposit.resource)=="Stone":
-			found=true
-			assert_float(float(deposit.remaining)).is_greater(0.0)
-	assert_bool(found).is_true()
+	ResourceSystem.ensure_pools(context)
+	assert_float(float(Pools.pool_of("Stone").get("remaining",0.0))).is_greater(0.0)
 
 func test_accessible_medicinal_plants_are_gathered_and_delivered()->void:
 	var herbs:=ResourceSystem._deposit("Medicinal Plants",Vector3.ZERO,0.8,100.0,0)
@@ -167,20 +175,18 @@ func test_surface_stone_mesh_uses_metre_scale_not_hill_scale()->void:
 	assert_float(Terrain.SURFACE_STONE_RADIUS_KM.x).is_greater(0.0)
 	assert_float(Terrain.SURFACE_STONE_RADIUS_KM.y).is_less_equal(0.005)
 
-func test_regrowth_does_not_trap_extractors_on_a_depleted_front()->void:
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	var first:Dictionary=GameState.resource_deposits[0]
-	first.remaining=0.2
-	GameState.population_allocations.Logistics=12
-	WorldSimulation.context_provider=func(point:Vector2)->Dictionary:
-		return {"woodland_catchment":{"density":0.8,"area_km2":9.0,"position":Vector3(point.x,0,point.y)},"surface_material_catchments":{}}
-	var timber:=float(GameState.resource_stockpiles.Timber)
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	assert_int(GameState.resource_deposits.size()).is_equal(2)
-	assert_float(float(first.remaining)).is_equal(0.2)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(timber)
-	ResourceSystem._ensure_woodland_supply(_context(0.7))
-	assert_int(GameState.resource_deposits.size()).is_equal(2)
+func test_a_pool_counts_as_the_faces_a_people_works_at_once()->void:
+	ResourceSystem.ensure_pools(_context(0.7))
+	var copper:=ResourceSystem._deposit("Copper Ore",Vector3.ZERO,.7,1000.0,1)
+	copper.stage="accessible";copper.access=1.0;copper.route=1.0
+	GameState.resource_deposits.append(copper)
+	GameState.resource_stockpiles={"Timber":0.0,"Copper Ore":0.0}
+	GameState.population_allocations.Extraction=600
+	ResourceSystem._process_material_flow(_context(0.7))
+	var timber:=Pools.pool_of("Timber")
+	# Five faces of timber to one copper pit at 600 cutters (FRONT_HANDS 150).
+	assert_int(ResourceSystem.working_fronts()).is_equal(5)
+	assert_float(float(timber.workers)/maxf(1.0,float(copper.workers))).is_greater(3.0)
 
 func test_overstock_releases_workers_for_missing_materials_without_free_output()->void:
 	GameState.resource_stockpiles={"Timber":0.0,"Stone":1000.0}
@@ -261,3 +267,11 @@ func test_known_craft_can_accumulate_startup_inputs_before_a_line_exists()->void
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
 	GameState.known_discoveries=[]
 	assert_bool(ResourceSystem._storage_gathering_priorities().has("Copper Ore")).is_true()
+
+func test_a_pool_remembers_where_its_woods_were_opened()->void:
+	var old:=ResourceSystem._deposit("Timber",Vector3(6.0,0,0),0.7,50.0,0)
+	old.landscape_source="woodland_catchment";old.stage="developed"
+	GameState.resource_deposits.append(old)
+	ResourceSystem.ensure_pools(_context(0.7))
+	var cells:Array=Pools.pool_of("Timber").cells
+	assert_bool(cells.has([6.0,0.0])).is_true()

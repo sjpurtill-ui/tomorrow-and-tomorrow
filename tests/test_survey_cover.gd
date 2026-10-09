@@ -121,6 +121,8 @@ func test_extraction_yield_follows_the_searched_land()->void:
 		GameState.resource_practice={}
 		GameState.land_survey={"cover":cover,"day":0,"find_month":0,"blend_from":-1,"finds":[],"last_roll":{}}
 		ResourceSystem._process_material_flow(_context())
+		# Workable clay joins the seat's clay pool (material_pools.gd).
+		if not GameState.resource_deposits.has(clay):clay=preload("res://scripts/material_pools.gd").pool_of("Clay")
 		yields[cover]=float(clay.daily_yield)
 		assert_float(float(GameState.material_metrics.land_factor)).is_equal_approx(ResourceSystem.land_yield(cover),0.000001)
 		# What one cutter brings in a day (the People view's "ten more").

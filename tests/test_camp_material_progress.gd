@@ -17,10 +17,13 @@ func test_existing_founding_surface_front_becomes_usable_and_delivers()->void:
 	for day in range(1,8):
 		GameState.elapsed_days=day
 		ResourceSystem._process_material_flow(context)
+	# The founding wood is the seat's timber pool (material_pools.gd).
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
-	assert_bool(deposit.stage in ["accessible","developed"]).is_true()
+	var pool:Dictionary=GameState.resource_deposits[0]
+	assert_bool(bool(pool.get("pool",false))).is_true()
+	assert_bool(pool.stage in ["accessible","developed"]).is_true()
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_greater(0.0)
-	assert_float(float(deposit.lifetime_delivered)).is_greater(0.0)
+	assert_float(float(pool.lifetime_delivered)).is_greater(0.0)
 func test_four_builders_can_finish_shelters_with_real_materials()->void:
 	GameState.resource_stockpiles={"Timber":25.0,"Fiber Plants":0.0}
 	for day in 60: Build.process_day()
