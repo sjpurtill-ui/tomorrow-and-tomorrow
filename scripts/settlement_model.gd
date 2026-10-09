@@ -1666,6 +1666,10 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 
 ## The city's construction era rises toward what its age, workers and knowledge
 ## support; builders keep its condition up against monthly wear.
+## Building materials that stand in for one another in the town's repair,
+## in the order they are reached for (_advance_city_form).
+const REPAIR_STANDINS:=["Stone","Limestone","Timber","Clay"]
+
 func _advance_city_form(month_day:int)->void:
 	var form:=city_form()
 	var supported:=float(_supported_fabric_tier(month_day))
@@ -1680,12 +1684,27 @@ func _advance_city_form(month_day:int)->void:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var paid:=1.0
 	if need>0.0:
-		# Each material pays its own share of the basket, so one scarce
-		# material slows upkeep without halting it.
+		# Each material pays its own share of the basket; what one lacks the
+		# others make good (REPAIR_STANDINS): a town out of stone mends in
+		# timber, clay and lime, so one scarce material slows upkeep without
+		# halting it.
 		paid=0.0
-		for item:String in basket:paid+=float(basket[item])*clampf(maxf(0.0,float(stocks.get(item,0.0)))/(need*float(basket[item])),0.0,1.0)
+		var short:=0.0
+		for item:String in basket:
+			var want:=need*float(basket[item])
+			var have:=maxf(0.0,float(stocks.get(item,0.0)))
+			var take:=minf(have,want)
+			stocks[item]=have-take
+			paid+=take/need
+			short+=want-take
+		for item:String in REPAIR_STANDINS:
+			if short<=0.0001:break
+			var have:=maxf(0.0,float(stocks.get(item,0.0)))
+			var take:=minf(have,short)
+			stocks[item]=have-take
+			paid+=take/need
+			short-=take
 		paid=clampf(paid,0.0,1.0)
-		for item:String in basket:stocks[item]=maxf(0.0,float(stocks.get(item,0.0))-need*float(basket[item]))
 	form["materials_paid"]=paid
 	if supported>float(form.tier) and paid>=0.5:form.tier=minf(supported,float(form.tier)+0.25*building_share*paid)
 	# Repair skill (research) makes the same hands and materials mend more
