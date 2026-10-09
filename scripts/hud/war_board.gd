@@ -46,6 +46,8 @@ const Covert:=preload("res://scripts/covert_ops.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
 const Watch:=preload("res://scripts/watch_military.gd")
 const Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
+const Makeup:=preload("res://scripts/army_makeup.gd")
+const Blocks:=preload("res://scripts/battle_blocks.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -163,7 +165,8 @@ func refresh(force:=false)->void:
 	_rebuild("army",army_box,str([reading,glance,pay_words(),Forces.drawn_from(MilitaryCampaign)]),force,func()->void:_build_army(reading,glance))
 	var forces:=Allocation.read(MilitaryCampaign)
 	var general:=Orders.war_leader_name()
-	_rebuild("watch",[manpower_box,guard_box,offense_box],str([forces,general,border_signature()]),force,func()->void:_build_watch(forces,general))
+	var makeup:=Makeup.rows(MilitaryCampaign)
+	_rebuild("watch",[manpower_box,guard_box,offense_box],str([forces,general,makeup.map(func(r:Dictionary)->Array:return [r.share,r.kind,r.men,r.target,snappedf(float(r.armed),0.02),snappedf(float(r.drill),0.02)]),border_signature()]),force,func()->void:_build_watch(forces,general,makeup))
 	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
 	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
 		var front:Dictionary=WarLoop.front(String(e.civ_id))
@@ -323,9 +326,10 @@ func _choose_level(id:String)->void:
 ## them is, how ready they are, how many stay home); the towns (each town's
 ## guard against what it needs); the bands out (men, will and fed, where
 ## bound).
-func _build_watch(f:Dictionary,general:String)->void:
+func _build_watch(f:Dictionary,general:String,makeup:Array=[])->void:
 	_clear(manpower_box);_clear(guard_box);_clear(offense_box)
 	manpower_box.add_child(_forces_card(f))
+	manpower_box.add_child(_makeup_card(makeup))
 	guard_box.add_child(_towns_card(f,general))
 	guard_box.add_child(_border_card())
 	offense_box.add_child(_bands_card(f))
@@ -489,6 +493,60 @@ func _forces_card(f:Dictionary)->Control:
 	people.pressed.connect(_open_people)
 	split.add_child(people)
 	return panel
+
+
+## (1b) The army's makeup (army_makeup.gd): each kind of fighter, the
+## best our people can field in it today, its share with the control to
+## change it, and its men against the share, armed and drilled. The war
+## leader does the rest: the men join or retrain, the workshops make the
+## kits and the carts.
+func _makeup_card(rows:Array)->Control:
+	var panel:=_card();panel.name="MakeupCard"
+	var column:=panel.get_node("Column") as VBoxContainer
+	var title:=_line("Army makeup",14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"))
+	title.tooltip_text="Set what the army is made of. The war leader fills each kind with the best fighters and gear our people can make, retrains a few at home each day toward it, and has the workshops make the kits and carts it needs."
+	title.mouse_filter=Control.MOUSE_FILTER_PASS
+	column.add_child(title)
+	for r:Dictionary in rows:column.add_child(_makeup_row(r))
+	return panel
+
+
+func _makeup_row(r:Dictionary)->Control:
+	var row:=HBoxContainer.new();row.name="Kind_%s" % String(r.id);row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
+	var can:=bool(r.can)
+	var glyph:=Blocks.glyph_of(String(r.unit),String(r.item)) if can else String(r.glyph)
+	var icon:=TextureRect.new();icon.texture=Icons.arm_texture(glyph,T.INK if can else T.INK_MUTED,T.GOLD,64);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size=Vector2(26,26);icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(icon)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);top.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(top)
+	var name_label:=_line(String(r.label),13,T.INK if can else T.INK_MUTED);name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(name_label)
+	var men:=_line("%s / %s" % [compact(int(r.men)),compact(int(r.target))],12,T.INK if int(r.men)>=int(r.target) else T.AMBER_TEXT);men.mouse_filter=Control.MOUSE_FILTER_IGNORE;men.size_flags_horizontal=Control.SIZE_EXPAND_FILL;men.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;top.add_child(men)
+	var waiting:=String(r.get("waiting",""))
+	var kind:=_line(String(r.kind) if waiting=="" else "%s · waiting" % String(r.best).get_slice(" · ",0),11,T.INK_MUTED if waiting=="" else T.AMBER_TEXT);kind.clip_text=true;kind.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;kind.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(kind)
+	var bars:=HBoxContainer.new();bars.add_theme_constant_override("separation",4);bars.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(bars)
+	for pair:Array in [[float(r.armed),BarModel.gear_color(maxf(0.0,float(r.armed)))],[float(r.drill),T.GREEN if float(r.drill)>=0.6 else T.AMBER]]:
+		var bar:=ShareBar.new();bar.share=maxf(0.0,float(pair[0]));bar.ink=pair[1];bar.custom_minimum_size=Vector2(0,4);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;bars.add_child(bar)
+	var share:=_line("%d%%" % roundi(float(r.share)*100.0),14,T.INK);share.add_theme_font_override("font",T.font("ui_strong"));share.custom_minimum_size=Vector2(40,0);share.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;share.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(share)
+	var id:=String(r.id)
+	var less:=_step_button("Less_%s" % id,"−","A tenth of the army fewer %s; the others take their place." % String(r.label).to_lower(),func()->void:_step_makeup(id,-1))
+	var more:=_step_button("More_%s" % id,"+","A tenth of the army more %s." % String(r.label).to_lower(),func()->void:_step_makeup(id,1))
+	less.disabled=float(r.share)<=0.0;more.disabled=not can or float(r.share)>=1.0
+	row.add_child(less);row.add_child(more)
+	var tip:=PackedStringArray([String(r.tip),
+		("Our best now: %s." % String(r.kind)) if can else "Our people cannot train any of these yet.",
+		("%s wait for their kit: %s" % [String(r.best),waiting]) if waiting!="" else "",
+		"%s of %s in the share (%d%% of the army)." % [EraWords.grouped(int(r.men)),EraWords.grouped(int(r.target)),roundi(float(r.share)*100.0)],
+		("Armed: %d%% of their kit in hand." % roundi(float(r.armed)*100.0)) if float(r.armed)>=0.0 else "",
+		("Drill: %d%%." % roundi(float(r.drill)*100.0)) if float(r.drill)>=0.0 else ""])
+	row.tooltip_text="
+".join(Array(tip).filter(func(x:String)->bool:return x!=""))
+	return row
+
+
+func _step_makeup(id:String,direction:int)->void:
+	var result:=Makeup.step(MilitaryCampaign,id,direction)
+	if result.has("error"):_say(String(result.error))
+	refresh(true)
 
 
 ## The bar in words, part by part, for the pointer.

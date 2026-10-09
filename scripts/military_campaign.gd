@@ -97,6 +97,10 @@ var army_levy_level:=""
 var watch_home_share:=-1.0
 var watch_home_auto:=-1.0
 var watch_folded:=true
+## The army's makeup the ruler chose (army_makeup.gd): each kind's share of
+## those under arms, {line, missile, mounted, guns}; empty until chosen (all
+## line, as before).
+var army_makeup:={}
 ## The watch share the ruler set, of those who can work (0..1; -1: the
 ## people's leaders choose it in their daily split). watch_military.gd move
 ## sets it; GovernmentPeopleSystem's daily split keeps it (hold_share).
@@ -243,6 +247,7 @@ func reset_for_new_world()->void:
 	watch_home_share=-1.0
 	watch_home_auto=-1.0
 	watch_folded=true
+	army_makeup={}
 	watch_work_share=-1.0
 	watch_path_share=-1.0
 	training_queue.clear()
@@ -4043,6 +4048,7 @@ func export_state()->Dictionary:
 		"watch_home_share":watch_home_share,
 		"watch_home_auto":watch_home_auto,
 		"watch_folded":watch_folded,
+		"army_makeup":army_makeup.duplicate(),
 		"watch_work_share":watch_work_share,
 		"watch_path_share":watch_path_share,
 		"training_queue":training_queue.duplicate(true),
@@ -4443,6 +4449,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	var auto:Variant=payload.get("watch_home_auto",-1.0)
 	watch_home_auto=clampf(float(auto),0.0,1.0) if (auto is float or auto is int) and is_finite(float(auto)) and float(auto)>=0.0 else -1.0
 	watch_folded=payload.has("watch_version") and bool(payload.get("watch_folded",true))
+	army_makeup=preload("res://scripts/army_makeup.gd").clean(payload.get("army_makeup",{}))
 	var held:Variant=payload.get("watch_work_share",-1.0)
 	watch_work_share=clampf(float(held),0.0,1.0) if (held is float or held is int) and is_finite(float(held)) and float(held)>=0.0 else -1.0
 	var path:Variant=payload.get("watch_path_share",-1.0)
@@ -5341,6 +5348,8 @@ func _process_military_day()->void:
 	if not home_fighting:
 		_process_training_day()
 		recruit_deploy.deploy_ready()
+		# The makeup the ruler chose and the newest kits: a few retrain a day.
+		preload("res://scripts/army_makeup.gd").converge_day(self)
 		preload("res://scripts/watch_military.gd").drill_day(self)
 	_process_training_program_day()
 	_process_field_army_movement_day()
