@@ -752,6 +752,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Resting stands whose last loads are still on the road: delivered as usual.
 	var delivering:Array[Dictionary]=[]
 	for deposit in WorldSimulation.state.resource_deposits:
+		# A face spent before its people learned to work it deeper opens again (_deepen).
+		if deposit.get("spent",false) and _can_deepen(deposit):deposit.erase("spent")
 		# A spent deposit (_mark_spent) can never yield, hold or send again; a
 		# resting one (_mark_resting) regrows by itself and is looked at again
 		# once a month (_rest_wakes).
@@ -770,10 +772,12 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		if not _is_material_resource(String(deposit.resource)): continue
 		deposit.distance_km=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
 		deposit["haul_km"]=OneSeat.haul_km(float(deposit.distance_km),homestead_reach,town_core)
+		_deepen(deposit)
 		material_deposits.append(deposit)
 	stamp=trace.mark("flow_available",stamp)
 	var extractors:=WorldSimulation.state.effective_workers("Extraction")
-	var carriers:=WorldSimulation.state.effective_workers("Logistics")
+	# Builders idle for want of materials help carry them home (built_fabric.gd).
+	var carriers:=WorldSimulation.state.effective_workers("Logistics")+preload("res://scripts/built_fabric.gd").idle_builders()
 	var labor_eff:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var storage_priorities:=_storage_gathering_priorities()
 	stamp=trace.mark("flow_workers_and_storage",stamp)
@@ -830,8 +834,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			if resource_name=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
 			knowledge_by_resource[resource_name]=knowledge_multiplier
 		var practice_multiplier:=1.0+minf(0.35,float((practice.get(resource_name,{}) as Dictionary).get("extraction",0.0))*0.035)
-		var daily_yield:=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus*land_factor
-		per_cutter+=share*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus*land_factor
+		# A face worked deeper gives less to the same hands (_deepen).
+		var depth_factor:=depth_yield(deposit)
+		var daily_yield:=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus*land_factor*depth_factor
+		per_cutter+=share*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus*land_factor*depth_factor
 		deposit.daily_yield=daily_yield
 		var extracted:=Resources.withdraw(deposit,daily_yield*span) if WorldSimulation.enabled else minf(float(deposit.remaining),daily_yield*span)
 		deposit.remaining=float(deposit.remaining)-extracted
@@ -988,6 +994,59 @@ func _add_shipment(deposit:Dictionary,arrival:int,quantity:float)->void:
 	else:moving.insert(at,[arrival,quantity])
 	deposit.in_transit=float(deposit.in_transit)+quantity
 
+## QUARRIES AND PITS GO DEEPER. Loose stone and the clay at the surface run
+## out, but rock and clay go on below: once a people knows how to read and
+## work a quarry face (DEEPER: quarry_reading for stone and limestone,
+## clay_shaping for clay), a face worked down to the working share opens
+## its next layer, as much again as the first, instead of being left spent.
+## Each layer gives DEPTH_YIELD of the one above to the same hands (deeper
+## faces are slower to cut and haul up), never below DEPTH_FLOOR, so a
+## people keeps its old quarries and still gains by finding new ones. The
+## layer is the world's (geography_stock), as any other reserve.
+const DEEPER:={"Stone":"quarry_reading","Limestone":"quarry_reading","Clay":"clay_shaping"}
+const DEPTH_YIELD:=0.88
+const DEPTH_FLOOR:=0.4
+
+func _deepen(deposit:Dictionary)->void:
+	var resource:=String(deposit.get("resource",""))
+	if not DEEPER.has(resource):return
+	var initial:=maxf(1.0,float(deposit.get("initial_amount",1.0)))
+	if float(deposit.get("remaining",0.0))>=initial*.05:return
+	if not _can_deepen(deposit):return
+	var depth:=_depth(deposit)+1
+	if deposit.has("world_key") and WorldSimulation.geography_stock.has(deposit.world_key):
+		var reserve:Dictionary=WorldSimulation.geography_stock[deposit.world_key]
+		reserve.remaining=float(reserve.remaining)+initial
+		reserve["depth"]=depth
+		deposit.remaining=float(reserve.remaining)
+	else:deposit.remaining=float(deposit.get("remaining",0.0))+initial
+	deposit["depth"]=depth
+	deposit.erase("spent")
+
+## Whether the people in scope can work `deposit` deeper (read once a day).
+var _deeper_day:=-1
+var _deeper_ok:={}
+func _can_deepen(deposit:Dictionary)->bool:
+	var resource:=String(deposit.get("resource",""))
+	if not DEEPER.has(resource):return false
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if day!=_deeper_day:
+		_deeper_day=day
+		_deeper_ok={}
+		for item:String in DEEPER:_deeper_ok[item]=String(DEEPER[item]) in WorldSimulation.state.known_discoveries
+	return bool(_deeper_ok.get(resource,false))
+
+## How many layers below the first a face has been worked.
+func _depth(deposit:Dictionary)->int:
+	if deposit.has("world_key") and WorldSimulation.geography_stock.has(deposit.world_key):
+		return int((WorldSimulation.geography_stock[deposit.world_key] as Dictionary).get("depth",0))
+	return int(deposit.get("depth",0))
+
+## What a face gives at its depth, against its first layer.
+func depth_yield(deposit:Dictionary)->float:
+	var depth:=_depth(deposit)
+	return 1.0 if depth<=0 else maxf(DEPTH_FLOOR,pow(DEPTH_YIELD,float(depth)))
+
 ## A worked-out deposit nothing can refill is left out of the daily flow: its
 ## reserve is gone (world geography is only ever drawn down, renewable kinds
 ## regrow only while worked), nothing waits at the source and nothing is on the
@@ -999,6 +1058,8 @@ func _mark_spent(deposit:Dictionary)->void:
 	# a sliver of stock or an emptied load record, and was walked every day
 	# for ever (770 of 1,410 deposits on a year-342 save).
 	if not deposit_exhausted(deposit):return
+	# A face the people can work deeper is not spent (_deepen).
+	if _can_deepen(deposit):return
 	deposit["spent"]=true
 
 ## Days between looks at a resting stand of woods or fibre.

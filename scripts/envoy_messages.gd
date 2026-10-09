@@ -1,4 +1,5 @@
 extends RefCounted
+const AiWire:=preload("res://scripts/ai_wire.gd")
 ## What an envoy carries, and what a message of menace does when it lands.
 ##
 ## The catalogue: every purpose the court's compose area offers, with the gift
@@ -1179,7 +1180,7 @@ static func request_voice(mission:Dictionary)->bool:
 				var content:=String(PronouncementInterpreter._content_text((envelope.choices[0] as Dictionary).get("message",{}).get("content","")))
 				value=JSON.parse_string(content.trim_prefix("```json").trim_suffix("```").strip_edges())
 		voice_answered(civ_id,depart,value))
-	var error:=http.request(String(config.endpoint),PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),HTTPClient.METHOD_POST,JSON.stringify(payload))
+	var error:=AiWire.send(http,config,PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),payload)
 	if error!=OK:
 		http.queue_free(); menace["voice"]="failed"; return false
 	return true

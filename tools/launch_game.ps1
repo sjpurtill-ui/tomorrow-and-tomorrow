@@ -70,6 +70,11 @@ if (-not [string]::IsNullOrWhiteSpace($leviathanKey)) {
     $env:OPENAI_API_KEY = $openAiKey
 }
 
+$anthropicKey = [Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY', 'User')
+if (-not [string]::IsNullOrWhiteSpace($anthropicKey)) {
+    $env:ANTHROPIC_API_KEY = $anthropicKey
+}
+
 $configuredModel = [Environment]::GetEnvironmentVariable('LEVIATHAN_AI_MODEL', 'User')
 $env:LEVIATHAN_AI_MODEL = if ([string]::IsNullOrWhiteSpace($configuredModel)) { 'gpt-6-luna' } else { $configuredModel }
 
@@ -95,6 +100,6 @@ $process = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $argu
 $buildCommit = & git -C $projectRoot rev-parse --short HEAD
 if ($LASTEXITCODE -ne 0) { $buildCommit = 'unknown' }
 $launchKind = if ($Editor) { 'canonical editor' } else { 'current game' }
-Write-Output "Launched $launchKind from $projectRoot, build $buildCommit (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)))"
+Write-Output "Launched $launchKind from $projectRoot, build $buildCommit (PID $($process.Id)); AI credential present: $([bool](-not [string]::IsNullOrWhiteSpace($env:LEVIATHAN_AI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY) -or -not [string]::IsNullOrWhiteSpace($env:ANTHROPIC_API_KEY)))"
 
 Write-Output "Player log: $launchLog"

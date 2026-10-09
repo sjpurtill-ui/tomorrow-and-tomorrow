@@ -1,4 +1,5 @@
 extends RefCounted
+const AiWire:=preload("res://scripts/ai_wire.gd")
 ## THE KEEPER'S HAND — an optional live rewrite of a finished year's entry.
 ##
 ## Offline the year's entry is the deterministic telling from
@@ -90,7 +91,7 @@ static func request(c:Dictionary,entry:Dictionary,facts:Dictionary={})->bool:
 		if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:receive(year,body.get_string_from_utf8())
 		else:_fail(year,"transport %d, http %d" % [result,code]))
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: annal-%s-%d" % [year,Time.get_ticks_msec()]])
-	if http.request(String(config.get("endpoint","")),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		http.queue_free()
 		_fail(year,"request could not start")
 	return true

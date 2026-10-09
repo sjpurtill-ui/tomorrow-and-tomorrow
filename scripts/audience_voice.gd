@@ -1,4 +1,5 @@
 extends Node
+const AiWire:=preload("res://scripts/ai_wire.gd")
 ## The voices of the Audience Hall. Writes scene lines (envoy, court, parting
 ## words) through AudienceHall.append_line and never touches world state beyond
 ## the bounded AudienceHall.apply_mood hook.
@@ -870,7 +871,7 @@ func pick_request(audience_id:String)->bool:
 	http.body_size_limit=MAX_RESPONSE_BYTES
 	http.request_completed.connect(_on_pick_response.bind(audience_id))
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: envoy-request-%s-%d" % [audience_id,Time.get_ticks_msec()]])
-	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		request.http=null
 		http.queue_free()
 		RequestAI.mark(audience,"fallback","request could not start")
@@ -937,7 +938,7 @@ func read_request_answer(audience_id:String,text:String,done:Callable)->bool:
 	http.body_size_limit=MAX_RESPONSE_BYTES
 	http.request_completed.connect(_on_answer_response.bind(audience_id))
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: envoy-answer-%s-%d" % [audience_id,Time.get_ticks_msec()]])
-	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		request.http=null
 		http.queue_free()
 		_reading.erase(audience_id)
@@ -1005,7 +1006,7 @@ func _send_order(audience_id:String)->void:
 	http.body_size_limit=OrderReader.MAX_RESPONSE_BYTES
 	http.request_completed.connect(_on_order_response.bind(audience_id))
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key","")),"X-Client-Request-Id: order-read-%s-%d" % [audience_id,Time.get_ticks_msec()]])
-	if http.request(String(config.endpoint),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		request.http=null
 		http.queue_free()
 		_ordering.erase(audience_id)
@@ -1389,7 +1390,7 @@ func _send(audience_id:String)->void:
 	http.max_redirects=0
 	http.body_size_limit=MAX_RESPONSE_BYTES
 	http.request_completed.connect(_on_response.bind(audience_id,attempt))
-	var error:Error=http.request(String(request.config.endpoint),request.headers,HTTPClient.METHOD_POST,JSON.stringify(request.payload))
+	var error:Error=AiWire.send(http,request.config,request.headers,request.payload)
 	if error!=OK:
 		request.http=null
 		http.queue_free()
@@ -4146,7 +4147,7 @@ func _ceremony_request(key:String,ctx:Dictionary,config:Dictionary,fallback:Arra
 	http.max_redirects=0
 	http.body_size_limit=MAX_RESPONSE_BYTES
 	http.request_completed.connect(_on_ceremony_response.bind(key,http,cast,ctx,fallback))
-	if http.request(String(config.get("endpoint","")),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		http.queue_free()
 		ceremony_ready.emit.call_deferred(key,fallback)
 

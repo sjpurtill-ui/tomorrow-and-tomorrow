@@ -1,4 +1,5 @@
 extends Node
+const AiWire:=preload("res://scripts/ai_wire.gd")
 
 signal interpretation_completed(request_id: String, result: Dictionary)
 signal interpretation_progress(request_id: String, status: Dictionary)
@@ -187,7 +188,7 @@ func _send_http(request_id:String)->void:
 	http.body_size_limit=MAX_API_RESPONSE_BYTES
 	http.request_completed.connect(_on_response.bind(request_id,attempt))
 	var config:Dictionary=request.config
-	var error:=http.request(String(config.endpoint),request.headers,HTTPClient.METHOD_POST,JSON.stringify(request.payload))
+	var error:=AiWire.send(http,config,request.headers,request.payload)
 	if error!=OK:
 		request["http"]=null
 		http.queue_free()
@@ -203,6 +204,11 @@ func _api_config()->Dictionary:
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
 	if model.is_empty(): model=DEFAULT_API_MODEL
 	if endpoint.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
+	if AiWire.is_anthropic(model):
+		# A Claude model is served by Anthropic (ai_wire.gd): its own key and address.
+		var anthropic:=AiWire.config_for_model({"endpoint":endpoint,"api_key":api_key,"model":model},model)
+		if anthropic.is_empty() or not bool(_endpoint_security(String(anthropic.endpoint)).get("allowed",false)): return {}
+		return anthropic
 	if endpoint.is_empty() or api_key.is_empty() or model.is_empty(): return {}
 	if not bool(_endpoint_security(endpoint).get("allowed",false)): return {}
 	var structured_output:=_structured_output_enabled(endpoint)
@@ -218,16 +224,20 @@ func configuration_status()->Dictionary:
 	var model:=OS.get_environment("LEVIATHAN_AI_MODEL").strip_edges()
 	if model.is_empty(): model=DEFAULT_API_MODEL
 	if endpoint.is_empty(): endpoint="https://api.openai.com/v1/chat/completions"
+	var claude:=AiWire.is_anthropic(model)
+	if claude:
+		api_key=AiWire.anthropic_key(api_key)
+		endpoint=AiWire.anthropic_endpoint()
 	var missing:Array[String]=[]
 	if endpoint.is_empty(): missing.append("LEVIATHAN_AI_ENDPOINT")
 	if model.is_empty(): missing.append("LEVIATHAN_AI_MODEL")
-	if api_key.is_empty(): missing.append("LEVIATHAN_AI_API_KEY or OPENAI_API_KEY")
+	if api_key.is_empty(): missing.append("ANTHROPIC_API_KEY" if claude else "LEVIATHAN_AI_API_KEY or OPENAI_API_KEY")
 	var security:=_endpoint_security(endpoint)
 	var issues:Array[String]=[]
 	if api_key.is_empty() and not preload("res://scripts/ai_connection_store.gd").issue.is_empty():issues.append(preload("res://scripts/ai_connection_store.gd").issue)
 	if not endpoint.is_empty() and not bool(security.get("allowed",false)): issues.append(String(security.get("issue","Endpoint transport is not allowed.")))
 	var configured:=missing.is_empty() and issues.is_empty()
-	var structured:=configured and _structured_output_enabled(endpoint)
+	var structured:=configured and (claude or _structured_output_enabled(endpoint))
 	return {"enabled":true,"configured":configured,"mode":"strict structured API" if structured else "compatible JSON API" if configured else "deterministic offline","model":_safe_diagnostic_text(model,80),"endpoint_host":_endpoint_host(endpoint),"transport_security":String(security.get("label","not configured")),"structured_output":structured,"missing":missing,"issues":issues}
 
 func configure_connection(key:String,model:String,endpoint:String,remember:bool=false)->Dictionary:
@@ -235,6 +245,12 @@ func configure_connection(key:String,model:String,endpoint:String,remember:bool=
 	var clean:=key.strip_edges();var selected_model:=model.strip_edges();var selected_endpoint:=endpoint.strip_edges()
 	if selected_endpoint.is_empty():selected_endpoint="https://api.openai.com/v1/chat/completions"
 	if selected_model.is_empty():selected_model=DEFAULT_API_MODEL
+	var claude:=AiWire.is_anthropic(selected_model)
+	if claude:
+		# Claude models are Anthropic's: their key, and their address unless one is named.
+		if clean.is_empty():clean=AiWire.anthropic_key()
+		if clean.is_empty():return {"error":"Enter your Anthropic API key (it begins sk-ant-) for a Claude model."}
+		if "api.openai.com" in selected_endpoint.to_lower():selected_endpoint=AiWire.ANTHROPIC_ENDPOINT
 	if clean.is_empty():clean=OS.get_environment("LEVIATHAN_AI_API_KEY").strip_edges()
 	if clean.is_empty():clean=OS.get_environment("OPENAI_API_KEY").strip_edges()
 	if clean.is_empty():return {"error":"Enter your existing API key once. You do not need a new key for each game."}
@@ -247,7 +263,8 @@ func configure_connection(key:String,model:String,endpoint:String,remember:bool=
 		if saved.has("error"):return saved
 	preload("res://scripts/ai_connection_store.gd").issue=""
 	# In-memory environment only; persistent credentials live exclusively in Keychain.
-	OS.set_environment("LEVIATHAN_AI_API_KEY",clean)
+	if claude:OS.set_environment("ANTHROPIC_API_KEY",clean)
+	else:OS.set_environment("LEVIATHAN_AI_API_KEY",clean)
 	OS.set_environment("LEVIATHAN_AI_ENDPOINT",selected_endpoint)
 	OS.set_environment("LEVIATHAN_AI_MODEL",selected_model)
 	set_api_enabled(true)

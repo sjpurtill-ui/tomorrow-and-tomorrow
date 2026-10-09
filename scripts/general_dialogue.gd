@@ -1,4 +1,5 @@
 extends Node
+const AiWire:=preload("res://scripts/ai_wire.gd")
 ## No player conversation cache or per-turn quota. Opponent reconsiderations
 ## are event-driven; executable policies remain reviewed engine strategies.
 var pending:Dictionary={}
@@ -59,7 +60,7 @@ func _request(id:String,messages:Array,config:Dictionary)->void:
 	var payload:Dictionary={"model":String(config.model),"messages":messages,"max_completion_tokens":2200}
 	if bool(config.get("structured_output",false)):
 		payload.response_format={"type":"json_schema","json_schema":{"name":"general_intent","strict":true,"schema":{"type":"object","additionalProperties":false,"properties":{"reply":{"type":"string"},"action":{"type":"string","enum":actions},"target":{"type":"string"}},"required":["reply","action","target"]}}}
-	var error:=http.request(String(config.endpoint),PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),HTTPClient.METHOD_POST,JSON.stringify(payload))
+	var error:=AiWire.send(http,config,PackedStringArray(["Content-Type: application/json","Authorization: Bearer "+String(config.api_key)]),payload)
 	if error!=OK:_completed.call_deferred(HTTPRequest.RESULT_CANT_CONNECT,0,PackedStringArray(),PackedByteArray(),id,http)
 	if id=="player":status="Your general is considering your words…"
 	WorldSimulation.campaign.changed.emit()
