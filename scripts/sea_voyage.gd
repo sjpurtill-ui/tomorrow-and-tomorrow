@@ -86,18 +86,19 @@ func _water(point:Vector2)->bool:
 
 ## Every sample of the segment is water: a boat does not sail across a cape.
 func _sea_segment(a:Vector2,b:Vector2)->bool:
-	var samples:=clampi(ceili(a.distance_to(b)/maxf(.5,world.SCOUT_LAND_SAMPLE_KM*.5)),1,512)
-	for i in samples+1:
+	# The scouts' land sampling interval; the start point is already known wet.
+	var samples:=clampi(ceili(a.distance_to(b)/maxf(.5,float(world.SCOUT_LAND_SAMPLE_KM))),1,512)
+	if not _water(a):return false
+	for i in range(1,samples+1):
 		if not _water(a.lerp(b,float(i)/float(samples))):return false
 	return true
 
 ## The nearest land within `radius` of a water point, or INF when out of
 ## sight of land.
 func _shore_near(point:Vector2,radius:float)->Vector2:
-	for r:float in [radius*.5,radius]:
-		for i in 8:
-			var probe:=point+Vector2.RIGHT.rotated(float(i)*TAU/8.0)*r
-			if _in_world(probe) and world._scout_land_at(probe):return probe
+	for i in 8:
+		var probe:=point+Vector2.RIGHT.rotated(float(i)*TAU/8.0)*radius
+		if _in_world(probe) and world._scout_land_at(probe):return probe
 	return Vector2.INF
 
 ## The nearest water a party can walk to from home and push off into, with

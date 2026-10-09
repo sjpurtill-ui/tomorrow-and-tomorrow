@@ -50,7 +50,7 @@ func set_policy(share:float,focus:String,delegated:bool=false)->Dictionary:
 		# Remembered so a load can tell a chosen "none" from a share left at 0.
 		data["player_chosen"]=true
 	if is_equal_approx(float(data.share),share) and data.focus==focus:return {"ok":true}
-	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0;data["fruitless"]=0
+	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0;data["fruitless"]=0;data["land_fruitless"]=0;data["land_rest_until"]=0
 	data.status="Staff will organize parties on the next day." if share>0 else "No new departures. Parties already away will finish and return."
 	return {"ok":true,"message":data.status}
 func set_origin(origin_city_id:String)->Dictionary:
@@ -178,6 +178,12 @@ func advance_steps(day:int)->Array:
 		routes.append(["scouting_route_%d" % days,func()->void:
 			if not shared.searching or bool(shared.get("land_done",false)):return
 			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
+			# Charted home country rests between land plans even while voyages
+			# keep leaving: the same four walks would come up empty each week.
+			if target=="open_world" and day<int(data.get("land_rest_until",0)):
+				shared["land_rested"]=true
+				shared.last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent."
+				return
 			var caution:Dictionary=shared.caution
 			# When every trip within the Chief Scout's limit covers charted ground
 			# only, one party may go one length farther (still one party at a time
@@ -210,6 +216,7 @@ func advance_steps(day:int)->Array:
 			shared.searching=false
 			var result:Dictionary=host.dispatch_scouts(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if result.has("error"):data.status=String(result.error);return
+			data["land_fruitless"]=0;data["land_rest_until"]=0
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
 			data.food_spent=float(data.food_spent)+float(party.provisions)
 			data["fruitless"]=0
@@ -228,6 +235,9 @@ func advance_steps(day:int)->Array:
 			if not bool(shared.get("voyage",false)):
 				if days!=90 or not (reason.begins_with("No useful uncharted") or reason.begins_with("No connected") or reason.begins_with("Scouts could not find") or reason.begins_with("The Chief Scout will not send")):return
 				shared["voyage"]=true
+				if reason.begins_with("No useful uncharted") and not bool(shared.get("land_rested",false)):
+					data["land_fruitless"]=int(data.get("land_fruitless",0))+1
+					data["land_rest_until"]=day+mini(FRUITLESS_WAIT_DAYS*(1<<mini(int(data.land_fruitless)-1,3)),FRUITLESS_WAIT_CAP_DAYS)
 			var caution:Dictionary=shared.caution
 			if days>maxi(int(caution.max_duration),180):return
 			var view:Dictionary=shared.view

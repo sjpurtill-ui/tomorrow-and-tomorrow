@@ -157,3 +157,16 @@ func test_fruitless_reviews_wait_longer_each_time_until_a_party_leaves()->void:
 	GameState.elapsed_days=800;system.scouting_staff.advance(800)
 	assert_int(system.scout_missions.size()).override_failure_message(String(system.scouting_staff.data.status)).is_equal(1)
 	assert_int(int(system.scouting_staff.data.fruitless)).is_equal(0)
+
+func test_charted_land_rests_while_voyages_keep_leaving()->void:
+	_know(COAST_BOATS)
+	system._add_revealed_area(Vector2(-20,0),70.0,"test: home island charted")
+	system.scouting_staff.set_policy(.05,"exploration")
+	GameState.elapsed_days=1;system.scouting_staff.advance(1)
+	assert_int(system.scout_missions.size()).is_equal(1)
+	assert_int(int(system.scouting_staff.data.get("land_rest_until",0))).is_equal(29)
+	# The next review inside the rest plans no land route but can still sail.
+	system.scout_missions.clear()
+	GameState.elapsed_days=8;system.scouting_staff.data.next_review=8;system.scouting_staff.advance(8)
+	assert_bool(system.scouting_staff.data.status.contains("put to sea") or system.scout_missions.size()==1).override_failure_message(String(system.scouting_staff.data.status)).is_true()
+	assert_int(int(system.scouting_staff.data.get("land_rest_until",0))).is_equal(29)
