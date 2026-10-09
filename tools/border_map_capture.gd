@@ -6,6 +6,16 @@ extends RefCounted
 static func stage(terrain:Node)->String:
 	var Map:=preload("res://scripts/hud/border_map.gd")
 	var Forts:=preload("res://scripts/fort_border.gd")
+	# "--capture-fort-close=<n>": the view over our n-th fort (with --capture-zoom), the map mode off.
+	for argument:String in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-fort-close="):
+			var list:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))!="abandoned")
+			var n:=clampi(int(argument.get_slice("=",1)),0,maxi(0,list.size()-1))
+			if list.is_empty():return "no forts"
+			var at:=Forts._pos(list[n])
+			terrain.call("_set_camera_target",Vector3(at.x,0.0,at.y))
+			terrain.set("_border_watch_day",-1)
+			return "close over %s (%s)" % [String(list[n].name),String(list[n].kind)]
 	Map.set_shown(terrain,true)
 	var map:Node=Map.find(terrain)
 	if map==null: return "no border map"

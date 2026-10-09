@@ -870,7 +870,7 @@ func _capture_preview_if_requested() -> void:
 	# the first fort with "--capture-border-move") or the first fort's note
 	# open with "--capture-border-note".
 	for argument in OS.get_cmdline_user_args():
-		if argument=="--capture-border-map" or argument.begins_with("--capture-border-"):
+		if argument=="--capture-border-map" or argument.begins_with("--capture-border-") or argument.begins_with("--capture-fort-close="):
 			print("CAPTURE BORDER ",load("res://tools/border_map_capture.gd").call("stage",self))
 			for capture_frame in 12: await get_tree().process_frame
 			break
