@@ -147,3 +147,12 @@ func test_our_eyes_name_themselves_as_the_source_and_judge_a_boast_by_the_truth(
 
 func CV_override()->void:
 	(preload("res://scripts/character_voice.gd") as GDScript).knowledge_override["player"]=["phonetic_notation","copper_smelting","seed_selection"]
+
+func test_a_met_people_the_board_cannot_name_still_shows_its_name_never_its_id()->void:
+	var id:=_met(0,0.05)
+	var name:=String(CivilizationSystem.civilizations[0].name)
+	for race:Dictionary in Races.races({},{}):
+		for row:Dictionary in race.rows:
+			if String(row.civ_id)!=id:continue
+			assert_str(String(row.name)).is_equal(name)
+			assert_bool(String(row.name).begins_with("civ_")).is_false()

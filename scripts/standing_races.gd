@@ -33,7 +33,7 @@ static func races(_our:Dictionary,names:Dictionary)->Array:
 		var id:=String(race[0])
 		var value:=float(ours.get(id,0.0))
 		var rows:Array=[{"civ_id":"player","name":"Us","ours":true,"value":value,"low":value,"high":value,"unknown":false,"text":_words(id,value,value,value,true)}]
-		for civ_id:String in known: rows.append(_theirs(id,civ_id,String(names.get(civ_id,civ_id))))
+		for civ_id:String in known: rows.append(_theirs(id,civ_id,String(names.get(civ_id,_civ_name(civ_id)))))
 		rows.sort_custom(_before)
 		out.append({"id":id,"race":String(race[1]),"unit":String(race[2]),"ask":String(race[3]),"rows":rows,"standing":_standing(rows)})
 	return out
@@ -69,6 +69,13 @@ static func _known_peoples()->Array:
 		var relation:Dictionary=civ.get("player_relation",{})
 		if int(relation.get("contact_level",0))>=1: out.append(String(civ.id))
 	return out
+
+## A people's own name, never its internal id: the board's name list covers
+## only peoples it can see in full, but every people we have met is raced.
+static func _civ_name(civ_id:String)->String:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==civ_id and String(civ.get("name",""))!="": return String(civ.name)
+	return "A people we have met"
 
 static func _theirs(id:String,civ_id:String,name:String)->Dictionary:
 	var truth:=their_measures(civ_id)
