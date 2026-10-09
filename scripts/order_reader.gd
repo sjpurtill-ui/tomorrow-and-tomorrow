@@ -116,9 +116,8 @@ static func reader_model(voice_model:String)->String:
 
 static func reader_config(config:Dictionary)->Dictionary:
 	if config.is_empty(): return {}
-	var out:=config.duplicate()
-	out["model"]=reader_model(String(config.get("model","")))
-	return out
+	# The reader's model may be another service's than the voice's (ai_wire.gd).
+	return preload("res://scripts/ai_wire.gd").config_for_model(config,reader_model(String(config.get("model",""))))
 
 # --------------------------------------------------------------------------
 # The world brief

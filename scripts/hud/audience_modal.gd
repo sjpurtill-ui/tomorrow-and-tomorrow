@@ -1,4 +1,5 @@
 extends Control
+const AiWire:=preload("res://scripts/ai_wire.gd")
 ## The Court: the one pausing screen for every dealing with the people who
 ## serve the god and the peoples beyond. At rest it shows the gathered court
 ## in its era's setting (fire circle, longhouse, hall), the antechamber of
@@ -3088,7 +3089,7 @@ func _request_mapping(id:String,text:String,request:Dictionary)->void:
 		if result==HTTPRequest.RESULT_SUCCESS and code>=200 and code<300:mapping=_mapping_from(body)
 		_apply_vision(id,text,mapping))
 	var headers:=PackedStringArray(["Content-Type: application/json","Authorization: Bearer %s" % String(config.get("api_key",""))])
-	if http.request(String(config.get("endpoint","")),headers,HTTPClient.METHOD_POST,JSON.stringify(payload))!=OK:
+	if AiWire.send(http,config,headers,payload)!=OK:
 		http.queue_free()
 		_apply_vision(id,text,{})
 

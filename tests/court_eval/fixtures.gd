@@ -449,6 +449,11 @@ func _feud_people(info:Dictionary)->String:
 	rel.at_war=false; rel.treaty="none"; rel.contact_level=2; rel.met_day=0
 	rel.home_location_known=false; rel.home_position={}
 	rel.opinion=-0.5; rel.border_tension=0.7
+	# Their raiders walk to us, so they live a few days off (war_loop.gd near_us).
+	var near:Vector2=CivilizationSystem.player_world_origin+Vector2(250.0,0.0)
+	neyali["position"]=Vector2(near.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,near.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in neyali.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=near
 	var war_loop:GDScript=load("res://scripts/war_loop.gd")
 	if bool(war_loop.call("formal",id)): return "the Neyali are large enough for war"
 	var day:=int(GameState.elapsed_days)
@@ -456,8 +461,13 @@ func _feud_people(info:Dictionary)->String:
 	war_loop.call("blood_feud",id,day-60,"the killing of their envoy Qira")
 	var f:Dictionary=war_loop.call("front",id)
 	f["pending"]={}
+	# Nobody followed their raiders home: held as known through the raid so
+	# war_loop.came_to_us charts nothing, then unknown again below.
+	rel.home_location_known=true
 	war_loop.call("_raid",id,day-40,"vengeance",false)
 	f["pending"]={}
+	rel=CivilizationSystem.civilizations[2].player_relation
+	rel.home_location_known=false; rel.home_position={}
 	if not bool(war_loop.call("feuding",id)): return "the feud did not take"
 	return ""
 
