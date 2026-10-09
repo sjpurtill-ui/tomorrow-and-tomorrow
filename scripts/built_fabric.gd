@@ -241,6 +241,11 @@ const GREAT_PAYOFF:=0.05
 # ===========================================================================================
 
 ## This town's fabric (the one in scope), made on first use.
+## Builders standing idle for want of materials at the last reckoning, who
+## carry loads home from the grounds meanwhile (reckon).
+static func idle_builders()->float:
+	return maxf(0.0,float(data().get("idle_builders",0.0)))
+
 static func data()->Dictionary:
 	var f:Dictionary=WorldSimulation.state.built_fabric
 	if int(f.get("v",0))<1:_found(f)
@@ -324,6 +329,7 @@ static func reckon(f:Dictionary,days:float)->void:
 		realm.wall_builders=float(crew.walls)
 		realm.wall_ready=float(crew.walls_ready)
 	var budget:=float(crew.fabric)*_labor()*days*(1.0+CRAFT_WORK*craft())*(1.0+KILN_BUILDING*works_cover("kilns",f))
+	var budget_at_start:=budget
 	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
 	var places:=maxf(1.0,float(f.places))
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
@@ -380,6 +386,10 @@ static func reckon(f:Dictionary,days:float)->void:
 	f.spent=spent
 	f.budget=float(spent.upkeep)+float(spent.homes)+float(spent.roads)+float(spent.works)+float(spent.beauty)
 	f.idle=budget
+	# The fabric's builders with nothing to build for want of materials go
+	# out to the cutting and digging grounds and carry loads home
+	# (resource_system.gd hauling reads idle_builders).
+	f.idle_builders=float(crew.fabric)*clampf(budget/budget_at_start,0.0,1.0) if budget_at_start>0.001 else 0.0
 	_cache(f)
 	_report_town(f,realm)
 
@@ -1098,7 +1108,7 @@ static func plus_lines(more:float=10.0)->Array:
 	if float(p.cover)>0.0:_add_line(lines,"Work buildings","+%s a decade" % _one(float(p.cover)*1000.0),"Points of cover (of 100) each ten years.","good","built_fabric.gd WORKS_FULL")
 	if float(p.beauty)>0.0:_add_line(lines,"Beauty","+%s in a year" % _one(float(p.beauty)*100.0),"Fine works: points of beauty (of 100) in the first year.","good","built_fabric.gd BEAUTY_SCALE")
 	_add_line(lines,"Craft","%s to %s" % [_one(float(p.craft_settles)),_one(float(p.craft_then))],"Where the builders' craft settles over a working life, now and with them.","good","built_fabric.gd CRAFT_YEARS, CRAFT_PER_LEVEL")
-	if bool(p.short):_add_line(lines,"Materials","short","Some builders stand idle for want of timber, clay and stone: more cutters and diggers, or carriers bringing them from our other towns.","bad","built_fabric.gd _spare")
+	if bool(p.short):_add_line(lines,"Materials","short","Some builders have nothing to build for want of timber, clay and stone; meanwhile they carry loads home from the cutting and digging grounds. More cutters and diggers bring more.","bad","built_fabric.gd _spare")
 	return lines
 
 
