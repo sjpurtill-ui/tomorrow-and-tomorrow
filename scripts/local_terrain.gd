@@ -14384,7 +14384,8 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()
 	var raw_heights:=PackedFloat32Array()
-	for p in chart: raw_heights.append(_rendered_ground_height_at(p))
+	# A voyage's ink lies on the water, not on the sea floor beneath it.
+	for p in chart: raw_heights.append(maxf(_rendered_ground_height_at(p),SEA_LEVEL))
 	# Drape on a smoothed ground line: raw samples jitter between terrain
 	# patches and would saw the fine ink stroke in a tilted view.
 	for i in raw_heights.size():
@@ -14416,6 +14417,7 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var ordered:=String(mission.get("ordered_heading","")).to_upper()
 	var planned:=String(mission.get("planned_heading","")).to_upper()
 	var first_line:="SCOUT ORDER · %s" % ordered if ordered!="" else "SCOUTS · PARTY CHOSE %s" % planned
+	if String(mission.get("travel_mode","land"))=="sea": first_line="VOYAGE · BOUND %s" % (ordered if ordered!="" else planned)
 	var label:=Label3D.new(); label.name="ScoutOrderLabel"
 	label.text="%s\nPLANNED CORRIDOR · DUE DAY %d" % [first_line,int(mission.get("return_day",0))]
 	label.font_size=10; label.outline_size=5; label.billboard=BaseMaterial3D.BILLBOARD_ENABLED; label.fixed_size=true; label.no_depth_test=true; label.render_priority=10; label.modulate=Color(ink,1.0); label.outline_modulate=Color(paper,0.95)

@@ -104,7 +104,7 @@ const VERB_PATTERNS:=[
 	["raise","\\b(?i:(promote|exalt|elevate|raise [\\w' ]{0,30}?up))\\b|\\b(?i:honou?r) ((?i:him|her|them)|[A-Z]\\w+)\\b"],
 	["boon","(?i)\\b(reward|boon)\\b"],
 	["bless","\\b(?i:bless) ((?i:him|her|them)|[A-Z]\\w+)\\b"],
-	["send","(?i)\\b((send|dispatch) [\\w' ]{0,40}?(to scout|scouting|scouts|to explore|exploring|outriders|an envoy|envoys|a messenger|messengers|an embassy|to (?-i:[A-Z])\\w+)|go (and )?(scout|explore)|scout the|explore the)\\b"],
+	["send","(?i)\\b((send|dispatch) [\\w' ]{0,40}?(to scout|scouting|scouts|to explore|exploring|outriders|an envoy|envoys|a messenger|messengers|an embassy|to (?-i:[A-Z])\\w+)|go (and )?(scout|explore)|scout the|explore the|(send|dispatch|put) [\\w' ]{0,40}?(to sea|by sea|by boat|in boats|on boats|on ships|on the water|on a voyage|to sail)|set sail|put to sea)\\b"],
 ]
 const GIVE_PATTERN:="(?i)\\b(give|hand|grant|bestow|send|bring)\\b"
 const TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|strip)\\b"
@@ -1176,7 +1176,7 @@ static func live_verb_allowed(verb:String,text:String)->bool:
 	match verb:
 		"take": return _re(EXPLICIT_TAKE_PATTERN).search(text)!=null
 		"give": return _resource_in(text.to_lower())!="" or _re("(?i)\\b(gift|gifts|goods|reward|bundle)\\b").search(text)!=null
-		"send": return _re(String(VERB_PATTERNS[VERB_PATTERNS.size()-1][1])).search(text)!=null or _re("(?i)\\b(scouts?|scouting|explore|expedition|party|envoys?|messengers?|embassy)\\b").search(text)!=null
+		"send": return _re(String(VERB_PATTERNS[VERB_PATTERNS.size()-1][1])).search(text)!=null or _re("(?i)\\b(scouts?|scouting|explore|expedition|party|envoys?|messengers?|embassy|voyage|sail|to sea|by sea|boats?)\\b").search(text)!=null
 	return true
 
 static func harm_to_people(text:String,cls:Dictionary,list:Array[Dictionary],live:Dictionary={})->String:
@@ -2432,9 +2432,13 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 		# the odds it carries say plainly what that costs.
 		var reckless:=_re("(?i)\\b(regardless|whatever the (cost|danger|risk)|no matter (what|the cost|the danger)|at any cost|at all costs|do not turn back|don't turn back|never turn back)\\b").search(text)!=null
 		var far:=_re("(?i)\\b(far|farther|further|distant|beyond the|to the ends|as far as|long journey|a year)\\b").search(text)!=null
+		# On the water: a voyage from the nearest shore (sea_voyage.gd), never a
+		# land party quietly sent instead.
+		var by_sea:=_re("(?i)\\b(sea|seas|ocean|boats?|ships?|canoes?|sail|sailing|voyage|by water|on the water|across the water|over the water)\\b").search(text)!=null
 		var sent2:Dictionary={}
-		for days:int in ([365,180,90,30] if far else [30]):
-			sent2=CivilizationSystem.dispatch_scouts(days,"open_world",heading,0,false,"",reckless)
+		var trips:Array=([365,180,90] if far else [90,180]) if by_sea else ([365,180,90,30] if far else [30])
+		for days:int in trips:
+			sent2=CivilizationSystem.dispatch_scouts(days,"open_world",heading,0,false,"",reckless,by_sea)
 			if not sent2.has("error"): break
 		if sent2.has("error"): return _order(id,audience,r,actor,text,context,String(sent2.error))
 		# The party as it really left: how many, which way, how long (the mission record).
@@ -2442,6 +2446,9 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 		var scouts:=int(party.get("personnel",0))
 		var away:=maxi(1,int(party.get("actual_return_day",party.get("return_day",0)))-int(GameState.elapsed_days))
 		r.outcome="A scouting party%s sets out%s at your word%s; they should be back in about %d days." % [(" of %d" % scouts) if scouts>0 else ""," to the "+heading if heading!="" else ""," under "+who if who!="" else "",away]
+		if by_sea:
+			var voyage:Dictionary=party.get("voyage",{})
+			r.outcome="A boat party%s puts to sea at your word%s, bound %s: about %d km under sail, then %d km on foot from where they land, and back to the boats. They should be home in about %d days." % [(" of %d" % scouts) if scouts>0 else ""," under "+who if who!="" else "",String(party.get("planned_heading","out")).to_lower(),int(voyage.get("sea_km",0)),int(voyage.get("shore_km",0)),away]
 		if reckless:
 			r.outcome+=" You have told them not to turn back; the Chief Scout judges that %s." % ScoutSurvival.odds_phrase({"death_chance":float(party.get("field_death_chance",0.0))})
 	if int(actor.get("person_id",0))>0:

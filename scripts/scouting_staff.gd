@@ -170,7 +170,7 @@ func advance_steps(day:int)->Array:
 		durations=[host.SCOUT_DURATIONS[posmod(int(data.get("search_turn",0)),host.SCOUT_DURATIONS.size())]]
 	for days:int in durations:
 		routes.append(["scouting_route_%d" % days,func()->void:
-			if not shared.searching:return
+			if not shared.searching or bool(shared.get("land_done",false)):return
 			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
 			var caution:Dictionary=shared.caution
 			# When every trip within the Chief Scout's limit covers charted ground
@@ -180,7 +180,8 @@ func advance_steps(day:int)->Array:
 			var stretch:=days>int(caution.max_duration) and String(shared.last_reason).begins_with("No useful uncharted") and not bool(shared.get("stretched",false))
 			if stretch:shared["stretched"]=true
 			elif days>int(caution.max_duration):
-				shared.searching=false
+				# Land is done for this review; a voyage may still be tried below.
+				shared["land_done"]=true
 				if shared.last_reason.begins_with("No connected"):shared.last_reason="The Chief Scout will not send parties farther than %d days out. %s" % [int(caution.max_duration),String(caution.label)]
 				data.status=shared.last_reason;return
 			var search:=target in ["open_world","recruit_people","rare_resources"]
@@ -209,6 +210,40 @@ func advance_steps(day:int)->Array:
 			if data.focus=="recruitment":purpose="search for scarce wandering bands"
 			elif data.focus=="prospecting":purpose="survey material, mineral and fuel sources"
 			data.status="%d scouts departed from %s to %s. Expected back in %d days; staff handle the next departure." % [int(party.personnel),String(party.get("origin_label","home")),purpose,int(party.duration_days)]
+		])
+	# When the walkable country is charted (or there is none), staff put a party
+	# on the water if our boats can go to sea (sea_voyage.gd): the same food, the
+	# same risk budget and the same test that the trip charts something new.
+	for days:int in [90,180,365]:
+		routes.append(["scouting_voyage_%d" % days,func()->void:
+			if not shared.searching or String(shared.target)!="open_world":return
+			var reason:=String(shared.last_reason)
+			if not bool(shared.get("voyage",false)):
+				if days!=90 or not (reason.begins_with("No useful uncharted") or reason.begins_with("No connected") or reason.begins_with("Scouts could not find") or reason.begins_with("The Chief Scout will not send")):return
+				shared["voyage"]=true
+			var caution:Dictionary=shared.caution
+			if days>maxi(int(caution.max_duration),180):return
+			var view:Dictionary=shared.view
+			var party_size:=mini(int(shared.people),floori(float(shared.spendable)/(days*.55)))
+			if party_size<2:return
+			var quote:Dictionary=host.scout_mission_quote(days,"open_world","",party_size,true,String(view.get("origin_city_id","")),false,true)
+			if not bool(quote.get("can_dispatch",false)):
+				# Say why no boat went only when no land party could go either.
+				if not reason.begins_with("No useful uncharted"):shared.last_reason=String(quote.get("blocker",quote.get("error",reason)))
+				return
+			if float(quote.route_plan.get("novelty",0))<.38 and float(quote.route_plan.get("fresh_km",0))<USEFUL_FRESH_KM:return
+			var field:Dictionary=quote.get("field_risk",{})
+			if float(caution.standing_risk)+float(field.get("annual_expected_deaths",0.0))>float(caution.budget) and int(view.parties)>0:
+				shared.searching=false
+				data.status="The Chief Scout holds the next voyage back: with the people growing so slowly, %d part%s away is risk enough." % [int(view.parties),"y" if int(view.parties)==1 else "ies"]
+				return
+			shared.searching=false
+			var result:Dictionary=host.dispatch_scouts(days,"open_world","",party_size,true,String(view.get("origin_city_id","")),false,true)
+			if result.has("error"):data.status=String(result.error);return
+			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
+			data.food_spent=float(data.food_spent)+float(party.provisions)
+			var voyage:Dictionary=party.get("voyage",{})
+			data.status="%d scouts put to sea from %s to chart new coasts: about %d km under sail and %d km ashore. Expected back in %d days." % [int(party.personnel),String(party.get("origin_label","home")),int(voyage.get("sea_km",0)),int(voyage.get("shore_km",0)),int(party.duration_days)]
 		])
 	routes.append(["scouting_status",func()->void:
 		if shared.searching and String(shared.get("target","")).begins_with("sign:"):

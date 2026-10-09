@@ -350,6 +350,7 @@ static func _terrain(journal_variant:Variant)->Dictionary:
 	var rivers:=0
 	var high:=false
 	var coast:=false
+	var sea_km:=0
 	var regex:=RegEx.new()
 	regex.compile("(\\d+) days? across ([^;.]+)")
 	for line_variant in journal:
@@ -363,11 +364,12 @@ static func _terrain(journal_variant:Variant)->Dictionary:
 			if " twice" in line: rivers=2
 		if "treeline" in line or "high bare ground" in line: high=true
 		if "open water" in line: coast=true
-	if legs.is_empty() and rivers==0 and not high and not coast: return {}
-	var label:=legs[0] if not legs.is_empty() else ("high country" if high else "river country")
+		if line.begins_with("They sailed about "): sea_km=maxi(1,_first_int(line,"about (\\d+) km"))
+	if legs.is_empty() and rivers==0 and not high and not coast and sea_km==0: return {}
+	var label:=legs[0] if not legs.is_empty() else ("the sea" if sea_km>0 else ("high country" if high else "river country"))
 	var text:=String(journal[0])
 	if journal.size()>1: text+=" "+" ".join(PackedStringArray(journal.slice(1).map(func(x):return String(x))))
-	return _fact("terrain",label.substr(0,40),text,1.0,{"legs":legs,"leg_days":leg_days,"rivers":rivers,"high":high,"coast":coast})
+	return _fact("terrain",label.substr(0,40),text,1.0,{"legs":legs,"leg_days":leg_days,"rivers":rivers,"high":high,"coast":coast,"sea_km":sea_km})
 
 
 static func _flags(facts:Array[Dictionary],no_city:bool,contacts:Array)->Dictionary:
@@ -986,11 +988,13 @@ static func _beat_country(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:
 	used["terrain_detail"]=true
 	var terrain:Dictionary=by.terrain
 	var parts:Array[String]=[]
+	var sea_km:=int(terrain.get("sea_km",0))
+	if sea_km>0: parts.append(_pick(rng,["We took the boats out, about %d km of water, and I'd rather forget the first days of it." % sea_km,"About %d km by boat, {addr}. We bailed, we slept wet, then we pulled the boats up on the shore and walked." % sea_km]))
 	var rivers:=int(terrain.get("rivers",0))
 	if rivers>0: parts.append("We forded running water %s and my boots still haven't forgiven me." % ("once" if rivers==1 else ("twice" if rivers==2 else "%s times" % _number_word(rivers))))
 	if bool(terrain.get("high",false)): parts.append("Went up high enough the trees gave up before we did.")
 	if bool(terrain.get("coast",false)): parts.append("Walked a good while with open water in sight — more of it than anyone needs.")
-	return " ".join(PackedStringArray(parts))
+	return _fill(" ".join(PackedStringArray(parts)),ctx)
 
 
 static func _closing(by:Dictionary,flags:Dictionary,ctx:Dictionary,persona:Dictionary,rng:RandomNumberGenerator,used:Dictionary)->String:
