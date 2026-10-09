@@ -730,3 +730,12 @@ func test_the_chronicle_warns_once_early_and_again_only_after_the_stores_recover
 	Manual.set_manual(false)
 	_starving()
 	assert_bool(Manual.warn_towns(day+30).is_empty()).is_true()
+
+func test_the_work_step_grows_with_the_people_in_round_numbers()->void:
+	var Overview:=preload("res://scripts/hud/content/dock_content_overview.gd")
+	assert_int(Overview.work_step(80)).is_equal(1)
+	assert_int(Overview.work_step(250)).is_equal(2)
+	assert_int(Overview.work_step(1200)).is_equal(10)
+	assert_int(Overview.work_step(45706)).is_equal(500)
+	assert_int(Overview.work_step(60000)).is_equal(500)
+	assert_int(Overview.work_step(2000000)).is_equal(20000)

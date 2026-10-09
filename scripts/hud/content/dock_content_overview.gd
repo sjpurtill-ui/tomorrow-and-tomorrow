@@ -51,7 +51,8 @@ func tab(_sub:int)->Dictionary:
 
 ## WHAT THE PEOPLE ARE DOING TODAY, and who sets it (manual_work.gd). Our
 ## leaders: the rows are a view, with each leader's word on why. The ruler:
-## each row takes −/+ and ×5 in whole people, and the counts' plain warnings
+## each row takes −/+ and ×5 in steps of about one in a hundred at work
+## (work_step), and the counts' plain warnings
 ## say what the split will do. The rows add up to the people who can work.
 func labor_block(hearth:bool,modern:bool)->Dictionary:
 	var tasks:=People.labor()
@@ -62,6 +63,9 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 		able+=int(task.count);most=maxi(most,int(task.count))
 	if manual:
 		var counts:=Manual.counts()
+		var step:=work_step(able)
+		var one:="One" if step==1 else EraWords.grouped(step)
+		var five:="Five" if step==1 else EraWords.grouped(step*5)
 		for task:Dictionary in tasks:
 			var role:=String(task.id)
 			var donor:=Manual._most(counts,role)
@@ -69,9 +73,9 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 			var words:=Manual.task_words(role)
 			task["can_add"]=donor!=""
 			task["can_take"]=int(task.count)>0 and taker!=""
-			task["add_tip"]=("One more on %s, from %s." % [words,Manual.task_words(donor)]) if donor!="" else "Every hand is here already."
-			task["take_tip"]=("One fewer on %s; they go to %s." % [words,Manual.task_words(taker)]) if int(task.count)>0 and taker!="" else "Nobody is on this now."
-			task["five_tip"]="Five more on %s, from the busiest tasks." % words
+			task["add_tip"]=("%s more on %s, from %s." % [one,words,Manual.task_words(donor)]) if donor!="" else "Every hand is here already."
+			task["take_tip"]=("%s fewer on %s; they go to %s." % [one,words,Manual.task_words(taker)]) if int(task.count)>0 and taker!="" else "Nobody is on this now."
+			task["five_tip"]="%s more on %s, from the busiest tasks." % [five,words]
 	var register:="%s can work" % (EraWords.count_word(able).capitalize() if hearth else EraWords.grouped(able))
 	return {"heading":"WHAT THE PEOPLE ARE DOING TODAY" if hearth else ("TODAY'S LABOUR, FROM THE ROLLS" if not modern else "LABOR FORCE BY TASK"),
 		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),"able":able,
@@ -92,10 +96,22 @@ func set_work(ruler:bool)->void:
 	Manual.set_manual(ruler)
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
-## −/+ on a task, in whole people (×5 is five).
-func move_work(role:String,people:int)->void:
-	Manual.move(role,people)
+## −/+ on a task, in steps of work_step people (×5 is five steps).
+func move_work(role:String,steps:int)->void:
+	Manual.move(role,steps*work_step(Manual.able()))
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
+
+## People one click moves: about one in a hundred at work, as a round
+## number (1, 2, 5, 10, 20, 50 ...), so a band moves one hand and a city of
+## tens of thousands moves a share that shows.
+static func work_step(able:int)->int:
+	var target:=maxf(1.0,float(able)/100.0)
+	var magnitude:=pow(10.0,floorf(log(target)/log(10.0)+0.000001))
+	# The nearest of 1, 2, 5 and 10 times the magnitude, by ratio.
+	var best:=magnitude
+	for m:float in [2.0,5.0,10.0]:
+		if absf(log(m*magnitude/target))<absf(log(best/target)):best=m*magnitude
+	return maxi(1,roundi(best))
 
 func summon(target:Dictionary)->void:
 	court(target).call()
