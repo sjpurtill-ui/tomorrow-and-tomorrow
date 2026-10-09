@@ -477,3 +477,22 @@ func test_a_levy_given_to_a_town_overseer_is_followed_in_the_ledger()->void:
 	Tracker.from_court(card,r)
 	assert_str(String(Tracker.find(card).kind)).is_equal("levy")
 	assert_str(String(Tracker.find(card).line)).starts_with("20 in drill")
+
+
+func test_an_order_whose_band_is_gone_ends_and_clears_instead_of_stalling_forever()->void:
+	var id:=Tracker.register("Attack Felik with 400 men","army")
+	Tracker.claim(id,"march",{"army_id":987654,"kind":"attack","start_day":int(GameState.elapsed_days)},"Fitha","military")
+	# The band was moving once, then was lost: an older save holds it stalled.
+	var card:=Tracker.find(id)
+	card["state"]="stalled";card["ever_moved"]=true
+	GameState.elapsed_days+=1
+	Tracker.update()
+	card=Tracker.find(id)
+	assert_str(String(card.state)).is_equal("refused")
+	assert_str(String(card.line)).contains("disbanded or lost")
+	# Off the stack the next day, out of the ledger once old.
+	GameState.elapsed_days+=2
+	assert_bool(Tracker.current().any(func(o:Dictionary)->bool:return int(o.id)==id)).is_false()
+	GameState.elapsed_days+=Tracker.KEEP_FINISHED_DAYS+1
+	Tracker.update()
+	assert_bool(Tracker.find(id).is_empty()).is_true()

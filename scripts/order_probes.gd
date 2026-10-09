@@ -149,7 +149,8 @@ static func _line(refs:Dictionary)->Dictionary:
 		for candidate in MilitaryCampaign.equipment_queue:
 			var j:Dictionary=candidate
 			if String(j.get("item",""))==item and bool(j.get("persistent",false)):job=j;break
-	if job.is_empty():return {"state":"stalled","line":"The line for %s is gone" % _arms(item),"reason":"the line was stopped","progress":0.0}
+	# A line that is gone can never carry the order on: it ends, it does not stall.
+	if job.is_empty():return {"state":"refused_now","line":"The line for %s was stopped" % _arms(item),"progress":0.0}
 	var stock:=int(P.stock(MilitaryCampaign,job))
 	var target:=int(job.get("target_stock",refs.get("target",0)))
 	var made:=int(job.get("completed",0))
@@ -169,7 +170,8 @@ static func _march(refs:Dictionary)->Dictionary:
 	var army:={}
 	for a in MilitaryCampaign.field_armies:
 		if int((a as Dictionary).get("army_id",-1))==int(refs.get("army_id",-1)):army=a;break
-	if army.is_empty():return {"state":"stalled","line":"The band is no more","reason":"the band was disbanded or lost","progress":0.0}
+	# A band that is no more can never carry the order on: it ends, it does not stall.
+	if army.is_empty():return {"state":"refused_now","line":"The band is no more: disbanded or lost","progress":0.0}
 	var name:=String(army.get("name","The band"))
 	var kind:=String(refs.get("kind",""))
 	if String(army.get("status",""))=="moving":
