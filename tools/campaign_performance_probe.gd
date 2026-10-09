@@ -29,8 +29,10 @@ func _ready() -> void:
 		var start := Time.get_ticks_usec()
 		WorldSimulation.advance_day(day,terrain._discovery_context(),terrain._process_local_settlement_day)
 		elapsed.append((Time.get_ticks_usec()-start)/1000.0)
+		# Calm rivals step several days at once (world_simulation.gd _span_waits),
+		# so a rival behind today is expected; only one far behind is a failure.
 		for id: String in WorldSimulation.actors:
-			if int(WorldSimulation.actors[id].last_day)!=day:failures.append("Missing opponent day "+id)
+			if day-int(WorldSimulation.actors[id].last_day)>WorldSimulation.uncontacted_span_limit*2:failures.append("Opponent stalled "+id)
 		await get_tree().process_frame
 	Trace.enabled=false
 	var rows:Array=[]
