@@ -124,6 +124,14 @@ func _ready() -> void:
 	var margins := MarginContainer.new(); margins.size_flags_vertical = SIZE_EXPAND_FILL; shell.add_child(margins)
 	for side: String in ["left","right","top","bottom"]: margins.add_theme_constant_override("margin_"+side, 16)
 	var content := _stack(margins, 10)
+	# expedition.gd: the god's own push into the unknown, planned on the map.
+	var plan_expedition := func():
+		var scene := get_tree().current_scene
+		close_requested.emit()
+		preload("res://scripts/hud/expedition_planner.gd").open(scene)
+	var expedition := button(content, "Send an expedition", plan_expedition, true)
+	expedition.name = "SendExpedition"; expedition.clip_text = true
+	expedition.tooltip_text = "Push far one way, by land or by sea: choose a direction, how far and how many. The farther they push, the fewer come home."
 	scroll = ScrollContainer.new(); scroll.size_flags_vertical = SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED; content.add_child(scroll)
 	body = _stack(scroll, 8)
