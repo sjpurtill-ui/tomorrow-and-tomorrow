@@ -34,7 +34,9 @@ static func data()->Dictionary:
 		if String(f.get("status",""))=="abandoned":continue
 		var need:=maxf(1.0,float(Forts.kind(String(f.kind)).get("garrison",1)))
 		marks.append({"at":Forts._pos(f),"status":String(f.status),"manned":float(kept.garrisons.get(int(f.id),0))/need,"name":String(f.get("name","")),"kind":String(f.kind)})
-	return {"points":shape.points,"strengths":strengths,"forts":marks}
+	var foreign:=[]
+	for f:Dictionary in Forts.known_foreign_forts():foreign.append({"at":f.at,"kind":String(f.kind),"status":String(f.status),"owner":String(f.owner)})
+	return {"points":shape.points,"strengths":strengths,"forts":marks,"foreign":foreign}
 
 ## What the drawing depends on, coarsely: redraw only when it changes.
 static func key(d:Dictionary,zoom_octave:int)->int:
@@ -42,7 +44,7 @@ static func key(d:Dictionary,zoom_octave:int)->int:
 	for value:float in (d.strengths as PackedFloat32Array):classes.append(_class(value))
 	var rounded:=PackedVector2Array()
 	for p:Vector2 in (d.points as PackedVector2Array):rounded.append(p.snapped(Vector2.ONE*0.5))
-	return hash([rounded,classes,var_to_str(d.forts),zoom_octave])
+	return hash([rounded,classes,var_to_str(d.forts),var_to_str(d.get("foreign",[])),zoom_octave])
 
 static func _class(strength:float)->int:
 	if strength<0.0:return -1
@@ -91,4 +93,10 @@ static func build(terrain:Node,d:Dictionary)->Node3D:
 		var kind:="fort:%s%s" % [String(f.get("kind","stone_fort")),"" if String(f.status)=="standing" else ":building"]
 		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(PLUM,0.6+0.4*clampf(float(f.manned),0.0,1.0)),f.at,float(profile.clearance)*2.0,size*2.4)
 		mark.name="BorderFort";root.add_child(mark)
+	# Forts of peoples we know, in their own colour (nation_borders.gd).
+	for f:Dictionary in d.get("foreign",[]):
+		var kind:="fort:%s%s" % [String(f.kind),"" if String(f.status)=="standing" else ":building"]
+		var colour:Color=preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.35)
+		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(colour,0.9),f.at,float(profile.clearance)*2.0,size*2.0)
+		mark.name="ForeignFort";root.add_child(mark)
 	return root

@@ -330,6 +330,10 @@ func _refresh_key()->void:
 	for step:Array in [["−",-0.1,"Fewer on the border: less food lost on the road, a thinner line."],["+",0.1,"More on the border: forts manned first, then the line between them."]]:
 		var b:=Kit.button(share_row,String(step[0]),false,func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step[1]),0.0,1.0));_changed(),String(step[2]))
 		b.custom_minimum_size=Vector2(36,32)
+	var to_man:=Forts.share_to_man()
+	if to_man>Forts.border_share()+0.001:
+		var man:=Kit.button(column,"Man every fort: send %d in 100 of the watch" % roundi(to_man*100.0),true,func()->void:Forts.set_border_share(to_man);_changed(),"Sends out enough of the watch at home to fill every fort's garrison. More food is lost on the road; fewer keep watch at home.")
+		man.name="ManEveryFort"
 	_legend(column)
 	if next.is_empty(): Kit.label(column,"Our people know no way to raise a fort yet.","note")
 	elif moving>=0: Kit.label(column,"Carrying %s: click where it should stand. Right-click to let it go." % String(Forts.find_fort(moving).get("name","the fort")),"note",PLUM)
@@ -408,6 +412,7 @@ class BorderChart extends Control:
 	## Every fort's name and every stretch's hold, refreshed with the pointer.
 	var _names:Array=[]
 	var _stretches:Array=[]
+	var _foreign:Array=[]
 
 	func _ready()->void:
 		mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -450,6 +455,8 @@ class BorderChart extends Control:
 			if String(f.get("status",""))!="abandoned": _names.append([Forts._pos(f),String(f.get("name",""))])
 		var kept:=Forts.watch()
 		for st:Dictionary in kept.stretches: _stretches.append([Vector2(st.mid),float(st.strength),float(st.per_km)])
+		_foreign=[]
+		for f:Dictionary in Forts.known_foreign_forts(): _foreign.append([f.at,"%s's %s" % [String(f.owner_name),String(Forts.kind(String(f.kind)).get("name","fort")).to_lower()],preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.45)])
 
 	func _draw()->void:
 		_draw_border_words()
@@ -469,6 +476,14 @@ class BorderChart extends Control:
 			var at:=s+Vector2(-w*0.5,30)
 			draw_string_outline(voice,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,15,5,Color(PAPER,0.92))
 			draw_string(voice,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color(PLUM.darkened(0.25),0.95))
+		for row:Array in _foreign:
+			var s:Vector2=owner_map.call("screen_of",row[0])
+			if not s.is_finite(): continue
+			var text:=String(row[1])
+			var w:=voice.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
+			var at:=s+Vector2(-w*0.5,28)
+			draw_string_outline(voice,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,5,Color(PAPER,0.92))
+			draw_string(voice,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,14,row[2])
 		for row:Array in _stretches:
 			var s:Vector2=owner_map.call("screen_of",row[0])
 			if not s.is_finite(): continue
@@ -480,6 +495,20 @@ class BorderChart extends Control:
 			draw_style_box(T.flat(Color(PAPER,0.95),Color(ink,0.9),1,3,0),box)
 			draw_rect(Rect2(box.position+Vector2(1,box.size.y-4),Vector2((box.size.x-2)*clampf(strength,0.0,1.0),3)),ink)
 			draw_string(ui,box.position+Vector2(8,14),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
+
+	## The border as it would run with the fort there: a dashed plum line over
+	## a faint wash, so the ground it takes in reads before the click.
+	func _draw_new_border(points:PackedVector2Array)->void:
+		if points.size()<3:return
+		var screen:=PackedVector2Array()
+		for p:Vector2 in points:
+			var s:Vector2=owner_map.call("screen_of",p)
+			if s.is_finite():screen.append(s)
+		if screen.size()<3:return
+		screen.append(screen[0])
+		for i in range(1,screen.size()):
+			draw_line(screen[i-1],screen[i],Color(PAPER,0.55),4.0,true)
+			_dashed(screen[i-1],screen[i],Color(PLUM,0.9),2.0)
 
 	func _circle(center:Vector2,km:float,colour:Color,dashed:bool)->void:
 		var pts:=PackedVector2Array()
@@ -501,6 +530,7 @@ class BorderChart extends Control:
 			var from:Vector2=owner_map.call("screen_of",Forts._pos(carried))
 			if from.is_finite(): _dashed(from,_mouse,Color(INK,0.7),1.6)
 		if String(_quote.get("problem",""))=="":
+			_draw_new_border(_quote.get("outline",PackedVector2Array()))
 			_circle(_ground,reach,Color(ink,0.75),true)
 			for link:Dictionary in _quote.links:
 				var other:=Forts.find_fort(int(link.get("to",-1)))

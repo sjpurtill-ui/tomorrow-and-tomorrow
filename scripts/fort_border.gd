@@ -366,6 +366,38 @@ static func abandon(id:int)->Dictionary:
 			return {"ok":true}
 	return {"error":"No such fort."}
 
+## The share of the watch at home that mans every fort's garrison (0..1; 1
+## when even all of it falls short).
+static func share_to_man(state:Node=null,mc:Node=null)->float:
+	if mc==null:mc=WorldSimulation.military if state==null or state==WorldSimulation.state else _military_of(state)
+	var home:=preload("res://scripts/watch_military.gd").at_home(mc) if mc!=null else 0
+	var need:=0
+	for f:Dictionary in forts(state):
+		if String(f.get("status",""))!="abandoned":need+=int(kind(String(f.kind)).get("garrison",0))
+	if need<=0:return 0.0
+	if home<=0:return 1.0
+	return clampf(ceilf(float(need)/float(home)*100.0)/100.0,0.0,1.0)
+
+## Other peoples' forts our people know of: on land we have charted, of the
+## peoples we have met. [{at, kind, status, owner, owner_name, name}].
+static func known_foreign_forts()->Array:
+	var out:=[]
+	var world:Variant=WorldSimulation.world
+	if world==null:return out
+	var Exchange:=preload("res://scripts/society_exchange.gd")
+	for civ:Dictionary in world.civilizations:
+		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2:continue
+		var id:=String(civ.get("id",""))
+		var state:Node=Exchange.owner_state(id)
+		if state==null or state==WorldSimulation.state:continue
+		var d:Dictionary=state.border_forts
+		for f:Dictionary in d.get("forts",[]):
+			if String(f.get("status",""))=="abandoned":continue
+			var at:=_pos(f)
+			if world.has_method("_position_is_revealed") and not bool(world._position_is_revealed(at)):continue
+			out.append({"at":at,"kind":String(f.get("kind","")),"status":String(f.get("status","")),"owner":id,"owner_name":String(civ.get("name","")),"name":String(f.get("name",""))})
+	return out
+
 ## Sets the share of the watch at home sent out to the border (0..1).
 static func set_border_share(share:float)->void:
 	ledger().border_share=clampf(share,0.0,1.0)
@@ -454,9 +486,12 @@ static func quote(point:Vector2,moving:int=-1)->Dictionary:
 		for l:Dictionary in links():
 			if int(l.a)==-99:joined.append({"name":String(names.get(int(l.b),"")),"km":float(l.km),"to":int(l.b)})
 			elif int(l.b)==-99:joined.append({"name":String(names.get(int(l.a),"")),"km":float(l.km),"to":int(l.a)})
-		return {"area":area(outline()),"links":joined})
+		var shape:=outline()
+		return {"area":area(shape),"links":joined,"points":shape.points})
 	out.gain_km2=float(after.area)-before
 	out.links=after.links
+	# The border as it would run with the fort standing there (the map's ghost).
+	out.outline=after.points
 	return out
 
 ## Whose land `point` is when another people's border holds it ("" if none).

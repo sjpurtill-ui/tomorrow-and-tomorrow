@@ -127,6 +127,10 @@ func test_the_quote_says_what_a_fort_there_costs_and_gains()->void:
 	# It links to the fort at (80, 0) and encloses the ground between.
 	assert_int((q.links as Array).size()).is_equal(1)
 	assert_float(float(q.gain_km2)).is_greater(PI*32.0*32.0*0.5)
+	# The border it would make reaches past the new fort.
+	var reach_north:=0.0
+	for p:Vector2 in (q.outline as PackedVector2Array):reach_north=maxf(reach_north,p.y)
+	assert_float(reach_north).is_greater(100.0)
 	# The quote changes nothing.
 	assert_int(Forts.forts().size()).is_equal(1)
 	# Home ground needs no fort; nor does a spot beside another fort.
@@ -191,6 +195,20 @@ func _texts(root:Node)->String:
 		if n is Label:out.append((n as Label).text)
 		elif n is Button:out.append((n as Button).text)
 	return " | ".join(out)
+
+func test_the_share_that_mans_every_fort_is_their_garrisons_over_the_watch_at_home()->void:
+	WorldSimulation.military=MilitaryCampaign
+	assert_float(Forts.share_to_man()).is_equal(0.0)
+	_standing(Vector2(80,0));_standing(Vector2(0,80))
+	var home:=preload("res://scripts/watch_military.gd").at_home(MilitaryCampaign)
+	if home<=0:
+		assert_float(Forts.share_to_man()).is_equal(1.0)
+		return
+	var share:=Forts.share_to_man()
+	assert_float(share).is_equal_approx(minf(1.0,ceilf(120.0/float(home)*100.0)/100.0),0.0001)
+	Forts.set_border_share(share)
+	var kept:=Forts.watch()
+	for f:Dictionary in Forts.forts():assert_int(int(kept.garrisons[int(f.id)])).is_equal(60 if share<1.0 else int(kept.garrisons[int(f.id)]))
 
 func test_every_kind_of_fort_has_its_own_chart_mark()->void:
 	var Icons:=preload("res://scripts/resource_icons.gd")
