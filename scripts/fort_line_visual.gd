@@ -2,9 +2,10 @@ extends RefCounted
 ## THE WATCHED BORDER ON THE CHART (fort_border.gd): our border inked along
 ## its own outline, each run as strongly as it is kept. A tight stretch is a
 ## heavy, unbroken plum line; a thin one a fine line; open ground, and forts
-## with too few to man them, a faint dotted trace. Forts stand on it as walled
-## squares (half drawn while going up); the war leader's suggested sites are
-## open dashed squares. Built by local_terrain.gd (_refresh_border_watch) with
+## with too few to man them, a faint dotted trace. Each fort stands on it in
+## its kind's own chart mark (resource_icons.gd _fort_glyph), half pencilled
+## while going up; the god places, moves and breaks them down in the map's
+## Border mode (hud/border_map.gd). Built by local_terrain.gd (_refresh_border_watch) with
 ## its chart ink, so it keeps its width on screen at every zoom.
 
 const Forts:=preload("res://scripts/fort_border.gd")
@@ -17,8 +18,8 @@ const CLASSES:=[0.15,0.4,0.7]
 const WATER:=-1.0
 
 ## What the chart needs, from the ledger: {points: PackedVector2Array along
-## the outline, strengths: per point, forts: [{at, status, manned}], sites:
-## [{at, why}]}. Pure data; key() decides whether to rebuild.
+## the outline, strengths: per point, forts: [{at, status, manned, kind}]}.
+## Pure data; key() decides whether to rebuild.
 static func data()->Dictionary:
 	var shape:=Forts.outline()
 	var kept:=Forts.watch()
@@ -32,10 +33,8 @@ static func data()->Dictionary:
 	for f:Dictionary in Forts.forts():
 		if String(f.get("status",""))=="abandoned":continue
 		var need:=maxf(1.0,float(Forts.kind(String(f.kind)).get("garrison",1)))
-		marks.append({"at":Forts._pos(f),"status":String(f.status),"manned":float(kept.garrisons.get(int(f.id),0))/need,"name":String(f.get("name",""))})
-	var sites:=[]
-	for site:Dictionary in Forts.suggest_sites():sites.append({"at":site.at,"why":String(site.why)})
-	return {"points":shape.points,"strengths":strengths,"forts":marks,"sites":sites}
+		marks.append({"at":Forts._pos(f),"status":String(f.status),"manned":float(kept.garrisons.get(int(f.id),0))/need,"name":String(f.get("name","")),"kind":String(f.kind)})
+	return {"points":shape.points,"strengths":strengths,"forts":marks}
 
 ## What the drawing depends on, coarsely: redraw only when it changes.
 static func key(d:Dictionary,zoom_octave:int)->int:
@@ -43,7 +42,7 @@ static func key(d:Dictionary,zoom_octave:int)->int:
 	for value:float in (d.strengths as PackedFloat32Array):classes.append(_class(value))
 	var rounded:=PackedVector2Array()
 	for p:Vector2 in (d.points as PackedVector2Array):rounded.append(p.snapped(Vector2.ONE*0.5))
-	return hash([rounded,classes,var_to_str(d.forts),var_to_str(d.sites),zoom_octave])
+	return hash([rounded,classes,var_to_str(d.forts),zoom_octave])
 
 static func _class(strength:float)->int:
 	if strength<0.0:return -1
@@ -89,10 +88,7 @@ static func build(terrain:Node,d:Dictionary)->Node3D:
 		var mesh:=MeshInstance3D.new();mesh.name="BorderWatchLine";mesh.mesh=ink.commit();mesh.material_override=terrain._scout_chart_material(4);root.add_child(mesh)
 	var size:=float(profile.mark)
 	for f:Dictionary in d.forts:
-		var kind:="fort" if String(f.status)=="standing" else "fort_building"
-		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(PLUM,0.55+0.45*clampf(float(f.manned),0.0,1.0)),f.at,float(profile.clearance)*2.0,size*1.15)
+		var kind:="fort:%s%s" % [String(f.get("kind","stone_fort")),"" if String(f.status)=="standing" else ":building"]
+		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(PLUM,0.6+0.4*clampf(float(f.manned),0.0,1.0)),f.at,float(profile.clearance)*2.0,size*2.4)
 		mark.name="BorderFort";root.add_child(mark)
-	for site:Dictionary in d.sites:
-		var mark:Sprite3D=terrain._scout_chart_mark("fort_site",Color(PLUM,0.8),site.at,float(profile.clearance)*2.0,size)
-		mark.name="BorderSite";root.add_child(mark)
 	return root
