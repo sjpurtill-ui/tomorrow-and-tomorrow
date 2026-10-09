@@ -135,3 +135,25 @@ func test_a_harbour_on_the_waterline_launches_from_home()->void:
 	var quote:Dictionary=system.scout_mission_quote(90,"open_world","",0,false,"",false,true)
 	assert_bool(bool(quote.can_dispatch)).override_failure_message(str(quote)).is_true()
 	assert_float(float(quote.route_plan.voyage.walk_to_boat_km)).is_equal(0.0)
+
+func test_fruitless_reviews_wait_longer_each_time_until_a_party_leaves()->void:
+	# A charted island with river boats only: nothing new by land or sea.
+	_know(["river_craft"])
+	system._add_revealed_area(Vector2(-20,0),70.0,"test: home island charted")
+	system.scouting_staff.set_policy(.05,"exploration")
+	var reviews:Array[int]=[]
+	for day in range(1,720):
+		GameState.elapsed_days=day
+		var before:=int(system.scouting_staff.data.next_review)
+		system.scouting_staff.advance(day)
+		if day>=before:reviews.append(day)
+	assert_array(system.scout_missions).is_empty()
+	var gaps:Array[int]=[]
+	for i in range(1,mini(reviews.size(),6)):gaps.append(reviews[i]-reviews[i-1])
+	assert_array(gaps).override_failure_message(str(reviews)).is_equal([28,56,112,168,168])
+	# Better boats and a fresh order from the player: staff look again at once.
+	_know(COAST_BOATS)
+	system.scouting_staff.set_policy(.06,"exploration")
+	GameState.elapsed_days=800;system.scouting_staff.advance(800)
+	assert_int(system.scout_missions.size()).override_failure_message(String(system.scouting_staff.data.status)).is_equal(1)
+	assert_int(int(system.scouting_staff.data.fruitless)).is_equal(0)
