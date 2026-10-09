@@ -466,7 +466,8 @@ static func _put(label:Label,text:String,color:Variant=null)->void:
 ## What the people are doing today, and who sets it (manual_work.gd): the
 ## switch "Who sets the daily work: Our leaders | I do", then each task as a
 ## row of figures and its count. Our leaders: each leader's word on why. The
-## ruler: −/+ and ×5 on each row, in whole people, and the plain warnings.
+## ruler: −/+ and ×5 on each row, in steps that grow with the people
+## (dock_content_overview.gd work_step), and the plain warnings.
 func _fill_labor(parent:Control,labor:Dictionary)->void:
 	_labor_head=_labor_header(labor);parent.add_child(_labor_head)
 	_labor_rows.clear()
