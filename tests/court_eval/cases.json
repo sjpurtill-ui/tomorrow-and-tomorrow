@@ -1246,7 +1246,7 @@
 
   {"id": "off.exile.family", "domain": "officials", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "Exile Kavu and his whole family", "ideal": {"kind": "order", "action": "exile", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "verb": "exile", "target": "kavu", "state": {"status_kavu": "=='exiled'"}}},
 
-  {"id": "off.dismiss.who_now", "domain": "officials", "fixture": "home_peace", "speaker": "suri", "source": "design", "note": "The council as it stands is common knowledge: the new keeper (the ablest the council knows, by the stated succession rule) is named.", "steps": [{"say": "Dismiss Kavu", "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "state": {"office_kavu": "==''"}}}, {"say": "Who keeps the stores now?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["Iwen"], "prompt_has": ["Council:"]}}]},
+  {"id": "off.dismiss.who_now", "domain": "officials", "fixture": "home_peace", "speaker": "suri", "source": "design", "note": "The council as it stands is common knowledge: the new keeper (the ablest the council knows, by the stated succession rule) is named.", "steps": [{"say": "Dismiss Kavu", "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "state": {"office_kavu": "==''", "keeper": "!=before"}}}, {"say": "Who keeps the stores now?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "state": {"keeper": "!=''"}, "reply_any": ["{keeper}"], "prompt_has": ["Council:"]}}]},
 
   {"id": "sum.best_hunter", "domain": "summon", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "Who is the best hunter?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"state": {"known": ">before", "waiting": "==before"}, "reply_has": ["hunter"]}, "variants": ["who's the best hunter here", "Who is our finest hunter?"]},
 
@@ -1388,7 +1388,7 @@
 
   {"id": "cul.bride_price", "domain": "culture", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "A man must give ten hides for his bride", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"modifiers": ">before"}}},
 
-  {"id": "q.work.headman", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "What are the people working on?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_has": ["259"], "prompt_has": ["At work:"]}, "variants": ["what is everyone doing", "What work are the people doing?"]},
+  {"id": "q.work.headman", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "What are the people working on?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_has": ["{work_food} getting food"], "prompt_has": ["At work:"]}, "variants": ["what is everyone doing", "What work are the people doing?"]},
 
   {"id": "q.food_last.typo", "domain": "office_questions", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "how long wil the food last", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["{food_days}"], "prompt_has": ["enough for {food_days_exact} days"]}},
 
@@ -1755,10 +1755,10 @@
    "variants": ["Put a palisade around our town", "Make them build our walls"]},
 
   {"id": "fn.found_town", "domain": "functions", "fixture": "home_charted", "speaker": "headman", "source": "design",
-   "note": "The test world has no mapped rivers: the court says plainly why no site will do (a founding that sets out is in tests/test_levy_orders.gd).",
+   "note": "One seat per people (one_seat.gd, the user 2026-10-05: no new towns): nobody sets out to found a town; the court says so plainly and why, and nothing is set in motion.",
    "say": "Found a new town by the river",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"handled": true, "state": {"modifiers": "==before", "settling": "==before"}, "says_any": ["scouts", "settlers set out"]},
+   "expect": {"handled": true, "state": {"modifiers": "==before", "settling": "==before"}, "says_has": ["do not leave to found towns"]},
    "variants": ["Send settlers to start a village by the river"]},
 
   {"id": "fn.great_work", "domain": "functions", "fixture": "home_peace", "speaker": "headman", "source": "design",
@@ -1897,10 +1897,10 @@
    "variants": ["our people shall be called the Reedfolk", "name our realm the Reedfolk", "call our people the reedfolk", "From now on we shall be known as the Reedfolk", "Let our nation be called the Reedfolk.", "the name of our nation is the Reedfolk", "Kishan, call our nation the Reedfolk", "Call our nation \"the Reedfolk\"", "Name our nation: the Reedfolk", "we shall call ourselves the Reedfolk"]},
 
   {"id": "cul.nation.one_town", "domain": "culture", "fixture": "home_peace", "speaker": "headman", "source": "design",
-   "note": "One town: the people go by its name. The headman says so plainly; nothing is named and nothing else changes.",
+   "note": "One settlement is enough to name our people (nation_name.gd, 08a5e059: every people has one seat, so the name is asked at the first fire and the court may name it from the start). The people is named; the settlement keeps its own name and nothing else changes.",
    "say": "Call our nation the Reedfolk",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "==before", "settlement_name": "==before", "modifiers": "==before"}, "reply_has": ["Seanstone", "Nothing is changed"]},
+   "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "=='The Reedfolk'", "settlement_name": "==before", "modifiers": "==before"}, "reply_has": ["the Reedfolk"]},
    "variants": ["our people shall be called the Reedfolk"]},
 
   {"id": "cul.nation.any_official", "domain": "culture", "fixture": "home_towns", "speaker": "suri", "source": "design",
@@ -1969,10 +1969,10 @@
    "variants": ["hire crews to build", "Pay the builders"]},
 
   {"id": "purse.relief_100", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
-   "note": "One town and no market: nothing can be bought, and the court says why instead of pretending.",
+   "note": "The common store holds real food (94fc59f6): relief goes from the store first and is bought only with coin at a market. Here the store is empty and there is no market, so nothing is sent, and the court says why instead of pretending.",
    "say": "Spend 100 on food for the hungry",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"handled": true, "stage": "none", "state": {"purse": "==before", "food": "==before"}, "says_has": ["Nothing is bought"]},
+   "expect": {"handled": true, "stage": "none", "state": {"purse": "==before", "food": "==before"}, "says_has": ["Nothing is sent", "store is empty"]},
    "variants": ["spend 100 on food for the hungry"]},
 
   {"id": "purse.relief_monthly", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
