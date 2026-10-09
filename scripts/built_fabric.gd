@@ -472,6 +472,12 @@ static func _take_any(work:float,loads:float,avail:Dictionary,stocks:Dictionary)
 ## have still to use (great_bills) and, at home, the next defence stage's
 ## (home_defense.gd material_targets), whichever is more.
 const RESERVE:=1.0
+## A large town keeps back less a head: RESERVE a person up to the point
+## where RESERVE_BASE + RESERVE_LARGE a person is less (about 2,200 people),
+## so a band keeps its store as before and a city of 39,000 keeps about
+## 5,900 of each, not 39,000 its builders may never touch.
+const RESERVE_BASE:=2000.0
+const RESERVE_LARGE:=0.1
 const MATERIALS:=["Timber","Clay","Stone","Fiber Plants"]
 static func _spare(pop:float,stocks:Dictionary)->Dictionary:
 	var kept:Dictionary=preload("res://scripts/local_material_reserves.gd").calculate()
@@ -479,7 +485,7 @@ static func _spare(pop:float,stocks:Dictionary)->Dictionary:
 	var works:=great_bills()
 	var out:={}
 	for item:String in MATERIALS:
-		var reserve:=maxf(RESERVE*pop,float(kept.get(item,0.0))+float(walls.get(item,0.0))+float(works.get(item,0.0)))
+		var reserve:=maxf(minf(RESERVE*pop,RESERVE_BASE+RESERVE_LARGE*pop),float(kept.get(item,0.0))+float(walls.get(item,0.0))+float(works.get(item,0.0)))
 		out[item]=maxf(0.0,float(stocks.get(item,0.0))-reserve)
 	return out
 

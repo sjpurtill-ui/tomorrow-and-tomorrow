@@ -10,6 +10,31 @@ const MAX_SURFACE_FRONT_RING:=3
 ## Carriers at work for each ring of new ground searched past the first.
 const SURFACE_SEARCH_CARRIERS:=6.0
 const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
+## The most fronts of one kind a people ever records (_ensure_surface_supply).
+const MAX_FRONTS_EVER:=1500
+## One working front of each kind for every FRONT_HANDS cutters and diggers,
+## never more than MAX_WORKING_FRONTS: a band works one wood, a city of
+## thousands many at once.
+const FRONT_HANDS:=150.0
+const MAX_WORKING_FRONTS:=24
+## The fronts of each landscape source, indexed once a day (and again when
+## the deposits change in number), for _ensure_surface_supply.
+var _fronts_day:=-1
+var _fronts_count:=-1
+var _fronts_list:Array=[]
+var _fronts:={}
+func _fronts_of(source:String)->Array:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var deposits:Array=WorldSimulation.state.resource_deposits
+	if day!=_fronts_day or deposits.size()!=_fronts_count or not is_same(deposits,_fronts_list):
+		_fronts_day=day;_fronts_count=deposits.size();_fronts_list=deposits;_fronts={}
+		for deposit:Dictionary in deposits:
+			var from:=String(deposit.get("landscape_source",""))
+			if from!="":(_fronts.get_or_add(from,[]) as Array).append(deposit)
+	return _fronts.get(source,[])
+
+func working_fronts()->int:
+	return clampi(1+int(WorldSimulation.state.effective_workers("Extraction")/FRONT_HANDS),1,MAX_WORKING_FRONTS)
 ## Wider ground holds more woods and quarries: this many more fronts per ring
 ## the carriers search (worked-out fronts stay on the list and regrow).
 const SURFACE_FRONTS_PER_RING:=6
@@ -605,19 +630,23 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 	var density:=clampf(float(field.get("density",0.0)),0.0,1.0)
 	var minimum_density:=0.03 if resource=="Stone" else 0.08
 	var existing_fronts:Array[Dictionary]=[]
-	for deposit in WorldSimulation.state.resource_deposits:
-		if String(deposit.get("landscape_source",""))!=source:continue
+	var working:=0
+	for deposit:Dictionary in _fronts_of(source):
 		existing_fronts.append(deposit)
 		if float(deposit.get("remaining",0.0))>0.001:
 			# Founding surveys already create these exposed surface fronts. They
 			# need the same access transition as newly created fronts, not mining.
 			deposit.stage="developed" if String(deposit.stage)=="developed" else "accessible"
 			deposit.clues=1.0;deposit.access=1.0;deposit.blockers=[]
-			# A trickle of regrowth is not a working supply. Keep the depleted
-			# front and its recovery, but seek another real front when its reserve
-			# is below the same working threshold used by extraction allocation.
-			if float(deposit.remaining)>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):return
-	if existing_fronts.size()>=maxi(MAX_SURFACE_FRONTS_PER_RESOURCE,surface_search_rings()*SURFACE_FRONTS_PER_RING):return
+			# A trickle of regrowth is not a working supply: a front counts as
+			# worked only above the working threshold extraction allocation uses.
+			if float(deposit.remaining)>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):working+=1
+	# The people works as many fronts at once as its cutters and diggers fill
+	# (working_fronts); cut woods and picked-over ground regrow or rest and do
+	# not hold it to the ground it first knew. A new front opens on unused
+	# ground within the search rings; MAX_FRONTS_EVER bounds a save's record.
+	if working>=working_fronts():return
+	if existing_fronts.size()>=MAX_FRONTS_EVER:return
 	if not existing_fronts.is_empty() or density<minimum_density:
 		field=_next_surface_front(resource,source,context,minimum_density)
 		if field.is_empty():return
@@ -855,7 +884,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			# at the source until labor harvests and hauls it, and cannot exceed the
 			# original carrying capacity of this local woodland.
 			var capacity:=float(deposit.initial_amount)
-			var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
+			var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else woods_regrowth()
 			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery*span)
 		elif bool(catalog[resource_name].renewable):
 			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0*span)
@@ -1062,6 +1091,25 @@ func _mark_spent(deposit:Dictionary)->void:
 	if _can_deepen(deposit):return
 	deposit["spent"]=true
 
+## COPPICE: woods cut for regrowth come back faster. A clear-felled stand
+## regrows WOOD_REGROWTH of its stock a day (about 1% a year, near a century
+## to come back); a people that cuts to the stool (coppice_regrowth_cutting)
+## or keeps standards over coppice (coppice_with_standards) grows it back
+## that many times as fast (about 3% and 4% a year: rotations of a
+## generation). Read once a day for the people in scope.
+const WOOD_REGROWTH:=0.00003
+const COPPICE:={"coppice_regrowth_cutting":3.0,"coppice_with_standards":4.0}
+var _coppice_day:=-1
+var _coppice_factor:=1.0
+func woods_regrowth()->float:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if day!=_coppice_day:
+		_coppice_day=day
+		_coppice_factor=1.0
+		for id:String in COPPICE:
+			if id in WorldSimulation.state.known_discoveries:_coppice_factor=maxf(_coppice_factor,float(COPPICE[id]))
+	return WOOD_REGROWTH*_coppice_factor
+
 ## Days between looks at a resting stand of woods or fibre.
 const REST_LOOK_DAYS:=30
 
@@ -1087,7 +1135,7 @@ func _wake(deposit:Dictionary,day:int)->void:
 	var days:=maxi(0,day-since-maxi(1,int(WorldSimulation.span)))
 	if days<=0:return
 	var capacity:=float(deposit.initial_amount)
-	var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
+	var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else woods_regrowth()
 	deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery*days)
 
 ## Whether a resting stand is looked at today: once every REST_LOOK_DAYS,

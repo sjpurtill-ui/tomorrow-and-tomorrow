@@ -156,7 +156,7 @@ static func available(deposit:Dictionary)->void:
 	if String(deposit.get("landscape_source","")) in ["woodland_catchment","plant_fiber_catchment"]:
 		var day:=int(WorldSimulation.state.elapsed_days)
 		var days:=maxi(0,day-int(reserve.get("last_day",day)))
-		var recovery:=.001 if deposit.landscape_source=="plant_fiber_catchment" else .00003
+		var recovery:=.001 if deposit.landscape_source=="plant_fiber_catchment" else float(WorldSimulation.resources.woods_regrowth())
 		reserve.remaining=minf(float(reserve.initial_amount),float(reserve.remaining)+float(reserve.initial_amount)*recovery*days)
 		reserve.last_day=day
 	deposit.remaining=reserve.remaining
