@@ -13673,7 +13673,8 @@ func _bounded_resource_overlay_selection(deposits:Array,view_center:Vector2,zoom
 		var distance_squared:=planar.distance_squared_to(view_center)
 		if distance_squared>view_radius*view_radius: continue
 		var resource_name:=String(deposit.get("resource","Resource"))
-		if resource_name=="Freshwater" or String(deposit.get("landscape_source","")).ends_with("_catchment"): continue
+		# A seat's pool of common material is its worked land, not a point site.
+		if resource_name=="Freshwater" or String(deposit.get("landscape_source","")).ends_with("_catchment") or bool(deposit.get("pool",false)): continue
 		var stage:=String(deposit.get("stage","recognized"))
 		var strategic:=stage in ["accessible","developed"]
 		if zoom>240.0 and not strategic: continue

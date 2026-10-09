@@ -544,7 +544,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
+const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
 
 func capture_actor(id:String)->Dictionary:

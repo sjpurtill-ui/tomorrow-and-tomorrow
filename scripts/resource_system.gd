@@ -5,39 +5,20 @@ var initialized := false
 const SPAN:=preload("res://scripts/day_span.gd")
 ## How a dry year dries the near sources (one rule for every people and the fast sim).
 const DryWater:=preload("res://scripts/dry_water.gd")
+## Common materials as one pool per seat (material_pools.gd).
+const Pools:=preload("res://scripts/material_pools.gd")
 const SURFACE_FRONT_SPACING_KM:=3.0
 const MAX_SURFACE_FRONT_RING:=3
 ## Carriers at work for each ring of new ground searched past the first.
 const SURFACE_SEARCH_CARRIERS:=6.0
-const MAX_SURFACE_FRONTS_PER_RESOURCE:=24
-## The most fronts of one kind a people ever records (_ensure_surface_supply).
-const MAX_FRONTS_EVER:=1500
 ## One working front of each kind for every FRONT_HANDS cutters and diggers,
 ## never more than MAX_WORKING_FRONTS: a band works one wood, a city of
 ## thousands many at once.
 const FRONT_HANDS:=150.0
 const MAX_WORKING_FRONTS:=24
-## The fronts of each landscape source, indexed once a day (and again when
-## the deposits change in number), for _ensure_surface_supply.
-var _fronts_day:=-1
-var _fronts_count:=-1
-var _fronts_list:Array=[]
-var _fronts:={}
-func _fronts_of(source:String)->Array:
-	var day:=int(WorldSimulation.state.elapsed_days)
-	var deposits:Array=WorldSimulation.state.resource_deposits
-	if day!=_fronts_day or deposits.size()!=_fronts_count or not is_same(deposits,_fronts_list):
-		_fronts_day=day;_fronts_count=deposits.size();_fronts_list=deposits;_fronts={}
-		for deposit:Dictionary in deposits:
-			var from:=String(deposit.get("landscape_source",""))
-			if from!="":(_fronts.get_or_add(from,[]) as Array).append(deposit)
-	return _fronts.get(source,[])
 
 func working_fronts()->int:
 	return clampi(1+int(WorldSimulation.state.effective_workers("Extraction")/FRONT_HANDS),1,MAX_WORKING_FRONTS)
-## Wider ground holds more woods and quarries: this many more fronts per ring
-## the carriers search (worked-out fronts stay on the list and regrow).
-const SURFACE_FRONTS_PER_RING:=6
 
 # Identification follows observations and existing methods, never campaign age.
 # These gates apply to unknown occurrences only; saved recognition is retained.
@@ -79,9 +60,9 @@ func plain_language_description(resource_name:String)->String:
 	return ""
 
 ## The ground around a seat, surveyed once ring by ring: what the authored
-## terrain holds never changes, only which sites are already worked. Keyed by
-## seed, seat and provider; each entry is an Array of rings, each ring a
-## {resource: [[density, site, front key], ...]} in search order. Never saved.
+## terrain holds never changes. Keyed by seed, seat and provider; each entry
+## is an Array of rings, each ring a {resource: [[density, site], ...]} in
+## search order (material_pools.gd opens them). Never saved.
 var _surface_rings:Dictionary={}
 const SURFACE_RING_ORIGIN_LIMIT:=32
 
@@ -233,7 +214,18 @@ func _register_local_occurrences(settlement_id:String,sites:Array[Dictionary],en
 func _deposit(resource_name: String, position: Vector3, quality: float, amount: float, index: int,origin_scope:String="",environment_potential:float=0.5,environment_signature:String="") -> Dictionary:
 	# Exposed surface water is directly observable; a deep aquifer remains hidden.
 	var initial_stage:="surveyed" if resource_name=="Freshwater" else "unknown"
+	index=_unique_index(index)
 	return {"id":"%s_%d" % [resource_name.to_snake_case(), index], "resource":resource_name, "position":position, "quality":quality, "remaining":amount, "initial_amount":amount, "stage":initial_stage, "clues":1.0 if initial_stage=="surveyed" else 0.0, "survey":1.0 if initial_stage=="surveyed" else 0.0, "access":0.0, "blockers":[], "development":0.0, "route":0.0, "workers":0,"daily_yield":0.0,"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Access not organized","last_reported_bottleneck":"","origin_scope":origin_scope,"environment_potential":environment_potential,"environment_signature":environment_signature,"source_settlement_id":""}
+
+## Ids number from the list's length; pooled sites leave the list, so a new
+## id starts past the highest one in use.
+func _unique_index(index:int)->int:
+	var highest:=-1
+	for deposit:Dictionary in WorldSimulation.state.resource_deposits:
+		var id:=String(deposit.get("id",""))
+		var cut:=id.rfind("_")
+		if cut>=0 and id.substr(cut+1).is_valid_int():highest=maxi(highest,int(id.substr(cut+1)))
+	return maxi(index,highest+1)
 
 func register_expedition_occurrence(resource_name:String,position:Vector2,profile:Dictionary)->Dictionary:
 	if not catalog.has(resource_name) or not recognition_ready(resource_name):return {}
@@ -619,75 +611,14 @@ func _access_practice_blocker(definition:Dictionary)->String:
 	if not developing.is_empty():return "Access practice is still spreading: %s" % " or ".join(developing)
 	return "Access work is incomplete"
 
-func _ensure_woodland_supply(context:Dictionary)->void:
-	_ensure_surface_supply("Timber",context.get("woodland_catchment",{}),context,"woodland_catchment",600.0)
-
-func _ensure_surface_material_supplies(context:Dictionary)->void:
-	var fields:Dictionary=context.get("surface_material_catchments",{})
-	_ensure_surface_supply("Stone",fields.get("Stone",{}),context,"surface_stone_catchment",1000.0)
-	_ensure_surface_supply("Fiber Plants",fields.get("Fiber Plants",{}),context,"plant_fiber_catchment",180.0)
-
-func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,source:String,stock_per_km2:float)->void:
-	# Surface cover is directly usable. Survey refines knowledge; it does not
-	# make familiar trees, loose stone or fibrous vegetation appear from nothing.
-	if field.is_empty() or not bool(context.get("settled",false)): return
-	var density:=clampf(float(field.get("density",0.0)),0.0,1.0)
-	var minimum_density:=0.03 if resource=="Stone" else 0.08
-	var existing_fronts:Array[Dictionary]=[]
-	var working:=0
-	for deposit:Dictionary in _fronts_of(source):
-		existing_fronts.append(deposit)
-		if float(deposit.get("remaining",0.0))>0.001:
-			# Founding surveys already create these exposed surface fronts. They
-			# need the same access transition as newly created fronts, not mining.
-			deposit.stage="developed" if String(deposit.stage)=="developed" else "accessible"
-			deposit.clues=1.0;deposit.access=1.0;deposit.blockers=[]
-			# A trickle of regrowth is not a working supply: a front counts as
-			# worked only above the working threshold extraction allocation uses.
-			if float(deposit.remaining)>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):working+=1
-	# The people works as many fronts at once as its cutters and diggers fill
-	# (working_fronts); cut woods and picked-over ground regrow or rest and do
-	# not hold it to the ground it first knew. A new front opens on unused
-	# ground within the search rings; MAX_FRONTS_EVER bounds a save's record.
-	if working>=working_fronts():return
-	if existing_fronts.size()>=MAX_FRONTS_EVER:return
-	if not existing_fronts.is_empty() or density<minimum_density:
-		field=_next_surface_front(resource,source,context,minimum_density)
-		if field.is_empty():return
-		density=clampf(float(field.get("density",0.0)),0.0,1.0)
-	var position:Vector3=field.get("position",context.get("origin",WorldSimulation.state.settlement_founded_at))
-	var supply:Dictionary={}
-	# Adopt an older nearby point record once before opening a new working front.
-	# This preserves its inventory, shipments and save identity.
-	if existing_fronts.is_empty():
-		for deposit in WorldSimulation.state.resource_deposits:
-			if String(deposit.get("resource",""))==resource and String(deposit.get("landscape_source",""))=="" and (deposit.position as Vector3).distance_to(position)<=2.5:
-				supply=deposit
-				break
-	if WorldSimulation.enabled:
-		if supply.is_empty():
-			supply=preload("res://scripts/civilization_resources.gd").surface(resource,source,field,stock_per_km2)
-			WorldSimulation.state.resource_deposits.append(supply)
-	if supply.is_empty():
-		for deposit in WorldSimulation.state.resource_deposits:
-			if String(deposit.get("resource",""))==resource and (deposit.position as Vector3).distance_to(position)<=2.5:
-				supply=deposit
-				break
-	if supply.is_empty():
-		supply=_deposit(resource,position,0.45+density*0.65,maxf(1.0,float(field.get("area_km2",9.0)))*density*stock_per_km2,WorldSimulation.state.resource_deposits.size(),"local_surface",density)
-		WorldSimulation.state.resource_deposits.append(supply)
-	supply["landscape_source"]=source
-	supply["area_km2"]=float(field.get("area_km2",9.0))
-	supply["surface_density"]=density
-	if resource=="Timber": supply["woodland_density"]=density
-	supply["stage"]="accessible" if String(supply.stage)!="developed" else "developed"
-	supply["clues"]=1.0
-	supply["access"]=1.0
-	supply["blockers"]=[]
+## Folds common-material sites into the seat's pools and opens new ground
+## (material_pools.gd); the daily flow calls it first.
+func ensure_pools(context:Dictionary)->void:
+	Pools.ensure(self,context)
 
 ## How many rings of new ground (SURFACE_FRONT_SPACING_KM apart) the people
-## search for new timber, stone and fibre once the fronts they work run low:
-## one more ring for every 6 carriers at work (_next_surface_front).
+## work for timber, stone and fibre once their pools run low: one more ring
+## for every 6 carriers at work (material_pools.gd _open_ground).
 func surface_search_rings()->int:
 	return clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/SURFACE_SEARCH_CARRIERS),1,max_surface_front_ring())
 
@@ -703,12 +634,8 @@ func max_surface_front_ring()->int:
 ## carriers on the roll, at today's share still working, who would look one
 ## ring farther; 0 at the farthest ring)}.
 func woodland_outlook()->Dictionary:
-	var known:=0;var working:=0
-	for deposit_variant in WorldSimulation.state.resource_deposits:
-		var deposit:Dictionary=deposit_variant
-		if String(deposit.get("resource",""))!="Timber":continue
-		known+=1
-		if float(deposit.get("remaining",0.0))>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):working+=1
+	var stands:=Pools.woodland_stands()
+	var known:=int(stands.stands_known);var working:=int(stands.stands_working)
 	var rings:=surface_search_rings()
 	var raw:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var at_work:=WorldSimulation.state.effective_workers("Logistics")
@@ -719,34 +646,7 @@ func woodland_outlook()->Dictionary:
 		"reach_km":SURFACE_FRONT_SPACING_KM*rings,"next_km":SURFACE_FRONT_SPACING_KM*(rings+1) if next>0 else 0.0,"carriers_for_next":next}
 
 
-func _next_surface_front(resource:String,source:String,context:Dictionary,minimum_density:float)->Dictionary:
-	if not WorldSimulation.context_provider.is_valid():return {}
-	var used:Dictionary={}
-	for deposit_variant in WorldSimulation.state.resource_deposits:
-		var deposit:Dictionary=deposit_variant
-		if String(deposit.get("landscape_source",""))!=source:continue
-		used[_surface_front_key(resource,deposit)]=true
-	var origin_value:Variant=context.get("origin",WorldSimulation.state.settlement_founded_at)
-	var origin:=Vector2(origin_value.x,origin_value.z) if origin_value is Vector3 else Vector2(origin_value.x,origin_value.y)
-	var max_ring:=surface_search_rings()
-	# Only the authored-terrain provider promises stable catchment potential:
-	# its ground is surveyed once per ring and only the used sites are checked
-	# each day. A city opening a new wood daily no longer resamples the map.
-	if WorldSimulation.surface_material_provider.is_valid():return _pick_surveyed_front(resource,origin,max_ring,used,minimum_density)
-	return _search_surface_front(resource,origin,max_ring,used,minimum_density)
 
-## The same choice as _search_surface_front, read from the surveyed rings: the
-## nearest ring holding an unused site dense enough, its densest site first.
-func _pick_surveyed_front(resource:String,origin:Vector2,max_ring:int,used:Dictionary,minimum_density:float)->Dictionary:
-	for ring in range(1,max_ring+1):
-		var best:Array=[]
-		var best_density:=-1.0
-		for entry:Array in (_surveyed_ring(origin,ring).get(resource,[]) as Array):
-			var density:float=entry[0]
-			if density<minimum_density or density<=best_density or used.has(entry[2]):continue
-			best=entry;best_density=density
-		if not best.is_empty():return (best[1] as Dictionary).duplicate(true)
-	return {}
 
 func _surveyed_ring(origin:Vector2,ring:int)->Dictionary:
 	var key:=[WorldSimulation.state.world_seed,origin,WorldSimulation.surface_material_provider]
@@ -766,41 +666,16 @@ func _surveyed_ring(origin:Vector2,ring:int)->Dictionary:
 					if not site is Dictionary:continue
 					var density:=clampf(float((site as Dictionary).get("density",0.0)),0.0,1.0)
 					if density<=0.0:continue
-					(found.get_or_add(String(resource_name),[]) as Array).append([density,site,_surface_front_key(String(resource_name),site)])
+					(found.get_or_add(String(resource_name),[]) as Array).append([density,site])
 		rings.append(found)
 	return rings[ring-1]
 
-func _search_surface_front(resource:String,origin:Vector2,max_ring:int,used:Dictionary,minimum_density:float)->Dictionary:
-	for ring in range(1,max_ring+1):
-		var best:Dictionary={}
-		var best_density:=-1.0
-		for z in range(-ring,ring+1):
-			for x in range(-ring,ring+1):
-				if absi(x)!=ring and absi(z)!=ring:continue
-				var point:=origin+Vector2(x,z)*SURFACE_FRONT_SPACING_KM
-				var candidate:Dictionary
-				if WorldSimulation.surface_material_provider.is_valid():
-					candidate=WorldSimulation.surface_material_provider.call(point).get(resource,{})
-				else:
-					var nearby:Dictionary=WorldSimulation.context_provider.call(point)
-					candidate=nearby.get("woodland_catchment",{}) if resource=="Timber" else (nearby.get("surface_material_catchments",{}) as Dictionary).get(resource,{})
-				var candidate_density:=clampf(float(candidate.get("density",0.0)),0.0,1.0)
-				if candidate_density<minimum_density or used.has(_surface_front_key(resource,candidate)):continue
-				if candidate_density>best_density:best=candidate;best_density=candidate_density
-		if not best.is_empty():return best
-	return {}
 
-func _surface_front_key(resource:String,field:Dictionary)->String:
-	if field.has("world_key"):return String(field.world_key)
-	var point:Vector3=field.get("position",Vector3.ZERO)
-	var tile:=Vector2i(floori(point.x/SURFACE_FRONT_SPACING_KM),floori(point.z/SURFACE_FRONT_SPACING_KM))
-	return "surface:%d:%d:%s" % [tile.x,tile.y,resource]
 
 func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
-	_ensure_woodland_supply(context)
-	_ensure_surface_material_supplies(context)
+	ensure_pools(context)
 	stamp=trace.mark("flow_fronts",stamp)
 	var events:Array[Dictionary]=[]
 	var material_deposits:Array[Dictionary]=[]
@@ -832,7 +707,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		deposit.delivered_today=0.0
 		if String(deposit.stage) not in ["accessible","developed"]: continue
 		if not _is_material_resource(String(deposit.resource)): continue
-		deposit.distance_km=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
+		deposit.distance_km=Pools.haul_km(deposit) if Pools.is_pool(deposit) else Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
 		deposit["haul_km"]=OneSeat.haul_km(float(deposit.distance_km),homestead_reach,town_core)
 		_deepen(deposit)
 		material_deposits.append(deposit)
@@ -853,6 +728,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	for index in material_deposits.size():
 		var deposit:Dictionary=material_deposits[index]
 		weights[index]=_extraction_priority(deposit,storage_priorities,pass_inputs) if float(deposit.remaining)>0.0 else 0.0
+		# A pool is worked at as many faces as a people works of one kind.
+		if Pools.is_pool(deposit):weights[index]*=Pools.faces(self)
 		total_weight+=weights[index]
 	# Owner-wide inputs, read once for every deposit in this pass.
 	var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")
@@ -974,7 +851,13 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			deposit.stock_at_source=waiting-dispatched
 			var speed_km_day:=maxf(1.0,8.0*route_factor*travel_effect)
 			deposit.travel_days=maxi(1,ceili(float(deposit.get("haul_km",deposit.distance_km))/speed_km_day))
-			_add_shipment(deposit,today+int(deposit.travel_days),dispatched)
+			if Pools.is_pool(deposit):
+				# Carriers as one number: a pool's loads reach the stores the day they leave.
+				stockpiles[String(deposit.resource)]=float(stockpiles.get(String(deposit.resource),0.0))+dispatched
+				deposit.delivered_today=float(deposit.delivered_today)+dispatched
+				deposit.lifetime_delivered=float(deposit.lifetime_delivered)+dispatched
+				delivered_total+=dispatched
+			else:_add_shipment(deposit,today+int(deposit.travel_days),dispatched)
 		_update_deposit_bottleneck(deposit,carriers,events)
 	stamp=trace.mark("flow_hauling",stamp)
 	var loss_report:=_apply_material_storage_losses(events)
@@ -1146,12 +1029,12 @@ func woods_regrowth()->float:
 ## Days between looks at a resting stand of woods or fibre.
 const REST_LOOK_DAYS:=30
 
-## A stand of woods or fibre cut below the working share (the threshold
-## _ensure_surface_supply opens a new front at), with nothing waiting at it,
+## A stand of woods or fibre cut below the working share, with nothing waiting at it,
 ## rests: it regrows by itself and its cutters go to the stands still worth
 ## working; loads already on the road still arrive. It is looked at once a
 ## month and works again once regrown past that share.
 func _mark_resting(deposit:Dictionary)->void:
+	if Pools.is_pool(deposit):return
 	if String(deposit.get("landscape_source","")) not in ["woodland_catchment","plant_fiber_catchment"]:return
 	if float(deposit.get("remaining",0.0))>=maxf(1.0,float(deposit.get("initial_amount",1.0))*.05):return
 	if float(deposit.get("stock_at_source",0.0))>0.0001:return
@@ -1633,7 +1516,7 @@ func _land_water(resource:String)->bool:
 
 ## A deposit of the land searchers look for: a material of the catalog, not
 ## water or a food ground, and not a worked front of woods, stone or fibre
-## (those the carriers find, _ensure_surface_supply).
+## (the seat's pools, material_pools.gd).
 func _land_kind(deposit:Dictionary)->bool:
 	var resource:=String(deposit.get("resource",""))
 	if not catalog.has(resource) or not _is_material_resource(resource) or _land_water(resource):return false

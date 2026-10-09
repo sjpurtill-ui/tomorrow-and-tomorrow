@@ -48,3 +48,16 @@ func test_boundary_is_continuous_and_regrowth_never_reduces_cover()->void:
 		assert_float(current).is_between(0.1,1.0)
 		assert_float(VISUALS.retained_at(point,regrown)).is_greater_equal(current)
 		previous=current
+
+func test_a_timber_pool_draws_its_opened_woods_at_its_standing_share()->void:
+	var pool:={"resource":"Timber","pool":true,"landscape_source":"woodland_catchment","initial_amount":1000.0,"remaining":250.0,
+		"position":Vector3.ZERO,"area_km2":27.0,"cells":[[0.0,0.0],[3.0,0.0],[90.0,0.0]]}
+	var areas:=preload("res://scripts/landscape_resource_visuals.gd").areas_from_ledgers([[pool]],Vector2.ZERO)
+	assert_int(areas.size()).is_equal(3)
+	for area in areas:
+		assert_float(area.z).is_equal(1.5)
+		assert_float(area.w).is_equal(0.25)
+	# Nearest first; uncut ground is never drawn.
+	assert_float(areas[0].x).is_equal(0.0)
+	pool.remaining=1000.0
+	assert_int(preload("res://scripts/landscape_resource_visuals.gd").areas_from_ledgers([[pool]],Vector2.ZERO).size()).is_equal(0)
