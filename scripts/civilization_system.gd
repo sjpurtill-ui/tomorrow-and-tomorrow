@@ -975,13 +975,33 @@ func _player_scout_hazards(mission:Dictionary)->Array[Dictionary]:
 	var duration_factor:=clampf(float(mission.get("duration_days",90))/180.0,0.35,2.1)
 	for civ in civilizations:
 		var closest:=_route_distance_to_point(route,_civilization_world_position(civ))
-		if closest>105.0: continue
+		# Their fort line: the stretch the route crosses into their border
+		# turns the party back or takes it at its strength (fort_border.gd).
+		var border:=_border_crossing_chance(civ,route,concealment)
+		if closest>105.0 and border<=0.0: continue
 		var exposure:=clampf(1.0-closest/105.0,0.0,1.0)
 		var patrol_quality:=clampf(float(civ.get("military_readiness",0.5))*0.65+float(civ.get("logistics",0.2))*0.20+float(civ.get("knowledge",0.2))*0.15,0.0,1.0)
 		var hostile_multiplier:=(1.0-0.35*clampf(float(mission.get("veterancy",0.0)),0.0,ScoutSurvival.MAX_VETERANCY))*(ScoutSurvival.RECKLESS_HOSTILE_FACTOR if bool(mission.get("reckless",false)) else 1.0)
-		var chance:=clampf(exposure*(0.16+patrol_quality*0.42)*(1.0-concealment*0.48)*(1.0-evasion*0.38)*duration_factor*hostile_multiplier,0.0,0.42)
-		if chance>0.005: hazards.append({"civ_id":String(civ.id),"chance":chance,"aggression":float(civ.get("aggression",0.5)),"at_war":bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)),"closest_km":closest})
+		var patrols:=clampf(exposure*(0.16+patrol_quality*0.42)*(1.0-concealment*0.48)*(1.0-evasion*0.38)*duration_factor*hostile_multiplier,0.0,0.42)
+		var chance:=clampf(1.0-(1.0-patrols)*(1.0-border*hostile_multiplier),0.0,0.95)
+		if chance>0.005: hazards.append({"civ_id":String(civ.id),"chance":chance,"border":border,"aggression":float(civ.get("aggression",0.5)),"at_war":bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)),"closest_km":closest})
 	return hazards
+
+
+## The chance `civ`'s fort line stops a party on `route` where it first
+## crosses into their border (fort_border.gd catch), 0 when it never does.
+func _border_crossing_chance(civ:Dictionary,route:Array,concealment:float)->float:
+	var Realm:=preload("res://scripts/realm_reach.gd")
+	var border:=Realm.border_of(civ)
+	if border.is_empty() or route.size()<2: return 0.0
+	var state:Node=preload("res://scripts/society_exchange.gd").owner_state(String(civ.get("id","")))
+	if state==null: return 0.0
+	var Forts:=preload("res://scripts/fort_border.gd")
+	var shape:={"center":border.center,"table":border.table}
+	for point_variant in route:
+		var point:=Vector2(float((point_variant as Dictionary).get("x",0.0)),float((point_variant as Dictionary).get("z",0.0)))
+		if Forts.inside(point,state,shape): return Forts.catch(point,concealment,state)
+	return 0.0
 
 
 func _player_scout_risk_snapshot(mission:Dictionary)->Dictionary:
@@ -2172,6 +2192,13 @@ func _foreign_scout_is_active(formation:Dictionary,day:int)->bool:
 func _foreign_scout_detected(formation:Dictionary,position:Vector2,day:int,radius:float)->bool:
 	if not _foreign_scout_is_active(formation,day) or day<int(formation.get("evaded_until_day",0)): return false
 	if _nearby_player_army(position,12.0): return true
+	# Our fort line, once, where they first cross into our border (fort_border.gd).
+	var Forts:=preload("res://scripts/fort_border.gd")
+	if not bool(formation.get("border_checked",false)) and Forts.inside(position):
+		formation["border_checked"]=true
+		var line_rng:=RandomNumberGenerator.new()
+		line_rng.seed=last_world_seed^day*15485863^String(formation.get("id","")).hash()^0x5bd1e995
+		if line_rng.randf()<Forts.catch(position,clampf(float(formation.get("concealment",0.80)),0.0,1.0)): return true
 	var distance:=position.distance_to(player_world_origin)
 	# Concealment helps a scout cross watched country; it cannot hide a physical
 	# encounter with the settlement's inhabitants and routine local traffic.

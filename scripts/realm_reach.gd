@@ -98,6 +98,38 @@ static func site_map()->Dictionary:
 	return out
 
 
+## THE BORDER (fort_border.gd): what a people holds and watches, spanned by
+## its forts, as distinct from the country its people live and work in
+## (ours()/of(), which homesteads and places follow). {owner, center, reach,
+## table (km at each bearing), points}; {} before a home.
+static func border_ours()->Dictionary:
+	if Engine.get_main_loop()==null or WorldSimulation.state==null: return {}
+	if not bool(WorldSimulation.state.get("settlement_site_committed")): return {}
+	return _border(WorldSimulation.state,"player")
+
+## Another people's border, from its own forts; {} when it has no home.
+static func border_of(civ:Dictionary)->Dictionary:
+	var civ_id:=String(civ.get("id",""))
+	if civ_id=="" or Engine.get_main_loop()==null: return {}
+	var state:Node=preload("res://scripts/society_exchange.gd").owner_state(civ_id)
+	if state==null or not bool(state.get("settlement_site_committed")): return {}
+	if of(civ).is_empty(): return {}
+	return _border(state,civ_id)
+
+static func _border(state:Node,owner:String)->Dictionary:
+	var shape:Dictionary=preload("res://scripts/fort_border.gd").outline(state)
+	return {"owner":owner,"center":shape.center,"reach":maxf(float(shape.reach),MIN_KM),"table":shape.table,"points":shape.points}
+
+## Every other people's border (not ours).
+static func border_others()->Array:
+	var out:Array=[]
+	if Engine.get_main_loop()==null: return out
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		var border:=border_of(civ)
+		if not border.is_empty(): out.append(border)
+	return out
+
+
 ## Whether `point` lies in another people's country, as the borders cut it:
 ## their realm scores higher there than ours does (score 1 - d/reach, as
 ## nation_border_partition scores a claim).
@@ -112,4 +144,10 @@ static func held_by_other(point:Vector2,others_list:Array=[],own:Dictionary={})-
 
 
 static func _score(realm:Dictionary,point:Vector2)->float:
-	return 1.0-(realm.center as Vector2).distance_to(point)/maxf(0.001,float(realm.reach))
+	var reach:=float(realm.reach)
+	# A border with a shape (border_of): its reach in that bearing.
+	if realm.get("table") is PackedFloat32Array and not (realm.table as PackedFloat32Array).is_empty():
+		var table:PackedFloat32Array=realm.table
+		var offset:=point-(realm.center as Vector2)
+		reach=float(table[posmod(roundi(fposmod(offset.angle(),TAU)/TAU*float(table.size())),table.size())])
+	return 1.0-(realm.center as Vector2).distance_to(point)/maxf(0.001,reach)

@@ -166,7 +166,7 @@ func refresh(force:=false)->void:
 	var forces:=Allocation.read(MilitaryCampaign)
 	var general:=Orders.war_leader_name()
 	var makeup:=Makeup.rows(MilitaryCampaign)
-	_rebuild("watch",[manpower_box,guard_box,offense_box],str([forces,general,makeup.map(func(r:Dictionary)->Array:return [r.share,r.kind,r.men,r.target,snappedf(float(r.armed),0.02),snappedf(float(r.drill),0.02)])]),force,func()->void:_build_watch(forces,general,makeup))
+	_rebuild("watch",[manpower_box,guard_box,offense_box],str([forces,general,makeup.map(func(r:Dictionary)->Array:return [r.share,r.kind,r.men,r.target,snappedf(float(r.armed),0.02),snappedf(float(r.drill),0.02)]),border_signature()]),force,func()->void:_build_watch(forces,general,makeup))
 	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
 	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
 		var front:Dictionary=WarLoop.front(String(e.civ_id))
@@ -331,7 +331,57 @@ func _build_watch(f:Dictionary,general:String,makeup:Array=[])->void:
 	manpower_box.add_child(_forces_card(f))
 	manpower_box.add_child(_makeup_card(makeup))
 	guard_box.add_child(_towns_card(f,general))
+	guard_box.add_child(_border_card())
 	offense_box.add_child(_bands_card(f))
+
+
+## What the Border card shows, coarsely, for its rebuild.
+static func border_signature()->Array:
+	var Forts:=preload("res://scripts/fort_border.gd")
+	var kept:=Forts.watch()
+	var strengths:=[]
+	for s:Dictionary in kept.stretches:strengths.append(snappedf(float(s.strength),0.05))
+	return [Forts.forts().map(func(f:Dictionary)->Array:return [int(f.id),String(f.status),snappedf(float(f.get("condition",1.0)),0.1)]),snappedf(Forts.border_share(),0.05),strengths,int(kept.posted)]
+
+
+## (2b) The border (fort_border.gd): our forts, how many of the watch are out
+## on it, how well its stretches hold, the food lost on the road, and the
+## share sent out. The full panel (forts, stretches, the war leader's sites)
+## opens from here.
+func _border_card()->Control:
+	var Forts:=preload("res://scripts/fort_border.gd")
+	var panel:=_card();panel.name="BorderCard"
+	var column:=panel.get_node("Column") as VBoxContainer
+	var kept:=Forts.watch()
+	var bill:=Forts.costs(null,kept)
+	var standing:=Forts.standing().size()
+	var going:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))=="building").size()
+	var tip:="Our border is spanned by our forts. Of the watch at home a share goes out: each fort's garrison first, the rest along the stretches between linked forts. The more on watch a km, the fewer slip in or out unseen; where no forts are linked anyone walks in."
+	var head:=_headline(column,"defend",int(kept.posted),"on the border · %d fort%s%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],tip);head.name="Border"
+	var share:=Forts.border_share()
+	head.add_child(_step_button("BorderLess","−","A tenth of the watch at home fewer on the border: less food lost on the road, a thinner line.",func()->void:Forts.set_border_share(maxf(0.0,Forts.border_share()-0.1));refresh(true)))
+	head.add_child(_step_button("BorderMore","+","A tenth of the watch at home more on the border: forts manned first, then the line between them.",func()->void:Forts.set_border_share(minf(1.0,Forts.border_share()+0.1));refresh(true)))
+	var held:=0.0;var km:=0.0
+	for st:Dictionary in kept.stretches:held+=float(st.strength)*float(st.km);km+=float(st.km)
+	var line_strength:=held/km if km>0.0 else 0.0
+	var row:=HBoxContainer.new();row.name="LineHolds";row.add_theme_constant_override("separation",8);row.mouse_filter=Control.MOUSE_FILTER_PASS
+	var words:=_line("The line holds %d in 100" % roundi(line_strength*100.0) if km>0.0 else "No two forts linked: the border is open",13,T.INK);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
+	var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(90,6);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(bar)
+	row.tooltip_text="Of every crossing of a linked stretch, about %d in 100 are stopped (fewer for the stealthy): %d km of line, %d of the watch along it." % [roundi(line_strength*100.0),roundi(km),roundi(float(kept.line))]
+	column.add_child(row)
+	var cost:=_line("%d%% of the watch at home · %d food lost a day" % [roundi(share*100.0),roundi(float(bill.food_lost))],12,T.INK_MUTED);cost.name="BorderCost";cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	cost.tooltip_text="Food carried out spoils and is eaten on the road: about a third is lost at 60 km on foot, more farther out; roads and carts lose less."
+	column.add_child(cost)
+	var open:=_small_button("Forts and sites","defend","Our forts, each stretch's watch, and where the war leader would raise the next fort.")
+	open.name="OpenBorder"
+	open.pressed.connect(func()->void:
+		var scene:=get_tree().current_scene if is_inside_tree() else null
+		var hud:Variant=scene.get("hud") if scene!=null else null
+		if hud==null or not hud.has_method("open_detail"):return
+		close_wanted.emit()
+		hud.open_detail(preload("res://scripts/hud/content/border_detail.gd").new(scene,hud)))
+	column.add_child(open)
+	return panel
 
 
 func _card()->PanelContainer:

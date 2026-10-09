@@ -1058,6 +1058,8 @@ func _process(delta: float) -> void:
 		stamp=trace.mark("frame_map_field_armies",stamp)
 		_refresh_player_scout_route_markers()
 		stamp=trace.mark("frame_map_scout_routes",stamp)
+		_refresh_border_watch()
+		stamp=trace.mark("frame_map_border_watch",stamp)
 	map_network_elapsed+=maxf(0.0,delta)
 	if map_network_elapsed>=0.1:
 		map_network_elapsed=fmod(map_network_elapsed,0.1)
@@ -14278,6 +14280,28 @@ func _seed_capture_land_walk(home:Vector2,heading:float,reach:float,rng:RandomNu
 
 const SCOUT_CHART_RETURNED_LIMIT:=6
 const ScoutChartStroke:=preload("res://scripts/scout_chart_stroke.gd")
+
+## Our watched border on the chart (fort_line_visual.gd): rebuilt only when
+## the outline, a stretch's strength class, a fort, a suggested site or the
+## zoom octave changes; read at most once a game day otherwise.
+var border_watch_node:Node3D
+var _border_watch_key:=0
+var _border_watch_day:=-1
+var _border_watch_octave:=0
+func _refresh_border_watch()->void:
+	if not GameState.settlement_site_committed or camera==null:return
+	var octave:=floori(log(maxf(0.035,camera.size))/log(2.0))
+	var day:=int(GameState.elapsed_days)
+	if day==_border_watch_day and octave==_border_watch_octave and border_watch_node!=null:return
+	_border_watch_day=day;_border_watch_octave=octave
+	var Visual:=preload("res://scripts/fort_line_visual.gd")
+	var d:=Visual.data()
+	var key:=Visual.key(d,octave)
+	if key==_border_watch_key and border_watch_node!=null and is_instance_valid(border_watch_node):return
+	_border_watch_key=key
+	if border_watch_node!=null and is_instance_valid(border_watch_node):border_watch_node.queue_free()
+	border_watch_node=Visual.build(self,d)
+	add_child(border_watch_node)
 
 func _refresh_player_scout_route_markers()->void:
 	# Scout routes read as an explorer's chart: parties still out are issued

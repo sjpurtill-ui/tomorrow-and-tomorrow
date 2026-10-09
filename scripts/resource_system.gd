@@ -1710,8 +1710,9 @@ func _foreign_holds()->Array:
 	# the borders' own rule). Read in our own scope, where "ours" is the player.
 	if us=="player":
 		var Realm:=preload("res://scripts/realm_reach.gd")
-		var others:=Realm.others()
-		if not others.is_empty(): holds.append({"realms":others,"own":Realm.ours()})
+		# Their borders against ours (realm_reach.gd border_others: their forts).
+		var others:=Realm.border_others()
+		if not others.is_empty(): holds.append({"realms":others,"own":Realm.border_ours()})
 	return holds
 
 static func _in_holds(point:Vector2,holds:Array)->bool:
