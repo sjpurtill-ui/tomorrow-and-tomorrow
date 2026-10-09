@@ -110,6 +110,10 @@ var sovereign_orders: Array[Dictionary] = []
 ## The god's own orders and how each is carried out (order_tracker.gd): the
 ## fail-safe cards at the bottom right. Bounded; an older save loads empty.
 var order_tracker: Dictionary = {}
+## The people's forts and its watched border (fort_border.gd): {forts,
+## border_share, next_id, seeded, last_bill}. An older save loads empty and
+## counts its old border posts on its first day.
+var border_forts: Dictionary = {}
 ## Bounded, persistent exchanges between the player and named settlement
 ## leaders. The API may interpret the player's language, but only deterministic
 ## government and consequence code can add a commitment or change simulation
@@ -540,6 +544,7 @@ func reset_for_new_world(new_seed:int)->void:
 	council_inbox=[]
 	sovereign_orders=[]
 	order_tracker={}
+	border_forts={}
 	civic_dialogues={}
 	civic_always_use_ai=true
 	civic_api_enabled=true

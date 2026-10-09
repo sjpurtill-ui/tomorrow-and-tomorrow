@@ -1551,7 +1551,23 @@ static func _catch_chance(sender:String="")->float:
 	var cohesion:=clampf(float(_people().simulation_metrics.get("cohesion",0.5)),0.0,1.0)
 	var Standing:=preload("res://scripts/standing.gd")
 	var theirs:=Standing.art_of(sender,"cunning") if sender!="" else 0.5
-	return clampf(0.25+edge*2.0+wary*0.45+EyesCorps.vigilance()+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.own_art("cunning"),theirs),0.1,0.95)
+	var within:=clampf(0.25+edge*2.0+wary*0.45+EyesCorps.vigilance()+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.own_art("cunning"),theirs),0.1,0.95)
+	# Before any of that, they must cross our fort line on the way in
+	# (fort_border.gd): the stretch facing their home, at its strength.
+	return clampf(1.0-(1.0-within)*(1.0-_border_catch(sender)),0.1,0.97)
+
+## The stretch of our border facing `sender`'s home stops their agent.
+static func _border_catch(sender:String)->float:
+	if sender=="" or WorldSimulation.world==null:return 0.0
+	var Forts:=preload("res://scripts/fort_border.gd")
+	var index:int=WorldSimulation.world._civilization_index(sender)
+	if index<0:return 0.0
+	var home:Vector2=WorldSimulation.world._civilization_world_position(WorldSimulation.world.civilizations[index])
+	var shape:=Forts.outline()
+	var bearing:=(home-Vector2(shape.center)).angle()
+	var table:PackedFloat32Array=shape.table
+	var edge:=Vector2(shape.center)+Vector2.RIGHT.rotated(bearing)*float(table[posmod(roundi(fposmod(bearing,TAU)/TAU*float(table.size())),table.size())])
+	return Forts.catch(edge,0.6)
 
 ## Their eyes now among us or on the road (the first of `civ_id`'s, any
 ## people's when ""), {} when none.

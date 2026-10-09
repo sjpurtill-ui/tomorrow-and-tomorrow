@@ -22,16 +22,21 @@ var _published:Array=[]
 var _day:=0
 
 
+var _forts:Dictionary={}
 func before_test()->void:
 	_knowledge=Borders.knowledge_override.duplicate(true)
 	_published=Borders.published
 	_day=int(GameState.elapsed_days)
+	# Borders here are drawn from towns alone: no forts, no old posts counted.
+	_forts=GameState.border_forts.duplicate(true)
+	GameState.border_forts={"seeded":true}
 
 
 func after_test()->void:
 	Borders.knowledge_override=_knowledge
 	Borders.published=_published
 	GameState.elapsed_days=_day
+	GameState.border_forts=_forts
 
 
 # --- Fixtures ----------------------------------------------------------------

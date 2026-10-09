@@ -643,6 +643,11 @@ static func _chart_glyph(kind:String,c:Color)->Array:
 		"find": return [wash,_t(28,10,24.5,28,31.5,28,c),_t(28,46,24.5,28,31.5,28,c),_t(10,28,28,24.5,28,31.5,c),_t(46,28,28,24.5,28,31.5,c),_c(28,28,3.2,paper)]
 		"sighting": return [wash,_ring(28,28,11,2.6,c),_c(28,28,4.6,c),_s(28,11,28,6,2.2,c),_s(40,16,43,12,2.2,c),_s(16,16,13,12,2.2,c)]
 		"walker": return [_c(28,30,19,paper),_ring(28,30,19,1.8,Color(c,0.7))]+_figure_small(28,c)+[_s(36,14,38,46,2.2,c)]
+		# A fort: a walled square with corner towers; going up, its wall half
+		# drawn; a site the war leader offers, an open dashed square.
+		"fort": return [_rr(28,28,17,17,3,Color(paper,0.95)),_rr(28,28,14,14,2,c),_rr(28,28,10,10,1.5,paper),_c(14,14,5,c),_c(42,14,5,c),_c(14,42,5,c),_c(42,42,5,c),_c(28,28,3.5,c)]
+		"fort_building": return [_rr(28,28,17,17,3,Color(paper,0.85)),_s(14,14,42,14,4,c),_s(14,14,14,42,4,c),_c(14,14,5,c),_c(42,14,4,Color(c,0.5)),_c(14,42,4,Color(c,0.5)),_s(28,42,42,42,3,Color(c,0.4)),_s(42,28,42,42,3,Color(c,0.4))]
+		"fort_site": return [_rr(28,28,15,15,3,Color(paper,0.55)),_s(13,13,21,13,2.6,c),_s(35,13,43,13,2.6,c),_s(13,43,21,43,2.6,c),_s(35,43,43,43,2.6,c),_s(13,13,13,21,2.6,c),_s(13,35,13,43,2.6,c),_s(43,13,43,21,2.6,c),_s(43,35,43,43,2.6,c),_s(28,22,28,34,2.4,c),_s(22,28,34,28,2.4,c)]
 	return [wash,_c(28,28,5,c)]
 
 

@@ -128,6 +128,8 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 				WorldSimulation.military.last_processed_day=day
 				WorldSimulation.military._process_military_day()
 			preload("res://scripts/civilization_travel.gd").advance(float(WorldSimulation.span))
+			# The forts and the watched border: building, food lost on the road, upkeep.
+			preload("res://scripts/fort_border.gd").advance(day)
 	),
 		# The war: the god's war ledger (their raids, the feuds, the real fights
 		# counted, war_loop.gd), then every people's war council

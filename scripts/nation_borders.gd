@@ -187,10 +187,11 @@ static func own_claims(settlements:Array)->Array[Dictionary]:
 		var holder:=String(settlement.get("occupied_by",""))
 		if holder=="" or holder=="human": holder="player"
 		out.append(make_claim(holder,"own:"+String(settlement.get("id","")),position_value,radius,settlement.get("boundary",PackedVector2Array())))
-	# The country we hold beyond our towns' fields (realm_reach.gd).
+	# The country we hold beyond our towns' fields: our border, spanned by our
+	# forts (realm_reach.gd border_ours, fort_border.gd).
 	if not out.is_empty():
-		var realm:Dictionary=Realm.ours()
-		if not realm.is_empty(): out.append(make_claim("player","realm:player",realm.center,float(realm.reach)))
+		var realm:Dictionary=Realm.border_ours()
+		if not realm.is_empty(): out.append(make_claim("player","realm:player",realm.center,float(realm.reach),realm.points))
 	return out
 
 
@@ -257,11 +258,11 @@ static func foreign_claims(center:Vector2,reach:float,cache:Dictionary={})->Arra
 			claim=make_claim(holder,"town:"+city_id,at,radius,boundary if outlined else null)
 		kept[city_id]={"sig":sig,"claim":claim}
 		out.append(claim)
-	# Each people's country beyond its towns (realm_reach.gd), about a chief
-	# town of theirs our people know of, as long as they hold it.
-	var sites:=Realm.site_map()
+	# Each people's country beyond its towns: its border, spanned by its forts
+	# (realm_reach.gd border_of), about a chief town of theirs our people know
+	# of, as long as they hold it.
 	for civ:Dictionary in CivilizationSystem.civilizations:
-		var realm:=Realm.of(civ,sites)
+		var realm:=Realm.border_of(civ)
 		if realm.is_empty(): continue
 		var capital_id:=""
 		for region:Dictionary in civ.get("strategic_regions",[]):
@@ -269,10 +270,10 @@ static func foreign_claims(center:Vector2,reach:float,cache:Dictionary={})->Arra
 		if not book.has(capital_id): continue
 		if (realm.center as Vector2).distance_to(center)>reach+float(realm.reach): continue
 		var key:="realm:"+String(realm.owner)
-		var sig:=hash([String(realm.owner),(realm.center as Vector2).snapped(Vector2.ONE*0.01),roundi(log(maxf(float(realm.reach),0.000001))/log(1.02))])
+		var sig:=hash([String(realm.owner),(realm.center as Vector2).snapped(Vector2.ONE*0.01),roundi(log(maxf(float(realm.reach),0.000001))/log(1.02)),hash(realm.table)])
 		var held:Dictionary=cache.get(key,{})
 		var claim:Dictionary=held.get("claim",{})
-		if int(held.get("sig",0))!=sig or claim.is_empty(): claim=make_claim(String(realm.owner),key,realm.center,float(realm.reach))
+		if int(held.get("sig",0))!=sig or claim.is_empty(): claim=make_claim(String(realm.owner),key,realm.center,float(realm.reach),realm.points)
 		kept[key]={"sig":sig,"claim":claim}
 		out.append(claim)
 	cache.clear()
