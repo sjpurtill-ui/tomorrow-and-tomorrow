@@ -104,7 +104,7 @@ const VERB_PATTERNS:=[
 	["raise","\\b(?i:(promote|exalt|elevate|raise [\\w' ]{0,30}?up))\\b|\\b(?i:honou?r) ((?i:him|her|them)|[A-Z]\\w+)\\b"],
 	["boon","(?i)\\b(reward|boon)\\b"],
 	["bless","\\b(?i:bless) ((?i:him|her|them)|[A-Z]\\w+)\\b"],
-	["send","(?i)\\b((send|dispatch) [\\w' ]{0,40}?(to scout|scouting|scouts|to explore|exploring|outriders|an envoy|envoys|a messenger|messengers|an embassy|to (?-i:[A-Z])\\w+)|go (and )?(scout|explore)|scout the|explore the|(send|dispatch|put) [\\w' ]{0,40}?(to sea|by sea|by boat|in boats|on boats|on ships|on the water|on a voyage|to sail)|set sail|put to sea)\\b"],
+	["send","(?i)\\b((send|dispatch) [\\w' ]{0,40}?(to scout|scouting|scouts|to explore|exploring|outriders|an expedition|expeditions?|an envoy|envoys|a messenger|messengers|an embassy|to (?-i:[A-Z])\\w+)|go (and )?(scout|explore)|scout the|explore the|(send|dispatch|put) [\\w' ]{0,40}?(to sea|by sea|by boat|in boats|on boats|on ships|on the water|on a voyage|to sail)|set sail|put to sea|(send|dispatch|mount|launch) an expedition)\\b"],
 ]
 const GIVE_PATTERN:="(?i)\\b(give|hand|grant|bestow|send|bring)\\b"
 const TAKE_PATTERN:="(?i)\\b(take|seize|confiscate|strip)\\b"
@@ -2435,6 +2435,23 @@ static func _send(id:String,audience:Dictionary,r:Dictionary,actor:Dictionary,cl
 		# On the water: a voyage from the nearest shore (sea_voyage.gd), never a
 		# land party quietly sent instead.
 		var by_sea:=_re("(?i)\\b(sea|seas|ocean|boats?|ships?|canoes?|sail|sailing|voyage|by water|on the water|across the water|over the water)\\b").search(text)!=null
+		# An expedition (expedition.gd): a push as far as it can go one way,
+		# with its stated odds of coming home, not a scouting round.
+		if _re("(?i)\\b(expeditions?|as far as (they|you) can|to the ends of the (earth|world)|push (out|on|as far))\\b").search(text)!=null:
+			if heading=="": return _order(id,audience,r,actor,text,context,"An expedition needs a direction to push: north, east, south, west or between.")
+			var E:=preload("res://scripts/expedition.gd")
+			var km_said:=_re("(?i)(\\d[\\d,]*)\\s*(km|kilomet)").search(text)
+			var reach:=float(km_said.get_string(1).replace(",","")) if km_said!=null else (2500.0 if far else 1200.0)
+			var many_said:=_re("(?i)(\\d+)\\s*(people|men|women|souls|of (us|them|our people)|strong)").search(text)
+			var party:=int(many_said.get_string(1)) if many_said!=null else E.PARTY_DEFAULT
+			var went:=E.send(heading,clampf(reach,100.0,8000.0),by_sea,party)
+			if went.has("error"): return _order(id,audience,r,actor,text,context,String(went.error))
+			var m:Dictionary=CivilizationSystem.scout_missions[-1]
+			var e:Dictionary=m.expedition
+			r.outcome="An expedition of %d sets out %s%s at your word, to push %d km %s. About %d in 100 such parties come home; they should be back in about %d days, or not at all." % [int(m.personnel),"by sea" if by_sea else "on foot"," under "+who if who!="" else "",roundi(float(e.km)),heading,roundi(float(e.chance)*100.0),int(m.duration_days)]
+			if int(actor.get("person_id",0))>0:GovernmentPeopleSystem.record_person_memory(int(actor.person_id),"The god sent an expedition %s: %s" % [heading,text.substr(0,160)],"divine",0.6,{"emotion":"duty","outcome":"sent"})
+			r.executed=true; r.stage="send"; r.reaction="pleased"
+			return r
 		var sent2:Dictionary={}
 		var trips:Array=([365,180,90] if far else [90,180]) if by_sea else ([365,180,90,30] if far else [30])
 		for days:int in trips:
