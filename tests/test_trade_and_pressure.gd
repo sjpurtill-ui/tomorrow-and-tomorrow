@@ -238,7 +238,10 @@ func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	assert_float(float(mods.cap)).is_equal_approx(Stances.TOLL_VOLUME,0.0001)
 	Ledger._settle(p,192)
 	var toll:=float(p.last.get("toll_b" if String(p.b)=="player" else "toll_a",0.0))
-	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*(float(p.last.trade_ab)+float(p.last.trade_ba)),0.05)
+	# Taken in full only where our border facing them is watched; smugglers
+	# carry the rest round an open line (fort_border.gd facing: half there).
+	var collected:=0.5+0.5*preload("res://scripts/fort_border.gd").facing("player",a,0.0)
+	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*collected*(float(p.last.trade_ab)+float(p.last.trade_ba)),0.05)
 	assert_float(toll).is_greater(0.0)
 	# Favour: we sell a fifth below our price, and more of it.
 	Stances.set_stance("player",a,"favour")

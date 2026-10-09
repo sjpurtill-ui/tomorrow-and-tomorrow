@@ -628,7 +628,14 @@ static func _drawn_arrival(source:String,source_name:String,count:int,_day:int,w
 	var departure:Dictionary=WorldSimulation.scoped(source,func()->Dictionary:
 		var free:=maxi(0,WorldSimulation.state.able_population()-WorldSimulation.military._mobilized_count()-12)
 		var leaving:=mini(count,free)
-		if leaving<1:return {}
+		# Their way out crosses our border on the side facing where they go:
+		# the watch there turns back its share (fort_border.gd facing).
+		var held:=floori(float(leaving)*preload("res://scripts/fort_border.gd").facing(source,recipient,0.3))
+		leaving-=held
+		if held>0:why["held"]=held
+		if leaving<1:
+			if held>0 and WorldSimulation.actor_id=="player":_tell_held(held,String(rivalry.call("civ_name",source,recipient)))
+			return {}
 		var there:=String(rivalry.call("civ_name",source,recipient))
 		var gone:Dictionary=WorldSimulation.state.register_population_departures(leaving,"Households left for %s, drawn by what they heard of its works" % there,{"children":1.0,"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":1.0,"elders":1.0})
 		gone["cohorts"]=WorldSimulation.state.last_population_removal_by_cohort.duplicate()
@@ -680,9 +687,15 @@ static func _tell_leaving(there:String,count:int,why:Dictionary)->void:
 		reasons.append(String(words[0]));fixes.append(String(words[1]))
 	var text:="%d of our people left for %s this month" % [count,there]
 	if not reasons.is_empty():text+=": "+" and ".join(reasons)
+	if int(why.get("held",0))>0:text+=". Our border watch turned back %d more on the way out" % int(why.held)
 	text+=". They keep going while life there looks clearly better than here (by %d in 100; under %d they stay)." % [roundi(float(why.get("advantage",0.0))*100.0),roundi(MINIMUM_ATTRACTION_ADVANTAGE*100.0)]
 	if not fixes.is_empty():text+=" "+". ".join(fixes)+"."
 	WorldSimulation.state.simulation_events.push_front({"day":day,"title":"PEOPLE LEAVE FOR %s" % there.to_upper(),"description":text,"domain":"population","severity":"major"})
+	if WorldSimulation.state.simulation_events.size()>80:WorldSimulation.state.simulation_events.resize(80)
+
+## Every household that tried to leave this month was turned back at our border.
+static func _tell_held(held:int,there:String)->void:
+	WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"HELD AT THE BORDER","description":"%d of our people set out for %s this month; our border watch turned every one of them back." % [held,there],"domain":"population","severity":"notice"})
 	if WorldSimulation.state.simulation_events.size()>80:WorldSimulation.state.simulation_events.resize(80)
 
 ## The past year's leaving, for the Standing tab: [{to, count, gaps}] by

@@ -190,7 +190,7 @@ static func inside(point:Vector2,state:Node=null,shape:Dictionary={})->bool:
 ## The watch out on the border: {garrisons: {fort id: people}, line: people,
 ## stretches: [{a, b, km, watchmen, per_km, strength}], posted}.
 static func watch(state:Node=null,mc:Node=null)->Dictionary:
-	if mc==null:mc=WorldSimulation.military if state==null else null
+	if mc==null:mc=WorldSimulation.military if state==null or state==WorldSimulation.state else _military_of(state)
 	var home:=0
 	if mc!=null:home=preload("res://scripts/watch_military.gd").at_home(mc)
 	else:home=int(float(state.population_allocations.get("Defense",0)))
@@ -211,6 +211,29 @@ static func watch(state:Node=null,mc:Node=null)->Dictionary:
 		var per_km:=men/maxf(1.0,float(l.km))
 		stretches.append({"a":int(l.a),"b":int(l.b),"km":float(l.km),"mid":l.mid,"watchmen":men,"per_km":per_km,"strength":strength_of(per_km)})
 	return {"garrisons":garrisons,"line":left if not ls.is_empty() else 0,"stretches":stretches,"posted":out-(left if ls.is_empty() else 0)}
+
+## The military of the people whose GameState is `state` (its own watch), or
+## null when it is not found (then the Defense share stands in).
+static func _military_of(state:Node)->Node:
+	if state==GameState:return MilitaryCampaign
+	for id:String in WorldSimulation.actors:
+		var systems:Dictionary=(WorldSimulation.actors[id] as Dictionary).get("systems",{})
+		if systems.get("GameState")==state:return systems.get("MilitaryCampaign")
+	return null
+
+## How `owner`'s border stops a crossing toward `other`'s home (the stretch
+## facing it), for someone of `stealth`. Owners as society_exchange.gd names
+## them ("player" or a people's id); 0 when either has no home.
+static func facing(owner:String,other:String,stealth:float=0.5)->float:
+	var Exchange:=preload("res://scripts/society_exchange.gd")
+	var state:Node=Exchange.owner_state(owner)
+	var there:Node=Exchange.owner_state(other)
+	if state==null or there==null or not bool(state.settlement_site_committed) or not bool(there.settlement_site_committed):return 0.0
+	var shape:=outline(state)
+	var bearing:=(seat(there)-Vector2(shape.center)).angle()
+	var table:PackedFloat32Array=shape.table
+	var edge:=Vector2(shape.center)+Vector2.RIGHT.rotated(bearing)*float(table[posmod(roundi(fposmod(bearing,TAU)/TAU*float(BEARINGS)),BEARINGS)])
+	return catch(edge,stealth,state)
 
 static func strength_of(per_km:float)->float:
 	return 1.0-exp(-maxf(0.0,per_km)/WATCH_KM)

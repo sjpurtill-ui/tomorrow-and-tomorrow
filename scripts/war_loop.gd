@@ -750,6 +750,13 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		_stat("raids_unmanned")
 		return {}
 	came_to_us(civ_id,day,"raiders")
+	# They must cross our border on the side facing their home: the watch
+	# there turns them back at its strength (fort_border.gd facing).
+	var stopped:=preload("res://scripts/fort_border.gd").facing("player",civ_id,0.3)
+	if stopped>0.0 and _rng(key+":border").randf()<stopped:
+		_log(civ_id,"turned_back","%d raiders from %s were seen crossing our border and turned back by the watch there." % [their_n,name],{"cause":cause,"raiders":their_n})
+		_stat("raids_turned_back")
+		return {}
 	var general:=_general()
 	var mc:Variant=WorldSimulation.military
 	# Ours: the watch at the approaches (our real soldiers at home) while the
