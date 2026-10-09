@@ -47,6 +47,7 @@ const Purse:=preload("res://scripts/realm_purse.gd")
 const Watch:=preload("res://scripts/watch_military.gd")
 const Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
 const Makeup:=preload("res://scripts/army_makeup.gd")
+const Economy:=preload("res://scripts/army_economy.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
@@ -330,6 +331,7 @@ func _build_watch(f:Dictionary,general:String,makeup:Array=[])->void:
 	_clear(manpower_box);_clear(guard_box);_clear(offense_box)
 	manpower_box.add_child(_forces_card(f))
 	manpower_box.add_child(_makeup_card(makeup))
+	manpower_box.add_child(_cost_card(f))
 	guard_box.add_child(_towns_card(f,general))
 	guard_box.add_child(_border_card())
 	offense_box.add_child(_bands_card(f))
@@ -449,6 +451,7 @@ func _forces_card(f:Dictionary)->Control:
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",0);column.add_child(pick)
 	var count:=Law.LEVELS.size()
 	var now_level:=_nearest_level(float(f.share))
+	var now_cost:=Economy.cost(0)
 	for i in count:
 		var id:=String((Law.LEVELS[i] as Dictionary).id)
 		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
@@ -460,7 +463,9 @@ func _forces_card(f:Dictionary)->Control:
 		button.add_theme_stylebox_override("pressed",_segment(true,false,i,count));button.add_theme_stylebox_override("hover_pressed",_segment(true,true,i,count))
 		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		button.set_pressed_no_signal(id==now_level)
-		button.tooltip_text="%s of the people keep watch.\n%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able))]
+		var at_level:=Law.target_men(id,int(f.population))
+		var effect:=Economy.step_words(now_cost,Economy.cost(at_level-watch)) if at_level>watch else PackedStringArray()
+		button.tooltip_text="%s of the people keep watch.\n%s%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able)),("\n\n"+"\n".join(effect)) if not effect.is_empty() else ""]
 		button.pressed.connect(func()->void:_choose_level(id))
 		pick.add_child(button)
 	# Where every one of them stands: one bar, its legend under it.
@@ -535,6 +540,7 @@ func _makeup_row(r:Dictionary)->Control:
 	var tip:=PackedStringArray([String(r.tip),
 		("Our best now: %s." % String(r.kind)) if can else "Our people cannot train any of these yet.",
 		("%s wait for their kit: %s" % [String(r.best),waiting]) if waiting!="" else "",
+		Economy.kit_words(String(r.unit),String(r.item)) if can else "",
 		"%s of %s in the share (%d%% of the army)." % [EraWords.grouped(int(r.men)),EraWords.grouped(int(r.target)),roundi(float(r.share)*100.0)],
 		("Armed: %d%% of their kit in hand." % roundi(float(r.armed)*100.0)) if float(r.armed)>=0.0 else "",
 		("Drill: %d%%." % roundi(float(r.drill)*100.0)) if float(r.drill)>=0.0 else ""])
@@ -547,6 +553,74 @@ func _step_makeup(id:String,direction:int)->void:
 	var result:=Makeup.step(MilitaryCampaign,id,direction)
 	if result.has("error"):_say(String(result.error))
 	refresh(true)
+
+
+## (1c) What the army costs the people (army_economy.gd), as it is and with
+## one step more (a hundredth of the people): the hands it takes and from
+## which work, the food, the births past the watch the people can spare,
+## the pay, the gear and the carts still to make. Red where it hurts.
+func _cost_card(f:Dictionary)->Control:
+	var panel:=_card();panel.name="CostCard"
+	var column:=panel.get_node("Column") as VBoxContainer
+	var now:=Economy.cost(0)
+	var population:=maxi(1,int(f.population))
+	var next_share:=(floorf(float(f.share)*100.0+0.0001)+1.0)/100.0
+	var extra:=maxi(1,roundi(float(population)*next_share)-int(now.watch))
+	var more:=Economy.cost(extra)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);column.add_child(head)
+	var title:=_line("Cost to the people",14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(title)
+	head.add_child(_cost_cell("now",T.INK_MUTED,76));head.add_child(_cost_cell("with +%s" % compact(extra),T.INK_MUTED,76))
+	title.mouse_filter=Control.MOUSE_FILTER_PASS
+	title.tooltip_text="What keeping this army costs, from the engine's own rules: now, and with %s more under arms (%s of the people)." % [EraWords.grouped(extra),Watch.percent(next_share)]
+	var food_now:=float(now.food_net);var food_more:=float(more.food_net)
+	var manual:=WorldSimulation.actor_id=="player" and Economy.Manual.manual()
+	_cost_row(column,"Hands","%s · 1 in %d" % [compact(int(now.watch)),int(now.one_in)] if int(now.watch)>0 else "none",
+		"%s · 1 in %d" % [compact(int(more.watch)),int(more.one_in)],T.AMBER_TEXT if int((more.from as Dictionary).get("Food",0))>0 else T.INK,
+		"Everyone under arms is off other work: %s of %s who can work. %s more would come from %s.%s" % [EraWords.grouped(int(now.watch)),EraWords.grouped(int(now.able)),EraWords.grouped(extra),Economy.from_words(more.from),
+			" With the daily work set by hand the watch takes from the biggest task first." if manual else " The leaders take them from every task in its share."])
+	var from_row:=_line("from "+Economy.from_words(more.from),11,T.INK_MUTED);from_row.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;from_row.clip_text=true;from_row.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(from_row)
+	_cost_row(column,"Food a day",_signed_compact(food_now),_signed_compact(food_more),T.RED_TEXT if food_more<0.0 else T.INK,
+		"Food brought in against food eaten, a day: %s in, %s eaten (soldiers eat %s of a ration more each than at rest). With %s more: %s fewer brought in by the food getters they leave, %s more eaten.%s" % [EraWords.grouped(roundi(float(now.food_in))),EraWords.grouped(roundi(float(now.food_need))),str(Economy.Impact.EXERTION.Defense),EraWords.grouped(extra),EraWords.grouped(roundi(float(more.food_lost))),EraWords.grouped(roundi(float(more.food_need)-float(now.food_need))),
+			(" The stores hold about %s days." % EraWords.grouped(roundi(float(now.food_days)))) if float(now.food_days)>0.0 else ""],food_now<0.0)
+	_cost_row(column,"Births",_births_words(float(now.births)),_births_words(float(more.births)),T.RED_TEXT if float(more.births)>0.05 else T.INK,
+		"Up to %s can keep watch at no extra cost (5 in 100 of the people, or the towns' guard if more). Past that every one more costs births, work and weariness, as an extra learner does: %s over now, %s with %s more." % [EraWords.grouped(int(now.free)),EraWords.grouped(roundi(float(now.over))),EraWords.grouped(roundi(float(more.over))),EraWords.grouped(extra)],float(now.births)>0.05)
+	var income:=maxf(1.0,float(now.income_season))
+	_cost_row(column,"Pay, share of income",_pct(float(now.pay_season)/income),_pct(float(more.pay_season)/income),T.INK,
+		"Soldiers' pay against what the realm brings in a season (%s): %s now, %s with %s more." % [Purse.amount_text(income),Purse.amount_text(float(now.pay_season)),Purse.amount_text(float(more.pay_season)),EraWords.grouped(extra)])
+	var gear_tip:=PackedStringArray()
+	for row:Dictionary in now.gear:gear_tip.append("%s %s: %s maker-days%s" % [EraWords.grouped(int(row.sets)),String(row.name).to_lower(),EraWords.grouped(roundi(float(row.days))),(" · "+Economy.materials_words(row.materials)) if not (row.materials as Dictionary).is_empty() else ""])
+	_cost_row(column,"Gear, maker-days",compact(roundi(float(now.gear_days))) if float(now.gear_days)>=0.5 else "none",compact(roundi(float(more.gear_days))),T.INK,
+		("The kits the army still lacks, made by the makers and the workshops, taking their materials from the stores:\n"+"\n".join(gear_tip)+(("\nMaterials: "+Economy.materials_words(now.gear_materials,6)) if not (now.gear_materials as Dictionary).is_empty() else "")) if not gear_tip.is_empty() else "Every soldier has his kit. More soldiers, or another makeup, need more.")
+	_cost_row(column,"Carts to build",compact(int(now.carts)) if int(now.carts)>0 else "none",compact(int(more.carts)) if int(more.carts)>0 else "none",T.INK,
+		"A baggage train of a cart for every %d under arms, as the carriers can drive them: %s in store, %s to build%s." % [int(Economy.Carts.READY_PER),EraWords.grouped(int(now.carts_held)),EraWords.grouped(int(now.carts)),(" ("+Economy.materials_words(now.carts_materials)+")") if not (now.carts_materials as Dictionary).is_empty() else ""])
+	return panel
+
+
+func _cost_row(parent:Control,label:String,now:String,more:String,more_ink:Color,tip:String,now_bad:=false)->void:
+	var row:=HBoxContainer.new();row.name="Cost_%s" % label.replace(" ","");row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS;row.tooltip_text=tip
+	var name_label:=_line(label,12,T.INK_MUTED);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
+	row.add_child(_cost_cell(now,T.RED_TEXT if now_bad else T.INK,76,true))
+	row.add_child(_cost_cell(more,more_ink,76,true))
+	parent.add_child(row)
+
+
+func _cost_cell(text:String,ink:Color,width:float,strong:=false)->Label:
+	var cell:=_line(text,12,ink);cell.custom_minimum_size=Vector2(width,0);cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;cell.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	cell.clip_text=true;cell.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	if strong:cell.add_theme_font_override("font",T.font("ui_strong"))
+	return cell
+
+
+static func _signed_compact(v:float)->String:
+	return ("+" if v>=0.0 else "−")+compact(roundi(absf(v)))
+
+
+static func _pct(share:float)->String:
+	return ("%.1f%%" % (share*100.0)) if share<0.1 else "%d%%" % roundi(share*100.0)
+
+
+static func _births_words(fewer:float)->String:
+	return "−%.1f in 100" % fewer if fewer>=0.05 else "no cost"
 
 
 ## The bar in words, part by part, for the pointer.
