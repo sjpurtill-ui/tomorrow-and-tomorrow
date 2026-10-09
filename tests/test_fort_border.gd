@@ -210,6 +210,20 @@ func test_the_share_that_mans_every_fort_is_their_garrisons_over_the_watch_at_ho
 	var kept:=Forts.watch()
 	for f:Dictionary in Forts.forts():assert_int(int(kept.garrisons[int(f.id)])).is_equal(60 if share<1.0 else int(kept.garrisons[int(f.id)]))
 
+func test_an_unmanned_fort_wearing_down_is_told_once_at_half()->void:
+	WorldSimulation.military=MilitaryCampaign
+	var fort:=_standing(Vector2(80,0))
+	fort.condition=0.501
+	Forts.ledger(GameState).border_share=0.0
+	GameState.simulation_events=[]
+	Forts.advance(int(GameState.elapsed_days)+1)
+	assert_float(float(fort.condition)).is_less(0.5)
+	var told:=GameState.simulation_events.filter(func(e:Dictionary)->bool:return "wearing down" in String(e.description))
+	assert_int(told.size()).is_equal(1)
+	Forts.advance(int(GameState.elapsed_days)+2)
+	told=GameState.simulation_events.filter(func(e:Dictionary)->bool:return "wearing down" in String(e.description))
+	assert_int(told.size()).is_equal(1)
+
 func test_every_kind_of_fort_has_its_own_chart_mark()->void:
 	var Icons:=preload("res://scripts/resource_icons.gd")
 	var seen:={}

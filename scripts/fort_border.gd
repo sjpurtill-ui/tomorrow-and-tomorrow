@@ -331,7 +331,12 @@ static func advance(day:int)->void:
 	for f:Dictionary in standing():
 		var manned:=float(kept.garrisons.get(int(f.id),0))/maxf(1.0,float(kind(String(f.kind)).get("garrison",1)))
 		var wear:=(DECAY if short else 0.0)+(DECAY*0.5 if manned<0.5 else 0.0)
-		f.condition=clampf(float(f.get("condition",1.0))-wear*span+(0.002*span if wear<=0.0 else 0.0),0.0,1.0)
+		var was:=float(f.get("condition",1.0))
+		f.condition=clampf(was-wear*span+(0.002*span if wear<=0.0 else 0.0),0.0,1.0)
+		# Said once, at half: why it is wearing down and how long it has.
+		if was>=0.5 and float(f.condition)<0.5 and wear>0.0:
+			var why:=("only %d of the %d it needs man it" % [int(kept.garrisons.get(int(f.id),0)),int(kind(String(f.kind)).get("garrison",0))]) if manned<0.5 else "its upkeep is short"
+			_tell("%s is wearing down: %s. Left so, it is abandoned in about %d days, and the border with it. Send more of the watch out, or break it down while its stone is worth carrying home." % [String(f.get("name","A fort")),why,ceili(float(f.condition)/wear)])
 		if float(f.condition)<=0.0:
 			f.status="abandoned"
 			_tell("%s at %s is left to the weather: it was not kept." % [String(kind(String(f.kind)).name),String(f.get("name","the post"))])
