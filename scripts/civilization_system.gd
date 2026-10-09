@@ -137,6 +137,8 @@ var neighborhood_generated:=false
 var chronicle:=preload("res://scripts/campaign_chronicle.gd").new()
 var scout_land_authority:Callable=Callable()
 var open_scout_plan_cache:Dictionary={}
+## Planned voyages for every people's seat (_quoted_sea_voyage). Never saved.
+var sea_voyage_plan_cache:Dictionary={}
 ## Reads the rendered ground (woodland density, river distance, height) so
 ## returned reports describe what the map actually shows there.
 var ground_survey_authority:Callable=Callable()
@@ -162,7 +164,7 @@ func initialize()->void:
 
 func reset_for_new_world()->void:
 	_revealed_chart_index=null
-	open_scout_plan_cache.clear()
+	open_scout_plan_cache.clear();sea_voyage_plan_cache.clear()
 	chronicle.reset()
 	neighborhood_generated=false
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
@@ -1003,7 +1005,7 @@ func set_ground_survey_authority(survey_query:Callable)->void:
 
 func set_scout_geography_authority(land_query:Callable)->void:
 	scout_land_authority=land_query
-	open_scout_plan_cache.clear()
+	open_scout_plan_cache.clear();sea_voyage_plan_cache.clear()
 	_audit_active_scout_land_route()
 
 
@@ -1204,11 +1206,14 @@ func _quoted_sea_voyage(duration_days:int,seed_value:int,heading:String,origin:V
 	if not scout_land_authority.is_valid():return {"ok":false,"reason":"No terrain survey is available. Unknown water cannot be charted."}
 	var craft:=SeaVoyage.capability()
 	if not bool(craft.ok):return {"ok":false,"reason":String(craft.reason)}
-	var key:="sea:"+var_to_str([last_world_seed,int(WorldSimulation.state.elapsed_days),origin,duration_days,seed_value,heading,craft.offshore_km,craft.sail_km_per_day,fog_revision,scout_missions.size()])
-	if open_scout_plan_cache.has(key):return open_scout_plan_cache[key].duplicate(true)
+	# Not keyed by the day: a voyage's plan changes only with the boats, the
+	# charted map, the parties out and the next party's seed. A people whose
+	# boats reach nothing new reuses its plan instead of re-searching the sea.
+	var key:="sea:"+var_to_str([last_world_seed,origin,duration_days,seed_value,heading,craft.offshore_km,craft.sail_km_per_day,fog_revision,scout_missions.size(),scout_land_authority.get_object_id()])
+	if sea_voyage_plan_cache.has(key):return sea_voyage_plan_cache[key].duplicate(true)
 	var plan:Dictionary=SeaVoyage.new(self,origin,craft).plan(duration_days,seed_value,heading)
-	if open_scout_plan_cache.size()>=32:open_scout_plan_cache.clear()
-	open_scout_plan_cache[key]=plan.duplicate(true)
+	if sea_voyage_plan_cache.size()>=96:sea_voyage_plan_cache.clear()
+	sea_voyage_plan_cache[key]=plan.duplicate(true)
 	return plan
 
 func _plan_open_scout_route(one_way_range:float,rng:RandomNumberGenerator,heading:String="",origin:Vector2=Vector2.INF)->Dictionary:

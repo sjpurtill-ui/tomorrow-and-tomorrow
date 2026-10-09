@@ -4,6 +4,12 @@ const EXCHANGE=preload("res://scripts/society_exchange.gd")
 const SURVIVAL=preload("res://scripts/scout_survival.gd")
 ## Days our staff wait after a search that found only charted ground.
 const FRUITLESS_WAIT_DAYS:=28
+## Each fruitless review in a row doubles the wait, up to this: a people whose
+## country is charted and whose boats reach nothing new stops re-planning
+## every route each month. Any departure starts the count again.
+const FRUITLESS_WAIT_CAP_DAYS:=168
+## Reasons that mean the ground itself offers nothing new (not food or people).
+const FRUITLESS_REASONS:=["No useful uncharted","No connected","Scouts could not find","Our boats","No open water","The walk to the shore"]
 ## New ground a trip must reach to be worth sending, however much charted
 ## country it crosses first.
 const USEFUL_FRESH_KM:=60.0
@@ -44,7 +50,7 @@ func set_policy(share:float,focus:String,delegated:bool=false)->Dictionary:
 		# Remembered so a load can tell a chosen "none" from a share left at 0.
 		data["player_chosen"]=true
 	if is_equal_approx(float(data.share),share) and data.focus==focus:return {"ok":true}
-	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0
+	data.share=share;data.focus=focus;data.next_review=int(WorldSimulation.state.elapsed_days);data.target_cursor=0;data["fruitless"]=0;data["land_fruitless"]=0;data["land_rest_until"]=0
 	data.status="Staff will organize parties on the next day." if share>0 else "No new departures. Parties already away will finish and return."
 	return {"ok":true,"message":data.status}
 func set_origin(origin_city_id:String)->Dictionary:
@@ -172,6 +178,12 @@ func advance_steps(day:int)->Array:
 		routes.append(["scouting_route_%d" % days,func()->void:
 			if not shared.searching or bool(shared.get("land_done",false)):return
 			var target:String=shared.target;var view:Dictionary=shared.view;var spendable:float=shared.spendable
+			# Charted home country rests between land plans even while voyages
+			# keep leaving: the same four walks would come up empty each week.
+			if target=="open_world" and day<int(data.get("land_rest_until",0)):
+				shared["land_rested"]=true
+				shared.last_reason="No useful uncharted route found within the affordable travel budget. Staff will check again; no food was spent."
+				return
 			var caution:Dictionary=shared.caution
 			# When every trip within the Chief Scout's limit covers charted ground
 			# only, one party may go one length farther (still one party at a time
@@ -204,8 +216,10 @@ func advance_steps(day:int)->Array:
 			shared.searching=false
 			var result:Dictionary=host.dispatch_scouts(days,target,"",party_size,true,String(view.get("origin_city_id","")))
 			if result.has("error"):data.status=String(result.error);return
+			data["land_fruitless"]=0;data["land_rest_until"]=0
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
 			data.food_spent=float(data.food_spent)+float(party.provisions)
+			data["fruitless"]=0
 			var purpose:="chart unvisited ground"
 			if data.focus=="recruitment":purpose="search for scarce wandering bands"
 			elif data.focus=="prospecting":purpose="survey material, mineral and fuel sources"
@@ -221,6 +235,9 @@ func advance_steps(day:int)->Array:
 			if not bool(shared.get("voyage",false)):
 				if days!=90 or not (reason.begins_with("No useful uncharted") or reason.begins_with("No connected") or reason.begins_with("Scouts could not find") or reason.begins_with("The Chief Scout will not send")):return
 				shared["voyage"]=true
+				if reason.begins_with("No useful uncharted") and not bool(shared.get("land_rested",false)):
+					data["land_fruitless"]=int(data.get("land_fruitless",0))+1
+					data["land_rest_until"]=day+mini(FRUITLESS_WAIT_DAYS*(1<<mini(int(data.land_fruitless)-1,3)),FRUITLESS_WAIT_CAP_DAYS)
 			var caution:Dictionary=shared.caution
 			if days>maxi(int(caution.max_duration),180):return
 			var view:Dictionary=shared.view
@@ -242,6 +259,7 @@ func advance_steps(day:int)->Array:
 			if result.has("error"):data.status=String(result.error);return
 			var party:Dictionary=host.scout_missions[-1];party["staff_managed"]=true;party["staff_focus"]=String(data.focus)
 			data.food_spent=float(data.food_spent)+float(party.provisions)
+			data["fruitless"]=0
 			var voyage:Dictionary=party.get("voyage",{})
 			data.status="%d scouts put to sea from %s to chart new coasts: about %d km under sail and %d km ashore. Expected back in %d days." % [int(party.personnel),String(party.get("origin_label","home")),int(voyage.get("sea_km",0)),int(voyage.get("shore_km",0)),int(party.duration_days)]
 		])
@@ -258,10 +276,15 @@ func advance_steps(day:int)->Array:
 			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
 			# fruitless search instead of repeating every route plan each week.
 			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)
-			# Ours too, when every trip found only charted ground: the four route
-			# plans cost a frame's worth of work and the near country changes
-			# slowly. Any other wait (food, people) is checked again next week.
-			elif String(shared.last_reason).begins_with("No useful uncharted"):data.next_review=maxi(int(data.next_review),day+FRUITLESS_WAIT_DAYS)
+			# Ours too, when every trip found only charted ground: the route plans
+			# cost a frame's worth of work and the near country changes slowly, so
+			# each fruitless review in a row waits twice as long (to a cap). Any
+			# other wait (food, people) is checked again next week.
+			var reason:=String(shared.last_reason)
+			if not String(shared.get("target","")).begins_with("sign:") and FRUITLESS_REASONS.any(func(lead:String)->bool:return reason.begins_with(lead)):
+				data["fruitless"]=int(data.get("fruitless",0))+1
+				var wait:=mini(FRUITLESS_WAIT_DAYS*(1<<mini(int(data.fruitless)-1,3)),FRUITLESS_WAIT_CAP_DAYS)
+				data.next_review=maxi(int(data.next_review),day+wait)
 	])
 	return parts
 

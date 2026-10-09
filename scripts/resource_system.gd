@@ -78,11 +78,15 @@ func plain_language_description(resource_name:String)->String:
 	if resource_name=="Medicinal Plants": return "Recognized medicinal plants are gathered as finite bulk for remedies and care. Access does not imply free inventory."
 	return ""
 
-var _surface_front_cache:Dictionary={}
-const SURFACE_FRONT_CACHE_LIMIT:=256
+## The ground around a seat, surveyed once ring by ring: what the authored
+## terrain holds never changes, only which sites are already worked. Keyed by
+## seed, seat and provider; each entry is an Array of rings, each ring a
+## {resource: [[density, site, front key], ...]} in search order. Never saved.
+var _surface_rings:Dictionary={}
+const SURFACE_RING_ORIGIN_LIMIT:=32
 
 func reset_for_new_world()->void:
-	_surface_front_cache.clear()
+	_surface_rings.clear()
 	initialized=false
 	rng=RandomNumberGenerator.new()
 
@@ -725,17 +729,46 @@ func _next_surface_front(resource:String,source:String,context:Dictionary,minimu
 	var origin_value:Variant=context.get("origin",WorldSimulation.state.settlement_founded_at)
 	var origin:=Vector2(origin_value.x,origin_value.z) if origin_value is Vector3 else Vector2(origin_value.x,origin_value.y)
 	var max_ring:=surface_search_rings()
-	# Only the authored-terrain provider promises stable catchment potential.
-	# Cache failed searches too; a desert should not be resurveyed every day.
-	# New fronts, more logistics, a new origin/seed or provider all change the key.
-	var cacheable:=WorldSimulation.surface_material_provider.is_valid()
-	var cache_key:=[WorldSimulation.state.world_seed,origin,resource,source,minimum_density,max_ring,used.keys(),WorldSimulation.surface_material_provider]
-	if cacheable and _surface_front_cache.has(cache_key):return (_surface_front_cache[cache_key] as Dictionary).duplicate(true)
-	var result:=_search_surface_front(resource,origin,max_ring,used,minimum_density)
-	if cacheable:
-		if _surface_front_cache.size()>=SURFACE_FRONT_CACHE_LIMIT:_surface_front_cache.erase(_surface_front_cache.keys()[0])
-		_surface_front_cache[cache_key]=result.duplicate(true)
-	return result
+	# Only the authored-terrain provider promises stable catchment potential:
+	# its ground is surveyed once per ring and only the used sites are checked
+	# each day. A city opening a new wood daily no longer resamples the map.
+	if WorldSimulation.surface_material_provider.is_valid():return _pick_surveyed_front(resource,origin,max_ring,used,minimum_density)
+	return _search_surface_front(resource,origin,max_ring,used,minimum_density)
+
+## The same choice as _search_surface_front, read from the surveyed rings: the
+## nearest ring holding an unused site dense enough, its densest site first.
+func _pick_surveyed_front(resource:String,origin:Vector2,max_ring:int,used:Dictionary,minimum_density:float)->Dictionary:
+	for ring in range(1,max_ring+1):
+		var best:Array=[]
+		var best_density:=-1.0
+		for entry:Array in (_surveyed_ring(origin,ring).get(resource,[]) as Array):
+			var density:float=entry[0]
+			if density<minimum_density or density<=best_density or used.has(entry[2]):continue
+			best=entry;best_density=density
+		if not best.is_empty():return (best[1] as Dictionary).duplicate(true)
+	return {}
+
+func _surveyed_ring(origin:Vector2,ring:int)->Dictionary:
+	var key:=[WorldSimulation.state.world_seed,origin,WorldSimulation.surface_material_provider]
+	if not _surface_rings.has(key):
+		if _surface_rings.size()>=SURFACE_RING_ORIGIN_LIMIT:_surface_rings.clear()
+		_surface_rings[key]=[]
+	var rings:Array=_surface_rings[key]
+	while rings.size()<ring:
+		var next:=rings.size()+1
+		var found:Dictionary={}
+		for z in range(-next,next+1):
+			for x in range(-next,next+1):
+				if absi(x)!=next and absi(z)!=next:continue
+				var sites:Dictionary=WorldSimulation.surface_material_provider.call(origin+Vector2(x,z)*SURFACE_FRONT_SPACING_KM)
+				for resource_name in sites:
+					var site:Variant=sites[resource_name]
+					if not site is Dictionary:continue
+					var density:=clampf(float((site as Dictionary).get("density",0.0)),0.0,1.0)
+					if density<=0.0:continue
+					(found.get_or_add(String(resource_name),[]) as Array).append([density,site,_surface_front_key(String(resource_name),site)])
+		rings.append(found)
+	return rings[ring-1]
 
 func _search_surface_front(resource:String,origin:Vector2,max_ring:int,used:Dictionary,minimum_density:float)->Dictionary:
 	for ring in range(1,max_ring+1):

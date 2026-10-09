@@ -10,7 +10,7 @@ func after_test()->void:
 func surface(point:Vector2)->Dictionary:
 	calls+=1
 	return {"Timber":{"density":.6,"area_km2":9.0,"position":Vector3(point.x,0,point.y)}}
-func test_front_search_reuses_potential_but_invalidates_used_sites_and_logistics()->void:
+func test_ground_is_surveyed_once_and_used_sites_are_skipped_without_resampling()->void:
 	WorldSimulation.scoped("performance",func()->void:
 		var resources:=WorldSimulation.resources
 		var state:=WorldSimulation.state
@@ -21,18 +21,36 @@ func test_front_search_reuses_potential_but_invalidates_used_sites_and_logistics
 		var initial_calls:=calls
 		assert_dict(resources._next_surface_front("Timber","woodland_catchment",context,.08)).is_equal(first)
 		assert_int(calls).is_equal(initial_calls)
+		# A worked site is skipped: the next site comes from the survey, not new samples.
 		var copy:=first.duplicate(true);copy.landscape_source="woodland_catchment";copy.resource="Timber"
 		state.resource_deposits.append(copy)
 		var second:=resources._next_surface_front("Timber","woodland_catchment",context,.08)
 		assert_bool(second.position!=first.position).is_true()
-		assert_int(calls).is_greater(initial_calls)
-		var before:=calls;state.population_allocations.Logistics=30
-		resources._next_surface_front("Timber","woodland_catchment",context,.08)
-		assert_int(calls).is_greater(before)
-		assert_bool(SaveSystem._capture_reflected(resources,SaveSystem.REFLECT_SKIP.ResourceSystem).has("_surface_front_cache")).is_false()
-		resources.reset_for_new_world();assert_dict(resources._surface_front_cache).is_empty()
+		assert_int(calls).is_equal(initial_calls)
+		# The surveyed site handed out is a copy: changing it never changes the survey.
+		second.density=0.0
+		assert_float(float(resources._next_surface_front("Timber","woodland_catchment",context,.08).density)).is_equal(.6)
+		assert_bool(SaveSystem._capture_reflected(resources,SaveSystem.REFLECT_SKIP.ResourceSystem).has("_surface_rings")).is_false()
+		resources.reset_for_new_world();assert_dict(resources._surface_rings).is_empty()
 	)
-func test_failed_searches_cache_and_changing_provider_rechecks_ground()->void:
+func test_wider_search_surveys_only_the_new_rings()->void:
+	WorldSimulation.scoped("performance",func()->void:
+		var resources:=WorldSimulation.resources
+		var state:=WorldSimulation.state
+		state.resource_deposits.clear();state.population_allocations.Logistics=0
+		var context:={"origin":Vector3.ZERO}
+		# Fill every site of ring 1 so the search must go wider.
+		for i in 8:
+			var site:=resources._next_surface_front("Timber","woodland_catchment",context,.08)
+			if site.is_empty():break
+			site.landscape_source="woodland_catchment";site.resource="Timber";state.resource_deposits.append(site)
+		assert_dict(resources._next_surface_front("Timber","woodland_catchment",context,.08)).is_empty()
+		var before:=calls
+		state.population_allocations.Logistics=6
+		assert_bool(resources._next_surface_front("Timber","woodland_catchment",context,.08).is_empty()).is_false()
+		assert_int(calls-before).is_equal(16)
+	)
+func test_empty_ground_is_not_resurveyed_and_a_new_provider_rechecks_it()->void:
 	WorldSimulation.scoped("performance",func()->void:
 		WorldSimulation.surface_material_provider=func(_point:Vector2)->Dictionary:calls+=1;return {}
 		var resources:=WorldSimulation.resources;WorldSimulation.state.resource_deposits.clear()
@@ -43,12 +61,9 @@ func test_failed_searches_cache_and_changing_provider_rechecks_ground()->void:
 		assert_int(calls).is_equal(before)
 		WorldSimulation.surface_material_provider=surface
 		assert_bool(resources._next_surface_front("Timber","woodland_catchment",context,.08).is_empty()).is_false()
-		WorldSimulation.context_provider=func(_point:Vector2)->Dictionary:return {}
-		assert_bool(WorldSimulation.surface_material_provider.is_valid()).is_false()
-		for i in resources.SURFACE_FRONT_CACHE_LIMIT+2:
-			WorldSimulation.surface_material_provider=surface
+		for i in resources.SURFACE_RING_ORIGIN_LIMIT+2:
 			resources._next_surface_front("Timber","woodland_catchment",{"origin":Vector3(i*10,0,0)},.08)
-		assert_int(resources._surface_front_cache.size()).is_less_equal(resources.SURFACE_FRONT_CACHE_LIMIT)
+		assert_int(resources._surface_rings.size()).is_less_equal(resources.SURFACE_RING_ORIGIN_LIMIT)
 	)
 func test_observer_summary_leaves_full_city_forecast_and_history_intact()->void:
 	WorldSimulation.scoped("performance",func()->void:
