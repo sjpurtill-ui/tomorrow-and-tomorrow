@@ -634,20 +634,24 @@ static func posted_men(posted:Dictionary)->int:
 	return men
 
 ## `n` people join the watch at home, raw, armed from the stock as far as it
-## goes. Returns those who joined.
+## goes, split among the kinds of the army's makeup (army_makeup.gd split;
+## all as arms_kit until the ruler chooses one). Returns those who joined.
 static func join(mc:Variant,n:int)->int:
 	if n<=0:return 0
 	if mc.home_army.is_empty():mc.home_army=mc._empty_home_army()
-	var kit:=arms_kit(mc)
-	var unit:=String(kit.unit);var item:=String(kit.item)
-	var sets:int=mc._equipment_required_for(unit,n)
-	var armed:=take_weapons(mc,sets,item)
-	var target:=_formation_of(mc,unit,item)
-	var addition:={"id":int(target.get("id",-1)) if not target.is_empty() else int(mc.next_formation_id),"unit":unit,"weapon":item,"count":n,"authorized_count":n,
-		"equipment":armed,"equipment_required":sets,"ammunition":0,"ammunition_required":mc._ammunition_required_for(item,sets),
-		"training":START_DRILL,"experience":0.0,"personnel_condition":float(mc._trainee_condition())}
-	if target.is_empty():mc.next_formation_id=int(mc.next_formation_id)+1
-	mc._rebuild_home_army_with([addition])
+	var additions:Array=[]
+	for part:Dictionary in preload("res://scripts/army_makeup.gd").split(mc,n):
+		var count:=int(part.count)
+		if count<=0:continue
+		var unit:=String(part.kit.unit);var item:=String(part.kit.item)
+		var sets:int=mc._equipment_required_for(unit,count)
+		var armed:=take_weapons(mc,sets,item)
+		var target:=_formation_of(mc,unit,item)
+		additions.append({"id":int(target.get("id",-1)) if not target.is_empty() else int(mc.next_formation_id),"unit":unit,"weapon":item,"count":count,"authorized_count":count,
+			"equipment":armed,"equipment_required":sets,"ammunition":0,"ammunition_required":mc._ammunition_required_for(item,sets),
+			"training":START_DRILL,"experience":0.0,"personnel_condition":float(mc._trainee_condition())})
+		if target.is_empty():mc.next_formation_id=int(mc.next_formation_id)+1
+	mc._rebuild_home_army_with(additions)
 	mc.army_changed.emit(mc.home_army.duplicate(true))
 	return n
 

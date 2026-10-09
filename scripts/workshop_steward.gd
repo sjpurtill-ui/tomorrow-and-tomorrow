@@ -15,7 +15,7 @@ func owner()->String:
 	for office:String in ["Quartermaster","Steward"]:
 		var person:Dictionary=WorldSimulation.government.officeholder(office)
 		if not person.is_empty():return "%s · %s" % [String(person.name),office]
-	return "No workshop officeholder"
+	return "The war leader · no steward"
 func set_enabled(enabled:bool)->Dictionary:
 	data.enabled=enabled
 	if not enabled:
@@ -56,8 +56,9 @@ func advance(day:int)->void:
 	data.last_day=day
 	if not bool(data.enabled):return
 	if not WorldSimulation.state.settlement_site_committed:return
-	if not WorldSimulation.government.has_officeholder("Quartermaster") and not WorldSimulation.government.has_officeholder("Steward"):
-		data.status="Appoint a steward or quartermaster to manage the workshops.";return
+	# With no steward or quartermaster the war leader still sees the army
+	# armed and carried: its gear and its carts are ordered all the same.
+	var officer:=_has_officer()
 	preload("res://scripts/ai_workshop_turnover.gd").advance("player",host,true)
 	var demands:=army_demands()
 	for job:Dictionary in host.equipment_queue:
@@ -71,7 +72,7 @@ func advance(day:int)->void:
 		job.target_stock=P.stock(host,job)+1 if finishing else maxi(1,target)
 		job.paused=target==0 and not finishing
 		job["staff_idle"]=bool(job.paused)
-	var civilian:=preload("res://scripts/civilian_investment_planner.gd").recommendation()
+	var civilian:=preload("res://scripts/civilian_investment_planner.gd").recommendation() if officer else {}
 	if not civilian.is_empty():demands.append(civilian)
 	# Alternate first consideration; a standing military order cannot starve
 	# civilian supply planning forever, and vice versa.
@@ -109,6 +110,10 @@ func army_demands()->Array[Dictionary]:
 		var item:=String(order.get("weapon","improvised"))
 		var needed:=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
 		totals[item]=int(totals.get(item,0))+needed
+	# The kits the army's makeup still lacks (army_makeup.gd): its kinds in
+	# the newest gear our people can make.
+	var makeup:Dictionary=preload("res://scripts/army_makeup.gd").wanted(host)
+	for item:String in makeup:totals[item]=int(totals.get(item,0))+int(makeup[item])
 	if not explicit_recruitment:
 		# The watch not yet under arms (watch_military.gd): they join at home.
 		var watch_gap:=maxi(0,int(host.watch_manpower())-int(host._mobilized_count()))
@@ -139,6 +144,13 @@ func army_demands()->Array[Dictionary]:
 		result.append(upstream if not upstream.is_empty() else {"item":item,"target":int(totals[item]),"gear":true})
 	# Gear for soldiers who already exist comes before stock for future intake.
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _waiting_total(String(a.get("item","")))>_waiting_total(String(b.get("item",""))))
+	# Carts (or lorries) to carry the army's bread: what the carriers cannot
+	# move, and a baggage train ready for the next march (cart_supply_planner).
+	var carts:=preload("res://scripts/cart_supply_planner.gd").recommendation()
+	if not carts.is_empty():
+		var at:=0
+		while at<result.size() and _waiting_total(String(result[at].get("item","")))>0:at+=1
+		result.insert(at,{"item":String(carts.item),"target":int(carts.target)})
 	return result
 func schedule(demand:Dictionary)->Dictionary:
 	if String(demand.get("kind",""))=="plant_install":

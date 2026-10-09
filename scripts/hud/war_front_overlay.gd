@@ -731,14 +731,34 @@ static func _border_inputs(home:Vector2)->Array:
 			var counted:Dictionary=Estimate.call("enemy_estimate",String(town.get("city_id","")))
 			var men:=roundi(float(counted.get("mid",-1.0)))
 			their_towns.append({"at":at,"men":maxi(0,men),"known":bool(counted.get("known",false)) and men>=0})
+		var lines:Array=[]
 		for line:Dictionary in NationBorders.published:
 			var owners:Array=line.owners
 			if not ((owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id)): continue
-			var points:PackedVector2Array=line.points
-			if points.size()<2: continue
-			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"our_towns":our_towns,"their_towns":their_towns,"kind":String(hot[civ_id])})
+			if (line.points as PackedVector2Array).size()>=2: lines.append(line.points)
+		# The border with them may be drawn in several pieces: each town's men
+		# stand on the piece nearest it, once (never the whole garrison again
+		# on every piece). Our towns still split each piece into stretches.
+		for index in lines.size():
+			var points:PackedVector2Array=lines[index]
+			var mine:Array=our_towns.map(func(t:Dictionary)->Dictionary:
+				var kept:=t.duplicate()
+				if _nearest_line(lines,t.at)!=index: kept.men=0
+				return kept)
+			var facing:Array=their_towns.filter(func(t:Dictionary)->bool: return _nearest_line(lines,t.at)==index)
+			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"our_towns":mine,"their_towns":facing,"kind":String(hot[civ_id])})
 			if out.size()>=Model.MAX_FRONTS: return out
 	return out
+
+
+## Which of the lines lies nearest the point (its index).
+static func _nearest_line(lines:Array,at:Vector2)->int:
+	var best:=0; var best_d:=INF
+	for i in lines.size():
+		for p:Vector2 in (lines[i] as PackedVector2Array):
+			var d:=p.distance_squared_to(at)
+			if d<best_d: best_d=d; best=i
+	return best
 
 
 ## The rival peoples' campaigns (each owner's own MilitaryCampaign), read
