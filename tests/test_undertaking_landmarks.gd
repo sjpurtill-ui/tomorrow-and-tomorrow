@@ -47,3 +47,31 @@ func test_visual_cache_ignores_daily_noise_but_tracks_construction_and_name()->v
 	var next:=Visual.signature(cities)
 	r.custom_name="A remembered name"
 	assert_str(Visual.signature(cities)).is_not_equal(next)
+
+func test_a_large_town_finds_ground_past_its_built_edge()->void:
+	var city:={"id":"big","position":Vector2.ZERO,"undertakings":[]}
+	var height:=func(_p:Vector2)->float:return 0.0
+	var land:=func(_p:Vector2)->bool:return true
+	# Plots packed solid out to 2 km: no gap anywhere inside.
+	var plots:Array=[]
+	for x in range(-20,21):
+		for z in range(-20,21):
+			var at:=Vector2(x,z)*.1
+			if at.length()<=2.0:plots.append({"centroid":at,"area_ha":4.0,"status":"active"})
+	var site:=Sites.choose(city,plots,17,height,land)
+	assert_dict(site).is_not_empty()
+	assert_float((site.position as Vector2).length()).is_greater(2.0)
+	assert_float((site.position as Vector2).length()).is_less(2.0+Sites.OUTSKIRT_KM+Sites.RING_KM*2.0)
+
+func test_steep_country_builds_on_a_terrace_when_no_level_ground_is_near()->void:
+	var city:={"id":"hill","position":Vector2.ZERO,"undertakings":[]}
+	var land:=func(_p:Vector2)->bool:return true
+	# A steady slope: 10 m across a footprint, too much for level ground.
+	var slope:=func(p:Vector2)->float:return p.x*.07
+	var site:=Sites.choose(city,[],17,slope,land)
+	assert_dict(site).is_not_empty()
+	assert_bool(bool(site.get("terraced",false))).is_true()
+	assert_bool(Sites.valid(site)).is_true()
+	# Level ground in reach is still preferred to a terrace.
+	var level:=Sites.choose(city,[],17,func(_p:Vector2)->float:return 0.0,land)
+	assert_bool(level.has("terraced")).is_false()
