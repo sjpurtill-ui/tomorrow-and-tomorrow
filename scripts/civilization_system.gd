@@ -100,6 +100,7 @@ var player_territory_balance:=0.0
 var scout_missions:Array[Dictionary]=[]
 const Exchange=preload("res://scripts/society_exchange.gd")
 const ScoutSurvival=preload("res://scripts/scout_survival.gd")
+const SeaVoyage=preload("res://scripts/sea_voyage.gd")
 const CharacterVoiceScript=preload("res://scripts/character_voice.gd")
 var scouting_staff=preload("res://scripts/scouting_staff.gd").new(self)
 var next_scout_mission_id:=1
@@ -1197,6 +1198,19 @@ func _quoted_open_scout_route(one_way_range:float,seed_value:int,heading:String,
 	open_scout_plan_cache[key]=plan.duplicate(true)
 	return plan
 
+## A sea voyage for this trip length, planned once per day, origin, boats and
+## charted map (sea_voyage.gd). The search is costly; quotes repeat it often.
+func _quoted_sea_voyage(duration_days:int,seed_value:int,heading:String,origin:Vector2)->Dictionary:
+	if not scout_land_authority.is_valid():return {"ok":false,"reason":"No terrain survey is available. Unknown water cannot be charted."}
+	var craft:=SeaVoyage.capability()
+	if not bool(craft.ok):return {"ok":false,"reason":String(craft.reason)}
+	var key:="sea:"+var_to_str([last_world_seed,int(WorldSimulation.state.elapsed_days),origin,duration_days,seed_value,heading,craft.offshore_km,craft.sail_km_per_day,fog_revision,scout_missions.size()])
+	if open_scout_plan_cache.has(key):return open_scout_plan_cache[key].duplicate(true)
+	var plan:Dictionary=SeaVoyage.new(self,origin,craft).plan(duration_days,seed_value,heading)
+	if open_scout_plan_cache.size()>=32:open_scout_plan_cache.clear()
+	open_scout_plan_cache[key]=plan.duplicate(true)
+	return plan
+
 func _plan_open_scout_route(one_way_range:float,rng:RandomNumberGenerator,heading:String="",origin:Vector2=Vector2.INF)->Dictionary:
 	if not is_finite(origin.x) or not is_finite(origin.y):origin=player_world_origin
 	if not scout_land_authority.is_valid():
@@ -1260,7 +1274,7 @@ func _audit_active_scout_land_route()->void:
 	for mission_index in scout_missions.size():
 		var mission:Dictionary=scout_missions[mission_index]
 		var route:Array=mission.get("route",[])
-		if String(mission.get("travel_mode","land"))=="land" and _scout_route_is_land(route): continue
+		if String(mission.get("travel_mode","land"))=="sea" or _scout_route_is_land(route): continue
 		var safe_route:Array[Dictionary]=[]
 		if not route.is_empty():
 			var first:Dictionary=route[0]
@@ -1439,7 +1453,7 @@ func _scout_target_option(target_id:String)->Dictionary:
 	return {}
 
 
-func scout_mission_quote(duration_days:int,target_id:String="open_world",heading:String="",party_size:int=0,wandering:bool=false,origin_city_id:String="",reckless:bool=false)->Dictionary:
+func scout_mission_quote(duration_days:int,target_id:String="open_world",heading:String="",party_size:int=0,wandering:bool=false,origin_city_id:String="",reckless:bool=false,by_sea:bool=false)->Dictionary:
 	if duration_days not in SCOUT_DURATIONS: return {"error":"Scout duration must be 30, 90, 180, or 365 days."}
 	var target:=_scout_target_option(target_id)
 	if target.is_empty(): return {"error":"That scouting target is not part of current knowledge."}
@@ -1466,6 +1480,8 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 		target_position=route_plan.get("search_position",{}).duplicate(true)
 		target["position"]=target_position
 		target_distance=origin.distance_to(rumor_network.vector(target_position)) if not target_position.is_empty() else 0.0
+	elif directional_search and by_sea:
+		route_plan=_quoted_sea_voyage(duration_days,last_world_seed^duration_days*8191^String(target.id).hash()^next_scout_mission_id*2654435761,ordered_heading,origin)
 	elif directional_search:
 		var quote_seed:=last_world_seed^duration_days*8191^String(target.id).hash()^next_scout_mission_id*2654435761
 		if wandering:
@@ -1498,7 +1514,9 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 			if wandering:
 				if open_scout_plan_cache.size()>32:open_scout_plan_cache.clear()
 				open_scout_plan_cache[key]=route_plan.duplicate(true)
-	if directional_search and bool(route_plan.get("ok",false)):
+	# A voyage keeps its whole allowance: the planner already split its days.
+	var sea:=String(route_plan.get("travel_mode","land"))=="sea"
+	if directional_search and not sea and bool(route_plan.get("ok",false)):
 		var distance:=float(route_plan.get("distance_km",0))
 		for allowance:int in SCOUT_DURATIONS:
 			if allowance>=duration_days:break
@@ -1508,26 +1526,29 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 	var planning_mission:={"duration_days":duration_days,"concealment":clampf(clampf(0.72+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)+pathfinder_cover,0.60,0.98),"evasion":clampf(clampf(0.76+logistics*0.14+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)+pathfinder_cover,0.66,0.99)}
 	var risk:=_player_scout_risk_snapshot(planning_mission)
 	var quoted_route:Array=route_plan.get("route",[]) if bool(route_plan.get("ok",false)) else []
-	var field_risk:=ScoutSurvival.assess({"duration_days":duration_days,"one_way_km":float(route_plan.get("distance_km",target_distance)) if bool(route_plan.get("ok",false)) else target_distance,"personnel":personnel,"terrain_danger":_scout_terrain_danger(quoted_route),"start_day":int(WorldSimulation.state.elapsed_days),"veterancy":scouting_staff.veterancy(),"reckless":reckless})
+	var field_risk:=ScoutSurvival.assess({"duration_days":duration_days,"one_way_km":float(route_plan.get("distance_km",target_distance)) if bool(route_plan.get("ok",false)) else target_distance,"personnel":personnel,"terrain_danger":float(route_plan.terrain_danger) if sea else _scout_terrain_danger(quoted_route),"start_day":int(WorldSimulation.state.elapsed_days),"veterancy":scouting_staff.veterancy(),"reckless":reckless})
 	var blocker:=""
 	if scout_missions.size()>=scout_party_capacity(): blocker="All %d scout parties this population can organize are already away." % scout_party_capacity()
 	elif not scout_land_authority.is_valid(): blocker="No terrain survey is available. Unknown ground cannot be assumed to be land."
 	elif int(staffing.available)<personnel: blocker="%s has only %d adults available after existing commitments and essential work." % [String(origin_option.label),int(staffing.available)]
 	elif float(staffing.food)+0.0001<provisions: blocker="Requires %.1f Food; only %.1f is stored at %s." % [provisions,float(staffing.food),String(origin_option.label)]
+	elif by_sea and not directional_search: blocker="Voyages search open country by sea; send a land party to a known place."
+	elif by_sea and not bool(route_plan.get("ok",false)): blocker=String(route_plan.get("reason","Our boats cannot make this voyage."))
+	elif sea: pass
 	elif target_distance>one_way_range: blocker="This mission can reach about %.0f km, but the target is %.0f km away. Choose a longer expedition." % [one_way_range,target_distance]
 	elif not route_plan.is_empty() and not bool(route_plan.get("ok",false)): blocker=String(route_plan.get("reason","No continuous land-only route reaches this target."))
 	elif not route_plan.is_empty() and float(route_plan.get("distance_km",INF))>one_way_range+.001: blocker="The land route is %.0f km after following the coastline, beyond this party's %.0f km range. Choose a longer expedition." % [float(route_plan.get("distance_km",0.0)),one_way_range]
 	var planned_distance:=float(route_plan.get("distance_km",0.0)) if bool(route_plan.get("ok",false)) else 0.0
 	var travel_leg:=maxi(1,ceili(planned_distance/maxf(.01,2.0*one_way_range/float(requested_duration))))
 	var observing_days:=maxi(0,duration_days-travel_leg*2) if target_kind=="observe_city" else 0
-	return {"requested_duration_days":requested_duration,"shortened":duration_days<requested_duration,"travel_leg_days":travel_leg,"observation_days":observing_days,"duration_days":duration_days,"personnel":personnel,"provisions":provisions,"one_way_range_km":one_way_range,"planned_outward_km":planned_distance,"charted_route_km":planned_distance*2.0,"target_distance_km":target_distance,"target":target,"risk":risk,"field_risk":field_risk,"reckless":reckless,"route_plan":route_plan,"ordered_heading":ordered_heading,"travel_mode":"land","origin_city_id":String(origin_option.id),"origin_label":String(origin_option.label),"origin_position":{"x":origin.x,"z":origin.y},"can_dispatch":blocker=="","blocker":blocker}
+	return {"requested_duration_days":requested_duration,"shortened":duration_days<requested_duration,"travel_leg_days":travel_leg,"observation_days":observing_days,"duration_days":duration_days,"personnel":personnel,"provisions":provisions,"one_way_range_km":one_way_range,"planned_outward_km":planned_distance,"charted_route_km":planned_distance*2.0,"target_distance_km":target_distance,"target":target,"risk":risk,"field_risk":field_risk,"reckless":reckless,"route_plan":route_plan,"ordered_heading":ordered_heading,"travel_mode":"sea" if sea else "land","origin_city_id":String(origin_option.id),"origin_label":String(origin_option.label),"origin_position":{"x":origin.x,"z":origin.y},"can_dispatch":blocker=="","blocker":blocker}
 
 
-func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:String="",party_size:int=0,wandering:bool=false,origin_city_id:String="",reckless:bool=false)->Dictionary:
+func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:String="",party_size:int=0,wandering:bool=false,origin_city_id:String="",reckless:bool=false,by_sea:bool=false)->Dictionary:
 	initialize()
 	var normalized_heading:=heading.to_lower().strip_edges()
 	if normalized_heading!="" and not SCOUT_HEADINGS.has(normalized_heading): return {"error":"Unknown scout heading: %s." % heading}
-	var quote:=scout_mission_quote(duration_days,target_id,normalized_heading,party_size,wandering,origin_city_id,reckless)
+	var quote:=scout_mission_quote(duration_days,target_id,normalized_heading,party_size,wandering,origin_city_id,reckless,by_sea)
 	if quote.has("error"): return quote
 	if not bool(quote.get("can_dispatch",false)): return {"error":String(quote.get("blocker","The mission cannot depart."))}
 	duration_days=int(quote.duration_days)
@@ -1541,10 +1562,11 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 		return {"error":String(route_plan.get("reason","No terrain-authoritative land route can support this expedition."))}
 	var route:Array[Dictionary]=[]
 	route.assign(route_plan.get("route",[]))
-	if route.size()<2 or not _scout_route_is_land(route):
+	var sea:=String(route_plan.get("travel_mode","land"))=="sea"
+	if route.size()<2 or route.size()>SCOUT_ROUTE_POINT_LIMIT or (not sea and not _scout_route_is_land(route)):
 		return {"error":"The planned scout trail is not a continuous land route. Nothing was spent and the party did not depart."}
 	var distance:=float(route_plan.get("distance_km",_scout_route_distance(route)))
-	if distance>one_way_range+0.001:
+	if not sea and distance>one_way_range+0.001:
 		return {"error":"The coastline-aware route is %.0f km, beyond this party's %.0f km range." % [distance,one_way_range]}
 	var start_day:=int(WorldSimulation.state.elapsed_days)
 	var issued_provisions:float=WorldSimulation.settlements.with_city_resources(String(quote.origin_city_id),func()->float:return WorldSimulation.food.issue_for_obligation(provisions,"scouting","Scout party • %s" % String(target_option.label),float(duration_days),personnel))
@@ -1558,11 +1580,13 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	var origin_position:Dictionary=quote.origin_position
 	var origin:=Vector2(float(origin_position.x),float(origin_position.z))
 	var planned_heading:=String(route_plan.get("planned_heading",_compass_phrase(origin,Vector2(float(route[-1].get("x",origin.x)),float(route[-1].get("z",origin.y))))))
-	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people","recruit_nomads","prospect_resources"] else "","planned_heading":planned_heading,"origin_city_id":String(quote.origin_city_id),"origin_label":String(quote.origin_label),"origin_position":origin_position.duplicate(true),"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
+	var mission:Dictionary={"mission_id":next_scout_mission_id,"start_day":start_day,"return_day":start_day+duration_days,"duration_days":duration_days,"personnel":personnel,"population_sources":{"productive":personnel},"provisions":issued_provisions,"route":route,"planned_distance":distance,"ordered_heading":normalized_heading if String(target_option.kind) in ["explore","recruit_people","recruit_nomads","prospect_resources"] else "","planned_heading":planned_heading,"origin_city_id":String(quote.origin_city_id),"origin_label":String(quote.origin_label),"origin_position":origin_position.duplicate(true),"target_id":String(target_option.id),"target_kind":String(target_option.kind),"target_civ_id":String(target_option.get("civ_id","")),"target_city_id":String(target_option.get("city_id","")),"target_label":String(target_option.label),"target_position":target_position.duplicate(true),"reached_target":bool(route_plan.get("target_reachable",true)),"travel_mode":"sea" if sea else "land","route_status":"outbound_and_returning","concealment":concealment,"evasion":evasion}
 	if bool(route_plan.get("circuit",false)):mission["circuit"]=true
-	# Field odds are fixed at departure: the ground, the season, the corps'
-	# experience and whether the party was ordered on regardless of danger.
-	mission["terrain_danger"]=_scout_terrain_danger(route)
+	if sea:mission["voyage"]=(route_plan.voyage as Dictionary).duplicate(true)
+	# Field odds are fixed at departure: the ground (or the sea and the boats),
+	# the season, the corps' experience and whether the party was ordered on
+	# regardless of danger.
+	mission["terrain_danger"]=float(route_plan.terrain_danger) if sea else _scout_terrain_danger(route)
 	mission["veterancy"]=scouting_staff.veterancy()
 	if reckless: mission["reckless"]=true
 	var field_risk:=_scout_field_assessment(mission)
@@ -1586,8 +1610,11 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	scout_missions.append(mission)
 	var direction_clause:=" on a %s search corridor" % planned_heading.to_upper()
 	if normalized_heading!="": direction_clause=" under orders to search %s; its traversable corridor runs %s" % [normalized_heading.to_upper(),planned_heading.to_upper()]
-	var message:="%d scouts depart from %s for a %d-day expedition to %s%s with %.1f Food. The planned outward route is %.0f km; the time and food allowance includes surveying and the return journey. The route is marked on the map. Discoveries become known when the party returns. Estimated patrol exposure: %s. Field danger: %s — %s.%s" % [personnel,String(quote.origin_label),duration_days,String(target_option.label).capitalize(),direction_clause,issued_provisions,distance,String(risk.label),String(field_risk.label),ScoutSurvival.odds_phrase(field_risk)," They are ordered on regardless of danger and will not turn back readily." if reckless else ""]
-	_record_world_event("Scout party departs",message,"diplomacy",start_day)
+	if sea:
+		var voyage:Dictionary=mission.voyage
+		direction_clause=" by boat, putting to sea %s and making for a landing to the %s" % ["at the shore by home" if float(voyage.walk_to_boat_km)<1.0 else "%d km from home" % int(voyage.walk_to_boat_km),planned_heading.to_upper()]
+	var message:="%d scouts depart from %s for a %d-day expedition to %s%s with %.1f Food. The planned outward route is %.0f km%s; the time and food allowance includes surveying and the return journey. The route is marked on the map. Discoveries become known when the party returns. Estimated patrol exposure: %s. Field danger: %s — %s.%s" % [personnel,String(quote.origin_label),duration_days,String(target_option.label).capitalize(),direction_clause,issued_provisions,distance," (%d km under sail, %d km ashore)" % [int(mission.voyage.sea_km),int(mission.voyage.shore_km)] if sea else "",String(risk.label),String(field_risk.label),ScoutSurvival.odds_phrase(field_risk)," They are ordered on regardless of danger and will not turn back readily." if reckless else ""]
+	_record_world_event("Voyage departs" if sea else "Scout party departs",message,"diplomacy",start_day)
 	# Callers that commissioned this physical expedition need a durable identity
 	# for its eventual return report. The mission remains the authoritative state;
 	# this ID only lets a civic directive wait for and cite the same party.
@@ -2932,17 +2959,23 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	if turnback_note!="": finding="%s %s" % [turnback_note,finding]
 	var is_recruitment:=not recruitment_account.is_empty()
 	var party_name:="recruitment party" if is_recruitment else "scout party"
-	var message:="The %s returns after %d days and charts roughly %d km of land travel. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.actual_days),int(report.distance_km),finding]
+	var travel:="%d km of land travel" % int(report.distance_km)
+	if String(report.travel_mode)=="sea":
+		party_name="voyage"
+		var voyage:Dictionary=mission.get("voyage",{})
+		report["voyage"]=voyage.duplicate(true)
+		travel="%d km under sail and %d km ashore" % [int(float(voyage.get("sea_km",0))*2.0),int(float(voyage.get("shore_km",0))*2.0)] if String(report.route_status)!="turned_back" else "%d km of coast and sea before turning for home" % int(report.distance_km)
+	var message:="The %s returns after %d days and charts roughly %s. %s The map now reveals only the physical route contained in its returned report." % [party_name,int(report.actual_days),travel,finding]
 	if String(mission.get("target_kind",""))=="observe_city":message=ScoutArchive.city_account(report)
 	message=CharacterVoiceScript.era_plain(message,era_tags)
 	scouting_staff.city_watch_returned(mission,day,true)
 	last_scout_outcome={"mission_id":int(mission.get("mission_id",0)),"day":day,"status":"returned","personnel":int(report.personnel),"message":message}
-	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Scout party returns",message,"diplomacy",day)
+	_record_world_event("City reconnaissance returns" if String(mission.get("target_kind",""))=="observe_city" else "Recruitment party returns" if is_recruitment else "Voyage returns" if party_name=="voyage" else "Scout party returns",message,"diplomacy",day)
 	scout_report_returned.emit(report.duplicate(true))
 	# The Chief Scout asks for an audience to tell the court what the party saw.
 	_chief_scout_report(report,"scouts")
 	if ScoutArchive.newsworthy(report):
-		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major","mission_id":int(report.get("mission_id",mission.get("mission_id",0)))})
+		WorldSimulation.state.simulation_events.push_front({"day":day,"title":"CITY RECONNAISSANCE" if String(mission.get("target_kind",""))=="observe_city" else "RECRUITMENT PARTY RETURNS" if is_recruitment else "VOYAGE RETURNS" if party_name=="voyage" else "SCOUTS RETURN","description":message,"domain":"diplomacy","severity":"major","mission_id":int(report.get("mission_id",mission.get("mission_id",0)))})
 	elif int(report.get("lost_personnel",0))>0:
 		# A quiet return still counts its dead in the season's tally.
 		preload("res://scripts/hearth_count.gd").tally("afield",int(report.lost_personnel))
@@ -2974,6 +3007,7 @@ func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
 	## Every line derives from the rendered world via the survey authority —
 	## nothing is invented that the map does not show.
 	var journal:Array[String]=[]
+	if String(mission.get("travel_mode","land"))=="sea": return _compose_voyage_journal(mission,route)
 	if not ground_survey_authority.is_valid() or route.size()<3: return journal
 	var outbound_days:=maxi(2,int(mission.get("duration_days",30))/2)
 	var legs:Array[Dictionary]=[]
@@ -3018,6 +3052,41 @@ func _compose_scout_journal(mission:Dictionary,route:Array)->Array[String]:
 	if saw_coast: journal.append("For part of the journey they walked within sight of open water.")
 	if farthest_distance>1.0:
 		journal.append("At their farthest they stood roughly %d km to the %s of %s." % [roundi(farthest_distance),_compass_phrase(origin,farthest_point),String(mission.get("origin_label","home"))])
+	return journal
+
+
+## A voyage told from its record: the walk to the boats, the sea crossed,
+## where they came ashore and the country they walked there. Every number is
+## the route's own; the ground lines come from the survey authority.
+func _compose_voyage_journal(mission:Dictionary,route:Array)->Array[String]:
+	var journal:Array[String]=[]
+	var voyage:Dictionary=mission.get("voyage",{})
+	var walk_km:=int(voyage.get("walk_to_boat_km",0))
+	var sea_km:=int(voyage.get("sea_km",0))
+	var open_km:=int(voyage.get("open_km",0))
+	var landing_index:=int(voyage.get("landing_index",route.size()-1))
+	journal.append("They put to sea %s." % ("from the shore by home" if walk_km<1 else "after a %d km walk to the shore" % walk_km))
+	var turned:=String(mission.get("route_status",""))=="turned_back"
+	if turned or landing_index>=route.size():
+		journal.append("They sailed about %d km before turning the boats for home; no one went ashore on a far coast." % roundi(_scout_route_distance(route)))
+		return journal
+	var landing_data:Dictionary=route[landing_index]
+	var landing:=Vector2(float(landing_data.get("x",0.0)),float(landing_data.get("z",0.0)))
+	var origin_data:Dictionary=mission.get("origin_position",{"x":player_world_origin.x,"z":player_world_origin.y})
+	var origin:=Vector2(float(origin_data.get("x",player_world_origin.x)),float(origin_data.get("z",player_world_origin.y)))
+	journal.append("They sailed about %d km%s and came ashore roughly %d km to the %s of %s." % [sea_km," keeping the coast in sight" if open_km<=0 else ", %d km of it out of sight of land" % open_km,roundi(origin.distance_to(landing)),_compass_phrase(origin,landing),String(mission.get("origin_label","home"))])
+	var shore_km:=int(voyage.get("shore_km",0))
+	if shore_km<=0:
+		journal.append("The landing was too cramped to walk far; they looked about the shore and went back to the boats.")
+		return journal
+	var country:="unknown country"
+	if ground_survey_authority.is_valid():
+		var labels:Array[String]=[]
+		for k in range(landing_index,route.size()):
+			var survey:Variant=ground_survey_authority.call(Vector2(float(route[k].get("x",0.0)),float(route[k].get("z",0.0))))
+			if survey is Dictionary and String((survey as Dictionary).get("label",""))!="" and not String(survey.label) in labels: labels.append(String(survey.label))
+		if not labels.is_empty(): country=" and ".join(PackedStringArray(labels.slice(0,2)))
+	journal.append("Ashore they walked %d km inland across %s, then walked back to the boats and sailed home the way they came." % [shore_km,country])
 	return journal
 
 
@@ -5998,7 +6067,8 @@ func validate_state()->Array[String]:
 			for point in route:
 				if not point is Dictionary or not is_finite(float(point.get("x",NAN))) or not is_finite(float(point.get("z",NAN))): errors.append("Scout mission route contains an invalid point.")
 			if String(mission.get("travel_mode","land"))=="land" and scout_land_authority.is_valid() and not _scout_route_is_land(route): errors.append("Land scout mission route crosses non-land terrain.")
-		if String(mission.get("travel_mode","land"))!="land": errors.append("Scout travel mode is unavailable without an implemented maritime expedition capability.")
+		if not String(mission.get("travel_mode","land")) in ["land","sea"]: errors.append("Scout travel mode must be land or sea.")
+		if String(mission.get("travel_mode","land"))=="sea" and not mission.get("voyage") is Dictionary: errors.append("A sea voyage must carry its voyage record.")
 		for scout_trait in ["concealment","evasion"]:
 			var scout_trait_value:=float(mission.get(scout_trait,NAN))
 			if not is_finite(scout_trait_value) or scout_trait_value<0.0 or scout_trait_value>1.0: errors.append("Scout mission %s must be normalized." % scout_trait)
