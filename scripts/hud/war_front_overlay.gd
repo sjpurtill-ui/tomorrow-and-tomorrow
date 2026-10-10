@@ -2340,6 +2340,8 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 	counter_rects.clear()
 	counter_obstacles.clear()
 	if _counters(band):
+		for battle:Dictionary in battles:
+			if battle.get("rect") is Rect2:counter_obstacles.append((battle.rect as Rect2).grow(5.0))
 		counter_bounds=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
 		var cities:=_city_labels()
 		if cities!=null and cities.has_method("chart_obstacles"):

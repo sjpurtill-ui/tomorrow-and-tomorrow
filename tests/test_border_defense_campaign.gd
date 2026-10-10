@@ -8,6 +8,7 @@ const War := preload("res://scripts/war_loop.gd")
 const Route := preload("res://scripts/army_land_route.gd")
 const Observation := preload("res://scripts/border_front_observation.gd")
 const Combat := preload("res://scripts/civilization_combat.gd")
+const Forts := preload("res://scripts/fort_border.gd")
 
 var _processing:Dictionary = {}
 var _world_started := false
@@ -166,6 +167,19 @@ func _march_to_contact() -> Dictionary:
 func _contact_diagnostic(army:Dictionary) -> String:
 	return "army %d: %s at %s; blocked=%s; engagements=%s; outcomes=%s" % [int(army.get("army_id",0)),String(army.get("status","")),str(army.get("position",{})),String(army.get("movement_block_reason","")),str(MilitaryCampaign.own_engagements.keys()),str(MilitaryCampaign.battle_history.slice(0,2).map(func(r:Dictionary)->String:return String(r.get("outcome",""))))]
 
+func _settle_broken_defender() -> void:
+	var engagement:Dictionary=MilitaryCampaign.active_engagement
+	var enemy_side:=MilitaryCampaign._engagement_enemy_side(engagement)
+	# Author an imminent break; the seeded resolver still applies the rout,
+	# casualties, captured soldiers and both owners' normal battle commits.
+	engagement[enemy_side]["morale"]=0.01
+	for block:Dictionary in (engagement.get("battle",{}) as Dictionary).get("live",{}).get(enemy_side,[]):
+		block["c"]=0.01; block["cond"]=0.01
+	for _round in 8:
+		if MilitaryCampaign.active_engagement.is_empty(): break
+		MilitaryCampaign.active_engagement.erase("awaiting_player_view")
+		MilitaryCampaign.fight_engagement_day("hold")
+
 func test_real_council_capital_march_meets_defense_before_the_city() -> void:
 	_start_world()
 	var population:=int(GameState.population_total)
@@ -203,17 +217,7 @@ func test_front_victory_preserves_the_capital_objective_and_can_meet_a_second_in
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	var initial_id:=int(army.army_id)
 	var before_population:=int(GameState.population_total)
-	var engagement:Dictionary=MilitaryCampaign.active_engagement
-	var enemy_side:=MilitaryCampaign._engagement_enemy_side(engagement)
-	# Author the defender's imminent break in the already-open block battle,
-	# then let the normal seeded resolver and both casualty commits settle it.
-	engagement[enemy_side]["morale"]=0.01
-	for block:Dictionary in (engagement.get("battle",{}) as Dictionary).get("live",{}).get(enemy_side,[]):
-		block["c"]=0.01; block["cond"]=0.01
-	for _round in 8:
-		if MilitaryCampaign.active_engagement.is_empty(): break
-		MilitaryCampaign.active_engagement.erase("awaiting_player_view")
-		MilitaryCampaign.fight_engagement_day("press")
+	_settle_broken_defender()
 	assert_bool(MilitaryCampaign.active_engagement.is_empty()).override_failure_message(_contact_diagnostic(army)).is_true()
 	var won:Array=MilitaryCampaign.battle_history.filter(func(record:Dictionary)->bool:return String(record.get("formation_id",""))=="border-guard" and String(record.get("outcome","")) in ["attacker_victory","defender_retreat"])
 	assert_int(won.size()).override_failure_message(_contact_diagnostic(army)).is_equal(1)
@@ -328,6 +332,28 @@ func test_a_real_owned_defender_is_reserved_once_for_a_front_battle() -> void:
 	assert_int(MilitaryCampaign.own_engagements.size()).is_equal(count)
 	assert_int(int(GameState.population_total)).is_equal(population)
 	assert_int(int(WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(their_population)
+	_settle_broken_defender()
+	assert_bool(MilitaryCampaign.active_engagement.is_empty()).override_failure_message(_contact_diagnostic(attacker)).is_true()
+	var defeated:Dictionary=WorldSimulation.scoped(owner_id,func()->Dictionary:
+		var mc=WorldSimulation.military
+		var index:int=mc._field_army_index(guard_id)
+		return mc.field_armies[index].duplicate(true) if index>=0 else {})
+	assert_bool(defeated.has("border_sector")).is_false()
+	assert_array(Array(Defense.coverage(defeated))).is_empty()
+	var histories:Array=MilitaryCampaign.battle_history.filter(func(record:Dictionary)->bool:return String(record.get("formation_id",""))==String(contact.formation_id))
+	assert_int(histories.size()).is_equal(1)
+	if histories.is_empty(): return
+	var dead:=0
+	for round_data:Dictionary in histories[0].get("rounds",[]): dead+=int((round_data.get("defender_casualties",{}) as Dictionary).get("killed",0))
+	var after_population:int=WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total))
+	assert_int(their_population-after_population).is_equal(dead)
+	WorldSimulation.refresh_projections(); WorldSimulation.refresh_views()
+	var remaining:Array=MilitaryCampaign.command_hierarchy.land.enemies(today)
+	assert_dict(Defense.first_contact(at-Vector2(0.1,0),at+Vector2(0.1,0),remaining,{"troops":120})).is_empty()
+	var again:Dictionary=MilitaryCampaign.launch_front_contact(second_id,contact)
+	assert_bool(again.has("error")).is_true()
+	assert_int(MilitaryCampaign.battle_history.filter(func(record:Dictionary)->bool:return String(record.get("formation_id",""))==String(contact.formation_id)).size()).is_equal(1)
+	assert_int(int(WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(after_population)
 
 func test_peak_defense_assigns_bounded_real_bands_and_keeps_a_home_reserve() -> void:
 	_start_world()
@@ -358,7 +384,17 @@ func test_peak_defense_assigns_bounded_real_bands_and_keeps_a_home_reserve() -> 
 	for _day in 6:
 		GameState.elapsed_days+=1; MilitaryCampaign._process_field_army_movement_day()
 	var arrived:=0
+	var covered:=0.0
 	for force:Dictionary in MilitaryCampaign.field_armies:
-		if not Defense.coverage(force).is_empty(): arrived+=1
-	assert_int(arrived).override_failure_message(str(MilitaryCampaign.field_armies.map(func(force:Dictionary)->Dictionary:return {"status":force.get("status",""),"position":force.get("position",{}),"remaining":force.get("distance_remaining_km",0)}))).is_greater(0)
+		var held:=Defense.coverage(force)
+		if not held.is_empty(): arrived+=1; covered+=Defense.length(held)
+	assert_int(arrived).override_failure_message(str(MilitaryCampaign.field_armies.map(func(force:Dictionary)->Dictionary:return {"status":force.get("status",""),"position":force.get("position",{}),"remaining":force.get("distance_remaining_km",0)}))).is_equal(bands.size())
+	var outline:PackedVector2Array=Forts.outline().points
+	var perimeter:=Defense.length(outline)+outline[-1].distance_to(outline[0])
+	assert_float(covered).is_equal_approx(perimeter,0.05)
+	var reserve:=int(MilitaryCampaign.home_army.troops)
+	var forces:=MilitaryCampaign.field_armies.size()
+	Council.order(civ_id,"defend")
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(reserve)
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(forces)
 	assert_int(int(GameState.population_total)).is_equal(people)
