@@ -163,6 +163,9 @@ func _march_to_contact() -> Dictionary:
 	MilitaryCampaign._process_field_army_movement_day()
 	return MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(army.army_id))]
 
+func _contact_diagnostic(army:Dictionary) -> String:
+	return "army=%s\nengagements=%s\nhistory=%s\nfoes=%s" % [str(army),str(MilitaryCampaign.own_engagements.keys()),str(MilitaryCampaign.battle_history.slice(0,2)),str(MilitaryCampaign.command_hierarchy.land.enemies(int(GameState.elapsed_days),false))]
+
 func test_real_council_capital_march_meets_defense_before_the_city() -> void:
 	_start_world()
 	var population:=int(GameState.population_total)
@@ -172,7 +175,7 @@ func test_real_council_capital_march_meets_defense_before_the_city() -> void:
 	assert_float(_point(army).x-origin.x).is_less(3.1)
 	assert_str(String(army.get("destination_id",""))).is_equal(city_id)
 	assert_bool(army.has("city_operation")).is_true()
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	assert_dict(MilitaryCampaign.active_engagement).override_failure_message(_contact_diagnostic(army)).is_not_empty()
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	assert_bool(bool(MilitaryCampaign.active_engagement.threat.get("front_contact",false))).is_true()
 	assert_str(String(MilitaryCampaign.active_engagement.threat.get("formation_id",""))).is_equal("border-guard")
@@ -196,7 +199,7 @@ func test_front_victory_preserves_the_capital_objective_and_can_meet_a_second_in
 	_start_world()
 	var army:=_march_to_contact()
 	if army.is_empty(): return
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	assert_dict(MilitaryCampaign.active_engagement).override_failure_message(_contact_diagnostic(army)).is_not_empty()
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	var initial_id:=int(army.army_id)
 	var before_population:=int(GameState.population_total)
@@ -219,7 +222,7 @@ func test_front_victory_preserves_the_capital_objective_and_can_meet_a_second_in
 	second.erase("border_sector")
 	CivilizationSystem.foreign_formations.append(second)
 	GameState.elapsed_days+=1; MilitaryCampaign._process_field_army_movement_day()
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	assert_dict(MilitaryCampaign.active_engagement).override_failure_message(_contact_diagnostic(army)).is_not_empty()
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	assert_str(String(MilitaryCampaign.active_engagement.threat.get("formation_id",""))).is_equal("inland-guard")
 	assert_float(_point(army).x-origin.x).is_between(3.0,6.1)
@@ -229,7 +232,7 @@ func test_retreat_from_front_cannot_resume_the_capital_march() -> void:
 	_start_world()
 	var army:=_march_to_contact()
 	if army.is_empty(): return
-	assert_dict(MilitaryCampaign.active_engagement).is_not_empty()
+	assert_dict(MilitaryCampaign.active_engagement).override_failure_message(_contact_diagnostic(army)).is_not_empty()
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	MilitaryCampaign.active_engagement.erase("awaiting_player_view")
 	MilitaryCampaign.fight_engagement_day("retreat")
