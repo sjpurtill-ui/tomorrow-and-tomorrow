@@ -93,9 +93,13 @@ func test_reserved_hungry_post_cannot_reappear_over_its_replacement()->void:
 	f._deploy(20000)
 	var original:Dictionary=MilitaryCampaign.field_armies[0]
 	var slot:=int(original.border_sector.index)
+	var before:Dictionary=original.position.duplicate(true)
 	MilitaryCampaign.own_engagements["reserved"]={"home_force_kind":"field_army","home_force_id":int(original.army_id)}
 	original.provision_ratio=0.1
 	f._home(8000);Council.order(String(f.fixture.civ_id),"defend")
+	assert_bool(original.has("border_sector")).is_false()
+	assert_dict(original.position).is_equal(before)
+	assert_bool(MilitaryCampaign.command_hierarchy.battle.engaged(int(original.army_id))).is_true()
 	original.provision_ratio=1.0;MilitaryCampaign.own_engagements.clear()
 	Council.order(String(f.fixture.civ_id),"defend")
 	var same_slot:=MilitaryCampaign.field_armies.filter(func(row:Dictionary)->bool:return row.has("border_sector") and int(row.border_sector.index)==slot and String(row.council.get("phase",""))!="home")
@@ -111,4 +115,18 @@ func test_returning_border_band_accepts_new_explicit_duty()->void:
 	Council.sit(int(GameState.elapsed_days))
 	print("REVIEW2_RETURN_RETASK ",{"destination":band.destination_position,"name":band.destination_name,"council":band.get("council",{})})
 	assert_vector(Defense.point(band.destination_position)).is_equal(destination)
+	assert_bool(band.has("council")).is_false()
+	f._march();Council.sit(int(GameState.elapsed_days))
+	assert_bool(_army(int(band.army_id)).is_empty()).is_false()
+	assert_vector(Defense.point(band.position)).is_equal(destination)
+	assert_bool(band.has("council")).is_false()
+
+func test_returning_band_keeps_new_city_destination_as_well_as_map_posts()->void:
+	f._deploy(20000)
+	var band:Dictionary=MilitaryCampaign.field_armies[0]
+	Council.order(String(f.fixture.civ_id),"leave")
+	var moved:=MilitaryCampaign.move_field_army(int(band.army_id),String(f.fixture.city_id))
+	assert_bool(moved.has("ok")).override_failure_message(str(moved)).is_true()
+	Council.sit(int(GameState.elapsed_days))
+	assert_str(String(band.destination_id)).is_equal(String(f.fixture.city_id))
 	assert_bool(band.has("council")).is_false()

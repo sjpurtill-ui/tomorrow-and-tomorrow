@@ -669,7 +669,7 @@ static func _deploy_border(civ_id:String,today:int)->String:
 	for band:Dictionary in _council_bands():
 		if String(band.council.get("act",""))!="border" or String(band.council.get("phase",""))=="home":continue
 		if not BorderDefense.fit(band,today) or not band.has("border_sector"):
-			_send_home(band)
+			_retire_border_post(band)
 			continue
 		if deployed.is_empty():toward=BorderDefense.point(band.border_sector.get("toward",toward))
 		deployed[int(band.border_sector.get("index",0))]=band
@@ -686,8 +686,7 @@ static func _deploy_border(civ_id:String,today:int)->String:
 		if not stations.has(index):
 			# No dry, known replacement station: coverage ceases even if the
 			# battle reservation means the old army cannot yet turn for home.
-			band.border_sector["relocating"]=true
-			_send_home(band);deployed.erase(index)
+			_retire_border_post(band);deployed.erase(index)
 			continue
 		var station:Dictionary=stations[index].duplicate(true)
 		station["assigned_troops"]=int(band.get("troops",0))
@@ -760,14 +759,30 @@ static func _deploy_border(civ_id:String,today:int)->String:
 static func _release_retasked_border_orders()->void:
 	for band:Dictionary in _council_bands():
 		var act:=String(band.council.get("act",""))
-		if act not in ["border","border_reinforce"] or String(band.council.get("phase",""))=="home":continue
+		if act not in ["border","border_reinforce"]:continue
 		var post:Dictionary=band.get("border_sector",{}) if act=="border" else band.get("border_reinforcement",{})
 		var expected:=_v2(post.get("order_position",post.get("anchor",{})))
+		var returning:=String(band.council.get("phase",""))=="home"
+		if returning:expected=BorderDefense.point(band.council.get("order_position",WorldSimulation.world.player_world_origin))
 		var destination:=_v2(band.get("destination_position",{}))
 		var changed:=destination.is_finite() and expected.is_finite() and destination.distance_to(expected)>BorderDefense.CONTACT_TOLERANCE_KM
+		# Upkeep can bring a retiring band to home or an owned town to rest;
+		# other changed destinations remain explicit orders, even after arrival.
+		var destination_id:=String(band.get("destination_id",""))
+		var rest_place:=String(band.get("rest_place",""))
+		var rest_route:=rest_place!="" and (destination_id==rest_place or (destination_id=="" and String(band.get("location_id",""))==rest_place))
+		if returning and (bool(band.get("resting",false)) or rest_route):changed=false
 		if not changed and not _mc().command_hierarchy.controls_army(int(band.get("army_id",0))) and not band.has("city_operation") and String(band.get("target_formation_id",""))=="":continue
 		band.erase("border_sector");band.erase("border_reinforcement");band.erase("council")
 		if changed:band["post"]={"x":destination.x,"z":destination.y}
+
+## A reserved army cannot move yet, but its retired station cannot be
+## reclaimed over the replacement when its supply or morale recovers.
+static func _retire_border_post(band:Dictionary)->void:
+	band.council["phase"]="home"
+	band.council["order_position"]=(band.get("destination_position",{}) as Dictionary).duplicate(true)
+	band.erase("border_sector")
+	_send_home(band)
 
 static func _border_free(band:Dictionary)->bool:
 	return _mc().upkeep.free_to_see_to(band)
@@ -1027,6 +1042,7 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 		# here; upkeep brings it to its rest, and the stance sends fresh men
 		# after the usual rest.
 		c["phase"]="home"
+		if act in ["border","border_reinforce"]:c["order_position"]=(band.get("destination_position",{}) as Dictionary).duplicate(true)
 		match act:
 			"take": _front(civ_id)["take_failed"]=today
 			"punish": _front(civ_id)["raided"]=today
@@ -1103,7 +1119,10 @@ static func _send_home(band:Dictionary)->bool:
 	var r:Dictionary=mc.return_field_army(army_id)
 	if r.has("error"): return false
 	index=mc._field_army_index(army_id)
-	if index>=0: mc.field_armies[index].erase("court_order")
+	if index>=0:
+		mc.field_armies[index].erase("court_order")
+		var council:Dictionary=mc.field_armies[index].get("council",{})
+		if String(council.get("act","")) in ["border","border_reinforce"]:council["order_position"]=(mc.field_armies[index].get("destination_position",{}) as Dictionary).duplicate(true)
 	return true
 
 ## The army stands above the watch the god keeps (watch_military.gd): the

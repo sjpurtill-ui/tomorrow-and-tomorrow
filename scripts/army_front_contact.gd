@@ -48,6 +48,8 @@ static func launch(host:Node,army_id:int,contact:Dictionary,order:Dictionary={})
 	var army:Dictionary=host.field_armies[index]
 	var at:Vector2=host.command_hierarchy.land.point(army)
 	var id:=String(contact.get("formation_id",""))
+	if host.command_hierarchy.battle.enemy_engaged(id):
+		return {"error":"Holding at the defended line · another army is already fighting there."}
 	var candidates:Array=[]
 	for enemy:Dictionary in enemies(host,army,order):
 		if String(enemy.id)==id:candidates.append(enemy)
