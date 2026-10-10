@@ -1767,6 +1767,7 @@ func _draw_battles(entries:Array,band:String)->void:
 			var priority:=8 if id==hover_id else (6 if biggest.has(id) else (5 if bool(battle.get("ours",false)) else 4))
 			# Set out to the side of the front with a leader line, not on it.
 			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,plate.size.x*0.5+8.0,plate.get_center(),"plate")
+			if String(battle.get("label",""))!="":caption_requests[-1]["attach_rect"]=plate
 		hits.append({"kind":"battle","rect":plate,"centre":plate.get_center(),"contact":contact,"contact_radius":11.0,"battle":battle,"line":String(battle.get("hover",""))})
 
 
@@ -2041,12 +2042,25 @@ func _draw_deployed_front(entry:Dictionary,band:String)->void:
 				hot_points=PackedVector2Array();hot_normals=PackedVector2Array();hot_heat=PackedFloat32Array()
 		if hot_points.size()>=2:_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide,ink,wash)
 	var armies:Array=data.get("armies",[])
-	hits.append({"kind":"front","line":points,"armies":armies,"stale":stale,"deployed":true,"ours":ours,"troops":int(data.get("troops",0)),"age":roundi(age),"name":String(data.get("name",""))})
-	front_chunks.append(bounds.grow(body+4.0))
-	if not wide and age>0.0 and bounds.size.length()>110.0:
+	var combat:=bool(data.get("combat",false))
+	hits.append({"kind":"front","line":points,"armies":armies,"stale":stale,"deployed":not combat,"combat":combat,"battle_id":String(data.get("battle_id","")),"ours":ours,"troops":int(data.get("troops",0)),"age":roundi(age),"name":String(data.get("name",""))})
+	front_chunks.append_array(front_obstacles(points,body+4.0))
+	if not combat and not wide and age>0.0 and bounds.size.length()>110.0:
 		var words:="Line reported %dd ago" % roundi(age) if ours else "Line last seen %dd ago" % roundi(age)
 		var midpoint:=points[n/2]-normal[n/2]*(body+17.0)
 		_request_caption(String(data.id),(entry.points as PackedVector2Array)[n/2],words,ink,3,10.0,midpoint,"plate")
+
+
+## Follow a curved front with narrow chunks; its empty interior is not ink.
+## At most sixteen boxes per front keep placement work bounded.
+static func front_obstacles(points:PackedVector2Array,padding:float)->Array[Rect2]:
+	var boxes:Array[Rect2]=[]
+	var stride:=maxi(1,ceili(float(points.size()-1)/16.0))
+	for start in range(0,points.size()-1,stride):
+		var box:=Rect2(points[start],Vector2.ZERO)
+		for i in range(start+1,mini(points.size(),start+stride+1)):box=box.expand(points[i])
+		boxes.append(box.grow(padding))
+	return boxes
 
 
 func _draw_front(entry:Dictionary,band:String,_step:float)->void:
@@ -2543,29 +2557,47 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 
 ## Where a counter's plate stands: just below its spot, or above, beside,
 ## aslant or further off, whichever first keeps clear of the town cards and
-## the counters already drawn and stays on the chart; when none is clear, the
-## one that covers least.
+## the counters already drawn and stays on the chart. If the local ring is
+## full, search a bounded grid for the nearest free patch of the chart.
 func _counter_spot(at:Vector2,plate:Vector2,scale:float)->Vector2:
 	var gap:=7.0*scale
 	var dx:=plate.x*0.5+gap*1.6; var dy:=plate.y*0.5+gap
 	var tries:=[Vector2(0.0,dy),Vector2(0.0,-dy),Vector2(dx,0.0),Vector2(-dx,0.0),Vector2(dx,dy),Vector2(-dx,dy),Vector2(dx,-dy),Vector2(-dx,-dy),
 		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0)),Vector2(dx*1.6,0.0),Vector2(-dx*1.6,0.0),
 		Vector2(dx*2.2,-dy*2),Vector2(-dx*2.2,-dy*2),Vector2(dx*2.2,dy*2),Vector2(-dx*2.2,dy*2),Vector2(0,-dy*3.5),Vector2(0,dy*3.5)]
-	var best:Vector2=at+(tries[0] as Vector2); var least:=INF
+	var best:=Vector2.INF; var least:=INF
 	for offset:Vector2 in tries:
 		var box:=Rect2(at+offset-plate*0.5,plate).grow(3.0)
 		if counter_bounds.has_area():box.position=box.position.clamp(counter_bounds.position,(counter_bounds.end-box.size).max(counter_bounds.position))
-		var cover:=0.0
-		if counter_bounds.has_area() and not counter_bounds.encloses(box): cover+=1e8
-		for r:Rect2 in counter_fixed:
-			if box.intersects(r):cover+=1e7+box.intersection(r).get_area()*10.0
-		for r:Rect2 in counter_obstacles:
-			if box.intersects(r): cover+=box.intersection(r).get_area()
-		for r:Rect2 in counter_rects:
-			if box.intersects(r): cover+=box.intersection(r).get_area()*2.0
+		var cover:=_counter_cover(box)
 		if cover<=0.0: return box.get_center()
-		if cover<least: least=cover; best=box.get_center()
+		var score:=cover*100.0+at.distance_to(box.get_center())*0.001
+		if score<least: least=score; best=box.get_center()
+	var extent:=plate+Vector2(6,6)
+	var room:=(counter_bounds.size-extent).max(Vector2.ZERO)
+	var columns:=clampi(ceili(room.x/maxf(40.0,plate.x*0.5)),1,24)
+	var rows:=clampi(ceili(room.y/maxf(24.0,plate.y*0.75)),1,18)
+	# Zero-overlap wins; distance chooses the nearest among those free spots.
+	for y in rows+1:
+		for x in columns+1:
+			var box:=Rect2(counter_bounds.position+room*Vector2(float(x)/columns,float(y)/rows),extent)
+			var cover:=_counter_cover(box)
+			if cover==INF:continue
+			var score:=cover*100.0+at.distance_to(box.get_center())*0.001
+			if score<least:least=score;best=box.get_center()
 	return best
+
+
+func _counter_cover(box:Rect2)->float:
+	if counter_bounds.has_area() and not counter_bounds.encloses(box):return INF
+	for rect in counter_fixed:
+		if box.intersects(rect):return INF
+	for rect in counter_rects:
+		if box.intersects(rect):return INF
+	var cover:=0.0
+	for rect in counter_obstacles:
+		if box.intersects(rect):cover+=box.intersection(rect).get_area()
+	return cover
 
 ## The point on a plate's edge nearest a spot (where its tie line meets it).
 static func _edge_toward(rect:Rect2,spot:Vector2)->Vector2:
@@ -2602,6 +2634,7 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	var plate:=Counter.plate_size(scale,data)
 	var clearance:=counter_clearance(data,scale)
 	var centre:=_counter_spot(at,clearance.size,scale)-clearance.get_center()
+	if not centre.is_finite():return
 	# The spot it stands on, and where it stepped aside from.
 	var ink:=INK if ours else THEIRS.darkened(0.25)
 	if bool(entry.get("moved",false)) and (entry.anchor as Vector2).distance_to(at)>3.0:
@@ -2621,7 +2654,7 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		draw_rect(rect.grow(7.0),Color(Counter.GOLD,0.22),false,6.0)
 		draw_rect(rect.grow(3.5),Counter.GOLD,false,2.5)
 	entry["plate_rect"]=rect
-	counter_rects.append(rect)
+	counter_rects.append(Rect2(centre+clearance.position,clearance.size))
 	var reach:=maxf(plate.x,plate.y)*0.5
 	var expanded:=bool(entry.get("selected",false)) or _pointed(entry)
 	if expanded:
@@ -3183,6 +3216,16 @@ func _caption_obstacles()->Dictionary:
 	return {"rects":rects,"pins":pins,"bounds":chart.bounds}
 
 
+## A battle's locality belongs to its readout. If neither adjoining edge is
+## free, the same locality remains in its tooltip instead of a long leader.
+static func near_battle_caption(plate:Rect2,extent:Vector2,bounds:Rect2,blocked:Array[Rect2])->Rect2:
+	var candidates:Array[Vector2]=[]
+	for y in [plate.position.y-extent.y-8.0,plate.end.y+8.0]:
+		for x in [plate.position.x,plate.end.x-extent.x,plate.get_center().x-extent.x*0.5]:
+			candidates.append(Vector2(x,y))
+	return CityLabels.free_spot(candidates,extent,bounds,blocked,[])
+
+
 func _letter_captions(font:Font)->void:
 	if caption_requests.is_empty():
 		placed_captions.clear(); dropped_captions=0; caption_key=0
@@ -3202,15 +3245,23 @@ func _letter_captions(font:Font)->void:
 			caption.anchor=anchors[String(caption.id)]
 	else:
 		var notes:Array=[]
+		var attached:Array=[]
+		var obstacles:=_caption_obstacles()
+		var attached_dropped:=0
 		for request in caption_requests:
 			var entry:Dictionary=request.duplicate()
 			entry.extent=_caption_size(String(request.text),font,String(request.get("style","card")))
+			if entry.has("attach_rect"):
+				var rect:=near_battle_caption(entry.attach_rect,entry.extent,obstacles.bounds,obstacles.rects)
+				if rect.has_area():
+					entry.rect=rect;attached.append(entry);obstacles.rects.append(rect.grow(3.0))
+				else:attached_dropped+=1
+				continue
 			notes.append(entry)
-		var obstacles:=_caption_obstacles()
 		var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
 		caption_memory=result.memory
-		placed_captions=result.notes
-		dropped_captions=(result.dropped as Array).size()
+		placed_captions=attached+result.notes
+		dropped_captions=(result.dropped as Array).size()+attached_dropped
 		caption_key=key
 		caption_placed_msec=now
 	for caption in placed_captions:
@@ -3218,7 +3269,7 @@ func _letter_captions(font:Font)->void:
 		var anchor:Vector2=caption.anchor
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
 		var plate:=String(caption.get("style","card"))=="plate"
-		if end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
+		if not caption.has("attach_rect") and end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
 			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*(0.45 if plate else 0.6)
 			draw_line(start,end,Color(PAPER,0.7),3.0,true)
 			draw_line(start,end,Color(INK,0.65),1.0,true)
@@ -3365,7 +3416,10 @@ func note_content(hit:Dictionary)->Dictionary:
 			var armies:Array=hit.get("armies",[])
 			var lines:Array=[]
 			if String(hit.kind)=="front":
-				if bool(hit.get("deployed",false)):
+				if bool(hit.get("combat",false)):
+					lines.append("Fighting here now.")
+					if not bool(hit.get("ours",true)):return {"kicker":"THEIR FIGHTERS","title":String(hit.get("name","Their force")),"lines":lines,"action":{}}
+				elif bool(hit.get("deployed",false)):
 					var ours:=bool(hit.get("ours",true))
 					var age:=maxi(0,int(hit.get("age",0)))
 					lines.append("%s holding this ground%s." % [EraWords.grouped(int(hit.get("troops",0))) if ours else _cap(ArmyMarks.about(int(hit.get("troops",0))))," when last reported %d days ago" % age if age>0 else ""])
@@ -3379,6 +3433,7 @@ func note_content(hit:Dictionary)->Dictionary:
 				lines.append("Their host is almost ringed by ours; the gap is what they can still escape through.")
 			var content:=_army_content(int(armies[0]) if not armies.is_empty() else 0,stage)
 			content.lines=lines+(content.lines as Array)
+			if bool(hit.get("combat",false)):content.kicker="FIGHTING"
 			if armies.size()>1: content.kicker="FRONT · %d HOSTS" % armies.size()
 			return content
 		"battle":
