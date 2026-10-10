@@ -2874,13 +2874,16 @@ static func with_article(noun:String)->String:
 	return ("an " if noun.substr(0,1).to_lower() in ["a","e","i","o","u"] else "a ")+noun
 
 func _complete_scout_mission(mission:Dictionary,day:int)->void:
+	# An expedition's own odds of coming home (expedition.gd): overdue, given
+	# up, or on to the ordinary homecoming below.
+	if mission.has("expedition") and preload("res://scripts/expedition.gd").resolve(mission,day,self):return
 	var interception:=_resolve_player_scout_interception(mission,day)
 	if bool(interception.get("intercepted",false)) and String(interception.get("fate",""))!="driven_off":
 		_fail_player_scout_mission(mission,interception,day)
 		return
 	# The road is resolved before anything is charted: a party that turned back
 	# only reveals the ground it actually covered.
-	var fate:=_resolve_party_fate(mission,day)
+	var fate:=preload("res://scripts/expedition.gd").homecoming(mission,day,self) if mission.has("expedition") else _resolve_party_fate(mission,day)
 	if bool(interception.get("intercepted",false)):
 		_turn_scout_party_back(mission,0.5,"Armed strangers chased the party off its road; it slipped away and came home early with what it had already seen.")
 	elif String(fate.get("mishap",""))=="turned_back":
@@ -2905,7 +2908,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	# One aggregate capsule trail follows the physical chart. Do not convert its
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
-	_add_revealed_trail(route,18.0,"returned scout trail",day)
+	_add_revealed_trail(route,preload("res://scripts/expedition.gd").REVEAL_KM if mission.has("expedition") else 18.0,"returned expedition" if mission.has("expedition") else "returned scout trail",day)
 	_scouts_read_their_signs(route,day)
 	var contacts:Array[String]=[]
 	var contact_records:Array[Dictionary]=[]

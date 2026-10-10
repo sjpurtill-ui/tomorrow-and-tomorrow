@@ -865,6 +865,17 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Capture only: the expedition planner, "--capture-expedition=<heading>,<km>[,sea]".
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-expedition="):
+			var parts:=argument.get_slice("=",1).split(",")
+			var planner:Node=preload("res://scripts/hud/expedition_planner.gd").open(self)
+			planner.set("heading",parts[0]);planner.set("reach_km",float(parts[1]));planner.set("by_sea",parts.size()>2 and parts[2]=="sea")
+			planner.call("requote")
+			for capture_frame in 30: await get_tree().process_frame
+			var glide_until:=Time.get_ticks_msec()+6000
+			while zoom_target_size>0.0 and Time.get_ticks_msec()<glide_until: await get_tree().process_frame
+			print("CAPTURE EXPEDITION size ",camera.size," ",(planner.get("current") as Dictionary).get("km",-1)," ",(planner.get("current") as Dictionary).get("blocker",""))
 	# Capture only: the map's Border mode (hud/border_map.gd), with the ghost
 	# at "--capture-border-ghost=<bearing deg>,<km>" from the seat (a move of
 	# the first fort with "--capture-border-move") or the first fort's note
