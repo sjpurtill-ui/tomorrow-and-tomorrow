@@ -411,20 +411,30 @@ static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,s
 	return plate.grow(2.0)
 
 
+## The complete cluster footprint. It names the number of battles, rather
+## than passing the first battle's strength off as the whole group's.
+static func cluster_rect(at:Vector2,group:Dictionary)->Rect2:
+	var members:Array=group.get("members",[])
+	var width:=T.font("ui_strong").get_string_size(aggregate_label(members.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+48.0
+	return Rect2(at-Vector2(19,19),Vector2(ceilf(maxf(112.0,width)),38)).grow(2.0)
+
+
 ## Many battles in one place, far out: the weapons with a count beside them.
-static func draw_cluster(canvas:CanvasItem,at:Vector2,group:Dictionary,era:int,font:Font)->Rect2:
+static func draw_cluster(canvas:CanvasItem,at:Vector2,group:Dictionary,era:int,_font:Font)->Rect2:
 	var members:Array=group.members
 	var first:Dictionary=(members[0] as Dictionary).battle
-	var shown:=first.duplicate()
-	shown["progress"]=float(group.get("progress",0.0))
-	var rect:=draw_battle(canvas,at,shown,era,0.9)
-	var badge:=at+Vector2(MARK_RADIUS+6.0,-MARK_RADIUS)
-	canvas.draw_circle(badge,8.0,Color(PAPER,0.96))
-	canvas.draw_arc(badge,8.0,0.0,TAU,18,Color(INK,0.8),1.0,true)
-	var text:=str(members.size())
-	var w:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-	canvas.draw_string(font,badge+Vector2(-w*0.5,4.5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK)
-	return rect.merge(Rect2(badge-Vector2(8,8),Vector2(16,16)))
+	var plate:=cluster_rect(at,group).grow(-2.0)
+	var ink:=OXBLOOD if bool(first.get("ours",false)) else INK
+	canvas.draw_rect(Rect2(plate.position+Vector2(2,3),plate.size),Color(0,0,0,0.18))
+	canvas.draw_rect(plate,Color(PAPER,0.97))
+	canvas.draw_rect(plate,Color(ink,0.9),false,1.2)
+	draw_weapons(canvas,at,12.0,int(first.get("era",era)),ink,PAPER)
+	canvas.draw_string(T.font("ui_strong"),Vector2(at.x+20,plate.position.y+17),aggregate_label(members.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,14,INK)
+	var sides:Dictionary=first.get("sides",{})
+	var colour_a:Color=(sides.get("a",{}) as Dictionary).get("colour",VERDIGRIS)
+	var colour_b:Color=(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD)
+	draw_bar(canvas,Rect2(Vector2(at.x+20,plate.end.y-11),Vector2(plate.end.x-at.x-27,6)),float(group.get("progress",0.0)),colour_a,colour_b)
+	return cluster_rect(at,group)
 
 
 ## Two thin bars under a force's mark: strength (men against full strength)

@@ -165,10 +165,7 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	var budget:float=host._field_army_speed(actual)
 	var mix:=March.mix_of(actual)
 	var current:=start
-	var opponents:Array[Dictionary]=[]
-	var target:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(order.get("target",""))) if order.get("mission","") in ["capture","occupy","raze"] else {}
-	for enemy:Dictionary in enemies(day,false):
-		if hostile(String(enemy.owner)) or String(enemy.owner)==String(target.get("civ_id","")):opponents.append(enemy)
+	var opponents:Array=preload("res://scripts/army_front_contact.gd").enemies(host,actual,order)
 	for waypoint:Dictionary in path:
 		var next:=G.unpack(waypoint)
 		while current.distance_to(next)>.01 and budget>.001:
@@ -187,7 +184,7 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 				actual["command_status"]="At the defended front · the general engages"
 				var index:int=host._field_army_index(int(actual.army_id))
 				if index>=0:host.field_armies[index]=actual
-				if host.has_method("launch_front_contact"):host.call("launch_front_contact",int(actual.army_id),contact)
+				if host.has_method("launch_front_contact"):host.call("launch_front_contact",int(actual.army_id),contact,order)
 				return
 			current=proposed;budget-=distance*weight
 		if budget<=.001:break

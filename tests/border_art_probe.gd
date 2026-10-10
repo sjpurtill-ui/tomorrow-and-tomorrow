@@ -308,6 +308,20 @@ func _interactions() -> void:
 		man.pressed.emit(); await _settle()
 		var watch := Forts.watch()
 		_check(int(watch.garrisons.get(1,0)) == 60 and int(watch.garrisons.get(3,0)) == 60,"Man every fort fills actual garrisons")
+	var allocations:=GameState.population_allocations.duplicate(true)
+	Forts.set_border_share(0.05)
+	for available in [0,40]:
+		GameState.population_allocations["Defense"]=available
+		_refresh();await _settle()
+		var staffing:=_button("ManEveryFort")
+		_check(staffing!=null,"A short watch has a truthful staffing action")
+		if staffing!=null:
+			_check(staffing.disabled==(available==0),"Empty watch cannot perform a staffing action")
+			_check(not staffing.text.begins_with("Man every"),"Insufficient watch never promises every fort will be filled")
+		_check(_all_text(map.get("key_card")).contains("Unwatched line"),"Zero crossing strength is described as unwatched")
+		await _capture("no_watch" if available==0 else "limited_watch","No watch to post" if available==0 else "Only 40 available for the fort garrisons")
+	GameState.population_allocations=allocations
+	_refresh();await _settle()
 	map.call("open_note",1); await _settle()
 	var close_note := _button("CloseFortNote")
 	_check(close_note != null,"Fort note has a direct close control")

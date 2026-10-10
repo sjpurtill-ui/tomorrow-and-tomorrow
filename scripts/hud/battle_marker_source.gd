@@ -257,7 +257,9 @@ static func from_engagement(engagement:Dictionary,id:String,context:Dictionary)-
 	var ours_initial:=int(engagement.get(home_side+"_initial",ours.get("troops",0)))
 	var theirs_initial:=int(engagement.get(enemy_side+"_initial",theirs.get("troops",0)))
 	var a:=_side(ours,ours_initial,"player",String(context.get("player_name","")),OURS_COLOUR)
-	var b:=_side(theirs,theirs_initial,enemy,enemy_name,_colour_for(enemy,context))
+	# This is our battle: the opposing side shares the hostile front's red,
+	# even when that civilization's identity happens to use our blue.
+	var b:=_side(theirs,theirs_initial,enemy,enemy_name,THEIRS_COLOUR)
 	var named:=String(threat.get("target_region_name",""))
 	var rounds:Variant=engagement.get("rounds",[])
 	return {"id":id,"kind":"battle","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":progress_of(engagement,home_side),
@@ -305,7 +307,7 @@ static func from_siege(siege:Dictionary,context:Dictionary)->Dictionary:
 	var name:=String(threat.get("target_region_name",""))
 	var place:=ArmyMarks.place(name) if _usable_name(name) else (String(context.get("home_name","home")) if not offensive else place_name(pos,"",context).trim_prefix("Near "))
 	var a:={"civ_id":"player","name":String(context.get("player_name","")),"colour":OURS_COLOUR,"troops":besiegers,"initial":besiegers,"morale":MORALE_FULL}
-	var b:={"civ_id":rival,"name":_name_for(rival,String(threat.get("source_name","")),context),"colour":_colour_for(rival,context),"troops":their_men,"initial":their_men,"morale":MORALE_FULL}
+	var b:={"civ_id":rival,"name":_name_for(rival,String(threat.get("source_name","")),context),"colour":THEIRS_COLOUR,"troops":their_men,"initial":their_men,"morale":MORALE_FULL}
 	return {"id":"siege:%s" % String(siege.get("id","")),"kind":"siege","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":pressure if offensive else -pressure,
 		"status":"besieging" if offensive else "besieged","day":maxi(1,int(siege.get("days",0))),"place_name":place,"ours":true,"army_id":int(siege.get("army_id",0)),
 		"seed":0,"rounds":0,"commanded":false,"skirmish":false,"age_days":0,"observed_day":int(context.get("today",0)),"siege_id":String(siege.get("id",""))}

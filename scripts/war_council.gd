@@ -225,6 +225,7 @@ static func day(today:int)->void:
 ## One sitting: every people we fight or hold a stance toward, and every band
 ## of ours out on the council's errand.
 static func sit(today:int)->void:
+	_release_retasked_border_orders()
 	var s:=state()
 	s["last"]=today
 	_old_orders_once(s)
@@ -422,6 +423,7 @@ static func call_raid(civ_id:String,cause:String,ref:String)->void:
 # --------------------------------------------------------------------------
 
 static func _act(civ_id:String,stance:String,today:int,options:Dictionary)->Dictionary:
+	_release_retasked_border_orders()
 	_see_them_coming(civ_id,today)
 	var done:Dictionary
 	match stance:
@@ -639,7 +641,7 @@ static func _defend(civ_id:String,today:int,options:Dictionary)->Dictionary:
 	var deployed:=_deploy_border(civ_id,today)
 	if deployed!="": parts.append(deployed)
 	# Live while a band of ours is out, or theirs is in sight.
-	live=live or not _band_on(civ_id,["reinforce","intercept","border"]).is_empty() or not their_bands(civ_id).is_empty()
+	live=live or not _band_on(civ_id,["reinforce","intercept","border","border_reinforce"]).is_empty() or not their_bands(civ_id).is_empty()
 	var home:=int(_mc().home_army.get("troops",0))
 	var held:=_held_words(civ_id)
 	if parts.is_empty():
@@ -651,27 +653,8 @@ static func _defend(civ_id:String,today:int,options:Dictionary)->Dictionary:
 ## every rival. All detachments come from MilitaryCampaign's actual reserve.
 static func _deploy_border(civ_id:String,today:int)->String:
 	var mc:=_mc()
-	var deployed:Array[Dictionary]=[]
-	var occupied:={};var deployed_men:=0;var holding:=0
+	var deployed:={}
 	var organization:=BorderDefense.organization(WorldSimulation.state.known_discoveries)
-	for band:Dictionary in _council_bands():
-		if String((band.council as Dictionary).get("act",""))!="border" or String(band.council.get("phase",""))=="home":continue
-		if not BorderDefense.fit(band,today) or not band.has("border_sector"):
-			_send_home(band)
-			continue
-		band.border_sector["organization"]=organization
-		deployed.append(band)
-		occupied[int(band.border_sector.get("index",0))]=true
-		deployed_men+=int(band.get("troops",0))
-		if not BorderDefense.coverage(band,today).is_empty():holding+=1
-	# Existing posts keep their exact sectors through ordinary council turns.
-	# Losses shorten their coverage; a lost sector is not redrawn elsewhere.
-	var standing:=_border_words(today)
-	if occupied.size()>=BorderDefense.MAX_SECTORS:return standing
-	var forces:=_forces()
-	var keep:=maxi(int(forces.keep),ceili(float(int(forces.home)+deployed_men)*WATCH_SHARE))
-	var available:=maxi(0,int(forces.home)-keep)
-	if available<MIN_BAND:return standing if not deployed.is_empty() else "The home reserve stays. No free band is ready to take a border station."
 	var shape:=FortBorder.outline()
 	var outline:PackedVector2Array=shape.points
 	if outline.size()<3:return "The general has no border line on which to place a band."
@@ -681,51 +664,139 @@ static func _deploy_border(civ_id:String,today:int)->String:
 	var towns:=known_towns(civ_id)
 	if not coming.is_empty():toward=coming[0].position
 	elif not towns.is_empty():toward=_v2(towns[0].position)
-	if not deployed.is_empty():
-		var previous:Dictionary=deployed[0].border_sector
-		outline=BorderDefense.points(previous.get("outline",outline))
-		toward=BorderDefense.point(previous.get("toward",toward))
-	var slots:Array[int]=[]
+	# Orientation stays stable; the actual political outline must not. Forts
+	# can extend or lose ground while these same real armies are in the field.
+	for band:Dictionary in _council_bands():
+		if String(band.council.get("act",""))!="border" or String(band.council.get("phase",""))=="home":continue
+		if not BorderDefense.fit(band,today) or not band.has("border_sector"):
+			_send_home(band)
+			continue
+		if deployed.is_empty():toward=BorderDefense.point(band.border_sector.get("toward",toward))
+		deployed[int(band.border_sector.get("index",0))]=band
+	var stations:={}
 	for index in BorderDefense.MAX_SECTORS:
-		if not occupied.has(index):slots.append(index)
-	var count:=clampi(available/100,1,slots.size())
-	count=mini(count,maxi(0,int(mc.field_army_capacity())-(mc.field_armies as Array).size()))
-	if count<=0:return "Every command is already assigned; the general waits for a free band."
-	var sent:=0;var posts:=0;var blocked:=""
-	for slot in count:
-		var index:int=slots[slot]
 		var line:=BorderDefense.sector(outline,index,BorderDefense.MAX_SECTORS,toward)
 		var world:=WorldSimulation.world
 		if world.scout_land_authority.is_valid():line=BorderDefense.land_span(line,Callable(world,"_scout_land_at"))
 		var anchor:=BorderDefense.at(line,BorderDefense.length(line)*0.5)
-		if not anchor.is_finite():continue
-		if not world._position_is_revealed(anchor) or (world.scout_land_authority.is_valid() and not world._scout_land_at(anchor)):
-			blocked="Some stations wait for a charted land approach."
+		if not anchor.is_finite() or not world._position_is_revealed(anchor):continue
+		stations[index]={"owner":WorldSimulation.actor_id,"civ_id":civ_id,"points":BorderDefense.packed(line),"anchor":{"x":anchor.x,"z":anchor.y},"day":today,"organization":organization,"index":index,"outline":BorderDefense.packed(outline),"toward":{"x":toward.x,"z":toward.y}}
+	for index in deployed.keys():
+		var band:Dictionary=deployed[index]
+		if not stations.has(index):
+			# No dry, known replacement station: coverage ceases even if the
+			# battle reservation means the old army cannot yet turn for home.
+			band.border_sector["relocating"]=true
+			_send_home(band);deployed.erase(index)
 			continue
-		var men:=available/count+(1 if slot<available%count else 0)
+		var station:Dictionary=stations[index].duplicate(true)
+		station["assigned_troops"]=int(band.get("troops",0))
+		station["order_position"]=band.border_sector.get("order_position",band.border_sector.anchor)
+		band["border_sector"]=station
+		_station_border_band(band,station,"Border station %d" % (int(index)+1))
+	# Transfers retain their people and equipment on the road. Only the
+	# existing merge ledger may combine them, after both bands have arrived.
+	var pending:={}
+	for band:Dictionary in _council_bands():
+		if String(band.council.get("act",""))!="border_reinforce" or String(band.council.get("phase",""))=="home":continue
+		var transfer:Dictionary=band.get("border_reinforcement",{})
+		var target:=_army(int(transfer.get("army_id",0)))
+		if target.is_empty() or not target.has("border_sector") or String((target.get("council",{}) as Dictionary).get("phase",""))=="home" or not BorderDefense.fit(band,today):
+			_send_home(band);continue
+		transfer["anchor"]=target.border_sector.anchor.duplicate(true)
+		_station_border_band(band,transfer,"Reinforcing the border")
+		if _border_free(band) and _border_free(target) and String(band.get("status",""))=="stationed" and String(target.get("status",""))=="stationed" and not BorderDefense.coverage(target,today).is_empty() and _v2(band.position).distance_to(_v2(target.position))<=BorderDefense.ARRIVAL_KM:
+			if mc.upkeep.merge(int(band.army_id),int(target.army_id),today):continue
+		pending[int(target.army_id)]=int(pending.get(int(target.army_id),0))+int(band.get("troops",0))
+	var forces:=_forces()
+	var out_men:=0
+	for band:Dictionary in deployed.values():out_men+=int(band.get("troops",0))
+	for n in pending.values():out_men+=int(n)
+	var keep:=maxi(int(forces.keep),ceili(float(int(forces.home)+out_men)*WATCH_SHARE))
+	var available:=maxi(0,int(forces.home)-keep)
+	if available<MIN_BAND or stations.is_empty():return _border_words(today)
+	# Add vacant stations first, then reinforce short sectors. Keeping at
+	# most one real transfer per sector bounds commands at twice the posts.
+	var slots:Array[int]=[]
+	for index in stations:
+		if not deployed.has(index):slots.append(int(index))
+	var count:=mini(slots.size(),maxi(1,available/100))
+	var target_size:=maxi(MIN_BAND,(out_men+available)/maxi(1,deployed.size()+count))
+	for slot in count:
+		if available<MIN_BAND:break
+		var index:=slots[slot]
+		var men:=mini(available,target_size)
 		var made:Dictionary=mc.create_field_army(men,"Border band %d" % (index+1))
-		if made.has("error"):blocked=String(made.error);continue
+		if made.has("error"):break
 		var id:=int(made.army.army_id)
+		var station:Dictionary=stations[index].duplicate(true)
+		var anchor:=_v2(station.anchor)
 		var moved:Dictionary=mc.move_field_army_to_position(id,anchor.x,anchor.y,"Border station %d" % (index+1))
-		if moved.has("error"):
-			mc.disband_field_army(id);blocked=String(moved.error);continue
+		if moved.has("error"):mc.disband_field_army(id);continue
 		_tag(id,civ_id,"border",{"name":"border station %d" % (index+1)},{},true)
 		var band:=_army(id)
-		band["border_sector"]={"owner":WorldSimulation.actor_id,"civ_id":civ_id,"points":BorderDefense.packed(line),"anchor":{"x":anchor.x,"z":anchor.y},"assigned_troops":int(band.troops),"day":today,"organization":organization,"index":index,"outline":BorderDefense.packed(outline),"toward":{"x":toward.x,"z":toward.y}}
-		band["command_status"]="Marching to the border station"
-		sent+=int(band.troops);posts+=1
-	if posts==0:return "No border band could set out. "+blocked
-	return "%d march to %d border stations. %s%s" % [sent,posts,_border_words(today),(" "+blocked) if blocked!="" else ""]
+		station["assigned_troops"]=int(band.troops);station["order_position"]=station.anchor.duplicate(true)
+		band["border_sector"]=station;band["command_status"]="Marching to the border station"
+		deployed[index]=band;available-=int(band.troops)
+	for band:Dictionary in deployed.values():
+		var target_id:=int(band.army_id)
+		if available<MIN_BAND:break
+		if pending.has(target_id) or not _border_free(band):continue
+		var men:=mini(available,maxi(0,target_size-int(band.get("troops",0))))
+		if men<MIN_BAND:continue
+		var made:Dictionary=mc.create_field_army(men,"Border reinforcements")
+		if made.has("error"):break
+		var id:=int(made.army.army_id)
+		var anchor:=_v2(band.border_sector.anchor)
+		var moved:Dictionary=mc.move_field_army_to_position(id,anchor.x,anchor.y,"Reinforcing the border")
+		if moved.has("error"):mc.disband_field_army(id);continue
+		_tag(id,String(band.council.civ),"border_reinforce",{"name":"the border station"},{},true)
+		_army(id)["border_reinforcement"]={"army_id":target_id,"anchor":band.border_sector.anchor.duplicate(true),"order_position":band.border_sector.anchor.duplicate(true)}
+		available-=int(made.army.troops)
+	return _border_words(today)
+
+## An explicit newer order owns the band from now on. Detect it before any
+## council recall or command-chain cancellation, including after save/load.
+static func _release_retasked_border_orders()->void:
+	for band:Dictionary in _council_bands():
+		var act:=String(band.council.get("act",""))
+		if act not in ["border","border_reinforce"] or String(band.council.get("phase",""))=="home":continue
+		var post:Dictionary=band.get("border_sector",{}) if act=="border" else band.get("border_reinforcement",{})
+		var expected:=_v2(post.get("order_position",post.get("anchor",{})))
+		var destination:=_v2(band.get("destination_position",{}))
+		var changed:=destination.is_finite() and expected.is_finite() and destination.distance_to(expected)>BorderDefense.CONTACT_TOLERANCE_KM
+		if not changed and not _mc().command_hierarchy.controls_army(int(band.get("army_id",0))) and not band.has("city_operation") and String(band.get("target_formation_id",""))=="":continue
+		band.erase("border_sector");band.erase("border_reinforcement");band.erase("council")
+		if changed:band["post"]={"x":destination.x,"z":destination.y}
+
+static func _border_free(band:Dictionary)->bool:
+	return _mc().upkeep.free_to_see_to(band)
+
+static func _station_border_band(band:Dictionary,station:Dictionary,label:String)->void:
+	var anchor:=_v2(station.anchor)
+	var here:=_v2(band.get("position",{}))
+	var goal:=_v2(band.get("destination_position",{}))
+	if String(band.get("status",""))=="moving" and goal.distance_to(anchor)<=BorderDefense.CONTACT_TOLERANCE_KM:return
+	if String(band.get("status",""))=="stationed" and here.distance_to(anchor)<=BorderDefense.ARRIVAL_KM:
+		station.erase("relocating");return
+	station["relocating"]=true
+	if not _border_free(band):return
+	var moved:Dictionary=_mc().move_field_army_to_position(int(band.army_id),anchor.x,anchor.y,label)
+	if moved.has("error"):return
+	station["order_position"]=station.anchor.duplicate(true)
+	station.erase("relocating")
+	band["command_status"]="Marching to the border station"
 
 static func _border_words(today:int)->String:
-	var held:=0.0;var assigned:=0.0;var men:=0;var marching:=0
+	var held:=0.0;var assigned:=0.0;var men:=0;var marching:=0;var reinforcements:=0
 	for band:Dictionary in _council_bands():
+		if band.has("border_reinforcement") and String(band.council.get("phase",""))!="home":reinforcements+=int(band.get("troops",0))
 		if not band.has("border_sector") or String(band.council.get("phase",""))=="home":continue
 		held+=BorderDefense.length(BorderDefense.coverage(band,today))
 		assigned+=BorderDefense.length(BorderDefense.points(band.border_sector.get("points",[])))
 		men+=int(band.get("troops",0))
 		if String(band.get("status",""))=="moving":marching+=1
-	return "%d deployed; %.1f of %.1f assigned border km held. %d bands taking station; %d remain at home." % [men,held,assigned,marching,int(_mc().home_army.get("troops",0))]
+	return "%d deployed; %.1f of %.1f assigned border km held. %d bands taking station; %d reinforcing; %d remain at home." % [men,held,assigned,marching,reinforcements,int(_mc().home_army.get("troops",0))]
 
 ## Towns we hold of theirs whose garrisons are short: men march from home.
 static func _man_garrisons(civ_id:String)->String:
@@ -972,6 +1043,8 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 	if act in ["take","punish"] and String(band.get("movement_block_reason",""))=="Fighting through the defended line" and not (band.get("city_operation",{}) as Dictionary).is_empty():
 		return _record(civ_id,"act","%s continues the approach to %s." % [who,name],ids)
 	match act:
+		"border_reinforce":
+			return _record(civ_id,"act","%s waits to join the border band where both stand." % who,ids)
 		"border":
 			if not _fit(band) or Supply.fed(band)<Supply.STARVING_BELOW:
 				_send_home(band)
@@ -1021,6 +1094,7 @@ static func _send_home(band:Dictionary)->bool:
 	var live:Dictionary=mc.field_armies[index]
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
 	live.erase("border_sector")
+	live.erase("border_reinforcement")
 	if live.get("council") is Dictionary: (live.council as Dictionary)["phase"]="home"
 	# Resting: the war leader's upkeep brings it to its rest (band_upkeep.gd).
 	if bool(live.get("resting",false)): return true

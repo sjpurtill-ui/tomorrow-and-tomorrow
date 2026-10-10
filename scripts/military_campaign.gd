@@ -1564,8 +1564,8 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 	return _start_map_engagement(army_id,availability,incident)
 
 
-func launch_front_contact(army_id:int,contact:Dictionary)->Dictionary:
-	return FrontContact.launch(self,army_id,contact)
+func launch_front_contact(army_id:int,contact:Dictionary,order:Dictionary={})->Dictionary:
+	return FrontContact.launch(self,army_id,contact,order)
 
 
 func _start_map_engagement(army_id:int,availability:Dictionary,incident:Dictionary)->Dictionary:
@@ -1580,13 +1580,15 @@ func _start_map_engagement(army_id:int,availability:Dictionary,incident:Dictiona
 	active_threat["front_contact"]=bool(incident.get("front_contact",false))
 	active_threat["formation_id"]=formation_id
 	var index:=_field_army_index(army_id)
-	if index>=0:
-		field_armies[index].erase("target_formation_id")
-		field_armies[index].erase("order_kind")
 	var engagement:=begin_threat_engagement(false)
 	if engagement.has("error"):
 		_restore_waiting_threat(waiting)
 		return engagement
+	# An intervening front does not complete the general's interception of
+	# a different army further along the road. Failed starts consume no order.
+	if index>=0 and (not bool(incident.get("front_contact",false)) or String(field_armies[index].get("target_formation_id",""))==formation_id):
+		field_armies[index].erase("target_formation_id")
+		field_armies[index].erase("order_kind")
 	active_engagement.threat["war_id"]=WorldSimulation.world.record_player_hostile_order(String(incident.source_civ_id),"","A player army attacked a foreign field force.")
 	if bool(active_engagement.get("overrun_expected",false)):
 		var settled:=settle_overrun_now()
