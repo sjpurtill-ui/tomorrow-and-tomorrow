@@ -224,6 +224,7 @@ func _ready()->void:
 
 
 func _process(delta:float)->void:
+	if not is_visible_in_tree():return
 	collect_elapsed+=delta
 	if collect_elapsed>=COLLECT_EVERY and is_instance_valid(terrain):
 		collect_elapsed=0.0
@@ -256,8 +257,9 @@ func _process(delta:float)->void:
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
 		view.append(ease_frame)
 	# The fighting works on its own small canvas, only while it is on screen.
-	anim_clock+=delta
-	if pulse_layer!=null and pulse_live and not Motion.reduced():
+	var war_paused:=is_instance_valid(terrain) and terrain.get("game_speed")!=null and float(terrain.get("game_speed"))<=0.0
+	if not war_paused:anim_clock+=delta
+	if pulse_layer!=null and pulse_live and not Motion.reduced() and not war_paused:
 		pulse_elapsed+=delta
 		if pulse_elapsed>=1.0/PULSE_FPS:
 			pulse_elapsed=0.0
@@ -312,6 +314,12 @@ func retarget_fronts(fronts:Array,immediate:bool=false)->void:
 		var best_distance:=sigma*2.5
 		for index in live_fronts.size():
 			if claimed.has(index) or float(live_fronts[index].target_alpha)<=0.0: continue
+			var old:Dictionary=live_fronts[index].get("data",{})
+			# A deployed sector has a real owner and identity. Never morph a
+			# neighbouring sector across an opened gap to replace it.
+			if bool(front.get("deployed",false)) or bool(old.get("deployed",false)):
+				if String(front.get("id",""))=="" or String(front.get("id",""))!=String(old.get("id","")):continue
+				best=index;break
 			var d:=(live_fronts[index].centre as Vector2).distance_to(centre)
 			if d<best_distance: best_distance=d; best=index
 		var entry:Dictionary
@@ -336,6 +344,8 @@ func retarget_fronts(fronts:Array,immediate:bool=false)->void:
 	for index in live_fronts.size():
 		if claimed.has(index): continue
 		var gone:Dictionary=live_fronts[index]
+		# Lost coverage opens a gap immediately, not a fading false defence.
+		if bool((gone.get("data",{}) as Dictionary).get("deployed",false)):continue
 		gone.target_alpha=0.0
 		if immediate: continue
 		next_live.append(gone)
@@ -599,6 +609,10 @@ func collect()->Dictionary:
 		largest=maxi(largest,strength); theatre+=strength
 		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
 			"report_age":0 if live or at_home or near_hold else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+		# Only the displayed report knows where this force actually holds.
+		# Missing old reports must never acquire current, unseen coverage.
+		for field:String in ["border_front","defense_points"]:
+			if shown.has(field):entry[field]=shown[field].duplicate(true)
 		# The general's chosen land road (round bays and inlets), not a straight line.
 		if objective.is_finite() and String(shown.get("status",army.get("status","")))=="moving":
 			var road:=_road_ahead(army,pos)
@@ -658,6 +672,8 @@ func collect()->Dictionary:
 				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false)),"road":_road_of(sighting.get("road_ahead",[])),
 				"will_low":float(sighting.get("readiness_estimate_low",-1.0)) if identified else -1.0,"will_high":float(sighting.get("readiness_estimate_high",-1.0)) if identified else -1.0}
 			var hostile:=bool(sighting.get("hostile",false)) and not bool(entry.scout)
+			for field:String in ["border_front","defense_points"]:
+				if sighting.has(field):entry[field]=sighting[field].duplicate(true)
 			if hostile: enemy.append(entry); listed[sighting_id]=true
 			elif list_name=="visible": strangers.append(entry); listed[sighting_id]=true
 	enemy.append_array(_campaign_sightings(today))
@@ -697,57 +713,18 @@ func collect()->Dictionary:
 	return inputs
 
 
-## The lines where our land meets the land of a people we are at war or in
-## hot feud with (nation_borders.gd publishes them as the map draws them),
-## with which side is whose: [{civ, points, ours_at, theirs_at}]. No shared
-## line, no border front: their land and ours do not touch.
-static func _border_inputs(home:Vector2)->Array:
+## Political boundaries with a hostile neighbour, published by the map.
+## These quiet chart lines make no claim about troops or defended ground.
+static func _border_inputs(_home:Vector2)->Array:
 	var out:Array=[]
 	var hot:Dictionary=NationBorders.hot_enemies()
 	if hot.is_empty() or NationBorders.published.is_empty(): return out
-	var ours_at:Array=[home]
-	var intel:Variant=CivilizationSystem.city_intelligence
-	if intel!=null:
-		for city:Dictionary in intel.known_cities("player","player",false):
-			var at:=_v2(city.get("position",{}))
-			if at.is_finite(): ours_at.append(at)
-	# Our towns as the borders read them (the settlement network), each with
-	# its share of the home guard (civilization_combat guard_ledger).
-	var our_towns:Array=[]
-	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").guard_ledger(MilitaryCampaign)
-	for settlement:Dictionary in WorldSimulation.settlements.settlement_network_snapshot().get("settlements",[]):
-		if not settlement.get("position") is Vector2 or String(settlement.get("occupied_by","")) not in ["","human","player"]: continue
-		our_towns.append({"at":settlement.position,"name":String(settlement.get("name","")),"men":int((guards.get(String(settlement.get("id","")),{}) as Dictionary).get("watch",0))})
-		ours_at.append(settlement.position)
-	var council:GDScript=load("res://scripts/war_council.gd")
-	var Estimate:GDScript=load("res://scripts/court_war_orders.gd")
-	for civ_id:String in hot:
-		var theirs_at:Array=[]
-		var their_towns:Array=[]
-		for town:Dictionary in council.call("known_towns",civ_id):
-			var at:=_v2(town.get("position",{}))
-			if not at.is_finite(): continue
-			theirs_at.append(at)
-			var counted:Dictionary=Estimate.call("enemy_estimate",String(town.get("city_id","")))
-			var men:=roundi(float(counted.get("mid",-1.0)))
-			their_towns.append({"at":at,"men":maxi(0,men),"known":bool(counted.get("known",false)) and men>=0})
-		var lines:Array=[]
-		for line:Dictionary in NationBorders.published:
-			var owners:Array=line.owners
-			if not ((owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id)): continue
-			if (line.points as PackedVector2Array).size()>=2: lines.append(line.points)
-		# The border with them may be drawn in several pieces: each town's men
-		# stand on the piece nearest it, once (never the whole garrison again
-		# on every piece). Our towns still split each piece into stretches.
-		for index in lines.size():
-			var points:PackedVector2Array=lines[index]
-			var mine:Array=our_towns.map(func(t:Dictionary)->Dictionary:
-				var kept:=t.duplicate()
-				if _nearest_line(lines,t.at)!=index: kept.men=0
-				return kept)
-			var facing:Array=their_towns.filter(func(t:Dictionary)->bool: return _nearest_line(lines,t.at)==index)
-			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"our_towns":mine,"their_towns":facing,"kind":String(hot[civ_id])})
-			if out.size()>=Model.MAX_FRONTS: return out
+	for line:Dictionary in NationBorders.published:
+		var owners:Array=line.owners
+		var civ_id:=String(owners[1]) if owners[0]=="player" else (String(owners[0]) if owners[1]=="player" else "")
+		if civ_id=="" or not hot.has(civ_id) or (line.points as PackedVector2Array).size()<2:continue
+		out.append({"civ":civ_id,"points":line.points,"kind":String(hot[civ_id])})
+		if out.size()>=Model.MAX_FRONTS:return out
 	return out
 
 
@@ -1180,7 +1157,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 	var enemy:Array=(inputs.get("enemy",[]) as Array).slice(0,Model.MAX_ENEMY)
 	var home:Vector2=inputs.get("home",Vector2.ZERO)
 	var today:=int(inputs.get("today",0))
-	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"battles":[],"fought":{},"era":1,"sigma":1.0}
+	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"political":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"battles":[],"fought":{},"era":1,"sigma":1.0}
 	var fronts:Array=[]
 	# The ground we hold is ours to the front as well as the hosts in the
 	# field: a garrison in a taken town pushes the line past the town.
@@ -1212,30 +1189,26 @@ static func compose(inputs:Dictionary)->Dictionary:
 			front["holders"]=holders
 		out.fronts=fronts
 		out.pockets=Model.pockets(fronts,holding,facing)
-	# At war with a people whose land meets ours, the front is that meeting
-	# line, worked by the forces near it (war_front_model border_front); a
-	# front derived from the forces alone that runs along it gives way to it.
+	# Political limits are context, not a deployed army. In particular a
+	# town's home guard is not painted out along its nearest national edge.
 	var borders:Array=(inputs.get("borders",[]) as Array).slice(0,Model.MAX_FRONTS)
-	if not borders.is_empty():
-		var border_fronts:Array=[]
-		for b:Dictionary in borders:
-			var front:=Model.border_front(b.points,b.get("ours_at",[]),b.get("theirs_at",[]),holding,facing,String(b.civ),float(out.sigma) if mode in ["front","theatre"] else 0.0)
-			if front.is_empty(): continue
-			front["our_towns"]=b.get("our_towns",[]); front["their_towns"]=b.get("their_towns",[])
-			border_fronts.append(front)
-		if not border_fronts.is_empty():
-			var reach:=float(border_fronts[0].sigma)*0.6
-			fronts=fronts.filter(func(d:Dictionary)->bool: return not border_fronts.any(func(b:Dictionary)->bool: return Model.along_border(d,b,reach)))
-			for front:Dictionary in border_fronts:
-				var holders:Array=holding.filter(func(h:Dictionary)->bool: return not bool(h.get("garrison",false)) and Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
-				front["armies"]=holders.map(func(h:Dictionary)->int: return int(h.get("army_id",0)))
-				front["holders"]=holders
-				# Who holds each stretch of it against whom (HOI4's front allocation).
-				var near:=func(list:Array)->Array: return list.filter(func(h:Dictionary)->bool: return Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
-				front["sectors"]=Model.border_sectors(front.points,front.our_towns,front.their_towns,near.call(holders),near.call(facing))
-			fronts=border_fronts+fronts
-			out.fronts=fronts
-			if not mode in ["front","theatre"]: out.sigma=float(border_fronts[0].sigma)
+	for border:Dictionary in borders:
+		var edge:PackedVector2Array=border.get("points",PackedVector2Array())
+		if edge.size()>=2:out.political.append({"points":Model.resample(edge,Model.BORDER_POINTS),"civ":String(border.get("civ",""))})
+	var deployments:=Model.deployed_fronts(friendly,enemy,home)
+	var reported_deployment:=friendly.any(func(force:Dictionary)->bool:return Model.has_deployment(force)) or enemy.any(func(force:Dictionary)->bool:return Model.has_deployment(force))
+	if reported_deployment:
+		# Observed coverage already says which ground the defenders hold.
+		# Remove inferred contact lines that would paint over an actual gap
+		# between those defenders. Mobile hosts still form inland contacts.
+		fronts=fronts.filter(func(front:Dictionary)->bool:
+			var holders:Array=front.get("holders",[])
+			return holders.any(func(force:Dictionary)->bool:return not Model.has_deployment(force)))
+		out.pockets=Model.pockets(fronts,holding,facing)
+		fronts.append_array(deployments)
+		out.fronts=fronts
+		if float(out.sigma)<=1.0:
+			for deployed:Dictionary in deployments:out.sigma=maxf(float(out.sigma),float(deployed.sigma))
 	if mode=="host":
 		var reach:=6.0
 		for f in holding:
@@ -1344,7 +1317,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 	out.battles=BattleMarks.place((inputs.get("battles",[]) as Array).slice(0,Model.MAX_BATTLES),lines,float(out.sigma))
 	for index in lines.size():
 		var line:Dictionary=lines[index]
-		line["heat"]=BattleMarks.heat(line.points,out.battles,index,float(out.sigma))
+		line["heat"]=_coverage_heat(line,inputs.get("battles",[])) if bool(line.get("deployed",false)) else BattleMarks.heat(line.points,out.battles,index,float(out.sigma))
 	var fought:Dictionary={}
 	for battle in out.battles:
 		if not bool(battle.get("ours",false)): continue
@@ -1380,6 +1353,24 @@ static func compose(inputs:Dictionary)->Dictionary:
 	out.echelons=(inputs.get("echelons",[]) as Array).slice(0,MAX_ECHELONS)
 	out.marks=_marks(inputs,friendly,enemy,out)
 	return out
+
+
+## Both sides of an actual contact can heat; a stale observation cannot.
+## Use recorded battle positions, never the chart's optional label snap.
+static func _coverage_heat(front:Dictionary,battles:Array)->PackedFloat32Array:
+	var points:PackedVector2Array=front.points
+	var heat:=PackedFloat32Array();heat.resize(points.size())
+	var ages:PackedFloat32Array=front.get("age",PackedFloat32Array())
+	if bool(front.get("stale",false)) or (not ages.is_empty() and ages[0]>0.0):return heat
+	var radius:=maxf(0.08,float(front.get("sigma",1.0))*0.6)
+	for battle:Dictionary in battles.slice(0,Model.MAX_BATTLES):
+		if bool(battle.get("skirmish",false)) or int(battle.get("age_days",0))>0 or String(battle.get("kind","battle"))=="siege":continue
+		if String(battle.get("status","fighting"))!="fighting":continue
+		var at:Vector2=battle.get("pos",Vector2(float(battle.get("x",0.0)),float(battle.get("z",0.0))))
+		for i in points.size():
+			var distance:=points[i].distance_to(at)/radius
+			if distance<=3.0:heat[i]=maxf(heat[i],exp(-distance*distance))
+	return heat
 
 
 ## The forces themselves: ours from the generals' own reports, theirs only
@@ -1464,7 +1455,7 @@ static func _cap(text:String)->String:
 ## Primitive counts, for probes and tests (bounded regardless of armies).
 static func primitive_count(built:Dictionary)->int:
 	var total:=0
-	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings","battles"]: total+=(built.get(key,[]) as Array).size()
+	for key in ["fronts","political","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings","battles"]: total+=(built.get(key,[]) as Array).size()
 	return total
 
 
@@ -1533,6 +1524,7 @@ func _draw()->void:
 	if pulse_layer!=null: pulse_layer.queue_redraw()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
+	_draw_political_edges(band)
 	if band=="ground":
 		# Up close only the forces' small paper cards stay, placed clear of
 		# the town cards; the front and its ink stand aside for the ground,
@@ -1540,7 +1532,7 @@ func _draw()->void:
 		var step_near:=_world_per_px(_centre_of_scene())*14.0
 		for index in live_fronts.size():
 			var entry:Dictionary=live_fronts[index]
-			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("border",false)): _draw_front(entry,"local",step_near)
+			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("deployed",false)): _draw_front(entry,"local",step_near)
 		_draw_marks(band,[],[])
 		_letter_captions(T.voice_font(true))
 		last_draw_usec=Time.get_ticks_usec()-started
@@ -1617,7 +1609,7 @@ func _draw()->void:
 	if not wide:
 		for entry in live_fronts:
 			var data:Dictionary=entry.data
-			if not bool(data.get("stale",false)) or float(entry.target_alpha)<=0.0: continue
+			if bool(data.get("deployed",false)) or not bool(data.get("stale",false)) or float(entry.target_alpha)<=0.0: continue
 			var ages:PackedFloat32Array=data.age
 			var oldest:=0; var where:=0
 			for k in ages.size():
@@ -1745,8 +1737,10 @@ func draw_animated(canvas:CanvasItem)->void:
 		var heat:PackedFloat32Array=run.heat
 		var alpha:=float(run.alpha)*float(run.peak)
 		var wide:=bool(run.wide)
-		canvas.draw_polyline(points,Color(THEIRS_WASH,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
-		canvas.draw_polyline(points,Color(THEIRS,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
+		var ink:Color=run.get("ink",THEIRS)
+		var wash:Color=run.get("wash",THEIRS_WASH)
+		canvas.draw_polyline(points,Color(wash,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
+		canvas.draw_polyline(points,Color(ink,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
 		# Teeth biting into their side from the edge of the ink, about every
 		# 14 px, in a slow wave running along the stretch being fought over.
 		var n:=points.size()
@@ -1763,7 +1757,7 @@ func draw_animated(canvas:CanvasItem)->void:
 			var tooth:=((6.0 if wide else 8.0)+(6.0 if wide else 9.0)*h)*wave
 			var base:=a+normals[i]*edge
 			var tri:=PackedVector2Array([base-along*5.0,base+along*5.0,base+normals[i]*tooth])
-			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(THEIRS,0.95*float(run.alpha)))
+			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(ink,0.95*float(run.alpha)))
 	if still: return
 	for entry in battle_cache:
 		if not bool(entry.get("live",false)): continue
@@ -1902,12 +1896,109 @@ static func _fillable(polygon:PackedVector2Array)->bool:
 	return absf(area)>4.0 and Geometry2D.triangulate_polygon(polygon).size()>0
 
 
-## The front: a soft band of each side's colour either side of the line (the
-## ground each holds), a paper halo, an ink line whose weight follows how
-## massed the two sides are, and oxblood teeth pointing into the enemy.
-## Stretches derived from stale reports are dashed and paler.
+## The quiet boundary remains visible through a breach. It has no teeth,
+## strength chips or battle heat: those belong to the forces holding it.
+func _draw_political_edges(band:String)->void:
+	if band=="ground":return
+	var wide:=band in ["continental","world"]
+	for edge:Dictionary in scene.get("political",[]):
+		var points:=_poly(edge.points)
+		if points.size()<2:continue
+		_dashed(points,Color(PAPER,0.38),3.0 if wide else 4.0,4.0,7.0)
+		_dashed(points,Color(INK,0.40),1.0 if wide else 1.4,4.0,7.0)
+
+
+## One actual defended sector. The rounded ink body ends at its published
+## coverage, so a loss of men visibly opens ground between neighbouring
+## worms. No spline, glow or interpolation joins separate sectors.
+func _draw_deployed_front(entry:Dictionary,band:String)->void:
+	var data:Dictionary=entry.data
+	var points:=_poly(entry.points)
+	if points.size()<2:return
+	var bounds:=Rect2(points[0],Vector2.ZERO)
+	for point:Vector2 in points:bounds=bounds.expand(point)
+	if not Rect2(Vector2.ZERO,size).grow(48.0).intersects(bounds.grow(1.0)):return
+	var ours:=bool(data.get("ours",true))
+	var wide:=band in ["continental","world"]
+	var ink:=OURS if ours else THEIRS
+	var wash:=OURS_WASH if ours else THEIRS_WASH
+	var alpha:=clampf(float(entry.get("alpha",1.0)),0.0,1.0)
+	var ages:PackedFloat32Array=data.get("age",PackedFloat32Array())
+	var age:=float(ages[0]) if not ages.is_empty() else 0.0
+	var stale:=bool(data.get("stale",false))
+	if stale:alpha*=0.52
+	var source:PackedVector2Array=data.points
+	var toward:PackedVector2Array=data.toward
+	var heat:PackedFloat32Array=data.get("heat",PackedFloat32Array())
+	var weights:PackedFloat32Array=data.width
+	var normal:=PackedVector2Array();var heat_at:=PackedFloat32Array()
+	var n:=points.size()
+	var middle:Vector2=(entry.points as PackedVector2Array)[n/2]
+	var eps:=maxf(0.0001,float(data.get("sigma",1.0))*0.05)
+	var origin:=_screen(middle)
+	var ex:=(_screen(middle+Vector2(eps,0.0))-origin)/eps
+	var ey:=(_screen(middle+Vector2(0.0,eps))-origin)/eps
+	for i in n:
+		var j:=clampi(roundi(float(i)*float(source.size()-1)/float(n-1)),0,source.size()-1)
+		var along:=(points[mini(i+1,n-1)]-points[maxi(0,i-1)]).normalized()
+		var side:=along.orthogonal()
+		var projected:=ex*toward[j].x+ey*toward[j].y
+		if side.dot(projected)<0.0:side=-side
+		normal.append(side);heat_at.append(float(heat[j]) if j<heat.size() else 0.0)
+	var body:=(3.5 if wide else 5.0)+(float(weights[0]) if not weights.is_empty() else 0.5)*(2.0 if wide else 3.5)
+	# Each side's body sits behind the shared contact seam, so coincident
+	# observed coverage shows two facing armies rather than one overpainted
+	# colour. This is screen-space clearance, not a shift of held ground.
+	points=_offset(points,normal,-body*0.58)
+	if stale:
+		_dashed(points,Color(PAPER,0.75*alpha),body+3.0,7.0,6.0)
+		_dashed(points,Color(ink,alpha),body,7.0,6.0)
+	else:
+		# A paper rim cuts through terrain detail. The shaded back and fine
+		# inner highlight give the long line a quiet, substantial body.
+		draw_polyline(_offset(points,normal,-body*0.55),Color(wash,0.20*alpha),body*2.4,true)
+		draw_polyline(points,Color(PAPER,0.88*alpha),body+4.0,true)
+		draw_polyline(points,Color(INK,0.82*alpha),body+1.8,true)
+		draw_polyline(points,Color(ink,alpha),body,true)
+		draw_polyline(_offset(points,normal,-body*0.16),Color(wash.lerp(PAPER,0.38),0.75*alpha),maxf(1.0,body*0.23),true)
+		# Rounded endcaps expose the exact ends of a held sector. The guard
+		# hatches face the opponent; their spacing is in pixels, not people.
+		for end:int in [0,n-1]:
+			draw_circle(points[end],body*0.5,Color(ink,alpha))
+			draw_circle(points[end],1.3,Color(PAPER,0.80*alpha))
+		var walked:=0.0
+		for i in range(1,n):
+			walked+=points[i-1].distance_to(points[i])
+			if walked<(32.0 if wide else 28.0):continue
+			walked=0.0
+			if heat_at[i]>0.3 and not Motion.reduced():continue
+			var at:=points[i];var side:=normal[i]
+			var along:=(points[i]-points[i-1]).normalized()
+			var tooth:=PackedVector2Array([at-along*3.2,at+along*3.2,at+side*(6.0 if wide else 8.0)])
+			if _fillable(tooth):draw_colored_polygon(tooth,Color(ink,alpha))
+		var hot_points:=PackedVector2Array();var hot_normals:=PackedVector2Array();var hot_heat:=PackedFloat32Array()
+		for i in n:
+			if heat_at[i]>0.06:
+				hot_points.append(points[i]);hot_normals.append(normal[i]);hot_heat.append(heat_at[i])
+			else:
+				if hot_points.size()>=2:_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide,ink,wash)
+				hot_points=PackedVector2Array();hot_normals=PackedVector2Array();hot_heat=PackedFloat32Array()
+		if hot_points.size()>=2:_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide,ink,wash)
+	var armies:Array=data.get("armies",[])
+	hits.append({"kind":"front","line":points,"armies":armies,"stale":stale,"deployed":true,"ours":ours,"troops":int(data.get("troops",0)),"age":roundi(age),"name":String(data.get("name",""))})
+	front_chunks.append(bounds.grow(body+4.0))
+	if not wide and bounds.size.length()>110.0:
+		var words:="%s holding" % (EraWords.grouped(int(data.get("troops",0))) if ours else ArmyMarks.about(int(data.get("troops",0))))
+		if age>0.0:words+=" · %dd ago" % roundi(age)
+		var midpoint:=points[n/2]-normal[n/2]*(body+17.0)
+		_request_caption(String(data.id),(entry.points as PackedVector2Array)[n/2],words,ink,3,10.0,midpoint,"plate")
+
+
 func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var data:Dictionary=entry.get("data",{})
+	if bool(data.get("deployed",false)):
+		_draw_deployed_front(entry,band)
+		return
 	# Where it has eased to, plus any surge running where a battle ended or a
 	# town changed hands.
 	var world:=_bulged(entry.points)
@@ -2075,10 +2166,10 @@ func _front_run(run:PackedVector2Array,stale:bool,base:float,alpha:float)->void:
 
 
 ## A stretch of front being fought over, kept for the pulse canvas.
-func _keep_hot(points:PackedVector2Array,normals:PackedVector2Array,heat:PackedFloat32Array,alpha:float,wide:bool)->void:
+func _keep_hot(points:PackedVector2Array,normals:PackedVector2Array,heat:PackedFloat32Array,alpha:float,wide:bool,ink:Color=THEIRS,wash:Color=THEIRS_WASH)->void:
 	var peak:=0.0
 	for h in heat: peak=maxf(peak,h)
-	hot_cache.append({"points":points,"normals":normals,"heat":heat,"peak":peak,"alpha":alpha,"wide":wide})
+	hot_cache.append({"points":points,"normals":normals,"heat":heat,"peak":peak,"alpha":alpha,"wide":wide,"ink":ink,"wash":wash})
 
 
 ## A pocket: the ring closing on them, hatched inside, the gap still open
@@ -3169,7 +3260,13 @@ func note_content(hit:Dictionary)->Dictionary:
 			var armies:Array=hit.get("armies",[])
 			var lines:Array=[]
 			if String(hit.kind)=="front":
-				lines.append("Where our hosts and theirs meet, drawn from where each was last reported.")
+				if bool(hit.get("deployed",false)):
+					var ours:=bool(hit.get("ours",true))
+					var age:=maxi(0,int(hit.get("age",0)))
+					lines.append("%s holding this ground%s." % [EraWords.grouped(int(hit.get("troops",0))) if ours else _cap(ArmyMarks.about(int(hit.get("troops",0))))," when last reported %d days ago" % age if age>0 else ""])
+					lines.append("The line ends where the deployed force's coverage ends. Open ground between sectors is not guarded by this force.")
+					if not ours:return {"kicker":"OBSERVED DEFENCE","title":"Their defended line","lines":lines,"action":{}}
+				else:lines.append("Where our hosts and theirs meet, drawn from where each was last reported.")
 				if bool(hit.get("stale",false)): lines.append("Part of their line is known only from old reports.")
 			elif String(hit.kind)=="fallback":
 				lines.append("Where the generals would fall back if the line gives: a day's march along their road home.")
