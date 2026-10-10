@@ -1,3 +1,22 @@
+## October 10 — Defended borders and fighting worms (READY)
+
+Branch `codex/border-art-direction`, based on `16982712`, PR #205. Extends the
+border art delivery below with real general-led border deployment, finite held
+sectors, swept contact for ordinary and commanded marches, existing-ledger
+battles before capital arrival, retained objectives after breakthrough, observed
+flank approaches, and coverage-driven animated fronts with honest dated reports.
+Optional army metadata; no save migration or player-session restart.
+
+Validation totals 139 cases: 138 pass with no errors or orphans. This includes
+the 115-case military/geometry/visual run, three outcome/intelligence cases and
+two observed-approach cases. The council suite retains one reproduced baseline
+raid-cadence failure; its changed defense behavior is covered by real deployment
+and reserve assertions. Six private copied-terrain captures pass and show held
+ground, gaps, contact and inland fighting at two scales. Design and reproduction are in
+`docs/design/DEFENDED_BORDERS.md`.
+
+This is a pushed worker delivery, not an integration into canonical main.
+
 ## October 10 — Border art direction (READY)
 
 Branch `codex/border-art-direction`, based on `16982712`. Presentation checkpoint
