@@ -666,7 +666,7 @@ static func _deploy_border(civ_id:String,today:int)->String:
 		if not BorderDefense.coverage(band,today).is_empty():holding+=1
 	# Existing posts keep their exact sectors through ordinary council turns.
 	# Losses shorten their coverage; a lost sector is not redrawn elsewhere.
-	var standing:="%d hold %d border sectors; %d bands are still taking station. The capital keeps its reserve." % [deployed_men,holding,deployed.size()-holding]
+	var standing:=_border_words(today)
 	if occupied.size()>=BorderDefense.MAX_SECTORS:return standing
 	var forces:=_forces()
 	var keep:=maxi(int(forces.keep),ceili(float(int(forces.home)+deployed_men)*WATCH_SHARE))
@@ -715,7 +715,17 @@ static func _deploy_border(civ_id:String,today:int)->String:
 		band["command_status"]="Marching to the border station"
 		sent+=int(band.troops);posts+=1
 	if posts==0:return "No border band could set out. "+blocked
-	return "%d march to %d border stations, leaving %d at home. Their line holds only as far as their men and supplies can cover.%s" % [sent,posts,int(mc.home_army.get("troops",0)),(" "+blocked) if blocked!="" else ""]
+	return "%d march to %d border stations. %s%s" % [sent,posts,_border_words(today),(" "+blocked) if blocked!="" else ""]
+
+static func _border_words(today:int)->String:
+	var held:=0.0;var assigned:=0.0;var men:=0;var marching:=0
+	for band:Dictionary in _council_bands():
+		if not band.has("border_sector") or String(band.council.get("phase",""))=="home":continue
+		held+=BorderDefense.length(BorderDefense.coverage(band,today))
+		assigned+=BorderDefense.length(BorderDefense.points(band.border_sector.get("points",[])))
+		men+=int(band.get("troops",0))
+		if String(band.get("status",""))=="moving":marching+=1
+	return "%d deployed; %.1f of %.1f assigned border km held. %d bands taking station; %d remain at home." % [men,held,assigned,marching,int(_mc().home_army.get("troops",0))]
 
 ## Towns we hold of theirs whose garrisons are short: men march from home.
 static func _man_garrisons(civ_id:String)->String:
@@ -1437,6 +1447,7 @@ static func _launch_ours(civ_id:String,town:Dictionary,act:String,besiege:bool,c
 	if verdict=="act" and int(objective.get("army_id",0))>0:
 		var army_id:=int(objective.army_id)
 		_tag(army_id,civ_id,act,town,answer.get("odds",{}) if answer.get("odds") is Dictionary else {},not before.has(army_id))
+		if act=="take":_observed_approach(army_id,civ_id)
 		answer["live"]=true
 		return answer
 	# The war leader's objection is his reason to wait, said in his words
@@ -1462,7 +1473,61 @@ static func _launch_theirs(civ_id:String,town:Dictionary,act:String,besiege:bool
 		mc.disband_field_army(army_id)
 		return _record(civ_id,"impossible",String(order.error))
 	_tag(army_id,civ_id,act,town,reading,true)
+	if act=="take":_observed_approach(army_id,civ_id)
 	return _record(civ_id,"act","%d set out for %s." % [going,String(town.name)],{"live":true,"army_id":army_id,"days":int(order.get("days",0))})
+
+## Two bounded alternatives around the first charted line. A dated report
+## can suggest an approach, never promise an unseen gap or remove resistance.
+static func _observed_approach(army_id:int,civ_id:String)->bool:
+	var mc:=_mc();var army:=_army(army_id)
+	if army.is_empty() or String(army.get("status",""))!="moving" or not army.has("city_operation"):return false
+	var world:=WorldSimulation.world
+	var reports:Dictionary=world.local_observation_snapshot()
+	var known:Array=[]
+	for report:Dictionary in (reports.get("visible",[]) as Array)+(reports.get("recent",[]) as Array):
+		if String(report.get("civ_id",""))!=civ_id or _today()-int(report.get("last_seen_day",-9999))>30:continue
+		var line:=BorderDefense.points(report.get("defense_points",[]))
+		if line.size()<2:continue
+		known.append({"id":report.id,"position":report.position,"troops":maxi(1,roundi((float(report.get("strength_estimate_low",0))+float(report.get("strength_estimate_high",0)))*0.5)),"defense_points":line,"day":int(report.last_seen_day)})
+		if known.size()>=16:break
+	if known.is_empty():return false
+	var start:=_v2(army.position);var goal:=_v2(army.destination_position)
+	var contact:=_reported_contact(start,army.get("march_route",[]),known,army)
+	if contact.is_empty():return false
+	var line:=BorderDefense.points(contact.enemy.defense_points)
+	var margin:=maxf(2.0,(BorderDefense.radius(army)+BorderDefense.radius(contact.enemy))*3.0)
+	var candidates:Array[Vector2]=[line[0]+(line[0]-line[1]).normalized()*margin,line[-1]+(line[-1]-line[-2]).normalized()*margin]
+	var best:={};var best_length:=float(army.get("distance_remaining_km",start.distance_to(goal)))*1.6+5.0
+	for flank:Vector2 in candidates:
+		if not world._position_is_revealed(flank) or not world._scout_land_at(flank):continue
+		var first:Dictionary=mc.field_route(start,flank,army)
+		if first.has("error"):continue
+		var second:Dictionary=mc.field_route(flank,goal,army)
+		if second.has("error"):continue
+		var length:=float(first.length_km)+float(second.length_km)
+		if length>=best_length:continue
+		var legs:Array=(first.points as Array).duplicate();legs.append_array(second.points)
+		if not _reported_contact(start,legs,known,army).is_empty():continue
+		var route:={"origin":start,"points":legs,"length_km":length,"direct":false}
+		if bool(mc.march_supply(army,route).get("hungry",false)):continue
+		best=route;best_length=length
+	if best.is_empty():return false
+	mc._set_march_route(army,best)
+	army["distance_total_km"]=best_length;army["distance_remaining_km"]=best_length
+	army["arrival_day"]=_today()+int(mc._march_days_left(army,start))
+	army["command_status"]="Approaching the last charted flank; resistance ahead is unconfirmed"
+	army["council_approach"]={"day":_today(),"report_day":int(contact.enemy.day),"kind":"charted_flank"}
+	return true
+
+static func _reported_contact(start:Vector2,legs:Array,known:Array,army:Dictionary)->Dictionary:
+	var previous:=start
+	for leg in legs:
+		var next:=BorderDefense.point(leg)
+		if not next.is_finite():continue
+		var found:=BorderDefense.first_contact(previous,next,known,army)
+		if not found.is_empty():return found
+		previous=next
+	return {}
 
 # --------------------------------------------------------------------------
 # Words for the War screen
@@ -1473,6 +1538,7 @@ static func _launch_theirs(civ_id:String,town:Dictionary,act:String,besiege:bool
 ## coming ("Their band of 40 marches on Ashford, here in about 6 days"), the
 ## trackers or messengers out, or why the war leader waits.
 static func operation_words(civ_id:String)->String:
+	if stance_of(civ_id)=="defend" and not _band_on(civ_id,["border"]).is_empty():return _border_words(_today()).trim_suffix(".")
 	for band in bands_against(civ_id):
 		var said:=band_words(band)
 		if said!="": return said

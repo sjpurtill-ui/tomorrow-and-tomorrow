@@ -355,8 +355,18 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,progress:float,a:Color,b:Color
 ## foot, the bar of who is winning. A fight seen before stands faded.
 ## Returns the rect it covers (for hits and lettering clearance).
 const PLATE_SIZE:=Vector2(124.0,40.0)
-static func plate_rect(at:Vector2,scale:float=1.0)->Rect2:
-	var size:=PLATE_SIZE*maxf(0.8,scale)
+static func plate_rect(at:Vector2,scale:float=1.0,battle:Dictionary={})->Rect2:
+	var k:=maxf(0.8,scale)
+	var size:=PLATE_SIZE*k
+	if not battle.is_empty():
+		var sides:Dictionary=battle.get("sides",{})
+		var mine:=count(int((sides.get("a",{}) as Dictionary).get("troops",0)),bool(battle.get("ours",false)))
+		var enemy:=int((sides.get("b",{}) as Dictionary).get("troops",0))
+		var theirs:=count(enemy,false) if enemy>0 else "?"
+		var fs:=roundi(15.0*k)
+		var words:=T.font("ui_strong").get_string_size(mine+theirs,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
+		words+=T.font("ui").get_string_size("v",HORIZONTAL_ALIGNMENT_LEFT,-1,roundi(fs*0.85)).x
+		size.x=maxf(size.x,ceilf(words+57.0*k))
 	return Rect2(at-Vector2(size.y*0.5,size.y*0.5),size)
 
 
@@ -368,7 +378,7 @@ static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,s
 	var seen_before:=int(battle.get("age_days",0))>0
 	var fade:=alpha*(0.6 if seen_before else 1.0)
 	var ours:=bool(battle.get("ours",false))
-	var plate:=plate_rect(at,scale)
+	var plate:=plate_rect(at,scale,battle)
 	var k:=plate.size.y/PLATE_SIZE.y
 	# The plate: paper, a war-red rule for a fight of ours, ink for others'.
 	canvas.draw_rect(Rect2(plate.position+Vector2(2,3)*k,plate.size),Color(0,0,0,0.18*fade))

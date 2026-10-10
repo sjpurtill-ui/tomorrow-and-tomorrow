@@ -6,6 +6,9 @@ const MAX_SECTORS:=8
 const MAX_POINTS:=96
 const ARRIVAL_KM:=0.5
 const STARVING_BELOW:=0.45
+## Vector2 storage is single precision: the same swept boundary must still
+## count as contact after packing a point many thousands of km from origin.
+const CONTACT_TOLERANCE_KM:=0.005
 
 static func point(value:Variant)->Vector2:
 	if value is Vector2:return value
@@ -146,7 +149,7 @@ static func _disk(from:Vector2,delta:Vector2,center:Vector2,r:float)->float:
 static func _capsule(from:Vector2,to:Vector2,a:Vector2,b:Vector2,r:float)->float:
 	var nearest:=Geometry2D.get_closest_point_to_segment(from,a,b)
 	var delta:=to-from
-	if from.distance_to(nearest)<=r+0.0001:
+	if from.distance_to(nearest)<=r+CONTACT_TOLERANCE_KM:
 		# A force may withdraw away from contact; it cannot step through it.
 		if delta.length_squared()>0.000001 and (from-nearest).dot(delta)>0.000001:return INF
 		return 0.0

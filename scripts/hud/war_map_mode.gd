@@ -740,7 +740,6 @@ func draw_top(canvas:Control)->void:
 		canvas.draw_string(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,0.95))
 	# The hosts.
 	var k:=0.9
-	var plate:=Counter.plate_size(k)
 	var items:Array=[]
 	var home:=_screen(scene.get("home",Vector2.INF))
 	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"data":scene.levy,"tip":scene.get("levy_tip",PackedStringArray())})
@@ -754,6 +753,7 @@ func draw_top(canvas:Control)->void:
 	for item:Dictionary in items:
 		var at:Vector2=item.at
 		if not view.grow(80).has_point(at): continue
+		var plate:=Counter.plate_size(k,item.data)
 		var spot:=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))
