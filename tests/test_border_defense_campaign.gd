@@ -6,6 +6,8 @@ const Defense := preload("res://scripts/border_defense.gd")
 const Council := preload("res://scripts/war_council.gd")
 const War := preload("res://scripts/war_loop.gd")
 const Route := preload("res://scripts/army_land_route.gd")
+const Observation := preload("res://scripts/border_front_observation.gd")
+const Combat := preload("res://scripts/civilization_combat.gd")
 
 var _processing:Dictionary = {}
 var _world_started := false
@@ -70,6 +72,24 @@ func test_broken_or_departed_defenders_do_not_leave_an_invisible_wall() -> void:
 	force.erase("resting"); force.position=_pack(Vector2(12,0)); force.status="moving"
 	assert_array(Array(Defense.coverage(force))).is_empty()
 	assert_dict(Defense.first_contact(Vector2(-4,0),Vector2(4,0),[force],{"troops":100})).is_empty()
+
+func test_observed_front_does_not_join_separate_glimpses_across_unseen_ground() -> void:
+	var actual:=[_pack(Vector2(-40,0)),_pack(Vector2(40,0))]
+	var viewers:=[{"point":Vector2(-20,0),"radius":3.0},{"point":Vector2(20,0),"radius":3.0}]
+	var seen:Array=Observation.seen(actual,viewers)
+	assert_int(seen.size()).is_greater_equal(2)
+	# Every point and every connecting segment must remain within one observed
+	# patch. Keeping only one bounded patch is allowed; joining the two isn't.
+	for index in seen.size():
+		var point:=Vector2(float(seen[index].x),float(seen[index].z))
+		assert_bool(viewers.any(func(v:Dictionary)->bool:return point.distance_to(v.point)<=float(v.radius)+0.001)).is_true()
+		if index>0:
+			var before:=Vector2(float(seen[index-1].x),float(seen[index-1].z))
+			assert_float(point.distance_to(before)).is_less_equal(6.001)
+	assert_array(Observation.seen(actual,[{"point":Vector2(0,40),"radius":3.0}])).is_empty()
+	var remembered:=seen.duplicate(true)
+	actual[0]=_pack(Vector2(100,100)); actual[1]=_pack(Vector2(200,100))
+	assert_array(seen).is_equal(remembered)
 
 func _start_world() -> void:
 	_world_started=true
@@ -219,3 +239,65 @@ func test_retreat_from_front_cannot_resume_the_capital_march() -> void:
 	GameState.elapsed_days+=1; MilitaryCampaign._process_field_army_movement_day()
 	assert_float(_point(army).x).is_less_equal(before.x+0.001)
 	assert_str(String(CivilizationSystem.region_snapshot(civ_id,city_id).get("controller",""))).is_not_equal("player")
+	# The winning defender still holds the approach tomorrow. Our withdrawal
+	# must not give it the defeated side's stand-down period.
+	var foes:Array=MilitaryCampaign.command_hierarchy.land.enemies(int(GameState.elapsed_days))
+	var contact:Dictionary=Defense.first_contact(origin+Vector2(1,0),origin+Vector2(5,0),foes,{"troops":120})
+	assert_dict(contact).is_not_empty()
+	if not contact.is_empty(): assert_str(String(contact.formation_id)).is_equal("border-guard")
+
+func test_a_real_owned_defender_is_reserved_once_for_a_front_battle() -> void:
+	_start_world()
+	var owner_id:=civ_id
+	var today:=int(GameState.elapsed_days)
+	var at:=origin+Vector2(3,0)
+	WorldSimulation.context_provider=func(_at:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":0.1,"surface_water_recognized":true}
+	WorldSimulation.create_actor(owner_id,hash(owner_id)&0x7fffffff,capital)
+	WorldSimulation.actors[owner_id].controller="manual"
+	WorldSimulation.actors[owner_id].systems.CivilizationSystem.scout_land_authority=func(_p:Vector2)->bool:return true
+	assert_bool(WorldSimulation.submit(owner_id,{"kind":"found"}).get("ok",false)).is_true()
+	var guard_id:int=WorldSimulation.scoped(owner_id,func()->int:
+		WorldSimulation.state.ensure_population_total(1000); WorldSimulation.state.elapsed_days=today
+		WorldSimulation.state.settlement_completed=["Hearth Circle"]; WorldSimulation.settlements.ensure_founded()
+		WorldSimulation.state.resource_stockpiles["Food"]=1000000.0
+		var mc=WorldSimulation.military
+		mc.home_army=mc.simulator.create_formation_force("Esurai levy",[{"id":1,"unit":"levy","weapon":"improvised","count":300,"equipment":300,"training":0.8}],0.9,0.8)
+		var made:Dictionary=mc.create_field_army(100)
+		if made.has("error"): return -1
+		var id:=int(made.army.army_id)
+		var force:Dictionary=mc.field_armies[mc._field_army_index(id)]
+		force.position=_pack(at); force.status="stationed"; force.location_id="field_position"; force.provision_ratio=1.0
+		force.border_sector=_defender("owned",at,100,1).border_sector
+		force.border_sector.owner=owner_id; force.border_sector.civ_id="human"
+		return id)
+	assert_int(guard_id).is_greater(0)
+	if guard_id<=0: return
+	WorldSimulation.enabled=true; WorldSimulation.refresh_projections(); WorldSimulation.refresh_views()
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		if String(civ.id)==owner_id: civ.player_relation.at_war=true; civ.player_relation.contact_level=2
+	var first:Dictionary=MilitaryCampaign.create_field_army(120)
+	var second:Dictionary=MilitaryCampaign.create_field_army(120)
+	assert_bool(first.has("ok")).override_failure_message(str(first)).is_true()
+	assert_bool(second.has("ok")).override_failure_message(str(second)).is_true()
+	if not first.has("ok") or not second.has("ok"): return
+	var first_id:=int(first.army.army_id); var second_id:=int(second.army.army_id)
+	for id in [first_id,second_id]:
+		var band:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(id)]
+		band.position=_pack(at-Vector2(0.1,0)); band.status="stationed"; band.location_id="field_position"
+	var attacker:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(first_id)]
+	var foes:Array=MilitaryCampaign.command_hierarchy.land.enemies(today)
+	var contact:Dictionary=Defense.first_contact(_point(attacker),_point(attacker),foes,attacker)
+	assert_dict(contact).override_failure_message(str(foes)).is_not_empty()
+	if contact.is_empty(): return
+	var population:=int(GameState.population_total)
+	var their_population:int=WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total))
+	var started:Dictionary=MilitaryCampaign.launch_front_contact(first_id,contact)
+	assert_bool(started.has("error")).override_failure_message(str(started)).is_false()
+	assert_bool(Combat.reserved({"actor":owner_id,"field_id":guard_id})).is_true()
+	var count:=MilitaryCampaign.own_engagements.size()
+	assert_int(count).is_equal(1)
+	var duplicate:Dictionary=MilitaryCampaign.launch_front_contact(second_id,contact)
+	assert_bool(duplicate.has("error")).override_failure_message(str(duplicate)).is_true()
+	assert_int(MilitaryCampaign.own_engagements.size()).is_equal(count)
+	assert_int(int(GameState.population_total)).is_equal(population)
+	assert_int(int(WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(their_population)
