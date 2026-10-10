@@ -200,6 +200,12 @@ func test_curved_front_clearance_leaves_its_interior_available()->void:
 	assert_int(boxes.size()).is_less_equal(16)
 	for box in boxes:assert_bool(box.has_point(Vector2(400,300))).is_false()
 	for point in points:assert_bool(boxes.any(func(box:Rect2)->bool:return box.has_point(point))).is_true()
+	# Nine motion vertices at distant zoom still need only one obstacle.
+	var compact:=PackedVector2Array()
+	for i in 9:compact.append(Vector2(400,300)+Vector2(float(i),0.0))
+	var compact_boxes:=Overlay.front_obstacles(compact,12.0)
+	assert_int(compact_boxes.size()).is_equal(1)
+	for point in compact:assert_bool(compact_boxes[0].has_point(point)).is_true()
 
 
 func test_battle_locality_stays_adjacent_or_waits_for_the_tooltip()->void:

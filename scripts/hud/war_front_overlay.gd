@@ -2057,6 +2057,14 @@ func _draw_deployed_front(entry:Dictionary,band:String)->void:
 ## At most sixteen boxes per front keep placement work bounded.
 static func front_obstacles(points:PackedVector2Array,padding:float)->Array[Rect2]:
 	var boxes:Array[Rect2]=[]
+	if points.size()<2:return boxes
+	var bounds:=Rect2(points[0],Vector2.ZERO)
+	for point in points:bounds=bounds.expand(point)
+	# A tiny contact ribbon has many vertices for its motion, but occupies
+	# just a few screen pixels. One box reserves that complete footprint.
+	if bounds.size.length()<=48.0:
+		boxes.append(bounds.grow(padding))
+		return boxes
 	var stride:=maxi(1,ceili(float(points.size()-1)/16.0))
 	for start in range(0,points.size()-1,stride):
 		var box:=Rect2(points[start],Vector2.ZERO)
@@ -2583,9 +2591,13 @@ func _counter_spot(at:Vector2,plate:Vector2,scale:float)->Vector2:
 	for y in rows+1:
 		for x in columns+1:
 			var box:=Rect2(counter_bounds.position+room*Vector2(float(x)/columns,float(y)/rows),extent)
+			var distance:=at.distance_to(box.get_center())*0.001
+			# Coverage can only add cost. Once a nearby free patch is found,
+			# farther candidates cannot improve it and need no obstacle scan.
+			if distance>=least:continue
 			var cover:=_counter_cover(box)
 			if cover==INF:continue
-			var score:=cover*100.0+at.distance_to(box.get_center())*0.001
+			var score:=cover*100.0+distance
 			if score<least:least=score;best=box.get_center()
 	return best
 
