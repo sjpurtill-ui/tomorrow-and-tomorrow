@@ -317,6 +317,29 @@ func _interactions() -> void:
 	if close_map != null:
 		close_map.pressed.emit(); _check(not bool(map.get("enabled")),"Close control exits border mode")
 	map.call("set_enabled",true)
+	var preserved_forts := GameState.border_forts.duplicate(true)
+	var preserved_stores := GameState.resource_stockpiles.duplicate(true)
+	var count := Forts.forts().size()
+	var place_at := Vector2(80,-70)
+	map.call("click",map.call("screen_of",place_at))
+	await _settle()
+	var created_id := int(map.get("selected"))
+	var created := Forts.find_fort(created_id)
+	_check(Forts.forts().size()==count+1 and not created.is_empty() and String(created.get("status",""))=="building","Clicking valid ground starts actual fort construction")
+	_check(is_instance_valid(map.get("note")) and (map.get("note") as Control).visible,"A newly placed fort immediately opens its construction note")
+	_check(float(GameState.resource_stockpiles.Timber)==float(preserved_stores.Timber)-220.0,"Placement pays the actual palisade timber cost")
+	if not created.is_empty():
+		map.call("start_move",created_id)
+		var move_at := Vector2(115,-75)
+		map.call("click",map.call("screen_of",move_at))
+		await _settle()
+		var moved := Forts.find_fort(created_id)
+		_check(int(map.get("selected"))==created_id and int(map.get("moving"))==-1 and Forts.forts().size()==count+1,"Moving keeps the fort identity and selects its result")
+		_check(Forts._pos(moved).distance_to(move_at)<0.01 and String(moved.status)=="building","Moved fort resumes construction at the clicked position")
+		_check(is_instance_valid(map.get("note")) and (map.get("note") as Control).visible,"A moved fort immediately opens its construction note")
+	map.call("_close_note")
+	GameState.border_forts=preserved_forts; GameState.resource_stockpiles=preserved_stores
+	_refresh()
 
 func _all_text(node:Node) -> String:
 	if not is_instance_valid(node): return ""
