@@ -294,13 +294,24 @@ func _interactions() -> void:
 	_check(not (quote.get("short",{}) as Dictionary).is_empty(),"A stationary placement quote refreshes after stores change")
 	GameState.resource_stockpiles["Timber"] = 5000.0
 	_pointer(Vector2.INF)
+	var border_chart:Control=map.get("chart")
+	var repaints:=[0]
+	var painted:=func()->void:repaints[0]+=1
+	border_chart.draw.connect(painted)
 	for share in [0.0,1.0]:
+		var before_paint:=int(repaints[0])
 		Forts.set_border_share(share); _refresh(); await _settle()
+		if DisplayServer.get_name()!="headless":_check(int(repaints[0])>before_paint,"Changed watch redraws map ink while pointer is off-chart")
+		var actual_stretches:Array=Forts.watch().stretches
+		var drawn_stretches:Array=border_chart.get("_stretches")
+		for i in mini(actual_stretches.size(),drawn_stretches.size()):
+			_check(is_equal_approx(float(drawn_stretches[i][1]),float(actual_stretches[i].strength)),"Map chip matches current watch strength")
 		var sign := "−" if share == 0.0 else "+"
 		var found := false
 		for button in map.find_children("*","Button",true,false):
 			if button.text == sign: found = true; _check(button.disabled,"Watch share "+sign+" is disabled at its bound")
 		_check(found,"Share stepper is present: "+sign)
+	border_chart.draw.disconnect(painted)
 	Forts.set_border_share(0.05); _refresh(); await _settle()
 	var man := _button("ManEveryFort")
 	_check(man != null,"Understaffed border offers ManEveryFort")

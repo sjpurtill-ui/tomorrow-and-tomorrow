@@ -497,6 +497,8 @@ class BorderChart extends Control:
 	var _ground:=Vector2.INF
 	var _elapsed:=0.0
 	var _view:=0
+	var _border_elapsed:=0.25
+	var _border_signature:=0
 	## Captures and tests: the pointer held here instead of the mouse.
 	var pointer_override:=Vector2.INF
 	## Every fort's name and every stretch's hold, refreshed with the pointer.
@@ -510,12 +512,15 @@ class BorderChart extends Control:
 
 	func forget()->void:
 		_quote={}; _quote_key=Vector2i(1<<30,1<<30)
+		_read_border()
+		queue_redraw()
 
 	func _process(delta:float)->void:
 		if owner_map==null: return
 		_elapsed+=delta
 		_quote_age+=delta
-		if _elapsed>=0.25 or _names.is_empty(): _read_border()
+		_border_elapsed+=delta
+		if _border_elapsed>=0.25: _read_border()
 		# The words ride the map: redrawn whenever the view moves.
 		var viewer:Camera3D=owner_map.call("camera")
 		if viewer!=null:
@@ -542,6 +547,7 @@ class BorderChart extends Control:
 		queue_redraw()
 
 	func _read_border()->void:
+		_border_elapsed=0.0
 		_names=[]; _stretches=[]
 		for f:Dictionary in Forts.forts():
 			if String(f.get("status",""))!="abandoned": _names.append([Forts._pos(f),String(f.get("name",""))])
@@ -549,6 +555,10 @@ class BorderChart extends Control:
 		for st:Dictionary in kept.stretches: _stretches.append([Vector2(st.mid),float(st.strength),float(st.per_km)])
 		_foreign=[]
 		for f:Dictionary in Forts.known_foreign_forts(): _foreign.append([f.at,"%s's %s" % [String(f.owner_name),String(Forts.kind(String(f.kind)).get("name","fort")).to_lower()],preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.45)])
+		var signature:=hash([_names,_stretches,_foreign,T.color_mode])
+		if signature!=_border_signature:
+			_border_signature=signature
+			queue_redraw()
 
 	func _draw()->void:
 		_draw_border_words()
