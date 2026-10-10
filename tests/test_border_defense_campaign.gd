@@ -9,6 +9,7 @@ const Route := preload("res://scripts/army_land_route.gd")
 const Observation := preload("res://scripts/border_front_observation.gd")
 const Combat := preload("res://scripts/civilization_combat.gd")
 const Forts := preload("res://scripts/fort_border.gd")
+const Overlay := preload("res://scripts/hud/war_front_overlay.gd")
 
 var _processing:Dictionary = {}
 var _world_started := false
@@ -193,6 +194,15 @@ func test_real_council_capital_march_meets_defense_before_the_city() -> void:
 	if MilitaryCampaign.active_engagement.is_empty(): return
 	assert_bool(bool(MilitaryCampaign.active_engagement.threat.get("front_contact",false))).is_true()
 	assert_str(String(MilitaryCampaign.active_engagement.threat.get("formation_id",""))).is_equal("border-guard")
+	# The ordinary report/observation/battle collector must publish the same
+	# contact the campaign owns, without injecting renderer inputs.
+	var map:=Overlay.new()
+	var chart:Dictionary=map.collect()
+	map.free()
+	assert_bool((chart.friendly as Array).any(func(entry:Dictionary)->bool:return int(entry.get("army_id",-1))==int(army.army_id))).is_true()
+	assert_bool((chart.enemy as Array).any(func(entry:Dictionary)->bool:return String(entry.get("id",""))=="border-guard")).is_true()
+	assert_int((chart.battles as Array).size()).is_equal(1)
+	assert_int((Overlay.compose(chart).battles as Array).size()).is_equal(1)
 	assert_str(String(CivilizationSystem.region_snapshot(civ_id,city_id).get("controller",""))).is_not_equal("player")
 	assert_int(int(GameState.population_total)).is_equal(population)
 	var deployed:=int(MilitaryCampaign.home_army.troops)
@@ -392,6 +402,23 @@ func test_peak_defense_assigns_bounded_real_bands_and_keeps_a_home_reserve() -> 
 	var outline:PackedVector2Array=Forts.outline().points
 	var perimeter:=Defense.length(outline)+outline[-1].distance_to(outline[0])
 	assert_float(covered).is_equal_approx(perimeter,0.05)
+	# Equal summed lengths alone could hide an overlap balanced by a gap.
+	# Thirty-two independent incoming marches must meet held ground outside
+	# the seat, including the joins between the eight assigned sectors.
+	for bearing in 32:
+		var direction:=Vector2.from_angle(TAU*float(bearing)/32.0)
+		var contact:=Defense.first_contact(origin+direction*(Forts.home_km()+5.0),origin,MilitaryCampaign.field_armies,{"troops":500})
+		assert_dict(contact).override_failure_message("Unheld perimeter bearing %d" % bearing).is_not_empty()
+		if not contact.is_empty():assert_float((contact.point as Vector2).distance_to(origin)).is_greater(Forts.home_km()-1.5)
+	# This fixture has sector organization, but not a complete signal-era
+	# economy. Let the ordinary runners actually deliver the arrival reports.
+	for _report_day in 12:
+		GameState.elapsed_days+=1;MilitaryCampaign._process_army_runners_day()
+	var map:=Overlay.new()
+	var chart:Dictionary=map.collect()
+	map.free()
+	var drawn:Array=Overlay.compose(chart).fronts
+	assert_int(drawn.filter(func(front:Dictionary)->bool:return bool(front.get("deployed",false)) and bool(front.get("ours",false))).size()).is_equal(bands.size())
 	var reserve:=int(MilitaryCampaign.home_army.troops)
 	var forces:=MilitaryCampaign.field_armies.size()
 	Council.order(civ_id,"defend")
