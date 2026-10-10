@@ -1,3 +1,37 @@
+## October 10 — Defended borders and fighting worms (READY)
+
+Branch `codex/border-art-direction`, based on `16982712`, PR #205. Extends the
+border art delivery below with real general-led border deployment, finite held
+sectors, swept contact for ordinary and commanded marches, existing-ledger
+battles before capital arrival, retained objectives after breakthrough, observed
+flank approaches, and coverage-driven animated fronts with honest dated reports.
+Optional army metadata; no save migration or player-session restart.
+
+Three refinement passes and two critic reviews address reinforcement, moving
+border stations, retasking, neutral invasions, retained targets, duplicate
+defender reservations, recalled posts, crowded counters and live watch ink.
+Compact combat fronts keep departed attackers visible without claiming held
+territory. Final headless validation totals 223 cases: 222 pass with no errors
+or orphans (126/127 core, 96/96 visual). The one long-run raid-cadence failure is
+reproduced on unchanged main and preserved. The 50-band/20-battle draw check is
+17.7 ms after fixing redundant placement work; its 60 ms limit is unchanged.
+Border UI verification passes 71 checks across 14 captures. Production GPU
+captures retain all 16 perimeter counters without overlap, and an independent
+ribbon-motion proof passes for both sides, pause and reduced motion. Design, critic
+findings and reproduction are in `docs/design/DEFENDED_BORDERS.md`.
+
+This is a pushed worker delivery, not an integration into canonical main.
+
+## October 10 — Border art direction (READY)
+
+Branch `codex/border-art-direction`, based on `16982712`. Presentation checkpoint
+`360c687c` combines the border map cards and placement feedback, War board border
+folio, paper-edged border ink and refined fort anchors. The existing 15 border
+tests pass; private UI and campaign-terrain captures cover placement, shortages,
+construction, movement, night palette and small windows. Details and reproduction:
+`docs/design/BORDER_ART_DIRECTION.md`. Fort rules and save schema are unchanged.
+This is a worker delivery; it has not been merged into the canonical player build.
+
 ## October 8 — Organic places on the map (INTEGRATED)
 
 User approved PR #182 after the private capture review. Source `ca8e2481`

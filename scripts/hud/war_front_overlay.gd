@@ -36,6 +36,7 @@ extends Control
 const Model:=preload("res://scripts/war_front_model.gd")
 const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
 const BattleSource:=preload("res://scripts/hud/battle_marker_source.gd")
+const ContactFronts:=preload("res://scripts/battle_contact_fronts.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
@@ -148,6 +149,7 @@ var drawn_marks:Array=[]
 ## The counters drawn this pass, and the town cards they keep clear of.
 var counter_rects:Array[Rect2]=[]
 var counter_obstacles:Array[Rect2]=[]
+var counter_fixed:Array[Rect2]=[]
 ## Where counters may stand: inside the chart, clear of the HUD's bars.
 var counter_bounds:=Rect2()
 ## Captions requested by the last drawing, and their placement memory.
@@ -224,6 +226,7 @@ func _ready()->void:
 
 
 func _process(delta:float)->void:
+	if not is_visible_in_tree():return
 	collect_elapsed+=delta
 	if collect_elapsed>=COLLECT_EVERY and is_instance_valid(terrain):
 		collect_elapsed=0.0
@@ -256,8 +259,9 @@ func _process(delta:float)->void:
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
 		view.append(ease_frame)
 	# The fighting works on its own small canvas, only while it is on screen.
-	anim_clock+=delta
-	if pulse_layer!=null and pulse_live and not Motion.reduced():
+	var war_paused:=is_instance_valid(terrain) and terrain.get("game_speed")!=null and float(terrain.get("game_speed"))<=0.0
+	if not war_paused:anim_clock+=delta
+	if pulse_layer!=null and pulse_live and not Motion.reduced() and not war_paused:
 		pulse_elapsed+=delta
 		if pulse_elapsed>=1.0/PULSE_FPS:
 			pulse_elapsed=0.0
@@ -266,6 +270,7 @@ func _process(delta:float)->void:
 	if camera!=null: view.append_array([camera.global_transform,camera.size])
 	var cities:=_city_labels()
 	if cities!=null: view.append(cities.get("layout_signature"))
+	if is_instance_valid(terrain):view.append(hash(_chart_obstacles().rects))
 	var signature:=hash(view)
 	if signature==drawn_signature: return
 	drawn_signature=signature
@@ -312,6 +317,12 @@ func retarget_fronts(fronts:Array,immediate:bool=false)->void:
 		var best_distance:=sigma*2.5
 		for index in live_fronts.size():
 			if claimed.has(index) or float(live_fronts[index].target_alpha)<=0.0: continue
+			var old:Dictionary=live_fronts[index].get("data",{})
+			# A deployed sector has a real owner and identity. Never morph a
+			# neighbouring sector across an opened gap to replace it.
+			if bool(front.get("deployed",false)) or bool(old.get("deployed",false)):
+				if String(front.get("id",""))=="" or String(front.get("id",""))!=String(old.get("id","")):continue
+				best=index;break
 			var d:=(live_fronts[index].centre as Vector2).distance_to(centre)
 			if d<best_distance: best_distance=d; best=index
 		var entry:Dictionary
@@ -336,6 +347,8 @@ func retarget_fronts(fronts:Array,immediate:bool=false)->void:
 	for index in live_fronts.size():
 		if claimed.has(index): continue
 		var gone:Dictionary=live_fronts[index]
+		# Lost coverage opens a gap immediately, not a fading false defence.
+		if bool((gone.get("data",{}) as Dictionary).get("deployed",false)):continue
 		gone.target_alpha=0.0
 		if immediate: continue
 		next_live.append(gone)
@@ -599,6 +612,10 @@ func collect()->Dictionary:
 		largest=maxi(largest,strength); theatre+=strength
 		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
 			"report_age":0 if live or at_home or near_hold else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+		# Only the displayed report knows where this force actually holds.
+		# Missing old reports must never acquire current, unseen coverage.
+		for field:String in ["border_front","defense_points"]:
+			if shown.has(field):entry[field]=shown[field].duplicate(true)
 		# The general's chosen land road (round bays and inlets), not a straight line.
 		if objective.is_finite() and String(shown.get("status",army.get("status","")))=="moving":
 			var road:=_road_ahead(army,pos)
@@ -658,6 +675,8 @@ func collect()->Dictionary:
 				"branch":ArmyMarks.branch(String(sighting.get("formation_role","")),String(sighting.get("formation_unit",""))) if identified else "foot","scout":bool(sighting.get("carries_report",false)),"road":_road_of(sighting.get("road_ahead",[])),
 				"will_low":float(sighting.get("readiness_estimate_low",-1.0)) if identified else -1.0,"will_high":float(sighting.get("readiness_estimate_high",-1.0)) if identified else -1.0}
 			var hostile:=bool(sighting.get("hostile",false)) and not bool(entry.scout)
+			for field:String in ["border_front","defense_points"]:
+				if sighting.has(field):entry[field]=sighting[field].duplicate(true)
 			if hostile: enemy.append(entry); listed[sighting_id]=true
 			elif list_name=="visible": strangers.append(entry); listed[sighting_id]=true
 	enemy.append_array(_campaign_sightings(today))
@@ -697,57 +716,18 @@ func collect()->Dictionary:
 	return inputs
 
 
-## The lines where our land meets the land of a people we are at war or in
-## hot feud with (nation_borders.gd publishes them as the map draws them),
-## with which side is whose: [{civ, points, ours_at, theirs_at}]. No shared
-## line, no border front: their land and ours do not touch.
-static func _border_inputs(home:Vector2)->Array:
+## Political boundaries with a hostile neighbour, published by the map.
+## These quiet chart lines make no claim about troops or defended ground.
+static func _border_inputs(_home:Vector2)->Array:
 	var out:Array=[]
 	var hot:Dictionary=NationBorders.hot_enemies()
 	if hot.is_empty() or NationBorders.published.is_empty(): return out
-	var ours_at:Array=[home]
-	var intel:Variant=CivilizationSystem.city_intelligence
-	if intel!=null:
-		for city:Dictionary in intel.known_cities("player","player",false):
-			var at:=_v2(city.get("position",{}))
-			if at.is_finite(): ours_at.append(at)
-	# Our towns as the borders read them (the settlement network), each with
-	# its share of the home guard (civilization_combat guard_ledger).
-	var our_towns:Array=[]
-	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").guard_ledger(MilitaryCampaign)
-	for settlement:Dictionary in WorldSimulation.settlements.settlement_network_snapshot().get("settlements",[]):
-		if not settlement.get("position") is Vector2 or String(settlement.get("occupied_by","")) not in ["","human","player"]: continue
-		our_towns.append({"at":settlement.position,"name":String(settlement.get("name","")),"men":int((guards.get(String(settlement.get("id","")),{}) as Dictionary).get("watch",0))})
-		ours_at.append(settlement.position)
-	var council:GDScript=load("res://scripts/war_council.gd")
-	var Estimate:GDScript=load("res://scripts/court_war_orders.gd")
-	for civ_id:String in hot:
-		var theirs_at:Array=[]
-		var their_towns:Array=[]
-		for town:Dictionary in council.call("known_towns",civ_id):
-			var at:=_v2(town.get("position",{}))
-			if not at.is_finite(): continue
-			theirs_at.append(at)
-			var counted:Dictionary=Estimate.call("enemy_estimate",String(town.get("city_id","")))
-			var men:=roundi(float(counted.get("mid",-1.0)))
-			their_towns.append({"at":at,"men":maxi(0,men),"known":bool(counted.get("known",false)) and men>=0})
-		var lines:Array=[]
-		for line:Dictionary in NationBorders.published:
-			var owners:Array=line.owners
-			if not ((owners[0]=="player" and owners[1]==civ_id) or (owners[1]=="player" and owners[0]==civ_id)): continue
-			if (line.points as PackedVector2Array).size()>=2: lines.append(line.points)
-		# The border with them may be drawn in several pieces: each town's men
-		# stand on the piece nearest it, once (never the whole garrison again
-		# on every piece). Our towns still split each piece into stretches.
-		for index in lines.size():
-			var points:PackedVector2Array=lines[index]
-			var mine:Array=our_towns.map(func(t:Dictionary)->Dictionary:
-				var kept:=t.duplicate()
-				if _nearest_line(lines,t.at)!=index: kept.men=0
-				return kept)
-			var facing:Array=their_towns.filter(func(t:Dictionary)->bool: return _nearest_line(lines,t.at)==index)
-			out.append({"civ":civ_id,"points":points,"ours_at":ours_at,"theirs_at":theirs_at,"our_towns":mine,"their_towns":facing,"kind":String(hot[civ_id])})
-			if out.size()>=Model.MAX_FRONTS: return out
+	for line:Dictionary in NationBorders.published:
+		var owners:Array=line.owners
+		var civ_id:=String(owners[1]) if owners[0]=="player" else (String(owners[0]) if owners[1]=="player" else "")
+		if civ_id=="" or not hot.has(civ_id) or (line.points as PackedVector2Array).size()<2:continue
+		out.append({"civ":civ_id,"points":line.points,"kind":String(hot[civ_id])})
+		if out.size()>=Model.MAX_FRONTS:return out
 	return out
 
 
@@ -1180,7 +1160,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 	var enemy:Array=(inputs.get("enemy",[]) as Array).slice(0,Model.MAX_ENEMY)
 	var home:Vector2=inputs.get("home",Vector2.ZERO)
 	var today:=int(inputs.get("today",0))
-	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"battles":[],"fought":{},"era":1,"sigma":1.0}
+	var out:={"mode":mode,"stage":stage,"today":today,"home":home,"friendly_seen":friendly,"enemy_seen":enemy,"fronts":[],"political":[],"faceoffs":[],"fallbacks":[],"supply":[],"arrows":[],"objectives":[],"clashes":[],"pockets":[],"sieges":[],"raids":[],"zones":[],"lanes":[],"echelons":[],"harbours":[],"withdrawals":[],"sightings":[],"battles":[],"fought":{},"era":1,"sigma":1.0}
 	var fronts:Array=[]
 	# The ground we hold is ours to the front as well as the hosts in the
 	# field: a garrison in a taken town pushes the line past the town.
@@ -1212,30 +1192,26 @@ static func compose(inputs:Dictionary)->Dictionary:
 			front["holders"]=holders
 		out.fronts=fronts
 		out.pockets=Model.pockets(fronts,holding,facing)
-	# At war with a people whose land meets ours, the front is that meeting
-	# line, worked by the forces near it (war_front_model border_front); a
-	# front derived from the forces alone that runs along it gives way to it.
+	# Political limits are context, not a deployed army. In particular a
+	# town's home guard is not painted out along its nearest national edge.
 	var borders:Array=(inputs.get("borders",[]) as Array).slice(0,Model.MAX_FRONTS)
-	if not borders.is_empty():
-		var border_fronts:Array=[]
-		for b:Dictionary in borders:
-			var front:=Model.border_front(b.points,b.get("ours_at",[]),b.get("theirs_at",[]),holding,facing,String(b.civ),float(out.sigma) if mode in ["front","theatre"] else 0.0)
-			if front.is_empty(): continue
-			front["our_towns"]=b.get("our_towns",[]); front["their_towns"]=b.get("their_towns",[])
-			border_fronts.append(front)
-		if not border_fronts.is_empty():
-			var reach:=float(border_fronts[0].sigma)*0.6
-			fronts=fronts.filter(func(d:Dictionary)->bool: return not border_fronts.any(func(b:Dictionary)->bool: return Model.along_border(d,b,reach)))
-			for front:Dictionary in border_fronts:
-				var holders:Array=holding.filter(func(h:Dictionary)->bool: return not bool(h.get("garrison",false)) and Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
-				front["armies"]=holders.map(func(h:Dictionary)->int: return int(h.get("army_id",0)))
-				front["holders"]=holders
-				# Who holds each stretch of it against whom (HOI4's front allocation).
-				var near:=func(list:Array)->Array: return list.filter(func(h:Dictionary)->bool: return Model.along_border({"points":PackedVector2Array([h.pos])},front,float(front.sigma)*1.6))
-				front["sectors"]=Model.border_sectors(front.points,front.our_towns,front.their_towns,near.call(holders),near.call(facing))
-			fronts=border_fronts+fronts
-			out.fronts=fronts
-			if not mode in ["front","theatre"]: out.sigma=float(border_fronts[0].sigma)
+	for border:Dictionary in borders:
+		var edge:PackedVector2Array=border.get("points",PackedVector2Array())
+		if edge.size()>=2:out.political.append({"points":Model.resample(edge,Model.BORDER_POINTS),"civ":String(border.get("civ",""))})
+	var deployments:=Model.deployed_fronts(friendly,enemy,home)
+	var reported_deployment:=friendly.any(func(force:Dictionary)->bool:return Model.has_deployment(force)) or enemy.any(func(force:Dictionary)->bool:return Model.has_deployment(force))
+	if reported_deployment:
+		# Observed coverage already says which ground the defenders hold.
+		# Remove inferred contact lines that would paint over an actual gap
+		# between those defenders. Mobile hosts still form inland contacts.
+		fronts=fronts.filter(func(front:Dictionary)->bool:
+			var holders:Array=front.get("holders",[])
+			return holders.any(func(force:Dictionary)->bool:return not Model.has_deployment(force)))
+		out.pockets=Model.pockets(fronts,holding,facing)
+		fronts.append_array(deployments)
+		out.fronts=fronts
+		if float(out.sigma)<=1.0:
+			for deployed:Dictionary in deployments:out.sigma=maxf(float(out.sigma),float(deployed.sigma))
 	if mode=="host":
 		var reach:=6.0
 		for f in holding:
@@ -1340,11 +1316,12 @@ static func compose(inputs:Dictionary)->Dictionary:
 	# Battles being fought now: ours on the front at their contact point, the
 	# stretch of front being fought over heated (the worm); rivals' where our
 	# watchers saw them. A siege's battle stands on its ring.
+	out.fronts.append_array(ContactFronts.build(inputs.get("battles",[]),friendly,enemy,(out.fronts as Array)+(out.faceoffs as Array)))
 	var lines:Array=(out.fronts as Array)+(out.faceoffs as Array)
 	out.battles=BattleMarks.place((inputs.get("battles",[]) as Array).slice(0,Model.MAX_BATTLES),lines,float(out.sigma))
 	for index in lines.size():
 		var line:Dictionary=lines[index]
-		line["heat"]=BattleMarks.heat(line.points,out.battles,index,float(out.sigma))
+		line["heat"]=_coverage_heat(line,inputs.get("battles",[])) if bool(line.get("deployed",false)) else BattleMarks.heat(line.points,out.battles,index,float(out.sigma))
 	var fought:Dictionary={}
 	for battle in out.battles:
 		if not bool(battle.get("ours",false)): continue
@@ -1380,6 +1357,24 @@ static func compose(inputs:Dictionary)->Dictionary:
 	out.echelons=(inputs.get("echelons",[]) as Array).slice(0,MAX_ECHELONS)
 	out.marks=_marks(inputs,friendly,enemy,out)
 	return out
+
+
+## Both sides of an actual contact can heat; a stale observation cannot.
+## Use recorded battle positions, never the chart's optional label snap.
+static func _coverage_heat(front:Dictionary,battles:Array)->PackedFloat32Array:
+	var points:PackedVector2Array=front.points
+	var heat:=PackedFloat32Array();heat.resize(points.size())
+	var ages:PackedFloat32Array=front.get("age",PackedFloat32Array())
+	if bool(front.get("stale",false)) or (not ages.is_empty() and ages[0]>0.0):return heat
+	var radius:=maxf(0.08,float(front.get("sigma",1.0))*0.6)
+	for battle:Dictionary in battles.slice(0,Model.MAX_BATTLES):
+		if bool(battle.get("skirmish",false)) or int(battle.get("age_days",0))>0 or String(battle.get("kind","battle"))=="siege":continue
+		if String(battle.get("status","fighting"))!="fighting":continue
+		var at:Vector2=battle.get("pos",Vector2(float(battle.get("x",0.0)),float(battle.get("z",0.0))))
+		for i in points.size():
+			var distance:=points[i].distance_to(at)/radius
+			if distance<=3.0:heat[i]=maxf(heat[i],exp(-distance*distance))
+	return heat
 
 
 ## The forces themselves: ours from the generals' own reports, theirs only
@@ -1464,7 +1459,7 @@ static func _cap(text:String)->String:
 ## Primitive counts, for probes and tests (bounded regardless of armies).
 static func primitive_count(built:Dictionary)->int:
 	var total:=0
-	for key in ["fronts","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings","battles"]: total+=(built.get(key,[]) as Array).size()
+	for key in ["fronts","political","faceoffs","fallbacks","supply","arrows","objectives","clashes","pockets","sieges","raids","zones","lanes","echelons","harbours","withdrawals","sightings","battles"]: total+=(built.get(key,[]) as Array).size()
 	return total
 
 
@@ -1533,6 +1528,7 @@ func _draw()->void:
 	if pulse_layer!=null: pulse_layer.queue_redraw()
 	if scene.is_empty(): placed_captions.clear(); return
 	var band:=_band()
+	_draw_political_edges(band)
 	if band=="ground":
 		# Up close only the forces' small paper cards stay, placed clear of
 		# the town cards; the front and its ink stand aside for the ground,
@@ -1540,7 +1536,7 @@ func _draw()->void:
 		var step_near:=_world_per_px(_centre_of_scene())*14.0
 		for index in live_fronts.size():
 			var entry:Dictionary=live_fronts[index]
-			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("border",false)): _draw_front(entry,"local",step_near)
+			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("deployed",false)): _draw_front(entry,"local",step_near)
 		_draw_marks(band,[],[])
 		_letter_captions(T.voice_font(true))
 		last_draw_usec=Time.get_ticks_usec()-started
@@ -1617,7 +1613,7 @@ func _draw()->void:
 	if not wide:
 		for entry in live_fronts:
 			var data:Dictionary=entry.data
-			if not bool(data.get("stale",false)) or float(entry.target_alpha)<=0.0: continue
+			if bool(data.get("deployed",false)) or not bool(data.get("stale",false)) or float(entry.target_alpha)<=0.0: continue
 			var ages:PackedFloat32Array=data.age
 			var oldest:=0; var where:=0
 			for k in ages.size():
@@ -1629,10 +1625,10 @@ func _draw()->void:
 
 # --- Battles ---------------------------------------------------------------------------
 
-## Where each battle stands on screen now: ours on the front, a siege's on
-## its ring clear of the town's own pin; far out, battles close together
-## stand as one. Kept for the forces' clearance, the lettering and the
-## pulse canvas. [{at, battle, radius, rect, live, phase, group?}]
+## The contact stays on the ground; its readout stands clear of the fighting.
+## At a distance nearby fights share one plate. These exact bounds also keep
+## counters and captions clear and supply the pointer's hit region.
+## [{at, contact_at, battle, radius, rect, live, phase, group?}]
 func _battle_entries(band:String)->Array:
 	var entries:Array=[]
 	var battles:Array=scene.get("battles",[])
@@ -1662,13 +1658,29 @@ func _battle_entries(band:String)->Array:
 			if (group.members as Array).size()==1: grouped.append(group.members[0])
 			else: grouped.append({"at":group.at,"battle":(group.members[0] as Dictionary).battle,"group":group})
 		entries=grouped
+	var chart:=_caption_obstacles()
+	var blocked:Array[Rect2]=[]
+	blocked.append_array(chart.rects)
+	var contacts:Array[Rect2]=[]
+	for entry in entries:
+		contacts.append(Rect2((entry.at as Vector2)-Vector2(42,42),Vector2(84,84)))
+	# Reserve likely counter positions too. The final counters then avoid the
+	# chosen battle plates, so neither can cover the other in a crowded fight.
+	for mark in scene.get("marks",[]):
+		var at:=_screen(mark.pos)
+		if not at.is_finite(): continue
+		var extent:=Counter.plate_size(_counter_scale(band)) if _counters(band) else Vector2(30,30)
+		blocked.append(Rect2(at-extent*0.5,extent).grow(8.0))
 	for entry in entries:
 		var battle:Dictionary=entry.battle
 		var s:=_mark_scale(battle,band)
 		var r:=BattleMarks.MARK_RADIUS*s
-		var bar:=BattleMarks.BAR_WIDTH*maxf(0.75,s)
 		entry["radius"]=r+3.0
-		entry["rect"]=BattleMarks.plate_rect(entry.at,s).grow(2.0) if not entry.has("group") else Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
+		var footprint:=BattleMarks.cluster_rect(Vector2.ZERO,entry.group) if entry.has("group") else BattleMarks.plate_rect(Vector2.ZERO,s,battle).grow(2.0)
+		entry["contact_at"]=entry.at
+		entry["rect"]=place_battle_plate(entry.contact_at,footprint.size,chart.bounds,blocked,contacts)
+		entry["at"]=(entry.rect as Rect2).position-footprint.position
+		blocked.append((entry.rect as Rect2).grow(8.0))
 		entry["live"]=int(battle.get("age_days",0))==0
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
 		if bool(entry.live): pulse_live=true
@@ -1677,10 +1689,34 @@ func _battle_entries(band:String)->Array:
 	return entries
 
 
+## A fixed number of anchor-relative candidates: stable when the map is
+## still, inside the HUD, and strongly biased away from the actual contact.
+## Pure geometry so small-window and crowded-map behavior can be exercised.
+static func place_battle_plate(contact:Vector2,extent:Vector2,bounds:Rect2,blocked:Array[Rect2],contacts:Array[Rect2])->Rect2:
+	var dx:=extent.x*0.5+60.0; var dy:=extent.y*0.5+62.0
+	var offsets:Array[Vector2]=[Vector2(dx,0),Vector2(-dx,0),Vector2(dx,-dy),Vector2(-dx,-dy),Vector2(dx,dy),Vector2(-dx,dy),
+		Vector2(0,-dy),Vector2(0,dy),Vector2(dx,-dy*2),Vector2(-dx,-dy*2),Vector2(dx,dy*2),Vector2(-dx,dy*2),
+		Vector2(dx*1.7,0),Vector2(-dx*1.7,0),Vector2(0,-dy*2.5),Vector2(0,dy*2.5)]
+	var best:=Rect2(); var least:=INF
+	for offset in offsets:
+		var pos:=contact+offset-extent*0.5
+		pos=pos.clamp(bounds.position,(bounds.end-extent).max(bounds.position))
+		var box:=Rect2(pos,extent)
+		var cost:=contact.distance_to(box.get_center())*0.02
+		if not bounds.encloses(box):cost+=1e8
+		for clear in contacts:
+			if box.intersects(clear):cost+=1e7+box.intersection(clear).get_area()*100.0
+		for obstacle in blocked:
+			if box.grow(4.0).intersects(obstacle):cost+=box.grow(4.0).intersection(obstacle).get_area()*10.0
+		if cost<least:least=cost;best=box
+	return best
+
+
 ## One battle's mark: by the map's band, a little larger for a great battle
 ## than for a fight of bands (a host of 30,000 reads apart from 300 at a
 ## glance), smaller for a skirmish.
 static func _mark_scale(battle:Dictionary,band:String)->float:
+	if band in ["continental","world"]: return _battle_scale(band)
 	var men:=float(maxi(1,_battle_men(battle)))
 	var great:=1.0+clampf(log(men/300.0)/log(10.0)*0.18,0.0,0.45)
 	return _battle_scale(band)*great*(0.8 if bool(battle.get("skirmish",false)) else 1.0)
@@ -1709,6 +1745,12 @@ func _draw_battles(entries:Array,band:String)->void:
 	for e in ours_by_size.slice(0,5): biggest[String(e.battle.get("id",""))]=true
 	for entry in entries:
 		var at:Vector2=entry.at
+		var contact:Vector2=entry.get("contact_at",at)
+		var edge:=_edge_toward(entry.rect,contact)
+		var start:=contact+contact.direction_to(edge)*9.0
+		draw_line(start,edge,Color(PAPER,0.65),3.0,true)
+		draw_line(start,edge,Color(INK,0.65),1.0,true)
+		draw_circle(contact,2.2,Color(OXBLOOD,0.9))
 		if entry.has("group"):
 			var group:Dictionary=entry.group
 			var members:Array=[]
@@ -1717,18 +1759,18 @@ func _draw_battles(entries:Array,band:String)->void:
 			var places:=PackedStringArray()
 			for battle in members.slice(0,3): places.append(String(battle.get("place_name","")))
 			var line:="%s: %s" % [BattleMarks.aggregate_label(members.size()),", ".join(places)]
-			_request_caption("battles:%s" % String((members[0] as Dictionary).get("id","")),Vector2.INF,BattleMarks.aggregate_label(members.size()),INK,6,float(entry.radius)+12.0,at,"plate")
-			hits.append({"kind":"battles","centre":at,"radius":float(entry.radius)+4.0,"battles":members,"line":line})
+			hits.append({"kind":"battles","rect":entry.rect,"centre":(entry.rect as Rect2).get_center(),"contact":contact,"contact_radius":11.0,"battles":members,"line":line})
 			continue
 		var battle:Dictionary=entry.battle
 		var scale:=_mark_scale(battle,band)
 		var plate:=BattleMarks.draw_battle(self,at,battle,era,scale)
-		if band!="world":
+		if not wide or String(battle.get("id",""))==hover_id:
 			var id:=String(battle.get("id",""))
 			var priority:=8 if id==hover_id else (6 if biggest.has(id) else (5 if bool(battle.get("ours",false)) else 4))
 			# Set out to the side of the front with a leader line, not on it.
-			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,float(entry.radius)+(16.0 if wide else 22.0),at,"plate")
-		hits.append({"kind":"battle","centre":plate.get_center(),"radius":plate.size.x*0.5+2.0,"battle":battle,"line":String(battle.get("hover",""))})
+			_request_caption("battle:%s" % id,Vector2.INF,String(battle.get("label","")),OXBLOOD if bool(battle.get("ours",false)) else INK,priority,plate.size.x*0.5+8.0,plate.get_center(),"plate")
+			if String(battle.get("label",""))!="":caption_requests[-1]["attach_rect"]=plate
+		hits.append({"kind":"battle","rect":plate,"centre":plate.get_center(),"contact":contact,"contact_radius":11.0,"battle":battle,"line":String(battle.get("hover",""))})
 
 
 ## The fighting's own motion, on the pulse canvas behind the chart's ink:
@@ -1745,8 +1787,10 @@ func draw_animated(canvas:CanvasItem)->void:
 		var heat:PackedFloat32Array=run.heat
 		var alpha:=float(run.alpha)*float(run.peak)
 		var wide:=bool(run.wide)
-		canvas.draw_polyline(points,Color(THEIRS_WASH,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
-		canvas.draw_polyline(points,Color(THEIRS,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
+		var ink:Color=run.get("ink",THEIRS)
+		var wash:Color=run.get("wash",THEIRS_WASH)
+		canvas.draw_polyline(points,Color(wash,(0.22+0.12*breath)*alpha),18.0 if wide else 30.0,true)
+		canvas.draw_polyline(points,Color(ink,(0.35+0.2*breath)*alpha),10.0 if wide else 16.0,true)
 		# Teeth biting into their side from the edge of the ink, about every
 		# 14 px, in a slow wave running along the stretch being fought over.
 		var n:=points.size()
@@ -1763,11 +1807,11 @@ func draw_animated(canvas:CanvasItem)->void:
 			var tooth:=((6.0 if wide else 8.0)+(6.0 if wide else 9.0)*h)*wave
 			var base:=a+normals[i]*edge
 			var tri:=PackedVector2Array([base-along*5.0,base+along*5.0,base+normals[i]*tooth])
-			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(THEIRS,0.95*float(run.alpha)))
+			if _fillable(tri): canvas.draw_colored_polygon(tri,Color(ink,0.95*float(run.alpha)))
 	if still: return
 	for entry in battle_cache:
 		if not bool(entry.get("live",false)): continue
-		var at:Vector2=entry.at
+		var at:Vector2=entry.get("contact_at",entry.at)
 		var r:=float(entry.radius)
 		var u:=fposmod(t/PULSE_PERIOD+float(entry.phase),1.0)
 		var spread:=1.0-(1.0-u)*(1.0-u)
@@ -1784,8 +1828,17 @@ func battle_at(point:Vector2)->Dictionary:
 	for hit in hits:
 		if not String(hit.get("kind","")) in ["battle","battles","sector"]: continue
 		var d:=(hit.centre as Vector2).distance_to(point)
-		if d<=float(hit.radius) and d<best_distance: best_distance=d; best=hit
+		if _hit_contains(hit,point) and d<best_distance: best_distance=d; best=hit
 	return best
+
+
+## Paper plates have rectangular hit regions. The tiny ground contact is
+## also clickable, without making the blank space around the card active.
+static func _hit_contains(hit:Dictionary,point:Vector2)->bool:
+	if hit.has("rect"):
+		if (hit.rect as Rect2).has_point(point):return true
+		return hit.has("contact") and (hit.contact as Vector2).distance_to(point)<=float(hit.get("contact_radius",0.0))
+	return hit.has("centre") and (hit.centre as Vector2).distance_to(point)<=float(hit.get("radius",0.0))
 
 
 ## How a battle is opened: our battles in the battle view (the game's own
@@ -1902,12 +1955,129 @@ static func _fillable(polygon:PackedVector2Array)->bool:
 	return absf(area)>4.0 and Geometry2D.triangulate_polygon(polygon).size()>0
 
 
-## The front: a soft band of each side's colour either side of the line (the
-## ground each holds), a paper halo, an ink line whose weight follows how
-## massed the two sides are, and oxblood teeth pointing into the enemy.
-## Stretches derived from stale reports are dashed and paler.
+## The quiet boundary remains visible through a breach. It has no teeth,
+## strength chips or battle heat: those belong to the forces holding it.
+func _draw_political_edges(band:String)->void:
+	if band=="ground":return
+	var wide:=band in ["continental","world"]
+	for edge:Dictionary in scene.get("political",[]):
+		var points:=_poly(edge.points)
+		if points.size()<2:continue
+		_dashed(points,Color(PAPER,0.38),3.0 if wide else 4.0,4.0,7.0)
+		_dashed(points,Color(INK,0.40),1.0 if wide else 1.4,4.0,7.0)
+
+
+## One actual defended sector. The rounded ink body ends at its published
+## coverage, so a loss of men visibly opens ground between neighbouring
+## worms. No spline, glow or interpolation joins separate sectors.
+func _draw_deployed_front(entry:Dictionary,band:String)->void:
+	var data:Dictionary=entry.data
+	var points:=_poly(entry.points)
+	if points.size()<2:return
+	var bounds:=Rect2(points[0],Vector2.ZERO)
+	for point:Vector2 in points:bounds=bounds.expand(point)
+	if not Rect2(Vector2.ZERO,size).grow(48.0).intersects(bounds.grow(1.0)):return
+	var ours:=bool(data.get("ours",true))
+	var wide:=band in ["continental","world"]
+	var ink:=OURS if ours else THEIRS
+	var wash:=OURS_WASH if ours else THEIRS_WASH
+	var alpha:=clampf(float(entry.get("alpha",1.0)),0.0,1.0)
+	var ages:PackedFloat32Array=data.get("age",PackedFloat32Array())
+	var age:=float(ages[0]) if not ages.is_empty() else 0.0
+	var stale:=bool(data.get("stale",false))
+	if stale:alpha*=0.52
+	var source:PackedVector2Array=data.points
+	var toward:PackedVector2Array=data.toward
+	var heat:PackedFloat32Array=data.get("heat",PackedFloat32Array())
+	var weights:PackedFloat32Array=data.width
+	var normal:=PackedVector2Array();var heat_at:=PackedFloat32Array()
+	var n:=points.size()
+	var middle:Vector2=(entry.points as PackedVector2Array)[n/2]
+	var eps:=maxf(0.0001,float(data.get("sigma",1.0))*0.05)
+	var origin:=_screen(middle)
+	var ex:=(_screen(middle+Vector2(eps,0.0))-origin)/eps
+	var ey:=(_screen(middle+Vector2(0.0,eps))-origin)/eps
+	for i in n:
+		var j:=clampi(roundi(float(i)*float(source.size()-1)/float(n-1)),0,source.size()-1)
+		var along:=(points[mini(i+1,n-1)]-points[maxi(0,i-1)]).normalized()
+		var side:=along.orthogonal()
+		var projected:=ex*toward[j].x+ey*toward[j].y
+		if side.dot(projected)<0.0:side=-side
+		normal.append(side);heat_at.append(float(heat[j]) if j<heat.size() else 0.0)
+	var body:=(3.5 if wide else 5.0)+(float(weights[0]) if not weights.is_empty() else 0.5)*(2.0 if wide else 3.5)
+	# Each side's body sits behind the shared contact seam, so coincident
+	# observed coverage shows two facing armies rather than one overpainted
+	# colour. This is screen-space clearance, not a shift of held ground.
+	points=_offset(points,normal,-body*0.58)
+	if stale:
+		_dashed(points,Color(PAPER,0.75*alpha),body+3.0,7.0,6.0)
+		_dashed(points,Color(ink,alpha),body,7.0,6.0)
+	else:
+		# A paper rim cuts through terrain detail. The shaded back and fine
+		# inner highlight give the long line a quiet, substantial body.
+		draw_polyline(_offset(points,normal,-body*0.55),Color(wash,0.20*alpha),body*2.4,true)
+		draw_polyline(points,Color(PAPER,0.88*alpha),body+4.0,true)
+		draw_polyline(points,Color(INK,0.82*alpha),body+1.8,true)
+		draw_polyline(points,Color(ink,alpha),body,true)
+		draw_polyline(_offset(points,normal,-body*0.16),Color(wash.lerp(PAPER,0.38),0.75*alpha),maxf(1.0,body*0.23),true)
+		# Rounded endcaps expose the exact ends of a held sector. The guard
+		# hatches face the opponent; their spacing is in pixels, not people.
+		for end:int in [0,n-1]:
+			draw_circle(points[end],body*0.5,Color(ink,alpha))
+			draw_circle(points[end],1.3,Color(PAPER,0.80*alpha))
+		var walked:=0.0
+		for i in range(1,n):
+			walked+=points[i-1].distance_to(points[i])
+			if walked<(32.0 if wide else 28.0):continue
+			walked=0.0
+			if heat_at[i]>0.3 and not Motion.reduced():continue
+			var at:=points[i];var side:=normal[i]
+			var along:=(points[i]-points[i-1]).normalized()
+			var tooth:=PackedVector2Array([at-along*3.2,at+along*3.2,at+side*(6.0 if wide else 8.0)])
+			if _fillable(tooth):draw_colored_polygon(tooth,Color(ink,alpha))
+		var hot_points:=PackedVector2Array();var hot_normals:=PackedVector2Array();var hot_heat:=PackedFloat32Array()
+		for i in n:
+			if heat_at[i]>0.06:
+				hot_points.append(points[i]);hot_normals.append(normal[i]);hot_heat.append(heat_at[i])
+			else:
+				if hot_points.size()>=2:_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide,ink,wash)
+				hot_points=PackedVector2Array();hot_normals=PackedVector2Array();hot_heat=PackedFloat32Array()
+		if hot_points.size()>=2:_keep_hot(hot_points,hot_normals,hot_heat,alpha,wide,ink,wash)
+	var armies:Array=data.get("armies",[])
+	var combat:=bool(data.get("combat",false))
+	hits.append({"kind":"front","line":points,"armies":armies,"stale":stale,"deployed":not combat,"combat":combat,"battle_id":String(data.get("battle_id","")),"ours":ours,"troops":int(data.get("troops",0)),"age":roundi(age),"name":String(data.get("name",""))})
+	front_chunks.append_array(front_obstacles(points,body+4.0))
+	if not combat and not wide and age>0.0 and bounds.size.length()>110.0:
+		var words:="Line reported %dd ago" % roundi(age) if ours else "Line last seen %dd ago" % roundi(age)
+		var midpoint:=points[n/2]-normal[n/2]*(body+17.0)
+		_request_caption(String(data.id),(entry.points as PackedVector2Array)[n/2],words,ink,3,10.0,midpoint,"plate")
+
+
+## Follow a curved front with narrow chunks; its empty interior is not ink.
+## At most sixteen boxes per front keep placement work bounded.
+static func front_obstacles(points:PackedVector2Array,padding:float)->Array[Rect2]:
+	var boxes:Array[Rect2]=[]
+	if points.size()<2:return boxes
+	var bounds:=Rect2(points[0],Vector2.ZERO)
+	for point in points:bounds=bounds.expand(point)
+	# A tiny contact ribbon has many vertices for its motion, but occupies
+	# just a few screen pixels. One box reserves that complete footprint.
+	if bounds.size.length()<=48.0:
+		boxes.append(bounds.grow(padding))
+		return boxes
+	var stride:=maxi(1,ceili(float(points.size()-1)/16.0))
+	for start in range(0,points.size()-1,stride):
+		var box:=Rect2(points[start],Vector2.ZERO)
+		for i in range(start+1,mini(points.size(),start+stride+1)):box=box.expand(points[i])
+		boxes.append(box.grow(padding))
+	return boxes
+
+
 func _draw_front(entry:Dictionary,band:String,_step:float)->void:
 	var data:Dictionary=entry.get("data",{})
+	if bool(data.get("deployed",false)):
+		_draw_deployed_front(entry,band)
+		return
 	# Where it has eased to, plus any surge running where a battle ended or a
 	# town changed hands.
 	var world:=_bulged(entry.points)
@@ -2075,10 +2245,10 @@ func _front_run(run:PackedVector2Array,stale:bool,base:float,alpha:float)->void:
 
 
 ## A stretch of front being fought over, kept for the pulse canvas.
-func _keep_hot(points:PackedVector2Array,normals:PackedVector2Array,heat:PackedFloat32Array,alpha:float,wide:bool)->void:
+func _keep_hot(points:PackedVector2Array,normals:PackedVector2Array,heat:PackedFloat32Array,alpha:float,wide:bool,ink:Color=THEIRS,wash:Color=THEIRS_WASH)->void:
 	var peak:=0.0
 	for h in heat: peak=maxf(peak,h)
-	hot_cache.append({"points":points,"normals":normals,"heat":heat,"peak":peak,"alpha":alpha,"wide":wide})
+	hot_cache.append({"points":points,"normals":normals,"heat":heat,"peak":peak,"alpha":alpha,"wide":wide,"ink":ink,"wash":wash})
 
 
 ## A pocket: the ring closing on them, hatched inside, the gap still open
@@ -2248,13 +2418,15 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 	drawn_marks.clear()
 	counter_rects.clear()
 	counter_obstacles.clear()
+	counter_fixed.clear()
 	if _counters(band):
-		counter_bounds=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
-		var cities:=_city_labels()
-		if cities!=null and cities.has_method("chart_obstacles"):
-			var chart:Dictionary=cities.chart_obstacles()
-			counter_obstacles.append_array(chart.get("rects",[]))
-			if (chart.get("bounds",Rect2()) as Rect2).has_area(): counter_bounds=chart.bounds
+		var chart:=_chart_obstacles()
+		counter_bounds=chart.bounds
+		counter_fixed.append_array(chart.rects)
+		counter_obstacles.append_array(front_chunks)
+		for battle in battles:
+			counter_fixed.append((battle.rect as Rect2).grow(5.0))
+			counter_fixed.append(Rect2((battle.get("contact_at",battle.at) as Vector2)-Vector2(30,30),Vector2(60,60)))
 	var marks:Array=scene.get("marks",[])
 	if marks.is_empty(): return
 	var candidates:Array=[]
@@ -2279,7 +2451,7 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 		var line:=_poly(_bulged(entry.points))
 		if line.size()>=2: fronts.append(line)
 	var clear:Array=[]
-	for battle in battles: clear.append({"at":battle.at,"clear":float(battle.get("radius",14.0))+4.0})
+	for battle in battles: clear.append({"at":battle.get("contact_at",battle.at),"clear":float(battle.get("radius",14.0))+4.0})
 	var laid:=ArmyMarks.layout(candidates,{"band":band,"bounds":Rect2(Vector2.ZERO,size),"fronts":fronts,"echelons":echelons_drawn,"home":_screen(scene.get("home",Vector2.ZERO)),
 		"battles":clear,"sector_px":float(SECTOR_PX.get(band,0.0))})
 	for entry in laid.drawn:
@@ -2395,29 +2567,105 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 
 ## Where a counter's plate stands: just below its spot, or above, beside,
 ## aslant or further off, whichever first keeps clear of the town cards and
-## the counters already drawn and stays on the chart; when none is clear, the
-## one that covers least.
+## the counters already drawn and stays on the chart. If the local ring is
+## full, search a bounded grid for the nearest free patch of the chart.
 func _counter_spot(at:Vector2,plate:Vector2,scale:float)->Vector2:
 	var gap:=7.0*scale
 	var dx:=plate.x*0.5+gap*1.6; var dy:=plate.y*0.5+gap
 	var tries:=[Vector2(0.0,dy),Vector2(0.0,-dy),Vector2(dx,0.0),Vector2(-dx,0.0),Vector2(dx,dy),Vector2(-dx,dy),Vector2(dx,-dy),Vector2(-dx,-dy),
-		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0)),Vector2(dx*1.6,0.0),Vector2(-dx*1.6,0.0)]
-	var best:Vector2=at+(tries[0] as Vector2); var least:=INF
+		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0)),Vector2(dx*1.6,0.0),Vector2(-dx*1.6,0.0),
+		Vector2(dx*2.2,-dy*2),Vector2(-dx*2.2,-dy*2),Vector2(dx*2.2,dy*2),Vector2(-dx*2.2,dy*2),Vector2(0,-dy*3.5),Vector2(0,dy*3.5)]
+	var best:=Vector2.INF; var least:=INF
 	for offset:Vector2 in tries:
 		var box:=Rect2(at+offset-plate*0.5,plate).grow(3.0)
-		var cover:=0.0
-		if counter_bounds.has_area() and not counter_bounds.encloses(box): cover+=1e6
-		for r:Rect2 in counter_obstacles:
-			if box.intersects(r): cover+=box.intersection(r).get_area()
-		for r:Rect2 in counter_rects:
-			if box.intersects(r): cover+=box.intersection(r).get_area()*2.0
-		if cover<=0.0: return at+offset
-		if cover<least: least=cover; best=at+offset
+		if counter_bounds.has_area():box.position=box.position.clamp(counter_bounds.position,(counter_bounds.end-box.size).max(counter_bounds.position))
+		var cover:=_counter_cover(box)
+		if cover<=0.0: return box.get_center()
+		var score:=cover*100.0+at.distance_to(box.get_center())*0.001
+		if score<least: least=score; best=box.get_center()
+	var extent:=plate+Vector2(6,6)
+	var room:=(counter_bounds.size-extent).max(Vector2.ZERO)
+	var columns:=clampi(ceili(room.x/maxf(40.0,plate.x*0.5)),1,24)
+	var rows:=clampi(ceili(room.y/maxf(24.0,plate.y*0.75)),1,18)
+	# Zero-overlap wins; distance chooses the nearest among those free spots.
+	for y in rows+1:
+		for x in columns+1:
+			var box:=Rect2(counter_bounds.position+room*Vector2(float(x)/columns,float(y)/rows),extent)
+			var distance:=at.distance_to(box.get_center())*0.001
+			# Coverage can only add cost. Once a nearby free patch is found,
+			# farther candidates cannot improve it and need no obstacle scan.
+			if distance>=least:continue
+			var cover:=_counter_cover(box)
+			if cover==INF:continue
+			var score:=cover*100.0+distance
+			if score<least:least=score;best=box.get_center()
 	return best
+
+
+func _counter_cover(box:Rect2)->float:
+	if counter_bounds.has_area() and not counter_bounds.encloses(box):return INF
+	for rect in counter_fixed:
+		if box.intersects(rect):return INF
+	for rect in counter_rects:
+		if box.intersects(rect):return INF
+	var cover:=0.0
+	for rect in counter_obstacles:
+		if box.intersects(rect):cover+=box.intersection(rect).get_area()
+	return cover
 
 ## The point on a plate's edge nearest a spot (where its tie line meets it).
 static func _edge_toward(rect:Rect2,spot:Vector2)->Vector2:
 	return Vector2(clampf(spot.x,rect.position.x,rect.end.x),clampf(spot.y,rect.position.y,rect.end.y))
+
+
+## Room for the paper's side tab and shoulder badges, as well as its body.
+## This is clearance only; pointer bounds come from Counter.draw itself.
+static func counter_clearance(data:Dictionary,scale:float)->Rect2:
+	var extent:=Counter.plate_size(scale,data)
+	var rect:=Rect2(-extent*0.5,extent).grow(9.0*scale)
+	var days:=int(data.get("days_left",0))
+	var march:=data.has("march_done")
+	var words:="%d %s" % [days,"day" if days==1 else "days"] if march and days>0 else ("" if march else String(data.get("tab","")))
+	if words!="":
+		var width:=T.font("ui_strong").get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,maxi(9,roundi(12.0*scale))).x
+		rect.size.x+=width+(18.0 if march else 10.0)*scale
+	return rect
+
+
+## A tie belongs beneath every paper card. Later cards naturally paint over
+## earlier ties; clip against cards already painted and fixed HUD furniture.
+static func clear_tie_segments(from:Vector2,to:Vector2,blocked:Array[Rect2])->Array[PackedVector2Array]:
+	var spans:Array[Vector2]=[Vector2(0,1)]
+	var direction:=to-from
+	for box in blocked:
+		var enter:=0.0;var leave:=1.0
+		var intersects:=true
+		for axis in 2:
+			if absf(direction[axis])<0.0001:
+				if from[axis]<box.position[axis] or from[axis]>box.end[axis]:intersects=false;break
+				continue
+			var first:float=(box.position[axis]-from[axis])/direction[axis]
+			var last:float=(box.end[axis]-from[axis])/direction[axis]
+			enter=maxf(enter,minf(first,last));leave=minf(leave,maxf(first,last))
+			if enter>=leave:intersects=false;break
+		if not intersects:continue
+		var remaining:Array[Vector2]=[]
+		for span in spans:
+			if leave<=span.x or enter>=span.y:remaining.append(span);continue
+			if enter>span.x:remaining.append(Vector2(span.x,enter))
+			if leave<span.y:remaining.append(Vector2(leave,span.y))
+		spans=remaining
+		if spans.is_empty():break
+	var segments:Array[PackedVector2Array]=[]
+	for span in spans:
+		if direction.length()*(span.y-span.x)>0.5:segments.append(PackedVector2Array([from+direction*span.x,from+direction*span.y]))
+	return segments
+
+
+func _draw_counter_tie(from:Vector2,to:Vector2,ink:Color,width:float)->void:
+	var blocked:Array[Rect2]=counter_fixed.duplicate()
+	blocked.append_array(counter_rects)
+	for segment in clear_tie_segments(from,to,blocked):draw_line(segment[0],segment[1],ink,width,true)
 
 ## A force as a HOI4 counter: the plate stands just below its spot, a short
 ## stroke ties it to the ground it holds, and the plate is what a click finds.
@@ -2432,16 +2680,18 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	if not ours and not bool(entry.get("hostile",true)): accent=Color("#b89a5a")
 	elif not ours and CivilizationSystem._civilization_index(String(entry.get("owner","")))>=0: accent=preload("res://scripts/city_map_identity.gd").foreign(String(entry.owner)).accent
 	var scale:=_counter_scale(band)
-	var plate:=Counter.plate_size(scale)
-	var centre:=_counter_spot(at,plate,scale)
+	var data:=counter_data(entry,accent)
+	var plate:=Counter.plate_size(scale,data)
+	var clearance:=counter_clearance(data,scale)
+	var centre:=_counter_spot(at,clearance.size,scale)-clearance.get_center()
+	if not centre.is_finite():return
 	# The spot it stands on, and where it stepped aside from.
 	var ink:=INK if ours else THEIRS.darkened(0.25)
 	if bool(entry.get("moved",false)) and (entry.anchor as Vector2).distance_to(at)>3.0:
-		draw_line(entry.anchor,at,Color(ink,0.5*alpha),1.0,true)
-	draw_line(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4,true)
+		_draw_counter_tie(entry.anchor,at,Color(ink,0.5*alpha),1.0)
+	_draw_counter_tie(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4)
 	draw_circle(at,2.6*scale,Color(PAPER,0.9*alpha))
 	draw_circle(at,1.8*scale,Color(ink,alpha))
-	var data:=counter_data(entry,accent)
 	var heading:Vector2=entry.get("heading",Vector2.ZERO)
 	if heading.length_squared()>0.0:
 		var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
@@ -2454,16 +2704,28 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		draw_rect(rect.grow(7.0),Color(Counter.GOLD,0.22),false,6.0)
 		draw_rect(rect.grow(3.5),Counter.GOLD,false,2.5)
 	entry["plate_rect"]=rect
-	counter_rects.append(rect)
+	counter_rects.append(Rect2(centre+clearance.position,clearance.size))
 	var reach:=maxf(plate.x,plate.y)*0.5
-	if bool(entry.get("sector",false)) and not bool(entry.get("card",false)): _request_caption("sector:%s" % String(entry.id),Vector2.INF,ArmyMarks.sector_words(entry),OURS if ours else THEIRS,3 if ours else 2,reach+8.0,centre,"plate")
-	if bool(entry.get("card",false)): _request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5 if bool(entry.get("selected",false)) else (3 if ours else 2),reach+6.0,centre)
+	var expanded:=bool(entry.get("selected",false)) or _pointed(entry)
+	if expanded:
+		_request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5,reach+6.0,centre)
+	else:
+		_request_caption("mark:%s" % String(entry.id),Vector2.INF,counter_caption(entry),OURS if ours else THEIRS,3,reach+6.0,centre,"plate")
 	if bool(entry.get("garrison",false)): return
-	if ours: hits.append({"kind":"army","centre":rect.get_center(),"radius":reach,"army_id":int(entry.army_id),"mark":true})
+	if ours: hits.append({"kind":"army","rect":rect,"centre":rect.get_center(),"army_id":int(entry.army_id),"mark":true})
 	else:
 		var sighting:Dictionary=(entry.get("sighting",{}) as Dictionary).duplicate()
 		sighting["noun"]=String(entry.get("noun","host"))
-		hits.append({"kind":"sighting","centre":rect.get_center(),"radius":reach,"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
+		hits.append({"kind":"sighting","rect":rect,"centre":rect.get_center(),"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
+
+
+## The counter already carries its number, kit and state. Keep only dated
+## intelligence beside it by default; selecting or pointing from the army
+## bar restores the full identity card, and clicking still opens its note.
+static func counter_caption(entry:Dictionary)->String:
+	var ours:=String(entry.get("side","ours"))=="ours"
+	var age:=int(entry.get("report_age",0)) if ours else int(entry.get("age_days",0))
+	return ArmyMarks.age_words(age,"reported" if ours else "seen")
 
 
 ## The drafts coming to a band: on the road and still in drill at home
@@ -2513,7 +2775,7 @@ func mark_at(point:Vector2)->Dictionary:
 	for hit in hits:
 		if not bool(hit.get("mark",false)): continue
 		var d:=(hit.centre as Vector2).distance_to(point)
-		if d<=float(hit.radius) and d<best_distance: best_distance=d; best=hit
+		if _hit_contains(hit,point) and d<best_distance: best_distance=d; best=hit
 	return best
 
 
@@ -2954,9 +3216,10 @@ func _caption_size(text:String,font:Font,style:="card")->Vector2:
 	return caption_extent[key]
 
 
-## Everything the captions must keep clear of: city cards and pins, great
-## works, the war tags, army and contact counters, and the open note.
-func _caption_obstacles()->Dictionary:
+## The current chart furniture, shared by battle plates, army counters and
+## captions. Read real visible control bounds so opened HUD panels do not
+## become places where the map silently puts a clickable army.
+func _chart_obstacles()->Dictionary:
 	var rects:Array[Rect2]=[]
 	var pins:Array=[]
 	var bounds:=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
@@ -2968,6 +3231,23 @@ func _caption_obstacles()->Dictionary:
 	var tags:Variant=get_parent().get_node_or_null("WarMapOverlay") if get_parent()!=null else null
 	if tags!=null:
 		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
+	var hud:Variant=terrain.get("hud") if is_instance_valid(terrain) else null
+	if hud is Control:
+		for key in ["army_bar","order_stack","queue_root","toolbar","dock","detail_dock","army_alerts"]:
+			var panel:Variant=hud.get(key)
+			if panel is Control and (panel as Control).is_visible_in_tree():rects.append((panel as Control).get_global_rect().grow(6.0))
+	if is_instance_valid(terrain):
+		var help:Variant=terrain.get("map_help_button")
+		if help is Control and (help as Control).is_visible_in_tree():rects.append((help as Control).get_global_rect().grow(6.0))
+	if note!=null and note.visible:rects.append(note.get_global_rect())
+	return {"rects":rects,"pins":pins,"bounds":bounds}
+
+
+## Everything the captions must keep clear of, including the map ink.
+func _caption_obstacles()->Dictionary:
+	var chart:=_chart_obstacles()
+	var rects:Array[Rect2]=chart.rects
+	var pins:Array=chart.pins
 	for entry in drawn_marks:
 		if entry.has("plate_rect"):
 			rects.append((entry.plate_rect as Rect2).grow(4.0))
@@ -2980,11 +3260,20 @@ func _caption_obstacles()->Dictionary:
 	# Battle marks, and the bar hanging beneath each.
 	for entry in battle_cache:
 		rects.append(entry.rect)
-		pins.append({"at":entry.at,"clear":float(entry.radius)+2.0})
+		pins.append({"at":entry.get("contact_at",entry.at),"clear":float(entry.radius)+12.0})
 	# The fronts: names never sit on the line.
 	rects.append_array(front_chunks)
-	if note!=null and note.visible: rects.append(note.get_global_rect())
-	return {"rects":rects,"pins":pins,"bounds":bounds}
+	return {"rects":rects,"pins":pins,"bounds":chart.bounds}
+
+
+## A battle's locality belongs to its readout. If neither adjoining edge is
+## free, the same locality remains in its tooltip instead of a long leader.
+static func near_battle_caption(plate:Rect2,extent:Vector2,bounds:Rect2,blocked:Array[Rect2])->Rect2:
+	var candidates:Array[Vector2]=[]
+	for y in [plate.position.y-extent.y-8.0,plate.end.y+8.0]:
+		for x in [plate.position.x,plate.end.x-extent.x,plate.get_center().x-extent.x*0.5]:
+			candidates.append(Vector2(x,y))
+	return CityLabels.free_spot(candidates,extent,bounds,blocked,[])
 
 
 func _letter_captions(font:Font)->void:
@@ -3006,15 +3295,23 @@ func _letter_captions(font:Font)->void:
 			caption.anchor=anchors[String(caption.id)]
 	else:
 		var notes:Array=[]
+		var attached:Array=[]
+		var obstacles:=_caption_obstacles()
+		var attached_dropped:=0
 		for request in caption_requests:
 			var entry:Dictionary=request.duplicate()
 			entry.extent=_caption_size(String(request.text),font,String(request.get("style","card")))
+			if entry.has("attach_rect"):
+				var rect:=near_battle_caption(entry.attach_rect,entry.extent,obstacles.bounds,obstacles.rects)
+				if rect.has_area():
+					entry.rect=rect;attached.append(entry);obstacles.rects.append(rect.grow(3.0))
+				else:attached_dropped+=1
+				continue
 			notes.append(entry)
-		var obstacles:=_caption_obstacles()
 		var result:=CityLabels.place_notes(notes,obstacles.bounds,obstacles.rects,obstacles.pins,caption_memory)
 		caption_memory=result.memory
-		placed_captions=result.notes
-		dropped_captions=(result.dropped as Array).size()
+		placed_captions=attached+result.notes
+		dropped_captions=(result.dropped as Array).size()+attached_dropped
 		caption_key=key
 		caption_placed_msec=now
 	for caption in placed_captions:
@@ -3022,7 +3319,7 @@ func _letter_captions(font:Font)->void:
 		var anchor:Vector2=caption.anchor
 		var end:=Vector2(clampf(anchor.x,box.position.x,box.end.x),clampf(anchor.y,box.position.y,box.end.y))
 		var plate:=String(caption.get("style","card"))=="plate"
-		if end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
+		if not caption.has("attach_rect") and end.distance_to(anchor)>float(caption.clear)*(0.7 if plate else 1.0)+4.0:
 			var start:=anchor+(end-anchor).normalized()*float(caption.clear)*(0.45 if plate else 0.6)
 			draw_line(start,end,Color(PAPER,0.7),3.0,true)
 			draw_line(start,end,Color(INK,0.65),1.0,true)
@@ -3068,7 +3365,7 @@ func hit_at(point:Vector2)->Dictionary:
 		var score:=INF
 		if hit.has("centre"):
 			var d:=(hit.centre as Vector2).distance_to(point)
-			if d<=float(hit.radius): score=d*0.5
+			if _hit_contains(hit,point): score=d*0.5
 		if hit.has("poly") and score==INF and Geometry2D.is_point_in_polygon(point,hit.poly): score=12.0 if String(hit.kind) in ["zone","pocket"] else 2.0
 		if hit.get("line") is PackedVector2Array and score==INF:
 			var d:=_distance_to_line(point,hit.line)
@@ -3169,7 +3466,16 @@ func note_content(hit:Dictionary)->Dictionary:
 			var armies:Array=hit.get("armies",[])
 			var lines:Array=[]
 			if String(hit.kind)=="front":
-				lines.append("Where our hosts and theirs meet, drawn from where each was last reported.")
+				if bool(hit.get("combat",false)):
+					lines.append("Fighting here now.")
+					if not bool(hit.get("ours",true)):return {"kicker":"THEIR FIGHTERS","title":String(hit.get("name","Their force")),"lines":lines,"action":{}}
+				elif bool(hit.get("deployed",false)):
+					var ours:=bool(hit.get("ours",true))
+					var age:=maxi(0,int(hit.get("age",0)))
+					lines.append("%s holding this ground%s." % [EraWords.grouped(int(hit.get("troops",0))) if ours else _cap(ArmyMarks.about(int(hit.get("troops",0))))," when last reported %d days ago" % age if age>0 else ""])
+					lines.append("The line ends where the deployed force's coverage ends. Open ground between sectors is not guarded by this force.")
+					if not ours:return {"kicker":"OBSERVED DEFENCE","title":"Their defended line","lines":lines,"action":{}}
+				else:lines.append("Where our hosts and theirs meet, drawn from where each was last reported.")
 				if bool(hit.get("stale",false)): lines.append("Part of their line is known only from old reports.")
 			elif String(hit.kind)=="fallback":
 				lines.append("Where the generals would fall back if the line gives: a day's march along their road home.")
@@ -3177,6 +3483,7 @@ func note_content(hit:Dictionary)->Dictionary:
 				lines.append("Their host is almost ringed by ours; the gap is what they can still escape through.")
 			var content:=_army_content(int(armies[0]) if not armies.is_empty() else 0,stage)
 			content.lines=lines+(content.lines as Array)
+			if bool(hit.get("combat",false)):content.kicker="FIGHTING"
 			if armies.size()>1: content.kicker="FRONT · %d HOSTS" % armies.size()
 			return content
 		"battle":
