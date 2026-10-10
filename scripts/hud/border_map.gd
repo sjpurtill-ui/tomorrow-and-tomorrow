@@ -332,6 +332,8 @@ func _refresh_key()->void:
 	var signature:=hash([compact,kept,snappedf(float(bill.food_lost),0.1),Forts.border_share(),standing,going,String(next.get("id","")),moving,to_man,T.color_mode])
 	if signature==_key_signature: return
 	_key_signature=signature
+	key_card.theme=T.control_theme()
+	key_card.add_theme_stylebox_override("panel",Kit.card_style(14,PLUM if T.is_light() else T.VIOLET))
 	for child in key_card.get_children(): child.hide(); child.queue_free()
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6 if compact else 10); column.custom_minimum_size=Vector2(304,0); key_card.add_child(column)
 	var head:=_heading(column,"The frontier","The border",String(next.get("id","watch_camp")))
