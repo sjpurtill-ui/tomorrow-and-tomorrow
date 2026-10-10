@@ -322,3 +322,37 @@ func test_a_real_owned_defender_is_reserved_once_for_a_front_battle() -> void:
 	assert_int(MilitaryCampaign.own_engagements.size()).is_equal(count)
 	assert_int(int(GameState.population_total)).is_equal(population)
 	assert_int(int(WorldSimulation.scoped(owner_id,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(their_population)
+
+func test_peak_defense_assigns_bounded_real_bands_and_keeps_a_home_reserve() -> void:
+	_start_world()
+	GameState.ensure_population_total(100000)
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
+	CivilizationSystem._add_revealed_area(origin,100.0,"border survey")
+	CivilizationSystem.foreign_formations.clear()
+	for discovery in ["military_staffs","radio_telegraphy"]:
+		if not discovery in GameState.known_discoveries: GameState.known_discoveries.append(discovery)
+		GameState.discovery_adoption[discovery]=1.0
+	# Author a trained peak-era force before giving the order. The assertion
+	# concerns allocation of those people, not recruitment speed.
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home army",[{"id":1,"unit":"levy","weapon":"improvised","count":20000,"equipment":20000,"training":0.8}],0.9,0.9)
+	MilitaryCampaign.home_army.provision_ratio=1.0; MilitaryCampaign.home_army.supply_level=1.0
+	var people:=int(GameState.population_total)
+	var result:Dictionary=Council.order(civ_id,"defend")
+	var bands:Array=MilitaryCampaign.field_armies.filter(func(force:Dictionary)->bool:return force.has("border_sector"))
+	assert_int(bands.size()).override_failure_message(str(result)).is_between(1,8)
+	var total:=int(MilitaryCampaign.home_army.troops)
+	for force:Dictionary in MilitaryCampaign.field_armies: total+=int(force.troops)
+	assert_int(total).is_equal(20000)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater_equal(4000)
+	assert_int(int(GameState.population_total)).is_equal(people)
+	for force:Dictionary in bands:
+		assert_str(String(force.status)).is_equal("moving")
+		assert_array(Array(Defense.coverage(force))).is_empty()
+	# Deployment becomes held ground only after the actual road is walked.
+	for _day in 6:
+		GameState.elapsed_days+=1; MilitaryCampaign._process_field_army_movement_day()
+	var arrived:=0
+	for force:Dictionary in MilitaryCampaign.field_armies:
+		if not Defense.coverage(force).is_empty(): arrived+=1
+	assert_int(arrived).override_failure_message(str(MilitaryCampaign.field_armies.map(func(force:Dictionary)->Dictionary:return {"status":force.get("status",""),"position":force.get("position",{}),"remaining":force.get("distance_remaining_km",0)}))).is_greater(0)
+	assert_int(int(GameState.population_total)).is_equal(people)
