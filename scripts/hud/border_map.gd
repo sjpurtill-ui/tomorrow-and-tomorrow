@@ -328,8 +328,12 @@ func _refresh_key()->void:
 	var standing:=Forts.standing().size()
 	var going:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))=="building").size()
 	var to_man:=Forts.share_to_man()
+	var available:=preload("res://scripts/watch_military.gd").at_home(WorldSimulation.military)
+	var needed:=0
+	for fort:Dictionary in Forts.forts():
+		if String(fort.get("status",""))!="abandoned":needed+=int(Forts.kind(String(fort.kind)).get("garrison",0))
 	var compact:=get_viewport().get_visible_rect().size.y<800.0
-	var signature:=hash([compact,kept,snappedf(float(bill.food_lost),0.1),Forts.border_share(),standing,going,String(next.get("id","")),moving,to_man,T.color_mode])
+	var signature:=hash([compact,kept,snappedf(float(bill.food_lost),0.1),Forts.border_share(),standing,going,String(next.get("id","")),moving,to_man,available,needed,T.color_mode])
 	if signature==_key_signature: return
 	_key_signature=signature
 	key_card.theme=T.control_theme()
@@ -346,14 +350,15 @@ func _refresh_key()->void:
 	_metric(numbers,"Food lost / day",_amount(float(bill.food_lost)))
 	var holds:=Kit.section(column,10); holds.add_theme_constant_override("separation",6)
 	var strength_ink:=T.TEAL if line>=0.7 else (T.AMBER if line>=0.4 else T.RED)
-	_status(holds,"The line holds" if km>0.0 else "Open country","%d%%" % roundi(line*100.0) if km>0.0 else "Unlinked",strength_ink if km>0.0 else T.INK_MUTED)
+	var watch_status:="Unwatched line" if roundi(line*100.0)==0 else ("Thin watch" if line<0.4 else "Border watch")
+	_status(holds,watch_status if km>0.0 else "Open country","%d%%" % roundi(line*100.0) if km>0.0 else "Unlinked",strength_ink if km>0.0 else T.INK_MUTED)
 	_bar(holds,line,strength_ink)
 	if km>0.0:
 		Kit.label(holds,"%d in 100 crossings stopped · %d km of line" % [roundi(line*100.0),roundi(km)],"note")
 	else:
 		Kit.label(holds,"Link standing forts to watch the land between them.","note")
 	if km>0.0 and int(kept.line)<=0:
-		Kit.label(holds,"The garrisons take everyone posted. No one is left to walk the line.","note",T.RED)
+		Kit.label(holds,"No one is posted to walk the line." if int(kept.posted)==0 else "The garrisons take everyone posted. No one is left to walk the line.","note",T.RED)
 	var share_row:=HBoxContainer.new(); share_row.add_theme_constant_override("separation",8); column.add_child(share_row)
 	var share_words:=VBoxContainer.new(); share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL; share_words.add_theme_constant_override("separation",0); share_row.add_child(share_words)
 	Kit.label(share_words,"Watch sent out","body")
@@ -364,8 +369,12 @@ func _refresh_key()->void:
 		b.custom_minimum_size=Vector2(36,36)
 		b.disabled=Forts.border_share()<=0.0 if float(step[1])<0.0 else Forts.border_share()>=1.0
 	if to_man>Forts.border_share()+0.001:
-		var man:=Kit.button(column,"Man every fort · %d%% of the watch" % roundi(to_man*100.0),true,func()->void:Forts.set_border_share(to_man);_changed(),"Sends enough of the watch at home to fill the garrisons, if available. More food is lost on the road; fewer keep watch at home.")
+		var action:="Man every fort · %d%% of the watch" % roundi(to_man*100.0)
+		if available<needed:action="Send all %d available" % available if available>0 else "No watch available"
+		var man:=Kit.button(column,action,true,func()->void:Forts.set_border_share(to_man);_changed(),"Posts the available watch to fort garrisons. More food is lost on the road; fewer keep watch at home.")
 		man.name="ManEveryFort"
+		man.disabled=available<=0
+	if needed>available:Kit.label(column,"%d available · %d needed to fill the forts" % [available,needed],"note",T.AMBER_TEXT)
 	_rule(column)
 	if next.is_empty(): Kit.label(column,"Our people know no way to raise a fort yet.","note")
 	elif moving>=0:
@@ -488,6 +497,8 @@ class BorderChart extends Control:
 	var _ground:=Vector2.INF
 	var _elapsed:=0.0
 	var _view:=0
+	var _border_elapsed:=0.25
+	var _border_signature:=0
 	## Captures and tests: the pointer held here instead of the mouse.
 	var pointer_override:=Vector2.INF
 	## Every fort's name and every stretch's hold, refreshed with the pointer.
@@ -501,12 +512,15 @@ class BorderChart extends Control:
 
 	func forget()->void:
 		_quote={}; _quote_key=Vector2i(1<<30,1<<30)
+		_read_border()
+		queue_redraw()
 
 	func _process(delta:float)->void:
 		if owner_map==null: return
 		_elapsed+=delta
 		_quote_age+=delta
-		if _elapsed>=0.25 or _names.is_empty(): _read_border()
+		_border_elapsed+=delta
+		if _border_elapsed>=0.25: _read_border()
 		# The words ride the map: redrawn whenever the view moves.
 		var viewer:Camera3D=owner_map.call("camera")
 		if viewer!=null:
@@ -533,6 +547,7 @@ class BorderChart extends Control:
 		queue_redraw()
 
 	func _read_border()->void:
+		_border_elapsed=0.0
 		_names=[]; _stretches=[]
 		for f:Dictionary in Forts.forts():
 			if String(f.get("status",""))!="abandoned": _names.append([Forts._pos(f),String(f.get("name",""))])
@@ -540,6 +555,10 @@ class BorderChart extends Control:
 		for st:Dictionary in kept.stretches: _stretches.append([Vector2(st.mid),float(st.strength),float(st.per_km)])
 		_foreign=[]
 		for f:Dictionary in Forts.known_foreign_forts(): _foreign.append([f.at,"%s's %s" % [String(f.owner_name),String(Forts.kind(String(f.kind)).get("name","fort")).to_lower()],preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.45)])
+		var signature:=hash([_names,_stretches,_foreign,T.color_mode])
+		if signature!=_border_signature:
+			_border_signature=signature
+			queue_redraw()
 
 	func _draw()->void:
 		_draw_border_words()

@@ -36,6 +36,7 @@ extends Control
 const Model:=preload("res://scripts/war_front_model.gd")
 const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
 const BattleSource:=preload("res://scripts/hud/battle_marker_source.gd")
+const ContactFronts:=preload("res://scripts/battle_contact_fronts.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
 const Tactics:=preload("res://scripts/battle_tactics.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
@@ -1315,6 +1316,7 @@ static func compose(inputs:Dictionary)->Dictionary:
 	# Battles being fought now: ours on the front at their contact point, the
 	# stretch of front being fought over heated (the worm); rivals' where our
 	# watchers saw them. A siege's battle stands on its ring.
+	out.fronts.append_array(ContactFronts.build(inputs.get("battles",[]),friendly,enemy,(out.fronts as Array)+(out.faceoffs as Array)))
 	var lines:Array=(out.fronts as Array)+(out.faceoffs as Array)
 	out.battles=BattleMarks.place((inputs.get("battles",[]) as Array).slice(0,Model.MAX_BATTLES),lines,float(out.sigma))
 	for index in lines.size():

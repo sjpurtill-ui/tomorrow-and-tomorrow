@@ -294,13 +294,24 @@ func _interactions() -> void:
 	_check(not (quote.get("short",{}) as Dictionary).is_empty(),"A stationary placement quote refreshes after stores change")
 	GameState.resource_stockpiles["Timber"] = 5000.0
 	_pointer(Vector2.INF)
+	var border_chart:Control=map.get("chart")
+	var repaints:=[0]
+	var painted:=func()->void:repaints[0]+=1
+	border_chart.draw.connect(painted)
 	for share in [0.0,1.0]:
+		var before_paint:=int(repaints[0])
 		Forts.set_border_share(share); _refresh(); await _settle()
+		if DisplayServer.get_name()!="headless":_check(int(repaints[0])>before_paint,"Changed watch redraws map ink while pointer is off-chart")
+		var actual_stretches:Array=Forts.watch().stretches
+		var drawn_stretches:Array=border_chart.get("_stretches")
+		for i in mini(actual_stretches.size(),drawn_stretches.size()):
+			_check(is_equal_approx(float(drawn_stretches[i][1]),float(actual_stretches[i].strength)),"Map chip matches current watch strength")
 		var sign := "−" if share == 0.0 else "+"
 		var found := false
 		for button in map.find_children("*","Button",true,false):
 			if button.text == sign: found = true; _check(button.disabled,"Watch share "+sign+" is disabled at its bound")
 		_check(found,"Share stepper is present: "+sign)
+	border_chart.draw.disconnect(painted)
 	Forts.set_border_share(0.05); _refresh(); await _settle()
 	var man := _button("ManEveryFort")
 	_check(man != null,"Understaffed border offers ManEveryFort")
@@ -308,6 +319,20 @@ func _interactions() -> void:
 		man.pressed.emit(); await _settle()
 		var watch := Forts.watch()
 		_check(int(watch.garrisons.get(1,0)) == 60 and int(watch.garrisons.get(3,0)) == 60,"Man every fort fills actual garrisons")
+	var allocations:=GameState.population_allocations.duplicate(true)
+	Forts.set_border_share(0.05)
+	for available in [0,40]:
+		GameState.population_allocations["Defense"]=available
+		_refresh();await _settle()
+		var staffing:=_button("ManEveryFort")
+		_check(staffing!=null,"A short watch has a truthful staffing action")
+		if staffing!=null:
+			_check(staffing.disabled==(available==0),"Empty watch cannot perform a staffing action")
+			_check(not staffing.text.begins_with("Man every"),"Insufficient watch never promises every fort will be filled")
+		_check(_all_text(map.get("key_card")).contains("Unwatched line"),"Zero crossing strength is described as unwatched")
+		await _capture("no_watch" if available==0 else "limited_watch","No watch to post" if available==0 else "Only 40 available for the fort garrisons")
+	GameState.population_allocations=allocations
+	_refresh();await _settle()
 	map.call("open_note",1); await _settle()
 	var close_note := _button("CloseFortNote")
 	_check(close_note != null,"Fort note has a direct close control")

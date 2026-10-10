@@ -26,6 +26,7 @@ var axis := Vector2.RIGHT
 var across := Vector2.DOWN
 var captures:Array = []
 var failures:Array[String] = []
+var scope := "TEST staged observations and battles, actual copied-save terrain, actual defense coverage and overlay; frozen simulation"
 
 func _ready() -> void:
 	for arg in OS.get_cmdline_user_args():
@@ -53,17 +54,17 @@ func _settle() -> void:
 		terrain.call("_update_world_streaming"); await get_tree().process_frame
 	terrain.call("_update_scale_lod"); await _frames(6)
 
-func _run() -> void:
+func _prepare() -> bool:
 	var path:=ProjectSettings.globalize_path(source).replace("\\","/").simplify_path()
 	var allowed:=ProjectSettings.globalize_path("res://artifacts/").replace("\\","/").simplify_path().trim_suffix("/")+"/"
 	if not path.begins_with(allowed) or not FileAccess.file_exists(source):
 		push_error("Copy the source save into this worktree's ignored artifacts directory first.")
-		get_tree().quit(2); return
+		get_tree().quit(2); return false
 	source_hash=FileAccess.get_sha256(source)
 	_freeze()
 	var snapshot:=Snapshot.new(); snapshot.source=source; add_child(snapshot)
 	var loaded:Dictionary=snapshot.load_game("copy")
-	if loaded.has("error"): push_error(str(loaded)); get_tree().quit(2); return
+	if loaded.has("error"): push_error(str(loaded)); get_tree().quit(2); return false
 	GameState.civic_api_enabled=false
 	if PeopleDirection.needs_century_choice(): PeopleDirection.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	_freeze(); day=int(GameState.elapsed_days)
@@ -83,7 +84,11 @@ func _run() -> void:
 	caption=Label.new(); caption.add_theme_font_override("font",T.font("ui")); caption.add_theme_font_size_override("font_size",17); caption.add_theme_color_override("font_color",Color("302c23")); panel.add_child(caption)
 	capital_label=Label.new(); capital_label.text="TSAREN · CAPITAL\nFixture objective · still defended"; capital_label.add_theme_font_override("font",T.voice_font(false)); capital_label.add_theme_font_size_override("font_size",17); capital_label.add_theme_color_override("font_color",Color("f6efdf")); capital_label.add_theme_color_override("font_shadow_color",Color("302c23")); capital_label.add_theme_constant_override("shadow_offset_x",1); capital_label.add_theme_constant_override("shadow_offset_y",2); labels.add_child(capital_label)
 	if not _choose_ground():
-		push_error("No sufficiently dry fixture area near the copied campaign home."); get_tree().quit(2); return
+		push_error("No sufficiently dry fixture area near the copied campaign home."); get_tree().quit(2); return false
+	return true
+
+func _run() -> void:
+	if not await _prepare():return
 	var views:=[
 		["held","Staffed fronts hold the approach · the capital lies beyond",0.9],
 		["gap","A thin detachment leaves a real opening in its assigned line",0.9],
@@ -92,10 +97,13 @@ func _run() -> void:
 		["inland","After a breakthrough · the fighting line follows the armies inland",1.1],
 		["inland_far","The inland battle at regional scale · capital objective retained",1.1]]
 	for view in views: await _capture(String(view[0]),String(view[1]),float(view[2]))
+	await _finish()
+
+func _finish() -> void:
 	_check(int(GameState.elapsed_days)==day,"Captures advance no simulation day")
 	_check(FileAccess.get_sha256(source)==source_hash,"Copied source save unchanged")
 	var file:=FileAccess.open(directory.path_join("audit.json"),FileAccess.WRITE)
-	file.store_string(JSON.stringify({"scope":"TEST staged observations and battles, actual copied-save terrain, actual defense coverage and overlay; frozen simulation","passed":failures.is_empty(),"failures":failures,"captures":captures,"day":day,"source_sha256":source_hash},"\t"))
+	file.store_string(JSON.stringify({"scope":scope,"passed":failures.is_empty(),"failures":failures,"captures":captures,"day":day,"source_sha256":source_hash},"\t"))
 	print("BORDER_DEFENSE_CAPTURE ","PASS" if failures.is_empty() else "FAIL"," captures=",captures.size()," directory=",directory)
 	var render:Variant=terrain.get("macro_render")
 	var deadline:=Time.get_ticks_msec()+10000
