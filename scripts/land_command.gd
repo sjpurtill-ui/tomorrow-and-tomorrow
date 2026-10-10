@@ -8,6 +8,7 @@ const March=preload("res://scripts/march_terrain.gd")
 ## number (supply_state.gd fed): the zone staff read them as every check does.
 const Lines=preload("res://scripts/army_lines.gd")
 const Supply=preload("res://scripts/supply_state.gd")
+const BorderDefense=preload("res://scripts/border_defense.gd")
 var _command:WeakRef
 var command:RefCounted:
 	get:return _command.get_ref()
@@ -64,7 +65,10 @@ func frontage(troops:int)->float:
 	return clampf(sqrt(maxf(0,troops))*.085,.12,10.0)
 func enemies(day:int,only_hostile:bool=true)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
-	for formation:Dictionary in WorldSimulation.world.foreign_formations:
+	var Combat:GDScript=load("res://scripts/civilization_combat.gd")
+	for original:Dictionary in WorldSimulation.world.foreign_formations:
+		var formation:Dictionary=Combat.call("refresh_formation",original) if Combat.has_method("refresh_formation") else original
+		if formation.is_empty() or not bool(formation.get("can_defend",true)):continue
 		if formation.get("kind","")=="scout" or day<int(formation.get("disabled_until_day",0)) or (only_hostile and not hostile(String(formation.civ_id))):continue
 		var index:int=WorldSimulation.world._civilization_index(String(formation.civ_id))
 		if index<0:continue
@@ -72,7 +76,9 @@ func enemies(day:int,only_hostile:bool=true)->Array[Dictionary]:
 		var land_personnel:float=WorldSimulation.world.land_military_population(civ)
 		var count:=int(formation.get("actual_troops",maxi(1,roundi(land_personnel*float(formation.get("strength_share",.05)))) if land_personnel>=1 else 0))
 		if count<=0:continue
-		result.append({"id":formation.id,"owner":formation.civ_id,"position":G.pack(WorldSimulation.world._foreign_formation_position(formation,float(day))),"troops":count,"strength":count*(.35+.65*float(formation.get("readiness",.4))),"record":formation})
+		var entry:={"id":formation.id,"owner":formation.civ_id,"position":G.pack(WorldSimulation.world._foreign_formation_position(formation,float(day))),"troops":count,"strength":count*(.35+.65*float(formation.get("readiness",.4))),"record":formation}
+		if formation.has("defense_points"):entry["defense_points"]=formation.defense_points
+		result.append(entry)
 	return result
 func _known_enemies(day:int)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
@@ -159,6 +165,10 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 	var budget:float=host._field_army_speed(actual)
 	var mix:=March.mix_of(actual)
 	var current:=start
+	var opponents:Array[Dictionary]=[]
+	var target:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(order.get("target",""))) if order.get("mission","") in ["capture","occupy","raze"] else {}
+	for enemy:Dictionary in enemies(day,false):
+		if hostile(String(enemy.owner)) or String(enemy.owner)==String(target.get("civ_id","")):opponents.append(enemy)
 	for waypoint:Dictionary in path:
 		var next:=G.unpack(waypoint)
 		while current.distance_to(next)>.01 and budget>.001:
@@ -171,12 +181,14 @@ func _move(actual:Dictionary,destination:Vector2,order:Dictionary,day:int)->void
 				if not city.is_empty() and String(city.get("civ_id",""))==String(claim.owner) and order.mission in ["capture","occupy","raze"]:
 					WorldSimulation.world.record_player_hostile_order(String(claim.owner),String(claim.city_id),"A commanded offensive crossed the defended city border.")
 				else:actual["command_status"]="Holding at neutral border · no authority to invade";budget=0;break
-			var blocked:=false
-			for enemy:Dictionary in enemies(day):
-				var width:=frontage(int(actual.get("troops",0)))+frontage(int(enemy.troops))
-				if proposed.distance_to(point(enemy))<width and proposed.distance_to(point(enemy))<current.distance_to(point(enemy)) and strength(actual)<float(enemy.strength)*1.15:
-					actual["command_status"]="Front contested · protecting flanks and awaiting support";blocked=true;break
-			if blocked:budget=0;break
+			var contact:=BorderDefense.first_contact(current,proposed,opponents,actual)
+			if not contact.is_empty():
+				actual["position"]=G.pack(contact.point);actual["status"]="stationed";actual["location_id"]="field_position"
+				actual["command_status"]="At the defended front · the general engages"
+				var index:int=host._field_army_index(int(actual.army_id))
+				if index>=0:host.field_armies[index]=actual
+				if host.has_method("launch_front_contact"):host.call("launch_front_contact",int(actual.army_id),contact)
+				return
 			current=proposed;budget-=distance*weight
 		if budget<=.001:break
 	actual["position"]=G.pack(current);actual["status"]="stationed";actual["location_id"]="field_position"
