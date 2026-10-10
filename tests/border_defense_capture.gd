@@ -7,6 +7,7 @@ extends Node
 const Defense := preload("res://scripts/border_defense.gd")
 const Overlay := preload("res://scripts/hud/war_front_overlay.gd")
 const T := preload("res://scripts/hud/hud_tokens.gd")
+const Motion := preload("res://scripts/hud/motion.gd")
 
 class Snapshot extends "res://scripts/save_system.gd":
 	var source := ""
@@ -66,6 +67,7 @@ func _run() -> void:
 	GameState.civic_api_enabled=false
 	if PeopleDirection.needs_century_choice(): PeopleDirection.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	_freeze(); day=int(GameState.elapsed_days)
+	Motion.reduce_motion=false
 	terrain=load("res://local_terrain.tscn").instantiate(); add_child(terrain)
 	terrain.call("_set_game_speed",0)
 	get_window().title="TEST · Border defense on copied terrain"
@@ -102,7 +104,8 @@ func _run() -> void:
 
 func _choose_ground() -> bool:
 	var home:Vector2=CivilizationSystem.player_world_origin
-	for ring in 7:
+	# Keep authored battles away from the actual town label at the save's home.
+	for ring in range(3,10):
 		for direction in 8:
 			var candidate:=home+Vector2.from_angle(float(direction)*TAU/8.0)*float(ring)*8.0
 			for heading in 8:
@@ -164,8 +167,14 @@ func _capture(key:String,description:String,clock:float) -> void:
 	var scene:Dictionary=Overlay.compose(inputs)
 	var compose_us:=Time.get_ticks_usec()-started
 	overlay.set_scene(scene,true); overlay.anim_clock=clock; overlay.band_override="regional" if key.ends_with("far") else "local"; overlay.queue_redraw()
-	capital_label.position=(overlay.call("_screen",_at(18)) as Vector2)+Vector2(12,-28)
+	capital_label.position=(overlay.call("_screen",_at(18)) as Vector2)+(Vector2(24,-140) if key.ends_with("far") else Vector2(12,-72))
 	await _frames(4)
+	# The frozen chart rebuilds its hot-cache first. Repaint the separate
+	# pulse canvas explicitly so each authored clock reaches the image.
+	var pulse:Control=overlay.get("pulse_layer")
+	pulse.queue_redraw(); await _frames(2)
+	if key.begins_with("contact") or key.begins_with("inland"):
+		_check((overlay.get("hot_cache") as Array).size()==2,"Both facing lines have battle heat in "+key)
 	_check((scene.get("fronts",[]) as Array).size()>0,"Fronts present in "+key)
 	if key.begins_with("contact") or key.begins_with("inland"): _check((scene.get("battles",[]) as Array).size()==1,"One live battle in "+key)
 	if DisplayServer.get_name()!="headless":
