@@ -2631,6 +2631,42 @@ static func counter_clearance(data:Dictionary,scale:float)->Rect2:
 		rect.size.x+=width+(18.0 if march else 10.0)*scale
 	return rect
 
+
+## A tie belongs beneath every paper card. Later cards naturally paint over
+## earlier ties; clip against cards already painted and fixed HUD furniture.
+static func clear_tie_segments(from:Vector2,to:Vector2,blocked:Array[Rect2])->Array[PackedVector2Array]:
+	var spans:Array[Vector2]=[Vector2(0,1)]
+	var direction:=to-from
+	for box in blocked:
+		var enter:=0.0;var leave:=1.0
+		var intersects:=true
+		for axis in 2:
+			if absf(direction[axis])<0.0001:
+				if from[axis]<box.position[axis] or from[axis]>box.end[axis]:intersects=false;break
+				continue
+			var first:float=(box.position[axis]-from[axis])/direction[axis]
+			var last:float=(box.end[axis]-from[axis])/direction[axis]
+			enter=maxf(enter,minf(first,last));leave=minf(leave,maxf(first,last))
+			if enter>=leave:intersects=false;break
+		if not intersects:continue
+		var remaining:Array[Vector2]=[]
+		for span in spans:
+			if leave<=span.x or enter>=span.y:remaining.append(span);continue
+			if enter>span.x:remaining.append(Vector2(span.x,enter))
+			if leave<span.y:remaining.append(Vector2(leave,span.y))
+		spans=remaining
+		if spans.is_empty():break
+	var segments:Array[PackedVector2Array]=[]
+	for span in spans:
+		if direction.length()*(span.y-span.x)>0.5:segments.append(PackedVector2Array([from+direction*span.x,from+direction*span.y]))
+	return segments
+
+
+func _draw_counter_tie(from:Vector2,to:Vector2,ink:Color,width:float)->void:
+	var blocked:Array[Rect2]=counter_fixed.duplicate()
+	blocked.append_array(counter_rects)
+	for segment in clear_tie_segments(from,to,blocked):draw_line(segment[0],segment[1],ink,width,true)
+
 ## A force as a HOI4 counter: the plate stands just below its spot, a short
 ## stroke ties it to the ground it holds, and the plate is what a click finds.
 func _draw_counter_mark(entry:Dictionary,band:String)->void:
@@ -2652,8 +2688,8 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	# The spot it stands on, and where it stepped aside from.
 	var ink:=INK if ours else THEIRS.darkened(0.25)
 	if bool(entry.get("moved",false)) and (entry.anchor as Vector2).distance_to(at)>3.0:
-		draw_line(entry.anchor,at,Color(ink,0.5*alpha),1.0,true)
-	draw_line(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4,true)
+		_draw_counter_tie(entry.anchor,at,Color(ink,0.5*alpha),1.0)
+	_draw_counter_tie(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4)
 	draw_circle(at,2.6*scale,Color(PAPER,0.9*alpha))
 	draw_circle(at,1.8*scale,Color(ink,alpha))
 	var heading:Vector2=entry.get("heading",Vector2.ZERO)
