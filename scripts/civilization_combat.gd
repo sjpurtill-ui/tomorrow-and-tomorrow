@@ -376,7 +376,7 @@ static func refresh_formation(formation:Dictionary)->Dictionary:
 		var force:Dictionary=WorldSimulation.military.field_armies[index]
 		var point:Vector2=WorldSimulation.military.command_hierarchy.land.point(force)
 		var front:=preload("res://scripts/army_front_contact.gd").snapshot(force)
-		view.merge({"point_a":point,"point_b":point,"command_position":{"x":point.x,"z":point.y},"actual_troops":int(force.get("troops",0)),"readiness":float(force.get("readiness",0)),"morale":float(force.get("morale",1)),"provision_ratio":preload("res://scripts/supply_state.gd").fed(force),"border_front":front,"defense_points":front.points,
+		view.merge({"point_a":point,"point_b":point,"command_position":{"x":point.x,"z":point.y},"actual_troops":int(force.get("troops",0)),"readiness":float(force.get("readiness",0)),"morale":float(force.get("morale",1)),"provision_ratio":preload("res://scripts/supply_state.gd").fed(force),"disabled_until_day":int(force.get("command_recover_until",0)),"morale_cap":float(force.get("morale",1.0)),"border_front":front,"defense_points":front.points,
 			"can_defend":preload("res://scripts/border_defense.gd").fit(force,int(WorldSimulation.state.elapsed_days))},true)
 		return view
 	)

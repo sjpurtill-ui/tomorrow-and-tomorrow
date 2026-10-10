@@ -1025,6 +1025,9 @@ func set_ground_survey_authority(survey_query:Callable)->void:
 
 func set_scout_geography_authority(land_query:Callable)->void:
 	scout_land_authority=land_query
+	# Two lambdas on the same object can share callable identity. A changed
+	# authority must never reuse the previous terrain answers.
+	_scout_land_cache.clear();_scout_land_cache_owner=0
 	open_scout_plan_cache.clear();sea_voyage_plan_cache.clear()
 	_audit_active_scout_land_route()
 
@@ -2322,7 +2325,8 @@ func _publish_observed_event(title:String,description:String,day:int,metadata:Di
 
 ## Lay remembered stand-downs and morale over freshly rebuilt rival views.
 func apply_formation_memory(day:int=-1)->void:
-	StandDown.apply(formation_memory,foreign_formations,day if day>=0 else int(WorldSimulation.state.elapsed_days))
+	var legacy:Array=foreign_formations.filter(func(formation:Dictionary)->bool:return not WorldSimulation.enabled or not formation.has("owned_force_id"))
+	StandDown.apply(formation_memory,legacy,day if day>=0 else int(WorldSimulation.state.elapsed_days))
 
 
 ## Only the visible part of a deployed line is published, frozen with the report.
@@ -2484,7 +2488,9 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 	# A band beaten lately has pulled back out of reach, however it is seen.
 	var today:=int(WorldSimulation.state.elapsed_days)
 	var standing:=_foreign_formation_index(formation_id)
-	if StandDown.standing_down(formation_memory,formation_id,today) or (standing>=0 and today<int(foreign_formations[standing].get("disabled_until_day",0))):
+	var current:Dictionary=preload("res://scripts/civilization_combat.gd").refresh_formation(foreign_formations[standing]) if standing>=0 else {}
+	var owned:=WorldSimulation.enabled and current.has("owned_force_id")
+	if (owned and not bool(current.get("can_defend",true))) or (not owned and StandDown.standing_down(formation_memory,formation_id,today)) or today<int(current.get("disabled_until_day",0)):
 		return {"error":"That band was beaten and has pulled back out of reach; it will not stand to fight again for a while.","standing_down":true}
 	var public_sighting:=visible_formation_sighting(formation_id)
 	if public_sighting.is_empty(): return {"error":"Contact has been lost. Reacquire the formation before ordering battle."}
@@ -2507,7 +2513,7 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,"owned_force_id":int(formation.get("owned_force_id",0)),
 		"target_region_id":"","target_region_name":"the field contact",
 		"target_position":position.duplicate(true),"terrain_defense":1.04,
-		"morale_cap":StandDown.morale_cap(formation_memory,formation_id,today),
+		"morale_cap":float(current.get("morale_cap",1.0)) if owned else StandDown.morale_cap(formation_memory,formation_id,today),
 	}
 
 
@@ -2535,6 +2541,17 @@ func resolve_foreign_formation_after_battle(formation_id:String,result:Dictionar
 	var remembered:=StandDown.remember(formation_memory,formation_id,day,rival_result,termination)
 	formation["disabled_until_day"]=maxi(int(formation.get("disabled_until_day",0)),int(remembered.get("until",0)))
 	foreign_formations[formation_index]=formation
+	# The battle itself is fresh evidence. A personally witnessed breach
+	# cannot remain an intact ribbon in the recent-sightings layer.
+	if bool((result.get("threat",{}) as Dictionary).get("front_contact",false)):
+		var outcome:=String(result.get("outcome",""))
+		var defeated:=outcome==home_side+"_victory" or outcome==rival_side+"_retreat" or bool(remembered.get("beaten",false))
+		var sighting_index:=_formation_sighting_index(formation_id)
+		if defeated and sighting_index>=0:
+			var seen:Dictionary=foreign_sightings[sighting_index]
+			seen["defense_points"]=[]
+			seen["border_front"]={"id":formation_id,"points":[],"assigned":true,"state":"breached","day":day}
+			seen["last_seen_day"]=day;seen["strength"]=remaining
 	_set_sighting_visibility(formation_id,false)
 	observation_revision+=1
 

@@ -76,6 +76,7 @@ static func after_battle(host:Node,result:Dictionary)->void:
 	var other:="defender" if side=="attacker" else "attacker"
 	var outcome:=String(result.get("outcome",""))
 	var won:=outcome==side+"_victory" or outcome==other+"_retreat"
+	var lost:=outcome==other+"_victory" or outcome==side+"_retreat" or String((result.get("termination",{}) as Dictionary).get("type",""))=="mutual_withdrawal"
 	var members:Array=result.get("command_participants",[])
 	if members.is_empty():members=[{"army_id":int(result.get("home_force_id",0))}]
 	for member:Dictionary in members:
@@ -83,8 +84,8 @@ static func after_battle(host:Node,result:Dictionary)->void:
 		if index<0:continue
 		var army:Dictionary=host.field_armies[index]
 		army.erase("movement_block_reason")
-		if won and not Lines.unfit(army):
-			army["command_status"]="The line holds" if side=="defender" else "Breakthrough · continuing toward the objective"
+		if not lost and not Lines.unfit(army):
+			army["command_status"]=("The line holds" if side=="defender" else "Breakthrough · continuing toward the objective") if won else "The line remains contested"
 			continue
 		if army.has("border_sector"):army["border_breached_day"]=int(WorldSimulation.state.elapsed_days)
 		army.erase("border_sector")
