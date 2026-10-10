@@ -57,14 +57,14 @@ func _run() -> void:
 	await _shot("continental","Automatic continental band · same armies and battles",900.0,center,Vector2i(1152,720))
 	T.set_color_mode("dark")
 	await _shot("night","Night palette · same contact, real map collection",38.0,focus,Vector2i(1152,720))
-	Motion.reduce_motion=true
+	_set_motion(true)
 	await _shot("reduced","Reduced motion · readable held ground and contact",38.0,focus,Vector2i(1152,720))
 	# Exercise the actual process path, without advancing any campaign day.
 	terrain.call("_set_game_speed",0)
 	var paused_clock:=float(overlay.anim_clock)
 	overlay.call("_process",0.5)
 	_check(is_equal_approx(float(overlay.anim_clock),paused_clock),"Pause freezes the overlay animation clock")
-	Motion.reduce_motion=false
+	_set_motion(false)
 	terrain.call("_set_game_speed",1)
 	overlay.call("_process",0.5)
 	_check(float(overlay.anim_clock)>paused_clock,"Resume advances the actual overlay animation clock")
@@ -85,6 +85,13 @@ func _interior() -> bool:
 				if not dry:break
 			if dry:center=candidate;return true
 	return false
+
+func _set_motion(reduced:bool) -> void:
+	# Window resizes reapply this real preference, so changing only the
+	# renderer's static Motion flag would silently lose the setting.
+	var preferences:Node=terrain.get("display_preferences")
+	preferences.set("reduce_motion",reduced);preferences.call("apply")
+	_check(Motion.reduced()==reduced,"Display preference reaches effective motion mode")
 
 static func _point(force:Dictionary) -> Vector2:
 	return Defense.point(force.get("position",{}))
@@ -114,6 +121,7 @@ func _author_campaign() -> void:
 	War.blood_feud(rival,int(GameState.elapsed_days),"TEST border exercise")
 	CivilizationSystem.record_player_hostile_order(rival,"","TEST declared field exercise")
 	terrain.set_process(false);terrain.set_physics_process(false)
+	_set_motion(false)
 	overlay.band_override="";overlay.extra_inputs={}
 
 func _add_rivals() -> void:
@@ -161,6 +169,7 @@ func _shot(key:String,words:String,zoom:float,at:Vector2,viewport:=Vector2i(1600
 	overlay.queue_redraw();await _frames(4)
 	(overlay.get("pulse_layer") as Control).queue_redraw();await _frames(2)
 	var chart:Dictionary=overlay.scene
+	_check(Motion.reduced()==(key=="reduced"),"Effective motion mode survives resize in "+key)
 	_check((chart.fronts as Array).size()>=8,"Collected sectors remain present in "+key)
 	_check(overlay.band_override=="","Automatic scale band in "+key)
 	if DisplayServer.get_name()!="headless":
