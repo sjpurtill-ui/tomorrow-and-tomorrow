@@ -334,25 +334,35 @@ func test_defend_calls_the_raiders_home_and_their_raid_meets_our_watch()->void:
 	WAR.from_battles(day)
 	assert_int(int(WAR.front(civ_id).get("raids",0))).is_equal(raids_before)
 
-func test_defend_sends_a_band_to_meet_their_band_when_the_watch_sees_it()->void:
+func test_defend_deploys_real_border_band_and_keeps_capital_reserve()->void:
 	_their_men(30.0)
 	_train(120)
 	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
 	var day:=int(GameState.elapsed_days)
-	CivilizationSystem._add_revealed_area(CivilizationSystem.player_world_origin,72.0,"home ground")
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
+	var border:Dictionary=preload("res://scripts/fort_border.gd").outline()
+	CivilizationSystem._add_revealed_area(CivilizationSystem.player_world_origin,float(border.reach)+5.0,"home border survey")
 	var at:=CivilizationSystem.player_world_origin+Vector2(14.0,0.0)
 	CivilizationSystem.foreign_formations.append({"id":"%s_raiders" % civ_id,"civ_id":civ_id,"kind":"expedition","command_position":{"x":at.x,"z":at.y},"strength_share":0.5,"actual_troops":15,"readiness":0.5})
 	CivilizationSystem._process_local_observation(day,true)
 	assert_dict(CivilizationSystem.visible_formation_sighting("%s_raiders" % civ_id)).is_not_empty()
+	var before:=int(MilitaryCampaign.home_army.troops)+MilitaryCampaign.field_army_active_personnel()
 	var held:=Council.order(civ_id,"defend")
 	# What the watch saw is kept for the screens at the sitting.
 	assert_str(String(Council.peek(civ_id).get("coming",""))).contains("km from")
 	assert_int(Council.incoming().size()).is_equal(1)
-	var band:=_band("intercept")
+	var band:=_band("border")
 	assert_dict(band).override_failure_message(str(held)).is_not_empty()
-	assert_str(String(held.says)).contains("out after")
-	# The watch stays home while the band goes out.
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater(0)
+	if band.is_empty():return
+	assert_str(String(band.status)).is_equal("moving")
+	assert_dict(band.position).is_equal({"x":CivilizationSystem.player_world_origin.x,"z":CivilizationSystem.player_world_origin.y})
+	assert_dict(band.destination_position).is_equal(band.border_sector.anchor)
+	assert_array(Array(preload("res://scripts/border_defense.gd").coverage(band,day))).is_empty()
+	assert_str(String(held.says)).contains("assigned border km")
+	assert_dict(_band("intercept")).is_empty()
+	# Forming the band transfers people; the capital retains at least its fifth.
+	assert_int(int(MilitaryCampaign.home_army.troops)+MilitaryCampaign.field_army_active_personnel()).is_equal(before)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_greater_equal(ceili(float(before)*0.2))
 
 # ---------------------------------------------------------------------------
 # Leave them be, seek peace
