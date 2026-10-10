@@ -46,6 +46,8 @@ const Lines:=preload("res://scripts/army_lines.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
 const DEPOTS:=preload("res://scripts/field_depots.gd")
+const BorderDefense:=preload("res://scripts/border_defense.gd")
+const FortBorder:=preload("res://scripts/fort_border.gd")
 
 const VERSION:=1
 const STANCES:=["leave","defend","punish","take","peace"]
@@ -632,17 +634,77 @@ static func _defend(civ_id:String,today:int,options:Dictionary)->Dictionary:
 	# A short garrison in a town we hold of theirs gets men from home.
 	var reinforced:=_man_garrisons(civ_id)
 	if reinforced!="": parts.append(reinforced)
-	# Their band seen coming: a band of ours goes out to meet it.
-	var met:=_meet_their_band(civ_id,options)
-	if met!="": parts.append(met)
+	# Actual armies take stations on our border. The home guard remains the
+	# reserve; fort watchmen are not copied into these military formations.
+	var deployed:=_deploy_border(civ_id,today)
+	if deployed!="": parts.append(deployed)
 	# Live while a band of ours is out, or theirs is in sight.
-	live=live or not _band_on(civ_id,["reinforce","intercept"]).is_empty() or not their_bands(civ_id).is_empty()
+	live=live or not _band_on(civ_id,["reinforce","intercept","border"]).is_empty() or not their_bands(civ_id).is_empty()
 	var home:=int(_mc().home_army.get("troops",0))
 	var held:=_held_words(civ_id)
 	if parts.is_empty():
 		var watch:="%s keeps %s at home on the approaches" % [_who(),_fighters(home)] if home>0 else "%s has nobody trained to put on the watch; the village keeps its own" % _who()
 		parts.append(watch+(("; "+held) if held!="" else "")+".")
 	return _record(civ_id,"hold"," ".join(parts),{"live":live})
+
+## One set of defensive sectors for the whole people, not another army for
+## every rival. All detachments come from MilitaryCampaign's actual reserve.
+static func _deploy_border(civ_id:String,today:int)->String:
+	var mc:=_mc()
+	var deployed:Array[Dictionary]=[]
+	for band:Dictionary in _council_bands():
+		if String((band.council as Dictionary).get("act",""))!="border" or String(band.council.get("phase",""))=="home":continue
+		if not _fit(band):
+			_send_home(band)
+			continue
+		deployed.append(band)
+	# Existing posts keep their exact sectors through ordinary council turns.
+	# Losses shorten their coverage; a lost sector is not redrawn elsewhere.
+	if not deployed.is_empty():
+		var holding:=0;var men:=0
+		for band:Dictionary in deployed:
+			men+=int(band.get("troops",0))
+			if not BorderDefense.coverage(band,today).is_empty():holding+=1
+		return "%d hold %d border sectors; %d bands are still taking station. The capital keeps its reserve." % [men,holding,deployed.size()-holding]
+	var forces:=_forces()
+	var keep:=maxi(int(forces.keep),ceili(float(forces.home)*WATCH_SHARE))
+	var available:=maxi(0,int(forces.home)-keep)
+	if available<MIN_BAND:return "The home reserve stays. No free band is ready to take a border station."
+	var shape:=FortBorder.outline()
+	var outline:PackedVector2Array=shape.points
+	if outline.size()<3:return "The general has no border line on which to place a band."
+	var center:Vector2=shape.center
+	var toward:=center+Vector2.RIGHT*maxf(1.0,float(shape.get("reach",30.0)))
+	var coming:=their_bands(civ_id)
+	var towns:=known_towns(civ_id)
+	if not coming.is_empty():toward=coming[0].position
+	elif not towns.is_empty():toward=_v2(towns[0].position)
+	var count:=clampi(available/100,1,BorderDefense.MAX_SECTORS)
+	count=mini(count,maxi(0,int(mc.field_army_capacity())-(mc.field_armies as Array).size()))
+	if count<=0:return "Every command is already assigned; the general waits for a free band."
+	var sent:=0;var posts:=0;var blocked:=""
+	for index in count:
+		var line:=BorderDefense.sector(outline,index,count,toward)
+		var anchor:=BorderDefense.at(line,BorderDefense.length(line)*0.5)
+		if not anchor.is_finite():continue
+		var world:=WorldSimulation.world
+		if not world._position_is_revealed(anchor) or (world.scout_land_authority.is_valid() and not world._scout_land_at(anchor)):
+			blocked="Some stations wait for a charted land approach."
+			continue
+		var men:=available/count+(1 if index<available%count else 0)
+		var made:Dictionary=mc.create_field_army(men,"Border band %d" % (index+1))
+		if made.has("error"):blocked=String(made.error);continue
+		var id:=int(made.army.army_id)
+		var moved:Dictionary=mc.move_field_army_to_position(id,anchor.x,anchor.y,"Border station %d" % (index+1))
+		if moved.has("error"):
+			mc.disband_field_army(id);blocked=String(moved.error);continue
+		_tag(id,civ_id,"border",{"name":"border station %d" % (index+1)},{},true)
+		var band:=_army(id)
+		band["border_sector"]={"owner":WorldSimulation.actor_id,"civ_id":civ_id,"points":BorderDefense.packed(line),"anchor":{"x":anchor.x,"z":anchor.y},"assigned_troops":int(band.troops),"day":today,"organization":BorderDefense.organization(WorldSimulation.state.known_discoveries)}
+		band["command_status"]="Marching to the border station"
+		sent+=int(band.troops);posts+=1
+	if posts==0:return "No border band could set out. "+blocked
+	return "%d march to %d border stations, leaving %d at home. Their line holds only as far as their men and supplies can cover.%s" % [sent,posts,int(mc.home_army.get("troops",0)),(" "+blocked) if blocked!="" else ""]
 
 ## Towns we hold of theirs whose garrisons are short: men march from home.
 static func _man_garrisons(civ_id:String)->String:
@@ -884,7 +946,16 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 		return _record(civ_id,"act","%s besieges %s, day %d." % [who,name,maxi(1,int(mc.active_siege.get("days",0)))],ids)
 	if String(band.get("status",""))=="moving":
 		return _record(civ_id,"act","%s is on the road%s." % [who,(" to "+name) if name!="" else ""],ids)
+	# A battle on the approach is not the end of the town's campaign. The
+	# existing city operation owns its arrival and resumes after contact.
+	if act in ["take","punish"] and not (band.get("city_operation",{}) as Dictionary).is_empty():
+		return _record(civ_id,"act","%s continues the approach to %s." % [who,name],ids)
 	match act:
+		"border":
+			if not _fit(band) or Supply.fed(band)<Supply.STARVING_BELOW:
+				_send_home(band)
+				return _record(civ_id,"rest","%s leaves its border station to rest and refill." % who,ids)
+			return _record(civ_id,"hold","%s holds its border station with %s." % [who,_fighters(int(band.troops))],ids)
 		"take":
 			if town_id!="" and _ours(civ_id,town_id):
 				c["phase"]="done"
@@ -927,12 +998,13 @@ static func _send_home(band:Dictionary)->bool:
 	var index:int=mc._field_army_index(army_id)
 	if index<0: return false
 	var live:Dictionary=mc.field_armies[index]
+	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
+	live.erase("border_sector")
 	if live.get("council") is Dictionary: (live.council as Dictionary)["phase"]="home"
 	# Resting: the war leader's upkeep brings it to its rest (band_upkeep.gd).
 	if bool(live.get("resting",false)): return true
 	if _at_home(live): return true
 	if String(live.get("status",""))=="moving" and String(live.get("destination_id",""))=="player_home": return true
-	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
 	var r:Dictionary=mc.return_field_army(army_id)
 	if r.has("error"): return false
 	index=mc._field_army_index(army_id)
@@ -1451,6 +1523,9 @@ static func band_words(band:Dictionary)->String:
 	var homeward:=moving and String(band.get("destination_id",""))=="player_home"
 	if homeward: return "%s's band comes home%s, %s" % [who,(" from "+name) if name!="" else "",("about %s out" % _span(days)) if days>0 else "nearly home"]
 	match String(c.get("act","")):
+		"border":
+			if moving:return "%s takes %d to a border station, about %s out" % [who,men,_span(days)]
+			return "%s holds %.1f km of the border with %d%s" % [who,BorderDefense.length(BorderDefense.coverage(band,_today())),men,(": "+tail) if tail!="" else ""]
 		"take":
 			if moving: return "%s marches on %s with %d, there in about %s%s" % [who,name,men,_span(days),(": "+tail) if tail!="" else ""]
 			return "%s stands before %s with %d%s" % [who,name,men,(": "+tail) if tail!="" else ""]
