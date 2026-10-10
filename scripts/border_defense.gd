@@ -105,6 +105,30 @@ static func sector(outline:PackedVector2Array,index:int,count:int,toward:Vector2
 		for i in range(1,rest.size()):out.append(rest[i])
 	return out
 
+## Keep the connected land stretch around the real station. A bounded survey
+## clips coast crossings without moving the anchor to another piece of shore.
+static func land_span(line:PackedVector2Array,is_land:Callable)->PackedVector2Array:
+	if not is_land.is_valid():return line
+	var total:=length(line);var middle:=total*0.5
+	if total<=0.0 or not bool(is_land.call(at(line,middle))):return PackedVector2Array()
+	var step:=maxf(0.25,total/96.0)
+	var edges:Array[float]=[]
+	for direction in [-1.0,1.0]:
+		var dry:=middle
+		for sample in 49:
+			var next:=clampf(middle+float(direction)*step*float(sample+1),0.0,total)
+			if not bool(is_land.call(at(line,next))):
+				var wet:=next
+				for refine in 7:
+					var test:=(dry+wet)*0.5
+					if bool(is_land.call(at(line,test))):dry=test
+					else:wet=test
+				break
+			dry=next
+			if next<=0.0 or next>=total:break
+		edges.append(dry)
+	return slice(line,edges[0],edges[1])
+
 ## Small physical depth, independent of an army's frontage along the border.
 static func radius(force:Dictionary)->float:
 	return clampf(sqrt(maxf(0,float(force.get("troops",force.get("actual_troops",0)))))*0.012,0.04,0.6)
