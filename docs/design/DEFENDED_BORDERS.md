@@ -80,7 +80,9 @@ ribbon; both sides now have current, bounded fighting geometry.
 The combined crowded-battle test then exposed redundant placement work for
 tiny combat ribbons. Coalescing their footprint and skipping candidates whose
 distance already exceeds the best placement reduced drawing from 86.6 ms to
-16.8 ms, without relaxing the 60 ms test budget or counter separation.
+17.7 ms, without relaxing the 60 ms test budget or counter separation. Final
+polish clips army leader lines beneath other paper cards and fixed readouts,
+removing thin strokes that crossed numbers in the crowded view.
 
 ## Validation
 
@@ -92,10 +94,10 @@ distance already exceeds the best placement reduced drawing from 86.6 ms to
 - The engine critic's final acceptance passes all 14 focused cases, including
   reinforcement, remarching, recalling reserved posts, new map/city duties,
   neutral contact and duplicate defender reservations.
-- Final combined visual run: all 95 cases passed, zero errors or orphans.
+- Final combined visual run: all 96 cases passed, zero errors or orphans.
   It covers front geometry, current battle collection, moving fighting fronts,
   counter and battle layout, captions, click targets, and the bounded combat
-  helper. The 50-band/20-battle case composes in 6.0 ms and draws in 16.8 ms
+  helper. The 50-band/20-battle case composes in 6.5 ms and draws in 17.7 ms
   on this machine; this is a focused draw measurement, not whole-game FPS.
 - The council defense regression now tests physical deployment. Its unrelated
   long-run raid cadence assertion also fails on unchanged `16982712` (two
@@ -106,6 +108,18 @@ distance already exceeds the best placement reduced drawing from 86.6 ms to
   The production collection probe runs the council, marches, delivers reports,
   collects observations and starts real battles. These are labelled TEST
   fixtures, not a claimed natural campaign replay.
+- Final production collection passes eight views and a timed contact pair
+  (ten screenshots): perimeter, close fighting, regional and continental
+  views, night, 1152 × 720, reduced motion and resumed presentation. All 16
+  army cards remain visible in the perimeter and crowded views, with zero
+  counter-clearance overlaps in every view.
+- A separate controlled motion proof suppresses only the decorative battle
+  ring and wash for the diagnostic frames, then restores their live flags.
+  The production scene and hot geometry hashes remain unchanged. The blue
+  ribbon changes 925 pixels and red changes 1,713; paused and reduced-motion
+  comparisons change zero pixels on both sides. Normal contact images retain
+  the ordinary battle pulse. The art critic accepted the distinct fighting
+  silhouettes, nearby captions, scale handling, night readability and watch ink.
 
 Headless evidence is local in `artifacts/border-critic-final-core.log` and
 `artifacts/border-critic-final-visual.log`; border UI
@@ -113,3 +127,11 @@ evidence is in `artifacts/border-art/critic-r2/`. Production collection uses
 `tests/border_defense_collection_probe.tscn`, launched only through
 `tools/run_isolated_gpu_probe.ps1` with a copied save in ignored artifacts.
 It verifies that the copied source and frozen campaign day remain unchanged.
+Production evidence is in the capture worktree at
+`artifacts/border-defense/collection-iteration3/`; the independent ribbon
+motion proof is in `artifacts/border-defense/collection-iteration3-motion-proof/`.
+The final leader-line polish is recaptured in
+`artifacts/border-defense/collection-final-crowded/`: both plates pass, all
+16 cards remain visible and separate, and the critic accepted the cleared
+numbers and exposed contact worms. These ignored artifacts stay local;
+the probe source and all production changes are committed to the worker branch.
