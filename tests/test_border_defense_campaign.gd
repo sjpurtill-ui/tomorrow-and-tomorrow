@@ -110,7 +110,7 @@ func _start_world() -> void:
 	Route.clear_cache()
 	origin=CivilizationSystem.player_world_origin; capital=origin+Vector2(8,0)
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
-	civ_id=String(civ.id); civ.name="Esurai"; civ.military_population=240.0
+	civ_id=String(civ.id); civ.name="Esurai"; civ.military_population=1000.0
 	civ.player_relation.at_war=false; civ.player_relation.treaty="none"; civ.player_relation.contact_level=2; civ.player_relation.home_location_known=true
 	var region:Dictionary=civ.strategic_regions[CivilizationSystem._frontline_region_index(civ)]
 	city_id=String(region.id)
@@ -129,11 +129,11 @@ func _start_world() -> void:
 	# A real legacy foreign force, placed on the approach. It is intentionally
 	# not a supplied scout sighting: physically meeting it must reveal contact.
 	var guard:Dictionary=CivilizationSystem.foreign_formations[0].duplicate(true)
-	guard.id="border-guard"; guard.civ_id=civ_id; guard.kind="patrol"; guard.actual_troops=100
-	guard.strength_share=100.0/240.0
+	guard.id="border-guard"; guard.civ_id=civ_id; guard.kind="patrol"; guard.actual_troops=400
+	guard.strength_share=0.4
 	guard.command_position=_pack(origin+Vector2(3,0)); guard.command_response_day=int(GameState.elapsed_days)
 	guard.disabled_until_day=0; guard.morale=0.9; guard.readiness=0.8
-	guard.border_sector=_defender("guard",origin+Vector2(3,0),100,1).border_sector
+	guard.border_sector=_defender("guard",origin+Vector2(3,0),400,1).border_sector
 	guard.border_sector.owner=civ_id; guard.border_sector.civ_id="player"
 	CivilizationSystem.foreign_formations.assign([guard])
 	War.blood_feud(civ_id,int(GameState.elapsed_days),"test frontier dispute")
@@ -164,7 +164,7 @@ func _march_to_contact() -> Dictionary:
 	return MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(army.army_id))]
 
 func _contact_diagnostic(army:Dictionary) -> String:
-	return "army=%s\nengagements=%s\nhistory=%s\nfoes=%s" % [str(army),str(MilitaryCampaign.own_engagements.keys()),str(MilitaryCampaign.battle_history.slice(0,2)),str(MilitaryCampaign.command_hierarchy.land.enemies(int(GameState.elapsed_days),false))]
+	return "army %d: %s at %s; blocked=%s; engagements=%s; outcomes=%s" % [int(army.get("army_id",0)),String(army.get("status","")),str(army.get("position",{})),String(army.get("movement_block_reason","")),str(MilitaryCampaign.own_engagements.keys()),str(MilitaryCampaign.battle_history.slice(0,2).map(func(r:Dictionary)->String:return String(r.get("outcome",""))))]
 
 func test_real_council_capital_march_meets_defense_before_the_city() -> void:
 	_start_world()
@@ -217,7 +217,7 @@ func test_front_victory_preserves_the_capital_objective_and_can_meet_a_second_in
 	assert_bool(army.has("city_operation")).is_true()
 	assert_int(int(GameState.population_total)).is_less_equal(before_population)
 	var second:Dictionary=CivilizationSystem.foreign_formations[0].duplicate(true)
-	second.id="inland-guard"; second.disabled_until_day=0; second.actual_troops=100; second.morale=0.9; second.readiness=0.8
+	second.id="inland-guard"; second.disabled_until_day=0; second.actual_troops=400; second.strength_share=0.4; second.morale=0.9; second.readiness=0.8
 	second.command_position=_pack(origin+Vector2(6,0)); second.command_response_day=int(GameState.elapsed_days)
 	second.erase("border_sector")
 	CivilizationSystem.foreign_formations.append(second)
@@ -248,6 +248,24 @@ func test_retreat_from_front_cannot_resume_the_capital_march() -> void:
 	var contact:Dictionary=Defense.first_contact(origin+Vector2(1,0),origin+Vector2(5,0),foes,{"troops":120})
 	assert_dict(contact).is_not_empty()
 	if not contact.is_empty(): assert_str(String(contact.formation_id)).is_equal("border-guard")
+
+func test_an_overwhelming_attack_still_commits_a_real_border_battle_before_continuing() -> void:
+	_start_world()
+	CivilizationSystem.foreign_formations[0].actual_troops=100
+	CivilizationSystem.foreign_formations[0].strength_share=0.1
+	var army:=_march_to_contact()
+	if army.is_empty(): return
+	assert_float(_point(army).x-origin.x).is_less(3.1)
+	assert_bool(army.has("city_operation")).is_true()
+	assert_str(String(army.get("destination_id",""))).is_equal(city_id)
+	var contacts:Array=MilitaryCampaign.battle_history.filter(func(record:Dictionary)->bool:return bool(record.get("field_encounter",false)) and String(record.get("formation_id",""))=="border-guard")
+	assert_int(contacts.size()).override_failure_message(_contact_diagnostic(army)).is_equal(1)
+	var population:=int(GameState.population_total)
+	var count:=MilitaryCampaign.battle_history.size()
+	var repeated:Dictionary=MilitaryCampaign.launch_front_contact(int(army.army_id),{"formation_id":"border-guard"})
+	assert_bool(repeated.has("error")).override_failure_message(str(repeated)).is_true()
+	assert_int(MilitaryCampaign.battle_history.size()).is_equal(count)
+	assert_int(int(GameState.population_total)).is_equal(population)
 
 func test_a_real_owned_defender_is_reserved_once_for_a_front_battle() -> void:
 	_start_world()
