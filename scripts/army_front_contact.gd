@@ -4,9 +4,15 @@ extends RefCounted
 const Defense:=preload("res://scripts/border_defense.gd")
 const Lines:=preload("res://scripts/army_lines.gd")
 
-static func enemies(host:Node,army:Dictionary)->Array:
+static func enemies(host:Node,army:Dictionary,order:Dictionary={})->Array:
 	var result:Array=[]
 	var intended:=String((army.get("city_operation",{}) as Dictionary).get("civ_id",""))
+	# A staff-directed invasion may meet a field defense before entering the
+	# city's territorial claim. Use the same authorized objective at sweep
+	# and launch, otherwise a neutral defender stops the march forever.
+	if String(order.get("mission","")) in ["capture","occupy","raze"]:
+		var city:Dictionary=WorldSimulation.world.city_intelligence.known("player",String(order.get("target","")))
+		intended=String(city.get("civ_id",""))
 	var intercept:=String(army.get("target_formation_id",""))
 	for enemy:Dictionary in host.command_hierarchy.land.enemies(int(WorldSimulation.state.elapsed_days),false):
 		if host.command_hierarchy.land.hostile(String(enemy.owner)) or String(enemy.owner)==intended or String(enemy.id)==intercept:
@@ -35,7 +41,7 @@ static func sweep(host:Node,army:Dictionary,origin:Vector2,packed:Array,before:f
 		if previous_effort>=after:break
 	return {}
 
-static func launch(host:Node,army_id:int,contact:Dictionary)->Dictionary:
+static func launch(host:Node,army_id:int,contact:Dictionary,order:Dictionary={})->Dictionary:
 	var index:int=host._field_army_index(army_id)
 	if index<0:return {"error":"The army is no longer present."}
 	if host.command_hierarchy.battle.engaged(army_id):return {"error":"This army is already fighting."}
@@ -43,7 +49,7 @@ static func launch(host:Node,army_id:int,contact:Dictionary)->Dictionary:
 	var at:Vector2=host.command_hierarchy.land.point(army)
 	var id:=String(contact.get("formation_id",""))
 	var candidates:Array=[]
-	for enemy:Dictionary in enemies(host,army):
+	for enemy:Dictionary in enemies(host,army,order):
 		if String(enemy.id)==id:candidates.append(enemy)
 	# A stored or caller-supplied contact cannot order a distant attack.
 	var confirmed:=Defense.first_contact(at,at,candidates,army)
