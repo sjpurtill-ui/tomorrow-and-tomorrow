@@ -346,8 +346,7 @@ static func border_signature()->Array:
 
 ## (2b) The border (fort_border.gd): our forts, how many of the watch are out
 ## on it, how well its stretches hold, the food lost on the road, and the
-## share sent out. The full panel (forts, stretches, the war leader's sites)
-## opens from here.
+## share sent out. Forts are placed on the map itself (hud/border_map.gd).
 func _border_card()->Control:
 	var Forts:=preload("res://scripts/fort_border.gd")
 	var panel:=_card();panel.name="BorderCard"
@@ -372,14 +371,13 @@ func _border_card()->Control:
 	var cost:=_line("%d%% of the watch at home · %d food lost a day" % [roundi(share*100.0),roundi(float(bill.food_lost))],12,T.INK_MUTED);cost.name="BorderCost";cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	cost.tooltip_text="Food carried out spoils and is eaten on the road: about a third is lost at 60 km on foot, more farther out; roads and carts lose less."
 	column.add_child(cost)
-	var open:=_small_button("Forts and sites","defend","Our forts, each stretch's watch, and where the war leader would raise the next fort.")
+	var open:=_small_button("Place forts on the map","defend","Opens the Border view on the map: click open land to raise a fort, click a fort to move it or break it down.")
 	open.name="OpenBorder"
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
-		var hud:Variant=scene.get("hud") if scene!=null else null
-		if hud==null or not hud.has_method("open_detail"):return
+		if scene==null:return
 		close_wanted.emit()
-		hud.open_detail(preload("res://scripts/hud/content/border_detail.gd").new(scene,hud)))
+		preload("res://scripts/hud/border_map.gd").set_shown(scene,true))
 	column.add_child(open)
 	return panel
 

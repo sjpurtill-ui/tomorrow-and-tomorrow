@@ -876,6 +876,15 @@ func _capture_preview_if_requested() -> void:
 			var glide_until:=Time.get_ticks_msec()+6000
 			while zoom_target_size>0.0 and Time.get_ticks_msec()<glide_until: await get_tree().process_frame
 			print("CAPTURE EXPEDITION size ",camera.size," ",(planner.get("current") as Dictionary).get("km",-1)," ",(planner.get("current") as Dictionary).get("blocker",""))
+	# Capture only: the map's Border mode (hud/border_map.gd), with the ghost
+	# at "--capture-border-ghost=<bearing deg>,<km>" from the seat (a move of
+	# the first fort with "--capture-border-move") or the first fort's note
+	# open with "--capture-border-note".
+	for argument in OS.get_cmdline_user_args():
+		if argument=="--capture-border-map" or argument.begins_with("--capture-border-") or argument.begins_with("--capture-fort-close="):
+			print("CAPTURE BORDER ",load("res://tools/border_map_capture.gd").call("stage",self))
+			for capture_frame in 12: await get_tree().process_frame
+			break
 	# Capture only: the War screen's map (its camera easing, the borders built
 	# on a worker thread and the fronts read from them) settles over a few
 	# seconds; give it them.
