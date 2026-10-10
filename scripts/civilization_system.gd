@@ -2325,6 +2325,42 @@ func apply_formation_memory(day:int=-1)->void:
 	StandDown.apply(formation_memory,foreign_formations,day if day>=0 else int(WorldSimulation.state.elapsed_days))
 
 
+## Only the visible part of a deployed line is published, frozen with the report.
+func _seen_defense_points(formation:Dictionary)->Array:
+	var viewers:Array=[{"point":player_world_origin,"radius":_local_observation_radius()}]
+	for army:Dictionary in WorldSimulation.military.field_armies:
+		if int(army.get("troops",0))>0 and not bool(army.get("embarked",false)):
+			viewers.append({"point":WorldSimulation.military.command_hierarchy.land.point(army),"radius":12.0})
+	return preload("res://scripts/border_front_observation.gd").seen(formation.get("defense_points",[]),viewers)
+
+
+## Physical contact discovers the soldiers on that patch of ground; it does
+## not reveal the rest of their front, capital or distant command position.
+func observe_front_contact(formation_id:String,at:Vector2)->Dictionary:
+	_process_local_observation(int(WorldSimulation.state.elapsed_days),true)
+	var index:=_foreign_formation_index(formation_id)
+	if index<0:return {}
+	var formation:=preload("res://scripts/civilization_combat.gd").refresh_formation(foreign_formations[index])
+	var civ_index:=_civilization_index(String(formation.get("civ_id","")))
+	if civ_index<0:return {}
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var civ:Dictionary=civilizations[civ_index]
+	var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
+	relation["contact_level"]=maxi(2,int(relation.contact_level))
+	relation["contact_intelligence"]=maxf(.18,float(relation.contact_intelligence))
+	civ["player_relation"]=_set_contact_provenance(relation,day,"local_formation",at,String(formation.get("kind","expedition")),formation_id)
+	var points:=_seen_defense_points(formation)
+	var sighting:={"formation_id":formation_id,"civ_id":String(formation.civ_id),"kind":String(formation.get("kind","expedition")),"last_seen_day":day,"position":{"x":at.x,"z":at.y},"distance_km":at.distance_to(player_world_origin),
+		"strength":float(formation.get("actual_troops",maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",.08))))),"readiness":float(formation.get("readiness",.5)),"visible":true,"defense_points":points,"border_front":{"id":formation_id,"points":points,"day":day,"assigned":bool((formation.get("border_front",{}) as Dictionary).get("assigned",not points.is_empty())),"state":String((formation.get("border_front",{}) as Dictionary).get("state","held"))}}
+	var seen_index:=_formation_sighting_index(formation_id)
+	if seen_index<0:
+		foreign_sightings.push_front(sighting)
+		if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT:foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
+	else:foreign_sightings[seen_index]=sighting
+	observation_revision+=1
+	return _public_formation_sighting(sighting)
+
+
 func _process_local_observation(day:int,force:bool=false)->void:
 	if not force and day==last_observation_day: return
 	last_observation_day=day
@@ -2333,9 +2369,14 @@ func _process_local_observation(day:int,force:bool=false)->void:
 	var radius:=_local_observation_radius()
 	var visible_ids:Dictionary={}
 	var changed:=false
-	for formation in foreign_formations:
-		if day<int(formation.get("disabled_until_day",0)): continue
+	for stored_formation in foreign_formations:
+		var formation:=preload("res://scripts/civilization_combat.gd").refresh_formation(stored_formation)
+		if day<int(formation.get("disabled_until_day",0)) or int(formation.get("actual_troops",1))<=0: continue
 		var position:=_foreign_formation_position(formation,float(day))
+		var seen_line:=_seen_defense_points(formation)
+		if not seen_line.is_empty():
+			var glimpse:Dictionary=seen_line[seen_line.size()/2]
+			position=Vector2(float(glimpse.x),float(glimpse.z))
 		var distance:=position.distance_to(player_world_origin)
 		if distance>radius and not _nearby_player_army(position,12.0): continue
 		var is_scout:=String(formation.get("kind",""))=="scout"
@@ -2362,10 +2403,12 @@ func _process_local_observation(day:int,force:bool=false)->void:
 				relation["rival_player_intelligence"]=maxf(0.18,float(relation.get("rival_player_intelligence",0.0)))
 				if int(relation.get("rival_met_day",-1))<0: relation["rival_met_day"]=day
 		civ["player_relation"]=relation; civilizations[civ_index]=civ
-		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
+		var strength:=float(formation.get("actual_troops",maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var first_sighting:=sighting_index<0 or day-int(foreign_sightings[sighting_index].get("last_seen_day",-9999))>30
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.kind),"last_seen_day":day,"position":{"x":position.x,"z":position.y},"distance_km":distance,"strength":strength,"readiness":float(formation.readiness),"visible":true}
+		sighting["defense_points"]=seen_line
+		sighting["border_front"]={"id":formation_id,"points":seen_line,"day":day,"assigned":bool((formation.get("border_front",{}) as Dictionary).get("assigned",not seen_line.is_empty())),"state":String((formation.get("border_front",{}) as Dictionary).get("state","held"))}
 		if String(formation.get("kind",""))=="scout": sighting["interception"]=_foreign_scout_interception_chances(formation,position)
 		# Seen on the march: its heading and the land road it is plausibly on.
 		sighting.merge(RivalLandRoutes.motion_at(formation,float(day)),true)
@@ -2407,7 +2450,7 @@ func _public_formation_sighting(sighting:Dictionary)->Dictionary:
 	var readiness_error:=lerpf(0.32,0.10,confidence)
 	var kind:=String(sighting.get("kind","movement"))
 	var unidentified_label:="UNIDENTIFIED SCOUT PARTY" if kind=="scout" else "UNIDENTIFIED FOREIGN FORMATION"
-	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"road_ahead":(sighting.get("road_ahead",[]) as Array).duplicate(true)}
+	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"road_ahead":(sighting.get("road_ahead",[]) as Array).duplicate(true),"defense_points":(sighting.get("defense_points",[]) as Array).duplicate(true),"border_front":(sighting.get("border_front",{}) as Dictionary).duplicate(true)}
 
 
 func local_observation_snapshot()->Dictionary:
@@ -2461,7 +2504,7 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 		"strength":strength,"technology":float(civ.knowledge),
 		"readiness":clampf(float(formation.get("readiness",civ.military_readiness)),0.1,1.0),
 		"aggression":float(civ.aggression),"created_day":int(WorldSimulation.state.elapsed_days),
-		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,
+		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,"owned_force_id":int(formation.get("owned_force_id",0)),
 		"target_region_id":"","target_region_name":"the field contact",
 		"target_position":position.duplicate(true),"terrain_defense":1.04,
 		"morale_cap":StandDown.morale_cap(formation_memory,formation_id,today),
@@ -2485,7 +2528,7 @@ func resolve_foreign_formation_after_battle(formation_id:String,result:Dictionar
 	formation["readiness"]=clampf(float(formation.get("readiness",0.5))*lerpf(0.42,0.82,remaining_ratio),0.08,1.0)
 	var termination:Dictionary=result.get("termination",{})
 	var day:=int(WorldSimulation.state.elapsed_days)
-	if String(termination.get("type","continued"))!="continued":
+	if String(termination.get("defeated",""))==String(rival_result.get("name","")) and not String(rival_result.get("name","")).is_empty():
 		formation["disabled_until_day"]=day+StandDown.BEATEN_DAYS
 	# Remembered by its stable id: rival armies are rebuilt from sightings
 	# every day, and the stand-down must outlive that.
