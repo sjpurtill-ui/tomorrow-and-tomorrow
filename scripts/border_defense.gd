@@ -80,6 +80,7 @@ static func coverage(force:Dictionary,today:int=-1)->PackedVector2Array:
 	if not fit(force,today) or String(force.get("status","stationed"))=="moving":return PackedVector2Array()
 	var sector:Dictionary=force.get("border_sector",{})
 	if sector.is_empty():return PackedVector2Array()
+	if bool(sector.get("relocating",false)):return PackedVector2Array()
 	if String((force.get("council",{}) as Dictionary).get("phase",""))=="home":return PackedVector2Array()
 	var anchor:=point(sector.get("anchor"));var here:=point(force.get("position"))
 	if not anchor.is_finite() or not here.is_finite() or here.distance_to(anchor)>ARRIVAL_KM:return PackedVector2Array()
