@@ -228,7 +228,7 @@ func _real_map() -> void:
 		terrain.call("_update_world_streaming")
 	BorderMap.set_shown(terrain,true); map = BorderMap.find(terrain)
 	var labels := CanvasLayer.new(); labels.layer = 100; add_child(labels)
-	title = Label.new(); title.position = Vector2(190,90); title.add_theme_font_size_override("font_size",16)
+	title = Label.new(); title.position = Vector2(190,44); title.add_theme_font_size_override("font_size",16)
 	title.add_theme_color_override("font_color",Color("f8eed7")); title.add_theme_color_override("font_shadow_color",Color("201d14"))
 	title.add_theme_constant_override("shadow_offset_x",1); title.add_theme_constant_override("shadow_offset_y",1); labels.add_child(title)
 	for i in 40: await get_tree().process_frame
@@ -340,6 +340,10 @@ func _interactions() -> void:
 	map.call("_close_note")
 	GameState.border_forts=preserved_forts; GameState.resource_stockpiles=preserved_stores
 	_refresh()
+	T.set_color_mode("dark"); await _settle()
+	_check(((map.get("key_card") as Control).get_theme_stylebox("panel") as StyleBoxFlat).bg_color==T.PAPER_RAISED,"An already open border card adopts its night background")
+	T.set_color_mode("light"); await _settle()
+	_check(((map.get("key_card") as Control).get_theme_stylebox("panel") as StyleBoxFlat).bg_color==T.PAPER_RAISED,"An already open border card returns to its paper background")
 
 func _all_text(node:Node) -> String:
 	if not is_instance_valid(node): return ""
