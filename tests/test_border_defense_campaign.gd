@@ -205,12 +205,18 @@ func test_front_victory_preserves_the_capital_objective_and_can_meet_a_second_in
 	var before_population:=int(GameState.population_total)
 	var engagement:Dictionary=MilitaryCampaign.active_engagement
 	var enemy_side:=MilitaryCampaign._engagement_enemy_side(engagement)
+	# Author the defender's imminent break in the already-open block battle,
+	# then let the normal seeded resolver and both casualty commits settle it.
 	engagement[enemy_side]["morale"]=0.01
+	for block:Dictionary in (engagement.get("battle",{}) as Dictionary).get("live",{}).get(enemy_side,[]):
+		block["c"]=0.01; block["cond"]=0.01
 	for _round in 8:
 		if MilitaryCampaign.active_engagement.is_empty(): break
 		MilitaryCampaign.active_engagement.erase("awaiting_player_view")
 		MilitaryCampaign.fight_engagement_day("press")
-	assert_dict(MilitaryCampaign.active_engagement).is_empty()
+	assert_bool(MilitaryCampaign.active_engagement.is_empty()).override_failure_message(_contact_diagnostic(army)).is_true()
+	var won:Array=MilitaryCampaign.battle_history.filter(func(record:Dictionary)->bool:return String(record.get("formation_id",""))=="border-guard" and String(record.get("outcome","")) in ["attacker_victory","defender_retreat"])
+	assert_int(won.size()).override_failure_message(_contact_diagnostic(army)).is_equal(1)
 	army=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(initial_id)]
 	assert_int(int(army.army_id)).is_equal(initial_id)
 	assert_str(String(army.get("destination_id",""))).is_equal(city_id)
