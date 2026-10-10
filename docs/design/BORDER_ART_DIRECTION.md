@@ -40,11 +40,12 @@ is bounded; there are no animated people or decorative simulation entities.
 The root worktree is `C:/Users/sjpur/tt-organic-place-art`. Captures and logs are
 ignored local evidence, not committed assets or player saves.
 
-Final evidence is `artifacts/border-art/acceptance/`: `audit.json` records all
-55 UI checks passing across 12 captures; `terrain-audit.json` records all seven
-terrain checks passing across four captures. Both private GPU processes exited
-normally. The final screenshots include the neutral condition advice, live-palette
-fix and unclipped move preview. Review: pull request #205.
+Initial evidence is `artifacts/border-art/acceptance/`: all 55 UI checks passed
+across 12 captures, and all seven terrain checks passed across four captures.
+After two critic reviews, `artifacts/border-art/critic-r2/` records 71 passing UI
+checks across 14 captures. These add no-watch and limited-watch availability,
+truthful zero coverage, and a live map-ink refresh while the pointer is away.
+All private GPU processes exited normally. Review: pull request #205.
 
 - `artifacts/border-art/fort-tests-final.log`: all 15 existing border tests passed,
   with zero failures, errors or orphan nodes.
