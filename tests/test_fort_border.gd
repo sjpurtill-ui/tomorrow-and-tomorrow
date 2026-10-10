@@ -17,6 +17,8 @@ func before_test()->void:
 	GameState.known_discoveries=["joinery"]
 	# These tests place their own forts: no old posts counted.
 	GameState.border_forts={"seeded":true}
+	CivilizationSystem.revealed_areas=[{"x":0.0,"z":0.0,"radius":400.0}]
+	CivilizationSystem.fog_revision+=1
 
 func after_test()->void:
 	GameState.border_forts={}
@@ -113,23 +115,124 @@ func test_an_older_people_counts_its_old_border_posts_once()->void:
 	Forts.seed_old_posts()
 	assert_int(Forts.forts().size()).is_equal(count)
 
-func test_the_border_panel_shows_each_stretch_the_forts_and_the_sites()->void:
+func test_the_quote_says_what_a_fort_there_costs_and_gains()->void:
+	_standing(Vector2(80,0))
+	var q:=Forts.quote(Vector2(0,80))
+	assert_str(String(q.problem)).is_equal("")
+	assert_str(String(q.kind)).is_equal("palisade_fort")
+	assert_float(float(q.km)).is_equal_approx(80.0,0.01)
+	assert_float(float(q.cost.Timber)).is_equal(220.0)
+	assert_int(int(q.days)).is_equal(100)
+	assert_float(float(q.food_lost)).is_greater(0.0)
+	# It links to the fort at (80, 0) and encloses the ground between.
+	assert_int((q.links as Array).size()).is_equal(1)
+	assert_float(float(q.gain_km2)).is_greater(PI*32.0*32.0*0.5)
+	# The border it would make reaches past the new fort.
+	var reach_north:=0.0
+	for p:Vector2 in (q.outline as PackedVector2Array):reach_north=maxf(reach_north,p.y)
+	assert_float(reach_north).is_greater(100.0)
+	# The quote changes nothing.
+	assert_int(Forts.forts().size()).is_equal(1)
+	# Home ground needs no fort; nor does a spot beside another fort.
+	assert_str(String(Forts.quote(Vector2(5,0)).problem)).contains("home")
+	assert_str(String(Forts.quote(Vector2(82,0)).problem)).contains("Too close")
+	GameState.resource_stockpiles={"Timber":10.0}
+	assert_str(Forts.short_words(Forts.quote(Vector2(0,80)))).contains("210 more timber")
+
+func test_the_god_places_a_fort_and_breaks_it_down_for_part_of_its_materials()->void:
+	var made:=Forts.place(Vector2(0,80))
+	assert_bool(bool(made.get("ok",false))).override_failure_message(str(made)).is_true()
+	var fort:Dictionary=made.fort
+	fort.status="standing";fort.condition=1.0
+	assert_bool(Forts.inside(Vector2(0,100),GameState)).is_true()
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	var broken:=Forts.dismantle(int(fort.id))
+	assert_float(float(broken.recovered.Timber)).is_equal_approx(220.0*Forts.RECOVER,0.01)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(timber+110.0,0.01)
+	assert_array(Forts.forts()).is_empty()
+	assert_bool(Forts.inside(Vector2(0,100),GameState)).is_false()
+	assert_str(String(Forts.place(Vector2(3,0)).get("error",""))).contains("home")
+
+func test_a_moved_fort_goes_up_again_where_it_is_set_down_keeping_part_of_its_work()->void:
+	var fort:=_standing(Vector2(80,0))
+	var timber:=float(GameState.resource_stockpiles.Timber)
+	var moved:=Forts.move(int(fort.id),Vector2(0,120))
+	assert_bool(bool(moved.get("ok",false))).override_failure_message(str(moved)).is_true()
+	assert_float(float(fort.z)).is_equal(120.0)
+	assert_str(String(fort.status)).is_equal("building")
+	assert_float(float(fort.progress)).is_equal_approx(6000.0*Forts.MOVE_KEEP,0.01)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(timber-220.0*Forts.MOVE_COST,0.01)
+	# Until it stands again the border is home ground only.
+	assert_bool(Forts.inside(Vector2(100,0),GameState)).is_false()
+	assert_str(String(Forts.move(999,Vector2(0,60)).get("error",""))).contains("No such")
+	# Unknown land takes no fort.
+	assert_str(String(Forts.quote(Vector2(0,450)).problem)).contains("do not know")
+
+func test_the_border_mode_keys_the_border_and_a_forts_note_moves_or_breaks_it_down()->void:
+	var fort:=_standing(Vector2(80,0))
+	var host:=Node3D.new();add_child(host)
+	var map:Node=load("res://scripts/hud/border_map.gd").new();map.set("terrain",host);host.add_child(map)
+	map.call("set_enabled",true)
+	map.call("_refresh_key")
+	var key:PanelContainer=map.get("key_card")
+	var words:=_texts(key)
+	assert_str(words).contains("1 fort").contains("Click open land to raise a palisade fort")
+	map.call("open_note",int(fort.id))
+	var note:PanelContainer=map.get("note")
+	assert_str(_texts(note)).contains("PALISADE FORT").contains("Move").contains("Break down").contains("gives back")
+	map.call("start_move",int(fort.id))
+	assert_int(int(map.get("moving"))).is_equal(int(fort.id))
+	assert_bool(bool(map.call("_let_go"))).is_true()
+	assert_int(int(map.get("moving"))).is_equal(-1)
+	for b:Node in note.find_children("*","Button",true,false):
+		if (b as Button).text=="Break down":(b as Button).pressed.emit()
+	assert_array(Forts.forts()).is_empty()
+	host.queue_free()
+
+func _texts(root:Node)->String:
+	var out:PackedStringArray=[]
+	for n:Node in root.find_children("*","",true,false):
+		if n is Label:out.append((n as Label).text)
+		elif n is Button:out.append((n as Button).text)
+	return " | ".join(out)
+
+func test_the_share_that_mans_every_fort_is_their_garrisons_over_the_watch_at_home()->void:
 	WorldSimulation.military=MilitaryCampaign
+	assert_float(Forts.share_to_man()).is_equal(0.0)
 	_standing(Vector2(80,0));_standing(Vector2(0,80))
-	Forts.ledger(GameState).border_share=1.0
-	var blocks:Array=preload("res://scripts/hud/content/border_blocks.gd").blocks(null)
-	var headings:PackedStringArray=[]
-	for b:Dictionary in blocks:headings.append(String(b.get("heading","")))
-	var text:=" | ".join(headings)
-	print("BORDER PANEL: ",text)
-	assert_str(text).contains("THE BORDER").contains("THE WATCH ON THE BORDER").contains("OUR FORTS").contains("LEAVE A FORT")
-	var bars:Array=blocks[0].items
-	assert_int(bars.size()).is_equal(2)
-	assert_str(String(bars[0].value)).contains("a km")
-	var box:=VBoxContainer.new();add_child(box)
-	preload("res://scripts/hud/dock_blocks.gd").render(box,blocks)
-	assert_int(box.get_child_count()).is_greater(0)
-	box.queue_free()
+	var home:=preload("res://scripts/watch_military.gd").at_home(MilitaryCampaign)
+	if home<=0:
+		assert_float(Forts.share_to_man()).is_equal(1.0)
+		return
+	var share:=Forts.share_to_man()
+	assert_float(share).is_equal_approx(minf(1.0,ceilf(120.0/float(home)*100.0)/100.0),0.0001)
+	Forts.set_border_share(share)
+	var kept:=Forts.watch()
+	for f:Dictionary in Forts.forts():assert_int(int(kept.garrisons[int(f.id)])).is_equal(60 if share<1.0 else int(kept.garrisons[int(f.id)]))
+
+func test_an_unmanned_fort_wearing_down_is_told_once_at_half()->void:
+	WorldSimulation.military=MilitaryCampaign
+	var fort:=_standing(Vector2(80,0))
+	fort.condition=0.501
+	Forts.ledger(GameState).border_share=0.0
+	GameState.simulation_events=[]
+	Forts.advance(int(GameState.elapsed_days)+1)
+	assert_float(float(fort.condition)).is_less(0.5)
+	var told:=GameState.simulation_events.filter(func(e:Dictionary)->bool:return "wearing down" in String(e.description))
+	assert_int(told.size()).is_equal(1)
+	Forts.advance(int(GameState.elapsed_days)+2)
+	told=GameState.simulation_events.filter(func(e:Dictionary)->bool:return "wearing down" in String(e.description))
+	assert_int(told.size()).is_equal(1)
+
+func test_every_kind_of_fort_has_its_own_chart_mark()->void:
+	var Icons:=preload("res://scripts/resource_icons.gd")
+	var seen:={}
+	for k:Dictionary in Forts.KINDS:
+		for building:String in ["",":building"]:
+			var image:=Icons.chart_texture("fort:%s%s" % [String(k.id),building],Color("#7b2a7a"),40).get_image()
+			assert_int(image.get_width()).is_equal(40)
+			seen[image.get_data()]=true
+	assert_int(seen.size()).is_equal(Forts.KINDS.size()*2)
 
 func test_the_line_facing_a_people_is_what_stops_crossings_toward_it()->void:
 	_standing(Vector2(80,0));_standing(Vector2(0,80))

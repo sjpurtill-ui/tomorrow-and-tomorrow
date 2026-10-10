@@ -638,6 +638,9 @@ static func chart_texture(kind:String,ink:Color,px:int=40)->Texture2D:
 static func _chart_glyph(kind:String,c:Color)->Array:
 	var paper:=Color(0.95,0.90,0.78,0.62)
 	var wash:=_c(28,28,17,Color(paper,0.40))
+	if kind.begins_with("fort:"):
+		var parts:=kind.split(":")
+		return _fort_glyph(parts[1],parts.size()>2 and parts[2]=="building",c)
 	match kind:
 		"camp": return [wash,_t(28,15,15,39,41,39,c),_t(28,26,24,39,32,39,paper),_s(12,40,44,40,2.2,c)]
 		"find": return [wash,_t(28,10,24.5,28,31.5,28,c),_t(28,46,24.5,28,31.5,28,c),_t(10,28,28,24.5,28,31.5,c),_t(46,28,28,24.5,28,31.5,c),_c(28,28,3.2,paper)]
@@ -650,6 +653,46 @@ static func _chart_glyph(kind:String,c:Color)->Array:
 		"fort_site": return [_rr(28,28,15,15,3,Color(paper,0.55)),_s(13,13,21,13,2.6,c),_s(35,13,43,13,2.6,c),_s(13,43,21,43,2.6,c),_s(35,43,43,43,2.6,c),_s(13,13,13,21,2.6,c),_s(13,35,13,43,2.6,c),_s(43,13,43,21,2.6,c),_s(43,35,43,43,2.6,c),_s(28,22,28,34,2.4,c),_s(22,28,34,28,2.4,c)]
 	return [wash,_c(28,28,5,c)]
 
+
+## A fort of each kind, as a chart draws it from above (fort_border.gd KINDS):
+## a watch camp a ring of stakes round a tent; an earthwork a bank and ditch;
+## a palisade a square of stakes with a gate; a stone fort walls with corner
+## towers and a keep; a bastion fort a star of arrowhead bastions. Going up,
+## its far half is only pencilled in. Chart kind "fort:<kind id>[:building]".
+static func _fort_glyph(id:String,building:bool,c:Color)->Array:
+	var paper:=Color(0.95,0.90,0.78,0.95)
+	var base:=[_c(28,28,21,Color(paper,0.7))]
+	var p:Array=[]
+	match id:
+		"watch_camp":
+			for k in 10:
+				var u:=Vector2.from_angle(TAU*float(k)/10.0+0.3)
+				if k==2: continue
+				p.append(_c(28.0+u.x*16.0,28.0+u.y*16.0,2.6,c))
+			p.append_array([_t(28,15,18,36,38,36,c),_t(28,25,25,36,31,36,paper),_s(28,15,28,8,1.8,c),_t(28,8,35,10,28,12.5,c)])
+		"earthwork_fort":
+			p.append_array([_ring(28,28,17,5,c),_ring(28,28,10.5,1.6,Color(c,0.7)),_rr(28,45,4,4,1,paper),_rr(28,28,4.5,4.5,1,c)])
+		"palisade_fort":
+			p.append(_rr(28,28,15,15,2,Color(paper,0.9)))
+			for k in 5:
+				var t:=-14.0+7.0*float(k)
+				p.append_array([_c(28.0+t,13,2.4,c),_c(13,28.0+t,2.4,c),_c(43,28.0+t,2.4,c)])
+				if absf(t)>5.0: p.append(_c(28.0+t,43,2.4,c))
+			p.append_array([_rr(28,28,6,4.5,1,c),_t(20,24,28,18,36,24,c)])
+		"bastion_fort":
+			p.append_array([_t(28,4,18,18,38,18,c),_t(28,52,18,38,38,38,c),_t(4,28,18,18,18,38,c),_t(52,28,38,18,38,38,c)])
+			p.append_array([_rr(28,28,12,12,1,c),_rr(28,28,8.5,8.5,1,paper),_c(28,28,4,c)])
+		_:
+			p.append_array([_rr(28,28,15,15,3,Color(paper,0.95)),_rr(28,28,13,13,2,c),_rr(28,28,9,9,1.5,paper),_c(15,15,5,c),_c(41,15,5,c),_c(15,41,5,c),_c(41,41,5,c),_rr(28,28,4,4,1,c)])
+	if building:
+		# Its far half (down and right of the near diagonal) pencilled in only.
+		for k in p.size():
+			var prim:Dictionary=p[k]
+			var a:Vector2=prim.a
+			if a.x+a.y>57.0 and (prim.col as Color).a>0.0 and prim.col!=paper:
+				prim=prim.duplicate();prim.col=Color(prim.col,0.3);p[k]=prim
+		p.append(_s(12,44,44,12,1.2,Color(c,0.5)))
+	return base+p
 
 static func _figure_small(x:float,c:Color)->Array:
 	return [_c(x,17,4.2,c),_rr(x,28,4.6,7.2,3,c),_s(x-1.8,35,x-4.5,45,3.0,c),_s(x+1.8,35,x+4.0,45,3.0,c)]

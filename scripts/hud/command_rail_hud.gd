@@ -1133,6 +1133,7 @@ func _build_toolbar()->void:
 	scale_box.add_child(world_button)
 	# The supply map (hud/supply_map.gd): where our fighters can be fed.
 	scale_box.add_child(preload("res://scripts/hud/supply_map.gd").toggle_button(terrain))
+	scale_box.add_child(preload("res://scripts/hud/border_map.gd").toggle_button(terrain))
 	# The trade map (hud/trade_map.gd): goods between peoples, embargoes broken red.
 	scale_box.add_child(preload("res://scripts/hud/trade_map.gd").toggle_button(terrain))
 	# Compile the world view's shader while the map loads, so its first opening
