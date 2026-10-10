@@ -7,13 +7,16 @@ battles before capital arrival, retained objectives after breakthrough, observed
 flank approaches, and coverage-driven animated fronts with honest dated reports.
 Optional army metadata; no save migration or player-session restart.
 
-Validation totals 139 cases: 138 pass with no errors or orphans. This includes
-the 115-case military/geometry/visual run, three outcome/intelligence cases and
-two observed-approach cases. The council suite retains one reproduced baseline
-raid-cadence failure; its changed defense behavior is covered by real deployment
-and reserve assertions. Six private copied-terrain captures pass and show held
-ground, gaps, contact and inland fighting at two scales. Design and reproduction are in
-`docs/design/DEFENDED_BORDERS.md`.
+Three refinement passes and two critic reviews address reinforcement, moving
+border stations, retasking, neutral invasions, retained targets, duplicate
+defender reservations, recalled posts, crowded counters and live watch ink.
+Compact combat fronts keep departed attackers visible without claiming held
+territory. Final headless validation totals 222 cases: 221 pass with no errors
+or orphans (126/127 core, 95/95 visual). The one long-run raid-cadence failure is
+reproduced on unchanged main and preserved. The 50-band/20-battle draw check is
+16.8 ms after fixing redundant placement work; its 60 ms limit is unchanged.
+Border UI verification passes 71 checks across 14 captures. Design, critic
+findings and reproduction are in `docs/design/DEFENDED_BORDERS.md`.
 
 This is a pushed worker delivery, not an integration into canonical main.
 

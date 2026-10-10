@@ -230,3 +230,20 @@ func test_a_contact_ribbon_names_fighting_without_claiming_held_ground()->void:
 	assert_str(String(note.kicker)).is_equal("THEIR FIGHTERS")
 	assert_str(String(note.title)).is_equal("Esurai")
 	assert_dict(note.action).is_empty()
+
+
+func test_counter_ties_leave_paper_text_and_hud_regions_clear()->void:
+	var blocked:Array[Rect2]=[Rect2(30,20,20,30),Rect2(70,20,20,30)]
+	var segments:=Overlay.clear_tie_segments(Vector2(0,35),Vector2(100,35),blocked)
+	assert_int(segments.size()).is_equal(3)
+	var expected:=[PackedVector2Array([Vector2(0,35),Vector2(30,35)]),PackedVector2Array([Vector2(50,35),Vector2(70,35)]),PackedVector2Array([Vector2(90,35),Vector2(100,35)])]
+	for i in 3:
+		for endpoint in 2:assert_float(segments[i][endpoint].distance_to(expected[i][endpoint])).is_less(0.001)
+	var reverse:=Overlay.clear_tie_segments(Vector2(100,35),Vector2(0,35),blocked)
+	assert_int(reverse.size()).is_equal(3)
+	assert_float(reverse[0][1].distance_to(Vector2(90,35))).is_less(0.001)
+	# A tie beginning inside a card emerges at its edge; one wholly inside
+	# it vanishes. A parallel line outside the card is left alone.
+	assert_float(Overlay.clear_tie_segments(Vector2(40,35),Vector2(60,35),blocked)[0][0].distance_to(Vector2(50,35))).is_less(0.001)
+	assert_array(Overlay.clear_tie_segments(Vector2(35,35),Vector2(45,35),blocked)).is_empty()
+	assert_int(Overlay.clear_tie_segments(Vector2(0,10),Vector2(100,10),blocked).size()).is_equal(1)
