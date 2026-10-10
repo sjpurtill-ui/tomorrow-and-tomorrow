@@ -42,6 +42,7 @@ const UnitCatalog:=preload("res://scripts/military_unit_catalog.gd")
 const SovereignWeapons:=preload("res://scripts/sovereign_weapons.gd")
 const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
 const MarchTerrain:=preload("res://scripts/march_terrain.gd")
+const FrontContact:=preload("res://scripts/army_front_contact.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const SupplyState:=preload("res://scripts/supply_state.gd")
 const ArmyLines:=preload("res://scripts/army_lines.gd")
@@ -1096,7 +1097,9 @@ func field_army_capacity()->int:
 
 
 func field_armies_snapshot()->Dictionary:
-	return {"armies":field_armies.duplicate(true),"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":WorldSimulation.world.military_movement_destinations() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_movement_destinations") else []}
+	var armies:=field_armies.duplicate(true)
+	for army:Dictionary in armies:army["border_front"]=FrontContact.snapshot(army)
+	return {"armies":armies,"active":field_armies.size(),"capacity":field_army_capacity(),"live_reports":_live_army_reporting(),"runner_messages_in_flight":runner_messages.size(),"destinations":WorldSimulation.world.military_movement_destinations() if CivilizationSystem!=null and WorldSimulation.world.has_method("military_movement_destinations") else []}
 
 
 func set_formation_visual(army_id:int,formation_id:int,model_id:String)->Dictionary:
@@ -1558,12 +1561,23 @@ func launch_map_engagement(army_id:int,formation_id:String)->Dictionary:
 		return caught
 	var incident:Dictionary=WorldSimulation.world.foreign_formation_engagement_data(formation_id,int(army.get("troops",0)))
 	if incident.has("error"): return incident
+	return _start_map_engagement(army_id,availability,incident)
+
+
+func launch_front_contact(army_id:int,contact:Dictionary)->Dictionary:
+	return FrontContact.launch(self,army_id,contact)
+
+
+func _start_map_engagement(army_id:int,availability:Dictionary,incident:Dictionary)->Dictionary:
+	var army:Dictionary=availability.army
+	var formation_id:=String(incident.get("formation_id",""))
 	incident["field_army_id"]=army_id
 	var waiting:=_set_aside_waiting_threat()
 	var operation_index:=_field_army_index(army_id)
 	if operation_index>=0 and (field_armies[operation_index].get("operation",{}) as Dictionary).is_empty(): _begin_operation(operation_index,"formation:"+formation_id)
 	_create_civilization_threat(incident,"offensive")
 	active_threat["field_encounter"]=true
+	active_threat["front_contact"]=bool(incident.get("front_contact",false))
 	active_threat["formation_id"]=formation_id
 	var index:=_field_army_index(army_id)
 	if index>=0:
@@ -1941,6 +1955,11 @@ func _process_field_army_movement_day()->void:
 				army["distance_remaining_km"]=float(detour.length_km)
 				field_armies[index]=army
 				continue
+		var frontier:=FrontContact.sweep(self,army,origin,packed,done_before,done)
+		if not frontier.is_empty():
+			walked=float(frontier.km);done=float(frontier.effort);arrived=false
+			remaining=maxf(0.001,float(army.get("distance_total_km",walked))-walked)
+			army["distance_remaining_km"]=remaining
 		army["march_travelled_km"]=walked
 		army["march_effort_done"]=done
 		var current:=ArmyLandRoute.point_along(origin,legs,walked) if not arrived else destination
@@ -1963,6 +1982,15 @@ func _process_field_army_movement_day()->void:
 				# Arrival is itself only known at home once a runner delivers it.
 				army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days))
 		field_armies[index]=army
+		if not frontier.is_empty():
+			var met:=launch_front_contact(int(army.army_id),frontier)
+			var held_index:=_field_army_index(int(army.army_id))
+			if met.has("error") and held_index>=0:
+				field_armies[held_index]["movement_block_reason"]=String(met.error)
+			# Keep the road and city objective. A winning army resumes tomorrow;
+			# a battle reservation prevents movement for as long as it fights.
+			continue
+		army.erase("movement_block_reason")
 		if remaining<=0.001 and army.has("city_operation"):
 			var planned:Dictionary=army.city_operation.duplicate(true)
 			field_armies[index].erase("city_operation")
@@ -1988,6 +2016,7 @@ func _army_report_snapshot(army:Dictionary)->Dictionary:
 		WorldSimulation.world.city_intelligence.stage(carried,"player",WorldSimulation.world.city_intelligence.vector(position),.65,int(WorldSimulation.state.elapsed_days),"army:%s" % str(army.get("army_id",0)))
 	return {
 		"city_observations":carried.get("city_observations",{}),
+		"border_front":FrontContact.snapshot(army),
 		"formations":(army.get("formations",[]) as Array).duplicate(true),
 		"day":int(WorldSimulation.state.elapsed_days),
 		"position":(army.get("position",{}) as Dictionary).duplicate(true),
@@ -2280,6 +2309,7 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 			int(termination.prisoners)
 		)
 	if home_force_kind=="field": _dismiss_watch_militia(result)
+	FrontContact.after_battle(self,result)
 	var termination_summary:=String(termination.get("summary",""))
 	if termination_summary!="": result["message"]=termination_summary
 	var record:=result.duplicate(true)

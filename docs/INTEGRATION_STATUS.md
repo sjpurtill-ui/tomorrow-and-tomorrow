@@ -1,3 +1,13 @@
+## October 10 — Border art direction (READY)
+
+Branch `codex/border-art-direction`, based on `16982712`. Presentation checkpoint
+`360c687c` combines the border map cards and placement feedback, War board border
+folio, paper-edged border ink and refined fort anchors. The existing 15 border
+tests pass; private UI and campaign-terrain captures cover placement, shortages,
+construction, movement, night palette and small windows. Details and reproduction:
+`docs/design/BORDER_ART_DIRECTION.md`. Fort rules and save schema are unchanged.
+This is a worker delivery; it has not been merged into the canonical player build.
+
 ## October 8 — Organic places on the map (INTEGRATED)
 
 User approved PR #182 after the private capture review. Source `ca8e2481`

@@ -1660,7 +1660,7 @@ func _battle_entries(band:String)->Array:
 		var r:=BattleMarks.MARK_RADIUS*s
 		var bar:=BattleMarks.BAR_WIDTH*maxf(0.75,s)
 		entry["radius"]=r+3.0
-		entry["rect"]=BattleMarks.plate_rect(entry.at,s).grow(2.0) if not entry.has("group") else Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
+		entry["rect"]=BattleMarks.plate_rect(entry.at,s,battle).grow(2.0) if not entry.has("group") else Rect2((entry.at as Vector2)-Vector2(bar*0.5+2.0,r+3.0),Vector2(bar+4.0,r*2.0+11.0+BattleMarks.BAR_HEIGHT))
 		entry["live"]=int(battle.get("age_days",0))==0
 		entry["phase"]=float(absi(hash(String(battle.get("id",""))))%1000)/1000.0
 		if bool(entry.live): pulse_live=true
@@ -2523,7 +2523,8 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	if not ours and not bool(entry.get("hostile",true)): accent=Color("#b89a5a")
 	elif not ours and CivilizationSystem._civilization_index(String(entry.get("owner","")))>=0: accent=preload("res://scripts/city_map_identity.gd").foreign(String(entry.owner)).accent
 	var scale:=_counter_scale(band)
-	var plate:=Counter.plate_size(scale)
+	var data:=counter_data(entry,accent)
+	var plate:=Counter.plate_size(scale,data)
 	var centre:=_counter_spot(at,plate,scale)
 	# The spot it stands on, and where it stepped aside from.
 	var ink:=INK if ours else THEIRS.darkened(0.25)
@@ -2532,7 +2533,6 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	draw_line(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4,true)
 	draw_circle(at,2.6*scale,Color(PAPER,0.9*alpha))
 	draw_circle(at,1.8*scale,Color(ink,alpha))
-	var data:=counter_data(entry,accent)
 	var heading:Vector2=entry.get("heading",Vector2.ZERO)
 	if heading.length_squared()>0.0:
 		var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
