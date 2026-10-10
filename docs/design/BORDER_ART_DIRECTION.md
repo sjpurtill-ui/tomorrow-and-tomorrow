@@ -40,6 +40,12 @@ is bounded; there are no animated people or decorative simulation entities.
 The root worktree is `C:/Users/sjpur/tt-organic-place-art`. Captures and logs are
 ignored local evidence, not committed assets or player saves.
 
+Final evidence is `artifacts/border-art/acceptance/`: `audit.json` records all
+55 UI checks passing across 12 captures; `terrain-audit.json` records all seven
+terrain checks passing across four captures. Both private GPU processes exited
+normally. The final screenshots include the neutral condition advice, live-palette
+fix and unclipped move preview. Review: pull request #205.
+
 - `artifacts/border-art/fort-tests-final.log`: all 15 existing border tests passed,
   with zero failures, errors or orphan nodes.
 - `tests/border_art_probe.tscn --verify`: actual BorderMap controls and FortBorder
