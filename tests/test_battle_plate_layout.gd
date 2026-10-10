@@ -174,3 +174,53 @@ func test_counter_clearance_contains_the_drawn_days_tab()->void:
 	var room:=Overlay.counter_clearance(data,0.85)
 	room.position+=at
 	assert_bool(room.encloses(drawn.rect)).is_true()
+
+
+func test_crowded_counters_find_free_ground_without_hiding_each_other()->void:
+	var overlay:Control=auto_free(Overlay.new())
+	overlay.counter_bounds=Rect2(90,100,1040,540)
+	overlay.counter_fixed.assign([Rect2(300,570,300,80),Rect2(800,550,330,90),Rect2(495,280,260,40)])
+	# Sixteen counters clustered around a small defended perimeter. The
+	# lower pair used to overlap when the local candidate ring was full.
+	for i in 16:
+		var at:=Vector2(555,365)+Vector2.from_angle(float(i)*TAU/16.0)*100.0
+		var extent:=Vector2(145,62)
+		var spot:Vector2=overlay._counter_spot(at,extent,0.85)
+		assert_bool(spot.is_finite()).is_true()
+		var box:=Rect2(spot-extent*0.5,extent)
+		assert_bool((overlay.counter_bounds as Rect2).encloses(box)).is_true()
+		for other in overlay.counter_fixed+overlay.counter_rects:assert_bool(box.intersects(other)).is_false()
+		overlay.counter_rects.append(box)
+
+
+func test_curved_front_clearance_leaves_its_interior_available()->void:
+	var points:=PackedVector2Array()
+	for i in 65:points.append(Vector2(400,300)+Vector2.from_angle(float(i)*TAU/64.0)*150.0)
+	var boxes:=Overlay.front_obstacles(points,12.0)
+	assert_int(boxes.size()).is_less_equal(16)
+	for box in boxes:assert_bool(box.has_point(Vector2(400,300))).is_false()
+	for point in points:assert_bool(boxes.any(func(box:Rect2)->bool:return box.has_point(point))).is_true()
+
+
+func test_battle_locality_stays_adjacent_or_waits_for_the_tooltip()->void:
+	var plate:=Rect2(120,440,280,70)
+	var bounds:=Rect2(90,100,1040,540)
+	var blocked:Array[Rect2]=[plate]
+	var label:=Overlay.near_battle_caption(plate,Vector2(200,21),bounds,blocked)
+	assert_bool(label.has_area()).is_true()
+	assert_float(plate.position.y-label.end.y).is_equal(8.0)
+	blocked.append(Rect2(90,400,400,40));blocked.append(Rect2(90,510,400,50))
+	assert_bool(Overlay.near_battle_caption(plate,Vector2(200,21),bounds,blocked).has_area()).is_false()
+
+
+func test_a_contact_ribbon_names_fighting_without_claiming_held_ground()->void:
+	var overlay:Control=auto_free(Overlay.new())
+	var hit:={"kind":"front","combat":true,"deployed":false,"ours":true,"armies":[7],"name":"Fith's army"}
+	var note:Dictionary=overlay.note_content(hit)
+	assert_str(String(note.kicker)).is_equal("FIGHTING")
+	assert_str(" ".join(note.lines)).contains("Fighting here now.").not_contains("coverage ends")
+	hit.ours=false;hit.armies=[];hit.name="Esurai"
+	note=overlay.note_content(hit)
+	assert_str(String(note.kicker)).is_equal("THEIR FIGHTERS")
+	assert_str(String(note.title)).is_equal("Esurai")
+	assert_dict(note.action).is_empty()
