@@ -1840,7 +1840,7 @@ func _hover(point:Vector2)->void:
 			if not over.is_empty():
 				var content:=note_content(over)
 				over=over.duplicate()
-				over["line"]=String(content.get("title",""))+"\n"+"\n".join((content.get("lines",[]) as Array).slice(0,2))
+				over["line"]=String(content.get("title",""))+"\n"+"\n".join(content.get("lines",[]))
 	var line:=String(over.get("line",""))
 	var id:=String((over.get("battle",{}) as Dictionary).get("id",over.get("kind","")))
 	# The battle under the pointer keeps its name on the chart, whatever else must give way.
@@ -2424,13 +2424,15 @@ func _draw_mark(entry:Dictionary,_band:String)->void:
 	var members:Array=entry.get("members",[])
 	if members.size()>1: draw_line(rect.position+Vector2(2,-3),Vector2(rect.end.x-2,rect.position.y-3),Color(ink,alpha),2.0,true)
 	if age>=ArmyMarks.STALE_DAYS: _dashed(_ring_points(at,px*0.65,20),Color(ink,0.65),1.0,2.0,3.0)
-	if bool(entry.get("garrison",false)): return
+	if bool(entry.get("garrison",false)):
+		hits.append({"kind":"garrison","centre":at,"radius":maxf(12.0,px*0.7),"mark_data":entry,"mark":true})
+		return
 	if ours:
-		hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.7),"army_id":int(entry.army_id),"members":members,"mark":true})
+		hits.append({"kind":"army","centre":at,"radius":maxf(12.0,px*0.7),"army_id":int(entry.army_id),"members":members,"mark_data":entry,"mark":true})
 	else:
 		var sighting:Dictionary=(entry.get("sighting",{}) as Dictionary).duplicate()
 		sighting["noun"]=String(entry.get("noun","host"))
-		hits.append({"kind":"sighting","centre":at,"radius":maxf(12.0,px*0.7),"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"members":members,"mark":true})
+		hits.append({"kind":"sighting","centre":at,"radius":maxf(12.0,px*0.7),"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"members":members,"mark_data":entry,"mark":true})
 
 
 ## Where a counter's plate stands: just below its spot, or above, beside,
@@ -3261,7 +3263,7 @@ func _input(event:InputEvent)->void:
 	# An army mark keeps its own click (selection); its general's note opens too.
 	var army_id:=_army_counter_at(event.position)
 	if army_id>0:
-		open_note({"kind":"army","army_id":army_id},event.position)
+		open_note(mark_at(event.position),event.position)
 		return
 	# A host in sight right now opens its contact card on the map instead.
 	var mark:=mark_at(event.position)
@@ -3289,6 +3291,14 @@ func close_note()->void:
 ## live ledgers: {kicker, title, lines:[String], action:{label, kind, target}}.
 func note_content(hit:Dictionary)->Dictionary:
 	var stage:=String(scene.get("stage",EraWords.stage()))
+	# Read the exact dated report behind the visible glyph, never today's
+	# private force ledger. Stacks and town guards keep their own account.
+	if hit.has("mark_data"):
+		var mark:Dictionary=hit.mark_data
+		var lines:=_card_lines(mark)
+		var action:Dictionary={}
+		if String(hit.get("kind",""))=="army": action=_general_action(int(hit.get("army_id",0)))
+		return {"kicker":"GARRISON" if bool(mark.get("garrison",false)) else ("OUR FORCE" if String(mark.side)=="ours" else "SIGHTING"),"title":lines[0] if not lines.is_empty() else "Force","lines":Array(lines.slice(1)),"action":action}
 	match String(hit.get("kind","")):
 		"zone":
 			var zone:Dictionary=hit.get("zone",{})
