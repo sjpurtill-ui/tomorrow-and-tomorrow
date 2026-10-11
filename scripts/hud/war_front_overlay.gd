@@ -20,14 +20,13 @@ extends Control
 ## COLLECT_EVERY seconds and only rebuilt when they changed; drawing happens
 ## only when the camera, the scene or the easing moves.
 ##
-## Battles (hud/battle_marks.gd, from hud/battle_marker_source.gd): every
-## fight going on now stands on the front at its contact point as a small
-## crossed-weapons mark with a two-colour bar and its name and day; a
-## pointer resting on it gets one plain line, a click opens the battle view.
+## Battles (hud/battle_marks.gd, from hud/battle_marker_source.gd) stand at
+## their actual contact as two small opposed strokes. Names, counts and
+## reports appear on inspection; a click opens the existing battle view.
 ## The stretch of front being fought over thickens and works (the worm),
 ## and when a battle is won or lost or a town changes hands the front surges
-## there and settles where control now lies. Forces carry HOI4-style
-## counters (strength, will to fight, one state glyph); far out, forces
+## there and settles where control now lies. Forces carry quiet banners;
+## strength and orders live in their dated contextual account. Far out, forces
 ## stand together per front sector and battles per place. The moving parts
 ## (the worm working, the battles' pulse) are drawn on one small child
 ## canvas behind this one, redrawn a few times a second only while battles
@@ -1534,14 +1533,14 @@ func _draw()->void:
 	var band:=_band()
 	_draw_political_edges(band)
 	if band=="ground":
-		# Up close only the forces' small paper cards stay, placed clear of
-		# the town cards; the front and its ink stand aside for the ground,
-		# all but a front along a border at war: that is the ground itself.
+		# The ground keeps quiet force banners and real defended/contact lines.
 		var step_near:=_world_per_px(_centre_of_scene())*14.0
 		for index in live_fronts.size():
 			var entry:Dictionary=live_fronts[index]
 			if float(entry.alpha)>0.01 and bool((entry.get("data",{}) as Dictionary).get("deployed",false)): _draw_front(entry,"local",step_near)
-		_draw_marks(band,[],[])
+		var near_battles:=_battle_entries(band)
+		_draw_marks(band,[],near_battles)
+		_draw_battles(near_battles,band)
 		_letter_captions(T.voice_font(true))
 		last_draw_usec=Time.get_ticks_usec()-started
 		return
@@ -1633,9 +1632,8 @@ func _draw()->void:
 
 # --- Battles ---------------------------------------------------------------------------
 
-## The contact stays on the ground; its readout stands clear of the fighting.
-## At a distance nearby fights share one plate. These exact bounds also keep
-## counters and captions clear and supply the pointer's hit region.
+## A compact contact signal stays at the fighting. At a distance nearby
+## fights share one signal, with the same bounds for drawing and hits.
 ## [{at, contact_at, battle, radius, rect, live, phase, group?}]
 func _battle_entries(band:String)->Array:
 	var entries:Array=[]
@@ -1832,6 +1830,9 @@ func open_battle(hit:Dictionary,at:Vector2)->void:
 
 ## A pointer resting on a battle: one plain line beside it.
 func _hover(point:Vector2)->void:
+	if note!=null and note.visible:
+		close_tip()
+		return
 	var over:Dictionary={}
 	if get_viewport()!=null and get_viewport().gui_get_hovered_control()==null:
 		over=battle_at(point)
@@ -2377,8 +2378,7 @@ func _draw_marks(band:String,echelons_drawn:Array,_battles:Array)->void:
 		drawn_marks.append(entry)
 
 
-## HOI4's counters on the close and regional charts; far out, the small
-## marks of the force's age stand for it.
+## Legacy detail-plate helpers, also used by explicit military screens.
 static func _counters(band:String)->bool:
 	return band in ["ground","local","regional"]
 
@@ -3577,10 +3577,13 @@ static func _mark_style(ink:Color,alpha:float)->StyleBoxFlat:
 
 ## Orders and support geometry appear only for the formation being inspected.
 func _focused(data:Dictionary)->bool:
-	var selected:=int(terrain.get("selected_army_id")) if is_instance_valid(terrain) and terrain.get("selected_army_id")!=null else 0
-	if selected<=0: selected=int(note_about.get("army_id",0))
-	if selected<=0 and not (note_about.get("armies",[]) as Array).is_empty(): selected=int(note_about.armies[0])
 	if data.has("enemy_id"):
 		return String(data.enemy_id)!="" and String(data.enemy_id)==String(note_about.get("enemy_id",""))
+	var selected:=0
+	if not note_about.is_empty():
+		selected=int(note_about.get("army_id",(note_about.get("battle",{}) as Dictionary).get("army_id",0)))
+		if selected<=0 and not (note_about.get("armies",[]) as Array).is_empty(): selected=int(note_about.armies[0])
+	elif is_instance_valid(terrain) and terrain.get("selected_army_id")!=null:
+		selected=int(terrain.get("selected_army_id"))
 	if selected<=0: return false
 	return int(data.get("army_id",0))==selected or (data.get("armies",[]) as Array).has(selected)
