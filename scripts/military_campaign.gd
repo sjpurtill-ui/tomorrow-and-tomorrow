@@ -1603,6 +1603,51 @@ func return_field_army(army_id:int)->Dictionary:
 	return move_field_army(army_id,"player_home")
 
 
+## ONE HOST. Folds the bands `others` into the band `into`: their fighters,
+## kit and hurt join it where it stands, and they cease to be bands of their
+## own. The army is one thing the ruler sends; the bands it happens to stand
+## in (border stations, old detachments) are the war leader's housekeeping,
+## and a god's order to march gathers them. Bands fighting, embarked or
+## already marching on an order are left alone. {ok, army, joined, bands}.
+func gather_field_armies(into:int,others:Array)->Dictionary:
+	var index:=_field_army_index(into)
+	if index<0:return {"error":"Select a valid field army."}
+	var core:Dictionary=field_armies[index]
+	if command_hierarchy.battle.engaged(into) or bool(core.get("embarked",false)):return {"error":"That band cannot take others in now."}
+	var formations:Array=(core.get("formations",[]) as Array).duplicate(true)
+	var men:=int(core.get("troops",0))
+	var morale:=float(core.get("morale",0.6))*float(men)
+	var readiness:=float(core.get("readiness",0.5))*float(men)
+	var supply:=float(core.get("supply_level",1.0))*float(men)
+	var joined:=0
+	var bands:=0
+	for other_id in others:
+		var id:=int(other_id)
+		if id==into:continue
+		var at:=_field_army_index(id)
+		if at<0:continue
+		var band:Dictionary=field_armies[at]
+		if command_hierarchy.battle.engaged(id) or bool(band.get("embarked",false)) or int(band.get("troops",0))<=0:continue
+		if not active_siege.is_empty() and int(active_siege.get("army_id",0))==id:continue
+		var count:=int(band.get("troops",0))
+		formations.append_array((band.get("formations",[]) as Array).duplicate(true))
+		morale+=float(band.get("morale",0.6))*float(count)
+		readiness+=float(band.get("readiness",0.5))*float(count)
+		supply+=float(band.get("supply_level",1.0))*float(count)
+		for pool in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool"]:
+			core[pool]=int(core.get(pool,0))+int(band.get(pool,0))
+		men+=count;joined+=count;bands+=1
+		field_armies.remove_at(at)
+	if bands<=0:return {"ok":true,"army":core,"joined":0,"bands":0}
+	var whole:=maxf(1.0,float(men))
+	var rebuilt:Dictionary=simulator.create_formation_force(String(core.get("name","Our host")),formations,morale/whole,readiness/whole)
+	for key in rebuilt:core[key]=rebuilt[key]
+	core["supply_level"]=clampf(supply/whole,0.0,1.0)
+	index=_field_army_index(into)
+	if index>=0:field_armies[index]=core
+	army_changed.emit(home_army.duplicate(true))
+	return {"ok":true,"army":core,"joined":joined,"bands":bands}
+
 func disband_field_army(army_id:int)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command must disengage before its soldiers can be reassigned."}
 	if recovery.home_unavailable():return {"error":"The home settlement is occupied. Reach a free settlement before dissolving the army."}

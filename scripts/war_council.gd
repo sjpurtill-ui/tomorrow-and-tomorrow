@@ -1488,7 +1488,7 @@ static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
 	var how:=PackedStringArray()
 	if float(fed.get("days",0.0))>=1.0: how.append("about %s on the road" % _span(roundi(float(fed.days))))
 	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land at half pace" % ("most" if float(fed.half_pace)>=0.6 else "part"))
-	return "%s waits: %s the band would eat about %d%% of a ration%s%s. He will not march them out to go hungry." % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else ""]
+	return "%s waits: %s the band would eat about %d%% of a ration%s%s. He will not march them out to go hungry. Tell him to go anyway and they march hungry." % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else ""]
 
 # --------------------------------------------------------------------------
 # Sending a band

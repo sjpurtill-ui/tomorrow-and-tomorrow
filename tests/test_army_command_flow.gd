@@ -387,3 +387,31 @@ func test_no_jargon_or_shouting_on_the_army_screen()->void:
 		assert_object(caps.search(text)).override_failure_message("shouting in '%s'" % text).is_null()
 	assert_bool("Home guard" in all).is_true()
 	assert_bool("No orders" in all).is_true()
+
+func test_bands_fold_into_one_host_with_every_fighter_and_their_kit()->void:
+	_train(120)
+	var a:=int(MilitaryCampaign.create_field_army(30,"Border band 1").army.army_id)
+	var b:=int(MilitaryCampaign.create_field_army(25,"Border band 2").army.army_id)
+	var c:=int(MilitaryCampaign.create_field_army(20,"Border band 3").army.army_id)
+	var gathered:Dictionary=MilitaryCampaign.gather_field_armies(a,[b,c])
+	assert_bool(bool(gathered.get("ok",false))).is_true()
+	assert_int(int(gathered.joined)).is_equal(45)
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(1)
+	var host:Dictionary=MilitaryCampaign.field_armies[0]
+	assert_int(int(host.army_id)).is_equal(a)
+	assert_int(int(host.troops)).is_equal(75)
+	var counted:=0
+	for formation:Dictionary in host.formations:counted+=int(formation.get("count",0))
+	assert_int(counted).is_equal(75)
+
+func test_a_march_ordered_in_court_gathers_the_bands_into_one_host()->void:
+	_train(120)
+	for i in 3:MilitaryCampaign.create_field_army(30,"Border band %d" % (i+1))
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(3)
+	_set_garrison(40.0)
+	var heard:=_court("March on Tsaren with all our soldiers")
+	# One host of all ninety, not one band of thirty.
+	assert_int(MilitaryCampaign.field_armies.size()).override_failure_message(str(heard.get("says",heard.get("outcome","")))).is_equal(1)
+	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(90)
+	var said:=String(heard.get("says",""))+" "+String(heard.get("outcome",""))+" "+String(heard.get("actor_says",""))
+	assert_str(said).override_failure_message(said).contains("90")
