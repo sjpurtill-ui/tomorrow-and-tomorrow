@@ -4,6 +4,12 @@ October 10, 2026. Worker delivery on `codex/border-art-direction`, based on
 integrated main `16982712`; combined with the border art direction in PR #205.
 The canonical player checkout has not been changed by this delivery.
 
+October 11: the user rejected the crowded encirclement presentation. All visual
+acceptance statements for the old card layout below are historical and
+superseded by the correction in `BORDER_ART_DIRECTION.md`. The defense/combat
+mechanics remain; the idle map now removes troop plates, detached battle
+scoreboards and route clutter. Real fighting and geography lead the composition.
+
 ## What the player gets
 
 The ruler gives the general a defensive or offensive objective. On defense,

@@ -1,4 +1,21 @@
-## October 10 — Defended borders and fighting worms (READY)
+## October 11 — Border map hierarchy correction (READY)
+
+The user rejected the prior encirclement screenshot. Its art acceptance is
+superseded. PR #205 remains unmerged; the default map is rebuilt around
+quiet force banners, contact signals, readable fighting fronts and details on
+inspection. The existing real deployment/combat mechanics remain unchanged.
+Three implementation passes and two screenshot critiques removed the card wall,
+archived route rays, duplicate war tokens and ambiguous contact glyphs. Final
+coastal, focused-battle, selected-army, night and reduced-motion screenshots
+received visual acceptance on production `41e09c85`. All 154 targeted tests pass;
+the final interaction change also passes its 20-case focused rerun. The private
+GPU probe passes 11 records across 14 images, with both fighting fronts moving
+and zero movement while paused or reduced. Probe source is `94bd2017`.
+Evidence, fixture provenance and limits are recorded in
+`docs/design/BORDER_ART_DIRECTION.md`. This is a worker delivery; the canonical
+checkout and player session were not changed.
+
+## October 10 — Defended borders and fighting worms (prior delivery)
 
 Branch `codex/border-art-direction`, based on `16982712`, PR #205. Extends the
 border art delivery below with real general-led border deployment, finite held
