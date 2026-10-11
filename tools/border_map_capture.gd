@@ -16,6 +16,16 @@ static func stage(terrain:Node)->String:
 			terrain.call("_set_camera_target",Vector3(at.x,0.0,at.y))
 			terrain.set("_border_watch_day",-1)
 			return "close over %s (%s)" % [String(list[n].name),String(list[n].kind)]
+	# "--capture-border-chain": capture only, three watch camps stood up in a
+	# line out from the seat, their stores part filled, stocking set to Some.
+	if "--capture-border-chain" in OS.get_cmdline_user_args():
+		var d:=Forts.ledger()
+		var kept:Array=[]
+		for i in 3:
+			var at:=Forts.seat()+Vector2(0.0,-1.0).rotated(deg_to_rad(40.0))*(45.0+90.0*float(i))
+			kept.append({"id":900+i,"kind":"watch_camp","x":at.x,"z":at.y,"status":"standing","condition":1.0,"name":"Chain %d" % (i+1),"store":80000.0*(1.0-0.35*float(i))})
+		d["forts"]=kept
+		Forts.set_stock_level(1)
 	Map.set_shown(terrain,true)
 	var map:Node=Map.find(terrain)
 	if map==null: return "no border map"

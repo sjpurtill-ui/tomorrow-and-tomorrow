@@ -270,6 +270,10 @@ func open_note(id:int)->void:
 		_status(facts,"Well kept" if condition>=0.95 else "Below full condition","%d%% kept" % roundi(condition*100.0),tone)
 		_bar(facts,condition,tone)
 		if condition<0.95: Kit.label(facts,"Keep the garrison and upkeep supplied to restore this fort.","note",T.AMBER)
+		var held:=clampf(float(fort.get("store",0.0))/maxf(1.0,Forts.store_cap(fort)),0.0,1.0)
+		_status(facts,"Food stored for an army","%d%% full" % roundi(held*100.0),T.TEAL)
+		_bar(facts,held,T.TEAL)
+		Kit.label(facts,Forts.store_words(fort)+" An army passing within %d km fills its carts here." % roundi(Forts.STORE_NEAR_KM),"note")
 	var grid:=GridContainer.new(); grid.columns=2; grid.add_theme_constant_override("h_separation",18); grid.add_theme_constant_override("v_separation",12); column.add_child(grid)
 	_metric(grid,"Garrison","%d / %d" % [manned,need],T.RED if manned<need else T.INK)
 	_metric(grid,"Reach","%d km" % roundi(Forts.reach_of(fort)) if not building else "Not held yet")
@@ -335,7 +339,8 @@ func _refresh_key()->void:
 	for fort:Dictionary in Forts.forts():
 		if String(fort.get("status",""))!="abandoned":needed+=int(Forts.kind(String(fort.kind)).get("garrison",0))
 	var compact:=get_viewport().get_visible_rect().size.y<800.0
-	var signature:=hash([compact,int(kept.posted),int(kept.line),roundi(line*100.0),roundi(km),_amount(float(bill.food_lost)),Forts.border_share(),standing,going,next,moving,Forts.find_fort(moving).get("name",""),to_man,available,needed,T.color_mode])
+	var stores:=Forts.stores_total()
+	var signature:=hash([roundi(float(stores.have)),roundi(float(stores.cap)),Forts.stock_level(),compact,int(kept.posted),int(kept.line),roundi(line*100.0),roundi(km),_amount(float(bill.food_lost)),Forts.border_share(),standing,going,next,moving,Forts.find_fort(moving).get("name",""),to_man,available,needed,T.color_mode])
 	if signature==_key_signature: return
 	_key_signature=signature
 	var layout_signature:=hash([compact,T.color_mode])
@@ -365,6 +370,8 @@ func _refresh_key()->void:
 	(_key_fields.share as Label).text="%d%% of the watch at home" % roundi(Forts.border_share()*100.0)
 	(_key_fields.fewer as Button).disabled=Forts.border_share()<=0.0
 	(_key_fields.more as Button).disabled=Forts.border_share()>=1.0
+	(_key_fields.stores as Label).text="%s of %s rations in the forts" % [preload("res://scripts/hud/era_words.gd").grouped(roundi(float(stores.have))),preload("res://scripts/hud/era_words.gd").grouped(roundi(float(stores.cap)))] if float(stores.cap)>0.0 else "No fort stands to hold any."
+	for level in 3: ((_key_fields.stock as Array)[level] as Button).set_pressed_no_signal(level==Forts.stock_level())
 	var man:Button=_key_fields.man
 	man.visible=to_man>Forts.border_share()+0.001
 	man.text="Man every fort · %d%% of the watch" % roundi(to_man*100.0)
@@ -415,6 +422,17 @@ func _build_key_fields(compact:bool)->void:
 		b.name="FewerBorderWatch" if float(step[1])<0.0 else "MoreBorderWatch"
 		b.custom_minimum_size=Vector2(36,36)
 		_key_fields["fewer" if float(step[1])<0.0 else "more"]=b
+	# Food kept at the forts for an army passing: the ruler sets how hard.
+	var stock_words:=VBoxContainer.new(); stock_words.add_theme_constant_override("separation",0); column.add_child(stock_words)
+	Kit.label(stock_words,"Food stored for armies","body")
+	_key_fields.stores=Kit.label(stock_words,"","note")
+	var stock_row:=HBoxContainer.new(); stock_row.add_theme_constant_override("separation",6); column.add_child(stock_row)
+	_key_fields.stock=[]
+	for level in 3:
+		var tip:String=["Send no food out to the forts' stores.","Each day send a little of the food we hold beyond %d days of our own eating. Forts hand it on to one another; some is eaten on the way." % roundi(Forts.STORE_RESERVE_DAYS),"Send three times as much each day: the stores fill sooner and home keeps less to spare."][level]
+		var pick:=Kit.button(stock_row,String(Forts.STOCK_NAMES[level]),false,func()->void:Forts.set_stock_level(level);_changed(),tip)
+		pick.name="StockForts%d" % level; pick.toggle_mode=true; pick.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		(_key_fields.stock as Array).append(pick)
 	var man:=Kit.button(column,"",true,func()->void:Forts.set_border_share(Forts.share_to_man());_changed(),"Posts the available watch to fort garrisons. More food is lost on the road; fewer keep watch at home.")
 	man.name="ManEveryFort";_key_fields.man=man
 	_key_fields.shortage=Kit.label(column,"","note",T.AMBER_TEXT)
