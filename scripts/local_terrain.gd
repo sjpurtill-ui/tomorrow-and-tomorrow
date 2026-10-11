@@ -14419,12 +14419,11 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var clearance:=float(profile.clearance)
 	root.set_meta("visual_zoom",visual_zoom)
 	root.set_meta("route_width",route_width)
-	# Ink darkens with recency; older charts fade toward the map.
-	# Iron-gall ink throughout: the party still out and the freshest charts at
-	# full strength, older charts fading in opacity but never turning grey.
+	# Current scout orders remain legible. Completed journeys are quiet map
+	# context; their former full-strength ink competed with borders and battles.
 	var freshness:=1.0 if active else lerpf(1.0,0.42,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
-	var ink:=Color("#2b2118"); ink.a=0.88*freshness
-	var paper:=Color("#efe3c2"); paper.a=(0.22 if active else 0.16)*freshness
+	var ink:=Color("#2b2118"); ink.a=(0.88 if active else 0.20)*freshness
+	var paper:=Color("#efe3c2"); paper.a=(0.22 if active else 0.04)*freshness
 	# Simplify at ~3 screen pixels before fitting the curve (the view is ~900 px).
 	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()
