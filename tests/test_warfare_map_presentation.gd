@@ -54,7 +54,8 @@ func test_moving_army_exposes_one_bounded_path_and_objective()->void:
 	army["distance_remaining_km"]=120.0
 	army["arrival_day"]=42
 	var marker:=PRESENTATION.player_marker(army,320.0,false)
-	assert_bool(bool(marker.show_path)).is_true()
+	assert_bool(bool(marker.show_path)).is_false()
+	assert_bool(bool(PRESENTATION.player_marker(army,320.0,true).show_path)).is_true()
 	assert_bool(bool(marker.show_objective_label)).is_false()
 	assert_str(String(marker.destination_id)).is_equal("region_alpha")
 	assert_dict(marker.destination_position).is_not_empty()
