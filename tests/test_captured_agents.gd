@@ -422,6 +422,7 @@ func test_the_gods_wrath_and_favour_move_the_prisoner_and_the_odds()->void:
 func test_our_agent_taken_abroad_is_judged_by_their_ruler()->void:
 	var civ:=_varesh()
 	var agent:=Covert.volunteer()
+	_place(civ)
 	var op:=Covert.launch("watch",civ,"","trader",agent)
 	var pop:=float(GameState.population_exact)
 	Covert._agent_caught_ours(op,_day(),"watching")
@@ -556,3 +557,11 @@ func test_the_ticker_carries_a_bring_them_button_while_they_are_held()->void:
 	preload("res://scripts/hud/map_ticker_style.gd").fit(label,1601.0)
 	assert_bool(button.visible).is_false()
 	label.queue_free()
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true

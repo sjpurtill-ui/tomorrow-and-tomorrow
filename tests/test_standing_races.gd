@@ -132,6 +132,7 @@ func test_our_eyes_name_themselves_as_the_source_and_judge_a_boast_by_the_truth(
 	var Covert:=preload("res://scripts/covert_ops.gd")
 	Covert.forget()
 	CV_override()
+	_place(id)
 	var op:=Covert.launch("plant",id,"","trader",Covert.volunteer())
 	op["stage"]="in_place"
 	op["settled_day"]=int(GameState.elapsed_days)-12*365
@@ -156,3 +157,11 @@ func test_a_met_people_the_board_cannot_name_still_shows_its_name_never_its_id()
 			if String(row.civ_id)!=id:continue
 			assert_str(String(row.name)).is_equal(name)
 			assert_bool(String(row.name).begins_with("civ_")).is_false()
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true

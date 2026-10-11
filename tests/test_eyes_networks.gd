@@ -43,6 +43,7 @@ func _civ_id()->String: return String(info.get("civ_id",""))
 func _eye(years:float,skill:float=0.8)->Dictionary:
 	var agent:=Covert.volunteer()
 	agent["stealth"]=skill; agent["tongue"]=skill
+	_place(_civ_id())
 	var op:=Covert.launch("plant",_civ_id(),"","trader",agent)
 	op["stage"]="in_place"
 	op["settled_day"]=int(GameState.elapsed_days)-roundi(years*365.0)
@@ -109,3 +110,11 @@ func test_the_board_names_its_source_and_our_eyes_judge_a_boast()->void:
 	# A world without their own simulation has no truth to read; the source
 	# line is what matters here when the estimate is known.
 	assert_bool(found or Races.their_measures(_civ_id()).is_empty()).is_true()
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true

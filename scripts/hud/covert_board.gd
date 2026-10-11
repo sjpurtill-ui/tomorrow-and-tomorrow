@@ -234,6 +234,8 @@ static func errand_rows()->Array:
 		var errands:Array=[]
 		for kind:String in ERRANDS:
 			var barred:=Covert.method_barred(kind)
+			# A people whose home and towns we have never found cannot be reached.
+			if barred=="" and not Covert.knows_where(id): barred=Covert.unplaced_words(id)
 			var e:={"kind":kind,"label":_errand_label(kind),"barred":barred}
 			if barred=="":
 				var o:=Covert.odds(kind,id,"","none",_likely_agent(kind))
