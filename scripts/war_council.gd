@@ -1474,7 +1474,7 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 		var road:=float(march.get("fed_on_road",1.0))
 		var there:=float(march.get("fed_there",1.0))
 		var land:Dictionary=Supply.land_at(Supply.rations_field(),at,_today())
-		return {"ratio":minf(road,there),"on_road":road,"there":there,"days":float(march.get("days",0)),"half_pace":float(march.get("half_pace",0.0)),"km":float(route.get("length_km",0.0)),"season":"winter" if float(land.get("cold",0.0))>=0.3 else ""}
+		return {"ratio":minf(road,there),"on_road":road,"there":there,"train_days":float(march.get("train_days",0.0)),"train_feeds":mc.train_feeds(float(march.get("days",0))/maxf(1.0,1.0+float(march.get("half_pace",0.0)))),"troops":troops,"days":float(march.get("days",0)),"half_pace":float(march.get("half_pace",0.0)),"km":float(route.get("length_km",0.0)),"season":"winter" if float(land.get("cold",0.0))>=0.3 else ""}
 	var km:float=WorldSimulation.world.player_world_origin.distance_to(at)
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	var road_days:=km/18.0
@@ -1494,7 +1494,12 @@ static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
 	var how:=PackedStringArray()
 	if float(fed.get("days",0.0))>=1.0: how.append("about %s on the road" % _span(roundi(float(fed.days))))
 	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land at half pace" % ("most" if float(fed.half_pace)>=0.6 else "part"))
-	return "%s waits: %s the band would eat about %d%% of a ration%s%s. He will not march them out to go hungry." % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else ""]
+	var carried:=(" They can carry food for %s." % _span(int(float(fed.train_days)))) if float(fed.get("train_days",0.0))>=1.0 else ""
+	# The host our carts could feed all that way, when it is a host at all.
+	var fewer:=int(fed.get("train_feeds",0))
+	if carried!="" and fewer>=MIN_BAND and fewer<int(fed.get("troops",0)): carried+=" Our carts could feed about %s of them that far." % EraWords.grouped(int(float(fewer)/10.0)*10 if fewer>=100 else fewer)
+	var anyway:="Sent anyway, most of them would die on the way." if float(fed.ratio)<0.2 else "Tell him to go anyway and they march hungry."
+	return "%s waits: %s the band would eat about %d%% of a ration%s once that is gone%s.%s He will not march them out to go hungry. %s" % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else "",carried,anyway] if carried!="" else "%s waits: %s the band would eat about %d%% of a ration%s%s. He will not march them out to go hungry. %s" % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else "",anyway]
 
 # --------------------------------------------------------------------------
 # Sending a band
@@ -1718,7 +1723,9 @@ static func band_words(band:Dictionary)->String:
 ## (military_campaign provision_ratio; cheap: no supply reckoning here).
 static func _fed_words(band:Dictionary)->String:
 	if not band.has("provision_ratio") and not band.has("supply_level"): return ""
-	return "fed %d%%" % roundi(clampf(float(band.get("provision_ratio",band.get("supply_level",1.0))),0.0,1.0)*100.0)
+	var fed:="fed %d%%" % roundi(clampf(float(band.get("provision_ratio",band.get("supply_level",1.0))),0.0,1.0)*100.0)
+	if String(band.get("status","stationed"))=="moving" and float(band.get("train_days",0.0))>=1.0: fed+=", carrying food for %d days" % int(float(band.train_days))
+	return fed
 
 ## "3 to 2", "even", "2 to 3": ours over theirs in the screen's short form.
 static func _odds_short(raw:float)->String:

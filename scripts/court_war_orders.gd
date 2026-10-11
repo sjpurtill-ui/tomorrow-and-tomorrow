@@ -107,7 +107,7 @@ const PEACE_WORDS:="((make|seek|sue for|ask for|want|offer) peace|end (the|this|
 const RECALL_WORDS:="((march|come|go|bring|call|send|pull|get|fall)\\w* [\\w' ]{0,30}?(home|back)\\b|withdraw|retreat|fall back|pull back|recall|disengage)"
 const DEFEND_WORDS:="(defend|hold|guard|protect|garrison|man the walls|stand guard)"
 const FULL_WORDS:="(full|whole|all (of )?(our|my|the)|every|everything|everyone|each and every|all we have|all you have|to the last)"
-const INSIST_WORDS:="(regardless|whatever the cost|no matter (what|the cost|the odds)|at any cost|at all costs|i don't care|i do not care|now!|at once|i insist|i command it|do it anyway|anyway)"
+const INSIST_WORDS:="(regardless|whatever the cost|no matter (what|the cost|the odds)|at any cost|at all costs|i don't care|i do not care|now!|at once|i insist|i command it|do it anyway|anyway|i said|i told you|i ordered|as i (said|ordered|command(ed)?)|that is an order|just (go|do it|march)|obey|as they are|i say go|say the word)"
 ## "Drill them first", "let them finish their drill": the god takes the war
 ## leader's advice instead of insisting.
 const DRILL_WORDS:="((drill|train) (them|the band|the levy|your band|your men) (first|more|longer)|let them (finish|drill|train)|finish (their|the) (drill|training)|bring (them|the band|your band) home (to|and) (drill|train))"
@@ -2117,6 +2117,29 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 	var chosen:=int(out.chosen)
 	# "With 17 troops": that many go from the home reserve when it has them.
 	var asked:=maxi(0,int(reading.get("count",0)))
+	# THE ARMY IS ONE HOST. A god's order to march does not go to one band of
+	# several: every band free to take an order gathers into one, the largest
+	# (his own if he leads one), up to the number named when one was named.
+	if chosen<=0 and not bool(out.home_only):
+		var free:Array=[]
+		for a:Dictionary in mc.field_armies:
+			if _available(a):free.append(a)
+		if free.size()>=2:
+			free.sort_custom(func(p:Dictionary,q:Dictionary)->bool:return int(p.troops)>int(q.troops))
+			var core:Dictionary=band if not band.is_empty() and _available(band) else free[0]
+			var total:=int(core.troops)
+			var joining:Array=[]
+			for a:Dictionary in free:
+				if int(a.army_id)==int(core.army_id):continue
+				if asked>0 and total>=asked:break
+				joining.append(int(a.army_id));total+=int(a.troops)
+			if not joining.is_empty():
+				var mustered:Dictionary=mc.gather_field_armies(int(core.army_id),joining)
+				if int(mustered.get("bands",0))>0:
+					out["mustered"]={"bands":int(mustered.bands)+1,"men":int((mustered.army as Dictionary).troops)}
+					f=forces(general)
+					band=f.band if not (f.band as Dictionary).is_empty() else _army(int(core.army_id))
+					chosen=int(core.army_id)
 	var exact:=asked>0 and chosen<=0 and not bool(out.home_only) and trained>=asked
 	if chosen>0:
 		var picked:=_army(chosen)

@@ -41,6 +41,8 @@ const KEEP_FINISHED_DAYS:=60
 const STALL_DAYS:=3
 ## Most words a card line may hold.
 const MAX_WORDS:=12
+## A reason why nothing happened is said whole (a refusal cut short reads as a fault).
+const REASON_WORDS:=48
 const ENDED:=["done","refused","called_off"]
 ## The screen each source opens (command_rail_hud section ids; "court" opens
 ## the court).
@@ -203,7 +205,8 @@ static func _read(o:Dictionary,day:int,claiming:bool)->void:
 	# and the next game day is over.
 	if not bool(o.get("ever_moved",false)) and not bool(r.get("moved",false)) and day>=int(o.day)+2 and not bool(r.get("standing",false)):
 		o["state"]="nothing"
-		o["line"]=short("Nothing has happened yet: "+(reason if reason!="" else "nothing in the ledger has moved"))
+		# The reason is the whole point of this line: never cut to a few words.
+		o["line"]=short("Nothing has happened yet: "+(reason if reason!="" else "nothing in the ledger has moved"),REASON_WORDS)
 		return
 	if state=="under_way" and bool(o.get("ever_moved",false)) and day-int(o.get("moved_day",day))>=STALL_DAYS and not bool(r.get("standing",false)):
 		state="stalled"
