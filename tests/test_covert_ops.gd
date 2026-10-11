@@ -80,6 +80,7 @@ func test_envoy_cover_is_refused_once_a_feud_is_hot()->void:
 
 func test_a_watch_report_sharpens_our_estimates_and_brings_a_fact()->void:
 	var agent:=Covert.volunteer()
+	_place(_civ_id())
 	var op:=Covert.launch("watch",_civ_id(),_tsaren(),"trader",agent)
 	assert_bool(op.has("error")).override_failure_message(String(op.get("error",""))).is_false()
 	(op.odds as Dictionary)["caught"]=0.0   # this watcher is not caught
@@ -98,6 +99,7 @@ func test_a_watch_report_sharpens_our_estimates_and_brings_a_fact()->void:
 
 func test_eyes_on_reports_to_the_war_screen()->void:
 	var agent:=Covert.volunteer()
+	_place(_civ_id())
 	var op:=Covert.launch("watch",_civ_id(),_tsaren(),"trader",agent)
 	(op.odds as Dictionary)["settle"]=0.0   # not found out moving in
 	Covert._arrive(op,int(op.arrive_day))   # now in place
@@ -112,6 +114,7 @@ func test_eyes_on_reports_to_the_war_screen()->void:
 func test_envoy_assassination_that_is_traced_brings_a_feud_and_breaks_envoy_sanctity()->void:
 	var target:=_varesh()
 	var agent:=Covert.volunteer()
+	_place(target)
 	var op:=Covert.launch("assassinate",target,"","envoy",agent,"as many of their leaders as he can")
 	assert_bool(op.has("error")).is_false()
 	op["stage"]="struck"
@@ -141,6 +144,7 @@ func test_a_dead_ruler_brings_a_successor()->void:
 	var before:=String(ForeignDiplomacy.leader(target).get("name",""))
 	assert_str(before).override_failure_message("the Esurai should have a named ruler").is_not_empty()
 	var agent:=Covert.volunteer()
+	_place(target)
 	var op:=Covert.launch("assassinate",target,"","none",agent,"their chief")
 	# Decide the kill with their ruler among the dead, then run the real death.
 	Covert._kill_leaders(target,1,true,op,int(GameState.elapsed_days))
@@ -151,6 +155,7 @@ func test_a_dead_ruler_brings_a_successor()->void:
 func test_a_failed_strike_changes_nobody_and_starts_no_feud()->void:
 	var target:=_varesh()
 	var agent:=Covert.volunteer()
+	_place(target)
 	var op:=Covert.launch("assassinate",target,"","none",agent,"their chief")
 	op["stage"]="struck"
 	(op.odds as Dictionary)["success"]=0.0
@@ -174,6 +179,7 @@ func test_a_caught_agent_who_talks_brings_a_feud()->void:
 		Covert.forget()
 		var agent:=Covert.volunteer()
 		agent["nerve"]=0.0   # a timid hand breaks under their questioning
+		_place(target)
 		var op:=Covert.launch("watch",target,"","trader",agent)
 		Covert._agent_caught_ours(op,day,"watching")
 		if bool((op.outcome as Dictionary).get("talks",false)):
@@ -199,6 +205,7 @@ func test_a_stolen_secret_moves_our_learning_forward()->void:
 	var index:=1
 	(CivilizationSystem.civilizations[index] as Dictionary)["discovery_profile"]={"technologies":[secret]}
 	var agent:=Covert.volunteer()
+	_place(target)
 	var op:=Covert.launch("steal",target,"","trader",agent)
 	op["stage"]="struck"
 	(op.odds as Dictionary)["success"]=1.0
@@ -213,6 +220,7 @@ func test_sabotage_is_applied_to_their_ledger()->void:
 	var index:=1
 	(CivilizationSystem.civilizations[index] as Dictionary)["food_days"]=40.0
 	var agent:=Covert.volunteer()
+	_place(target)
 	var op:=Covert.launch("sabotage",target,"","pilgrim",agent)
 	op["stage"]="struck"
 	(op.odds as Dictionary)["success"]=1.0
@@ -286,7 +294,9 @@ func test_a_writing_people_gains_networks()->void:
 
 func test_the_covert_ledger_saves_and_loads()->void:
 	var agent:=Covert.volunteer()
+	_place(_civ_id())
 	Covert.launch("watch",_civ_id(),_tsaren(),"trader",agent)
+	_place(_varesh())
 	Covert.launch("assassinate",_varesh(),"","envoy",Covert.volunteer(),"their chief")
 	assert_bool(Covert.valid_state(Covert.state())).is_true()
 	# Through the court's own save validator.
@@ -341,3 +351,24 @@ func test_a_settled_eye_sends_varied_news_and_never_repeats_an_unchanged_count()
 func test_old_word_reads_in_years()->void:
 	assert_str(Covert._since(800)).is_equal("2 years ago")
 	assert_str(preload("res://scripts/hud/covert_board.gd")._age(65640)).is_equal("180 years ago")
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true
+
+func test_nobody_is_sent_among_a_people_whose_home_we_have_not_found()->void:
+	var target:=_varesh()
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==target:
+			(civ.player_relation as Dictionary)["home_location_known"]=false
+			(civ.player_relation as Dictionary).erase("home_position")
+	if Covert.knows_where(target):return
+	var refused:Dictionary=Covert.launch("watch",target,"","trader",Covert.volunteer())
+	assert_str(String(refused.get("error",""))).contains("do not know where")
+	# Once scouts find their home, the same order goes.
+	_place(target)
+	assert_bool(Covert.launch("watch",target,"","trader",Covert.volunteer()).has("error")).is_false()
