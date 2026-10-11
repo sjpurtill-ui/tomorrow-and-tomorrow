@@ -723,6 +723,98 @@ static func networks()->Array:
 static func network_strength(civ_id:String)->float:
 	return float(network(civ_id).strength)
 
+# --------------------------------------------------------------------------
+# The ruler's hand on a network: how hard, never who
+# --------------------------------------------------------------------------
+#
+# The god does not send watchers one at a time. For each people the god sets
+# how hard we watch them, and the Pathfinder keeps the network to it: who
+# goes, when one found is replaced, how many are taught for it. A killing or
+# a burning is still a word at court.
+
+const NETWORK_NAMES:=["None","Light","Steady","Heavy"]
+## Watchers kept living among a people at each level.
+const NETWORK_EYES:=[0,1,3,6]
+const NETWORK_REVIEW_DAYS:=30
+## At Heavy the network also goes after one of their crafts, this often.
+const NETWORK_STEAL_DAYS:=365
+const NETWORK_STEAL_STRENGTH:=0.3
+
+static func network_level(civ_id:String)->int:
+	_seed_reach()
+	var reach:Variant=state().get("reach")
+	return clampi(int((reach as Dictionary).get(civ_id,0)),0,3) if reach is Dictionary else 0
+
+## A campaign from before networks: each people starts at the level its
+## watchers already there amount to, so nothing the god built is dropped.
+static func _seed_reach()->void:
+	var s:=state()
+	if s.get("reach") is Dictionary: return
+	var reach:={}
+	var seen:={}
+	for op in s.ops:
+		var o:Dictionary=op
+		if String(o.get("kind",""))=="plant" and String(o.get("stage","")) in ["travelling","in_place"]: seen[String(o.get("civ_id",""))]=int(seen.get(String(o.get("civ_id","")),0))+1
+	for id in seen: reach[id]=1 if int(seen[id])<=1 else (2 if int(seen[id])<=3 else 3)
+	s["reach"]=reach
+
+## Sets how hard we watch a people. Returns the Pathfinder's plain answer.
+static func set_network_level(civ_id:String,level:int)->String:
+	var s:=state()
+	if not s.get("reach") is Dictionary: s["reach"]={}
+	level=clampi(level,0,3)
+	(s.reach as Dictionary)[civ_id]=level
+	_teach_for_networks()
+	s["next_network"]=_day()
+	var eyes:=EyesCorps.word("eyes")
+	if level==0: return "No more of our %s go among %s. Those there stay until they are found or grow old." % [eyes,_the(civ_id)]
+	if not knows_where(civ_id): return "%s When we find it, %d will be kept among them." % [unplaced_words(civ_id),int(NETWORK_EYES[level])]
+	return "%d of our %s will be kept living among %s%s. One goes at a time; one found is replaced." % [int(NETWORK_EYES[level]),eyes,_the(civ_id)," and they will go after their crafts" if level==3 else ""]
+
+## Watchers all our networks want in place, and those there or on the way.
+static func network_wanted()->int:
+	var want:=0
+	var reach:Variant=state().get("reach")
+	if reach is Dictionary:
+		for id in reach: want+=int(NETWORK_EYES[clampi(int(reach[id]),0,3)])
+	return want
+
+static func _network_placed(civ_id:String="")->int:
+	var n:=0
+	for op in state().ops:
+		var o:Dictionary=op
+		if String(o.get("kind",""))=="plant" and String(o.get("stage","")) in ["travelling","in_place"] and (civ_id=="" or String(o.get("civ_id",""))==civ_id): n+=1
+	return n
+
+## The teaching follows the networks: none wanted, none taught; the further
+## short of what is wanted, the more taught each year.
+static func _teach_for_networks()->void:
+	var short:=network_wanted()-_network_placed()-floori(EyesCorps.members("eyes"))
+	var want:=network_wanted()
+	EyesCorps.set_policy("eyes","none" if want<=0 else ("few" if short<=0 else ("steady" if short<=3 else "many")))
+
+## Once a month: one watcher sent where a network is short, strongest need
+## first; at Heavy a try for a craft once the network has roots.
+static func _network_review(day:int)->void:
+	var s:=state()
+	var reach:Variant=s.get("reach")
+	if not reach is Dictionary or (reach as Dictionary).is_empty(): return
+	_teach_for_networks()
+	var Orders:GDScript=load("res://scripts/covert_orders.gd")
+	var best:="";var best_short:=0
+	for id in reach:
+		var civ_id:=String(id)
+		var level:=network_level(civ_id)
+		if level<=0 or _civ(civ_id).is_empty() or not bool(_civ(civ_id).get("alive",true)) or not knows_where(civ_id): continue
+		if method_barred("plant")=="":
+			var short:=int(NETWORK_EYES[level])-_network_placed(civ_id)
+			if short>best_short: best_short=short;best=civ_id
+		if level==3 and method_barred("steal")=="" and network_strength(civ_id)>=NETWORK_STEAL_STRENGTH and day>=int((s.get("steal_next",{}) as Dictionary).get(civ_id,0)):
+			if not s.get("steal_next") is Dictionary: s["steal_next"]={}
+			(s.steal_next as Dictionary)[civ_id]=day+NETWORK_STEAL_DAYS
+			Orders.call("perform",{"kind":"steal","civ_id":civ_id,"city_id":"","cover":"none","target_desc":"Steal a craft"},true)
+	if best!="": Orders.call("perform",{"kind":"plant","civ_id":best,"city_id":"","cover":"trader","target_desc":"Live among them"},true)
+
 static func _cover_word(cover:String)->String:
 	return {"envoy":"envoy","trader":"trader","pilgrim":"pilgrim","refugee":"refugee","none":"no"}.get(cover,"no")
 
@@ -743,6 +835,10 @@ static func daily(day:int)->void:
 			_ruler_review(day)
 		return
 	_catch_incoming(day)
+	# The god's networks, kept to the level set for each people.
+	if day>=int(s.get("next_network",0)):
+		s["next_network"]=day+NETWORK_REVIEW_DAYS
+		_network_review(day)
 	# Prisoners held, tended, sent home or won over; ours held abroad.
 	_captives().call("daily",day)
 	# Without simulated peoples (an older world, a test), their errands
