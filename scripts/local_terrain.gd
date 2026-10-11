@@ -865,6 +865,9 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Diagnostic: whether each people's home can be reached from ours by land (tools/land_link_report.gd).
+	if "--capture-land-links" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/land_link_report.gd").call("lines"):print("LAND LINK ",line)
 	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
 	if "--capture-rival-ships" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)

@@ -1303,6 +1303,11 @@ func field_route(start:Vector2,target:Vector2,force:Dictionary={})->Dictionary:
 	var land:=Callable(WorldSimulation.world,"_scout_land_at")
 	var mix:=MarchTerrain.mix_of(force) if not force.is_empty() else {"foot":1.0}
 	var path:=ArmyLandRoute.find(start,target,land,true,MarchTerrain.context(mix))
+	if path.has("error") and String(path.get("reason",""))=="no_land_route":
+		# No way by land: by sea, if this people's boats are fit for it
+		# (army_sea_road.gd), at the crossing's stated cost in lives.
+		var by_sea:Dictionary=preload("res://scripts/army_sea_road.gd").find(start,target,land,mix,_field_army_speed(force) if not force.is_empty() else 24.0)
+		if not by_sea.is_empty():return by_sea
 	if path.has("error"):
 		var why:=String(path.get("reason",""))
 		var words:={"start_water":"The army is not standing on dry ground, so it cannot set out by land.","goal_water":"That place is open water; an army needs dry ground to march to.","no_land_route":"No march was ordered: there is no way there by land. It lies across open water, and our people have no boats that can carry an army."}
@@ -1346,10 +1351,14 @@ func march_supply(force:Dictionary,route:Dictionary)->Dictionary:
 	var troops:=maxi(1,int(force.get("troops",0)))
 	var total:=MarchTerrain.total_effort(packed)
 	var lean:=1.0
+	var sea:Dictionary=route.get("sea",{}) if route.get("sea") is Dictionary else {}
 	for k in MARCH_SAMPLES:
-		var at:Vector2=MarchTerrain.at_effort(origin,packed,total*(float(k)+0.5)/float(MARCH_SAMPLES)).position
+		var spent:=total*(float(k)+0.5)/float(MARCH_SAMPLES)
+		# Under sail, and ashore beyond it, the boats' stores feed them.
+		if not sea.is_empty() and spent>=float(sea.from_e):continue
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,spent).position
 		lean=minf(lean,float(SupplyState.at_point(at,troops,true,false).get("ratio",1.0)))
-	var there:=float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
+	var there:=1.0 if not sea.is_empty() else float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
 	return {"days":MarchTerrain.days(origin,packed,_field_army_speed(force)/slowing,int(WorldSimulation.state.elapsed_days),mix),"half_pace":clampf((slowing-1.0)/(1.0/FieldRations.FORAGE_PACE-1.0),0.0,1.0),
 		"fed_on_road":lean,"fed_there":there,"hungry":minf(lean,there)<FieldRations.HUNGRY_BELOW}
 
@@ -1441,7 +1450,7 @@ func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"days":days,"distance_km":distance,"message":"%s is moving to %s: %.0f km%s%s, about %d %s." % [String(army.name),String(army.destination_name),distance,"" if bool(route.get("direct",true)) else " by land round the water",_march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
+	return {"ok":true,"army":army.duplicate(true),"days":days,"distance_km":distance,"message":"%s is moving to %s: %.0f km%s%s, about %d %s." % [String(army.name),String(army.destination_name),distance,"" if bool(route.get("direct",true)) else (preload("res://scripts/army_sea_road.gd").order_words(route.sea,int(army.get("troops",0))) if route.get("sea") is Dictionary else " by land round the water"),"" if route.get("sea") is Dictionary else _march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
 
 func _set_march_route(army:Dictionary,route:Dictionary)->void:
 	## The legs the general chose (after the army's current position; the last
@@ -1453,6 +1462,11 @@ func _set_march_route(army:Dictionary,route:Dictionary)->void:
 	army["march_travelled_km"]=0.0
 	army["march_effort_done"]=0.0
 	army["march_direct"]=bool(route.get("direct",true))
+	# A road over the sea: where it embarks and lands, and what the crossing costs.
+	if route.get("sea") is Dictionary:
+		army["march_sea"]=(route.sea as Dictionary).duplicate(true)
+		army.march_sea["crossed"]=false
+	else:army.erase("march_sea")
 	# Half pace where it must live off the land, reckoned once for this road.
 	army["march_slowing"]=_forage_slowing(army,route.get("origin",Vector2.ZERO),army.march_route)
 
@@ -1506,7 +1520,7 @@ func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD
 	army["speed_km_day"]=speed
 	field_armies[index]=army
 	army_changed.emit(home_army.duplicate(true))
-	return {"ok":true,"army":army.duplicate(true),"days":days,"message":"%s marches to the marked ground: %.0f km%s, about %d %s. Runners will carry its reports home." % [String(army.name),distance,_march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
+	return {"ok":true,"army":army.duplicate(true),"days":days,"message":"%s %s to the marked ground: %.0f km%s, about %d %s. Runners will carry its reports home." % [String(army.name),"goes" if route.get("sea") is Dictionary else "marches",distance,preload("res://scripts/army_sea_road.gd").order_words(route.sea,int(army.get("troops",0))) if route.get("sea") is Dictionary else _march_ground_words(route),days,"day" if days==1 else "days"]+_field_supply_advice(army)}
 
 
 func map_engagement_availability(army_id:int,formation_id:String)->Dictionary:
@@ -1906,7 +1920,9 @@ func _process_field_army_movement_day()->void:
 		# Where the carriers cannot feed the band, the general lives off the
 		# land: half pace, foraging and hunting as they go, when that feeds the
 		# men better than the full march (field_rations.gd). A chase keeps pace.
-		army["living_off_land"]=intercept_target_id.is_empty() and _lives_off_land(army)
+		var SeaRoad:=preload("res://scripts/army_sea_road.gd")
+		var sailing:=SeaRoad.at_sea(army,float(army.get("march_effort_done",0.0)))
+		army["living_off_land"]=intercept_target_id.is_empty() and not sailing and _lives_off_land(army)
 		var speed:=_field_army_speed(army)*(FieldRations.FORAGE_PACE if bool(army.living_off_land) else 1.0)
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var done_before:=float(army.get("march_effort_done",0.0))
@@ -1931,7 +1947,9 @@ func _process_field_army_movement_day()->void:
 		# of town, not new water; counted as water, the band re-planned the
 		# same road every day and never left home.
 		var shore:=_shore_start_km(origin,legs,land)
-		while probe<walked and dry:
+		# A day that touches the sea leg is the boats' business, not a road gone under water.
+		var sea_day:=sailing or SeaRoad.at_sea(army,done) or (army.get("march_sea") is Dictionary and done_before<float(army.march_sea.to_e) and done>float(army.march_sea.from_e))
+		while probe<walked and dry and not sea_day:
 			probe=minf(walked,probe+ArmyLandRoute.SAMPLE_KM)
 			if probe<=shore: continue
 			if bool(land.call(ArmyLandRoute.point_along(origin,legs,probe))): wet=0.0
@@ -1957,7 +1975,16 @@ func _process_field_army_movement_day()->void:
 				army["distance_remaining_km"]=float(detour.length_km)
 				field_armies[index]=army
 				continue
-		var frontier:=FrontContact.sweep(self,army,origin,packed,done_before,done)
+		var frontier:Dictionary={} if sea_day else FrontContact.sweep(self,army,origin,packed,done_before,done)
+		# The landing: those the crossing drowned are counted as it comes ashore.
+		if army.get("march_sea") is Dictionary and not bool(army.march_sea.get("crossed",false)) and done>=float(army.march_sea.to_e)-0.001:
+			army.march_sea["crossed"]=true
+			army["sea_stores_until"]=today+SeaRoad.STORES_ASHORE_DAYS
+			var embarked:=int(army.get("troops",0))
+			var drowned:=apply_transport_casualties(int(army.army_id),float(army.march_sea.get("drown",0.0)))
+			army=field_armies[index]
+			if drowned>0:
+				WorldSimulation.state.simulation_events.push_front({"day":today,"title":"THE CROSSING","description":"%s came ashore after %d km under sail. Of the %d who embarked, %d were lost to the sea." % [String(army.get("name","The army")),roundi(float(army.march_sea.get("sea_km",0.0))),embarked,drowned],"domain":"security","severity":"major"})
 		if not frontier.is_empty():
 			walked=float(frontier.km);done=float(frontier.effort);arrived=false
 			remaining=maxf(0.001,float(army.get("distance_total_km",walked))-walked)
@@ -1977,7 +2004,7 @@ func _process_field_army_movement_day()->void:
 			army["location_name"]=String(army.get("destination_name","DESTINATION"))
 			army["destination_id"]=""
 			army["arrival_day"]=int(WorldSimulation.state.elapsed_days)
-			army.erase("march_route"); army.erase("march_travelled_km"); army.erase("march_effort_done")
+			army.erase("march_route"); army.erase("march_travelled_km"); army.erase("march_effort_done"); army.erase("march_sea")
 			if _army_is_home(army) or _live_army_reporting():
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d men, fed %d%%." % [String(army.name),String(army.location_name),int(army.troops),roundi(SupplyState.fed(army)*100.0)],"domain":"security","severity":"notice"})
 			else:
@@ -3855,6 +3882,9 @@ func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
 	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
 		if reserve:return 1.0
 		if at_home_point(force):return 1.0
+		# An army over the sea eats from its boats: under sail and for some
+		# days after landing (army_sea_road.gd STORES_ASHORE_DAYS).
+		if preload("res://scripts/army_sea_road.gd").on_ship_stores(force,int(WorldSimulation.state.elapsed_days)):return 1.0
 	# What the carriers bring, less what they eat on the haul (supply_state.gd).
 	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
 
