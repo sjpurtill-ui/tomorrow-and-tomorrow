@@ -68,6 +68,7 @@ func _prepare() -> bool:
 	GameState.civic_api_enabled=false
 	if PeopleDirection.needs_century_choice(): PeopleDirection.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	_freeze(); day=int(GameState.elapsed_days)
+	_fixture_loaded()
 	Motion.reduce_motion=false
 	terrain=load("res://local_terrain.tscn").instantiate(); add_child(terrain)
 	terrain.call("_set_game_speed",0)
@@ -86,6 +87,9 @@ func _prepare() -> bool:
 	if not _choose_ground():
 		push_error("No sufficiently dry fixture area near the copied campaign home."); get_tree().quit(2); return false
 	return true
+
+func _fixture_loaded() -> void:
+	pass
 
 func _run() -> void:
 	if not await _prepare():return
