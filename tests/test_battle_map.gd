@@ -341,7 +341,7 @@ func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_l
 	# Resting on it: one plain line.
 	overlay._hover(ours.at)
 	assert_bool(overlay.tip.visible).is_true()
-	assert_str((overlay.tip.get_child(0) as Label).text).is_equal("We are pushing them back · 340 against 280")
+	assert_str((overlay.tip.get_child(0) as Label).text).contains("Tsaren · day 2").contains("We are pushing them back · 340 against 280").contains("Click to watch the battle")
 	overlay._hover(Vector2(5,5))
 	assert_bool(overlay.tip.visible).is_false()
 	# A rival's fight is not ours to open: a note about what was seen.
