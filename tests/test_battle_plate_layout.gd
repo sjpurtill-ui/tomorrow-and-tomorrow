@@ -94,8 +94,10 @@ func test_contact_and_readout_both_open_the_same_battle_after_layout()->void:
 	await await_idle_frame()
 	await await_idle_frame()
 	var entry:Dictionary=overlay.battle_cache[0]
-	assert_bool((entry.rect as Rect2).has_point(entry.contact_at)).is_false()
-	assert_float((entry.at as Vector2).distance_to(entry.contact_at)).is_greater(50.0)
+	assert_bool((entry.rect as Rect2).has_point(entry.contact_at)).is_true()
+	assert_that(entry.at).is_equal(entry.contact_at)
+	assert_that((entry.rect as Rect2).size).is_equal(Vector2(26,24))
+	assert_array(overlay.placed_captions).is_empty()
 	var opened:Array=[]
 	overlay.battle_opener=func(request:Dictionary)->void:opened.append(request)
 	for point in [entry.contact_at,(entry.rect as Rect2).get_center()]:
