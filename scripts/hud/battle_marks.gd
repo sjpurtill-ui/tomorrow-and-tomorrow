@@ -2,8 +2,8 @@ extends RefCounted
 ## BATTLE MARKS: how a battle, a force's counter and its state are inked on
 ## the war chart.
 ##
-## At rest, a battle is two small opposed strokes at the contact point.
-## A fine seam moves toward the side being pushed back. The full paper
+## At rest, a battle is a small roundel of crossed weapons at the contact.
+## Its two-colour rim shows the balance of the fight. The full paper
 ## readout remains available for detail, with historically appropriate
 ## weapons, troop estimates and the balance of the fight. Nearby battles
 ## can share one small signal with a count, leaving the front itself clear.
@@ -276,24 +276,28 @@ static func signal_rect(at:Vector2,scale:float=1.0)->Rect2:
 	return Rect2(at-Vector2(13,12)*k,Vector2(26,24)*k)
 
 
-## Opposed strokes and a pressure seam, with only enough paper halo to
-## remain legible over either light ground or a dark map. No panel or label.
+## The round ivory badge differs from rectangular army banners, even when
+## paused. Its restrained rim favours the side gaining ground; the dark
+## crossed mark identifies a battle without requiring colour or motion.
 static func draw_signal(canvas:CanvasItem,at:Vector2,battle:Dictionary,scale:float=1.0)->Rect2:
 	var k:=maxf(0.5,scale)
 	var sides:Dictionary=battle.get("sides",{})
 	var colour_a:Color=(sides.get("a",{}) as Dictionary).get("colour",VERDIGRIS)
 	var colour_b:Color=(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD)
 	var fade:=ArmyMarks.fade(int(battle.get("age_days",0)))
-	var seam:=clampf(float(battle.get("progress",0.0)),-1.0,1.0)*3.0
-	var left:=PackedVector2Array([at+Vector2(-9,-6)*k,at+Vector2(seam-2,0)*k,at+Vector2(-9,6)*k])
-	var right:=PackedVector2Array([at+Vector2(9,-6)*k,at+Vector2(seam+2,0)*k,at+Vector2(9,6)*k])
-	for stroke in [left,right]:canvas.draw_polyline(stroke,Color(PAPER,0.94*fade),5.0*k,true)
-	canvas.draw_polyline(left,Color(colour_a,fade),2.6*k,true)
-	canvas.draw_polyline(right,Color(colour_b,fade),2.6*k,true)
-	var top:=at+Vector2(seam,-4)*k
-	var bottom:=at+Vector2(seam,4)*k
-	canvas.draw_line(top,bottom,Color(PAPER,0.94*fade),3.2*k,true)
-	canvas.draw_line(top,bottom,Color(INK,0.9*fade),1.1*k,true)
+	canvas.draw_circle(at,10.8*k,Color(PAPER,0.98*fade))
+	canvas.draw_arc(at,10.8*k,0.0,TAU,32,Color(INK,0.28*fade),0.8*k,true)
+	var pressure:=clampf(float(battle.get("progress",0.0)),-1.0,1.0)*PI*0.25
+	var top:=-PI*0.5+pressure
+	var bottom:=PI*0.5-pressure
+	canvas.draw_arc(at,9.5*k,bottom+0.06,top+TAU-0.06,24,Color(colour_a,0.9*fade),1.65*k,true)
+	canvas.draw_arc(at,9.5*k,top+0.06,bottom-0.06,24,Color(colour_b,0.9*fade),1.65*k,true)
+	if battle.has("era"):
+		draw_weapons(canvas,at,5.8*k,int(battle.era),Color(INK,fade),Color.TRANSPARENT)
+	else:
+		# Unknown equipment still reads as contact without inventing a kit.
+		canvas.draw_line(at+Vector2(-4.6,-5.0)*k,at+Vector2(4.6,5.0)*k,Color(INK,fade),1.9*k,true)
+		canvas.draw_line(at+Vector2(-4.6,5.0)*k,at+Vector2(4.6,-5.0)*k,Color(INK,fade),1.9*k,true)
 	return signal_rect(at,scale)
 
 
