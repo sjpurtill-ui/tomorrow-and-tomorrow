@@ -27,6 +27,7 @@ var verify := false
 var title: Label
 var ground_ink: Control
 var fixture_day := 0
+var refresh_frames:Array=[]
 
 func _ready() -> void:
 	call_deferred("_run")
@@ -111,7 +112,7 @@ func _run() -> void:
 	await _capture("small", "1152 × 720: card fit and controls")
 	_check(GameState.elapsed_days == fixture_day, "Opening, inspecting and capturing the border advances no game time")
 	var file := FileAccess.open(out.path_join("audit.json"), FileAccess.WRITE)
-	file.store_string(JSON.stringify({"scope":"TEST fixture, actual BorderMap controls and FortBorder rules; flat inspection ground, no player save", "passed":failures.is_empty(), "checks":checks, "failures":failures, "captures":captures, "day":GameState.elapsed_days}, "\t"))
+	file.store_string(JSON.stringify({"scope":"TEST fixture, actual BorderMap controls and FortBorder rules; flat inspection ground, no player save", "passed":failures.is_empty(), "checks":checks, "failures":failures, "captures":captures, "refresh_frames":refresh_frames, "day":GameState.elapsed_days}, "\t"))
 	print("BORDER_ART_PROBE ", "PASS" if failures.is_empty() else "FAIL", " checks=",checks," captures=",captures.size()," out=",out)
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -266,6 +267,7 @@ func _button(name:String) -> Button:
 	return map.find_child(name,true,false) as Button
 
 func _interactions() -> void:
+	await _daily_refresh_frames()
 	map.call("open_note",1); await _settle()
 	var ledger_before := hash(var_to_bytes(GameState.border_forts))
 	var stock_before := hash(var_to_bytes(GameState.resource_stockpiles))
@@ -369,6 +371,39 @@ func _interactions() -> void:
 	_check(((map.get("key_card") as Control).get_theme_stylebox("panel") as StyleBoxFlat).bg_color==T.PAPER_RAISED,"An already open border card adopts its night background")
 	T.set_color_mode("light"); await _settle()
 	_check(((map.get("key_card") as Control).get_theme_stylebox("panel") as StyleBoxFlat).bg_color==T.PAPER_RAISED,"An already open border card returns to its paper background")
+
+func _daily_refresh_frames()->void:
+	var allocations:=GameState.population_allocations.duplicate(true)
+	var old_share:=Forts.border_share()
+	map.call("_close_note")
+	GameState.population_allocations["Defense"]=600
+	Forts.set_border_share(0.5)
+	_refresh();await _settle()
+	await _capture("daily_before","Daily border reading: before the watch changes")
+	var card:Control=map.get("key_card")
+	var stable:=card.get_global_rect()
+	var button:=_button("MoreBorderWatch")
+	button.grab_focus()
+	for day in 4:
+		GameState.population_allocations["Defense"]=602+day*2
+		map.call("_process",0.6)
+		var maximum_delta:=0.0
+		# Deliberately do not settle after refresh: the first frames exposed the
+		# regression even when every ordinary screenshot looked correct.
+		for frame in 12:
+			var rect:=card.get_global_rect()
+			maximum_delta=maxf(maximum_delta,rect.size.distance_to(stable.size))
+			maximum_delta=maxf(maximum_delta,rect.position.distance_to(stable.position))
+			refresh_frames.append({"update":day,"frame":frame,"position":str(rect.position),"size":str(rect.size)})
+			await get_tree().process_frame
+			if DisplayServer.get_name()!="headless":await RenderingServer.frame_post_draw
+		_check(maximum_delta<=1.0,"Daily watch update %d: popup stays still on every frame (%.1f px)" % [day,maximum_delta])
+		_check(_all_text(card).contains(str(int(Forts.watch().posted))),"Daily watch update %d: current posted count is visible" % day)
+	_check(is_instance_valid(button) and button.has_focus(),"Daily watch updates retain keyboard focus on the watch control")
+	await _capture("daily_after","Daily border reading: updated watch, steady card")
+	GameState.population_allocations=allocations
+	Forts.set_border_share(old_share)
+	_refresh();await _settle()
 
 func _all_text(node:Node) -> String:
 	if not is_instance_valid(node): return ""
