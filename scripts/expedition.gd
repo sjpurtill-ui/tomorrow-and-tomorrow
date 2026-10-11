@@ -56,6 +56,8 @@ const INLAND_MAX_KM:=800.0
 ## An expedition reads the signs of a people (smoke, tracks, worked ground)
 ## from at least this far off, and brings home a rumour of where they lie.
 const SIGNS_KM:=400.0
+## A home with open water within this of it can be reached in boats, km.
+const HARBOUR_KM:=20.0
 ## A route with less than this share new to our charts brings home little.
 const STALE_SHARE:=0.08
 ## A land leg the planner walks at a time, km.
@@ -369,9 +371,10 @@ static func homecoming(mission:Dictionary,day:int,world:Node=null)->Dictionary:
 
 ## An expedition that reads a people's signs within SIGNS_KM goes to look:
 ## from the nearest dry point of its track it walks to them if the land
-## allows a way no longer than half again that distance. Where it left its
+## allows a way no longer than half again that distance; one that came by
+## sea coasts round in its boats to a home that stands by the water. Where it left its
 ## track, or INF when the signs lie too far or over water.
-static func followed_signs(world:Node,route:Array,home:Vector2)->Vector2:
+static func followed_signs(world:Node,route:Array,home:Vector2,by_boat:bool=false)->Vector2:
 	var from:=Vector2.INF
 	var near:=INF
 	# The nearest point of the track itself if it is dry, else its nearest dry turn.
@@ -381,10 +384,114 @@ static func followed_signs(world:Node,route:Array,home:Vector2)->Vector2:
 		var at:=Vector2(float(p.x),float(p.z))
 		if at.distance_to(home)<near and bool(world._scout_land_at(at)):near=at.distance_to(home);from=at
 	if not from.is_finite() or near>SIGNS_KM:return Vector2.INF
-	if not bool(world._scout_land_at(home)):return Vector2.INF
+	# A harbour town's mark can sit on the waterline: the dry ground beside it.
+	if not bool(world._scout_land_at(home)):
+		var beside:=Vector2.INF
+		for ring:float in [1.0,2.0,4.0,8.0]:
+			for k in 8:
+				var p:=home+Vector2.from_angle(TAU*float(k)/8.0)*ring
+				if not beside.is_finite() and bool(world._scout_land_at(p)):beside=p
+		if not beside.is_finite():return Vector2.INF
+		home=beside
 	var way:Dictionary=world._plan_scout_land_route(from,home)
-	if not bool(way.get("ok",false)) or float(way.get("distance_km",INF))>SIGNS_KM*1.5:return Vector2.INF
-	return from
+	if bool(way.get("ok",false)) and float(way.get("distance_km",INF))<=SIGNS_KM*1.5:return from
+	# No way overland: a party that came in boats coasts round to a home that
+	# stands by the water (HARBOUR_KM of it).
+	if not by_boat:return Vector2.INF
+	for k in 16:
+		if not bool(world._scout_land_at(home+Vector2.from_angle(TAU*float(k)/16.0)*HARBOUR_KM)):return from
+	return Vector2.INF
+
+## A computer ruler's expeditions, at its monthly review, by the one rule
+## (the people in scope): when its scouting staff has found nothing new to
+## chart, its boats are fit for the sea, it is fed and none of its own is
+## away, it sends one by sea: toward word of a people it has not met when it
+## holds any (hearsay_over_the_sea), else a new direction each time, round
+## the compass from one its own; the farther reach every other round. It will not send
+## one over charted water, nor at worse than LEADERS_LEAST_CHANCE, nor more
+## often than LEADERS_EVERY_DAYS. Same quote, same odds, same roll as ours.
+const LEADERS_EVERY_DAYS:=180
+const LEADERS_LEAST_CHANCE:=0.04
+const LEADERS_PARTY:=20
+static func leaders_decide(plan:Dictionary={})->Dictionary:
+	if WorldSimulation.actor_id=="player":return {}
+	var world:Node=WorldSimulation.world
+	var state:Node=WorldSimulation.state
+	if world==null or not bool(state.settlement_site_committed) or bool(state.convoy_traveling):return {}
+	var staff:Dictionary=world.scouting_staff.data
+	var day:=int(state.elapsed_days)
+	if day<int(staff.get("expedition_next_day",0)):return {}
+	if bool(plan.get("hungry",false)) or float(staff.get("share",0.0))<=0.0:return {}
+	if int(staff.get("fruitless",0))<1 and int(staff.get("land_fruitless",0))<1:return {}
+	if not away(world).is_empty() or not bool(sea_ready().ok):return {}
+	staff["expedition_next_day"]=day+LEADERS_EVERY_DAYS
+	var turn:=int(staff.get("expedition_turn",0))
+	staff["expedition_turn"]=turn+1
+	var names:Array=world.SCOUT_HEADINGS.keys()
+	# Round the compass three points at a time (every direction in eight tries).
+	var heading:=String(names[posmod(absi(hash(String(WorldSimulation.actor_id)))+turn*3,names.size())])
+	# Word of a people not yet met comes first: the compass point nearest it,
+	# every other try (the open round goes on between).
+	var aimed:=_word_to_follow(world,day)
+	if aimed.is_finite() and turn%2==0:
+		heading=String(names[posmod(roundi(rad_to_deg(fposmod((aimed-Vector2(world.player_world_origin)).angle(),TAU))/45.0),names.size())])
+	var q:=quote(heading,2500.0 if (turn>>3)%2==1 else 1200.0,true,LEADERS_PARTY,world)
+	if not bool(q.ok) or bool(q.get("stale",false)) or float(q.get("chance",0.0))<LEADERS_LEAST_CHANCE:return {"tried":heading,"sent":false,"why":String(q.get("blocker","")) if not bool(q.ok) else ("charted" if bool(q.get("stale",false)) else "too far")}
+	var sent:=send(heading,float(q.reach_km),true,LEADERS_PARTY,world)
+	return {"tried":heading,"sent":bool(sent.get("ok",false)),"why":String(sent.get("error",""))}
+
+## Where the freshest word of a people this one has not met points, or INF.
+static func _word_to_follow(world:Node,day:int)->Vector2:
+	var best:=Vector2.INF
+	var newest:=-1
+	for lead:Dictionary in world.rumor_network.list_leads("player",day):
+		var met:=false
+		for civ:Dictionary in world.civilizations:
+			if String(civ.get("id",""))==String(lead.get("subject","")) and int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2:met=true
+		if met or int(lead.get("observed_day",0))<=newest:continue
+		newest=int(lead.get("observed_day",0))
+		best=world.rumor_network.vector(lead.center)
+	return best
+
+## WORD FROM OVER THE SEA. A people whose boats go to sea now and then hears
+## of a people it has not met: worked timber on the tide, a storm-blown boat,
+## a tale from the fishing grounds. Once a month for each people (the one in
+## scope), for each unmet people, at
+##     0.04 x its sea endurance / the distance   (0.2% to 3% a month)
+## seeded. It is a rumour only: a rough place, wide of the truth, on the
+## rumours map with the rest, and something to send an expedition toward.
+## Never a meeting. Returns the peoples heard of.
+const HEARSAY_RATE:=0.04
+static func hearsay_over_the_sea(world:Node,day:int)->Array:
+	var heard:=[]
+	var actor:=String(WorldSimulation.actor_id)
+	if posmod(day,30)!=posmod(absi(hash(actor+":sea_hearsay")),30):return heard
+	var state:Node=WorldSimulation.state
+	if not bool(state.settlement_site_committed) or bool(state.convoy_traveling):return heard
+	var endurance:=endurance_km(true)
+	if endurance<=0.0:return heard
+	var home:Vector2=world.player_world_origin
+	for civ:Dictionary in world.civilizations:
+		if not bool(civ.get("alive",true)):continue
+		var relation:Dictionary=civ.get("player_relation",{})
+		if int(relation.get("contact_level",0))>=1:continue
+		var id:=String(civ.get("id",""))
+		if world.rumor_network.list_leads("player",day).any(func(lead:Dictionary)->bool:return String(lead.get("subject",""))==id):continue
+		var there:Vector2=world._civilization_world_position(civ)
+		var distance:=there.distance_to(home)
+		if distance<1.0:continue
+		var rng:=RandomNumberGenerator.new()
+		rng.seed=int(world.last_world_seed)^day*40503^hash(actor+">"+id)
+		if rng.randf()>=clampf(HEARSAY_RATE*endurance/distance,0.002,0.03):continue
+		var wide:=clampf(distance*0.3,150.0,1500.0)
+		var center:Vector2=world._bounded_world_point(there+Vector2.from_angle(rng.randf_range(-PI,PI))*wide*rng.randf_range(0.2,0.7))
+		var lead:Dictionary=world.rumor_network.observation("player",id,"a people over the sea",center,wide,day,"worked timber on the tide and a storm-blown boat's tale")
+		lead.confidence=0.2
+		if not bool(world.rumor_network.receive("player",lead,day)):continue
+		heard.append(id)
+		if actor=="player":
+			_tell("WORD FROM OVER THE SEA","Our fishers bring in worked timber that none of ours cut, and tell of a boat seen far out that was not ours. Some people live over the sea, somewhere to the %s. It is on the map of rumours; an expedition by sea could look for them." % String(world._compass_phrase(home,center)).to_lower(),"notice")
+	return heard
 
 ## The god's people remember their expeditions: [{day, heading, by_sea, km,
 ## outcome, count}], latest last, at most 24.

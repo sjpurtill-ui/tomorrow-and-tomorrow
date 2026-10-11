@@ -665,6 +665,8 @@ func owned_day_steps(target_day:int)->Array:
 		["world_exchange",func()->void:Exchange.sample_missions(self,target_day)],
 		["world_scouts",func()->void:_complete_due_scout_missions(target_day)],
 		["world_held_scouts",func()->void:age_held_scouts(target_day)],
+		# Once a month: word of peoples over the sea (expedition.gd), ours and every ruler's alike.
+		["world_sea_hearsay",func()->void:preload("res://scripts/expedition.gd").hearsay_over_the_sea(self,target_day)],
 	]+scouting_staff.advance_steps(target_day)+[
 		["world_diplomatic_mission",func()->void:_process_diplomatic_mission(target_day)],
 		["world_observation",func()->void:_process_local_observation(target_day)],
@@ -2020,6 +2022,7 @@ func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 			relation["last_observed_day"]=day
 			civ["player_relation"]=relation
 			civilizations[index]=civ
+			_meeting_is_mutual(civ,day,home,"a scouting party",false)
 			_add_revealed_area(home,72.0,"foreign settlement observed")
 			_publish_observed_event("Home found — %s" % String(civ.name),"Returning scouts came within sight of the %s home settlement. It is on our map now." % String(civ.name),day,{"kind":"home_found","civ_id":String(civ.id),"identified":true,"position":{"x":home.x,"z":home.y}})
 			continue
@@ -2330,6 +2333,35 @@ func _formation_sighting_index(formation_id:String)->int:
 	return -1
 
 
+## A meeting has two sides. When this people's party meets another people,
+## that people has met it too: in its own world (each people is its own
+## simulation, WorldSimulation actors) the meeting is recorded with where and
+## how, and it is told. Ours is told as a first contact like any other.
+func _meeting_is_mutual(civ:Dictionary,day:int,at:Vector2,party:String,by_sea:bool)->void:
+	if not WorldSimulation.enabled:return
+	var them:=String(civ.get("id",""))
+	var target:="player" if them=="human" else them
+	var me:="human" if WorldSimulation.actor_id=="player" else String(WorldSimulation.actor_id)
+	if target==String(WorldSimulation.actor_id) or (target!="player" and not WorldSimulation.actors.has(target)):return
+	WorldSimulation.scoped(target,func()->void:
+		var there:Node=WorldSimulation.world
+		for index in there.civilizations.size():
+			var visitor:Dictionary=there.civilizations[index]
+			if String(visitor.get("id",""))!=me:continue
+			var relation:Dictionary=there._relation_with_strategy_defaults(visitor.get("player_relation",{}),visitor)
+			if int(relation.get("contact_level",0))>=2:return
+			relation["contact_level"]=2
+			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
+			relation["rival_contact_level"]=2
+			relation["rival_player_intelligence"]=maxf(0.20,float(relation.get("rival_player_intelligence",0.0)))
+			if int(relation.get("rival_met_day",-1))<0:relation["rival_met_day"]=day
+			relation=there._set_contact_provenance(relation,day,"their_party_came",at,party.trim_prefix("an ").trim_prefix("a "),"")
+			visitor["player_relation"]=relation
+			there.civilizations[index]=visitor
+			var who:=String(visitor.get("name","a people we did not know"))
+			there._publish_observed_event("First contact — %s" % who,"Strangers have come to us: %s of the %s%s. They found our people at the marked place, spoke with them as far as either could, and turned for home with word of us. We do not know where their home lies." % [party,who," from over the sea" if by_sea else ""],day,{"kind":"first_contact","civ_id":me,"formation_id":"","formation_kind":party,"identified":true,"position":{"x":at.x,"z":at.y}})
+			return)
+
 func _set_contact_provenance(relation:Dictionary,day:int,source:String,position:Vector2,formation_kind:String="",formation_id:String="")->Dictionary:
 	var result:=relation.duplicate(true)
 	# First contact is a historical fact. Later diplomacy may improve knowledge,
@@ -2593,6 +2625,8 @@ func contact_source_description(source:String,formation_kind:String="")->String:
 			return "Direct local encounter with a nearby %s" % formation_kind.replace("_"," ")
 		"returned_scout_report":
 			return "Your scout party encountered them and carried the report home"
+		"their_party_came":
+			return "Their own %s found us" % (formation_kind if formation_kind!="" else "party")
 		"physical reconnaissance":
 			return "Your scouts watched one of their settlements and carried the report home"
 		"captured_foreign_scout":
@@ -3020,7 +3054,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 			# Signs seen from farther off are followed overland when the land
 			# allows it (expedition.gd followed_signs); else they are a rumour.
 			if not mission.has("expedition"): continue
-			var turned:Vector2=preload("res://scripts/expedition.gd").followed_signs(self,route,civ_position)
+			var turned:Vector2=preload("res://scripts/expedition.gd").followed_signs(self,route,civ_position,String(mission.get("travel_mode","land"))=="sea")
 			if not turned.is_finite(): continue
 			encounter_position=turned
 		relation["contact_level"]=2
@@ -3035,6 +3069,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		contacts.append(String(civ.name))
 		var contact_record:Dictionary={"civ_id":String(civ.id),"name":String(civ.name),"position":{"x":encounter_position.x,"z":encounter_position.y},"source":"returned_scout_report","day":day}
 		contact_records.append(contact_record)
+		_meeting_is_mutual(civ,day,encounter_position,"an expedition" if mission.has("expedition") else "a scouting party",String(mission.get("travel_mode","land"))=="sea")
 		var contact_description:="Returning scouts report direct contact with people of the %s at the marked point on their charted route. This is the encounter site, not a revealed homeland." % String(civ.name)
 		_publish_observed_event("First contact — %s" % String(civ.name),contact_description,day,{"kind":"first_contact","civ_id":String(civ.id),"formation_id":"","formation_kind":"returned scout party","identified":true,"position":contact_record.position})
 	var targeted_finding:=_resolve_targeted_scout_report(mission,day)

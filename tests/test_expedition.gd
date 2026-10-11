@@ -209,3 +209,13 @@ func test_signs_of_a_people_are_followed_overland_or_come_home_as_a_rumour()->vo
 	mission.expedition.rolled=0.0
 	system._complete_scout_mission(mission,int(mission.actual_return_day))
 	assert_int(int((system.civilizations[0].player_relation as Dictionary).contact_level)).is_equal(2)
+
+func test_a_party_that_came_in_boats_coasts_round_to_a_harbour_home()->void:
+	# Two lands with a 100 km strait between: no way overland from one to the other.
+	system.set_scout_geography_authority(func(point:Vector2)->bool:return (point.x>=-40.0 and point.x<=600.0 and absf(point.y)<300.0) or (point.x>700.0 and point.x<2000.0 and absf(point.y)<300.0))
+	var track:Array=[{"x":720.0,"z":0.0},{"x":1200.0,"z":0.0}]
+	# A home by the water across the strait: reached in boats, not on foot.
+	assert_bool(Expedition.followed_signs(system,track,Vector2(590,0),false).is_finite()).is_false()
+	assert_bool(Expedition.followed_signs(system,track,Vector2(590,0),true).is_finite()).is_true()
+	# A home far inland of that shore: boats do not reach it.
+	assert_bool(Expedition.followed_signs(system,track,Vector2(450,0),true).is_finite()).is_false()

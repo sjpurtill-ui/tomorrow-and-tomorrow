@@ -865,6 +865,9 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
+	if "--capture-rival-ships" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)
 	# Capture only: the expedition planner, "--capture-expedition=<heading>,<km>[,sea]".
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture-expedition="):
@@ -881,7 +884,7 @@ func _capture_preview_if_requested() -> void:
 			var staged_route:Array=((planner.get("current") as Dictionary).get("route_plan",{}) as Dictionary).get("route",[])
 			for civ:Dictionary in CivilizationSystem.civilizations:
 				var off:=float(CivilizationSystem._closest_route_encounter(staged_route,CivilizationSystem._civilization_world_position(civ)).distance) if staged_route.size()>1 else INF
-				if off<600.0:print("CAPTURE EXPEDITION passes ",roundi(off)," km from the home of ",civ.name,"; signs followed overland: ",preload("res://scripts/expedition.gd").followed_signs(CivilizationSystem,staged_route,CivilizationSystem._civilization_world_position(civ)).is_finite())
+				if off<600.0:print("CAPTURE EXPEDITION passes ",roundi(off)," km from the home of ",civ.name,"; signs followed overland: ",preload("res://scripts/expedition.gd").followed_signs(CivilizationSystem,staged_route,CivilizationSystem._civilization_world_position(civ),bool(planner.get("by_sea"))).is_finite())
 	# Capture only: the map's Border mode (hud/border_map.gd), with the ghost
 	# at "--capture-border-ghost=<bearing deg>,<km>" from the seat (a move of
 	# the first fort with "--capture-border-move") or the first fort's note

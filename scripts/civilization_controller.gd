@@ -142,7 +142,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","work_path","military","purse","business","defense","civilian","foreign","great_works","expansion"]:
+	for kind:String in ["research","work_path","military","purse","business","defense","civilian","foreign","expedition","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -160,6 +160,8 @@ static func order_steps(id:String)->Array:
 				"business":business_orders(id,shared.plan)
 				"defense":defense_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
+				# A ruler whose scouts have nothing left to chart sends an expedition by sea (expedition.gd).
+				"expedition":preload("res://scripts/expedition.gd").leaders_decide(shared.plan)
 				"great_works":great_work_orders(id,shared.plan)
 		])
 	return first

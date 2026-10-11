@@ -36,6 +36,8 @@ func valid(value:Variant)->bool:
 	for counter in ["homecomings","scouts_lost"]:
 		if not host.city_intelligence.number(value.get(counter,0)) or float(value.get(counter,0))<0:return false
 	if not host.city_intelligence.number(value.get("last_loss_day",-1)):return false
+	for counter in ["expedition_next_day","expedition_turn"]:
+		if not host.city_intelligence.number(value.get(counter,0)) or float(value.get(counter,0))<0:return false
 	# expedition.gd's remembered expeditions.
 	var expeditions:Variant=value.get("expeditions",[])
 	if not expeditions is Array or expeditions.size()>24:return false
