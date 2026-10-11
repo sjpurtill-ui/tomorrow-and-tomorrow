@@ -32,6 +32,8 @@ var current:Dictionary={}
 var _previous_speed:=-1.0
 ## Set when the quote waits a frame (a land push can take a moment to plan).
 var _pending:=false
+var _frame_at:=Vector3.ZERO
+var _frame_frames:=0
 
 ## Opens the planner on `t` (local_terrain.gd), or brings it back.
 static func open(t:Node)->Node:
@@ -71,6 +73,12 @@ func _process(_delta:float)->void:
 		card.size=card.get_combined_minimum_size()
 		var view:=get_viewport().get_visible_rect().size
 		card.position=Vector2(view.x-card.size.x-24.0,clampf((view.y-card.size.y)*0.5,T.CONTENT_TOP+8.0,maxf(T.CONTENT_TOP+8.0,view.y-card.size.y-130.0)))
+	# The view glides out to the push; it is held on it until the glide ends.
+	if _frame_frames>0 and is_instance_valid(terrain):
+		_frame_frames-=1
+		var gliding:Variant=terrain.get("zoom_target_size")
+		if gliding!=null and float(gliding)>0.0 and terrain.has_method("_set_camera_target"):terrain.call("_set_camera_target",_frame_at)
+		else:_frame_frames=0
 	if _pending:
 		_pending=false
 		current=Expedition.quote(heading,reach_km,by_sea,party)
@@ -111,10 +119,13 @@ func _frame_the_push()->void:
 	var middle:=(home+far)*0.5
 	# The card covers the map's right; the push sits in the clear part left of it.
 	var span:=clampf(maxf(home.distance_to(far),reach_km)*2.4,260.0,9000.0)
-	if terrain.has_method("_set_camera_target"):terrain.call("_set_camera_target",Vector3(middle.x+span*0.22,0.0,middle.y))
+	# Toward the screen's right, whichever way the view is turned.
+	var right:Vector3=terrain.call("_camera_ground_screen_right") if terrain.has_method("_camera_ground_screen_right") else Vector3.RIGHT
+	_frame_at=Vector3(middle.x,0.0,middle.y)+right*span*0.2
+	_frame_frames=120
+	if terrain.has_method("_set_camera_target"):terrain.call("_set_camera_target",_frame_at)
 	terrain.set("zoom_target_size",span)
 	terrain.set("zoom_pointer",get_viewport().get_visible_rect().size*0.5)
-	terrain.set("zoom_preset_active",true)
 
 
 # --- The card --------------------------------------------------------------------
@@ -148,7 +159,7 @@ func _rebuild(reckoning:=false)->void:
 	var reaches:=HBoxContainer.new(); reaches.add_theme_constant_override("h_separation",4); reaches.add_theme_constant_override("v_separation",4); reaches.size_flags_horizontal=Control.SIZE_EXPAND_FILL; far.add_child(reaches)
 	for km:int in Expedition.REACHES:
 		var b:=_choice(reaches,_thousands(km),is_equal_approx(reach_km,float(km)),func()->void:choose("reach",km))
-		b.tooltip_text="About %d in 100 of such parties come home from %s km out." % [roundi(Expedition.return_chance(float(km),by_sea)*100.0),_thousands(km)]
+		b.tooltip_text=("%s km under sail from the shore that way." % _thousands(km)) if by_sea else ("About %d in 100 of such parties come home from %s km out." % [roundi(Expedition.return_chance(float(km),false)*100.0),_thousands(km)])
 	# How many.
 	var many:=_row(column,"How many")
 	var minus:=Kit.button(many,"−",false,func()->void:choose("party",party-(10 if party>30 else 4)))
@@ -166,9 +177,17 @@ func _rebuild(reckoning:=false)->void:
 		var odds:=HBoxContainer.new(); odds.add_theme_constant_override("separation",10); facts.add_child(odds)
 		var words:=Kit.label(odds,"%d in 100 come home" % roundi(chance*100.0),"heading",_odds_ink(chance),false); words.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 		var bar:=OddsBar.new(); bar.share=chance; bar.ink=_odds_ink(chance); bar.custom_minimum_size=Vector2(120,8); bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL; bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER; odds.add_child(bar)
-		if by_sea and float(current.km)<reach_km*0.3:Kit.label(facts,"Our ships find no far shore %s within their range out of sight of land; they would follow our own coast instead." % heading,"note",T.AMBER)
-		Kit.label(facts,"Half of such parties come home from %s km out; every %s km more halves it again. Food: %s from our stores." % [_thousands(roundi(float(current.endurance_km))),_thousands(roundi(float(current.endurance_km))),_thousands(ceili(float(current.provisions)))],"note")
-		Kit.label(facts,"Home again: country %d km each side of their track is charted and every people they pass is met; about %d of them may die on the way." % [roundi(Expedition.REVEAL_KM),roundi(float(party)*(1.0-chance)*Expedition.ROAD_TOLL)],"note",T.GREEN)
+		if by_sea:
+			var walk:=float(current.get("walk_km",0.0))
+			var open:=float(current.get("open_km",0.0))
+			var sail:=open+float(current.get("coast_km",0.0))
+			var inland:=float(current.get("inland_km",0.0))
+			Kit.label(facts,"%s%s km under sail, %s of it out of sight of land%s%s." % [("They walk %s km to the shore, then " % _thousands(roundi(walk))) if walk>=1.0 else "",_thousands(roundi(sail)),_thousands(roundi(open)),(" (our boats dare %s)" % _thousands(roundi(float(current.get("dare_km",0.0))))) if open>float(current.get("dare_km",0.0)) else "",("; then %s km inland where they land" % _thousands(roundi(inland))) if inland>=1.0 else ""],"note",T.AMBER if open>float(current.get("dare_km",0.0)) else Color(0,0,0,0))
+		if bool(current.get("stale",false)):Kit.label(facts,"This way is already on our charts: they would bring home little that is new. Try another direction, farther, or the sea.","body",T.RED)
+		else:Kit.label(facts,"New to our charts: %s km of the way." % _thousands(roundi(float(current.get("fresh_km",0.0)))),"note",T.GREEN)
+		if by_sea:Kit.label(facts,"Half are lost for every %s km out of sight of land; water in sight of a coast counts a fifth. Food: %s from our stores." % [_thousands(roundi(float(current.endurance_km))),_thousands(ceili(float(current.provisions)))],"note")
+		else:Kit.label(facts,"Half of such parties come home from %s km out; every %s km more halves it again. Food: %s from our stores." % [_thousands(roundi(float(current.endurance_km))),_thousands(roundi(float(current.endurance_km))),_thousands(ceili(float(current.provisions)))],"note")
+		Kit.label(facts,"Home again: country %d km each side of their track is charted; any people within %d km of it is met. Signs of one within %d km are followed, overland or round the coast in the boats, and come home as a rumour where neither can be done. About %d of them may die on the way." % [roundi(Expedition.REVEAL_KM),roundi(Expedition.MEET_KM),roundi(Expedition.SIGNS_KM),roundi(float(party)*(1.0-chance)*Expedition.ROAD_TOLL)],"note",T.GREEN)
 		Kit.label(facts,"Lost: all %d die, and nothing they saw comes back." % party,"note",T.RED)
 	if String(current.get("blocker",""))!="":Kit.label(column,String(current.blocker),"body",T.RED)
 	var buttons:=HBoxContainer.new(); buttons.add_theme_constant_override("separation",8); column.add_child(buttons)
@@ -189,7 +208,7 @@ func _away(parent:Node)->void:
 		var e:Dictionary=m.expedition
 		var due:=int(m.get("return_day",day))-day
 		Kit.label(box,"Away: %d %s %s, %s km out · %s" % [int(m.personnel),"by sea" if bool(e.by_sea) else "on foot",String(m.get("ordered_heading","")),_thousands(roundi(float(e.km))),("due in %d days" % due) if due>0 else "overdue"],"note")
-	for k in range(past.size()-1,maxi(-1,past.size()-3),-1):
+	for k in range(past.size()-1,maxi(-1,past.size()-2),-1):
 		var p:Dictionary=past[k]
 		var home:=String(p.outcome)=="home"
 		Kit.label(box,"%s %s, %s km: %s" % [Kit.when(int(p.day)),String(p.heading),_thousands(roundi(float(p.km))),("%d came home" % int(p.count)) if home else ("lost, %d dead" % int(p.count))],"note",T.GREEN if home else T.RED)
@@ -274,7 +293,7 @@ class PushChart extends Control:
 		var ui:=T.font("ui_strong")
 		# The odds rings: an arc a quarter-turn wide about the heading at each reach.
 		var taken:Array[Rect2]=[]
-		for km:int in Expedition.REACHES:
+		for km:int in ([] if sea else Expedition.REACHES):
 			var chance:=Expedition.return_chance(float(km),sea)
 			var pts:=PackedVector2Array()
 			for k in 33:

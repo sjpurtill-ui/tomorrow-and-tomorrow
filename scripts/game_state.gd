@@ -1841,6 +1841,12 @@ func synchronize_population_allocations() -> void:
 		population_allocation_percentages={"Food":42.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":6.0,"Administration":4.0,"Defense":4.0}
 		total_percentage=100.0
 	var able:=able_population()
+	# Under the ruler's own split the counts hold: as the people grow or
+	# shrink by a few, only those few are added or taken, never every row
+	# rounded afresh. A change of the split itself is laid anew.
+	if self==GameState:
+		var Manual:GDScript=load("res://scripts/manual_work.gd")
+		if not bool(Manual.relaid) and bool(Manual.manual()) and _hold_allocations(able,total_percentage):return
 	var assigned:=0
 	var remainders:Dictionary={}
 	for role in POPULATION_ROLES:
@@ -1860,6 +1866,35 @@ func synchronize_population_allocations() -> void:
 		population_allocations[best_role]=int(population_allocations.get(best_role,0))+1
 		remainders[best_role]=-1.0
 		assigned+=1
+
+## Keeps yesterday's counts when today's shares ask for the same within a
+## person a task (rounding only), moving just the difference in the working
+## total: added where a task is furthest under its share, taken where one is
+## furthest over. False when the shares really changed.
+func _hold_allocations(able:int,total_percentage:float)->bool:
+	var exact:Dictionary={}
+	var held:=0
+	for role in POPULATION_ROLES:
+		exact[role]=float(able)*maxf(0.0,float(population_allocation_percentages.get(role,0.0)))/total_percentage
+		var now:=int(population_allocations.get(role,0))
+		if absf(float(now)-float(exact[role]))>1.5:return false
+		# A task given its first person, or emptied, is a real change.
+		if (now==0)!=(float(exact[role])<0.5):return false
+		held+=now
+	if held<=0:return false
+	var delta:=able-held
+	if absi(delta)>POPULATION_ROLES.size():return false
+	while delta!=0:
+		var pick:="";var most:=-INF
+		for role in POPULATION_ROLES:
+			var now:=int(population_allocations.get(role,0))
+			var gap:=(float(exact[role])-float(now)) if delta>0 else (float(now)-float(exact[role]))
+			if delta<0 and now<=0:continue
+			if gap>most:most=gap;pick=String(role)
+		if pick=="":return false
+		population_allocations[pick]=int(population_allocations.get(pick,0))+(1 if delta>0 else -1)
+		delta+=-1 if delta>0 else 1
+	return true
 
 func ensure_population_total(target:int) -> void:
 	target=maxi(1,target)
