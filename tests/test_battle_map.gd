@@ -341,7 +341,7 @@ func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_l
 	# Resting on it: one plain line.
 	overlay._hover(ours.at)
 	assert_bool(overlay.tip.visible).is_true()
-	assert_str((overlay.tip.get_child(0) as Label).text).is_equal("We are pushing them back · 340 against 280")
+	assert_str((overlay.tip.get_child(0) as Label).text).contains("Tsaren · day 2").contains("We are pushing them back · 340 against 280").contains("Click to watch the battle")
 	overlay._hover(Vector2(5,5))
 	assert_bool(overlay.tip.visible).is_false()
 	# A rival's fight is not ours to open: a note about what was seen.
@@ -351,9 +351,9 @@ func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_l
 	assert_int(opened.size()).is_equal(1)
 	assert_bool(overlay.note.visible).is_true()
 	assert_str(String(overlay.note_content(overlay.note_about).kicker)).is_equal("THEIR BATTLE")
-	# The battle labels are lettered on the chart: its name and day.
+	# The contact owns the idle chart; names and strength wait for inspection.
 	var labels:=(overlay.placed_captions as Array).filter(func(c:Dictionary)->bool: return String(c.id).begins_with("battle:"))
-	assert_bool(labels.any(func(c:Dictionary)->bool: return String(c.text)=="Tsaren · day 2")).is_true()
+	assert_array(labels).is_empty()
 
 
 # --- Scale ---------------------------------------------------------------------------------------------

@@ -349,37 +349,84 @@ static func border_signature()->Array:
 ## share sent out. Forts are placed on the map itself (hud/border_map.gd).
 func _border_card()->Control:
 	var Forts:=preload("res://scripts/fort_border.gd")
+	var Kit:=preload("res://scripts/hud/paper_kit.gd")
 	var panel:=_card();panel.name="BorderCard"
+	var plum:=Color("7b2a7a") if T.is_light() else Color("d69bd2")
+	var paper:=_skin(T.PAPER_RAISED,T.RULE,12,0)
+	paper.border_width_top=3;paper.border_color=plum
+	panel.add_theme_stylebox_override("panel",paper)
 	var column:=panel.get_node("Column") as VBoxContainer
+	column.add_theme_constant_override("separation",10)
 	var kept:=Forts.watch()
 	var bill:=Forts.costs(null,kept)
 	var standing:=Forts.standing().size()
 	var going:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))=="building").size()
-	var tip:="Our border is spanned by our forts. Of the watch at home a share goes out: each fort's garrison first, the rest along the stretches between linked forts. The more on watch a km, the fewer slip in or out unseen; where no forts are linked anyone walks in."
-	var head:=_headline(column,"defend",int(kept.posted),"on the border · %d fort%s%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],tip);head.name="Border"
-	var share:=Forts.border_share()
-	head.add_child(_step_button("BorderLess","−","A tenth of the watch at home fewer on the border: less food lost on the road, a thinner line.",func()->void:Forts.set_border_share(maxf(0.0,Forts.border_share()-0.1));refresh(true)))
-	head.add_child(_step_button("BorderMore","+","A tenth of the watch at home more on the border: forts manned first, then the line between them.",func()->void:Forts.set_border_share(minf(1.0,Forts.border_share()+0.1));refresh(true)))
+	var garrison:=0
+	for people:Variant in kept.garrisons.values():garrison+=int(people)
 	var held:=0.0;var km:=0.0
 	for st:Dictionary in kept.stretches:held+=float(st.strength)*float(st.km);km+=float(st.km)
 	var line_strength:=held/km if km>0.0 else 0.0
-	var row:=HBoxContainer.new();row.name="LineHolds";row.add_theme_constant_override("separation",8);row.mouse_filter=Control.MOUSE_FILTER_PASS
-	var words:=_line("The line holds %d in 100" % roundi(line_strength*100.0) if km>0.0 else "No two forts linked: the border is open",13,T.INK);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
-	var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(90,6);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(bar)
-	row.tooltip_text="Of every crossing of a linked stretch, about %d in 100 are stopped (fewer for the stealthy): %d km of line, %d of the watch along it." % [roundi(line_strength*100.0),roundi(km),roundi(float(kept.line))]
-	column.add_child(row)
-	var cost:=_line("%d%% of the watch at home · %d food lost a day" % [roundi(share*100.0),roundi(float(bill.food_lost))],12,T.INK_MUTED);cost.name="BorderCost";cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	cost.tooltip_text="Food carried out spoils and is eaten on the road: about a third is lost at 60 km on foot, more farther out; roads and carts lose less."
-	column.add_child(cost)
-	var open:=_small_button("Place forts on the map","defend","Opens the Border view on the map: click open land to raise a fort, click a fort to move it or break it down.")
+	# A fort from the current age, not a castle borrowed from a later one.
+	var head:=HBoxContainer.new();head.name="Border";head.add_theme_constant_override("separation",10);column.add_child(head)
+	var seal:=PanelContainer.new();seal.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,7,0));seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(seal)
+	var emblem:=TextureRect.new();emblem.texture=Icons.chart_texture("fort:%s" % String(Forts.best_kind().id),plum,64)
+	emblem.custom_minimum_size=Vector2(34,34);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;seal.add_child(emblem)
+	var titles:=VBoxContainer.new();titles.add_theme_constant_override("separation",0);titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(titles)
+	var kicker:=_line("BORDER WATCH",12,Kit.text_color(plum));kicker.add_theme_font_override("font",T.font("ui_strong"));titles.add_child(kicker)
+	var title:=_line("Our border",24,T.INK);title.add_theme_font_override("font",T.font("voice_bold"));titles.add_child(title)
+	var detail:="%d standing" % standing
+	if going>0:detail+=" · %d going up" % going
+	if standing+going==0:detail="No forts raised yet"
+	var count:=_line(detail,12,T.INK_MUTED,true);count.name="FortCount";titles.add_child(count)
+	# The state is readable without interpreting a bar or opening a tooltip.
+	var state_words:="The border is open"
+	var advice:="Raise nearby forts to link their watch."
+	var state_ink:=T.INK
+	if km>0.0:
+		state_words="A well-watched line" if line_strength>=0.7 else ("A watch along the line" if line_strength>=0.4 else "A thinly watched line")
+		state_ink=T.TEAL_TEXT if line_strength>=0.7 else T.AMBER_TEXT
+		advice="%d km linked · %s watching between forts" % [roundi(km),EraWords.grouped(int(kept.line))]
+	elif going>0:
+		state_words="Forts taking shape"
+		advice="The garrisons are building. Finished forts can link their watch."
+	elif standing>0:
+		advice="No two forts are linked. Place another within reach."
+	var condition:=VBoxContainer.new();condition.name="LineHolds";condition.add_theme_constant_override("separation",3);column.add_child(condition)
+	condition.add_child(_line(state_words,15,state_ink,true))
+	condition.add_child(_line(advice,12,T.INK_MUTED,true))
+	if km>0.0:
+		var strength:=_line("Linked crossings stopped · about %d in 100" % roundi(line_strength*100.0),12,T.INK,true);condition.add_child(strength)
+		var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(0,7);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;condition.add_child(bar)
+	condition.tooltip_text="Only linked stretches are watched: about %d in 100 crossings are stopped there, fewer for the stealthy. Unlinked ground stays open." % roundi(line_strength*100.0)
+	var facts:=HBoxContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("separation",6);column.add_child(facts)
+	facts.add_child(_border_fact("Posted",compact(int(kept.posted)),"on the border","%s posted out: garrisons plus the watch along linked stretches." % EraWords.grouped(int(kept.posted)),plum))
+	facts.add_child(_border_fact("Garrison",compact(garrison),"in the forts","%s in the forts. Garrisons are manned first; those left watch the linked stretches." % EraWords.grouped(garrison),plum))
+	facts.add_child(_border_fact("FoodLoss",compact(roundi(float(bill.food_lost))),"food lost / day","%s food spoils or is eaten on the road each day, in addition to the rations the border watch eats. Roads and carts reduce this loss." % EraWords.grouped(roundi(float(bill.food_lost))),T.GOLD))
+	var share:=Forts.border_share()
+	var split:=HBoxContainer.new();split.name="BorderCost";split.add_theme_constant_override("separation",6);column.add_child(split)
+	var share_words:=_line("%d%% of the watch at home" % roundi(share*100.0),13,T.INK,true);share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;share_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;split.add_child(share_words)
+	for step:int in [-1,1]:
+		var button:=_step_button("BorderLess" if step<0 else "BorderMore","−" if step<0 else "+","Send 10% fewer of the watch at home to the border." if step<0 else "Send 10% more of the watch at home to the border; garrisons are filled first.",func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step)*0.1,0.0,1.0));refresh(true))
+		button.custom_minimum_size=Vector2(34,32);button.focus_mode=Control.FOCUS_ALL;button.add_theme_stylebox_override("focus",T.gold_outline_style());button.disabled=share<=0.0 if step<0 else share>=1.0;split.add_child(button)
+	var open:=Kit.button(column,"Place the first fort  ›" if standing+going==0 else "Explore the border  ›",true,Callable(),"Open the Border map. Inspect the watch, choose ground for a fort, or move an existing post.")
 	open.name="OpenBorder"
+	open.icon=Icons.chart_texture("fort:%s" % String(Forts.best_kind().id),T.INK,40);open.add_theme_constant_override("icon_max_width",20);open.add_theme_constant_override("h_separation",8)
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
 		if scene==null:return
 		close_wanted.emit()
 		preload("res://scripts/hud/border_map.gd").set_shown(scene,true))
-	column.add_child(open)
 	return panel
+
+
+func _border_fact(fact_name:String,value:String,caption:String,tip:String,ink:Color)->Control:
+	var card:=PanelContainer.new();card.name=fact_name;card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.tooltip_text=tip
+	card.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,7,0))
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(words)
+	var number:=_line(value,20,T.INK);number.name="Value";number.add_theme_font_override("font",T.font("ui_strong"));number.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(number)
+	var rule:=ColorRect.new();rule.color=Color(ink,0.6);rule.custom_minimum_size=Vector2(0,2);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(rule)
+	var label:=_line(caption,12,T.INK_MUTED,true);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(label)
+	return card
 
 
 func _card()->PanelContainer:

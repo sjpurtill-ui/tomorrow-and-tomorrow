@@ -414,7 +414,7 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 		"position":position_data,"destination_id":String(army.get("destination_id","")),"heading":heading,
 		"destination_name":destination,
 		"destination_position":destination_data,"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
-		"arrival_day":int(army.get("arrival_day",-1)),"scale":marker_scale(camera_size),"show_path":moving and band in ["local","regional","continental"],
+		"arrival_day":int(army.get("arrival_day",-1)),"scale":marker_scale(camera_size),"show_path":selected and moving and band in ["local","regional","continental"],
 		# The selected formation label already names its destination and arrival day. A
 		# second label at the path endpoint competes with battle/front text and turns one
 		# order into two overlapping paragraphs. The ring and chevrons carry the endpoint.

@@ -10,6 +10,7 @@ extends RefCounted
 
 const Forts:=preload("res://scripts/fort_border.gd")
 const Stroke:=preload("res://scripts/scout_chart_stroke.gd")
+const ChartArt:=preload("res://scripts/fort_chart_art.gd")
 ## Our colour (nation_borders.gd PLAYER_COLOR), the ink of our own line.
 const PLUM:=Color("#7b2a7a")
 ## Strength runs drawn as one class (a run changes ink only between classes).
@@ -88,6 +89,7 @@ static func build(terrain:Node,d:Dictionary)->Node3D:
 			if c!=run_class or j==n:
 				runs.append([run,run_class]);run=PackedVector2Array([points[i]]);run_class=c
 		var ink:=Stroke.Ink.new(zoom)
+		var underlay:=Stroke.Ink.new(zoom)
 		for r:Array in runs:
 			var line:PackedVector2Array=Stroke.smooth(r[0],float(profile.dot),zoom*0.0035)
 			if line.size()<2:continue
@@ -97,22 +99,30 @@ static func build(terrain:Node,d:Dictionary)->Node3D:
 			if cls<0:continue
 			var width:float=float(profile.width)*float([1.1,1.4,2.2,3.2][cls])
 			var color:=Color(PLUM,float([0.62,0.75,0.88,0.97][cls]))
+			# A fine paper edge keeps the border legible against dark woods and
+			# neighbouring nation washes. It follows the exact same gaps: open
+			# ground must never acquire a continuous line from its backing.
+			Stroke.ribbon(underlay,line,heights,width+float(profile.width)*0.8,Color(ChartArt.PAPER,0.65),0.0,0.0,2 if cls==0 else 0,4 if cls==0 else 0)
 			# Open ground and thin watch dotted; a kept line unbroken.
 			if cls==0:Stroke.ribbon(ink,line,heights,width,color,0.6,0.0,2,4)
 			else:Stroke.ribbon(ink,line,heights,width,color,0.45,0.0)
+		var backing:=MeshInstance3D.new();backing.name="BorderWatchPaperEdge";backing.mesh=underlay.commit();backing.material_override=terrain._scout_chart_material(3);root.add_child(backing)
 		var mesh:=MeshInstance3D.new();mesh.name="BorderWatchLine";mesh.mesh=ink.commit();mesh.material_override=terrain._scout_chart_material(4);root.add_child(mesh)
 	var size:=float(profile.mark)
 	# Close in, the fort itself stands there (_models); its chart mark would hide it.
 	for f:Dictionary in (d.forts if zoom>MODEL_ZOOM_KM*0.12 else []):
 		var kind:="fort:%s%s" % [String(f.get("kind","stone_fort")),"" if String(f.status)=="standing" else ":building"]
-		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(PLUM,0.6+0.4*clampf(float(f.manned),0.0,1.0)),f.at,float(profile.clearance)*2.0,size*2.4)
+		var strength:=0.6+0.4*clampf(float(f.manned),0.0,1.0)
+		var mark:Sprite3D=terrain._scout_chart_mark(kind,PLUM,f.at,float(profile.clearance)*2.0,size*2.1)
+		ChartArt.finish(mark,kind,Color(PLUM,strength))
 		mark.name="BorderFort";root.add_child(mark)
 	if zoom<=MODEL_ZOOM_KM:root.add_child(_models(terrain,d))
 	# Forts of peoples we know, in their own colour (nation_borders.gd).
 	for f:Dictionary in d.get("foreign",[]):
 		var kind:="fort:%s%s" % [String(f.kind),"" if String(f.status)=="standing" else ":building"]
 		var colour:Color=preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.35)
-		var mark:Sprite3D=terrain._scout_chart_mark(kind,Color(colour,0.9),f.at,float(profile.clearance)*2.0,size*2.0)
+		var mark:Sprite3D=terrain._scout_chart_mark(kind,colour,f.at,float(profile.clearance)*2.0,size*1.8)
+		ChartArt.finish(mark,kind,Color(colour,0.9))
 		mark.name="ForeignFort";root.add_child(mark)
 	return root
 

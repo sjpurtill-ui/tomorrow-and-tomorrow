@@ -42,6 +42,7 @@ var moving:=-1
 var _refusal:Dictionary={}
 var _key_signature:=0
 var _look:=0.0
+var _note_signature:=0
 
 
 # --- The toolbar's toggle ----------------------------------------------------
@@ -131,11 +132,15 @@ func _process(delta:float)->void:
 	if _look>=0.5:
 		_look=0.0
 		_refresh_key()
+		if selected>=0 and moving<0:
+			var f:=Forts.find_fort(selected)
+			var stamp:=hash([f,Forts.watch().garrisons,Forts.costs().posts,T.color_mode])
+			if stamp!=_note_signature: open_note(selected)
 	if is_instance_valid(key_card):
 		# Cards fit their words (wrapped labels settle a frame after a rebuild).
 		key_card.size=key_card.get_combined_minimum_size()
 		var view:=get_viewport().get_visible_rect().size
-		key_card.position=Vector2(T.RAIL_WIDTH+40.0,view.y-key_card.size.y-176.0)
+		key_card.position=Vector2(T.RAIL_WIDTH+24.0,maxf(T.CONTENT_TOP+8.0,view.y-key_card.size.y-160.0))
 	if is_instance_valid(note): note.size=note.get_combined_minimum_size()
 	if is_instance_valid(note) and selected>=0: _place_note()
 
@@ -193,6 +198,7 @@ func _unhandled_input(event:InputEvent)->void:
 ## A left click on the map at `at` (screen): open a fort's note, set a carried
 ## fort down, or raise a fort.
 func click(at:Vector2)->void:
+	if _pointer_over_cards(at): return
 	var fort:=fort_at(at)
 	if moving<0 and not fort.is_empty():
 		open_note(int(fort.id)); return
@@ -205,12 +211,14 @@ func click(at:Vector2)->void:
 	moving=-1
 	_close_note()
 	_changed()
+	if result.has("fort"): open_note(int(result.fort.id))
 
 ## Lets a carried fort go, else closes the open note. Whether anything went.
 func _let_go()->bool:
 	if moving>=0:
 		moving=-1
 		if selected>=0: open_note(selected)
+		_changed()
 		return true
 	if selected>=0: _close_note(); return true
 	return false
@@ -226,56 +234,65 @@ func _changed()->void:
 
 func open_note(id:int)->void:
 	var fort:=Forts.find_fort(id)
-	if fort.is_empty(): return
+	if fort.is_empty(): _close_note(); return
 	_close_note()
 	selected=id
 	var k:=Forts.kind(String(fort.kind))
 	var kept:=Forts.watch()
 	var bill:=Forts.costs(null,kept)
-	note=Kit.panel(PLUM,14); note.name="FortNote"
-	_layers[1].add_child(note)
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6); column.custom_minimum_size=Vector2(320,0); note.add_child(column)
-	var head:=HBoxContainer.new(); head.add_theme_constant_override("separation",10); column.add_child(head)
-	var glyph:=TextureRect.new(); glyph.texture=Icons.chart_texture("fort:%s%s" % [String(fort.kind),"" if String(fort.status)=="standing" else ":building"],PLUM,64)
-	glyph.custom_minimum_size=Vector2(44,44); glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; head.add_child(glyph)
-	var titles:=VBoxContainer.new(); titles.add_theme_constant_override("separation",0); titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL; head.add_child(titles)
-	Kit.label(titles,String(k.get("name","Fort")),"kicker")
-	Kit.label(titles,String(fort.get("name","")),"heading")
-	var need:=int(k.get("garrison",1))
+	_note_signature=hash([fort,kept.garrisons,bill.posts,T.color_mode])
+	var building:=String(fort.status)=="building"
 	var manned:=int(kept.garrisons.get(id,0))
-	var km:=Forts._pos(fort).distance_to(Forts.seat())
+	var need:=int(k.get("garrison",1))
 	var lost:=0.0
 	for post:Dictionary in bill.posts:
 		if int(post.id)==id: lost=float(post.lost)
-	var facts:=Kit.section(column,10)
-	if String(fort.status)=="building":
+	note=Kit.panel(PLUM,16); note.name="FortNote"
+	_layers[1].add_child(note)
+	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",12); column.custom_minimum_size=Vector2(320,0); note.add_child(column)
+	var head:=_heading(column,String(k.get("name","Fort")),String(fort.get("name","")),String(fort.kind),building)
+	var close:=Kit.quiet_button(head,"×",func()->void:_close_note(),"Close fort note · Esc")
+	close.name="CloseFortNote"; close.custom_minimum_size=Vector2(36,36)
+	var facts:=Kit.section(column,12)
+	facts.add_theme_constant_override("separation",8)
+	if building:
 		var work:=float(k.get("work",1.0))
 		var done:=clampf(float(fort.get("progress",0.0))/work,0.0,1.0)
 		var days:=ceili((work-float(fort.get("progress",0.0)))/maxf(1.0,float(manned)))
-		Kit.label(facts,"Going up: %d in 100 raised%s." % [roundi(done*100.0),(", about %d days more" % days) if manned>0 else "; no one is posted to raise it"],"body")
-		_bar(facts,done,PLUM)
+		_status(facts,"Raising the fort","%d%%" % roundi(done*100.0),T.VIOLET)
+		_bar(facts,done,T.VIOLET)
+		Kit.label(facts,("About %d days to stand. Holds no ground until complete." % days) if manned>0 else "Work is waiting. Send a garrison to raise this fort.","note",T.AMBER if manned<=0 else Color.TRANSPARENT)
 	else:
 		var condition:=clampf(float(fort.get("condition",1.0)),0.0,1.0)
-		Kit.label(facts,"Holds %d km of ground about it. Kept %d in 100%s." % [roundi(Forts.reach_of(fort)),roundi(condition*100.0)," (short of upkeep, it wears down)" if condition<0.95 else ""],"body")
-		_bar(facts,condition,T.TEAL if condition>=0.7 else (T.AMBER if condition>=0.4 else T.RED))
-	Kit.label(facts,"%d of %d to man it · %d km out · %s food lost on the road a day" % [manned,need,roundi(km),_amount(lost)],"note",T.RED if manned<need else Color(0,0,0,0))
+		var tone:=T.TEAL if condition>=0.7 else (T.AMBER if condition>=0.4 else T.RED)
+		_status(facts,"Well kept" if condition>=0.95 else "Below full condition","%d%% kept" % roundi(condition*100.0),tone)
+		_bar(facts,condition,tone)
+		if condition<0.95: Kit.label(facts,"Keep the garrison and upkeep supplied to restore this fort.","note",T.AMBER)
+	var grid:=GridContainer.new(); grid.columns=2; grid.add_theme_constant_override("h_separation",18); grid.add_theme_constant_override("v_separation",12); column.add_child(grid)
+	_metric(grid,"Garrison","%d / %d" % [manned,need],T.RED if manned<need else T.INK)
+	_metric(grid,"Reach","%d km" % roundi(Forts.reach_of(fort)) if not building else "Not held yet")
+	_metric(grid,"From home","%d km" % roundi(Forts._pos(fort).distance_to(Forts.seat())))
+	_metric(grid,"Food lost / day",_amount(lost),T.AMBER if lost>0.0 else T.INK)
 	var upkeep:=_materials(k.get("upkeep",{}),1.0)
-	if upkeep!="": Kit.label(facts,"Upkeep %s a day" % upkeep,"note")
+	if upkeep!="": Kit.label(column,"Upkeep · %s each day" % upkeep,"note")
+	_rule(column)
 	var buttons:=HBoxContainer.new(); buttons.add_theme_constant_override("separation",8); column.add_child(buttons)
 	var back:=Forts.recovered(fort)
-	Kit.button(buttons,"Move",true,func()->void:start_move(id),"Carry it elsewhere: it keeps %d in 100 of its work and costs a quarter of a new fort's materials. Until it stands again it holds no ground." % roundi(Forts.MOVE_KEEP*100.0))
+	var move:=Kit.button(buttons,"Move",true,func()->void:start_move(id),"Keeps %d%% of its work and costs a quarter of a new fort's materials. Until it stands again it holds no ground." % roundi(Forts.MOVE_KEEP*100.0))
+	move.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var break_down:=func()->void:
 		Forts.dismantle(id)
 		_close_note(); _changed()
-	Kit.button(buttons,"Break down",false,break_down,"Take it down: %s back to the stores. The ground it held is no longer ours." % (_materials(back,1.0) if not back.is_empty() else "nothing"))
-	var spacer:=Control.new(); spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL; buttons.add_child(spacer)
-	Kit.quiet_button(buttons,"Close",func()->void:_close_note())
+	var remove:=Kit.button(buttons,"Break down",false,break_down,"Take it down: %s back to the stores. The ground it held is no longer ours." % (_materials(back,1.0) if not back.is_empty() else "nothing"))
+	remove.add_theme_color_override("font_color",T.RED_TEXT)
+	remove.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	if not back.is_empty(): Kit.label(column,"Broken down it gives back %s." % _materials(back,1.0),"note")
 	_place_note()
 
 func start_move(id:int)->void:
 	moving=id
 	if is_instance_valid(note): note.visible=false
+	_changed()
 
 func _close_note()->void:
 	if is_instance_valid(note): note.queue_free()
@@ -292,6 +309,9 @@ func _place_note()->void:
 	var at:=s+Vector2(28,-note.size.y*0.5)
 	if at.x+note.size.x>view.x-16.0: at.x=s.x-28.0-note.size.x
 	at.y=clampf(at.y,T.CONTENT_TOP+8.0,maxf(T.CONTENT_TOP+8.0,view.y-note.size.y-150.0))
+	if is_instance_valid(key_card) and Rect2(at,note.size).intersects(key_card.get_global_rect().grow(12)):
+		at.x=key_card.position.x+key_card.size.x+16
+	at.x=clampf(at.x,T.RAIL_WIDTH+8.0,maxf(T.RAIL_WIDTH+8.0,view.x-note.size.x-16))
 	note.position=at
 
 
@@ -305,42 +325,93 @@ func _refresh_key()->void:
 	for st:Dictionary in kept.stretches: held+=float(st.strength)*float(st.km); km+=float(st.km)
 	var line:=held/km if km>0.0 else 0.0
 	var next:=Forts.best_kind()
-	var signature:=hash([int(kept.posted),roundi(line*100.0),roundi(float(bill.food_lost)),snappedf(Forts.border_share(),0.05),Forts.forts().size(),String(next.get("id","")),moving])
-	if signature==_key_signature: return
-	_key_signature=signature
-	for child in key_card.get_children(): child.queue_free()
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6); column.custom_minimum_size=Vector2(300,0); key_card.add_child(column)
-	Kit.label(column,"The border","kicker")
 	var standing:=Forts.standing().size()
 	var going:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))=="building").size()
-	Kit.label(column,"%d on watch · %d fort%s%s" % [int(kept.posted),standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],"heading")
-	var holds:=HBoxContainer.new(); holds.add_theme_constant_override("separation",8); column.add_child(holds)
-	var words:=Kit.label(holds,("The line holds %d in 100" % roundi(line*100.0)) if km>0.0 else "No two forts linked: open","body")
-	words.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var bar:=_bar(holds,line,T.TEAL if line>=0.7 else (T.AMBER if line>=0.4 else T.RED)); bar.custom_minimum_size=Vector2(90,6); bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var to_man:=Forts.share_to_man()
+	var available:=preload("res://scripts/watch_military.gd").at_home(WorldSimulation.military)
+	var needed:=0
+	for fort:Dictionary in Forts.forts():
+		if String(fort.get("status",""))!="abandoned":needed+=int(Forts.kind(String(fort.kind)).get("garrison",0))
+	var compact:=get_viewport().get_visible_rect().size.y<800.0
+	var signature:=hash([compact,kept,snappedf(float(bill.food_lost),0.1),Forts.border_share(),standing,going,String(next.get("id","")),moving,to_man,available,needed,T.color_mode])
+	if signature==_key_signature: return
+	_key_signature=signature
+	key_card.theme=T.control_theme()
+	key_card.add_theme_stylebox_override("panel",Kit.card_style(14,PLUM if T.is_light() else T.VIOLET))
+	for child in key_card.get_children(): child.hide(); child.queue_free()
+	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6 if compact else 10); column.custom_minimum_size=Vector2(304,0); key_card.add_child(column)
+	var head:=_heading(column,"The frontier","The border",String(next.get("id","watch_camp")))
+	var close:=Kit.quiet_button(head,"×",func()->void:set_shown(terrain,false),"Leave border view")
+	close.name="CloseBorder"; close.custom_minimum_size=Vector2(36,36)
+	Kit.label(column,"%d fort%s standing%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],"note")
+	var numbers:=HBoxContainer.new(); numbers.add_theme_constant_override("separation",14); column.add_child(numbers)
+	_metric(numbers,"Posted",str(int(kept.posted)))
+	_metric(numbers,"On the line",str(int(kept.line)))
+	_metric(numbers,"Food lost / day",_amount(float(bill.food_lost)))
+	var holds:=Kit.section(column,10); holds.add_theme_constant_override("separation",6)
+	var strength_ink:=T.TEAL if line>=0.7 else (T.AMBER if line>=0.4 else T.RED)
+	var watch_status:="Unwatched line" if roundi(line*100.0)==0 else ("Thin watch" if line<0.4 else "Border watch")
+	_status(holds,watch_status if km>0.0 else "Open country","%d%%" % roundi(line*100.0) if km>0.0 else "Unlinked",strength_ink if km>0.0 else T.INK_MUTED)
+	_bar(holds,line,strength_ink)
+	if km>0.0:
+		Kit.label(holds,"%d in 100 crossings stopped · %d km of line" % [roundi(line*100.0),roundi(km)],"note")
+	else:
+		Kit.label(holds,"Link standing forts to watch the land between them.","note")
 	if km>0.0 and int(kept.line)<=0:
-		var need:=0
-		for f:Dictionary in Forts.forts():
-			if String(f.get("status",""))!="abandoned": need+=int(Forts.kind(String(f.kind)).get("garrison",0))
-		Kit.label(column,"The forts' garrisons take all %d sent out (they need %d): none are left to walk the line between them." % [int(kept.posted),need],"note",T.RED)
-	Kit.label(column,"%s food lost on the road a day" % _amount(float(bill.food_lost)),"note")
-	var share_row:=HBoxContainer.new(); share_row.add_theme_constant_override("separation",6); column.add_child(share_row)
-	var said:=Kit.label(share_row,"%d in 100 of the watch at home sent out" % roundi(Forts.border_share()*100.0),"note"); said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	said.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		Kit.label(holds,"No one is posted to walk the line." if int(kept.posted)==0 else "The garrisons take everyone posted. No one is left to walk the line.","note",T.RED)
+	var share_row:=HBoxContainer.new(); share_row.add_theme_constant_override("separation",8); column.add_child(share_row)
+	var share_words:=VBoxContainer.new(); share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL; share_words.add_theme_constant_override("separation",0); share_row.add_child(share_words)
+	Kit.label(share_words,"Watch sent out","body")
+	Kit.label(share_words,"%d%% of the watch at home" % roundi(Forts.border_share()*100.0),"note")
 	for step:Array in [["−",-0.1,"Fewer on the border: less food lost on the road, a thinner line."],["+",0.1,"More on the border: forts manned first, then the line between them."]]:
 		var b:=Kit.button(share_row,String(step[0]),false,func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step[1]),0.0,1.0));_changed(),String(step[2]))
-		b.custom_minimum_size=Vector2(36,32)
-	var to_man:=Forts.share_to_man()
+		b.name="FewerBorderWatch" if float(step[1])<0.0 else "MoreBorderWatch"
+		b.custom_minimum_size=Vector2(36,36)
+		b.disabled=Forts.border_share()<=0.0 if float(step[1])<0.0 else Forts.border_share()>=1.0
 	if to_man>Forts.border_share()+0.001:
-		var man:=Kit.button(column,"Man every fort: send %d in 100 of the watch" % roundi(to_man*100.0),true,func()->void:Forts.set_border_share(to_man);_changed(),"Sends out enough of the watch at home to fill every fort's garrison. More food is lost on the road; fewer keep watch at home.")
+		var action:="Man every fort · %d%% of the watch" % roundi(to_man*100.0)
+		if available<needed:action="Send all %d available" % available if available>0 else "No watch available"
+		var man:=Kit.button(column,action,true,func()->void:Forts.set_border_share(to_man);_changed(),"Posts the available watch to fort garrisons. More food is lost on the road; fewer keep watch at home.")
 		man.name="ManEveryFort"
-	_legend(column)
+		man.disabled=available<=0
+	if needed>available:Kit.label(column,"%d available · %d needed to fill the forts" % [available,needed],"note",T.AMBER_TEXT)
+	_rule(column)
 	if next.is_empty(): Kit.label(column,"Our people know no way to raise a fort yet.","note")
-	elif moving>=0: Kit.label(column,"Carrying %s: click where it should stand. Right-click to let it go." % String(Forts.find_fort(moving).get("name","the fort")),"note",PLUM)
-	else: Kit.label(column,"Click open land to raise a %s (%s). Click a fort to move it or break it down." % [String(next.name).to_lower(),_materials(next.cost,1.0)],"note")
+	elif moving>=0:
+		Kit.label(column,"Moving %s" % String(Forts.find_fort(moving).get("name","the fort")),"heading",T.VIOLET)
+		Kit.label(column,"Choose new ground. The preview shows what changes.","note")
+		Kit.button(column,"Cancel move",false,func()->void:_let_go(),"Keep the fort where it stands · Esc or right-click")
+	else:
+		Kit.label(column,"Click open land to raise a %s." % String(next.name).to_lower(),"body")
+		if not compact: Kit.label(column,"Inspect a fort for orders. Preview the cost before you place.","note")
+	if not compact: _legend(column)
+
+## A compact field-atlas heading. Its seal uses the actual available fort kind.
+func _heading(parent:Node,kicker:String,title:String,kind_id:String,building:bool=false)->HBoxContainer:
+	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",12); parent.add_child(row)
+	var seal:=FortSeal.new(); seal.kind_id=kind_id; seal.building=building; seal.custom_minimum_size=Vector2(52,58); row.add_child(seal)
+	var words:=VBoxContainer.new(); words.size_flags_horizontal=Control.SIZE_EXPAND_FILL; words.add_theme_constant_override("separation",0); row.add_child(words)
+	Kit.label(words,kicker,"kicker")
+	var name_label:=Kit.label(words,title,"title")
+	name_label.add_theme_font_override("font",T.voice_font()); name_label.add_theme_font_size_override("font_size",28)
+	return row
+
+func _metric(parent:Node,caption:String,value:String,tone:Color=Color.TRANSPARENT)->void:
+	var col:=VBoxContainer.new(); col.size_flags_horizontal=Control.SIZE_EXPAND_FILL; col.add_theme_constant_override("separation",0); parent.add_child(col)
+	var number:=Kit.label(col,value,"value",tone)
+	number.add_theme_font_size_override("font_size",22)
+	Kit.label(col,caption,"note")
+
+func _status(parent:Node,caption:String,value:String,tone:Color)->void:
+	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",10); parent.add_child(row)
+	Kit.label(row,caption,"body").size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	Kit.label(row,value,"heading",tone,false)
+
+func _rule(parent:Node)->void:
+	var line:=HSeparator.new(); line.mouse_filter=Control.MOUSE_FILTER_IGNORE; parent.add_child(line)
 
 func _legend(parent:Node)->void:
-	var swatches:=LegendInk.new(); swatches.custom_minimum_size=Vector2(270,62); parent.add_child(swatches)
+	var swatches:=LegendInk.new(); swatches.custom_minimum_size=Vector2(270,40); parent.add_child(swatches)
 
 func _bar(parent:Node,share:float,ink:Color)->Control:
 	var bar:=ShareBar.new(); bar.share=share; bar.ink=ink; bar.custom_minimum_size=Vector2(0,6); bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -363,6 +434,23 @@ static func _materials(amounts:Dictionary,scale:float)->String:
 	return ", ".join(parts)
 
 
+## A cartographer's seal: status and kind, with small compass ticks.
+class FortSeal extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Icons:=preload("res://scripts/resource_icons.gd")
+	var kind_id:="watch_camp"
+	var building:=false
+	func _ready()->void: mouse_filter=Control.MOUSE_FILTER_IGNORE
+	func _draw()->void:
+		var c:=Vector2(26,28)
+		draw_circle(c,24,T.PAPER_SUNK)
+		draw_arc(c,24,0,TAU,48,T.RULE,1,true)
+		for i in 4:
+			var spoke:=Vector2.from_angle(TAU*float(i)/4.0)
+			draw_line(c+spoke*21,c+spoke*26,T.GOLD,1,true)
+		var glyph:=Icons.chart_texture("fort:%s%s" % [kind_id,":building" if building else ""],T.text_for(T.VIOLET),64)
+		draw_texture_rect(glyph,Rect2(c-Vector2(19,19),Vector2(38,38)),false)
+
 ## A thin bar of a share, in an ink.
 class ShareBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
@@ -379,13 +467,14 @@ class LegendInk extends Control:
 	const PLUM:=Color("#7b2a7a")
 	func _draw()->void:
 		var ui:=T.font("ui")
-		var rows:=[[3.2,0.97,false,"Well kept: few slip through"],[1.5,0.75,false,"Thinly kept"],[1.4,0.62,true,"Open: anyone walks in and out"]]
+		var ink:=PLUM if T.is_light() else T.VIOLET
+		var rows:=[[3.2,0.97,false,"Strong line → fewer crossings"],[1.4,0.62,true,"Dotted line → open country"]]
 		for i in rows.size():
 			var row:Array=rows[i]
 			var y:=10.0+float(i)*20.0
 			if bool(row[2]):
-				for k in 4: draw_circle(Vector2(4.0+float(k)*7.0,y),1.6,Color(PLUM,float(row[1])))
-			else: draw_line(Vector2(0,y),Vector2(26,y),Color(PLUM,float(row[1])),float(row[0]),true)
+				for k in 4: draw_circle(Vector2(4.0+float(k)*7.0,y),1.6,Color(ink,float(row[1])))
+			else: draw_line(Vector2(0,y),Vector2(26,y),Color(ink,float(row[1])),float(row[0]),true)
 			draw_string(ui,Vector2(36,y+5.0),String(row[3]),HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.BODY)
 
 
@@ -402,11 +491,14 @@ class BorderChart extends Control:
 	var _quote:Dictionary={}
 	var _quote_key:=Vector2i(1<<30,1<<30)
 	var _quote_moving:=-2
+	var _quote_age:=0.0
 	var _hover_fort:Dictionary={}
 	var _mouse:=Vector2.INF
 	var _ground:=Vector2.INF
 	var _elapsed:=0.0
 	var _view:=0
+	var _border_elapsed:=0.25
+	var _border_signature:=0
 	## Captures and tests: the pointer held here instead of the mouse.
 	var pointer_override:=Vector2.INF
 	## Every fort's name and every stretch's hold, refreshed with the pointer.
@@ -420,11 +512,15 @@ class BorderChart extends Control:
 
 	func forget()->void:
 		_quote={}; _quote_key=Vector2i(1<<30,1<<30)
+		_read_border()
+		queue_redraw()
 
 	func _process(delta:float)->void:
 		if owner_map==null: return
 		_elapsed+=delta
-		if _elapsed>=0.25 or _names.is_empty(): _read_border()
+		_quote_age+=delta
+		_border_elapsed+=delta
+		if _border_elapsed>=0.25: _read_border()
 		# The words ride the map: redrawn whenever the view moves.
 		var viewer:Camera3D=owner_map.call("camera")
 		if viewer!=null:
@@ -444,12 +540,14 @@ class BorderChart extends Control:
 			var cam:Camera3D=owner_map.call("camera")
 			var grain:=maxf(0.25,float(cam.size)/300.0) if cam!=null else 1.0
 			var key:=Vector2i(roundi(_ground.x/grain),roundi(_ground.y/grain))
-			if key!=_quote_key or _quote_moving!=int(owner_map.moving):
+			if key!=_quote_key or _quote_moving!=int(owner_map.moving) or _quote_age>=0.5:
+				_quote_age=0.0
 				_quote_key=key; _quote_moving=int(owner_map.moving)
 				_quote=Forts.quote(_ground,int(owner_map.moving))
 		queue_redraw()
 
 	func _read_border()->void:
+		_border_elapsed=0.0
 		_names=[]; _stretches=[]
 		for f:Dictionary in Forts.forts():
 			if String(f.get("status",""))!="abandoned": _names.append([Forts._pos(f),String(f.get("name",""))])
@@ -457,12 +555,29 @@ class BorderChart extends Control:
 		for st:Dictionary in kept.stretches: _stretches.append([Vector2(st.mid),float(st.strength),float(st.per_km)])
 		_foreign=[]
 		for f:Dictionary in Forts.known_foreign_forts(): _foreign.append([f.at,"%s's %s" % [String(f.owner_name),String(Forts.kind(String(f.kind)).get("name","fort")).to_lower()],preload("res://scripts/nation_borders.gd").nation_color(String(f.owner)).darkened(0.45)])
+		var signature:=hash([_names,_stretches,_foreign,T.color_mode])
+		if signature!=_border_signature:
+			_border_signature=signature
+			queue_redraw()
 
 	func _draw()->void:
 		_draw_border_words()
+		_draw_selection()
 		if not _mouse.is_finite(): return
 		if not _hover_fort.is_empty(): _draw_fort_hover(); return
 		if _ground.is_finite() and not _quote.is_empty() and _quote.has("kind"): _draw_ghost()
+
+	func _draw_selection()->void:
+		if int(owner_map.selected)<0 or int(owner_map.moving)>=0: return
+		var fort:=Forts.find_fort(int(owner_map.selected))
+		if fort.is_empty(): return
+		var at:Vector2=owner_map.call("screen_of",Forts._pos(fort))
+		if not at.is_finite(): return
+		draw_arc(at,25,0,TAU,48,Color(PAPER,0.95),5,true)
+		draw_arc(at,25,0,TAU,48,PLUM,1.5,true)
+		for i in 4:
+			var spoke:=Vector2.from_angle(TAU*float(i)/4.0)
+			draw_line(at+spoke*23,at+spoke*30,PLUM,2,true)
 
 	## Each fort's name beneath its mark; on each stretch between linked forts,
 	## how many in 100 crossings it stops and its watch a km.
@@ -492,7 +607,7 @@ class BorderChart extends Control:
 			var w:=ui.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 			var box:=Rect2(s-Vector2(w*0.5+8,10),Vector2(w+16,20))
 			var ink:=T.TEAL if strength>=0.7 else (T.AMBER if strength>=0.4 else T.RED)
-			draw_style_box(T.flat(Color(PAPER,0.95),Color(ink,0.9),1,3,0),box)
+			draw_style_box(T.flat(T.PAPER_RAISED,Color(ink,0.9),1,3,0),box)
 			draw_rect(Rect2(box.position+Vector2(1,box.size.y-4),Vector2((box.size.x-2)*clampf(strength,0.0,1.0),3)),ink)
 			draw_string(ui,box.position+Vector2(8,14),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
 
@@ -545,31 +660,37 @@ class BorderChart extends Control:
 
 	func _draw_quote_tip(ok:bool)->void:
 		var q:=_quote
-		var title:=("Move %s here" % String(Forts.find_fort(int(owner_map.moving)).get("name","the fort"))) if int(owner_map.moving)>=0 else ("Raise a %s here" % String(q.kind_name).to_lower())
+		var moving:=int(owner_map.moving)>=0
+		var title:=("Move %s" % String(Forts.find_fort(int(owner_map.moving)).get("name","the fort"))) if moving else String(q.kind_name)
 		var rows:Array=[]
 		var refusal:Dictionary=owner_map.get("_refusal")
 		if not refusal.is_empty() and Time.get_ticks_msec()<int(refusal.until): rows.append([String(refusal.text),T.RED_TEXT,true])
 		var problem:=String(q.get("problem",""))
+		var hero:={}
 		if problem!="":
 			rows.append([problem,T.RED_TEXT,true])
+			rows.append(["Choose another place on known, open land.",T.BODY,false])
 		else:
-			rows.append(["%d km out · %d of the watch to man it · about %d days to raise" % [roundi(float(q.km)),int(q.garrison),int(q.days)],T.BODY,false])
-			var cost:="Costs %s" % owner_map.call("_materials",q.cost,1.0)
-			rows.append([cost,T.BODY,false])
+			if moving: rows.append(["Holds no ground while it goes up again.",T.AMBER_TEXT,false])
+			rows.append(["%d watch · about %d days · %d km from home" % [int(q.garrison),int(q.days),roundi(float(q.km))],T.BODY,false])
+			rows.append(["Materials · %s" % owner_map.call("_materials",q.cost,1.0),T.INK,true])
 			if not (q.short as Dictionary).is_empty(): rows.append([Forts.short_words(q),T.RED_TEXT,true])
-			rows.append(["%s food lost on the road a day (%d in 100 of what is carried out)" % [owner_map.call("_amount",float(q.food_lost)),roundi(float(q.loss_share)*100.0)],T.BODY,false])
+			rows.append(["Road loss · %s food/day (%d%% of supplies carried)" % [owner_map.call("_amount",float(q.food_lost)),roundi(float(q.loss_share)*100.0)],T.BODY,false])
 			var up:=String(owner_map.call("_materials",q.upkeep,1.0))
-			if up!="": rows.append(["Upkeep %s a day" % up,T.MUTED,false])
+			if up!="": rows.append(["Upkeep · %s/day" % up,T.MUTED,false])
 			var gain:=float(q.gain_km2)
-			if absf(gain)>=1.0: rows.append([("The border grows by %s km²" if gain>0.0 else "The border shrinks by %s km²") % _thousands(absf(gain)),T.GREEN_TEXT if gain>0.0 else T.RED_TEXT,true])
-			else: rows.append(["Inside the border already: no ground gained",T.MUTED,false])
-			if (q.links as Array).is_empty(): rows.append(["Links to no fort: a lone post, the land about it open",T.AMBER_TEXT,false])
-			for link:Dictionary in q.links: rows.append(["Links to %s, %d km of line to watch" % [String(link.name),roundi(float(link.km))],T.BODY,false])
-		rows.append([("Click to set it down · right-click to let it go" if int(owner_map.moving)>=0 else "Click to raise it") if ok else "",T.MUTED,false])
-		_tip(title,rows,PLUM if ok else T.RED)
+			if absf(gain)>=1.0:
+				hero={"value":("%s%s km²" % ["+" if gain>0.0 else "−",_thousands(absf(gain))]),"caption":"Ground gained when it stands" if gain>0.0 else "Ground given up after moving","ink":T.TEAL if gain>0.0 else T.RED}
+			else:
+				hero={"value":"No new ground","caption":"This site is inside the border","ink":T.INK_MUTED}
+			if (q.links as Array).is_empty(): rows.append(["A lone post. Link another fort to watch the line.",T.AMBER_TEXT,false])
+			for link:Dictionary in q.links: rows.append(["Links to %s · %d km of line" % [String(link.name),roundi(float(link.km))],T.BODY,false])
+		rows.append([("Click to set it down · Esc to cancel" if moving else "Click to raise this fort") if ok else "Cannot place here",T.VIOLET_TEXT if ok else T.RED_TEXT,true])
+		_tip(title,rows,T.VIOLET if ok else T.RED,String(q.kind),hero)
 
 	func _draw_fort_hover()->void:
 		var f:=_hover_fort
+		if int(owner_map.selected)==int(f.id) and is_instance_valid(owner_map.note) and owner_map.note.visible: return
 		var s:Vector2=owner_map.call("screen_of",Forts._pos(f))
 		if s.is_finite():
 			draw_arc(s,22.0,0.0,TAU,40,Color(PAPER,0.8),5.0,true)
@@ -579,33 +700,66 @@ class BorderChart extends Control:
 		var kept:=Forts.watch()
 		var manned:=int(kept.garrisons.get(int(f.id),0))
 		var status:="Going up, %d in 100 raised" % roundi(100.0*float(f.get("progress",0.0))/maxf(1.0,float(k.get("work",1.0)))) if String(f.status)=="building" else "Kept %d in 100" % roundi(100.0*float(f.get("condition",1.0)))
-		_tip(String(f.get("name","")),[[String(k.get("name","")),T.MUTED,false],[status,T.BODY,false],["%d of %d to man it · %d km out" % [manned,int(k.get("garrison",0)),roundi(Forts._pos(f).distance_to(Forts.seat()))],T.RED_TEXT if manned<int(k.get("garrison",0)) else T.BODY,false],["Click for orders: move it or break it down",T.MUTED,false]],PLUM)
+		_tip(String(f.get("name","")),[[String(k.get("name","")),T.MUTED,false],[status,T.BODY,false],["%d of %d to man it · %d km out" % [manned,int(k.get("garrison",0)),roundi(Forts._pos(f).distance_to(Forts.seat()))],T.RED_TEXT if manned<int(k.get("garrison",0)) else T.BODY,false],["Click for orders: move it or break it down",T.MUTED,false]],T.VIOLET,String(f.kind),{},String(f.status)=="building")
 
 	## A paper note beside the pointer: a title and rows [text, colour, strong].
-	func _tip(title:String,rows:Array,accent:Color)->void:
-		var ui:=T.font("ui"); var strong:=T.font("ui_strong")
-		var height:=40.0
-		for row:Array in rows:
-			if String(row[0])!="": height+=ui.get_multiline_string_size(String(row[0]),HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,14).y+3.0
-		var box:=Vector2(TIP_WIDTH+28.0,height+8.0)
+	func _tip(title:String,rows:Array,accent:Color,kind_id:String="",hero:Dictionary={},building:bool=true)->void:
+		var ui:=T.font("ui"); var strong:=T.font("ui_strong"); var voice:=T.voice_font()
 		var view:=get_viewport_rect().size
-		var origin:=_mouse+Vector2(30,18)
-		if origin.x+box.x>view.x-12.0: origin.x=_mouse.x-30.0-box.x
-		if origin.y+box.y>view.y-150.0: origin.y=_mouse.y-box.y-18.0
-		origin.y=clampf(origin.y,T.CONTENT_TOP,maxf(T.CONTENT_TOP,view.y-box.y-150.0))
-		var rect:=Rect2(origin,box)
-		draw_style_box(T.flat(Color(0.12,0.09,0.05,0.16),Color(0,0,0,0),0,6,0),Rect2(rect.position+Vector2(0,4),rect.size).grow(3))
-		draw_style_box(T.flat(T.PANEL_BG_SOLID,T.RULE,1,4,0),rect)
-		draw_rect(Rect2(origin,Vector2(box.x,3)),accent)
-		var y:=origin.y+28.0
-		draw_string(strong,Vector2(origin.x+14,y),title,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,17,T.INK)
-		y+=10.0
+		var width:=minf(TIP_WIDTH,view.x-T.RAIL_WIDTH-80.0)
+		var title_width:=width-52.0 if kind_id!="" else width
+		var title_height:=maxf(40.0,voice.get_multiline_string_size(title,HORIZONTAL_ALIGNMENT_LEFT,title_width,24).y)
+		var height:=title_height+32.0
+		if not hero.is_empty(): height+=70.0
 		for row:Array in rows:
-			var text:=String(row[0])
-			if text=="": continue
-			var font:=strong if bool(row[2]) else ui
-			draw_multiline_string(font,Vector2(origin.x+14,y+font.get_ascent(14)),text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,14,-1,row[1])
-			y+=ui.get_multiline_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,14).y+3.0
+			if String(row[0])!="":
+				var face:=strong if bool(row[2]) else ui
+				height+=face.get_multiline_string_size(String(row[0]),HORIZONTAL_ALIGNMENT_LEFT,width,14).y+8.0
+		var box:=Vector2(width+32.0,height+12.0)
+		var origin:=_tip_origin(box,view)
+		var rect:=Rect2(origin,box)
+		draw_style_box(T.flat(Color(0.12,0.09,0.05,0.16),Color.TRANSPARENT,0,4,0),Rect2(rect.position+Vector2(0,4),rect.size).grow(3))
+		draw_style_box(T.paper_panel_style(true,4,0),rect)
+		draw_rect(Rect2(origin,Vector2(box.x,3)),accent)
+		var title_x:=origin.x+16.0
+		if kind_id!="":
+			var c:=origin+Vector2(35,38)
+			draw_circle(c,22,T.PAPER_SUNK)
+			draw_arc(c,22,0,TAU,40,T.RULE,1,true)
+			draw_texture_rect(Icons.chart_texture("fort:%s%s" % [kind_id,":building" if building else ""],T.text_for(accent),64),Rect2(c-Vector2(18,18),Vector2(36,36)),false)
+			title_x+=52.0
+		draw_multiline_string(voice,Vector2(title_x,origin.y+16.0+voice.get_ascent(24)),title,HORIZONTAL_ALIGNMENT_LEFT,title_width,24,-1,T.INK)
+		var y:=origin.y+title_height+24.0
+		draw_line(Vector2(origin.x+16,y),Vector2(origin.x+box.x-16,y),T.RULE,1)
+		y+=12.0
+		if not hero.is_empty():
+			var hero_ink:Color=T.text_for(hero.ink)
+			draw_style_box(T.flat(T.PAPER_SUNK,Color.TRANSPARENT,0,2,0),Rect2(Vector2(origin.x+12,y),Vector2(box.x-24,60)))
+			draw_rect(Rect2(Vector2(origin.x+12,y),Vector2(3,60)),hero.ink)
+			draw_string(strong,Vector2(origin.x+24,y+27),String(hero.value),HORIZONTAL_ALIGNMENT_LEFT,width-16,23,hero_ink)
+			draw_string(ui,Vector2(origin.x+24,y+47),String(hero.caption),HORIZONTAL_ALIGNMENT_LEFT,width-16,13,T.INK_MUTED)
+			y+=70
+		for row:Array in rows:
+			var words:=String(row[0])
+			if words=="": continue
+			var face:=strong if bool(row[2]) else ui
+			draw_multiline_string(face,Vector2(origin.x+16,y+face.get_ascent(14)),words,HORIZONTAL_ALIGNMENT_LEFT,width,14,-1,row[1])
+			y+=face.get_multiline_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,width,14).y+8.0
+
+	## Prefer a free corner around the pointer, avoiding the persistent cards.
+	func _tip_origin(box:Vector2,view:Vector2)->Vector2:
+		var best:=Vector2.ZERO; var penalty:=INF
+		var choices:=[_mouse+Vector2(30,18),_mouse-Vector2(box.x+30,-18),_mouse-Vector2(-30,box.y+18),_mouse-box-Vector2(30,18)]
+		for choice:Vector2 in choices:
+			var at:=Vector2(clampf(choice.x,T.RAIL_WIDTH+8.0,maxf(T.RAIL_WIDTH+8.0,view.x-box.x-12)),clampf(choice.y,T.CONTENT_TOP,maxf(T.CONTENT_TOP,view.y-box.y-150)))
+			var rect:=Rect2(at,box); var cost:=at.distance_to(choice)
+			for card:Control in [owner_map.key_card,owner_map.note]:
+				if is_instance_valid(card) and card.visible:
+					var overlap:=rect.intersection(card.get_global_rect().grow(12))
+					cost+=overlap.get_area()
+			if rect.has_point(_mouse): cost+=10000
+			if cost<penalty: penalty=cost; best=at
+		return best
 
 	func _dashed(a:Vector2,b:Vector2,colour:Color,width:float)->void:
 		var length:=a.distance_to(b)
