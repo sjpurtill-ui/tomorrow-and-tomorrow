@@ -423,6 +423,22 @@ static func _target_position(civ_id:String,city_id:String)->Vector2:
 	var world:Variant=WorldSimulation.world
 	return world._civilization_world_position(_civ(civ_id)) if world!=null and not _civ(civ_id).is_empty() else _home()
 
+## Whether we know a place of theirs to send anyone to: a town of theirs on
+## our charts (city_intelligence.gd), or their home found. A people only
+## heard of, or met on the road with its home still unknown, cannot be
+## spied on: nobody can be sent to a place we have never found.
+static func knows_where(civ_id:String,city_id:String="")->bool:
+	var chart:Variant=_chart()
+	if chart!=null:
+		if city_id!="" and not (chart.known("player",city_id) as Dictionary).is_empty(): return true
+		if not (chart.known_cities("player",civ_id,false) as Array).is_empty(): return true
+	var relation:=_relation(civ_id)
+	if bool(relation.get("home_location_known",false)): return true
+	return relation.get("home_position") is Dictionary and not (relation.home_position as Dictionary).is_empty()
+
+static func unplaced_words(civ_id:String)->String:
+	return "We do not know where %s live. Scouts must find their home, or one of their towns, before anyone can be sent among them." % _the(civ_id)
+
 static func travel_days(civ_id:String,city_id:String)->int:
 	## Days on foot to their town: distance at a walking pace, with a floor so
 	## even a near neighbour is some days off (sparse-contact rule).
@@ -608,6 +624,8 @@ static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:D
 	# (captured_agents.gd send_double): no craft of ours is needed for that.
 	var barred:=method_barred(kind) if not their_own else ""
 	if barred!="": return {"error":barred}
+	# One of their own knows the way home; ours must know where to go.
+	if not their_own and not knows_where(civ_id,city_id): return {"error":unplaced_words(civ_id)}
 	if agent.is_empty(): agent=volunteer_for(kind)
 	if bool(agent.get("trained",false)): EyesCorps.take_eye()
 	var s:=state()

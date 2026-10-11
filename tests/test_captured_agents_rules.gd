@@ -206,6 +206,7 @@ func test_our_official_killed_abroad_dies_of_their_hand_not_ours()->void:
 		if String(person.get("office_key",""))!="" and String(person.get("office_key",""))!="settlement": official=person; break
 	assert_bool(official.is_empty()).is_false()
 	var agent:=Covert.agent_from_person(official)
+	_place(civ)
 	var op:=Covert.launch("watch",civ,"","trader",agent)
 	var metrics:Dictionary=GameState.simulation_metrics
 	var legitimacy:=float(metrics.get("legitimacy",0.5)); var cohesion:=float(metrics.get("cohesion",0.5))
@@ -321,6 +322,7 @@ func test_a_town_leader_killed_abroad_dies_quietly_and_truthfully()->void:
 	var events_before:=GameState.simulation_events.size()
 	var pop:=float(GameState.population_exact)
 	var agent:=Covert.agent_from_person(GovernmentPeopleSystem.person_snapshot(pid))
+	_place(civ)
 	var op:=Covert.launch("watch",civ,"","trader",agent)
 	Captives._our_agent_dies(op,agent,civ)
 	var after:=GovernmentPeopleSystem.person_snapshot(pid)
@@ -337,3 +339,11 @@ func test_a_town_leader_killed_abroad_dies_quietly_and_truthfully()->void:
 	var now:=GovernmentPeopleSystem.settlement_leader(town)
 	assert_bool(now.is_empty() or int(now.get("person_id",0))!=pid).is_true()
 	for key in GameState.leadership_positions: assert_int(int((GameState.leadership_positions[key] as Dictionary).get("person_id",0))).is_not_equal(pid)
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true
