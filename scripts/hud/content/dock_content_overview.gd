@@ -61,21 +61,23 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 	var most:=1
 	for task:Dictionary in tasks:
 		able+=int(task.count);most=maxi(most,int(task.count))
+	for task:Dictionary in tasks:task["share_plain"]=hearth
 	if manual:
-		var counts:=Manual.counts()
-		var step:=work_step(able)
-		var one:="One" if step==1 else EraWords.grouped(step)
-		var five:="Five" if step==1 else EraWords.grouped(step*5)
+		# The ruler sets each task as a share of those who can work, a
+		# hundredth at a click (manual_work.gd move_share): shares hold still
+		# as the people grow, where head-counts never could.
+		var shares:=Manual.percents()
+		var hundredth:=EraWords.grouped(maxi(1,roundi(float(able)/100.0)))
 		for task:Dictionary in tasks:
 			var role:=String(task.id)
-			var donor:=Manual._most(counts,role)
-			var taker:=Manual._most(counts,role,0)
+			var donor:=Manual._most(shares,role)
+			var taker:=Manual._most(shares,role,0)
 			var words:=Manual.task_words(role)
 			task["can_add"]=donor!=""
-			task["can_take"]=int(task.count)>0 and taker!=""
-			task["add_tip"]=("%s more on %s, from %s." % [one,words,Manual.task_words(donor)]) if donor!="" else "Every hand is here already."
-			task["take_tip"]=("%s fewer on %s; they go to %s." % [one,words,Manual.task_words(taker)]) if int(task.count)>0 and taker!="" else "Nobody is on this now."
-			task["five_tip"]="%s more on %s, from the busiest tasks." % [five,words]
+			task["can_take"]=int(shares.get(role,0))>0 and taker!=""
+			task["add_tip"]=("One in a hundred more on %s (about %s people), from %s." % [words,hundredth,Manual.task_words(donor)]) if donor!="" else "Every hand is here already."
+			task["take_tip"]=("One in a hundred fewer on %s (about %s people); they go to %s." % [words,hundredth,Manual.task_words(taker)]) if int(shares.get(role,0))>0 and taker!="" else "Nobody is on this now."
+			task["five_tip"]="Five in a hundred more on %s, from the busiest tasks." % words
 	var register:="%s can work" % (EraWords.count_word(able).capitalize() if hearth else EraWords.grouped(able))
 	return {"heading":"WHAT THE PEOPLE ARE DOING TODAY" if hearth else ("TODAY'S LABOUR, FROM THE ROLLS" if not modern else "LABOR FORCE BY TASK"),
 		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),"able":able,
@@ -96,9 +98,9 @@ func set_work(ruler:bool)->void:
 	Manual.set_manual(ruler)
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
-## −/+ on a task, in steps of work_step people (×5 is five steps).
+## −/+ on a task: one in a hundred of those who can work (×5 is five).
 func move_work(role:String,steps:int)->void:
-	Manual.move(role,steps*work_step(Manual.able()))
+	Manual.move_share(role,steps)
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
 ## People one click moves: about one in a hundred at work, as a round

@@ -255,7 +255,7 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			# townsfolk, who are no soldiers (the map badge sets them apart).
 			if trained>0:value=untrained_words(trained+int(s.get("watch",0)),int(s.get("rise",0)))
 			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-				"note":("%s for the bands" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The watch at home (its home guard and those free for the bands), and the townsfolk who take up arms when raiders come."}
+				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The army at home (its home guard and those free to send), and the townsfolk who take up arms when raiders come."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if s.is_empty() or int(s.wall_stage)<=0:
@@ -380,7 +380,7 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0:
 				var bands:=int(s.fighters);var kept:=int(s.get("watch",0))
-				if kept>0:lines.append("Of the %s on watch, %s are free for the bands and %s are the home guard." % [EraWords.grouped(bands+kept),EraWords.grouped(bands),EraWords.grouped(kept)])
+				if kept>0:lines.append("Of the %s of the army here, %s are free to send and %s are the home guard." % [EraWords.grouped(bands+kept),EraWords.grouped(bands),EraWords.grouped(kept)])
 				else:lines.append("None of the %s on watch is kept as the home guard: a general may lead them away in a band." % EraWords.grouped(bands))
 			if String(s.get("held_by",""))=="":lines.append(RISE_WORDS)
 		"fortification":

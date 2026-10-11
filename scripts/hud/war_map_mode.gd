@@ -321,8 +321,8 @@ func collect()->Dictionary:
 	# for the bands, in a drill course or joining.
 	var army_home:=int(levy.get("men",0))
 	out["levy_tip"]=_lines(PackedStringArray(["The watch at home: %s" % EraWords.grouped(army_home),
-		"%s free for the bands%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in a drill course" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
-		("%s guard home and the towns" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
+		"%s free to send%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in a drill course" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
+		("%s in the home guard" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
 		("Keeping watch: %s of %s, %s" % [Law.level_name(String(reading.get("level",""))),EraWords.grouped(people),EraWords.grouped(target)]) if target>0 else "Nobody keeps watch"]))
 	out.levy={"side":"ours","troops":army_home,"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
