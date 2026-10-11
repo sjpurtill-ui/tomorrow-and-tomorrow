@@ -11,11 +11,13 @@ Three refinement passes and two critic reviews address reinforcement, moving
 border stations, retasking, neutral invasions, retained targets, duplicate
 defender reservations, recalled posts, crowded counters and live watch ink.
 Compact combat fronts keep departed attackers visible without claiming held
-territory. Final headless validation totals 222 cases: 221 pass with no errors
-or orphans (126/127 core, 95/95 visual). The one long-run raid-cadence failure is
+territory. Final headless validation totals 223 cases: 222 pass with no errors
+or orphans (126/127 core, 96/96 visual). The one long-run raid-cadence failure is
 reproduced on unchanged main and preserved. The 50-band/20-battle draw check is
-16.8 ms after fixing redundant placement work; its 60 ms limit is unchanged.
-Border UI verification passes 71 checks across 14 captures. Design, critic
+17.7 ms after fixing redundant placement work; its 60 ms limit is unchanged.
+Border UI verification passes 71 checks across 14 captures. Production GPU
+captures retain all 16 perimeter counters without overlap, and an independent
+ribbon-motion proof passes for both sides, pause and reduced motion. Design, critic
 findings and reproduction are in `docs/design/DEFENDED_BORDERS.md`.
 
 This is a pushed worker delivery, not an integration into canonical main.
