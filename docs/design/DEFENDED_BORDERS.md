@@ -14,7 +14,10 @@ arrives. Its held length depends on actual soldiers, readiness, food and
 military organization. Small forces leave gaps; sufficient developed armies
 can cover the complete land perimeter. Fort watchmen are not duplicated into
 these bands. Repeated councils preserve surviving stations and the reserve,
-and send real replacements to vacant stations.
+and send real replacements to vacant stations. Growing armies reinforce occupied
+stations through actual marching transfers. Moving the border remarches the
+bands; retasking a band releases its old station. An army already fighting
+cannot also defend a second battle or leave a duplicate occupied station.
 
 The general reports soldiers deployed, kilometres held against kilometres
 assigned, and people retained at home. Drill, military staffs and radio
@@ -40,7 +43,10 @@ the contact and the existing mobile fronts follow fighting inland. Own runner
 reports and dated enemy observations retain their uncertainty. Enemy lines
 are clipped to visible ground; separate glimpses cannot become a continuous
 invented front. Witnessed defeat clears that particular remembered ribbon.
-Battle and army cards measure their numbers and avoid one another.
+Battle and army cards measure their numbers and avoid one another. A departing
+attacker receives a compact fighting ribbon at its actual battle, without
+claiming held territory. Battle readouts move away from the contact so the
+opposing worms remain visible. Pause and reduced motion hold the animation still.
 
 ## Ownership and compatibility
 
@@ -56,27 +62,76 @@ No save version change, player-session restart, population expansion or new
 individual-soldier simulation is introduced. Rendering stays bounded and
 respects pause and reduced motion.
 
+## Three refinement passes
+
+The first implementation received separate engine and art critiques. Pass two
+fixed reinforcement of occupied posts, remarching after border changes, stale
+assignments after new orders, neutral commanded invasions, and preservation of
+the original target after an intervening battle. It also moved battle readouts
+off the fighting, corrected cluster counts, and made unavailable border-watch
+actions truthful.
+
+A second critic review found duplicate defender reservations, recalled posts
+reappearing over their replacements, and homeward bands ignoring new duties.
+Pass three fixes these lifecycle cases, separates crowded army counters, keeps
+battle captions close to their cards, and refreshes border-watch ink even while
+the pointer is away. A real combat exchange exposed the missing attacking
+ribbon; both sides now have current, bounded fighting geometry.
+The combined crowded-battle test then exposed redundant placement work for
+tiny combat ribbons. Coalescing their footprint and skipping candidates whose
+distance already exceeds the best placement reduced drawing from 86.6 ms to
+17.7 ms, without relaxing the 60 ms test budget or counter separation. Final
+polish clips army leader lines beneath other paper cards and fixed readouts,
+removing thin strokes that crossed numbers in the crowded view.
+
 ## Validation
 
-- Combined headless run: 115 cases passed, zero errors, failures or orphans.
-  This covers campaign contact, complete peak perimeter deployment, reserve
-  conservation, save/load during combat, successive defenses, real owned
-  casualty commitment, command hierarchy and the existing worm presentation.
-- The second combined run passes 23 of 24 cases, with zero errors or orphans.
-  Three outcome/intelligence regressions pass: inconclusive fronts remain,
-  witnessed breaches clear, recovered real defenders override old reports.
-- Two observed-approach cases pass: recent evidence changes the route while
-  stale or missing evidence leaves it unchanged.
+- Final combined core run: 127 cases, 126 passed, zero errors or orphans.
+  This covers actual council deployment and arrival, 32 spatial crossings,
+  delivered reports through normal collection/composition, reserve conservation,
+  save/load, successive defenses, real owned casualty commitment, target
+  preservation, command hierarchy, and the critic's deployment lifecycle cases.
+- The engine critic's final acceptance passes all 14 focused cases, including
+  reinforcement, remarching, recalling reserved posts, new map/city duties,
+  neutral contact and duplicate defender reservations.
+- Final combined visual run: all 96 cases passed, zero errors or orphans.
+  It covers front geometry, current battle collection, moving fighting fronts,
+  counter and battle layout, captions, click targets, and the bounded combat
+  helper. The 50-band/20-battle case composes in 6.5 ms and draws in 17.7 ms
+  on this machine; this is a focused draw measurement, not whole-game FPS.
 - The council defense regression now tests physical deployment. Its unrelated
   long-run raid cadence assertion also fails on unchanged `16982712` (two
   bands where it expects at least three); it is preserved, not weakened.
-- Private GPU fixtures show held ground, thinly staffed gaps, two contact phases,
-  inland fighting and regional overview on copied campaign terrain. These are
-  labelled staged observations, not a claimed natural campaign replay.
+- The border UI probe passes 71 checks across 14 captures, including actual
+  staffing availability and a draw refresh with the pointer away from the map.
+- Private GPU fixtures use copied campaign terrain and authored real armies.
+  The production collection probe runs the council, marches, delivers reports,
+  collects observations and starts real battles. These are labelled TEST
+  fixtures, not a claimed natural campaign replay.
+- Final production collection passes eight views and a timed contact pair
+  (ten screenshots): perimeter, close fighting, regional and continental
+  views, night, 1152 × 720, reduced motion and resumed presentation. All 16
+  army cards remain visible in the perimeter and crowded views, with zero
+  counter-clearance overlaps in every view.
+- A separate controlled motion proof suppresses only the decorative battle
+  ring and wash for the diagnostic frames, then restores their live flags.
+  The production scene and hot geometry hashes remain unchanged. The blue
+  ribbon changes 925 pixels and red changes 1,713; paused and reduced-motion
+  comparisons change zero pixels on both sides. Normal contact images retain
+  the ordinary battle pulse. The art critic accepted the distinct fighting
+  silhouettes, nearby captions, scale handling, night readability and watch ink.
 
-Evidence is local under `artifacts/border-defense-*.log` and the capture
-worktree's `artifacts/border-defense/terrain-ready/` (six captures, all checks
-passed; private process 23316 exited normally). The probe is
-`tests/border_defense_capture.tscn`, launched only through
+Headless evidence is local in `artifacts/border-critic-final-core.log` and
+`artifacts/border-critic-final-visual.log`; border UI
+evidence is in `artifacts/border-art/critic-r2/`. Production collection uses
+`tests/border_defense_collection_probe.tscn`, launched only through
 `tools/run_isolated_gpu_probe.ps1` with a copied save in ignored artifacts.
 It verifies that the copied source and frozen campaign day remain unchanged.
+Production evidence is in the capture worktree at
+`artifacts/border-defense/collection-iteration3/`; the independent ribbon
+motion proof is in `artifacts/border-defense/collection-iteration3-motion-proof/`.
+The final leader-line polish is recaptured in
+`artifacts/border-defense/collection-final-crowded/`: both plates pass, all
+16 cards remain visible and separate, and the critic accepted the cleared
+numbers and exposed contact worms. These ignored artifacts stay local;
+the probe source and all production changes are committed to the worker branch.

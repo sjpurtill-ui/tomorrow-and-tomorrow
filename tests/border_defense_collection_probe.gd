@@ -51,8 +51,20 @@ func _run() -> void:
 	day=int(GameState.elapsed_days)
 	var collected:Dictionary=overlay.collect()
 	_check((collected.battles as Array).size()>=2,"Two real contacts reach the normal battle collector")
+	# Contact begins with armies drawn up. Fight one genuine exchange in each
+	# existing engagement before claiming that the subsequent worms are fighting.
+	for id in MilitaryCampaign.own_engagements.keys():
+		_check(MilitaryCampaign.focus_engagement(String(id)),"Real contact engagement can be focused")
+		MilitaryCampaign.fight_engagement_day("hold")
+	CivilizationSystem._process_local_observation(int(GameState.elapsed_days),true)
 	focus=_point(MilitaryCampaign.field_armies[0])
+	if "--crowded-only" in OS.get_cmdline_user_args():
+		await _shot("crowded_small","1152 × 720 · multiple sectors and simultaneous contacts",120.0,center,Vector2i(1152,720))
+		await _finish();return
 	await _shot("contact_local","Real contact · normal battle registry, no injected battle marks",38.0,focus)
+	await _motion_proof()
+	if "--contact-only" in OS.get_cmdline_user_args():await _finish();return
+	await _shot("contact_close","Close combat · both armies work against the crossing",16.0,focus)
 	await _shot("crowded_small","1152 × 720 · multiple sectors and simultaneous contacts",120.0,center,Vector2i(1152,720))
 	await _shot("continental","Automatic continental band · same armies and battles",900.0,center,Vector2i(1152,720))
 	T.set_color_mode("dark")
@@ -172,8 +184,136 @@ func _shot(key:String,words:String,zoom:float,at:Vector2,viewport:=Vector2i(1600
 	_check(Motion.reduced()==(key=="reduced"),"Effective motion mode survives resize in "+key)
 	_check((chart.fronts as Array).size()>=8,"Collected sectors remain present in "+key)
 	_check(overlay.band_override=="","Automatic scale band in "+key)
+	var overlap_pairs:=0
+	var counters:Array=overlay.get("counter_rects")
+	if key in ["perimeter","crowded_small"]:_check(counters.size()==16,"All sixteen army cards remain present in "+key)
+	for i in counters.size():
+		for j in range(i+1,counters.size()):
+			if (counters[i] as Rect2).intersection(counters[j]).get_area()>1.0:overlap_pairs+=1
+	_check(overlap_pairs==0,"Army cards remain separately readable in "+key)
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		_check(get_viewport().get_texture().get_image().save_png(directory.path_join(key+".png"))==OK,"Saved "+key)
-	captures.append({"key":key,"fronts":(chart.fronts as Array).size(),"battles":(chart.battles as Array).size(),"band":overlay.call("_band"),"viewport":str(viewport),"reduced_motion":Motion.reduced(),"palette":T.color_mode,"spatial_crossings":crossings})
+	captures.append({"key":key,"fronts":(chart.fronts as Array).size(),"battles":(chart.battles as Array).size(),"band":overlay.call("_band"),"viewport":str(viewport),"reduced_motion":Motion.reduced(),"palette":T.color_mode,"spatial_crossings":crossings,"counter_count":counters.size(),"counter_overlap_pairs":overlap_pairs})
 	print("BORDER_COLLECTION_PLATE ",key," fronts=",(chart.fronts as Array).size()," battles=",(chart.battles as Array).size()," band=",overlay.call("_band"))
+
+func _heat_metrics() -> Dictionary:
+	var out:={"ours":{"fronts":0,"deployed":0,"mobile":0,"peak":0.0,"hot_runs":0},"theirs":{"fronts":0,"deployed":0,"mobile":0,"peak":0.0,"hot_runs":0},"battles":[]}
+	for line:Dictionary in overlay.scene.get("fronts",[]):
+		var side:String="ours" if bool(line.get("ours",true)) else "theirs"
+		out[side].fronts+=1
+		out[side]["deployed" if bool(line.get("deployed",false)) else "mobile"]+=1
+		for heat:float in line.get("heat",PackedFloat32Array()):out[side].peak=maxf(float(out[side].peak),heat)
+	for battle:Dictionary in overlay.collect().get("battles",[]):
+		out.battles.append({"id":battle.get("id",""),"status":battle.get("status",""),"age_days":battle.get("age_days",-1)})
+	for run:Dictionary in overlay.get("hot_cache"):
+		var side:String="ours" if (run.get("ink",Overlay.THEIRS) as Color).is_equal_approx(Overlay.OURS) else "theirs"
+		out[side].hot_runs+=1
+	return out
+
+func _worm_regions(side:String,image:Image) -> Array[Rect2i]:
+	# Scope pixel comparisons to each side's actual hot ribbon neighbourhood,
+	# rather than accepting motion anywhere in the map or its HUD as evidence.
+	var regions:Array[Rect2i]=[]
+	var factor:Vector2=Vector2(image.get_size())/overlay.get_viewport_rect().size
+	var bounds:=Rect2i(Vector2i.ZERO,image.get_size())
+	for run:Dictionary in overlay.get("hot_cache"):
+		var own:bool=(run.get("ink",Overlay.THEIRS) as Color).is_equal_approx(Overlay.OURS)
+		if own!=(side=="ours"):continue
+		var points:PackedVector2Array=run.points
+		for i in range(1,points.size()):
+			var rect:=Rect2(points[i-1]*factor,Vector2.ZERO).expand(points[i]*factor).grow(22.0*factor.x)
+			regions.append(Rect2i(rect).intersection(bounds))
+	return regions
+
+static func _changed_pixels(a:Image,b:Image,regions:Array[Rect2i]) -> int:
+	var counted:Dictionary={}
+	var changed:=0
+	for region:Rect2i in regions:
+		for y in range(region.position.y,region.end.y):
+			for x in range(region.position.x,region.end.x):
+				var key:=y*a.get_width()+x
+				if counted.has(key):continue
+				counted[key]=true
+				var before:=a.get_pixel(x,y);var after:=b.get_pixel(x,y)
+				if not before.is_equal_approx(after):changed+=1
+	return changed
+
+func _pulse_image() -> Image:
+	(overlay.get("pulse_layer") as Control).queue_redraw()
+	await _frames(3)
+	await RenderingServer.frame_post_draw
+	return get_viewport().get_texture().get_image()
+
+func _ribbon_only_image() -> Image:
+	# Controlled rendering diagnostic only: suppress each decorative battle
+	# pulse while retaining the unmodified production scene and hot ribbons.
+	# A pulsing ring or wash can otherwise change pixels over a static worm.
+	var caption_before:=caption.text
+	caption.text="TEST · Controlled ribbon diagnostic · decorative ring and wash suppressed\nProduction scene and hot geometry unchanged · cosmetic pulse flags restored after this frame"
+	await _frames(3)
+	var entries:Array=overlay.get("battle_cache")
+	var previous:Array=[]
+	var scene_before:=hash(overlay.scene)
+	var heat_before:=hash(overlay.get("hot_cache"))
+	for entry:Dictionary in entries:
+		previous.append(bool(entry.get("live",false)));entry.live=false
+	var result:Image=await _pulse_image()
+	for i in entries.size():entries[i].live=previous[i]
+	caption.text=caption_before
+	_check(hash(overlay.scene)==scene_before and hash(overlay.get("hot_cache"))==heat_before,"Controlled pulse suppression preserves scene and fighting geometry")
+	return result
+
+func _motion_proof() -> void:
+	# Let geometry finish approaching its target before comparing pixels. All
+	# simulation nodes remain frozen: only the production overlay process runs.
+	for _i in 80:overlay.call("_process",0.1)
+	await _frames(4)
+	var metrics:=_heat_metrics()
+	for side in ["ours","theirs"]:
+		_check(float(metrics[side].peak)>0.06,"Real contact heats the "+side+" formation")
+		_check(int(metrics[side].hot_runs)>0,"Real contact draws a "+side+" fighting ribbon")
+	if DisplayServer.get_name()=="headless":
+		captures.append({"key":"contact_motion","heat":metrics,"pixels":"GPU required"});return
+	caption.text="TEST · Same real contact, two animation phases · no campaign tick\nAuthored army exercise · production collection on copied terrain"
+	terrain.call("_set_game_speed",1)
+	overlay.call("_process",0.25)
+	var first:Image=await _pulse_image()
+	var clock_a:=float(overlay.anim_clock)
+	_check(first.save_png(directory.path_join("contact_a.png"))==OK,"Saved timed contact A")
+	var ribbon_a:Image=await _ribbon_only_image()
+	_check(ribbon_a.save_png(directory.path_join("worm_only_a.png"))==OK,"Saved controlled ribbon A")
+	overlay.call("_process",0.73)
+	var second:Image=await _pulse_image()
+	_check(second.save_png(directory.path_join("contact_b.png"))==OK,"Saved timed contact B")
+	var ribbon_b:Image=await _ribbon_only_image()
+	_check(ribbon_b.save_png(directory.path_join("worm_only_b.png"))==OK,"Saved controlled ribbon B")
+	var changes:={}
+	for side in ["ours","theirs"]:
+		changes[side]=_changed_pixels(ribbon_a,ribbon_b,_worm_regions(side,ribbon_b))
+		_check(int(changes[side])>8,"Real "+side+" fighting ribbon changes pixels with time")
+	terrain.call("_set_game_speed",0)
+	var stopped:=float(overlay.anim_clock)
+	var paused_a:Image=await _ribbon_only_image()
+	for _i in 6:overlay.call("_process",0.25)
+	var paused_b:Image=await _ribbon_only_image()
+	_check(is_equal_approx(stopped,float(overlay.anim_clock)),"Paused production clock stays fixed")
+	var paused_changes:={}
+	for side in ["ours","theirs"]:
+		paused_changes[side]=_changed_pixels(paused_a,paused_b,_worm_regions(side,paused_b))
+		_check(int(paused_changes[side])==0,"Paused "+side+" fighting ribbon is pixel-stable")
+	_set_motion(true)
+	terrain.call("_set_game_speed",1)
+	# Force a chart rebuild after the actual setting changes, matching the
+	# redraw that resizing and normal camera movement can cause in play.
+	overlay.queue_redraw();await _frames(3)
+	var reduced_a:Image=await _ribbon_only_image()
+	overlay.call("_process",0.73)
+	var reduced_b:Image=await _ribbon_only_image()
+	var reduced_changes:={}
+	for side in ["ours","theirs"]:
+		reduced_changes[side]=_changed_pixels(reduced_a,reduced_b,_worm_regions(side,reduced_b))
+		_check(int(reduced_changes[side])==0,"Reduced-motion "+side+" fighting ribbon is pixel-stable")
+	_set_motion(false);terrain.call("_set_game_speed",0)
+	captures.append({"key":"contact_motion","heat":metrics,"clock_a":clock_a,"clock_b":stopped,"comparison":"Controlled decorative pulse suppression: battle_cache live flags false only for worm_only images and comparisons, restored immediately; scene and hot geometry untouched","changed_pixels":changes,"paused_changed_pixels":paused_changes,"reduced_changed_pixels":reduced_changes})
+	print("BORDER_CONTACT_MOTION ",JSON.stringify(captures[-1]))
