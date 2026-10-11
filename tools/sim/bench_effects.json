@@ -1,0 +1,666 @@
+{
+ "_doc": "bench_scan.py: percent change at the year below when one number is raised by a quarter (leaders' balanced path, good land, one town).",
+ "year": 200,
+ "bump": 1.25,
+ "rev": "dc0bf1d1",
+ "base": {
+  "population": 911.5192646745818,
+  "life_expectancy": 28.338974946087824,
+  "infant_mortality": 198.456587812932,
+  "food_days": 30.408155508981626,
+  "known": 615.0,
+  "goods_per_head": 5.011565187932527,
+  "field_strength": 55.51758192956041,
+  "home_quality": 0.6545593630827687,
+  "crisis_deaths": 0.0
+ },
+ "effects": {
+  "model.BASE_ALLOC.Food": {
+   "food_days": 3.7,
+   "field_strength": 1.1
+  },
+  "model.BASE_ALLOC.Survey": {
+   "field_strength": -2.8,
+   "home_quality": -1.3
+  },
+  "model.BASE_ALLOC.Extraction": {
+   "goods_per_head": -1.2,
+   "field_strength": -5.0,
+   "home_quality": -2.4
+  },
+  "model.BASE_ALLOC.Construction": {
+   "field_strength": -4.0,
+   "home_quality": 6.5
+  },
+  "model.BASE_ALLOC.Crafting": {
+   "goods_per_head": 1.8,
+   "field_strength": -2.4,
+   "home_quality": -1.2
+  },
+  "model.BASE_ALLOC.Logistics": {
+   "field_strength": -2.4,
+   "home_quality": -1.2
+  },
+  "model.BASE_ALLOC.Knowledge": {},
+  "model.BASE_ALLOC.Administration": {
+   "population": 1.4,
+   "infant_mortality": -1.9
+  },
+  "model.BASE_ALLOC.Defense": {
+   "field_strength": 23.3
+  },
+  "model.LEARNING_CAP.balanced": {
+   "known": 2.1,
+   "field_strength": -1.4
+  },
+  "model.LEARNING_CAP.growth": {},
+  "model.LEARNING_CAP.making": {},
+  "model.LEARNING_CAP.war": {},
+  "model.LEARNING_CAP.building": {},
+  "model.LEARNING_CAP.learning": {},
+  "model.LEARNERS_KEPT": {},
+  "model.LEARNERS_KEPT_MOST": {},
+  "model.INQUIRY_CAP": {},
+  "model.LABOR_EXTRAS.Food": {
+   "field_strength": -1.0
+  },
+  "model.LABOR_EXTRAS.Extraction": {},
+  "model.LABOR_EXTRAS.Construction": {},
+  "model.LABOR_EXTRAS.Defense": {},
+  "model.LABOR_EXTRAS.Survey": {},
+  "model.LABOR_EXTRAS.Logistics": {},
+  "model.LABOR_EXTRAS.Crafting": {},
+  "model.LABOR_EXTRAS.Knowledge": {},
+  "model.LABOR_EXTRAS.Administration": {},
+  "model.FOUNDING_PREGNANCY_SHARE": {},
+  "model.ERA_BURDEN.under5": {
+   "life_expectancy": -9.1,
+   "infant_mortality": 20.9
+  },
+  "model.ERA_BURDEN.child": {
+   "population": -1.1,
+   "life_expectancy": -1.5,
+   "field_strength": -1.2
+  },
+  "model.ERA_BURDEN.adult": {
+   "population": -5.0,
+   "life_expectancy": -4.1,
+   "field_strength": -7.2,
+   "home_quality": -1.7
+  },
+  "model.ERA_BURDEN.elder": {
+   "life_expectancy": -1.7
+  },
+  "model.ERA_BURDEN.neonatal": {
+   "infant_mortality": 2.2
+  },
+  "model.ERA_BURDEN.maternal": {},
+  "model.EXCESS_WEIGHT.under5": {},
+  "model.EXCESS_WEIGHT.child": {},
+  "model.EXCESS_WEIGHT.adult": {},
+  "model.RELIEF_CHANNELS.health_protection": {},
+  "model.RELIEF_CHANNELS.sanitation": {},
+  "model.RELIEF_CHANNELS.water_safety": {},
+  "model.RELIEF_CHANNELS.disease_exposure": {},
+  "model.RELIEF_POWER": {
+   "infant_mortality": 1.2
+  },
+  "model.MODERN.MODERN_BURDEN_LIFT": {},
+  "model.MODERN.MODERN_TABLE_ONSET": {},
+  "model.MODERN.MODERN_TABLE_FULL": {},
+  "model.MODERN.MODERN_TABLE_DEPTH": {},
+  "model.MODERN.MODERN_SURVIVAL_LIMIT": {},
+  "model.SURPLUS_RELEASE.SURPLUS_RELEASE_MARGIN": {
+   "food_days": 44.7
+  },
+  "model.SURPLUS_RELEASE.RESERVE_TARGET_DAYS": {
+   "food_days": 23.9,
+   "field_strength": -1.9
+  },
+  "model.SURPLUS_RELEASE.RESERVE_MARGIN": {
+   "food_days": 1.1
+  },
+  "model.BURDEN_OVERLAP_FLOOR": {},
+  "model.PREMODERN_FECUNDITY": {
+   "population": 14.2,
+   "life_expectancy": -2.5,
+   "infant_mortality": 3.0,
+   "known": 1.1,
+   "field_strength": 13.1
+  },
+  "model.FECUNDITY_KNEE": {
+   "population": 8.4,
+   "life_expectancy": -1.4,
+   "infant_mortality": 1.8,
+   "field_strength": 7.8
+  },
+  "model.FECUNDITY_SLOPE": {
+   "population": 1.9,
+   "field_strength": 1.8
+  },
+  "model.TERRITORY_SLOPE": {},
+  "model.CARER_CROWDING": {
+   "population": 1.8,
+   "field_strength": 1.7
+  },
+  "model.CULTIVATION_YIELD": {
+   "food_days": 1.8,
+   "goods_per_head": 1.2,
+   "field_strength": 5.4,
+   "home_quality": 2.5
+  },
+  "model.HARVEST_SETTLED": {
+   "infant_mortality": -1.8,
+   "food_days": 4.0,
+   "goods_per_head": 3.0,
+   "field_strength": 13.5,
+   "home_quality": 5.2
+  },
+  "model.HARVEST_SETTLED_YEAR": {
+   "field_strength": 3.9,
+   "home_quality": 1.5
+  },
+  "model.CROWDING_ONSET": {
+   "population": 16.2,
+   "known": 1.3,
+   "field_strength": 15.0
+  },
+  "model.CROWDING_MORTALITY": {
+   "life_expectancy": -1.3,
+   "infant_mortality": 1.5
+  },
+  "model.CROWDING_CONCEPTION": {
+   "population": -6.3,
+   "life_expectancy": 1.1,
+   "infant_mortality": -1.3,
+   "field_strength": -5.8
+  },
+  "model.SPARE_LAND_ONSET": {},
+  "model.SPARE_LAND_CONCEPTION": {},
+  "model.SPARE_LAND_HEALTH": {},
+  "model.FRONTIER_ONSET": {},
+  "model.FRONTIER_CONCEPTION": {},
+  "model.SPECIALIST_UPKEEP.labor_demand": {},
+  "model.SPECIALIST_UPKEEP.fatigue": {},
+  "model.SPECIALIST_UPKEEP.cohesion": {},
+  "model.SPECIALIST_UPKEEP.conception_support": {},
+  "model.SPECIALIST_UPKEEP.food_storage": {},
+  "model.WATCH_FREE_SHARE": {},
+  "model.WATCH_UPKEEP": {},
+  "model.GUARD.GUARD_SHARE": {},
+  "model.GUARD.GUARD_MIN": {},
+  "model.FOOD_FLOOR_OF_TYPICAL": {},
+  "model.SPECIALIZATION_HEADROOM": {},
+  "model.INFANT_LOSS_REPLACEMENT": {
+   "population": 1.9,
+   "field_strength": 1.8
+  },
+  "model.SPECIALIZATION_NEGLECT": {},
+  "model.MODERN_SURVIVAL_WEIGHT.under5": {},
+  "model.MODERN_SURVIVAL_WEIGHT.child": {},
+  "model.MODERN_SURVIVAL_WEIGHT.adult": {},
+  "model.MODERN_SURVIVAL_WEIGHT.elder": {},
+  "model.MODERN_SURVIVAL_WEIGHT.neonatal": {},
+  "model.MODERN_SURVIVAL_WEIGHT.maternal": {},
+  "model.TRANSITION.TRANSITION_URBAN": {},
+  "model.TRANSITION.URBAN_ONSET": {},
+  "model.TRANSITION.TRANSITION_SCHOOLING": {},
+  "model.TRANSITION.LITERACY_ONSET": {},
+  "model.TRANSITION.TRANSITION_MAX": {},
+  "model.URBAN.URBAN_SCALE": {},
+  "model.URBAN.URBAN_POWER": {},
+  "model.URBAN.URBAN_MIN_POPULATION": {},
+  "model.URBAN.URBAN_FULL_POPULATION_SPAN": {},
+  "model.FOOD_CARE.LEAN_DAYS": {},
+  "model.FOOD_CARE.LEAN_WEIGHT": {},
+  "model.FOOD_CARE.FRESH_HEALTH": {},
+  "model.FOOD_CARE.FRESH_PENALTY": {},
+  "model.FOOD_CARE.FRESH_EVEN": {},
+  "model.FOOD_CARE.CARRY_SHARE": {},
+  "model.FOOD_CARE.CARRY_FRESH_CUT": {},
+  "model.FOOD_CARE.CARRY_REACH": {},
+  "model.FOOD_CARE.KEEP_SHARE": {},
+  "model.FOOD_CARE.KEEP_STORED_CUT": {},
+  "model.FOOD_CARE.CARE_SHARE": {
+   "population": -1.5,
+   "infant_mortality": 2.2,
+   "field_strength": -1.4
+  },
+  "model.FOOD_CARE.CARE_HEALTH": {},
+  "model.FOOD_CARE.CARE_SETTLE_DAYS": {},
+  "model.CARER_COVER.childcare": {},
+  "model.CARER_COVER.remedies": {},
+  "model.CARER_COVER.water": {},
+  "model.CARER_COVER.wounds": {},
+  "model.CARER_BURDEN.under5": {
+   "life_expectancy": 1.2,
+   "infant_mortality": -2.6
+  },
+  "model.CARER_BURDEN.child": {},
+  "model.CARER_BURDEN.neonatal": {},
+  "model.CARER_BURDEN.maternal": {},
+  "model.ATTENTION_STEPS": {},
+  "model.QUESTION_EXPONENT": {
+   "known": 1.3
+  },
+  "model.NORMAL.LEARNER_PACE": {
+   "known": 1.8
+  },
+  "model.NORMAL.LEAD_YEARS_PER_DOUBLING": {},
+  "model.NORMAL.LEAD_FALL_DOUBLINGS": {},
+  "model.LEARNER_GOODS.LEARNER_DAYS_PER_GOOD": {},
+  "model.LEARNER_GOODS.GOODS_FLOOR": {},
+  "model.LEARNER_GOODS.LEAD_GOODS_YEARS": {},
+  "model.LEARNER_GOODS.LEAD_UPKEEP_YEARS": {},
+  "model.FOUNDING.FOUNDING_WORK": {},
+  "model.FOUNDING.FOUNDING_HOLD_YEARS": {},
+  "model.FOUNDING.FOUNDING_FADE_YEARS": {},
+  "model.GOODS_K.BASE_TARGET_PER_PERSON": {},
+  "model.GOODS_K.DAILY_WEAR": {},
+  "model.GOODS_K.CRAFT_SHARE": {},
+  "model.GOODS_K.BASE_RATE": {},
+  "model.GOODS_K.TECHNIQUE_OUTPUT": {},
+  "model.GOODS_TARGETS.controlled_flaking": {},
+  "model.GOODS_TARGETS.cordage": {},
+  "model.GOODS_TARGETS.food_drying": {},
+  "model.GOODS_TARGETS.smoking": {},
+  "model.GOODS_TARGETS.hafted_tools": {},
+  "model.GOODS_TARGETS.basketry": {},
+  "model.GOODS_TARGETS.clay_shaping": {},
+  "model.GOODS_TARGETS.pit_firing": {},
+  "model.GOODS_TARGETS.clay_tempering": {},
+  "model.GOODS_TARGETS.sealed_vessels": {},
+  "model.GOODS_TARGETS.joinery": {},
+  "model.REPLAN_STEPS": {},
+  "model.PATH_FOOD_LEAN.growth": {},
+  "model.RESERVE_FOOD_WISH": {},
+  "model.RULER.RULER_RELEASE_DAYS": {},
+  "model.RULER.FOOD_CEILING_SHARE": {},
+  "model.RULER.RESERVE_TARGET_DAYS": {},
+  "model.RULER.RESERVE_MARGIN": {},
+  "model.LAND.PEOPLE_PER_SEARCHER": {},
+  "model.LAND.RISE_YEAR": {},
+  "model.LAND.SAG_YEAR": {},
+  "model.LAND.YIELD_BASE": {},
+  "model.LAND.YIELD_SPAN": {},
+  "model.LAND.FIND_RATE": {},
+  "model.LAND.HALF": {},
+  "model.GOODS_X.SPECIALIZATION": {},
+  "model.GOODS_X.MAKERS_START": {
+   "goods_per_head": -2.3
+  },
+  "model.GOODS_X.MAKERS_FULL": {
+   "goods_per_head": -3.5
+  },
+  "model.GOODS_X.HOLD_MORE": {
+   "goods_per_head": 3.5
+  },
+  "model.GOODS_X.SURPLUS_PER_HEAD": {
+   "goods_per_head": 23.5
+  },
+  "model.GOODS_X.RAW_PER_UNIT": {},
+  "model.GOODS_X.REFERENCE_EFFICIENCY": {},
+  "model.GOODS_BASKET.Fiber Plants": {},
+  "model.GOODS_BASKET.Timber": {},
+  "model.GOODS_BASKET.Clay": {},
+  "model.GOODS_BASKET.Stone": {},
+  "model.GOODS_BASKET.Flint": {},
+  "model.BASKET_YIELD": {},
+  "model.PRICES.Food": {},
+  "model.PRICES.Timber": {},
+  "model.PRICES.Stone": {},
+  "model.PRICES.Clay": {},
+  "model.PRICES.Fiber Plants": {},
+  "model.PRICES.Salt": {},
+  "model.PRICES.Medicinal Plants": {},
+  "model.PRICES.Copper Ore": {},
+  "model.PRICES.Tin Ore": {},
+  "model.PRICES.Iron Ore": {},
+  "model.PRICES.Coal": {},
+  "model.PRICES.Civilian Goods": {},
+  "model.PRICES.Transport Carts": {},
+  "model.PRICES.Coin": {},
+  "model.PRICES.Arms": {},
+  "model.ARMS_SHARE": {},
+  "model.ARMS_WEAR_DAY": {},
+  "model.WATCH.MARTIAL_FROM": {},
+  "model.WATCH.MARTIAL_FULL": {},
+  "model.WATCH.MARTIAL_DRILL": {},
+  "model.WATCH.MARTIAL_PACE": {},
+  "model.WATCH.START_DRILL": {},
+  "model.WARRIOR_WEIGHT": {
+   "field_strength": 16.1
+  },
+  "model.LEVY_TRAINING_DAYS": {},
+  "model.ESTABLISHMENT_DAYS": {},
+  "model.SITE_YEARS": {},
+  "model.RAW_START": {},
+  "model.RAW_PER_HEAD_HELD": {},
+  "model.BUILD_DRAW": {},
+  "model.STALE.STALE_GRACE": {},
+  "model.STALE.STALE_DOUBLING": {},
+  "model.STALE.STALE_ABANDON": {},
+  "model.STALE.DEAD_END_PENALTY": {},
+  "model.STALE.DEAD_END_VIABLE": {
+   "known": 1.8
+  },
+  "model.EARLY.OPEN_JITTER": {},
+  "model.EARLY.OPEN_JITTER_MAX": {},
+  "model.EARLY.AHEAD_STEP_YEARS": {
+   "known": 1.3
+  },
+  "model.FOUNDATION_HORIZON": {},
+  "model.SWITCH_CHECK_DAYS": {},
+  "model.SWITCH_MARGIN": {},
+  "model.EARLY_SCORE_PER_WORK": {},
+  "model.NEAR_AGE_YEARS": {},
+  "model.TEAMS.TEAMS_BASE": {},
+  "model.TEAMS.TEAMS_PER_TENFOLD": {},
+  "model.TEAMS.TEAMS_REF": {},
+  "model.TEAMS.TEAM_MAX_WAIT_YEARS": {},
+  "model.TEAMS.TEAM_TURN_YEARS": {},
+  "model.TEAMS.PROOF_ADOPTION": {},
+  "model.AGE_BUCKET_SCORE": {},
+  "model.LEVER_LIMITS.fresh_spoilage": {},
+  "model.LEVER_LIMITS.stored_spoilage": {},
+  "model.LEVER_LIMITS.preservation": {},
+  "model.LEVER_LIMITS.diet": {},
+  "model.LEVER_LIMITS.cultivation": {},
+  "model.LEVER_LIMITS.gathering": {},
+  "model.ART_ERA_BONUS_SHARE": {},
+  "crisis.HOME_SICKNESS": {
+   "crisis_deaths": 23.8
+  },
+  "crisis.HOME_FIRE": {
+   "crisis_deaths": 6.4
+  },
+  "crisis.BASE_SICKNESS": {
+   "crisis_deaths": 17.6
+  },
+  "crisis.BASE_FIRE": {},
+  "crisis.BASE_FLOOD_WET": {},
+  "crisis.BASE_FLOOD_DRY": {},
+  "crisis.CROWD_REF": {
+   "crisis_deaths": -7.3
+  },
+  "crisis.HEALTH_REF": {},
+  "crisis.POOL_REF": {
+   "crisis_deaths": 15.8
+  },
+  "crisis.WATER_SHORT_BETA": {},
+  "crisis.CLEAN_WATER_BETA": {},
+  "crisis.WATER_Q_MAX": {},
+  "crisis.SPACED_FIRE_FACTOR": {},
+  "crisis.QUIET_AFTER_FOUNDING": {
+   "crisis_deaths": 16.7
+  },
+  "crisis.ONSET_GAP": {
+   "crisis_deaths": -8.8
+  },
+  "crisis.ACTIVE_MAX": {
+   "crisis_deaths": -5.4
+  },
+  "crisis.FLOOR_SHARE": {},
+  "crisis.FLOOR_PEOPLE": {},
+  "crisis.SEVERE.hunger": {},
+  "crisis.SEVERE.sickness": {},
+  "crisis.SEVERE.stranger": {},
+  "crisis.DEATH_FACTOR.children_apart": {},
+  "crisis.DEATH_FACTOR.mothers": {},
+  "crisis.DEATH_FACTOR.far_camp": {},
+  "crisis.DEATH_FACTOR.send_away": {},
+  "crisis.DEATH_FACTOR.roots": {},
+  "crisis.DEATH_FACTOR.ration": {
+   "crisis_deaths": 9.4
+  },
+  "crisis.DEATH_FACTOR.hunt": {},
+  "crisis.DEATH_FACTOR.ask": {},
+  "crisis.DEATH_FACTOR.seed": {},
+  "crisis.DEATH_FACTOR.pots": {},
+  "crisis.DEATH_FACTOR.herd": {},
+  "crisis.DEATH_FACTOR.speak": {},
+  "crisis.DEATH_FACTOR.apart": {},
+  "crisis.DEATH_FACTOR.tend": {
+   "crisis_deaths": 5.2
+  },
+  "crisis.DEATH_FACTOR.herbs": {},
+  "crisis.DEATH_FACTOR.water": {},
+  "crisis.DEATH_FACTOR.burn": {},
+  "crisis.DEATH_FACTOR.rite": {},
+  "crisis.DEATH_FACTOR.close": {},
+  "crisis.DEATH_FACTOR.healers": {},
+  "crisis.DEATH_FACTOR.hardy": {},
+  "crisis.DEATH_FACTOR.raid": {},
+  "crisis.APART_CUSTOM_FACTOR": {
+   "crisis_deaths": 5.5
+  },
+  "crisis.VOLCANIC_NOTABLE": {},
+  "crisis.DROUGHT_LOOKAHEAD": {},
+  "crisis.REBUILD_APART_DAYS": {},
+  "crisis.REBUILD_APART_EFFECTS.labor_multiplier": {},
+  "crisis.REBUILD_APART_EFFECTS.health_target": {},
+  "crisis.LEAN_DAYS": {},
+  "crisis.STORE_GATE": {},
+  "fabric.K.TICK_DAYS": {},
+  "fabric.K.HOME_HEALTH": {},
+  "fabric.K.HOME_COHESION": {},
+  "fabric.K.HOME_ILLNESS": {},
+  "fabric.K.HOME_SICKNESS": {},
+  "fabric.K.HOME_FIRE": {},
+  "fabric.K.ROAD_FULL": {},
+  "fabric.K.ROAD_WEAR": {},
+  "fabric.K.ROAD_STONE": {},
+  "fabric.K.ROAD_LOGISTICS": {},
+  "fabric.K.HOME_WEATHER": {},
+  "fabric.K.HOMES_AHEAD": {},
+  "fabric.K.HOMES_SHORT": {},
+  "fabric.K.CIVIC_SHARE": {},
+  "fabric.K.REPAIR_SHARE": {},
+  "fabric.K.WALL_UPKEEP": {},
+  "fabric.K.WALL_WEAR": {},
+  "fabric.K.GREAT_CREW_SHARE": {},
+  "fabric.K.BEAUTY_SCALE": {},
+  "fabric.K.BEAUTY_WEAR": {},
+  "fabric.K.ARTISTRY_EACH": {},
+  "fabric.K.BEAUTY_MATERIALS": {},
+  "fabric.K.BEAUTY_COHESION": {},
+  "fabric.K.BEAUTY_CULTURE": {},
+  "fabric.K.WORKS_FULL": {},
+  "fabric.K.WORKS_WEAR": {},
+  "fabric.K.WORKSHOP_MAKING": {},
+  "fabric.K.GRANARY_ROT": {},
+  "fabric.K.KILN_BUILDING": {},
+  "fabric.K.STOREHOUSE_LOGISTICS": {},
+  "fabric.K.STOREHOUSE_EXTRACTION": {},
+  "fabric.K.WALL_SHARE": {},
+  "fabric.K.CRAFT_YEARS": {
+   "home_quality": 10.0
+  },
+  "fabric.K.CRAFT_PER_LEVEL": {
+   "home_quality": -13.1
+  },
+  "fabric.K.CRAFT_MAX": {},
+  "fabric.K.CRAFT_WORK": {},
+  "fabric.K.CRAFT_RESEARCH": {},
+  "fabric.K.CRAFT_SIGNAL": {},
+  "fabric.K.CRAFT_WALLS": {},
+  "fabric.K.CRAFT_WALL_QUALITY": {},
+  "fabric.K.STONE_DEFENSE": {},
+  "fabric.K.BUILDER_WALL_WEIGHT": {},
+  "fabric.K.STONE_STAGE": {},
+  "fabric.K.STONE_WATCH": {},
+  "fabric.K.FORT_STRENGTH": {},
+  "fabric.K.BASTION_BONUS": {},
+  "fabric.K.WALL_WISH": {},
+  "fabric.K.WALL_WISH_FROM": {},
+  "fabric.K.WALL_WISH_MAX": {},
+  "fabric.K.GREAT_CRAFT": {},
+  "fabric.K.GREAT_BUILDERS": {},
+  "fabric.K.GREAT_CREW": {},
+  "fabric.K.GREAT_MATERIALS": {},
+  "fabric.K.GREAT_PAYOFF": {},
+  "fabric.K.RESERVE": {},
+  "fabric.WORKS_LOADS": {},
+  "fabric.SPLIT.homes": {},
+  "fabric.SPLIT.roads": {},
+  "fabric.SPLIT.works": {},
+  "fabric.SPLIT.beauty": {},
+  "fabric.FABRIC_RESERVE": {},
+  "fabric.DAILY_SHARE": {},
+  "fabric.WORK_PER_HAND": {},
+  "fabric.SPARE": {},
+  "fabric.DEFENSE_FOOD_DAYS": {},
+  "fabric.DEFENSE_MAX_DAYS": {},
+  "fabric.DANGER.war": {},
+  "fabric.DANGER.attacked": {},
+  "fabric.DANGER.hostile": {},
+  "fabric.DANGER.tempting": {},
+  "fabric.DANGER.neighbours": {},
+  "fabric.AMBITION_WORK.modest": {},
+  "fabric.AMBITION_WORK.grand": {},
+  "fabric.AMBITION_WORK.audacious": {},
+  "fabric.AMBITION_DEMAND.modest": {},
+  "fabric.AMBITION_DEMAND.grand": {},
+  "fabric.AMBITION_DEMAND.audacious": {},
+  "fabric.AMBITION_RISK.modest": {},
+  "fabric.AMBITION_RISK.grand": {},
+  "fabric.AMBITION_RISK.audacious": {},
+  "fabric.AMBITION_PAY.modest": {},
+  "fabric.AMBITION_PAY.grand": {},
+  "fabric.AMBITION_PAY.audacious": {},
+  "fabric.AMBITION_TRIUMPH.modest": {},
+  "fabric.AMBITION_TRIUMPH.grand": {},
+  "fabric.AMBITION_TRIUMPH.audacious": {},
+  "fabric.OUTCOME_PAY.triumph": {},
+  "fabric.OUTCOME_PAY.success": {},
+  "fabric.OUTCOME_PAY.flawed": {},
+  "fabric.RING_WORK": {},
+  "fabric.STONE_QUALITY": {},
+  "fabric.TALENT": {},
+  "fabric.WORK_INTERVAL": {},
+  "fabric.WORK_FOOD_DAYS": {},
+  "fabric.WORK_RISK": {},
+  "fabric.RENOWN_SCALE": {},
+  "fabric.WORKS_CAP": {},
+  "c.modern_era": {},
+  "c.adoption_pace": {},
+  "c.precedent_bonus": {},
+  "c.precedent_cap": {},
+  "c.era_window": {},
+  "c.era_doubling": {},
+  "c.reference_infant_loss": {
+   "population": -2.2,
+   "field_strength": -2.0
+  },
+  "c.good_conditions": {},
+  "c.spoilage_fresh": {},
+  "c.spoilage_stored": {
+   "field_strength": -2.0
+  },
+  "c.standing_harvest": {},
+  "c.yield_calibration": {
+   "infant_mortality": -1.1,
+   "food_days": 3.7,
+   "goods_per_head": 2.1,
+   "field_strength": 10.0,
+   "home_quality": 4.5
+  },
+  "c.food_work_share": {
+   "infant_mortality": -1.8,
+   "food_days": 4.1,
+   "goods_per_head": 3.0,
+   "field_strength": 13.6,
+   "home_quality": 6.3
+  },
+  "p.substeps_per_month": {},
+  "p.seasonality_c": {
+   "infant_mortality": 1.2,
+   "food_days": 1.8,
+   "field_strength": -6.1,
+   "home_quality": -1.8
+  },
+  "p.mean_temperature_c": {},
+  "p.disease_pressure": {},
+  "p.cold_pressure": {},
+  "p.fishing_access": {
+   "field_strength": 1.4
+  },
+  "p.knowledge_effective_factor": {
+   "known": 2.1
+  },
+  "p.food_buffer": {},
+  "p.food_pct_min": {},
+  "p.food_pct_max": {},
+  "p.food_adjust_rate": {
+   "field_strength": -2.0
+  },
+  "p.shelter_bonus": {},
+  "p.cohesion_offset": {},
+  "p.institution_offset": {},
+  "p.housing_build_rate": {},
+  "p.housing_target_ratio": {},
+  "p.completed_per_year": {},
+  "p.completed_max": {},
+  "p.storage_pits_year": {},
+  "p.storage_base_rations": {},
+  "p.settlement_population": {},
+  "p.accessible_deposits_per_decade": {},
+  "p.contact_year": {},
+  "p.openness": {},
+  "p.founding_works": {},
+  "p.build_delay_years": {},
+  "p.fresh_spoil_mult": {},
+  "p.knowledge_gain_mult": {},
+  "p.other_mortality": {
+   "population": -1.3,
+   "life_expectancy": -1.4,
+   "field_strength": -1.5
+  },
+  "p.ai_settlement_until": {},
+  "p.found_crowding": {},
+  "p.found_interval_years": {},
+  "p.found_from_year": {},
+  "p.harvest_mult": {
+   "infant_mortality": -1.8,
+   "food_days": 4.1,
+   "goods_per_head": 3.0,
+   "field_strength": 13.6,
+   "home_quality": 6.3
+  },
+  "p.throughput": {
+   "known": 1.8
+  },
+  "p.throughput_growth": {},
+  "p.opening_gate_delay_years": {},
+  "p.signal_scale": {},
+  "p.resource_potential": {},
+  "p.throughput_growth_until": {},
+  "p.goods_coverage": {},
+  "p.party_size": {},
+  "p.trip_days": {},
+  "p.cells_per_trip": {},
+  "p.ground_density": {},
+  "p.explored_area_cells": {},
+  "p.rival_claim_rate": {},
+  "p.legend_reach_cells": {},
+  "p.tune_research_pace": {
+   "known": 1.8
+  },
+  "p.tune_adoption_pace": {},
+  "p.tune_cap_scale": {
+   "population": 2.9,
+   "field_strength": 3.8
+  },
+  "p.tune_burden_scale": {
+   "population": -6.1,
+   "life_expectancy": -11.8,
+   "infant_mortality": 16.2,
+   "field_strength": -7.3,
+   "home_quality": -1.4
+  }
+ },
+ "failed": {
+  "model.LAND.RISE_MAX": "ValueError: cannot convert float NaN to integer",
+  "c.frontier_percentile": "IndexError: index 10 is out of bounds for axis 0 with size 10"
+ }
+}

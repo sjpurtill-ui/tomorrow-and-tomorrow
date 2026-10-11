@@ -28,6 +28,24 @@ python tools/sim/ingest_rc.py rc.log                                   # add res
 
 Requirements: Python 3.11 and numpy. The Godot executable is used only by `run_truth.py`. It defaults to the 4.7 console build under `C:\Users\sjpur\leviathan\tools\godot\...`, or set the `GODOT` environment variable. Every engine run uses `--headless` and an explicit `--path` for the worktree, and never touches the player's game.
 
+## The bench: set the numbers, run, compare (`bench.py`)
+
+```
+python tools/sim/bench.py                 # opens http://127.0.0.1:8765 (Windows: tools\sim_bench.ps1)
+python tools/sim/bench.py --check         # reads the numbers and runs one 5-year world; exit 0 = it works
+python tools/sim/bench_scan.py            # re-measure what each number moves -> bench_effects.json (about 15 minutes)
+```
+
+A local page over the surrogate for reading long runs without a terminal. On the left are the numbers: years and worlds (seeds), the founders and the land, who shares out the work (the leaders on a path, or the ruler's own split, with changes of course at set years), the research emphasis, new towns, crises and the shock world, and every game number the surrogate reads (454: the module constants of `model.py`, `crisis.py` and `fabric.py`, the scalar fields of `gamedata.Constants`, and `params.json`). On the right are the runs, each in one colour on every chart: a summary in sentences, headline tiles, about a hundred yearly charts (people, food, work, health, learning, making, the watch, homes and works, the nine strengths, crises), the landmark discoveries against their design bands, a table with a CSV of every year, and the first world's crises and discoveries in order.
+
+How it works, and what it does not do:
+
+- Every world is its own low-priority process (`bench_worker.run_seed`), at most the machine's processors less two, eight at most. A changed game number is assigned on the loaded modules of that process only. Nothing is written to the game, its saves or `params.json`.
+- Finished runs are kept as JSON under `tools/sim/bench_runs/` (ignored by git; the latest 40).
+- Under each number the page says what a quarter more of it moved by year 200 (`bench_effects.json`, written by `bench_scan.py`: the leaders' balanced path on good land with crises off; a number that moves nothing there is tried on the war path with new towns and on the learning path; the crisis numbers run with crises on over three worlds and report only their toll and the people's number). Re-run the scan after the game's rules change.
+- Plain names for the main dials are in `bench_labels.json`; every other number is listed under its game name with its file.
+- The bench is as true as the surrogate under it: when `check.py` reports formula drift or stale truth, the bench's runs carry the same drift.
+
 ## Files
 
 | File | Purpose |
@@ -37,6 +55,7 @@ Requirements: Python 3.11 and numpy. The Godot executable is used only by `run_t
 | `gdparse.py` | Reads constants straight out of GDScript. |
 | `params.json` | Constants that cannot be parsed, each with its source. The `calibrated` section holds the fitted values. |
 | `scenarios.json` | Player-policy knobs. The `path_<p>` scenarios mirror the truth probe (`--path`); `suites` names the people-first suite. The `sensible`/`poor`/`research`/`ai`/`artifacts` scenarios mirror the pre-overhaul truth (archived). |
+| `bench.py`, `bench_worker.py`, `bench.html` | The bench: a local page to set the numbers, run and compare (above). `bench_labels.json` names the main dials; `bench_scan.py` writes `bench_effects.json`. |
 | `crisis.py` | The crises: a seeded mirror of `crisis_unattended.gd` on `crisis_system.gd`'s hazards and tolls. |
 | `crisis_share.py` | Measures the crises' share of the age table by era and cohort for `scripts/crisis_background.gd` (`--apply` writes it). |
 | `paths.py` | The people-first suite and its one report: paths, extremes, switches, the founding years, milestones and flags against the benchmark bands. |

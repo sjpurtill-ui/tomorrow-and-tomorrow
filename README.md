@@ -74,4 +74,5 @@ sections, F12 the court, Esc backs out.
 gdUnit4 suites live in `tests/`; run one headless with
 `<godot> --headless --path . -s res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests/<suite>.gd --ignoreHeadlessMode`.
 The fast surrogate model of the civilization engine is in `tools/sim/`
-(`docs/research/SURROGATE_SIM.md`).
+(`docs/research/SURROGATE_SIM.md`). `python tools/sim/bench.py` opens its bench in
+the browser: set the numbers, run centuries in seconds, compare runs.

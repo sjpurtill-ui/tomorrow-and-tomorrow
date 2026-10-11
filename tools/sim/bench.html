@@ -1,0 +1,785 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulator</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  color-scheme:light;
+  --page:#f9f9f7;--surface:#fcfcfb;--raised:#ffffff;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;
+  --border:rgba(11,11,11,.10);--wash:rgba(11,11,11,.04);--accent:#2a78d6;--accent-ink:#ffffff;
+  --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--s4:#eda100;
+  --good:#006300;--bad:#b3261e;--changed:#fff3d6;--changed-edge:#eda100;
+}
+@media (prefers-color-scheme:dark){:root{
+  color-scheme:dark;
+  --page:#0d0d0d;--surface:#1a1a19;--raised:#222220;--ink:#ffffff;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;
+  --border:rgba(255,255,255,.10);--wash:rgba(255,255,255,.05);--accent:#3987e5;--accent-ink:#ffffff;
+  --s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;
+  --good:#0ca30c;--bad:#e66767;--changed:#3a2f12;--changed-edge:#c98500;
+}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+h1{font-size:18px;margin:0;font-weight:650}
+h2{font-size:16px;margin:0;font-weight:650}
+h3{font-size:13px;margin:0;font-weight:600}
+.sub{color:var(--ink2);font-size:13px}
+.small{font-size:12px;color:var(--ink2)}
+.mono{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--muted)}
+#app{display:grid;grid-template-columns:400px 1fr;height:100vh}
+#left{border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+#left header{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+#form{overflow:auto;flex:1;padding:4px 0 12px}
+#runbar{border-top:1px solid var(--border);padding:12px 16px;background:var(--raised)}
+#right{overflow:auto;min-width:0}
+.step{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--page);font-size:12px;font-weight:650;margin-right:8px;flex:none}
+details.grp{border-bottom:1px solid var(--border)}
+details.grp>summary{list-style:none;cursor:pointer;padding:11px 16px;display:flex;align-items:baseline;gap:8px;user-select:none}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary:before{content:"▸";color:var(--muted);font-size:11px;width:10px}
+details.grp[open]>summary:before{content:"▾"}
+details.grp>summary .t{font-weight:600}
+details.grp>summary .v{margin-left:auto;color:var(--ink2);font-size:12px;text-align:right}
+.body{padding:2px 16px 14px 34px}
+.row{display:flex;align-items:center;gap:8px;margin:6px 0}
+.row label{flex:1;min-width:0}
+.hint{color:var(--ink2);font-size:12px;margin:4px 0 8px}
+input[type=number],input[type=text],select{background:var(--raised);border:1px solid var(--border);border-radius:6px;padding:5px 8px;min-width:0}
+input[type=number]{width:84px;text-align:right;font-variant-numeric:tabular-nums}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chip{border:1px solid var(--border);background:var(--raised);border-radius:999px;padding:4px 11px;cursor:pointer;font-size:13px}
+.seg button:hover,.chip:hover{background:var(--wash)}
+.seg button.on,.chip.on{background:var(--ink);color:var(--page);border-color:var(--ink)}
+.btn{border:1px solid var(--border);background:var(--raised);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{background:var(--wash)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:650;padding:9px 18px;font-size:15px}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.link{border:none;background:none;padding:2px 4px;color:var(--accent);cursor:pointer;font-size:12px}
+.bar{height:6px;border-radius:3px;background:var(--wash);overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.knob{padding:8px 10px;border-radius:8px;margin:4px 0;border:1px solid transparent}
+.knob.changed{background:var(--changed);border-color:var(--changed-edge)}
+.knob .top{display:flex;align-items:center;gap:8px}
+.knob .nm{flex:1;min-width:0;font-weight:550}
+.knob .fx{font-size:12px;color:var(--ink2);margin-top:2px}
+.knob .was{font-size:12px;color:var(--ink2);white-space:nowrap}
+.gh{font-size:12px;font-weight:650;color:var(--ink2);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 2px}
+#right>header{position:sticky;top:0;z-index:5;background:var(--page);border-bottom:1px solid var(--border);padding:12px 20px 10px}
+#cards{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+#legend .k{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer}
+#legend .k.f{font-weight:650}
+.card{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 10px;width:270px;display:flex;flex-direction:column;gap:4px}
+.card.off{opacity:.62}
+.card.focus{box-shadow:0 0 0 2px var(--ink)}
+.card .hd{display:flex;align-items:center;gap:8px}
+.sw{width:14px;height:4px;border-radius:2px;flex:none}
+.card .nm{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card .acts{display:flex;gap:2px;flex-wrap:wrap}
+#nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
+main{padding:16px 20px 80px;max-width:1500px}
+#main{display:block}
+section{margin-bottom:28px;scroll-margin-top:110px}
+section>h2{margin-bottom:2px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-top:10px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.tile .v{font-size:24px;font-weight:650;line-height:1.2}
+.tile .d{font-size:12px}
+.up{color:var(--good)}.down{color:var(--bad)}
+.charts{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:12px;margin-top:10px}
+.charts.mini{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.chart{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px 6px}
+.chart .u{font-size:12px;color:var(--ink2);min-height:17px}
+.chart canvas{width:100%;height:190px;display:block;margin-top:4px}
+.charts.mini canvas{height:120px}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.18);display:none;max-width:320px}
+#tip .r{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#tip .r b{margin-left:auto;padding-left:14px;font-variant-numeric:tabular-nums}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-top:10px}
+.box p{margin:4px 0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--grid);font-variant-numeric:tabular-nums;white-space:nowrap}
+th{font-weight:600;color:var(--ink2);position:sticky;top:0;background:var(--surface)}
+th:first-child,td:first-child{text-align:left}
+td.l,th.l{text-align:left;white-space:normal}
+.scroll{overflow:auto;max-height:460px}
+.tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:12px;border:1px solid var(--border)}
+.tag.early{background:rgba(42,120,214,.14)}.tag.late{background:rgba(227,73,72,.16)}.tag.ok{background:rgba(12,163,12,.14)}
+.empty{padding:60px 20px;text-align:center;color:var(--ink2)}
+.err{color:var(--bad);white-space:pre-wrap;font-size:12px}
+@media (max-width:900px){#app{grid-template-columns:1fr;height:auto}#left{border-right:none}#form{max-height:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="left">
+    <header>
+      <h1>Simulator</h1>
+      <div class="sub">A fast model of the game's rules. Set the numbers, run centuries in seconds, compare. Nothing here changes the game or your saves.</div>
+    </header>
+    <div id="form"></div>
+    <div id="runbar">
+      <div class="row"><input type="text" id="runname" placeholder="Name this run (optional)" style="flex:1"></div>
+      <div class="row">
+        <button class="btn primary" id="go">▶ Run</button>
+        <div class="small" id="gosum" style="flex:1"></div>
+        <button class="btn" id="reset" title="Put every number back to the game's own">Reset all</button>
+      </div>
+    </div>
+  </aside>
+  <div id="right">
+    <header>
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <h2>Results</h2>
+        <div id="legend" style="display:flex;gap:14px;flex-wrap:wrap;align-items:center"></div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px" class="small">
+          Show years <input type="number" id="x0" value="0" min="0" style="width:70px"> to <input type="number" id="x1" placeholder="end" min="1" style="width:70px">
+          <button class="chip" data-range="all">All</button><button class="chip" data-range="100">First 100</button><button class="chip" data-range="last">Last 300</button>
+        </div>
+      </div>
+      <div id="nav"></div>
+    </header>
+    <main><section id="s-runs"><h2>Runs</h2><div class="sub" id="runsnote"></div><div id="cards"></div></section><div id="main"></div></main>
+  </div>
+</div>
+<div id="tip"></div>
+<script>
+"use strict";
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs)){if(k==="class")e.className=v;else if(k==="html")e.innerHTML=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(v!==false&&v!=null)e.setAttribute(k,v===true?"":v)}for(const k of kids.flat())if(k!=null&&k!==false)e.append(k.nodeType?k:document.createTextNode(k));return e};
+const api=async(path,body)=>{const r=await fetch(path,body?{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}:undefined);return r.json()};
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+// ---------------------------------------------------------------- words
+const ROLE={Food:"Getting food",Survey:"Scouting and surveying",Extraction:"Cutting and digging materials",Construction:"Building",Crafting:"Making goods",Logistics:"Carrying",Knowledge:"Learning",Administration:"Caring and keeping (administration)",Defense:"The watch (the army)"};
+const PATH={balanced:"Balanced",growth:"Growth",making:"Making",war:"War",learning:"Learning",building:"Building"};
+const SPLIT={balanced:"Balanced",big_dumb:"Many and simple",small_smart:"Few and learned",war_heavy:"War-heavy",making_heavy:"Making-heavy"};
+const LAND={forage:"Wild plants to gather",game:"Game to hunt",fertility:"Soil",growing_season:"Growing season",water_access:"Water close by",rainfall_variability:"How unsteady the rain is",precipitation:"Rain",ecological_resilience:"How well the land recovers"};
+const AGE={children:"children",youth:"youths",early_adults:"young adults",established_adults:"adults",mature_adults:"older adults",elders:"elders"};
+const OUT={population:"People",life_expectancy:"Life expectancy",infant_mortality:"Babies lost",food_days:"Food in store",known:"Discoveries",goods_per_head:"Goods a head",field_strength:"Field strength",home_quality:"Home quality",crisis_deaths:"Deaths in crises"};
+const NINE=["might","endurance","wealth","reach","persuasion","splendor","genius","cunning","order"];
+
+// ---------------------------------------------------------------- what is drawn
+// key, title, unit line; o: tight (do not start the scale at 0), smooth (years averaged), pct, ref (a marked level)
+const C=(key,title,unit,o={})=>({key,title,unit,...o});
+const SECTIONS=[
+ {id:"people",title:"People",note:"How many there are, and how fast they are born and die.",charts:[
+   C("population","People","everyone alive"),
+   C("growth","Growth","% a year, 10-year average",{smooth:10,tight:true,ref:0}),
+   C("births_rate","Births","per 1,000 people a year, 10-year average",{smooth:10}),
+   C("deaths_rate","Deaths","per 1,000 people a year, 10-year average",{smooth:10}),
+   C("life_expectancy","Life expectancy at birth","years",{tight:true}),
+   C("infant_mortality","Babies dying before their first birthday","per 1,000 born"),
+   C("child_mortality_1_4","Children dying between 1 and 4","per 1,000"),
+   C("carrying_capacity","People the land can hold","before crowding bites"),
+   C("crowding","Crowding","0 = room to spare, 1 = full"),
+   C("towns","Towns","")],
+  mini:{title:"Ages (share of the people)",charts:Object.keys(AGE).map(k=>C("ageshare_"+k,cap(AGE[k]),"% of the people"))}},
+ {id:"food",title:"Food",note:"What is in store, who gets it, and what the land gives.",charts:[
+   C("food_days","Food in store","days it would last"),
+   C("work_Food","People getting food","% of the workers"),
+   C("food_per_worker","Food one food worker brings in","rations a day",{tight:true}),
+   C("intake","How much of their need people eat","1 = everyone fed in full",{tight:true}),
+   C("diet","Variety of the diet","0 to 1",{tight:true}),
+   C("malnutrition","Malnutrition","0 = none"),
+   C("land_yield","What surveyed land gives","1 = unsurveyed land",{tight:true}),
+   C("food_alarm","Food alarm","share of the time the leaders pull hands to food",{smooth:10})],
+  mini:{title:"Where the food comes from (rations a day)",charts:[["plants","Gathered plants"],["meat","Hunted meat"],["fish","Fish"],["staples","Field staples"]].map(([k,t])=>C("harvest_"+k,t,"rations a day"))}},
+ {id:"work",title:"Work",note:"How the people's working days are shared out.",charts:[
+   C("able","People able to work",""),
+   C("labor_efficiency","How well the work goes","health, housing and unity together; 1 = normal",{tight:true})],
+  mini:{title:"Share of the workers on each job",charts:Object.keys(ROLE).map(k=>C("work_"+k,ROLE[k],"% of the workers"))}},
+ {id:"society",title:"Health and order",note:"The condition of the people and of the land they live on.",charts:[
+   C("health","Health","0 to 1",{tight:true}),
+   C("cohesion","Unity","0 to 1",{tight:true}),
+   C("legitimacy","Trust in the rulers","0 to 1",{tight:true}),
+   C("security","Safety","0 to 1",{tight:true}),
+   C("housing_ratio","Homes for the people","1 = everyone housed",{tight:true}),
+   C("ecology","Health of the land","0 to 1",{tight:true})]},
+ {id:"learning",title:"Learning",note:"What the people know, and how quickly they come to know more.",charts:[
+   C("known","Discoveries known","of the game's questions"),
+   C("learned_year","Discoveries made","a year, 10-year average",{smooth:10}),
+   C("knowledge_workers","Learners","people"),
+   C("work_Knowledge","Learners","% of the workers"),
+   C("scholarship","Scholarship","built up over the years"),
+   C("education","Education","0 to 1"),
+   C("literacy","People who can read","%"),
+   C("lead","Years ahead of the age","0 = level with the calendar",{tight:true,ref:0}),
+   C("urban_share","People living in towns of size","%")],
+  mini:{title:"Discoveries in each field",charts:"LINES"}},
+ {id:"making",title:"Making and wealth",note:"Materials brought in, goods made, and what a household holds.",charts:[
+   C("goods_per_head","Goods a head","held by households"),
+   C("goods_made","Goods made","a day"),
+   C("extracted","Materials brought in","loads a day"),
+   C("raw","Materials in the yards","loads"),
+   C("output","Everything produced","a day, in rations' worth"),
+   C("tool_quality","Quality of tools","from what is known"),
+   C("craft_output","Skill at making","from what is known"),
+   C("trade_capacity","Means to trade","from what is known")]},
+ {id:"war",title:"The watch and war",note:"The watch is the army: how many, how armed, how drilled.",charts:[
+   C("watch","People on watch",""),
+   C("work_Defense","People on watch","% of the workers"),
+   C("armed","Watch that has arms","1 = all of them",{tight:true}),
+   C("drill","Drill","0 to 1",{tight:true}),
+   C("field_strength","Field strength","the watch counted by drill and arms"),
+   C("walls","Walls","0 = none")]},
+ {id:"built",title:"Homes and great works",note:"What the builders have made of the place.",charts:[
+   C("home_quality","Quality of the homes","0 to 1"),
+   C("roads","Roads","0 to 1"),
+   C("beauty","Beauty","0 to 1"),
+   C("stone_share","Homes built in stone","share"),
+   C("great_works","Great works standing",""),
+   C("triumphs","Great works that were triumphs",""),
+   C("follies","Great works that fell",""),]},
+ {id:"standing",title:"Standing",note:"The nine strengths, each measured against a typical people of the same age: 50 is typical.",charts:[],
+  mini:{title:"",charts:NINE.map(k=>C("st_"+k,cap(k),"0 to 100; 50 = a typical people of the age",{ref:50,fixed:[0,100]}))}},
+ {id:"crises",title:"Crises",note:"Outbreaks, fires, floods, droughts and hungers, and what they cost.",charts:[
+   C("crisis_rate","Deaths in crises","per 1,000 people a year, 10-year average",{smooth:10}),
+   C("crisis_deaths","Deaths in crises","all so far")],
+  mini:{title:"Deaths so far, by cause",charts:"CRISES"}},
+];
+const TILES=[["population","People"],["life_expectancy","Life expectancy (years)"],["infant_mortality","Babies lost per 1,000"],["food_days","Days of food in store"],["known","Discoveries known"],["goods_per_head","Goods a head"],["field_strength","Field strength"],["towns","Towns"]];
+const TABLE=[["population","People"],["births_rate","Births /1,000"],["deaths_rate","Deaths /1,000"],["life_expectancy","Life exp."],["infant_mortality","Babies lost /1,000"],["food_days","Food days"],["work_Food","Food work %"],["work_Knowledge","Learners %"],["work_Defense","Watch %"],["known","Discoveries"],["goods_per_head","Goods a head"],["field_strength","Field strength"],["towns","Towns"],["crisis_deaths","Crisis deaths"]];
+
+// ---------------------------------------------------------------- state
+let M=null;                       // /api/meta
+let F=null;                       // the form's numbers
+const S={runs:[],focus:null,x0:0,x1:null,hover:null,knobView:"main",knobQuery:""};
+const SLOTS=["--s1","--s2","--s3","--s4"];
+
+function defaults(){
+  return {years:600,worlds:2,seed0:1,start_population:120,site:"good",site_profile:{},mode:"leaders",path:"balanced",ambition:M.ambitions.includes("makers")?"makers":M.ambitions[0],
+    manual:{...M.splits.balanced},phases:[],research:{...M.research},towns:false,crises:true,shocks:false,knobs:{}};
+}
+function saveForm(){store.set("bench.form",F)}
+
+// ---------------------------------------------------------------- numbers as words
+function fmt(v,digits){
+  if(v==null||!isFinite(v))return "–";
+  const a=Math.abs(v);
+  if(a>=1e9)return (v/1e9).toFixed(a>=1e10?1:2)+"B";
+  if(a>=1e6)return (v/1e6).toFixed(a>=1e7?1:2)+"M";
+  if(a>=100)return Math.round(v).toLocaleString("en-US");
+  if(a>=10)return (+v.toFixed(1)).toLocaleString("en-US");
+  if(a>=1)return (+v.toFixed(2)).toString();
+  if(a===0)return "0";
+  return (+v.toPrecision(digits||2)).toString();
+}
+const plain=v=>{const a=Math.abs(v);return a>=1000?Math.round(v).toLocaleString("en-US"):(+v.toPrecision(4)).toString()};
+const pct=v=>(v>0?"+":"−")+fmt(Math.abs(v))+"%";
+
+// ---------------------------------------------------------------- the form
+function grp(id,title,valueText,build,open){
+  const d=el("details",{class:"grp",id:"g-"+id});
+  if(store.get("bench.open."+id,open))d.open=true;
+  d.addEventListener("toggle",()=>store.set("bench.open."+id,d.open));
+  const v=el("span",{class:"v"});
+  d.append(el("summary",{},el("span",{class:"t"},title),v),el("div",{class:"body"}));
+  d._value=()=>{v.textContent=valueText()};d._build=()=>{const b=$(".body",d);b.textContent="";build(b);d._value()};
+  return d;
+}
+function num(get,set,attrs={}){
+  const i=el("input",{type:"number",...attrs});i.value=get();
+  i.addEventListener("change",()=>{let v=parseFloat(i.value);if(!isFinite(v))v=get();if(attrs.min!=null)v=Math.max(+attrs.min,v);if(attrs.max!=null)v=Math.min(+attrs.max,v);i.value=v;set(v);saveForm();refreshForm()});
+  return i;
+}
+function seg(options,get,set){
+  const d=el("div",{class:"seg"});
+  for(const[val,label]of options)d.append(el("button",{class:get()===val?"on":"",onclick:()=>{set(val);saveForm();buildForm()}},label));
+  return d;
+}
+function splitEditor(parent,manual,after){
+  const total=el("div",{class:"small"});
+  const upd=()=>{const t=M.roles.reduce((a,r)=>a+(+manual[r]||0),0);total.textContent="Adds up to "+fmt(t)+(Math.abs(t-100)>0.5?" — the run will scale it to 100":"")};
+  for(const r of M.roles){
+    const bar=el("i");const set=v=>{manual[r]=v;bar.style.width=Math.min(100,v)+"%";upd();after&&after()};
+    const i=el("input",{type:"number",min:0,max:100,step:1});i.value=manual[r]||0;bar.style.width=Math.min(100,manual[r]||0)+"%";
+    i.addEventListener("input",()=>{set(Math.max(0,parseFloat(i.value)||0));saveForm()});
+    parent.append(el("div",{class:"row"},el("label",{},ROLE[r]),el("div",{class:"bar",style:"max-width:70px"},bar),i));
+  }
+  parent.append(total);upd();
+}
+function buildForm(){
+  const form=$("#form");const top=form.scrollTop;form.textContent="";
+  const groups=[
+   grp("run","How long, how many worlds",()=>F.years+" years · "+F.worlds+(F.worlds>1?" worlds":" world"),b=>{
+     b.append(el("div",{class:"row"},el("label",{},"Years to run"),num(()=>F.years,v=>F.years=Math.round(v),{min:10,max:M.max_years,step:50})),
+       seg([100,300,600,1200,2400].map(y=>[y,y.toLocaleString("en-US")]),()=>F.years,v=>F.years=v),
+       el("div",{class:"row",style:"margin-top:12px"},el("label",{},"Worlds to run")),
+       seg([1,2,3,4,6,8].filter(n=>n<=M.max_worlds).map(n=>[n,String(n)]),()=>F.worlds,v=>F.worlds=v),
+       el("div",{class:"hint"},"Each world rolls its own luck: its own weather, crises and chances. More worlds give a steadier average and take longer. Charts draw the average, with a pale band from the lowest world to the highest."),
+       el("div",{class:"row"},el("label",{},"Luck starts from world number"),num(()=>F.seed0,v=>F.seed0=Math.round(v),{min:1,max:99999,step:1})));
+   },true),
+   grp("start","The start",()=>F.start_population+" people on "+F.site+" land"+(Object.keys(F.site_profile).length?" (changed)":""),b=>{
+     b.append(el("div",{class:"row"},el("label",{},"People at the founding"),num(()=>F.start_population,v=>F.start_population=Math.round(v),{min:20,max:5000,step:10})),
+       el("div",{class:"row"},el("label",{},"The land")),
+       seg(Object.keys(M.sites).map(k=>[k,cap(k)]),()=>F.site,v=>{F.site=v;F.site_profile={}}));
+     const d=el("details",{},el("summary",{class:"small",style:"cursor:pointer;margin-top:8px"},"Fine-tune the land (0 = none, 1 = the best there is)"));
+     if(Object.keys(F.site_profile).length)d.open=true;
+     for(const k of Object.keys(LAND)){
+       const base=M.sites[F.site][k];
+       d.append(el("div",{class:"row"},el("label",{},LAND[k]),k in F.site_profile?el("span",{class:"small"},"was "+base):null,
+         num(()=>k in F.site_profile?F.site_profile[k]:base,v=>{if(Math.abs(v-base)<1e-9)delete F.site_profile[k];else F.site_profile[k]=v},{min:0,max:1,step:0.05})));
+     }
+     b.append(d);
+   },true),
+   grp("work","Who shares out the work",()=>F.mode==="leaders"?"The leaders, "+PATH[F.path].toLowerCase()+" path":"My own split",b=>{
+     b.append(seg([["leaders","The leaders decide"],["split","I set the split"]],()=>F.mode,v=>F.mode=v));
+     if(F.mode==="leaders"){
+       b.append(el("div",{class:"hint"},"The town's leaders share out the work day by day, leaning toward a path. They put hands on food first whenever the stores run short."),
+         el("div",{class:"row"},el("label",{},"Path they lean toward")),seg(M.paths.map(p=>[p,PATH[p]||cap(p)]),()=>F.path,v=>F.path=v),
+         el("div",{class:"row",style:"margin-top:10px"},el("label",{},"What the people long for"),
+           (()=>{const s=el("select",{onchange:e=>{F.ambition=e.target.value;saveForm();refreshForm()}});for(const a of M.ambitions)s.append(el("option",{value:a,selected:a===F.ambition},cap(a)));return s})()));
+     }else{
+       b.append(el("div",{class:"hint"},"Your split is used as given. The town's leader still pulls hands to food while the food alarm is up."),
+         el("div",{class:"seg",style:"margin-bottom:8px"},Object.keys(M.splits).map(k=>el("button",{onclick:()=>{F.manual={...M.splits[k]};saveForm();buildForm()}},SPLIT[k]||cap(k)))));
+       splitEditor(b,F.manual,()=>{});
+     }
+     b.append(el("div",{class:"gh"},"Change course later"));
+     F.phases.forEach((ph,n)=>{
+       const s=el("select",{onchange:e=>{ph.to=e.target.value;saveForm()}});
+       for(const p of M.paths)s.append(el("option",{value:"path:"+p,selected:ph.to==="path:"+p},"Leaders, "+(PATH[p]||p).toLowerCase()+" path"));
+       for(const k of Object.keys(M.splits))s.append(el("option",{value:"split:"+k,selected:ph.to==="split:"+k},"Split: "+(SPLIT[k]||k).toLowerCase()));
+       b.append(el("div",{class:"row"},"From year",num(()=>ph.from,v=>ph.from=Math.round(v),{min:1,max:M.max_years,step:50,style:"width:70px"}),s,el("button",{class:"btn link",onclick:()=>{F.phases.splice(n,1);saveForm();buildForm()}},"remove")));
+     });
+     b.append(el("button",{class:"btn",onclick:()=>{F.phases.push({from:200,to:"path:"+M.paths[0]});saveForm();buildForm()}},"+ Add a change"));
+   },true),
+   grp("study","What they study",()=>{const d=M.lines.filter(l=>F.research[l]!==M.research[l]).length;return d?d+" changed":"as the game starts"},b=>{
+     b.append(el("div",{class:"hint"},"Attention to each field, 0 to 12, as on the game's research screen. It is the shares that count: doubling every number changes nothing."),
+       el("div",{class:"seg",style:"margin-bottom:8px"},el("button",{onclick:()=>{F.research={...M.research};saveForm();buildForm()}},"As the game starts"),el("button",{onclick:()=>{for(const l of M.lines)F.research[l]=2;saveForm();buildForm()}},"Even")));
+     for(const l of M.lines)b.append(el("div",{class:"row"},el("label",{},cap(l)),F.research[l]!==M.research[l]?el("span",{class:"small"},"was "+M.research[l]):null,num(()=>F.research[l],v=>F.research[l]=Math.round(v),{min:0,max:12,step:1})));
+   },false),
+   grp("world","The world around them",()=>[F.towns?"new towns":"one town",F.crises?"crises":"no crises",F.shocks?"upheavals":null].filter(Boolean).join(" · "),b=>{
+     const tog=(key,title,help)=>el("label",{class:"row",style:"align-items:flex-start;cursor:pointer"},el("input",{type:"checkbox",checked:F[key],style:"margin-top:3px",onchange:e=>{F[key]=e.target.checked;saveForm();refreshForm()}}),el("span",{},el("b",{style:"font-weight:600"},title),el("div",{class:"small"},help)));
+     b.append(tog("towns","The leaders found new towns","A new town about every 30 years when the stores allow. Off: one town, and a crowded people spreads only slowly from year 600."),
+       tog("crises","Crises strike","Sickness, fire, flood, drought and hunger, with the game's own odds and tolls."),
+       tog("shocks","Other peoples and great upheavals","Runs the people inside a world of other peoples with wars, migrations, plagues and collapses. Slower, and much less steady from world to world."));
+   },false),
+   grp("knobs","The game's own numbers",()=>{const n=Object.keys(F.knobs).length;return n?n+" changed":M.knobs.length+" to set"},buildKnobs,true),
+  ];
+  for(const g of groups){form.append(g);g._build()}
+  form.scrollTop=top;refreshForm();
+}
+function refreshForm(){
+  for(const g of $$("details.grp"))g._value&&g._value();
+  const n=Object.keys(F.knobs).length;
+  const last=[...S.runs].filter(r=>r.status==="done"&&r.seconds>0).sort((a,b)=>b.created-a.created)[0];
+  const est=last?F.years*(last.seconds/last.spec.years)*Math.ceil(F.worlds/M.parallel):null;
+  $("#gosum").textContent=(est?"About "+(est>=90?fmt(est/60)+" min":Math.max(1,Math.round(est))+" s")+" · ":"")+F.years.toLocaleString("en-US")+" years × "+F.worlds+(F.worlds>1?" worlds":" world")+(n?" · "+n+" game number"+(n>1?"s":"")+" changed":" · the game as it is");
+}
+const KNOB={};
+function knobLabel(k){const l=M.labels.knobs&&M.labels.knobs[k.id];return l?l.label:k.name.replace(/_/g," ").toLowerCase().replace(/^./,c=>c.toUpperCase())}
+function effectText(k){
+  const fx=M.effects.effects;if(!fx)return "";
+  if(k.value===0)return "Off in the game now (0).";
+  const e=fx[k.id];if(!e)return "";
+  const parts=Object.entries(e).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3).map(([o,v])=>(OUT[o]||o)+" "+pct(v));
+  const where=M.effects.where&&M.effects.where[k.id];
+  return parts.length?"A quarter more → by year "+M.effects.year+(where?", "+where:"")+": "+parts.join(", "):"A quarter more changed nothing in "+M.effects.year+"-year test runs (balanced, war with towns, learning).";
+}
+function knobRow(k){
+  const lab=M.labels.knobs&&M.labels.knobs[k.id];
+  const changed=k.id in F.knobs;
+  const i=el("input",{type:"number",step:"any"});i.value=changed?F.knobs[k.id]:plain(k.value);
+  const row=el("div",{class:"knob"+(changed?" changed":"")});
+  i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v)||Math.abs(v-k.value)<=Math.abs(k.value)*1e-6){delete F.knobs[k.id];i.value=plain(k.value)}else F.knobs[k.id]=v;saveForm();row.replaceWith(knobRow(k));refreshForm()});
+  const step=dir=>{const cur=k.id in F.knobs?F.knobs[k.id]:k.value;const v=k.whole?cur+dir:+(cur*(dir>0?1.1:1/1.1)).toPrecision(4);i.value=v;i.dispatchEvent(new Event("change"))};
+  row.append(...[el("div",{class:"top"},el("div",{class:"nm"},knobLabel(k)),
+      el("button",{class:"btn link",title:"A tenth less",onclick:()=>step(-1)},"−"),i,el("button",{class:"btn link",title:"A tenth more",onclick:()=>step(1)},"+")),
+    changed?el("div",{class:"was"},"The game has "+plain(k.value)+" ",el("button",{class:"btn link",onclick:()=>{delete F.knobs[k.id];saveForm();row.replaceWith(knobRow(k));refreshForm()}},"put it back")):null,
+    lab&&lab.help?el("div",{class:"fx"},lab.help):(k.note?el("div",{class:"fx"},k.note.length>170?k.note.slice(0,170)+"…":k.note):null),
+    el("div",{class:"fx"},effectText(k)),
+    el("div",{class:"mono"},k.id.replace(/^(model|crisis|fabric|c|p)\./,"")+(k.file?" · "+k.file:k.id.startsWith("p.")?" · simulator stand-in":""))].filter(Boolean));
+  return row;
+}
+function buildKnobs(b){
+  b.append(el("div",{class:"hint"},"These are the game's rules, read from its files when the simulator starts. Change one here to see what it would do — the game itself is not touched. A changed number is marked, with the game's own value beside it."),
+    el("input",{type:"text",placeholder:"Search the numbers…",style:"width:100%",value:S.knobQuery,oninput:e=>{S.knobQuery=e.target.value;list()}}),
+    el("div",{class:"seg",style:"margin:8px 0"},[["main","Main dials"],["changed","Changed"],["all","Every number ("+M.knobs.length+")"]].map(([v,t])=>el("button",{class:S.knobView===v?"on":"",onclick:e=>{S.knobView=v;$$("button",e.target.parentNode).forEach(x=>x.classList.toggle("on",x===e.target));list()}},t))));
+  const box=el("div");b.append(box);
+  function list(){
+    box.textContent="";
+    const q=S.knobQuery.trim().toLowerCase();
+    const lab=M.labels.knobs||{};
+    let ks=M.knobs;
+    if(q)ks=ks.filter(k=>(knobLabel(k)+" "+k.id+" "+k.note+" "+k.file+" "+((lab[k.id]||{}).help||"")).toLowerCase().includes(q));
+    else if(S.knobView==="main")ks=ks.filter(k=>lab[k.id]);
+    else if(S.knobView==="changed")ks=ks.filter(k=>k.id in F.knobs);
+    if(!ks.length){box.append(el("div",{class:"hint"},S.knobView==="changed"&&!q?"No game number is changed: this is the game as it is.":"Nothing matches."));return}
+    const byGroup=new Map();
+    for(const k of ks){const g=(lab[k.id]||{}).group||(k.id.startsWith("p.")?"Simulator stand-ins":k.id.startsWith("crisis.")?"Crises, more":k.id.startsWith("fabric.")?"Homes and works, more":k.id.startsWith("c.")?"Other rules":"Other rules");(byGroup.get(g)||byGroup.set(g,[]).get(g)).push(k)}
+    const order=[...(M.labels.groups||[]),"Other rules","Crises, more","Homes and works, more","Simulator stand-ins"];
+    let shown=0;
+    for(const g of order){const list=byGroup.get(g);if(!list)continue;box.append(el("div",{class:"gh"},g));
+      list.sort((a,b)=>impact(b)-impact(a));
+      for(const k of list){if(shown++>220){box.append(el("div",{class:"hint"},"More match — narrow the search."));return}box.append(knobRow(k))}}
+  }
+  list();
+}
+function impact(k){const e=M.effects.effects&&M.effects.effects[k.id];return e?Math.max(0,...Object.values(e).map(Math.abs)):-1}
+
+// ---------------------------------------------------------------- runs
+function specFromForm(){
+  const s=JSON.parse(JSON.stringify(F));
+  const t=M.roles.reduce((a,r)=>a+(+s.manual[r]||0),0)||1;
+  for(const r of M.roles)s.manual[r]=+((+s.manual[r]||0)*100/t).toFixed(3);
+  s.phases=F.phases.map(ph=>{const[kind,what]=ph.to.split(":");return kind==="path"?{from:ph.from,path:what,to:ph.to}:{from:ph.from,manual:M.splits[what],to:ph.to}});
+  return s;
+}
+function describe(spec){
+  const bits=[spec.mode==="split"?"own split":PATH[spec.path]+" path",spec.site+" land"];
+  if(spec.start_population!==120)bits.push(spec.start_population+" founders");
+  if(spec.towns)bits.push("new towns");if(spec.crises===false)bits.push("no crises");if(spec.shocks)bits.push("upheavals");
+  for(const ph of spec.phases||[])bits.push("from "+ph.from+": "+(ph.path?PATH[ph.path]+" path":"new split"));
+  const ks=Object.entries(spec.knobs||{});
+  for(const[id,v]of ks.slice(0,3)){const k=KNOB[id];bits.push((k?knobLabel(k):id)+" "+plain(v)+(k?" (game "+plain(k.value)+")":""))}
+  if(ks.length>3)bits.push("+"+(ks.length-3)+" more numbers");
+  return bits.join(" · ");
+}
+function addRun(meta,shown){
+  let r=S.runs.find(x=>x.id===meta.id);
+  if(!r){r={id:meta.id,rows:{},extra:{},cache:new Map(),ver:0,shown:false,loaded:false,slot:null};S.runs.push(r)}
+  Object.assign(r,{name:meta.name,spec:meta.spec,seeds:meta.seeds,status:meta.status,expect:meta.expect,seconds:meta.seconds,errors:meta.errors||{},created:meta.created});
+  for(const s of r.seeds)r.rows[s]=r.rows[s]||[];
+  if(shown)show(r,true);
+  return r;
+}
+function show(r,on){
+  if(on&&!r.shown){
+    const used=new Set(S.runs.filter(x=>x.shown).map(x=>x.slot));
+    if(used.size>=SLOTS.length){const oldest=S.runs.filter(x=>x.shown&&x.id!==S.focus).sort((a,b)=>a.created-b.created)[0];oldest.shown=false;used.delete(oldest.slot)}
+    r.slot=SLOTS.findIndex((_,i)=>!used.has(i));r.shown=true;
+    if(!r.loaded&&!live(r))loadSaved(r);
+  }else if(!on)r.shown=false;
+  if(on)S.focus=r.id;else if(S.focus===r.id){const o=S.runs.filter(x=>x.shown).pop();S.focus=o?o.id:null}
+  renderAll();
+}
+const live=r=>r.status==="running"||r.status==="waiting";
+async function loadSaved(r){
+  const doc=await api("/api/saved/"+r.id);if(doc.error)return;
+  for(const[s,rows]of Object.entries(doc.rows))r.rows[s]=rows;
+  r.extra=doc.extra||{};r.loaded=true;r.ver++;renderAll();
+}
+async function pollRuns(){
+  for(const r of S.runs.filter(live)){
+    const c={};for(const s of r.seeds)c[s]=r.rows[s].length;
+    let d;try{d=await api("/api/run/"+r.id+"?c="+encodeURIComponent(JSON.stringify(c)))}catch(e){continue}
+    if(d.error)continue;
+    let got=false;for(const[s,rows]of Object.entries(d.rows))if(rows.length){r.rows[s].push(...rows);got=true}
+    const was=r.status;Object.assign(r,{status:d.status,seconds:d.seconds,errors:d.errors||{}});
+    if(Object.keys(d.extra||{}).length){r.extra=d.extra;r.loaded=true}
+    if(got)r.ver++;
+    // Charts that exist only once their readings do (causes of death, effects of knowledge).
+    const rows=r.rows[r.seeds[0]],dyn=rows.length?Object.keys(rows[rows.length-1]).filter(k=>k.startsWith("crisisby_")||S.deep&&k.startsWith("eff_")).length:0;
+    const grew=dyn!==r.dyn&&r.shown;r.dyn=dyn;
+    if(got||was!==r.status){if(was!==r.status||grew)renderAll();else{renderCards();dataChanged()}}
+  }
+  setTimeout(pollRuns,S.runs.some(live)?500:1500);
+}
+async function go(){
+  const spec=specFromForm();
+  const n=S.runs.length+1;
+  const name=$("#runname").value.trim()||(Object.keys(spec.knobs).length||spec.mode==="split"||spec.path!=="balanced"||spec.phases.length?"Run "+n:"The game as it is")+" · "+spec.years+" yrs";
+  const meta=await api("/api/run",{name,spec});
+  if(meta.error){alert(meta.error);return}
+  $("#runname").value="";addRun(meta,true);
+}
+
+// ---------------------------------------------------------------- series
+function series(r,key,smooth){
+  const ck=key+"|"+(smooth||0);const hit=r.cache.get(ck);if(hit&&hit.ver===r.ver)return hit;
+  const lists=r.seeds.map(s=>r.rows[s]).filter(a=>a.length);
+  const n=Math.max(0,...lists.map(a=>a.length));
+  const x=new Array(n),mean=new Array(n),lo=new Array(n),hi=new Array(n);
+  for(let i=0;i<n;i++){
+    let sum=0,c=0,a=Infinity,b=-Infinity,yr=null;
+    for(const rows of lists){const row=rows[i];if(!row)continue;yr=row.year;const v=row[key];if(v==null)continue;sum+=v;c++;if(v<a)a=v;if(v>b)b=v}
+    x[i]=yr;mean[i]=c?sum/c:null;lo[i]=c?a:null;hi[i]=c?b:null;
+  }
+  const out={ver:r.ver,x,mean,lo,hi,many:lists.length>1};
+  if(smooth&&n>2){
+    const w=Math.max(1,Math.round(smooth/Math.max(1e-9,(x[1]??1)-(x[0]??0))));
+    for(const name of ["mean","lo","hi"]){const src=out[name],dst=new Array(n);let sum=0,c=0;
+      for(let i=0;i<n;i++){if(src[i]!=null){sum+=src[i];c++}if(i>=w&&src[i-w]!=null){sum-=src[i-w];c--}dst[i]=c?sum/c:null}
+      out[name]=dst}
+  }
+  r.cache.set(ck,out);return out;
+}
+const shown=()=>S.runs.filter(r=>r.shown).sort((a,b)=>a.created-b.created);
+const focus=()=>S.runs.find(r=>r.id===S.focus&&r.shown)||shown().pop()||null;
+const xEnd=()=>S.x1||Math.max(10,...shown().map(r=>r.spec.years));
+function at(r,key,year,smooth){const s=series(r,key,smooth);if(!s.x.length)return null;let best=0,bd=Infinity;for(let i=0;i<s.x.length;i++){const d=Math.abs(s.x[i]-year);if(d<bd){bd=d;best=i}}return s.mean[best]}
+const lastYear=r=>{const s=series(r,"population");return s.x.length?s.x[s.x.length-1]:0};
+
+// ---------------------------------------------------------------- charts
+const CHARTS=new Set();let css={};
+function readCss(){const g=getComputedStyle(document.documentElement);css={};for(const k of["--surface","--ink","--ink2","--muted","--grid","--axis",...SLOTS])css[k]=g.getPropertyValue(k).trim()}
+matchMedia("(prefers-color-scheme:dark)").addEventListener("change",()=>{readCss();drawAll()});
+const io=new IntersectionObserver(es=>{for(const e of es){e.target._vis=e.isIntersecting;if(e.isIntersecting)draw(e.target._chart)}},{root:$("#right"),rootMargin:"200px"});
+function niceTicks(a,b,n){
+  if(!(b>a)){b=a+1}const span=b-a,step0=Math.pow(10,Math.floor(Math.log10(span/n)));
+  const step=[1,2,2.5,5,10].map(m=>m*step0).find(s=>span/s<=n)||step0*10;
+  const t=[];for(let v=Math.ceil(a/step-1e-9)*step;v<=b+step*1e-6;v+=step)t.push(+v.toPrecision(12));return t;
+}
+function chartEl(def){
+  const cv=el("canvas");const box=el("div",{class:"chart"},el("h3",{},def.title),el("div",{class:"u"},def.unit||""),cv);
+  const ch={def,cv,box};cv._chart=ch;CHARTS.add(ch);io.observe(cv);
+  cv.addEventListener("mousemove",e=>{const r=cv.getBoundingClientRect();const g=ch.geo;if(!g)return;const yr=g.x0+(e.clientX-r.left-g.l)/g.w*(g.x1-g.x0);S.hover=Math.max(g.x0,Math.min(g.x1,yr));S.hoverChart=ch;tip(e);drawAll()});
+  cv.addEventListener("mouseleave",()=>{S.hover=null;S.hoverChart=null;$("#tip").style.display="none";drawAll()});
+  return box;
+}
+function draw(ch){
+  const cv=ch.cv;if(!cv._vis||!cv.isConnected)return;
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W||!H)return;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
+  const c=cv.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);
+  const def=ch.def,runs=shown(),x0=S.x0,x1=Math.max(S.x0+1,xEnd());
+  const l=44,rgt=46,t=8,b=20,w=W-l-rgt,h=H-t-b;
+  let lo=Infinity,hi=-Infinity;const data=[];
+  for(const r of runs){const s=series(r,def.key,def.smooth);data.push([r,s]);
+    for(let i=0;i<s.x.length;i++){if(s.x[i]<x0||s.x[i]>x1)continue;const a=s.lo[i],bb=s.hi[i];if(a!=null&&a<lo)lo=a;if(bb!=null&&bb>hi)hi=bb}}
+  const has=isFinite(lo);
+  if(!has){lo=0;hi=1}
+  if(def.fixed){lo=def.fixed[0];hi=def.fixed[1]}
+  else{if(def.ref!=null){lo=Math.min(lo,def.ref);hi=Math.max(hi,def.ref)}
+    if(!def.tight)lo=Math.min(0,lo);
+    if(hi-lo<1e-9){hi=lo+(Math.abs(lo)||1)*0.1;if(def.tight)lo-=(Math.abs(lo)||1)*0.1}
+    const pad=(hi-lo)*0.08;hi+=pad;if(def.tight||lo<0)lo-=pad}
+  const X=v=>l+(v-x0)/(x1-x0)*w,Y=v=>t+h-(v-lo)/(hi-lo)*h;
+  ch.geo={l,w,x0,x1};
+  c.font="11px system-ui,sans-serif";c.textBaseline="middle";c.lineWidth=1;
+  for(const v of niceTicks(lo,hi,4)){const y=Math.round(Y(v))+.5;c.strokeStyle=css["--grid"];c.beginPath();c.moveTo(l,y);c.lineTo(l+w,y);c.stroke();c.fillStyle=css["--muted"];c.textAlign="right";c.fillText(fmt(v),l-6,y)}
+  c.textAlign="center";c.textBaseline="top";
+  for(const v of niceTicks(x0,x1,Math.max(2,Math.floor(w/70)))){c.fillStyle=css["--muted"];c.fillText(String(Math.round(v)),X(v),t+h+5)}
+  c.strokeStyle=css["--axis"];c.beginPath();c.moveTo(l,t+h+.5);c.lineTo(l+w,t+h+.5);c.stroke();
+  if(def.ref!=null&&def.ref>lo&&def.ref<hi){const y=Math.round(Y(def.ref))+.5;c.strokeStyle=css["--axis"];c.beginPath();c.moveTo(l,y);c.lineTo(l+w,y);c.stroke()}
+  if(!has){c.fillStyle=css["--muted"];c.textAlign="center";c.textBaseline="middle";c.fillText(runs.length?"nothing recorded here":"no run shown",l+w/2,t+h/2);return}
+  c.save();c.beginPath();c.rect(l,t-2,w+1,h+4);c.clip();
+  const ends=[];
+  for(const[r,s]of data){
+    const col=css[SLOTS[r.slot]],n=s.x.length;if(!n)continue;
+    let i0=0,i1=n-1;while(i0<n-1&&s.x[i0+1]<x0)i0++;while(i1>0&&s.x[i1-1]>x1)i1--;
+    const stride=Math.max(1,Math.floor((i1-i0)/(w*1.5)));
+    if(s.many){c.fillStyle=col;c.globalAlpha=.13;c.beginPath();let started=false;
+      for(let i=i0;i<=i1;i+=stride){if(s.hi[i]==null)continue;const px=X(s.x[i]),py=Y(s.hi[i]);started?c.lineTo(px,py):c.moveTo(px,py);started=true}
+      for(let i=i0+Math.floor((i1-i0)/stride)*stride;i>=i0;i-=stride){if(s.lo[i]==null)continue;c.lineTo(X(s.x[i]),Y(s.lo[i]))}
+      c.closePath();c.fill();c.globalAlpha=1}
+    c.strokeStyle=col;c.lineWidth=r.id===S.focus||runs.length===1?2.2:1.8;c.lineJoin="round";c.lineCap="round";c.beginPath();let pen=false,lastI=-1;
+    for(let i=i0;i<=i1;i+=stride){
+      let v=s.mean[i];
+      if(stride>1){let mn=Infinity,mx=-Infinity;for(let j=i;j<Math.min(i1+1,i+stride);j++){const u=s.mean[j];if(u==null)continue;if(u<mn)mn=u;if(u>mx)mx=u}
+        if(isFinite(mn)){const px=X(s.x[i]);if(!pen){c.moveTo(px,Y(mn));pen=true}else c.lineTo(px,Y(mn));c.lineTo(px,Y(mx));lastI=i}continue}
+      if(v==null){pen=false;continue}const px=X(s.x[i]),py=Y(v);pen?c.lineTo(px,py):c.moveTo(px,py);pen=true;lastI=i}
+    c.stroke();
+    let e=i1;while(e>i0&&s.mean[e]==null)e--;
+    if(s.mean[e]!=null)ends.push({r,col,x:X(s.x[e]),y:Y(s.mean[e]),v:s.mean[e]});
+  }
+  c.restore();
+  const placed=[];c.textAlign="left";c.textBaseline="middle";c.font="11px system-ui,sans-serif";
+  for(const e of ends.sort((a,b)=>(b.r.id===S.focus)-(a.r.id===S.focus))){
+    c.fillStyle=css["--surface"];c.beginPath();c.arc(e.x,e.y,5.5,0,7);c.fill();c.fillStyle=e.col;c.beginPath();c.arc(e.x,e.y,3.5,0,7);c.fill();
+    if(S.hover==null&&e.x>l+w-4&&!placed.some(p=>Math.abs(p-e.y)<12)){placed.push(e.y);c.fillStyle=css["--ink2"];c.fillText(fmt(e.v),e.x+8,e.y)}
+  }
+  if(S.hover!=null&&S.hover>=x0&&S.hover<=x1){
+    const px=Math.round(X(S.hover))+.5;c.strokeStyle=css["--muted"];c.lineWidth=1;c.beginPath();c.moveTo(px,t);c.lineTo(px,t+h);c.stroke();
+    for(const[r]of data){const v=at(r,def.key,S.hover,def.smooth);if(v==null)continue;const py=Y(v);if(py<t-2||py>t+h+2)continue;
+      c.fillStyle=css["--surface"];c.beginPath();c.arc(px,py,5.5,0,7);c.fill();c.fillStyle=css[SLOTS[r.slot]];c.beginPath();c.arc(px,py,3.5,0,7);c.fill()}
+  }
+}
+let raf=0;
+function drawAll(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;for(const ch of CHARTS)draw(ch)})}
+function tip(e){
+  const ch=S.hoverChart,t=$("#tip");if(!ch||S.hover==null){t.style.display="none";return}
+  t.textContent="";t.append(el("div",{style:"font-weight:600;margin-bottom:4px"},ch.def.title+" · year "+Math.round(S.hover)));
+  for(const r of shown()){const v=at(r,ch.def.key,S.hover,ch.def.smooth);t.append(el("div",{class:"r"},el("span",{class:"sw",style:"background:var("+SLOTS[r.slot]+")"}),r.name,el("b",{},fmt(v,3))))}
+  if(ch.def.unit)t.append(el("div",{class:"small",style:"margin-top:4px"},ch.def.unit));
+  t.style.display="block";const w=t.offsetWidth,h=t.offsetHeight;
+  t.style.left=Math.min(window.innerWidth-w-8,e.clientX+16)+"px";t.style.top=Math.max(8,Math.min(window.innerHeight-h-8,e.clientY-h-12))+"px";
+}
+window.addEventListener("resize",drawAll);
+
+// ---------------------------------------------------------------- results
+function renderCards(){
+  const lg=$("#legend");lg.textContent="";const sh=shown(),f=focus();
+  for(const r of sh)lg.append(el("div",{class:"k"+(f===r&&sh.length>1?" f":""),title:"Read this run in the summary, tiles and tables",onclick:()=>{S.focus=r.id;renderAll()}},el("span",{class:"sw",style:"background:var("+SLOTS[r.slot]+")"}),r.name+(live(r)?" (running…)":"")));
+  $("#runsnote").textContent=S.runs.length?"Up to four runs are drawn at once, each in its own colour on every chart. With more than one world, the line is the average and the pale band runs from the lowest world to the highest. The run with the dark outline is the one read in the summary and tables.":"";
+  const box=$("#cards");box.textContent="";
+  const list=[...S.runs].sort((a,b)=>b.created-a.created);
+  if(!list.length){box.append(el("div",{class:"sub"},"No runs yet."));return}
+  for(const r of list.slice(0,S.allCards?99:8)){
+    const got=Math.min(...r.seeds.map(s=>r.rows[s].length)),frac=Math.min(1,got/Math.max(1,r.expect));
+    const state=r.status==="running"?"Running… year "+Math.round(frac*r.spec.years).toLocaleString("en-US")+" of "+r.spec.years.toLocaleString("en-US"):r.status==="waiting"?"Waiting for a free processor…":r.status==="stopped"?"Stopped":r.status==="error"?"Failed":r.spec.years.toLocaleString("en-US")+" years · "+r.seeds.length+(r.seeds.length>1?" worlds":" world")+" · took "+fmt(r.seconds)+" s";
+    box.append(el("div",{class:"card"+(r.shown?"":" off")+(r.shown&&r.id===S.focus?" focus":"")},
+      el("div",{class:"hd"},r.shown?el("span",{class:"sw",style:"background:var("+SLOTS[r.slot]+")"}):null,el("div",{class:"nm",title:r.name},r.name)),
+      el("div",{class:"small",title:describe(r.spec)},describe(r.spec)),
+      live(r)?el("div",{class:"row",style:"margin:2px 0"},el("div",{class:"bar"},el("i",{style:"width:"+frac*100+"%"}))):null,
+      el("div",{class:"small"},state),
+      Object.keys(r.errors).length?el("div",{class:"err"},Object.values(r.errors)[0].split("\n").slice(-3).join("\n")):null,
+      el("div",{class:"acts"},
+        el("button",{class:"btn link",onclick:()=>show(r,!r.shown)},r.shown?"Hide":"Show"),
+        r.shown&&r.id!==S.focus?el("button",{class:"btn link",title:"Read this run in the summary, tiles and tables",onclick:()=>{S.focus=r.id;renderAll()}},"Read this one"):null,
+        el("button",{class:"btn link",title:"Put this run's numbers back in the panel on the left",onclick:()=>{F={...defaults(),...JSON.parse(JSON.stringify(r.spec))};F.phases=(r.spec.phases||[]).map(p=>({from:p.from,to:p.to||"path:balanced"}));saveForm();buildForm()}},"Use its numbers"),
+        live(r)?el("button",{class:"btn link",onclick:async()=>{await api("/api/stop/"+r.id,{});}},"Stop"):
+          el("button",{class:"btn link",onclick:async()=>{await api("/api/forget/"+r.id,{});S.runs=S.runs.filter(x=>x!==r);if(S.focus===r.id)S.focus=null;renderAll()}},"Delete"))));
+  }
+  if(list.length>8&&!S.allCards)box.append(el("button",{class:"btn link",onclick:()=>{S.allCards=true;renderCards()}},"Show "+(list.length-8)+" older runs"));
+}
+function summary(r){
+  const P=series(r,"population"),n=P.x.length;if(n<2)return ["Just started."];
+  const end=P.x[n-1],v=(k,y,sm)=>at(r,k,y,sm),out=[];
+  let pk=0,lw=0;for(let i=0;i<n;i++){if(P.mean[i]>P.mean[pk])pk=i;if(P.mean[i]<P.mean[lw])lw=i}
+  out.push("People: from "+fmt(P.mean[0])+" to "+fmt(P.mean[n-1])+" in "+fmt(end)+" years"+(pk<n-1?", after a peak of "+fmt(P.mean[pk])+" in year "+Math.round(P.x[pk]):"")+(lw>0&&P.mean[lw]<P.mean[0]*0.98?". The fewest was "+fmt(P.mean[lw])+" in year "+Math.round(P.x[lw]):"")+".");
+  const fd=series(r,"food_days");let thin=0,sum=0,c=0;for(let i=0;i<fd.x.length;i++){if(fd.mean[i]==null)continue;sum+=fd.mean[i];c++;if(fd.mean[i]<10)thin++}
+  const yrs=end/Math.max(1,n-1);
+  out.push("Food: "+fmt(sum/Math.max(1,c))+" days in store on average"+(thin?"; under 10 days in about "+fmt(thin*yrs)+" of the years":"; never under 10 days")+". Food took "+fmt(v("work_Food",end))+"% of the workers at the end.");
+  out.push("Life: babies lost went from "+fmt(v("infant_mortality",Math.min(5,end)))+" to "+fmt(v("infant_mortality",end))+" in every 1,000 born; life expectancy from "+fmt(v("life_expectancy",Math.min(5,end)))+" to "+fmt(v("life_expectancy",end))+" years.");
+  const marks=landmarkYears(r).filter(m=>m.year!=null),last=marks[marks.length-1];
+  out.push("Learning: "+fmt(v("known",end))+" discoveries known"+(last?"; the latest landmark was "+last.name+" in year "+Math.round(last.year):"")+".");
+  const cd=v("crisis_deaths",end);
+  if(cd>0){const ex=r.extra[r.seeds[0]];let worst=null;for(const cr of (ex&&ex.crises)||[])if(!worst||cr.deaths>worst.deaths)worst=cr;
+    out.push("Crises: "+fmt(cd)+" died in crises in all"+(worst&&worst.deaths>0?". The worst remembered in the first world: "+worst.type+" in year "+Math.round(worst.year)+", "+fmt(worst.deaths)+" dead":"")+".")}
+  out.push("At the end: a watch of "+fmt(v("watch",end))+" with field strength "+fmt(v("field_strength",end))+"; "+fmt(v("goods_per_head",end))+" goods a head; "+fmt(v("towns",end))+(v("towns",end)>1.5?" towns.":" town."));
+  return out;
+}
+function compare(r,base){
+  const y=Math.min(lastYear(r),lastYear(base));if(y<=0)return [];
+  const rows=[];
+  for(const[k,label]of [...TILES,["births_rate","Births per 1,000"],["deaths_rate","Deaths per 1,000"],["work_Food","Food work %"],["home_quality","Home quality"],["crisis_deaths","Deaths in crises"]]){
+    const a=at(r,k,y,k.endsWith("_rate")?10:0),b=at(base,k,y,k.endsWith("_rate")?10:0);if(a==null||b==null||Math.abs(b)<1e-9)continue;
+    const d=(a-b)/Math.abs(b)*100;if(Math.abs(d)>=2)rows.push({label,a,b,d})}
+  return rows.sort((p,q)=>Math.abs(q.d)-Math.abs(p.d)).slice(0,8).map(x=>({...x,y}));
+}
+function landmarkYears(r){
+  return M.landmarks.map(m=>{const ys=r.seeds.map(s=>r.extra[s]&&r.extra[s].marks?r.extra[s].marks[m.id]:undefined).filter(y=>y!==undefined);const got=ys.filter(y=>y!=null);
+    return {...m,year:got.length?got.reduce((a,b)=>a+b,0)/got.length:null,reached:got.length,worlds:ys.length}});
+}
+function renderAll(){renderCards();renderMain();refreshForm()}
+function dataChanged(){renderTop();drawAll()}
+function renderTop(){
+  const box=$("#top");if(!box)return;box.textContent="";
+  const r=focus();if(!r)return;
+  const others=shown().filter(x=>x!==r),base=others[0];
+  box.append(el("h2",{},"In short"),el("div",{class:"sub"},"Reading ",el("b",{},r.name),base?[" · compared with ",el("b",{},base.name)]:" · run another with one number changed to see what it does"));
+  const s=el("div",{class:"box"});for(const line of summary(r))s.append(el("p",{},line));
+  if(base){const rows=compare(r,base);
+    s.append(el("p",{style:"margin-top:10px;font-weight:600"},rows.length?"Against "+base.name+" at year "+Math.round(rows[0].y)+":":"Against "+base.name+": no headline number differs by 2% or more."));
+    for(const x of rows)s.append(el("p",{},x.label+": ",el("b",{},pct(x.d))," ("+fmt(x.a)+" against "+fmt(x.b)+")"))}
+  box.append(s);
+  const tiles=el("div",{class:"tiles"}),end=lastYear(r);
+  const early=Math.min(5,end);
+  for(const[k,label]of TILES){const v=at(r,k,end),v0=at(r,k,early);let d=null;
+    if(base){const b=at(base,k,Math.min(end,lastYear(base))),a=at(r,k,Math.min(end,lastYear(base)));if(a!=null&&b!=null&&Math.abs(b)>1e-9){const p=(a-b)/Math.abs(b)*100;if(Math.abs(p)>=0.5)d=el("div",{class:"d"},(p>0?"▲ ":"▼ ")+fmt(Math.abs(p))+"% against "+base.name);else d=el("div",{class:"d small"},"same as "+base.name)}}
+    tiles.append(el("div",{class:"tile"},el("div",{class:"small"},label),el("div",{class:"v"},fmt(v)),el("div",{class:"small"},"in year "+Math.round(end)+" · it was "+fmt(v0)+" in year "+early),d))}
+  box.append(tiles);
+}
+function chartsBlock(sec){
+  const s=el("section",{id:"s-"+sec.id},el("h2",{},sec.title),el("div",{class:"sub"},sec.note));
+  if(sec.charts.length)s.append(el("div",{class:"charts"},sec.charts.map(chartEl)));
+  if(sec.mini){
+    let defs=sec.mini.charts;
+    if(defs==="LINES")defs=M.lines.map(l=>C("line_"+l,cap(l),"discoveries known"));
+    if(defs==="CRISES"){const keys=new Set();for(const r of shown())for(const sd of r.seeds){const rows=r.rows[sd];if(rows.length)for(const k of Object.keys(rows[rows.length-1]))if(k.startsWith("crisisby_"))keys.add(k)}
+      defs=[...keys].sort().map(k=>C(k,k.slice(9),"deaths so far"))}
+    if(defs.length){if(sec.mini.title)s.append(el("h3",{style:"margin-top:14px"},sec.mini.title));s.append(el("div",{class:"charts mini"},defs.map(chartEl)))}
+  }
+  return s;
+}
+function renderMain(){
+  const main=$("#main"),nav=$("#nav"),top=$("#right").scrollTop;
+  for(const ch of CHARTS)io.unobserve(ch.cv);CHARTS.clear();main.textContent="";nav.textContent="";
+  const runs=shown();
+  if(!runs.length){main.append(el("div",{class:"empty"},el("h2",{},S.runs.length?"No run is shown":"Nothing run yet"),el("p",{},S.runs.length?"Press Show on a run above.":"Press ▶ Run on the left. Start with the game as it is — that is the baseline everything else is compared with. Then change one number and run again.")));return}
+  const links=[["runs","Runs"],["top","In short"],...SECTIONS.map(s=>[s.id,s.title]),["deep","Deeper"],["marks","Landmarks"],["table","Table"],["logs","What happened"]];
+  for(const[id,t]of links)nav.append(el("button",{class:"chip",onclick:()=>$("#s-"+id).scrollIntoView({behavior:"smooth"})},t));
+  main.append(el("section",{id:"s-top"},el("div",{id:"top"})));
+  for(const sec of SECTIONS)main.append(chartsBlock(sec));
+  main.append(deepBlock(),marksBlock(),tableBlock(),logsBlock());
+  renderTop();$("#right").scrollTop=top;drawAll();
+}
+function deepBlock(){
+  const keys=new Set();for(const r of shown())for(const sd of r.seeds){const rows=r.rows[sd];if(rows.length)for(const k of Object.keys(rows[rows.length-1]))if(k.startsWith("eff_"))keys.add(k)}
+  const caps=M.lines.map(l=>C("cap_"+l,cap(l),"0 to 1"));
+  const effs=[...keys].sort().map(k=>C(k,cap(k.slice(4).replace(/_/g," ")),"what the people's knowledge gives"));
+  const d=el("details",{},el("summary",{style:"cursor:pointer"},el("h2",{style:"display:inline"},"Deeper"),el("span",{class:"sub"}," · the twelve capacities and every effect of what is known ("+(caps.length+effs.length)+" more charts)")));
+  if(S.deep)d.open=true;
+  const fill=()=>{if(d._done)return;d._done=true;d.append(el("h3",{style:"margin-top:12px"},"Capacity in each field"),el("div",{class:"charts mini"},caps.map(chartEl)),
+    el("h3",{style:"margin-top:14px"},"Every effect of what is known"),el("div",{class:"charts mini"},effs.map(chartEl)));drawAll()};
+  d.addEventListener("toggle",()=>{S.deep=d.open;if(d.open)fill()});if(d.open)fill();
+  return el("section",{id:"s-deep"},d);
+}
+function marksBlock(){
+  const runs=shown(),maxY=Math.max(...runs.map(r=>r.spec.years));
+  const s=el("section",{id:"s-marks"},el("h2",{},"Landmarks"),el("div",{class:"sub"},"When each landmark discovery was made, against the years the game's design aims for. A year is the average over the worlds that reached it."));
+  const t=el("table"),head=el("tr",{},el("th",{class:"l"},"Discovery"),el("th",{},"Aimed for"),runs.map(r=>el("th",{},el("span",{class:"sw",style:"display:inline-block;margin-right:6px;vertical-align:middle;background:var("+SLOTS[r.slot]+")"}),r.name)));
+  t.append(head);
+  const per=runs.map(landmarkYears);
+  M.landmarks.forEach((m,i)=>{if(m.low>maxY)return;
+    t.append(el("tr",{},el("td",{class:"l"},m.name),el("td",{},Math.round(m.design)+" ("+Math.round(m.low)+"–"+Math.round(m.high)+")"),
+      per.map((p,j)=>{const x=p[i],r=runs[j];if(!x.worlds)return el("td",{},live(r)?"running…":"–");
+        if(x.year==null)return el("td",{},el("span",{class:"tag"+(lastYear(r)>m.high?" late":"")},lastYear(r)>m.high?"not reached":"not yet"));
+        const cls=x.year<m.low?"early":x.year>m.high?"late":"ok";
+        return el("td",{},"year "+Math.round(x.year)+(x.reached<x.worlds?" ("+x.reached+" of "+x.worlds+")":"")+" ",el("span",{class:"tag "+cls},cls==="ok"?"on time":cls))})))});
+  s.append(el("div",{class:"box scroll"},t));return s;
+}
+function tableBlock(){
+  const r=focus(),s=el("section",{id:"s-table"},el("h2",{},"Table"),el("div",{class:"sub"},"The run being read, at steps through its years. The download has every year and every number the simulator records."));
+  if(!r)return s;
+  const end=lastYear(r),step=end<=150?10:end<=600?50:end<=1500?100:200;
+  const t=el("table");t.append(el("tr",{},el("th",{},"Year"),TABLE.map(([,l])=>el("th",{},l))));
+  for(let y=0;y<=end+0.5;y+=step)t.append(el("tr",{},el("td",{},String(y)),TABLE.map(([k])=>el("td",{},fmt(at(r,k,y,k.endsWith("_rate")?10:0))))));
+  s.append(el("div",{class:"box scroll"},t),el("div",{style:"margin-top:8px"},el("button",{class:"btn",onclick:()=>csv(r)},"Download every year (CSV)")));
+  return s;
+}
+function csv(r){
+  const keys=new Set();for(const sd of r.seeds)for(const row of r.rows[sd].slice(-1))for(const k of Object.keys(row))if(typeof row[k]==="number")keys.add(k);
+  keys.delete("year");const cols=[...keys],P=series(r,"population");
+  const lines=["year,"+cols.join(",")];const ss=cols.map(k=>series(r,k));
+  for(let i=0;i<P.x.length;i++)lines.push(P.x[i]+","+ss.map(s=>s.mean[i]==null?"":+s.mean[i].toPrecision(6)).join(","));
+  const a=el("a",{href:URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/csv"})),download:r.name.replace(/[^\w\-]+/g,"_")+".csv"});document.body.append(a);a.click();a.remove();
+}
+function logsBlock(){
+  const r=focus(),s=el("section",{id:"s-logs"},el("h2",{},"What happened"),el("div",{class:"sub"},"The first world of the run being read: every crisis and every discovery, in order."));
+  if(!r)return s;const ex=r.extra[r.seeds[0]];
+  if(!ex){s.append(el("div",{class:"box"},live(r)?"These lists fill in when the run finishes.":"Nothing was recorded."));return s}
+  const cr=(ex.crises||[]).filter(c=>c.deaths>0);
+  const ct=el("table");ct.append(el("tr",{},el("th",{},"Year"),el("th",{class:"l"},"Crisis"),el("th",{},"Dead")));
+  for(const c of cr)ct.append(el("tr",{},el("td",{},fmt(c.year)),el("td",{class:"l"},cap(c.type)+(c.severe?" (severe)":"")),el("td",{},fmt(c.deaths))));
+  const lt=el("table"),q=el("input",{type:"text",placeholder:"Search discoveries…",style:"width:260px"});
+  const fill=()=>{lt.textContent="";lt.append(el("tr",{},el("th",{},"Year"),el("th",{class:"l"},"Discovery"),el("th",{class:"l"},"Field")));const f=q.value.trim().toLowerCase();let n=0;
+    for(const[y,name,line]of ex.learned){if(f&&!(name+" "+line).toLowerCase().includes(f))continue;if(n++>=400){lt.append(el("tr",{},el("td",{class:"l",colspan:3},"…and more. Search to narrow.")));break}lt.append(el("tr",{},el("td",{},fmt(y)),el("td",{class:"l"},name),el("td",{class:"l"},cap(line))))}};
+  q.addEventListener("input",fill);fill();
+  s.append(el("h3",{style:"margin-top:12px"},"Crises that killed ("+cr.length+(ex.crises&&ex.crises.length>=400?", the latest 400 kept":"")+")"),el("div",{class:"box scroll",style:"max-height:300px"},cr.length?ct:"None."),
+    el("h3",{style:"margin-top:14px"},"Discoveries ("+ex.learned.length.toLocaleString("en-US")+")"),el("div",{style:"margin-top:6px"},q),el("div",{class:"box scroll"},lt));
+  return s;
+}
+
+// ---------------------------------------------------------------- start
+async function start(){
+  readCss();
+  M=await api("/api/meta");for(const k of M.knobs)KNOB[k.id]=k;
+  F={...defaults(),...store.get("bench.form",{})};
+  for(const id of Object.keys(F.knobs))if(!KNOB[id])delete F.knobs[id];
+  if(!M.paths.includes(F.path))F.path=M.paths[0];
+  buildForm();
+  $("#go").addEventListener("click",go);
+  $("#reset").addEventListener("click",()=>{F=defaults();saveForm();buildForm()});
+  const setRange=()=>{S.x0=Math.max(0,parseFloat($("#x0").value)||0);const b=parseFloat($("#x1").value);S.x1=isFinite(b)&&b>S.x0?b:null;drawAll()};
+  $("#x0").addEventListener("change",setRange);$("#x1").addEventListener("change",setRange);
+  for(const b of $$("[data-range]"))b.addEventListener("click",()=>{const k=b.dataset.range,end=Math.max(10,...shown().map(r=>r.spec.years));
+    $("#x0").value=k==="last"?Math.max(0,end-300):0;$("#x1").value=k==="100"?100:"";setRange()});
+  const runs=await api("/api/runs");
+  for(const m of runs.live)addRun(m,false);
+  for(const m of runs.saved)addRun(m,false);
+  const recent=[...S.runs].sort((a,b)=>b.created-a.created).slice(0,2).reverse();
+  for(const r of recent){r.shown=false;show(r,true)}
+  renderAll();pollRuns();
+}
+start();
+</script>
+</body>
+</html>

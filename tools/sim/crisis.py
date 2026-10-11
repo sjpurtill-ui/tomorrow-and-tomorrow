@@ -135,6 +135,10 @@ class Crises:
     # ----------------------------------------------------------- policy channels
     def policy(self, channel: str) -> float:
         day = self.sim.day
+        # The day only moves forward: an ended decree is dropped, not re-read
+        # forty times a month for the rest of the run.
+        if self.mods and self.mods[0][0] <= day:
+            self.mods = [m for m in self.mods if m[0] > day]
         return sum(float(eff.get(channel, 0.0)) for until, eff in self.mods if until > day)
 
     def _policy(self, effects: dict, days: float) -> None:
