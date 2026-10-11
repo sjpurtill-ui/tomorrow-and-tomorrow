@@ -1346,12 +1346,19 @@ func march_supply(force:Dictionary,route:Dictionary)->Dictionary:
 	var troops:=maxi(1,int(force.get("troops",0)))
 	var total:=MarchTerrain.total_effort(packed)
 	var lean:=1.0
+	# The food they carry feeds them for its days of the road, wherever the
+	# carriers from home reach or not (train_days_for); past it, the model.
+	var train:=train_days_for(force)
+	var days:=MarchTerrain.days(origin,packed,_field_army_speed(force)/slowing,int(WorldSimulation.state.elapsed_days),mix)
 	for k in MARCH_SAMPLES:
-		var at:Vector2=MarchTerrain.at_effort(origin,packed,total*(float(k)+0.5)/float(MARCH_SAMPLES)).position
+		var along:=(float(k)+0.5)/float(MARCH_SAMPLES)
+		if train>=float(days)*along: continue
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,total*along).position
 		lean=minf(lean,float(SupplyState.at_point(at,troops,true,false).get("ratio",1.0)))
-	var there:=float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
-	return {"days":MarchTerrain.days(origin,packed,_field_army_speed(force)/slowing,int(WorldSimulation.state.elapsed_days),mix),"half_pace":clampf((slowing-1.0)/(1.0/FieldRations.FORAGE_PACE-1.0),0.0,1.0),
-		"fed_on_road":lean,"fed_there":there,"hungry":minf(lean,there)<FieldRations.HUNGRY_BELOW}
+	var left:=maxf(0.0,train-float(days))
+	var there:=1.0 if left>=TRAIN_CAMP_DAYS else float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
+	return {"days":days,"half_pace":clampf((slowing-1.0)/(1.0/FieldRations.FORAGE_PACE-1.0),0.0,1.0),
+		"fed_on_road":lean,"fed_there":there,"hungry":minf(lean,there)<FieldRations.HUNGRY_BELOW,"train_days":train,"train_left":left}
 
 ## How much living off the land slows a march on this road (from `done`
 ## level km on): 1 where the carriers feed the band all the way, up to
@@ -1365,9 +1372,15 @@ func _forage_slowing(force:Dictionary,origin:Vector2,packed:Array,done:float=0.0
 	var probe:=force.duplicate(false)
 	probe["status"]="moving"
 	probe["forage_eaten"]=0.0
+	# While the food they carry lasts they keep the full pace.
+	var train:=train_days_for(force)
+	probe["train_days"]=0.0
+	var ahead:=float(MarchTerrain.days(origin,packed,_field_army_speed(force),int(WorldSimulation.state.elapsed_days),MarchTerrain.mix_of(force)))*(total-done)/total
 	var living:=0
 	for k in MARCH_SAMPLES:
-		var at:Vector2=MarchTerrain.at_effort(origin,packed,lerpf(done,total,(float(k)+0.5)/float(MARCH_SAMPLES))).position
+		var along:=(float(k)+0.5)/float(MARCH_SAMPLES)
+		if train>=ahead*along: continue
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,lerpf(done,total,along)).position
 		probe["position"]={"x":at.x,"z":at.y}
 		if _lives_off_land(probe): living+=1
 	var share:=float(living)/float(MARCH_SAMPLES)
@@ -1448,6 +1461,8 @@ func _set_march_route(army:Dictionary,route:Dictionary)->void:
 	## is the destination), each with the level km of effort to reach it
 	## (march_terrain.gd). Movement spends them; the map draws them.
 	var here:Dictionary=army.get("position",{}) if army.get("position") is Dictionary else {}
+	# Setting out from home, or never yet loaded: the carts go with them, full.
+	if not army.has("train_days") or at_home_point(army): army["train_days"]=train_capacity_days(army);army["train_full"]=float(army.train_days)
 	if not route.has("origin"): route["origin"]=Vector2(float(here.get("x",0.0)),float(here.get("z",0.0)))
 	army["march_route"]=_march_packed(route,MarchTerrain.mix_of(army))
 	army["march_travelled_km"]=0.0
@@ -3895,11 +3910,58 @@ func at_home_point(force:Dictionary)->bool:
 	return Vector2(float(position.get("x",0)),float(position.get("z",0))).distance_to(_home_point.at as Vector2)<=.25
 
 
+## THE FOOD AN ARMY CARRIES. A band leaving home loads the people's carts
+## (porters before there are carts) and each fighter a few days on his back,
+## and eats from them wherever the carriers shuttling from home cannot reach.
+## The home stores still pay for each day's bread as it is eaten (the load
+## was theirs); what the train changes is that the food is there. Days of a
+## full ration: one trip's load of our carriers, shared among the bands out
+## by their numbers, over what the band and its drivers eat in a day.
+const TRAIN_PACK_DAYS:=4.0
+## Days of carried food left on arrival for a camp there to count as fed.
+const TRAIN_CAMP_DAYS:=10.0
+## Where the carriers from home bring this share of a ration the carts fill again.
+const TRAIN_REFILL:=0.75
+func train_capacity_days(force:Dictionary)->float:
+	var troops:=maxi(1,int(force.get("troops",0)))
+	var out:=troops
+	var id:=int(force.get("army_id",0))
+	for other:Dictionary in field_armies:
+		if int(other.get("army_id",0))!=id and not at_home_point(other): out+=int(other.get("troops",0))
+	var share:=float(troops)/float(out)
+	var Carriers:=preload("res://scripts/carriers.gd")
+	var fleet:Dictionary=Carriers.fleet(WorldSimulation.state,func(tech:String)->float: return float(_adoption(tech)))
+	var eaters:=float(troops)+float(fleet.drivers)*share
+	return TRAIN_PACK_DAYS+float(fleet.loads)*share/(eaters*Carriers.RATION)
+
+## How many fighters our carriers' one load feeds for `days` of road and a
+## camp at its end (TRAIN_CAMP_DAYS), with every cart going with them: the
+## size of host that can make a road the whole army cannot. 0: none can.
+func train_feeds(days:float)->int:
+	var Carriers:=preload("res://scripts/carriers.gd")
+	var fleet:Dictionary=Carriers.fleet(WorldSimulation.state,func(tech:String)->float: return float(_adoption(tech)))
+	var beyond:=days+TRAIN_CAMP_DAYS-TRAIN_PACK_DAYS
+	if beyond<=0.0: return 1<<30
+	return maxi(0,int(float(fleet.loads)/(beyond*Carriers.RATION)-float(fleet.drivers)))
+
+## The days of carried food a band has, or would set out with from home.
+func train_days_for(force:Dictionary)->float:
+	if force.has("train_days") and not at_home_point(force): return maxf(0.0,float(force.train_days))
+	return train_capacity_days(force)
+
+## What the carriers from home bring a band, less what they eat on the haul
+## (supply_state.gd): the line alone, never the food it carries itself.
+func _carried_access(force:Dictionary)->float:
+	if recovery.home_unavailable():return 0.0
+	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
+
 func _force_provision_access(force:Dictionary,reserve:bool=false)->float:
 	if recovery.home_unavailable():return 0.0
 	if WorldSimulation.state.settlement_site_committed and not WorldSimulation.state.convoy_traveling:
 		if reserve:return 1.0
 		if at_home_point(force):return 1.0
+	# Eating from its own carts (train_capacity_days).
+	if float(force.get("train_days",0.0))>0.0:return 1.0
 	# What the carriers bring, less what they eat on the haul (supply_state.gd).
 	return _field_transport_delivery_ratio()*SupplyState.haul_for(force)
 
@@ -3970,6 +4032,19 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
 		var field_received:=minf(need*share,field_credit+maxf(0,need*share-field_credit)*_force_provision_access(force)*delivery_ratio)
+		# Its own carts make up what the carriers from home did not bring, and
+		# empty by that much; within the carriers' reach, or home, they fill.
+		var line:=_carried_access(force)
+		var from_train:=0.0
+		if not force.has("train_days"): force["train_days"]=train_capacity_days(force);force["train_full"]=float(force.train_days)
+		if at_home_point(force) or line>=TRAIN_REFILL:
+			force["train_days"]=train_capacity_days(force);force["train_full"]=float(force.train_days)
+		elif float(force.train_days)>0.0 and need*share>0.0:
+			from_train=maxf(0.0,field_received-minf(need*share,field_credit+maxf(0,need*share-field_credit)*line*delivery_ratio))
+			# The carts empty by the part of the day's bread the line from home
+			# did not cover, whether or not the stores had it to give.
+			force["train_days"]=maxf(0.0,float(force.train_days)-clampf(1.0-line,0.0,1.0)*float(WorldSimulation.span))
+		force["provisions_train_today"]=from_train
 		# A band away from home forages for part of what the carriers did not
 		# bring. What is still missing is the band's own hunger, not the home's.
 		var foraged:=0.0
@@ -3991,7 +4066,7 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 		# Fodder, fuel, rounds and spares come on the same line; horses can graze.
 		var at_home:=_army_is_home(force)
 		# Stores come after every band's bread (carriers.gd stores ratio).
-		force["stores_share"]=1.0 if at_home else sustainment.stores_share(force,float(carrier_reading().stores)*SupplyState.haul_for(force),FieldRations.forage_share(force))
+		force["stores_share"]=1.0 if at_home or float(force.get("train_days",0.0))>0.0 else sustainment.stores_share(force,float(carrier_reading().stores)*SupplyState.haul_for(force),FieldRations.forage_share(force))
 		sustainment.hunger_day(force,float(WorldSimulation.span))
 		sustainment.recovery_day(force,float(WorldSimulation.span))
 		sustainment.rest_day(force,float(WorldSimulation.span))
