@@ -1,3 +1,26 @@
+## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
+
+User approved PR #205. Source `38aa6e7c` from `codex/border-art-direction`
+and main `16982712` combine at code merge `4fb540e1`, without conflicts or
+runtime changes relative to the accepted source. Border armies occupy actual
+stations and fight invading armies before capital arrival; the map presents
+quiet held lines, small army markers and animated contact, with dated details
+on inspection. The border placement and staffing controls are included.
+
+Integration validation ran 281 cases: 280 passed, zero errors or orphans. The
+existing raid-cadence assertion fails identically on unchanged main (two bands
+instead of at least three). All 154 presentation checks and the other 126 core
+checks pass. Evidence: integration worktree `artifacts/border-integration281.log`
+and `reports/report_26`; accepted visual evidence and fixture limits are in
+`docs/design/BORDER_ART_DIRECTION.md`. No repeat GPU render is required for
+this conflict-free merge because the runtime code is identical to the reviewed
+and captured source.
+
+Optional deployment metadata requires no save migration. The remote main push
+is verified before the canonical checkout is fast-forwarded. Existing local
+imports and running player/editor sessions are preserved; a normal save and
+restart loads the integrated scripts.
+
 ## October 8 — Organic places on the map (INTEGRATED)
 
 User approved PR #182 after the private capture review. Source `ca8e2481`

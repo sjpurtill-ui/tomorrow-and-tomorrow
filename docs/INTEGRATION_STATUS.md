@@ -1,4 +1,25 @@
-## October 11 — Border map hierarchy correction (READY)
+## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
+
+User approved PR #205 for integration. Source `38aa6e7c` from
+`codex/border-art-direction` is merged with canonical and remote main `16982712`
+at code merge `4fb540e1`. There were no conflicts and the integrated runtime/test
+files match the reviewed source exactly. Real stationed border armies, contact
+combat before capital arrival, animated fighting fronts, revised border controls
+and the corrected quiet map presentation are included together.
+
+Combined headless validation ran 281 cases: 280 passed, zero errors or orphans.
+The only failure is the unchanged long-run raid-cadence assertion (two bands
+where it expects three), already reproduced on baseline `16982712`. All 154
+presentation checks and the remaining 126 core checks pass. Evidence is the
+integration worktree's `artifacts/border-integration281.log` / `reports/report_26`.
+The accepted coastal and stress captures remain valid because integration
+changed no runtime code. Full evidence: `docs/design/BORDER_ART_DIRECTION.md`.
+
+Optional army metadata remains save-compatible. The integration is pushed and
+remotely verified before fast-forwarding the canonical checkout. Existing local
+imports are preserved; no player/editor process is launched or restarted.
+
+## October 11 — Border map hierarchy correction (worker record)
 
 The user rejected the prior encirclement screenshot. Its art acceptance is
 superseded. PR #205 remains unmerged; the default map is rebuilt around
