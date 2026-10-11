@@ -9,22 +9,44 @@ const Route := preload("res://scripts/army_land_route.gd")
 var rival := ""
 var focus := Vector2.ZERO
 var crossings := 0
+var encirclement := false
+var inland := Vector2.RIGHT
+var attacking_ids:Array[int]=[]
+var expected_actors := 0
+var fort_shape:Dictionary={}
+var removed_scout_paths := 0
+
+func _fixture_loaded() -> void:
+	# The authored army exercise relocates the home and replaces its armies.
+	# Old scout trajectories and orders refer to that discarded setup. Clear
+	# fixture data before terrain layers mount; never hide a rendered layer.
+	if not "--retain-scout-charts" in OS.get_cmdline_user_args():
+		removed_scout_paths=CivilizationSystem.scout_missions.size()+CivilizationSystem.scout_reports.size()
+		CivilizationSystem.scout_missions.clear();CivilizationSystem.scout_reports.clear()
+	GameState.order_tracker={"next_id":1,"orders":[]}
 
 func _run() -> void:
 	if not await _prepare():return
-	scope="TEST authored staff-era armies and enemy stations on copied terrain; real council, movement, reports, observations, contact battle and unmodified overlay collection"
+	encirclement="--encirclement" in OS.get_cmdline_user_args()
+	scope="TEST authored neighboring-country conflict on copied terrain; actual fort outline, council deployment, marches, observed enemy sectors, combat and production map collection" if not encirclement else "TEST encirclement stress case: eight friendly and eight enemy armies through production collection"
+	scope+="; unrelated copied scout paths (%d) and order references cleared before terrain initialization" % removed_scout_paths
+	if "--retain-scout-charts" in OS.get_cmdline_user_args():scope+="; copied scout archive retained to test ordinary chart clutter"
 	capital_label.hide()
-	caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	caption.custom_minimum_size=Vector2(760,0)
-	caption.add_theme_font_size_override("font_size",14)
-	(caption.get_parent() as Control).custom_minimum_size=Vector2(790,48)
-	if not _interior():
-		_check(false,"Dry interior found for the authored perimeter");await _finish();return
+	caption.autowrap_mode=TextServer.AUTOWRAP_OFF
+	caption.custom_minimum_size=Vector2.ZERO
+	caption.add_theme_font_size_override("font_size",11)
+	var badge:=caption.get_parent() as Control
+	badge.custom_minimum_size=Vector2.ZERO
+	badge.position=Vector2(930,610)
+	var paper:=caption.get_parent().get_theme_stylebox("panel") as StyleBoxFlat
+	paper.content_margin_left=8;paper.content_margin_right=8;paper.content_margin_top=4;paper.content_margin_bottom=4
+	if not (_interior() if encirclement else _coastal_site()):
+		_check(false,"Suitable real terrain found for the authored border");await _finish();return
 	_author_campaign()
 	var result:Dictionary=Council.order(rival,"defend")
-	_check(MilitaryCampaign.field_armies.size()==8,"Council creates eight real stations: "+str(result))
-	if MilitaryCampaign.field_armies.size()!=8:day=int(GameState.elapsed_days);await _finish();return
-	for _i in 8:
+	_check(MilitaryCampaign.field_armies.size()>=4,"Council deploys real land stations: "+str(result))
+	if MilitaryCampaign.field_armies.size()<4:day=int(GameState.elapsed_days);await _finish();return
+	for _i in 12:
 		GameState.elapsed_days+=1
 		MilitaryCampaign._process_field_army_movement_day()
 		MilitaryCampaign._process_army_runners_day()
@@ -32,40 +54,42 @@ func _run() -> void:
 		var direction:=Vector2.from_angle(TAU*float(bearing)/32.0)
 		var contact:=Defense.first_contact(center+direction*35.0,center,MilitaryCampaign.field_armies,{"troops":500})
 		if not contact.is_empty():crossings+=1
-	_check(crossings==32,"All 32 perimeter approaches meet real deployed armies")
+	if encirclement:_check(crossings==32,"All 32 perimeter approaches meet real deployed armies")
 	_add_rivals()
 	CivilizationSystem._process_local_observation(int(GameState.elapsed_days),true)
 	day=int(GameState.elapsed_days)
-	await _shot("perimeter","Eight council stations · normal army reports and observations",145.0,center)
+	await _shot("perimeter","Encirclement stress" if encirclement else "Neighboring border",145.0 if encirclement else 155.0,center+inland*12.0,Vector2i(1152,720))
 	# Order two actual stationed bands forward. The ordinary swept movement
 	# must discover contact and reserve both existing battle engagements.
-	for index in 2:
-		var army:Dictionary=MilitaryCampaign.field_armies[index]
+	for army_id in attacking_ids.slice(0,2 if encirclement else 1):
+		var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
 		var position:=_point(army)
 		var direction:=(position-center).normalized()
 		var goal:=position+direction*4.0
-		MilitaryCampaign.move_field_army_to_position(int(army.army_id),goal.x,goal.y,"Fixture advance through the held line")
+		MilitaryCampaign.move_field_army_to_position(int(army.army_id),goal.x,goal.y,"Advance across the border")
 	GameState.elapsed_days+=1;MilitaryCampaign._process_field_army_movement_day()
 	MilitaryCampaign._process_army_runners_day()
 	CivilizationSystem._process_local_observation(int(GameState.elapsed_days),true)
 	day=int(GameState.elapsed_days)
 	var collected:Dictionary=overlay.collect()
-	_check((collected.battles as Array).size()>=2,"Two real contacts reach the normal battle collector")
+	_check((collected.battles as Array).size()>=(2 if encirclement else 1),"Real contact reaches the normal battle collector")
 	# Contact begins with armies drawn up. Fight one genuine exchange in each
 	# existing engagement before claiming that the subsequent worms are fighting.
 	for id in MilitaryCampaign.own_engagements.keys():
 		_check(MilitaryCampaign.focus_engagement(String(id)),"Real contact engagement can be focused")
 		MilitaryCampaign.fight_engagement_day("hold")
 	CivilizationSystem._process_local_observation(int(GameState.elapsed_days),true)
-	focus=_point(MilitaryCampaign.field_armies[0])
+	focus=_point(MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(attacking_ids[0])])
 	if "--crowded-only" in OS.get_cmdline_user_args():
 		await _shot("crowded_small","1152 × 720 · multiple sectors and simultaneous contacts",120.0,center,Vector2i(1152,720))
 		await _finish();return
-	await _shot("contact_local","Real contact · normal battle registry, no injected battle marks",38.0,focus)
+	await _shot("contact_local","Border fighting",38.0,focus,Vector2i(1152,720))
 	await _motion_proof()
 	if "--contact-only" in OS.get_cmdline_user_args():await _finish();return
-	await _shot("contact_close","Close combat · both armies work against the crossing",16.0,focus)
-	await _shot("crowded_small","1152 × 720 · multiple sectors and simultaneous contacts",120.0,center,Vector2i(1152,720))
+	await _shot("contact_close","At the crossing",16.0,focus,Vector2i(1152,720))
+	await _focused_battle()
+	await _shot("crowded_small","Encirclement stress" if encirclement else "Border overview",145.0 if encirclement else 155.0,center+inland*12.0,Vector2i(1152,720))
+	await _selected_army()
 	await _shot("continental","Automatic continental band · same armies and battles",900.0,center,Vector2i(1152,720))
 	T.set_color_mode("dark")
 	await _shot("night","Night palette · same contact, real map collection",38.0,focus,Vector2i(1152,720))
@@ -98,6 +122,26 @@ func _interior() -> bool:
 			if dry:center=candidate;return true
 	return false
 
+func _coastal_site() -> bool:
+	var original:Vector2=CivilizationSystem.player_world_origin
+	# Choose actual coastline with a dry inland approach, never paint water
+	# or invent a terrain mask. Council's normal land clipping owns the coast.
+	for ring in range(4,25,2):
+		for bearing in 12:
+			var candidate:=original+Vector2.from_angle(TAU*float(bearing)/12.0)*float(ring)*8.0
+			if not CivilizationSystem._scout_land_at(candidate):continue
+			for coast in 8:
+				var shore:=Vector2.from_angle(TAU*float(coast)/8.0)
+				if CivilizationSystem._scout_land_at(candidate+shore*26.0):continue
+				var dry:=true
+				for a in 8:
+					if not CivilizationSystem._scout_land_at(candidate+Vector2.from_angle(TAU*a/8.0)*9.0):dry=false;break
+				for angle in [-0.8,-0.4,0.0,0.4,0.8]:
+					for radius in [18.0,32.0,46.0,60.0,78.0]:
+						if not CivilizationSystem._scout_land_at(candidate-shore.rotated(angle)*radius):dry=false;break
+				if dry:center=candidate;inland=-shore;return true
+	return false
+
 func _set_motion(reduced:bool) -> void:
 	# Window resizes reapply this real preference, so changing only the
 	# renderer's static Motion flag would silently lose the setting.
@@ -110,13 +154,28 @@ static func _point(force:Dictionary) -> Vector2:
 
 func _author_campaign() -> void:
 	WorldSimulation.clear();MilitaryCampaign.reset_for_new_world()
-	GameState.ensure_population_total(400000)
+	ForeignDiplomacy.audiences.erase("war");ForeignDiplomacy.audiences.erase("council")
+	CivilizationSystem.war_history.clear()
+	GameState.ensure_population_total(400000 if encirclement else 120000)
 	GameState.resource_stockpiles["Food"]=10000000.0;GameState.food_stocks={"Preserved food":10000000.0}
 	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
 	CivilizationSystem.player_world_origin=center
 	GameState.settlement_founded_at=Vector3(center.x,0,center.y)
 	for city:Dictionary in GameState.player_settlements:
 		if bool(city.get("primary",false)):city.position=center;city.claim_radius_km=2.0
+	if not encirclement:
+		for offset in [Vector2(18,-10),Vector2(27,8),Vector2(7,20)]:
+			var at:Vector2=center+inland*offset.x+inland.orthogonal()*offset.y
+			GameState.border_forts.forts.append({"id":int(GameState.border_forts.next_id),"kind":"watch_camp","x":at.x,"z":at.y,"status":"standing","progress":600.0,"condition":1.0,"since":int(GameState.elapsed_days)-100,"name":"Border watch"})
+			GameState.border_forts.next_id+=1
+	fort_shape=Forts.outline()
+	if not encirclement:_check(float(fort_shape.reach)>Forts.home_km()+5.0,"Real standing forts make an irregular border")
+	# These copied orders reference armies erased by fixture setup. Reset
+	# the fixture ledger and notify its normal UI, never hide the order panel.
+	GameState.order_tracker={"next_id":1,"orders":[]}
+	preload("res://scripts/order_tracker.gd").hub().changed.emit()
+	terrain.call("_clear_army_selection")
+	overlay.close_tip();overlay.close_note()
 	CivilizationSystem._add_revealed_area(center,100.0,"TEST perimeter survey")
 	Route.clear_cache()
 	for discovery in ["formation_drill","military_staffs","radio_telegraphy"]:
@@ -124,12 +183,25 @@ func _author_campaign() -> void:
 		GameState.discovery_adoption[discovery]=1.0
 	# Development is authored setup, so live signal-era reports are legitimate.
 	for domain in ["security","production","logistics","institutions"]:ProgressionSystem.domain_levels[domain]=5
-	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("TEST trained reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":200000,"equipment":200000,"training":0.8}],0.9,0.9)
+	var trained:=200000 if encirclement else 40000
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("TEST trained reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":trained,"equipment":trained,"training":0.8}],0.9,0.9)
 	MilitaryCampaign.home_army.provision_ratio=1.0;MilitaryCampaign.home_army.supply_level=1.0
 	CivilizationSystem.foreign_formations.clear();CivilizationSystem.foreign_sightings.clear();CivilizationSystem.formation_memory.clear()
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
-	rival=String(civ.id);civ.name="Fixture Esurai";civ.military_population=200000.0
+	rival=String(civ.id);civ.military_population=float(trained)
+	var neighboring_home:=center+inland*(50.0 if encirclement else 78.0)
+	civ.world_position=neighboring_home
+	civ.position=Vector2(neighboring_home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,neighboring_home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	civ.player_relation.home_position=_pack(neighboring_home)
+	civ.player_relation.war_started_day=-1;civ.player_relation.war_id=""
 	civ.player_relation.at_war=false;civ.player_relation.treaty="none";civ.player_relation.contact_level=2;civ.player_relation.home_location_known=true
+	var capital:Dictionary=civ.strategic_regions[CivilizationSystem._frontline_region_index(civ)]
+	capital.position=neighboring_home;capital.role="capital"
+	civ.strategic_regions=[capital]
+	CivilizationSystem.city_intelligence.records["player"]={}
+	var today:=int(GameState.elapsed_days)
+	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(capital.id),0.9,today,"scout report","authored neighboring country"),today)
+	_check(Defense.point(Council.known_towns(rival)[0].position).distance_to(neighboring_home)<0.1,"Council knows the actual neighboring capital")
 	War.blood_feud(rival,int(GameState.elapsed_days),"TEST border exercise")
 	CivilizationSystem.record_player_hostile_order(rival,"","TEST declared field exercise")
 	terrain.set_process(false);terrain.set_physics_process(false)
@@ -138,27 +210,34 @@ func _author_campaign() -> void:
 
 func _add_rivals() -> void:
 	var stations:Array=[]
-	for index in MilitaryCampaign.field_armies.size():
-		var army:Dictionary=MilitaryCampaign.field_armies[index]
+	var candidates:Array=MilitaryCampaign.field_armies.duplicate()
+	if not encirclement:candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return (_point(a)-center).dot(inland)>(_point(b)-center).dot(inland))
+	for army:Dictionary in candidates:
+		if not encirclement and stations.size()>=2:break
 		var at:=_point(army)
 		var offset:=(at-center).normalized()*1.6
 		var points:Array=[]
 		for point:Vector2 in Defense.coverage(army):points.append(_pack(point+offset))
+		if points.size()<2:continue
 		stations.append({"at":at+offset,"points":points,"troops":int(army.troops)})
+		attacking_ids.append(int(army.army_id))
+	expected_actors=MilitaryCampaign.field_armies.size()+stations.size()
+	_check(stations.size()==(8 if encirclement else 2),"Rival deployments are restricted to the intended frontier")
 	var today:=int(GameState.elapsed_days)
 	var land:Callable=CivilizationSystem.scout_land_authority
 	WorldSimulation.context_provider=func(_at:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":0.1,"surface_water_recognized":true}
-	WorldSimulation.create_actor(rival,hash(rival)&0x7fffffff,center+Vector2(50,0))
+	WorldSimulation.create_actor(rival,hash(rival)&0x7fffffff,center+inland*(50.0 if encirclement else 78.0))
 	WorldSimulation.actors[rival].controller="manual"
 	WorldSimulation.actors[rival].systems.CivilizationSystem.scout_land_authority=land
 	_check(bool(WorldSimulation.submit(rival,{"kind":"found"}).get("ok",false)),"Owned rival settlement founded")
 	WorldSimulation.scoped(rival,func()->void:
-		WorldSimulation.state.ensure_population_total(400000);WorldSimulation.state.elapsed_days=today
+		WorldSimulation.state.ensure_population_total(400000 if encirclement else 120000);WorldSimulation.state.elapsed_days=today
 		WorldSimulation.state.settlement_completed=["Hearth Circle"];WorldSimulation.settlements.ensure_founded()
 		WorldSimulation.state.resource_stockpiles["Food"]=10000000.0
 		WorldSimulation.state.known_discoveries.append_array(["formation_drill","military_staffs","radio_telegraphy"])
 		var mc=WorldSimulation.military
-		mc.home_army=mc.simulator.create_formation_force("TEST opposing reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":200000,"equipment":200000,"training":0.8}],0.9,0.9)
+		var trained:=200000 if encirclement else 40000
+		mc.home_army=mc.simulator.create_formation_force("TEST opposing reserve",[{"id":1,"unit":"levy","weapon":"improvised","count":trained,"equipment":trained,"training":0.8}],0.9,0.9)
 		for station:Dictionary in stations:
 			var made:Dictionary=mc.create_field_army(int(station.troops))
 			_check(made.has("ok"),"Real rival field army created")
@@ -171,8 +250,10 @@ func _add_rivals() -> void:
 	CivilizationSystem.record_player_hostile_order(rival,"","TEST declared field exercise")
 
 func _shot(key:String,words:String,zoom:float,at:Vector2,viewport:=Vector2i(1600,900)) -> void:
-	caption.text="TEST · "+words+"\nAuthored army exercise · production collection on copied terrain"
+	_label("TEST · "+words)
+	Input.warp_mouse(Vector2(12,12));overlay.close_tip();overlay.close_note()
 	get_window().size=viewport;get_window().content_scale_size=viewport
+	_label(words)
 	terrain.camera_target=Vector3(at.x,terrain.call("_height_at",at.x,at.y),at.y)
 	terrain.camera.size=zoom;terrain.call("_update_camera");await _settle()
 	# Normal update path collects, composes and retargets; no scene override.
@@ -182,11 +263,20 @@ func _shot(key:String,words:String,zoom:float,at:Vector2,viewport:=Vector2i(1600
 	(overlay.get("pulse_layer") as Control).queue_redraw();await _frames(2)
 	var chart:Dictionary=overlay.scene
 	_check(Motion.reduced()==(key=="reduced"),"Effective motion mode survives resize in "+key)
-	_check((chart.fronts as Array).size()>=8,"Collected sectors remain present in "+key)
+	_check((chart.fronts as Array).size()>=4,"Collected sectors remain present in "+key)
 	_check(overlay.band_override=="","Automatic scale band in "+key)
 	var overlap_pairs:=0
 	var counters:Array=overlay.get("counter_rects")
-	if key in ["perimeter","crowded_small"]:_check(counters.size()==16,"All sixteen army cards remain present in "+key)
+	var represented:Dictionary={}
+	for hit:Dictionary in overlay.get("hits"):
+		if String(hit.get("kind",""))=="army":represented["ours:"+str(hit.get("army_id",0))]=true
+		elif String(hit.get("kind",""))=="sighting":represented["theirs:"+str(hit.get("enemy_id",""))]=true
+		for member in hit.get("members",[]):represented[String(member)]=true
+	var actual_count:=(overlay.collect().get("friendly",[]) as Array).size()+(overlay.collect().get("enemy",[]) as Array).size()
+	_check(actual_count==expected_actors,"Every authored actor remains in production collection in "+key)
+	if key in ["perimeter","crowded_small"]:
+		for mark:Dictionary in chart.get("marks",[]):
+			if int(mark.get("army_id",0))>0 or String(mark.get("enemy_id",""))!="":_check(represented.has(String(mark.id)),"Map signal remains hittable for "+String(mark.id)+" in "+key)
 	for i in counters.size():
 		for j in range(i+1,counters.size()):
 			if (counters[i] as Rect2).intersection(counters[j]).get_area()>1.0:overlap_pairs+=1
@@ -194,8 +284,51 @@ func _shot(key:String,words:String,zoom:float,at:Vector2,viewport:=Vector2i(1600
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
 		_check(get_viewport().get_texture().get_image().save_png(directory.path_join(key+".png"))==OK,"Saved "+key)
-	captures.append({"key":key,"fronts":(chart.fronts as Array).size(),"battles":(chart.battles as Array).size(),"band":overlay.call("_band"),"viewport":str(viewport),"reduced_motion":Motion.reduced(),"palette":T.color_mode,"spatial_crossings":crossings,"counter_count":counters.size(),"counter_overlap_pairs":overlap_pairs})
+	captures.append({"key":key,"description":words,"fronts":(chart.fronts as Array).size(),"battles":(chart.battles as Array).size(),"band":overlay.call("_band"),"viewport":str(viewport),"reduced_motion":Motion.reduced(),"palette":T.color_mode,"spatial_crossings":crossings,"actors":actual_count,"hit_identities":represented.keys(),"counter_count":counters.size(),"counter_overlap_pairs":overlap_pairs})
 	print("BORDER_COLLECTION_PLATE ",key," fronts=",(chart.fronts as Array).size()," battles=",(chart.battles as Array).size()," band=",overlay.call("_band"))
+
+func _label(_words:String) -> void:
+	caption.text="TEST · Encirclement" if encirclement else "TEST · Authored conflict"
+	var badge:=caption.get_parent() as Control
+	badge.reset_size()
+	badge.position=Vector2(get_window().content_scale_size)-badge.size-Vector2(24,82)
+
+func _focused_battle() -> void:
+	var picked:Dictionary={}
+	for hit:Dictionary in overlay.get("hits"):
+		if String(hit.get("kind",""))=="battle":picked=hit;break
+	_check(not picked.is_empty(),"A real battle has a focusable map signal")
+	if picked.is_empty():return
+	var at:Vector2=picked.centre
+	Input.warp_mouse(at);await _frames(3)
+	overlay.call("_hover",at);await _frames(3)
+	var tip:Control=overlay.get("tip")
+	_check(is_instance_valid(tip) and tip.visible,"Battle focus reveals actual details")
+	_label("TEST · Focused battle")
+	await _frames(2)
+	if DisplayServer.get_name()!="headless":
+		await RenderingServer.frame_post_draw
+		_check(get_viewport().get_texture().get_image().save_png(directory.path_join("focused_battle.png"))==OK,"Saved focused battle")
+	captures.append({"key":"focused_battle","battle_id":picked.battle.get("id",""),"detail_visible":is_instance_valid(tip) and tip.visible})
+	overlay.close_tip();Input.warp_mouse(Vector2(12,12))
+
+func _selected_army() -> void:
+	var bar:Control=(terrain.get("hud") as Control).get("army_bar")
+	bar.call("refresh")
+	var group:Dictionary={}
+	for card:Dictionary in bar.get("cards"):
+		if String(card.get("kind",""))=="group" and (card.get("member_cards",[]) as Array).size()>(group.get("member_cards",[]) as Array).size():group=card
+	_check(not group.is_empty(),"Real general has a selectable army group")
+	if group.is_empty():return
+	bar.call("select_card",group);await _frames(3)
+	var last:Dictionary=(group.member_cards as Array)[-1]
+	bar.call("select_card",last);await _frames(3)
+	_check(int(terrain.selected_army_id)==int(last.army_id),"Last army member can be selected through the actual bar")
+	await _shot("selected_army","Selected army",120.0,center+inland*12.0,Vector2i(1152,720))
+	var strip:Control=bar.get("member_scroll")
+	if is_instance_valid(strip):_check(Rect2(Vector2.ZERO,bar.get_viewport_rect().size).encloses(strip.get_global_rect()),"Selected army member strip stays inside the small viewport")
+	terrain.call("_clear_army_selection");bar.call("refresh")
+	if bool(bar.call("expanded")):bar.call("toggle_disclosure")
 
 func _heat_metrics() -> Dictionary:
 	var out:={"ours":{"fronts":0,"deployed":0,"mobile":0,"peak":0.0,"hot_runs":0},"theirs":{"fronts":0,"deployed":0,"mobile":0,"peak":0.0,"hot_runs":0},"battles":[]}
@@ -250,7 +383,7 @@ func _ribbon_only_image() -> Image:
 	# pulse while retaining the unmodified production scene and hot ribbons.
 	# A pulsing ring or wash can otherwise change pixels over a static worm.
 	var caption_before:=caption.text
-	caption.text="TEST · Controlled ribbon diagnostic · decorative ring and wash suppressed\nProduction scene and hot geometry unchanged · cosmetic pulse flags restored after this frame"
+	_label("TEST · Ribbon-only diagnostic")
 	await _frames(3)
 	var entries:Array=overlay.get("battle_cache")
 	var previous:Array=[]
@@ -260,7 +393,7 @@ func _ribbon_only_image() -> Image:
 		previous.append(bool(entry.get("live",false)));entry.live=false
 	var result:Image=await _pulse_image()
 	for i in entries.size():entries[i].live=previous[i]
-	caption.text=caption_before
+	_label(caption_before)
 	_check(hash(overlay.scene)==scene_before and hash(overlay.get("hot_cache"))==heat_before,"Controlled pulse suppression preserves scene and fighting geometry")
 	return result
 
@@ -275,7 +408,7 @@ func _motion_proof() -> void:
 		_check(int(metrics[side].hot_runs)>0,"Real contact draws a "+side+" fighting ribbon")
 	if DisplayServer.get_name()=="headless":
 		captures.append({"key":"contact_motion","heat":metrics,"pixels":"GPU required"});return
-	caption.text="TEST · Same real contact, two animation phases · no campaign tick\nAuthored army exercise · production collection on copied terrain"
+	_label("TEST · Combat motion")
 	terrain.call("_set_game_speed",1)
 	overlay.call("_process",0.25)
 	var first:Image=await _pulse_image()
