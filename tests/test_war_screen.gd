@@ -116,7 +116,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 
 func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
 	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":3,"away":9},424,612)).is_equal("327 ready · 85 in a drill course, about 40 days · 3 joining the watch · 9 hurt or away · 188 to join")
-	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 above the share")
+	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 more than asked")
 	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
 	# Nobody out: no fed share to show.
 	assert_float(float(Board.strength(MilitaryCampaign).fed)).is_equal(-1.0)
@@ -226,7 +226,7 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_array(kinds).not_contains(["drill"])
 	var home:Dictionary=rows[kinds.find("home")]
 	assert_str(String(home.title)).starts_with("At home in ")
-	assert_str(String(home.doing)).contains("guard home")
+	assert_str(String(home.doing)).contains("home guard")
 	assert_str(String(home.kit)).is_not_empty()
 	assert_int(int(home.men)).is_equal(Law.under_arms(MilitaryCampaign))
 	# The board shows them as numbers: shares on the strip, and where they

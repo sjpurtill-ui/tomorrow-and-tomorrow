@@ -485,12 +485,12 @@ static func hearsay_over_the_sea(world:Node,day:int)->Array:
 		if rng.randf()>=clampf(HEARSAY_RATE*endurance/distance,0.002,0.03):continue
 		var wide:=clampf(distance*0.3,150.0,1500.0)
 		var center:Vector2=world._bounded_world_point(there+Vector2.from_angle(rng.randf_range(-PI,PI))*wide*rng.randf_range(0.2,0.7))
-		var lead:Dictionary=world.rumor_network.observation("player",id,"a people over the sea",center,wide,day,"worked timber on the tide and a storm-blown boat's tale")
+		var lead:Dictionary=world.rumor_network.observation("player",id,"a people our fishers heard of",center,wide,day,"worked timber on the tide and a storm-blown boat's tale")
 		lead.confidence=0.2
 		if not bool(world.rumor_network.receive("player",lead,day)):continue
 		heard.append(id)
 		if actor=="player":
-			_tell("WORD FROM OVER THE SEA","Our fishers bring in worked timber that none of ours cut, and tell of a boat seen far out that was not ours. Some people live over the sea, somewhere to the %s. It is on the map of rumours; an expedition by sea could look for them." % String(world._compass_phrase(home,center)).to_lower(),"notice")
+			_tell("WORD OF ANOTHER PEOPLE","Our fishers bring in worked timber that none of ours cut, and tell of a boat seen far out that was not ours. Some people live somewhere to the %s, by land or over the water we cannot say. It is on the map of rumours; scouts or an expedition could look for them." % String(world._compass_phrase(home,center)).to_lower(),"notice")
 	return heard
 
 ## The god's people remember their expeditions: [{day, heading, by_sea, km,

@@ -868,6 +868,9 @@ func _capture_preview_if_requested() -> void:
 	# Diagnostic: whether each people's home can be reached from ours by land (tools/land_link_report.gd).
 	if "--capture-land-links" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/land_link_report.gd").call("lines"):print("LAND LINK ",line)
+	# Diagnostic: what the scouts' search beyond the charts finds (tools/scout_beyond_report.gd).
+	if "--capture-scout-beyond" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/scout_beyond_report.gd").call("lines"):print("SCOUT BEYOND ",line)
 	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
 	if "--capture-rival-ships" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)

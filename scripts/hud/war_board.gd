@@ -266,9 +266,9 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	# held), the count stands alone; the War screen's bar says where they are.
 	if target>now:
 		var of:=_line("/ "+compact(target),14,T.INK_MUTED);of.name="Target";of.size_flags_vertical=Control.SIZE_SHRINK_END;top.add_child(of)
-	var word:=_line("under arms",12,T.INK_MUTED);word.name="Caption";word.size_flags_vertical=Control.SIZE_SHRINK_END;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(word)
+	var word:=_line("in the army",12,T.INK_MUTED);word.name="Caption";word.size_flags_vertical=Control.SIZE_SHRINK_END;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(word)
 	var bar:=StrengthBar.new();bar.name="Strength";bar.parts=glance;bar.target=target;bar.custom_minimum_size=Vector2(92,6);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;numbers.add_child(bar)
-	soldiers.tooltip_text="Keeping watch: %s, %s of the people. The watch is the army: everyone keeping watch serves under arms.\n%s" % [EraWords.grouped(now),Law.level_name(String(reading.level)),strength_words(glance,now,target)]
+	soldiers.tooltip_text="The army: %s, %s of the people. Everyone set to keeping watch is in it.\n%s" % [EraWords.grouped(now),Law.level_name(String(reading.level)),strength_words(glance,now,target)]
 	_rule(army_box,"SoldiersRule")
 	# Where they come from: every soldier is one fewer at work.
 	var from:=Forces.drawn_from(MilitaryCampaign)
@@ -474,21 +474,18 @@ func _forces_card(f:Dictionary)->Control:
 	var panel:=_card();panel.name="ForcesCard"
 	var column:=panel.get_node("Column") as VBoxContainer
 	var total:=int(f.total);var watch:=int(f.watch)
-	var tip:="Everyone under arms, anywhere: at home, in the bands, holding towns, drilling, hurt or away. The watch is the army: raising the share sets more of the people to keep watch; they join at home at once and drill over time. Lowering it sends the least drilled at home back to their work."
-	var head:=_headline(column,"guard",total,"under arms · %s of the people" % Watch.percent(float(total)/float(maxi(1,int(f.population)))),tip)
+	var tip:="The army: everyone in it, anywhere. It is three things: the home guard (some of them out on the border), those free to send, and those in the field. The − and + here set how big it is, as a share of the people: more join at home at once and drill over time; fewer sends the least drilled at home back to their work. Keeping watch on the People view is this same number."
+	var head:=_headline(column,"guard",total,"in the army · %s of the people" % Watch.percent(float(total)/float(maxi(1,int(f.population)))),tip)
 	head.name="Total"
-	head.add_child(_step_button("WatchLess","−","One in a hundred of the people fewer keeping watch: the least drilled at home go back to their work.",func()->void:_step_watch(-1)))
-	head.add_child(_step_button("WatchMore","+","One in a hundred of the people more keeping watch: they leave other work and join the watch at home.",func()->void:_step_watch(1)))
-	# What the share asks against what serves, and the manpower left.
-	var asked:=_line("share asks %s · %s could be raised" % [EraWords.grouped(watch),compact(int(f.can_raise))],12,T.INK_MUTED);asked.name="Asks"
-	asked.tooltip_text="The share of the people set to keep watch is %s of %s people (%s); %s of those who can work are not keeping watch and could be raised." % [EraWords.grouped(watch),EraWords.grouped(int(f.population)),Watch.percent(float(f.share)),EraWords.grouped(int(f.can_raise))]
-	column.add_child(asked)
+	head.add_child(_step_button("WatchLess","−","A smaller army: one in a hundred of the people fewer. The least drilled at home go back to their work.",func()->void:_step_watch(-1)))
+	head.add_child(_step_button("WatchMore","+","A bigger army: one in a hundred of the people more. They leave other work and join at home.",func()->void:_step_watch(1)))
+	# Only when the army is not yet the size asked for: said in one line.
 	if total>watch:
-		var over:=_line("%s above the share · back to work later" % EraWords.grouped(total-watch),12,T.AMBER_TEXT);over.name="Over"
-		over.tooltip_text="%s more serve than the share asks: away in bands, holding towns, hurt, or not yet sent home. They go back to their work when they come home." % EraWords.grouped(total-watch)
+		var over:=_line("%s asked: %s more go back to work once home" % [EraWords.grouped(watch),EraWords.grouped(total-watch)],12,T.AMBER_TEXT);over.name="Over"
+		over.tooltip_text="%s more are in the army than the size you set: away in the field, holding towns, hurt, or not yet sent home. They go back to their work when they come home." % EraWords.grouped(total-watch)
 		column.add_child(over)
 	elif total<watch:
-		var under:=_line("%s still joining the watch" % EraWords.grouped(watch-total),12,T.AMBER_TEXT);under.name="Under"
+		var under:=_line("%s asked: %s are still joining" % [EraWords.grouped(watch),EraWords.grouped(watch-total)],12,T.AMBER_TEXT);under.name="Under"
 		column.add_child(under)
 	# The quick shares, as plain shares of the people (army_levy_law LEVELS).
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",0);column.add_child(pick)
@@ -505,7 +502,7 @@ func _forces_card(f:Dictionary)->Control:
 		button.add_theme_stylebox_override("pressed",_segment(true,false,i,count));button.add_theme_stylebox_override("hover_pressed",_segment(true,true,i,count))
 		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 		button.set_pressed_no_signal(id==now_level)
-		button.tooltip_text="%s of the people keep watch.\n%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able))]
+		button.tooltip_text="An army of %s of the people.\n%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able))]
 		button.pressed.connect(func()->void:_choose_level(id))
 		pick.add_child(button)
 	# Where every one of them stands: one bar, its legend under it.
@@ -527,11 +524,17 @@ func _forces_card(f:Dictionary)->Control:
 	gauges.add_child(_gauge("Fed",float(ready.fed),T.TEAL if float(ready.fed)>=0.75 else (T.AMBER if float(ready.fed)>=0.4 else T.RED),"Fed in the field: the share of the rations the bands out need that reached them." if float(ready.fed)>=0.0 else "Fed in the field: nobody is out."))
 	# How many of them stay home.
 	var split:=HBoxContainer.new();split.name="Split";split.add_theme_constant_override("separation",6);column.add_child(split)
-	var split_words:=_line("Keep %d%% at home · %s" % [roundi(float(f.home_share)*100.0),EraWords.grouped(int(f.guard_target))],13,T.INK);split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	split_words.tooltip_text="The home guard: the share of everyone under arms kept at home and in the towns. The war council never sends them away; the rest are free for the bands."
+	# The home guard, and how many of it stand out on the border (fort_border.gd).
+	var on_border:=int(preload("res://scripts/fort_border.gd").watch().get("posted",0))
+	var split_words:=_line("Home guard: %d%% of the army · %s" % [roundi(float(f.home_share)*100.0),EraWords.grouped(int(f.guard_target))],13,T.INK);split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	split_words.tooltip_text="The home guard: the part of the army kept at home and in the towns. Those posted to the border forts and the line are part of it. The war council never sends the home guard away; everyone else is free to send."
 	split.add_child(split_words)
-	split.add_child(_step_button("GuardLess","−","A tenth of them fewer at home: more are free for the bands.",func()->void:_step_split(-1)))
-	split.add_child(_step_button("GuardMore","+","A tenth of them more at home: idle bands come home to guard.",func()->void:_step_split(1)))
+	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
+	split.add_child(_step_button("GuardMore","+","A bigger home guard, by a tenth of the army: idle bands come home to guard.",func()->void:_step_split(1)))
+	if on_border>0:
+		var border:=_line("%s of the home guard are out on the border" % EraWords.grouped(on_border),12,T.INK_MUTED);border.name="OnBorder"
+		border.tooltip_text="Posted to the border forts and the line between them (the Border card below). They are part of the home guard, not extra."
+		column.add_child(border)
 	var people:=Button.new();people.name="People";people.text="People ›";people.flat=true;people.focus_mode=Control.FOCUS_NONE
 	people.add_theme_font_size_override("font_size",12);people.add_theme_color_override("font_color",T.GOLD_TEXT);people.add_theme_color_override("font_hover_color",T.INK)
 	people.tooltip_text="Who works at what, keeping watch among the rest (the People view)."
@@ -596,7 +599,7 @@ func _step_makeup(id:String,direction:int)->void:
 
 ## The bar in words, part by part, for the pointer.
 static func allocation_words(f:Dictionary)->String:
-	var lines:=PackedStringArray(["Everyone under arms: %s." % EraWords.grouped(int(f.total))])
+	var lines:=PackedStringArray(["The army: %s." % EraWords.grouped(int(f.total))])
 	for part:Dictionary in f.parts:lines.append("%s: %s" % [String(part.label),EraWords.grouped(int(part.men))])
 	lines.append("The tick marks the share the people keep on watch: %s." % EraWords.grouped(int(f.watch)))
 	return "\n".join(lines)
@@ -1028,7 +1031,7 @@ static func strength_words(glance:Dictionary,now:int,target:int)->String:
 	if int(glance.waiting)>0:parts.append("%s joining the watch" % EraWords.grouped(int(glance.waiting)))
 	if int(glance.get("away",0))>0:parts.append("%s hurt or away" % EraWords.grouped(int(glance.away)))
 	if target>now:parts.append("%s to join" % EraWords.grouped(target-now))
-	elif target>=0 and now>target:parts.append("%s above the share" % EraWords.grouped(now-target))
+	elif target>=0 and now>target:parts.append("%s more than asked" % EraWords.grouped(now-target))
 	return " · ".join(parts)
 
 

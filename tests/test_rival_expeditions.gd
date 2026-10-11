@@ -48,7 +48,7 @@ func test_a_meeting_made_by_their_party_is_known_to_us_and_told()->void:
 	assert_float(float(relation.encounter_position.x)).is_equal(120.0)
 	var told:=GameState.simulation_events.filter(func(e:Dictionary)->bool:return String(e.get("title","")).begins_with("First contact"))
 	assert_int(told.size()).is_equal(1)
-	assert_str(String(told[0].description)).contains("from over the sea")
+	assert_str(String(told[0].description)).contains("who came in boats")
 	# Once met, a second meeting says nothing new.
 	WorldSimulation.scoped(rival,func()->void:
 		WorldSimulation.world._meeting_is_mutual({"id":"human","name":"x"},4100,Vector2(0,0),"a scouting party",false))
@@ -105,10 +105,10 @@ func test_word_from_over_the_sea_is_a_rumour_with_a_place_and_never_a_meeting()-
 	assert_array(heard).override_failure_message("nothing heard in 200 years").is_not_empty()
 	var leads:Array=CivilizationSystem.rumor_network.list_leads("player",day)
 	var lead:Dictionary=leads.filter(func(l:Dictionary)->bool:return String(l.subject)==String(heard[0]))[0]
-	assert_str(String(lead.name)).is_equal("a people over the sea")
+	assert_str(String(lead.name)).is_equal("a people our fishers heard of")
 	assert_float(float(lead.radius)).is_between(150.0,1500.0)
 	for civ:Dictionary in CivilizationSystem.civilizations:
 		if String(civ.id)==String(heard[0]):assert_int(int((civ.player_relation as Dictionary).get("contact_level",0))).is_equal(0)
-	assert_str(String(GameState.simulation_events[0].title)).is_equal("WORD FROM OVER THE SEA")
+	assert_str(String(GameState.simulation_events[0].title)).is_equal("WORD OF ANOTHER PEOPLE")
 	# Any other day of the month: nothing.
 	assert_array(Expedition.hearsay_over_the_sea(CivilizationSystem,day+1)).is_empty()

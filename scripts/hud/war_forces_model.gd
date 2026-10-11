@@ -27,8 +27,8 @@ static func rows(mc:Node)->Array[Dictionary]:
 	if home_men>0:
 		var blocks:=Strips.composition(mc.home_army.get("formations",[]))
 		var ready:=maxi(0,home_men-int(watch.home))
-		var doing:="%s free for the bands" % EraWords.grouped(ready)
-		if int(watch.home)>0:doing+=" · %s guard home and the towns" % EraWords.grouped(int(watch.home))
+		var doing:="%s free to send" % EraWords.grouped(ready)
+		if int(watch.home)>0:doing+=" · %s in the home guard" % EraWords.grouped(int(watch.home))
 		out.append({"kind":"home","id":"home","title":"At home in %s" % home,"men":home_men,"full":home_men,"blocks":blocks,"kit":kit_words(blocks),
 			"leader":_name_of(mc.home_army.get("commander",{})),"doing":doing,"will":clampf(float(mc.home_army.get("morale",0.6)),0.0,1.0),"fed":-1.0,"army_id":0})
 	for army_variant in mc.field_armies:

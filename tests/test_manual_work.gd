@@ -565,29 +565,34 @@ func test_the_people_view_shows_the_switch_and_the_controls()->void:
 	assert_object(who).is_not_null()
 	var leader:=String(GovernmentPeopleSystem.settlement_leader(String(GameState.player_settlements[0].id)).get("name","")).get_slice(" ",0)
 	assert_str(who.text).starts_with(leader+": ")
-	# The rows add up to the people who can work, and the heading says so.
+	# Each row is its share of those who can work: whole percents adding to
+	# 100, with the people behind it on its tooltip.
 	var sum:=0
 	for role:String in GameState.POPULATION_ROLES:
 		var row:=_task_row(labor,role)
 		assert_object(row).override_failure_message(role).is_not_null()
-		sum+=int((row.find_child("Count",true,false) as Label).text)
-		assert_int(int((row.find_child("Count",true,false) as Label).text)).is_equal(int(GameState.population_allocations[role]))
-	assert_int(sum).is_equal(GameState.able_population())
-	assert_str(text).contains("%d can work" % sum)
-	# I do: each row has −, + and ×5, in whole people.
+		var shown:=row.find_child("Count",true,false) as Label
+		assert_bool(shown.text.ends_with("%") or shown.text.ends_with("in 100")).is_true()
+		sum+=int(shown.text.get_slice(" ",0).trim_suffix("%"))
+		assert_str(shown.tooltip_text).contains("%d people today" % int(GameState.population_allocations[role]))
+	assert_int(sum).is_equal(100)
+	assert_str(text).contains("%d can work" % GameState.able_population())
+	# I do: each row has −, + and ×5, in hundredths of those who can work.
 	(labor.find_child("WorkRuler",true,false) as Button).pressed.emit()
 	assert_bool(Manual.manual()).is_true()
 	labor=_people_view(hud)
 	text="\n".join(_texts(labor))
 	assert_str(text).contains("Back to our leaders").contains("I do (now)").contains("You set the work in every town")
 	var build:=_task_row(labor,"Construction")
-	var before:=int(GameState.population_allocations.Construction)
+	var before:=int(Manual.percents().Construction)
 	(build.find_child("More",true,false) as Button).pressed.emit()
-	assert_int(int(GameState.population_allocations.Construction)).is_equal(before+1)
+	assert_int(int(Manual.percents().Construction)).is_equal(before+1)
 	(build.find_child("Five",true,false) as Button).pressed.emit()
-	assert_int(int(GameState.population_allocations.Construction)).is_equal(before+6)
+	assert_int(int(Manual.percents().Construction)).is_equal(before+6)
 	(build.find_child("Less",true,false) as Button).pressed.emit()
-	assert_int(int(GameState.population_allocations.Construction)).is_equal(before+5)
+	assert_int(int(Manual.percents().Construction)).is_equal(before+5)
+	# The people follow the share.
+	assert_float(float(GameState.population_allocations.Construction)).is_equal_approx(float(GameState.able_population())*float(before+5)/100.0,1.0)
 	assert_int(hud.refreshed).is_greater_equal(4)
 	# Tooltips name where each one comes from and goes.
 	assert_str((build.find_child("More",true,false) as Button).tooltip_text).contains("from getting food")
@@ -761,3 +766,26 @@ func test_the_counts_hold_as_the_people_change_by_a_few()->void:
 	var defense:=int(after.Defense)
 	Manual.move("Defense",1)
 	assert_int(int(Manual.counts().Defense)).is_equal(defense+1)
+
+func test_the_ruler_sets_shares_that_hold_as_the_people_grow()->void:
+	_world(900)
+	var moved:=Manual.move_share("Knowledge",3)
+	assert_bool(bool(moved.ok)).is_true()
+	assert_bool(Manual.manual()).is_true()
+	var shares:=Manual.percents()
+	var total:=0
+	for role:String in Manual.ROLES:total+=int(shares[role])
+	assert_int(total).is_equal(100)
+	# Three points to learning, taken from the largest share each time.
+	assert_int(int(moved.moved)).is_equal(3)
+	assert_int(int((moved.to as Dictionary).size())).is_equal(0)
+	# The people grow by a third: every share reads exactly as it did.
+	GameState.ensure_population_total(1200)
+	_delegate()
+	assert_that(Manual.percents()).is_equal(shares)
+	for role:String in Manual.ROLES:
+		assert_float(float(Manual.counts()[role])).override_failure_message(role).is_equal_approx(float(GameState.able_population())*float(shares[role])/100.0,1.0)
+	# A point back: to the largest share.
+	var back:=Manual.move_share("Knowledge",-1)
+	assert_int(int(Manual.percents().Knowledge)).is_equal(int(shares.Knowledge)-1)
+	assert_int((back.to as Dictionary).size()).is_equal(1)
