@@ -44,6 +44,7 @@ var clock:=REFRESH_SECONDS
 var _shape:=""
 var strip:Control
 var members:Control
+var member_scroll:ScrollContainer
 var left_button:Button
 var right_button:Button
 var disclosure:Button
@@ -54,7 +55,11 @@ var _war_is_open:=false
 func _ready()->void:
 	name="ArmyBar"
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
-	members=Control.new();members.name="Bands";members.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(members)
+	member_scroll=ScrollContainer.new();member_scroll.name="BandScroll"
+	member_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;member_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	member_scroll.gui_input.connect(_member_scroll_input);add_child(member_scroll)
+	members=Control.new();members.name="Bands";members.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	members.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;member_scroll.add_child(members)
 	strip=Control.new();strip.name="Cards";strip.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.clip_contents=true;add_child(strip)
 	left_button=_arrow("‹",-1);right_button=_arrow("›",1)
 	disclosure=Button.new();disclosure.name="ArmyDisclosure";disclosure.focus_mode=Control.FOCUS_NONE
@@ -101,7 +106,17 @@ func _arrow(text:String,step:int)->Button:
 
 ## Height the bar needs, including the bands row of a selected army.
 func bar_height()->float:
-	return DISCLOSURE_HEIGHT+(GAP+CARD_SIZE.y+((CHIP_SIZE.y+GAP) if _selected_group().size()>1 else 0.0) if expanded() else 0.0)
+	return DISCLOSURE_HEIGHT+(GAP+CARD_SIZE.y+((_member_row_height()+GAP) if _selected_group().size()>1 else 0.0) if expanded() else 0.0)
+
+
+func _member_row_height()->float:
+	return CHIP_SIZE.y+maxf(12.0,member_scroll.get_h_scroll_bar().get_combined_minimum_size().y if member_scroll!=null else 14.0)
+
+
+func _member_scroll_input(event:InputEvent)->void:
+	if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
+		member_scroll.scroll_horizontal+=roundi((CHIP_SIZE.x+GAP)*(-1.0 if event.button_index==MOUSE_BUTTON_WHEEL_UP else 1.0))
+		member_scroll.accept_event()
 
 
 func expanded()->bool:
@@ -294,12 +309,21 @@ func _rebuild()->void:
 	var hud:=get_parent()
 	if hud!=null and hud.has_method("_position_army_bar"):hud.call_deferred("_position_army_bar")
 	_arrange()
+	_reveal_member.call_deferred()
+
+
+func _reveal_member()->void:
+	if not is_inside_tree() or not member_scroll.visible:return
+	for chip:Control in members.get_children():
+		if String(chip.card_id)==selected_id:
+			member_scroll.ensure_control_visible(chip);return
+	member_scroll.scroll_horizontal=0
 
 
 func _arrange()->void:
 	if strip==null:return
 	disclosure.position=Vector2.ZERO;disclosure.size=Vector2(minf(142.0,maxf(0.0,size.x)),DISCLOSURE_HEIGHT)
-	strip.visible=expanded();members.visible=expanded()
+	strip.visible=expanded();members.visible=expanded();member_scroll.visible=expanded() and members.get_child_count()>1
 	if not expanded():left_button.hide();right_button.hide();return
 	var count:=strip.get_child_count()
 	var fits:=_fits()
@@ -321,7 +345,9 @@ func _arrange()->void:
 	left_button.disabled=scroll<=0;right_button.disabled=scroll>=count-fits
 	left_button.position=Vector2(left-28,top);right_button.position=Vector2(left+width+6,top)
 	var chip_width:=chips*CHIP_SIZE.x+maxi(0,chips-1)*GAP
-	members.position=Vector2(left,top-CHIP_SIZE.y-GAP);members.size=Vector2(chip_width,CHIP_SIZE.y)
+	member_scroll.position=Vector2(left,top-_member_row_height()-GAP)
+	member_scroll.size=Vector2(maxf(0.0,size.x-left-(ARROW_ROOM if overflow else 0.0)),_member_row_height())
+	members.custom_minimum_size=Vector2(chip_width,CHIP_SIZE.y);members.size=Vector2(chip_width,CHIP_SIZE.y)
 	var j:=0
 	for node:Control in members.get_children():
 		if node.is_queued_for_deletion():continue

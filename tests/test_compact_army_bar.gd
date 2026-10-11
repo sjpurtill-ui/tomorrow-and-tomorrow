@@ -94,3 +94,30 @@ func test_count_and_plan_ink_follow_only_the_selected_band_or_general()->void:
 	map.selected_army_id=2;bar.refresh()
 	assert_str(bar.selected_id).is_equal("army:2")
 	assert_array(bar.selected_plan_zones(command)).is_equal(["west"])
+
+func test_eight_members_scroll_inside_the_available_bar_and_selected_last_band_is_reachable()->void:
+	var member_cards:Array=[]
+	for id in range(1,9):member_cards.append(_card(id))
+	bar.fixture.assign([{"id":"general:eight","kind":"group","army_id":1,"members":[1,2,3,4,5,6,7,8],"member_cards":member_cards,
+		"title":"Eight bands","short":"Eight bands","men":800,"general":{},"position":Vector2.INF}])
+	bar.refresh();bar.select_card(bar.fixture[0])
+	# The full 1152px view leaves 600px between map rail, orders and margins.
+	bar.place(Rect2(120,450,600,bar.bar_height()))
+	await get_tree().process_frame
+	assert_int(bar.members.get_child_count()).is_equal(8)
+	assert_float(bar.member_scroll.size.x).is_less_equal(600.0)
+	assert_bool(bar.member_scroll.clip_contents).is_true()
+	assert_bool(bar.member_scroll.get_h_scroll_bar().visible).is_true()
+	assert_bool(bar.get_global_rect().encloses(bar.member_scroll.get_global_rect())).is_true()
+	assert_float(bar.member_scroll.size.y).is_greater_equal(Bar.CHIP_SIZE.y+bar.member_scroll.get_h_scroll_bar().get_combined_minimum_size().y)
+	bar.select_card(member_cards[7]);bar.place(Rect2(120,450,600,bar.bar_height()))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_str(bar.selected_id).is_equal("army:8")
+	assert_int(map.selected_army_id).is_equal(8)
+	assert_int(bar.member_scroll.scroll_horizontal).is_greater(0)
+	var last:Control=bar.members.get_child(7)
+	assert_bool(bar.member_scroll.get_global_rect().encloses(last.get_global_rect())).is_true()
+	bar.member_scroll.scroll_horizontal=0
+	await get_tree().process_frame
+	assert_bool(bar.member_scroll.get_global_rect().encloses(bar.members.get_child(0).get_global_rect())).is_true()
