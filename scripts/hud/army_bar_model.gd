@@ -441,7 +441,7 @@ static func drill_words(card:Dictionary)->String:
 
 ## The levy card's tooltip: who is at home and how the drill goes.
 static func levy_words(card:Dictionary)->String:
-	var out:=PackedStringArray(["At home: %s under arms." % EraWords.grouped(int(card.get("men",0)))])
+	var out:=PackedStringArray(["At home: %s of the army." % EraWords.grouped(int(card.get("men",0)))])
 	out.append("%s ready · %s keep the watch" % [EraWords.grouped(int(card.get("ready",0))),EraWords.grouped(int(card.get("watch",0)))])
 	var drilling:=int(card.get("drill",0))
 	if drilling>0:

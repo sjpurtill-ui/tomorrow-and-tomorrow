@@ -397,8 +397,8 @@ func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->
 	# Those keeping watch and the townsfolk apart, never one count of
 	# "fighters" that reads as soldiers.
 	assert_str(String(row.value)).is_equal("35 on watch, %d would take up arms" % int(parts.rise))
-	assert_str(String(row.note)).is_equal("20 for the bands")
-	assert_str(Model._tip(row,{"strength":strong})).contains("Of the 35 on watch, 20 are free for the bands and 15 are the home guard.")
+	assert_str(String(row.note)).is_equal("20 free to send")
+	assert_str(Model._tip(row,{"strength":strong})).contains("Of the 35 of the army here, 20 are free to send and 15 are the home guard.")
 	# The Military ledger's garrison at home, and a scout's count, are the same muster.
 	assert_int(int(MilitaryCampaign.settlement_defense_snapshot().garrison_personnel)).is_equal(musters)
 	assert_float(float(CivilizationSystem.city_intelligence.truth(home).values.garrison)).is_equal(float(musters))

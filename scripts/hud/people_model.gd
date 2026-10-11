@@ -363,6 +363,9 @@ static func store_cause(trend:int,food_days:float)->String:
 ## [{id: role, label, count, icon, mix:[[icon, people]], effect:{now, plus_ten}}].
 static func labor()->Array:
 	var counts:=Manual.counts()
+	# Each task's share of those who can work, in whole percents adding to 100:
+	# the ruler's own split, or the work as our leaders have it today.
+	var shares:Dictionary=Manual.percents() if Manual.manual() else Manual.percents(Manual._shares_of(counts))
 	var harvest:Dictionary=GameState.simulation_metrics.get("food_harvest",{}) if GameState.simulation_metrics.get("food_harvest") is Dictionary else {}
 	var split:={"gather":float(harvest.get("Fresh plants",0.0)),"hunt":float(harvest.get("Fresh meat",0.0)),"fish":float(harvest.get("Fish",0.0)),"tend":float(harvest.get("Dry staples",0.0))}
 	var total:=0.0
@@ -389,7 +392,7 @@ static func labor()->Array:
 		# A gifted person of this work, grown or growing (geniuses.gd).
 		var gifted:=preload("res://scripts/geniuses.gd").row_words(role)
 		if gifted!="":effect["genius"]=gifted
-		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else [],
+		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"share":int(shares.get(role,0)),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else [],
 			"effect":effect})
 	return out
 
