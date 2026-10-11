@@ -27,6 +27,7 @@ from urllib.parse import parse_qs, urlparse
 
 SIM = Path(__file__).resolve().parent
 sys.path.insert(0, str(SIM))
+import bench_engine as engine  # noqa: E402
 import bench_worker as worker  # noqa: E402
 
 RUNS = SIM / "bench_runs"
@@ -54,11 +55,13 @@ class Job:
         self.rows: dict[int, list] = {s: [] for s in self.seeds}
         self.extra: dict[int, dict] = {}
         self.errors: dict[int, str] = {}
-        self.queue = mp.Queue()
+        # The real game's worlds are threads over an engine each; the quick copy's are processes.
+        self.game = spec.get("engine") == "game"
+        self.queue = queue_mod.Queue() if self.game else mp.Queue()
         self.status = "waiting"
         self.created = time.time()
         self.finished = 0.0
-        self.expect = int(int(spec["years"]) / float(spec["record_every"])) + 1
+        self.expect = int(spec["years"]) if self.game else int(int(spec["years"]) / float(spec["record_every"])) + 1
 
     def meta(self) -> dict:
         return {"id": self.id, "name": self.name, "spec": self.spec, "seeds": self.seeds, "status": self.status, "created": self.created,
@@ -106,13 +109,21 @@ def scheduler() -> None:
                     time.sleep(0.2)
                     job.drain()
                 if not job.settled(seed) and job.status != "stopped":
-                    job.errors[seed] = f"the world's process ended without finishing (exit code {proc.exitcode})"
+                    job.errors[seed] = f"the world ended without finishing (exit code {proc.exitcode})"
                 RUNNING.remove(entry)
-            while PENDING and len(RUNNING) < PARALLEL:
-                job, seed = PENDING.pop(0)
+            for entry in list(PENDING):
+                job, seed = entry
                 if job.status == "stopped":
+                    PENDING.remove(entry)
                     continue
-                proc = ctx.Process(target=worker.run_seed, args=(job.spec, seed, job.queue), daemon=True)
+                room = engine.PARALLEL if job.game else PARALLEL
+                if sum(1 for j, _s, _p in RUNNING if j.game == job.game) >= room:
+                    continue
+                PENDING.remove(entry)
+                if job.game:
+                    proc = engine.World(job.id, job.spec, seed, job.queue)
+                else:
+                    proc = ctx.Process(target=worker.run_seed, args=(job.spec, seed, job.queue), daemon=True)
                 proc.start()
                 job.status = "running"
                 RUNNING.append((job, seed, proc))
@@ -130,7 +141,13 @@ def start_run(body: dict) -> dict:
     spec = dict(body.get("spec") or {})
     spec["years"] = max(10, min(MAX_YEARS, int(spec.get("years", 600))))
     spec["worlds"] = max(1, min(MAX_WORLDS, int(spec.get("worlds", 1))))
-    spec["record_every"] = record_every(spec["years"])
+    if spec.get("engine") != "copy" and not engine.available():
+        spec["engine"] = "game"
+        spec["span"] = max(1, min(30, int(spec.get("span", 30))))
+        spec["record_every"] = 1.0
+    else:
+        spec["engine"] = "copy"
+        spec["record_every"] = record_every(spec["years"])
     job = Job(str(body.get("name") or "Run")[:80], spec)
     with LOCK:
         JOBS[job.id] = job
@@ -194,6 +211,35 @@ def git_rev() -> str:
         return ""
 
 
+def game_labels(knobs: list, consts: list, labels: dict, effects: dict) -> tuple[dict, dict]:
+    """The main dials' plain names and measured effects, carried from the quick
+    copy's numbers to the game consts they were read from."""
+    by_file = {(c["file"], c["name"]): c["id"] for c in consts}
+    by_name: dict[str, list] = {}
+    for c in consts:
+        by_name.setdefault(c["name"], []).append(c["id"])
+    aliases = {"c.yield_calibration": "BASE_SUBSISTENCE_YIELD_CALIBRATION", "c.era_doubling": "DOUBLING", "c.era_window": "WINDOW",
+               "c.adoption_pace": "ADOPTION_PACE", "c.food_work_share": "FOOD_WORK_SHARE", "c.standing_harvest": "STANDING_HARVEST",
+               "model.FECUNDITY_KNEE": "PREMODERN_FECUNDITY_KNEE", "model.FECUNDITY_SLOPE": "PREMODERN_FECUNDITY_SLOPE"}
+    out_labels, out_effects = {}, {}
+    for k in knobs:
+        parts = k["id"].split(".")
+        if parts[0] == "p":
+            continue
+        last = parts[-1]
+        names = [aliases.get(k["id"], ""), last, f"{parts[1]}_{last}" if len(parts) == 3 else "", f"{parts[1].rstrip('S')}_{last}" if len(parts) == 3 else ""]
+        cid = next((by_file[(k["file"], n)] for n in names if n and (k["file"], n) in by_file), None)
+        if cid is None:
+            cid = next((by_name[n][0] for n in names if n and len(by_name.get(n, [])) == 1), None)
+        if cid is None:
+            continue
+        if k["id"] in labels.get("knobs", {}):
+            out_labels[cid] = labels["knobs"][k["id"]]
+        if k["id"] in effects.get("effects", {}):
+            out_effects[cid] = {"moved": effects["effects"][k["id"]], "where": effects.get("where", {}).get(k["id"], "")}
+    return out_labels, out_effects
+
+
 def meta() -> dict:
     import gamedata as gd
     import model
@@ -204,14 +250,17 @@ def meta() -> dict:
     def side(name: str) -> dict:
         path = SIM / name
         return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    knobs, consts, labels, effects = worker.knob_catalog(), engine.const_catalog(), side("bench_labels.json"), side("bench_effects.json")
+    const_labels, const_effects = game_labels(knobs, consts, labels, effects)
     return {
-        "knobs": worker.knob_catalog(), "labels": side("bench_labels.json"), "effects": side("bench_effects.json"),
+        "knobs": knobs, "labels": labels, "effects": effects, "const_labels": const_labels, "const_effects": const_effects,
         "sites": {k: {a: b for a, b in v.items() if isinstance(b, (int, float))} for k, v in sites.items()},
         "paths": list(model.PATH_WORK.keys()) or ["balanced"], "ambitions": list(model.AMBITION_WORK.keys()) or ["makers"],
         "roles": list(model.ROLES), "lines": list(gd.LINES), "research": table["path_balanced"]["research"],
         "splits": {k[6:]: v["manual"] for k, v in table.items() if k.startswith("split_") and v.get("manual")},
         "landmarks": worker.landmarks(cat), "rev": git_rev(), "parallel": PARALLEL, "max_years": MAX_YEARS, "max_worlds": MAX_WORLDS,
         "questions": cat.n,
+        "consts": consts, "game": {"unavailable": engine.available(), "parallel": engine.PARALLEL},
     }
 
 

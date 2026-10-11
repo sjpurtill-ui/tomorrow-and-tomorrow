@@ -32,19 +32,26 @@ Requirements: Python 3.11 and numpy. The Godot executable is used only by `run_t
 
 ```
 python tools/sim/bench.py                 # opens http://127.0.0.1:8765 (Windows: tools\sim_bench.ps1)
-python tools/sim/bench.py --check         # reads the numbers and runs one 5-year world; exit 0 = it works
-python tools/sim/bench_scan.py            # re-measure what each number moves -> bench_effects.json (about 15 minutes)
+python tools/sim/bench.py --check         # reads the numbers and runs one 5-year world of the copy; exit 0 = it works
+python tools/sim/bench_scan.py --procs 6  # re-measure what each of the copy's numbers moves -> bench_effects.json
 ```
 
-A local page over the surrogate for reading long runs without a terminal. On the left are the numbers: years and worlds (seeds), the founders and the land, who shares out the work (the leaders on a path, or the ruler's own split, with changes of course at set years), the research emphasis, new towns, crises and the shock world, and every game number the surrogate reads (454: the module constants of `model.py`, `crisis.py` and `fabric.py`, the scalar fields of `gamedata.Constants`, and `params.json`). On the right are the runs, each in one colour on every chart: a summary in sentences, headline tiles, about a hundred yearly charts (people, food, work, health, learning, making, the watch, homes and works, the nine strengths, crises), the landmark discoveries against their design bands, a table with a CSV of every year, and the first world's crises and discoveries in order.
+A local page for running a people over centuries and reading what happened. It runs one of two things:
 
-How it works, and what it does not do:
+- **The real game's rules** (the default; `bench_engine.py`, `bench_probe.gd`). One headless Godot per world runs the truth probe's disposable people on the game's own code, so nothing is re-typed and nothing can drift. Day by day it is the game exactly, at about 7 s a game year at the founding. With steps of up to 5 or 30 days the people steps as a calm people the player has not met does (`scripts/day_span.gd`, `WorldSimulation._span_waits`; `truth_probe.gd --span=N`): about 2.5 s and 0.6 s a year.
+- **The quick copy** (`model.py`, the surrogate this document describes): a century in about 6 s, a hand copy that drifts.
 
-- Every world is its own low-priority process (`bench_worker.run_seed`), at most the machine's processors less two, eight at most. A changed game number is assigned on the loaded modules of that process only. Nothing is written to the game, its saves or `params.json`.
-- Finished runs are kept as JSON under `tools/sim/bench_runs/` (ignored by git; the latest 40).
-- Under each number the page says what a quarter more of it moved by year 200 (`bench_effects.json`, written by `bench_scan.py`: the leaders' balanced path on good land with crises off; a number that moves nothing there is tried on the war path with new towns and on the learning path; the crisis numbers run with crises on over three worlds and report only their toll and the people's number). Re-run the scan after the game's rules change.
-- Plain names for the main dials are in `bench_labels.json`; every other number is listed under its game name with its file.
-- The bench is as true as the surrogate under it: when `check.py` reports formula drift or stale truth, the bench's runs carry the same drift.
+**How far the game's own fast-forward is from its daily play** (few-and-learned split, good land, seed 1, year 20, main dc0bf1d1): people 134 daily, 132 at 5-day steps, 130 at 30-day; discoveries 238 / 218 / 221; days of food in store 122 / 46 / 53. The food store is the large difference: a people on multi-day steps holds less than half of what the same people holds stepping daily. The page says so beside the step choice.
+
+On the left are the numbers: what runs and the step, years and worlds (seeds), the founders and the land, who shares out the work (the leaders on a path, or the ruler's own split, with changes of course at set years), the research emphasis, and the game's own numbers. For a real-game run those are the 416 plain numeric `const` lines of the rule files (`bench_engine.CONST_FILES`), each with the game's own comment; a run with one changed uses a copy of `scripts/` with that line rewritten, under `tools/sim/bench_runs/projects/` (everything else is joined to the checkout; the six latest sets are kept; junctions are unlinked before a copy is removed). For the quick copy they are the 454 numbers it reads. On the right are the runs, each in one colour on every chart: a summary in sentences, headline tiles, the yearly charts (people, food, work, health, learning, making, the watch, homes and works, the nine strengths from `standing.gd`, deaths by cause, and under "Deeper" every number in `simulation_metrics`, the stores and every knowledge effect), the landmark discoveries against their design bands, a table with a CSV of every year, and the discoveries in order.
+
+What it does not do:
+
+- Nothing is written to the game, its saves or `params.json`. The player's game is never launched; every engine is `--headless` with an explicit `--path`, at below-normal priority, four at once at most.
+- A real-game run is the truth probe's world: one people alone, one town, the headless site and water stand-ins of `truth_probe.gd`. New towns, other peoples and the shock world are only in the quick copy.
+- Only scalar consts can be changed for a real-game run (not the tables and curves).
+- The "a quarter more moved..." line under a number is measured on the quick copy (`bench_scan.py`) and is labelled so.
+- Finished and stopped runs are kept as JSON under `tools/sim/bench_runs/` (ignored by git; the latest 40).
 
 ## Files
 
@@ -55,7 +62,9 @@ How it works, and what it does not do:
 | `gdparse.py` | Reads constants straight out of GDScript. |
 | `params.json` | Constants that cannot be parsed, each with its source. The `calibrated` section holds the fitted values. |
 | `scenarios.json` | Player-policy knobs. The `path_<p>` scenarios mirror the truth probe (`--path`); `suites` names the people-first suite. The `sensible`/`poor`/`research`/`ai`/`artifacts` scenarios mirror the pre-overhaul truth (archived). |
-| `bench.py`, `bench_worker.py`, `bench.html` | The bench: a local page to set the numbers, run and compare (above). `bench_labels.json` names the main dials; `bench_scan.py` writes `bench_effects.json`. |
+| `bench.py`, `bench.html` | The bench: a local page to set the numbers, run and compare (above). |
+| `bench_engine.py`, `bench_probe.gd/.tscn` | The bench's real-game runs: one headless engine a world, the game's consts, the patched script copies. |
+| `bench_worker.py`, `bench_labels.json`, `bench_scan.py`, `bench_effects.json` | The bench's quick-copy runs, the main dials' plain names, and what each number moves. |
 | `crisis.py` | The crises: a seeded mirror of `crisis_unattended.gd` on `crisis_system.gd`'s hazards and tolls. |
 | `crisis_share.py` | Measures the crises' share of the age table by era and cohort for `scripts/crisis_background.gd` (`--apply` writes it). |
 | `paths.py` | The people-first suite and its one report: paths, extremes, switches, the founding years, milestones and flags against the benchmark bands. |

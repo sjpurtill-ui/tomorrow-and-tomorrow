@@ -2,7 +2,7 @@
  "_doc": "bench_scan.py: percent change at the year below when one number is raised by a quarter (leaders' balanced path, good land, one town).",
  "year": 200,
  "bump": 1.25,
- "rev": "dc0bf1d1",
+ "rev": "72468bfd",
  "base": {
   "population": 911.5192646745818,
   "life_expectancy": 28.338974946087824,
@@ -41,7 +41,10 @@
    "field_strength": -2.4,
    "home_quality": -1.2
   },
-  "model.BASE_ALLOC.Knowledge": {},
+  "model.BASE_ALLOC.Knowledge": {
+   "field_strength": -2.1,
+   "home_quality": -1.6
+  },
   "model.BASE_ALLOC.Administration": {
    "population": 1.4,
    "infant_mortality": -1.9
@@ -55,7 +58,9 @@
   },
   "model.LEARNING_CAP.growth": {},
   "model.LEARNING_CAP.making": {},
-  "model.LEARNING_CAP.war": {},
+  "model.LEARNING_CAP.war": {
+   "known": 2.0
+  },
   "model.LEARNING_CAP.building": {},
   "model.LEARNING_CAP.learning": {},
   "model.LEARNERS_KEPT": {},
@@ -138,7 +143,11 @@
    "population": 1.9,
    "field_strength": 1.8
   },
-  "model.TERRITORY_SLOPE": {},
+  "model.TERRITORY_SLOPE": {
+   "population": 9.3,
+   "field_strength": 5.2,
+   "home_quality": -5.3
+  },
   "model.CARER_CROWDING": {
    "population": 1.8,
    "field_strength": 1.7
@@ -178,14 +187,21 @@
   "model.SPARE_LAND_ONSET": {},
   "model.SPARE_LAND_CONCEPTION": {},
   "model.SPARE_LAND_HEALTH": {},
-  "model.FRONTIER_ONSET": {},
+  "model.FRONTIER_ONSET": {
+   "population": 2.1,
+   "field_strength": 2.5,
+   "home_quality": 2.3
+  },
   "model.FRONTIER_CONCEPTION": {},
   "model.SPECIALIST_UPKEEP.labor_demand": {},
   "model.SPECIALIST_UPKEEP.fatigue": {},
   "model.SPECIALIST_UPKEEP.cohesion": {},
   "model.SPECIALIST_UPKEEP.conception_support": {},
   "model.SPECIALIST_UPKEEP.food_storage": {},
-  "model.WATCH_FREE_SHARE": {},
+  "model.WATCH_FREE_SHARE": {
+   "population": 1.7,
+   "field_strength": 1.7
+  },
   "model.WATCH_UPKEEP": {},
   "model.GUARD.GUARD_SHARE": {},
   "model.GUARD.GUARD_MIN": {},
@@ -216,9 +232,13 @@
   "model.FOOD_CARE.FRESH_HEALTH": {},
   "model.FOOD_CARE.FRESH_PENALTY": {},
   "model.FOOD_CARE.FRESH_EVEN": {},
-  "model.FOOD_CARE.CARRY_SHARE": {},
+  "model.FOOD_CARE.CARRY_SHARE": {
+   "field_strength": -1.0
+  },
   "model.FOOD_CARE.CARRY_FRESH_CUT": {},
-  "model.FOOD_CARE.CARRY_REACH": {},
+  "model.FOOD_CARE.CARRY_REACH": {
+   "field_strength": 1.3
+  },
   "model.FOOD_CARE.KEEP_SHARE": {},
   "model.FOOD_CARE.KEEP_STORED_CUT": {},
   "model.FOOD_CARE.CARE_SHARE": {
@@ -327,13 +347,21 @@
   "model.WATCH.MARTIAL_FULL": {},
   "model.WATCH.MARTIAL_DRILL": {},
   "model.WATCH.MARTIAL_PACE": {},
-  "model.WATCH.START_DRILL": {},
+  "model.WATCH.START_DRILL": {
+   "field_strength": 1.0
+  },
   "model.WARRIOR_WEIGHT": {
    "field_strength": 16.1
   },
-  "model.LEVY_TRAINING_DAYS": {},
+  "model.LEVY_TRAINING_DAYS": {
+   "field_strength": -1.1
+  },
   "model.ESTABLISHMENT_DAYS": {},
-  "model.SITE_YEARS": {},
+  "model.SITE_YEARS": {
+   "population": -5.7,
+   "field_strength": -4.7,
+   "home_quality": 2.6
+  },
   "model.RAW_START": {},
   "model.RAW_PER_HEAD_HELD": {},
   "model.BUILD_DRAW": {},
@@ -557,7 +585,10 @@
   "c.spoilage_stored": {
    "field_strength": -2.0
   },
-  "c.standing_harvest": {},
+  "c.standing_harvest": {
+   "field_strength": 1.8,
+   "home_quality": 1.6
+  },
   "c.yield_calibration": {
    "infant_mortality": -1.1,
    "food_days": 3.7,
@@ -572,14 +603,18 @@
    "field_strength": 13.6,
    "home_quality": 6.3
   },
-  "p.substeps_per_month": {},
+  "p.substeps_per_month": {
+   "field_strength": 2.1
+  },
   "p.seasonality_c": {
    "infant_mortality": 1.2,
    "food_days": 1.8,
    "field_strength": -6.1,
    "home_quality": -1.8
   },
-  "p.mean_temperature_c": {},
+  "p.mean_temperature_c": {
+   "field_strength": 1.0
+  },
   "p.disease_pressure": {},
   "p.cold_pressure": {},
   "p.fishing_access": {
@@ -658,6 +693,21 @@
    "field_strength": -7.3,
    "home_quality": -1.4
   }
+ },
+ "where": {
+  "model.LEARNING_CAP.war": "on the war path with new towns",
+  "model.TERRITORY_SLOPE": "on the war path with new towns",
+  "model.FRONTIER_ONSET": "on the war path with new towns",
+  "model.WATCH_FREE_SHARE": "on the war path with new towns",
+  "model.FOOD_CARE.CARRY_SHARE": "on the war path with new towns",
+  "model.FOOD_CARE.CARRY_REACH": "on the war path with new towns",
+  "model.WATCH.START_DRILL": "on the war path with new towns",
+  "model.LEVY_TRAINING_DAYS": "on the war path with new towns",
+  "model.SITE_YEARS": "on the war path with new towns",
+  "c.standing_harvest": "on the war path with new towns",
+  "p.substeps_per_month": "on the war path with new towns",
+  "p.mean_temperature_c": "on the war path with new towns",
+  "model.BASE_ALLOC.Knowledge": "on the learning path"
  },
  "failed": {
   "model.LAND.RISE_MAX": "ValueError: cannot convert float NaN to integer",

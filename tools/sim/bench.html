@@ -119,7 +119,7 @@ td.l,th.l{text-align:left;white-space:normal}
   <aside id="left">
     <header>
       <h1>Simulator</h1>
-      <div class="sub">A fast model of the game's rules. Set the numbers, run centuries in seconds, compare. Nothing here changes the game or your saves.</div>
+      <div class="sub">Runs the game's own rules on a hidden, throwaway people. Set the numbers, run, compare. Nothing here changes the game or your saves.</div>
     </header>
     <div id="form"></div>
     <div id="runbar">
@@ -238,6 +238,10 @@ const SECTIONS=[
    C("follies","Great works that fell",""),]},
  {id:"standing",title:"Standing",note:"The nine strengths, each measured against a typical people of the same age: 50 is typical.",charts:[],
   mini:{title:"",charts:NINE.map(k=>C("st_"+k,cap(k),"0 to 100; 50 = a typical people of the age",{ref:50,fixed:[0,100]}))}},
+ {id:"causes",title:"What people die of",note:"Water, and the deaths of the last year by cause, as the game counts them.",charts:[
+   C("water_intake","Water drunk","share of their need; 1 = in full",{tight:true}),
+   C("water_days","Water in reach","days")],
+  mini:{title:"Deaths in the last year, by cause",charts:"CAUSES"}},
  {id:"crises",title:"Crises",note:"Outbreaks, fires, floods, droughts and hungers, and what they cost.",charts:[
    C("crisis_rate","Deaths in crises","per 1,000 people a year, 10-year average",{smooth:10}),
    C("crisis_deaths","Deaths in crises","all so far")],
@@ -254,7 +258,8 @@ const SLOTS=["--s1","--s2","--s3","--s4"];
 
 function defaults(){
   return {years:600,worlds:2,seed0:1,start_population:120,site:"good",site_profile:{},mode:"leaders",path:"balanced",ambition:M.ambitions.includes("makers")?"makers":M.ambitions[0],
-    manual:{...M.splits.balanced},phases:[],research:{...M.research},towns:false,crises:true,shocks:false,knobs:{}};
+    manual:{...M.splits.balanced},phases:[],research:{...M.research},towns:false,crises:true,shocks:false,knobs:{},
+    engine:M.game.unavailable?"copy":"game",span:30,consts:{}};
 }
 function saveForm(){store.set("bench.form",F)}
 
@@ -306,7 +311,16 @@ function splitEditor(parent,manual,after){
 }
 function buildForm(){
   const form=$("#form");const top=form.scrollTop;form.textContent="";
+  const game=F.engine==="game";
   const groups=[
+   grp("engine","What runs",()=>game?"the real game's rules, "+(F.span>1?"steps of up to "+F.span+" days":"day by day"):"the quick copy",b=>{
+     b.append(seg([["game","The real game's rules"],["copy","The quick copy"]],()=>F.engine,v=>{if(v==="game"&&M.game.unavailable){alert(M.game.unavailable);return}F.engine=v}));
+     if(game)b.append(el("div",{class:"hint"},"The game's own code, run hidden on a throwaway people. Up to "+M.game.parallel+" worlds at once; each takes about half a minute to start."),
+       el("div",{class:"row"},el("label",{},"How big a step")),
+       seg([[1,"Day by day · exact"],[5,"Up to 5 days"],[30,"Up to 30 days · quickest"]],()=>F.span,v=>F.span=v),
+       el("div",{class:"hint"},F.span===1?"The game exactly as you play it: every day, one at a time. About 7 seconds a game year at the founding, slower as the people grow.":"The game's own fast-forward, the one it uses for peoples you have not met: several days in one pass on the same rules. About "+(F.span>=30?"12":"4")+" times quicker than day by day, but not the same: in a 20-year test the people came out 3% fewer, discoveries 8% fewer, and the food store less than half as deep. Use it to look far ahead; use day by day for a number you will rely on."));
+     else b.append(el("div",{class:"hint"},"A separate program that imitates the rules: a century in about six seconds, but it is a hand-made copy and it drifts from the game. A rough first look, not a number to rely on."));
+   },true),
    grp("run","How long, how many worlds",()=>F.years+" years · "+F.worlds+(F.worlds>1?" worlds":" world"),b=>{
      b.append(el("div",{class:"row"},el("label",{},"Years to run"),num(()=>F.years,v=>F.years=Math.round(v),{min:10,max:M.max_years,step:50})),
        seg([100,300,600,1200,2400].map(y=>[y,y.toLocaleString("en-US")]),()=>F.years,v=>F.years=v),
@@ -354,66 +368,75 @@ function buildForm(){
        el("div",{class:"seg",style:"margin-bottom:8px"},el("button",{onclick:()=>{F.research={...M.research};saveForm();buildForm()}},"As the game starts"),el("button",{onclick:()=>{for(const l of M.lines)F.research[l]=2;saveForm();buildForm()}},"Even")));
      for(const l of M.lines)b.append(el("div",{class:"row"},el("label",{},cap(l)),F.research[l]!==M.research[l]?el("span",{class:"small"},"was "+M.research[l]):null,num(()=>F.research[l],v=>F.research[l]=Math.round(v),{min:0,max:12,step:1})));
    },false),
-   grp("world","The world around them",()=>[F.towns?"new towns":"one town",F.crises?"crises":"no crises",F.shocks?"upheavals":null].filter(Boolean).join(" · "),b=>{
+   grp("world","The world around them",()=>game?"one town · the game's crises":[F.towns?"new towns":"one town",F.crises?"crises":"no crises",F.shocks?"upheavals":null].filter(Boolean).join(" · "),b=>{
      const tog=(key,title,help)=>el("label",{class:"row",style:"align-items:flex-start;cursor:pointer"},el("input",{type:"checkbox",checked:F[key],style:"margin-top:3px",onchange:e=>{F[key]=e.target.checked;saveForm();refreshForm()}}),el("span",{},el("b",{style:"font-weight:600"},title),el("div",{class:"small"},help)));
+     if(game){b.append(el("div",{class:"hint"},"In a real-game run the people lives as the game has it: crises strike by the game's own odds, and it stays one town (new towns and other peoples are not in real-game runs yet)."));return}
      b.append(tog("towns","The leaders found new towns","A new town about every 30 years when the stores allow. Off: one town, and a crowded people spreads only slowly from year 600."),
        tog("crises","Crises strike","Sickness, fire, flood, drought and hunger, with the game's own odds and tolls."),
        tog("shocks","Other peoples and great upheavals","Runs the people inside a world of other peoples with wars, migrations, plagues and collapses. Slower, and much less steady from world to world."));
    },false),
-   grp("knobs","The game's own numbers",()=>{const n=Object.keys(F.knobs).length;return n?n+" changed":M.knobs.length+" to set"},buildKnobs,true),
+   grp("knobs","The game's own numbers",()=>{const n=Object.keys(chg()).length;return n?n+" changed":cat().length+" to set"},buildKnobs,true),
   ];
   for(const g of groups){form.append(g);g._build()}
   form.scrollTop=top;refreshForm();
 }
 function refreshForm(){
   for(const g of $$("details.grp"))g._value&&g._value();
-  const n=Object.keys(F.knobs).length;
-  const last=[...S.runs].filter(r=>r.status==="done"&&r.seconds>0).sort((a,b)=>b.created-a.created)[0];
-  const est=last?F.years*(last.seconds/last.spec.years)*Math.ceil(F.worlds/M.parallel):null;
-  $("#gosum").textContent=(est?"About "+(est>=90?fmt(est/60)+" min":Math.max(1,Math.round(est))+" s")+" · ":"")+F.years.toLocaleString("en-US")+" years × "+F.worlds+(F.worlds>1?" worlds":" world")+(n?" · "+n+" game number"+(n>1?"s":"")+" changed":" · the game as it is");
+  const n=Object.keys(chg()).length;
+  const last=[...S.runs].filter(r=>r.status==="done"&&r.seconds>0&&(r.spec.engine||"copy")===F.engine&&(F.engine!=="game"||r.spec.span===F.span)).sort((a,b)=>b.created-a.created)[0];
+  const est=last?F.years*(last.seconds/last.spec.years)*Math.ceil(F.worlds/(F.engine==="game"?M.game.parallel:M.parallel)):F.engine==="game"?(30+F.years*(F.span===1?7:F.span===5?2.5:0.6))*Math.ceil(F.worlds/M.game.parallel):null;
+  $("#gosum").textContent=(est?(last?"About ":"At least ")+(est>=90?fmt(est/60)+" min":Math.max(1,Math.round(est))+" s")+" · ":"")+F.years.toLocaleString("en-US")+" years × "+F.worlds+(F.worlds>1?" worlds":" world")+(n?" · "+n+" game number"+(n>1?"s":"")+" changed":" · the game as it is")+(F.engine==="copy"?" · quick copy":"");
 }
 const KNOB={};
-function knobLabel(k){const l=M.labels.knobs&&M.labels.knobs[k.id];return l?l.label:k.name.replace(/_/g," ").toLowerCase().replace(/^./,c=>c.toUpperCase())}
+// The numbers on offer and the changed ones: the game's consts for a real-game run, the copy's for the quick copy.
+const cat=()=>F.engine==="game"?M.consts:M.knobs;
+const chg=()=>F.engine==="game"?F.consts:F.knobs;
+const labs=()=>F.engine==="game"?M.const_labels:(M.labels.knobs||{});
+function knobLabel(k){const l=M.const_labels[k.id]||(M.labels.knobs&&M.labels.knobs[k.id]);return l?l.label:k.name.replace(/_/g," ").toLowerCase().replace(/^./,c=>c.toUpperCase())}
 function effectText(k){
   const fx=M.effects.effects;if(!fx)return "";
   if(k.value===0)return "Off in the game now (0).";
+  if(k.id.includes("::")){const ce=M.const_effects[k.id];if(!ce||!Object.keys(ce.moved).length)return "";
+    const ps=Object.entries(ce.moved).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3).map(([o,v])=>(OUT[o]||o)+" "+pct(v));
+    return "On the quick copy, a quarter more \u2192 by year "+M.effects.year+(ce.where?", "+ce.where:"")+": "+ps.join(", ")+". Run it on the real rules to be sure."}
   const e=fx[k.id];if(!e)return "";
   const parts=Object.entries(e).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3).map(([o,v])=>(OUT[o]||o)+" "+pct(v));
   const where=M.effects.where&&M.effects.where[k.id];
   return parts.length?"A quarter more → by year "+M.effects.year+(where?", "+where:"")+": "+parts.join(", "):"A quarter more changed nothing in "+M.effects.year+"-year test runs (balanced, war with towns, learning).";
 }
 function knobRow(k){
-  const lab=M.labels.knobs&&M.labels.knobs[k.id];
-  const changed=k.id in F.knobs;
-  const i=el("input",{type:"number",step:"any"});i.value=changed?F.knobs[k.id]:plain(k.value);
+  const lab=labs()[k.id];
+  const K=chg();
+  const changed=k.id in K;
+  const i=el("input",{type:"number",step:"any"});i.value=changed?K[k.id]:plain(k.value);
   const row=el("div",{class:"knob"+(changed?" changed":"")});
-  i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v)||Math.abs(v-k.value)<=Math.abs(k.value)*1e-6){delete F.knobs[k.id];i.value=plain(k.value)}else F.knobs[k.id]=v;saveForm();row.replaceWith(knobRow(k));refreshForm()});
-  const step=dir=>{const cur=k.id in F.knobs?F.knobs[k.id]:k.value;const v=k.whole?cur+dir:+(cur*(dir>0?1.1:1/1.1)).toPrecision(4);i.value=v;i.dispatchEvent(new Event("change"))};
+  i.addEventListener("change",()=>{const v=parseFloat(i.value);if(!isFinite(v)||Math.abs(v-k.value)<=Math.abs(k.value)*1e-6){delete K[k.id];i.value=plain(k.value)}else K[k.id]=v;saveForm();row.replaceWith(knobRow(k));refreshForm()});
+  const step=dir=>{const cur=k.id in K?K[k.id]:k.value;const v=k.whole?cur+dir:+(cur*(dir>0?1.1:1/1.1)).toPrecision(4);i.value=v;i.dispatchEvent(new Event("change"))};
   row.append(...[el("div",{class:"top"},el("div",{class:"nm"},knobLabel(k)),
       el("button",{class:"btn link",title:"A tenth less",onclick:()=>step(-1)},"−"),i,el("button",{class:"btn link",title:"A tenth more",onclick:()=>step(1)},"+")),
-    changed?el("div",{class:"was"},"The game has "+plain(k.value)+" ",el("button",{class:"btn link",onclick:()=>{delete F.knobs[k.id];saveForm();row.replaceWith(knobRow(k));refreshForm()}},"put it back")):null,
-    lab&&lab.help?el("div",{class:"fx"},lab.help):(k.note?el("div",{class:"fx"},k.note.length>170?k.note.slice(0,170)+"…":k.note):null),
+    changed?el("div",{class:"was"},"The game has "+plain(k.value)+" ",el("button",{class:"btn link",onclick:()=>{delete K[k.id];saveForm();row.replaceWith(knobRow(k));refreshForm()}},"put it back")):null,
+    lab&&lab.help?el("div",{class:"fx"},lab.help):(k.note?el("div",{class:"fx",title:k.note},k.note.length>240?k.note.slice(0,240)+"\u2026":k.note):null),
     el("div",{class:"fx"},effectText(k)),
-    el("div",{class:"mono"},k.id.replace(/^(model|crisis|fabric|c|p)\./,"")+(k.file?" · "+k.file:k.id.startsWith("p.")?" · simulator stand-in":""))].filter(Boolean));
+    el("div",{class:"mono"},k.id.includes("::")?"const "+k.name+" \u00b7 "+k.file+" line "+k.line:k.id.replace(/^(model|crisis|fabric|c|p)\./,"")+(k.file?" \u00b7 "+k.file:k.id.startsWith("p.")?" \u00b7 simulator stand-in":""))].filter(Boolean));
   return row;
 }
 function buildKnobs(b){
-  b.append(el("div",{class:"hint"},"These are the game's rules, read from its files when the simulator starts. Change one here to see what it would do — the game itself is not touched. A changed number is marked, with the game's own value beside it."),
+  b.append(el("div",{class:"hint"},F.engine==="game"?"Every plain number the game's rule files set, read when the simulator starts, with the game's own note on it. Change one and the run uses a private copy of the game's scripts with that line rewritten: the game itself is not touched. To keep a change, it is that one line in that file.":"The numbers the quick copy reads from the game's files, and its own stand-ins. Change one here to see what it would do: the game itself is not touched."),
     el("input",{type:"text",placeholder:"Search the numbers…",style:"width:100%",value:S.knobQuery,oninput:e=>{S.knobQuery=e.target.value;list()}}),
-    el("div",{class:"seg",style:"margin:8px 0"},[["main","Main dials"],["changed","Changed"],["all","Every number ("+M.knobs.length+")"]].map(([v,t])=>el("button",{class:S.knobView===v?"on":"",onclick:e=>{S.knobView=v;$$("button",e.target.parentNode).forEach(x=>x.classList.toggle("on",x===e.target));list()}},t))));
+    el("div",{class:"seg",style:"margin:8px 0"},[["main","Main dials"],["changed","Changed"],["all","Every number ("+cat().length+")"]].map(([v,t])=>el("button",{class:S.knobView===v?"on":"",onclick:e=>{S.knobView=v;$$("button",e.target.parentNode).forEach(x=>x.classList.toggle("on",x===e.target));list()}},t))));
   const box=el("div");b.append(box);
   function list(){
     box.textContent="";
     const q=S.knobQuery.trim().toLowerCase();
-    const lab=M.labels.knobs||{};
-    let ks=M.knobs;
+    const lab=labs();
+    let ks=cat();
     if(q)ks=ks.filter(k=>(knobLabel(k)+" "+k.id+" "+k.note+" "+k.file+" "+((lab[k.id]||{}).help||"")).toLowerCase().includes(q));
     else if(S.knobView==="main")ks=ks.filter(k=>lab[k.id]);
-    else if(S.knobView==="changed")ks=ks.filter(k=>k.id in F.knobs);
+    else if(S.knobView==="changed")ks=ks.filter(k=>k.id in chg());
     if(!ks.length){box.append(el("div",{class:"hint"},S.knobView==="changed"&&!q?"No game number is changed: this is the game as it is.":"Nothing matches."));return}
     const byGroup=new Map();
-    for(const k of ks){const g=(lab[k.id]||{}).group||(k.id.startsWith("p.")?"Simulator stand-ins":k.id.startsWith("crisis.")?"Crises, more":k.id.startsWith("fabric.")?"Homes and works, more":k.id.startsWith("c.")?"Other rules":"Other rules");(byGroup.get(g)||byGroup.set(g,[]).get(g)).push(k)}
-    const order=[...(M.labels.groups||[]),"Other rules","Crises, more","Homes and works, more","Simulator stand-ins"];
+    for(const k of ks){const g=(lab[k.id]||{}).group||(k.id.includes("::")?k.file.replace("scripts/",""):k.id.startsWith("p.")?"Simulator stand-ins":k.id.startsWith("crisis.")?"Crises, more":k.id.startsWith("fabric.")?"Homes and works, more":"Other rules");(byGroup.get(g)||byGroup.set(g,[]).get(g)).push(k)}
+    const order=[...(M.labels.groups||[]),"Other rules","Crises, more","Homes and works, more","Simulator stand-ins",...[...byGroup.keys()].filter(g=>g.endsWith(".gd")).sort()];
     let shown=0;
     for(const g of order){const list=byGroup.get(g);if(!list)continue;box.append(el("div",{class:"gh"},g));
       list.sort((a,b)=>impact(b)-impact(a));
@@ -421,22 +444,23 @@ function buildKnobs(b){
   }
   list();
 }
-function impact(k){const e=M.effects.effects&&M.effects.effects[k.id];return e?Math.max(0,...Object.values(e).map(Math.abs)):-1}
+function impact(k){const e=k.id.includes("::")?(M.const_effects[k.id]||{}).moved:M.effects.effects&&M.effects.effects[k.id];return e?Math.max(0,...Object.values(e).map(Math.abs)):-1}
 
 // ---------------------------------------------------------------- runs
 function specFromForm(){
   const s=JSON.parse(JSON.stringify(F));
   const t=M.roles.reduce((a,r)=>a+(+s.manual[r]||0),0)||1;
   for(const r of M.roles)s.manual[r]=+((+s.manual[r]||0)*100/t).toFixed(3);
+  if(s.engine==="game"){s.knobs={};s.towns=false;s.shocks=false;s.crises=true}else s.consts={};
   s.phases=F.phases.map(ph=>{const[kind,what]=ph.to.split(":");return kind==="path"?{from:ph.from,path:what,to:ph.to}:{from:ph.from,manual:M.splits[what],to:ph.to}});
   return s;
 }
 function describe(spec){
-  const bits=[spec.mode==="split"?"own split":PATH[spec.path]+" path",spec.site+" land"];
+  const bits=[spec.engine==="game"?"real game"+(spec.span>1?", "+spec.span+"-day steps":", day by day"):"quick copy",spec.mode==="split"?"own split":PATH[spec.path]+" path",spec.site+" land"];
   if(spec.start_population!==120)bits.push(spec.start_population+" founders");
   if(spec.towns)bits.push("new towns");if(spec.crises===false)bits.push("no crises");if(spec.shocks)bits.push("upheavals");
   for(const ph of spec.phases||[])bits.push("from "+ph.from+": "+(ph.path?PATH[ph.path]+" path":"new split"));
-  const ks=Object.entries(spec.knobs||{});
+  const ks=Object.entries(spec.engine==="game"?spec.consts||{}:spec.knobs||{});
   for(const[id,v]of ks.slice(0,3)){const k=KNOB[id];bits.push((k?knobLabel(k):id)+" "+plain(v)+(k?" (game "+plain(k.value)+")":""))}
   if(ks.length>3)bits.push("+"+(ks.length-3)+" more numbers");
   return bits.join(" · ");
@@ -475,7 +499,7 @@ async function pollRuns(){
     if(Object.keys(d.extra||{}).length){r.extra=d.extra;r.loaded=true}
     if(got)r.ver++;
     // Charts that exist only once their readings do (causes of death, effects of knowledge).
-    const rows=r.rows[r.seeds[0]],dyn=rows.length?Object.keys(rows[rows.length-1]).filter(k=>k.startsWith("crisisby_")||S.deep&&k.startsWith("eff_")).length:0;
+    const rows=r.rows[r.seeds[0]],dyn=rows.length?Object.keys(rows[rows.length-1]).filter(k=>S.deep||!/^(eff_|m_|stock_|mort_)/.test(k)).length:0;
     const grew=dyn!==r.dyn&&r.shown;r.dyn=dyn;
     if(got||was!==r.status){if(was!==r.status||grew)renderAll();else{renderCards();dataChanged()}}
   }
@@ -484,7 +508,7 @@ async function pollRuns(){
 async function go(){
   const spec=specFromForm();
   const n=S.runs.length+1;
-  const name=$("#runname").value.trim()||(Object.keys(spec.knobs).length||spec.mode==="split"||spec.path!=="balanced"||spec.phases.length?"Run "+n:"The game as it is")+" · "+spec.years+" yrs";
+  const name=$("#runname").value.trim()||(Object.keys(spec.knobs).length||Object.keys(spec.consts).length||spec.mode==="split"||spec.path!=="balanced"||spec.phases.length?"Run "+n:"The game as it is")+" · "+spec.years+" yrs";
   const meta=await api("/api/run",{name,spec});
   if(meta.error){alert(meta.error);return}
   $("#runname").value="";addRun(meta,true);
@@ -613,7 +637,7 @@ function renderCards(){
   if(!list.length){box.append(el("div",{class:"sub"},"No runs yet."));return}
   for(const r of list.slice(0,S.allCards?99:8)){
     const got=Math.min(...r.seeds.map(s=>r.rows[s].length)),frac=Math.min(1,got/Math.max(1,r.expect));
-    const state=r.status==="running"?"Running… year "+Math.round(frac*r.spec.years).toLocaleString("en-US")+" of "+r.spec.years.toLocaleString("en-US"):r.status==="waiting"?"Waiting for a free processor…":r.status==="stopped"?"Stopped":r.status==="error"?"Failed":r.spec.years.toLocaleString("en-US")+" years · "+r.seeds.length+(r.seeds.length>1?" worlds":" world")+" · took "+fmt(r.seconds)+" s";
+    const state=r.status==="running"?"Running… year "+Math.round(frac*r.spec.years).toLocaleString("en-US")+" of "+r.spec.years.toLocaleString("en-US"):r.status==="running"&&!got&&r.spec.engine==="game"?"Starting the game's rules (about half a minute)\u2026":r.status==="waiting"?"Waiting for a free processor…":r.status==="stopped"?"Stopped":r.status==="error"?"Failed":r.spec.years.toLocaleString("en-US")+" years · "+r.seeds.length+(r.seeds.length>1?" worlds":" world")+" · took "+fmt(r.seconds)+" s";
     box.append(el("div",{class:"card"+(r.shown?"":" off")+(r.shown&&r.id===S.focus?" focus":"")},
       el("div",{class:"hd"},r.shown?el("span",{class:"sw",style:"background:var("+SLOTS[r.slot]+")"}):null,el("div",{class:"nm",title:r.name},r.name)),
       el("div",{class:"small",title:describe(r.spec)},describe(r.spec)),
@@ -677,14 +701,21 @@ function renderTop(){
     tiles.append(el("div",{class:"tile"},el("div",{class:"small"},label),el("div",{class:"v"},fmt(v)),el("div",{class:"small"},"in year "+Math.round(end)+" · it was "+fmt(v0)+" in year "+early),d))}
   box.append(tiles);
 }
+// The readings the shown runs carry: a chart is drawn only for one of these.
+let HAVE=new Set();
+function readHave(){HAVE=new Set();for(const r of shown())for(const sd of r.seeds){const rows=r.rows[sd];if(rows.length)for(const k of Object.keys(rows[rows.length-1]))HAVE.add(k)}}
+const has=d=>!HAVE.size||HAVE.has(d.key);
 function chartsBlock(sec){
   const s=el("section",{id:"s-"+sec.id},el("h2",{},sec.title),el("div",{class:"sub"},sec.note));
-  if(sec.charts.length)s.append(el("div",{class:"charts"},sec.charts.map(chartEl)));
+  const main=sec.charts.filter(has);
+  if(main.length)s.append(el("div",{class:"charts"},main.map(chartEl)));
   if(sec.mini){
     let defs=sec.mini.charts;
     if(defs==="LINES")defs=M.lines.map(l=>C("line_"+l,cap(l),"discoveries known"));
-    if(defs==="CRISES"){const keys=new Set();for(const r of shown())for(const sd of r.seeds){const rows=r.rows[sd];if(rows.length)for(const k of Object.keys(rows[rows.length-1]))if(k.startsWith("crisisby_"))keys.add(k)}
-      defs=[...keys].sort().map(k=>C(k,k.slice(9),"deaths so far"))}
+    if(defs==="CRISES")defs=[...HAVE].filter(k=>k.startsWith("crisisby_")).sort().map(k=>C(k,k.slice(9),"deaths so far"));
+    if(defs==="CAUSES")defs=[...HAVE].filter(k=>k.startsWith("cause_")).sort().map(k=>C(k,k.slice(6),"deaths in the last year"));
+    defs=defs.filter(has);
+    if(!main.length&&!defs.length)return null;
     if(defs.length){if(sec.mini.title)s.append(el("h3",{style:"margin-top:14px"},sec.mini.title));s.append(el("div",{class:"charts mini"},defs.map(chartEl)))}
   }
   return s;
@@ -697,18 +728,21 @@ function renderMain(){
   const links=[["runs","Runs"],["top","In short"],...SECTIONS.map(s=>[s.id,s.title]),["deep","Deeper"],["marks","Landmarks"],["table","Table"],["logs","What happened"]];
   for(const[id,t]of links)nav.append(el("button",{class:"chip",onclick:()=>$("#s-"+id).scrollIntoView({behavior:"smooth"})},t));
   main.append(el("section",{id:"s-top"},el("div",{id:"top"})));
-  for(const sec of SECTIONS)main.append(chartsBlock(sec));
+  readHave();
+  for(const sec of SECTIONS){const b=chartsBlock(sec);if(b)main.append(b);else{const c=$$("#nav .chip").find(c=>c.textContent===sec.title);if(c)c.remove()}}
   main.append(deepBlock(),marksBlock(),tableBlock(),logsBlock());
   renderTop();$("#right").scrollTop=top;drawAll();
 }
 function deepBlock(){
-  const keys=new Set();for(const r of shown())for(const sd of r.seeds){const rows=r.rows[sd];if(rows.length)for(const k of Object.keys(rows[rows.length-1]))if(k.startsWith("eff_"))keys.add(k)}
-  const caps=M.lines.map(l=>C("cap_"+l,cap(l),"0 to 1"));
-  const effs=[...keys].sort().map(k=>C(k,cap(k.slice(4).replace(/_/g," ")),"what the people's knowledge gives"));
-  const d=el("details",{},el("summary",{style:"cursor:pointer"},el("h2",{style:"display:inline"},"Deeper"),el("span",{class:"sub"}," · the twelve capacities and every effect of what is known ("+(caps.length+effs.length)+" more charts)")));
+  const pick=(pre,unit)=>[...HAVE].filter(k=>k.startsWith(pre)).sort().map(k=>C(k,cap(k.slice(pre.length).replace(/_/g," ")),unit));
+  const caps=M.lines.map(l=>C("cap_"+l,cap(l),"0 to 1")).filter(has);
+  const effs=pick("eff_","what the people's knowledge gives"),stocks=pick("stock_","held in the stores"),metrics=pick("m_","as the game tracks it"),morts=pick("mort_","share of the people a day");
+  const d=el("details",{},el("summary",{style:"cursor:pointer"},el("h2",{style:"display:inline"},"Deeper"),el("span",{class:"sub"}," \u00b7 capacities, stores, every effect of what is known and everything else the game tracks ("+(caps.length+effs.length+stocks.length+metrics.length+morts.length)+" more charts)")));
   if(S.deep)d.open=true;
-  const fill=()=>{if(d._done)return;d._done=true;d.append(el("h3",{style:"margin-top:12px"},"Capacity in each field"),el("div",{class:"charts mini"},caps.map(chartEl)),
-    el("h3",{style:"margin-top:14px"},"Every effect of what is known"),el("div",{class:"charts mini"},effs.map(chartEl)));drawAll()};
+  const fill=()=>{if(d._done)return;d._done=true;
+    for(const[title,defs]of [["Capacity in each field",caps],["What is in the stores",stocks],["Every number the game tracks day to day",metrics],["What is killing people, as daily rates",morts],["Every effect of what is known",effs]])
+      if(defs.length)d.append(el("h3",{style:"margin-top:14px"},title),el("div",{class:"charts mini"},defs.map(chartEl)));
+    drawAll()};
   d.addEventListener("toggle",()=>{S.deep=d.open;if(d.open)fill()});if(d.open)fill();
   return el("section",{id:"s-deep"},d);
 }
@@ -761,9 +795,11 @@ function logsBlock(){
 // ---------------------------------------------------------------- start
 async function start(){
   readCss();
-  M=await api("/api/meta");for(const k of M.knobs)KNOB[k.id]=k;
+  M=await api("/api/meta");for(const k of M.knobs)KNOB[k.id]=k;for(const k of M.consts)KNOB[k.id]=k;
   F={...defaults(),...store.get("bench.form",{})};
   for(const id of Object.keys(F.knobs))if(!KNOB[id])delete F.knobs[id];
+  for(const id of Object.keys(F.consts))if(!KNOB[id])delete F.consts[id];
+  if(F.engine==="game"&&M.game.unavailable)F.engine="copy";
   if(!M.paths.includes(F.path))F.path=M.paths[0];
   buildForm();
   $("#go").addEventListener("click",go);

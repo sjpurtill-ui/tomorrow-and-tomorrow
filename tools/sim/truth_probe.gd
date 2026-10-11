@@ -97,6 +97,18 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 	WorldSimulation.submit("ec",{"kind":"ambition","id":"makers"})
 	WorldSimulation.submit("ec",{"kind":"found"})
 	if _arg("path","")!="":WorldSimulation.submit("ec",{"kind":"work_path","path":_arg("path",""),"why":"probe"})
+	# --split=Food:40,Knowledge:30,...: the ruler's own split (manual_work.gd), laid from the first day.
+	if _arg("split","")!="":
+		WorldSimulation.scoped("ec",func()->void:
+			var manual_work=preload("res://scripts/manual_work.gd")
+			var shares:={}
+			for part:String in _arg("split","").split(","):
+				var pair:=part.split(":")
+				shares[String(pair[0])]=float(pair[1])
+			manual_work.set_manual(true)
+			WorldSimulation.direction.work_baseline=shares
+			manual_work.apply()
+		)
 	for domain in DOMAINS if not bool(scenario.get("ai",false)) else []:
 		WorldSimulation.submit("ec",{"kind":"research_emphasis","domain":domain,"weight":int((scenario.research as Dictionary).get(domain,0))})
 	if scenario.has("scouting"):WorldSimulation.submit("ec",{"kind":"scouting_policy","share":float(scenario.scouting),"focus":"exploration"})
@@ -118,7 +130,22 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 		tally.seen=(holder.starting as Array).size()
 		rows.append(_row(0,tally,start))
 	)
+	# --span=N: the people steps as a calm people the player has not met does
+	# (day_span.gd, WorldSimulation._span_waits): up to N days in one step on
+	# the same rules, daily whenever its food, water or wars ask for it. 1
+	# (the default) is strictly daily. A year always ends on a step.
+	var span_max:=maxi(1,int(_arg("span","1")))
+	WorldSimulation.span_limit=mini(WorldSimulation.span_limit,span_max)
+	WorldSimulation.uncontacted_span_limit=span_max
+	var stream:FileAccess=FileAccess.open(_arg("stream",""),FileAccess.WRITE) if _arg("stream","")!="" else null
+	var stepped:={"last":0,"steps":0}
 	for day in range(1,years*365+1):
+		if span_max>1 and day%365!=0 and day>debug_days:
+			var gap:int=day-int(stepped.last)
+			if bool(WorldSimulation.scoped("ec",func()->bool:return WorldSimulation._span_waits("ec",start_days+day,gap))):continue
+		WorldSimulation.actors["ec"]["span"]=day-int(stepped.last)
+		stepped.last=day
+		stepped.steps=int(stepped.steps)+1
 		WorldSimulation.scoped("ec",func()->void:
 			var state:=WorldSimulation.state
 			state.elapsed_days=start_days+day
@@ -150,9 +177,14 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 			if day%365==0 or day<=debug_days:
 				var row:=_row(int(day/365.0),tally,start)
 				row["day"]=day
+				row["steps"]=int(stepped.steps)
 				rows.append(row)
+				if stream!=null:
+					stream.store_line(JSON.stringify(row))
+					stream.flush()
 		)
-		if day%60==0:await get_tree().process_frame
+		WorldSimulation.actors["ec"]["span"]=1
+		if int(stepped.steps)%60==0:await get_tree().process_frame
 	return {"schema":"sim_truth/1","scenario":scenario_name,"seed":seed_value,"years":years,"scenario_config":scenario,"start_year":float(scenario.get("start_year",0.0)),
 		"starting_known":holder.starting,"rows":rows,"discoveries":discoveries,"stages":stages,"seconds":(Time.get_ticks_msec()-start)/1000.0}
 
