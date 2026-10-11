@@ -167,8 +167,6 @@ static func _build_snapshot(camera_size:float,armies:Array,foreign_sightings:Arr
 	_apply_front_label_budget(front_views,camera_size)
 	_suppress_formation_labels_behind_fronts(player,front_views,camera_size,true)
 	_suppress_formation_labels_behind_fronts(foreign,front_views,camera_size,false)
-	if band!="world":
-		for view in front_views: view["show_label"]=false
 	return {"band":band,"marker_scale":marker_scale(camera_size),"player":player,"foreign":foreign,"fronts":front_views,"bounded":true,"limits":{"player":MAX_PLAYER_MARKERS,"foreign":MAX_FOREIGN_MARKERS,"fronts":MAX_FRONT_MARKERS}}
 
 
@@ -481,7 +479,7 @@ static func front_marker(front:Dictionary,destination:Dictionary,camera_size:flo
 	elif band=="local":
 		label="%s • %s %d%%\nFIELD %s\nREADY %d%% • SUPPLY %d%%" % [phase if phase!="OBJECTIVE" else String(front.get("war_name","ACTIVE FRONT")).to_upper(),String(front.get("target","HOME TERRITORY")).to_upper(),roundi(progress*100.0),compact_count(fielded),roundi(readiness*100.0),roundi(clampf(float(front.get("supply",0.0)),0.0,1.0)*100.0)]
 	return {
-		"id":String(front.get("id","")),"visible":band!="ground","show_label":false,"label":label,
+		"id":String(front.get("id","")),"visible":band!="ground","show_label":band!="ground","label":label,
 		"engagement":engagement_active,"color":ENGAGEMENT_COLOR if engagement_active else FRONT_COLOR,
 		"attacker_color":PLAYER_COLOR,"defender_color":HOSTILE_COLOR,"progress":progress,"field_personnel":fielded,
 		"readiness":readiness,"readiness_color":readiness_color(readiness),"occupation_active":occupation_personnel>0,"occupation_personnel":occupation_personnel,"phase":phase,"target_region_id":String(front.get("target_region_id","")),"position":(destination.get("position",{}) as Dictionary).duplicate(true),"scale":marker_scale(camera_size)*1.05

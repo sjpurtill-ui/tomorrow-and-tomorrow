@@ -1,7 +1,7 @@
 extends Control
 ## War on the map: one small mark per war or feud on the real meeting line
 ## of our lands (the nation borders light that line red: nation_borders.gd),
-## a short tag beside it, the smoke of recent raids and the bands that are
+## a short tag on inspection, the smoke of recent raids and the bands that are
 ## out. Every mark explains itself on hover (or stays open after a click).
 ## Tags use the city-label layout and never cover a city.
 ## Observe-only: clicks still reach the map.
@@ -92,7 +92,7 @@ func _collect_key()->int:
 func _view_signature()->int:
 	if marks.is_empty() and screen.is_empty() and tags.is_empty(): return 0
 	var camera:=_camera()
-	var view:Array=[marks_signature,get_viewport_rect().size,hover_id,pinned_id]
+	var view:Array=[marks_signature,get_viewport_rect().size,hover_id,pinned_id,_fronts_own_chart()]
 	if camera!=null: view.append_array([camera.global_transform,camera.size,camera.fov])
 	var cities:Variant=terrain.get("city_labels") if is_instance_valid(terrain) else null
 	if cities is Control and is_instance_valid(cities): view.append((cities as Control).get("cards").size())
@@ -236,6 +236,7 @@ func _project()->void:
 	if camera==null: tags.clear(); return
 	var viewport:=Rect2(Vector2.ZERO,get_viewport_rect().size)
 	for mark:Dictionary in marks:
+		if String(mark.kind)=="war" and _fronts_own_chart(): continue
 		var points:PackedVector2Array=[]
 		var ok:=true
 		for world:Vector3 in mark.points:
@@ -246,6 +247,13 @@ func _project()->void:
 		var entry:=mark.duplicate(); entry["screen"]=points
 		screen.append(entry)
 	_layout_tags(viewport)
+
+
+## Deployed fronts already show the conflict. Do not add a second set of
+## floating war tokens over them; the War screen retains the full ledger.
+func _fronts_own_chart()->bool:
+	var chart:=get_parent().get_node_or_null("WarFrontOverlay") if get_parent()!=null else null
+	return chart!=null and chart.is_visible_in_tree() and chart._band()!="world" and not (chart.get("live_fronts") as Array).is_empty()
 
 
 func _reserved()->Array[Rect2]:
@@ -290,6 +298,7 @@ static func arrange_tags(entries:Array[Dictionary],bounds:Rect2,old:Dictionary={
 
 func mark_at(point:Vector2)->Dictionary:
 	for tag:Dictionary in tags:
+		if String(tag.id)!=hover_id and String(tag.id)!=pinned_id: continue
 		if (tag.rect as Rect2).has_point(point):
 			for entry:Dictionary in screen:
 				if String(entry.id)==String(tag.id): return entry
@@ -325,6 +334,7 @@ func _draw()->void:
 		if entry.kind=="remnant": draw_arc(entry.screen[0],ICON*0.22,0.0,TAU,20,Color(entry.color,float(entry.alpha)),2.0,true)
 	var font:=ThemeDB.fallback_font
 	for tag:Dictionary in tags:
+		if String(tag.id)!=hover_id and String(tag.id)!=pinned_id: continue
 		var box:Rect2=tag.rect
 		var anchor:Vector2=tag.anchor
 		var ink:Color=tag.get("color",WAR_COLOR)
