@@ -1843,6 +1843,10 @@ func _hover(point:Vector2)->void:
 				over=over.duplicate()
 				over["line"]=String(content.get("title",""))+"\n"+"\n".join(content.get("lines",[]))
 	var line:=String(over.get("line",""))
+	var battle:Dictionary=over.get("battle",{})
+	if not battle.is_empty():
+		line=String(battle.get("label",BattleMarks.label(battle)))+"\n"+line
+		if bool(battle.get("ours",false)): line+="\nClick to watch the battle"
 	var id:=String((over.get("battle",{}) as Dictionary).get("id",over.get("kind","")))
 	# The battle under the pointer keeps its name on the chart, whatever else must give way.
 	if id!=hover_id and line!="": hover_id=id; queue_redraw()
