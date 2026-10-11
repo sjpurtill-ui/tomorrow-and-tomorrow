@@ -2,16 +2,11 @@ extends RefCounted
 ## BATTLE MARKS: how a battle, a force's counter and its state are inked on
 ## the war chart.
 ##
-## A battle is a small crossed-weapons mark standing on the front where the
-## two sides touch, the weapons those armies carry (by the equipment ledger's
-## year of their kits: crossed spears, swords, muskets, rifles, then the
-## armour sign, then the lattice of drones and robots), with a
-## two-colour bar in the sides' colours: the split sits at the middle when
-## neither side gives ground and moves toward whoever is being pushed back.
-## Beneath it the chart letters where and how long ("Tsaren · day 2"). A
-## pointer resting on it gets one plain line ("We are pushing them back ·
-## 340 against 280"). Far out, battles close together stand as one mark
-## ("2 battles").
+## At rest, a battle is two small opposed strokes at the contact point.
+## A fine seam moves toward the side being pushed back. The full paper
+## readout remains available for detail, with historically appropriate
+## weapons, troop estimates and the balance of the fight. Nearby battles
+## can share one small signal with a count, leaving the front itself clear.
 ##
 ## A force's counter (hud/army_marks.gd) gains two thin bars under its mark,
 ## strength (men against its full strength) and will to fight (morale), and
@@ -273,6 +268,63 @@ static func state_words(state:String)->String:
 
 
 # --- Drawing (on the overlay's own canvas) -------------------------------------------------
+
+## The quiet map signal occupies the contact itself. Its size does not
+## depend on troop counts, names or equipment; those belong in detail.
+static func signal_rect(at:Vector2,scale:float=1.0)->Rect2:
+	var k:=maxf(0.5,scale)
+	return Rect2(at-Vector2(13,12)*k,Vector2(26,24)*k)
+
+
+## Opposed strokes and a pressure seam, with only enough paper halo to
+## remain legible over either light ground or a dark map. No panel or label.
+static func draw_signal(canvas:CanvasItem,at:Vector2,battle:Dictionary,scale:float=1.0)->Rect2:
+	var k:=maxf(0.5,scale)
+	var sides:Dictionary=battle.get("sides",{})
+	var colour_a:Color=(sides.get("a",{}) as Dictionary).get("colour",VERDIGRIS)
+	var colour_b:Color=(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD)
+	var fade:=ArmyMarks.fade(int(battle.get("age_days",0)))
+	var seam:=clampf(float(battle.get("progress",0.0)),-1.0,1.0)*3.0
+	var left:=PackedVector2Array([at+Vector2(-9,-6)*k,at+Vector2(seam-2,0)*k,at+Vector2(-9,6)*k])
+	var right:=PackedVector2Array([at+Vector2(9,-6)*k,at+Vector2(seam+2,0)*k,at+Vector2(9,6)*k])
+	for stroke in [left,right]:canvas.draw_polyline(stroke,Color(PAPER,0.94*fade),5.0*k,true)
+	canvas.draw_polyline(left,Color(colour_a,fade),2.6*k,true)
+	canvas.draw_polyline(right,Color(colour_b,fade),2.6*k,true)
+	var top:=at+Vector2(seam,-4)*k
+	var bottom:=at+Vector2(seam,4)*k
+	canvas.draw_line(top,bottom,Color(PAPER,0.94*fade),3.2*k,true)
+	canvas.draw_line(top,bottom,Color(INK,0.9*fade),1.1*k,true)
+	return signal_rect(at,scale)
+
+
+## A count tab stays inside a 32px footprint. One member needs no tab.
+static func cluster_signal_rect(at:Vector2,group:Dictionary,scale:float=1.0)->Rect2:
+	var members:Array=group.get("members",[])
+	if members.is_empty():return Rect2()
+	if members.size()==1:return signal_rect(at,scale)
+	var k:=maxf(0.5,scale)
+	return Rect2(at-Vector2(16,16)*k,Vector2(32,32)*k)
+
+
+static func draw_cluster_signal(canvas:CanvasItem,at:Vector2,group:Dictionary,scale:float=1.0)->Rect2:
+	var members:Array=group.get("members",[])
+	if members.is_empty():return Rect2()
+	var battle:Dictionary=((members[0] as Dictionary).get("battle",{}) as Dictionary).duplicate()
+	battle["progress"]=float(group.get("progress",battle.get("progress",0.0)))
+	if members.size()==1:return draw_signal(canvas,at,battle,scale)
+	var k:=maxf(0.5,scale)
+	draw_signal(canvas,at+Vector2(0,3)*k,battle,scale)
+	var tab:=Rect2(at+Vector2(-2,-15)*k,Vector2(17,11)*k)
+	var fade:=ArmyMarks.fade(int(battle.get("age_days",0)))
+	canvas.draw_rect(tab,Color(PAPER,0.96*fade))
+	var words:=str(members.size()) if members.size()<=99 else "99+"
+	var font:=T.font("ui_strong")
+	var fs:=maxi(4,roundi(9.0*k))
+	var size:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs)
+	var baseline:=tab.get_center()+Vector2(-size.x*0.5,(font.get_ascent(fs)-font.get_descent(fs))*0.5)
+	canvas.draw_string(font,baseline,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,fade))
+	return cluster_signal_rect(at,group,scale)
+
 
 ## The battle's weapons, r = half size, by weapons era: crossed spears,
 ## swords, muskets or rifles (0-3), then the staff map's armour sign (4) and
