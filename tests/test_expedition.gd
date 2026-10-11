@@ -136,3 +136,76 @@ func test_the_planner_card_states_the_odds_and_sends_them()->void:
 	CivilizationSystem.scout_missions.clear()
 	CivilizationSystem.set_scout_geography_authority(saved)
 	host.queue_free()
+
+## Home country x -40..600, 400 km of open sea, and a far land beyond x 1000.
+static func _two_lands()->Callable:
+	return func(point:Vector2)->bool:return (point.x>=-40.0 and point.x<=600.0 and absf(point.y)<300.0) or (point.x>1000.0 and point.x<3000.0 and absf(point.y)<900.0)
+
+const COAST_BOATS:=["river_craft","hide_covered_boats","plank_extended_dugouts","sail_panel_cutting","sail_seaming","wayfinding_stars"]
+
+func test_by_sea_they_walk_to_the_far_shore_and_sail_on_past_where_the_boats_dare()->void:
+	system.set_scout_geography_authority(_two_lands())
+	_know(COAST_BOATS)
+	var craft:=SeaVoyage.capability()
+	assert_float(float(craft.offshore_km)).is_less(100.0)
+	var q:=Expedition.quote("east",1200.0,true,40,system)
+	assert_bool(bool(q.ok)).override_failure_message(str(q.get("blocker",""))).is_true()
+	# On foot across our own land first, then the crossing, then ashore beyond.
+	assert_float(float(q.walk_km)).is_greater(450.0)
+	assert_float(float(q.open_km)).is_greater(float(craft.offshore_km))
+	assert_float(float(q.km)).is_greater(1000.0)
+	var route:Array=q.route_plan.route
+	var voyage:Dictionary=q.route_plan.voyage
+	var landing:Dictionary=route[int(voyage.landing_index)]
+	assert_float(float(landing.x)).is_greater(1000.0)
+	for k in range(1,int(voyage.sea_start)):assert_bool(system._scout_land_at(Vector2(float(route[k].x),float(route[k].z)))).is_true()
+	# The stated odds: the walk at the land's endurance, open water in full, coast water a fifth.
+	# Ashore they push on inland along the heading.
+	assert_float(float(q.inland_km)).is_greater(Expedition.INLAND_MIN_KM-1.0)
+	var last:Dictionary=route[-1]
+	assert_float(float(last.x)).is_greater(float(landing.x)+100.0)
+	var want:=pow(0.5,(float(q.walk_km)+float(q.inland_km))/Expedition.endurance_km(false))*pow(0.5,(float(q.coast_km)*Expedition.COAST_WEIGHT+float(q.open_km))/Expedition.endurance_km(true))
+	assert_float(float(q.chance)).is_equal_approx(clampf(want,0.01,0.99),0.0001)
+	assert_float(float(q.chance)).is_less(0.5)
+	assert_float(float(q.fresh_km)).is_greater(900.0)
+	assert_bool(bool(q.stale)).is_false()
+
+func test_a_way_already_charted_is_said_to_bring_home_little()->void:
+	system.revealed_areas.append({"x":0.0,"z":0.0,"radius":2000.0})
+	system.fog_revision+=1
+	var q:=Expedition.quote("east",600.0,false,40,system)
+	assert_bool(bool(q.ok)).is_true()
+	assert_float(float(q.fresh_km)).is_less(1.0)
+	assert_bool(bool(q.stale)).is_true()
+
+func test_an_expedition_meets_the_people_of_the_country_it_enters()->void:
+	system.initialize()
+	if system.civilizations.is_empty():return
+	var civ:Dictionary=system.civilizations[0]
+	# Their home 120 km off the track: too far for scouts (58 km), not for an expedition.
+	civ.position=Vector2(700.0/system.CIVILIZATION_WORLD_RADIUS_X_KM,120.0/system.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	var sent:=Expedition.send("east",1200.0,false,40,system)
+	assert_bool(bool(sent.get("ok",false))).override_failure_message(str(sent)).is_true()
+	var mission:Dictionary=system.scout_missions[0]
+	mission.expedition.rolled=0.0
+	system._complete_scout_mission(mission,int(mission.actual_return_day))
+	assert_int(int((system.civilizations[0].player_relation as Dictionary).contact_level)).is_equal(2)
+
+func test_signs_of_a_people_are_followed_overland_or_come_home_as_a_rumour()->void:
+	system.initialize()
+	if system.civilizations.is_empty():return
+	var civ:Dictionary=system.civilizations[0]
+	# Their home 300 km off the track across dry land: too far to meet outright, near enough to go and look.
+	civ.position=Vector2(700.0/system.CIVILIZATION_WORLD_RADIUS_X_KM,300.0/system.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	var route:Array=[{"x":-6.0,"z":0.0},{"x":1200.0,"z":0.0}]
+	assert_bool(Expedition.followed_signs(system,route,Vector2(700,300)).is_finite()).is_true()
+	# Over water (north of the continent's shore at 900): no way, so no meeting.
+	assert_bool(Expedition.followed_signs(system,route,Vector2(700,1000)).is_finite()).is_false()
+	# Too far off to have seen anything.
+	assert_bool(Expedition.followed_signs(system,route,Vector2(700,600)).is_finite()).is_false()
+	var sent:=Expedition.send("east",1200.0,false,40,system)
+	assert_bool(bool(sent.get("ok",false))).override_failure_message(str(sent)).is_true()
+	var mission:Dictionary=system.scout_missions[0]
+	mission.expedition.rolled=0.0
+	system._complete_scout_mission(mission,int(mission.actual_return_day))
+	assert_int(int((system.civilizations[0].player_relation as Dictionary).contact_level)).is_equal(2)

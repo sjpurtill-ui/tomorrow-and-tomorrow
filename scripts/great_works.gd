@@ -108,7 +108,7 @@ static func knows(observer:String,owner:String)->bool:
 		for civ:Dictionary in WorldSimulation.world.civilizations:
 			if Exchange.recipient(String(civ.id))!=owner:continue
 			var relation:Dictionary=civ.get("player_relation",{})
-			return int(relation.get("contact_level",0))>0 or int(relation.get("met_day",-1))>=0
+			return int(relation.get("contact_level",0))>=2
 		return false)
 
 ## Deprecated (fixed catalog removed): the twelve legacy founding definitions.

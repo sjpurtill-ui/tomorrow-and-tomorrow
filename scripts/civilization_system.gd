@@ -1997,7 +1997,7 @@ func _civ_settlement_signal_radius(civ:Dictionary,day:int)->float:
 ## radius, 10 to 58 km) saw the place itself, so its home is on our map; a
 ## route within its signal radius brought back signs (smoke, fields, tracks)
 ## and the Map of Rumors gets a circle where it should lie.
-func _scouts_read_their_signs(route:Array,day:int)->void:
+func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 	if route.size()<2: return
 	for index in civilizations.size():
 		var civ:Dictionary=civilizations[index]
@@ -2006,9 +2006,10 @@ func _scouts_read_their_signs(route:Array,day:int)->void:
 		if bool(relation.get("home_location_known",false)): continue
 		var home:=_civilization_world_position(civ)
 		var distance:=_route_distance_to_point(route,home)
-		var signal_radius:=_civ_settlement_signal_radius(civ,day)
+		# An expedition asks and looks farther than a scouts' round (at_least_km).
+		var signal_radius:=maxf(_civ_settlement_signal_radius(civ,day),at_least_km)
 		if distance>signal_radius: continue
-		var direct:=clampf(8.0+signal_radius*0.20,10.0,58.0)
+		var direct:=clampf(8.0+_civ_settlement_signal_radius(civ,day)*0.20,10.0,58.0)
 		if distance<=direct:
 			relation["contact_level"]=2
 			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
@@ -2179,6 +2180,35 @@ func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
 	if on_road.is_finite(): return on_road
 	return a.lerp(b,clampf(progress,0.0,1.0))
 
+
+## A people only seen (contact level 1) is a rumour on the map: somewhere
+## between where its people were seen and where they came from, wide enough
+## to need searching. Nothing here is a meeting.
+func _hearsay_of_strangers(civ:Dictionary,seen_at:Vector2,day:int,source:String)->void:
+	var home:=_civilization_world_position(civ)
+	var away:=home-seen_at
+	var far:=away.length()
+	var center:=_bounded_world_point(seen_at+away.normalized()*far*0.6) if far>1.0 else seen_at
+	var lead:Dictionary=rumor_network.observation("player",String(civ.get("id","")),"a people seen on the march",center,clampf(far*0.5,60.0,1500.0),day,source)
+	lead.confidence=0.3
+	rumor_network.receive("player",lead,day)
+
+## Older saves: a people marked as heard of with nothing behind it (no
+## rumour, no meeting, no home seen) is not known at all. Some were "seen"
+## along the straight line of a band that never left its own shore.
+func _repair_unsourced_hearsay()->void:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var leads:Array=rumor_network.list_leads("player",day)
+	for index in civilizations.size():
+		var civ:Dictionary=civilizations[index]
+		var relation:Dictionary=civ.get("player_relation",{})
+		if int(relation.get("contact_level",0))!=1 or int(relation.get("met_day",-1))>=0 or bool(relation.get("home_location_known",false)):continue
+		if leads.any(func(lead:Dictionary)->bool:return String(lead.get("subject",""))==String(civ.get("id",""))):continue
+		if foreign_sightings.any(func(s:Dictionary)->bool:return String(s.get("civ_id",""))==String(civ.get("id","")) and bool(s.get("visible",false))):continue
+		relation["contact_level"]=0
+		relation["contact_intelligence"]=0.0
+		civ["player_relation"]=relation
+		civilizations[index]=civ
 
 func _formation_route_distance_to(formation:Dictionary,point:Vector2)->float:
 	if not formation.get("route",[]).is_empty(): return _route_distance_to_point(formation.route,point)
@@ -2407,6 +2437,7 @@ func _process_local_observation(day:int,force:bool=false)->void:
 				relation["rival_player_intelligence"]=maxf(0.18,float(relation.get("rival_player_intelligence",0.0)))
 				if int(relation.get("rival_met_day",-1))<0: relation["rival_met_day"]=day
 		civ["player_relation"]=relation; civilizations[civ_index]=civ
+		if previous_contact<1 and int(relation.contact_level)==1:_hearsay_of_strangers(civ,position,day,"a band of strangers our lookouts saw")
 		var strength:=float(formation.get("actual_troops",maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var first_sighting:=sighting_index<0 or day-int(foreign_sightings[sighting_index].get("last_seen_day",-9999))>30
@@ -2969,7 +3000,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
 	_add_revealed_trail(route,preload("res://scripts/expedition.gd").REVEAL_KM if mission.has("expedition") else 18.0,"returned expedition" if mission.has("expedition") else "returned scout trail",day)
-	_scouts_read_their_signs(route,day)
+	_scouts_read_their_signs(route,day,preload("res://scripts/expedition.gd").SIGNS_KM if mission.has("expedition") else 0.0)
 	var contacts:Array[String]=[]
 	var contact_records:Array[Dictionary]=[]
 	for index in civilizations.size():
@@ -2978,8 +3009,20 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		if int(relation.contact_level)>=2: continue
 		var civ_position:=_civilization_world_position(civ)
 		var encounter:=_closest_route_encounter(route,civ_position)
-		if float(encounter.distance)>58.0 or not encounter.position is Vector2: continue
+		# Scouts meet a people within a day or two's walk of its home. An
+		# expedition asks after the people of any country it enters
+		# (expedition.gd MEET_KM, or their own land if that runs wider).
+		var meeting_km:=58.0
+		if mission.has("expedition"):meeting_km=maxf(preload("res://scripts/expedition.gd").MEET_KM,float(preload("res://scripts/realm_reach.gd").of(civ).get("reach",0.0)))
+		if not encounter.position is Vector2: continue
 		var encounter_position:Vector2=encounter.position
+		if float(encounter.distance)>meeting_km:
+			# Signs seen from farther off are followed overland when the land
+			# allows it (expedition.gd followed_signs); else they are a rumour.
+			if not mission.has("expedition"): continue
+			var turned:Vector2=preload("res://scripts/expedition.gd").followed_signs(self,route,civ_position)
+			if not turned.is_finite(): continue
+			encounter_position=turned
 		relation["contact_level"]=2
 		relation["contact_intelligence"]=maxf(0.20,float(relation.contact_intelligence))
 		relation["met_day"]=day
@@ -3571,6 +3614,9 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 	for formation_variant in foreign_formations:
 		if findings.size()>=2: break
 		var formation:Dictionary=formation_variant
+		# A band with no land road stays at home (rival_land_routes.gd): the
+		# straight line to where it would have gone is not a march to cross.
+		if formation.get("route",[]).is_empty() and RivalLandRoutes.managed(formation) and (String(formation.get("land_route_state",""))!="ok" or RivalLandRoutes.pending(formation)):continue
 		var closest_distance:=INF
 		var closest_point:=Vector2.ZERO
 		for waypoint_variant in route:
@@ -3592,6 +3638,7 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 		relation["contact_intelligence"]=maxf(float(relation.get("contact_intelligence",0.0)),0.08)
 		civ["player_relation"]=relation
 		civilizations[civ_index]=civ
+		if not identified:_hearsay_of_strangers(civ,closest_point,day,"a band of strangers our scouts crossed")
 		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.get("kind","formation")),"last_seen_day":day,"position":{"x":closest_point.x,"z":closest_point.y},"distance_km":player_world_origin.distance_to(closest_point),"strength":strength,"readiness":float(formation.get("readiness",0.5)),"visible":false,"source":"returned_scout_report"}
@@ -5887,6 +5934,7 @@ func _apply_state(payload:Dictionary)->void:
 	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 	city_intelligence.records=payload.get("city_intelligence",{}).duplicate(true)
 	rumor_network.books=payload.get("rumor_leads",{}).duplicate(true)
+	_repair_unsourced_hearsay.call_deferred()
 	last_world_seed=int(payload.get("world_seed",WorldSimulation.state.world_seed))
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
 	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))

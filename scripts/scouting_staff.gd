@@ -278,6 +278,11 @@ func advance_steps(day:int)->Array:
 			data.next_review=mini(int(data.next_review),day+1)
 		if shared.searching:
 			data.status=shared.last_reason
+			# All the land in reach charted and no coast our boats can make: say
+			# so, and what would change it, instead of a search that never ends.
+			if WorldSimulation.actor_id=="player" and String(shared.get("target",""))=="open_world" and String(shared.last_reason).begins_with("No useful uncharted"):
+				var craft:Dictionary=preload("res://scripts/sea_voyage.gd").capability()
+				data.status="Every country our scouts can walk to is charted%s. What lies beyond is over open sea. An expedition by sea may hold its course out of sight of land, at its own odds; ships that stand farther out would let the scouts follow." % ((", and our %s find no new coast within the %d km they dare stand off from land" % [String(craft.label),int(craft.offshore_km)]) if bool(craft.get("ok",false)) else ", and our boats are for rivers and the shallows")
 			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
 			# fruitless search instead of repeating every route plan each week.
 			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)

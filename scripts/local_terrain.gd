@@ -875,7 +875,13 @@ func _capture_preview_if_requested() -> void:
 			for capture_frame in 30: await get_tree().process_frame
 			var glide_until:=Time.get_ticks_msec()+6000
 			while zoom_target_size>0.0 and Time.get_ticks_msec()<glide_until: await get_tree().process_frame
-			print("CAPTURE EXPEDITION size ",camera.size," ",(planner.get("current") as Dictionary).get("km",-1)," ",(planner.get("current") as Dictionary).get("blocker",""))
+			var staged:Dictionary=(planner.get("current") as Dictionary).duplicate()
+			staged.erase("route_plan")
+			print("CAPTURE EXPEDITION size ",camera.size," ",staged)
+			var staged_route:Array=((planner.get("current") as Dictionary).get("route_plan",{}) as Dictionary).get("route",[])
+			for civ:Dictionary in CivilizationSystem.civilizations:
+				var off:=float(CivilizationSystem._closest_route_encounter(staged_route,CivilizationSystem._civilization_world_position(civ)).distance) if staged_route.size()>1 else INF
+				if off<600.0:print("CAPTURE EXPEDITION passes ",roundi(off)," km from the home of ",civ.name,"; signs followed overland: ",preload("res://scripts/expedition.gd").followed_signs(CivilizationSystem,staged_route,CivilizationSystem._civilization_world_position(civ)).is_finite())
 	# Capture only: the map's Border mode (hud/border_map.gd), with the ghost
 	# at "--capture-border-ghost=<bearing deg>,<km>" from the seat (a move of
 	# the first fort with "--capture-border-move") or the first fort's note

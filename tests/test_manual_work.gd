@@ -739,3 +739,25 @@ func test_the_work_step_grows_with_the_people_in_round_numbers()->void:
 	assert_int(Overview.work_step(45706)).is_equal(500)
 	assert_int(Overview.work_step(60000)).is_equal(500)
 	assert_int(Overview.work_step(2000000)).is_equal(20000)
+
+func test_the_counts_hold_as_the_people_change_by_a_few()->void:
+	_world(900)
+	Manual.set_manual(true)
+	Manual.move("Knowledge",7)
+	_delegate()
+	var before:=Manual.counts()
+	# Three more can work: only three rows move, each by one, and none falls.
+	GameState.ensure_population_total(GameState.population_total+5)
+	_delegate()
+	var after:=Manual.counts()
+	var grown:=GameState.able_population()-_total(before)
+	var moved:=0
+	for role:String in Manual.ROLES:
+		assert_int(int(after[role])).is_greater_equal(int(before[role]))
+		moved+=int(after[role])-int(before[role])
+	assert_int(moved).is_equal(grown)
+	assert_int(_total(after)).is_equal(GameState.able_population())
+	# The ruler moving one person still moves exactly one.
+	var defense:=int(after.Defense)
+	Manual.move("Defense",1)
+	assert_int(int(Manual.counts().Defense)).is_equal(defense+1)

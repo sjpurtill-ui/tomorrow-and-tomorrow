@@ -11,6 +11,13 @@ extends RefCounted
 ##     sea:  250 km + 1.6 x how far its boats stand out of sight of land
 ## and the chance of coming home from `km` out is
 ##     0.5 ^ (km / endurance)
+## By sea the party first walks to the shore of our land that way, however far,
+## and puts out from there. It may sail on past where its boats dare stand off
+## from land: that is the gamble. Water in sight of a coast counts a fifth
+## (COAST_WEIGHT) of water out of sight of land, so
+##     0.5 ^ (walk km / land endurance) x 0.5 ^ ((coast km x 0.2 + open km) / sea endurance)
+## the walk being the way to the shore and the push inland where they land
+## (INLAND_SHARE of the reach).
 ## stated before it sails and rolled once, seeded, when it is due (resolve()).
 ## A party that comes home brings a wide band of charted country (REVEAL_KM
 ## each side of its track), meets the peoples it passed and loses some on the
@@ -36,6 +43,21 @@ const RATION:=0.55
 ## Of those who come home, this share of the odds against is lost on the way.
 const ROAD_TOLL:=0.3
 const LAND_ENDURANCE_KM:=650.0
+## A km sailed in sight of a coast, against a km out of sight of land.
+const COAST_WEIGHT:=0.2
+## An expedition asks after the people of any country it enters: it meets a
+## people whose home lies within this of its track, or within their own land.
+const MEET_KM:=150.0
+## Ashore at the far end the party pushes on inland along its heading: this
+## share of the reach, within these bounds, km.
+const INLAND_SHARE:=0.3
+const INLAND_MIN_KM:=120.0
+const INLAND_MAX_KM:=800.0
+## An expedition reads the signs of a people (smoke, tracks, worked ground)
+## from at least this far off, and brings home a rumour of where they lie.
+const SIGNS_KM:=400.0
+## A route with less than this share new to our charts brings home little.
+const STALE_SHARE:=0.08
 ## A land leg the planner walks at a time, km.
 const LEG_KM:=260.0
 const ROUTE_POINTS:=24
@@ -84,12 +106,12 @@ static func quote(heading:String,reach_km:float,by_sea:bool,party:int=PARTY_DEFA
 	if not world.SCOUT_HEADINGS.has(heading):out.blocker="Choose a direction.";return out
 	var plan:Dictionary
 	var days:=0
+	var craft:Dictionary={}
 	if by_sea:
-		var craft:=sea_ready()
+		craft=sea_ready()
 		if not bool(craft.ok):out.blocker=String(craft.reason);return out
-		# Out and back at sail, a walk to the boat and some days ashore at the far end.
-		days=ceili(2.0*reach_km/float(craft.sail_km_per_day)*1.25+30.0)
-		plan=_voyage(world,origin,days,_seed(heading,reach_km,true,world),heading)
+		plan=_walk_then_sail(world,origin,heading,reach_km,craft)
+		days=int(plan.get("days",0))
 	else:
 		plan=_push_on_foot(origin,heading,reach_km,world)
 	out.route_plan=plan
@@ -99,7 +121,21 @@ static func quote(heading:String,reach_km:float,by_sea:bool,party:int=PARTY_DEFA
 	out.km=km
 	out.days=days
 	out.provisions=float(party)*float(days)*RATION
-	out.chance=return_chance(km,by_sea)
+	out.chance=return_chance(km,false)
+	if by_sea:
+		var voyage:Dictionary=plan.voyage
+		var open:=float(voyage.get("open_km",0.0))
+		var coast:=maxf(0.0,float(voyage.get("sea_km",0.0))-open)
+		out.walk_km=float(plan.get("approach_km",0.0))
+		out.inland_km=float(plan.get("inland_km",0.0))
+		out.open_km=open
+		out.coast_km=coast
+		out.dare_km=float(craft.offshore_km)
+		out.chance=clampf(pow(0.5,(float(out.walk_km)+float(out.inland_km))/maxf(1.0,endurance_km(false)))*pow(0.5,(coast*COAST_WEIGHT+open)/maxf(1.0,endurance_km(true))),0.01,0.99)
+	# How much of the way our charts do not already hold.
+	var way:=_route_km(plan.route)
+	out.fresh_km=_fresh_km(plan.route,world)
+	out.stale=way>1.0 and float(out.fresh_km)<way*STALE_SHARE
 	out.label="an expedition %s %s" % ["by sea" if by_sea else "overland",heading]
 	var staffing:Dictionary=world.scout_origin_staffing(String(origin_option.id))
 	if away(world).size()>=AT_ONCE:out.blocker="%d expeditions are already away; wait for one to come home or be given up." % AT_ONCE
@@ -108,24 +144,104 @@ static func quote(heading:String,reach_km:float,by_sea:bool,party:int=PARTY_DEFA
 	out.ok=String(out.blocker)==""
 	return out
 
-## A pushed voyage (sea_voyage.gd push), planned once per heading, reach,
+## By sea: on foot to the shore of our land that way (however far that is),
+## then a pushed voyage of `reach_km` from there (sea_voyage.gd push), sailing
+## past where the boats dare stand off if the bearing asks it. One route, the
+## voyage's marks moved along by the walk. Planned once per heading, reach,
 ## boats and charted map: the card re-quotes as the god chooses.
 static var _voyages:={}
-static func _voyage(world:Node,origin:Vector2,days:int,seed_value:int,heading:String)->Dictionary:
+static func _walk_then_sail(world:Node,origin:Vector2,heading:String,reach_km:float,craft:Dictionary)->Dictionary:
 	if not world.scout_land_authority.is_valid():return {"ok":false,"reason":"No terrain survey is available. Unknown water cannot be charted."}
-	var craft:=SeaVoyage.capability()
-	var key:=var_to_str([world.get_instance_id(),origin,days,seed_value,heading,craft,world.fog_revision])
+	var key:=var_to_str([world.get_instance_id(),origin,heading,reach_km,craft,world.fog_revision,int(world.next_scout_mission_id)])
 	if _voyages.has(key):return (_voyages[key] as Dictionary).duplicate(true)
-	var planner:=SeaVoyage.new(world,origin,craft)
-	planner.push=true
-	var plan:Dictionary=planner.plan(days,seed_value,heading)
+	# Where to put out from: the shore our land ends at that way, the shores a
+	# half-turn to either side of it (a bay or a lake is no way out to sea), or
+	# the water by home. The voyage that makes farthest along the bearing is taken.
+	var bearing:=deg_to_rad(float(world.SCOUT_HEADINGS[heading]))
+	var along:=Vector2.from_angle(bearing)
+	var names:Array=world.SCOUT_HEADINGS.keys()
+	var at:=names.find(heading)
+	var walks:Array=[{}]
+	for way:String in [heading,String(names[posmod(at-1,names.size())]),String(names[posmod(at+1,names.size())])]:
+		var walk:=_push_on_foot(origin,way,4000.0,world,true)
+		if bool(walk.get("ok",false)):walks.append(walk)
+	var sea_days:=ceili(2.0*reach_km/float(craft.sail_km_per_day)*1.25+30.0)
+	var plan:={"ok":false,"reason":"Our boats find no coast to make %s." % heading}
+	var best:=-INF
+	var tried:Array=[]
+	for walk:Dictionary in walks:
+		var land:Array=walk.get("route",[{"x":origin.x,"z":origin.y}])
+		var walked:=float(walk.get("distance_km",0.0))
+		var shore:=Vector2(float(land[-1].x),float(land[-1].z))
+		if tried.any(func(p:Vector2)->bool:return p.distance_to(shore)<40.0):continue
+		tried.append(shore)
+		# The boats as they are, but free to hold the bearing out of sight of land.
+		var bold:=SeaVoyage.capability()
+		bold["offshore_km"]=1000000.0
+		var planner:=SeaVoyage.new(world,shore,bold)
+		planner.push=true
+		var trial:Dictionary=planner.plan(sea_days,_seed(heading,reach_km,true,world),heading)
+		if not bool(trial.get("ok",false)):
+			if not bool(plan.ok) and walked>1.0:plan.reason="They can walk %d km to the shore, but %s" % [roundi(walked),String(trial.get("reason","find no water to put a boat into there.")).to_lower()]
+			continue
+		var sea_route:Array=trial.route
+		var landing:Dictionary=sea_route[int(trial.voyage.landing_index)]
+		var made:=(Vector2(float(landing.x),float(landing.z))-origin).dot(along)
+		if made<=best:continue
+		best=made
+		var route:Array=land.duplicate(true)
+		for k in range(1,sea_route.size()):route.append((sea_route[k] as Dictionary).duplicate())
+		var shift:=land.size()-1
+		var voyage:Dictionary=(trial.voyage as Dictionary).duplicate(true)
+		voyage.sea_start=int(voyage.sea_start)+shift
+		voyage.landing_index=int(voyage.landing_index)+shift
+		voyage.walk_to_boat_km=roundf(walked+float(voyage.get("walk_to_boat_km",0.0)))
+		voyage.craft_label=String(craft.label)
+		plan=trial
+		plan.route=route
+		plan.voyage=voyage
+		plan.distance_km=_route_km(route)
+		plan["approach_km"]=walked
+		plan["days"]=sea_days+ceili(2.0*walked/walk_km_a_day()*1.15)
+		plan.planned_heading=world._compass_phrase(origin,Vector2(float(landing.x),float(landing.z)))
+	# Ashore: on inland along the heading, in place of the scouts' short look round.
+	if bool(plan.get("ok",false)):
+		var voyage:Dictionary=plan.voyage
+		var route:Array=(plan.route as Array).slice(0,int(voyage.landing_index)+1)
+		var landing:Dictionary=route[-1]
+		var inland:=_push_on_foot(Vector2(float(landing.x),float(landing.z)),heading,clampf(reach_km*INLAND_SHARE,INLAND_MIN_KM,INLAND_MAX_KM),world)
+		if bool(inland.get("ok",false)):
+			var steps:Array=inland.route
+			for k in range(1,steps.size()):route.append((steps[k] as Dictionary).duplicate())
+			plan["days"]=int(plan.days)+ceili(2.0*float(inland.distance_km)/walk_km_a_day()*1.15)-int(clampf(float(sea_days)*0.125,2.0,45.0))
+			voyage.shore_km=roundf(float(inland.distance_km))
+			plan.route=route
+			plan.distance_km=_route_km(route)
+		plan["inland_km"]=float(voyage.get("shore_km",0.0))
 	if _voyages.size()>=24:_voyages.clear()
 	_voyages[key]=plan.duplicate(true)
 	return plan
 
+## The length of a route, km.
+static func _route_km(route:Array)->float:
+	var total:=0.0
+	for k in range(1,route.size()):total+=Vector2(float(route[k-1].x),float(route[k-1].z)).distance_to(Vector2(float(route[k].x),float(route[k].z)))
+	return total
+
+## How much of a route lies off our charts, km (sampled along it).
+static func _fresh_km(route:Array,world:Node)->float:
+	var fresh:=0.0
+	for k in range(1,route.size()):
+		var a:=Vector2(float(route[k-1].x),float(route[k-1].z));var b:=Vector2(float(route[k].x),float(route[k].z))
+		var length:=a.distance_to(b)
+		var steps:=clampi(ceili(length/12.0),1,60)
+		for i in steps:
+			if not bool(world._position_is_revealed(a.lerp(b,(float(i)+0.5)/float(steps)))):fresh+=length/float(steps)
+	return fresh
+
 ## A land route pushed `reach_km` toward `heading` in legs, each walked on dry
 ## ground (the scouts' own planner), until the reach is spent or the land ends.
-static func _push_on_foot(origin:Vector2,heading:String,reach_km:float,world:Node=null)->Dictionary:
+static func _push_on_foot(origin:Vector2,heading:String,reach_km:float,world:Node=null,to_the_shore:bool=false)->Dictionary:
 	if world==null:world=CivilizationSystem
 	if not world.scout_land_authority.is_valid():return {"ok":false,"reason":"No terrain survey is available. Unknown ground cannot be assumed to be land."}
 	var points:Array[Dictionary]=[{"x":origin.x,"z":origin.y}]
@@ -146,6 +262,18 @@ static func _push_on_foot(origin:Vector2,heading:String,reach_km:float,world:Nod
 		for k in range(1,route.size()):points.append((route[k] as Dictionary).duplicate())
 		walked+=float(plan.get("distance_km",here.distance_to(there)))
 		here=there
+	# For a voyage: the last short stretch down to the water itself.
+	if to_the_shore and stop!="":
+		for creep in 3:
+			if points.size()>=ROUTE_POINTS:break
+			var last:Dictionary=world._plan_open_scout_route(leg*0.25/float(creep+1),rng,heading,here)
+			if not bool(last.get("ok",false)):break
+			var tail:Array=last.route
+			var edge:=Vector2(float(tail[-1].x),float(tail[-1].z))
+			if edge.distance_to(origin)<=here.distance_to(origin)+1.0 or points.size()+tail.size()-1>ROUTE_POINTS:continue
+			for k in range(1,tail.size()):points.append((tail[k] as Dictionary).duplicate())
+			walked+=float(last.get("distance_km",here.distance_to(edge)))
+			here=edge
 	if points.size()<2:return {"ok":false,"reason":"Our people find no way %s on foot from home." % heading}
 	return {"ok":true,"route":points,"distance_km":walked,"travel_mode":"land","target_reachable":true,"ordered_heading":heading,"planned_heading":world._compass_phrase(origin,here),"stopped":stop}
 
@@ -179,7 +307,7 @@ static func send(heading:String,reach_km:float,by_sea:bool,party:int=PARTY_DEFAU
 		"target_id":"open_world","target_kind":"explore","target_civ_id":"","target_city_id":"","target_label":String(q.label).to_upper(),"target_position":{},"reached_target":true,
 		"travel_mode":"sea" if sea else "land","route_status":"outbound_and_returning","concealment":0.75,"evasion":0.85,
 		"terrain_danger":float(plan.get("terrain_danger",0.5)) if sea else float(world._scout_terrain_danger(route)),"veterancy":float(world.scouting_staff.veterancy()),
-		"expedition":{"chance":float(q.chance),"km":float(q.km),"endurance_km":float(q.endurance_km),"reach_km":float(q.reach_km),"by_sea":sea}}
+		"expedition":{"chance":float(q.chance),"km":float(q.km),"endurance_km":float(q.endurance_km),"reach_km":float(q.reach_km),"by_sea":sea,"walk_km":float(q.get("walk_km",0.0)),"open_km":float(q.get("open_km",0.0)),"fresh_km":float(q.get("fresh_km",0.0))}}
 	if sea:mission["voyage"]=(plan.voyage as Dictionary).duplicate(true)
 	var variance:int=world._scout_timing_variance(int(q.days),id,start)
 	mission["timing_variance_days"]=variance
@@ -238,6 +366,25 @@ static func homecoming(mission:Dictionary,day:int,world:Node=null)->Dictionary:
 	_remember(mission,"home",personnel-lost,day,world)
 	_tell("THE EXPEDITION COMES HOME","The expedition %s %s is home from %d km out. %s Their charts are ours." % ["by sea" if bool(e.by_sea) else "overland",String(mission.get("ordered_heading","")),roundi(float(e.km)),line],"major")
 	return {"lost":lost,"stayed":0,"returned":personnel-lost,"line":line,"mishap":"","death_chance":1.0-float(e.chance)}
+
+## An expedition that reads a people's signs within SIGNS_KM goes to look:
+## from the nearest dry point of its track it walks to them if the land
+## allows a way no longer than half again that distance. Where it left its
+## track, or INF when the signs lie too far or over water.
+static func followed_signs(world:Node,route:Array,home:Vector2)->Vector2:
+	var from:=Vector2.INF
+	var near:=INF
+	# The nearest point of the track itself if it is dry, else its nearest dry turn.
+	var closest:Dictionary=world._closest_route_encounter(route,home)
+	if closest.position is Vector2 and bool(world._scout_land_at(closest.position)):from=closest.position;near=float(closest.distance)
+	for p:Dictionary in (route if not from.is_finite() else []):
+		var at:=Vector2(float(p.x),float(p.z))
+		if at.distance_to(home)<near and bool(world._scout_land_at(at)):near=at.distance_to(home);from=at
+	if not from.is_finite() or near>SIGNS_KM:return Vector2.INF
+	if not bool(world._scout_land_at(home)):return Vector2.INF
+	var way:Dictionary=world._plan_scout_land_route(from,home)
+	if not bool(way.get("ok",false)) or float(way.get("distance_km",INF))>SIGNS_KM*1.5:return Vector2.INF
+	return from
 
 ## The god's people remember their expeditions: [{day, heading, by_sea, km,
 ## outcome, count}], latest last, at most 24.

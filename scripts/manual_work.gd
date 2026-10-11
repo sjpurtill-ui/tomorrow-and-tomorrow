@@ -61,6 +61,10 @@ static func _direction()->Variant:
 # --------------------------------------------------------------------------
 
 ## Does the ruler set the daily work (true), or our leaders (false)?
+## True while a change of the split is being laid: the counts are rounded
+## afresh (GameState.synchronize_population_allocations holds them otherwise).
+static var relaid:=false
+
 static func manual()->bool:
 	return not bool(_direction().automatic_work)
 
@@ -81,7 +85,10 @@ static func set_manual(on:bool)->bool:
 ## Lays the split on our towns now, through the owner of daily labour.
 static func apply()->void:
 	var government=WorldSimulation.government
+	# A change of the split is laid afresh, to the person (see `relaid`).
+	relaid=true
 	if government!=null and government.has_method("delegate_now"):government.delegate_now()
+	relaid=false
 
 # --------------------------------------------------------------------------
 # The split
