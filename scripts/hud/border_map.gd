@@ -41,6 +41,8 @@ var moving:=-1
 ## A refusal shown in the ghost's note for a moment: {text, until}.
 var _refusal:Dictionary={}
 var _key_signature:=0
+var _key_layout_signature:=0
+var _key_fields:Dictionary={}
 var _look:=0.0
 var _note_signature:=0
 
@@ -137,7 +139,7 @@ func _process(delta:float)->void:
 			var stamp:=hash([f,Forts.watch().garrisons,Forts.costs().posts,T.color_mode])
 			if stamp!=_note_signature: open_note(selected)
 	if is_instance_valid(key_card):
-		# Cards fit their words (wrapped labels settle a frame after a rebuild).
+		# Daily readings reuse their laid-out controls and established wrap widths.
 		key_card.size=key_card.get_combined_minimum_size()
 		var view:=get_viewport().get_visible_rect().size
 		key_card.position=Vector2(T.RAIL_WIDTH+24.0,maxf(T.CONTENT_TOP+8.0,view.y-key_card.size.y-160.0))
@@ -333,57 +335,96 @@ func _refresh_key()->void:
 	for fort:Dictionary in Forts.forts():
 		if String(fort.get("status",""))!="abandoned":needed+=int(Forts.kind(String(fort.kind)).get("garrison",0))
 	var compact:=get_viewport().get_visible_rect().size.y<800.0
-	var signature:=hash([compact,kept,snappedf(float(bill.food_lost),0.1),Forts.border_share(),standing,going,String(next.get("id","")),moving,to_man,available,needed,T.color_mode])
+	var signature:=hash([compact,int(kept.posted),int(kept.line),roundi(line*100.0),roundi(km),_amount(float(bill.food_lost)),Forts.border_share(),standing,going,next,moving,Forts.find_fort(moving).get("name",""),to_man,available,needed,T.color_mode])
 	if signature==_key_signature: return
 	_key_signature=signature
-	key_card.theme=T.control_theme()
-	key_card.add_theme_stylebox_override("panel",Kit.card_style(14,PLUM if T.is_light() else T.VIOLET))
-	for child in key_card.get_children(): child.hide(); child.queue_free()
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6 if compact else 10); column.custom_minimum_size=Vector2(304,0); key_card.add_child(column)
-	var head:=_heading(column,"The frontier","The border",String(next.get("id","watch_camp")))
-	var close:=Kit.quiet_button(head,"×",func()->void:set_shown(terrain,false),"Leave border view")
-	close.name="CloseBorder"; close.custom_minimum_size=Vector2(36,36)
-	Kit.label(column,"%d fort%s standing%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],"note")
-	var numbers:=HBoxContainer.new(); numbers.add_theme_constant_override("separation",14); column.add_child(numbers)
-	_metric(numbers,"Posted",str(int(kept.posted)))
-	_metric(numbers,"On the line",str(int(kept.line)))
-	_metric(numbers,"Food lost / day",_amount(float(bill.food_lost)))
-	var holds:=Kit.section(column,10); holds.add_theme_constant_override("separation",6)
+	var layout_signature:=hash([compact,T.color_mode])
+	if _key_fields.is_empty() or layout_signature!=_key_layout_signature:
+		_key_layout_signature=layout_signature
+		_build_key_fields(compact)
+	# Keep these controls alive: replacing wrapped labels briefly measures them
+	# at zero width, then stretches and collapses the bottom-anchored popup.
+	var seal:FortSeal=_key_fields.seal
+	seal.kind_id=String(next.get("id","watch_camp"));seal.queue_redraw()
+	(_key_fields.forts as Label).text="%d fort%s standing%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""]
+	(_key_fields.posted as Label).text=str(int(kept.posted))
+	(_key_fields.line as Label).text=str(int(kept.line))
+	(_key_fields.food as Label).text=_amount(float(bill.food_lost))
 	var strength_ink:=T.TEAL if line>=0.7 else (T.AMBER if line>=0.4 else T.RED)
 	var watch_status:="Unwatched line" if roundi(line*100.0)==0 else ("Thin watch" if line<0.4 else "Border watch")
-	_status(holds,watch_status if km>0.0 else "Open country","%d%%" % roundi(line*100.0) if km>0.0 else "Unlinked",strength_ink if km>0.0 else T.INK_MUTED)
-	_bar(holds,line,strength_ink)
-	if km>0.0:
-		Kit.label(holds,"%d in 100 crossings stopped · %d km of line" % [roundi(line*100.0),roundi(km)],"note")
-	else:
-		Kit.label(holds,"Link standing forts to watch the land between them.","note")
-	if km>0.0 and int(kept.line)<=0:
-		Kit.label(holds,"No one is posted to walk the line." if int(kept.posted)==0 else "The garrisons take everyone posted. No one is left to walk the line.","note",T.RED)
+	(_key_fields.status as Label).text=watch_status if km>0.0 else "Open country"
+	var strength:Label=_key_fields.strength
+	strength.text="%d%%" % roundi(line*100.0) if km>0.0 else "Unlinked"
+	strength.add_theme_color_override("font_color",Kit.text_color(strength_ink if km>0.0 else T.INK_MUTED))
+	var bar:ShareBar=_key_fields.bar
+	bar.share=line;bar.ink=strength_ink;bar.queue_redraw()
+	(_key_fields.crossings as Label).text="%d in 100 crossings stopped · %d km of line" % [roundi(line*100.0),roundi(km)] if km>0.0 else "Link standing forts to watch the land between them."
+	var warning:Label=_key_fields.warning
+	warning.text="No one is posted to walk the line." if int(kept.posted)==0 else "The garrisons take everyone posted. No one is left to walk the line."
+	warning.visible=km>0.0 and int(kept.line)<=0
+	(_key_fields.share as Label).text="%d%% of the watch at home" % roundi(Forts.border_share()*100.0)
+	(_key_fields.fewer as Button).disabled=Forts.border_share()<=0.0
+	(_key_fields.more as Button).disabled=Forts.border_share()>=1.0
+	var man:Button=_key_fields.man
+	man.visible=to_man>Forts.border_share()+0.001
+	man.text="Man every fort · %d%% of the watch" % roundi(to_man*100.0)
+	if available<needed:man.text="Send all %d available" % available if available>0 else "No watch available"
+	man.disabled=available<=0
+	var shortage:Label=_key_fields.shortage
+	shortage.text="%d available · %d needed to fill the forts" % [available,needed]
+	shortage.visible=needed>available
+	(_key_fields.unknown as Label).visible=next.is_empty()
+	var move_title:Label=_key_fields.move_title
+	move_title.text="Moving %s" % String(Forts.find_fort(moving).get("name","the fort"))
+	move_title.visible=not next.is_empty() and moving>=0
+	(_key_fields.move_hint as Label).visible=move_title.visible
+	(_key_fields.cancel as Button).visible=move_title.visible
+	var placement:Label=_key_fields.placement
+	placement.text="Click open land to raise a %s." % String(next.get("name","fort")).to_lower()
+	placement.visible=not next.is_empty() and moving<0
+	(_key_fields.inspect as Label).visible=placement.visible and not compact
+
+func _build_key_fields(compact:bool)->void:
+	# Only an explicit palette/viewport layout change rebuilds the static chrome.
+	key_card.theme=T.control_theme()
+	key_card.add_theme_stylebox_override("panel",Kit.card_style(14,PLUM if T.is_light() else T.VIOLET))
+	for child in key_card.get_children(): key_card.remove_child(child); child.queue_free()
+	_key_fields.clear()
+	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",6 if compact else 10); column.custom_minimum_size=Vector2(304,0); key_card.add_child(column)
+	var head:=_heading(column,"The frontier","The border","watch_camp")
+	_key_fields.seal=head.get_child(0)
+	var close:=Kit.quiet_button(head,"×",func()->void:set_shown(terrain,false),"Leave border view")
+	close.name="CloseBorder"; close.custom_minimum_size=Vector2(36,36)
+	_key_fields.forts=Kit.label(column,"","note")
+	var numbers:=HBoxContainer.new(); numbers.add_theme_constant_override("separation",14); column.add_child(numbers)
+	_key_fields.posted=_metric(numbers,"Posted","")
+	_key_fields.line=_metric(numbers,"On the line","")
+	_key_fields.food=_metric(numbers,"Food lost / day","")
+	var holds:=Kit.section(column,10); holds.add_theme_constant_override("separation",6)
+	var status:=_status(holds,"","",T.INK_MUTED)
+	_key_fields.status=status.get_child(0);_key_fields.strength=status.get_child(1)
+	_key_fields.bar=_bar(holds,0.0,T.INK_MUTED)
+	_key_fields.crossings=Kit.label(holds,"","note")
+	_key_fields.warning=Kit.label(holds,"","note",T.RED)
 	var share_row:=HBoxContainer.new(); share_row.add_theme_constant_override("separation",8); column.add_child(share_row)
 	var share_words:=VBoxContainer.new(); share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL; share_words.add_theme_constant_override("separation",0); share_row.add_child(share_words)
 	Kit.label(share_words,"Watch sent out","body")
-	Kit.label(share_words,"%d%% of the watch at home" % roundi(Forts.border_share()*100.0),"note")
+	_key_fields.share=Kit.label(share_words,"","note")
 	for step:Array in [["−",-0.1,"Fewer on the border: less food lost on the road, a thinner line."],["+",0.1,"More on the border: forts manned first, then the line between them."]]:
 		var b:=Kit.button(share_row,String(step[0]),false,func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step[1]),0.0,1.0));_changed(),String(step[2]))
 		b.name="FewerBorderWatch" if float(step[1])<0.0 else "MoreBorderWatch"
 		b.custom_minimum_size=Vector2(36,36)
-		b.disabled=Forts.border_share()<=0.0 if float(step[1])<0.0 else Forts.border_share()>=1.0
-	if to_man>Forts.border_share()+0.001:
-		var action:="Man every fort · %d%% of the watch" % roundi(to_man*100.0)
-		if available<needed:action="Send all %d available" % available if available>0 else "No watch available"
-		var man:=Kit.button(column,action,true,func()->void:Forts.set_border_share(to_man);_changed(),"Posts the available watch to fort garrisons. More food is lost on the road; fewer keep watch at home.")
-		man.name="ManEveryFort"
-		man.disabled=available<=0
-	if needed>available:Kit.label(column,"%d available · %d needed to fill the forts" % [available,needed],"note",T.AMBER_TEXT)
+		_key_fields["fewer" if float(step[1])<0.0 else "more"]=b
+	var man:=Kit.button(column,"",true,func()->void:Forts.set_border_share(Forts.share_to_man());_changed(),"Posts the available watch to fort garrisons. More food is lost on the road; fewer keep watch at home.")
+	man.name="ManEveryFort";_key_fields.man=man
+	_key_fields.shortage=Kit.label(column,"","note",T.AMBER_TEXT)
 	_rule(column)
-	if next.is_empty(): Kit.label(column,"Our people know no way to raise a fort yet.","note")
-	elif moving>=0:
-		Kit.label(column,"Moving %s" % String(Forts.find_fort(moving).get("name","the fort")),"heading",T.VIOLET)
-		Kit.label(column,"Choose new ground. The preview shows what changes.","note")
-		Kit.button(column,"Cancel move",false,func()->void:_let_go(),"Keep the fort where it stands · Esc or right-click")
-	else:
-		Kit.label(column,"Click open land to raise a %s." % String(next.name).to_lower(),"body")
-		if not compact: Kit.label(column,"Inspect a fort for orders. Preview the cost before you place.","note")
+	_key_fields.unknown=Kit.label(column,"Our people know no way to raise a fort yet.","note")
+	_key_fields.move_title=Kit.label(column,"","heading",T.VIOLET)
+	_key_fields.move_hint=Kit.label(column,"Choose new ground. The preview shows what changes.","note")
+	_key_fields.cancel=Kit.button(column,"Cancel move",false,func()->void:_let_go(),"Keep the fort where it stands · Esc or right-click")
+	_key_fields.placement=Kit.label(column,"","body")
+	_key_fields.inspect=Kit.label(column,"Inspect a fort for orders. Preview the cost before you place.","note")
 	if not compact: _legend(column)
 
 ## A compact field-atlas heading. Its seal uses the actual available fort kind.
@@ -396,16 +437,18 @@ func _heading(parent:Node,kicker:String,title:String,kind_id:String,building:boo
 	name_label.add_theme_font_override("font",T.voice_font()); name_label.add_theme_font_size_override("font_size",28)
 	return row
 
-func _metric(parent:Node,caption:String,value:String,tone:Color=Color.TRANSPARENT)->void:
+func _metric(parent:Node,caption:String,value:String,tone:Color=Color.TRANSPARENT)->Label:
 	var col:=VBoxContainer.new(); col.size_flags_horizontal=Control.SIZE_EXPAND_FILL; col.add_theme_constant_override("separation",0); parent.add_child(col)
 	var number:=Kit.label(col,value,"value",tone)
 	number.add_theme_font_size_override("font_size",22)
 	Kit.label(col,caption,"note")
+	return number
 
-func _status(parent:Node,caption:String,value:String,tone:Color)->void:
+func _status(parent:Node,caption:String,value:String,tone:Color)->HBoxContainer:
 	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",10); parent.add_child(row)
 	Kit.label(row,caption,"body").size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Kit.label(row,value,"heading",tone,false)
+	return row
 
 func _rule(parent:Node)->void:
 	var line:=HSeparator.new(); line.mouse_filter=Control.MOUSE_FILTER_IGNORE; parent.add_child(line)

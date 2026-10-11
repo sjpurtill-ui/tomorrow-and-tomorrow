@@ -1,3 +1,20 @@
+## October 11 — Stable daily border popup (INTEGRATED)
+
+Source `54951c19`, branch `codex/stable-border-popup`, is combined with main
+`54b41d2e` at code merge `4c22397d`. The border summary keeps its controls alive
+and updates readings in place, preventing the daily wrapped-text layout jump
+and loss of keyboard focus. Staffing commands use current capacity. Border
+mechanics, save data and the separate fort-detail note are unchanged.
+
+The regression reproduces on unchanged main; all 18 focused cases pass on the
+fix with zero errors or orphans. Private GPU verification passes 84 checks
+across 16 captures, including zero size/position drift in 48 immediate refresh
+frames. Evidence: task worktree `artifacts/border-popup-fixed.log`,
+`reports/report_28`, and `artifacts/border-popup-stable/`. Integration has no
+conflicts and leaves the tested runtime code unchanged. Remote main is verified
+before the canonical fast-forward; local imports and running sessions remain.
+No migration is needed. A normal save/restart loads the changed scripts.
+
 ## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
 
 User approved PR #205. Source `38aa6e7c` from `codex/border-art-direction`

@@ -1,3 +1,26 @@
+## October 11 — Stable daily border popup (INTEGRATED)
+
+The open "The border" summary now updates its existing readings, bars and
+controls instead of destroying and rebuilding wrapped labels every day. This
+removes the transient height/position jump and preserves keyboard focus. Real
+staffing warnings and move controls still appear as needed; the staffing action
+reads current capacity when pressed. Palette and viewport layout changes retain
+their explicit rebuild. Fort-detail notes and simulation rules are unchanged.
+
+Source `54951c19` on `codex/stable-border-popup` combines with main `54b41d2e`
+at code merge `4c22397d`, without conflicts or runtime changes. The same new
+regression on unchanged main reproduced a 3306 px transient and destroyed focus,
+with zero engine errors. All 18 focused tests pass after the fix. Private GPU
+verification passes 84 checks / 16 captures, including 48 immediate update
+frames with zero geometry drift and fresh counts. The process exited normally.
+Evidence: task worktree `artifacts/border-popup-fixed.log` / `reports/report_28`
+and `artifacts/border-popup-stable/`; baseline log is in the capture worktree at
+`artifacts/border-key-refresh-baseline.log`.
+
+Source and integrated main are pushed and remotely verified before updating the
+canonical checkout. Existing local changes and player/editor sessions remain;
+save and restart normally to load the fix. No save migration is needed.
+
 ## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
 
 User approved PR #205 for integration. Source `38aa6e7c` from
