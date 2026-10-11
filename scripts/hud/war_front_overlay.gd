@@ -1830,6 +1830,9 @@ func open_battle(hit:Dictionary,at:Vector2)->void:
 
 ## A pointer resting on a battle: one plain line beside it.
 func _hover(point:Vector2)->void:
+	if note!=null and note.visible:
+		close_tip()
+		return
 	var over:Dictionary={}
 	if get_viewport()!=null and get_viewport().gui_get_hovered_control()==null:
 		over=battle_at(point)
@@ -3574,10 +3577,13 @@ static func _mark_style(ink:Color,alpha:float)->StyleBoxFlat:
 
 ## Orders and support geometry appear only for the formation being inspected.
 func _focused(data:Dictionary)->bool:
-	var selected:=int(terrain.get("selected_army_id")) if is_instance_valid(terrain) and terrain.get("selected_army_id")!=null else 0
-	if selected<=0: selected=int(note_about.get("army_id",0))
-	if selected<=0 and not (note_about.get("armies",[]) as Array).is_empty(): selected=int(note_about.armies[0])
 	if data.has("enemy_id"):
 		return String(data.enemy_id)!="" and String(data.enemy_id)==String(note_about.get("enemy_id",""))
+	var selected:=0
+	if not note_about.is_empty():
+		selected=int(note_about.get("army_id",(note_about.get("battle",{}) as Dictionary).get("army_id",0)))
+		if selected<=0 and not (note_about.get("armies",[]) as Array).is_empty(): selected=int(note_about.armies[0])
+	elif is_instance_valid(terrain) and terrain.get("selected_army_id")!=null:
+		selected=int(terrain.get("selected_army_id"))
 	if selected<=0: return false
 	return int(data.get("army_id",0))==selected or (data.get("armies",[]) as Array).has(selected)
