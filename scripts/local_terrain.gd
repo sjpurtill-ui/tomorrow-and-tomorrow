@@ -865,6 +865,9 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Diagnostic: what the scouts' search beyond the charts finds (tools/scout_beyond_report.gd).
+	if "--capture-scout-beyond" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/scout_beyond_report.gd").call("lines"):print("SCOUT BEYOND ",line)
 	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
 	if "--capture-rival-ships" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)

@@ -371,3 +371,28 @@ func test_a_long_crossing_of_charted_country_to_new_land_is_worth_sending()->voi
 	assert_float(walker.fresh_km(plan)).is_greater_equal(preload("res://scripts/scouting_staff.gd").USEFUL_FRESH_KM)
 	var charted:={"ok":true,"route":system._scout_route_dictionaries([Vector2.ZERO,Vector2(900,0)] as Array[Vector2])}
 	assert_float(walker.fresh_km(charted)).is_less(preload("res://scripts/scouting_staff.gd").USEFUL_FRESH_KM)
+
+## A long country in narrow bends: east 400 km along a strip 12 km wide, then
+## south 600 km down another, then east again. Straight outward steps cannot
+## thread it; the land road can.
+static func _winding()->Callable:
+	return func(p:Vector2)->bool:
+		if p.x>=-20.0 and p.x<=400.0 and absf(p.y)<=6.0:return true
+		if absf(p.x-400.0)<=6.0 and p.y>=-6.0 and p.y<=600.0:return true
+		return p.x>=394.0 and p.x<=1400.0 and absf(p.y-600.0)<=6.0
+
+func test_scouts_cross_their_charted_country_and_search_on_beyond_it()->void:
+	system.set_scout_geography_authority(_winding())
+	# The first stretch is charted, out to the bend.
+	system._add_revealed_trail([{"x":-6.0,"z":0.0},{"x":200.0,"z":0.0},{"x":398.0,"z":0.0}],18.0,"returned scout trail",1)
+	var walker:RefCounted=preload("res://scripts/scout_frontier.gd").new(system,1500.0,0.0,Vector2(-6.0,0.0))
+	var plan:Dictionary=walker.beyond(1500.0,0)
+	assert_bool(bool(plan.get("ok",false))).is_true()
+	assert_bool(bool(plan.beyond)).is_true()
+	assert_bool(system._scout_route_is_land(plan.route)).is_true()
+	assert_int((plan.route as Array).size()).is_less_equal(system.SCOUT_ROUTE_POINT_LIMIT)
+	# It goes round the bend and well down the next strip: new ground.
+	var last:Dictionary=plan.route[-1]
+	assert_float(float(last.z)).is_greater(200.0)
+	assert_float(walker.fresh_km(plan)).is_greater(150.0)
+	assert_float(float(plan.distance_km)).is_less_equal(1500.0)

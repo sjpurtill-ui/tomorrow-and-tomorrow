@@ -98,6 +98,60 @@ func search(step:float,node_limit:int=NODE_LIMIT)->Dictionary:
 	var route:Array[Dictionary]=world._scout_route_dictionaries(compressed)
 	return {"ok":true,"route":route,"distance_km":world._scout_route_distance(route),"travel_mode":"land","target_reachable":true,"ordered_heading":"","planned_heading":world._compass_phrase(origin,points[-1])}
 
+## BEYOND THE CHARTS. The search above grows outward from home in straight
+## steps; on a long, narrow or winding country (necks of land, a coast road)
+## it runs out of nodes or cannot lay a step, and reports nothing new though
+## dry land goes on. An old people must cross its own charted country first:
+## this takes the farthest dry points our returned charts reach (one for each
+## of SECTORS bearings from home), walks to one by the real land road
+## (_plan_scout_land_route) and searches on from there with the range left.
+## Up to TRIES roads are planned a call (each a real search of the land,
+## a tenth to half a second on a large country), starting at sector `turn` so
+## successive calls go round the compass; the route with the most new ground
+## is returned, or {ok:false}.
+const SECTORS:=16
+const TRIES:=2
+func beyond(range_km:float,turn:int)->Dictionary:
+	var far:Array=[];far.resize(SECTORS)
+	var reach:=PackedFloat32Array();reach.resize(SECTORS)
+	for area:Dictionary in world.revealed_areas:
+		if String(area.get("kind","circle"))!="trail":continue
+		for p:Dictionary in area.get("points",[]):
+			var at:=Vector2(float(p.get("x",0.0)),float(p.get("z",0.0)))
+			var d:=at.distance_to(origin)
+			if d<30.0 or d>range_km*0.92:continue
+			var k:=posmod(roundi(fposmod((at-origin).angle(),TAU)/TAU*float(SECTORS)),SECTORS)
+			if d>reach[k] and world._scout_land_at(at):reach[k]=d;far[k]=at
+	var best:={"ok":false}
+	var best_fresh:=0.0
+	var tried:=0
+	for step_index in SECTORS:
+		if tried>=TRIES:break
+		var k:=posmod(turn+step_index,SECTORS)
+		if not far[k] is Vector2:continue
+		var anchor:Vector2=far[k]
+		tried+=1
+		var road:Dictionary=world._plan_scout_land_route(origin,anchor)
+		if not bool(road.get("ok",false)):continue
+		var walked:=float(road.get("distance_km",origin.distance_to(anchor)))
+		var left:=range_km-walked
+		if left<60.0:continue
+		var onward:RefCounted=get_script().new(world,left,(anchor-origin).angle(),anchor)
+		var found:Dictionary=onward.search(clampf(left/24.0,4.0,40.0),200)
+		if not bool(found.get("ok",false)):continue
+		var points:Array[Vector2]=[]
+		for p:Dictionary in road.route:points.append(Vector2(float(p.x),float(p.z)))
+		var more:Array=found.route
+		for i in range(1,more.size()):points.append(Vector2(float(more[i].x),float(more[i].z)))
+		var compressed:Array[Vector2]=world._compress_scout_land_path(points)
+		if compressed.size()<2:continue
+		var route:Array[Dictionary]=world._scout_route_dictionaries(compressed)
+		var plan:={"ok":true,"route":route,"distance_km":world._scout_route_distance(route),"travel_mode":"land","target_reachable":true,"ordered_heading":"","planned_heading":world._compass_phrase(origin,compressed[-1]),"beyond":true}
+		if float(plan.distance_km)>range_km+0.001:continue
+		var fresh:=fresh_km(plan)
+		if fresh>best_fresh:best=plan;best_fresh=fresh
+	return best
+
 func wander(plan:Dictionary,seed_value:int)->Dictionary:
 	# Side investigations are part of the physical route, not decorative bends.
 	# Preserve every checked waypoint; do not compress away the visited ground.

@@ -45,7 +45,9 @@ const SCORE_DOMAINS:=["population","knowledge","production","logistics","militar
 const SCOUT_DURATIONS:=[30,90,180,365]
 const REVEAL_HISTORY_LIMIT:=1024
 const SCOUT_REPORT_LIMIT:=256
-const SCOUT_ROUTE_POINT_LIMIT:=24
+## (64 since the roads beyond the charts and the walk-sail-walk expeditions:
+## a winding country or a crossing needs more turns than 24.)
+const SCOUT_ROUTE_POINT_LIMIT:=64
 const REVEALED_TRAIL_POINT_LIMIT:=128
 const SCOUT_LAND_SAMPLE_KM:=8.0
 const SCOUT_ROUTE_GRID_LIMIT:=96
@@ -1526,11 +1528,22 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 				var step:=clampf(walker.budget/20.0,4.0,128.0)
 				route_plan=walker.search(step,96)
 				if not bool(route_plan.get("ok",false)):route_plan=walker.search(clampf(step*.25,1.0,6.0),96)
+				# Nothing new within the outward search: across our own charted
+				# country by its land road, and on from where the charts end
+				# (scout_frontier.gd beyond). Round the compass, a few roads a review.
+				# Only for the long trips (half a year and more): each road is a
+				# real search of the land and costs a moment.
+				if duration_days>=180 and (not bool(route_plan.get("ok",false)) or walker.fresh_km(route_plan)<scouting_staff.USEFUL_FRESH_KM):
+					var turn:=int(scouting_staff.data.get("beyond_turn",0))
+					scouting_staff.data["beyond_turn"]=posmod(turn+walker.TRIES,walker.SECTORS)
+					var onward:Dictionary=walker.beyond(one_way_range,turn)
+					if bool(onward.get("ok",false)):route_plan=onward
 				if open_scout_plan_cache.size()>32:open_scout_plan_cache.clear()
 				open_scout_plan_cache[key]=route_plan.duplicate(true)
 			if bool(route_plan.get("ok",false)):
 				walker.budget=one_way_range
-				route_plan=walker.wander(route_plan,quote_seed)
+				# A road beyond the charts is already the whole journey: no side trips.
+				if not bool(route_plan.get("beyond",false)):route_plan=walker.wander(route_plan,quote_seed)
 				route_plan["novelty"]=walker.score(route_plan)
 				route_plan["fresh_km"]=walker.fresh_km(route_plan)
 			else:route_plan["reason"]="No connected walking route found. Staff will review the departure later."
@@ -2359,7 +2372,7 @@ func _meeting_is_mutual(civ:Dictionary,day:int,at:Vector2,party:String,by_sea:bo
 			visitor["player_relation"]=relation
 			there.civilizations[index]=visitor
 			var who:=String(visitor.get("name","a people we did not know"))
-			there._publish_observed_event("First contact — %s" % who,"Strangers have come to us: %s of the %s%s. They found our people at the marked place, spoke with them as far as either could, and turned for home with word of us. We do not know where their home lies." % [party,who," from over the sea" if by_sea else ""],day,{"kind":"first_contact","civ_id":me,"formation_id":"","formation_kind":party,"identified":true,"position":{"x":at.x,"z":at.y}})
+			there._publish_observed_event("First contact — %s" % who,"Strangers have come to us: %s of the %s%s. They found our people at the marked place, spoke with them as far as either could, and turned for home with word of us. We do not know where their home lies." % [party,who,", who came in boats" if by_sea else ""],day,{"kind":"first_contact","civ_id":me,"formation_id":"","formation_kind":party,"identified":true,"position":{"x":at.x,"z":at.y}})
 			return)
 
 func _set_contact_provenance(relation:Dictionary,day:int,source:String,position:Vector2,formation_kind:String="",formation_id:String="")->Dictionary:
