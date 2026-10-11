@@ -85,6 +85,23 @@ func test_inspecting_either_army_reveals_only_its_route_and_shared_objective()->
 	assert_array(chart.drawn_routes).is_empty()
 	assert_array(chart.drawn_objectives).is_empty()
 
+func test_a_force_at_contact_keeps_a_separate_click_target()->void:
+	var inputs:=_inputs()
+	inputs.friendly=[_force(1,Vector2.ZERO)]
+	inputs.enemy=[]
+	var chart:=_chart(inputs)
+	await await_idle_frame();await await_idle_frame()
+	var force_at:=chart.mark_screen_position("ours","1")
+	assert_int(int(chart.mark_at(force_at).army_id)).is_equal(1)
+	assert_dict(chart.battle_at(force_at)).is_empty()
+	assert_str(String(chart.battle_at(chart.battle_cache[0].at).battle.id)).is_equal("battle-one")
+	# The same real contact stays inspectable on the close ground view.
+	chart.band_override="ground"
+	chart.queue_redraw()
+	await await_idle_frame();await await_idle_frame()
+	assert_int(chart.battle_cache.size()).is_equal(1)
+	assert_str(String(chart.battle_at(chart.battle_cache[0].at).battle.id)).is_equal("battle-one")
+
 func test_a_selected_late_army_keeps_its_route_inside_the_arrow_budget()->void:
 	var inputs:=_inputs()
 	inputs.friendly=[]
