@@ -865,9 +865,15 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Diagnostic: whether each people's home can be reached from ours by land (tools/land_link_report.gd).
+	if "--capture-land-links" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/land_link_report.gd").call("lines"):print("LAND LINK ",line)
 	# Diagnostic: what the scouts' search beyond the charts finds (tools/scout_beyond_report.gd).
 	if "--capture-scout-beyond" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/scout_beyond_report.gd").call("lines"):print("SCOUT BEYOND ",line)
+	# Diagnostic: how armies go between us and each people, and over real water near home (tools/army_sea_report.gd).
+	if "--capture-army-sea" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/army_sea_report.gd").call("lines"):print("ARMY SEA ",line)
 	# Diagnostic: the food an army carries on each road (tools/march_food_report.gd).
 	if "--capture-march-food" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/march_food_report.gd").call("lines"):print("MARCH FOOD ",line)

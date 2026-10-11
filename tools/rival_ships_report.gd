@@ -37,5 +37,15 @@ static func lines()->PackedStringArray:
 					var voyage:Dictionary=q.route_plan.voyage
 					best+="[nearest dry turn %d km, home dry %s, land way ok=%s km=%s reason=%s; landing index %d of %d; closest point dry=%s] " % [roundi(dry),str(world._scout_land_at(home)),str(way.get("ok",false)),str(way.get("distance_km","-")),String(way.get("reason","")),int(voyage.landing_index),route.size(),str(world._scout_land_at(world._closest_route_encounter(route,home).position))]
 			return text+best)
-		out.append("%s (%d km): %s" % [String(civ.get("name",id)),roundi(at.distance_to(home)),line])
+		# An army's road from their home to ours, and from ours to theirs (army_sea_road.gd).
+		var theirs:String=WorldSimulation.scoped(id,func()->String:
+			var road:Dictionary=WorldSimulation.military.field_route(WorldSimulation.world.player_world_origin,home)
+			return _road_words(road))
+		var ours:String=_road_words(MilitaryCampaign.field_route(home,at))
+		out.append("%s (%d km): %s | ARMY theirs to us: %s | ours to them: %s | war in reach: ours %s" % [String(civ.get("name",id)),roundi(at.distance_to(home)),line,theirs,ours,str(preload("res://scripts/war_loop.gd").near_us(id))])
 	return out
+
+static func _road_words(road:Dictionary)->String:
+	if road.has("error"):return "refused (%s)" % String(road.get("reason",""))
+	if road.get("sea") is Dictionary:return "by sea %d km, %d open, %d in 100 drown" % [roundi(float(road.sea.sea_km)),roundi(float(road.sea.open_km)),roundi(float(road.sea.drown)*100.0)]
+	return "by land %d km" % roundi(float(road.get("length_km",0.0)))
