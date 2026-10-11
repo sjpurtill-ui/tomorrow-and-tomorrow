@@ -2304,14 +2304,24 @@ static func near_us(civ_id:String,on_foot:bool=false)->bool:
 	var theirs:=RealmReach.of(civ)
 	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
 	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
-	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+(NEIGHBOUR_MARGIN_KM if on_foot else war_margin_km())
+	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+(NEIGHBOUR_MARGIN_KM if on_foot else war_margin_km(civ_id))
 
-## How far apart two peoples' countries may lie and still make war on one
-## another: NEIGHBOUR_MARGIN_KM on foot, or as far over the sea as the boats
-## of the people in scope can carry an army (army_sea_road.gd war_reach_km)
-## when that is farther.
-static func war_margin_km()->float:
-	return maxf(NEIGHBOUR_MARGIN_KM,float(preload("res://scripts/army_sea_road.gd").war_reach_km()))
+## How far apart our country and theirs may lie and still make war on one
+## another: NEIGHBOUR_MARGIN_KM on foot. Only where the road between the two
+## homes is over the sea (no way by land, and the boats of the people in
+## scope can carry an army there: army_sea_road.gd) is it as far as those
+## boats reach. Boats never bring a distant neighbour by land any nearer.
+static func war_margin_km(civ_id:String="")->float:
+	var Sea:=preload("res://scripts/army_sea_road.gd")
+	var by_sea:=float(Sea.war_reach_km())
+	if civ_id=="" or by_sea<=NEIGHBOUR_MARGIN_KM:return NEIGHBOUR_MARGIN_KM
+	var gap:=gap_km(civ_id)
+	if gap<=NEIGHBOUR_MARGIN_KM or gap>by_sea:return NEIGHBOUR_MARGIN_KM
+	var civ:=_civ(civ_id)
+	var ours:=RealmReach.ours()
+	if civ.is_empty() or ours.is_empty():return NEIGHBOUR_MARGIN_KM
+	var there:Vector2=RealmReach.of(civ).get("center",WorldSimulation.world._civilization_world_position(civ))
+	return by_sea if Sea.links_by_sea(civ_id,ours.center,there) else NEIGHBOUR_MARGIN_KM
 
 ## How close a people's country lies to ours, 0..1: 1 where the two meet,
 ## falling to 0 at war_margin_km() apart (no band can march or sail farther). The
@@ -2321,7 +2331,7 @@ static func war_margin_km()->float:
 static func proximity(civ_id:String)->float:
 	if RealmReach.ours().is_empty(): return 1.0
 	if _civ(civ_id).is_empty(): return 0.0
-	return clampf(1.0-gap_km(civ_id)/war_margin_km(),0.0,1.0)
+	return clampf(1.0-gap_km(civ_id)/war_margin_km(civ_id),0.0,1.0)
 
 ## Two peoples' proximity from their records alone (rival against rival).
 static func proximity_between(first:Dictionary,second:Dictionary)->float:

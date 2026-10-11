@@ -125,12 +125,17 @@ func test_an_army_crosses_lands_fewer_and_arrives()->void:
 	assert_bool(SeaRoad.on_ship_stores(army,int(army.sea_stores_until)+1)).is_false()
 	assert_int(GameState.simulation_events.filter(func(e:Dictionary)->bool:return String(e.get("title",""))=="THE CROSSING").size()).is_equal(1)
 
-func test_boats_carry_war_farther_than_feet()->void:
-	assert_float(War.war_margin_km()).is_equal(War.NEIGHBOUR_MARGIN_KM)
+func test_boats_carry_war_farther_only_where_the_road_is_by_sea()->void:
+	assert_float(SeaRoad.war_reach_km()).is_equal(0.0)
 	_boats()
 	GameState.elapsed_days+=1
-	assert_float(War.war_margin_km()).is_equal_approx(Expedition.endurance_km(true)*SeaRoad.WAR_ENDURANCES,0.01)
-	assert_float(War.war_margin_km()).is_greater(War.NEIGHBOUR_MARGIN_KM)
+	assert_float(SeaRoad.war_reach_km()).is_equal_approx(Expedition.endurance_km(true)*SeaRoad.WAR_ENDURANCES,0.01)
+	assert_float(SeaRoad.war_reach_km()).is_greater(War.NEIGHBOUR_MARGIN_KM)
+	# With no people named, and for a road by land, the reach is the reach on foot.
+	assert_float(War.war_margin_km()).is_equal(War.NEIGHBOUR_MARGIN_KM)
+	# A place over the water is linked by sea; a place on our own land is not.
+	assert_bool(SeaRoad.links_by_sea("far",home,home+Vector2(300,0))).is_true()
+	assert_bool(SeaRoad.links_by_sea("near",home,home+Vector2(40,0))).is_false()
 
 func test_raiders_who_cannot_march_a_real_band_come_only_on_foot()->void:
 	_boats()
@@ -140,7 +145,7 @@ func test_raiders_who_cannot_march_a_real_band_come_only_on_foot()->void:
 	var theirs:Dictionary=preload("res://scripts/realm_reach.gd").of(civ)
 	# Their country set beyond a month's march but within our boats' reach.
 	var gap:=float(ours.reach)+float(theirs.get("reach",0.0))+War.NEIGHBOUR_MARGIN_KM+200.0
-	assert_float(gap-float(ours.reach)-float(theirs.get("reach",0.0))).is_less(War.war_margin_km())
+	assert_float(gap-float(ours.reach)-float(theirs.get("reach",0.0))).is_less(SeaRoad.war_reach_km())
 	var at:Vector2=(ours.center as Vector2)+Vector2(gap,0.0)
 	civ.position=Vector2(at.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,at.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 	civ.erase("strategic_regions")

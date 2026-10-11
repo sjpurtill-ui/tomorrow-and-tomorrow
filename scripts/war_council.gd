@@ -1478,10 +1478,12 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 	var km:float=WorldSimulation.world.player_world_origin.distance_to(at)
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	var road_days:=km/18.0
-	# Farther than feet can carry a war but within the boats' reach
-	# (army_sea_road.gd): the stores go aboard, and the sea's own cost is the
-	# crossing (field_route refuses one that would drown too many).
-	var by_boat:=km>float(load(WAR_LOOP_PATH).NEIGHBOUR_MARGIN_KM) and km<=float(preload("res://scripts/army_sea_road.gd").war_reach_km())
+	# Farther than feet can carry a war, the road to it over the sea, and
+	# within the boats' reach (army_sea_road.gd): the stores go aboard, and
+	# the sea's own cost is the crossing (field_route refuses one that would
+	# drown too many). A far town by land is as far as it ever was.
+	var SeaRoad:=preload("res://scripts/army_sea_road.gd")
+	var by_boat:=km>float(load(WAR_LOOP_PATH).NEIGHBOUR_MARGIN_KM) and km<=float(SeaRoad.war_reach_km()) and SeaRoad.links_by_sea("town:"+String(town.get("city_id",town.get("name",""))),WorldSimulation.world.player_world_origin,at)
 	var ratio:=clampf(food_days/maxf(1.0,road_days*4.0),0.0,1.0)*(1.0 if by_boat else clampf(1.15-km/400.0,0.2,1.0))
 	return {"ratio":ratio,"season":"","km":km,"days":road_days}
 

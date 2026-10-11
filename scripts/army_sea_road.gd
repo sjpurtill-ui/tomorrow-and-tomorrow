@@ -61,6 +61,21 @@ static func war_reach_km()->float:
 	_reach[key]={"day":day,"km":km}
 	return km
 
+## Whether the road from `from` to `to` (our home, their home) is over the
+## sea for the people in scope: no way by land, and a crossing its boats can
+## make. Asked of the armies' own planner, once a month for each pair.
+const LINK_DAYS:=30
+static var _links:={}
+static func links_by_sea(civ_id:String,from:Vector2,to:Vector2)->bool:
+	var key:="%s>%s" % [String(WorldSimulation.actor_id),civ_id]
+	var day:=int(WorldSimulation.state.elapsed_days) if WorldSimulation.state!=null else 0
+	var held:Dictionary=_links.get(key,{})
+	if not held.is_empty() and day-int(held.day)<LINK_DAYS and day>=int(held.day) and (held.from as Vector2).distance_to(from)<5.0:return bool(held.ok)
+	var road:Dictionary=WorldSimulation.military.field_route(from,to) if WorldSimulation.military!=null else {}
+	if _links.size()>256:_links.clear()
+	_links[key]={"day":day,"ok":road.get("sea") is Dictionary,"from":from}
+	return bool(_links[key].ok)
+
 ## The sea road for a force of `mix` marching at `pace` km a day, for the
 ## people in scope: {} when its boats cannot go to sea or the bearing holds
 ## no crossing; {error, reason} when the crossing would drown too many.

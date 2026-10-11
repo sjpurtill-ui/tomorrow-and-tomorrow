@@ -871,6 +871,9 @@ func _capture_preview_if_requested() -> void:
 	# Diagnostic: what the scouts' search beyond the charts finds (tools/scout_beyond_report.gd).
 	if "--capture-scout-beyond" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/scout_beyond_report.gd").call("lines"):print("SCOUT BEYOND ",line)
+	# Diagnostic: how armies go between us and each people, and over real water near home (tools/army_sea_report.gd).
+	if "--capture-army-sea" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/army_sea_report.gd").call("lines"):print("ARMY SEA ",line)
 	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
 	if "--capture-rival-ships" in OS.get_cmdline_user_args():
 		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)
