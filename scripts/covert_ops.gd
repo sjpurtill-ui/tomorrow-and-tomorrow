@@ -879,7 +879,7 @@ static func _ruler_review(day:int)->void:
 	var eyes_lean:=lean if reachable>0 else 0.0
 	EyesCorps.set_policy("eyes","none" if eyes_lean<0.38 else ("few" if eyes_lean<0.5 else ("steady" if eyes_lean<0.65 else "many")))
 	var found:=int((state().stats as Dictionary).get("found_theirs",0))
-	EyesCorps.set_policy("wary","steady" if found>0 or lean>=0.6 else ("few" if lean>=0.4 else "none"))
+	EyesCorps.set_watch_level(3 if found>0 else (2 if lean>=0.6 else (1 if lean>=0.4 else 0)))
 	# Plant an eye where it matters: a people within reach, the more feared or
 	# disliked the better; the god's people as much as any other.
 	var want:=int(floor(lean*4.0))

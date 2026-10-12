@@ -26,7 +26,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"production","label":"Production","tooltip":"Crafts, tools and weapons in the making · F9"},
 	{"id":"civ","label":"Culture","tooltip":"Society and civic dialogue · F4"},
 	{"id":"military","label":"Security","tooltip":"War: how many serve, our enemies and our leaders · F8"},
-	{"id":"eyes","label":"Eyes","tooltip":"Our eyes among other peoples and the wary watching for theirs: how many to teach, where to send them, what came back · F3"},
+	{"id":"eyes","label":"Eyes","tooltip":"Our eyes among other peoples and the wary watching for theirs: how hard we watch each people and our own, and what came back · F3"},
 	{"id":"trade","label":"Trade","section":"economy","sub":3,"tooltip":"Trade with other peoples: what passes, who leans on whom, and pressure"},
 	{"id":"inquiry","label":"Research","tooltip":"What the people know and are learning · F5"},
 	{"id":"world","label":"World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
