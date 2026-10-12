@@ -574,7 +574,8 @@ static func _tribute(out:Dictionary)->void:
 			var trade:=TradeLedger.flow_value("player",cid)+TradeLedger.flow_value(cid,"player")
 			peoples.append({"people":String(c.get("name","")),"treaty":String(rel.get("treaty","none")),"trade":snappedf(trade,0.1),"pact":String(pact.get("kind",pact.get("action",""))) if not pact.is_empty() else "none",
 				"we_send":TradeWords.flow_words("player",cid),"they_send":TradeWords.flow_words(cid,"player"),"they_lean":TradeWords.leaning_line(cid,"player"),"we_lean":TradeWords.leaning_line("player",cid),
-				"our_stance":TradeWords.stance_words("player",cid),"their_stance":TradeWords.theirs_label(cid),"tribute":TradeWords.tribute_label(cid),"met":int(rel.get("contact_level",0))>=2})
+				"our_stance":TradeWords.stance_words("player",cid),"their_stance":TradeWords.theirs_label(cid),"tribute":TradeWords.tribute_label(cid),"met":int(rel.get("contact_level",0))>=2,
+				"no_way":TradeLedger.sea_words("player",cid) if int(rel.get("contact_level",0))>=2 and TradeLedger.blocked("player",cid)=="sea" else ""})
 	out["peoples"]=peoples
 
 # --------------------------------------------------------------------------

@@ -258,7 +258,7 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var p:=Ledger.pair("player",civ_id)
 	var subtitle:="Known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "Met; no goods have passed yet")
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
-	if blocked!="":subtitle=_blocked_words(blocked)
+	if blocked!="":subtitle=Ledger.sea_words("player",civ_id) if blocked=="sea" else _blocked_words(blocked)
 	var form_label:=_line(subtitle,16,T.RED_TEXT if blocked!="" else T.INK_MUTED,true);form_label.add_theme_font_override("font",T.font("voice_italic"));words.add_child(form_label)
 	if contact<2:
 		overview.set_meta("wide_columns",1);overview.columns=1
@@ -343,6 +343,7 @@ func _blocked_words(why:String)->String:
 		"feud":return "Feuding: no trader crosses"
 		"hostile":return "They will not meet our traders"
 		"unlocated":return "We do not know where they live: find their home first"
+		"sea":return "The sea between us is too wide for our boats or theirs"
 	return "Embargoed: nothing passes" if why.begins_with("embargo") else why
 
 

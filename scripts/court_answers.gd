@@ -801,7 +801,7 @@ static func _tribute_answer(sheet:Dictionary,lower:String)->String:
 			var named:=String(p.people).to_lower().trim_prefix("the ")
 			if named.length()>=3 and _has(lower,"\\b"+named+"s?\\b"): return _trade_with(p)
 		for p:Dictionary in sheet.get("peoples",[]):
-			if float(p.get("trade",0.0))>0.0: with_us.append("the %s (we send %s; they send %s)" % [String(p.people),String(p.get("we_send","")),String(p.get("they_send",""))])
+			if float(p.get("trade",0.0))>0.0 and String(p.get("no_way",""))=="": with_us.append("the %s (we send %s; they send %s)" % [String(p.people),String(p.get("we_send","")),String(p.get("they_send",""))])
 			else: none.append("the %s" % String(p.people))
 		if with_us.is_empty(): return "We trade with no one yet: nothing passes between us and %s." % (_join(none) if not none.is_empty() else "any people we know")
 		return "We trade with %s.%s" % [_join(with_us),(" Nothing passes between us and %s." % _join(none)) if not none.is_empty() else ""]
@@ -812,6 +812,8 @@ static func _trade_with(p:Dictionary)->String:
 	var name:=String(p.people)
 	if not bool(p.get("met",true)): return "We know the %s only by word: no trader of ours has reached them, and nothing passes between us." % name
 	var parts:=PackedStringArray()
+	# No way between us: the keeper says why, in the ledger's own numbers.
+	if String(p.get("no_way",""))!="": return "Nothing passes between us and the %s. %s" % [name,String(p.no_way)]
 	if float(p.get("trade",0.0))>0.0: parts.append("With the %s: we send %s; they send %s." % [name,String(p.get("we_send","nothing")),String(p.get("they_send","nothing"))])
 	else: parts.append("Nothing passes between us and the %s yet." % name)
 	for key in ["they_lean","we_lean"]:
