@@ -105,6 +105,7 @@ func test_the_wary_catch_more_and_breed_distrust_that_costs_cohesion()->void:
 	var state:Dictionary=Corps.state()
 	(state.wary as Dictionary)["members"]=float(GameState.population_exact)/1000.0*Corps.FULL_WATCH_PER_K
 	(state.wary as Dictionary)["craft"]=0.8
+	Corps.set_watch_level(3)
 	assert_float(Corps.coverage()).is_equal_approx(1.0,0.01)
 	assert_float(Covert._catch_chance(_civ_id())).is_greater(plain)
 	_run(400)

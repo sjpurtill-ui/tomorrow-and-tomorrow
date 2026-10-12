@@ -5,29 +5,24 @@ extends VBoxContainer
 ## society's name (The Listeners, then The Quiet Watch). In a reckoned age it
 ## turns to the service's terminal: phosphor green on black.
 ##
-## Top: our two corps (eyes_corps.gd) as seals, each with how many serve, how
-## many learn, their craft as a row of marks and the course; the wary carry
-## the distrust they cost at home. Below: our eyes abroad, what they sent
-## home, how our errands ended, theirs we caught, and those we hold
-## (covert_ops.gd, captured_agents.gd).
+## Nothing here is managed person by person. Top: our networks abroad, one
+## choice for each people we know (how hard we watch them) with the network's
+## strength, its last word and its risk (covert_ops.gd). Then the watch at
+## home: one choice (how hard we watch our own people for theirs) with the
+## share watched and the distrust it costs (eyes_corps.gd). The Pathfinder
+## keeps both to the level set: who goes, who is taught, who is replaced.
+## Below: what they sent home, how our errands ended, theirs we caught, and
+## those we hold (covert_ops.gd, captured_agents.gd). A killing or a burning
+## stays a word at court: the war leader answers for it.
 ##
-## It is also where the god gives the orders, in plain buttons: how many to
-## teach for each corps (the same policy the Pathfinder carries at court,
-## court_eyes_orders.gd), and an errand among each people we know (watch,
-## live among them, steal a craft) with the engine's odds on the button. A
-## killing or a burning stays a word at court: the war leader answers for it.
-##
-## sections(), corps_view(), level_rows() and errand_rows() are the data
+## sections(), corps_view(), network_rows() and watch_rows() are the data
 ## (also read by tests).
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Covert:=preload("res://scripts/covert_ops.gd")
 const Corps:=preload("res://scripts/eyes_corps.gd")
-const Orders:=preload("res://scripts/covert_orders.gd")
 const REFRESH_SECONDS:=1.5
-## The errands a button can send (the eyes' own work, carried by the
-## Pathfinder); the peoples shown at most.
-const ERRANDS:=["watch","plant","steal"]
+## The peoples shown at most.
 const MAX_PEOPLES:=8
 
 ## The folio's inks by age: [page, raised, rule, leaf (titles and seals),
@@ -95,7 +90,7 @@ class Sigil extends Control:
 		if modern: draw_rect(Rect2(c-Vector2(h*0.18,h*0.6),Vector2(h*0.36,h*1.2)),leaf)
 
 
-## A row of craft marks: filled to the corps' craft, out of the age's cap.
+## A row of marks: filled to a share (0..1), out of what can be reached.
 class Marks extends Control:
 	var value:=0.0
 	var cap:=1.0
@@ -118,7 +113,34 @@ func setup()->void:
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",8)
 	box=VBoxContainer.new(); box.add_theme_constant_override("separation",10); add_child(box)
+	if "--capture-covert-sample" in OS.get_cmdline_user_args(): capture_sample()
 	refresh(true)
+
+
+## Capture only ("--capture-covert-sample"; never saved, captures run isolated):
+## a watch at home part built, a settled network among one people we know and
+## none among another.
+static func capture_sample()->void:
+	var ops:Dictionary=Covert.state()
+	if ops.has("capture_sample"): return
+	ops["capture_sample"]=true
+	var corps:Dictionary=Corps.state()
+	corps.eyes.merge({"policy":"few","members":2.0,"craft":0.62,"training":[{"count":1.0,"done":int(GameState.elapsed_days)+60}]},true)
+	corps["watch"]=2
+	corps.wary.merge({"members":Corps.watch_wanted(2)*0.7,"craft":0.55},true)
+	corps["distrust"]=0.08
+	var day:=int(GameState.elapsed_days); var shown:=0
+	if not ops.get("reach") is Dictionary: ops["reach"]={}
+	for c in WorldSimulation.world.civilizations:
+		if not c is Dictionary or String((c as Dictionary).get("id","")) in ["","player"]: continue
+		var civ:Dictionary=c
+		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
+		relation["contact_level"]=2; relation["home_location_known"]=true; civ["player_relation"]=relation
+		(ops.reach as Dictionary)[String(civ.id)]=2 if shown==0 else 0
+		if shown==0:
+			for i in 3: (ops.ops as Array).append({"kind":"plant","stage":"in_place","civ_id":String(civ.id),"agent_name":"","cover":"trader","civ_name":String(civ.get("name","")),"target_desc":"Live among them","start_day":day-365*(4-i)-30,"settled_day":day-365*(4-i),"recruits":2-i,"odds":{"caught":0.04},"report_day":day+9000,"next_report":day+9000,"seed":"capture:%d" % i})
+		shown+=1
+		if shown>=2: break
 
 
 func _process(delta:float)->void:
@@ -182,19 +204,21 @@ static func network_rows()->Array:
 		if barred=="" and not Covert.knows_where(id): barred=Covert.unplaced_words(id)
 		var on_way:=Covert._network_placed(id)-int(n.eyes)
 		var words:=""
-		if int(n.eyes)<=0 and on_way<=0: words=barred if barred!="" else ("None of ours among them." if level==0 else "The first is being chosen.")
+		if int(n.eyes)<=0 and on_way<=0: words=barred if barred!="" else ("We keep no watch among them." if level==0 else "The network is being started.")
 		else:
 			var parts:PackedStringArray=[]
-			parts.append("%d living among them" % int(n.eyes))
-			if on_way>0: parts.append("%d on the way" % on_way)
-			if int(n.recruits)>0: parts.append("%d of theirs won over" % int(n.recruits))
-			if int(n.eyes)>0:
+			if int(n.eyes)<=0: parts.append("The network is on its way there")
+			else:
+				parts.append("Network strength %d in 100" % roundi(float(n.strength)*100.0))
 				parts.append("there %s" % ("under a year" if float(n.years)<1.0 else "%d years" % roundi(float(n.years))))
-				parts.append("strength %d in 100" % roundi(float(n.strength)*100.0))
 				parts.append("no word yet" if int(n.last_word_days)<0 else "last word %s" % _age(int(n.last_word_days)))
-				parts.append("risk %s" % _risk_words(float(n.risk)))
+				parts.append("risk of being found %s" % _risk_words(float(n.risk)))
+				var body:="%d of ours there" % int(n.eyes)
+				if on_way>0: body+=", %d more on the way" % on_way
+				if int(n.recruits)>0: body+=", %d of theirs won over" % int(n.recruits)
+				parts.append(body)
 			words=" · ".join(parts)
-			if barred!="": words+=". No more can be sent: "+barred
+			if barred!="": words+=". It cannot grow: "+barred
 		out.append({"civ_id":id,"name":String(civ.get("name",id)),"level":level,"wanted":int(Covert.NETWORK_EYES[level]),"placed":int(n.eyes),"on_way":on_way,"recruits":int(n.recruits),
 			"years":float(n.years),"strength":float(n.strength),"last_word_days":int(n.last_word_days),"risk":float(n.risk),"barred":barred,"words":words,"eyes_word":eyes})
 		if out.size()>=MAX_PEOPLES: break
@@ -209,14 +233,14 @@ func set_network(civ_id:String,level:int)->String:
 
 
 ## Our networks: a row for each people we know, one choice each.
-func _network_panel(rows:Array,ink:Array)->Control:
+func _network_panel(rows:Array,view:Dictionary,ink:Array)->Control:
 	var panel:=PanelContainer.new(); panel.name="Networks"
 	var style:=StyleBoxFlat.new(); style.bg_color=ink[1]; style.border_color=ink[2]; style.set_border_width_all(1)
 	style.set_corner_radius_all(T.RADIUS_CARD); style.set_content_margin_all(12)
 	panel.add_theme_stylebox_override("panel",style)
 	var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",8); panel.add_child(col)
-	col.add_child(_line("OUR NETWORKS",12,ink[3],false,"ui_strong"))
-	col.add_child(_line("Choose how hard we watch each people. The Pathfinder picks who goes, replaces any who are found and teaches as many as it takes.",13,ink[5],true))
+	col.add_child(_line("OUR NETWORKS ABROAD",12,ink[3],false,"ui_strong"))
+	col.add_child(_line("Choose how hard we watch each people. That is the whole of it: the Pathfinder picks who goes, replaces any who are found and teaches as many as it takes.",13,ink[5],true))
 	if rows.is_empty():
 		col.add_child(_line("We know no other people yet. Our scouts must find them first.",13,ink[5],true,"voice_italic"))
 		return panel
@@ -224,23 +248,97 @@ func _network_panel(rows:Array,ink:Array)->Control:
 		var block:=VBoxContainer.new(); block.name="People_"+String(r.civ_id); block.add_theme_constant_override("separation",2); col.add_child(block)
 		var line:=HBoxContainer.new(); line.add_theme_constant_override("separation",6); block.add_child(line)
 		var who:=_line(String(r.name),15,ink[4],false,"ui_strong"); who.custom_minimum_size=Vector2(130,0); who.size_flags_horizontal=Control.SIZE_EXPAND_FILL; who.clip_text=true; line.add_child(who)
+		var marks:=Marks.new(); marks.name="Strength_"+String(r.civ_id); marks.value=float(r.strength); marks.leaf=ink[3]; marks.size_flags_vertical=Control.SIZE_SHRINK_CENTER; line.add_child(marks)
+		marks.tooltip_text="Network strength %d in 100. It grows with the years it has lived there and the locals it wins over." % roundi(float(r.strength)*100.0)
 		for level in 4:
 			var b:=_ink_button(String(Covert.NETWORK_NAMES[level]),level==int(r.level),ink)
 			b.name="Network_%s_%d" % [String(r.civ_id),level]
 			b.custom_minimum_size=Vector2(72,0)
-			b.tooltip_text=["Send no one among them.","Keep one living among them: a little word, little risk.","Keep three among them: steadier word, and locals won over.","Keep six among them and go after their crafts: the most word, and the most of ours found."][level]
+			b.tooltip_text=["Keep no watch among them.","A thin network (%d of ours kept there): a little word, little risk." % int(Covert.NETWORK_EYES[1]),"A settled network (%d of ours kept there): steadier word, and locals won over." % int(Covert.NETWORK_EYES[2]),"A deep network (%d of ours kept there) that also goes after their crafts: the most word, and the most of ours found." % int(Covert.NETWORK_EYES[3])][level]
 			var civ_id:=String(r.civ_id); var chosen:=level
 			b.pressed.connect(func()->void: set_network(civ_id,chosen))
 			line.add_child(b)
 		block.add_child(_line(String(r.words),13,ink[5] if String(r.barred)=="" else ink[3],true))
+	var kept:=abroad_words(view)
+	if kept!="": var total:=_line(kept,12,ink[5],true); total.name="Abroad"; col.add_child(total)
 	col.add_child(_line("A killing or a burning among them is a word at court: the war leader answers for it.",12,ink[5],true,"voice_italic"))
 	return panel
 
 
-static func _cover_words(cover:String,kind:String)->String:
-	var work:String=String({"watch":"watching","plant":"living among them","steal":"after a secret","sabotage":"to strike their stores","assassinate":"to strike their leaders"}.get(kind,"abroad"))
-	if cover=="none": return work
-	return "%s, as %s %s" % [work,"an" if cover=="envoy" else "a",cover]
+## All our networks together, in one line ("" while none is asked for).
+static func abroad_words(view:Dictionary)->String:
+	var placed:=Covert._network_placed(); var wanted:=Covert.network_wanted()
+	var c:Dictionary=view.eyes
+	if wanted<=0 and placed<=0 and float(c.members)<1.0 and float(c.training)<1.0: return ""
+	var parts:PackedStringArray=["All our networks together: %d of ours abroad or on the way, of the %d they ask for" % [placed,wanted]]
+	if roundi(float(c.members))>0: parts.append("%d taught and waiting" % roundi(float(c.members)))
+	if roundi(float(c.training))>0: parts.append("%d learning" % roundi(float(c.training)))
+	if float(c.members)>0.0: parts.append("craft %d in 100" % roundi(float(c.craft)*100.0))
+	return " · ".join(parts)+"."
+
+
+## The four levels of the watch at home, with what each means in the engine's
+## numbers: [{level, label, active, share, wanted, words}].
+static func watch_rows()->Array:
+	var out:Array=[]
+	var now:=Corps.watch_level()
+	for level in 4:
+		var share:=float(Corps.WATCH_SHARE[level])
+		var wanted:=Corps.watch_wanted(level)
+		var words:="Keep no watch at home. No one is taken from other work, and no distrust is bred."
+		if level>0: words="Watch about %d in 100 of our people for theirs: %s kept at it, away from other work at %s food a day each. The people's trust in one another falls by up to %d in 100." % [roundi(share*100.0),_kept(wanted),_n(Corps.KEEP_FOOD),roundi(share*Corps.WATCH_DISTRUST*Corps.COHESION_COST*100.0)]
+		out.append({"level":level,"label":String(Corps.WATCH_NAMES[level]),"active":level==now,"share":share,"wanted":wanted,"words":words})
+	return out
+
+
+## Sets how hard we watch our own people, as the Pathfinder's order would.
+func set_watch(level:int)->String:
+	var done:=preload("res://scripts/court_eyes_orders.gd").perform({"corps":"wary","policy":String(Corps.POLICY_ORDER[clampi(level,0,3)])})
+	answer=String(done.get("says",""))
+	refresh(true)
+	return answer
+
+
+## The watch at home: one choice, the share watched and what it costs.
+func _home_panel(view:Dictionary,ink:Array)->Control:
+	var c:Dictionary=view.wary
+	var panel:=PanelContainer.new(); panel.name="Home"
+	var style:=StyleBoxFlat.new(); style.bg_color=ink[1]; style.border_color=ink[2]; style.set_border_width_all(1)
+	style.set_corner_radius_all(T.RADIUS_CARD); style.set_content_margin_all(12)
+	panel.add_theme_stylebox_override("panel",style)
+	var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",8); panel.add_child(col)
+	col.add_child(_line(("%s: the watch at home" % Corps.word("Wary")).to_upper(),12,ink[3],false,"ui_strong"))
+	col.add_child(_line("Choose how hard we watch our own people for theirs. The Pathfinder finds and teaches as many as it takes, and sends the rest back to other work.",13,ink[5],true))
+	var block:=VBoxContainer.new(); block.add_theme_constant_override("separation",2); col.add_child(block)
+	var line:=HBoxContainer.new(); line.add_theme_constant_override("separation",6); block.add_child(line)
+	var who:=_line("Among our own people",15,ink[4],false,"ui_strong"); who.custom_minimum_size=Vector2(130,0); who.size_flags_horizontal=Control.SIZE_EXPAND_FILL; who.clip_text=true; line.add_child(who)
+	var marks:=Marks.new(); marks.name="Coverage"; marks.value=float(view.coverage); marks.cap=float(view.watch_share); marks.leaf=ink[3]; marks.size_flags_vertical=Control.SIZE_SHRINK_CENTER; line.add_child(marks)
+	marks.tooltip_text="Watching %d in 100 of our people; this level asks for %d." % [roundi(float(view.coverage)*100.0),roundi(float(view.watch_share)*100.0)]
+	var lit:=""
+	for row:Dictionary in watch_rows():
+		var b:=_ink_button(String(row.label),bool(row.active),ink)
+		b.name="Watch_%d" % int(row.level)
+		b.custom_minimum_size=Vector2(72,0)
+		b.tooltip_text=String(row.words)
+		var chosen:=int(row.level)
+		b.pressed.connect(func()->void: set_watch(chosen))
+		line.add_child(b)
+		if bool(row.active): lit=String(row.words)
+	block.add_child(_line(lit,13,ink[5],true))
+	var cost:=roundi(float(view.cohesion_cost)*100.0)
+	var have:=roundi(float(view.coverage)*100.0); var aim:=roundi(float(view.watch_share)*100.0)
+	var now:=PackedStringArray(["Now watching %d in 100 of our people%s" % [have,"" if have==aim else (", building toward %d" % aim if have<aim else ", easing back toward %d" % aim)]])
+	if float(c.members)>0.0: now.append("craft %d in 100" % roundi(float(c.craft)*100.0))
+	now.append("distrust costs %d in 100 of their trust in one another" % cost)
+	var state:=_line(" · ".join(now),13,ink[6] if cost>=2 else ink[4],true); state.name="Watching"; block.add_child(state)
+	panel.tooltip_text="Ours who watch for theirs among us. A harder watch catches more, but the people start wondering who reports on whom."
+	return panel
+
+
+## "about 12 of ours" or, for a small people, part of one person's days.
+static func _kept(n:float)->String:
+	if n<0.75: return "part of one person's days"
+	return "about %d of ours" % maxi(1,roundi(n))
 
 
 static func _risk_words(risk:float)->String:
@@ -260,89 +358,6 @@ static func _age(days:int)->String:
 	return "%d years ago" % roundi(days/365.0)
 
 
-## The four teaching levels for one corps, with what each means in the
-## engine's numbers: [{id, label, active, yearly, words}].
-static func level_rows(corps:String)->Array:
-	var people:=maxf(1.0,float(GameState.population_exact))
-	var sum:=Corps.summary()
-	var out:Array=[]
-	for id:String in Corps.POLICY_ORDER:
-		var row:Array=Corps.POLICIES[id]
-		var yearly:=float(row[1])*people/1000.0
-		var words:=""
-		if id=="none": words="No one starts the course. Those we have keep serving until the years thin them."
-		else: words="About %s a year start a %d-day course at %s food a day each, and leave other work while they learn and serve." % [_count(yearly),int(sum.course_days),_n(float(sum.course_food))]
-		out.append({"id":id,"label":String(row[0]),"active":Corps.policy(corps)==id,"yearly":yearly,"words":words})
-	return out
-
-
-## Every people we know, with the odds of each errand our eyes can run among
-## them: [{civ_id, name, errands:[{kind, label, success, caught, days, barred}]}].
-## The odds are for whoever would go now: a trained eye of ours when one is
-## ready, else an untried volunteer (covert_ops.gd volunteer_for).
-static func errand_rows()->Array:
-	var out:Array=[]
-	if WorldSimulation.world==null: return out
-	for c in WorldSimulation.world.civilizations:
-		if not c is Dictionary: continue
-		var civ:Dictionary=c
-		var id:=String(civ.get("id",""))
-		if id=="" or id=="player" or not bool(civ.get("alive",true)): continue
-		var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
-		if int(rel.get("contact_level",0))<1: continue
-		var errands:Array=[]
-		for kind:String in ERRANDS:
-			var barred:=Covert.method_barred(kind)
-			# A people whose home and towns we have never found cannot be reached.
-			if barred=="" and not Covert.knows_where(id): barred=Covert.unplaced_words(id)
-			var e:={"kind":kind,"label":_errand_label(kind),"barred":barred}
-			if barred=="":
-				var o:=Covert.odds(kind,id,"","none",_likely_agent(kind))
-				e["success"]=float(o.get("success",0.0))
-				e["caught"]=float(o.get("settle",0.0))+float(o.get("caught",0.0)) if kind=="plant" else float(o.get("caught",0.0))
-				e["days"]=int(o.get("days",0))
-			errands.append(e)
-		out.append({"civ_id":id,"name":String(civ.get("name",id)),"errands":errands})
-		if out.size()>=MAX_PEOPLES: break
-	return out
-
-
-## Who would go, for the odds shown (nothing is drawn or spent): a trained
-## eye at the corps' craft, else a volunteer of middling hand.
-static func _likely_agent(kind:String)->Dictionary:
-	if kind in ["watch","plant"] and Corps.members("eyes")>=1.0:
-		var k:=Corps.craft("eyes")
-		return {"stealth":clampf(k,0.1,0.95),"tongue":clampf(k*0.9+0.05,0.1,0.95),"nerve":clampf(k*0.85+0.1,0.1,0.95),"blade":0.4,"poison":0.35,"trained":true}
-	return {"stealth":0.55,"tongue":0.5,"nerve":0.5,"blade":0.45,"poison":0.4}
-
-
-static func _errand_label(kind:String)->String:
-	return String({"watch":"Watch them","plant":"Live among them","steal":"Steal a craft"}.get(kind,kind))
-
-
-## Sets one corps' teaching, as the Pathfinder's order would. Returns the words.
-func set_level(corps:String,level:String)->String:
-	var done:=preload("res://scripts/court_eyes_orders.gd").perform({"corps":corps,"policy":level})
-	answer=String(done.get("says",""))
-	refresh(true)
-	return answer
-
-
-## Sends one errand among a people, as the Pathfinder's order would, on the
-## odds the button showed. Returns the official's answer.
-func send(kind:String,civ_id:String)->String:
-	var done:=Orders.perform({"kind":kind,"civ_id":civ_id,"city_id":"","cover":"none","target_desc":_errand_label(kind)},true)
-	answer=String(done.get("says",""))
-	if String(done.get("outcome",""))!="": answer+=" "+String(done.outcome)
-	refresh(true)
-	return answer
-
-
-static func _count(n:float)->String:
-	if n<1.0: return "one every %d years" % maxi(2,roundi(1.0/maxf(0.01,n)))
-	return str(roundi(n))
-
-
 static func _n(v:float)->String:
 	return ("%.2f" % v).trim_suffix("0").trim_suffix("0").trim_suffix(".")
 
@@ -350,8 +365,7 @@ static func _n(v:float)->String:
 func refresh(force:=false)->void:
 	var data:=sections()
 	var view:=corps_view()
-	var errands:=errand_rows()
-	var sig:=str([data,_rounded(view),answer,_errand_sig(errands),network_rows()])
+	var sig:=str([data,_rounded(view),answer,network_rows()])
 	if not force and sig==signature: return
 	# Do not rebuild under the pointer (a click is informing).
 	if not force and is_instance_valid(box) and box.get_global_rect().has_point(box.get_global_mouse_position()): return
@@ -369,10 +383,8 @@ func refresh(force:=false)->void:
 	column.add_child(_cipher_rule(ink))
 	if answer!="":
 		var said:=_line(answer,13,ink[4],true,"voice_italic"); said.name="Answer"; column.add_child(said)
-	column.add_child(_network_panel(network_rows(),ink))
-	var seals:=HBoxContainer.new(); seals.add_theme_constant_override("separation",12); column.add_child(seals)
-	seals.add_child(_seal("eyes",view,ink))
-	seals.add_child(_seal("wary",view,ink))
+	column.add_child(_network_panel(network_rows(),view,ink))
+	column.add_child(_home_panel(view,ink))
 	column.add_child(_cipher_rule(ink))
 	for section:Dictionary in data:
 		if String(section.kind)=="empty":
@@ -381,17 +393,8 @@ func refresh(force:=false)->void:
 		column.add_child(_panel(section,ink))
 
 
-static func _errand_sig(rows:Array)->Array:
-	var out:Array=[]
-	for r:Dictionary in rows:
-		var e:Array=[String(r.civ_id)]
-		for x:Dictionary in r.errands: e.append(roundi(float(x.get("success",0.0))*100.0))
-		out.append(e)
-	return out
-
-
 static func _rounded(view:Dictionary)->Array:
-	var out:=[String(view.stage),roundi(float(view.distrust)*100.0)]
+	var out:=[String(view.stage),roundi(float(view.distrust)*100.0),int(view.watch),roundi(float(view.coverage)*100.0)]
 	for corps in ["eyes","wary"]:
 		var c:Dictionary=view[corps]
 		out.append([String(c.policy),roundi(float(c.members)),roundi(float(c.training)),roundi(float(c.craft)*20.0)])
@@ -413,77 +416,6 @@ func _cipher_rule(ink:Array)->Control:
 	var rule:=_line("◦ ⟡ ◦ ✶ ◦ ⟡ ◦ ✶ ◦ ⟡ ◦" if ink!=INKS.reckoned else "// 01 ·· 10 ·· 01 ·· 10 //",12,Color(ink[3],0.7))
 	rule.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	return rule
-
-
-func _seal(corps:String,view:Dictionary,ink:Array)->Control:
-	var c:Dictionary=view[corps]
-	var panel:=PanelContainer.new(); panel.name="Seal_"+corps; panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var style:=StyleBoxFlat.new(); style.bg_color=ink[1]; style.border_color=ink[2]; style.set_border_width_all(1)
-	style.set_corner_radius_all(T.RADIUS_CARD); style.set_content_margin_all(12)
-	panel.add_theme_stylebox_override("panel",style)
-	var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",4); panel.add_child(col)
-	var name:=Corps.word("Eyes") if corps=="eyes" else Corps.word("Wary")
-	col.add_child(_line(("Our %s" % Corps.word("eyes")).to_upper() if corps=="eyes" else name.to_upper(),12,ink[3],false,"ui_strong"))
-	var count:=_line(str(roundi(float(c.members))),28,ink[4],false,"display")
-	col.add_child(count)
-	var serving:=("taught and waiting to go" if corps=="eyes" else "watch among our own people")
-	col.add_child(_line("%s · %d learning" % [serving,roundi(float(c.training))],13,ink[5],true))
-	var marks:=Marks.new(); marks.value=float(c.craft); marks.cap=float(view.cap); marks.leaf=ink[3]; col.add_child(marks)
-	marks.tooltip_text="Craft %d in 100; the most this age can teach is %d." % [roundi(float(c.craft)*100.0),roundi(float(view.cap)*100.0)]
-	# Our watchers abroad are taught to match the networks set below: no
-	# second choice to make here.
-	if corps=="eyes":
-		var placed:=Covert._network_placed(); var wanted:=Covert.network_wanted()
-		col.add_child(_line("%d live among other peoples or are on the way · the networks below ask for %d" % [placed,wanted],13,ink[4],true))
-		for row:Dictionary in level_rows(corps):
-			if bool(row.active): col.add_child(_line("Taught to match: "+String(row.words),12,ink[5],true))
-		panel.tooltip_text="Ours who live unseen among other peoples. A taught one blends in far better than a volunteer."
-		return panel
-	col.add_child(_line("%s how many a year?" % Corps.word("train").capitalize(),12,ink[3],false,"ui_strong"))
-	var levels:=HBoxContainer.new(); levels.name="Levels_"+corps; levels.add_theme_constant_override("separation",4); col.add_child(levels)
-	for row:Dictionary in level_rows(corps):
-		var b:=_ink_button(String(row.label),bool(row.active),ink)
-		b.name="Level_%s_%s" % [corps,String(row.id)]; b.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		b.tooltip_text=String(row.words)
-		var level:=String(row.id)
-		b.pressed.connect(func()->void: set_level(corps,level))
-		levels.add_child(b)
-	for row:Dictionary in level_rows(corps):
-		if bool(row.active): col.add_child(_line(String(row.words),12,ink[5],true))
-	if corps=="wary":
-		var cost:=roundi(float(view.cohesion_cost)*100.0)
-		col.add_child(_line("Watching %d in 100 of our people · distrust costs %d in 100 of their trust in one another" % [roundi(float(view.coverage)*100.0),cost],13,ink[6] if cost>=2 else ink[5],true))
-	panel.tooltip_text=("Ours who live unseen among other peoples. A taught one blends in far better than a volunteer." if corps=="eyes" else "Ours who watch for theirs among us. More of them catch more, but the people start wondering who reports on whom.")
-	return panel
-
-
-## Send our eyes: a row for each people we know, a button for each errand
-## with its odds, and who would go.
-func _send_panel(rows:Array,ink:Array)->Control:
-	var panel:=PanelContainer.new(); panel.name="Send"
-	var style:=StyleBoxFlat.new(); style.bg_color=ink[1]; style.border_color=ink[2]; style.set_border_width_all(1)
-	style.set_corner_radius_all(T.RADIUS_CARD); style.set_content_margin_all(12)
-	panel.add_theme_stylebox_override("panel",style)
-	var col:=VBoxContainer.new(); col.add_theme_constant_override("separation",6); panel.add_child(col)
-	col.add_child(_line(("Send our %s" % Corps.word("eyes")).to_upper(),12,ink[3],false,"ui_strong"))
-	var ready:=floori(Corps.members("eyes"))
-	col.add_child(_line(("%d taught %s ready: one of them goes." % [ready,Corps.word("eye") if ready==1 else Corps.word("eyes")]) if ready>=1 else "None taught yet: an untried volunteer goes. Teach some above to raise the odds.",13,ink[5],true))
-	if rows.is_empty():
-		col.add_child(_line("We know no other people yet. Our scouts must find them first.",13,ink[5],true,"voice_italic"))
-		return panel
-	for r:Dictionary in rows:
-		var line:=HBoxContainer.new(); line.name="People_"+String(r.civ_id); line.add_theme_constant_override("separation",6); col.add_child(line)
-		var who:=_line(String(r.name),14,ink[4],false,"ui_strong"); who.custom_minimum_size=Vector2(110,0); who.size_flags_horizontal=Control.SIZE_EXPAND_FILL; who.clip_text=true; line.add_child(who)
-		for e:Dictionary in r.errands:
-			if String(e.barred)!="": continue
-			var b:=_ink_button("%s · %d%%" % [String(e.label),roundi(float(e.success)*100.0)],false,ink)
-			b.name="Send_%s_%s" % [String(e.kind),String(r.civ_id)]
-			b.tooltip_text="%s: about %d in 100 it works · about %d in 100 ours is caught · %d days to reach them." % [String(e.label),roundi(float(e.success)*100.0),roundi(float(e.caught)*100.0),int(e.days)]
-			var kind:=String(e.kind); var civ_id:=String(r.civ_id)
-			b.pressed.connect(func()->void: send(kind,civ_id))
-			line.add_child(b)
-	col.add_child(_line("A killing or a burning among them is a word at court: the war leader answers for it.",12,ink[5],true,"voice_italic"))
-	return panel
 
 
 ## A button in the folio's inks; a lit one is the choice in force.

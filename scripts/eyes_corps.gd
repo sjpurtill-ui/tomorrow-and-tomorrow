@@ -46,6 +46,13 @@ const KEEP_FOOD:=0.15
 const ATTRITION:=0.04
 ## The wary needed per 1,000 of our people to watch everyone (coverage 1).
 const FULL_WATCH_PER_K:=4.0
+## The watch at home is one choice, as a network abroad is: how hard we watch
+## our own people for theirs. The share of our people watched at each level;
+## the corps is kept to it (who is taught, who goes back to other work).
+const WATCH_NAMES:=["None","Light","Steady","Heavy"]
+const WATCH_SHARE:=[0.0,0.25,0.6,1.0]
+## Days for the wary above the level to go back to other work.
+const STAND_DOWN_DAYS:=60.0
 ## Distrust (0..1): the share the wary's watching sets as its floor, what each
 ## eye of theirs found among us adds, how fast it fades toward the floor (a
 ## day), and how much of it is taken from cohesion.
@@ -109,8 +116,39 @@ static func policy(corps:String)->String:
 
 static func set_policy(corps:String,value:String)->bool:
 	if not corps in CORPS or not POLICIES.has(value): return false
+	# The wary are kept to a level, not taught by a yearly number: the old
+	# word for it ("a few", "steady", "many") picks the matching level.
+	if corps=="wary":
+		set_watch_level(POLICY_ORDER.find(value))
+		return true
 	(state()[corps] as Dictionary)["policy"]=value
 	return true
+
+## How hard we watch our own people (0..3, WATCH_NAMES).
+static func watch_level()->int:
+	var s:=state()
+	# A campaign from before levels starts at what its teaching amounted to.
+	if not s.has("watch"): s["watch"]=maxi(0,POLICY_ORDER.find(String((s.wary as Dictionary).get("policy","none"))))
+	return clampi(int(s.watch),0,3)
+
+static func set_watch_level(level:int)->void:
+	state()["watch"]=clampi(level,0,3)
+	_teach_for_watch()
+
+## The wary a level asks for, for our numbers (the level in force by default).
+static func watch_wanted(level:int=-1)->float:
+	if level<0: level=watch_level()
+	return float(WATCH_SHARE[clampi(level,0,3)])*maxf(1.0,float(_people().population_exact))/1000.0*FULL_WATCH_PER_K
+
+## The wary still to find for the level in force (serving and learning counted).
+static func _watch_short()->float:
+	return watch_wanted()-members("wary")-in_training("wary")
+
+## The teaching follows the level: none short, none taught; the further short,
+## the more start the course each year.
+static func _teach_for_watch()->void:
+	var per_k:=_watch_short()/(maxf(1.0,float(_people().population_exact))/1000.0)
+	(state().wary as Dictionary)["policy"]="none" if per_k<=0.0001 else ("few" if per_k<=0.8 else ("steady" if per_k<=2.0 else "many"))
 
 ## Members ready (trained, at home or abroad counted together).
 static func members(corps:String)->float:
@@ -157,15 +195,19 @@ static func daily(day:int)->void:
 	var course:Dictionary=COURSE.get(stage(),COURSE.hearth)
 	var people:=maxf(1.0,float(_people().population_exact))
 	var food_need:=0.0
+	_teach_for_watch()
 	for corps in CORPS:
 		var c:Dictionary=s[corps]
 		# Intake: the policy's yearly share, carried in fractions until a whole
 		# person starts the course.
 		var yearly:=float((POLICIES.get(String(c.policy),POLICIES.none) as Array)[1])*people/1000.0
 		var carry:=float((s.carry as Dictionary).get(corps,0.0))+yearly*float(span)/365.0
-		var starting:=floorf(carry)
+		# A small people's watch can be less than one person's whole days: the
+		# wary start the course once the share still short has been found.
+		var whole:=clampf(_watch_short(),0.05,1.0) if corps=="wary" else 1.0
+		var starting:=floorf(carry/whole)*whole
 		(s.carry as Dictionary)[corps]=carry-starting
-		if starting>=1.0: (c.training as Array).append({"count":starting,"done":day+roundi(float(course.days))})
+		if starting>=whole: (c.training as Array).append({"count":starting,"done":day+roundi(float(course.days))})
 		# Graduates join at the age's starting craft (the corps' craft is the
 		# weighted mean of who serves).
 		for t in (c.training as Array).duplicate():
@@ -180,6 +222,10 @@ static func daily(day:int)->void:
 		if float(c.members)>0.0:
 			c["craft"]=minf(float(course.cap),float(c.craft)+SERVICE_GAIN*float(span)/365.0) if float(c.craft)<float(course.cap) else float(c.craft)
 			c["members"]=maxf(0.0,float(c.members)*(1.0-ATTRITION*float(span)/365.0))
+			# The wary above the level go back to other work.
+			if corps=="wary":
+				var over:=float(c.members)-watch_wanted()
+				if over>0.0: c["members"]=float(c.members)-over*minf(1.0,float(span)/STAND_DOWN_DAYS)
 		food_need+=in_training(corps)*float(course.food)+float(c.members)*KEEP_FOOD
 	if food_need>0.0 and WorldSimulation.food!=null and WorldSimulation.food.has_method("issue_for_obligation"):
 		WorldSimulation.food.issue_for_obligation(food_need*float(span),"eyes","%s and %s" % [word("Eyes"),word("wary")])
@@ -215,7 +261,7 @@ static func eye_home(agent:Dictionary)->void:
 static func summary()->Dictionary:
 	var course:Dictionary=COURSE.get(stage(),COURSE.hearth)
 	var out:={"stage":stage(),"distrust":distrust(),"coverage":coverage(),"course_days":int(course.days),"course_food":float(course.food),"cap":float(course.cap),
-		"cohesion_cost":distrust()*COHESION_COST}
+		"cohesion_cost":distrust()*COHESION_COST,"watch":watch_level(),"watch_wanted":watch_wanted(),"watch_share":float(WATCH_SHARE[watch_level()])}
 	for corps in CORPS:
 		out[corps]={"policy":policy(corps),"policy_label":String((POLICIES.get(policy(corps),POLICIES.none) as Array)[0]),"members":members(corps),"craft":craft(corps),"training":in_training(corps)}
 	return out
