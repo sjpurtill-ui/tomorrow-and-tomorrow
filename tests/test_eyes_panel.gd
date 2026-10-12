@@ -62,29 +62,45 @@ func test_level_buttons_set_each_corps_as_the_pathfinder_would()->void:
 	var said:=board.set_level("wary","many")
 	assert_str(Corps.policy("wary")).is_equal("many")
 	assert_str(said).contains("distrust")
-	board.set_level("eyes","few")
-	assert_str(Corps.policy("eyes")).is_equal("few")
-	assert_object(board.find_child("Level_eyes_few",true,false)).is_not_null()
+	assert_object(board.find_child("Level_wary_many",true,false)).is_not_null()
+	# Our watchers abroad have no teaching buttons: the networks set it.
+	assert_object(board.find_child("Level_eyes_few",true,false)).is_null()
 	# The lit level says what it costs in the engine's numbers.
-	for row:Dictionary in Board.level_rows("eyes"):
+	for row:Dictionary in Board.level_rows("wary"):
 		if bool(row.active): assert_str(String(row.words)).contains("day course")
 
 
-func test_an_errand_button_shows_odds_and_launches_a_real_operation()->void:
+func test_the_ruler_sets_how_hard_a_people_is_watched_and_the_network_runs_itself()->void:
 	var civ:=_civ_id()
 	assert_str(civ).is_not_empty()
-	var rows:=Board.errand_rows()
 	var mine:={}
-	for r:Dictionary in rows:
+	for r:Dictionary in Board.network_rows():
 		if String(r.civ_id)==civ: mine=r
 	assert_bool(mine.is_empty()).override_failure_message("known people missing from the page").is_false()
-	var watch:Dictionary=(mine.errands as Array)[0]
-	assert_str(String(watch.kind)).is_equal("watch")
-	assert_float(float(watch.success)).is_between(0.05,0.99)
+	assert_int(int(mine.level)).is_equal(0)
 	var board:=auto_free(Board.new()) as Board
 	add_child(board); board.setup()
-	assert_object(board.find_child("Send_watch_%s" % civ,true,false)).is_not_null()
-	var before:=Covert.agents_abroad().size()
-	var said:=board.send("watch",civ)
-	assert_str(said).is_not_empty()
-	assert_int(Covert.agents_abroad().size()).is_equal(before+1)
+	# One choice for each people, and no button that sends a named watcher.
+	for level in 4: assert_object(board.find_child("Network_%s_%d" % [civ,level],true,false)).is_not_null()
+	assert_object(board.find_child("Send_watch_%s" % civ,true,false)).is_null()
+	var said:=board.set_network(civ,2)
+	assert_str(said).contains("3")
+	assert_int(Covert.network_level(civ)).is_equal(2)
+	assert_int(Covert.network_wanted()).is_equal(3)
+	# Watchers are taught for it without being asked.
+	assert_str(Corps.policy("eyes")).is_not_equal("none")
+	# Month by month the Pathfinder sends one at a time until three are kept.
+	var day:=int(GameState.elapsed_days)
+	for month in 3:
+		day+=Covert.NETWORK_REVIEW_DAYS
+		Covert._network_review(day)
+		assert_int(Covert._network_placed(civ)).is_equal(month+1)
+	Covert._network_review(day+Covert.NETWORK_REVIEW_DAYS)
+	assert_int(Covert._network_placed(civ)).is_equal(3)
+	# Set to None, no more go.
+	board.set_network(civ,0)
+	assert_int(Covert.network_wanted()).is_equal(0)
+	assert_str(Corps.policy("eyes")).is_equal("none")
+	Covert._network_review(day+2*Covert.NETWORK_REVIEW_DAYS)
+	assert_int(Covert._network_placed(civ)).is_equal(3)
+
