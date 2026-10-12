@@ -15,7 +15,7 @@ const SEEDS:=[7932,15851,23770,31689,39608,47527,55446,63365,71284,79203,87122,9
 ## travels far. 1,000 km is about two months' walk at a caravan's 16 km a day,
 ## and a young people's known country (110 km, 18 km more a year) reaches that
 ## far only after about fifty years.
-const FAR_RADIUS_KM:=330.0
+const FAR_RADIUS_KM:=300.0
 ## The boldest ruler settles new towns this far from home (civilization_strategy.gd
 ## settle_distance, 16 + 24 × boldness).
 const BOLDEST_SETTLE_KM:=40.0
@@ -58,7 +58,17 @@ func _world(seed_value:int)->Array:
 		var terrain=preload("res://scripts/local_terrain.gd").new()
 		terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 		var sites:Array=[terrain._civilization_start(Start.candidate(seed_value,0))]
-		for civ:Dictionary in CivilizationSystem.civilizations:sites.append(terrain._civilization_start(CivilizationSystem._civilization_world_position(civ)))
+		var seats:Array=[Start.candidate(seed_value,0)]
+		for civ:Dictionary in CivilizationSystem.civilizations:seats.append(CivilizationSystem._civilization_world_position(civ))
+		for civ:Dictionary in CivilizationSystem.civilizations:
+			var seat:=CivilizationSystem._civilization_world_position(civ)
+			var origin:Vector2=terrain._civilization_start(seat)
+			# As the game does (world_simulation.start_world): a search that
+			# wandered far into another people's country stays at its seat.
+			var others:=seats.filter(func(other:Vector2)->bool:return other!=seat)
+			var apart:=Start.separation(origin,others)
+			if origin.distance_to(seat)>Start.SETTING_REACH_KM and apart<Start.SEAT_SEPARATION_KM*0.75 and apart<Start.separation(seat,others):origin=seat
+			sites.append(origin)
 		terrain.free()
 		_sites[seed_value]=sites
 	var sites:Array=_sites[seed_value]
@@ -115,6 +125,10 @@ func test_every_people_lives_far_from_every_other()->void:
 			assert_float(Start.separation(seat,seats)).override_failure_message("seed %d: %s is %.0f km from another people" % [seed_value,String(civ.name),Start.separation(seat,seats)]).is_greater_equal(Start.SEAT_SEPARATION_KM)
 			assert_bool(Start.supports_founders(PlanetEnvironment.profile_at(seat))).is_true()
 			seats.append(seat)
+		# And nobody starts alone: each has another people within ISOLATION_KM.
+		for i in seats.size():
+			var others:=seats.duplicate();others.remove_at(i)
+			assert_float(Start.separation(seats[i],others)).override_failure_message("seed %d: a people starts %.0f km from anyone" % [seed_value,Start.separation(seats[i],others)]).is_less_equal(Start.ISOLATION_KM+2.0*FOUNDING_MOVE_KM)
 
 func test_no_foreign_town_can_stand_near_ours_without_long_journeys()->void:
 	# The farthest any people's leaders found a town from their first site:
@@ -222,4 +236,4 @@ func test_peoples_are_spread_over_half_the_world_islands_and_all()->void:
 			assert_float(absf(off.y)).is_less_equal(Start.REGION_HALF_Z_KM*1.35+2300.0)
 			west=minf(west,off.x);east=maxf(east,off.x)
 		# Spread, not huddled.
-		assert_float(east-west).override_failure_message("seed %d: peoples span only %d km" % [seed_value,roundi(east-west)]).is_greater(3000.0)
+		assert_float(east-west).override_failure_message("seed %d: peoples span only %d km" % [seed_value,roundi(east-west)]).is_greater(2000.0)

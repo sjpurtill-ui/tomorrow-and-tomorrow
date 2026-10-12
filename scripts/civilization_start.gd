@@ -28,6 +28,10 @@ extends RefCounted
 ## founding kit can live (supports_founders: mainland or island alike), and
 ## never nearer than SEAT_SEPARATION_KM, itself halved.
 const SEAT_SEPARATION_KM:=550.0
+## Nobody starts alone: every people has another within this distance (the
+## user, 2026-10-11: "cap isolation at 1,500"). Each seat after the first is
+## placed no farther than this from some seat placed before it.
+const ISOLATION_KM:=1500.0
 ## The region every people of a world lives in: half its width and depth (km).
 const REGION_HALF_X_KM:=4500.0
 const REGION_HALF_Z_KM:=2500.0
@@ -74,14 +78,17 @@ static func _planet_candidate(seed_value:int,seat:int,earlier:Array=[])->Vector2
 		# A crowded continent: its later draws reach a little past its edges.
 		var spread:=1.0 if attempt<FIRST_DRAWS+SEPARATION_DRAWS/2 else 1.35
 		var desired:=centre+Vector2(rng.randf_range(-REGION_HALF_X_KM,REGION_HALF_X_KM),rng.randf_range(-REGION_HALF_Z_KM,REGION_HALF_Z_KM))*spread
+		# Once the open draws are spent, every other draw looks near a people already placed, so none is left alone.
+		if not earlier.is_empty() and attempt>=FIRST_DRAWS and attempt%2==1:
+			desired=(earlier[rng.randi_range(0,earlier.size()-1)] as Vector2)+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(SEAT_SEPARATION_KM*1.1,ISOLATION_KM*0.9)
 		var point:=PlanetEnvironment.nearest_viable_land(desired,seed_value^((seat+1)*104729+attempt))
 		var profile:=PlanetEnvironment.profile_at(point)
 		var score:=float(profile.food_potential)+minf(.3,float(profile.growing_season)*.3)
 		if score>best_score:best=point;best_score=score
 		var fits:=supports_founders(profile)
 		var apart:=separation(point,earlier)
-		if fits and apart>=SEAT_SEPARATION_KM:return point
-		var value:=minf(apart,SEAT_SEPARATION_KM)+(100000.0 if fits else 0.0)
+		if fits and apart>=SEAT_SEPARATION_KM and (earlier.is_empty() or apart<=ISOLATION_KM):return point
+		var value:=minf(apart,SEAT_SEPARATION_KM)-maxf(0.0,apart-ISOLATION_KM)*0.05+(100000.0 if fits else 0.0)
 		if value>far_value:far=point;far_value=value
 	return best if earlier.is_empty() else far
 
