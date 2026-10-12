@@ -154,6 +154,10 @@ static func track_points(start:Vector2,finish:Vector2,place:Dictionary,land:Call
 
 static func label(place:Dictionary,origin:Vector2,height:Callable)->Label3D:
 	var node:=Label3D.new();node.name="PlaceChartName"
+	# The shared screen-space layer owns placement; never render a second
+	# world-space name over neighbouring towns or their cards.
+	node.add_to_group("chart_place_names");node.layers=0
+	node.set_meta("chart_place_id",String(place.get("id","")))
 	node.text=String(place.get("name",""));node.font=preload("res://assets/fonts/serif/EBGaramond-Italic.ttf")
 	# Match the root label's base pixel scale. Its shared aerial normalizer
 	# multiplies font resolution by four and divides this scale by sixteen.

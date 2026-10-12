@@ -70,6 +70,8 @@ static func nice_round(value:float)->int:
 var terrain:Node
 var sources:Dictionary={}
 var cards:Array[Dictionary]=[]
+var place_cards:Array[Dictionary]=[]
+var place_memory:Dictionary={}
 var previous:Dictionary={}
 var overflow:Array[Dictionary]=[]
 var more:Button
@@ -247,6 +249,8 @@ func refresh()->void:
 		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
 		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	var work_entries:=_work_entries(camera,viewport_size)
+	var place_entries:=_place_entries(camera,viewport_size,bounds)
+	for place:Dictionary in place_entries:signature+=String(place.id)+str(place.anchor)+str(place.lines)+str(place.extent)
 	for work:Dictionary in work_entries:signature+=String(work.id)+str(work.anchor)+str(snappedf(float(work.emblem_alpha),.05))+String(work.status)
 	if signature==layout_signature:return
 	layout_signature=signature
@@ -255,8 +259,32 @@ func refresh()->void:
 	cards=result.cards;overflow=result.overflow;previous=result.memory
 	var placed_works:=arrange_works(work_entries,bounds,cards,entries,reserved,work_memory)
 	works=placed_works.works;work_memory=placed_works.memory
+	# Small surrounding places borrow only space left by cities and works.
+	var place_reserved:Array[Rect2]=reserved.duplicate()
+	for card:Dictionary in cards:place_reserved.append(card.rect)
+	for work:Dictionary in works:
+		if work.rect.has_area():place_reserved.append(work.rect)
+		if work.mark.has_area():place_reserved.append(work.mark)
+	for entry:Dictionary in entries:place_reserved.append(Rect2(entry.anchor-Vector2(8,8),Vector2(16,16)))
+	var placed_places:=arrange(place_entries,bounds,place_memory,place_reserved)
+	place_cards=placed_places.cards;place_memory=placed_places.memory
 	_update_overflow(viewport_size)
 	queue_redraw()
+
+func _place_entries(camera:Camera3D,viewport_size:Vector2,bounds:Rect2)->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	var font:=T.voice_font()
+	for node:Node in get_tree().get_nodes_in_group("chart_place_names"):
+		var label:=node as Label3D
+		if label==null or label.is_queued_for_deletion() or not label.is_visible_in_tree():continue
+		if camera.is_position_behind(label.global_position):continue
+		var anchor:=camera.unproject_position(label.global_position)
+		if not Rect2(Vector2.ZERO,viewport_size).has_point(anchor):continue
+		var lines:=wrap_name(label.text,font,minf(220.0,bounds.size.x-22.0))
+		var width:=22.0
+		for line:String in lines:width=maxf(width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+22.0)
+		result.append({"id":"place:"+String(label.get_meta("chart_place_id",""))+":"+str(label.get_instance_id()),"foreign":true,"anchor":anchor,"extent":Vector2(width,lines.size()*20+10),"lines":lines,"color":T.INK_MUTED,"flag":null})
+	return result
 
 ## Whose a town is, in words, on its card: a stranger's town names its people
 ## as our chart knows them; a town of ours, our nation's name once it has
@@ -880,6 +908,9 @@ func _update_overflow(viewport_size:Vector2)->void:
 		list_rows.add_child(button)
 
 func _draw()->void:
+	for place:Dictionary in place_cards:
+		_draw_leader(place,place.rect,place.anchor)
+		_draw_frame(place,place.rect,true)
 	# Works first: the cities' own cards and leaders always sit above them.
 	_draw_works()
 	if not founding_rings.is_empty():_draw_founding_rings()
