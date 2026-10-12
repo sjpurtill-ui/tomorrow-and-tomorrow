@@ -3286,3 +3286,12 @@ What changed:
 Results (25 years, `--aims=player`, seeds 424242 / 77013): routine share 21% / 24%; first-hour moments 27–42 / 18–31 and decisions 10–20 / 11–17 per 10 minutes, longest gap 1.6 real minutes; a live aim 96% of the time; rail 5 entries and 0 modern terms at every mark; 0 free gifts.
 
 Tests: listed suites and probes pass. menu_architecture fails identically on base. foreign_dialogue_ui and research_600_campaign time out identically on base. early_consequences reports EC_FAILURES [] with rows identical to base.
+## October 12 — Surrounding village label spacing
+
+Player code checkpoint `ef47aa5b` moves named country-place labels into the
+collision-aware screen-space layer. Readable paper tags and leaders replace
+the overlapping world-space italic names. Cities retain priority and selection;
+place tags avoid city pins and great-work marks. All 46 focused headless cases
+pass. No save changes or running-session restart were made. The integration
+record is in `docs/INTEGRATION_STATUS.md`; publication precedes canonical update.
+

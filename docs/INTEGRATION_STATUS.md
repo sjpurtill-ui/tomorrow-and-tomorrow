@@ -3309,3 +3309,24 @@ Private GPU captures pass for empty and active queues at 1600x1000 and 1024x640,
 with no horizontal overflow. Reference: Paradox's HOI IV Strategy Guide,
 https://forumcontent.paradoxplaza.com/public/paradox/banners/HoI_IV_Strategy_Guide.pdf
 Generated imports and captures excluded.
+## October 12 — Readable surrounding village names (INTEGRATED)
+
+Source `ef47aa5b` on `codex/town-label-readability` replaces the independent
+world-space italic place names with measured paper tags in the shared city
+label layer. Main city cards receive space first; surrounding names avoid
+one another, city cards, city pins and great-work cards/emblems. Leader lines
+connect relocated tags to their actual places. Names with no available space
+are omitted until the view has room. Place tags do not become city click targets.
+
+Headless validation passed 46 cases across city-label layout, settlement-place
+visuals and great-work map marks, with zero errors, failures or orphans. The new
+regression places three village names at the same anchor as a city, verifies
+separate tags and confirms the world labels render on no layers. Logs are in
+the task worktree's `artifacts/town-label-tests.log` and
+`artifacts/town-label-work-tests.log`. No graphical capture was performed.
+
+This is presentation only and requires no save migration. Integration is pushed
+and remotely verified before the canonical checkout is fast-forwarded. Existing
+local imports and the running player session are preserved; save and restart
+normally to load the labels.
+
