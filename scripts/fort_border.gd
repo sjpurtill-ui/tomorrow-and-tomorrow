@@ -288,7 +288,8 @@ static func costs(state:Node=null,kept:Dictionary={})->Dictionary:
 		if String(f.get("status",""))=="abandoned":continue
 		var people:=float(kept.garrisons.get(int(f.id),0))
 		var km:=_pos(f).distance_to(center)
-		var loss:=transit_loss(km,carry)
+		# Fed straight from the seat, or fort to fort where that loses less.
+		var loss:=minf(transit_loss(km,carry),1.0-arrives(int(f.id),state))
 		var gone:=people*ration*loss/maxf(0.05,1.0-loss)
 		lost+=gone;out+=people*ration
 		posts.append({"id":int(f.id),"km":km,"people":people,"lost":gone})
@@ -341,6 +342,134 @@ static func advance(day:int)->void:
 			f.status="abandoned"
 			_tell("%s at %s is left to the weather: it was not kept." % [String(kind(String(f.kind)).name),String(f.get("name","the post"))])
 	d["last_bill"]={"day":day,"food_lost":float(bill.food_lost),"upkeep":bill.upkeep,"posted":int(kept.posted)}
+	stock_day(span)
+
+# --- The way of forts: food passed fort to fort -------------------------------
+#
+# A standing fort keeps a store of food for an army passing. Food reaches a
+# fort straight from the seat (transit_loss), or handed on from a fort no more
+# than WAY_HOP_KM off: carriers who sleep and are fed at a fort each few days
+# lose far less on a kept way than on the open road (WAY_CARRY times the
+# carrying). A chain of forts is so a road an army can be fed along, where
+# the carriers from home alone reach nowhere. The seat fills the stores a
+# little each day from what it holds above STORE_RESERVE_DAYS of its own
+# eating, nearest fort first, and an army within STORE_NEAR_KM of a stocked
+# fort fills its carts there (military_campaign.gd, the baggage train).
+
+## Forts hand food on to one another when no farther apart than this.
+const WAY_HOP_KM:=120.0
+## How much better a kept way between two forts carries than the open road.
+const WAY_CARRY:=4.0
+## Rations a fort can store for each of the garrison its kind needs.
+const STORE_PER_POST:=4000.0
+## An army this near a fort draws on its store.
+const STORE_NEAR_KM:=40.0
+## The seat sends nothing out that would leave it under this many days' food.
+const STORE_RESERVE_DAYS:=90.0
+## Share of the food above that reserve the seat sends out in a day, by how
+## hard the ruler has the forts stocked (stock_level 0 none, 1 some, 2 much).
+const STORE_SEND_SHARE:=[0.0,0.02,0.06]
+const STOCK_NAMES:=["None","Some","Much"]
+
+static func stock_level(state:Node=null)->int:
+	return clampi(int(ledger(state).get("stock_level",0)),0,2)
+
+static func set_stock_level(level:int)->void:
+	ledger()["stock_level"]=clampi(level,0,2)
+
+## All the food in our forts' stores, and all they can hold.
+static func stores_total(state:Node=null)->Dictionary:
+	var have:=0.0;var cap:=0.0
+	for f:Dictionary in standing(state):have+=float(f.get("store",0.0));cap+=store_cap(f)
+	return {"have":have,"cap":cap}
+
+static var _way_cache:Dictionary={}
+## For each standing fort, how food reaches it: {id: {share (of what is sent
+## that arrives), via (fort id handing it on, -1 the seat), hops}}.
+static func way(state:Node=null)->Dictionary:
+	if state==null:state=WorldSimulation.state
+	var list:=standing(state)
+	var key:=[state.get_instance_id(),int(state.elapsed_days),list.size()]
+	var where:=0.0
+	for f:Dictionary in list:where+=float(f.x)*1.3+float(f.z)
+	key.append(snappedf(where,0.1))
+	if _way_cache.get("key")==key:return _way_cache.way
+	var carry:=carrying() if state==WorldSimulation.state else 1.0
+	var center:=seat(state)
+	var out:={}
+	for f:Dictionary in list:out[int(f.id)]={"share":1.0-transit_loss(_pos(f).distance_to(center),carry),"via":-1,"hops":1}
+	for _pass in list.size():
+		var changed:=false
+		for a:Dictionary in list:
+			for b:Dictionary in list:
+				if int(a.id)==int(b.id):continue
+				var km:=_pos(a).distance_to(_pos(b))
+				if km>WAY_HOP_KM:continue
+				var through:=float(out[int(a.id)].share)*(1.0-transit_loss(km,carry*WAY_CARRY))
+				if through>float(out[int(b.id)].share)+0.0001:
+					out[int(b.id)]={"share":through,"via":int(a.id),"hops":int(out[int(a.id)].hops)+1};changed=true
+		if not changed:break
+	_way_cache={"key":key,"way":out}
+	return out
+
+## The share of food sent to fort `id` that arrives (0 for no standing fort).
+static func arrives(id:int,state:Node=null)->float:
+	return float((way(state).get(id,{}) as Dictionary).get("share",0.0))
+
+static func store_cap(fort:Dictionary)->float:
+	return float(kind(String(fort.get("kind",""))).get("garrison",0))*STORE_PER_POST
+
+## The day's filling of the stores: nearest fort (by what arrives) first, from
+## the seat's food above its reserve. What is eaten on the way is lost.
+static func stock_day(span:float)->void:
+	var state:=WorldSimulation.state
+	if WorldSimulation.food==null:return
+	var eaten:=float(state.simulation_metrics.get("food_consumption",state.population_exact))
+	var spare:=float(WorldSimulation.food.total_stored())-eaten*STORE_RESERVE_DAYS
+	var budget:=spare*float(STORE_SEND_SHARE[stock_level()])*span
+	if budget<=1.0:return
+	var routes:=way()
+	var order:=standing()
+	order.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(routes[int(a.id)].share)>float(routes[int(b.id)].share))
+	var sent:=0.0
+	for f:Dictionary in order:
+		var share:=float(routes[int(f.id)].share)
+		var want:=store_cap(f)-float(f.get("store",0.0))
+		if want<1.0 or share<0.02:continue
+		var give:=minf(want/share,budget-sent)
+		if give<1.0:break
+		f["store"]=float(f.get("store",0.0))+give*share
+		sent+=give
+	if sent>0.0:WorldSimulation.food.issue_for_obligation(sent,"fort_stores","Food sent out to the forts' stores",span,0)
+
+## Stocked forts of the people in scope: [{id, pos, store}].
+static func stocked()->Array:
+	var out:=[]
+	for f:Dictionary in standing():
+		if float(f.get("store",0.0))>=1.0:out.append({"id":int(f.id),"pos":_pos(f),"store":float(f.store),"name":String(f.get("name",""))})
+	return out
+
+## Takes up to `rations` from the stores of forts within STORE_NEAR_KM of
+## `point`, nearest first. Returns what was taken.
+static func draw(point:Vector2,rations:float)->float:
+	var near:=standing().filter(func(f:Dictionary)->bool:return float(f.get("store",0.0))>=1.0 and _pos(f).distance_to(point)<=STORE_NEAR_KM)
+	near.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _pos(a).distance_to(point)<_pos(b).distance_to(point))
+	var taken:=0.0
+	for f:Dictionary in near:
+		var take:=minf(float(f.store),rations-taken)
+		f["store"]=float(f.store)-take;taken+=take
+		if taken>=rations-0.5:break
+	return taken
+
+## The store in plain words for a fort's note: what it holds and what it costs to fill.
+static func store_words(fort:Dictionary)->String:
+	if String(fort.get("status",""))!="standing":return ""
+	var EraWords:=preload("res://scripts/hud/era_words.gd")
+	var r:Dictionary=way().get(int(fort.id),{})
+	var share:=float(r.get("share",0.0))
+	var by:="straight from home"
+	if int(r.get("via",-1))>=0:by="handed on from %s" % String(find_fort(int(r.via)).get("name","the fort before it"))
+	return "%s of %s rations. Food comes %s; of every 100 sent, %d arrive." % [EraWords.grouped(roundi(float(fort.get("store",0.0)))),EraWords.grouped(roundi(store_cap(fort))),by,roundi(share*100.0)]
 
 # --- Raising and leaving forts ----------------------------------------------
 

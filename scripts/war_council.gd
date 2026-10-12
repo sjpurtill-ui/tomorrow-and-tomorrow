@@ -1474,7 +1474,7 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 		var road:=float(march.get("fed_on_road",1.0))
 		var there:=float(march.get("fed_there",1.0))
 		var land:Dictionary=Supply.land_at(Supply.rations_field(),at,_today())
-		return {"ratio":minf(road,there),"on_road":road,"there":there,"train_days":float(march.get("train_days",0.0)),"train_feeds":mc.train_feeds(float(march.get("days",0))/maxf(1.0,1.0+float(march.get("half_pace",0.0)))),"troops":troops,"days":float(march.get("days",0)),"half_pace":float(march.get("half_pace",0.0)),"km":float(route.get("length_km",0.0)),"season":"winter" if float(land.get("cold",0.0))>=0.3 else ""}
+		return {"ratio":minf(road,there),"on_road":road,"there":there,"train_days":float(march.get("train_days",0.0)),"forts":int(march.get("forts",0)),"fort_days":float(march.get("fort_days",0.0)),"train_feeds":mc.train_feeds(float(march.get("days",0))/maxf(1.0,1.0+float(march.get("half_pace",0.0)))),"troops":troops,"days":float(march.get("days",0)),"half_pace":float(march.get("half_pace",0.0)),"km":float(route.get("length_km",0.0)),"season":"winter" if float(land.get("cold",0.0))>=0.3 else ""}
 	var km:float=WorldSimulation.world.player_world_origin.distance_to(at)
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	var road_days:=km/18.0
@@ -1495,6 +1495,8 @@ static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
 	if float(fed.get("days",0.0))>=1.0: how.append("about %s on the road" % _span(roundi(float(fed.days))))
 	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land at half pace" % ("most" if float(fed.half_pace)>=0.6 else "part"))
 	var carried:=(" They can carry food for %s." % _span(int(float(fed.train_days)))) if float(fed.get("train_days",0.0))>=1.0 else ""
+	if carried!="" and int(fed.get("forts",0))>0: carried+=" Our forts on the way hold %s more." % _span(int(float(fed.fort_days)))
+	elif carried!="": carried+=" No stocked fort of ours stands on that road."
 	# The host our carts could feed all that way, when it is a host at all.
 	var fewer:=int(fed.get("train_feeds",0))
 	if carried!="" and fewer>=MIN_BAND and fewer<int(fed.get("troops",0)): carried+=" Our carts could feed about %s of them that far." % EraWords.grouped(int(float(fewer)/10.0)*10 if fewer>=100 else fewer)

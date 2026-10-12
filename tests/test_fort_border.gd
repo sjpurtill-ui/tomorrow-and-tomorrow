@@ -72,7 +72,8 @@ func test_food_carried_out_is_lost_more_the_farther_the_fort()->void:
 	assert_float(Forts.transit_loss(0.0)).is_equal(0.0)
 	assert_float(Forts.transit_loss(60.0)).is_between(0.3,0.36)
 	assert_float(Forts.transit_loss(120.0)).is_greater(Forts.transit_loss(60.0))
-	_standing(Vector2(40,0));var far:=_standing(Vector2(120,0))
+	# Too far apart to hand food on to one another: each is fed from the seat.
+	_standing(Vector2(40,0));var far:=_standing(Vector2(-150,0))
 	Forts.ledger(GameState).border_share=1.0
 	var bill:=Forts.costs(GameState)
 	var near_post:Dictionary=bill.posts[0];var far_post:Dictionary=bill.posts[1]
