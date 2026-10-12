@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
 ## Peoples live far apart in one region of the planet (civilization_start.gd:
-## about 1,100 km between neighbours), so nobody is met in the first decades and the court has no foreign business
+## about 550 km between neighbours), so nobody is met in the first decades and the court has no foreign business
 ## until someone's party really walks that far. Twenty generated worlds, each
 ## measured between the real founding sites (local_terrain._civilization_start),
 ## with contact decided by the real code paths: our returned party
@@ -15,7 +15,7 @@ const SEEDS:=[7932,15851,23770,31689,39608,47527,55446,63365,71284,79203,87122,9
 ## travels far. 1,000 km is about two months' walk at a caravan's 16 km a day,
 ## and a young people's known country (110 km, 18 km more a year) reaches that
 ## far only after about fifty years.
-const FAR_RADIUS_KM:=900.0
+const FAR_RADIUS_KM:=330.0
 ## The boldest ruler settles new towns this far from home (civilization_strategy.gd
 ## settle_distance, 16 + 24 × boldness).
 const BOLDEST_SETTLE_KM:=40.0
@@ -24,11 +24,11 @@ const BOLDEST_SETTLE_KM:=40.0
 const FOUNDING_MOVE_KM:=40.0
 ## Nobody even glimpses anybody for this many years, with the route lore a
 ## people has by then (the route_speed of a few wayfinding practices).
-const GLIMPSE_YEARS:=15
+const GLIMPSE_YEARS:=4
 const GLIMPSE_LORE:=0.3
 ## Nobody reaches anybody's home for this many years, even with route lore at
 ## the engine's cap (no mounts in the stone age).
-const MEET_YEARS:=25
+const MEET_YEARS:=9
 const LORE_CAP:=0.6
 
 var _sites:Dictionary={}
@@ -207,14 +207,19 @@ func test_a_saved_world_keeps_its_peoples_where_they_were()->void:
 	assert_str(String(CivilizationSystem.import_state(saved).get("error",""))).is_empty()
 	assert_float(CivilizationSystem._civilization_world_position(CivilizationSystem.civilizations[0]).distance_to(near)).is_less(1.0)
 
-func test_peoples_share_two_continents_six_or_seven_each()->void:
-	# "6-7 on one continent and 6-7 on another (think Europe and Asia)."
+func test_peoples_are_spread_over_half_the_world_islands_and_all()->void:
+	# "Shrink it to half" and "spread across anywhere on map that doesn't give
+	# an opponent massive disadvantage, including islands": one window a quarter of
+	# the planet's width and depth, every seat on land the founders can live on.
 	for seed_value in SEEDS.slice(0,6):
 		var sites:=_world(seed_value)
-		var ours:=Start.region_centre(seed_value,0)
-		var other:=Start.region_centre(seed_value,1)
-		assert_float(ours.distance_to(other)).is_greater_equal(Start.CONTINENT_APART_KM)
-		var with_us:=0
+		var centre:=Start.region_centre(seed_value,0)
+		var west:=INF;var east:=-INF
 		for site:Vector2 in sites:
-			if site.distance_to(ours)<site.distance_to(other): with_us+=1
-		assert_int(with_us).override_failure_message("seed %d: %d peoples on our continent" % [seed_value,with_us]).is_between(6,8)
+			var off:=site-centre
+			# A draw over water moves to the nearest land (planet_environment), at most 2,240 km.
+			assert_float(absf(off.x)).override_failure_message("seed %d: a people %d km east or west of the centre" % [seed_value,roundi(off.x)]).is_less_equal(Start.REGION_HALF_X_KM*1.35+2300.0)
+			assert_float(absf(off.y)).is_less_equal(Start.REGION_HALF_Z_KM*1.35+2300.0)
+			west=minf(west,off.x);east=maxf(east,off.x)
+		# Spread, not huddled.
+		assert_float(east-west).override_failure_message("seed %d: peoples span only %d km" % [seed_value,roundi(east-west)]).is_greater(3000.0)

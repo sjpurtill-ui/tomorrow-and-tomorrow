@@ -12,19 +12,27 @@ extends RefCounted
 ## shared founding kit can live, and never nearer than SEAT_SEPARATION_KM to
 ## any seat placed before it. The player's people is seat 0 and is placed
 ## first by the same draw; every other people keeps the same distance from
-## every other, the player's included. So the nearest people is about 1,100
-## km off: nobody is glimpsed in the first fifteen years and nobody's party can
-## reach another people's home in the first quarter century
+## every other, the player's included. So the nearest people is about 550
+## km off (halved 2026-10-11: "shrink it to half"): nobody is glimpsed in the first four years and nobody's party can
+## reach another people's home in the first nine
 ## (tests/test_far_peoples.gd), but their lands, which grow with them
 ## (realm_reach.gd), come to meet in the middle centuries, and the frontiers,
 ## realms and fronts of docs/WAR_GEOGRAPHY.md follow. Worlds already made
 ## keep their stored positions; this only shapes new worlds.
-const SEAT_SEPARATION_KM:=1100.0
+##
+## HALF THE WORLD, SPREAD ANYWHERE (the user, 2026-10-11: "shrink it to half,
+## new only" and "can be spread across anywhere on map that doesn't give an
+## opponent massive disadvantage, including islands"). A new world's peoples
+## no longer share two continents: all of them live in one window (9,000 by 5,000 km, a quarter of the
+## planet's width and depth, which halves how far off the neighbours are) about a seeded centre, anywhere in it the shared
+## founding kit can live (supports_founders: mainland or island alike), and
+## never nearer than SEAT_SEPARATION_KM, itself halved.
+const SEAT_SEPARATION_KM:=550.0
 ## The region every people of a world lives in: half its width and depth (km).
-const REGION_HALF_X_KM:=3200.0
-const REGION_HALF_Z_KM:=2000.0
+const REGION_HALF_X_KM:=4500.0
+const REGION_HALF_Z_KM:=2500.0
 ## The two continents' centres stand at least this far apart (km).
-const CONTINENT_APART_KM:=8000.0
+const CONTINENT_APART_KM:=4000.0
 ## The planet's own half extents (CivilizationSystem.CIVILIZATION_WORLD_RADIUS_*).
 const PLANET_HALF_X_KM:=18000.0
 const PLANET_HALF_Z_KM:=8000.0
@@ -61,7 +69,7 @@ static func _planet_candidate(seed_value:int,seat:int,earlier:Array=[])->Vector2
 	# Generated communities share a generalist founding kit. Select places where
 	# that kit has a plausible subsistence base, not merely a patch of dry ground.
 	# This does not restrict later player settlement or grant local resources.
-	var centre:=region_centre(seed_value,seat%2)
+	var centre:=region_centre(seed_value,0)
 	for attempt in FIRST_DRAWS+(0 if earlier.is_empty() else SEPARATION_DRAWS):
 		# A crowded continent: its later draws reach a little past its edges.
 		var spread:=1.0 if attempt<FIRST_DRAWS+SEPARATION_DRAWS/2 else 1.35

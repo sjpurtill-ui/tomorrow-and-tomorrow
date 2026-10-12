@@ -13,7 +13,7 @@ extends RefCounted
 ## travel and knowledge of the world extend (civilization_system world_reach;
 ## ours progression_reach_snapshot().combined). A village of 400 ranges about
 ## 72 km about its hearth; a people of 25,000 with good roads 600 to 950 km.
-## With the peoples of a continent about 1,100 km apart (civilization_start),
+## With the peoples of a continent about 550 km apart (civilization_start),
 ## lands come to meet in the middle centuries, as they did on Earth's
 ## continents.
 ##

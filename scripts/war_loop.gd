@@ -2288,7 +2288,7 @@ const RIVAL_WAR_CAP:=0.012
 ## Two peoples are neighbours when their countries (realm_reach.gd) come
 ## within NEIGHBOUR_MARGIN_KM of meeting: about a month's march, the distance
 ## bulk goods are still worth carrying (envoy_requests.gd BULK_KM). Peoples
-## founded 1,100 km apart (civilization_start.gd) become neighbours as their
+## founded 550 km apart (civilization_start.gd) become neighbours as their
 ## lands grow toward each other; a people across the sea never is.
 const NEIGHBOUR_MARGIN_KM:=450.0
 const RealmReach:=preload("res://scripts/realm_reach.gd")
