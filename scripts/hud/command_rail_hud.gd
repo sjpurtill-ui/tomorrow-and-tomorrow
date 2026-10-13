@@ -1512,7 +1512,7 @@ func _economy_danger_active(metrics:Dictionary,water:Dictionary)->bool:
 	var food_intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)
 	var food_days:=maxf(0.0,float(metrics.get("food_days",30.0)))
 	var food_net:=float(metrics.get("food_net",0.0))
-	var food_danger:=GameState.consecutive_food_shortage_days>=2.0 or food_intake<0.90 or (food_days<7.0 and food_net<0.0)
+	var food_danger:=GameState.consecutive_food_shortage_days>=2.0 or food_intake<0.90 or (preload("res://scripts/food_care.gd").store_level(food_days)=="bare" and food_net<0.0)
 	var water_required:=maxf(0.0,float(water.get("required_today",0.0)))
 	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)
 	var water_danger:=water_required>0.0 and GameState.consecutive_water_shortage_days>=2.0 and water_intake<0.95

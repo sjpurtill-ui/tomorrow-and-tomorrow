@@ -143,6 +143,8 @@ func test_home_defence_is_beside_the_town_name_not_an_army()->void:
 	var Labels:=preload("res://scripts/hud/city_labels.gd")
 	var home:Dictionary=GameState.player_settlements[0]
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	# No border posts: this counts the watch at home.
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
 	assert_bool(bool(home.get("primary",false))).is_true()
 	var Combat:=preload("res://scripts/civilization_combat.gd")
 	var defense:=maxi(0,int(GameState.population_allocations.get("Defense",0)))

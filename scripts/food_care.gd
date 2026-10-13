@@ -26,6 +26,16 @@ const SPAN:=preload("res://scripts/day_span.gd")
 ## counts the store up to here (consequence_engine.gd), and the realm's
 ## relief brings a hungry town back to it (realm_purse.gd RELIEF_TARGET).
 const LEAN_DAYS:=20.0
+## Below this many days the stores are nearly bare. Every screen that calls
+## the stores bare, low or holding reads store_level(), so the map badge, the
+## overview's concerns and the people's talk cannot disagree.
+const BARE_DAYS:=7.0
+## "uncounted" (no count yet), "bare" (under BARE_DAYS), "low" (under the
+## lean days) or "holding".
+static func store_level(food_days:float)->String:
+	if food_days<0.0:return "uncounted"
+	if food_days<BARE_DAYS:return "bare"
+	return "low" if food_days<LEAN_DAYS else "holding"
 ## Food-security points the lean buffer gives when it is full.
 const LEAN_WEIGHT:=0.30
 ## Health leans by FRESH_HEALTH × (fresh share of what is eaten − 0.5) above
