@@ -78,7 +78,8 @@ func test_a_ruler_with_nothing_left_to_chart_sends_an_expedition_by_sea()->void:
 			if bool(result.get("sent",false)):break
 		# Not again within the half year, nor while one is away.
 		var again:Dictionary=Expedition.leaders_decide({})
-		return {"idle":idle,"tries":tries,"again":again,"away":Expedition.away(world).size(),"mission":world.scout_missions[-1] if not world.scout_missions.is_empty() else {}})
+		return {"idle":idle,"tries":tries,"again":again,"away":Expedition.away(world).size(),"mission":world.scout_missions[-1] if not world.scout_missions.is_empty() else {},
+			"next":int(staff.expedition_next_day),"day":int(state.elapsed_days),"people":float(state.population_exact)})
 	assert_bool((outcome.idle as Dictionary).is_empty()).is_true()
 	assert_int(int(outcome.away)).override_failure_message(str(outcome.tries)).is_equal(1)
 	assert_bool((outcome.again as Dictionary).is_empty()).is_true()
@@ -87,6 +88,27 @@ func test_a_ruler_with_nothing_left_to_chart_sends_an_expedition_by_sea()->void:
 	assert_float(float(mission.expedition.chance)).is_greater_equal(Expedition.LEADERS_LEAST_CHANCE)
 	# Theirs, not ours.
 	assert_array(CivilizationSystem.scout_missions).is_empty()
+	# It waits for what the party puts at stake, by its people's number.
+	var party:=int(mission.personnel)
+	assert_int(party).is_equal(Expedition.leaders_party(float(outcome.people)))
+	assert_int(int(outcome.next)-int(outcome.day)).is_equal(Expedition.leaders_wait(float(outcome.people),party,float(mission.expedition.chance)))
+
+func test_a_ruler_stakes_no_more_of_its_people_than_they_can_bear()->void:
+	# A hundredth of the people go, never fewer than a party nor more than twenty.
+	assert_int(Expedition.leaders_party(200.0)).is_equal(Expedition.PARTY_MIN)
+	assert_int(Expedition.leaders_party(1500.0)).is_equal(15)
+	assert_int(Expedition.leaders_party(50000.0)).is_equal(Expedition.LEADERS_PARTY)
+	# 200 people at 1 in 10 wait a generation; 1,500 some five years; a great
+	# people only the half year.
+	assert_int(Expedition.leaders_wait(200.0,12,0.1)).is_equal(ceili(365.0*10.8/0.4))
+	assert_int(Expedition.leaders_wait(1500.0,15,0.1)/365).is_between(4,6)
+	assert_int(Expedition.leaders_wait(200000.0,20,0.1)).is_equal(Expedition.LEADERS_EVERY_DAYS)
+	# Whatever the odds, the lives expected lost stay within the stake a year.
+	for people:float in [150.0,800.0,4000.0,30000.0]:
+		for chance:float in [0.04,0.3,0.8]:
+			var party:=Expedition.leaders_party(people)
+			var yearly:=float(party)*(1.0-chance)*365.0/float(Expedition.leaders_wait(people,party,chance))
+			assert_float(yearly).is_less_equal(people*Expedition.LEADERS_STAKE+0.001)
 
 func test_word_from_over_the_sea_is_a_rumour_with_a_place_and_never_a_meeting()->void:
 	# No boats fit for the sea: nothing is heard.

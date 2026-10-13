@@ -410,9 +410,30 @@ static func followed_signs(world:Node,route:Array,home:Vector2,by_boat:bool=fals
 ## the compass from one its own; the farther reach every other round. It will not send
 ## one over charted water, nor at worse than LEADERS_LEAST_CHANCE, nor more
 ## often than LEADERS_EVERY_DAYS. Same quote, same odds, same roll as ours.
+##
+## It stakes no more of its people than they can bear. The party is
+## LEADERS_PARTY_SHARE of the people (PARTY_MIN to LEADERS_PARTY), and after
+## sending one it waits until the lives it expects to lose, party x the chance
+## of no return, are at most LEADERS_STAKE of its people a year:
+##     wait = 365 x party x (1 - chance) / (people x LEADERS_STAKE) days
+## never less than LEADERS_EVERY_DAYS. So 8,000 people at 1 in 10 send a party
+## about once a year, 1,500 one in six years, 200 one in a generation. (Sent
+## every half year whatever their number, 200 people buried some 3,600 at sea
+## in 180 years, and no people outgrew what its boats took.)
 const LEADERS_EVERY_DAYS:=180
 const LEADERS_LEAST_CHANCE:=0.04
 const LEADERS_PARTY:=20
+const LEADERS_PARTY_SHARE:=0.01
+const LEADERS_STAKE:=0.002
+
+## How many a ruler of `people` sends.
+static func leaders_party(people:float)->int:
+	return clampi(roundi(people*LEADERS_PARTY_SHARE),PARTY_MIN,LEADERS_PARTY)
+
+## Days a ruler of `people` waits after sending `party` at `chance` of return.
+static func leaders_wait(people:float,party:int,chance:float)->int:
+	var at_stake:=float(party)*(1.0-clampf(chance,0.0,1.0))
+	return maxi(LEADERS_EVERY_DAYS,ceili(365.0*at_stake/maxf(0.01,people*LEADERS_STAKE)))
 static func leaders_decide(plan:Dictionary={})->Dictionary:
 	if WorldSimulation.actor_id=="player":return {}
 	var world:Node=WorldSimulation.world
@@ -435,9 +456,12 @@ static func leaders_decide(plan:Dictionary={})->Dictionary:
 	var aimed:=_word_to_follow(world,day)
 	if aimed.is_finite() and turn%2==0:
 		heading=String(names[posmod(roundi(rad_to_deg(fposmod((aimed-Vector2(world.player_world_origin)).angle(),TAU))/45.0),names.size())])
-	var q:=quote(heading,2500.0 if (turn>>3)%2==1 else 1200.0,true,LEADERS_PARTY,world)
+	var people:=maxf(1.0,float(state.population_exact))
+	var party:=leaders_party(people)
+	var q:=quote(heading,2500.0 if (turn>>3)%2==1 else 1200.0,true,party,world)
 	if not bool(q.ok) or bool(q.get("stale",false)) or float(q.get("chance",0.0))<LEADERS_LEAST_CHANCE:return {"tried":heading,"sent":false,"why":String(q.get("blocker","")) if not bool(q.ok) else ("charted" if bool(q.get("stale",false)) else "too far")}
-	var sent:=send(heading,float(q.reach_km),true,LEADERS_PARTY,world)
+	var sent:=send(heading,float(q.reach_km),true,party,world)
+	if bool(sent.get("ok",false)):staff["expedition_next_day"]=day+leaders_wait(people,party,float(q.chance))
 	return {"tried":heading,"sent":bool(sent.get("ok",false)),"why":String(sent.get("error",""))}
 
 ## Where the freshest word of a people this one has not met points, or INF.
