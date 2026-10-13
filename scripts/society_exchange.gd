@@ -10,10 +10,12 @@ const CONTACT_RADIUS:=2.0
 const MINIMUM_ATTRACTION_ADVANTAGE:=0.10
 ## Households drawn by a work that welcomes strangers (drawn_households): every
 ## DRAWN_REVIEW_DAYS, their people x DRAWN_RATE x our pull x their advantage,
-## at most DRAWN_SHARE_MAX of them a month.
+## at most DRAWN_SHARE_MAX of them a month. That is 1.2% a year, under an
+## ordinary people's natural growth (about 1.7%): at .002 a people beside a
+## splendid neighbour lost more than it bore and shrank for 45 years running.
 const DRAWN_REVIEW_DAYS:=30
 const DRAWN_RATE:=.1
-const DRAWN_SHARE_MAX:=.002
+const DRAWN_SHARE_MAX:=.001
 const OBJECTS:={"clay_shaping":["Clay trial vessel","Clay"],"pit_firing":["Fired clay trial piece","Clay"],"cordage":["Braided cord sample","Fiber Plants"],"basketry":["Woven container sample","Fiber Plants"],"stone_sorting":["Selected cutting stone","Stone"],"joinery":["Fitted timber joint","Timber"],"tallies":["Marked counting stick","Timber"]}
 const CULTURE:=["oral_epics","festival_calendar","public_theatre","civic_games","comparative_chronicles","public_libraries","customary_law"]
 
