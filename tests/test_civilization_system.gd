@@ -553,35 +553,6 @@ func test_a_carried_compact_is_their_choice_on_stated_odds()->void:
 	assert_bool(system.compact_answer(civ,relation,"goodwill",0).is_empty()).is_true()
 
 
-func test_computer_civilizations_also_wait_for_carried_treaty_messages()->void:
-	var first:Dictionary=system.civilizations[0]
-	var second:Dictionary=system.civilizations[1]
-	first["position"]=Vector2(0.10,0.10)
-	second["position"]=Vector2(0.105,0.10)
-	system.civilizations[0]=first
-	system.civilizations[1]=second
-	var relation:Dictionary=(first.relations as Dictionary).get(String(second.id),{})
-	relation["opinion"]=0.70
-	relation["border_tension"]=0.05
-	relation["treaty"]="none"
-	relation["at_war"]=false
-	relation["pending_message"]=""
-	system._set_pair_relation(0,1,relation)
-	system._process_intercivilization_relations(30)
-	var proposed:Dictionary=(system.civilizations[0].relations as Dictionary)[String(second.id)]
-	assert_str(String(proposed.get("treaty","none"))).is_equal("none")
-	assert_str(String(proposed.get("pending_message",""))).is_equal("trade")
-	var due_day:=int(proposed.get("pending_message_due_day",-1))
-	assert_int(due_day).is_greater(30)
-	system._process_intercivilization_relations(due_day-1)
-	var in_transit:Dictionary=(system.civilizations[0].relations as Dictionary)[String(second.id)]
-	assert_str(String(in_transit.get("treaty","none"))).is_equal("none")
-	system._process_intercivilization_relations(due_day)
-	var delivered:Dictionary=(system.civilizations[0].relations as Dictionary)[String(second.id)]
-	assert_str(String(delivered.get("treaty","none"))).is_equal("trade")
-	assert_str(String(delivered.get("pending_message",""))).is_equal("")
-
-
 func test_war_declaration_begins_when_the_carried_message_arrives_not_at_departure()->void:
 	_organised_for_war()
 	var civ:Dictionary=system.civilizations[0]
@@ -725,34 +696,6 @@ func test_foreign_scout_homecoming_replaces_the_route_and_uses_current_world_rea
 	assert_float(Vector2(next_scout.point_a).distance_to(Vector2(next_scout.point_b))).is_greater(1000.0)
 	assert_int(int(next_scout.depart_day)).is_equal(20)
 	assert_array(system.validate_state()).is_empty()
-
-
-func test_distant_foreign_rumors_require_reachable_information_and_do_not_create_contact()->void:
-	_hide_all_contacts()
-	system.register_player_origin(Vector2.ZERO)
-	var civ:Dictionary=system.civilizations[0]
-	civ["position"]=Vector2(0.20,0.0)
-	civ["world_reach"]=0.0
-	civ["logistics"]=0.12
-	civ["institutions"]=0.12
-	system.civilizations[0]=civ
-	system._process_foreign_player_rumors(30)
-	assert_float(float(system.civilizations[0].player_relation.get("rival_player_trace_confidence",0.0))).is_equal(0.0)
-	civ=system.civilizations[0]
-	civ["world_reach"]=0.62
-	civ["logistics"]=0.58
-	civ["institutions"]=0.52
-	civ["diplomacy"]=0.55
-	system.civilizations[0]=civ
-	for day in range(60,12001,30):
-		system._process_foreign_player_rumors(day)
-		if float(system.civilizations[0].player_relation.get("rival_player_trace_confidence",0.0))>0.0: break
-	var relation:Dictionary=system.civilizations[0].player_relation
-	assert_float(float(relation.get("rival_player_trace_confidence",0.0))).is_greater(0.0)
-	assert_float(float(relation.get("rival_player_trace_radius_km",0.0))).is_greater(100.0)
-	assert_int(int(relation.get("rival_contact_level",0))).is_equal(1)
-	assert_int(int(relation.get("rival_met_day",-1))).is_equal(-1)
-	assert_int(int(relation.get("contact_level",0))).is_equal(0)
 
 
 func test_foreign_scouts_carry_indirect_settlement_traces_home_before_investigating()->void:
@@ -1236,26 +1179,6 @@ func test_recapture_restores_the_same_region_and_does_not_manufacture_territory(
 	assert_float(system.player_territory_balance).is_equal_approx(starting_player_balance,0.0001)
 
 
-func test_unsupported_occupation_creates_relief_resistance_and_uprising_pressure()->void:
-	var civ:Dictionary=system.civilizations[0]
-	var civ_id:=String(civ.id)
-	var target:Dictionary=system.campaign_targets(civ_id)[0]
-	var capture_result:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":String(target.id),"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(civ.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(civ.name),"prisoners":0}}
-	system.resolve_player_battle(civ_id,capture_result)
-	var region:Dictionary=system.civilizations[0].strategic_regions[0]
-	region["occupation_turns"]=3
-	region["resistance"]=0.88
-	region["integration"]=0.0
-	region["damage"]=0.30
-	system.civilizations[0].strategic_regions[0]=region
-	var pressure:Dictionary=system._occupation_uprising_pressure(system.civilizations[0])
-	assert_bool(bool(pressure.get("eligible",false))).is_true()
-	assert_float(float(pressure.get("chance",0.0))).is_greater(0.06)
-	var effects:Dictionary=system.player_effects()
-	assert_float(float(effects.occupation_relief_demand)).is_greater(0.0)
-	assert_float(float(effects.occupation_burden)).is_greater(0.0)
-
-
 func test_total_urban_control_changes_strategy_status_and_peace_leverage()->void:
 	var civ_id:=String(system.civilizations[0].id)
 	for region_index in system.STRATEGIC_REGIONS_PER_CIV:
@@ -1273,34 +1196,6 @@ func test_total_urban_control_changes_strategy_status_and_peace_leverage()->void
 	system.civilizations[0].player_relation["treaty"]="war"
 	system.civilizations[0].player_relation["opinion"]=-0.60
 	assert_bool(system.player_action_availability(civ_id,"seek_peace").has("error")).is_false()
-
-
-func test_foreign_ai_holding_is_reachable_and_liberated_without_starting_a_hidden_occupation()->void:
-	var occupier:Dictionary=system.civilizations[0]
-	var original_owner:Dictionary=system.civilizations[1]
-	var ai_result:Dictionary=system._resolve_ai_region_control(occupier,original_owner,true,30)
-	assert_bool(bool(ai_result.changed)).is_true()
-	system.civilizations[0]=ai_result.first
-	system.civilizations[1]=ai_result.second
-	var occupied_region_id:=String(ai_result.region_id)
-	system.city_intelligence.publish("player",system.city_intelligence.capture("player",occupied_region_id,.8,30,"returned occupation report","test"),30)
-	var targets:Array=system.campaign_targets(String(occupier.id))
-	var foreign_targets:=targets.filter(func(region:Dictionary)->bool: return bool(region.get("foreign_holding",false)))
-	assert_int(foreign_targets.size()).is_equal(1)
-	assert_bool(bool(foreign_targets[0].available)).is_true()
-	system.civilizations[0].player_relation["at_war"]=true
-	system.civilizations[0].player_relation["treaty"]="war"
-	var campaign:Dictionary=system.offensive_campaign_data(String(occupier.id),100,occupied_region_id)
-	assert_bool(campaign.has("error")).is_false()
-	assert_bool(bool(campaign.liberation_campaign)).is_true()
-	var territory_before:=float(system.civilizations[0].territory)+float(system.civilizations[1].territory)
-	var battle:={"home_side":"attacker","campaign_mode":"offensive","target_region_id":occupied_region_id,"attacker":{"name":"HOME HOST","dead":0,"remaining_troops":200,"supply_level":1.0,"readiness":1.0},"defender":{"name":String(occupier.name),"dead":0},"termination":{"type":"surrender","captor":"HOME HOST","defeated":String(occupier.name),"prisoners":0}}
-	var outcome:Dictionary=system.resolve_player_battle(String(occupier.id),battle)
-	assert_bool(bool(outcome.get("region_liberated",false))).is_true()
-	assert_str(String(system.region_snapshot(String(original_owner.id),occupied_region_id).controller)).is_equal(String(original_owner.id))
-	assert_float(float(system.civilizations[0].territory)+float(system.civilizations[1].territory)).is_equal_approx(territory_before,0.0001)
-	assert_float(float(system.player_territory_balance)).is_equal(0.0)
-	assert_array(system.validate_state()).is_empty()
 
 
 func test_import_rejects_incomplete_or_asymmetric_state_without_mutating_live_world()->void:

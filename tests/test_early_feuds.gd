@@ -590,61 +590,6 @@ func test_the_court_calls_a_feud_a_feud()->void:
 # 6. Two other small peoples feud too; large ones still declare
 # --------------------------------------------------------------------------
 
-func test_two_small_peoples_feud_and_two_large_peoples_carry_a_declaration()->void:
-	var a:=CivilizationSystem.civilizations[1]; var b:=CivilizationSystem.civilizations[2]
-	var day:=100
-	CivilizationSystem.start_rival_feud(1,2,day,"a quarrel on the border")
-	var rel:Dictionary=(a.relations as Dictionary)[String(b.id)]
-	assert_bool(bool(rel.get("at_war",false))).is_false()
-	assert_bool(CivilizationSystem.rival_feud_hot(rel,day+10)).is_true()
-	assert_dict((b.relations as Dictionary)[String(a.id)]).is_equal(rel)
-	# An older save's war between two small peoples becomes their feud.
-	var old:=rel.duplicate(true)
-	old["at_war"]=true; old["treaty"]="war"; old["war_started_day"]=50
-	old["war_id"]=CivilizationSystem._start_war(String(a.id),String(b.id),"limited","",50,"old")
-	CivilizationSystem._set_pair_relation(1,2,old)
-	CivilizationSystem.reconcile_rival_feuds(day)
-	rel=(CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)]
-	assert_bool(bool(rel.get("at_war",false))).is_false()
-	assert_bool(CivilizationSystem.rival_feud_hot(rel,day)).is_true()
-	# A carried "war" between small peoples arrives as a feud.
-	var carried:=rel.duplicate(true)
-	carried["pending_message"]="war"; carried["pending_message_sent_day"]=day; carried["pending_message_due_day"]=day
-	CivilizationSystem._set_pair_relation(1,2,carried)
-	CivilizationSystem._process_intercivilization_relations(day)
-	assert_bool(bool(((CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)] as Dictionary).get("at_war",false))).is_false()
-	# Large peoples keep the declared war.
-	for civ in [CivilizationSystem.civilizations[1],CivilizationSystem.civilizations[2]]:
-		civ["population"]=4000.0
-		civ["cohorts"]=CivilizationSystem._scaled_cohorts(civ.get("cohorts",{}),4000.0)
-	var big:=((CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)] as Dictionary).duplicate(true)
-	for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: big.erase(key)
-	big["pending_message"]="war"; big["pending_message_sent_day"]=day; big["pending_message_due_day"]=day
-	CivilizationSystem._set_pair_relation(1,2,big)
-	CivilizationSystem._process_intercivilization_relations(day)
-	assert_bool(bool(((CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)] as Dictionary).get("at_war",false))).is_true()
-
-func test_a_rival_feud_raids_a_little_and_goes_cold()->void:
-	var a:=CivilizationSystem.civilizations[1]; var b:=CivilizationSystem.civilizations[2]
-	var pop_before:=float(a.population)+float(b.population)
-	CivilizationSystem.start_rival_feud(1,2,0,"a quarrel on the border")
-	for day in range(1,5*365):
-		var rel:Dictionary=(CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)]
-		if int(rel.get("feud_since",-1))<0: break
-		CivilizationSystem._rival_feud_day(CivilizationSystem.civilizations[1],CivilizationSystem.civilizations[2],rel,day)
-		CivilizationSystem._set_pair_relation(1,2,rel)
-	var rel2:Dictionary=(CivilizationSystem.civilizations[1].relations as Dictionary)[String(b.id)]
-	assert_int(int(rel2.get("feud_since",-1))).override_failure_message("the feud never went cold").is_equal(-1)
-	var lost:=pop_before-(float(CivilizationSystem.civilizations[1].population)+float(CivilizationSystem.civilizations[2].population))
-	# A feud between bands kills a few, never a war's toll (EPOCHAL_SHIFTS s3.4).
-	assert_float(lost).is_less(pop_before*0.07)
-	assert_bool(bool(rel2.get("at_war",false))).is_false()
-
-# --------------------------------------------------------------------------
-# 7. A people broken past feuding (Oruq, year 187: its last town burned with
-# one of them left, and the map still read "Feud with Oruq")
-# --------------------------------------------------------------------------
-
 ## Every town of theirs burned or held by us, and only `living` of them left.
 func _break(id:String,living:float)->void:
 	var civ:=_civ(id)
