@@ -513,7 +513,13 @@ static func _contacts()->Array[Dictionary]:
 	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary: continue
 		var rel:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
-		if int(rel.get("contact_level",0))>0: out.append(civ)
+		if int(rel.get("contact_level",0))<=0: continue
+		# Sickness, food begged or robbed, families sent away and healers all
+		# travel: a people with no way between us and them (passage.gd) is no
+		# neighbour for any of it.
+		var me:=String(WorldSimulation.actor_id); var id:=String((civ as Dictionary).get("id",""))
+		if not preload("res://scripts/passage.gd").open(me,id) and not preload("res://scripts/passage.gd").open(id,me): continue
+		out.append(civ)
 	return out
 
 static func _trade_level()->float:

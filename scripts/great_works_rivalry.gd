@@ -337,6 +337,8 @@ static func sabotage(target:String,city_id:String,work_id:String)->Dictionary:
 				sighting=s.duplicate();sighting["position"]=report.get("position",{})
 	if sighting.is_empty():return {"error":"No recent report identifies that work and where it stands."}
 	if not in_contact(source,target):return {"error":"Agents need known routes to that people."}
+	# And a way to walk or sail it (passage.gd).
+	if not preload("res://scripts/passage.gd").open(source,target):return {"error":"No agents can reach that people. "+preload("res://scripts/passage.gd").words(source,target)}
 	var ties:=Exchange.connection(target)
 	if day<int(ties.get("great_work_sabotage_day",-SABOTAGE_COOLDOWN))+SABOTAGE_COOLDOWN:return {"error":"Agents are still recovering from the last attempt."}
 	var r:=work_record(target,city_id,work_id)

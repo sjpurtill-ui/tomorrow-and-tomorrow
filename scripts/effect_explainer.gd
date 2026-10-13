@@ -748,8 +748,26 @@ static func held_words(key:String,amount:float)->String:
 	var full:=(total<=ceiling.x+0.000001) if lower else (total>=ceiling.y-0.000001)
 	if not full: return ""
 	var limit:=ceiling.x if lower else ceiling.y
-	if absf(limit)<0.0000001: return "Held back by our age: this age allows none of it yet, so it adds nothing until a later age opens room for it."
-	return "Held back by our age: what the people know already fills all this age allows (%s), so this adds nothing more until a later age opens more room. Scale bonuses for the same thing share that limit." % percent(limit)
+	var later:=_later_limit(model,key,limit,lower)
+	if absf(limit)<0.0000001: return "Held back by the year: in year %d none of this is possible yet, so it adds nothing until the limit opens%s." % [roundi(float(model.ceiling_era)),later]
+	return "Held back by the year: in year %d this can reach at most %s, and what the people know already fills that, so this adds nothing more yet%s. Scale bonuses for the same thing share that limit." % [roundi(float(model.ceiling_era)),percent(limit),later]
+
+## What the same limit will be a century on, as words to end a "held back"
+## line ("; the limit rises to +31% by year 394"), "" when it will not move.
+## The year is the one the people's knowledge has reached
+## (SocietyModel.society_era): the calendar, or their learning if it lags.
+static func _later_limit(model,key:String,limit:float,lower:bool)->String:
+	var year:=float(model.ceiling_era)
+	var then:=minf(Society.MODERN_ERA,year+100.0)
+	if then<=year: return ""
+	var now_common:Vector2=Society.era_ceiling_for(key,year)
+	var then_common:Vector2=Society.era_ceiling_for(key,then)
+	var base:=now_common.x if lower else now_common.y
+	var next:=then_common.x if lower else then_common.y
+	# The line's own focus or neglect scales both alike.
+	if absf(base)>0.0000001: next*=limit/base
+	if absf(next)<=absf(limit)+0.0005: return ""
+	return "; the limit rises to %s by year %d" % [percent(next),roundi(then)]
 
 static func _feed_line(key:String,feed:Dictionary,now:float)->String:
 	if feed.has("capacity"): return _capacity_line(key,String(feed.capacity),now)
@@ -1101,7 +1119,7 @@ static func _total_notes(key:String,sum:float,capped:float,ceiling:Vector2,upkee
 	var notes:Array[String]=[]
 	if absf(sum-capped)>0.000001:
 		var limit:=ceiling.x if sum<ceiling.x else ceiling.y
-		notes.append("Held back by our age: everything known adds up to %s, but this age allows %s; the rest (%s) counts only as later ages open. Scale bonuses for the same thing share this limit." % [percent(sum),percent(limit),percent(sum-capped)])
+		notes.append("Held back by the year: everything known adds up to %s, but in year %d this can reach at most %s; the rest (%s) counts as the years open more room%s. Scale bonuses for the same thing share this limit." % [percent(sum),roundi(float(_model().ceiling_era)) if _model()!=null else 0,percent(limit),percent(sum-capped),_later_limit(_model(),key,limit,sum<ceiling.x) if _model()!=null else ""])
 	if absf(upkeep)>0.000001:
 		notes.append("Feeding more full-time lore keepers, or keeping more on watch, than this age can spare moves it by %s." % percent(upkeep))
 	return notes

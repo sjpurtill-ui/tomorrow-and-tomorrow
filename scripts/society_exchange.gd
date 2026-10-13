@@ -608,12 +608,16 @@ static func drawn_households(day:int)->int:
 		if source==recipient or owner_state(source)==null or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)):continue
 		if day<int(known_relation(source).get("recruitment_truce_until",0)):continue
 		if float(rivalry.call("known_traffic",source,recipient))<=0.0:continue
+		# Households walk, or cross in their own boats (passage.gd): with no way
+		# nobody comes, and over the sea only the share that lands.
+		var landing:=float(preload("res://scripts/passage.gd").share(source,recipient))
+		if landing<=0.0:continue
 		var theirs_parts:Dictionary=WorldSimulation.scoped(source,func()->Dictionary:return attraction_parts())
 		var theirs:float=WorldSimulation.scoped(source,func()->float:return attraction())
 		var advantage:=ours-theirs
 		if advantage<MINIMUM_ATTRACTION_ADVANTAGE:continue
 		var people:=maxf(0.0,float(owner_state(source).population_exact))
-		var expected:=minf(people*DRAWN_SHARE_MAX,people*DRAWN_RATE*pull*advantage)
+		var expected:=minf(people*DRAWN_SHARE_MAX,people*DRAWN_RATE*pull*advantage)*landing
 		var rng:=RandomNumberGenerator.new()
 		rng.seed=hash("%d:drawn:%s:%s:%d" % [int(WorldSimulation.state.world_seed),source,recipient,day])
 		var count:=mini(room-arrived,floori(expected+rng.randf()))

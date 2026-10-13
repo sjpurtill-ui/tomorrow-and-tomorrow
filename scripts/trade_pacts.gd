@@ -447,6 +447,7 @@ static func seal_blocker(civ_id:String,terms:Dictionary)->String:
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	if civ.is_empty() or not bool(civ.get("alive",true)): return "You have no way to reach that people."
 	if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): return "No exchange holds while you are at war with them."
+	if _ledger().sea_shut("player",civ_id): return String(_ledger().sea_words("player",civ_id))
 	if not valid_terms(terms): return "These terms are incomplete."
 	if pacts(civ_id).size()>=PER_CIV_MAX: return "You already keep %d exchanges with them." % PER_CIV_MAX
 	if pacts().size()>=ACTIVE_MAX: return "Your traders already carry %d exchanges." % ACTIVE_MAX
@@ -516,6 +517,14 @@ static func settle(p:Dictionary,day:int)->void:
 		p.status="lapsed"; p["ended"]=day
 		_log(p,"lapsed","Their people are gone.")
 		_record("An Exchange Ends","The standing exchange with %s is over: there is no one left to trade with." % name,civ_id,"gone:"+String(p.id),"notice")
+		return
+	# No way between us (trade_ledger.sea_shut): the exchange waits like one
+	# stopped by war, and takes up again if the boats ever reach.
+	if _ledger().sea_shut("player",civ_id):
+		if not bool(p.get("suspended",false)):
+			p["suspended"]=true
+			_log(p,"suspended","Suspended: no way across the sea.")
+			_record("No Trader Crosses","The exchange of %s with %s waits. %s" % [short_words(t),name,String(_ledger().sea_words("player",civ_id))],civ_id,"sea:%s:%d" % [p.id,day],"notice")
 		return
 	if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)):
 		if not bool(p.get("suspended",false)):
@@ -673,3 +682,6 @@ static func next_words(p:Dictionary)->String:
 	if bool(p.get("suspended",false)): return "Suspended while you are at war"
 	if bool(p.get("waiting",false)): return "Portion %d waiting for goods (until %s)" % [int(p.done)+1,_when(int(p.due)+window(p.terms))]
 	return "Portion %d of %d due %s" % [int(p.done)+1,int(p.terms.portions),_when(int(p.due))]
+
+static func _ledger()->GDScript:
+	return load("res://scripts/trade_ledger.gd") as GDScript

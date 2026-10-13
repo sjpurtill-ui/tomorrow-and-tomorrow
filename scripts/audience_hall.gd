@@ -1439,6 +1439,10 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var civ:=ForeignDiplomacy.civilization(civ_id)
 	var leader:=ForeignDiplomacy.leader(civ_id)
 	if civ.is_empty() or leader.is_empty(): return {}
+	# No way, no envoy (passage.gd): with no land road they come in their own
+	# boats, only the share those boats bring through arrives, and over a sea
+	# too wide for them nobody is sent at all.
+	if not preload("res://scripts/passage.gd").arrives(civ_id,"player","envoy:%s:%d" % [String(occasion.get("key","")),int(state().serial)],day): return {}
 	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
 	# They come to bow (world_answer.gd): through a feud, past their own
 	# withholding and the business a beaten people would otherwise bring.

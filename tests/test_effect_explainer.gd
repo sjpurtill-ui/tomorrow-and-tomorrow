@@ -255,7 +255,7 @@ func test_a_total_at_its_age_limit_says_it_is_held_back()->void:
 	var model=DiscoverySystem.society_model
 	var ceiling:Vector2=model.era_ceiling("health_protection")
 	model.effect_totals["health_protection"]=ceiling.y
-	assert_str(Explainer.held_words("health_protection",0.01)).starts_with("Held back by our age")
+	assert_str(Explainer.held_words("health_protection",0.01)).starts_with("Held back by the year: in year ")
 	assert_str(Explainer.held_words("health_protection",-0.01)).is_empty()
 	model.effect_totals["health_protection"]=0.0
 	assert_str(Explainer.held_words("health_protection",0.01)).is_empty()

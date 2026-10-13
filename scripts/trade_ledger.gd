@@ -96,8 +96,13 @@ const BOAT_REACH:=1.6
 const BOATS:=["river_craft","reed_bundle_boats","hide_covered_boats","coastal_watercraft"]
 ## Over the sea: no trader puts out when fewer than this share of boats would
 ## come home; water in sight of a coast counts this share of open water
-## (expedition.gd COAST_WEIGHT).
-const SEA_LEAST_HOME:=0.5
+## (expedition.gd COAST_WEIGHT). Nobody makes a road of a crossing that
+## drowns more than one boat in five: that is an expedition's gamble, taken
+## once, not the way traders, envoys or runners go season after season
+## (passage.gd keeps the same floor for everyone a people sends). At 0.5,
+## peoples 670 km of open water apart traded and sent envoys every season
+## in ships that stand 289 km out of sight of land.
+const SEA_LEAST_HOME:=0.8
 const SEA_COAST_WEIGHT:=0.2
 ## A home moved further than this is surveyed again.
 const WAY_MOVED_KM:=5.0
@@ -418,6 +423,11 @@ static func sea_bars(a:String,b:String,ra:Dictionary,rb:Dictionary)->bool:
 	if float(ra.get("end",-1.0))<0.0 and float(rb.get("end",-1.0))<0.0: return false
 	var w:=way(a,b)
 	return String(w.kind)=="sea" and sea_share(a,b,ra,rb)<=0.0 and not is_finite(float(w.around))
+
+## The same, read from each people's own boats: nothing of trade, tribute or
+## the raids on it passes between these two.
+static func sea_shut(a:String,b:String)->bool:
+	return sea_bars(a,b,report(a),report(b))
 
 ## Why nothing crosses, in the engine's numbers.
 static func sea_words(a:String,b:String)->String:

@@ -1711,6 +1711,11 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 	var target_position:Dictionary=(relation.get("home_position",{}) as Dictionary).duplicate(true)
 	if not target_position.has("x") or not target_position.has("z"):
 		return {"error":"The settlement report has no usable map position. A returned scouting report must confirm the route before diplomats can depart."}
+	# A way must lie between the two homes (passage.gd): a land road, or a
+	# sea the boats of the people in scope cross, at the crossing's odds.
+	var Passage:=preload("res://scripts/passage.gd")
+	var passage:Dictionary=Passage.between(String(WorldSimulation.actor_id),civ_id)
+	if not bool(passage.open): return {"error":"No envoy can reach them. "+Passage.words(String(WorldSimulation.actor_id),civ_id)}
 	var normalized_purpose:=purpose.strip_edges().to_lower().replace(" ","_")
 	if normalized_purpose!="goodwill" and normalized_purpose not in CARRIED_DIPLOMATIC_ACTIONS and normalized_purpose not in HOSTILE_DIPLOMATIC_ACTIONS: return {"error":"Unknown diplomatic purpose."}
 	if normalized_purpose in HOSTILE_DIPLOMATIC_ACTIONS:
@@ -1741,7 +1746,7 @@ func diplomatic_mission_quote(civ_id:String,gift_resource:String="",purpose:Stri
 	var provisions:=float(personnel)*float(total_days)*0.55
 	var food_required:=provisions+(float(gift.amount) if String(gift.resource)=="Food" else 0.0)
 	if WorldSimulation.food.total_stored()+0.0001<food_required: return {"error":"Envoys and gift require %.1f Food; only %.1f is stored." % [food_required,WorldSimulation.food.total_stored()]}
-	return {"ok":true,"civ_id":civ_id,"civilization":String(civ.name),"gift":gift,"purpose":normalized_purpose,"purpose_label":String(DIPLOMATIC_PURPOSE_LABELS.get(normalized_purpose,"DIPLOMATIC MISSION")),"personnel":personnel,"provisions":provisions,"origin_position":{"x":player_world_origin.x,"z":player_world_origin.y},"target_position":target_position,"target_kind":target_kind,"distance_km":distance,"travel_days":travel_days,"total_days":total_days}
+	return {"passage_share":float(passage.share),"passage_words":Passage.words(String(WorldSimulation.actor_id),civ_id),"ok":true,"civ_id":civ_id,"civilization":String(civ.name),"gift":gift,"purpose":normalized_purpose,"purpose_label":String(DIPLOMATIC_PURPOSE_LABELS.get(normalized_purpose,"DIPLOMATIC MISSION")),"personnel":personnel,"provisions":provisions,"origin_position":{"x":player_world_origin.x,"z":player_world_origin.y},"target_position":target_position,"target_kind":target_kind,"distance_km":distance,"travel_days":travel_days,"total_days":total_days}
 
 
 func dispatch_diplomat(civ_id:String,gift_resource:String="",purpose:String="goodwill",research_subject:String="",research_mode:String="purchase")->Dictionary:
@@ -1819,6 +1824,15 @@ func _process_diplomatic_mission(day:int)->void:
 	var civ:Dictionary=civilizations[index]
 	var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
 	if not bool(diplomatic_mission.get("arrival_resolved",false)) and day>=int(diplomatic_mission.get("arrival_day",day+1)):
+		# Over the sea only the share the boats bring through arrives (passage.gd).
+		if not preload("res://scripts/passage.gd").arrives(String(WorldSimulation.actor_id),civ_id,"envoys",int(diplomatic_mission.get("depart_day",day))):
+			var lost:=int(diplomatic_mission.get("personnel",2))
+			WorldSimulation.state.register_population_deaths(lost,"Envoys lost at sea")
+			var words:="The %d envoys sent to %s never arrived: their boat was lost at sea, with all they carried. %s" % [lost,String(civ.get("name","them")),preload("res://scripts/passage.gd").words(String(WorldSimulation.actor_id),civ_id)]
+			_record_world_event("Envoys lost at sea",words,"diplomacy",day)
+			WorldSimulation.state.simulation_events.push_front({"day":day,"title":"OUR ENVOYS ARE LOST AT SEA","description":words,"domain":"diplomacy","severity":"major"})
+			diplomatic_mission.clear()
+			return
 		diplomatic_mission["arrival_resolved"]=true
 		diplomatic_mission["stage"]="returning"
 		if day<=int(diplomatic_mission.return_day):
@@ -4234,6 +4248,8 @@ func rival_opens_war(civ_id:String,reason:String)->Dictionary:
 		if not bool(civ.get("alive",true)): return {"ok":false,"error":"gone"}
 		var relation:Dictionary=civ.get("player_relation",{})
 		if bool(relation.get("at_war",false)): return {"ok":false,"error":"already at war"}
+		# No war over a sea neither people's boats cross (war_loop.sea_shut).
+		if bool(preload("res://scripts/war_loop.gd").sea_shut(civ_id)): return {"ok":false,"error":"no way"}
 		# A small people opens no war: it feuds (conflict_scale.gd, war_loop.gd).
 		if not CONFLICT_SCALE.formal(civ_id,self): return {"ok":false,"error":"feud"}
 		var day:=int(WorldSimulation.state.elapsed_days)
@@ -4649,6 +4665,8 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 		return {"ok":true,"action":normalized}
 	if normalized in CARRIED_DIPLOMATIC_ACTIONS and not bool(relation.get("home_location_known",false)):
 		return {"error":"Their settlement is unlocated. A returned scout report must establish a physical destination before this message can be sent.","requires_location":true}
+	if normalized in CARRIED_DIPLOMATIC_ACTIONS and not preload("res://scripts/passage.gd").open(String(WorldSimulation.actor_id),civ_id):
+		return {"error":"No envoy can reach them. "+preload("res://scripts/passage.gd").words(String(WorldSimulation.actor_id),civ_id)}
 	# A good messenger opens doors a poor one finds shut (office_levers.gd).
 	var opinion:=float(relation.get("opinion",0.0))+preload("res://scripts/office_levers.gd").value("Envoy")
 	var at_war:=bool(relation.get("at_war",false))
