@@ -426,6 +426,9 @@ func test_a_few_years_of_punishing_give_a_sane_number_of_raids()->void:
 	_their_men(30.0)
 	_counted(6.0)
 	_train(120)
+	# Spare weapons in store: this bare world has no workshops to replace what
+	# a raid breaks, and a war leader will not take unarmed men to a wall.
+	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+600
 	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
 	Council.order(civ_id,"punish")
 	var sittings:=0

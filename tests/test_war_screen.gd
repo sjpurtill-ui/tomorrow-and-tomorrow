@@ -48,6 +48,7 @@ func before_test()->void:
 		var relation:Dictionary=civ.player_relation
 		relation.contact_level=2; relation.met_day=0
 		for other in civ.relations: civ.relations[other].at_war=false
+	probe._next_door()
 	GameState.elapsed_days=10
 	civ_id=String(CivilizationSystem.civilizations[0].id)
 	MilitaryCampaign.reset_for_new_world()
