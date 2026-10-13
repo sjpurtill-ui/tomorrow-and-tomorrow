@@ -412,8 +412,7 @@ static func _feud_hot(civ_id:String,civ:Dictionary)->bool:
 		return bool(WorldSimulation.scoped("player",func()->bool:return bool(_war_loop().call("hot",me))))
 	var relations:Dictionary=civ.get("relations",{}) if civ.get("relations") is Dictionary else {}
 	var pair:Dictionary=relations.get(String(WorldSimulation.actor_id),{}) if relations.get(String(WorldSimulation.actor_id)) is Dictionary else {}
-	if int(pair.get("feud_since",-1))<0: return false
-	return _today()-int(pair.get("feud_last",-99999))<int(CivilizationSystem.RIVAL_FEUD_HOT_DAYS)
+	return bool(CivilizationSystem.rival_feud_hot(pair,_today()))
 
 ## Their raid on us, called by their feud (war_loop for the god's people):
 ## the council sends a real band at its next sitting, or says why it cannot.

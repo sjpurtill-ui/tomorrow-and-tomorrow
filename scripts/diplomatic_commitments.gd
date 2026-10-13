@@ -30,7 +30,7 @@ func opinion(first:String,second:String)->float:
 func at_war(first:String,second:String)->bool:
 	var value:=civ(second if first=="player" else first)
 	if value.is_empty(): return true
-	return bool(value.player_relation.get("at_war",false)) if "player" in [first,second] else bool((value.relations as Dictionary).get(second,{}).get("at_war",false))
+	return preload("res://scripts/war_state.gd").at_war(first,second)
 
 func eligibility(id:String,t:Dictionary)->String:
 	if not valid_terms(t) or WorldSimulation.diplomacy.leader(id).is_empty(): return "Choose a known leader and valid terms."
