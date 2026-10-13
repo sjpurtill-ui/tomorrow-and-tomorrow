@@ -615,3 +615,21 @@ func test_settles_on_schedule_over_years_without_spam_or_rising_cost()->void:
 	print("trade per-day cost: first year %.0f us, third year %.0f us" % [per_day_first,per_day_third])
 	assert_float(per_day_third).is_less(1500.0)
 	assert_float(per_day_third).is_less_equal(per_day_first*2.0+200.0)
+
+## Food begged or robbed from a neighbour in a hungry season (crisis_system
+## _take_from_civ) comes out of their real stores, at most a quarter of them.
+## It used to lower only their summary's food-days, which their next day's
+## reading wrote over: we were fed and they lost nothing.
+func test_food_taken_from_a_neighbour_in_a_crisis_leaves_their_stores()->void:
+	var Crisis:=preload("res://scripts/crisis_system.gd")
+	var a:=String(ids[0])
+	var before:=_stock(a,"Food")
+	assert_float(before).is_greater(1000.0)
+	var taken:=float(Crisis._take_from_civ(a,400.0))
+	assert_float(taken).is_equal_approx(400.0,0.5)
+	assert_float(_stock(a,"Food")).is_equal_approx(before-taken,0.5)
+	# Never more than a quarter of what they hold.
+	var held:=_stock(a,"Food")
+	var most:=float(Crisis._take_from_civ(a,1000000.0))
+	assert_float(most).is_equal_approx(held*0.25,1.0)
+	assert_float(_stock(a,"Food")).is_equal_approx(held-most,1.0)
