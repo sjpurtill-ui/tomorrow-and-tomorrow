@@ -30,7 +30,6 @@ const STRATEGIC_TURN_DAYS:=30
 const HISTORY_LIMIT:=240
 const INCIDENT_LIMIT:=4
 const AGE_COHORTS:=["children","youth","early_adults","established_adults","mature_adults","elders"]
-const COHORT_DURATION_TURNS:={"children":168.0,"youth":132.0,"early_adults":120.0,"established_adults":120.0,"mature_adults":180.0}
 const STRATEGIES:=["sustenance","growth","inquiry","commerce","fortification","expansion"]
 const IDENTITIES=preload("res://scripts/civilization_identity.gd")
 const LEADER_PERSONALITY=preload("res://scripts/leader_personality.gd")
@@ -77,13 +76,6 @@ const WAR_HISTORY_LIMIT:=64
 # ledger. Individual engagements are a rolling operational appendix; the total
 # battle count survives after old engagement detail is compacted.
 const WAR_BATTLE_LIMIT:=12
-const REGION_VALUE_TEXT:={
-	"frontier":"Opens the road into the rival's strategic interior and weakens its logistics.",
-	"granary":"Constrains the rival's food growth and can eventually support your provision network.",
-	"market":"Cuts exchange access and can become a valuable integrated market.",
-	"works":"Reduces rival production and can add bounded material capacity after integration.",
-	"capital":"Cripples institutions and knowledge, creates major peace leverage, and may break organized resistance."
-}
 
 var civilizations:Array[Dictionary]=[]
 var city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
@@ -641,9 +633,6 @@ func advance_to_day(target_day:int)->void:
 		# Ignoring a backward clock prevents the same strategic turns from being
 		# applied twice to already-advanced aggregate state.
 		return
-	while last_turn_day+STRATEGIC_TURN_DAYS<=target_day:
-		last_turn_day+=STRATEGIC_TURN_DAYS
-		_process_strategic_turn(last_turn_day)
 	last_processed_day=target_day
 	city_intelligence.sample_missions(target_day)
 	Exchange.sample_missions(self,target_day)
@@ -674,21 +663,6 @@ func owned_day_steps(target_day:int)->Array:
 		["world_observation",func()->void:_process_local_observation(target_day)],
 		["world_diplomacy",func()->void:WorldSimulation.diplomacy.advance(target_day)],
 	]
-
-
-func _process_strategic_turn(day:int)->void:
-	turn_index+=1
-	# Every people is a full simulation of its own (WorldSimulation actors) on
-	# the player's own rules; this turn only keeps contact and word moving.
-	_process_intercivilization_relations(day)
-	_process_foreign_player_rumors(day)
-	_process_foreign_scout_reports(day)
-	_process_player_contact(day)
-	_process_player_relations(day)
-	city_intelligence.sample_missions(day)
-	rumor_network.sample(day)
-	_rebuild_competition(true,day)
-	world_changed.emit(competition_snapshot())
 
 
 func register_player_origin(position:Vector2)->void:
@@ -2043,6 +2017,8 @@ func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 			relation["home_position"]={"x":home.x,"z":home.y}
 			relation["home_location_source"]="returned scouts saw it"
 			relation["last_observed_day"]=day
+			# Where and how the two peoples first met is kept with the meeting.
+			relation=_set_contact_provenance(relation,day,"returned_scout_report",home,"settlement","")
 			civ["player_relation"]=relation
 			civilizations[index]=civ
 			_meeting_is_mutual(civ,day,home,"a scouting party",false)
@@ -2075,15 +2051,6 @@ func _foreign_scout_operational_range(civ:Dictionary)->float:
 	# Known country grows about as the player's does (scout_known_reach_km):
 	# a few hundred kilometres in the first decades, continents only later.
 	return clampf(FOREIGN_SCOUT_MIN_RANGE_KM+reach*CIVILIZATION_WORLD_RADIUS_X_KM*institutional_support,FOREIGN_SCOUT_MIN_RANGE_KM,FOREIGN_SCOUT_MAX_RANGE_KM)
-
-
-func _foreign_information_reach_km(civ:Dictionary)->float:
-	# Hearsay can move through several human relays, so its frontier is somewhat
-	# broader than one field party's safe radius, but it still advances only as
-	# logistics, population, diplomacy, and accumulated world reach allow.
-	var diplomacy:=clampf(float(civ.get("diplomacy",0.20)),0.0,1.0)
-	var institutions:=clampf(float(civ.get("institutions",0.15)),0.0,1.0)
-	return _foreign_scout_operational_range(civ)*(0.88+diplomacy*0.26+institutions*0.12)
 
 
 func _foreign_scout_speed_km_per_day(civ:Dictionary)->float:
@@ -2154,41 +2121,6 @@ func _set_foreign_player_trace(relation:Dictionary,center:Vector2,uncertainty_km
 	result["rival_player_trace_day"]=day
 	result["rival_player_trace_source"]=source
 	return result
-
-
-func _process_foreign_player_rumors(day:int)->void:
-	## This is the off-map human network: travelers, displaced people, exchanged
-	## stories, and copied route knowledge. It can create a coarse search lead only
-	## after a polity's physically attainable information frontier reaches the
-	## player's region. It never creates diplomatic contact or an exact location.
-	if not WorldSimulation.state.settlement_site_committed: return
-	var settlement_signal:=_player_settlement_signal_radius(day)
-	for index in civilizations.size():
-		var civ:Dictionary=civilizations[index]
-		if not bool(civ.get("alive",true)): continue
-		var relation:=_relation_with_strategy_defaults(civ.get("player_relation",{}),civ)
-		if int(relation.get("rival_contact_level",0))>=2 or float(relation.get("rival_player_trace_confidence",0.0))>0.0: continue
-		var home:=_civilization_world_position(civ)
-		var distance:=home.distance_to(player_world_origin)
-		var information_reach:=_foreign_information_reach_km(civ)
-		if information_reach<distance: continue
-		var overlap:=clampf((information_reach-distance)/maxf(1.0,distance),0.0,1.0)
-		var network_quality:=clampf(float(civ.get("diplomacy",0.2))*0.38+float(civ.get("logistics",0.1))*0.34+float(civ.get("institutions",0.1))*0.28,0.0,1.0)
-		var monthly_chance:=clampf(0.002+overlap*0.024+network_quality*0.012+settlement_signal/320.0*0.008,0.0,0.055)
-		var rng:=RandomNumberGenerator.new()
-		rng.seed=last_world_seed^day*86028121^String(civ.get("id","civ")).hash()
-		if rng.randf()>=monthly_chance: continue
-		var uncertainty:=clampf(distance*lerpf(0.36,0.12,network_quality),160.0,2800.0)
-		var error_bearing:=rng.randf_range(-PI,PI)
-		var reported_center:=_bounded_world_point(player_world_origin+Vector2.from_angle(error_bearing)*uncertainty*rng.randf_range(0.32,0.88))
-		relation=_set_foreign_player_trace(relation,reported_center,uncertainty,0.06+network_quality*0.18,day,"traveler rumor")
-		var lead:=rumor_network.observation(String(civ.id),"player","the reported people",reported_center,uncertainty,day,"traveler account at the information frontier")
-		lead.confidence=0.06+network_quality*.18; lead.heard_position=rumor_network.point(home)
-		rumor_network.receive(String(civ.id),lead,day)
-		relation["rival_contact_level"]=maxi(1,int(relation.get("rival_contact_level",0)))
-		relation["rival_player_intelligence"]=maxf(float(relation.get("rival_player_intelligence",0.0)),0.015+network_quality*0.025)
-		civ["player_relation"]=relation
-		civilizations[index]=civ
 
 
 func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
@@ -3610,7 +3542,6 @@ func _resolve_taught_knowledge(_day:int,_recruits:int,_contacts:Array)->String:
 	# Specific carried evidence is studied through the ordinary workforce.
 	return ""
 
-const SCOUT_FIND_RESOURCES:Array[String]=["Timber","Stone","Fiber Plants","Fertile Soil","Game"]
 func scout_one_way_range(duration_days:int)->float:
 	## How far a party can range: logistics staffing, established route-speed knowledge from Logistics inquiry, and —
 	## transformatively — an adopted mounted-scouting tradition.
@@ -3714,22 +3645,6 @@ func _resolve_scout_windfalls(mission:Dictionary,_route:Array,day:int)->Array[St
 	for item:Dictionary in mission.discoveries:notes.append("%s — %s" % [String(item.title),String(item.consequence)])
 	return notes
 
-func _process_player_contact(day:int)->void:
-	# Intelligence grows only after a real meeting. A scout mission reveals nothing
-	# in transit; its bounded route and observations become knowledge on return.
-	for index in civilizations.size():
-		var civ:Dictionary=civilizations[index]
-		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-		if int(relation.contact_level)>=2:
-			var access:=0.006+float(civ.diplomacy)*0.003
-			if String(relation.get("treaty","none"))=="trade": access+=0.018
-			if bool(relation.get("at_war",false)): access+=0.010
-			relation["contact_intelligence"]=clampf(float(relation.contact_intelligence)+access,0.0,0.95)
-		civ["player_relation"]=relation
-		civilizations[index]=civ
-	_complete_due_scout_missions(day)
-
-
 func _external_threat(civ:Dictionary) -> float:
 	var highest:=0.0
 	var own_power:=_military_power(civ)
@@ -3801,112 +3716,6 @@ func _intercivilization_message_days(first:Dictionary,second:Dictionary,round_tr
 	return one_way*(2 if round_trip else 1)
 
 
-func _process_intercivilization_relations(day:int)->void:
-	for first_index in civilizations.size():
-		for second_index in range(first_index+1,civilizations.size()):
-			var first:Dictionary=civilizations[first_index]
-			var second:Dictionary=civilizations[second_index]
-			if not bool(first.alive) or not bool(second.alive): continue
-			var relation:Dictionary=(first.relations as Dictionary).get(String(second.id),{})
-			var rng:=RandomNumberGenerator.new()
-			rng.seed=last_world_seed^day*104729^(first_index+1)*8191^(second_index+1)*131071
-			var pending_message:=String(relation.get("pending_message",""))
-			var pending_due_day:=int(relation.get("pending_message_due_day",-1))
-			if pending_message!="" and pending_due_day>=0 and day>=pending_due_day:
-				var current_opinion:=float(relation.get("opinion",0.0))
-				var current_tension:=float(relation.get("border_tension",0.0))
-				match pending_message:
-					"trade":
-						if not bool(relation.get("at_war",false)) and current_opinion>0.14:
-							relation["treaty"]="trade"
-					"non_aggression":
-						if not bool(relation.get("at_war",false)) and current_opinion>0.08 and current_tension<0.42:
-							relation["treaty"]="non_aggression"
-					"war":
-						if not bool(relation.get("at_war",false)):
-							if not CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self):
-								# Small peoples carry no declaration: the quarrel is a feud.
-								_begin_rival_feud(relation,first,second,day,"a quarrel on the border")
-							else:
-								relation["at_war"]=true
-								relation["treaty"]="war"
-								relation["war_started_day"]=day
-								relation["war_id"]=_start_war(String(first.id),String(second.id),"limited","",day,"A physically carried declaration follows escalating border pressure")
-								relation["trade"]=0.0
-								relation["border_tension"]=maxf(current_tension,0.68)
-								_record_world_event("War declaration delivered","A declaration carried between %s and %s opens a state of war." % [String(first.name),String(second.name)],"war",day)
-				relation["pending_message"]=""
-				relation["pending_message_sent_day"]=-1
-				relation["pending_message_due_day"]=-1
-			if bool(relation.get("at_war",false)):
-				relation["trade"]=0.0
-				civilizations[first_index]=first
-				civilizations[second_index]=second
-				_set_pair_relation(first_index,second_index,relation)
-				_resolve_ai_war_turn(first_index,second_index,relation,rng,day)
-				continue
-			var opinion:=clampf(float(relation.get("opinion",0.0))+rng.randf_range(-0.006,0.006),-1.0,1.0)
-			var proximity_distance:=Vector2(first.position).distance_to(Vector2(second.position))
-			var trade:=0.0
-			var treaty:=String(relation.get("treaty","none"))
-			if treaty=="trade" and opinion>0.10 and proximity_distance<1.55:
-				trade=minf(float(first.population),float(second.population))*(0.0008+opinion*0.0018)*(0.35+minf(float(first.logistics),float(second.logistics)))
-				# A blockaded port trades less by sea (naval_blockade.gd, bounded).
-				trade*=WorldSimulation.military.blockade_trade_factor(String(first.id))*WorldSimulation.military.blockade_trade_factor(String(second.id))
-				first["production"]=clampf(float(first.production)+trade/maxf(1.0,float(first.population))*0.004,0.0,1.0)
-				second["production"]=clampf(float(second.production)+trade/maxf(1.0,float(second.population))*0.004,0.0,1.0)
-				first["trade_total"]=float(first.trade_total)+trade
-				second["trade_total"]=float(second.trade_total)+trade
-				opinion=clampf(opinion+0.0015, -1.0,1.0)
-			var pressure:=clampf(maxf(0.0,float(first.population)/maxf(1.0,float(first.food_capacity))-0.98)*0.30+maxf(0.0,float(second.population)/maxf(1.0,float(second.food_capacity))-0.98)*0.30,0.0,0.50)
-			var shared_aggression:=(float(first.aggression)+float(second.aggression))*0.5
-			var shared_diplomacy:=(float(first.diplomacy)+float(second.diplomacy))*0.5
-			var tension:=clampf(float(relation.get("border_tension",0.0))+pressure*0.025+maxf(0.0,-opinion)*0.006+shared_aggression*0.004-shared_diplomacy*0.002-maxf(0.0,opinion)*0.004,0.0,1.0)
-			if treaty=="truce":
-				tension=maxf(0.0,tension-0.018)
-				if tension<0.18: treaty="none"
-			# A treaty breaks when regard falls below its floor: lower between
-			# persuasive peoples (standing.gd treaty_floor; 0.04 for typical ones).
-			elif treaty in ["trade","non_aggression"] and opinion<preload("res://scripts/standing.gd").treaty_floor(String(first.id),String(second.id)):
-				treaty="none"
-			relation["treaty"]=treaty
-			var war_capacity:=_war_count(first)<2 and _war_count(second)<2
-			var pact_blocks_war:=treaty in ["non_aggression","truce"]
-			pending_message=String(relation.get("pending_message",""))
-			if pending_message=="":
-				if not pact_blocks_war and war_capacity and opinion<-0.20 and tension>0.48 and shared_aggression+rng.randf()*0.35>0.76:
-					if CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self):
-						relation["pending_message"]="war"
-						relation["pending_message_sent_day"]=day
-						relation["pending_message_due_day"]=day+_intercivilization_message_days(first,second,false)
-					elif not rival_feud_hot(relation,day):
-						# Two small peoples: the same pressure starts a feud, not a war.
-						_begin_rival_feud(relation,first,second,day,"pressure on the border")
-				elif treaty=="none" and opinion>0.38 and proximity_distance<1.55:
-					relation["pending_message"]="trade"
-					relation["pending_message_sent_day"]=day
-					relation["pending_message_due_day"]=day+_intercivilization_message_days(first,second,true)
-				elif treaty=="none" and opinion>0.18 and tension<0.27:
-					relation["pending_message"]="non_aggression"
-					relation["pending_message_sent_day"]=day
-					relation["pending_message_due_day"]=day+_intercivilization_message_days(first,second,true)
-			relation["opinion"]=opinion
-			relation["trade"]=trade
-			relation["border_tension"]=tension
-			if int(relation.get("feud_since",-1))>=0: _rival_feud_day(first,second,relation,day)
-			civilizations[first_index]=first
-			civilizations[second_index]=second
-			_set_pair_relation(first_index,second_index,relation)
-
-
-# --------------------------------------------------------------------------
-# Feuds between two other peoples (conflict_scale.gd): below the war line two
-# peoples raid each other; nobody declares or carries anything. Kept on their
-# pair relation: feud_since, feud_last (the last raid), feud_raids,
-# feud_dead {civ_id: n}, feud_cause. Hot while blood was spilled within
-# RIVAL_FEUD_HOT_DAYS; cold after RIVAL_FEUD_COLD_DAYS of quiet.
-# --------------------------------------------------------------------------
-
 func rival_feud_hot(relation:Dictionary,day:int)->bool:
 	return int(relation.get("feud_since",-1))>=0 and day-int(relation.get("feud_last",-99999))<RIVAL_FEUD_HOT_DAYS
 
@@ -3930,47 +3739,6 @@ func start_rival_feud(first_index:int,second_index:int,day:int,why:String="")->v
 	_begin_rival_feud(relation,first,second,day,why if why!="" else "old quarrels")
 	_set_pair_relation(first_index,second_index,relation)
 
-## One day of a feud between two other peoples: now and then a raid, fewer as
-## the feud ages and none once a side has buried too many; cold after long quiet.
-func _rival_feud_day(first:Dictionary,second:Dictionary,relation:Dictionary,day:int)->void:
-	if day-int(relation.get("feud_last",-99999))>=RIVAL_FEUD_COLD_DAYS:
-		for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
-		relation["feud_ended_day"]=day
-		return
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:rival_feud:%s:%s:%d" % [last_world_seed,String(first.id),String(second.id),day])
-	var heat:=exp(-float(maxi(0,day-int(relation.get("feud_since",day))))/RIVAL_FEUD_AGE_DAYS)
-	if rng.randf()>=RIVAL_FEUD_RAID_DAILY*heat: return
-	var dead:Dictionary=relation.get("feud_dead",{}) if relation.get("feud_dead") is Dictionary else {}
-	var first_attacks:=rng.randf()<clampf(0.5+(float(first.get("aggression",0.4))-float(second.get("aggression",0.4)))*0.5,0.2,0.8)
-	var attacker:Dictionary=first if first_attacks else second
-	var defender:Dictionary=second if first_attacks else first
-	# A people that has buried a twenty-fifth of itself in the feud stays home.
-	if float(dead.get(String(attacker.id),0))>=float(attacker.population)*0.04: return
-	var d_pop:=float(defender.population)
-	var d_dead:=clampi(roundi(d_pop*rng.randf_range(0.002,0.008)),0,maxi(1,ceili(d_pop*0.025)))
-	var a_dead:=roundi(float(d_dead)*rng.randf_range(0.0,0.6))
-	_feud_losses(defender,d_dead)
-	_feud_losses(attacker,a_dead)
-	dead[String(defender.id)]=int(dead.get(String(defender.id),0))+d_dead
-	dead[String(attacker.id)]=int(dead.get(String(attacker.id),0))+a_dead
-	relation["feud_dead"]=dead
-	relation["feud_raids"]=int(relation.get("feud_raids",0))+1
-	if d_dead+a_dead>0: relation["feud_last"]=day
-	relation["border_tension"]=clampf(float(relation.get("border_tension",0.5))+0.02,0.0,1.0)
-	relation["opinion"]=clampf(float(relation.get("opinion",-0.3))-0.02,-1.0,1.0)
-
-## Those a feud's raid killed, from a people's own count.
-func _feud_losses(civ:Dictionary,dead:int)->void:
-	if dead<=0: return
-	var before:=float(civ.population)
-	var lost:=minf(float(dead),maxf(0.0,before-1.0))
-	if lost<=0.0: return
-	civ["population"]=before-lost
-	civ["military_population"]=maxf(0.0,float(civ.get("military_population",0.0))-lost*0.7)
-	if civ.get("cohorts") is Dictionary: civ["cohorts"]=_scaled_cohorts(_remove_weighted_cohort_population(civ.cohorts,lost,{"children":0.08,"youth":1.3,"early_adults":1.85,"established_adults":1.7,"mature_adults":1.05,"elders":0.18}),float(civ.population))
-	_scale_strategic_region_populations(civ,float(civ.population)/maxf(1.0,before))
-
 ## Two small peoples found at war with each other (an older save, a war from
 ## before the rule): the war ends and they feud (war_loop.reconcile).
 func reconcile_rival_feuds(day:int)->void:
@@ -3993,191 +3761,6 @@ func reconcile_rival_feuds(day:int)->void:
 			_begin_rival_feud(relation,first,second,since,"the old war between them" if since<day else "a quarrel on the border")
 			relation["feud_last"]=day
 			_set_pair_relation(first_index,second_index,relation)
-
-
-func _resolve_ai_war_turn(first_index:int,second_index:int,relation:Dictionary,rng:RandomNumberGenerator,day:int)->void:
-	var first:Dictionary=civilizations[first_index]
-	var second:Dictionary=civilizations[second_index]
-	var first_population_before:=float(first.population)
-	var second_population_before:=float(second.population)
-	var first_power:=_military_power(first)*rng.randf_range(0.82,1.18)
-	var second_power:=_military_power(second)*rng.randf_range(0.82,1.18)
-	var total_power:=maxf(1.0,first_power+second_power)
-	relation=_ensure_relation_war(relation,String(first.id),String(second.id),day,"Ongoing interstate war")
-	relation["trade"]=0.0
-	var intensity:=rng.randf_range(0.002,0.010)
-	var first_total_dead:=minf(float(first.population)*0.035,float(first.population)*intensity*(second_power/total_power))
-	var second_total_dead:=minf(float(second.population)*0.035,float(second.population)*intensity*(first_power/total_power))
-	var first_military_dead:=minf(float(first.military_population),first_total_dead*0.72)
-	var second_military_dead:=minf(float(second.military_population),second_total_dead*0.72)
-	var first_civilian_dead:=maxf(0.0,first_total_dead-first_military_dead)
-	var second_civilian_dead:=maxf(0.0,second_total_dead-second_military_dead)
-	first["population"]=maxf(1.0,float(first.population)-first_total_dead)
-	second["population"]=maxf(1.0,float(second.population)-second_total_dead)
-	first=_scale_strategic_region_populations(first,float(first.population)/maxf(1.0,first_population_before))
-	second=_scale_strategic_region_populations(second,float(second.population)/maxf(1.0,second_population_before))
-	first["military_population"]=maxf(0.0,float(first.military_population)-first_military_dead)
-	second["military_population"]=maxf(0.0,float(second.military_population)-second_military_dead)
-	var combat_weights:={"children":0.08,"youth":1.30,"early_adults":1.85,"established_adults":1.70,"mature_adults":1.05,"elders":0.18}
-	first["cohorts"]=_scaled_cohorts(_remove_weighted_cohort_population(first.cohorts,first_total_dead,combat_weights),float(first.population))
-	second["cohorts"]=_scaled_cohorts(_remove_weighted_cohort_population(second.cohorts,second_total_dead,combat_weights),float(second.population))
-	_record_war_battle(String(relation.war_id),{"day":day,"name":"Campaign of Year %d" % (int(floor(float(day)/365.0))+1),"location":"contested frontier","outcome":"ongoing","losses":{String(first.id):{"military_dead":roundi(first_military_dead),"civilian_dead":roundi(first_civilian_dead),"wounded":roundi(first_military_dead*1.7),"captured":0,"displaced":roundi(first_civilian_dead*3.0)},String(second.id):{"military_dead":roundi(second_military_dead),"civilian_dead":roundi(second_civilian_dead),"wounded":roundi(second_military_dead*1.7),"captured":0,"displaced":roundi(second_civilian_dead*3.0)}}})
-	var transfer:=rng.randf_range(0.002,0.012)
-	var power_ratio:=maxf(first_power,second_power)/maxf(1.0,minf(first_power,second_power))
-	if rng.randf()<clampf(0.035+(power_ratio-1.0)*0.055,0.035,0.16):
-		var control_result:=_resolve_ai_region_control(first,second,first_power>second_power,day)
-		first=control_result.first
-		second=control_result.second
-		if not bool(control_result.get("changed",false)):
-			if first_power>second_power: first["territory"]=float(first.territory)+transfer; second["territory"]=maxf(0.08,float(second.territory)-transfer)
-			else: second["territory"]=float(second.territory)+transfer; first["territory"]=maxf(0.08,float(first.territory)-transfer)
-	elif first_power>second_power:
-		first["territory"]=float(first.territory)+transfer
-		second["territory"]=maxf(0.08,float(second.territory)-transfer)
-	else:
-		second["territory"]=float(second.territory)+transfer
-		first["territory"]=maxf(0.08,float(first.territory)-transfer)
-	relation["opinion"]=clampf(float(relation.get("opinion",-0.5))-0.015,-1.0,1.0)
-	relation["border_tension"]=clampf(float(relation.get("border_tension",0.7))+0.01,0.0,1.0)
-	if rng.randf()<0.035+minf(first_power,second_power)/maxf(first_power,second_power)*0.025:
-		relation["at_war"]=false
-		relation["treaty"]="truce"
-		relation["border_tension"]=0.28
-		var winner:=String(first.name) if first_power>second_power else String(second.name)
-		if first_power>second_power: first["wars_won"]=int(first.wars_won)+1; second["wars_lost"]=int(second.wars_lost)+1
-		else: second["wars_won"]=int(second.wars_won)+1; first["wars_lost"]=int(first.wars_lost)+1
-		_end_war(String(relation.get("war_id","")),day,"%s advantage; truce" % winner)
-		_record_world_event("Interstate truce","%s gains the advantage before a truce halts the current campaign." % winner,"diplomacy",day)
-	civilizations[first_index]=first
-	civilizations[second_index]=second
-	_set_pair_relation(first_index,second_index,relation)
-
-
-func _resolve_ai_region_control(first:Dictionary,second:Dictionary,first_won:bool,day:int)->Dictionary:
-	var winner:=first if first_won else second
-	var loser:=second if first_won else first
-	var target_owner:Dictionary=loser
-	var target_index:=-1
-	var recapture:=false
-	# A polity restores its own deepest occupied region before pushing farther
-	# into its enemy's ordered strategic front.
-	for index in range((winner.get("strategic_regions",[]) as Array).size()-1,-1,-1):
-		var candidate:Dictionary=winner.strategic_regions[index]
-		if String(candidate.get("controller",String(winner.id)))==String(loser.id): target_index=index; target_owner=winner; recapture=true; break
-	if target_index<0:
-		for index in (loser.get("strategic_regions",[]) as Array).size():
-			var candidate:Dictionary=loser.strategic_regions[index]
-			var controller:=String(candidate.get("controller",String(loser.id)))
-			if controller==String(winner.id): continue
-			if controller==String(loser.id): target_index=index
-			# A third power or the player physically controls the next approach.
-			# The winner cannot skip through that region and seize cities behind it.
-			break
-	if target_index<0: return {"first":first,"second":second,"changed":false}
-	var regions:Array=(target_owner.get("strategic_regions",[]) as Array).duplicate(true)
-	var region:Dictionary=regions[target_index]
-	var territory_value:=minf(float(region.get("territory_value",0.01)),maxf(0.0,float(loser.territory)-0.08))
-	region["controller"]=String(winner.id)
-	region["resistance"]=0.0 if recapture else clampf(0.36+float(target_owner.cohesion)*0.32,0.25,0.86)
-	region["integration"]=1.0 if recapture else 0.0
-	region["occupation_turns"]=0
-	region["damage"]=clampf(float(region.get("damage",0.0))+0.04,0.0,1.0)
-	region["last_control_change_day"]=day
-	regions[target_index]=region
-	target_owner["strategic_regions"]=regions
-	winner["territory"]=float(winner.territory)+territory_value
-	loser["territory"]=maxf(0.08,float(loser.territory)-territory_value)
-	if String(target_owner.id)==String(winner.id): winner=target_owner
-	else: loser=target_owner
-	var action:="recaptures" if recapture else "captures"
-	_record_world_event("Strategic region changes hands","%s %s %s from %s; population remains aggregate while control, territory, and regional capacity change." % [String(winner.name),action,String(region.name),String(loser.name)],"war",day)
-	return {"first":winner if first_won else loser,"second":loser if first_won else winner,"changed":true,"region_id":String(region.id),"recapture":recapture}
-
-
-func _process_player_relations(day:int)->void:
-	for index in civilizations.size():
-		var civ:Dictionary=civilizations[index]
-		var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id))
-		var player_power:=float(known_player.power) if float(known_player.power)>0 else _military_power(civ)
-		var relation:Dictionary=_relation_with_strategy_defaults(civ.player_relation,civ)
-		relation=settlement_siting.apply_observed(civ,relation,day)
-		var opinion:=float(relation.get("opinion",0.0))
-		if int(relation.get("contact_level",0))<2:
-			relation["trade"]=0.0
-			relation["opinion"]=opinion
-			civ["player_relation"]=relation
-			civilizations[index]=civ
-			continue
-		if String(relation.get("treaty","none"))=="trade" and not bool(relation.get("at_war",false)):
-			var trade:=minf(WorldSimulation.state.population_exact,float(civ.population))*(0.001+maxf(0.0,opinion)*0.002)*(0.4+float(civ.logistics)*0.6)
-			trade*=WorldSimulation.military.blockade_trade_factor("player")*WorldSimulation.military.blockade_trade_factor(String(civ.id))
-			relation["trade"]=trade
-			civ["trade_total"]=float(civ.trade_total)+trade
-			opinion=clampf(opinion+0.002,-1.0,1.0)
-		else: relation["trade"]=0.0
-		if bool(relation.get("at_war",false)):
-			relation=_ensure_relation_war(relation,"player",String(civ.id),day,"Ongoing player war")
-			relation["conflict_turns"]=int(relation.get("conflict_turns",0))+1
-			var occupied_status:=_player_occupation_status(civ)
-			relation["player_war_exhaustion"]=clampf(float(relation.get("player_war_exhaustion",0.0))+0.012+float(occupied_status.region_count)*0.002,0.0,1.0)
-			relation["rival_war_exhaustion"]=clampf(float(relation.get("rival_war_exhaustion",0.0))+0.014+float(occupied_status.region_count)*0.008,0.0,1.0)
-			relation["border_tension"]=clampf(float(relation.get("border_tension",0.7))+0.018,0.0,1.0)
-			opinion=clampf(opinion-0.01,-1.0,1.0)
-			_queue_player_incident_if_due(civ,relation,day)
-		elif String(relation.get("treaty","none"))!="non_aggression" and day>=int(relation.get("truce_until_day",0)):
-			var rival_intelligence:=clampf(float(relation.get("rival_player_intelligence",0.0)),0.0,1.0)
-			var strategic_pressure:=(float(civ.aggression)*0.45+maxf(0.0,_military_power(civ)/maxf(1.0,player_power)-1.0)*0.10+maxf(0.0,-opinion)*0.25)*lerpf(0.42,1.0,rival_intelligence)
-			if int(relation.get("rival_contact_level",0))>=2 and rival_intelligence>=0.12 and WorldSimulation.state.settlement_site_committed and day>=90 and opinion<-0.34 and strategic_pressure>0.48:
-				var rng:=RandomNumberGenerator.new(); rng.seed=last_world_seed^day*524287^(index+1)*4099
-				# A small people mounts no campaign: its raiders come instead (the
-				# raid below and war_loop.gd's feud; conflict_scale.gd).
-				if rng.randf()<clampf(0.06+strategic_pressure*0.16,0.0,0.32) and CONFLICT_SCALE.formal(String(civ.id),self):
-					relation["at_war"]=true
-					relation["treaty"]="war"
-					relation["war_goal"]="defend"
-					relation["war_target_region_id"]=""
-					relation["war_score"]=0.0
-					relation["war_started_day"]=day
-					relation["war_id"]=_start_war("player",String(civ.id),"defend","",day,"Organized rival invasion")
-					relation["conflict_turns"]=0
-					relation["trade"]=0.0
-					relation["border_tension"]=maxf(0.72,float(relation.get("border_tension",0.0)))
-					_record_world_event("A rival opens war","%s begins an organized campaign against the player civilization." % String(civ.name),"war",day)
-					_queue_player_incident_if_due(civ,relation,day)
-			# Hostile neighbors can also attempt a bounded raid without first opening a
-			# conquest war. Contact, intelligence, disposition, distance/logistics, and a
-			# long cooldown all constrain this; it is not a random alert generator.
-			if not bool(relation.get("at_war",false)):
-				_queue_player_raid_if_due(civ,relation,day,index)
-		# A paper truce cannot make an unsupported occupation inert. High local
-		# resistance can reopen the war as a bounded regional uprising, using the
-		# same aggregate recapture campaign rather than spawning citizen agents.
-		if not bool(relation.get("at_war",false)):
-			relation["player_war_exhaustion"]=maxf(0.0,float(relation.get("player_war_exhaustion",0.0))-0.025)
-			relation["rival_war_exhaustion"]=maxf(0.0,float(relation.get("rival_war_exhaustion",0.0))-0.025)
-			relation["war_score"]=move_toward(float(relation.get("war_score",0.0)),0.0,5.0)
-			relation["conflict_turns"]=0
-			var uprising:=_occupation_uprising_pressure(civ)
-			if bool(uprising.get("eligible",false)):
-				var rng:=RandomNumberGenerator.new()
-				rng.seed=last_world_seed^day*15485863^(index+1)*32452843^String(uprising.get("region_id","")).hash()
-				if rng.randf()<float(uprising.get("chance",0.0)):
-					relation["at_war"]=true
-					relation["treaty"]="war"
-					relation["stance"]="hostile"
-					relation["war_goal"]="defend"
-					relation["war_target_region_id"]=String(uprising.get("region_id",""))
-					relation["war_score"]=-15.0
-					relation["war_started_day"]=day
-					relation["war_id"]=_start_war("player",String(civ.id),"defend",String(uprising.get("region_id","")),day,"Occupation uprising")
-					relation["trade"]=0.0
-					relation["border_tension"]=maxf(0.84,float(relation.get("border_tension",0.0)))
-					if CONFLICT_SCALE.formal(String(civ.id),self): _record_world_event("Occupation uprising","%s organizes a mass recapture campaign around %s; aggregate resistance became action because the occupation was under-garrisoned." % [String(civ.name),String(uprising.get("region_name","an occupied region"))],"war",day)
-					else: _record_world_event("Occupation uprising","The people of %s rise against the garrison we left at %s; there were too few of ours to hold them down." % [String(civ.name),String(uprising.get("region_name","their town"))],"war",day,{"feud":true})
-					_queue_player_incident_if_due(civ,relation,day)
-		relation["opinion"]=opinion
-		civ["player_relation"]=relation
-		civilizations[index]=civ
 
 
 func _player_occupation_status(civ:Dictionary)->Dictionary:
@@ -4204,27 +3787,6 @@ func _home_control_status(civ:Dictionary)->Dictionary:
 		controlled+=1
 		capital_controlled=capital_controlled or String(region.get("role",""))=="capital"
 	return {"controlled":controlled,"lost":STRATEGIC_REGIONS_PER_CIV-controlled,"capital_controlled":capital_controlled}
-
-
-func _occupation_uprising_pressure(civ:Dictionary)->Dictionary:
-	var selected:Dictionary={}
-	var highest_pressure:=0.0
-	for region_variant in civ.get("strategic_regions",[]):
-		var region:Dictionary=region_variant
-		if String(region.get("controller",String(civ.id)))!="player": continue
-		if int(region.get("occupation_turns",0))<2: continue
-		var force:Dictionary={}
-		if MilitaryCampaign!=null and WorldSimulation.military.has_method("occupation_force_for_region"):
-			force=WorldSimulation.military.occupation_force_for_region(String(civ.id),String(region.id))
-		var required:=occupation_requirement(civ,region)
-		var coverage:=clampf(float(force.get("troops",0))/maxf(1.0,required),0.0,1.5)
-		var resistance:=float(region.get("resistance",0.0))
-		var pressure:=resistance*(1.0-minf(1.0,coverage))*clampf(0.65+float(region.get("damage",0.0))*0.55,0.0,1.2)
-		if resistance>=0.55 and coverage<0.72 and pressure>highest_pressure:
-			highest_pressure=pressure
-			selected={"eligible":true,"region_id":String(region.id),"region_name":String(region.name),"resistance":resistance,"coverage":coverage,"chance":clampf(0.06+maxf(0.0,resistance-0.55)*0.42+(1.0-minf(1.0,coverage))*0.14,0.06,0.32)}
-	if selected.is_empty(): return {"eligible":false,"chance":0.0}
-	return selected
 
 
 ## A rival ruler's own decision to open war on the player (vengeance for
@@ -4277,30 +3839,6 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 		incident["terrain_defense"]=clampf(1.02+float(recapture_target.get("fortification",0.2))*(1.0-float(recapture_target.get("damage",0.0))*0.70)*0.30,1.02,1.30)
 	pending_player_incidents.append(incident)
 	relation["last_incident_day"]=day
-
-
-func _queue_player_raid_if_due(civ:Dictionary,relation:Dictionary,day:int,civ_index:int)->void:
-	if not bool(city_intelligence.player_estimate(String(civ.id),true).known): return
-	if pending_player_incidents.size()>=INCIDENT_LIMIT: return
-	if day-int(relation.get("last_raid_day",-9999))<mini(720,180*(1+int(relation.get("failed_home_raids",0)))): return
-	if int(relation.get("rival_contact_level",0))<2: return
-	var intelligence:=clampf(float(relation.get("rival_player_intelligence",0.0)),0.0,1.0)
-	if intelligence<0.10: return
-	var hostility:=clampf(float(civ.get("aggression",0.0))*0.46+maxf(0.0,-float(relation.get("opinion",0.0)))*0.34+float(relation.get("border_tension",0.0))*0.20,0.0,1.0)
-	if hostility<0.30: return
-	for queued in pending_player_incidents:
-		if String((queued as Dictionary).get("source_civ_id",""))==String(civ.id): return
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=last_world_seed^day*32452843^(civ_index+1)*49979687
-	if rng.randf()>clampf(0.025+hostility*0.085,0.0,0.12): return
-	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
-	if not bool(known_player.known): return
-	var projection:=land_military_population(civ)*0.16
-	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
-	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return
-	pending_player_incidents.append({"id":"raid_%s_%d" % [String(civ.id),day],"incident_kind":"raid","field_encounter":true,"source_civ_id":String(civ.id),"source_name":String(civ.name),"strength":strength,"technology":float(civ.knowledge),"readiness":clampf(float(civ.military_readiness),0.1,1.0),"aggression":float(civ.aggression),"created_day":day})
-	relation["last_raid_day"]=day
-	relation["border_tension"]=clampf(float(relation.get("border_tension",0.0))+0.08,0.0,1.0)
 
 
 func _recapture_target(civ:Dictionary)->Dictionary:
@@ -5355,7 +4893,7 @@ func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
 	return visible
 
 
-func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->void:
+func _rebuild_competition()->void:
 	var snapshot_data:=competition_snapshot() if not civilizations.is_empty() else {}
 	if snapshot_data.is_empty(): return
 	for contender in snapshot_data.leaders:
@@ -5364,26 +4902,6 @@ func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->voi
 		if score_index>=0:
 			civilizations[score_index]["score"]=float(contender.score)
 			civilizations[score_index]["rank"]=int(contender.rank)
-	if advance_outcome:
-		var outcome_day:=evaluation_day if evaluation_day>=0 else int(WorldSimulation.state.elapsed_days)
-		# Comparative strength is a chronicle observation only; nothing is won.
-		var strong:=int(snapshot_data.player_rank)==1 and int(snapshot_data.player_domains_led)>=4 and float(snapshot_data.lead_margin)>=1.10
-		var effects:=player_effects()
-		var collapsing:=WorldSimulation.state.population_health<0.12 and WorldSimulation.state.food_security<0.12 and float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.62))<0.12 and float(effects.hostile_pressure)>0.35
-		collapse_turns=collapse_turns+1 if collapsing and not WorldSimulation.military.recovery.has_active_occupation() and WorldSimulation.military.recovery.data.remnant.is_empty() else 0
-		# Strength and distress are historical episodes; the game has no end state.
-		chronicle.observe(outcome_day,_chronicle_facts(collapsing,strong))
-
-func _chronicle_facts(crisis:bool=false,strong:bool=false)->Dictionary:
-	var contacts:=0;var trading:=false
-	for civ:Dictionary in civilizations:
-		if int(civ.player_relation.get("contact_level",0))>=2:contacts+=1
-		if float(civ.player_relation.get("trade",0))>0:trading=true
-	var discoveries:=0
-	for value in WorldSimulation.state.discovery_adoption.values():
-		if float(value)>=.5:discoveries+=1
-	return {"population":int(WorldSimulation.state.population_exact),"contacts":contacts,"discoveries":discoveries,"crisis":crisis,"healthy":WorldSimulation.state.population_health>=.65 and WorldSimulation.state.food_security>=.7,"dominant":strong,"settlement":not WorldSimulation.state.settlement_completed.is_empty(),"exchange":trading,"learning":discoveries>=12,"institutions":float(WorldSimulation.state.society_capacities.get("institutions",0))>=.6,"communities":WorldSimulation.state.settlement_nuclei.size()>1}
-
 
 func _player_profile()->Dictionary:
 	var effects:=player_effects()
