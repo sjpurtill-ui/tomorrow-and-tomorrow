@@ -40,6 +40,10 @@ var world:Node
 var origin:Vector2
 var explorer:RefCounted
 var craft:Dictionary
+## An expedition's push (expedition.gd): the voyage makes as far along its
+## bearing as the days allow and lands at the farthest shore that way, rather
+## than the scouts' freshest coast.
+var push:=false
 
 static func seaworthiness()->float:
 	var known:Array=WorldSimulation.state.known_discoveries
@@ -168,6 +172,11 @@ func search(launch:Vector2,budget:float,bearing:float,step:float)->Dictionary:
 			var weight:=1.0 if is_finite(shore.x) else .35
 			var fresh:float=float(current.fresh)+step*weight*explorer.novelty(shore if is_finite(shore.x) else point)
 			var value:float=(fresh+distance*.10+origin.distance_to(point)*.15)/maxf(1.0,budget)
+			if push:
+				# Along the bearing; drifting off it to either side counts against.
+				var u:=Vector2.from_angle(bearing)
+				var off:=point-origin
+				value=(off.dot(u)-0.35*absf(off.cross(u))+fresh*.02)/maxf(1.0,budget)
 			nodes.append({"point":point,"distance":distance,"open":open,"fresh":fresh,"parent":index,"score":value,"shore":shore})
 			var next:=nodes.size()-1;pending.append(next)
 			if is_finite(shore.x) and (best<0 or value>float(nodes[best].score)):best=next

@@ -11,8 +11,16 @@ extends RefCounted
 ## - Planning is spread over days: at most PLANS_PER_DAY searches a day, in a
 ##   fixed order (deterministic for a seed), never from a per-frame getter.
 ## - Until its road is planned a formation holds at its own home (point_a).
-## - With no land road at all (another landmass, no way round) it stays home;
-##   it never walks on water. (Rival sea transport is not modelled here.)
+## - With no land road at all (another landmass, no way round) an army stays
+##   home; it never walks on water.
+## - A SCOUT party with no land road takes to its people's boats, by the rule
+##   our own expeditions sail under (expedition.gd): on foot to its shore, over
+##   the water on its bearing, ashore and on to where it was sent. Its boats
+##   must be fit for the sea (sea_voyage.gd capability, that people's own);
+##   the crossing is survived at
+##       0.5 ^ ((coast km x 0.2 + open km) / that people's sea endurance)
+##   rolled once, seeded, when the road is planned. A party lost at sea is not
+##   seen again that journey (it holds at home until its next is planned).
 ## - Formations with their own planned route (rumour-led scouts, whose route
 ##   comes from the scout planner) or a commanded position (live rivals moved
 ##   by land_command.gd) are left alone.
@@ -23,6 +31,8 @@ extends RefCounted
 ##   land_route        [{x,z},...] from point_a to point_b along the road
 ##   land_route_key    which point_a/point_b the road was planned for
 ##   land_route_state  "ok" | "none"
+##   sea_road          {open_km, coast_km, chance, from, to} when it sails
+##   lost_at_sea       true for a journey whose crossing failed
 ##   land_route_km     the road's length
 ##   land_leg_base     the scheduler's straight-line leg_days, before scaling
 ##   land_route_effort the road's effort in level km (march_terrain.gd); each
@@ -55,7 +65,79 @@ static func managed(f:Dictionary)->bool:
 static func pending(f:Dictionary)->bool:
 	return managed(f) and String(f.get("land_route_key",""))!=key(f)
 
-static func plan(f:Dictionary,ground:Callable=Callable())->Dictionary:
+## Water run samples along a crossing, km apart.
+const SEA_SAMPLE_KM:=4.0
+## A stretch of water is open sea when no land lies within this of it, km.
+const SEA_SIGHT_KM:=25.0
+## A km under sail costs this much of a km on foot (for the march's timing).
+const SEA_EFFORT:=0.45
+
+## That people's boats: {ok, endurance_km}, in its own scope. A people that
+## is not simulated by the shared rules has none.
+static func craft_of(f:Dictionary)->Dictionary:
+	var id:=String(f.get("civ_id",""))
+	if id=="" or Engine.get_main_loop()==null or not WorldSimulation.actors.has(id): return {"ok":false}
+	return WorldSimulation.scoped(id,func()->Dictionary:
+		var craft:Dictionary=preload("res://scripts/sea_voyage.gd").capability()
+		return {"ok":bool(craft.get("ok",false)),"endurance_km":float(preload("res://scripts/expedition.gd").endurance_km(true))})
+
+## A scout party's road over water when the land gives none: {points, e,
+## length_km, effort_km, open_km, coast_km, from, to, end} or {error}.
+static func sea_road(a:Vector2,b:Vector2,ground:Callable)->Dictionary:
+	var length:=a.distance_to(b)
+	if length<SEA_SAMPLE_KM*3.0 or not bool(ground.call(a)): return {"error":"no crossing"}
+	var steps:=clampi(ceili(length/SEA_SAMPLE_KM),3,2400)
+	# The shore it leaves: the last dry sample before the first water.
+	var first_wet:=-1
+	for i in range(1,steps+1):
+		if not bool(ground.call(a.lerp(b,float(i)/float(steps)))): first_wet=i; break
+	if first_wet<0: return {"error":"no water on the way"}
+	# The shore it makes: the first dry sample after the last water short of the goal.
+	var last_wet:=-1
+	for i in range(steps,first_wet-1,-1):
+		if not bool(ground.call(a.lerp(b,float(i)/float(steps)))): last_wet=i; break
+	if last_wet>=steps:
+		# Sent to a point at sea: it lands at the last dry ground on its bearing.
+		var dry:=-1
+		for i in range(steps,first_wet,-1):
+			if bool(ground.call(a.lerp(b,float(i)/float(steps)))): dry=i; break
+		if dry<0: return {"error":"no far shore"}
+		b=a.lerp(b,float(dry)/float(steps))
+		return sea_road(a,b,ground)
+	var from:=a.lerp(b,float(first_wet-1)/float(steps))
+	var to:=a.lerp(b,float(last_wet+1)/float(steps))
+	# Water in sight of a coast, and water out of sight of land.
+	var open:=0.0; var coast:=0.0
+	var piece:=length/float(steps)
+	for i in range(first_wet,last_wet+1):
+		var p:=a.lerp(b,float(i)/float(steps))
+		if bool(ground.call(p)): continue
+		var near:=false
+		for k in 8:
+			if bool(ground.call(p+Vector2.from_angle(TAU*float(k)/8.0)*SEA_SIGHT_KM)): near=true; break
+		if near: coast+=piece
+		else: open+=piece
+	var points:Array[Vector2]=[]
+	var marks:=PackedFloat32Array()
+	var effort:=0.0
+	# On foot to the shore.
+	var here:=a
+	for leg:Array in [[a,from,false],[from,to,true],[to,b,false]]:
+		var start:Vector2=leg[0]; var goal:Vector2=leg[1]
+		var way:Array=[goal]
+		if not bool(leg[2]) and start.distance_to(goal)>1.0:
+			var found:=Route.find(start,goal,ground,true,{})
+			if not found.has("error"): way=found.get("points",[goal])
+		for p:Vector2 in way:
+			effort+=here.distance_to(p)*(SEA_EFFORT if bool(leg[2]) else 1.0)
+			points.append(p); marks.append(effort)
+			here=p
+	var total:=0.0
+	var at:=a
+	for p in points: total+=at.distance_to(p); at=p
+	return {"points":points,"e":marks,"length_km":total,"effort_km":effort,"open_km":open,"coast_km":coast,"from":from,"to":to,"end":b}
+
+static func plan(f:Dictionary,ground:Callable=Callable(),craft:Dictionary={})->Dictionary:
 	## Plans one formation's road in place. Returns the search result.
 	if not ground.is_valid(): ground=land()
 	if not ground.is_valid(): return {"error":"no survey"}
@@ -71,6 +153,22 @@ static func plan(f:Dictionary,ground:Callable=Callable())->Dictionary:
 	var found:=Route.find(a,b,ground,true,ctx)
 	if not found.has("error") and not found.has("e"): found=Route._with_profile(a,found.get("points",[]),mix,ground,found)
 	f["land_route_key"]=key(f)
+	f.erase("sea_road"); f.erase("lost_at_sea")
+	if found.has("error") and String(f.get("kind",""))=="scout":
+		# No way by land: by sea, if this people's boats are fit for it.
+		if craft.is_empty(): craft=craft_of(f)
+		if bool(craft.get("ok",false)):
+			var sailed:=sea_road(a,b,ground)
+			if not sailed.has("error"):
+				var chance:=clampf(pow(0.5,(float(sailed.coast_km)*0.2+float(sailed.open_km))/maxf(1.0,float(craft.get("endurance_km",250.0)))),0.01,0.99)
+				var rng:=RandomNumberGenerator.new()
+				rng.seed=hash(key(f)+"|"+String(f.get("id","")))
+				if float(craft.get("roll",rng.randf()))<chance:
+					found=sailed
+					b=sailed.end
+					f["sea_road"]={"open_km":float(sailed.open_km),"coast_km":float(sailed.coast_km),"chance":chance,"from":{"x":sailed.from.x,"z":sailed.from.y},"to":{"x":sailed.to.x,"z":sailed.to.y}}
+				else:
+					f["lost_at_sea"]=true
 	if found.has("error"):
 		f["land_route_state"]="none"
 		f["land_route"]=[]
@@ -205,5 +303,6 @@ static func valid(f:Dictionary)->String:
 	for p in road:
 		if not p is Dictionary or not is_finite(float(p.get("x",NAN))) or not is_finite(float(p.get("z",NAN))): return "Foreign formation land route has an invalid point."
 	if String(f.get("land_route_state","ok")) not in ["ok","none"]: return "Foreign formation land route state is invalid."
+	if f.has("sea_road") and not f.sea_road is Dictionary: return "Foreign formation sea road is malformed."
 	if not is_finite(float(f.get("land_route_km",0.0))) or not is_finite(float(f.get("land_leg_base",1.0))) or not is_finite(float(f.get("land_route_effort",0.0))): return "Foreign formation land route length is invalid."
 	return ""

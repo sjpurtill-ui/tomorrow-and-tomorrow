@@ -132,14 +132,77 @@ func test_at_war_the_front_is_where_our_lands_meet()->void:
 	assert_float(pts[pts.size()/2].x).is_less(5.0+float(worked.sigma)*Model.BORDER_BEND+0.01)
 
 
-func test_a_border_front_stands_in_any_age_once_lands_meet()->void:
-	# The raid age draws no front from the forces, but a shared border at
-	# war is a front all the same; a front along it gives way to it.
+func test_a_political_border_does_not_claim_a_deployed_defence()->void:
+	# A shared border is quiet context. Town guards do not become troops
+	# physically deployed along it merely because the chart needs a line.
 	var built:=Overlay.compose({"mode":"raid","stage":"band","friendly":[],"enemy":[],"borders":[{"civ":"kez","points":_border(),"ours_at":[Vector2(0,0)],"theirs_at":[Vector2(10,0)]}]})
-	assert_int((built.fronts as Array).size()).is_equal(1)
-	assert_bool(bool(built.fronts[0].border)).is_true()
+	assert_array(built.fronts).is_empty()
+	assert_int((built.political as Array).size()).is_equal(1)
 	# No shared border: no front in the raid age.
 	assert_array(Overlay.compose({"mode":"raid","stage":"band","friendly":[],"enemy":[]}).fronts).is_empty()
+
+
+func test_deployed_coverage_keeps_real_gaps_and_ignores_intended_assignment()->void:
+	var left:={"id":"1","army_id":1,"pos":Vector2(-1,-3),"strength":3000.0,"border_front":{"id":"sector-a","points":[{"x":0.0,"z":-5.0},{"x":0.0,"z":-1.0}]}}
+	var right:={"id":"2","army_id":2,"pos":Vector2(-1,3),"strength":1800.0,"defense_points":[{"x":0.0,"z":1.0},{"x":0.0,"z":5.0}]}
+	var intended:={"id":"3","army_id":3,"pos":Vector2(-1,0),"strength":2000.0,"border_sector":{"points":[{"x":0.0,"z":-1.0},{"x":0.0,"z":1.0}]},"border_front":{"id":"sector-c","points":[]}}
+	var built:=Overlay.compose({"mode":"front","home":Vector2(-10,0),"friendly":[left,right,intended],"enemy":[]})
+	assert_int(built.fronts.size()).is_equal(2)
+	for front:Dictionary in built.fronts:
+		assert_bool(front.deployed).is_true()
+		for point:Vector2 in front.points:assert_float(absf(point.y)).is_greater_equal(0.999)
+	assert_array(Model.defense_points(intended)).is_empty()
+	assert_str(String(built.fronts[0].id)).contains("sector-a")
+
+
+func test_enemy_held_line_stays_at_the_observed_geometry_and_report_age()->void:
+	var seen:={"id":"foe","pos":Vector2(8,0),"strength":900.0,"age_days":25,"defense_points":[{"x":7.0,"z":-2.0},{"x":7.0,"z":2.0}]}
+	var before:=var_to_str(seen)
+	var held:=Model.deployed_fronts([], [seen], Vector2.ZERO)
+	assert_int(held.size()).is_equal(1)
+	assert_bool(held[0].ours).is_false()
+	assert_bool(held[0].stale).is_true()
+	for point:Vector2 in held[0].points:assert_float(point.x).is_equal(7.0)
+	assert_float(held[0].age[0]).is_equal(25.0)
+	assert_str(var_to_str(seen)).is_equal(before)
+
+
+func test_lost_coverage_opens_a_gap_without_morphing_a_neighbour_into_it()->void:
+	var overlay:Control=auto_free(Overlay.new())
+	var forces:=[{"id":"left","army_id":1,"pos":Vector2(0,-3),"strength":3000.0,"defense_points":[Vector2(0,-5),Vector2(0,-1)]},
+		{"id":"right","army_id":2,"pos":Vector2(0,3),"strength":3000.0,"defense_points":[Vector2(0,1),Vector2(0,5)]}]
+	overlay.set_scene(Overlay.compose({"mode":"front","friendly":forces}),true)
+	forces[0].defense_points=[]
+	overlay.set_scene(Overlay.compose({"mode":"front","friendly":forces}))
+	assert_int(overlay.live_fronts.size()).is_equal(1)
+	assert_str(overlay.live_fronts[0].data.id).contains("right")
+	for point:Vector2 in overlay.live_fronts[0].points:assert_float(point.y).is_greater_equal(0.999)
+
+
+func test_reported_coverage_is_bounded_and_does_not_heat_without_live_contact()->void:
+	var sources:Array=[]
+	for i in 120:sources.append({"id":str(i),"pos":Vector2(i,0),"strength":10000.0,"defense_points":[Vector2(i,-2),Vector2(i,2)]})
+	var held:=Model.deployed_fronts(sources,sources)
+	assert_int(held.size()).is_less_equal(Model.MAX_DEPLOYED_FRONTS)
+	for front:Dictionary in held:
+		assert_int(front.points.size()).is_less_equal(Model.DEPLOYED_POINTS)
+		for value:float in Overlay._coverage_heat(front,[]):assert_float(value).is_equal(0.0)
+
+
+func test_mobile_snapshot_does_not_become_a_guard_and_only_current_coverage_heats()->void:
+	var mobile:={"id":"mobile","army_id":1,"pos":Vector2(-1,0),"strength":5000.0,"border_front":{"assigned":false,"points":[]}}
+	assert_bool(Model.has_deployment(mobile)).is_false()
+	var old:=mobile.duplicate(true)
+	old.border_front={"assigned":true,"id":"old","points":[Vector2(0,-2),Vector2(0,2)]}
+	old.report_age=2
+	var now:=old.duplicate(true);now.report_age=0
+	var battle:={"pos":Vector2.ZERO,"age_days":0,"kind":"battle","skirmish":false}
+	var dated:=Overlay._coverage_heat(Model.deployed_fronts([old],[])[0],[battle])
+	for value:float in dated:assert_float(value).is_equal(0.0)
+	var heated:=Overlay._coverage_heat(Model.deployed_fronts([now],[])[0],[battle])
+	assert_float(heated[heated.size()/2]).is_greater(0.9)
+	battle.status="won"
+	for value:float in Overlay._coverage_heat(Model.deployed_fronts([now],[])[0],[battle]):assert_float(value).is_equal(0.0)
 
 
 func test_a_border_front_splits_into_sectors_with_who_holds_each()->void:

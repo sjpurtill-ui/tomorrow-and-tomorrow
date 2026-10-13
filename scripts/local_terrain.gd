@@ -865,6 +865,47 @@ func _capture_preview_if_requested() -> void:
 	if "--capture-supply-map" in OS.get_cmdline_user_args():
 		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
 		for capture_frame in 40: await get_tree().process_frame
+	# Diagnostic: whether each people's home can be reached from ours by land (tools/land_link_report.gd).
+	if "--capture-land-links" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/land_link_report.gd").call("lines"):print("LAND LINK ",line)
+	# Diagnostic: what the scouts' search beyond the charts finds (tools/scout_beyond_report.gd).
+	if "--capture-scout-beyond" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/scout_beyond_report.gd").call("lines"):print("SCOUT BEYOND ",line)
+	# Diagnostic: how armies go between us and each people, and over real water near home (tools/army_sea_report.gd).
+	if "--capture-army-sea" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/army_sea_report.gd").call("lines"):print("ARMY SEA ",line)
+	# Diagnostic: the food an army carries on each road (tools/march_food_report.gd).
+	if "--capture-march-food" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/march_food_report.gd").call("lines"):print("MARCH FOOD ",line)
+	# Diagnostic: whether each rival's scouts could reach us by sea (tools/rival_ships_report.gd).
+	if "--capture-rival-ships" in OS.get_cmdline_user_args():
+		for line:String in load("res://tools/rival_ships_report.gd").call("lines"):print("RIVAL SHIPS ",line)
+	# Capture only: the expedition planner, "--capture-expedition=<heading>,<km>[,sea]".
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-expedition="):
+			var parts:=argument.get_slice("=",1).split(",")
+			var planner:Node=preload("res://scripts/hud/expedition_planner.gd").open(self)
+			planner.set("heading",parts[0]);planner.set("reach_km",float(parts[1]));planner.set("by_sea",parts.size()>2 and parts[2]=="sea")
+			planner.call("requote")
+			for capture_frame in 30: await get_tree().process_frame
+			var glide_until:=Time.get_ticks_msec()+6000
+			while zoom_target_size>0.0 and Time.get_ticks_msec()<glide_until: await get_tree().process_frame
+			var staged:Dictionary=(planner.get("current") as Dictionary).duplicate()
+			staged.erase("route_plan")
+			print("CAPTURE EXPEDITION size ",camera.size," ",staged)
+			var staged_route:Array=((planner.get("current") as Dictionary).get("route_plan",{}) as Dictionary).get("route",[])
+			for civ:Dictionary in CivilizationSystem.civilizations:
+				var off:=float(CivilizationSystem._closest_route_encounter(staged_route,CivilizationSystem._civilization_world_position(civ)).distance) if staged_route.size()>1 else INF
+				if off<600.0:print("CAPTURE EXPEDITION passes ",roundi(off)," km from the home of ",civ.name,"; signs followed overland: ",preload("res://scripts/expedition.gd").followed_signs(CivilizationSystem,staged_route,CivilizationSystem._civilization_world_position(civ),bool(planner.get("by_sea"))).is_finite())
+	# Capture only: the map's Border mode (hud/border_map.gd), with the ghost
+	# at "--capture-border-ghost=<bearing deg>,<km>" from the seat (a move of
+	# the first fort with "--capture-border-move") or the first fort's note
+	# open with "--capture-border-note".
+	for argument in OS.get_cmdline_user_args():
+		if argument=="--capture-border-map" or argument.begins_with("--capture-border-") or argument.begins_with("--capture-fort-close="):
+			print("CAPTURE BORDER ",load("res://tools/border_map_capture.gd").call("stage",self))
+			for capture_frame in 12: await get_tree().process_frame
+			break
 	# Capture only: the War screen's map (its camera easing, the borders built
 	# on a worker thread and the fronts read from them) settles over a few
 	# seconds; give it them.
@@ -14399,12 +14440,11 @@ func _create_player_scout_route_marker(mission:Dictionary,route:Array,band:Strin
 	var clearance:=float(profile.clearance)
 	root.set_meta("visual_zoom",visual_zoom)
 	root.set_meta("route_width",route_width)
-	# Ink darkens with recency; older charts fade toward the map.
-	# Iron-gall ink throughout: the party still out and the freshest charts at
-	# full strength, older charts fading in opacity but never turning grey.
+	# Current scout orders remain legible. Completed journeys are quiet map
+	# context; their former full-strength ink competed with borders and battles.
 	var freshness:=1.0 if active else lerpf(1.0,0.42,float(rank)/float(maxi(1,SCOUT_CHART_RETURNED_LIMIT-1)))
-	var ink:=Color("#2b2118"); ink.a=0.88*freshness
-	var paper:=Color("#efe3c2"); paper.a=(0.22 if active else 0.16)*freshness
+	var ink:=Color("#2b2118"); ink.a=(0.88 if active else 0.20)*freshness
+	var paper:=Color("#efe3c2"); paper.a=(0.22 if active else 0.04)*freshness
 	# Simplify at ~3 screen pixels before fitting the curve (the view is ~900 px).
 	var chart:=ScoutChartStroke.smooth(route_points,float(profile.dot),visual_zoom*0.0035)
 	var heights:=PackedFloat32Array()

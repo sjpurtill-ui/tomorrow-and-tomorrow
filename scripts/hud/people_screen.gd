@@ -530,13 +530,24 @@ func _row_kinds(task:Dictionary,per:int)->Array:
 	return kinds.slice(0,FIGURES_PER_ROW)
 
 
+## A task's number: its share of those who can work, in whole percents
+## (the split adds up to 100). A share holds still as the people grow.
+static func _share_text(task:Dictionary)->String:
+	if not task.has("share"):return str(int(task.get("count",0)))
+	# Before percents are a people's own way of counting: "18 in 100".
+	return ("%d in 100" if bool(task.get("share_plain",false)) else "%d%%") % int(task.get("share",0))
+
+static func _share_tip(task:Dictionary)->String:
+	return "%s people today." % preload("res://scripts/hud/era_words.gd").grouped(int(task.get("count",0)))
+
 ## Writes a task's count, effect words and tooltip into the row drawn.
 func _write_row_numbers(row:Control,task:Dictionary)->bool:
 	var role:=String(task.get("id",""))
 	var line:=row.get_node_or_null("TaskHead/Task_%s" % role) as HBoxContainer
 	var number:=line.get_node_or_null("Count") as Label if line!=null else null
 	if number==null:return false
-	number.text=str(int(task.get("count",0)))
+	number.text=_share_text(task)
+	number.tooltip_text=_share_tip(task)
 	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
 	for part:Array in [["now","Effect"],["plus_ten","TenMore"],["genius","Gifted"]]:
 		var label:=row.get_node_or_null("TaskHead/%s" % String(part[1])) as Label
@@ -579,7 +590,7 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 		var parts:PackedStringArray=[]
 		for pair in task.mix:parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
 		row.tooltip_text=", ".join(parts).capitalize().left(1)+", ".join(parts).substr(1)+"."
-	var number:=T.make_label(str(count),12,T.INK);number.name="Count";number.custom_minimum_size.x=30;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(number)
+	var number:=T.make_label(_share_text(task),12,T.INK);number.name="Count";number.custom_minimum_size.x=62 if bool(task.get("share_plain",false)) else 36;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;number.mouse_filter=Control.MOUSE_FILTER_PASS;number.tooltip_text=_share_tip(task);row.add_child(number)
 	if manual and on_move is Callable:
 		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
 		less.pressed.connect((on_move as Callable).bind(role,-1))

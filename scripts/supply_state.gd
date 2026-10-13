@@ -1436,6 +1436,9 @@ static func of_force(force:Dictionary)->Dictionary:
 			var ratio:=clampf(float(force.get("provision_ratio",0.0)),0.0,1.0)
 			report.ratio=ratio; report.state=state_of(ratio)
 			report.carried=clampf(float(force.get("provisions_delivered_today",0.0))/need,0.0,1.0)
+			# What came off the band's own carts, apart from the line from home.
+			report["train"]=clampf(float(force.get("provisions_train_today",0.0))/need,0.0,float(report.carried))
+			report.carried=float(report.carried)-float(report.train)
 			report.foraged=clampf(float(force.get("provisions_foraged_today",0.0))/need,0.0,1.0)
 			report.local=clampf(float(force.get("provisions_local_today",0.0))/need,0.0,1.0)
 			report["recorded"]=true
@@ -1461,6 +1464,7 @@ static func of_force(force:Dictionary)->Dictionary:
 	var hunger_recent:=today()-int(force.get("hunger_last_day",-100000))<=30
 	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary and hunger_recent else {}
 	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
+	if kind=="field" and force.has("train_days") and not bool(report.get("at_home",false)): report["train_days"]=float(force.train_days)
 	report["living_off_land"]=bool(force.get("living_off_land",false)) and String(force.get("status",""))=="moving"
 	# How long they have camped here and how much of the country's food is left.
 	if kind=="field" and String(force.get("status",""))!="moving" and not bool(report.get("at_home",false)):
@@ -1556,7 +1560,7 @@ static func words(report:Dictionary)->String:
 		return "At home: fed from the stores (%d%%)." % roundi(ratio*100.0)
 	var parts:Array=[]; var names:Array=[]
 	var town:=String(report.get("name","the town")) if String(report.get("force_kind",""))=="garrison" else "the town"
-	for row in [["local",float(report.get("local",0.0)),"from %s" % town],["foraged",float(report.get("foraged",0.0)),"foraged"],["carried",float(report.get("carried",0.0)),"carried"]]:
+	for row in [["local",float(report.get("local",0.0)),"from %s" % town],["foraged",float(report.get("foraged",0.0)),"foraged"],["train",float(report.get("train",0.0)),"from what they brought"],["carried",float(report.get("carried",0.0)),"carried from home"]]:
 		if float(row[1])>0.004: parts.append(float(row[1])); names.append(String(row[2]))
 	var pcts:=percents(ratio,parts)
 	var shares:PackedStringArray=PackedStringArray()
@@ -1567,6 +1571,8 @@ static func words(report:Dictionary)->String:
 	var text:=head+(": "+", ".join(shares) if not shares.is_empty() else "")
 	text+="; "+line_words(report)+"."
 	var hungry:=float(report.get("hungry_days",0.0))
+	if float(report.get("train_days",0.0))>=1.0: text+=" They carry food for %d more days." % int(float(report.train_days))
+	elif report.has("train_days") and float(report.get("train",0.0))<=0.004 and float(report.get("carried",0.0))<0.5: text+=" The food they brought is gone."
 	if bool(report.get("hungry",false)) and hungry>=1.0: text+=" Hungry %d days." % roundi(hungry)
 	if float(report.get("forage_left",1.0))<0.5: text+=" Camped %d days, they have eaten out %s the country round them." % [roundi(float(report.get("camp_days",0.0))),"most of" if float(report.forage_left)>CAMP_FORAGE_FLOOR+0.05 else "all"]
 	return text

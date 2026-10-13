@@ -73,6 +73,7 @@ func test_a_rivals_eye_found_among_us_is_our_prisoner_and_our_distrust()->void:
 	var held_before:=Captives.held().size()
 	var before:=Corps.distrust()
 	WorldSimulation.scoped(rival,func()->void:
+		_place("human")
 		var op:=Covert.launch("plant","human","","trader",Covert.volunteer_for("plant"))
 		assert_bool(op.has("error")).override_failure_message(String(op.get("error",""))).is_false()
 		(op.odds as Dictionary)["settle"]=1.0
@@ -95,9 +96,18 @@ func test_a_rivals_long_network_among_us_sharpens_what_it_knows_of_us()->void:
 	(them.player_relation as Dictionary)["contact_intelligence"]=0.2
 	var fresh:float=WorldSimulation.scoped(rival,func()->float: return Standing.certainty("human"))
 	WorldSimulation.scoped(rival,func()->void:
+		_place("human")
 		var op:=Covert.launch("plant","human","","trader",Covert.volunteer_for("plant"))
 		op["stage"]="in_place"
 		op["settled_day"]=int(WorldSimulation.state.elapsed_days)-20*365)
 	var old:float=WorldSimulation.scoped(rival,func()->float: return Standing.certainty("human"))
 	assert_float(old).is_greater(fresh)
 	assert_float(old).is_greater_equal(0.95)
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true

@@ -321,8 +321,8 @@ func collect()->Dictionary:
 	# for the bands, in a drill course or joining.
 	var army_home:=int(levy.get("men",0))
 	out["levy_tip"]=_lines(PackedStringArray(["The watch at home: %s" % EraWords.grouped(army_home),
-		"%s free for the bands%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in a drill course" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
-		("%s guard home and the towns" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
+		"%s free to send%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in a drill course" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
+		("%s in the home guard" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
 		("Keeping watch: %s of %s, %s" % [Law.level_name(String(reading.get("level",""))),EraWords.grouped(people),EraWords.grouped(target)]) if target>0 else "Nobody keeps watch"]))
 	out.levy={"side":"ours","troops":army_home,"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
@@ -740,7 +740,6 @@ func draw_top(canvas:Control)->void:
 		canvas.draw_string(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,0.95))
 	# The hosts.
 	var k:=0.9
-	var plate:=Counter.plate_size(k)
 	var items:Array=[]
 	var home:=_screen(scene.get("home",Vector2.INF))
 	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"data":scene.levy,"tip":scene.get("levy_tip",PackedStringArray())})
@@ -754,6 +753,7 @@ func draw_top(canvas:Control)->void:
 	for item:Dictionary in items:
 		var at:Vector2=item.at
 		if not view.grow(80).has_point(at): continue
+		var plate:=Counter.plate_size(k,item.data)
 		var spot:=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))

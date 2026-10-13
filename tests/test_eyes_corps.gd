@@ -79,6 +79,7 @@ func test_a_trained_eye_settled_in_is_rarely_found_and_word_comes_home_by_the_ro
 	(state.eyes as Dictionary)["craft"]=0.75
 	var agent:=Covert.volunteer_for("plant")
 	assert_bool(bool(agent.get("trained",false))).is_true()
+	_place(_civ_id())
 	var op:=Covert.launch("plant",_civ_id(),"","trader",agent)
 	assert_bool(op.has("error")).override_failure_message(String(op.get("error",""))).is_false()
 	assert_float(Corps.members("eyes")).is_equal(2.0)
@@ -104,6 +105,7 @@ func test_the_wary_catch_more_and_breed_distrust_that_costs_cohesion()->void:
 	var state:Dictionary=Corps.state()
 	(state.wary as Dictionary)["members"]=float(GameState.population_exact)/1000.0*Corps.FULL_WATCH_PER_K
 	(state.wary as Dictionary)["craft"]=0.8
+	Corps.set_watch_level(3)
 	assert_float(Corps.coverage()).is_equal_approx(1.0,0.01)
 	assert_float(Covert._catch_chance(_civ_id())).is_greater(plain)
 	_run(400)
@@ -194,6 +196,7 @@ func test_a_long_settled_eye_makes_what_we_know_of_them_nearly_exact()->void:
 	CV.knowledge_override["player"]=["phonetic_notation","copper_smelting","seed_selection"]
 	var rel:Dictionary=(WorldSimulation.world.civilizations[0] as Dictionary).player_relation
 	rel["contact_level"]=2; rel["contact_intelligence"]=0.2
+	_place(_civ_id())
 	var op:=Covert.launch("plant",_civ_id(),"","trader",Covert.volunteer())
 	op["stage"]="in_place"
 	op["settled_day"]=int(GameState.elapsed_days)
@@ -202,3 +205,11 @@ func test_a_long_settled_eye_makes_what_we_know_of_them_nearly_exact()->void:
 	var old:=Standing.certainty(_civ_id())
 	assert_float(old).is_greater(fresh)
 	assert_float(old).is_greater_equal(0.95)
+
+
+## The people's home is found (covert_ops.gd knows_where): agents can be sent.
+func _place(id:String)->void:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==id:
+			if not civ.get("player_relation") is Dictionary:civ["player_relation"]={}
+			(civ.player_relation as Dictionary)["home_location_known"]=true

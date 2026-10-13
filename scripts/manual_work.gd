@@ -61,6 +61,10 @@ static func _direction()->Variant:
 # --------------------------------------------------------------------------
 
 ## Does the ruler set the daily work (true), or our leaders (false)?
+## True while a change of the split is being laid: the counts are rounded
+## afresh (GameState.synchronize_population_allocations holds them otherwise).
+static var relaid:=false
+
 static func manual()->bool:
 	return not bool(_direction().automatic_work)
 
@@ -81,7 +85,10 @@ static func set_manual(on:bool)->bool:
 ## Lays the split on our towns now, through the owner of daily labour.
 static func apply()->void:
 	var government=WorldSimulation.government
+	# A change of the split is laid afresh, to the person (see `relaid`).
+	relaid=true
 	if government!=null and government.has_method("delegate_now"):government.delegate_now()
+	relaid=false
 
 # --------------------------------------------------------------------------
 # The split
@@ -157,6 +164,47 @@ static func _most(people:Dictionary,except:String,least:int=1)->String:
 		if role==except:continue
 		if int(people.get(role,0))>most:most=int(people[role]);best=role
 	return best
+
+## THE WORK IN SHARES. The ruler sets each task as a share, in whole
+## hundredths, of those who can work; the shares add up to 100. A share does
+## not move when the people grow or shrink: the people behind it do, quietly.
+## `shares` (any that add up to something) as whole percents adding to 100,
+## by the largest remainders; a task given any share keeps at least 1.
+static func percents(shares:Dictionary={})->Dictionary:
+	if shares.is_empty():shares=split()
+	var whole:=whole_people(shares,100)
+	return whole
+
+## −/+ on a task in whole percents of those who can work (`points` of them):
+## the split is first set to whole percents, then each point comes from the
+## task with the largest share (or goes to it). Takes the daily work into
+## the ruler's hands if it was not. {ok, role, moved, from, to, percents}.
+static func move_share(role:String,points:int)->Dictionary:
+	if not role in ROLES or points==0:return {"ok":false,"role":role,"moved":0,"from":{},"to":{},"reason":"No such work."}
+	if not manual():set_manual(true)
+	var now:=percents()
+	var gave:={};var took:={}
+	for step in absi(points):
+		if points>0:
+			var donor:=_most(now,role)
+			if donor=="":break
+			now[donor]=int(now[donor])-1;now[role]=int(now[role])+1
+			gave[donor]=int(gave.get(donor,0))+1
+		else:
+			if int(now[role])<=0:break
+			var taker:=_most(now,role,0)
+			if taker=="":break
+			now[role]=int(now[role])-1;now[taker]=int(now[taker])+1
+			took[taker]=int(took.get(taker,0))+1
+	var moved:=0
+	for n in gave.values():moved+=int(n)
+	for n in took.values():moved+=int(n)
+	if moved>0:
+		var shares:={}
+		for task:String in ROLES:shares[task]=float(int(now[task]))
+		_direction().work_baseline=shares
+		apply()
+	return {"ok":moved>0,"role":role,"moved":moved,"from":gave,"to":took,"percents":now}
 
 ## The shares the ledger is given today: the ruler's split in whole people
 ## for the people who can work now, as percentages the ledger reads back to

@@ -40,19 +40,23 @@ static func perform(reading:Dictionary)->Dictionary:
 	var corps:=String(reading.get("corps",""))
 	var value:=String(reading.get("policy","steady"))
 	var before:=Corps.policy(corps)
+	var level_before:=Corps.watch_level()
 	if not Corps.set_policy(corps,value): return {"ok":false,"says":"I do not follow which you mean.","outcome":""}
 	var sum:=Corps.summary()
 	var name:=Corps.word("eyes") if corps=="eyes" else Corps.word("wary")
+	if corps=="wary":
+		# The wary are kept to a level: the share of our people watched.
+		var level:=Corps.watch_level()
+		var kept:="No more of %s will be kept. Those we have go back to other work." % name
+		if level>0: kept="%s will be kept to watch about %d in 100 of our people. I will find and teach as many as that takes, and replace those the years thin; they leave other work while they serve. Watching our own people breeds distrust: at this level the people's trust in one another falls by up to %d in 100." % [name.capitalize(),roundi(float(Corps.WATCH_SHARE[level])*100.0),roundi(float(Corps.WATCH_SHARE[level])*Corps.WATCH_DISTRUST*Corps.COHESION_COST*100.0)]
+		return {"ok":true,"changed":level!=level_before,"says":kept,"outcome":"%s: %s." % [name.capitalize(),String(Corps.WATCH_NAMES[level]).to_lower()]}
 	var yearly:=float((Corps.POLICIES[value] as Array)[1])*maxf(1.0,float(GameState.population_exact))/1000.0
 	var says:=""
 	if value=="none":
 		says="No more %s will be taught. Those we have keep serving until the years thin them." % name
 	else:
 		says="About %s a year will be taught as %s: a course of %d days at %s food a day each. They leave other work while they learn and while they serve." % [_count(yearly),name,int(sum.course_days),_n(float(sum.course_food))]
-		if corps=="wary":
-			says+=" Watching our own people breeds distrust: with enough of the wary to watch everyone, the people's trust in one another falls by up to %d in 100." % roundi(Corps.WATCH_DISTRUST*Corps.COHESION_COST*100.0)
-		else:
-			says+=" A taught %s blends in far better than a volunteer; still, moving in among a small people is the dangerous part." % Corps.word("eye")
+		says+=" A taught %s blends in far better than a volunteer; still, moving in among a small people is the dangerous part." % Corps.word("eye")
 	return {"ok":true,"changed":before!=value,"says":says,"outcome":"%s: %s." % [name.capitalize(),String((Corps.POLICIES[value] as Array)[0]).to_lower()]}
 
 static func carry(r:Dictionary,reading:Dictionary)->Dictionary:

@@ -726,7 +726,9 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	# Raiders who cannot march a real band to us walk no farther than a
 	# neighbour's road: a people whose country is nowhere near ours, or across
 	# the sea, sends no raiders out of nowhere.
-	if not near_us(civ_id):
+	# (Over the sea a raid is a real band in boats, marched by their council
+	# above, or it does not come: on-foot distance only here.)
+	if not near_us(civ_id,true):
 		_log(civ_id,"stood_down","No raiders came from %s: their country lies too far from ours." % _name(civ_id),{"cause":cause})
 		_stat("raids_too_far")
 		return {}
@@ -750,6 +752,13 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		_stat("raids_unmanned")
 		return {}
 	came_to_us(civ_id,day,"raiders")
+	# They must cross our border on the side facing their home: the watch
+	# there turns them back at its strength (fort_border.gd facing).
+	var stopped:=preload("res://scripts/fort_border.gd").facing("player",civ_id,0.3)
+	if stopped>0.0 and _rng(key+":border").randf()<stopped:
+		_log(civ_id,"turned_back","%d raiders from %s were seen crossing our border and turned back by the watch there." % [their_n,name],{"cause":cause,"raiders":their_n})
+		_stat("raids_turned_back")
+		return {}
 	var general:=_general()
 	var mc:Variant=WorldSimulation.military
 	# Ours: the watch at the approaches (our real soldiers at home) while the
@@ -2279,7 +2288,7 @@ const RIVAL_WAR_CAP:=0.012
 ## Two peoples are neighbours when their countries (realm_reach.gd) come
 ## within NEIGHBOUR_MARGIN_KM of meeting: about a month's march, the distance
 ## bulk goods are still worth carrying (envoy_requests.gd BULK_KM). Peoples
-## founded 1,100 km apart (civilization_start.gd) become neighbours as their
+## founded 550 km apart (civilization_start.gd) become neighbours as their
 ## lands grow toward each other; a people across the sea never is.
 const NEIGHBOUR_MARGIN_KM:=450.0
 const RealmReach:=preload("res://scripts/realm_reach.gd")
@@ -2287,7 +2296,7 @@ const RealmReach:=preload("res://scripts/realm_reach.gd")
 ## Whether a people's country comes within NEIGHBOUR_MARGIN_KM of ours (the
 ## same rule as neighbours, with our realm as one side). True before we have
 ## a home, when there is no country of ours to measure from.
-static func near_us(civ_id:String)->bool:
+static func near_us(civ_id:String,on_foot:bool=false)->bool:
 	var ours:=RealmReach.ours()
 	if ours.is_empty(): return true
 	var civ:=_civ(civ_id)
@@ -2295,17 +2304,34 @@ static func near_us(civ_id:String)->bool:
 	var theirs:=RealmReach.of(civ)
 	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
 	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
-	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+NEIGHBOUR_MARGIN_KM
+	return (ours.center as Vector2).distance_to(center)<=float(ours.reach)+reach+(NEIGHBOUR_MARGIN_KM if on_foot else war_margin_km(civ_id))
+
+## How far apart our country and theirs may lie and still make war on one
+## another: NEIGHBOUR_MARGIN_KM on foot. Only where the road between the two
+## homes is over the sea (no way by land, and the boats of the people in
+## scope can carry an army there: army_sea_road.gd) is it as far as those
+## boats reach. Boats never bring a distant neighbour by land any nearer.
+static func war_margin_km(civ_id:String="")->float:
+	var Sea:=preload("res://scripts/army_sea_road.gd")
+	var by_sea:=float(Sea.war_reach_km())
+	if civ_id=="" or by_sea<=NEIGHBOUR_MARGIN_KM:return NEIGHBOUR_MARGIN_KM
+	var gap:=gap_km(civ_id)
+	if gap<=NEIGHBOUR_MARGIN_KM or gap>by_sea:return NEIGHBOUR_MARGIN_KM
+	var civ:=_civ(civ_id)
+	var ours:=RealmReach.ours()
+	if civ.is_empty() or ours.is_empty():return NEIGHBOUR_MARGIN_KM
+	var there:Vector2=RealmReach.of(civ).get("center",WorldSimulation.world._civilization_world_position(civ))
+	return by_sea if Sea.links_by_sea(civ_id,ours.center,there) else NEIGHBOUR_MARGIN_KM
 
 ## How close a people's country lies to ours, 0..1: 1 where the two meet,
-## falling to 0 at NEIGHBOUR_MARGIN_KM apart (no band can march farther). The
+## falling to 0 at war_margin_km() apart (no band can march or sail farther). The
 ## same for every people, read in its own scope (RealmReach.ours is the
 ## people in scope). Proximity drives the potential for war: raids, feuds,
 ## declarations and threats all come more often the closer two peoples live.
 static func proximity(civ_id:String)->float:
 	if RealmReach.ours().is_empty(): return 1.0
 	if _civ(civ_id).is_empty(): return 0.0
-	return clampf(1.0-gap_km(civ_id)/NEIGHBOUR_MARGIN_KM,0.0,1.0)
+	return clampf(1.0-gap_km(civ_id)/war_margin_km(civ_id),0.0,1.0)
 
 ## Two peoples' proximity from their records alone (rival against rival).
 static func proximity_between(first:Dictionary,second:Dictionary)->float:

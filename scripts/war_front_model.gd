@@ -43,6 +43,10 @@ const MAX_CLASHES:=24
 const MAX_BATTLES:=32
 ## Supply lines from home in a theatre: the farthest hosts only.
 const MAX_SUPPLY:=16
+## Real deployed coverage: a bounded path per reported force, never a join
+## between separate sectors. Population affects ink weight, not node counts.
+const MAX_DEPLOYED_FRONTS:=64
+const DEPLOYED_POINTS:=48
 ## Sources nearer than this share of the theatre's scale act as one.
 const MERGE_SIGMA:=0.25
 ## Report age (days) at which an enemy observation has lost most weight.
@@ -95,6 +99,70 @@ static func mode(stage:String,known:Array,largest_force:int,armies:int,theatre_t
 	if largest_force<1000 or not drilled: return "host"
 	if known.has("military_staffs") and (armies>=3 or theatre_troops>=20000): return "theatre"
 	return "front"
+
+
+## Actual held ground, frozen by the reporting layer. An empty published
+## path means the force is no longer holding its assigned sector. The
+## intended border_sector is deliberately never read by this visual model.
+static func has_deployment(source:Dictionary)->bool:
+	if source.get("border_front") is Dictionary:
+		return bool((source.border_front as Dictionary).get("assigned",true))
+	return source.has("defense_points")
+
+
+static func defense_points(source:Dictionary)->PackedVector2Array:
+	var front:Dictionary=source.get("border_front",{}) if source.get("border_front") is Dictionary else {}
+	var raw:Variant=front.get("points",source.get("defense_points",[]))
+	var out:=PackedVector2Array()
+	if not raw is Array and not raw is PackedVector2Array:return out
+	for item:Variant in raw:
+		var at:=Vector2.INF
+		if item is Vector2:at=item
+		elif item is Dictionary and item.has("x") and item.has("z"):at=Vector2(float(item.x),float(item.z))
+		# A malformed path cannot be joined through an unknown point.
+		if not at.is_finite():return PackedVector2Array()
+		if out.is_empty() or at.distance_squared_to(out[-1])>0.00000001:out.append(at)
+	if out.size()<2:return PackedVector2Array()
+	return resample(out,DEPLOYED_POINTS)
+
+
+## Held ribbons use the supplied path exactly. Normals face the nearest
+## observed opponent, or away from our home when nobody is seen. They are
+## orientation for ink only; no visual field grants defended ground.
+static func deployed_fronts(friendly:Array,enemy:Array,home:Vector2=Vector2.ZERO)->Array:
+	var out:Array=[]
+	var layers:=[[friendly,enemy,true],[enemy,friendly,false]]
+	for layer:Array in layers:
+		var ours:=bool(layer[2])
+		var sources:Array=layer[0]
+		var opposing:Array=layer[1]
+		for source:Dictionary in sources.filter(func(force:Dictionary)->bool:return has_deployment(force)).slice(0,MAX_DEPLOYED_FRONTS/2):
+			var points:=defense_points(source)
+			var troops:=maxi(0,roundi(float(source.get("strength",0.0))))
+			if points.size()<2 or troops==0:continue
+			var snapshot:Dictionary=source.get("border_front",{}) if source.get("border_front") is Dictionary else {}
+			var source_id:=String(snapshot.get("id",source.get("id",source.get("army_id",""))))
+			var age:=maxf(0.0,float(source.get("report_age",0.0) if ours else source.get("age_days",0.0)))
+			var width:=PackedFloat32Array();var ages:=PackedFloat32Array();var pressure:=PackedFloat32Array();var toward:=PackedVector2Array()
+			var density:=float(troops)/maxf(0.1,_length(points))
+			var weight:=clampf(log(1.0+density)/9.0,0.22,1.0)
+			for i in points.size():
+				var at:=points[i]
+				var along:=(points[mini(i+1,points.size()-1)]-points[maxi(0,i-1)]).normalized()
+				var normal:=along.orthogonal()
+				var facing:=at-home if ours else home-at
+				var nearest:=INF
+				for other:Dictionary in opposing:
+					var pos:Vector2=other.get("pos",Vector2.INF)
+					var distance:=at.distance_squared_to(pos)
+					if distance<nearest:nearest=distance;facing=pos-at
+				if absf(normal.dot(facing))<0.0001:facing=at-home if ours else home-at
+				if normal.dot(facing)<0.0:normal=-normal
+				toward.append(normal);width.append(weight);ages.append(age);pressure.append(0.0)
+			out.append({"id":"deployed:%s:%s" % ["ours" if ours else "theirs",source_id],"points":points,"width":width,"age":ages,"pressure":pressure,"toward":toward,
+				"deployed":true,"ours":ours,"stale":age>=STALE_DAYS,"troops":troops,"army_id":int(source.get("army_id",0)) if ours else 0,
+				"armies":[int(source.get("army_id",0))] if ours and int(source.get("army_id",0))>0 else [],"holders":[source] if ours else [],"name":String(source.get("name","")),"sigma":maxf(0.1,_length(points)*0.12)})
+	return out
 
 
 static func _sigma(friendly:Array,enemy:Array)->float:
@@ -635,6 +703,7 @@ static func arrow(from:Vector2,objective:Vector2,fronts:Array,bias:float=0.0)->P
 	var start:=from
 	var best:=INF
 	for front in fronts:
+		if bool(front.get("deployed",false)) and not bool(front.get("ours",true)):continue
 		for p in (front.points as PackedVector2Array):
 			var d:=p.distance_squared_to(from)
 			if d<best and p.distance_to(objective)<from.distance_to(objective): best=d; start=p

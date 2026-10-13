@@ -1,3 +1,98 @@
+## October 11 — Stable daily border popup (INTEGRATED)
+
+The open "The border" summary now updates its existing readings, bars and
+controls instead of destroying and rebuilding wrapped labels every day. This
+removes the transient height/position jump and preserves keyboard focus. Real
+staffing warnings and move controls still appear as needed; the staffing action
+reads current capacity when pressed. Palette and viewport layout changes retain
+their explicit rebuild. Fort-detail notes and simulation rules are unchanged.
+
+Source `54951c19` on `codex/stable-border-popup` combines with main `54b41d2e`
+at code merge `4c22397d`, without conflicts or runtime changes. The same new
+regression on unchanged main reproduced a 3306 px transient and destroyed focus,
+with zero engine errors. All 18 focused tests pass after the fix. Private GPU
+verification passes 84 checks / 16 captures, including 48 immediate update
+frames with zero geometry drift and fresh counts. The process exited normally.
+Evidence: task worktree `artifacts/border-popup-fixed.log` / `reports/report_28`
+and `artifacts/border-popup-stable/`; baseline log is in the capture worktree at
+`artifacts/border-key-refresh-baseline.log`.
+
+Source and integrated main are pushed and remotely verified before updating the
+canonical checkout. Existing local changes and player/editor sessions remain;
+save and restart normally to load the fix. No save migration is needed.
+
+## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
+
+User approved PR #205 for integration. Source `38aa6e7c` from
+`codex/border-art-direction` is merged with canonical and remote main `16982712`
+at code merge `4fb540e1`. There were no conflicts and the integrated runtime/test
+files match the reviewed source exactly. Real stationed border armies, contact
+combat before capital arrival, animated fighting fronts, revised border controls
+and the corrected quiet map presentation are included together.
+
+Combined headless validation ran 281 cases: 280 passed, zero errors or orphans.
+The only failure is the unchanged long-run raid-cadence assertion (two bands
+where it expects three), already reproduced on baseline `16982712`. All 154
+presentation checks and the remaining 126 core checks pass. Evidence is the
+integration worktree's `artifacts/border-integration281.log` / `reports/report_26`.
+The accepted coastal and stress captures remain valid because integration
+changed no runtime code. Full evidence: `docs/design/BORDER_ART_DIRECTION.md`.
+
+Optional army metadata remains save-compatible. The integration is pushed and
+remotely verified before fast-forwarding the canonical checkout. Existing local
+imports are preserved; no player/editor process is launched or restarted.
+
+## October 11 — Border map hierarchy correction (worker record)
+
+The user rejected the prior encirclement screenshot. Its art acceptance is
+superseded. PR #205 remains unmerged; the default map is rebuilt around
+quiet force banners, contact signals, readable fighting fronts and details on
+inspection. The existing real deployment/combat mechanics remain unchanged.
+Three implementation passes and two screenshot critiques removed the card wall,
+archived route rays, duplicate war tokens and ambiguous contact glyphs. Final
+coastal, focused-battle, selected-army, night and reduced-motion screenshots
+received visual acceptance on production `41e09c85`. All 154 targeted tests pass;
+the final interaction change also passes its 20-case focused rerun. The private
+GPU probe passes 11 records across 14 images, with both fighting fronts moving
+and zero movement while paused or reduced. Probe source is `94bd2017`.
+Evidence, fixture provenance and limits are recorded in
+`docs/design/BORDER_ART_DIRECTION.md`. This is a worker delivery; the canonical
+checkout and player session were not changed.
+
+## October 10 — Defended borders and fighting worms (prior delivery)
+
+Branch `codex/border-art-direction`, based on `16982712`, PR #205. Extends the
+border art delivery below with real general-led border deployment, finite held
+sectors, swept contact for ordinary and commanded marches, existing-ledger
+battles before capital arrival, retained objectives after breakthrough, observed
+flank approaches, and coverage-driven animated fronts with honest dated reports.
+Optional army metadata; no save migration or player-session restart.
+
+Three refinement passes and two critic reviews address reinforcement, moving
+border stations, retasking, neutral invasions, retained targets, duplicate
+defender reservations, recalled posts, crowded counters and live watch ink.
+Compact combat fronts keep departed attackers visible without claiming held
+territory. Final headless validation totals 223 cases: 222 pass with no errors
+or orphans (126/127 core, 96/96 visual). The one long-run raid-cadence failure is
+reproduced on unchanged main and preserved. The 50-band/20-battle draw check is
+17.7 ms after fixing redundant placement work; its 60 ms limit is unchanged.
+Border UI verification passes 71 checks across 14 captures. Production GPU
+captures retain all 16 perimeter counters without overlap, and an independent
+ribbon-motion proof passes for both sides, pause and reduced motion. Design, critic
+findings and reproduction are in `docs/design/DEFENDED_BORDERS.md`.
+
+This is a pushed worker delivery, not an integration into canonical main.
+
+## October 10 — Border art direction (READY)
+
+Branch `codex/border-art-direction`, based on `16982712`. Presentation checkpoint
+`360c687c` combines the border map cards and placement feedback, War board border
+folio, paper-edged border ink and refined fort anchors. The existing 15 border
+tests pass; private UI and campaign-terrain captures cover placement, shortages,
+construction, movement, night palette and small windows. Details and reproduction:
+`docs/design/BORDER_ART_DIRECTION.md`. Fort rules and save schema are unchanged.
+This is a worker delivery; it has not been merged into the canonical player build.
+
 ## October 8 — Organic places on the map (INTEGRATED)
 
 User approved PR #182 after the private capture review. Source `ca8e2481`
@@ -3214,3 +3309,24 @@ Private GPU captures pass for empty and active queues at 1600x1000 and 1024x640,
 with no horizontal overflow. Reference: Paradox's HOI IV Strategy Guide,
 https://forumcontent.paradoxplaza.com/public/paradox/banners/HoI_IV_Strategy_Guide.pdf
 Generated imports and captures excluded.
+## October 12 — Readable surrounding village names (INTEGRATED)
+
+Source `ef47aa5b` on `codex/town-label-readability` replaces the independent
+world-space italic place names with measured paper tags in the shared city
+label layer. Main city cards receive space first; surrounding names avoid
+one another, city cards, city pins and great-work cards/emblems. Leader lines
+connect relocated tags to their actual places. Names with no available space
+are omitted until the view has room. Place tags do not become city click targets.
+
+Headless validation passed 46 cases across city-label layout, settlement-place
+visuals and great-work map marks, with zero errors, failures or orphans. The new
+regression places three village names at the same anchor as a city, verifies
+separate tags and confirms the world labels render on no layers. Logs are in
+the task worktree's `artifacts/town-label-tests.log` and
+`artifacts/town-label-work-tests.log`. No graphical capture was performed.
+
+This is presentation only and requires no save migration. Integration is pushed
+and remotely verified before the canonical checkout is fast-forwarded. Existing
+local imports and the running player session are preserved; save and restart
+normally to load the labels.
+

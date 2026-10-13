@@ -361,6 +361,26 @@ static func commit_enemy(result:Dictionary)->void:
 	mirrored.commander_managed=id!="player"
 	WorldSimulation.scoped(id,func()->void:WorldSimulation.military._commit_campaign_battle(mirrored))
 
+## Views can be a day old while actors take their turns. Contact must read the
+## current owner, including a line that just broke in another actor's battle.
+static func refresh_formation(formation:Dictionary)->Dictionary:
+	if not WorldSimulation.enabled or not formation.has("owned_force_id"):return formation
+	var actor:=owner(String(formation.get("civ_id","")))
+	if actor!="player" and not WorldSimulation.actors.has(actor):return formation
+	return WorldSimulation.scoped(actor,func()->Dictionary:
+		var view:=formation.duplicate(true)
+		var index:int=WorldSimulation.military._field_army_index(int(formation.owned_force_id))
+		if index<0:
+			view["actual_troops"]=0;view["can_defend"]=false;view["defense_points"]=[]
+			return view
+		var force:Dictionary=WorldSimulation.military.field_armies[index]
+		var point:Vector2=WorldSimulation.military.command_hierarchy.land.point(force)
+		var front:=preload("res://scripts/army_front_contact.gd").snapshot(force)
+		view.merge({"point_a":point,"point_b":point,"command_position":{"x":point.x,"z":point.y},"actual_troops":int(force.get("troops",0)),"readiness":float(force.get("readiness",0)),"morale":float(force.get("morale",1)),"provision_ratio":preload("res://scripts/supply_state.gd").fed(force),"disabled_until_day":int(force.get("command_recover_until",0)),"morale_cap":float(force.get("morale",1.0)),"border_front":front,"defense_points":front.points,
+			"can_defend":preload("res://scripts/border_defense.gd").fit(force,int(WorldSimulation.state.elapsed_days))},true)
+		return view
+	)
+
 static func troop_catalog()->Dictionary:
 	var catalog:Dictionary={}
 	var ids:Array=WorldSimulation.actors.keys();ids.append("player");ids.sort()
@@ -378,6 +398,7 @@ static func troop_catalog()->Dictionary:
 				if int(force.get("troops",0))<=0:continue
 				var point:Vector2=WorldSimulation.military.command_hierarchy.land.point(force)
 				result.append({"id":"%s:army:%d" % [visible_id,int(force.army_id)],"civ_id":visible_id,"kind":"expedition","point_a":point,"point_b":point,"command_position":{"x":point.x,"z":point.y},"depart_day":0,"leg_days":1.0,"strength_share":float(force.troops)/maxf(1,WorldSimulation.military._mobilized_count()),"readiness":float(force.get("readiness",0)),"actual_troops":int(force.troops),"owned_force_id":int(force.army_id)})
+				result[-1]=refresh_formation(result[-1])
 		)
 		catalog[id]=result
 	return catalog

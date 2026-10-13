@@ -391,10 +391,11 @@ func test_undrilled_levy_band_gets_an_objection_then_goes_if_the_god_insists()->
 
 func test_the_war_leader_at_home_sends_the_strongest_of_his_bands()->void:
 	# Bands serve under the war leader at home until the ruler names a general
-	# for them (leader_commands.gd), so the Marshal leads every one of them:
-	# told to attack, he sends the strongest that can go, not the first formed.
+	# for them (leader_commands.gd), so the Marshal leads every one of them.
+	# The army is one host: told to attack, he gathers every band free to go
+	# into the strongest and marches them all, not one band of several.
 	_train(12)
-	var small:=int(MilitaryCampaign.create_field_army(12,"LEVY BAND 1").army.army_id)
+	MilitaryCampaign.create_field_army(12,"LEVY BAND 1")
 	_train(150)
 	var large:=int(MilitaryCampaign.create_field_army(150,"LEVY BAND 2").army.army_id)
 	_set_garrison(10.0)
@@ -403,11 +404,10 @@ func test_the_war_leader_at_home_sends_the_strongest_of_his_bands()->void:
 	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("act")
 	var objective:Dictionary=r.get("objective",{})
 	assert_int(int(objective.get("army_id",0))).is_equal(large)
-	assert_bool(bool(objective.get("own_band",false))).is_true()
-	assert_int(int(objective.get("troops",0))).is_equal(150)
-	assert_str(String(r.get("actor_says",""))).contains("My band of 150 marches")
+	assert_int(int(objective.get("troops",0))).is_equal(162)
+	assert_str(String(r.get("actor_says",""))).contains("162")
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(1)
 	assert_str(String(MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(large)].status)).is_equal("moving")
-	assert_str(String(MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(small)].status)).is_equal("stationed")
 	# A band the ruler put under a general is that general's, never the Marshal's.
 	MilitaryCampaign.field_armies.clear()
 	_train(150)

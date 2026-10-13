@@ -386,6 +386,10 @@ static func _road_lines(out:Dictionary,road:Dictionary,force:Dictionary,where:St
 	if km<0.5: out.lines.append("They are already there."); return
 	var round_water:="" if bool(road.get("direct",true)) else " by land round the water"
 	var ground:=String(road.get("ground_words",""))
+	# Over the sea (army_sea_road.gd): the crossing and who it will drown.
+	if road.get("sea") is Dictionary:
+		round_water=preload("res://scripts/army_sea_road.gd").order_words(road.sea,int(force.get("troops",0)))
+		ground=""
 	out.lines.append("The road to %s is %s km%s%s, about %d %s." % [where,EraWords.grouped(roundi(km)),round_water," "+ground if ground!="" else "",days,"day" if days==1 else "days"])
 
 static func guard_radius(troops:int)->float:

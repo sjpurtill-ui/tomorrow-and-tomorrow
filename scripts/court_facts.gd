@@ -449,7 +449,7 @@ static func battles(limit:int=3,detail:bool=true)->Array:
 ## {gets, foraged, carried, from_town, state, hungry_days, line, words}.
 static func fed_facts(report:Dictionary)->Dictionary:
 	if report.is_empty(): return {}
-	var parts:=Supply.percents(float(report.get("ratio",0.0)),[float(report.get("local",0.0)),float(report.get("foraged",0.0)),float(report.get("carried",0.0))])
+	var parts:=Supply.percents(float(report.get("ratio",0.0)),[float(report.get("local",0.0)),float(report.get("foraged",0.0)),float(report.get("carried",0.0))+float(report.get("train",0.0))])
 	return {"gets":roundi(float(report.get("ratio",0.0))*100.0),"from_town":int(parts[0]),"foraged":int(parts[1]),"carried":int(parts[2]),
 		"state":Supply.state_words(String(report.get("state",""))),"hungry_days":roundi(float(report.get("hungry_days",0.0))) if bool(report.get("hungry",false)) else 0,
 		"at_home":bool(report.get("at_home",false)),"line":"" if bool(report.get("at_home",false)) else Supply.line_words(report),"words":String(report.get("words","")),
@@ -574,7 +574,8 @@ static func _tribute(out:Dictionary)->void:
 			var trade:=TradeLedger.flow_value("player",cid)+TradeLedger.flow_value(cid,"player")
 			peoples.append({"people":String(c.get("name","")),"treaty":String(rel.get("treaty","none")),"trade":snappedf(trade,0.1),"pact":String(pact.get("kind",pact.get("action",""))) if not pact.is_empty() else "none",
 				"we_send":TradeWords.flow_words("player",cid),"they_send":TradeWords.flow_words(cid,"player"),"they_lean":TradeWords.leaning_line(cid,"player"),"we_lean":TradeWords.leaning_line("player",cid),
-				"our_stance":TradeWords.stance_words("player",cid),"their_stance":TradeWords.theirs_label(cid),"tribute":TradeWords.tribute_label(cid),"met":int(rel.get("contact_level",0))>=2})
+				"our_stance":TradeWords.stance_words("player",cid),"their_stance":TradeWords.theirs_label(cid),"tribute":TradeWords.tribute_label(cid),"met":int(rel.get("contact_level",0))>=2,
+				"no_way":TradeLedger.sea_words("player",cid) if int(rel.get("contact_level",0))>=2 and TradeLedger.blocked("player",cid)=="sea" else ""})
 	out["peoples"]=peoples
 
 # --------------------------------------------------------------------------

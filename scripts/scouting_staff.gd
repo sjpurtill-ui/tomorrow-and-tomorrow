@@ -36,6 +36,13 @@ func valid(value:Variant)->bool:
 	for counter in ["homecomings","scouts_lost"]:
 		if not host.city_intelligence.number(value.get(counter,0)) or float(value.get(counter,0))<0:return false
 	if not host.city_intelligence.number(value.get("last_loss_day",-1)):return false
+	for counter in ["expedition_next_day","expedition_turn","beyond_turn"]:
+		if not host.city_intelligence.number(value.get(counter,0)) or float(value.get(counter,0))<0:return false
+	# expedition.gd's remembered expeditions.
+	var expeditions:Variant=value.get("expeditions",[])
+	if not expeditions is Array or expeditions.size()>24:return false
+	for entry:Variant in expeditions:
+		if not entry is Dictionary or not host.city_intelligence.number(entry.get("day")) or not host.city_intelligence.number(entry.get("km")) or not String(entry.get("outcome","")) in ["home","lost"]:return false
 	var visits:Variant=value.get("last_visits",{})
 	if not visits is Dictionary or visits.size()>64:return false
 	for date in visits.values():
@@ -273,6 +280,11 @@ func advance_steps(day:int)->Array:
 			data.next_review=mini(int(data.next_review),day+1)
 		if shared.searching:
 			data.status=shared.last_reason
+			# All the land in reach charted and no coast our boats can make: say
+			# so, and what would change it, instead of a search that never ends.
+			if WorldSimulation.actor_id=="player" and String(shared.get("target",""))=="open_world" and String(shared.last_reason).begins_with("No useful uncharted"):
+				var craft:Dictionary=preload("res://scripts/sea_voyage.gd").capability()
+				data.status="The scouts found no new ground within a year's walk of home this time%s. They will try another way at the next review; an expedition can push farther than they range." % ((", and our %s found no new coast within the %d km they dare stand off from land" % [String(craft.label),int(craft.offshore_km)]) if bool(craft.get("ok",false)) else "")
 			# Rival staff with multi-day steps (day_span.gd) wait four weeks after a
 			# fruitless search instead of repeating every route plan each week.
 			if WorldSimulation.actor_id!="player" and WorldSimulation.span_limit>1:data.next_review=maxi(int(data.next_review),day+28)

@@ -53,6 +53,26 @@ class Actions extends Node:
 func entry(id:String,point:Vector2,foreign:bool=true)->Dictionary:
 	return {"id":id,"anchor":point,"extent":Vector2(230,45),"foreign":foreign}
 
+func test_surrounding_place_names_use_shared_layout_without_world_text()->void:
+	var map:Node=auto_free(Actions.new());add_child(map)
+	map.camera=Camera3D.new();map.add_child(map.camera)
+	map.camera.position=Vector3(0,0,10)
+	var overlay:Control=auto_free(Labels.new());overlay.terrain=map;add_child(overlay)
+	var art:=preload("res://scripts/settlement_place_art.gd")
+	for index in 3:
+		var label:Label3D=art.label({"id":"p%d"%index,"name":"Reedhaven shore village %d"%index},Vector2.ZERO,func(_at:Vector2)->float:return 0.0)
+		map.add_child(label)
+		assert_int(label.layers).is_equal(0)
+	var town:=Label3D.new();town.text="Ashley & Wally's Land";map.add_child(town)
+	overlay.register_label(town,"home",false,Vector3.ZERO)
+	overlay.refresh()
+	assert_array(overlay.place_cards).has_size(3)
+	var combined:Array=overlay.cards.duplicate();combined.append_array(overlay.place_cards)
+	assert_separate(combined,overlay.last_bounds)
+	for place:Dictionary in overlay.place_cards:
+		assert_bool(place.rect.grow(8).has_point(place.anchor)).is_false()
+		assert_dict(overlay.city_at(place.rect.get_center())).is_empty()
+
 func assert_separate(cards:Array,bounds:Rect2)->void:
 	for i in cards.size():
 		assert_bool(bounds.encloses(cards[i].rect)).is_true()

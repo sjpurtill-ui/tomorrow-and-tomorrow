@@ -1,3 +1,43 @@
+## October 11 — Stable daily border popup (INTEGRATED)
+
+Source `54951c19`, branch `codex/stable-border-popup`, is combined with main
+`54b41d2e` at code merge `4c22397d`. The border summary keeps its controls alive
+and updates readings in place, preventing the daily wrapped-text layout jump
+and loss of keyboard focus. Staffing commands use current capacity. Border
+mechanics, save data and the separate fort-detail note are unchanged.
+
+The regression reproduces on unchanged main; all 18 focused cases pass on the
+fix with zero errors or orphans. Private GPU verification passes 84 checks
+across 16 captures, including zero size/position drift in 48 immediate refresh
+frames. Evidence: task worktree `artifacts/border-popup-fixed.log`,
+`reports/report_28`, and `artifacts/border-popup-stable/`. Integration has no
+conflicts and leaves the tested runtime code unchanged. Remote main is verified
+before the canonical fast-forward; local imports and running sessions remain.
+No migration is needed. A normal save/restart loads the changed scripts.
+
+## October 11 — Defended borders and corrected map hierarchy (INTEGRATED)
+
+User approved PR #205. Source `38aa6e7c` from `codex/border-art-direction`
+and main `16982712` combine at code merge `4fb540e1`, without conflicts or
+runtime changes relative to the accepted source. Border armies occupy actual
+stations and fight invading armies before capital arrival; the map presents
+quiet held lines, small army markers and animated contact, with dated details
+on inspection. The border placement and staffing controls are included.
+
+Integration validation ran 281 cases: 280 passed, zero errors or orphans. The
+existing raid-cadence assertion fails identically on unchanged main (two bands
+instead of at least three). All 154 presentation checks and the other 126 core
+checks pass. Evidence: integration worktree `artifacts/border-integration281.log`
+and `reports/report_26`; accepted visual evidence and fixture limits are in
+`docs/design/BORDER_ART_DIRECTION.md`. No repeat GPU render is required for
+this conflict-free merge because the runtime code is identical to the reviewed
+and captured source.
+
+Optional deployment metadata requires no save migration. The remote main push
+is verified before the canonical checkout is fast-forwarded. Existing local
+imports and running player/editor sessions are preserved; a normal save and
+restart loads the integrated scripts.
+
 ## October 8 — Organic places on the map (INTEGRATED)
 
 User approved PR #182 after the private capture review. Source `ca8e2481`
@@ -3246,3 +3286,12 @@ What changed:
 Results (25 years, `--aims=player`, seeds 424242 / 77013): routine share 21% / 24%; first-hour moments 27–42 / 18–31 and decisions 10–20 / 11–17 per 10 minutes, longest gap 1.6 real minutes; a live aim 96% of the time; rail 5 entries and 0 modern terms at every mark; 0 free gifts.
 
 Tests: listed suites and probes pass. menu_architecture fails identically on base. foreign_dialogue_ui and research_600_campaign time out identically on base. early_consequences reports EC_FAILURES [] with rows identical to base.
+## October 12 — Surrounding village label spacing
+
+Player code checkpoint `ef47aa5b` moves named country-place labels into the
+collision-aware screen-space layer. Readable paper tags and leaders replace
+the overlapping world-space italic names. Cities retain priority and selection;
+place tags avoid city pins and great-work marks. All 46 focused headless cases
+pass. No save changes or running-session restart were made. The integration
+record is in `docs/INTEGRATION_STATUS.md`; publication precedes canonical update.
+

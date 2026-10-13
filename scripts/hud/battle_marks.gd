@@ -2,16 +2,11 @@ extends RefCounted
 ## BATTLE MARKS: how a battle, a force's counter and its state are inked on
 ## the war chart.
 ##
-## A battle is a small crossed-weapons mark standing on the front where the
-## two sides touch, the weapons those armies carry (by the equipment ledger's
-## year of their kits: crossed spears, swords, muskets, rifles, then the
-## armour sign, then the lattice of drones and robots), with a
-## two-colour bar in the sides' colours: the split sits at the middle when
-## neither side gives ground and moves toward whoever is being pushed back.
-## Beneath it the chart letters where and how long ("Tsaren · day 2"). A
-## pointer resting on it gets one plain line ("We are pushing them back ·
-## 340 against 280"). Far out, battles close together stand as one mark
-## ("2 battles").
+## At rest, a battle is a small roundel of crossed weapons at the contact.
+## Its two-colour rim shows the balance of the fight. The full paper
+## readout remains available for detail, with historically appropriate
+## weapons, troop estimates and the balance of the fight. Nearby battles
+## can share one small signal with a count, leaving the front itself clear.
 ##
 ## A force's counter (hud/army_marks.gd) gains two thin bars under its mark,
 ## strength (men against its full strength) and will to fight (morale), and
@@ -274,6 +269,67 @@ static func state_words(state:String)->String:
 
 # --- Drawing (on the overlay's own canvas) -------------------------------------------------
 
+## The quiet map signal occupies the contact itself. Its size does not
+## depend on troop counts, names or equipment; those belong in detail.
+static func signal_rect(at:Vector2,scale:float=1.0)->Rect2:
+	var k:=maxf(0.5,scale)
+	return Rect2(at-Vector2(13,12)*k,Vector2(26,24)*k)
+
+
+## The round ivory badge differs from rectangular army banners, even when
+## paused. Its restrained rim favours the side gaining ground; the dark
+## crossed mark identifies a battle without requiring colour or motion.
+static func draw_signal(canvas:CanvasItem,at:Vector2,battle:Dictionary,scale:float=1.0)->Rect2:
+	var k:=maxf(0.5,scale)
+	var sides:Dictionary=battle.get("sides",{})
+	var colour_a:Color=(sides.get("a",{}) as Dictionary).get("colour",VERDIGRIS)
+	var colour_b:Color=(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD)
+	var fade:=ArmyMarks.fade(int(battle.get("age_days",0)))
+	canvas.draw_circle(at,10.8*k,Color(PAPER,0.98*fade))
+	canvas.draw_arc(at,10.8*k,0.0,TAU,32,Color(INK,0.28*fade),0.8*k,true)
+	var pressure:=clampf(float(battle.get("progress",0.0)),-1.0,1.0)*PI*0.25
+	var top:=-PI*0.5+pressure
+	var bottom:=PI*0.5-pressure
+	canvas.draw_arc(at,9.5*k,bottom+0.06,top+TAU-0.06,24,Color(colour_a,0.9*fade),1.65*k,true)
+	canvas.draw_arc(at,9.5*k,top+0.06,bottom-0.06,24,Color(colour_b,0.9*fade),1.65*k,true)
+	if battle.has("era"):
+		draw_weapons(canvas,at,5.8*k,int(battle.era),Color(INK,fade),Color.TRANSPARENT)
+	else:
+		# Unknown equipment still reads as contact without inventing a kit.
+		canvas.draw_line(at+Vector2(-4.6,-5.0)*k,at+Vector2(4.6,5.0)*k,Color(INK,fade),1.9*k,true)
+		canvas.draw_line(at+Vector2(-4.6,5.0)*k,at+Vector2(4.6,-5.0)*k,Color(INK,fade),1.9*k,true)
+	return signal_rect(at,scale)
+
+
+## A count tab stays inside a 32px footprint. One member needs no tab.
+static func cluster_signal_rect(at:Vector2,group:Dictionary,scale:float=1.0)->Rect2:
+	var members:Array=group.get("members",[])
+	if members.is_empty():return Rect2()
+	if members.size()==1:return signal_rect(at,scale)
+	var k:=maxf(0.5,scale)
+	return Rect2(at-Vector2(16,16)*k,Vector2(32,32)*k)
+
+
+static func draw_cluster_signal(canvas:CanvasItem,at:Vector2,group:Dictionary,scale:float=1.0)->Rect2:
+	var members:Array=group.get("members",[])
+	if members.is_empty():return Rect2()
+	var battle:Dictionary=((members[0] as Dictionary).get("battle",{}) as Dictionary).duplicate()
+	battle["progress"]=float(group.get("progress",battle.get("progress",0.0)))
+	if members.size()==1:return draw_signal(canvas,at,battle,scale)
+	var k:=maxf(0.5,scale)
+	draw_signal(canvas,at+Vector2(0,3)*k,battle,scale)
+	var tab:=Rect2(at+Vector2(-2,-15)*k,Vector2(17,11)*k)
+	var fade:=ArmyMarks.fade(int(battle.get("age_days",0)))
+	canvas.draw_rect(tab,Color(PAPER,0.96*fade))
+	var words:=str(members.size()) if members.size()<=99 else "99+"
+	var font:=T.font("ui_strong")
+	var fs:=maxi(4,roundi(9.0*k))
+	var size:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs)
+	var baseline:=tab.get_center()+Vector2(-size.x*0.5,(font.get_ascent(fs)-font.get_descent(fs))*0.5)
+	canvas.draw_string(font,baseline,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,fade))
+	return cluster_signal_rect(at,group,scale)
+
+
 ## The battle's weapons, r = half size, by weapons era: crossed spears,
 ## swords, muskets or rifles (0-3), then the staff map's armour sign (4) and
 ## the lattice sign of drones and robots (5). Paper halos are laid first,
@@ -355,8 +411,18 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,progress:float,a:Color,b:Color
 ## foot, the bar of who is winning. A fight seen before stands faded.
 ## Returns the rect it covers (for hits and lettering clearance).
 const PLATE_SIZE:=Vector2(124.0,40.0)
-static func plate_rect(at:Vector2,scale:float=1.0)->Rect2:
-	var size:=PLATE_SIZE*maxf(0.8,scale)
+static func plate_rect(at:Vector2,scale:float=1.0,battle:Dictionary={})->Rect2:
+	var k:=maxf(0.8,scale)
+	var size:=PLATE_SIZE*k
+	if not battle.is_empty():
+		var sides:Dictionary=battle.get("sides",{})
+		var mine:=count(int((sides.get("a",{}) as Dictionary).get("troops",0)),bool(battle.get("ours",false)))
+		var enemy:=int((sides.get("b",{}) as Dictionary).get("troops",0))
+		var theirs:=count(enemy,false) if enemy>0 else "?"
+		var fs:=roundi(15.0*k)
+		var words:=T.font("ui_strong").get_string_size(mine+theirs,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
+		words+=T.font("ui").get_string_size("v",HORIZONTAL_ALIGNMENT_LEFT,-1,roundi(fs*0.85)).x
+		size.x=maxf(size.x,ceilf(words+57.0*k))
 	return Rect2(at-Vector2(size.y*0.5,size.y*0.5),size)
 
 
@@ -368,7 +434,7 @@ static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,s
 	var seen_before:=int(battle.get("age_days",0))>0
 	var fade:=alpha*(0.6 if seen_before else 1.0)
 	var ours:=bool(battle.get("ours",false))
-	var plate:=plate_rect(at,scale)
+	var plate:=plate_rect(at,scale,battle)
 	var k:=plate.size.y/PLATE_SIZE.y
 	# The plate: paper, a war-red rule for a fight of ours, ink for others'.
 	canvas.draw_rect(Rect2(plate.position+Vector2(2,3)*k,plate.size),Color(0,0,0,0.18*fade))
@@ -401,20 +467,30 @@ static func draw_battle(canvas:CanvasItem,at:Vector2,battle:Dictionary,era:int,s
 	return plate.grow(2.0)
 
 
+## The complete cluster footprint. It names the number of battles, rather
+## than passing the first battle's strength off as the whole group's.
+static func cluster_rect(at:Vector2,group:Dictionary)->Rect2:
+	var members:Array=group.get("members",[])
+	var width:=T.font("ui_strong").get_string_size(aggregate_label(members.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+48.0
+	return Rect2(at-Vector2(19,19),Vector2(ceilf(maxf(112.0,width)),38)).grow(2.0)
+
+
 ## Many battles in one place, far out: the weapons with a count beside them.
-static func draw_cluster(canvas:CanvasItem,at:Vector2,group:Dictionary,era:int,font:Font)->Rect2:
+static func draw_cluster(canvas:CanvasItem,at:Vector2,group:Dictionary,era:int,_font:Font)->Rect2:
 	var members:Array=group.members
 	var first:Dictionary=(members[0] as Dictionary).battle
-	var shown:=first.duplicate()
-	shown["progress"]=float(group.get("progress",0.0))
-	var rect:=draw_battle(canvas,at,shown,era,0.9)
-	var badge:=at+Vector2(MARK_RADIUS+6.0,-MARK_RADIUS)
-	canvas.draw_circle(badge,8.0,Color(PAPER,0.96))
-	canvas.draw_arc(badge,8.0,0.0,TAU,18,Color(INK,0.8),1.0,true)
-	var text:=str(members.size())
-	var w:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-	canvas.draw_string(font,badge+Vector2(-w*0.5,4.5),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,INK)
-	return rect.merge(Rect2(badge-Vector2(8,8),Vector2(16,16)))
+	var plate:=cluster_rect(at,group).grow(-2.0)
+	var ink:=OXBLOOD if bool(first.get("ours",false)) else INK
+	canvas.draw_rect(Rect2(plate.position+Vector2(2,3),plate.size),Color(0,0,0,0.18))
+	canvas.draw_rect(plate,Color(PAPER,0.97))
+	canvas.draw_rect(plate,Color(ink,0.9),false,1.2)
+	draw_weapons(canvas,at,12.0,int(first.get("era",era)),ink,PAPER)
+	canvas.draw_string(T.font("ui_strong"),Vector2(at.x+20,plate.position.y+17),aggregate_label(members.size()),HORIZONTAL_ALIGNMENT_LEFT,-1,14,INK)
+	var sides:Dictionary=first.get("sides",{})
+	var colour_a:Color=(sides.get("a",{}) as Dictionary).get("colour",VERDIGRIS)
+	var colour_b:Color=(sides.get("b",{}) as Dictionary).get("colour",OXBLOOD)
+	draw_bar(canvas,Rect2(Vector2(at.x+20,plate.end.y-11),Vector2(plate.end.x-at.x-27,6)),float(group.get("progress",0.0)),colour_a,colour_b)
+	return cluster_rect(at,group)
 
 
 ## Two thin bars under a force's mark: strength (men against full strength)

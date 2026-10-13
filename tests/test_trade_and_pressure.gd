@@ -133,6 +133,79 @@ func test_no_trade_with_a_people_whose_home_we_have_not_found()->void:
 	(Ledger.civ(a).player_relation as Dictionary)["home_location_known"]=true
 	assert_str(Ledger.blocked("player",a)).is_equal("")
 
+## Sets a surveyed way on a pair by hand: "land", or "sea" with its km of
+## water out of sight of land and in sight of a coast.
+func _way(a:String,b:String,kind:String,open:float=0.0,coast:float=0.0)->void:
+	var p:=Ledger.pair(a,b)
+	var from:=Ledger.position(String(p.a)); var to:=Ledger.position(String(p.b))
+	p["way"]={"k":kind,"o":open,"c":coast,"fx":from.x,"fy":from.y,"tx":to.x,"ty":to.y}
+
+## Sets how far a people's boats go over the sea (its report's sea endurance).
+func _boats(owner:String,endurance:float)->void:
+	Ledger._refresh_report(owner,int(GameState.elapsed_days))
+	(Ledger.state().reports[owner] as Dictionary)["end"]=endurance
+
+## Over the sea with no land road: goods cross only in boats that can make
+## the crossing and come home, by the expeditions' own odds; a crossing too
+## wide for either people's boats carries nothing, and says why.
+func test_no_trade_over_a_sea_too_wide_for_either_peoples_boats()->void:
+	var a:=String(ids[0]); var b:=String(ids[1])
+	# The survey finds the land road between homes on one land.
+	Ledger._discover_pairs(10)
+	assert_int(Ledger.survey_ways(100)).is_greater(0)
+	assert_str(String(Ledger.way("player",a).kind)).is_equal("land")
+	var by_land:=Ledger.reach("player",a,Ledger.report("player"),Ledger.report(a))
+	# Now we are an island: 600 km of open water to every people.
+	for id:String in ids: _way("player",id,"sea",600.0,50.0)
+	for id:String in ids: _boats(id,300.0)
+	_boats("player",350.0)
+	assert_str(String(Ledger.way("player",a).kind)).is_equal("sea")
+	assert_bool(is_finite(float(Ledger.way("player",a).around))).is_false()
+	# 0.5 ^ ((50 x 0.2 + 600) / 350) = 0.30 come home: no trader puts out.
+	assert_float(Ledger.sea_home("player",a,Ledger.report("player"),Ledger.report(a))).is_equal_approx(pow(0.5,610.0/350.0),0.001)
+	assert_str(Ledger.blocked("player",a)).is_equal("sea")
+	assert_float(Ledger.reach("player",a,Ledger.report("player"),Ledger.report(a))).is_equal(0.0)
+	assert_str(Ledger.sea_words("player",a)).contains("650 km of water").contains("30 in 100")
+	# The court says the same, from the same ledger.
+	var sheet:=preload("res://scripts/court_facts.gd").sheet(["common","tribute"])
+	var said:=String((load("res://scripts/court_answers.gd") as GDScript).call("answer",sheet,"what do we trade with %s?" % Ledger.name_of(a)))
+	assert_str(said).contains("Nothing passes").contains("650 km of water")
+	var our_flint:=_stock("player","Flint")
+	var p:=_settle("player",a)
+	_boats(a,300.0); _boats("player",350.0)
+	assert_float(_stock("player","Flint")).is_equal_approx(our_flint,0.0001)
+	assert_float(float(p.total.ab)+float(p.total.ba)).is_equal(0.0)
+	# Better ships on either side open it: the share that come home carries.
+	_boats(a,1400.0)
+	var home:=pow(0.5,610.0/1400.0)
+	assert_float(Ledger.sea_share("player",a,Ledger.report("player"),Ledger.report(a))).is_equal_approx(home,0.001)
+	assert_str(Ledger.blocked("player",a)).is_equal("")
+	assert_float(Ledger.reach("player",a,Ledger.report("player"),Ledger.report(a))).is_equal_approx(by_land*home,0.001)
+	# Peoples with a land road between them are untouched by any of it.
+	assert_str(Ledger.blocked(a,b)).is_equal("")
+	assert_str(String(Ledger.way(a,b).kind)).is_equal("land")
+
+## Two peoples with no land road between their homes and boats too poor to
+## cross still trade the long way round by land, through a people both know,
+## at that longer distance.
+func test_goods_go_the_long_way_round_by_land_when_the_sea_is_too_wide()->void:
+	var a:=String(ids[0]); var b:=String(ids[1])
+	Ledger._discover_pairs(10)
+	Ledger.survey_ways(100)
+	_way(a,b,"sea",900.0,0.0)
+	for id:String in ids: _boats(id,300.0)
+	_boats("player",300.0)
+	var w:=Ledger.way(a,b)
+	assert_str(String(w.kind)).is_equal("sea")
+	var round:=minf(Ledger.distance_km(a,"player")+Ledger.distance_km("player",b),Ledger.distance_km(a,String(ids[2]))+Ledger.distance_km(String(ids[2]),b))
+	assert_float(float(w.around)).is_equal_approx(round,0.01)
+	assert_str(Ledger.blocked(a,b)).is_equal("")
+	var reach:=Ledger.reach(a,b,Ledger.report(a),Ledger.report(b))
+	assert_float(reach).is_greater(0.0)
+	# Less than the straight road would carry: the way round is longer.
+	_way(a,b,"land")
+	assert_float(reach).is_less(Ledger.reach(a,b,Ledger.report(a),Ledger.report(b)))
+
 ## The pair's direction from `from` to `to` ("ab" or "ba").
 func _dir(p:Dictionary,from:String)->String:
 	return "ab" if String(p.a)==from else "ba"
@@ -238,7 +311,10 @@ func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	assert_float(float(mods.cap)).is_equal_approx(Stances.TOLL_VOLUME,0.0001)
 	Ledger._settle(p,192)
 	var toll:=float(p.last.get("toll_b" if String(p.b)=="player" else "toll_a",0.0))
-	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*(float(p.last.trade_ab)+float(p.last.trade_ba)),0.05)
+	# Taken in full only where our border facing them is watched; smugglers
+	# carry the rest round an open line (fort_border.gd facing: half there).
+	var collected:=0.5+0.5*preload("res://scripts/fort_border.gd").facing("player",a,0.0)
+	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*collected*(float(p.last.trade_ab)+float(p.last.trade_ba)),0.05)
 	assert_float(toll).is_greater(0.0)
 	# Favour: we sell a fifth below our price, and more of it.
 	Stances.set_stance("player",a,"favour")

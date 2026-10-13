@@ -301,10 +301,13 @@ func test_a_click_on_a_mark_selects_it_and_opens_the_generals_note()->void:
 	var hit:Dictionary=overlay.mark_at(there)
 	assert_str(String(hit.kind)).is_equal("sighting")
 	var note:Dictionary=overlay.note_content(hit)
-	assert_str(String(note.kicker)).starts_with("THEIR")
+	assert_str(String(note.kicker)).is_equal("SIGHTING")
 	assert_str(" ".join(note.lines)).contains("40 days ago")
-	# Cards are lettered like the city cards: two lines, plain words, no jargon.
+	# Identity and dated strength are disclosed on the inspected banner.
 	var cards:=(overlay.placed_captions as Array).filter(func(c:Dictionary)->bool: return String(c.id).begins_with("mark:"))
-	assert_int(cards.size()).is_greater(0)
-	for card in cards: assert_str(_jargon_in(String(card.text))).is_equal("")
-	assert_bool(cards.any(func(c:Dictionary)->bool: return "Arno's corps, about 30,000" in String(c.text) or "Arno's army, about 30,000" in String(c.text))).is_true()
+	assert_array(cards).is_empty()
+	overlay._hover(at)
+	assert_bool(overlay.tip.visible).is_true()
+	var words:=String((overlay.tip.get_child(0) as Label).text)
+	assert_str(_jargon_in(words)).is_equal("")
+	assert_bool("Arno's corps, about 30,000" in words or "Arno's army, about 30,000" in words).is_true()

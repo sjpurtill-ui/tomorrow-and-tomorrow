@@ -932,7 +932,8 @@ static func _plan_ceremony(state:Node,r:Dictionary,_city:Dictionary,day:int)->vo
 	for civ:Dictionary in civs:
 		var relation:Dictionary=civ.get("player_relation",{})
 		if bool(relation.get("at_war",false)):continue
-		if int(relation.get("contact_level",0))<=0 and int(relation.get("met_day",-1))<0:continue
+		# Envoys come from peoples we have met, never from one whose tracks alone were seen.
+		if int(relation.get("contact_level",0))<2:continue
 		var owner:=Exchange.recipient(String(civ.id))
 		if owner==WorldSimulation.actor_id:continue
 		var opinion:=float(relation.get("opinion",0))

@@ -351,7 +351,7 @@ static func set_split(mc:Variant,share:float)->Dictionary:
 	# More at home than stand there: idle bands come home to guard it.
 	var called:=recall_for_guard(mc)
 	return {"ok":true,"home_share":home_share(mc),"guard":guard,"called":called,
-		"said":"%d%% of the watch guard home and the towns: %s of %s. The rest, %s, are for the bands." % [roundi(home_share(mc)*100.0),EraWords.grouped(guard),EraWords.grouped(manpower(mc)),EraWords.grouped(maxi(0,manpower(mc)-guard))]}
+		"said":"The home guard is %d%% of the army: %s of %s. The rest, %s, are free to send." % [roundi(home_share(mc)*100.0),EraWords.grouped(guard),EraWords.grouped(manpower(mc)),EraWords.grouped(maxi(0,manpower(mc)-guard))]}
 
 ## The home guard asks for more than stand at home: bands with nothing to do
 ## come home to guard it, those at home at once (they fold into the host),
@@ -499,9 +499,9 @@ static func role_effect(mc:Variant=null)->Dictionary:
 	var pace:=float(mc._training_rate())*float(mc.training_staff.policy("army",WorldSimulation.actor_id).get("intake",1.0))
 	var days:=roundi(float(mc.UnitCatalog.training_days(unit))/pace) if pace>0.0 else -1
 	var guard_more:=roundi(10.0*float(r.home_share))
-	var now:="%s keep watch: they are the army. %s guard home and the towns; %s are for the bands. Drilled %d in 100, armed %d in 100." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(int(r.offensive)),roundi(float(r.drill)*100.0),roundi(float(r.armed)*100.0)]
+	var now:="%s keep watch: they are the army. %s are the home guard; %s are free to send. Drilled %d in 100, armed %d in 100." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(int(r.offensive)),roundi(float(r.drill)*100.0),roundi(float(r.armed)*100.0)]
 	if float(r.martial)>0.0:now+=" Given to war: their drill reaches %d in 100 higher." % roundi(float(r.martial_drill)*100.0)
-	var more:="Ten more: 10 more under arms at once (%d to the home guard, %d for the bands), raw at first%s; 10 fewer at other work." % [guard_more,10-guard_more,(", most of their drill in about %d days" % days) if days>0 else ", not drilled while drill is stopped"]
+	var more:="Ten more: 10 more under arms at once (%d to the home guard, %d free to send), raw at first%s; 10 fewer at other work." % [guard_more,10-guard_more,(", most of their drill in about %d days" % days) if days>0 else ", not drilled while drill is stopped"]
 	# The People view's row (role_effects.gd), twelve words or fewer each:
 	# the army, and the safety ten more lift the people toward
 	# (consequence_engine.gd: +42 points for every 5 in 100 on watch).
@@ -510,7 +510,7 @@ static func role_effect(mc:Variant=null)->Dictionary:
 	var lift:=func(people:float)->int:return roundi(people/maxf(1.0,pop*Impact.WATCH_SHARE)*Impact.WATCH_SAFETY*100.0)
 	# Order is kept by the watch at home (consequence_engine.gd), not its bands away.
 	var keeping:=float(at_home(mc))
-	var short_now:="%s keep watch: %s guard home, %s for bands." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(maxi(0,int(r.watch)-int(r.guard)))]
+	var short_now:="The army, %s: %s home guard, %s free to send." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(maxi(0,int(r.watch)-int(r.guard)))]
 	# Ten more join at home: the home guard's share of them is spread over
 	# the towns by their people, the rest stand at home until sent out.
 	var Combat:=preload("res://scripts/civilization_combat.gd")

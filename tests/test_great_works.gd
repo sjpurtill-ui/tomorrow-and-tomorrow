@@ -352,7 +352,7 @@ func test_construction_events_are_deterministic_and_bounded()->void:
 	assert_float(absf(float(first.shift))).is_less_equal(.4)
 
 func test_ceremony_gifts_come_from_real_stores_and_conserve_goods()->void:
-	CivilizationSystem.civilizations.append({"id":RIVAL,"name":"The Rival League","strategic_regions":[],"player_relation":{"opinion":.5,"contact_level":1,"at_war":false,"met_day":1}})
+	CivilizationSystem.civilizations.append({"id":RIVAL,"name":"The Rival League","strategic_regions":[],"player_relation":{"opinion":.5,"contact_level":2,"at_war":false,"met_day":1}})
 	_rival(func()->void:WorldSimulation.state.resource_stockpiles={"Stone":1000.0})
 	var r:=_record(city,_id("ring","honor_dead","grand","stone",1,"cer"),.99999)
 	U.apply_outcome(GameState,r,city,50,"success")

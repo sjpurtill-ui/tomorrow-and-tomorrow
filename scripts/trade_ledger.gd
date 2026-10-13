@@ -23,6 +23,22 @@ extends RefCounted
 ## against roads and boats, the trade discoveries both know). Bulky goods
 ## (grain, timber, stone) use more of it than goods that carry well (salt,
 ## flint, made goods): CARRY.
+## THE WAY BETWEEN THEM. Carriers need a way: a land road, or a sea crossing
+## their boats can make. Each pair's homes are surveyed once with the armies'
+## own planner (army_land_route.gd); where it finds no land road between them
+## the pair is over the sea, and goods go the better of two ways:
+##   by sea   the crossing on their bearing (rival_land_routes.gd sea_road),
+##            in the boats of whichever people has the better. Of trading
+##            boats sent over and home again
+##                0.5 ^ ((coast km x 0.2 + open km) / sea endurance)
+##            come home (expedition.gd's own rule and weights). That share
+##            scales what the pair can carry; under SEA_LEAST_HOME no trader
+##            puts out at all.
+##   by land  the long way round, hand to hand through peoples who know each
+##            other and have land roads between them, at that longer distance.
+## With neither, nothing passes (blocked "sea") until one of them builds
+## better ships.
+##
 ## Settled on a schedule per pair (a season for gifts and barter, a month for
 ## priced trade), each pair on its own day, so a few pairs settle a day.
 ## Goods move between the real stores of both peoples' capitals
@@ -78,6 +94,16 @@ const INTENSITY:={"gift":0.06,"barter":0.25,"silver":0.7,"coin":1.4}
 const REACH_KM:=120.0
 const BOAT_REACH:=1.6
 const BOATS:=["river_craft","reed_bundle_boats","hide_covered_boats","coastal_watercraft"]
+## Over the sea: no trader puts out when fewer than this share of boats would
+## come home; water in sight of a coast counts this share of open water
+## (expedition.gd COAST_WEIGHT).
+const SEA_LEAST_HOME:=0.5
+const SEA_COAST_WEIGHT:=0.2
+## A home moved further than this is surveyed again.
+const WAY_MOVED_KM:=5.0
+const LAND_ROUTE_PATH:="res://scripts/army_land_route.gd"
+const SEA_ROAD_PATH:="res://scripts/rival_land_routes.gd"
+const EXPEDITION_PATH:="res://scripts/expedition.gd"
 const MEETING_SEASONS:=4
 ## A people parts with what it holds over OFFER_OVER times its wanted
 ## holding, and with no more than OFFER_SHARE of that excess at one time.
@@ -272,7 +298,132 @@ static func blocked(a:String,b:String,day:int=-1)->String:
 	if stances!=null:
 		var why:=String(stances.call("embargo_between",a,b))
 		if why!="": return why
+	# The sea between them is wider than either people's boats dare.
+	if sea_bars(a,b,report(a),report(b)): return "sea"
 	return ""
+
+# --------------------------------------------------------------------------
+# The way between two peoples: a land road, or a sea crossing
+# --------------------------------------------------------------------------
+
+## One pair's homes surveyed: kept on the pair as {k: "land" or "sea", o:
+## km of water out of sight of land, c: km in sight of a coast, and the two
+## homes it was taken between}. {} without a survey of the land (a test
+## world) or before the pair's turn has come.
+static func _surveyed(p:Dictionary)->Dictionary:
+	var w:Variant=p.get("way")
+	if not w is Dictionary: return {}
+	var from:=position(String(p.a)); var to:=position(String(p.b))
+	if Vector2(float(w.get("fx",0.0)),float(w.get("fy",0.0))).distance_to(from)>WAY_MOVED_KM or Vector2(float(w.get("tx",0.0)),float(w.get("ty",0.0))).distance_to(to)>WAY_MOVED_KM: return {}
+	return w
+
+## Surveys the way for up to `budget` pairs that lack one (ours first): the
+## armies' planner between the two homes, then the sea crossing on their
+## bearing. A pair's homes do not move, so each is surveyed once a campaign.
+static func survey_ways(budget:int=1)->int:
+	var authority:Variant=CivilizationSystem.get("scout_land_authority")
+	if not authority is Callable or not (authority as Callable).is_valid(): return 0
+	var land:=Callable(CivilizationSystem,"_scout_land_at")
+	var pairs:Dictionary=state().pairs
+	var keys:Array=pairs.keys()
+	keys.sort_custom(func(x:String,y:String)->bool: return ("player" in x.split("|")) and not ("player" in y.split("|")))
+	var done:=0
+	for k:String in keys:
+		if done>=budget: break
+		var p:Dictionary=pairs[k]
+		if not bool(p.get("known",false)) or not _surveyed(p).is_empty(): continue
+		var from:=position(String(p.a)); var to:=position(String(p.b))
+		var w:={"k":"land","o":0.0,"c":0.0,"fx":from.x,"fy":from.y,"tx":to.x,"ty":to.y}
+		var road:Dictionary=(load(LAND_ROUTE_PATH) as GDScript).call("find",from,to,land,true,{})
+		if road.has("error") and String(road.get("reason",""))=="no_land_route":
+			var chord:Dictionary=(load(SEA_ROAD_PATH) as GDScript).call("sea_road",from,to,land)
+			if not chord.has("error"):
+				w.k="sea"; w.o=float(chord.open_km); w.c=float(chord.coast_km)
+		p["way"]=w
+		done+=1
+	return done
+
+## The land roads between peoples who know each other, as one net: for every
+## two of them the shortest way round by land, hand to hand (km; absent when
+## there is none). Rebuilt when a pair is surveyed. ready: every known pair
+## has been surveyed, so "no way round" can be trusted.
+static var _net:={}
+static func _land_net()->Dictionary:
+	var pairs:Dictionary=state().pairs
+	var surveyed:=0; var known:=0
+	for k:String in pairs:
+		if not bool((pairs[k] as Dictionary).get("known",false)): continue
+		known+=1
+		if not _surveyed(pairs[k]).is_empty(): surveyed+=1
+	var stamp:="%d/%d/%d" % [surveyed,known,pairs.size()]
+	if String(_net.get("stamp",""))==stamp and is_same(_net.get("of"),pairs): return _net
+	var km:={}
+	var nodes:={}
+	for k:String in pairs:
+		var p:Dictionary=pairs[k]
+		if not bool(p.get("known",false)) or String(_surveyed(p).get("k",""))!="land": continue
+		var a:=String(p.a); var b:=String(p.b)
+		nodes[a]=true; nodes[b]=true
+		var d:=distance_km(a,b)
+		km[a+">"+b]=d; km[b+">"+a]=d
+	for mid:String in nodes:
+		for a:String in nodes:
+			if not km.has(a+">"+mid): continue
+			for b:String in nodes:
+				if a==b or not km.has(mid+">"+b): continue
+				var through:=float(km[a+">"+mid])+float(km[mid+">"+b])
+				if through<float(km.get(a+">"+b,INF)): km[a+">"+b]=through
+	_net={"stamp":stamp,"of":pairs,"ready":known>0 and surveyed>=known,"km":km}
+	return _net
+
+## The way between two peoples: {kind, open, coast, around}. kind "land" (a
+## land road between their homes), "sea" (none: the crossing's km of water
+## out of sight of land and in sight of a coast, and `around`, the km of the
+## long way round by land through peoples who know each other, INF when
+## there is none), or "" while the ways are not all surveyed (no rule yet).
+static func way(a:String,b:String)->Dictionary:
+	var out:={"kind":"","open":0.0,"coast":0.0,"around":INF}
+	var p:=pair(a,b)
+	if p.is_empty(): return out
+	var w:=_surveyed(p)
+	if w.is_empty(): return out
+	if String(w.k)=="land":
+		out.kind="land"
+		return out
+	var net:=_land_net()
+	if not bool(net.ready): return out
+	out.kind="sea"; out.open=float(w.o); out.coast=float(w.c)
+	out.around=float((net.km as Dictionary).get(a+">"+b,INF))
+	return out
+
+## Of trading boats sent over the pair's crossing and home again, the share
+## that come home (1 by land, or before either people's boats are read).
+static func sea_home(a:String,b:String,ra:Dictionary,rb:Dictionary)->float:
+	var endurance:=maxf(float(ra.get("end",-1.0)),float(rb.get("end",-1.0)))
+	if endurance<0.0: return 1.0
+	var w:=way(a,b)
+	if String(w.kind)!="sea": return 1.0
+	if endurance<=0.0: return 0.0
+	return clampf(pow(0.5,(float(w.coast)*SEA_COAST_WEIGHT+float(w.open))/endurance),0.0,1.0)
+
+## What the crossing leaves of a pair's carrying: the share of boats that
+## come home, or nothing when too few would for any trader to put out.
+static func sea_share(a:String,b:String,ra:Dictionary,rb:Dictionary)->float:
+	var home:=sea_home(a,b,ra,rb)
+	return home if home>=SEA_LEAST_HOME else 0.0
+
+## Whether nothing can pass between them for want of a way: over the sea,
+## too wide for either people's boats, and no way round by land.
+static func sea_bars(a:String,b:String,ra:Dictionary,rb:Dictionary)->bool:
+	if float(ra.get("end",-1.0))<0.0 and float(rb.get("end",-1.0))<0.0: return false
+	var w:=way(a,b)
+	return String(w.kind)=="sea" and sea_share(a,b,ra,rb)<=0.0 and not is_finite(float(w.around))
+
+## Why nothing crosses, in the engine's numbers.
+static func sea_words(a:String,b:String)->String:
+	var w:=way(a,b)
+	var home:=sea_home(a,b,report(a),report(b))
+	return "No trader crosses: there is no land road between us, and the sea is too wide for our boats or theirs. The crossing is %d km of water, %d of it out of sight of land; about %d in 100 trading boats would come home, and none puts out at worse than %d." % [roundi(float(w.open)+float(w.coast)),roundi(float(w.open)),roundi(home*100.0),roundi(SEA_LEAST_HOME*100.0)]
 
 # --------------------------------------------------------------------------
 # The day: pairs found, settled on their days, stances answered
@@ -287,6 +438,8 @@ static func advance(day:int)->void:
 	var first:=int(s.get("day",-1))<0
 	s["day"]=day
 	if first or posmod(day,30)==7: _discover_pairs(day)
+	# One pair's way a day until all are surveyed (once a campaign each).
+	survey_ways(1)
 	# Each people's market is read on its own day of the month.
 	for owner:String in owners():
 		if posmod(day+posmod(hash("trade_report:"+owner),REPORT_DAYS),REPORT_DAYS)==0: _refresh_report(owner,day)
@@ -388,7 +541,11 @@ static func _settle(p:Dictionary,day:int)->void:
 			if share<=0.0: continue
 			var levier:=a if side=="a" else b
 			var payer2:=b if side=="a" else a
-			tolls[side]=_levy(payer2,levier,share*(float(value.ab)+float(value.ba)),form)
+			# Smugglers carry goods round a thinly watched border: the toll is
+			# taken in full only where the levier's line facing them holds
+			# (half at an open border, fort_border.gd facing).
+			var collected:=0.5+0.5*preload("res://scripts/fort_border.gd").facing(owner_of(levier),owner_of(payer2),0.0)
+			tolls[side]=_levy(payer2,levier,share*collected*(float(value.ab)+float(value.ba)),form)
 		# Gifts beyond trade, from a stance (trade_stances.gd "gifts").
 		for dir in ["ab","ba"]:
 			var size:=float((mods.gift as Dictionary).get(dir,0.0))*float(period)/30.0
@@ -459,7 +616,14 @@ static func reach(a:String,b:String,ra:Dictionary,rb:Dictionary)->float:
 	# Each side's roads carry the trade further (built_fabric.gd ROAD_REACH).
 	km*=1.0+preload("res://scripts/built_fabric.gd").ROAD_REACH*(float(ra.get("roads",0.0))+float(rb.get("roads",0.0)))*0.5
 	if bool(ra.get("boats",false)) and bool(rb.get("boats",false)): km*=BOAT_REACH*clampf(minf(float(ra.get("sea",1.0)),float(rb.get("sea",1.0))),0.2,1.0)
-	return 1.0/(1.0+distance_km(a,b)/maxf(1.0,km))
+	var straight:=1.0/(1.0+distance_km(a,b)/maxf(1.0,km))
+	if float(ra.get("end",-1.0))<0.0 and float(rb.get("end",-1.0))<0.0: return straight
+	var w:=way(a,b)
+	if String(w.kind)!="sea": return straight
+	# No land road between them: what their boats can carry over the crossing
+	# and home, or the long way round by land, whichever brings more.
+	var around:=float(w.around)
+	return maxf(straight*sea_share(a,b,ra,rb),1.0/(1.0+around/maxf(1.0,km)) if is_finite(around) else 0.0)
 
 static func by_water(ra:Dictionary,rb:Dictionary)->bool:
 	return bool(ra.get("boats",false)) and bool(rb.get("boats",false))
@@ -847,6 +1011,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 			if st.known_discoveries.has(id): boats=true; break
 		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco.values_comparable_abroad()),"log":float(st.simulation_metrics.get("logistics",0.16)),"roads":float(preload("res://scripts/built_fabric.gd").realm_roads()),
 			"tc":float(WorldSimulation.discovery.effect("trade_capacity")),"gw":float((load("res://scripts/great_works_rivalry.gd") as GDScript).call("trade_routing",owner)),"boats":boats,"sea":float(WorldSimulation.military.joint_operations.sea_trade_factor()) if WorldSimulation.military!=null and WorldSimulation.military.get("joint_operations")!=null else 1.0,
+			"end":float((load(EXPEDITION_PATH) as GDScript).call("endurance_km",true)),
 			"sim":true,"g":goods,"acc_in":{},"acc_out":{}})
 
 static func _read_unsimulated(owner:String,day:int,prev:Dictionary)->Dictionary:
@@ -1022,7 +1187,7 @@ static func deal_terms(buyer:String,seller:String,what:String,count:float)->Dict
 		return out
 	var why:=blocked(buyer,seller)
 	if why!="" and not (what=="captives" and why=="feud"):
-		out.why=String({"war":"We are at war: no trader crosses.","feud":"We are feuding: no trader crosses.","hostile":"They will not meet our traders.","unlocated":"We do not know where they live; our traders have no road to them."}.get(why,"Nothing passes between us now."))
+		out.why=String({"war":"We are at war: no trader crosses.","feud":"We are feuding: no trader crosses.","hostile":"They will not meet our traders.","unlocated":"We do not know where they live; our traders have no road to them.","sea":sea_words(buyer,seller)}.get(why,"Nothing passes between us now."))
 		return out
 	var form:=form_of(p,report(buyer),report(seller))
 	out.form=form

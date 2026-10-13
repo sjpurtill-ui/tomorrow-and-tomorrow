@@ -1,5 +1,5 @@
 extends Control
-## THE ARMY BAR: HOI4's strip of army cards in the map's bottom-left corner.
+## The map's army disclosure: quiet until opened or an army is selected.
 ##
 ## One paper card per army, band, garrison and the levy at home
 ## (hud/army_bar_model.gd gives every number), shown only while we have a
@@ -33,6 +33,7 @@ const GAP:=6.0
 ## Width kept at each end for a scroll arrow (22 px and its gap).
 const ARROW_ROOM:=28.0
 const REFRESH_SECONDS:=0.5
+const DISCLOSURE_HEIGHT:=30.0
 
 var terrain:Node
 var cards:Array[Dictionary]=[]
@@ -43,22 +44,40 @@ var clock:=REFRESH_SECONDS
 var _shape:=""
 var strip:Control
 var members:Control
+var member_scroll:ScrollContainer
 var left_button:Button
 var right_button:Button
+var disclosure:Button
+var expanded_by_user:=false
+var _war_is_open:=false
 
 
 func _ready()->void:
 	name="ArmyBar"
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
-	members=Control.new();members.name="Bands";members.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(members)
+	member_scroll=ScrollContainer.new();member_scroll.name="BandScroll"
+	member_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;member_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	member_scroll.gui_input.connect(_member_scroll_input);add_child(member_scroll)
+	members=Control.new();members.name="Bands";members.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	members.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;member_scroll.add_child(members)
 	strip=Control.new();strip.name="Cards";strip.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.clip_contents=true;add_child(strip)
 	left_button=_arrow("‹",-1);right_button=_arrow("›",1)
+	disclosure=Button.new();disclosure.name="ArmyDisclosure";disclosure.focus_mode=Control.FOCUS_NONE
+	disclosure.custom_minimum_size=Vector2(142,DISCLOSURE_HEIGHT)
+	disclosure.add_theme_font_override("font",T.font("ui"))
+	disclosure.add_theme_font_size_override("font_size",13)
+	disclosure.add_theme_color_override("font_color",T.INK)
+	disclosure.add_theme_color_override("font_disabled_color",T.MUTED)
+	disclosure.add_theme_stylebox_override("normal",T.action_button_style(false))
+	disclosure.add_theme_stylebox_override("hover",T.action_button_style(false,true))
+	disclosure.add_theme_stylebox_override("pressed",T.button_pressed_style())
+	disclosure.add_theme_stylebox_override("disabled",T.button_disabled_style())
+	disclosure.pressed.connect(toggle_disclosure);add_child(disclosure)
 	refresh()
 	_mount_plans.call_deferred()
 
 
-## The battle plans the generals are carrying out stay drawn on the map, as
-## HOI4 keeps its front lines: under the rest of the HUD, over the ground.
+## Only the selected command's intended line is shown, beneath its cards.
 var plans:Control
 
 func _exit_tree()->void:
@@ -87,7 +106,43 @@ func _arrow(text:String,step:int)->Button:
 
 ## Height the bar needs, including the bands row of a selected army.
 func bar_height()->float:
-	return CARD_SIZE.y+((CHIP_SIZE.y+GAP) if _selected_group().size()>1 else 0.0)
+	return DISCLOSURE_HEIGHT+(GAP+CARD_SIZE.y+((_member_row_height()+GAP) if _selected_group().size()>1 else 0.0) if expanded() else 0.0)
+
+
+func _member_row_height()->float:
+	return CHIP_SIZE.y+maxf(12.0,member_scroll.get_h_scroll_bar().get_combined_minimum_size().y if member_scroll!=null else 14.0)
+
+
+func _member_scroll_input(event:InputEvent)->void:
+	if event is InputEventMouseButton and event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
+		member_scroll.scroll_horizontal+=roundi((CHIP_SIZE.x+GAP)*(-1.0 if event.button_index==MOUSE_BUTTON_WHEEL_UP else 1.0))
+		member_scroll.accept_event()
+
+
+func expanded()->bool:
+	return _war_is_open or expanded_by_user or selected_id!=""
+
+
+func toggle_disclosure()->void:
+	if _war_is_open:return
+	if expanded():
+		expanded_by_user=false;selected_id=""
+		if is_instance_valid(terrain):
+			if "selected_army_id" in terrain:terrain.selected_army_id=-1
+			terrain.set_meta("pointed_marks",[])
+			if terrain.has_method("_refresh_player_field_army_markers"):terrain._refresh_player_field_army_markers()
+	else:expanded_by_user=true
+	_shape="";refresh()
+
+
+## Count bands, not the number of general cards they are grouped under.
+static func army_count(shown:Array)->int:
+	var ids:Dictionary={};var garrisons:=0
+	for card:Dictionary in shown:
+		if String(card.get("kind",""))=="garrison":garrisons+=1
+		for id in card.get("members",[]):
+			if int(id)>0:ids[int(id)]=true
+	return ids.size()+garrisons
 
 
 ## The HUD gives the bar the stretch of screen above the map toolbar.
@@ -179,16 +234,34 @@ static func levy_card(mc:Node=null)->Dictionary:
 
 
 func refresh()->void:
-	var fresh:=war_cards() if war_open() else bar_cards()
+	var war:=war_open()
+	_apply_cards(war_cards() if war else bar_cards(),war)
+
+
+func _apply_cards(fresh:Array[Dictionary],war:bool)->void:
+	_war_is_open=war
 	# A selection made on the map shows on the bar too.
 	if is_instance_valid(terrain) and "selected_army_id" in terrain:
 		var on_map:=int(terrain.selected_army_id)
 		if on_map>0:
+			var found:=false
 			for card:Dictionary in fresh:
-				if on_map in (card.members as Array) and String(card.id)!=selected_id and not _member_selected(card,on_map):selected_id=String(card.id)
-	var shape:=str(fresh.map(func(c:Dictionary)->String:return String(c.id)))+selected_id
+				if not on_map in (card.get("members",[]) as Array):continue
+				found=true
+				if selected_id==String(card.id) and on_map==int(card.get("army_id",-1)):break
+				selected_id="army:%d" % on_map if String(card.get("kind",""))=="group" else String(card.id)
+				break
+			if not found:selected_id=""
+		else:
+			for card:Dictionary in _all_cards():
+				if String(card.id)==selected_id and String(card.get("kind","")) in ["army","group"]:selected_id="";break
 	cards=fresh
+	if not _all_cards().any(func(card:Dictionary)->bool:return String(card.id)==selected_id):selected_id=""
+	var shape:=str(fresh.map(func(c:Dictionary)->String:return String(c.id)))+selected_id+str(expanded())
 	visible=not cards.is_empty() and not bool(get_meta("covered",false))
+	disclosure.text="Armies · %d  %s" % [army_count(cards),"▾" if expanded() else "▸"]
+	disclosure.disabled=_war_is_open
+	disclosure.tooltip_text="Army details stay open with War" if _war_is_open else ("Collapse army details and clear selection" if expanded() else "Show armies and their generals")
 	if shape!=_shape:
 		_shape=shape
 		_rebuild()
@@ -226,19 +299,32 @@ func _selected_group()->Array:
 func _rebuild()->void:
 	for node in strip.get_children()+members.get_children():
 		node.get_parent().remove_child(node);node.queue_free()
-	for card:Dictionary in cards:
-		var face:=ArmyCard.new();face.bar=self;strip.add_child(face);face.bind(card,_is_selected(card))
-	for card:Dictionary in _selected_group():
-		var chip:=BandChip.new();chip.bar=self;members.add_child(chip);chip.bind(card,_is_selected(card))
+	if expanded():
+		for card:Dictionary in cards:
+			var face:=ArmyCard.new();face.bar=self;strip.add_child(face);face.bind(card,_is_selected(card))
+		for card:Dictionary in _selected_group():
+			var chip:=BandChip.new();chip.bar=self;members.add_child(chip);chip.bind(card,_is_selected(card))
 	scroll=clampi(scroll,0,maxi(0,cards.size()-_fits()))
 	# The bands row changes the bar's height: the HUD places it again.
 	var hud:=get_parent()
 	if hud!=null and hud.has_method("_position_army_bar"):hud.call_deferred("_position_army_bar")
 	_arrange()
+	_reveal_member.call_deferred()
+
+
+func _reveal_member()->void:
+	if not is_inside_tree() or not member_scroll.visible:return
+	for chip:Control in members.get_children():
+		if String(chip.card_id)==selected_id:
+			member_scroll.ensure_control_visible(chip);return
+	member_scroll.scroll_horizontal=0
 
 
 func _arrange()->void:
 	if strip==null:return
+	disclosure.position=Vector2.ZERO;disclosure.size=Vector2(minf(142.0,maxf(0.0,size.x)),DISCLOSURE_HEIGHT)
+	strip.visible=expanded();members.visible=expanded();member_scroll.visible=expanded() and members.get_child_count()>1
+	if not expanded():left_button.hide();right_button.hide();return
 	var count:=strip.get_child_count()
 	var fits:=_fits()
 	var overflow:=count>fits
@@ -259,7 +345,9 @@ func _arrange()->void:
 	left_button.disabled=scroll<=0;right_button.disabled=scroll>=count-fits
 	left_button.position=Vector2(left-28,top);right_button.position=Vector2(left+width+6,top)
 	var chip_width:=chips*CHIP_SIZE.x+maxi(0,chips-1)*GAP
-	members.position=Vector2(left,top-CHIP_SIZE.y-GAP);members.size=Vector2(chip_width,CHIP_SIZE.y)
+	member_scroll.position=Vector2(left,top-_member_row_height()-GAP)
+	member_scroll.size=Vector2(maxf(0.0,size.x-left-(ARROW_ROOM if overflow else 0.0)),_member_row_height())
+	members.custom_minimum_size=Vector2(chip_width,CHIP_SIZE.y);members.size=Vector2(chip_width,CHIP_SIZE.y)
 	var j:=0
 	for node:Control in members.get_children():
 		if node.is_queued_for_deletion():continue
@@ -285,6 +373,22 @@ func select_card(card:Dictionary)->void:
 	_shape=""
 	refresh()
 	army_selected.emit(card)
+
+
+## Read inherited orders only for the selected band's or general's members.
+## Intended plans are inspection ink, never a second global border layer.
+func selected_plan_zones(command:RefCounted)->Array[String]:
+	var ids:Array=[]
+	for card:Dictionary in _all_cards():
+		if String(card.id)==selected_id:ids=card.get("members",[]);break
+	var zones:Array[String]=[]
+	if ids.is_empty():return zones
+	for entry:Dictionary in command.data.nodes.values():
+		if String(entry.get("service",""))!="army" or not int(entry.get("force_id",-1)) in ids:continue
+		var order:Dictionary=command.order_for(String(entry.id))
+		var zone:=String(order.get("zone_id",""))
+		if String(order.get("mission",""))=="defend" and zone!="" and not zones.has(zone):zones.append(zone)
+	return zones
 
 
 func open_card(card:Dictionary)->void:
@@ -538,10 +642,8 @@ class PlanInk extends Control:
 		if not is_instance_valid(terrain) or not ("camera" in terrain) or terrain.camera==null:return
 		if is_instance_valid(MilitaryCampaign.joint_operations.screen):return
 		var command:RefCounted=MilitaryCampaign.command_hierarchy
-		var held:={}
-		for entry:Dictionary in command.data.nodes.values():
-			var order:Dictionary=entry.get("order",{})
-			if String(order.get("mission",""))=="defend":held[String(order.get("zone_id",""))]=true
+		var held:Array[String]=bar.selected_plan_zones(command)
+		if held.is_empty():return
 		var ink:=BattleMarks.OXBLOOD
 		for region:Dictionary in command.data.zones:
 			if String(region.get("plan",""))!="front" or not held.has(String(region.get("id",""))) or not region.get("line") is Array:continue

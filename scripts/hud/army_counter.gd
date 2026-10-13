@@ -34,8 +34,12 @@ const MARCH:=Color("#3d7f9c")
 ## The plate at full size (the close and regional charts scale it).
 const BASE:=Vector2(104,40)
 
-static func plate_size(scale:float=1.0)->Vector2:
-	return BASE*scale
+static func plate_size(scale:float=1.0,data:Dictionary={})->Vector2:
+	var size:=BASE*scale
+	if not data.is_empty():
+		var words:=T.font("ui_strong").get_string_size(men_words(data),HORIZONTAL_ALIGNMENT_LEFT,-1,maxi(11,roundi(18.0*scale))).x
+		size.x=maxf(size.x,ceilf(words+59.0*scale))
+	return size
 
 ## The kit most of a force's men carry, as a glyph name ("spear", "musket",
 ## "tank"...): its largest formation's kit.
@@ -77,7 +81,7 @@ static func supply_color(state:String)->Color:
 ## Draws the counter centred at `center`; returns the ground it covers (the
 ## plate and any tab at its side).
 static func draw(canvas:CanvasItem,center:Vector2,data:Dictionary,scale:float=1.0,alpha:float=1.0)->Rect2:
-	var size:=BASE*scale
+	var size:=plate_size(scale,data)
 	var rect:=Rect2((center-size*0.5).round(),size.round())
 	var ours:=String(data.get("side","ours"))=="ours"
 	var stale:=bool(data.get("stale",false))

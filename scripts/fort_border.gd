@@ -190,7 +190,7 @@ static func inside(point:Vector2,state:Node=null,shape:Dictionary={})->bool:
 ## The watch out on the border: {garrisons: {fort id: people}, line: people,
 ## stretches: [{a, b, km, watchmen, per_km, strength}], posted}.
 static func watch(state:Node=null,mc:Node=null)->Dictionary:
-	if mc==null:mc=WorldSimulation.military if state==null else null
+	if mc==null:mc=WorldSimulation.military if state==null or state==WorldSimulation.state else _military_of(state)
 	var home:=0
 	if mc!=null:home=preload("res://scripts/watch_military.gd").at_home(mc)
 	else:home=int(float(state.population_allocations.get("Defense",0)))
@@ -211,6 +211,29 @@ static func watch(state:Node=null,mc:Node=null)->Dictionary:
 		var per_km:=men/maxf(1.0,float(l.km))
 		stretches.append({"a":int(l.a),"b":int(l.b),"km":float(l.km),"mid":l.mid,"watchmen":men,"per_km":per_km,"strength":strength_of(per_km)})
 	return {"garrisons":garrisons,"line":left if not ls.is_empty() else 0,"stretches":stretches,"posted":out-(left if ls.is_empty() else 0)}
+
+## The military of the people whose GameState is `state` (its own watch), or
+## null when it is not found (then the Defense share stands in).
+static func _military_of(state:Node)->Node:
+	if state==GameState:return MilitaryCampaign
+	for id:String in WorldSimulation.actors:
+		var systems:Dictionary=(WorldSimulation.actors[id] as Dictionary).get("systems",{})
+		if systems.get("GameState")==state:return systems.get("MilitaryCampaign")
+	return null
+
+## How `owner`'s border stops a crossing toward `other`'s home (the stretch
+## facing it), for someone of `stealth`. Owners as society_exchange.gd names
+## them ("player" or a people's id); 0 when either has no home.
+static func facing(owner:String,other:String,stealth:float=0.5)->float:
+	var Exchange:=preload("res://scripts/society_exchange.gd")
+	var state:Node=Exchange.owner_state(owner)
+	var there:Node=Exchange.owner_state(other)
+	if state==null or there==null or not bool(state.settlement_site_committed) or not bool(there.settlement_site_committed):return 0.0
+	var shape:=outline(state)
+	var bearing:=(seat(there)-Vector2(shape.center)).angle()
+	var table:PackedFloat32Array=shape.table
+	var edge:=Vector2(shape.center)+Vector2.RIGHT.rotated(bearing)*float(table[posmod(roundi(fposmod(bearing,TAU)/TAU*float(BEARINGS)),BEARINGS)])
+	return catch(edge,stealth,state)
 
 static func strength_of(per_km:float)->float:
 	return 1.0-exp(-maxf(0.0,per_km)/WATCH_KM)
@@ -265,7 +288,8 @@ static func costs(state:Node=null,kept:Dictionary={})->Dictionary:
 		if String(f.get("status",""))=="abandoned":continue
 		var people:=float(kept.garrisons.get(int(f.id),0))
 		var km:=_pos(f).distance_to(center)
-		var loss:=transit_loss(km,carry)
+		# Fed straight from the seat, or fort to fort where that loses less.
+		var loss:=minf(transit_loss(km,carry),1.0-arrives(int(f.id),state))
 		var gone:=people*ration*loss/maxf(0.05,1.0-loss)
 		lost+=gone;out+=people*ration
 		posts.append({"id":int(f.id),"km":km,"people":people,"lost":gone})
@@ -308,11 +332,144 @@ static func advance(day:int)->void:
 	for f:Dictionary in standing():
 		var manned:=float(kept.garrisons.get(int(f.id),0))/maxf(1.0,float(kind(String(f.kind)).get("garrison",1)))
 		var wear:=(DECAY if short else 0.0)+(DECAY*0.5 if manned<0.5 else 0.0)
-		f.condition=clampf(float(f.get("condition",1.0))-wear*span+(0.002*span if wear<=0.0 else 0.0),0.0,1.0)
+		var was:=float(f.get("condition",1.0))
+		f.condition=clampf(was-wear*span+(0.002*span if wear<=0.0 else 0.0),0.0,1.0)
+		# Said once, at half: why it is wearing down and how long it has.
+		if was>=0.5 and float(f.condition)<0.5 and wear>0.0:
+			var why:=("only %d of the %d it needs man it" % [int(kept.garrisons.get(int(f.id),0)),int(kind(String(f.kind)).get("garrison",0))]) if manned<0.5 else "its upkeep is short"
+			_tell("%s is wearing down: %s. Left so, it is abandoned in about %d days, and the border with it. Send more of the watch out, or break it down while its stone is worth carrying home." % [String(f.get("name","A fort")),why,ceili(float(f.condition)/wear)])
 		if float(f.condition)<=0.0:
 			f.status="abandoned"
 			_tell("%s at %s is left to the weather: it was not kept." % [String(kind(String(f.kind)).name),String(f.get("name","the post"))])
 	d["last_bill"]={"day":day,"food_lost":float(bill.food_lost),"upkeep":bill.upkeep,"posted":int(kept.posted)}
+	stock_day(span)
+
+# --- The way of forts: food passed fort to fort -------------------------------
+#
+# A standing fort keeps a store of food for an army passing. Food reaches a
+# fort straight from the seat (transit_loss), or handed on from a fort no more
+# than WAY_HOP_KM off: carriers who sleep and are fed at a fort each few days
+# lose far less on a kept way than on the open road (WAY_CARRY times the
+# carrying). A chain of forts is so a road an army can be fed along, where
+# the carriers from home alone reach nowhere. The seat fills the stores a
+# little each day from what it holds above STORE_RESERVE_DAYS of its own
+# eating, nearest fort first, and an army within STORE_NEAR_KM of a stocked
+# fort fills its carts there (military_campaign.gd, the baggage train).
+
+## Forts hand food on to one another when no farther apart than this.
+const WAY_HOP_KM:=120.0
+## How much better a kept way between two forts carries than the open road.
+const WAY_CARRY:=4.0
+## Rations a fort can store for each of the garrison its kind needs.
+const STORE_PER_POST:=4000.0
+## An army this near a fort draws on its store.
+const STORE_NEAR_KM:=40.0
+## The seat sends nothing out that would leave it under this many days' food.
+const STORE_RESERVE_DAYS:=90.0
+## Share of the food above that reserve the seat sends out in a day, by how
+## hard the ruler has the forts stocked (stock_level 0 none, 1 some, 2 much).
+const STORE_SEND_SHARE:=[0.0,0.02,0.06]
+const STOCK_NAMES:=["None","Some","Much"]
+
+static func stock_level(state:Node=null)->int:
+	return clampi(int(ledger(state).get("stock_level",0)),0,2)
+
+static func set_stock_level(level:int)->void:
+	ledger()["stock_level"]=clampi(level,0,2)
+
+## All the food in our forts' stores, and all they can hold.
+static func stores_total(state:Node=null)->Dictionary:
+	var have:=0.0;var cap:=0.0
+	for f:Dictionary in standing(state):have+=float(f.get("store",0.0));cap+=store_cap(f)
+	return {"have":have,"cap":cap}
+
+static var _way_cache:Dictionary={}
+## For each standing fort, how food reaches it: {id: {share (of what is sent
+## that arrives), via (fort id handing it on, -1 the seat), hops}}.
+static func way(state:Node=null)->Dictionary:
+	if state==null:state=WorldSimulation.state
+	var list:=standing(state)
+	var key:=[state.get_instance_id(),int(state.elapsed_days),list.size()]
+	var where:=0.0
+	for f:Dictionary in list:where+=float(f.x)*1.3+float(f.z)
+	key.append(snappedf(where,0.1))
+	if _way_cache.get("key")==key:return _way_cache.way
+	var carry:=carrying() if state==WorldSimulation.state else 1.0
+	var center:=seat(state)
+	var out:={}
+	for f:Dictionary in list:out[int(f.id)]={"share":1.0-transit_loss(_pos(f).distance_to(center),carry),"via":-1,"hops":1}
+	for _pass in list.size():
+		var changed:=false
+		for a:Dictionary in list:
+			for b:Dictionary in list:
+				if int(a.id)==int(b.id):continue
+				var km:=_pos(a).distance_to(_pos(b))
+				if km>WAY_HOP_KM:continue
+				var through:=float(out[int(a.id)].share)*(1.0-transit_loss(km,carry*WAY_CARRY))
+				if through>float(out[int(b.id)].share)+0.0001:
+					out[int(b.id)]={"share":through,"via":int(a.id),"hops":int(out[int(a.id)].hops)+1};changed=true
+		if not changed:break
+	_way_cache={"key":key,"way":out}
+	return out
+
+## The share of food sent to fort `id` that arrives (0 for no standing fort).
+static func arrives(id:int,state:Node=null)->float:
+	return float((way(state).get(id,{}) as Dictionary).get("share",0.0))
+
+static func store_cap(fort:Dictionary)->float:
+	return float(kind(String(fort.get("kind",""))).get("garrison",0))*STORE_PER_POST
+
+## The day's filling of the stores: nearest fort (by what arrives) first, from
+## the seat's food above its reserve. What is eaten on the way is lost.
+static func stock_day(span:float)->void:
+	var state:=WorldSimulation.state
+	if WorldSimulation.food==null:return
+	var eaten:=float(state.simulation_metrics.get("food_consumption",state.population_exact))
+	var spare:=float(WorldSimulation.food.total_stored())-eaten*STORE_RESERVE_DAYS
+	var budget:=spare*float(STORE_SEND_SHARE[stock_level()])*span
+	if budget<=1.0:return
+	var routes:=way()
+	var order:=standing()
+	order.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(routes[int(a.id)].share)>float(routes[int(b.id)].share))
+	var sent:=0.0
+	for f:Dictionary in order:
+		var share:=float(routes[int(f.id)].share)
+		var want:=store_cap(f)-float(f.get("store",0.0))
+		if want<1.0 or share<0.02:continue
+		var give:=minf(want/share,budget-sent)
+		if give<1.0:break
+		f["store"]=float(f.get("store",0.0))+give*share
+		sent+=give
+	if sent>0.0:WorldSimulation.food.issue_for_obligation(sent,"fort_stores","Food sent out to the forts' stores",span,0)
+
+## Stocked forts of the people in scope: [{id, pos, store}].
+static func stocked()->Array:
+	var out:=[]
+	for f:Dictionary in standing():
+		if float(f.get("store",0.0))>=1.0:out.append({"id":int(f.id),"pos":_pos(f),"store":float(f.store),"name":String(f.get("name",""))})
+	return out
+
+## Takes up to `rations` from the stores of forts within STORE_NEAR_KM of
+## `point`, nearest first. Returns what was taken.
+static func draw(point:Vector2,rations:float)->float:
+	var near:=standing().filter(func(f:Dictionary)->bool:return float(f.get("store",0.0))>=1.0 and _pos(f).distance_to(point)<=STORE_NEAR_KM)
+	near.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _pos(a).distance_to(point)<_pos(b).distance_to(point))
+	var taken:=0.0
+	for f:Dictionary in near:
+		var take:=minf(float(f.store),rations-taken)
+		f["store"]=float(f.store)-take;taken+=take
+		if taken>=rations-0.5:break
+	return taken
+
+## The store in plain words for a fort's note: what it holds and what it costs to fill.
+static func store_words(fort:Dictionary)->String:
+	if String(fort.get("status",""))!="standing":return ""
+	var EraWords:=preload("res://scripts/hud/era_words.gd")
+	var r:Dictionary=way().get(int(fort.id),{})
+	var share:=float(r.get("share",0.0))
+	var by:="straight from home"
+	if int(r.get("via",-1))>=0:by="handed on from %s" % String(find_fort(int(r.via)).get("name","the fort before it"))
+	return "%s of %s rations. Food comes %s; of every 100 sent, %d arrive." % [EraWords.grouped(roundi(float(fort.get("store",0.0)))),EraWords.grouped(roundi(store_cap(fort))),by,roundi(share*100.0)]
 
 # --- Raising and leaving forts ----------------------------------------------
 
@@ -343,73 +500,203 @@ static func abandon(id:int)->Dictionary:
 			return {"ok":true}
 	return {"error":"No such fort."}
 
+## The share of the watch at home that mans every fort's garrison (0..1; 1
+## when even all of it falls short).
+static func share_to_man(state:Node=null,mc:Node=null)->float:
+	if mc==null:mc=WorldSimulation.military if state==null or state==WorldSimulation.state else _military_of(state)
+	var home:=preload("res://scripts/watch_military.gd").at_home(mc) if mc!=null else 0
+	var need:=0
+	for f:Dictionary in forts(state):
+		if String(f.get("status",""))!="abandoned":need+=int(kind(String(f.kind)).get("garrison",0))
+	if need<=0:return 0.0
+	if home<=0:return 1.0
+	return clampf(ceilf(float(need)/float(home)*100.0)/100.0,0.0,1.0)
+
+## Other peoples' forts our people know of: on land we have charted, of the
+## peoples we have met. [{at, kind, status, owner, owner_name, name}].
+static func known_foreign_forts()->Array:
+	var out:=[]
+	var world:Variant=WorldSimulation.world
+	if world==null:return out
+	var Exchange:=preload("res://scripts/society_exchange.gd")
+	for civ:Dictionary in world.civilizations:
+		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2:continue
+		var id:=String(civ.get("id",""))
+		var state:Node=Exchange.owner_state(id)
+		if state==null or state==WorldSimulation.state:continue
+		var d:Dictionary=state.border_forts
+		for f:Dictionary in d.get("forts",[]):
+			if String(f.get("status",""))=="abandoned":continue
+			var at:=_pos(f)
+			if world.has_method("_position_is_revealed") and not bool(world._position_is_revealed(at)):continue
+			out.append({"at":at,"kind":String(f.get("kind","")),"status":String(f.get("status","")),"owner":id,"owner_name":String(civ.get("name","")),"name":String(f.get("name",""))})
+	return out
+
 ## Sets the share of the watch at home sent out to the border (0..1).
 static func set_border_share(share:float)->void:
 	ledger().border_share=clampf(share,0.0,1.0)
 
-# --- The war leader's sites -------------------------------------------------
+# --- The god's hand: placing, moving, breaking down ----------------------------
 
-## Up to `count` places the war leader would raise the next fort, each with
-## what it costs and gains, in the engine's numbers: toward each people we
-## know, across the widest open side, and closing the gap between forts not
-## yet linked. [{at, why, kind, km, cost, garrison, food_lost, upkeep,
-## gain_km2, links}] for the people in scope; [] before any fort is known.
-static func suggest_sites(count:int=4)->Array:
+## A fort moved keeps this share of the work done (its timbers and stones go
+## with it); the move costs MOVE_COST of a new fort's materials.
+const MOVE_KEEP:=0.4
+const MOVE_COST:=0.25
+## Broken down, a standing fort gives back this share of its materials (by its
+## condition); one still going up gives back more, less what was raised.
+const RECOVER:=0.5
+## No two of our forts closer than this, km.
+const MIN_APART_KM:=4.0
+
+## Ground within the outline, km².
+static func area(shape:Dictionary)->float:
+	var total:=0.0
+	for r:float in (shape.table as PackedFloat32Array):total+=0.5*r*r*TAU/float(BEARINGS)
+	return total
+
+## Runs `fn` with the ledger's forts as they would be with `extra` added and
+## the fort `without` gone, then puts them back.
+static func _with(extra:Dictionary,without:int,fn:Callable)->Variant:
+	var d:=ledger()
+	var saved:Array=d.forts
+	var trial:=saved.filter(func(f:Dictionary)->bool:return int(f.id)!=without)
+	if not extra.is_empty():trial.append(extra)
+	d.forts=trial
+	var result:Variant=fn.call()
+	d.forts=saved
+	return result
+
+static func find_fort(id:int)->Dictionary:
+	for f:Dictionary in forts():
+		if int(f.id)==id:return f
+	return {}
+
+## What raising a fort at `point` (or moving fort `moving` there) would cost
+## and gain, in the engine's numbers, for the god's people: {kind, kind_name,
+## at, km, cost, short: {material: lacking}, garrison, days, food_lost,
+## loss_share, upkeep, gain_km2, links: [{name, km}], problem}. It can be
+## done when problem is "" and short is empty.
+static func quote(point:Vector2,moving:int=-1)->Dictionary:
+	var old:={}
 	var k:=best_kind()
-	if k.is_empty() or not WorldSimulation.state.settlement_site_committed:return []
+	if moving>=0:
+		old=find_fort(moving)
+		if old.is_empty():return {"problem":"No such fort.","short":{}}
+		k=kind(String(old.kind))
+	if k.is_empty():return {"problem":"Our people know no way to raise a fort yet.","short":{}}
+	var state:=WorldSimulation.state
 	var center:=seat()
-	var shape:=outline()
-	var table:PackedFloat32Array=shape.table
-	var reach:=float(k.reach)
-	var bearings:=[]
-	for civ:Dictionary in WorldSimulation.world.civilizations:
-		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2:continue
-		var there:Vector2=WorldSimulation.world._civilization_world_position(civ)
-		if not there.is_finite() or there.distance_to(center)<1.0:continue
-		bearings.append([(there-center).angle(),"Toward %s" % String(civ.get("name","a people we know")),there.distance_to(center)*0.45])
-	# The widest stretch of open ground: the bearing farthest from any fort.
-	var standing_forts:=standing()
-	var best_gap:=-1.0;var gap_bearing:=0.0
-	for b in 32:
-		var angle:=TAU*float(b)/32.0
-		var nearest:=PI
-		for f:Dictionary in standing_forts:nearest=minf(nearest,absf(wrapf((_pos(f)-center).angle()-angle,-PI,PI)))
-		if nearest>best_gap:best_gap=nearest;gap_bearing=angle
-	bearings.append([gap_bearing,"Across our widest open side",INF])
-	# Between two forts too far apart to link: halfway, closing the line.
-	var list:=standing_forts.duplicate()
-	list.sort_custom(func(p:Dictionary,q:Dictionary)->bool:return (_pos(p)-center).angle()<(_pos(q)-center).angle())
-	var linked:={}
-	for l:Dictionary in links():linked["%d:%d" % [int(l.a),int(l.b)]]=true
-	for i in list.size():
-		if list.size()<2:break
-		var a:Dictionary=list[i];var b:Dictionary=list[(i+1)%list.size()]
-		if linked.has("%d:%d" % [int(a.id),int(b.id)]):continue
-		var mid:=(_pos(a)+_pos(b))*0.5
-		if mid.distance_to(center)<1.0:continue
-		bearings.append([(mid-center).angle(),"Closing the gap between %s and %s" % [String(a.get("name","a fort")),String(b.get("name","a fort"))],mid.distance_to(center)])
-	var out:=[]
-	var carry:=carrying()
-	var ration:=float(WorldSimulation.state.simulation_metrics.get("food_consumption",WorldSimulation.state.population_exact))/maxf(1.0,float(WorldSimulation.state.population_exact))
-	for entry:Array in bearings:
-		if out.size()>=count:break
-		var angle:float=entry[0]
-		if out.any(func(o:Dictionary)->bool:return absf(wrapf(float(o.bearing)-angle,-PI,PI))<0.4):continue
-		var u:=Vector2.RIGHT.rotated(angle)
-		var edge:=float(table[posmod(roundi(fposmod(angle,TAU)/TAU*float(BEARINGS)),BEARINGS)])
-		var km:=minf(edge+reach*0.8,float(entry[2]))
-		if km<edge*0.6:km=edge+reach*0.5
-		var at:=Vector2.INF
-		for step in 6:
-			var p:=center+u*km*(1.0-float(step)*0.1)
-			if not WorldSimulation.world.scout_land_authority.is_valid() or WorldSimulation.world._scout_land_at(p):at=p;break
-		if not at.is_finite():continue
-		var dist:=at.distance_to(center)
-		var loss:=transit_loss(dist,carry)
-		var gain:=maxf(0.0,PI*reach*reach-PI*maxf(0.0,reach-maxf(0.0,dist-edge))*maxf(0.0,reach-maxf(0.0,dist-edge))*0.5)
-		out.append({"at":at,"bearing":angle,"why":String(entry[1]),"kind":String(k.id),"kind_name":String(k.name),"km":dist,"cost":k.cost,"garrison":int(k.garrison),
-			"food_lost":float(k.garrison)*ration*loss/maxf(0.05,1.0-loss),"upkeep":k.upkeep,"gain_km2":gain,"loss_share":loss})
+	var out:={"kind":String(k.id),"kind_name":String(k.name),"at":point,"km":point.distance_to(center),"garrison":int(k.garrison),"upkeep":k.upkeep,"problem":"","links":[],"short":{},"moving":moving}
+	var share:=MOVE_COST if moving>=0 else 1.0
+	var cost:={}
+	for m:String in k.cost:cost[m]=float(k.cost[m])*share
+	out.cost=cost
+	var stock:Dictionary=state.resource_stockpiles
+	for m:String in cost:
+		if float(stock.get(m,0.0))<float(cost[m]):out.short[m]=float(cost[m])-float(stock.get(m,0.0))
+	out.days=ceili(float(k.work)*((1.0-MOVE_KEEP) if moving>=0 else 1.0)/maxf(1.0,float(k.garrison)))
+	var ration:=float(state.simulation_metrics.get("food_consumption",state.population_exact))/maxf(1.0,float(state.population_exact))
+	var loss:=transit_loss(float(out.km),carrying())
+	out.loss_share=loss
+	out.food_lost=float(k.garrison)*ration*loss/maxf(0.05,1.0-loss)
+	var world:Variant=WorldSimulation.world
+	if world!=null and world.scout_land_authority.is_valid() and not world._scout_land_at(point):out.problem="A fort needs dry ground."
+	elif world!=null and world.has_method("_position_is_revealed") and not bool(world._position_is_revealed(point)):out.problem="Our people do not know this land yet."
+	elif float(out.km)<home_km()*0.5:out.problem="This is our home country; it needs no fort."
+	if out.problem=="":
+		var held:=_held_by(point)
+		if held!="":out.problem="That is %s's land: a fort there is an act of war." % held
+	if out.problem=="":
+		for f:Dictionary in forts():
+			if int(f.id)==moving or String(f.get("status",""))=="abandoned":continue
+			if _pos(f).distance_to(point)<MIN_APART_KM:out.problem="Too close to %s." % String(f.get("name","another fort"));break
+	# What the border would become with it standing there.
+	var trial:={"id":-99,"kind":String(k.id),"x":point.x,"z":point.y,"status":"standing","condition":1.0,"name":"the new fort"}
+	var before:=area(outline())
+	var after:Dictionary=_with(trial,moving,func()->Dictionary:
+		var names:={}
+		for f:Dictionary in forts():names[int(f.id)]=String(f.get("name",""))
+		var joined:=[]
+		for l:Dictionary in links():
+			if int(l.a)==-99:joined.append({"name":String(names.get(int(l.b),"")),"km":float(l.km),"to":int(l.b)})
+			elif int(l.b)==-99:joined.append({"name":String(names.get(int(l.a),"")),"km":float(l.km),"to":int(l.a)})
+		var shape:=outline()
+		return {"area":area(shape),"links":joined,"points":shape.points})
+	out.gain_km2=float(after.area)-before
+	out.links=after.links
+	# The border as it would run with the fort standing there (the map's ghost).
+	out.outline=after.points
 	return out
+
+## Whose land `point` is when another people's border holds it ("" if none).
+static func _held_by(point:Vector2)->String:
+	var Realm:=preload("res://scripts/realm_reach.gd")
+	var own:=Realm.border_ours()
+	var mine:=Realm._score(own,point) if not own.is_empty() else -INF
+	for border:Dictionary in Realm.border_others():
+		var theirs:=Realm._score(border,point)
+		if theirs>0.0 and theirs>mine:
+			for civ:Dictionary in WorldSimulation.world.civilizations:
+				if String(civ.get("id",""))==String(border.owner):return String(civ.get("name","another people"))
+			return "another people"
+	return ""
+
+## The god's hand: raises a fort at `point` when quote() allows it.
+static func place(point:Vector2)->Dictionary:
+	var q:=quote(point)
+	if String(q.get("problem",""))!="":return {"error":String(q.problem)}
+	if not (q.short as Dictionary).is_empty():return {"error":short_words(q)}
+	var made:=build(point)
+	if made.has("fort"):_tell("A %s is going up at %s, %d km out: about %d days to raise, %d of the watch to man it." % [String(q.kind_name).to_lower(),String(made.fort.name),roundi(float(q.km)),int(q.days),int(q.garrison)])
+	return made
+
+## "We need 12 more timber and 3 more stone."
+static func short_words(q:Dictionary)->String:
+	var parts:PackedStringArray=[]
+	for m:String in q.short:parts.append("%d more %s" % [ceili(float(q.short[m])),m.to_lower()])
+	return "We need %s." % " and ".join(parts)
+
+## What breaking `fort` down gives back: {material: amount}.
+static func recovered(fort:Dictionary)->Dictionary:
+	var k:=kind(String(fort.get("kind","")))
+	var share:=0.0
+	match String(fort.get("status","")):
+		"standing":share=RECOVER*clampf(float(fort.get("condition",1.0)),0.0,1.0)
+		"building":share=lerpf(0.9,RECOVER,clampf(float(fort.get("progress",0.0))/maxf(1.0,float(k.get("work",1.0))),0.0,1.0))
+	var out:={}
+	for m:String in k.get("cost",{}):out[m]=float(k.cost[m])*share
+	return out
+
+## Breaks fort `id` down: its garrison comes home, part of its materials come
+## back to the stores, and the ground it held is no longer ours.
+static func dismantle(id:int)->Dictionary:
+	var fort:=find_fort(id)
+	if fort.is_empty():return {"error":"No such fort."}
+	var back:=recovered(fort)
+	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
+	for m:String in back:stock[m]=float(stock.get(m,0.0))+float(back[m])
+	(ledger().forts as Array).erase(fort)
+	_tell("%s is broken down; its garrison comes home with what could be carried, and the border draws back." % String(fort.get("name","The fort")))
+	return {"ok":true,"recovered":back}
+
+## Moves fort `id` to `point`: taken down and raised again there, keeping
+## MOVE_KEEP of its work and costing MOVE_COST of its materials. Until it
+## stands again it holds no ground.
+static func move(id:int,point:Vector2)->Dictionary:
+	var q:=quote(point,id)
+	if String(q.get("problem",""))!="":return {"error":String(q.problem)}
+	if not (q.short as Dictionary).is_empty():return {"error":short_words(q)}
+	var fort:=find_fort(id)
+	var stock:Dictionary=WorldSimulation.state.resource_stockpiles
+	for m:String in q.cost:stock[m]=float(stock.get(m,0.0))-float(q.cost[m])
+	var k:=kind(String(fort.kind))
+	var was:=String(fort.get("name",""))
+	fort.x=point.x;fort.z=point.y
+	fort.status="building";fort.progress=float(k.work)*MOVE_KEEP;fort.condition=1.0
+	fort.erase("old_post")
+	fort.name="%s %s" % [_compass(seat(),point),String(k.name).to_lower()]
+	_tell("%s is taken down and carried to %s, %d km out: about %d days to raise it again." % [was,String(fort.name),roundi(float(q.km)),int(q.days)])
+	return {"ok":true,"fort":fort}
 
 # --- Older campaigns and the leaders' forts ----------------------------------
 

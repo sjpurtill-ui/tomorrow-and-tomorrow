@@ -43,8 +43,8 @@ static func read(mc:Node)->Dictionary:
 	var parts:Array=[]
 	var guard:=int(r.guard)
 	var ready:=int(r.offensive_home)
-	parts.append(_part("guard","Guarding home",guard,"guard","Standing at home and in the towns, spread over them by their people. They meet raiders; the war council never sends them away."))
-	parts.append(_part("ready","Ready at home",ready,"ready","At home beyond the home guard: drilled, armed as far as the stock goes, free for the war council to send when a stance needs them."))
+	parts.append(_part("guard","Home guard",guard,"guard","The home guard: standing at home and in the towns, spread over them by their people, some of them out on the border. They meet raiders; the war council never sends them away."))
+	parts.append(_part("ready","Free to send",ready,"ready","At home beyond the home guard: drilled, armed as far as the stock goes, free for the war council to send when a stance needs them."))
 	var council:GDScript=load("res://scripts/war_council.gd")
 	var by_civ:={}
 	var bands:Array=[]

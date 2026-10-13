@@ -45,7 +45,9 @@ const SCORE_DOMAINS:=["population","knowledge","production","logistics","militar
 const SCOUT_DURATIONS:=[30,90,180,365]
 const REVEAL_HISTORY_LIMIT:=1024
 const SCOUT_REPORT_LIMIT:=256
-const SCOUT_ROUTE_POINT_LIMIT:=24
+## (64 since the roads beyond the charts and the walk-sail-walk expeditions:
+## a winding country or a crossing needs more turns than 24.)
+const SCOUT_ROUTE_POINT_LIMIT:=64
 const REVEALED_TRAIL_POINT_LIMIT:=128
 const SCOUT_LAND_SAMPLE_KM:=8.0
 const SCOUT_ROUTE_GRID_LIMIT:=96
@@ -665,6 +667,8 @@ func owned_day_steps(target_day:int)->Array:
 		["world_exchange",func()->void:Exchange.sample_missions(self,target_day)],
 		["world_scouts",func()->void:_complete_due_scout_missions(target_day)],
 		["world_held_scouts",func()->void:age_held_scouts(target_day)],
+		# Once a month: word of peoples over the sea (expedition.gd), ours and every ruler's alike.
+		["world_sea_hearsay",func()->void:preload("res://scripts/expedition.gd").hearsay_over_the_sea(self,target_day)],
 	]+scouting_staff.advance_steps(target_day)+[
 		["world_diplomatic_mission",func()->void:_process_diplomatic_mission(target_day)],
 		["world_observation",func()->void:_process_local_observation(target_day)],
@@ -1025,6 +1029,9 @@ func set_ground_survey_authority(survey_query:Callable)->void:
 
 func set_scout_geography_authority(land_query:Callable)->void:
 	scout_land_authority=land_query
+	# Two lambdas on the same object can share callable identity. A changed
+	# authority must never reuse the previous terrain answers.
+	_scout_land_cache.clear();_scout_land_cache_owner=0
 	open_scout_plan_cache.clear();sea_voyage_plan_cache.clear()
 	_audit_active_scout_land_route()
 
@@ -1521,11 +1528,22 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 				var step:=clampf(walker.budget/20.0,4.0,128.0)
 				route_plan=walker.search(step,96)
 				if not bool(route_plan.get("ok",false)):route_plan=walker.search(clampf(step*.25,1.0,6.0),96)
+				# Nothing new within the outward search: across our own charted
+				# country by its land road, and on from where the charts end
+				# (scout_frontier.gd beyond). Round the compass, a few roads a review.
+				# Only for the long trips (half a year and more): each road is a
+				# real search of the land and costs a moment.
+				if duration_days>=180 and (not bool(route_plan.get("ok",false)) or walker.fresh_km(route_plan)<scouting_staff.USEFUL_FRESH_KM):
+					var turn:=int(scouting_staff.data.get("beyond_turn",0))
+					scouting_staff.data["beyond_turn"]=posmod(turn+walker.TRIES,walker.SECTORS)
+					var onward:Dictionary=walker.beyond(one_way_range,turn)
+					if bool(onward.get("ok",false)):route_plan=onward
 				if open_scout_plan_cache.size()>32:open_scout_plan_cache.clear()
 				open_scout_plan_cache[key]=route_plan.duplicate(true)
 			if bool(route_plan.get("ok",false)):
 				walker.budget=one_way_range
-				route_plan=walker.wander(route_plan,quote_seed)
+				# A road beyond the charts is already the whole journey: no side trips.
+				if not bool(route_plan.get("beyond",false)):route_plan=walker.wander(route_plan,quote_seed)
 				route_plan["novelty"]=walker.score(route_plan)
 				route_plan["fresh_km"]=walker.fresh_km(route_plan)
 			else:route_plan["reason"]="No connected walking route found. Staff will review the departure later."
@@ -1994,7 +2012,7 @@ func _civ_settlement_signal_radius(civ:Dictionary,day:int)->float:
 ## radius, 10 to 58 km) saw the place itself, so its home is on our map; a
 ## route within its signal radius brought back signs (smoke, fields, tracks)
 ## and the Map of Rumors gets a circle where it should lie.
-func _scouts_read_their_signs(route:Array,day:int)->void:
+func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 	if route.size()<2: return
 	for index in civilizations.size():
 		var civ:Dictionary=civilizations[index]
@@ -2003,9 +2021,10 @@ func _scouts_read_their_signs(route:Array,day:int)->void:
 		if bool(relation.get("home_location_known",false)): continue
 		var home:=_civilization_world_position(civ)
 		var distance:=_route_distance_to_point(route,home)
-		var signal_radius:=_civ_settlement_signal_radius(civ,day)
+		# An expedition asks and looks farther than a scouts' round (at_least_km).
+		var signal_radius:=maxf(_civ_settlement_signal_radius(civ,day),at_least_km)
 		if distance>signal_radius: continue
-		var direct:=clampf(8.0+signal_radius*0.20,10.0,58.0)
+		var direct:=clampf(8.0+_civ_settlement_signal_radius(civ,day)*0.20,10.0,58.0)
 		if distance<=direct:
 			relation["contact_level"]=2
 			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
@@ -2016,6 +2035,7 @@ func _scouts_read_their_signs(route:Array,day:int)->void:
 			relation["last_observed_day"]=day
 			civ["player_relation"]=relation
 			civilizations[index]=civ
+			_meeting_is_mutual(civ,day,home,"a scouting party",false)
 			_add_revealed_area(home,72.0,"foreign settlement observed")
 			_publish_observed_event("Home found — %s" % String(civ.name),"Returning scouts came within sight of the %s home settlement. It is on our map now." % String(civ.name),day,{"kind":"home_found","civ_id":String(civ.id),"identified":true,"position":{"x":home.x,"z":home.y}})
 			continue
@@ -2177,6 +2197,35 @@ func _foreign_formation_position(formation:Dictionary,day:float)->Vector2:
 	return a.lerp(b,clampf(progress,0.0,1.0))
 
 
+## A people only seen (contact level 1) is a rumour on the map: somewhere
+## between where its people were seen and where they came from, wide enough
+## to need searching. Nothing here is a meeting.
+func _hearsay_of_strangers(civ:Dictionary,seen_at:Vector2,day:int,source:String)->void:
+	var home:=_civilization_world_position(civ)
+	var away:=home-seen_at
+	var far:=away.length()
+	var center:=_bounded_world_point(seen_at+away.normalized()*far*0.6) if far>1.0 else seen_at
+	var lead:Dictionary=rumor_network.observation("player",String(civ.get("id","")),"a people seen on the march",center,clampf(far*0.5,60.0,1500.0),day,source)
+	lead.confidence=0.3
+	rumor_network.receive("player",lead,day)
+
+## Older saves: a people marked as heard of with nothing behind it (no
+## rumour, no meeting, no home seen) is not known at all. Some were "seen"
+## along the straight line of a band that never left its own shore.
+func _repair_unsourced_hearsay()->void:
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var leads:Array=rumor_network.list_leads("player",day)
+	for index in civilizations.size():
+		var civ:Dictionary=civilizations[index]
+		var relation:Dictionary=civ.get("player_relation",{})
+		if int(relation.get("contact_level",0))!=1 or int(relation.get("met_day",-1))>=0 or bool(relation.get("home_location_known",false)):continue
+		if leads.any(func(lead:Dictionary)->bool:return String(lead.get("subject",""))==String(civ.get("id",""))):continue
+		if foreign_sightings.any(func(s:Dictionary)->bool:return String(s.get("civ_id",""))==String(civ.get("id","")) and bool(s.get("visible",false))):continue
+		relation["contact_level"]=0
+		relation["contact_intelligence"]=0.0
+		civ["player_relation"]=relation
+		civilizations[index]=civ
+
 func _formation_route_distance_to(formation:Dictionary,point:Vector2)->float:
 	if not formation.get("route",[]).is_empty(): return _route_distance_to_point(formation.route,point)
 	if RivalLandRoutes.managed(formation) and String(formation.get("land_route_state",""))=="ok" and not RivalLandRoutes.pending(formation): return _route_distance_to_point(formation.land_route,point)
@@ -2297,6 +2346,35 @@ func _formation_sighting_index(formation_id:String)->int:
 	return -1
 
 
+## A meeting has two sides. When this people's party meets another people,
+## that people has met it too: in its own world (each people is its own
+## simulation, WorldSimulation actors) the meeting is recorded with where and
+## how, and it is told. Ours is told as a first contact like any other.
+func _meeting_is_mutual(civ:Dictionary,day:int,at:Vector2,party:String,by_sea:bool)->void:
+	if not WorldSimulation.enabled:return
+	var them:=String(civ.get("id",""))
+	var target:="player" if them=="human" else them
+	var me:="human" if WorldSimulation.actor_id=="player" else String(WorldSimulation.actor_id)
+	if target==String(WorldSimulation.actor_id) or (target!="player" and not WorldSimulation.actors.has(target)):return
+	WorldSimulation.scoped(target,func()->void:
+		var there:Node=WorldSimulation.world
+		for index in there.civilizations.size():
+			var visitor:Dictionary=there.civilizations[index]
+			if String(visitor.get("id",""))!=me:continue
+			var relation:Dictionary=there._relation_with_strategy_defaults(visitor.get("player_relation",{}),visitor)
+			if int(relation.get("contact_level",0))>=2:return
+			relation["contact_level"]=2
+			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
+			relation["rival_contact_level"]=2
+			relation["rival_player_intelligence"]=maxf(0.20,float(relation.get("rival_player_intelligence",0.0)))
+			if int(relation.get("rival_met_day",-1))<0:relation["rival_met_day"]=day
+			relation=there._set_contact_provenance(relation,day,"their_party_came",at,party.trim_prefix("an ").trim_prefix("a "),"")
+			visitor["player_relation"]=relation
+			there.civilizations[index]=visitor
+			var who:=String(visitor.get("name","a people we did not know"))
+			there._publish_observed_event("First contact — %s" % who,"Strangers have come to us: %s of the %s%s. They found our people at the marked place, spoke with them as far as either could, and turned for home with word of us. We do not know where their home lies." % [party,who,", who came in boats" if by_sea else ""],day,{"kind":"first_contact","civ_id":me,"formation_id":"","formation_kind":party,"identified":true,"position":{"x":at.x,"z":at.y}})
+			return)
+
 func _set_contact_provenance(relation:Dictionary,day:int,source:String,position:Vector2,formation_kind:String="",formation_id:String="")->Dictionary:
 	var result:=relation.duplicate(true)
 	# First contact is a historical fact. Later diplomacy may improve knowledge,
@@ -2322,7 +2400,44 @@ func _publish_observed_event(title:String,description:String,day:int,metadata:Di
 
 ## Lay remembered stand-downs and morale over freshly rebuilt rival views.
 func apply_formation_memory(day:int=-1)->void:
-	StandDown.apply(formation_memory,foreign_formations,day if day>=0 else int(WorldSimulation.state.elapsed_days))
+	var legacy:Array=foreign_formations.filter(func(formation:Dictionary)->bool:return not WorldSimulation.enabled or not formation.has("owned_force_id"))
+	StandDown.apply(formation_memory,legacy,day if day>=0 else int(WorldSimulation.state.elapsed_days))
+
+
+## Only the visible part of a deployed line is published, frozen with the report.
+func _seen_defense_points(formation:Dictionary)->Array:
+	var viewers:Array=[{"point":player_world_origin,"radius":_local_observation_radius()}]
+	for army:Dictionary in WorldSimulation.military.field_armies:
+		if int(army.get("troops",0))>0 and not bool(army.get("embarked",false)):
+			viewers.append({"point":WorldSimulation.military.command_hierarchy.land.point(army),"radius":12.0})
+	return preload("res://scripts/border_front_observation.gd").seen(formation.get("defense_points",[]),viewers)
+
+
+## Physical contact discovers the soldiers on that patch of ground; it does
+## not reveal the rest of their front, capital or distant command position.
+func observe_front_contact(formation_id:String,at:Vector2)->Dictionary:
+	_process_local_observation(int(WorldSimulation.state.elapsed_days),true)
+	var index:=_foreign_formation_index(formation_id)
+	if index<0:return {}
+	var formation:=preload("res://scripts/civilization_combat.gd").refresh_formation(foreign_formations[index])
+	var civ_index:=_civilization_index(String(formation.get("civ_id","")))
+	if civ_index<0:return {}
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var civ:Dictionary=civilizations[civ_index]
+	var relation:=_relation_with_strategy_defaults(civ.player_relation,civ)
+	relation["contact_level"]=maxi(2,int(relation.contact_level))
+	relation["contact_intelligence"]=maxf(.18,float(relation.contact_intelligence))
+	civ["player_relation"]=_set_contact_provenance(relation,day,"local_formation",at,String(formation.get("kind","expedition")),formation_id)
+	var points:=_seen_defense_points(formation)
+	var sighting:={"formation_id":formation_id,"civ_id":String(formation.civ_id),"kind":String(formation.get("kind","expedition")),"last_seen_day":day,"position":{"x":at.x,"z":at.y},"distance_km":at.distance_to(player_world_origin),
+		"strength":float(formation.get("actual_troops",maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",.08))))),"readiness":float(formation.get("readiness",.5)),"visible":true,"defense_points":points,"border_front":{"id":formation_id,"points":points,"day":day,"assigned":bool((formation.get("border_front",{}) as Dictionary).get("assigned",not points.is_empty())),"state":String((formation.get("border_front",{}) as Dictionary).get("state","held"))}}
+	var seen_index:=_formation_sighting_index(formation_id)
+	if seen_index<0:
+		foreign_sightings.push_front(sighting)
+		if foreign_sightings.size()>FOREIGN_SIGHTING_LIMIT:foreign_sightings.resize(FOREIGN_SIGHTING_LIMIT)
+	else:foreign_sightings[seen_index]=sighting
+	observation_revision+=1
+	return _public_formation_sighting(sighting)
 
 
 func _process_local_observation(day:int,force:bool=false)->void:
@@ -2333,9 +2448,14 @@ func _process_local_observation(day:int,force:bool=false)->void:
 	var radius:=_local_observation_radius()
 	var visible_ids:Dictionary={}
 	var changed:=false
-	for formation in foreign_formations:
-		if day<int(formation.get("disabled_until_day",0)): continue
+	for stored_formation in foreign_formations:
+		var formation:=preload("res://scripts/civilization_combat.gd").refresh_formation(stored_formation)
+		if day<int(formation.get("disabled_until_day",0)) or int(formation.get("actual_troops",1))<=0: continue
 		var position:=_foreign_formation_position(formation,float(day))
+		var seen_line:=_seen_defense_points(formation)
+		if not seen_line.is_empty():
+			var glimpse:Dictionary=seen_line[seen_line.size()/2]
+			position=Vector2(float(glimpse.x),float(glimpse.z))
 		var distance:=position.distance_to(player_world_origin)
 		if distance>radius and not _nearby_player_army(position,12.0): continue
 		var is_scout:=String(formation.get("kind",""))=="scout"
@@ -2362,10 +2482,13 @@ func _process_local_observation(day:int,force:bool=false)->void:
 				relation["rival_player_intelligence"]=maxf(0.18,float(relation.get("rival_player_intelligence",0.0)))
 				if int(relation.get("rival_met_day",-1))<0: relation["rival_met_day"]=day
 		civ["player_relation"]=relation; civilizations[civ_index]=civ
-		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
+		if previous_contact<1 and int(relation.contact_level)==1:_hearsay_of_strangers(civ,position,day,"a band of strangers our lookouts saw")
+		var strength:=float(formation.get("actual_troops",maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var first_sighting:=sighting_index<0 or day-int(foreign_sightings[sighting_index].get("last_seen_day",-9999))>30
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.kind),"last_seen_day":day,"position":{"x":position.x,"z":position.y},"distance_km":distance,"strength":strength,"readiness":float(formation.readiness),"visible":true}
+		sighting["defense_points"]=seen_line
+		sighting["border_front"]={"id":formation_id,"points":seen_line,"day":day,"assigned":bool((formation.get("border_front",{}) as Dictionary).get("assigned",not seen_line.is_empty())),"state":String((formation.get("border_front",{}) as Dictionary).get("state","held"))}
 		if String(formation.get("kind",""))=="scout": sighting["interception"]=_foreign_scout_interception_chances(formation,position)
 		# Seen on the march: its heading and the land road it is plausibly on.
 		sighting.merge(RivalLandRoutes.motion_at(formation,float(day)),true)
@@ -2407,7 +2530,7 @@ func _public_formation_sighting(sighting:Dictionary)->Dictionary:
 	var readiness_error:=lerpf(0.32,0.10,confidence)
 	var kind:=String(sighting.get("kind","movement"))
 	var unidentified_label:="UNIDENTIFIED SCOUT PARTY" if kind=="scout" else "UNIDENTIFIED FOREIGN FORMATION"
-	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"road_ahead":(sighting.get("road_ahead",[]) as Array).duplicate(true)}
+	return {"id":String(sighting.get("formation_id","")),"civ_id":String(sighting.get("civ_id","")) if identified else "","label":"%s %s" % [String(civ.get("name","FOREIGN")).to_upper(),kind.to_upper()] if identified else unidentified_label,"civilization":String(civ.get("name","")) if identified else "","kind":kind if identified or kind=="scout" else "movement","identified":identified,"visible":bool(sighting.get("visible",false)),"last_seen_day":int(sighting.get("last_seen_day",0)),"position":sighting.get("position",{}).duplicate(true),"distance_km":float(sighting.get("distance_km",0.0)),"strength_estimate_low":maxi(1,roundi(strength*(1.0-error))),"strength_estimate_high":maxi(1,roundi(strength*(1.0+error))),"readiness_estimate_low":clampf(readiness-readiness_error,0.0,1.0),"readiness_estimate_high":clampf(readiness+readiness_error,0.0,1.0),"hostile":bool(relation.get("at_war",false)),"carries_report":kind=="scout","interception":sighting.get("interception",{}).duplicate(true),"moving":bool(sighting.get("moving",false)),"heading":float(sighting.get("heading",0.0)),"road_ahead":(sighting.get("road_ahead",[]) as Array).duplicate(true),"defense_points":(sighting.get("defense_points",[]) as Array).duplicate(true),"border_front":(sighting.get("border_front",{}) as Dictionary).duplicate(true)}
 
 
 func local_observation_snapshot()->Dictionary:
@@ -2441,7 +2564,9 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 	# A band beaten lately has pulled back out of reach, however it is seen.
 	var today:=int(WorldSimulation.state.elapsed_days)
 	var standing:=_foreign_formation_index(formation_id)
-	if StandDown.standing_down(formation_memory,formation_id,today) or (standing>=0 and today<int(foreign_formations[standing].get("disabled_until_day",0))):
+	var current:Dictionary=preload("res://scripts/civilization_combat.gd").refresh_formation(foreign_formations[standing]) if standing>=0 else {}
+	var owned:=WorldSimulation.enabled and current.has("owned_force_id")
+	if (owned and not bool(current.get("can_defend",true))) or (not owned and StandDown.standing_down(formation_memory,formation_id,today)) or today<int(current.get("disabled_until_day",0)):
 		return {"error":"That band was beaten and has pulled back out of reach; it will not stand to fight again for a while.","standing_down":true}
 	var public_sighting:=visible_formation_sighting(formation_id)
 	if public_sighting.is_empty(): return {"error":"Contact has been lost. Reacquire the formation before ordering battle."}
@@ -2461,10 +2586,10 @@ func foreign_formation_engagement_data(formation_id:String,fielded_strength:int)
 		"strength":strength,"technology":float(civ.knowledge),
 		"readiness":clampf(float(formation.get("readiness",civ.military_readiness)),0.1,1.0),
 		"aggression":float(civ.aggression),"created_day":int(WorldSimulation.state.elapsed_days),
-		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,
+		"campaign_mode":"offensive","field_encounter":true,"formation_id":formation_id,"owned_force_id":int(formation.get("owned_force_id",0)),
 		"target_region_id":"","target_region_name":"the field contact",
 		"target_position":position.duplicate(true),"terrain_defense":1.04,
-		"morale_cap":StandDown.morale_cap(formation_memory,formation_id,today),
+		"morale_cap":float(current.get("morale_cap",1.0)) if owned else StandDown.morale_cap(formation_memory,formation_id,today),
 	}
 
 
@@ -2485,13 +2610,24 @@ func resolve_foreign_formation_after_battle(formation_id:String,result:Dictionar
 	formation["readiness"]=clampf(float(formation.get("readiness",0.5))*lerpf(0.42,0.82,remaining_ratio),0.08,1.0)
 	var termination:Dictionary=result.get("termination",{})
 	var day:=int(WorldSimulation.state.elapsed_days)
-	if String(termination.get("type","continued"))!="continued":
+	if String(termination.get("defeated",""))==String(rival_result.get("name","")) and not String(rival_result.get("name","")).is_empty():
 		formation["disabled_until_day"]=day+StandDown.BEATEN_DAYS
 	# Remembered by its stable id: rival armies are rebuilt from sightings
 	# every day, and the stand-down must outlive that.
 	var remembered:=StandDown.remember(formation_memory,formation_id,day,rival_result,termination)
 	formation["disabled_until_day"]=maxi(int(formation.get("disabled_until_day",0)),int(remembered.get("until",0)))
 	foreign_formations[formation_index]=formation
+	# The battle itself is fresh evidence. A personally witnessed breach
+	# cannot remain an intact ribbon in the recent-sightings layer.
+	if bool((result.get("threat",{}) as Dictionary).get("front_contact",false)):
+		var outcome:=String(result.get("outcome",""))
+		var defeated:=outcome==home_side+"_victory" or outcome==rival_side+"_retreat" or bool(remembered.get("beaten",false))
+		var sighting_index:=_formation_sighting_index(formation_id)
+		if defeated and sighting_index>=0:
+			var seen:Dictionary=foreign_sightings[sighting_index]
+			seen["defense_points"]=[]
+			seen["border_front"]={"id":formation_id,"points":[],"assigned":true,"state":"breached","day":day}
+			seen["last_seen_day"]=day;seen["strength"]=remaining
 	_set_sighting_visibility(formation_id,false)
 	observation_revision+=1
 
@@ -2502,6 +2638,8 @@ func contact_source_description(source:String,formation_kind:String="")->String:
 			return "Direct local encounter with a nearby %s" % formation_kind.replace("_"," ")
 		"returned_scout_report":
 			return "Your scout party encountered them and carried the report home"
+		"their_party_came":
+			return "Their own %s found us" % (formation_kind if formation_kind!="" else "party")
 		"physical reconnaissance":
 			return "Your scouts watched one of their settlements and carried the report home"
 		"captured_foreign_scout":
@@ -2874,13 +3012,16 @@ static func with_article(noun:String)->String:
 	return ("an " if noun.substr(0,1).to_lower() in ["a","e","i","o","u"] else "a ")+noun
 
 func _complete_scout_mission(mission:Dictionary,day:int)->void:
+	# An expedition's own odds of coming home (expedition.gd): overdue, given
+	# up, or on to the ordinary homecoming below.
+	if mission.has("expedition") and preload("res://scripts/expedition.gd").resolve(mission,day,self):return
 	var interception:=_resolve_player_scout_interception(mission,day)
 	if bool(interception.get("intercepted",false)) and String(interception.get("fate",""))!="driven_off":
 		_fail_player_scout_mission(mission,interception,day)
 		return
 	# The road is resolved before anything is charted: a party that turned back
 	# only reveals the ground it actually covered.
-	var fate:=_resolve_party_fate(mission,day)
+	var fate:=preload("res://scripts/expedition.gd").homecoming(mission,day,self) if mission.has("expedition") else _resolve_party_fate(mission,day)
 	if bool(interception.get("intercepted",false)):
 		_turn_scout_party_back(mission,0.5,"Armed strangers chased the party off its road; it slipped away and came home early with what it had already seen.")
 	elif String(fate.get("mishap",""))=="turned_back":
@@ -2905,8 +3046,8 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 	# One aggregate capsule trail follows the physical chart. Do not convert its
 	# samples into circles: circle consolidation was what inflated a returned line
 	# into an impossible continental reveal.
-	_add_revealed_trail(route,18.0,"returned scout trail",day)
-	_scouts_read_their_signs(route,day)
+	_add_revealed_trail(route,preload("res://scripts/expedition.gd").REVEAL_KM if mission.has("expedition") else 18.0,"returned expedition" if mission.has("expedition") else "returned scout trail",day)
+	_scouts_read_their_signs(route,day,preload("res://scripts/expedition.gd").SIGNS_KM if mission.has("expedition") else 0.0)
 	var contacts:Array[String]=[]
 	var contact_records:Array[Dictionary]=[]
 	for index in civilizations.size():
@@ -2915,8 +3056,20 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		if int(relation.contact_level)>=2: continue
 		var civ_position:=_civilization_world_position(civ)
 		var encounter:=_closest_route_encounter(route,civ_position)
-		if float(encounter.distance)>58.0 or not encounter.position is Vector2: continue
+		# Scouts meet a people within a day or two's walk of its home. An
+		# expedition asks after the people of any country it enters
+		# (expedition.gd MEET_KM, or their own land if that runs wider).
+		var meeting_km:=58.0
+		if mission.has("expedition"):meeting_km=maxf(preload("res://scripts/expedition.gd").MEET_KM,float(preload("res://scripts/realm_reach.gd").of(civ).get("reach",0.0)))
+		if not encounter.position is Vector2: continue
 		var encounter_position:Vector2=encounter.position
+		if float(encounter.distance)>meeting_km:
+			# Signs seen from farther off are followed overland when the land
+			# allows it (expedition.gd followed_signs); else they are a rumour.
+			if not mission.has("expedition"): continue
+			var turned:Vector2=preload("res://scripts/expedition.gd").followed_signs(self,route,civ_position,String(mission.get("travel_mode","land"))=="sea")
+			if not turned.is_finite(): continue
+			encounter_position=turned
 		relation["contact_level"]=2
 		relation["contact_intelligence"]=maxf(0.20,float(relation.contact_intelligence))
 		relation["met_day"]=day
@@ -2929,6 +3082,7 @@ func _complete_scout_mission(mission:Dictionary,day:int)->void:
 		contacts.append(String(civ.name))
 		var contact_record:Dictionary={"civ_id":String(civ.id),"name":String(civ.name),"position":{"x":encounter_position.x,"z":encounter_position.y},"source":"returned_scout_report","day":day}
 		contact_records.append(contact_record)
+		_meeting_is_mutual(civ,day,encounter_position,"an expedition" if mission.has("expedition") else "a scouting party",String(mission.get("travel_mode","land"))=="sea")
 		var contact_description:="Returning scouts report direct contact with people of the %s at the marked point on their charted route. This is the encounter site, not a revealed homeland." % String(civ.name)
 		_publish_observed_event("First contact — %s" % String(civ.name),contact_description,day,{"kind":"first_contact","civ_id":String(civ.id),"formation_id":"","formation_kind":"returned scout party","identified":true,"position":contact_record.position})
 	var targeted_finding:=_resolve_targeted_scout_report(mission,day)
@@ -3508,6 +3662,9 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 	for formation_variant in foreign_formations:
 		if findings.size()>=2: break
 		var formation:Dictionary=formation_variant
+		# A band with no land road stays at home (rival_land_routes.gd): the
+		# straight line to where it would have gone is not a march to cross.
+		if formation.get("route",[]).is_empty() and RivalLandRoutes.managed(formation) and (String(formation.get("land_route_state",""))!="ok" or RivalLandRoutes.pending(formation)):continue
 		var closest_distance:=INF
 		var closest_point:=Vector2.ZERO
 		for waypoint_variant in route:
@@ -3529,6 +3686,7 @@ func _resolve_route_military_sightings(mission:Dictionary,route:Array,day:int)->
 		relation["contact_intelligence"]=maxf(float(relation.get("contact_intelligence",0.0)),0.08)
 		civ["player_relation"]=relation
 		civilizations[civ_index]=civ
+		if not identified:_hearsay_of_strangers(civ,closest_point,day,"a band of strangers our scouts crossed")
 		var strength:=maxf(1.0,land_military_population(civ)*float(formation.get("strength_share",0.08)))
 		var sighting_index:=_formation_sighting_index(formation_id)
 		var sighting:={"formation_id":formation_id,"civ_id":civ_id,"kind":String(formation.get("kind","formation")),"last_seen_day":day,"position":{"x":closest_point.x,"z":closest_point.y},"distance_km":player_world_origin.distance_to(closest_point),"strength":strength,"readiness":float(formation.get("readiness",0.5)),"visible":false,"source":"returned_scout_report"}
@@ -5824,6 +5982,7 @@ func _apply_state(payload:Dictionary)->void:
 	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 	city_intelligence.records=payload.get("city_intelligence",{}).duplicate(true)
 	rumor_network.books=payload.get("rumor_leads",{}).duplicate(true)
+	_repair_unsourced_hearsay.call_deferred()
 	last_world_seed=int(payload.get("world_seed",WorldSimulation.state.world_seed))
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
 	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))

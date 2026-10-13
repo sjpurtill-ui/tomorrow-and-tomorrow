@@ -149,3 +149,39 @@ func test_no_survey_keeps_the_old_straight_line()->void:
 	assert_int(RR.advance(CivilizationSystem.foreign_formations,1)).is_equal(0)
 	var mid:=CivilizationSystem._foreign_formation_position(f,float(f.depart_day)+float(f.leg_days)*0.5)
 	assert_vector(mid).is_equal_approx(Vector2(45,10),Vector2(0.01,0.01))
+
+func _party(kind:String)->Dictionary:
+	return {"id":"t_"+kind,"civ_id":"none","kind":kind,"point_a":Vector2(0,0),"point_b":Vector2(90,0),"depart_day":0,"leg_days":10.0}
+
+func test_a_scout_party_with_no_land_road_takes_to_its_peoples_boats()->void:
+	mode="islands"
+	var scout:=_party("scout")
+	RR.plan(scout,Callable(self,"_land"),{"ok":true,"endurance_km":400.0,"roll":0.0})
+	assert_str(String(scout.land_route_state)).is_equal("ok")
+	assert_bool(scout.has("sea_road")).is_true()
+	# About 82 km of water between the two shores, part of it out of sight of land.
+	assert_float(float(scout.sea_road.open_km)+float(scout.sea_road.coast_km)).is_between(74.0,90.0)
+	assert_float(float(scout.sea_road.open_km)).is_greater(20.0)
+	assert_float(float(scout.sea_road.chance)).is_equal_approx(pow(0.5,(float(scout.sea_road.coast_km)*0.2+float(scout.sea_road.open_km))/400.0),0.0001)
+	# Half way it is on the water; at the end it stands where it was sent.
+	assert_bool(_land(RR.position(scout,0.5))).is_false()
+	assert_bool(RR.position(scout,1.0).distance_to(Vector2(90,0))<0.5).is_true()
+	assert_str(RR.valid(scout)).is_equal("")
+
+func test_a_crossing_that_fails_its_roll_is_lost_and_armies_never_sail()->void:
+	mode="islands"
+	var lost:=_party("scout")
+	RR.plan(lost,Callable(self,"_land"),{"ok":true,"endurance_km":400.0,"roll":0.999})
+	assert_str(String(lost.land_route_state)).is_equal("none")
+	assert_bool(bool(lost.get("lost_at_sea",false))).is_true()
+	assert_bool(RR.position(lost,0.5).distance_to(Vector2.ZERO)<0.01).is_true()
+	# Boats for rivers only: it stays home, not lost.
+	var ashore:=_party("scout")
+	RR.plan(ashore,Callable(self,"_land"),{"ok":false})
+	assert_str(String(ashore.land_route_state)).is_equal("none")
+	assert_bool(ashore.has("lost_at_sea")).is_false()
+	# An army has no sea road, whatever the boats.
+	var army:=_party("expedition")
+	RR.plan(army,Callable(self,"_land"),{"ok":true,"endurance_km":400.0,"roll":0.0})
+	assert_str(String(army.land_route_state)).is_equal("none")
+	assert_bool(army.has("sea_road")).is_false()

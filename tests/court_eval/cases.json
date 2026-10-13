@@ -730,6 +730,11 @@
    "say": "Send scouts to the north",
    "ideal": {"kind": "order", "action": "send", "type": "none", "confidence": 0.9},
    "expect": {"verb": "send", "state": {"scouts": ">before"}}},
+  {"id": "home.expedition", "domain": "home_orders", "fixture": "home_peace", "speaker": "imeri", "source": "design",
+   "note": "An expedition is a push as far as it can go one way with stated odds of coming home (expedition.gd), not a scouting round.",
+   "say": "Send an expedition east with 30 people, 600 km",
+   "ideal": {"kind": "order", "action": "send", "type": "none", "confidence": 0.9},
+   "expect": {"verb": "send", "state": {"scouts": ">before"}}},
 
   {"id": "home.envoy_out", "domain": "home_orders", "fixture": "war_not_held", "speaker": "headman", "source": "design",
    "say": "Send an envoy to the Esurai",

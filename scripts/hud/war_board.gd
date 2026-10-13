@@ -127,7 +127,7 @@ func setup(_block:Dictionary={})->void:
 	covert_toggle=Button.new();covert_toggle.name="CovertToggle";covert_toggle.flat=true;covert_toggle.focus_mode=Control.FOCUS_NONE
 	covert_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;covert_toggle.add_theme_font_override("font",T.font("ui_strong"));covert_toggle.add_theme_font_size_override("font_size",12)
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:covert_toggle.add_theme_color_override(state,T.INK_MUTED)
-	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Their own page on the rail (F3) sets how many are taught and sends them out."
+	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Their own page on the rail (F3) sets how hard we watch each people and our own."
 	add_child(covert_toggle)
 	covert=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup();covert.visible=false
 	covert_toggle.pressed.connect(func()->void:covert.visible=not covert.visible;_spies_words())
@@ -135,12 +135,6 @@ func setup(_block:Dictionary={})->void:
 	for argument in OS.get_cmdline_user_args():
 		if String(argument).begins_with("--capture-war-scroll="):_capture_scroll=int(String(argument).trim_prefix("--capture-war-scroll="))
 		if String(argument)=="--capture-covert":covert.visible=true;_spies_words();_capture_covert=true
-		# A capture-only sample of trained corps (never saved: isolated captures).
-		if String(argument)=="--capture-covert-sample":
-			var corps:Dictionary=preload("res://scripts/eyes_corps.gd").state()
-			corps.eyes.merge({"policy":"steady","members":6.0,"craft":0.62,"training":[{"count":2.0,"done":int(GameState.elapsed_days)+60}]},true)
-			corps.wary.merge({"policy":"few","members":9.0,"craft":0.55},true)
-			corps["distrust"]=0.12
 	refresh(true)
 
 
@@ -267,9 +261,9 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	# held), the count stands alone; the War screen's bar says where they are.
 	if target>now:
 		var of:=_line("/ "+compact(target),14,T.INK_MUTED);of.name="Target";of.size_flags_vertical=Control.SIZE_SHRINK_END;top.add_child(of)
-	var word:=_line("under arms",12,T.INK_MUTED);word.name="Caption";word.size_flags_vertical=Control.SIZE_SHRINK_END;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(word)
+	var word:=_line("in the army",12,T.INK_MUTED);word.name="Caption";word.size_flags_vertical=Control.SIZE_SHRINK_END;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(word)
 	var bar:=StrengthBar.new();bar.name="Strength";bar.parts=glance;bar.target=target;bar.custom_minimum_size=Vector2(92,6);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;numbers.add_child(bar)
-	soldiers.tooltip_text="Keeping watch: %s, %s of the people. The watch is the army: everyone keeping watch serves under arms.\n%s" % [EraWords.grouped(now),Law.level_name(String(reading.level)),strength_words(glance,now,target)]
+	soldiers.tooltip_text="The army: %s, %s of the people. Everyone set to keeping watch is in it.\n%s" % [EraWords.grouped(now),Law.level_name(String(reading.level)),strength_words(glance,now,target)]
 	_rule(army_box,"SoldiersRule")
 	# Where they come from: every soldier is one fewer at work.
 	var from:=Forces.drawn_from(MilitaryCampaign)
@@ -348,42 +342,87 @@ static func border_signature()->Array:
 
 ## (2b) The border (fort_border.gd): our forts, how many of the watch are out
 ## on it, how well its stretches hold, the food lost on the road, and the
-## share sent out. The full panel (forts, stretches, the war leader's sites)
-## opens from here.
+## share sent out. Forts are placed on the map itself (hud/border_map.gd).
 func _border_card()->Control:
 	var Forts:=preload("res://scripts/fort_border.gd")
+	var Kit:=preload("res://scripts/hud/paper_kit.gd")
 	var panel:=_card();panel.name="BorderCard"
+	var plum:=Color("7b2a7a") if T.is_light() else Color("d69bd2")
+	var paper:=_skin(T.PAPER_RAISED,T.RULE,12,0)
+	paper.border_width_top=3;paper.border_color=plum
+	panel.add_theme_stylebox_override("panel",paper)
 	var column:=panel.get_node("Column") as VBoxContainer
+	column.add_theme_constant_override("separation",10)
 	var kept:=Forts.watch()
 	var bill:=Forts.costs(null,kept)
 	var standing:=Forts.standing().size()
 	var going:=Forts.forts().filter(func(f:Dictionary)->bool:return String(f.get("status",""))=="building").size()
-	var tip:="Our border is spanned by our forts. Of the watch at home a share goes out: each fort's garrison first, the rest along the stretches between linked forts. The more on watch a km, the fewer slip in or out unseen; where no forts are linked anyone walks in."
-	var head:=_headline(column,"defend",int(kept.posted),"on the border · %d fort%s%s" % [standing,"" if standing==1 else "s",(" · %d going up" % going) if going>0 else ""],tip);head.name="Border"
-	var share:=Forts.border_share()
-	head.add_child(_step_button("BorderLess","−","A tenth of the watch at home fewer on the border: less food lost on the road, a thinner line.",func()->void:Forts.set_border_share(maxf(0.0,Forts.border_share()-0.1));refresh(true)))
-	head.add_child(_step_button("BorderMore","+","A tenth of the watch at home more on the border: forts manned first, then the line between them.",func()->void:Forts.set_border_share(minf(1.0,Forts.border_share()+0.1));refresh(true)))
+	var garrison:=0
+	for people:Variant in kept.garrisons.values():garrison+=int(people)
 	var held:=0.0;var km:=0.0
 	for st:Dictionary in kept.stretches:held+=float(st.strength)*float(st.km);km+=float(st.km)
 	var line_strength:=held/km if km>0.0 else 0.0
-	var row:=HBoxContainer.new();row.name="LineHolds";row.add_theme_constant_override("separation",8);row.mouse_filter=Control.MOUSE_FILTER_PASS
-	var words:=_line("The line holds %d in 100" % roundi(line_strength*100.0) if km>0.0 else "No two forts linked: the border is open",13,T.INK);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
-	var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(90,6);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(bar)
-	row.tooltip_text="Of every crossing of a linked stretch, about %d in 100 are stopped (fewer for the stealthy): %d km of line, %d of the watch along it." % [roundi(line_strength*100.0),roundi(km),roundi(float(kept.line))]
-	column.add_child(row)
-	var cost:=_line("%d%% of the watch at home · %d food lost a day" % [roundi(share*100.0),roundi(float(bill.food_lost))],12,T.INK_MUTED);cost.name="BorderCost";cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	cost.tooltip_text="Food carried out spoils and is eaten on the road: about a third is lost at 60 km on foot, more farther out; roads and carts lose less."
-	column.add_child(cost)
-	var open:=_small_button("Forts and sites","defend","Our forts, each stretch's watch, and where the war leader would raise the next fort.")
+	# A fort from the current age, not a castle borrowed from a later one.
+	var head:=HBoxContainer.new();head.name="Border";head.add_theme_constant_override("separation",10);column.add_child(head)
+	var seal:=PanelContainer.new();seal.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,7,0));seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(seal)
+	var emblem:=TextureRect.new();emblem.texture=Icons.chart_texture("fort:%s" % String(Forts.best_kind().id),plum,64)
+	emblem.custom_minimum_size=Vector2(34,34);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;seal.add_child(emblem)
+	var titles:=VBoxContainer.new();titles.add_theme_constant_override("separation",0);titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(titles)
+	var kicker:=_line("BORDER WATCH",12,Kit.text_color(plum));kicker.add_theme_font_override("font",T.font("ui_strong"));titles.add_child(kicker)
+	var title:=_line("Our border",24,T.INK);title.add_theme_font_override("font",T.font("voice_bold"));titles.add_child(title)
+	var detail:="%d standing" % standing
+	if going>0:detail+=" · %d going up" % going
+	if standing+going==0:detail="No forts raised yet"
+	var count:=_line(detail,12,T.INK_MUTED,true);count.name="FortCount";titles.add_child(count)
+	# The state is readable without interpreting a bar or opening a tooltip.
+	var state_words:="The border is open"
+	var advice:="Raise nearby forts to link their watch."
+	var state_ink:=T.INK
+	if km>0.0:
+		state_words="A well-watched line" if line_strength>=0.7 else ("A watch along the line" if line_strength>=0.4 else "A thinly watched line")
+		state_ink=T.TEAL_TEXT if line_strength>=0.7 else T.AMBER_TEXT
+		advice="%d km linked · %s watching between forts" % [roundi(km),EraWords.grouped(int(kept.line))]
+	elif going>0:
+		state_words="Forts taking shape"
+		advice="The garrisons are building. Finished forts can link their watch."
+	elif standing>0:
+		advice="No two forts are linked. Place another within reach."
+	var condition:=VBoxContainer.new();condition.name="LineHolds";condition.add_theme_constant_override("separation",3);column.add_child(condition)
+	condition.add_child(_line(state_words,15,state_ink,true))
+	condition.add_child(_line(advice,12,T.INK_MUTED,true))
+	if km>0.0:
+		var strength:=_line("Linked crossings stopped · about %d in 100" % roundi(line_strength*100.0),12,T.INK,true);condition.add_child(strength)
+		var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(0,7);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;condition.add_child(bar)
+	condition.tooltip_text="Only linked stretches are watched: about %d in 100 crossings are stopped there, fewer for the stealthy. Unlinked ground stays open." % roundi(line_strength*100.0)
+	var facts:=HBoxContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("separation",6);column.add_child(facts)
+	facts.add_child(_border_fact("Posted",compact(int(kept.posted)),"on the border","%s posted out: garrisons plus the watch along linked stretches." % EraWords.grouped(int(kept.posted)),plum))
+	facts.add_child(_border_fact("Garrison",compact(garrison),"in the forts","%s in the forts. Garrisons are manned first; those left watch the linked stretches." % EraWords.grouped(garrison),plum))
+	facts.add_child(_border_fact("FoodLoss",compact(roundi(float(bill.food_lost))),"food lost / day","%s food spoils or is eaten on the road each day, in addition to the rations the border watch eats. Roads and carts reduce this loss." % EraWords.grouped(roundi(float(bill.food_lost))),T.GOLD))
+	var share:=Forts.border_share()
+	var split:=HBoxContainer.new();split.name="BorderCost";split.add_theme_constant_override("separation",6);column.add_child(split)
+	var share_words:=_line("%d%% of the watch at home" % roundi(share*100.0),13,T.INK,true);share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;share_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;split.add_child(share_words)
+	for step:int in [-1,1]:
+		var button:=_step_button("BorderLess" if step<0 else "BorderMore","−" if step<0 else "+","Send 10% fewer of the watch at home to the border." if step<0 else "Send 10% more of the watch at home to the border; garrisons are filled first.",func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step)*0.1,0.0,1.0));refresh(true))
+		button.custom_minimum_size=Vector2(34,32);button.focus_mode=Control.FOCUS_ALL;button.add_theme_stylebox_override("focus",T.gold_outline_style());button.disabled=share<=0.0 if step<0 else share>=1.0;split.add_child(button)
+	var open:=Kit.button(column,"Place the first fort  ›" if standing+going==0 else "Explore the border  ›",true,Callable(),"Open the Border map. Inspect the watch, choose ground for a fort, or move an existing post.")
 	open.name="OpenBorder"
+	open.icon=Icons.chart_texture("fort:%s" % String(Forts.best_kind().id),T.INK,40);open.add_theme_constant_override("icon_max_width",20);open.add_theme_constant_override("h_separation",8)
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
-		var hud:Variant=scene.get("hud") if scene!=null else null
-		if hud==null or not hud.has_method("open_detail"):return
+		if scene==null:return
 		close_wanted.emit()
-		hud.open_detail(preload("res://scripts/hud/content/border_detail.gd").new(scene,hud)))
-	column.add_child(open)
+		preload("res://scripts/hud/border_map.gd").set_shown(scene,true))
 	return panel
+
+
+func _border_fact(fact_name:String,value:String,caption:String,tip:String,ink:Color)->Control:
+	var card:=PanelContainer.new();card.name=fact_name;card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.tooltip_text=tip
+	card.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,7,0))
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(words)
+	var number:=_line(value,20,T.INK);number.name="Value";number.add_theme_font_override("font",T.font("ui_strong"));number.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(number)
+	var rule:=ColorRect.new();rule.color=Color(ink,0.6);rule.custom_minimum_size=Vector2(0,2);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(rule)
+	var label:=_line(caption,12,T.INK_MUTED,true);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(label)
+	return card
 
 
 func _card()->PanelContainer:
@@ -431,21 +470,18 @@ func _forces_card(f:Dictionary)->Control:
 	var panel:=_card();panel.name="ForcesCard"
 	var column:=panel.get_node("Column") as VBoxContainer
 	var total:=int(f.total);var watch:=int(f.watch)
-	var tip:="Everyone under arms, anywhere: at home, in the bands, holding towns, drilling, hurt or away. The watch is the army: raising the share sets more of the people to keep watch; they join at home at once and drill over time. Lowering it sends the least drilled at home back to their work."
-	var head:=_headline(column,"guard",total,"under arms · %s of the people" % Watch.percent(float(total)/float(maxi(1,int(f.population)))),tip)
+	var tip:="The army: everyone in it, anywhere. It is three things: the home guard (some of them out on the border), those free to send, and those in the field. The − and + here set how big it is, as a share of the people: more join at home at once and drill over time; fewer sends the least drilled at home back to their work. Keeping watch on the People view is this same number."
+	var head:=_headline(column,"guard",total,"in the army · %s of the people" % Watch.percent(float(total)/float(maxi(1,int(f.population)))),tip)
 	head.name="Total"
-	head.add_child(_step_button("WatchLess","−","One in a hundred of the people fewer keeping watch: the least drilled at home go back to their work.",func()->void:_step_watch(-1)))
-	head.add_child(_step_button("WatchMore","+","One in a hundred of the people more keeping watch: they leave other work and join the watch at home.",func()->void:_step_watch(1)))
-	# What the share asks against what serves, and the manpower left.
-	var asked:=_line("share asks %s · %s could be raised" % [EraWords.grouped(watch),compact(int(f.can_raise))],12,T.INK_MUTED);asked.name="Asks"
-	asked.tooltip_text="The share of the people set to keep watch is %s of %s people (%s); %s of those who can work are not keeping watch and could be raised." % [EraWords.grouped(watch),EraWords.grouped(int(f.population)),Watch.percent(float(f.share)),EraWords.grouped(int(f.can_raise))]
-	column.add_child(asked)
+	head.add_child(_step_button("WatchLess","−","A smaller army: one in a hundred of the people fewer. The least drilled at home go back to their work.",func()->void:_step_watch(-1)))
+	head.add_child(_step_button("WatchMore","+","A bigger army: one in a hundred of the people more. They leave other work and join at home.",func()->void:_step_watch(1)))
+	# Only when the army is not yet the size asked for: said in one line.
 	if total>watch:
-		var over:=_line("%s above the share · back to work later" % EraWords.grouped(total-watch),12,T.AMBER_TEXT);over.name="Over"
-		over.tooltip_text="%s more serve than the share asks: away in bands, holding towns, hurt, or not yet sent home. They go back to their work when they come home." % EraWords.grouped(total-watch)
+		var over:=_line("%s asked: %s more go back to work once home" % [EraWords.grouped(watch),EraWords.grouped(total-watch)],12,T.AMBER_TEXT);over.name="Over"
+		over.tooltip_text="%s more are in the army than the size you set: away in the field, holding towns, hurt, or not yet sent home. They go back to their work when they come home." % EraWords.grouped(total-watch)
 		column.add_child(over)
 	elif total<watch:
-		var under:=_line("%s still joining the watch" % EraWords.grouped(watch-total),12,T.AMBER_TEXT);under.name="Under"
+		var under:=_line("%s asked: %s are still joining" % [EraWords.grouped(watch),EraWords.grouped(watch-total)],12,T.AMBER_TEXT);under.name="Under"
 		column.add_child(under)
 	# The quick shares, as plain shares of the people (army_levy_law LEVELS).
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",0);column.add_child(pick)
@@ -465,7 +501,7 @@ func _forces_card(f:Dictionary)->Control:
 		button.set_pressed_no_signal(id==now_level)
 		var at_level:=Law.target_men(id,int(f.population))
 		var effect:=Economy.step_words(now_cost,Economy.cost(at_level-watch)) if at_level>watch else PackedStringArray()
-		button.tooltip_text="%s of the people keep watch.\n%s%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able)),("\n\n"+"\n".join(effect)) if not effect.is_empty() else ""]
+		button.tooltip_text="An army of %s of the people.\n%s%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able)),("\n\n"+"\n".join(effect)) if not effect.is_empty() else ""]
 		button.pressed.connect(func()->void:_choose_level(id))
 		pick.add_child(button)
 	# Where every one of them stands: one bar, its legend under it.
@@ -487,11 +523,17 @@ func _forces_card(f:Dictionary)->Control:
 	gauges.add_child(_gauge("Fed",float(ready.fed),T.TEAL if float(ready.fed)>=0.75 else (T.AMBER if float(ready.fed)>=0.4 else T.RED),"Fed in the field: the share of the rations the bands out need that reached them." if float(ready.fed)>=0.0 else "Fed in the field: nobody is out."))
 	# How many of them stay home.
 	var split:=HBoxContainer.new();split.name="Split";split.add_theme_constant_override("separation",6);column.add_child(split)
-	var split_words:=_line("Keep %d%% at home · %s" % [roundi(float(f.home_share)*100.0),EraWords.grouped(int(f.guard_target))],13,T.INK);split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	split_words.tooltip_text="The home guard: the share of everyone under arms kept at home and in the towns. The war council never sends them away; the rest are free for the bands."
+	# The home guard, and how many of it stand out on the border (fort_border.gd).
+	var on_border:=int(preload("res://scripts/fort_border.gd").watch().get("posted",0))
+	var split_words:=_line("Home guard: %d%% of the army · %s" % [roundi(float(f.home_share)*100.0),EraWords.grouped(int(f.guard_target))],13,T.INK);split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	split_words.tooltip_text="The home guard: the part of the army kept at home and in the towns. Those posted to the border forts and the line are part of it. The war council never sends the home guard away; everyone else is free to send."
 	split.add_child(split_words)
-	split.add_child(_step_button("GuardLess","−","A tenth of them fewer at home: more are free for the bands.",func()->void:_step_split(-1)))
-	split.add_child(_step_button("GuardMore","+","A tenth of them more at home: idle bands come home to guard.",func()->void:_step_split(1)))
+	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
+	split.add_child(_step_button("GuardMore","+","A bigger home guard, by a tenth of the army: idle bands come home to guard.",func()->void:_step_split(1)))
+	if on_border>0:
+		var border:=_line("%s of the home guard are out on the border" % EraWords.grouped(on_border),12,T.INK_MUTED);border.name="OnBorder"
+		border.tooltip_text="Posted to the border forts and the line between them (the Border card below). They are part of the home guard, not extra."
+		column.add_child(border)
 	var people:=Button.new();people.name="People";people.text="People ›";people.flat=true;people.focus_mode=Control.FOCUS_NONE
 	people.add_theme_font_size_override("font_size",12);people.add_theme_color_override("font_color",T.GOLD_TEXT);people.add_theme_color_override("font_hover_color",T.INK)
 	people.tooltip_text="Who works at what, keeping watch among the rest (the People view)."
@@ -625,7 +667,7 @@ static func _births_words(fewer:float)->String:
 
 ## The bar in words, part by part, for the pointer.
 static func allocation_words(f:Dictionary)->String:
-	var lines:=PackedStringArray(["Everyone under arms: %s." % EraWords.grouped(int(f.total))])
+	var lines:=PackedStringArray(["The army: %s." % EraWords.grouped(int(f.total))])
 	for part:Dictionary in f.parts:lines.append("%s: %s" % [String(part.label),EraWords.grouped(int(part.men))])
 	lines.append("The tick marks the share the people keep on watch: %s." % EraWords.grouped(int(f.watch)))
 	return "\n".join(lines)
@@ -1057,7 +1099,7 @@ static func strength_words(glance:Dictionary,now:int,target:int)->String:
 	if int(glance.waiting)>0:parts.append("%s joining the watch" % EraWords.grouped(int(glance.waiting)))
 	if int(glance.get("away",0))>0:parts.append("%s hurt or away" % EraWords.grouped(int(glance.away)))
 	if target>now:parts.append("%s to join" % EraWords.grouped(target-now))
-	elif target>=0 and now>target:parts.append("%s above the share" % EraWords.grouped(now-target))
+	elif target>=0 and now>target:parts.append("%s more than asked" % EraWords.grouped(now-target))
 	return " · ".join(parts)
 
 

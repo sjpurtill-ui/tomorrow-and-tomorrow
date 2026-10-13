@@ -304,7 +304,7 @@ func _card(o:Dictionary)->PanelContainer:
 		var alarm:=_line(String(STATE_WORDS.nothing),12,Tokens.RED_TEXT,0.06);alarm.name="OrderAlarm";alarm.add_theme_font_override("font",Tokens.font("ui_strong"));column.add_child(alarm)
 	var status:=Label.new();status.name="OrderStatus";status.text=status_words(o)
 	Tokens.style_label(status,12,Tokens.text_for(colour) if state!="accepted" else Tokens.BODY_2)
-	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=2;status.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=6 if state=="nothing" else 2;status.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	# A set width: the wrapped words know their height before the first sort.
 	status.custom_minimum_size=Vector2(TEXT_WIDTH,0)
 	column.add_child(status)

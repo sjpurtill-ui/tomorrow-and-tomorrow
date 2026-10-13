@@ -251,7 +251,13 @@ func test_a_blood_price_settles_the_feud_and_keeps_their_raiders_home()->void:
 ## punish them is set down so our raiders do not start it again.
 func test_a_peace_they_paid_for_ends_their_threats_and_our_punishing()->void:
 	# Before any feud they could demand tribute (the gate below is the peace's).
-	assert_dict(Hall._candidate("tribute_demand",civ_id,{"type":"routine","civ_id":civ_id,"data":{}},RandomNumberGenerator.new(),{},5)).is_not_empty()
+	# (A demand also needs a road: some rolls fail on distance alone, so the
+	# rolls are seeded and any one of a few must bring a demand.)
+	var could:=false
+	for seed_value in 8:
+		var roll:=RandomNumberGenerator.new();roll.seed=seed_value
+		could=could or not Hall._candidate("tribute_demand",civ_id,{"type":"routine","civ_id":civ_id,"data":{}},roll,{},5).is_empty()
+	assert_bool(could).is_true()
 	WAR.blood_feud(civ_id,10,"old wrongs")
 	WAR.front(civ_id)["stance"]="punish"
 	WAR._peace_answered({"civ_id":civ_id,"terms":{"resource":"Food","amount":12.0}},"accept")

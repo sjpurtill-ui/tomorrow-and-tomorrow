@@ -501,6 +501,8 @@ func test_half_pace_counts_in_the_march_estimate()->void:
 	# land the whole way, at half pace.
 	GameState.population_allocations["Logistics"]=0
 	var band:=_band(3,[_formation(31,"levy","spear",20)],40.0)
+	# The food they brought is eaten.
+	band["train_days"]=0.0
 	MilitaryCampaign.field_armies.assign([band])
 	assert_float(float(MilitaryCampaign.carrier_reading().food)).is_less(0.05)
 	var from:=_home()+Vector2(40.0,0.0)
@@ -537,3 +539,160 @@ func test_one_supply_number_on_the_band_its_runner_and_its_report()->void:
 	var Bar:=preload("res://scripts/hud/army_bar_model.gd")
 	band["last_report"]=told
 	assert_str(String(Bar.known_supply(MilitaryCampaign,band).get("state",""))).is_equal("well")
+
+
+# --- The food an army carries ---------------------------------------------------
+
+func test_an_army_loads_the_carts_and_carries_days_of_food()->void:
+	# A hundred drivers with a hundred carts, and five hundred fighters: four
+	# days on their backs and one trip's load over what they all eat in a day.
+	GameState.population_allocations["Logistics"]=100
+	GameState.resource_stockpiles["Transport Carts"]=100.0
+	var band:=_band(4,[_formation(41,"levy","spear",500)],0.0)
+	MilitaryCampaign.field_armies.assign([band])
+	var days:=MilitaryCampaign.train_capacity_days(band)
+	assert_float(days).is_equal_approx(4.0+100.0*250.0/(600.0*1.12),0.1)
+	# Without carts the porters carry far less.
+	GameState.resource_stockpiles["Transport Carts"]=0.0
+	assert_float(MilitaryCampaign.train_capacity_days(band)).is_less(8.0)
+	# A second band out takes its share of the carts.
+	GameState.resource_stockpiles["Transport Carts"]=100.0
+	MilitaryCampaign.field_armies.assign([band,_band(5,[_formation(51,"levy","spear",500)],60.0)])
+	assert_float(MilitaryCampaign.train_capacity_days(band)).is_equal_approx(4.0+50.0*250.0/(550.0*1.12),0.1)
+
+
+func test_carried_food_feeds_the_road_the_carriers_cannot_reach()->void:
+	GameState.population_allocations["Logistics"]=100
+	GameState.resource_stockpiles["Transport Carts"]=100.0
+	var from:=_home()
+	var probe:=_band(6,[_formation(61,"levy","spear",500)],0.0)
+	probe["status"]="moving"
+	var road:Dictionary=MilitaryCampaign.field_route(from,from+Vector2(400.0,0.0),probe)
+	assert_bool(road.has("error")).override_failure_message(str(road)).is_false()
+	# With the carts: fed all the way, at the full pace.
+	var loaded:Dictionary=MilitaryCampaign.march_supply(probe,road)
+	assert_float(float(loaded.train_days)).is_greater(float(loaded.days))
+	assert_float(float(loaded.fed_on_road)).is_equal(1.0)
+	assert_float(float(loaded.half_pace)).is_equal(0.0)
+	assert_bool(bool(loaded.hungry)).is_false()
+	# The same road with nothing carried: hungry, and slower.
+	var out:Dictionary=probe.duplicate(true)
+	out["location_id"]="field";out["train_days"]=0.0
+	var bare:Dictionary=MilitaryCampaign.march_supply(out,road)
+	assert_float(float(bare.fed_on_road)).is_less(0.75)
+	assert_int(int(bare.days)).is_greater(int(loaded.days))
+	# A road longer than the food: the days carried are told, and it is hungry.
+	var far:Dictionary=MilitaryCampaign.field_route(from,from+Vector2(1700.0,0.0),probe)
+	var long_march:Dictionary=MilitaryCampaign.march_supply(probe,far)
+	assert_float(float(long_march.train_days)).is_less(float(long_march.days))
+	assert_bool(bool(long_march.hungry)).is_true()
+
+
+func test_the_carts_empty_a_day_at_a_time_and_then_the_band_goes_hungry()->void:
+	GameState.population_allocations["Logistics"]=100
+	GameState.resource_stockpiles["Transport Carts"]=100.0
+	var band:=_band(7,[_formation(71,"levy","spear",500)],900.0)
+	band["train_days"]=3.0
+	MilitaryCampaign.field_armies.assign([band])
+	var need:=500.0*1.12
+	# Far past the carriers' reach, yet fed: from what they brought.
+	assert_float(MilitaryCampaign._carried_access(band)).is_less(0.1)
+	MilitaryCampaign.record_daily_provisions(need,need)
+	var fed:Dictionary=MilitaryCampaign.field_armies[0]
+	assert_float(float(fed.provision_ratio)).is_equal_approx(1.0,0.01)
+	assert_float(float(fed.train_days)).is_less(3.0)
+	assert_float(float(fed.provisions_train_today)).is_greater(need*0.8)
+	assert_str(String(Supply.of_force(fed).words)).contains("They carry food for")
+	for day in 4: MilitaryCampaign.record_daily_provisions(need,need)
+	var empty:Dictionary=MilitaryCampaign.field_armies[0]
+	assert_float(float(empty.train_days)).is_equal(0.0)
+	assert_float(float(empty.provision_ratio)).is_less(0.75)
+	# Setting out from home again, the carts are filled from the stores, which pay for it.
+	empty["position"]={"x":_home().x,"z":_home().y};empty["location_id"]="player_home"
+	var stock:=FoodSystem.total_stored()
+	var road:Dictionary=MilitaryCampaign.field_route(_home(),_home()+Vector2(100.0,0.0),empty)
+	MilitaryCampaign._set_march_route(empty,road)
+	assert_float(float(empty.train_days)).is_greater(30.0)
+	assert_float(stock-FoodSystem.total_stored()).is_equal_approx(float(empty.train_days)*need,need)
+
+
+# --- Forts hand food on, and an army fills its carts at them ----------------------
+
+const Forts:=preload("res://scripts/fort_border.gd")
+
+func _fort(id:int,km:float,store:float=0.0)->Dictionary:
+	var at:=_home()+Vector2(km,0.0)
+	return {"id":id,"kind":"watch_camp","x":at.x,"z":at.y,"status":"standing","condition":1.0,"name":"Fort %d" % id,"store":store}
+
+func test_food_reaches_far_forts_only_fort_to_fort()->void:
+	var d:=Forts.ledger()
+	d["seeded"]=true
+	# One fort alone 600 km out: almost nothing sent arrives.
+	d["forts"]=[_fort(1,600.0)]
+	var alone:=Forts.arrives(1)
+	assert_float(alone).is_less(0.05)
+	# A chain of forts a hundred km apart: most of it does.
+	var chain:=[]
+	for i in 6: chain.append(_fort(i+1,100.0*float(i+1)))
+	d["forts"]=chain
+	assert_float(Forts.arrives(6)).is_greater(alone*4.0)
+	assert_int(int(Forts.way()[6].via)).is_equal(5)
+	# A gap too wide to hand across breaks the chain there.
+	chain.remove_at(2)
+	d["forts"]=chain
+	assert_int(int(Forts.way()[6].via)).is_equal(5)
+	assert_float(Forts.arrives(4)).is_less(Forts.arrives(2)*0.5)
+
+func test_the_seat_fills_the_forts_stores_above_its_own_reserve()->void:
+	var d:=Forts.ledger()
+	d["seeded"]=true
+	d["forts"]=[_fort(1,60.0)]
+	GameState.simulation_metrics["food_consumption"]=600.0
+	var stock:=FoodSystem.total_stored()
+	# Nothing goes out until the ruler says so.
+	Forts.stock_day(1.0)
+	assert_float(float(Forts.forts()[0].get("store",0.0))).is_equal(0.0)
+	Forts.set_stock_level(1)
+	Forts.stock_day(1.0)
+	var fort:Dictionary=Forts.forts()[0]
+	assert_float(float(fort.store)).is_greater(0.0)
+	# More left home than arrived: some is eaten on the way.
+	assert_float(stock-FoodSystem.total_stored()).is_greater(float(fort.store))
+	for day in 400: Forts.stock_day(1.0)
+	assert_float(float(Forts.forts()[0].store)).is_equal_approx(Forts.store_cap(fort),1.0)
+	# With no more than the reserve at home nothing is sent.
+	Forts.forts()[0]["store"]=0.0
+	GameState.simulation_metrics["food_consumption"]=FoodSystem.total_stored()
+	Forts.stock_day(1.0)
+	assert_float(float(Forts.forts()[0].store)).is_equal(0.0)
+
+func test_an_army_fills_its_carts_at_a_stocked_fort_and_the_road_counts_it()->void:
+	GameState.population_allocations["Logistics"]=100
+	GameState.resource_stockpiles["Transport Carts"]=100.0
+	var d:=Forts.ledger()
+	d["seeded"]=true
+	var probe:=_band(8,[_formation(81,"levy","spear",500)],0.0)
+	probe["status"]="moving"
+	var far:Dictionary=MilitaryCampaign.field_route(_home(),_home()+Vector2(1400.0,0.0),probe)
+	d["forts"]=[]
+	var bare:Dictionary=MilitaryCampaign.march_supply(probe,far)
+	assert_bool(bool(bare.hungry)).is_true()
+	# Stocked forts along that road: the same march is fed.
+	var chain:=[]
+	for i in 13: chain.append(_fort(i+1,100.0*float(i+1),80000.0))
+	d["forts"]=chain
+	var fed:Dictionary=MilitaryCampaign.march_supply(probe,far)
+	assert_int(int(fed.forts)).is_greater(3)
+	assert_float(float(fed.fed_on_road)).is_equal(1.0)
+	assert_bool(bool(fed.hungry)).override_failure_message(str(fed)).is_false()
+	# On the day itself: a band with empty carts by a fort takes from its store.
+	var band:=_band(9,[_formation(91,"levy","spear",500)],905.0)
+	band["train_days"]=0.0
+	MilitaryCampaign.field_armies.assign([band])
+	var need:=500.0*1.12
+	MilitaryCampaign.record_daily_provisions(need,need)
+	var after:Dictionary=MilitaryCampaign.field_armies[0]
+	assert_float(float(after.train_days)).is_greater(20.0)
+	assert_float(float(Forts.find_fort(9).store)).is_less(80000.0)
+	MilitaryCampaign.record_daily_provisions(need,need)
+	assert_float(float(MilitaryCampaign.field_armies[0].provision_ratio)).is_equal_approx(1.0,0.01)
