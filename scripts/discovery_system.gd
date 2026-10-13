@@ -2563,10 +2563,7 @@ func _discovery_effect_summary_base(entry:Dictionary)->String:
 	if not String(entry.get("clinical_care_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("rail_service_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("naval_service_method","")).is_empty():return String(entry.production_contract)
-	if not String(entry.get("grain_method","")).is_empty():return String(entry.production_contract)
 	if not String(entry.get("clothing_method","")).is_empty():return String(entry.production_contract)
-	if not String(entry.get("food_batch_method","")).is_empty():return String(entry.production_contract)
-	if not String(entry.get("meal_preparation","")).is_empty():return String(entry.production_contract)
 	if String(entry.get("id",""))=="smoking":return "Adopted smoking converts meat and fish to preserved rations at 82% yield using shared Logistics/Crafting capacity and 0.04 Timber per input ration. Fuel shortages limit output; unavailable during travel."
 	if String(entry.get("id",""))=="food_drying":return "Adopted air drying converts fresh plants to dry staples at 88% yield using shared Logistics/Crafting capacity, without fuel. Unavailable during travel."
 	if not entry.get("agronomy_profile",{}).is_empty():

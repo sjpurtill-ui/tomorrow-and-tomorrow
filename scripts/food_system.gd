@@ -130,21 +130,7 @@ func _fold_legacy_pools()->void:
 	var fresh:=float(stocks.get(FRESH,0.0));var stored:=float(stocks.get(STORED,0.0))
 	for key:String in LEGACY_FRESH:fresh+=maxf(0.0,float(stocks.get(key,0.0)));stocks.erase(key)
 	for key:String in LEGACY_STORED:stored+=maxf(0.0,float(stocks.get(key,0.0)));stocks.erase(key)
-	stored+=_legacy_ledger_rations()
 	stocks[FRESH]=fresh;stocks[STORED]=stored
-
-## Food held in the retired grain and batch ledgers, which are then cleared.
-func _legacy_ledger_rations()->float:
-	var total:=0.0
-	var state=WorldSimulation.state
-	var grain:Dictionary=state.grain_processing if state.get("grain_processing") is Dictionary else {}
-	for amount in (grain.get("stocks",{}) as Dictionary).values():total+=maxf(0.0,float(amount))
-	for batch in grain.get("batches",[]):total+=maxf(0.0,float((batch as Dictionary).get("amount",0.0)))
-	var batches:Dictionary=state.food_batches if state.get("food_batches") is Dictionary else {}
-	for lot in batches.get("lots",[]):total+=maxf(0.0,float((lot as Dictionary).get("amount",0.0)))
-	if not grain.is_empty():state.grain_processing=preload("res://scripts/grain_processing.gd").empty_state()
-	if not batches.is_empty():state.food_batches=preload("res://scripts/food_batches.gd").empty_state()
-	return total
 
 func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> Dictionary:
 	return WorldSimulation.settlements.with_local_population(func()->Dictionary: return _process_local_day(context,labor_efficiency,ecology))

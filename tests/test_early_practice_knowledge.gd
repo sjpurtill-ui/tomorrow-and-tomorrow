@@ -5,7 +5,7 @@ const Society=preload("res://scripts/society_model.gd")
 const Frontier=preload("res://scripts/discovery_frontier_catalog.gd")
 # Consequence hooks that would make an entry a production line, building,
 # recipe, operating plant or equipment. Early practices are knowledge only.
-const OPERATING_FIELDS:=["production_items","production_contract","operating_plants","inspection_items","building_method","grain_method","meal_preparation","food_batch_method","clothing_method","water_conveyance_method","naval_service_method","repair_method","clinical_care_method","medical_method","doctrine","training_profile","prospecting_profile","agronomy_profile","preservation_profile","nutrient_application"]
+const OPERATING_FIELDS:=["production_items","production_contract","operating_plants","inspection_items","building_method","clothing_method","water_conveyance_method","naval_service_method","repair_method","clinical_care_method","medical_method","doctrine","training_profile","prospecting_profile","agronomy_profile","preservation_profile","nutrient_application"]
 const RESEARCH_SPEED:=["knowledge_rate","observation_rate","adoption_rate"]
 
 func before_test()->void:

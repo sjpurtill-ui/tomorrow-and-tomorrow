@@ -8,7 +8,6 @@ func run()->void:
 	var meal_ids:Array[String]=[]
 	for entry:Dictionary in load("res://scripts/food_preparation.gd").entries():
 		meal_ids.append(entry.id)
-		if not load("res://scripts/food_preparation.gd").METHODS.has(entry.id):errors.append("Missing operating method: "+String(entry.id))
 		if int(entry.day)!=0:errors.append("Unexpected calendar gate: "+String(entry.id))
 	for entry:Dictionary in discovery.technology_catalog:
 		var channels:Dictionary=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES

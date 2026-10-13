@@ -32,8 +32,6 @@ const CITY_RESOURCE_DEFAULTS:={
 	"built_fabric":{},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
-	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
-	"grain_processing":{"stocks":{"grain":0.0,"clean":0.0,"tested":0.0,"dry":0.0,"flour":0.0,"fine":0.0,"bran":0.0,"malt":0.0},"tools":{},"batches":[],"last_day":-1,"report":{}},
 	"microscopy":{"enabled":true,"staff_share":.25,"work_bank":0.0,"last_day":-1,"next_id":1,"specimens":[],"records":[],"protocols":[],"tools":{},"report":{}},
 	"field_botany":{"last_day":-1,"next_id":1,"lines":[],"trials":[],"vouchers":[],"applications":[],"report":{},"balance":false,"reference_seed":0.0,"reference_site":"","reference_day":-1,"reference_line":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
