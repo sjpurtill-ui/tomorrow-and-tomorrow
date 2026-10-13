@@ -98,6 +98,7 @@ static func description(id:String,condition:float=1.0,r:Dictionary={})->String:
 	var definition:=Catalog.get_definition(id)
 	if bool(definition.get("concept",false)):
 		d=load("res://scripts/wonder_concept.gd").rewards_for(String(definition.purpose),String(definition.ambition),"success")
+		d=preload("res://scripts/great_work_progression.gd").rewards(d,r.get("budget",{}))
 		d["path"]=String(PURPOSE_PATH.get(String(definition.purpose),"Legacy"))
 	if r.get("rewards") is Dictionary and not (r.rewards as Dictionary).is_empty():
 		var path:=String(d.get("path","Legacy"))

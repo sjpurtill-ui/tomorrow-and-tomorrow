@@ -43,7 +43,11 @@ static func strength(r:Dictionary)->float:
 static func deterrence_of(r:Dictionary)->float:return float(DETERRENCE[String(r.id)]) if DETERRENCE.has(String(r.id)) else minf(.25,.10*strength(r))
 static func traffic_of(r:Dictionary)->float:return float(TRAFFIC[String(r.id)]) if TRAFFIC.has(String(r.id)) else minf(.40,.12*strength(r))
 static func forecast_days(r:Dictionary)->int:return int(FORECAST_DAYS[String(r.id)]) if FORECAST_DAYS.has(String(r.id)) else mini(365,roundi(120*strength(r)))
-static func covenant_cap(r:Dictionary)->float:return float(COVENANT_CAP[String(r.id)]) if COVENANT_CAP.has(String(r.id)) else minf(24000.0,6000.0*strength(r))
+static func covenant_cap(r:Dictionary)->float:
+	if COVENANT_CAP.has(String(r.id)):return float(COVENANT_CAP[String(r.id)])
+	var budget:Dictionary=r.get("budget",{})
+	if not budget.is_empty():return minf(100000.0,maxf(6000.0,float(budget.population)*0.30)*strength(r))
+	return minf(24000.0,6000.0*strength(r))
 static func memory_cap(r:Dictionary)->int:return int(MEMORY_CAP[String(r.id)]) if MEMORY_CAP.has(String(r.id)) else (24 if strength(r)>=1.5 else 12)
 static func restore_rate(r:Dictionary)->int:return int(RESTORE_PER_YEAR[String(r.id)]) if RESTORE_PER_YEAR.has(String(r.id)) else (3 if strength(r)>=1.5 else 1)
 const MAX_ARCHIVED_DISCOVERIES:=4096
@@ -114,9 +118,12 @@ static func decree_options(owner:String)->Array:
 static func describe(id:String,condition:float=1.0,record:Dictionary={})->String:
 	var d:=Catalog.get_definition(id)
 	var r:Dictionary=record if not record.is_empty() else {"id":id}
-	if record.is_empty() and bool(d.get("concept",false)):
+	if bool(d.get("concept",false)) and (record.is_empty() or (String(record.get("status","")) in ["building","stalled"] and (record.get("effect",{}) as Dictionary).is_empty())):
 		# Before completion: describe a successful outcome at the design's ambition.
-		r={"id":id,"effect":{"family":String(d.effect),"strength":load("res://scripts/wonder_concept.gd").pay(String(d.ambition),"success")}}
+		r=record.duplicate(true)
+		r.id=id
+		var scale:=preload("res://scripts/great_work_progression.gd").reward_scale(int(d.get("tier",0))) if not (record.get("budget",{}) as Dictionary).is_empty() else 1.0
+		r.effect={"family":String(d.effect),"strength":minf(4.0,float(load("res://scripts/wonder_concept.gd").pay(String(d.ambition),"success"))*scale)}
 	match family(r):
 		"watching_sky":return "Warns of lean seasons and famine up to %d days ahead." % roundi(float(forecast_days(r))*maxf(.25,condition))
 		"covenant":return "Seals up to %d rations of real surplus against famine; released when people go hungry." % roundi(covenant_cap(r)*condition)

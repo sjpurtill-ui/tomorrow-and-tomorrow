@@ -72,7 +72,9 @@ static func idle_words(r:Dictionary)->String:
 	return "no work done"
 
 static func total_work(r:Dictionary)->float:
-	return float(Catalog.get_definition(String(r.id)).get("work",1.0))*float(r.get("work_scale",1.0))
+	return float(record_definition(r).get("work",1.0))*float(r.get("work_scale",1.0))
+static func record_definition(r:Dictionary)->Dictionary:
+	return preload("res://scripts/great_work_progression.gd").apply(Catalog.get_definition(String(r.id)),r.get("budget",{}))
 static func fraction(r:Dictionary)->float:
 	return clampf(float(r.get("progress",0))/maxf(.001,total_work(r)),0,1)
 static func stage_of(r:Dictionary)->String:
@@ -145,7 +147,7 @@ static func share(state:Node)->float:
 static func benefit(state:Node,role:String)->float:
 	var bonus:=0.0
 	for r:Dictionary in current_city(state).get("undertakings",[]):
-		var d:=Catalog.get_definition(String(r.id))
+		var d:=record_definition(r)
 		if Rewards.rewarding(r) and d.get("role","")==role:bonus+=float(d.bonus)*float(r.condition)*float(Concept.OUTCOME_PAY.get(String(r.get("outcome","success")),1.0))
 	if role=="Crafting":bonus+=Rewards.local_bonus(state,"craft")
 	if role=="Knowledge":bonus+=Rewards.local_bonus(state,"research")
@@ -235,8 +237,9 @@ static func commission(city_id:String,concept:Dictionary,ambition:String,site_he
 				record_event(record,day,"Foundations authorized")
 			record.custom_name=name
 			record.concept={"name":name,"lore":String(concept.get("lore","")).substr(0,240),"motive":String(concept.get("motive","")).substr(0,240),"purpose":String(p.purpose),"form":String(p.form),"ambition":ambition,"material":String(p.material),"tier":int(p.tier),"trigger":String(concept.get("trigger",{}).get("kind","")).substr(0,32),"tradition":Concept.tradition(owner)}
+			record.budget=preload("res://scripts/great_work_progression.gd").quote(Catalog.get_definition(id),WorldSimulation.state)
 			record.architect=_commission_architect(String(city.id),id,day)
-			var assessment:=Concept.assess(concept.merged({"id":id},true),owner,{"architect":record.architect})
+			var assessment:=Concept.assess(concept.merged({"id":id},true),owner,{"architect":record.architect,"record":record})
 			record.feasibility=float(assessment.score)
 			record.shift=0.0
 			if not record.architect.is_empty():
@@ -255,11 +258,11 @@ static func _shift(r:Dictionary,delta:float)->void:
 
 static func _reset_building(r:Dictionary,day:int)->void:
 	r.merge({"status":"building","policy":"careful","progress":0.0,"quality":0.0,"condition":1.0,"strain":0,"stalled_days":0,"operating_days":0,"last_day":day,"started":day,"reason":"Foundations authorized; staff organize the work.","legacy":"An ambition, not yet an achievement","gates":[],"decisions":[],"work_scale":1.0,"speed":1.0,"allure_scale":1.0,"quality_bonus":0.0},true)
-	for key in ["decision","ceremony","claimed_day","dedicated_day","halt_until","stage_events","last_work","outcome","rewards","effect","scar","feasibility","shift","concept"]:r.erase(key)
+	for key in ["decision","ceremony","claimed_day","dedicated_day","halt_until","stage_events","last_work","outcome","rewards","effect","scar","feasibility","shift","concept","budget"]:r.erase(key)
 
 static func _push_layer(r:Dictionary,day:int)->void:
 	if not r.has("layers"):r.layers=[]
-	r.layers.append({"id":String(r.id),"title":String(Catalog.get_definition(String(r.id)).title),"name":display_name(r),"claimed_day":int(r.get("claimed_day",0)),"outcome":String(r.get("outcome","success" if r.status=="functioning" else "collapse")),"lore":String(r.get("concept",{}).get("lore","")),"from":int(r.get("started",0)),"to":day,"condition":float(r.condition),"operating_days":int(r.operating_days),"strain":int(r.strain),"architect":String(r.get("architect",{}).get("name",""))})
+	r.layers.append({"id":String(r.id),"title":String(Catalog.get_definition(String(r.id)).title),"name":display_name(r),"claimed_day":int(r.get("claimed_day",0)),"outcome":String(r.get("outcome","success" if r.status=="functioning" else "collapse")),"lore":String(r.get("concept",{}).get("lore","")),"from":int(r.get("started",0)),"to":day,"condition":float(r.condition),"operating_days":int(r.operating_days),"strain":int(r.strain),"architect":String(r.get("architect",{}).get("name","")),"work_scale":float(r.get("work_scale",1.0)),"budget":r.get("budget",{}).duplicate(true),"rewards":r.get("rewards",{}).duplicate(true),"effect":r.get("effect",{}).duplicate(true)})
 	if r.layers.size()>8:r.layers.pop_front()
 
 static func _commission_architect(city_id:String,id:String,day:int)->Dictionary:
@@ -297,15 +300,18 @@ static func _revert_layer(r:Dictionary,day:int)->void:
 	var layer:Dictionary=r.layers.pop_back()
 	var abandoned:=display_name(r)
 	r.id=String(layer.id)
-	var work:=float(Catalog.get_definition(r.id).work)
+	r.budget=layer.get("budget",{}).duplicate(true)
+	var work:=float(record_definition(r).work)*float(layer.get("work_scale",1.0))
 	var outcome:=String(layer.get("outcome","success"))
-	r.merge({"status":"ruined" if outcome=="collapse" else "functioning","progress":work,"quality":work*float(layer.condition),"condition":float(layer.condition),"operating_days":int(layer.operating_days),"strain":int(layer.strain),"claimed_day":int(layer.claimed_day),"work_scale":1.0,"custom_name":String(layer.get("name",display_name(r))),"reason":"The new work was abandoned; the older one reopens.","legacy":"Useful, not yet renowned"},true)
+	r.merge({"status":"ruined" if outcome=="collapse" else "functioning","progress":work,"quality":work*float(layer.condition),"condition":float(layer.condition),"operating_days":int(layer.operating_days),"strain":int(layer.strain),"claimed_day":int(layer.claimed_day),"work_scale":float(layer.get("work_scale",1.0)),"custom_name":String(layer.get("name",display_name(r))),"reason":"The new work was abandoned; the older one reopens.","legacy":"Useful, not yet renowned"},true)
 	if Catalog.get_definition(r.id).get("concept",false):
 		var p:=Concept.parse(String(r.id))
 		r.outcome=outcome
-		r.rewards=Concept.rewards_for(String(p.purpose),String(p.ambition),outcome)
+		r.rewards=preload("res://scripts/great_work_progression.gd").rewards(Concept.rewards_for(String(p.purpose),String(p.ambition),outcome),r.get("budget",{}))
 		r.effect={"family":String(Catalog.get_definition(r.id).effect),"strength":Concept.pay(String(p.ambition),outcome)}
 	else:r.erase("outcome")
+	if not (layer.get("budget",{}) as Dictionary).is_empty():
+		r.rewards=layer.get("rewards",{}).duplicate(true);r.effect=layer.get("effect",{}).duplicate(true)
 	for key in ["decision","ceremony","halt_until","stage_events"]:r.erase(key)
 	var passed:Array=[]
 	for gate:Array in GATES:passed.append(gate[1])
@@ -480,7 +486,7 @@ static func advance_record(state:Node,r:Dictionary,day:int,city:Dictionary={})->
 	r.last_day=day
 	r.last_work=0.0
 	migrate(r)
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var m:Dictionary=state.simulation_metrics
 	var need:=minf(float(m.get("food_intake_ratio",1)),float(state.water_metrics.get("intake_ratio",1)))
 	if r.status in ["abandoned","ruined","rival","quarried"]:return
@@ -564,7 +570,7 @@ static func _release_architect(r:Dictionary,day:int,text:String,renown:int=0)->v
 		if String(WorldSimulation.figures.assignments[slot])==String(architect.id) and String(slot).begins_with("work:"):WorldSimulation.figures.release_assignment(String(slot))
 
 static func _complete(state:Node,r:Dictionary,city:Dictionary,day:int)->void:
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	r.claimed_day=day
 	if not bool(d.get("concept",false)):
 		# Legacy founding works keep their original workmanship test.
@@ -590,7 +596,7 @@ static func _complete(state:Node,r:Dictionary,city:Dictionary,day:int)->void:
 
 ## Apply a resolved outcome. Public so tests and tools can study outcomes.
 static func apply_outcome(state:Node,r:Dictionary,city:Dictionary,day:int,outcome:String)->void:
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var p:=Concept.parse(String(r.id))
 	var name:=display_name(r)
 	var m:Dictionary=state.simulation_metrics
@@ -616,16 +622,17 @@ static func apply_outcome(state:Node,r:Dictionary,city:Dictionary,day:int,outcom
 	else:
 		r.status="functioning"
 		r.condition=minf(float(Concept.OUTCOME_CONDITION.get(outcome,.9)),clampf(float(r.quality)/total_work(r),.3,1)+.1)
-		r.rewards=Concept.rewards_for(String(p.purpose),String(p.ambition),outcome)
+		r.rewards=preload("res://scripts/great_work_progression.gd").rewards(Concept.rewards_for(String(p.purpose),String(p.ambition),outcome),r.get("budget",{}))
 		r.effect={"family":String(d.effect),"strength":Concept.pay(String(p.ambition),outcome)}
 		# [built-fabric] Skilled builders and a gifted master builder make a
 		# work that stands worth more: its strength, rewards and renown x the
 		# payoff (built_fabric.gd great_payoff), recorded with the work.
 		var gifted:=preload("res://scripts/geniuses.gd").architect_capability(r.get("architect",{}))>0.0
 		var payoff:=float(preload("res://scripts/built_fabric.gd").great_payoff(state,gifted))
+		if r.has("budget"):payoff*=preload("res://scripts/great_work_progression.gd").reward_scale(int(p.tier))
 		r.payoff=snappedf(payoff,.001)
-		r.effect.strength=float(r.effect.strength)*payoff
-		for key:String in (r.rewards as Dictionary).keys():r.rewards[key]=snappedf(float(r.rewards[key])*payoff,.0001)
+		r.effect.strength=minf(4.0,float(r.effect.strength)*payoff)
+		for key:String in (r.rewards as Dictionary).keys():r.rewards[key]=minf(200000.0,snappedf(float(r.rewards[key])*float(preload("res://scripts/built_fabric.gd").great_payoff(state,gifted)),.0001))
 		r.allure_scale=minf(4.0,float(r.get("allure_scale",1.0))*payoff)
 		r.legacy={"triumph":"A triumph beyond its builders' vision","success":"Useful, not yet renowned","flawed":"It stands, but its flaws are plain to all"}[outcome]
 		if outcome!="flawed" and int(r.strain)>=180:r.legacy="An achievement built through hardship"
@@ -667,7 +674,7 @@ static func _pose(r:Dictionary,key:String,day:int)->void:
 ## Options for a record's pending decision; `enabled` reflects real stocks now.
 static func decision_options(state:Node,r:Dictionary)->Array:
 	var key:=String(r.get("decision",{}).get("key",""))
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var remaining:=maxf(0,total_work(r)-float(r.progress))
 	var architect:Dictionary=r.get("architect",{})
 	match key:
@@ -741,7 +748,7 @@ static func auto_option(state:Node,r:Dictionary,temper:Dictionary={})->String:
 	var enabled:={}
 	for option:Dictionary in decision_options(state,r):
 		if bool(option.enabled):enabled[option.id]=true
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var ample:=true
 	for material:String in d.cost:
 		if float(state.resource_stockpiles.get(material,0))<float(d.cost[material])*.5:ample=false
@@ -755,7 +762,7 @@ static func auto_option(state:Node,r:Dictionary,temper:Dictionary={})->String:
 
 static func _apply_decision(state:Node,r:Dictionary,city_id:String,option:String,day:int,council:bool)->Dictionary:
 	var key:=String(r.decision.get("key",""))
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var architect:Dictionary=r.get("architect",{})
 	var m:Dictionary=state.simulation_metrics
 	var text:=""
@@ -856,7 +863,7 @@ static func _roll_event(state:Node,r:Dictionary,city_id:String,day:int)->void:
 		pick-=int(weights[k])
 		if pick<0:kind=k;break
 	r.stage_events[stage]=int(r.stage_events.get(stage,0))+1
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var title:=display_name(r)
 	var ids:Array=[String(architect.id)]
 	match kind:
@@ -957,7 +964,7 @@ static func _gift_plan(owner:String,opinion:float)->Dictionary:
 	return {"resource":best,"amount":gift} if gift>=5 else {}
 
 static func _name_suggestions(state:Node,r:Dictionary)->Array:
-	var d:=Catalog.get_definition(String(r.id))
+	var d:=record_definition(r)
 	var result:Array=[display_name(r)]
 	var place:=String(state.settlement_name)
 	var noun:=String(Concept.FORMS.get(String(d.get("shape","")),{}).get("nouns",[String(d.title)])[0])
@@ -1038,7 +1045,7 @@ static func quarry(city_id:String,work_id:String)->Dictionary:
 	if city.is_empty() or not controlled(city):return {"error":"Choose a settlement you control."}
 	var r:=find(city,work_id)
 	if r.get("status","") not in ["rival","abandoned","ruined"]:return {"error":"Only unfinished remains or ruins can be quarried."}
-	var d:=Catalog.get_definition(work_id)
+	var d:=record_definition(r)
 	var day:=int(WorldSimulation.state.elapsed_days)
 	return WorldSimulation.settlements.with_city_resources(city_id,func()->Dictionary:
 		var recovered:Array=[]
@@ -1081,6 +1088,15 @@ static func valid(cities:Array)->bool:
 	return true
 static func _number(value:Variant)->bool:return (value is int or value is float) and is_finite(float(value))
 static func _valid_extras(r:Dictionary)->bool:
+	if r.has("budget"):
+		if not r.budget is Dictionary:return false
+		var budget:Dictionary=r.budget
+		if not budget.is_empty():
+			for key in ["work","population","capacity","crew_share","years","tier"]:
+				if not _number(budget.get(key)) or float(budget[key])<0:return false
+			if float(budget.work)<=0 or not budget.get("cost") is Dictionary:return false
+			for value in budget.cost.values():
+				if not _number(value) or float(value)<0:return false
 	for key:String in ["claimed_day","dedicated_day","halt_until"]:
 		if r.has(key) and (not r[key] is int or int(r[key])<-1):return false
 	if r.has("lesser") and not r.lesser is bool:return false

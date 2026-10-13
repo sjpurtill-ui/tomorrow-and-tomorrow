@@ -87,6 +87,10 @@ static func describe(work:Dictionary)->Dictionary:
 	var ambition:=String(parsed.get("ambition",definition.get("ambition",work.get("ambition","grand"))))
 	if not SCALES.has(ambition):ambition="grand"
 	var tier:=clampi(int(parsed.get("tier",definition.get("tier",0))),0,5)
+	var evolved:=not (work.get("budget",{}) as Dictionary).is_empty()
+	if evolved and tier>=4:
+		var modern:Dictionary={"hall":"The grand exhibition palace","archive":"The national research library","observatory":"The scientific observatory","tower":"The skyline spire","bridge":"The great engineered span","dam":"The monumental reservoir","garden":"The botanical conservatory","amphitheatre":"The great civic arena","granary":"The national provision complex","canal":"The navigable waterway"}
+		title=String(modern.get(form,title))
 	if valid and not legacy and form=="ring":
 		if material=="timber":
 			title="The circle of standing posts"
@@ -94,7 +98,7 @@ static func describe(work:Dictionary)->Dictionary:
 		if tier==0:phases[2]="Finishing the circle"
 	return {"valid":valid,"id":id,"design_id":("legacy:"+id if legacy else "form:"+form) if valid else "",
 		"legacy":legacy,"form":form,"material":material,"purpose":purpose,"ambition":ambition,"tier":tier,
-		"seed":absi(id.hash()),"scale":float(SCALES[ambition]),"title":title,"construction_labels":phases,
+		"seed":absi(id.hash()),"scale":float(SCALES[ambition])*(1.0+tier*.35 if evolved else 1.0),"evolved":evolved,"title":title,"construction_labels":phases,
 		"emblem":emblem,"accent":accent,"tier_style":TIER_STYLES[tier],
 		"purpose_title":String(purpose_data[0]),"purpose_emblem":String(purpose_data[1]),
 		"purpose_accent":Color(purpose_data[2]),"purpose_words":String(purpose_data[3])}

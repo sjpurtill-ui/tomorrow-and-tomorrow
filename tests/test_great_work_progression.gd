@@ -1,0 +1,45 @@
+extends GdUnitTestSuite
+const Progression:=preload("res://scripts/great_work_progression.gd")
+const Concept:=preload("res://scripts/wonder_concept.gd")
+const System:=preload("res://scripts/undertaking_system.gd")
+const Design:=preload("res://scripts/hud/great_work_design.gd")
+const Architecture:=preload("res://scripts/hud/great_work_architecture.gd")
+func _base(tier:int=0,ambition:String="grand")->Dictionary:
+	return Concept.definition(Concept.make_id("hall","remember_knowledge",ambition,"stone",tier,"test"))
+func test_cost_keeps_the_same_share_as_the_society_grows()->void:
+	var base:=_base()
+	var small:=Progression.budget(base,1000,100,1.0)
+	var large:=Progression.budget(base,10000,1000,1.0)
+	assert_float(float(large.work)/float(small.work)).is_equal_approx(10.0,0.01)
+	assert_float(float(small.work)/float(small.capacity)).is_equal_approx(0.2*365*6,0.01)
+	assert_float(float(large.cost.Stone)/float(small.cost.Stone)).is_equal_approx(10.0,0.01)
+func test_productivity_cannot_make_new_wonders_trivial()->void:
+	var base:=_base(5)
+	var ordinary:=Progression.budget(base,10000,1000,1.0)
+	var advanced:=Progression.budget(base,10000,1000,4.0)
+	assert_float(float(advanced.work)/float(ordinary.work)).is_equal_approx(4.0,0.01)
+func test_new_budget_is_frozen_and_old_records_keep_their_work()->void:
+	var base:=_base()
+	var budget:=Progression.budget(base,10000,1000,1.0)
+	var record:Dictionary={"id":base.id,"budget":budget,"work_scale":1.0}
+	assert_float(System.total_work(record)).is_equal(float(budget.work))
+	assert_float(System.total_work({"id":base.id})).is_equal(float(base.work))
+	var d:=System.record_definition(record)
+	assert_dict(d.cost).is_equal(budget.cost)
+func test_advanced_work_has_larger_complex_and_better_rewards()->void:
+	var early:=_base(0);var late:=_base(5)
+	var early_budget:=Progression.budget(early,1000,100,1)
+	var late_budget:=Progression.budget(late,10000,1000,2)
+	var a:=Design.describe({"id":early.id,"budget":early_budget})
+	var b:=Design.describe({"id":late.id,"budget":late_budget})
+	assert_float(float(b.scale)).is_greater(float(a.scale))
+	assert_int(Architecture.pieces(b).size()).is_greater(Architecture.pieces(a).size())
+	assert_str(String(b.title)).is_equal("The grand exhibition palace")
+	var old_reward:=Progression.rewards({"food_capacity":6000.0,"research":0.05},early_budget)
+	var new_reward:=Progression.rewards({"food_capacity":6000.0,"research":0.05},late_budget)
+	assert_float(float(new_reward.food_capacity)).is_greater(float(old_reward.food_capacity))
+	assert_float(float(new_reward.research)).is_greater(float(old_reward.research))
+func test_ambitions_have_distinct_commitments()->void:
+	var modest:=Progression.budget(_base(2,"modest"),10000,1000,1)
+	var audacious:=Progression.budget(_base(2,"audacious"),10000,1000,1)
+	assert_float(float(audacious.work)/float(modest.work)).is_equal_approx(6.0,0.01)
