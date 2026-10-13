@@ -176,8 +176,8 @@ func test_no_trade_over_a_sea_too_wide_for_either_peoples_boats()->void:
 	assert_float(_stock("player","Flint")).is_equal_approx(our_flint,0.0001)
 	assert_float(float(p.total.ab)+float(p.total.ba)).is_equal(0.0)
 	# Better ships on either side open it: the share that come home carries.
-	_boats(a,1400.0)
-	var home:=pow(0.5,610.0/1400.0)
+	_boats(a,2800.0)
+	var home:=pow(0.5,610.0/2800.0)
 	assert_float(Ledger.sea_share("player",a,Ledger.report("player"),Ledger.report(a))).is_equal_approx(home,0.001)
 	assert_str(Ledger.blocked("player",a)).is_equal("")
 	assert_float(Ledger.reach("player",a,Ledger.report("player"),Ledger.report(a))).is_equal_approx(by_land*home,0.001)

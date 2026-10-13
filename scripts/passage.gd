@@ -10,7 +10,8 @@ extends RefCounted
 ##   - no land road: they go in the SENDER'S boats, and of those who put out
 ##         0.5 ^ ((km in sight of a coast x 0.2 + km out of sight of land) / the sender's sea endurance)
 ##     come through (expedition.gd's endurance, trade_ledger.sea_home's
-##     rule). Nobody is sent at worse than LEAST: the way is shut;
+##     rule). Nobody is sent at worse than LEAST (4 in 5): the way is
+##     shut. Only an expedition gambles past that (expedition.gd);
 ##   - a sender with no boats fit for the sea sends nobody over it.
 ## Until a pair's way is surveyed (a day each, once a campaign) there is no
 ## rule yet and the way counts as open.

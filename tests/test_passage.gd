@@ -73,8 +73,8 @@ func test_by_land_everyone_arrives_and_by_sea_only_the_senders_boats_count()->vo
 	assert_float(Passage.share("player",a)).is_equal(1.0)
 	assert_str(Passage.words("player",a)).is_empty()
 	# Our boats are good, theirs are poor: we reach them, they do not reach us.
-	_island(1400.0,300.0)
-	var ours:=pow(0.5,610.0/1400.0)
+	_island(2800.0,300.0)
+	var ours:=pow(0.5,610.0/2800.0)
 	assert_float(Passage.share("player",a)).is_equal_approx(ours,0.001)
 	assert_bool(Passage.open("player",a)).is_true()
 	assert_float(Passage.share(a,"player")).is_equal(0.0)
@@ -108,7 +108,7 @@ func test_no_envoy_comes_to_our_hall_over_a_sea_their_boats_cannot_cross()->void
 	var occasion:={"type":"debug","key":"t","civ_id":a,"day":10,"data":{"text":"a test"}}
 	# By land the hall hears them (whatever business the world backs).
 	var before:=int(Hall.state().serial)
-	_island(1400.0,300.0)
+	_island(2800.0,300.0)
 	for n in 20:
 		Hall.state()["serial"]=before+n
 		assert_dict(Hall._generate_foreign_occasion(occasion.duplicate(true),10+n)).is_empty()
@@ -138,10 +138,10 @@ func test_our_envoys_are_refused_over_a_shut_sea_and_told_the_odds_over_an_open_
 	_island(300.0,300.0)
 	var shut:Dictionary=CivilizationSystem.diplomatic_mission_quote(a,"Food","goodwill")
 	assert_str(String(shut.get("error",""))).contains("No envoy can reach them").contains("650 km of water")
-	_island(1400.0,300.0)
+	_island(2800.0,300.0)
 	var open:Dictionary=CivilizationSystem.diplomatic_mission_quote(a,"Food","goodwill")
 	if not open.has("error"):
-		assert_float(float(open.passage_share)).is_equal_approx(pow(0.5,610.0/1400.0),0.001)
+		assert_float(float(open.passage_share)).is_equal_approx(pow(0.5,610.0/2800.0),0.001)
 		assert_str(String(open.passage_words)).contains("come through")
 	else:
 		# Whatever else stops it, it is not the sea.
@@ -168,7 +168,7 @@ func test_no_war_feud_raid_tribute_or_sickness_crosses_a_shut_sea()->void:
 	# Peoples with a land road between them are untouched.
 	assert_bool(War.sea_shut_between(a,b)).is_false()
 	# Boats that cross open war again, but nobody walks it.
-	_island(1400.0,1400.0)
+	_island(2800.0,2800.0)
 	assert_bool(War.sea_shut(a)).is_false()
 	assert_bool(War.near_us(a,true)).is_false()
 	assert_int(Crisis._contacts().size()).is_equal(ids.size())
