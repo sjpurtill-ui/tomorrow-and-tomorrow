@@ -57,7 +57,9 @@ static func tick(day:int,days:int)->void:
 			if String(relation.get("pending_message",""))=="war": relation["pending_message"]=""
 			# A people down to a handful (war_loop.BROKEN_PEOPLE) keeps no feud:
 			# nobody is left to send raiders, and nobody needs raiding.
-			var spent:=minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<War.BROKEN_PEOPLE
+			# Nor do two peoples with no way between them (war_loop.sea_shut_between):
+			# no land road, and a sea too wide for either's boats.
+			var spent:=minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<War.BROKEN_PEOPLE or War.sea_shut_between(String(first.id),String(second.id))
 			if int(relation.get("feud_since",-1))>=0 and spent:
 				for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
 				relation["feud_ended_day"]=day

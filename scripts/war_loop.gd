@@ -1582,6 +1582,7 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 				return "We know where %s live already%s. Say what you want done there." % [name,(": "+where) if where!="" else ""]
 			return send_trackers(civ_id)
 		"war_pay":
+			if not Passage.open("player",civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
 			var terms:Dictionary=war.get("terms",{})
 			var paid:=Hall._debit_player("Food",float(terms.get("amount",0.0)))
 			if paid>0.0: Hall._credit_civ(civ_id,"Food",paid)
@@ -1590,6 +1591,7 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 		"war_price":
 			# A blood price ends a feud; a war ends only on its own terms.
 			if at_war: return "This is a war. Only their terms, a truce or their exhaustion end it."
+			if not Passage.open("player",civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
 			var price:=blood_price(civ_id)
 			var short:=Hall._short("Food",price)
 			if short!="": return "%s The blood price for %s's dead is %d Food." % [short,name,roundi(price)]
@@ -1648,6 +1650,7 @@ static func send_trackers(civ_id:String,asked:String="")->String:
 	if out_now.is_empty() and war.get("op") is Dictionary: out_now=war.op
 	if not out_now.is_empty():
 		return "%s is already out against %s; the trackers wait for them." % [String(out_now.get("general",gname)),name]
+	if not Passage.open("player",civ_id): return "No trackers can follow %s home. %s" % [name,Passage.words("player",civ_id)]
 	var rng:=_rng("order:%s:war_track:%d" % [civ_id,day])
 	var band:=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
 	var due:=day+_march_days(civ_id,rng)
@@ -1668,6 +1671,7 @@ static func send_messengers(civ_id:String)->String:
 	var f:=front(civ_id)
 	var general:=_general()
 	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
+	if not Passage.open("player",civ_id): return "No messenger of ours can reach %s. %s" % [_name(civ_id),Passage.words("player",civ_id)]
 	var rng:=_rng("order:%s:war_parley:%d" % [civ_id,day])
 	var due:=day+_march_days(civ_id,rng)
 	var op:={"objective":"war_parley","start":day,"due":due,"band":2,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":false}
@@ -2301,6 +2305,9 @@ static func near_us(civ_id:String,on_foot:bool=false)->bool:
 	if ours.is_empty(): return true
 	var civ:=_civ(civ_id)
 	if civ.is_empty(): return false
+	# No land road between the two homes: nobody walks it, and boats carry a
+	# band only where the way is open to either people's (passage.gd).
+	if over_sea(civ_id) and (on_foot or sea_shut(civ_id)): return false
 	var theirs:=RealmReach.of(civ)
 	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
 	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
@@ -2331,7 +2338,25 @@ static func war_margin_km(civ_id:String="")->float:
 static func proximity(civ_id:String)->float:
 	if RealmReach.ours().is_empty(): return 1.0
 	if _civ(civ_id).is_empty(): return 0.0
+	if sea_shut(civ_id): return 0.0
 	return clampf(1.0-gap_km(civ_id)/war_margin_km(civ_id),0.0,1.0)
+
+const Passage:=preload("res://scripts/passage.gd")
+
+## No land road lies between the home of the people in scope and theirs
+## (passage.gd, the traders' survey of the real land).
+static func over_sea(civ_id:String)->bool:
+	return String(Passage.between(WorldSimulation.actor_id,civ_id).kind)=="sea"
+
+## Over the sea, and too wide for our boats and for theirs: nothing of war
+## passes either way.
+static func sea_shut(civ_id:String)->bool:
+	var me:=String(WorldSimulation.actor_id)
+	return over_sea(civ_id) and not Passage.open(me,civ_id) and not Passage.open(civ_id,me)
+
+## The same between two other peoples.
+static func sea_shut_between(first:String,second:String)->bool:
+	return String(Passage.between(first,second).kind)=="sea" and not Passage.open(first,second) and not Passage.open(second,first)
 
 ## Two peoples' proximity from their records alone (rival against rival).
 static func proximity_between(first:Dictionary,second:Dictionary)->float:
@@ -2371,6 +2396,7 @@ static func _too_far(civ_id:String,day:int,what:String)->String:
 	return text
 
 static func neighbours(first:Dictionary,second:Dictionary)->bool:
+	if sea_shut_between(String(first.get("id","")),String(second.get("id",""))): return false
 	var world=WorldSimulation.world
 	var a:Vector2=world._civilization_world_position(first); var b:Vector2=world._civilization_world_position(second)
 	var reach:=RealmReach.reach_km(float(first.get("population",0.0)),float(first.get("world_reach",0.0)))+RealmReach.reach_km(float(second.get("population",0.0)),float(second.get("world_reach",0.0)))

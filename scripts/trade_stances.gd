@@ -105,6 +105,8 @@ static func embargo_between(a:String,b:String)->String:
 static func set_stance(actor:String,target:String,id:String,good:String="",amount:float=0.0,by:String="god")->Dictionary:
 	if not id in IDS: return {"ok":false,"said":"There is no such way of dealing with a people."}
 	if actor==target or not Ledger.alive(target): return {"ok":false,"said":"There is no such people to deal with."}
+	# No way between them: nothing to toll, squeeze, embargo or demand.
+	if id!="free" and Ledger.sea_shut(actor,target): return {"ok":false,"said":Ledger.sea_words(actor,target)}
 	if id=="squeeze" and good=="":
 		var most:=Ledger.most_needed(target,actor)
 		good=String(most.get("good",""))
@@ -465,6 +467,7 @@ static func _rounded(p:Dictionary)->Dictionary:
 	return out
 
 static func _apply(actor:String,target:String,st:Dictionary,kind:String,day:int)->void:
+	if Ledger.sea_shut(actor,target): return
 	var id:=String(st.get("id",""))
 	var cause:=String((load(WORDS_PATH) as GDScript).call("cause",st))
 	match kind:
@@ -516,6 +519,7 @@ static func _others_watch(actor:String,target:String,delta:float)->void:
 
 ## War (or a feud between small peoples) over the trade, through the war's own engine.
 static func _war(attacker:String,defender:String,cause:String,day:int)->void:
+	if Ledger.sea_shut(attacker,defender): return
 	var war:=load(WAR_PATH) as GDScript
 	if defender=="player":
 		if war!=null: war.call("declare",attacker,day,cause)
@@ -572,7 +576,7 @@ static func _collect(k:String,t:Dictionary,day:int)->void:
 		if payer=="player" or payee=="player": Ledger.news("tribute_end",payer,payee,"",{"paid":float(t.get("paid",0.0))})
 		return
 	t["next"]=day+91
-	if Ledger.blocked(payer,payee,day) in ["war","feud"]:
+	if Ledger.blocked(payer,payee,day) in ["war","feud"] or Ledger.sea_shut(payer,payee):
 		t["missed"]=int(t.get("missed",0))+1
 	else:
 		var p:=Ledger.pair(payer,payee)
@@ -598,7 +602,7 @@ static func _raid(k:String,r:Dictionary,day:int)->void:
 	var raider:=k.get_slice(">",0); var victim:=k.get_slice(">",1)
 	var rng:=_rng("raid:%s:%d" % [k,day])
 	r["next"]=day+rng.randi_range(30,90)
-	if not Ledger.alive(raider) or not Ledger.alive(victim): return
+	if not Ledger.alive(raider) or not Ledger.alive(victim) or Ledger.sea_shut(raider,victim): return
 	var road:={}
 	for row:Dictionary in Ledger.partners(victim):
 		if float(row.value)>float(road.get("value",0.0)): road=row
@@ -668,7 +672,7 @@ static func review(owner:String,day:int)->void:
 	var s:=Ledger.state()
 	for row:Dictionary in Ledger.partners(owner):
 		var other:=String(row.id)
-		if not Ledger.alive(other) or Ledger.blocked(owner,other,day) in ["war","feud"]: continue
+		if not Ledger.alive(other) or Ledger.blocked(owner,other,day) in ["war","feud"] or Ledger.sea_shut(owner,other): continue
 		var cur:=stance(owner,other)
 		var op:=Ledger.opinion(owner,other)
 		var rng:=_rng("review:%s:%s:%d" % [owner,other,day])

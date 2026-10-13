@@ -943,6 +943,8 @@ static func _plan_ceremony(state:Node,r:Dictionary,_city:Dictionary,day:int)->vo
 		if int(relation.get("contact_level",0))<2:continue
 		var owner:=Exchange.recipient(String(civ.id))
 		if owner==WorldSimulation.actor_id:continue
+		# Guests and their gifts need a way here (passage.gd).
+		if not preload("res://scripts/passage.gd").open(owner,String(WorldSimulation.actor_id)):continue
 		var opinion:=float(relation.get("opinion",0))
 		if opinion<-.25:continue
 		attendees.append({"civ_id":owner,"name":String(civ.get("name",owner)),"opinion":opinion,"gift":_gift_plan(owner,opinion)})

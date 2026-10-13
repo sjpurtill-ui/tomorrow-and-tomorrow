@@ -47,6 +47,7 @@ extends RefCounted
 ## State lives in ForeignDiplomacy.audiences["covert"], saved with the court;
 ## older saves start with an empty ledger. Static helpers; preload.
 
+const Passage:=preload("res://scripts/passage.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const CV:=preload("res://scripts/character_voice.gd")
 const DIVINE:=preload("res://scripts/divine_regard.gd")
@@ -626,6 +627,10 @@ static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:D
 	if barred!="": return {"error":barred}
 	# One of their own knows the way home; ours must know where to go.
 	if not their_own and not knows_where(civ_id,city_id): return {"error":unplaced_words(civ_id)}
+	# And there must be a way (passage.gd): a land road, or a sea our boats
+	# cross (their boats, for one of theirs going home).
+	var me:=String(WorldSimulation.actor_id)
+	if not (Passage.open(civ_id,me) if their_own else Passage.open(me,civ_id)): return {"error":"Nobody can be sent among %s. %s" % [_the(civ_id),Passage.words(civ_id,me) if their_own else Passage.words(me,civ_id)]}
 	if agent.is_empty(): agent=volunteer_for(kind)
 	if bool(agent.get("trained",false)): EyesCorps.take_eye()
 	var s:=state()
@@ -805,7 +810,7 @@ static func _network_review(day:int)->void:
 	for id in reach:
 		var civ_id:=String(id)
 		var level:=network_level(civ_id)
-		if level<=0 or _civ(civ_id).is_empty() or not bool(_civ(civ_id).get("alive",true)) or not knows_where(civ_id): continue
+		if level<=0 or _civ(civ_id).is_empty() or not bool(_civ(civ_id).get("alive",true)) or not knows_where(civ_id) or not Passage.open("player",civ_id): continue
 		if method_barred("plant")=="":
 			var short:=int(NETWORK_EYES[level])-_network_placed(civ_id)
 			if short>best_short: best_short=short;best=civ_id
@@ -828,6 +833,7 @@ static func daily(day:int)->void:
 	EyesCorps.daily(day)
 	for op in (s.ops as Array).duplicate():
 		_advance(op as Dictionary,day)
+	if posmod(day,30)==3: _cut_off(day)
 	if String(WorldSimulation.actor_id)!="player":
 		# A ruler weighs eyes and the wary at a monthly review, by temperament.
 		if day>=int(s.get("next_review",0)):
@@ -846,6 +852,26 @@ static func daily(day:int)->void:
 	if day>=int(s.get("next_rival",day)) and not _peoples_simulated():
 		s["next_rival"]=day+RIVAL_TICK
 		_rivals_scheme(day)
+
+## Eyes among a people there is no way to (passage.gd): no runner comes home
+## and none goes out, so they are counted gone and the network there ends.
+static func _cut_off(_day_now:int)->void:
+	var me:=String(WorldSimulation.actor_id)
+	var gone:={}
+	for op in state().ops:
+		var o:Dictionary=op
+		if not String(o.get("stage","")) in ["travelling","in_place"] or bool(o.get("double",false)) or bool(o.get("double_feigned",false)): continue
+		var civ_id:=String(o.get("civ_id",""))
+		if Passage.open(me,civ_id): continue
+		o["stage"]="done"
+		o["outcome"]={"kind":"cut_off","traced":false}
+		record_agent(_op_agent(o),String(o.get("kind","")),civ_id,"lost")
+		_agent_deed(String(o.get("agent","")),"Cut off among %s: no boat of ours reaches them, and no word comes." % _the(civ_id))
+		gone[civ_id]=int(gone.get(civ_id,0))+1
+		_stat("cut_off")
+	if me!="player": return
+	for civ_id:String in gone:
+		GameState.simulation_events.push_front({"day":int(GameState.elapsed_days),"title":"OUR EYES ARE CUT OFF","description":"%d of ours among %s can send no word home. %s" % [int(gone[civ_id]),_the(civ_id),Passage.words("player",civ_id)],"domain":"diplomacy","severity":"notice"})
 
 static func _peoples_simulated()->bool:
 	return WorldSimulation.enabled and not WorldSimulation.actors.is_empty()
@@ -914,6 +940,16 @@ static func _advance(op:Dictionary,day:int)->void:
 static func _arrive(op:Dictionary,day:int)->void:
 	## The agent reached them. A strike happens on arrival; eyes settle in.
 	var kind:=String(op.kind)
+	# Over the sea only the share the boats bring through arrives (passage.gd).
+	var me:=String(WorldSimulation.actor_id)
+	var theirs:=bool(op.get("double",false)) or bool(op.get("double_feigned",false))
+	if not (Passage.arrives(String(op.civ_id),me,String(op.seed),int(op.start_day)) if theirs else Passage.arrives(me,String(op.civ_id),String(op.seed),int(op.start_day))):
+		op["stage"]="done"
+		op["outcome"]={"kind":"lost_at_sea","traced":false}
+		record_agent(_op_agent(op),kind,String(op.civ_id),"lost")
+		_agent_deed(String(op.agent),"Put out for %s and was never seen again: lost at sea." % _the(String(op.civ_id)))
+		_stat("lost_at_sea")
+		return
 	if kind in ["assassinate","sabotage","steal"]:
 		op["stage"]="struck"
 		_resolve(op,day)
@@ -1575,6 +1611,8 @@ static func _rivals_scheme(day:int)->void:
 		var civ_id:=String((civ as Dictionary).get("id",""))
 		var rel:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
 		if int(rel.get("contact_level",0))<2: continue
+		# No way to us, nobody sent; over the sea, only the share that lands.
+		if not Passage.arrives(civ_id,String(WorldSimulation.actor_id),"scheme",day): continue
 		# One errand at a time: no second agent while one of theirs is on the
 		# road to us or held under our guard.
 		if _theirs_in_hand(civ_id): continue

@@ -308,6 +308,9 @@ static func _apart(civ:Dictionary)->Dictionary:
 	var our_reach:=float(ours.get("reach",Realm.reach_km(float(GameState.population_total),0.0)))
 	var their_reach:=float(theirs.get("reach",Realm.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
 	var km:=here.distance_to(there)
+	# With no land road between the homes (passage.gd) the countries do not
+	# touch and nothing bulky is carried, however near the far shore lies.
+	if String(preload("res://scripts/passage.gd").between(String(civ.get("id","")),"player").kind)=="sea": return {"km":INF,"touch":false,"there":there,"here":here}
 	return {"km":km,"touch":km<=our_reach+their_reach,"there":there,"here":here}
 
 ## Whether a people living where it does could truly ask this (NEIGHBOUR_ONLY,

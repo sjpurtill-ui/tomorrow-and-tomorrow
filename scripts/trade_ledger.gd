@@ -419,6 +419,11 @@ static func sea_bars(a:String,b:String,ra:Dictionary,rb:Dictionary)->bool:
 	var w:=way(a,b)
 	return String(w.kind)=="sea" and sea_share(a,b,ra,rb)<=0.0 and not is_finite(float(w.around))
 
+## The same, read from each people's own boats: nothing of trade, tribute or
+## the raids on it passes between these two.
+static func sea_shut(a:String,b:String)->bool:
+	return sea_bars(a,b,report(a),report(b))
+
 ## Why nothing crosses, in the engine's numbers.
 static func sea_words(a:String,b:String)->String:
 	var w:=way(a,b)

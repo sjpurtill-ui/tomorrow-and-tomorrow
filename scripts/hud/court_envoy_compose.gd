@@ -548,6 +548,8 @@ func _fill_footer()->void:
 		parts.append("%d %s" % [int(q.personnel),"envoy" if int(q.personnel)==1 else "envoys"])
 		parts.append("about %s Food for the road" % about(float(q.get("provisions",0))+float(q.get("consultation_food",0))))
 		parts.append("about %d days there and back" % (int(q.get("total_days",0))+int(q.get("consultation_days",0))))
+		# Over the sea, the crossing's own odds (passage.gd).
+		if float(q.get("passage_share",1.0))<1.0:parts.append("by sea: about %d in 100 arrive, the rest are lost with all they carry" % roundi(float(q.passage_share)*100.0))
 		var gift:Dictionary=q.get("gift",{}) if q.get("gift") is Dictionary else {}
 		if float(gift.get("amount",0.0))>0.0:parts.append("about %s %s given away" % [about(float(gift.amount)),String(gift.resource)])
 	if purpose=="shared_work":parts.append("%d Timber" % (12 if bool(sel.generous) else 4))
