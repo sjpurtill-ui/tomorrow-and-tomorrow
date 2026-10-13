@@ -81,10 +81,12 @@ func test_installation_is_paid_atomic_and_gauge_specific()->void:
 	assert_bool(Rail.install(source_id,"dawngate").has("error")).is_true()
 func test_shared_monthly_construction_does_not_duplicate_builders()->void:
 	var line:=installed(false)
-	var active:=0
-	for plot:Dictionary in GameState.settlement_plots:
-		if plot.status=="under_construction":active+=1
-	var expected:=GameState.effective_workers("Construction")/float(active+1)*float(GameState.simulation_metrics.get("labor_efficiency",.72))*.1
+	# Railways are raised by the works crew alone (built_fabric.gd crews):
+	# what is left of the builders after homes, civic works and repairs.
+	GameState.population_allocations.Construction=200
+	var crew:=float(preload("res://scripts/built_fabric.gd").crews().infra)
+	assert_float(crew).is_greater(0.0)
+	var expected:=crew/float(Rail.construction_sites())*float(GameState.simulation_metrics.get("labor_efficiency",.72))*.1
 	GameState.last_morphology_day=-1
 	SettlementModel.process_month()
 	assert_float(float(line.work_done)).is_equal_approx(expected,.0001)

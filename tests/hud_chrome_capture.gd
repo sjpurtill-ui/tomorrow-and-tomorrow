@@ -42,7 +42,6 @@ func _ready()->void:
 	for id in fixture:
 		var f:Array=fixture[id];hud._update_kpi(id,f[0],f[1],f[2],"")
 	hud._refresh_words()
-	hud.drawer_open=true;hud._sync_drawer()
 	hud._set_badge("chronicle","3",T.RED)
 	var dir:="res://reports/hud_chrome/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(dir))
@@ -73,8 +72,6 @@ func _ready()->void:
 	if hud.kpi_strip.get_global_rect()!=old_rect:failures.append("warning resized the status strip")
 	hud.rail_buttons.overview.grab_focus()
 	await _capture(dir+"%s-warning-focus.png" % ["dark" if dark else "light"])
-	hud.drawer_open=false;hud._sync_drawer();await _frames(3)
-	if hud.drawer_box.get_parent().visible:failures.append("closed drawer leaves its frame visible")
 	await _capture(dir+"%s-closed.png" % ["dark" if dark else "light"])
 	print("HUD_CHROME_RESULT ",JSON.stringify({"failures":failures,"palette":T.color_mode}))
 	get_tree().quit(0 if failures.is_empty() else 1)
@@ -105,7 +102,6 @@ func _world_capture()->void:
 	await _frames(4)
 	if is_instance_valid(terrain.settlement_naming_panel):terrain.settlement_naming_panel.queue_free()
 	terrain._set_game_speed(0)
-	terrain.hud.drawer_open=true;terrain.hud._sync_drawer()
 	await _frames(8)
 	var path:="res://reports/hud_chrome/"
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(path))

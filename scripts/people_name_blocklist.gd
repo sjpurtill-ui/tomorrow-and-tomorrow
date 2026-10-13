@@ -600,21 +600,26 @@ static var _words:Dictionary={}
 static var _offensive:PackedStringArray=[]
 static var _offensive_start:PackedStringArray=[]
 
+## The words of a list. The file may be saved with either kind of line
+## ending; a carriage return left on a line's last word would let it through.
+static func _split(text:String)->PackedStringArray:
+	return text.replace(""," ").replace(BREAK," ").split(" ",false)
+
 ## Every whole word a name may not be, lower case.
 static func words()->Dictionary:
 	if _words.is_empty():
 		for text:String in [PLACES,PROVINCES,PEOPLES,FIGURES,FIGURES_MORE,ENGLISH,COMMON_ENGLISH,FOUND_ENGLISH,BRANDS,LOANWORDS,OFFENSIVE_WORDS]:
-			for word in text.replace(BREAK," ").split(" ",false):_words[String(word)]=true
+			for word in _split(text):_words[String(word)]=true
 	return _words
 
 ## The strings no name may contain.
 static func offensive()->PackedStringArray:
-	if _offensive.is_empty():_offensive=OFFENSIVE.replace(BREAK," ").split(" ",false)
+	if _offensive.is_empty():_offensive=_split(OFFENSIVE)
 	return _offensive
 
 ## The strings no name or word of a name may begin with.
 static func offensive_start()->PackedStringArray:
-	if _offensive_start.is_empty():_offensive_start=OFFENSIVE_START.replace(BREAK," ").split(" ",false)
+	if _offensive_start.is_empty():_offensive_start=_split(OFFENSIVE_START)
 	return _offensive_start
 
 ## True when a lower-case word (or any word of it) may not be a name.
