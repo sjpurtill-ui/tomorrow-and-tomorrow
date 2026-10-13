@@ -170,3 +170,36 @@ func test_rulers_keep_more_under_arms_and_take_offence_sooner_under_pressure()->
 	assert_float(pressed).is_greater_equal(plain)
 	var quiet_band:Array=Scale.anchors(Scale.DEFENSE_SHARE,200.0)
 	assert_float(Strategy.watch_share(p,200.0,false)).is_equal_approx(float(quiet_band[1])/100.0*Scale.ABLE_SHARE,0.00001)
+
+## The user, year 426: "Raiders From Avawa Seen Gathering", from a people
+## 2,188 km of open water away whose raiders could never arrive. Nobody
+## gathers who cannot come, so nothing is set, seen or told.
+func test_a_people_with_no_way_to_us_gathers_no_raiders_and_raises_no_alarm()->void:
+	var a:=String(ids[0])
+	_year(400.0)
+	preload("res://scripts/rival_rulers.gd").grudge(a,"the fighters you killed",1.4,"test:killed")
+	assert_float(War.grudge_raid_chance(a)).is_greater(0.0)
+	# The sea opens between us, too wide for any ship of theirs or ours.
+	var Ledger:=preload("res://scripts/trade_ledger.gd")
+	Ledger._discover_pairs(10)
+	Ledger.survey_ways(100)
+	var pair:Dictionary=Ledger.pair("player",a)
+	var from:Vector2=Ledger.position(String(pair.a)); var to:Vector2=Ledger.position(String(pair.b))
+	pair["way"]={"k":"sea","o":2188.0,"c":280.0,"fx":from.x,"fy":from.y,"tx":to.x,"ty":to.y}
+	assert_bool(War.over_sea(a)).is_true()
+	assert_bool(War.near_us(a)).is_false()
+	assert_float(War.grudge_raid_chance(a)).is_equal(0.0)
+	assert_float(War.envy_raid_chance(a,0.9)).is_equal(0.0)
+	assert_float(War.pressure_chance(a)).is_equal(0.0)
+	for cause:String in ["grudge","envy","vengeance","refusal","pressure"]:
+		War._schedule(a,int(GameState.elapsed_days)+30,cause,"t")
+		assert_dict(War.front(a).pending).override_failure_message(cause).is_empty()
+	# A raid set before the sea shut them out is dropped without a word.
+	War.front(a)["pending"]={"day":int(GameState.elapsed_days)+5,"cause":"grudge","ref":"old","seen":true,"warn_day":int(GameState.elapsed_days)}
+	GameState.simulation_events=[]
+	var day:=int(GameState.elapsed_days)
+	day+=War.TICK-day%War.TICK
+	GameState.elapsed_days=float(day)
+	War.daily(day)
+	assert_dict(War.front(a).pending).is_empty()
+	assert_bool((War.state().log as Array).any(func(e:Dictionary)->bool:return String(e.get("civ",""))==a and String(e.get("kind",""))=="seen_coming")).is_false()

@@ -30,6 +30,12 @@ func after_test()->void:
 
 func _met(population:float=120.0,warriors:float=6.0,readiness:float=0.55)->String:
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	# Next door, where the war's rules look (realm_reach.gd): a people no band
+	# could reach sends no raiders and is no threat (war_loop.near_us).
+	var near_home:Vector2=CivilizationSystem.player_world_origin+Vector2(180.0,0.0)
+	civ["position"]=Vector2(near_home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,near_home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=near_home
 	civ.player_relation.contact_level=2
 	civ.player_relation.opinion=0.0
 	civ.player_relation.border_tension=0.2
@@ -227,6 +233,12 @@ func test_memory_grows_with_what_a_people_knows()->void:
 ## together; each weighs our strength against both, and backs the other's raids.
 func _met_second(population:float=120.0,warriors:float=6.0,readiness:float=0.55)->String:
 	var civ:Dictionary=CivilizationSystem.civilizations[1]
+	# Next door, where the war's rules look (realm_reach.gd): a people no band
+	# could reach sends no raiders and is no threat (war_loop.near_us).
+	var near_home:Vector2=CivilizationSystem.player_world_origin+Vector2(220.0,0.0)
+	civ["position"]=Vector2(near_home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,near_home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	for region:Dictionary in civ.get("strategic_regions",[]):
+		if String(region.get("role",""))=="capital": region["position"]=near_home
 	civ.player_relation.contact_level=2
 	civ.player_relation.opinion=0.0
 	civ.player_relation.border_tension=0.2
