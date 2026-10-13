@@ -11,11 +11,13 @@ func _init(campaign:Node)->void:
 	reset()
 func reset()->void:
 	data={"enabled":true,"last_day":-1,"status":"Staff review workshop needs each day.","receipts":[],"totals":{},"tracking_day":-1}
+## Who answers for the workshop when no quartermaster or steward holds office.
+const NO_STEWARD:="The war leader · no steward"
 func owner()->String:
 	for office:String in ["Quartermaster","Steward"]:
 		var person:Dictionary=WorldSimulation.government.officeholder(office)
 		if not person.is_empty():return "%s · %s" % [String(person.name),office]
-	return "The war leader · no steward"
+	return NO_STEWARD
 func set_enabled(enabled:bool)->Dictionary:
 	data.enabled=enabled
 	if not enabled:

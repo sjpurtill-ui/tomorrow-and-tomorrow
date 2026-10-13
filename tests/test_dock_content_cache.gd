@@ -20,7 +20,7 @@ const Archive:=preload("res://scripts/scout_archive.gd")
 const PROVIDERS:={"overview":"dock_content_overview.gd","standing":"dock_content_standing.gd","inquiry":"dock_content_inquiry.gd","construction":"dock_content_construction.gd","economy":"dock_content_economy.gd","production":"dock_content_production.gd","world":"dock_content_world.gd","chronicle":"dock_content_chronicle.gd","settlement":"dock_content_settlement.gd","civ":"dock_content_civilization.gd"}
 const PAGES:=[["overview",0],["standing",0],["inquiry",0],["inquiry",1],["inquiry",2],["construction",0],["construction",1],["construction",2],["economy",0],["economy",1],["economy",2],["production",0],["world",0],["world",1],["world",2],["chronicle",0],["settlement",0],["settlement",1],["civ",0],["civ",1]]
 ## Widget state that is animation or bookkeeping, not what is shown.
-const NOT_SHOWN:=["reveal","_clock","data","model","block","prints","parts","rebuilds","face_slots","_folio_print","_row_prints","_list_shape","_shape","_rows","_incoming","open_impact","hits","labels","sections_built","_section_prints","_section_frames","_kpi_print","_brief_print","_room","fit_height","_fitting","provider","explained","records","years","_cards","_fields","_refs","_page_shape","_page_refs","_culture","_culture_shape","_card_refs","_gauges","_groups","_group_refs","_row_refs","_vital_rows","_labor_head","_labor_rows","_labor_row_prints","_labor_row_shapes","_per_held"]
+const NOT_SHOWN:=["_tween","reveal","_clock","data","model","block","prints","parts","rebuilds","face_slots","_folio_print","_row_prints","_list_shape","_shape","_rows","_incoming","open_impact","hits","labels","sections_built","_section_prints","_section_frames","_kpi_print","_brief_print","_room","fit_height","_fitting","provider","explained","records","years","_cards","_fields","_refs","_page_shape","_page_refs","_culture","_culture_shape","_card_refs","_gauges","_groups","_group_refs","_row_refs","_vital_rows","_labor_head","_labor_rows","_labor_row_prints","_labor_row_shapes","_per_held"]
 
 class StubTerrain extends Node:
 	var selected_army_id:=-1
@@ -144,9 +144,29 @@ static func snap(node:Node,out:PackedStringArray,depth:int=0)->void:
 			if not (int(property.usage) & PROPERTY_USAGE_SCRIPT_VARIABLE) or String(property.name) in NOT_SHOWN:continue
 			var value:Variant=node.get(String(property.name))
 			if typeof(value) in [TYPE_OBJECT,TYPE_CALLABLE,TYPE_SIGNAL]:continue
+			# Drawn amounts to the hundredth: about a pixel of the widest bar or dial.
+			value=_drawn(value)
+			# The village view's record day is bookkeeping for its album, not drawn.
+			if node.name=="LivingVillageView" and String(property.name)=="state" and value is Dictionary:
+				value=(value as Dictionary).duplicate();(value as Dictionary).erase("day")
 			line+=" %s=%s" % [property.name,canon(value)]
 	out.append("  ".repeat(depth)+line)
 	for child in node.get_children():snap(child,out,depth+1)
+
+static func _drawn(value:Variant)->Variant:
+	if value is float:return snappedf(float(value),0.01)
+	if value is Dictionary:
+		var out:={}
+		for key in value:out[key]=_drawn(value[key])
+		return out
+	if value is Array:return (value as Array).map(func(item:Variant)->Variant:return _drawn(item))
+	return value
+
+## Finishes any easing under way, so a page is compared as it comes to rest.
+static func _settle(node:Node)->void:
+	var tween:Variant=node.get("_tween")
+	if tween is Tween and (tween as Tween).is_valid():(tween as Tween).custom_step(30.0)
+	for child in node.get_children():_settle(child)
 
 func test_pages_made_with_memory_equal_pages_made_fresh()->void:
 	var providers:=_providers()
@@ -182,6 +202,8 @@ func test_docks_refreshed_in_place_look_like_docks_drawn_fresh()->void:
 			live.rebuild_body()
 		var fresh:=DockPanel.new();add_child(fresh);fresh.size=live.size
 		fresh.present(provider,int(page[1]))
+		# An arc easing to the day's value is drawn where it is going.
+		_settle(live.body);_settle(fresh.body)
 		var a:=PackedStringArray();var b:=PackedStringArray()
 		snap(live.body,a);snap(fresh.body,b)
 		var at:=0

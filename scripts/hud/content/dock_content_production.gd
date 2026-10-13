@@ -270,7 +270,7 @@ static func workshop_owner()->String:
 		var pid:=int(holder.get("person_id",0))
 		for person:Dictionary in WorldSimulation.government.people:
 			if int(person.get("person_id",0))==pid:return "%s · %s" % [String(person.name),office]
-	return "No workshop officeholder"
+	return preload("res://scripts/workshop_steward.gd").NO_STEWARD
 
 ## Damaged sets waiting for staff repair (the stock strip shows them as a
 ## badge on each kind; this list serves the standalone report).
