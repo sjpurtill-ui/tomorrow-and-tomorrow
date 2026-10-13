@@ -1118,6 +1118,8 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	if option_id.begins_with("pr_send:"):
 		var kind:=option_id.trim_prefix("pr_send:")
 		if not kind in MESSAGES: return {"ok":false,"outcome":"That message is not open to you.","reaction":"neutral"}
+		# They walk or sail home by the way between us (passage.gd), or not at all.
+		if not preload("res://scripts/passage.gd").open("player",String(p.civ_id)): return {"ok":false,"outcome":"%s cannot be sent home. %s" % [String(p.given),preload("res://scripts/passage.gd").words("player",String(p.civ_id))],"reaction":"neutral"}
 		if words.strip_edges()=="":
 			words=message_words(kind,String(p.civ_id))
 			_god(id,words)

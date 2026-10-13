@@ -961,6 +961,17 @@ func age_held_scouts(day:int)->Dictionary:
 	return out
 
 
+## Whether the point of `route` nearest `point` is joined to it by land: a
+## party that only saw smoke across a strait has not walked in.
+func _route_reaches_by_land(route:Array,point:Vector2)->bool:
+	var nearest:=Vector2.INF
+	var closest:=INF
+	for route_index in maxi(0,route.size()-1):
+		var a_dict:Dictionary=route[route_index]; var b_dict:Dictionary=route[route_index+1]
+		var on:=Geometry2D.get_closest_point_to_segment(point,Vector2(float(a_dict.get("x",0.0)),float(a_dict.get("z",0.0))),Vector2(float(b_dict.get("x",0.0)),float(b_dict.get("z",0.0))))
+		if point.distance_to(on)<closest:closest=point.distance_to(on);nearest=on
+	return nearest.is_finite() and _scout_segment_is_land(nearest,point)
+
 func _route_distance_to_point(route:Array,point:Vector2)->float:
 	var closest:=INF
 	for route_index in maxi(0,route.size()-1):
@@ -2039,7 +2050,9 @@ func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 		var signal_radius:=maxf(_civ_settlement_signal_radius(civ,day),at_least_km)
 		if distance>signal_radius: continue
 		var direct:=clampf(8.0+_civ_settlement_signal_radius(civ,day)*0.20,10.0,58.0)
-		if distance<=direct:
+		# A meeting needs ground to walk in on (or water their craft cross):
+		# seen only across the water, a home is signs and a rumour, below.
+		if distance<=direct and _route_reaches_by_land(route,home):
 			relation["contact_level"]=2
 			relation["contact_intelligence"]=maxf(0.20,float(relation.get("contact_intelligence",0.0)))
 			if int(relation.get("met_day",-1))<0: relation["met_day"]=day
@@ -4272,6 +4285,8 @@ func _queue_player_incident_if_due(civ:Dictionary,relation:Dictionary,day:int)->
 		if String(incident.get("source_civ_id",""))==String(civ.id): return
 	var known_player:Dictionary=city_intelligence.player_estimate(String(civ.id),true)
 	if not bool(known_player.known) and _recapture_target(civ).is_empty(): return
+	# No host appears at our home over a sea neither people's boats cross.
+	if bool(preload("res://scripts/war_loop.gd").sea_shut(String(civ.id))): return
 	var projection:=land_military_population(civ)*0.42
 	var strength:=maxi(0,roundi(projection*clampf(float(civ.military_readiness),0.25,1.0)))
 	if not preload("res://scripts/raid_policy.gd").worthwhile(strength,float(civ.military_readiness),float(known_player.get("power",0.0))): return

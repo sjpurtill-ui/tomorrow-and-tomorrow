@@ -499,6 +499,7 @@ static func return_loot(owner:String,work_id:String)->Dictionary:
 	var looter:=WorldSimulation.actor_id
 	if owner==looter or owner_state(owner)==null:return {"error":"Choose the people the treasures were taken from."}
 	if bool(relation(looter,owner).get("at_war",false)):return {"error":"Nothing can be returned while at war."}
+	if not preload("res://scripts/passage.gd").open(looter,owner):return {"error":"Nothing can be carried back to them. "+preload("res://scripts/passage.gd").words(looter,owner)}
 	var source:=owner_state(looter);var target:=owner_state(owner)
 	var day:=int(WorldSimulation.state.elapsed_days)
 	var count:=0;var title:=""
