@@ -96,7 +96,6 @@ var opponent_count := 12
 var world_seed := 0
 var founding_banner_index := -1
 var founding_focus := ""
-var founding_focus_selected_day := -1
 var active_province := -1
 var province_name := ""
 var province_terrain := "Plains"
@@ -157,7 +156,6 @@ var combined_intelligence:=0.18
 var technology_operations:Dictionary=preload("res://scripts/technology_operations.gd").empty_state()
 var research_notification_mode:="milestones"
 var discovery_log: Array[Dictionary] = []
-var active_observations: Array[String] = []
 var research_targets:Dictionary={}
 ## Accumulated scholarship in game-year equivalents; -1 until established.
 var scholarship_level:=-1.0
@@ -165,7 +163,6 @@ var active_investigations:Dictionary={}
 var discovery_progress:Dictionary={}
 var population_allocations := {"Food": 30, "Survey": 6, "Extraction": 8, "Construction": 8, "Crafting": 5, "Logistics": 5, "Knowledge": 4, "Administration": 3, "Defense": 3}
 var population_allocation_percentages := {"Food":42.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":6.0,"Administration":4.0,"Defense":4.0}
-var population_allocation_auto := true
 var population_total := 120
 var population_exact := 120.0
 var population_health := 0.72
@@ -226,7 +223,6 @@ var resource_deposits: Array[Dictionary] = []
 var resource_stockpiles: Dictionary = {}
 var civilian_goods:Dictionary=preload("res://scripts/civilian_goods.gd").empty_state()
 var opening_opportunities:Dictionary=preload("res://scripts/opening_opportunities.gd").empty_state()
-var resource_events: Array[Dictionary] = []
 var resource_practice: Dictionary = {}
 var resource_priorities: Dictionary = {}
 ## The land searched (resource_system.gd land_survey): its cover, the month
@@ -241,7 +237,6 @@ var economy_history:Array[Dictionary]=[]
 var strategic_history:Dictionary={}
 ## Bounded observed settlement images and their dated readings; saved by reflection.
 var settlement_portrait_history:Dictionary={}
-var economy_events:Array[Dictionary]=[]
 var economy_known_goods:Dictionary={}
 var currency_supply:=0.0
 var public_treasury:=0.0
@@ -252,17 +247,12 @@ var weighed_metal_circulation:=0.0
 var weighed_metal_composition:Dictionary={}
 var weighed_metal_losses:=0.0
 var monetary_reserve_metals:Dictionary={}
-var currency_issued:=0.0
-var currency_retired:=0.0
 var currency_demand:=0.0
 var civil_arrears:=0.0
 var military_arrears:=0.0
 var in_kind_labor_arrears:=0.0
 var in_kind_material_arrears:=0.0
 var public_debt:=0.0
-var public_borrowed:=0.0
-var public_debt_repaid:=0.0
-var public_interest_accrued:=0.0
 var credit_outstanding:=0.0
 var credit_defaulted:=0.0
 var wealth_shares:Array[float]=[0.08,0.13,0.19,0.25,0.35]
@@ -285,7 +275,6 @@ var material_metrics: Dictionary = {
 	"at_source":0.0,"in_transit":0.0,"stored_bulk":0.0,"storage_capacity":0.0,
 	"flow_ratio":0.0
 }
-var material_history: Array[Dictionary] = []
 var water_metrics: Dictionary = {"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 var water_history: Array[Dictionary] = []
 var food_stocks: Dictionary = {}
@@ -325,7 +314,6 @@ var simulation_metrics := {
 	"resource_access":0.0,
 	"settlement":0.0
 }
-var simulation_trends: Dictionary = {}
 var simulation_events: Array[Dictionary] = []
 var last_simulation_event_days: Dictionary = {}
 ## Evidence signals contributed by returned field parties (scouts, envoys).
@@ -532,7 +520,6 @@ func reset_for_new_world(new_seed:int)->void:
 	world_seed=new_seed
 	founding_banner_index=-1
 	founding_focus=""
-	founding_focus_selected_day=-1
 	active_province=-1
 	province_name=""
 	province_terrain="Plains"
@@ -568,14 +555,12 @@ func reset_for_new_world(new_seed:int)->void:
 	technology_operations=preload("res://scripts/technology_operations.gd").empty_state()
 	research_notification_mode="milestones"
 	discovery_log=[]
-	active_observations=[]
 	research_targets={}
 	scholarship_level=-1.0
 	active_investigations={}
 	discovery_progress={}
 	population_allocations={"Food":30,"Survey":6,"Extraction":8,"Construction":8,"Crafting":5,"Logistics":5,"Knowledge":4,"Administration":3,"Defense":3}
 	population_allocation_percentages={"Food":42.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":6.0,"Administration":4.0,"Defense":4.0}
-	population_allocation_auto=true
 	population_total=120
 	population_exact=120.0
 	population_health=0.72
@@ -611,7 +596,6 @@ func reset_for_new_world(new_seed:int)->void:
 	resource_deposits=[]
 	resource_stockpiles={}
 	civilian_goods=preload("res://scripts/civilian_goods.gd").empty_state()
-	resource_events=[]
 	resource_practice={}
 	resource_priorities={}
 	land_survey={}
@@ -623,7 +607,6 @@ func reset_for_new_world(new_seed:int)->void:
 	economy_history=[]
 	strategic_history={}
 	settlement_portrait_history={}
-	economy_events=[]
 	economy_known_goods={}
 	currency_supply=0.0
 	public_treasury=0.0
@@ -634,17 +617,12 @@ func reset_for_new_world(new_seed:int)->void:
 	weighed_metal_composition={}
 	weighed_metal_losses=0.0
 	monetary_reserve_metals={}
-	currency_issued=0.0
-	currency_retired=0.0
 	currency_demand=0.0
 	civil_arrears=0.0
 	military_arrears=0.0
 	in_kind_labor_arrears=0.0
 	in_kind_material_arrears=0.0
 	public_debt=0.0
-	public_borrowed=0.0
-	public_debt_repaid=0.0
-	public_interest_accrued=0.0
 	credit_outstanding=0.0
 	credit_defaulted=0.0
 	wealth_shares=[0.08,0.13,0.19,0.25,0.35]
@@ -659,7 +637,6 @@ func reset_for_new_world(new_seed:int)->void:
 	external_trade_imports=0.0
 	external_trade_losses=0.0
 	material_metrics={"extracted_today":0.0,"delivered_today":0.0,"lost_today":0.0,"at_source":0.0,"in_transit":0.0,"stored_bulk":0.0,"storage_capacity":0.0,"flow_ratio":0.0}
-	material_history=[]
 	water_metrics={"stored":0.0,"capacity":0.0,"collected_today":0.0,"required_today":0.0,"consumed_today":0.0,"intake_ratio":0.0,"days":0.0,"source_accessible":false}
 	water_history=[]
 	food_stocks={}
@@ -681,7 +658,6 @@ func reset_for_new_world(new_seed:int)->void:
 	malnutrition_burden=0.0
 	active_modifiers=[]
 	simulation_metrics={"food_days":30.0,"food_balance":-1.0,"health":0.72,"labor_efficiency":0.72,"cohesion":0.58,"knowledge":0.18,"material_capacity":0.12,"logistics":0.16,"security":0.38,"ecology":0.88,"legitimacy":0.62,"resource_access":0.0,"settlement":0.0}
-	simulation_trends={}
 	simulation_events=[]
 	last_simulation_event_days={}
 	field_observation_signals={}
@@ -768,7 +744,6 @@ func select_founding_focus(focus_id:String)->Dictionary:
 	if elapsed_days>=1.0: return {"error":"A founding focus can only be established before the first day passes."}
 	var definition:Dictionary=FOUNDING_FOCUSES[focus_id]
 	founding_focus=focus_id
-	founding_focus_selected_day=int(floor(elapsed_days))
 	founding_banner_index=FOUNDING_FOCUS_ORDER.find(focus_id)
 	_apply_founding_focus_start(definition)
 	societal_values=SOCIETAL_VALUES_MODEL.apply_founding_focus(societal_values,focus_id)

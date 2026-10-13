@@ -202,9 +202,6 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	# Told when the richest fifth nears the most the age allows (WEALTH_BOUNDS),
 	# not at an ordinary share; the pressure itself applies every day.
 	if float(WorldSimulation.state.wealth_shares[4])>=float((WEALTH_BOUNDS.get(String(WorldSimulation.state.economy_stage),WEALTH_BOUNDS.subsistence) as Array)[1])-0.05: _threshold_event(events,"wealth_concentration","Claims Concentrate","The richest fifth of households now hold %d in every 100 parts of the realm's wealth, adding pressure to cohesion and legitimacy." % roundi(float(WorldSimulation.state.wealth_shares[4])*100.0),120)
-	for event in events:
-		WorldSimulation.state.economy_events.push_front(event)
-	if WorldSimulation.state.economy_events.size()>120: WorldSimulation.state.economy_events.resize(120)
 	return events
 
 func _update_benchmarks(events:Array[Dictionary])->void:
@@ -1454,7 +1451,6 @@ func retire_currency(requested:float,reason:String="Currency retirement")->Dicti
 	var accepted:=minf(maxf(0.0,requested),minf(WorldSimulation.state.public_treasury,WorldSimulation.state.currency_supply))
 	WorldSimulation.state.public_treasury-=accepted
 	WorldSimulation.state.currency_supply-=accepted
-	WorldSimulation.state.currency_retired+=accepted
 	if accepted>0.0: _ledger("currency_retired",accepted,"public","retired",reason)
 	return {"accepted":accepted,"requested":requested,"money_supply":WorldSimulation.state.currency_supply,"treasury":WorldSimulation.state.public_treasury}
 
@@ -1463,7 +1459,6 @@ func _issue_currency_internal(requested:float,reason:String,public_share:float)-
 	var accepted:=minf(maxf(0.0,requested),maxf(0.0,maximum-WorldSimulation.state.currency_supply))
 	var public_amount:=accepted*clampf(public_share,0.0,1.0)
 	WorldSimulation.state.currency_supply+=accepted
-	WorldSimulation.state.currency_issued+=accepted
 	WorldSimulation.state.public_treasury+=public_amount
 	WorldSimulation.state.private_currency+=accepted-public_amount
 	if accepted>0.0: _ledger("currency_issued",accepted,"mint","circulation",reason)

@@ -838,9 +838,6 @@ func _refresh_active_investigations(full:=false)->void:
 	_release_extra_teams(count)
 	_place_free_teams(current_day,count,full)
 	_switch_to_quicker_questions(current_day)
-	WorldSimulation.state.active_observations.clear()
-	for record in active_investigation_records_shallow():
-		WorldSimulation.state.active_observations.append(String(record.observation))
 	end_research_scan()
 
 

@@ -122,10 +122,8 @@ func _reset_state()->void:
 	GameState.population_total=120
 	GameState.resource_deposits.clear()
 	GameState.resource_stockpiles.clear()
-	GameState.resource_events.clear()
 	GameState.resource_practice.clear()
 	GameState.resource_priorities.clear()
-	GameState.material_history.clear()
 	GameState.known_discoveries.clear()
 	GameState.settlement_completed.clear()
 	GameState.settlement_site_committed=true

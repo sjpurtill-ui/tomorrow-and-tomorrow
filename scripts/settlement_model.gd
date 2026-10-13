@@ -39,8 +39,8 @@ const CITY_RESOURCE_DEFAULTS:={
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
 	"civilian_goods":{"initialized":true,"last_day":-1,"report":{}},
-	"resource_events":[],"resource_practice":{},"resource_priorities":{},"land_survey":{},
-	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
+	"resource_practice":{},"resource_priorities":{},"land_survey":{},
+	"material_metrics":{},"water_metrics":{},"water_history":[],
 	"food_stocks":{"Fresh food":0.0,"Stored food":0.0},
 	"fire_practice":{"initialized":false,"embers":0.0,"last_day":-1,"source":"none","last_event":"No maintained fire","fuel_today":0.0,"ignitions":0,"extinctions":0},
 	"food_source_health":{"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94},
@@ -56,14 +56,14 @@ const CITY_RESOURCE_DEFAULTS:={
 	# kept with it: a town's day never overwrites the capital's.
 	"early_care":{},
 	"convoy_traveling":false,"convoy_exposure_days":0.0,"health_history":[],"last_simulation_event_days":{},
-	"currency_demand":0.0,"currency_issued":0.0,"currency_retired":0.0,
+	"currency_demand":0.0,
 	"in_kind_labor_arrears":0.0,"in_kind_material_arrears":0.0,
 	"credit_outstanding":0.0,"credit_defaulted":0.0,"external_trade_credit":0.0,
 	"simulation_metrics":{},"economy_metrics":{},"economy_history":[],"economic_ledger":[],
 	"economy_stage":"subsistence","market_prices":{},"economy_known_goods":{},
 	"currency_supply":0.0,"public_treasury":0.0,"private_currency":0.0,"currency_hoards":0.0,
 	"mutual_aid_reserve":0.0,"weighed_metal_circulation":0.0,"weighed_metal_composition":{},
-	"monetary_reserve_metals":{},"civil_arrears":0.0,"military_arrears":0.0,"public_debt":0.0,"public_borrowed":0.0,"public_debt_repaid":0.0,"public_interest_accrued":0.0,
+	"monetary_reserve_metals":{},"civil_arrears":0.0,"military_arrears":0.0,"public_debt":0.0,
 	"external_trade_exports":0.0,"external_trade_imports":0.0,"external_trade_losses":0.0,"weighed_metal_losses":0.0,"economy_benchmarks":{},"simulation_trends":{}
 }
 const CITY_VITAL_COUNTERS:=["lifetime_births","lifetime_deaths","lifetime_conceptions","lifetime_pregnancy_losses","lifetime_stillbirths","lifetime_maternal_deaths","lifetime_neonatal_deaths","observed_death_age_sum"]

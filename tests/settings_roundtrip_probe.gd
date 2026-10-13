@@ -4,7 +4,7 @@ func snapshot()->Dictionary:
 	var places:Array=[]
 	for p:Dictionary in GameState.player_settlements:
 		places.append({"id":p.id,"auto":p.get("auto_manage",true),"focus":p.get("management_focus","")})
-	return {"weights":GameState.research_allocations.duplicate(true),"targets":GameState.research_targets.duplicate(true),"places":places,"completed":GameState.known_discoveries.duplicate(),"selected":GameState.selected_player_settlement_id,"labor_auto":GameState.population_allocation_auto,"api":GameState.civic_api_enabled}
+	return {"weights":GameState.research_allocations.duplicate(true),"targets":GameState.research_targets.duplicate(true),"places":places,"completed":GameState.known_discoveries.duplicate(),"selected":GameState.selected_player_settlement_id,"api":GameState.civic_api_enabled}
 func _ready()->void:
 	if "--write-settings" in OS.get_cmdline_user_args():
 		GameState.reset_for_new_world(456789)
@@ -28,7 +28,6 @@ func _ready()->void:
 		GameState.known_discoveries.append("food_drying")
 		GameState.discovery_adoption["food_drying"]=1.0
 		DiscoverySystem._refresh_active_investigations()
-		GameState.population_allocation_auto=false
 		GameState.selected_player_settlement_id="settings_second"
 		var file:=FileAccess.open("res://artifacts/settings-expected.var",FileAccess.WRITE)
 		file.store_string(var_to_str(snapshot()));file.close()
