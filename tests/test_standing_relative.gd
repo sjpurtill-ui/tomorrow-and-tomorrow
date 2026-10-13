@@ -235,6 +235,8 @@ func test_parity_the_same_state_reads_the_same_in_any_scope()->void:
 
 func test_cunning_sees_raids_coming_and_the_watch_meets_them()->void:
 	var id:=_met()
+	# Raiders for our goods come only once the quiet age is over (pressure_age.gd).
+	GameState.elapsed_days=400.0*365.0
 	var day:=int(GameState.elapsed_days)
 	_arts(0.95,0.5)
 	var seen:=0

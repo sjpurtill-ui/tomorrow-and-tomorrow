@@ -111,6 +111,13 @@ func test_after_it_a_neighbour_who_can_reach_us_comes_about_once_in_ten_years()-
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["treaty"]="non_aggression"
 	assert_float(War.pressure_chance(a)).is_equal(0.0)
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["treaty"]="none"
+	# Nor a people far weaker than us: it has nothing to press with.
+	if War.ratio(a)>=War.PRESSURE_LEAST_RATIO:
+		var people:=float(CivilizationSystem.civilizations[0].population)
+		CivilizationSystem.civilizations[0]["population"]=1.0
+		GameState.ensure_population_total(60000)
+		if War.ratio(a)<War.PRESSURE_LEAST_RATIO: assert_float(War.pressure_chance(a)).is_equal(0.0)
+		CivilizationSystem.civilizations[0]["population"]=people
 	# Nor a people at war with us already, nor one we have never met.
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["contact_level"]=1
 	assert_float(War.pressure_chance(a)).is_equal(0.0)

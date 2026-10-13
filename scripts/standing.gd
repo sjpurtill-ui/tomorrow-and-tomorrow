@@ -1163,6 +1163,7 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 			var coming:=float(war.call("pressure_chance",civ_id))
 			if coming>0.0: out.append({"id":"pressure","tone":"danger","words":"Coming against us of their own will: %s" % monthly_odds_words(coming),"detail":"%s Their ruler leans %.1f against 1 for an even ruler of our own strength; a sworn peace with them stops it." % [Pressure.words(),float(war.call("pressure_lean",civ_id))]})
 			elif bool(war.call("war_shut",civ_id)): out.append({"id":"pressure","tone":"calm","words":"No war fleet of theirs or ours can cross to the other","detail":Pressure.words()+" The sea between us is wider than either people's ships can carry an army over."})
+			elif float(war.call("ratio",civ_id))<float(war.get_script_constant_map().get("PRESSURE_LEAST_RATIO",0.35)): out.append({"id":"pressure","tone":"calm","words":"Too weak beside us to come of their own will","detail":"%s A people under %d parts in 100 of our fighting strength does not press us." % [Pressure.words(),roundi(float(war.get_script_constant_map().get("PRESSURE_LEAST_RATIO",0.35))*100.0)]})
 		var grudge:=float(war.call("grudge_raid_chance",civ_id))
 		if grudge>0.0: out.append({"id":"grudge","tone":"danger","words":"Raiders to settle an old grudge: %s" % monthly_odds_words(grudge),"detail":"Their ruler's grudges weigh heavy enough to send raiders without a new quarrel."})
 		var raid:=float(war.call("envy_raid_chance",civ_id,float(v.get("envy",0.0))))

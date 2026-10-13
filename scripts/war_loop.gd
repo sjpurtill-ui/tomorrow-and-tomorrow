@@ -600,6 +600,9 @@ const UNPROVOKED_CAUSES:=["refusal","envy","bolder","pressure"]
 ## seized, captives kept, a threat carried home: rival_rulers.grudge).
 const PROVOKED_WEIGHT:=0.3
 const PRESSURE_CAUSE:="our land and our stores, which they mean to have"
+## A people under this share of our fighting strength does not come of its
+## own will: it has nothing to press with (it bows or begs: world_answer.gd).
+const PRESSURE_LEAST_RATIO:=0.35
 
 ## Whether we have wronged this people: wrongs they still hold against us, or
 ## our own spears among them.
@@ -622,7 +625,8 @@ static func pressure_lean(civ_id:String)->float:
 
 ## This month's chance that they come against us of their own will: nothing
 ## in the quiet age, to a people bound to peace with us, already fighting us,
-## broken, or with no way to reach us; else
+## broken, far weaker than us (PRESSURE_LEAST_RATIO), or with no way to
+## reach us; else
 ##     pressure x 0.10 a year x lean x how near they live, a twelfth a month.
 static func pressure_chance(civ_id:String,day:int=-1)->float:
 	if day<0: day=_day()
@@ -632,6 +636,7 @@ static func pressure_chance(civ_id:String,day:int=-1)->float:
 	if relation.is_empty() or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)): return 0.0
 	if String(relation.get("treaty","none")) in ["non_aggression","truce","alliance","protection"]: return 0.0
 	if broken(civ_id) or keeps_peace(civ_id,day) or hot(civ_id,day): return 0.0
+	if ratio(civ_id)<PRESSURE_LEAST_RATIO: return 0.0
 	var near:=proximity(civ_id)
 	if near<=0.0: return 0.0
 	return pressure*Pressure.PER_YEAR/12.0*pressure_lean(civ_id)*lerpf(0.5,1.0,near)*_league_backing(civ_id)
