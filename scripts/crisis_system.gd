@@ -1182,9 +1182,17 @@ static func _give_food(amount:float)->float:
 	if amount<=0.0: return 0.0
 	return float(EXCHANGE.receive("player","Food",amount))
 
+## Food from another people's stores: at most a quarter of what they hold.
+## A people that keeps its own stores (every simulated people) really loses
+## it (civilization_exchange.take): the old way lowered only a summary
+## figure that their next day's reading wrote over, so the food we were
+## given or took cost them nothing.
 static func _take_from_civ(civ_id:String,amount:float)->float:
 	var index:=Hall._civ_index(civ_id)
 	if index<0: return 0.0
+	if WorldSimulation.actors.has(civ_id):
+		var held:=maxf(0.0,float(Hall.foreign_stock(civ_id,"Food")))
+		return maxf(0.0,float(preload("res://scripts/civilization_exchange.gd").take(civ_id,"Food",minf(amount,held*0.25))))
 	var civ:Dictionary=WorldSimulation.world.civilizations[index]
 	var pop:=maxf(1.0,float(civ.get("population",1.0)))
 	var have:=float(civ.get("food_days",0.0))*pop

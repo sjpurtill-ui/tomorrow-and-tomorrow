@@ -982,6 +982,15 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var standing_reading:={}
 	for key in WorldSimulation.state.simulation_metrics:
 		if String(key).begins_with("standing_"): standing_reading[key]=WorldSimulation.state.simulation_metrics[key]
+	# Readings other systems keep in the metrics from day to day (KEPT_METRICS)
+	# outlive the rebuild too. Rebuilt from nothing, a decree's pull on people
+	# never added up to a whole person, the share of food brought in never
+	# rose past a day's step, a struck people's fear was gone by morning, and
+	# the weather's wear on homes and the usual toll of hard times read zero.
+	for key:String in KEPT_METRICS:
+		if WorldSimulation.state.simulation_metrics.has(key): standing_reading[key]=WorldSimulation.state.simulation_metrics[key]
+	# Fear of being struck fades: half of it is gone in about a year.
+	if standing_reading.has("war_fear"): standing_reading["war_fear"]=float(standing_reading["war_fear"])*(1.0-SPAN.rate(WAR_FEAR_FADE))
 	WorldSimulation.state.simulation_metrics = {
 		"clothing_coverage":clothing.duplicate(),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
@@ -1047,6 +1056,19 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if legitimacy < 0.42: _threshold_event(events,"authority_strain","Directives Meet Resistance","Hardship and weak administration are eroding compliance with sovereign priorities.","legitimacy","warning",60)
 	return events
 
+
+## Metrics that are not the day's own reading but a running one, kept by the
+## system named: they are carried through the daily rebuild of the metrics.
+##   directive_migration_progress  the part of a person a decree has drawn or driven (below)
+##   food_import_share             the smoothed share of food brought in (economy_system.gd)
+##   market_access                 the day's reach of exchange (economy_system.gd)
+##   top_fifth_share               the richest fifth's share of wealth (economy_system.gd; a policy's measure)
+##   war_fear                      a people struck from the air or sea (air_naval_consequences.gd; rulers read it)
+##   fabric_weather                the season's wear on homes (built_fabric.gd)
+##   usual_hardship_rate           what hard times take in a usual year (the Health page)
+const KEPT_METRICS:=["directive_migration_progress","food_import_share","market_access","top_fifth_share","war_fear","fabric_weather","usual_hardship_rate"]
+## The share of war fear that fades each day (half in about a year).
+const WAR_FEAR_FADE:=0.0019
 
 func _process_directive_migration(population:float,span:float)->void:
 	## Orders that draw people in or drive them away move whole people, through
