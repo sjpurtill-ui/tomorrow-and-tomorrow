@@ -33,6 +33,14 @@ func test_same_orders_and_daily_inputs_produce_identical_owned_state()->void:
 		)
 	var first:=WorldSimulation.capture_actor("alpha")
 	var second:=WorldSimulation.capture_actor("beta")
+	# Each people's old border posts stand on one ring turned to its own
+	# bearing (fort_border.seed_old_posts, seeded by the people): the same
+	# count, kind and distance out, a different turn. Compared by distance.
+	for capture:Dictionary in [first,second]:
+		for fort:Dictionary in ((capture.GameState as Dictionary).get("border_forts",{}) as Dictionary).get("forts",[]):
+			if not bool(fort.get("old_post",false)):continue
+			fort["ring_km"]=snappedf(Vector2(float(fort.x),float(fort.z)).length(),0.01)
+			fort.erase("x");fort.erase("z")
 	for name in ["GameState","MilitaryCampaign","DiscoverySystem","GovernmentPeopleSystem","EconomySystem","ProgressionSystem","society_model"]:
 		assert_bool(_simulated(first[name])==_simulated(second[name])).override_failure_message("Different owned state in "+name).is_true()
 
