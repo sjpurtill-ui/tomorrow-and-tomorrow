@@ -29,6 +29,9 @@ func before_test()->void:
 	SettlementModel.reset_for_new_world();PeopleDirection.reset_for_new_world()
 	GameState.ensure_population_total(400);GameState.housing_capacity=500
 	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];GameState.settlement_name="SEANSTONE"
+	# No border posts in these worlds: every one of the home guard stands in a
+	# town (those out on the border are counted there, civilization_combat.on_the_border).
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
 	GameState.resource_stockpiles["Food"]=100000.0
 	SettlementModel.ensure_founded()
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
@@ -594,3 +597,36 @@ func test_a_computer_people_keeps_its_watch_by_the_same_rules()->void:
 	assert_float(float(out.split)).is_equal_approx(0.3,0.0001)
 	# The god's people are untouched by it.
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(0)
+
+## The home guard posted out to the border forts stands there, not in the
+## towns: counted once. (The Towns card's "on guard", each town's defenders
+## and the home defence all included the men the Border card showed posted.)
+func test_the_guard_out_on_the_border_is_not_also_counted_in_the_towns()->void:
+	_second_town()
+	var watch:=_watch(0.10)
+	MilitaryCampaign.set_watch_split(0.5)
+	var Forts:=preload("res://scripts/fort_border.gd")
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
+	var guard:=int(MilitaryCampaign.watch_reading().guard)
+	var before:=Combat.guard_ledger()
+	var home_id:=String(Combat._home_record().id)
+	assert_int(int(before[TOWN].watch)+int(before[home_id].watch)).is_equal(guard)
+	assert_int(Combat.on_the_border()).is_equal(0)
+	# A fort is raised and manned from the home guard.
+	var d:=Forts.ledger(GameState)
+	(d.forts as Array).append({"id":int(d.next_id),"kind":"palisade_fort","x":CivilizationSystem.player_world_origin.x+40.0,"z":CivilizationSystem.player_world_origin.y,"status":"standing","condition":1.0,"progress":0.0,"name":"test"})
+	d.next_id=int(d.next_id)+1
+	Forts.set_border_share(0.3)
+	var posted:=int(Forts.watch().posted)
+	assert_int(posted).is_greater(0)
+	assert_int(Combat.on_the_border()).is_equal(mini(posted,guard))
+	var after:=Combat.guard_ledger()
+	# Towns and border together are the home guard, no more.
+	assert_int(int(after[TOWN].watch)+int(after[home_id].watch)+Combat.on_the_border()).is_equal(guard)
+	assert_int(int(after[TOWN].watch)+int(after[home_id].watch)).is_less(int(before[TOWN].watch)+int(before[home_id].watch))
+	# Home's fight musters those who are there: not the men at the fort.
+	var rise:=int(Combat.home_militia().rise)
+	var home_force:=MilitaryCampaign._home_defense_force(false)
+	assert_int(int(home_force.troops)).is_equal(watch-Combat.posted_away()+rise)
+	var parts:=Combat.home_defenders()
+	assert_int(int(parts.trained)+int(parts.watch)+int(parts.rise)).is_equal(int(home_force.troops))

@@ -141,7 +141,11 @@ static func _whole_people(mc:Variant)->Dictionary:
 	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(away)-float(serving))
 	# Roads bring more of the countryside's people to the fight in time
 	# (built_fabric.gd ROAD_RISE).
-	return {"watch":Watch.home_guard(mc),"rise_exact":minf(adults,RISE_SHARE*adults*preload("res://scripts/built_fabric.gd").rise_factor())}
+	# The home guard posted out to the border forts and the line between them
+	# (fort_border.gd watch) stand there, not in the towns: the towns share
+	# what is left. (They were counted in both: the Towns card's "on guard"
+	# and a town's defenders included the men the Border card showed posted.)
+	return {"watch":maxi(0,int(Watch.home_guard(mc))-on_the_border(mc)),"rise_exact":minf(adults,RISE_SHARE*adults*preload("res://scripts/built_fabric.gd").rise_factor())}
 
 ## Grown people of the people in scope who are away from their towns.
 static func _away(state:Variant)->int:
@@ -255,7 +259,15 @@ static func posted_away(mc:Variant=null)->int:
 	for id in ledger:
 		if not home.is_empty() and String(id)==String(home.get("id","")):continue
 		out+=int((ledger[id] as Dictionary).get("watch",0))
-	return out
+	# And those out on the border (fort_border.gd): not at home either.
+	return out+on_the_border(mc)
+
+## The home guard posted to the border forts and the line between them,
+## never more than the home guard itself.
+static func on_the_border(mc:Variant=null)->int:
+	if mc==null:mc=WorldSimulation.military
+	if mc==null:return 0
+	return mini(int(preload("res://scripts/watch_military.gd").home_guard(mc)),int(preload("res://scripts/fort_border.gd").watch(null,mc).get("posted",0)))
 
 static func _home_record()->Dictionary:
 	for city:Dictionary in WorldSimulation.state.player_settlements:

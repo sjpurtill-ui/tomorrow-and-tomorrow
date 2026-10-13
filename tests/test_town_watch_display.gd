@@ -41,6 +41,9 @@ func before_test()->void:
 	SettlementModel.reset_for_new_world()
 	GameState.ensure_population_total(400);GameState.housing_capacity=500
 	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];GameState.settlement_name="SEANSTONE"
+	# No border posts in these worlds: every one of the home guard stands in a
+	# town (those out on the border are counted there, civilization_combat.on_the_border).
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
 	SettlementModel.ensure_founded()
 	GameState.population_allocations["Defense"]=40
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
