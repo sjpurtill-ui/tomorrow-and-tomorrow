@@ -203,3 +203,31 @@ func test_a_people_with_no_way_to_us_gathers_no_raiders_and_raises_no_alarm()->v
 	War.daily(day)
 	assert_dict(War.front(a).pending).is_empty()
 	assert_bool((War.state().log as Array).any(func(e:Dictionary)->bool:return String(e.get("civ",""))==a and String(e.get("kind",""))=="seen_coming")).is_false()
+
+## Weariness of war is kept on the feud and on the record of the pair. Both
+## ease in peace; neither eases while the fighting is on. (In the living
+## world they could only rise: only the old world model eased them.)
+func test_weariness_of_war_eases_in_peace_and_not_while_it_is_fought()->void:
+	var a:=String(ids[0])
+	_year(120.0)
+	var relation:Dictionary=CivilizationSystem.civilizations[0].player_relation
+	relation["player_war_exhaustion"]=0.6; relation["rival_war_exhaustion"]=0.8; relation["war_score"]=42.0
+	var f:=War.front(a)
+	f["our_exh"]=0.5; f["their_exh"]=0.7
+	var day:=int(GameState.elapsed_days)
+	War._recover(day)
+	assert_float(float(relation.player_war_exhaustion)).is_equal_approx(0.6-War.RECOVER_A_MONTH,0.0001)
+	assert_float(float(relation.rival_war_exhaustion)).is_equal_approx(0.8-War.RECOVER_A_MONTH,0.0001)
+	assert_float(float(relation.war_score)).is_equal_approx(37.0,0.0001)
+	assert_float(float(War.front(a).their_exh)).is_equal_approx(0.7-War.RECOVER_A_MONTH,0.0001)
+	assert_float(float(War.front(a).our_exh)).is_equal_approx(0.5-War.RECOVER_A_MONTH,0.0001)
+	# Three years of peace and a people spent past raiding is fit to raid again.
+	for month in 36: War._recover(day+month*30)
+	assert_float(float(relation.rival_war_exhaustion)).is_equal(0.0)
+	assert_float(float(War.front(a).their_exh)).is_less(War.ENEMY_SPENT)
+	assert_float(float(relation.war_score)).is_equal(0.0)
+	# At war, nothing eases.
+	relation["at_war"]=true; relation["rival_war_exhaustion"]=0.8
+	War._recover(day)
+	assert_float(float(relation.rival_war_exhaustion)).is_equal(0.8)
+	relation["at_war"]=false
