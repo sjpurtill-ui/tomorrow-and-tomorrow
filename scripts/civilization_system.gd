@@ -704,12 +704,6 @@ func register_player_origin(position:Vector2)->void:
 	_process_local_observation(int(WorldSimulation.state.elapsed_days),true)
 
 
-func _generate_founding_neighborhood()->void:
-	# Retained for older callers. Starting a player must not relocate rivals.
-	# Their homes were generated from the world seed before player placement.
-	pass
-
-
 func record_player_travel(position:Vector2)->void:
 	initialize()
 	var previous_position:=player_world_origin
@@ -1689,10 +1683,6 @@ func _scout_timing_variance(duration_days:int,mission_id:int,start_day:int)->int
 	return maxi(1,roundi(float(duration_days)*timing_rng.randf_range(0.035,0.32)))
 
 
-func begin_exploration(duration_days:int=90)->Dictionary:
-	return dispatch_scouts(duration_days)
-
-
 func diplomatic_gift_options(civ_id:String)->Array[Dictionary]:
 	initialize()
 	var index:=_civilization_index(civ_id)
@@ -1950,14 +1940,6 @@ func _diplomatic_return_report(civ:Dictionary,_relation:Dictionary,mission:Dicti
 	if observations.is_empty(): observations.append("No dated city assessment survived this journey. The previously known location remains on the chart.")
 	mission["returned_city_observations"]=cities
 	return {"day":day,"observations":observations,"city_observations":cities,"intelligence_gain":.055 if not cities.is_empty() else .015,"access":.5}
-
-
-func _diplomatic_capacity_word(value:float)->String:
-	if value<0.22: return "FRAGILE"
-	if value<0.40: return "LIMITED"
-	if value<0.60: return "DEVELOPING"
-	if value<0.78: return "STRONG"
-	return "FORMIDABLE"
 
 
 func _reveal_diplomatic_route(origin:Vector2,target:Vector2)->void:
@@ -3530,12 +3512,6 @@ func _compass_phrase(from:Vector2,to:Vector2)->String:
 	# World coordinates: +x east, +z south (Godot's -z is the map's north).
 	var directions:=["east","southeast","south","southwest","west","northwest","north","northeast"]
 	return directions[posmod(roundi(rad_to_deg((to-from).angle())/45.0),8)]
-
-
-func _rumor_distance_hint(distance:float)->String:
-	if distance<150.0: return "some days' travel"
-	if distance<400.0: return "many days' travel"
-	return "a season's journey or more"
 
 
 func _resolve_scout_rumors(_day:int,_recruits:int)->String:
@@ -5484,13 +5460,6 @@ func _public_regions(civ:Dictionary)->Array[Dictionary]:
 	return city_intelligence.public_regions(String(civ.id))
 
 
-func civilization_snapshot(civ_id:String)->Dictionary:
-	initialize()
-	for contender in competition_snapshot().leaders:
-		if String(contender.id)==civ_id: return (contender as Dictionary).duplicate(true)
-	return {}
-
-
 func known_civilization_snapshot(civ_id:String)->Dictionary:
 	var index:=_civilization_index(civ_id)
 	if index<0 or int((civilizations[index].get("player_relation",{}) as Dictionary).get("contact_level",0))<2: return {}
@@ -5526,11 +5495,6 @@ func _lead_margin_for(contender_id:String,contenders:Array[Dictionary])->float:
 		if String(contender.id)==contender_id: own_score=float(contender.score)
 		else: strongest_other=maxf(strongest_other,float(contender.score))
 	return own_score/maxf(0.001,strongest_other)
-
-
-func _score_for_civilization(civ:Dictionary)->float:
-	var profile:=_public_profile(civ)
-	return _score_values(profile)
 
 
 func _score_values(profile:Dictionary)->float:
@@ -5592,13 +5556,6 @@ func _war_count(civ:Dictionary)->int:
 	for relation in (civ.get("relations",{}) as Dictionary).values():
 		if bool((relation as Dictionary).get("at_war",false)): total+=1
 	if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): total+=1
-	return total
-
-
-func _friendly_relation_count(civ:Dictionary)->int:
-	var total:=0
-	for relation in (civ.get("relations",{}) as Dictionary).values():
-		if float((relation as Dictionary).get("opinion",0.0))>0.18 and not bool((relation as Dictionary).get("at_war",false)): total+=1
 	return total
 
 
