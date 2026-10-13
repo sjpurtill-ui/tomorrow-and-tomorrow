@@ -372,7 +372,19 @@ func project(civ:Dictionary)->void:
 	# commitment ledger (which can retain absent personnel after population loss).
 	civ.military_population=minf(float(military._mobilized_count()),maxf(0,state.population_exact))
 	civ.military_share=float(civ.military_population)/maxf(1,state.population_exact)
-	civ.military_readiness=clampf(float(military.home_army.get("readiness",0)),0.0,1.0)
+	# Their fighting strength by the one rule every people is read by
+	# (MilitaryCampaign.fighting_reading): the men fit to fight wherever they
+	# stand, their readiness weighed over every force, their commander as he
+	# is now, the age of their arms and how much of their kit is made. (The
+	# commander's figure was a number drawn at the world's making and never
+	# changed; the age and the kit were read by the power reckoning and never
+	# written; readiness was the home force's alone.)
+	var fighting:Dictionary=military.fighting_reading()
+	civ["fighting_men"]=minf(float(fighting.warriors),maxf(0.0,state.population_exact))
+	civ.military_readiness=clampf(float(fighting.readiness),0.0,1.0)
+	civ["command_readiness"]=float(fighting.command)
+	civ["military_era_tier"]=int(fighting.tier)
+	civ["military_replacement_coverage"]=float(fighting.coverage)
 	civ.military_stockpile=0.0
 	for amount in military.military_inventory.values():civ.military_stockpile+=int(amount)
 	civ["local_allocations"]=state.population_allocation_percentages.duplicate(true)
