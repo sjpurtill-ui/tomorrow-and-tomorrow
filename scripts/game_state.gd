@@ -506,7 +506,7 @@ var lifetime_neonatal_deaths := 0
 func reset_for_new_world(new_seed:int)->void:
 	if WorldSimulation.actor_id=="player":WorldSimulation.clear()
 	civilian_injuries={"limited":0.0,"severe":0.0}
-	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork","GeneralCampaign"]:
+	for system_name in ["HistoricalFigures","PeopleDirection","CommunityNetwork"]:
 		var system:=WorldSimulation.system(system_name)
 		if system: system.reset_for_new_world()
 	var foreign:=WorldSimulation.system("ForeignDiplomacy")

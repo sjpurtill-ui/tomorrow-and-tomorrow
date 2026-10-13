@@ -105,7 +105,6 @@ static func demand(mc:Object,rail:float)->Dictionary:
 	var forces:Array=[]
 	for force:Dictionary in mc.field_armies:
 		if int(force.get("troops",0))<=0 or mc.at_home_point(force): continue
-		if bool(force.get("general_managed",false)) and WorldSimulation.campaign!=null and WorldSimulation.campaign.active: continue
 		forces.append(force)
 	for force:Dictionary in mc.occupation_forces:
 		if int(force.get("troops",0))>0: forces.append(force)

@@ -116,7 +116,6 @@ func can_open()->bool:
 	if is_instance_valid(modal) or is_instance_valid(ceremony):return false
 	if GameState.founding_focus=="":return false
 	if is_instance_valid(terrain) and SimulationPause.blocks(terrain):return false
-	if GeneralCampaign.active:return false
 	if is_instance_valid(ForeignDiplomacy.panel):return false
 	if is_instance_valid(terrain) and terrain.has_method("_blocking_modal_or_report_open") and terrain._blocking_modal_or_report_open():return false
 	return true

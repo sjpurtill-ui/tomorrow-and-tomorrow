@@ -63,10 +63,8 @@ var consequences := ConsequenceEngine
 var civics := CivicImplementationSystem
 var world := CivilizationSystem
 var military := MilitaryCampaign
-var campaign := GeneralCampaign
-var general_dialogue := GeneralDialogue
 
-const OWNED_SYSTEMS:=["GameState", "DiscoverySystem", "ProgressionSystem", "ResourceSystem", "EconomySystem", "SettlementModel", "GovernmentPeopleSystem", "HistoricalFigures", "PeopleDirection", "CommunityNetwork", "ForeignDiplomacy", "ForeignDialogue", "WorldFacts", "AdvisorSystem", "FoodSystem", "ConsequenceEngine", "CivicImplementationSystem", "CivilizationSystem", "MilitaryCampaign", "GeneralCampaign", "GeneralDialogue"]
+const OWNED_SYSTEMS:=["GameState", "DiscoverySystem", "ProgressionSystem", "ResourceSystem", "EconomySystem", "SettlementModel", "GovernmentPeopleSystem", "HistoricalFigures", "PeopleDirection", "CommunityNetwork", "ForeignDiplomacy", "ForeignDialogue", "WorldFacts", "AdvisorSystem", "FoodSystem", "ConsequenceEngine", "CivicImplementationSystem", "CivilizationSystem", "MilitaryCampaign"]
 
 func system(system_name:String)->Node:
 	if _active.has(system_name): return _active[system_name]
@@ -121,11 +119,9 @@ func _bind_scope()->void:
 	civics=b[16]
 	world=b[17]
 	military=b[18]
-	campaign=b[19]
-	general_dialogue=b[20]
 
 func _build_binding(active:Dictionary)->Array:
-	return [active.get("GameState",GameState),active.get("DiscoverySystem",DiscoverySystem),active.get("ProgressionSystem",ProgressionSystem),active.get("ResourceSystem",ResourceSystem),active.get("EconomySystem",EconomySystem),active.get("SettlementModel",SettlementModel),active.get("GovernmentPeopleSystem",GovernmentPeopleSystem),active.get("HistoricalFigures",HistoricalFigures),active.get("PeopleDirection",PeopleDirection),active.get("CommunityNetwork",CommunityNetwork),active.get("ForeignDiplomacy",ForeignDiplomacy),active.get("ForeignDialogue",ForeignDialogue),active.get("WorldFacts",WorldFacts),active.get("AdvisorSystem",AdvisorSystem),active.get("FoodSystem",FoodSystem),active.get("ConsequenceEngine",ConsequenceEngine),active.get("CivicImplementationSystem",CivicImplementationSystem),active.get("CivilizationSystem",CivilizationSystem),active.get("MilitaryCampaign",MilitaryCampaign),active.get("GeneralCampaign",GeneralCampaign),active.get("GeneralDialogue",GeneralDialogue)]
+	return [active.get("GameState",GameState),active.get("DiscoverySystem",DiscoverySystem),active.get("ProgressionSystem",ProgressionSystem),active.get("ResourceSystem",ResourceSystem),active.get("EconomySystem",EconomySystem),active.get("SettlementModel",SettlementModel),active.get("GovernmentPeopleSystem",GovernmentPeopleSystem),active.get("HistoricalFigures",HistoricalFigures),active.get("PeopleDirection",PeopleDirection),active.get("CommunityNetwork",CommunityNetwork),active.get("ForeignDiplomacy",ForeignDiplomacy),active.get("ForeignDialogue",ForeignDialogue),active.get("WorldFacts",WorldFacts),active.get("AdvisorSystem",AdvisorSystem),active.get("FoodSystem",FoodSystem),active.get("ConsequenceEngine",ConsequenceEngine),active.get("CivicImplementationSystem",CivicImplementationSystem),active.get("CivilizationSystem",CivilizationSystem),active.get("MilitaryCampaign",MilitaryCampaign)]
 
 func clear()->void:
 	assert(_active.is_empty())
@@ -557,7 +553,7 @@ const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
 const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice","active_observations","simulation_trends","economy_events","currency_issued","currency_retired","founding_focus_selected_day","public_borrowed","public_debt_repaid","public_interest_accrued","material_history","resource_events","population_allocation_auto"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
-const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy","GeneralCampaign"]
+const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy"]
 
 func capture_actor(id:String)->Dictionary:
 	return scoped(id,func()->Dictionary:

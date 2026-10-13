@@ -74,7 +74,7 @@ func _ready()->void:
 		if bool(own[2]):glyph.set_instance_shader_parameter("home_ring_radius",0.44)
 		glyph.position=Vector3(at.x,0,at.y);map.add_child(glyph)
 	# The rival's second town falls to our band, which leaves a guard behind:
-	# the same calls the general's campaign makes (general_campaign._secure_home).
+	# the calls a capture makes.
 	var owner_index:=CivilizationSystem._civilization_index(owner_id)
 	var taken:Dictionary=CivilizationSystem.region_snapshot(owner_id,String(chosen[1].city_id))
 	var fell:Dictionary=CivilizationSystem._capture_region(CivilizationSystem.civilizations[owner_index],String(taken.id),{"remaining_troops":400,"supply_level":1.0,"readiness":1.0,"dead":3},{"dead":9})

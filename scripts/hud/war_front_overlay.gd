@@ -575,7 +575,6 @@ func collect()->Dictionary:
 	var live:=bool(snapshot.get("live_reports",true))
 	var largest:=0
 	var theatre:=0
-	var campaign_army:=int(GeneralCampaign.state.get("army_id",-1)) if GeneralCampaign.active else -1
 	var selected:=int(terrain.get("selected_army_id")) if is_instance_valid(terrain) and terrain.get("selected_army_id")!=null else -1
 	for army_variant in snapshot.get("armies",[]):
 		var army:Dictionary=army_variant
@@ -610,7 +609,7 @@ func collect()->Dictionary:
 		var strength:=int(shown.get("troops",troops))
 		largest=maxi(largest,strength); theatre+=strength
 		var entry:={"id":str(id),"army_id":id,"pos":pos,"strength":float(strength),"objective":objective,"offensive":offensive,"name":String(army.get("name","")),
-			"report_age":0 if live or at_home or near_hold else maxi(0,today-int(shown.get("day",today))),"campaign":id==campaign_army}
+			"report_age":0 if live or at_home or near_hold else maxi(0,today-int(shown.get("day",today)))}
 		# Only the displayed report knows where this force actually holds.
 		# Missing old reports must never acquire current, unseen coverage.
 		for field:String in ["border_front","defense_points"]:
@@ -621,7 +620,7 @@ func collect()->Dictionary:
 			if road.size()>=2: entry["road"]=road
 			var days_left:=int(army.get("arrival_day",-1))-today
 			if days_left>0: entry["days_left"]=days_left
-		if not at_home: entry.merge(_withdrawal(army,pos,home,id==campaign_army))
+		if not at_home: entry.merge(_withdrawal(army,pos,home))
 		if bool(entry.get("withdrawing",false)): entry.offensive=false
 		# What its mark and card need: its arm and era (read from the kits it
 		# carries), its general, what it is doing.
@@ -678,7 +677,6 @@ func collect()->Dictionary:
 				if sighting.has(field):entry[field]=sighting[field].duplicate(true)
 			if hostile: enemy.append(entry); listed[sighting_id]=true
 			elif list_name=="visible": strangers.append(entry); listed[sighting_id]=true
-	enemy.append_array(_campaign_sightings(today))
 	var engagements:Array=[]
 	# Every battle of ours being fought now: the watched one, the battle
 	# model's registry and the command staff's parallel battles, each once.
@@ -887,20 +885,14 @@ static func _resample(line:PackedVector2Array,n:int)->PackedVector2Array:
 	return out
 
 ## The general's withdrawal intent: where he would fall back to, one day's
-## march along the road he would take. Campaign generals use the board's road
-## home; commanded armies their commanded route when already withdrawing, or
+## march along the road he would take. Commanded armies use their commanded route when already withdrawing, or
 ## the land route home; any other army the road home, as the engine retreats.
-func _withdrawal(army:Dictionary,pos:Vector2,home:Vector2,campaign:bool)->Dictionary:
+func _withdrawal(army:Dictionary,pos:Vector2,home:Vector2)->Dictionary:
 	var status:=String(army.get("command_status",""))
 	var withdrawing:="withdraw" in status.to_lower()
 	var route:=PackedVector2Array()
 	var how:="home"
-	if campaign and GeneralCampaign.active:
-		var cell:Vector2i=GeneralCampaign.state.get("cell",Vector2i.ZERO)
-		for c in GeneralCampaign.route(cell,Vector2i.ZERO): route.append(GeneralCampaign.world_position(c))
-		how="road"
-		withdrawing=withdrawing or String((GeneralCampaign.state.get("mission",{}) as Dictionary).get("action","")) in ["withdraw","recover"]
-	elif withdrawing and not (army.get("command_route",[]) as Array).is_empty():
+	if withdrawing and not (army.get("command_route",[]) as Array).is_empty():
 		for waypoint in army.command_route: route.append(_v2(waypoint))
 		how="road"
 	else:
@@ -923,20 +915,6 @@ func _withdrawal(army:Dictionary,pos:Vector2,home:Vector2,campaign:bool)->Dictio
 	var troops:=int(army.get("troops",0))
 	return {"fallback":Model.withdrawal_point(pos,route,depth),"withdrawing":withdrawing,"fallback_how":how,"route_home":route.slice(0,24),
 		"frontage":clampf(sqrt(maxf(0,troops))*0.085,0.12,10.0),"day_march":day_march}
-
-
-## The Alderford war's rival hosts, as the general last saw them (dated).
-func _campaign_sightings(today:int)->Array:
-	var out:Array=[]
-	if not GeneralCampaign.active: return out
-	var seen:Dictionary=GeneralCampaign.state.get("seen",{})
-	for id in seen:
-		var s:Dictionary=seen[id]
-		if not s.get("cell") is Vector2i: continue
-		var troops:=int(s.get("troops",0))
-		if troops<=0: continue
-		out.append({"id":"campaign:"+String(id),"pos":GeneralCampaign.world_position(s.cell),"strength":float(troops),"low":troops,"high":troops,"age_days":maxi(0,today-int(s.get("day",today))),"moving":false,"heading":0.0,"seen_day":int(s.get("day",today)),"name":String(s.get("name","")),"marked":true})
-	return out
 
 
 func _engagement_input(engagement:Dictionary,friendly:Array,enemy:Array,home:Vector2)->Dictionary:
@@ -3343,7 +3321,7 @@ func note_content(hit:Dictionary)->Dictionary:
 			lines.append("Seen on the move." if bool(seen.get("moving",false)) else "Seen encamped.")
 			lines.append("Where they are now, no one here knows." if ago>=ArmyMarks.FRESH_DAYS else "Our watchers still have them in sight.")
 			var title:=String(seen.get("name",seen.get("owner","")))
-			return {"kicker":"THEIR %s" % word.to_upper(),"title":title if title!="" else "Their %s" % word,"lines":lines,"action":_general_action(int(GeneralCampaign.state.get("army_id",-1)) if GeneralCampaign.active else 0)}
+			return {"kicker":"THEIR %s" % word.to_upper(),"title":title if title!="" else "Their %s" % word,"lines":lines,"action":_general_action(0)}
 		"enemy_arrow":
 			var ago:=maxi(0,int(scene.get("today",0))-int(hit.get("seen_day",0)))
 			return {"kicker":"THEIR MOVEMENT","title":"Seen marching","lines":["Seen on the move %s." % ("today" if ago==0 else ("%d days ago" % ago)),"Nothing newer has reached us."],"action":{}}
@@ -3478,11 +3456,8 @@ func _army_content(army_id:int,stage:String)->Dictionary:
 	return {"kicker":"WAR LEADER · "+String(army.get("name","")).to_upper(),"title":name,"lines":lines,"action":_general_action(army_id)}
 
 
-## Who answers for an army: the Alderford general in his own campaign screen,
-## a named war leader summoned into the court, or the Marshal's office.
+## Who answers for an army: a named war leader summoned into the court, or the Marshal's office.
 func _general_action(army_id:int)->Dictionary:
-	if GeneralCampaign.active and army_id==int(GeneralCampaign.state.get("army_id",-1)):
-		return {"label":"Talk with %s" % String(GeneralCampaign.state.get("general_name","the general")),"kind":"campaign"}
 	var army:=_army_record(army_id)
 	var commander:Dictionary=army.get("commander",{}) if not army.is_empty() else {}
 	if String(commander.get("figure_id",""))!="":
@@ -3560,7 +3535,6 @@ func _act(action:Dictionary)->void:
 	close_note()
 	match String(action.get("kind","")):
 		"battle": open_battle({"kind":"battle","battle":action.get("battle",{})},Vector2.ZERO)
-		"campaign": GeneralCampaign.open_screen()
 		"report": preload("res://scripts/hud/battle_report_panel.gd").open(get_tree().current_scene,int(action.get("seed",0)))
 		"watch":
 			var ui:Node=get_tree().root.get_node_or_null("MilitaryCommandUI")

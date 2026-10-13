@@ -252,14 +252,13 @@ func test_an_older_save_without_the_newer_fields_loads_with_safe_defaults()->voi
 	var fled:Dictionary=preload("res://scripts/town_ledger.gd").snapshot(civ_id,city_id)  # the flight lives in the town ledger
 	var made:=Legacy.write(slot)
 	assert_bool(made.has("error")).override_failure_message(str(made)).is_false()
-	assert_array(made.removed as Array).contains(["curated_GeneralCampaign","reflected_GeneralDialogue","player MilitaryCampaign.engagements","player MilitaryCampaign.joint_operations.raiding","player CivilizationSystem.formation_memory","player ConsequenceEngine._home_intake_today"])
+	assert_array(made.removed as Array).contains(["player MilitaryCampaign.engagements","player MilitaryCampaign.joint_operations.raiding","player CivilizationSystem.formation_memory","player ConsequenceEngine._home_intake_today"])
 	# The game being played has state of its own that the older save lacks.
 	CivilizationSystem.formation_memory["stale"]={"day":1}
 	ConsequenceEngine._home_intake_today=0.25
 	MilitaryCampaign.joint_operations.state["captured_holding"]=5
 	var loaded:=SaveSystem.load_game(slot)
 	assert_bool(loaded.has("error")).override_failure_message(str(loaded)).is_false()
-	assert_bool(GeneralCampaign.active).is_false()
 	assert_dict(CivilizationSystem.formation_memory).is_empty()
 	assert_float(ConsequenceEngine._home_intake_today).is_equal(1.0)
 	var joint:Dictionary=MilitaryCampaign.joint_operations.state

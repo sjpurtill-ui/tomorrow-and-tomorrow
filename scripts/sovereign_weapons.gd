@@ -12,7 +12,7 @@ extends RefCounted
 ##   human_signoff  the machine only proposes targets; a named commander must
 ##                  approve each strike, and it never widens his authority.
 ## MilitaryCampaign keeps the decisions (sovereign_decisions) and answers
-## general_use_gate(); GeneralCampaign and the battle entry points ask it.
+## general_use_gate(); the battle entry points ask it.
 ## Static helpers; reference with preload.
 
 const SOVEREIGN:={

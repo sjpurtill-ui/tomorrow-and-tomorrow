@@ -14,7 +14,6 @@ func before_test()->void:
 	GameState.food_stocks={"Preserved food":1000000.0};GameState.resource_stockpiles.Food=1000000.0
 	command=MilitaryCampaign.command_hierarchy;op=MilitaryCampaign.joint_operations
 	op.geography.land_query=func(at:Vector2)->bool:return at.y>=0
-	GeneralCampaign.active=false
 func after_test()->void:
 	CivilizationSystem.set_scout_geography_authority(Callable())
 	GameState.elapsed_days=0;GameState.set_process(true);MilitaryCampaign.set_process(true);CivilizationSystem.set_process(true)

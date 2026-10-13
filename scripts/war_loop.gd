@@ -678,7 +678,7 @@ static func _recover(day:int)->void:
 ## smaller peoples send raiders, and the ladder climbs from there.
 static func _pressure(day:int)->void:
 	for civ in WorldSimulation.world.civilizations:
-		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)) or bool((civ as Dictionary).get("general_campaign_owned",false)): continue
+		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
 		var id:=String((civ as Dictionary).get("id",""))
 		var chance:=pressure_chance(id,day)
 		if chance<=0.0 or _rng("pressure:%s:%d" % [id,day]).randf()>=chance: continue
@@ -1971,8 +1971,6 @@ static func _peace_made(f:Dictionary)->void:
 
 static func daily(day:int)->void:
 	if WorldSimulation.actor_id!="player" or not GameState.settlement_site_committed or day%TICK!=0: return
-	# The authored General Campaign runs its own war; leave it alone.
-	if WorldSimulation.system("GeneralCampaign")!=null and bool(WorldSimulation.campaign.active): return
 	var s:=state()
 	# Envoys who stood in our hall before the rule showed us the way home too.
 	_envoys_from_before(day)
@@ -1986,7 +1984,7 @@ static func daily(day:int)->void:
 	# attack on a small people is the feud, hot from the day it began.
 	for civ in WorldSimulation.world.civilizations:
 		var relation:Dictionary=civ.get("player_relation",{})
-		if not bool(relation.get("at_war",false)) or not bool(civ.get("alive",true)) or bool(civ.get("general_campaign_owned",false)) or int(relation.get("contact_level",0))<1: continue
+		if not bool(relation.get("at_war",false)) or not bool(civ.get("alive",true)) or int(relation.get("contact_level",0))<1: continue
 		var cid:=String(civ.id)
 		# A war no band can march to ends: neither side can reach the other.
 		if not near_us(cid):
@@ -2236,7 +2234,7 @@ static func reconcile(day:int=-1)->Array:
 	for index in world.civilizations.size():
 		var civ:Dictionary=world.civilizations[index]
 		var id:=String(civ.get("id",""))
-		if id=="" or bool(civ.get("general_campaign_owned",false)) or not bool(civ.get("alive",true)): continue
+		if id=="" or not bool(civ.get("alive",true)): continue
 		var relation:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 		if not bool(relation.get("at_war",false)) or Scale.formal(id): continue
 		if _our_fight_live(id):
@@ -2581,7 +2579,6 @@ static func _rival_wars(day:int)->void:
 		for j in range(i+1,civs.size()):
 			var first:Dictionary=civs[i]; var second:Dictionary=civs[j]
 			if not bool(first.get("alive",true)) or not bool(second.get("alive",true)): continue
-			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
 			# A people down to a handful starts no quarrel and is worth none.
 			if minf(float(first.get("population",0.0)),float(second.get("population",0.0)))<BROKEN_PEOPLE: continue
 			if not neighbours(first,second): continue

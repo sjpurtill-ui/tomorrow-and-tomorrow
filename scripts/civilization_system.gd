@@ -680,9 +680,6 @@ func _process_strategic_turn(day:int)->void:
 	turn_index+=1
 	# Every people is a full simulation of its own (WorldSimulation actors) on
 	# the player's own rules; this turn only keeps contact and word moving.
-	if WorldSimulation.campaign.active:
-		world_changed.emit(competition_snapshot())
-		return
 	_process_intercivilization_relations(day)
 	_process_foreign_player_rumors(day)
 	_process_foreign_scout_reports(day)
@@ -3981,7 +3978,6 @@ func reconcile_rival_feuds(day:int)->void:
 		for second_index in range(first_index+1,civilizations.size()):
 			var first:Dictionary=civilizations[first_index]
 			var second:Dictionary=civilizations[second_index]
-			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
 			var relation:Dictionary=((first.relations as Dictionary).get(String(second.id),{}) as Dictionary).duplicate(true)
 			if relation.is_empty() or CONFLICT_SCALE.formal_war(String(first.id),String(second.id),self): continue
 			var carried:=String(relation.get("pending_message",""))=="war"

@@ -5,11 +5,14 @@ battlefield decisions in every era: routes, camps, deployment, tactics and retre
 Direct early-era cohort controls were considered and explicitly discarded.
 Do not restore mandatory tactical orders or settings-heavy management screens.
 
-The first slice is the Alderford War: one early campaign, two rival leaders,
-one coalition war, and a conversation → validated objective → actual movement
-and battle → unsolicited report → next conversation loop. It is an explicit
-authored campaign, not a claim that this setup arose naturally in a fresh world.
-It uses its own save slot and preserves the world the player leaves.
+The first slice was the Alderford War, an authored early campaign with its own
+screen, map and save slot. It was removed on 2026-10-13 (scripts
+general_campaign*.gd and general_dialogue.gd, and its button on the military
+page): it was a separate scenario, not the player's world, and some forty
+places in the engine had to ask whether it was running. The principle above stands and is carried by the living war (war
+council, command hierarchy, generals summoned to court). Saves that hold the
+old sections still load; the sections are passed over. The notes below
+describe that slice and are kept as design record only.
 
 The ruler decides purpose. Routine execution belongs to the general. Discussions
 pause; commitments advance all ordinary world systems through the same calendar

@@ -254,7 +254,6 @@ func advance(day:int)->void:
 		for index in group.size():
 			var item:Dictionary=group[index];var actual:Dictionary=item.actual;var order:Dictionary=item.order
 			if int(actual.get("troops",0))<=0 or bool(actual.get("embarked",false)):continue
-			if WorldSimulation.campaign.active and int(actual.army_id)==int(WorldSimulation.campaign.state.get("army_id",-1)):continue
 			if not host.active_siege.is_empty() and int(actual.army_id) in host.active_siege.get("command_members",[int(host.active_siege.get("army_id",0))]):
 				if order.mission=="withdraw" and int(actual.army_id)==int(host.active_siege.army_id):host.siege_order(String(host.active_siege.id),"withdraw")
 				else:actual["command_status"]="Investing city · siege staff executing";continue
