@@ -24,8 +24,6 @@ func _ready()->void:
 	_expect(terrain.hud!=null,"Command Rail HUD missing")
 	var nav_names:Array[String]=["RailSettlement","RailEconomy","RailCivilization","RailInquiry","RailWorld","RailMilitary"]
 	var labels:Array[String]=["SETTLEMENT","ECONOMY","CIVILIZATION","INQUIRY","WORLD","MILITARY"]
-	# The ledgers wait in the rail's drawer; open it to find them.
-	terrain.hud.toggle_drawer()
 	await get_tree().process_frame
 	for index in labels.size():
 		var nav:=terrain.hud.find_child(nav_names[index],true,false) as Control

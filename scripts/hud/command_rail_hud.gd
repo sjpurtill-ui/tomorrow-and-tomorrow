@@ -57,10 +57,6 @@ var rail_buttons:Dictionary={}
 var rail_badges:Dictionary={}
 var rail_icons:Dictionary={}
 var rail_labels:Dictionary={}
-var drawer_button:Button
-var drawer_label:Label
-var drawer_box:VBoxContainer
-var drawer_open:=false
 var _words_signature:=""
 var time_pill:PanelContainer
 var time_text:RichTextLabel
@@ -461,89 +457,6 @@ func _make_rail_button(section:Dictionary)->Button:
 	rail_buttons[id]=button;rail_badges[id]=badge
 	return button
 
-func _make_drawer_button()->Button:
-	var button:=Button.new()
-	button.name="RailLedgers"
-	button.custom_minimum_size=Vector2(0,52)
-	button.tooltip_text="The tallies of the people's work: food, materials, wealth, buildings, crafts, culture, warriors and lore"
-	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
-	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
-	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
-	button.add_theme_stylebox_override("focus",_rail_focus_style())
-	button.pressed.connect(toggle_drawer)
-	var content:=VBoxContainer.new()
-	content.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content.alignment=BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation",0)
-	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	button.add_child(content)
-	var mark:=NavIcon.new("drawer")
-	mark.name="DrawerMark"
-	mark.set_icon_color(_rail_ink())
-	mark.custom_minimum_size=Vector2(32,32)
-	mark.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	content.add_child(mark)
-	drawer_label=Tokens.make_label("",13,Tokens.INK);drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
-	# Alerts inside a closed drawer show on the drawer button itself.
-	var badge:=Label.new()
-	badge.name="DrawerBadge"
-	badge.visible=false
-	badge.custom_minimum_size=Vector2(16,16)
-	badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	badge.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	badge.add_theme_font_size_override("font_size",12)
-	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	badge.position=Vector2(Folio.RAIL_WIDTH-16.0-14.0,2.0)
-	button.add_child(badge)
-	rail_badges["drawer"]=badge
-	drawer_button=button
-	_style_drawer_label()
-	return button
-
-func _style_drawer_label()->void:
-	var open:=drawer_box!=null and drawer_box.visible
-	var word:=EraWords.word("rail.drawer","Ledgers")
-	if drawer_label:drawer_label.text=word+(" −" if open else " +")
-	if drawer_button:drawer_button.tooltip_text=("Hide the %s" if open else "Show the %s: food, materials, wealth, buildings, crafts, culture, warriors and learning") % word.to_lower()
-	_sync_drawer_badge()
-
-## Drawer alerts, summed onto the drawer button while the drawer is closed.
-var _drawer_alerts:Dictionary={}
-
-func _sync_drawer_badge()->void:
-	var badge:Label=rail_badges.get("drawer")
-	if badge==null:return
-	var open:=drawer_box!=null and drawer_box.visible
-	var count:=0;var urgent:=false
-	for id in _drawer_alerts:
-		var alert:Dictionary=_drawer_alerts[id]
-		if String(alert.text)=="":continue
-		count+=int(alert.text) if String(alert.text).is_valid_int() else 1
-		urgent=urgent or alert.color==Tokens.RED
-	var tint:=Tokens.RED if urgent else Tokens.AMBER
-	_set_badge("drawer","" if open or count==0 else str(count),tint)
-
-func _in_drawer(id:String)->bool:
-	for spec in SECTIONS:
-		if String(spec.id)==id or String(spec.get("section",""))==id and id!="":
-			if bool(spec.get("drawer",false)):return true
-	return false
-
-func toggle_drawer()->void:
-	drawer_open=not drawer_open
-	_sync_drawer()
-
-func _sync_drawer()->void:
-	if drawer_box==null:return
-	# An open ledger keeps its drawer open so the lit entry stays in view.
-	drawer_box.visible=drawer_open or (active_section!="" and _in_drawer(active_section))
-	_style_drawer_label()
-	if drawer_button:
-		var lit:=drawer_box.visible
-		drawer_button.add_theme_stylebox_override("normal",_approved_rail_style(lit))
-	_layout()
 
 ## Rail labels and top-strip captions follow what the people know.
 func _refresh_words()->void:
@@ -556,7 +469,6 @@ func _refresh_words()->void:
 	# The eyes go by the age's word: Eyes, Watchers, Spies (eyes_corps.gd).
 	var eyes_label:Label=rail_labels.get("eyes")
 	if eyes_label:eyes_label.text=preload("res://scripts/eyes_corps.gd").word("Eyes")
-	_style_drawer_label()
 	var military:Button=rail_buttons.get("military")
 	if military:
 		var extra:=""
@@ -602,13 +514,9 @@ func set_active_section(id:String)->void:
 			if icon.has_method("set_icon_color"): icon.set_icon_color(Folio.GOLD)
 		var label:Label=rail_labels.get(section_id)
 		if label:label.add_theme_color_override("font_color",Color.WHITE if active else Folio.RAIL_TEXT)
-	_sync_drawer()
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:
-	if id!="drawer" and _in_drawer(id):
-		_drawer_alerts[id]={"text":text,"color":color}
-		_sync_drawer_badge()
 	var badge:Label=rail_badges.get(id)
 	if badge==null: return
 	badge.visible=text!=""

@@ -4,53 +4,22 @@ const Hud:=preload("res://scripts/hud/command_rail_hud.gd")
 class BareHud extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:pass
 
-func test_food_shortage_copy_cannot_resize_or_drop_the_kpi_strip()->void:
-	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1138,640);add_child(canvas)
-	var hud:Control=auto_free(BareHud.new());canvas.add_child(hud)
-	hud._build_time_pill();hud._build_kpi_strip()
-	for i in 3:await get_tree().process_frame
-	var food:Dictionary=hud.kpi_chips.food
-	var reserved_width:float=float((food.chip as Control).custom_minimum_size.x)
-	hud._update_kpi("food","12.0 d","▲",Hud.Tokens.GREEN,"positive")
-	for i in 2:await get_tree().process_frame
-	assert_float(food.value.size.x).is_greater(20.0)
-	assert_float(food.delta.size.x).is_greater_equal(52.0)
-	hud._layout();var positive_y:float=float(hud.kpi_strip.position.y)
-	assert_float(hud.kpi_strip.position.x).is_greater_equal(hud.time_pill.position.x+hud.time_pill.size.x+12.0)
-	hud._update_kpi("food","0.0 d","▼ shortage -99999d",Hud.Tokens.RED,"negative")
-	hud._layout()
-	assert_float(food.chip.custom_minimum_size.x).is_equal(reserved_width)
-	assert_float(hud.kpi_strip.position.y).is_equal(positive_y)
-	assert_float(hud.kpi_strip.get_combined_minimum_size().x).is_less_equal(800.0)
-
-func test_a_later_age_strip_never_covers_the_clock()->void:
-	# A later age shows every chip (goods and the day's labour too). The canvas
-	# is the window divided by the UI scale (display_preferences.logical_size):
-	# a 1600x900 window at the default 1.25 lays out at 1280x720, and 1138x640
-	# is the smallest. There the least urgent chips give way; food, lives and
-	# the day's labour stay; a wide canvas shows them all again.
-	var known:Array[String]=GameState.known_discoveries.duplicate()
-	GameState.known_discoveries.append("printing_process")
+func test_the_readings_stand_on_the_top_bar_not_in_a_second_strip()->void:
+	# The parchment shell keeps the day's readings on the one top bar; the old
+	# row of boxed chips under it stays hidden at every window size, so
+	# nothing can cover the clock.
 	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1280,720);add_child(canvas)
 	var hud:Control=auto_free(BareHud.new());canvas.add_child(hud)
 	hud._build_time_pill();hud._build_kpi_strip()
-	hud.time_text.text="[b]Year 13 · Summer[/b] · Hot →"
-	for size in [Vector2i(1280,720),Vector2i(1138,640)]:
+	for size in [Vector2i(1138,640),Vector2i(1280,720),Vector2i(2400,1000)]:
 		canvas.size=size
-		for i in 3:await get_tree().process_frame
-		hud._layout()
 		for i in 2:await get_tree().process_frame
-		var clock_end:float=hud.time_pill.position.x+hud.time_pill.get_combined_minimum_size().x
-		assert_float(hud.kpi_strip.position.x).override_failure_message("strip over the clock at %s" % str(size)).is_greater_equal(clock_end+12.0)
-		assert_float(hud.kpi_strip.position.x+hud.kpi_strip.get_combined_minimum_size().x).override_failure_message("strip off the edge at %s" % str(size)).is_less_equal(float(size.x))
-		for id in ["food","health","gdp"]:
-			assert_bool((hud.kpi_chips[id].chip as Control).visible).override_failure_message("%s must stay at %s" % [id,str(size)]).is_true()
-	canvas.size=Vector2i(2400,1000)
-	for i in 2:await get_tree().process_frame
-	hud._layout()
-	for id in hud.kpi_chips:
-		assert_bool((hud.kpi_chips[id].chip as Control).visible).override_failure_message(String(id)+" hidden at 2400").is_true()
-	GameState.known_discoveries.clear();GameState.known_discoveries.append_array(known)
+		hud._layout()
+		assert_bool(hud.kpi_strip.visible).override_failure_message("a second strip at %s" % str(size)).is_false()
+		assert_float(hud.time_pill.position.x+hud.time_pill.get_combined_minimum_size().x).override_failure_message("clock off the edge at %s" % str(size)).is_less_equal(float(size.x))
+	# The chips still take the day's words, for the bar and its hover cards.
+	hud._update_kpi("food","0.0 d","▼ shortage -99999d",Hud.Tokens.RED,"negative")
+	assert_str((hud.kpi_chips.food.value as Label).text).is_equal("0.0 d")
 
 class RailBare extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:
@@ -78,30 +47,20 @@ func test_decision_queue_has_one_answer_path_and_a_season_date()->void:
 	assert_str(joined).not_contains("Day 34844")
 	assert_str(joined).not_contains("DECISION")
 
-func test_time_controls_are_words_not_glyphs()->void:
+func test_pause_is_one_sign_with_its_words_and_the_paces_are_named()->void:
+	# The parchment shell (approved 2026-10-04): pause is the one sign every
+	# player reads, with its words on hover; each pace says its name on hover.
 	var hud:=_rail()
 	hud._style_speed_controls(0)
-	assert_str(hud.pause_button.text).is_equal("Resume")
+	assert_str(hud.pause_button.text).is_equal("▶")
+	assert_str(hud.pause_button.tooltip_text).contains("Let time run")
 	hud._style_speed_controls(3)
-	assert_str(hud.pause_button.text).is_equal("Pause")
-	for button:Button in hud.speed_buttons:
-		for glyph in ["▶","Ⅱ","½","1d","3d"]:
-			assert_str(button.text).not_contains(glyph)
-		assert_bool(button.text.length()>=4).is_true()
-
-func test_alerts_in_the_closed_drawer_show_on_the_drawer_button()->void:
-	var hud:=_rail()
-	hud.drawer_open=false;hud._sync_drawer()
-	hud._set_badge("civ","2",Hud.Tokens.RED)
-	hud._set_badge("economy","!",Hud.Tokens.RED)
-	var badge:Label=hud.rail_badges["drawer"]
-	assert_bool(badge.visible).is_true()
-	assert_str(badge.text).is_equal("3")
-	hud.drawer_open=true;hud._sync_drawer()
-	assert_bool(badge.visible).is_false()
-	hud._set_badge("civ","",Hud.Tokens.RED);hud._set_badge("economy","",Hud.Tokens.RED)
-	hud.drawer_open=false;hud._sync_drawer()
-	assert_bool(badge.visible).is_false()
+	assert_str(hud.pause_button.text).is_equal("Ⅱ")
+	assert_str(hud.pause_button.tooltip_text).contains("Stop time")
+	assert_int(hud.speed_buttons.size()).is_equal(Hud.SPEED_LABELS.size())
+	for speed:int in hud.speed_buttons.size():
+		if speed==0:continue
+		assert_str(String(hud._speed_card(speed).kicker)).contains(String(Hud.SPEED_LABELS[speed]).to_lower())
 
 func test_every_rail_hotkey_has_one_owner_and_is_named()->void:
 	var seen:={}

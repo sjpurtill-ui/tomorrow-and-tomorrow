@@ -37,8 +37,6 @@ func _preview() -> void:
 	add_child(terrain)
 	hud.register_provider("settlement", preload("res://scripts/hud/content/dock_content_settlement.gd").new(terrain, hud))
 	hud._refresh_kpis()
-	hud.drawer_open = true
-	hud._sync_drawer()
 	hud.open_dock("settlement", 0)
 	for frame in 24: await get_tree().process_frame
 	hud.force_dock_layout()

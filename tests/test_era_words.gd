@@ -168,32 +168,20 @@ func test_every_top_strip_value_fits_in_full_at_1280()->void:
 			var need:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
 			assert_float(need).override_failure_message("%s %s '%s' needs %.0f, has %.0f" % [id,key,label.text,need,label.size.x]).is_less_equal(label.size.x+0.5)
 
-func test_the_rail_leads_with_the_fantasy_and_folds_the_ledgers()->void:
+func test_the_rail_leads_with_the_fantasy_and_shows_every_page()->void:
 	var rail=auto_free(RailOnly.new())
 	add_child(rail)
 	await _next_frame()
-	var primary:Array=[]
-	for spec in Rail.SECTIONS:
-		if not bool(spec.get("drawer",false)):primary.append(String(spec.id))
-	# The warriors stand on the rail itself (the player's word: HOI4 keeps the
-	# army one click away); the other ledgers fold into the drawer.
-	assert_array(primary).is_equal(["overview","standing","world","military","chronicle"])
-	assert_str((rail.rail_labels.overview as Label).text).is_equal("The People")
-	assert_str(rail.drawer_label.text).starts_with("Tallies")
-	# Court + the People + Standing + Known World + Warriors + Chronicle + the drawer.
-	var visible:=0
+	# The parchment shell (approved 2026-10-04) stands every page on the rail
+	# itself under a plain name: nothing folds away.
+	var ids:Array=[]
+	for spec in Rail.SECTIONS:ids.append(String(spec.id))
+	for id:String in ["overview","standing","world","military","chronicle"]:
+		assert_array(ids).contains([id])
+	assert_str((rail.rail_labels.overview as Label).text).is_equal("People")
 	for id in rail.rail_buttons:
-		if (rail.rail_buttons[id] as Control).is_visible_in_tree():visible+=1
-	assert_int(visible).is_equal(5)
-	assert_bool(rail.drawer_box.visible).is_false()
-	rail.toggle_drawer()
-	assert_bool(rail.drawer_box.visible).is_true()
-	rail.toggle_drawer()
-	# Opening a ledger keeps its drawer open so the lit entry stays in view.
-	rail.set_active_section("economy")
-	assert_bool(rail.drawer_box.visible).is_true()
-	rail.set_active_section("")
-	assert_bool(rail.drawer_box.visible).is_false()
+		assert_bool((rail.rail_buttons[id] as Control).is_visible_in_tree()).override_failure_message(String(id)+" is not on the rail").is_true()
+	assert_bool(rail.get("drawer_box")==null).is_true()
 
 func test_carts_saddles_and_bullets_wait_for_their_discoveries()->void:
 	var text:="A cartload of hides went by cart. Clay Sling Bullets and a pack saddle. Riders on horseback with guns."
