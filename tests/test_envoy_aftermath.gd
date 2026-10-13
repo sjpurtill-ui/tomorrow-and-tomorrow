@@ -65,11 +65,13 @@ func before_test()->void:
 	CivilizationSystem.city_intelligence.records.player[city_id]["position"]={"x":home.x-20.0,"z":home.y+8.0}
 	CivilizationSystem.city_intelligence.records.player[other_id]["position"]={"x":home.x-30.0,"z":home.y+12.0}
 	CivilizationSystem.set_scout_geography_authority(Callable(self,"_land"))
-	# A hard, assertive ruler: the kind who would demand tribute of anyone else.
-	var leader:=ForeignDiplomacy.leader(civ_id)
-	var p:Dictionary=leader.get("personality",{})
-	p["assertiveness"]=0.9; p["risk_tolerance"]=0.7; p["empathy"]=0.3
-	leader["personality"]=p
+	# Next door, where the war's rules look (realm_reach.gd): a threat needs a
+	# road, and a people no band could bring to us demands nothing
+	# (audience_hall._candidate). The ruler's temper is their own, drawn from
+	# the world's seed (foreign_diplomacy.leader); nothing here sets it.
+	tsaren["position"]=Vector2(home.x-20.0,home.y+8.0)
+	stonefield["position"]=Vector2(home.x-30.0,home.y+12.0)
+	civ["position"]=Vector2((home.x-20.0)/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,(home.y+8.0)/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 	# Their stores, for ransoms and prices.
 	for res in ["Food","Timber"]: Hall.EXCHANGE.receive(civ_id,res,400.0)
 
@@ -117,7 +119,7 @@ func _types(occasion:Dictionary)->Array:
 
 func test_no_tribute_demand_from_a_people_whose_chief_town_we_hold()->void:
 	var refused:={"previous":{"situation":"tribute_demand","option":"defy","kind":"threat","resource":"Food"}}
-	# Before the war went our way, this ruler's refused demand comes back as a test of resolve.
+	# Before the war went our way, this ruler still makes demands of us.
 	var before:=_types(_occasion("sequel",refused))+_types(_occasion("tension_rise"))
 	assert_bool(before.any(func(t:String)->bool: return t in Aftermath.DEMANDS)).override_failure_message(str(before)).is_true()
 	_take_tsaren()
