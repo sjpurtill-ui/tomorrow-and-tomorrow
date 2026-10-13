@@ -219,7 +219,7 @@ static func voice(face_list:Array)->Dictionary:
 		role="provider";line="We walk to the water again and again and it is still not enough. The little ones' lips are cracked."
 	elif float(m.get("food_intake_ratio",1.0))<0.99:
 		role="grievance";line="My children went to sleep hungry again. There is nothing left to dig near the camp."
-	elif food_days>=0.0 and food_days<10.0:
+	elif preload("res://scripts/food_care.gd").store_level(food_days)=="bare":
 		role="maker";line="The stores are nearly bare. I look at what is left every night before I sleep."
 	elif GameState.housing_capacity<GameState.population_total:
 		role="grievance";line="There are too many of us under one roof. When it rains, the children wake up wet."
@@ -333,7 +333,7 @@ static func store_cause(trend:int,food_days:float)->String:
 	var season:=season_word()
 	if food_days<0.0:return "Told once the stores are counted."
 	if trend>0:return "Stores rising: more comes in than we eat."
-	if trend==0 and food_days>=20.0:return "Stores holding."
+	if trend==0 and preload("res://scripts/food_care.gd").store_level(food_days)=="holding":return "Stores holding."
 	var weakest:="";var low:=1.0
 	for key in ["Hunting","Wild gathering","Fishing","Cultivation"]:
 		if health.has(key) and float(health[key])<low:low=float(health[key]);weakest=key

@@ -46,7 +46,7 @@ static func local_snapshot()->Dictionary:
 	var water_days:=float(water.get("days",-1))
 	var issues:Array[String]=[]
 	if float(metrics.get("food_intake_ratio",1))<.99:issues.append("Food shortfall")
-	elif food_days>=0 and food_days<7:issues.append("Low food reserve")
+	elif preload("res://scripts/food_care.gd").store_level(food_days)=="bare":issues.append("Low food reserve")
 	if float(water.get("intake_ratio",1))<.99:issues.append("Water shortfall")
 	if state.housing_capacity<state.population_total:issues.append("Shelter shortfall")
 	var building:=0

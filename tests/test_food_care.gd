@@ -338,3 +338,19 @@ func test_role_effects_say_what_ten_more_would_do()->void:
 	assert_float(float(keeping.more.infant_deaths_per_1000)).is_less(float(keeping.now.infant_deaths_per_1000))
 	var getting:=FoodCare.role_effect("Food")
 	assert_float(float(getting.more.fresh_rations)).is_greater(float(getting.now.fresh_rations))
+
+## One rule says how the stores stand, and the screens that say so read it.
+func test_the_stores_are_bare_low_or_holding_by_one_rule()->void:
+	var Care:=preload("res://scripts/food_care.gd")
+	assert_str(Care.store_level(-1.0)).is_equal("uncounted")
+	assert_str(Care.store_level(0.0)).is_equal("bare")
+	assert_str(Care.store_level(Care.BARE_DAYS-0.1)).is_equal("bare")
+	assert_str(Care.store_level(Care.BARE_DAYS)).is_equal("low")
+	assert_str(Care.store_level(Care.LEAN_DAYS-0.1)).is_equal("low")
+	assert_str(Care.store_level(Care.LEAN_DAYS)).is_equal("holding")
+	# No screen keeps a threshold of its own.
+	for path:String in ["res://scripts/hud/civilization_overview_model.gd","res://scripts/hud/command_rail_hud.gd","res://scripts/hud/people_model.gd"]:
+		var source:=FileAccess.get_file_as_string(path)
+		assert_bool(source.contains("store_level(")).override_failure_message(path).is_true()
+		for stale:String in ["food_days<7","food_days<10","food_days>=20"]:
+			assert_bool(source.contains(stale)).override_failure_message(path+" keeps "+stale).is_false()
