@@ -36,6 +36,8 @@ func before_test()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.reset_for_new_world(5357);GameState.civic_api_enabled=false
 	DiscoverySystem.reset_for_new_world();FoodSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	# No border posts: these tests count the watch at home and in the towns.
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
 	GameState.ensure_population_total(535);GameState.housing_capacity=800
 	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];SettlementModel.ensure_founded()
 	GameState.settlement_name="Seanstone"
