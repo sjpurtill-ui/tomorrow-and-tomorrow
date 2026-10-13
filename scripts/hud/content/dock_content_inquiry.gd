@@ -294,17 +294,31 @@ func _domain_aggregate_text(domain:String)->String:
 	if effect_ids.size()>4: text+=" and %d more" % (effect_ids.size()-4)
 	return text+"."
 
-## The field's contributions as ledger rows.
+## The field's contributions as ledger rows: what counts now. Where
+## everything known about an effect adds up past the limit the year sets
+## (effect_explainer.totals), each field's part is cut in the same measure,
+## so the bars add up to what the engine uses; the row says what was cut.
 func _field_rows(domain:String)->Array:
 	var totals:=Explainer.field_totals(domain)
+	var all:={}
+	for total:Dictionary in Explainer.totals():all[String(total.key)]=total
 	var rows:Array=[]
+	var counted:={}
 	for key:String in totals:
-		var row:=Explainer.ledger_row(key,float(totals[key]),1.0,1.0,"total")
+		var whole:Dictionary=all.get(key,{})
+		var raw:=float(whole.get("raw",0.0))
+		var used:=float(whole.get("total",raw))-float(whole.get("upkeep",0.0))
+		var before:=float(totals[key])
+		var now:=before*used/raw if absf(raw)>absf(used)+0.000001 and absf(raw)>0.000001 else before
+		counted[key]=now
+		var row:=Explainer.ledger_row(key,now,1.0,1.0,"total")
 		row["id"]="field:%s:%s" % [domain,key]
-		row["usage"]="now, from this field's practices, before the age's limit"
-		row["value"]=float(totals[key])
+		row["usage"]="now, from this field's practices"
+		row["value"]=now
+		if absf(before-now)>0.0005:
+			(row.notes as Array).push_front("This field's practices add up to %s; %s of it counts now, the rest waits on the year's limit." % [Explainer.percent(before),Explainer.percent(now)])
 		rows.append(row)
-	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return absf(float(totals[a.key]))>absf(float(totals[b.key])))
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return absf(float(counted[a.key]))>absf(float(counted[b.key])))
 	return rows
 
 func _toggle_domain(domain:String)->void:
