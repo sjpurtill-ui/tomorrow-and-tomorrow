@@ -362,6 +362,10 @@ func _border_card()->Control:
 	var held:=0.0;var km:=0.0
 	for st:Dictionary in kept.stretches:held+=float(st.strength)*float(st.km);km+=float(st.km)
 	var line_strength:=held/km if km>0.0 else 0.0
+	# The army's own bands at their border stations (war_council.border_bands):
+	# with the forts' watch, everyone of ours on the border. One count.
+	var bands:Dictionary=preload("res://scripts/war_council.gd").border_bands()
+	var on_border_all:=int(kept.posted)+int(bands.men)
 	# A fort from the current age, not a castle borrowed from a later one.
 	var head:=HBoxContainer.new();head.name="Border";head.add_theme_constant_override("separation",10);column.add_child(head)
 	var seal:=PanelContainer.new();seal.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,7,0));seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(seal)
@@ -387,15 +391,22 @@ func _border_card()->Control:
 		advice="The garrisons are building. Finished forts can link their watch."
 	elif standing>0:
 		advice="No two forts are linked. Place another within reach."
+	# No linked forts, but bands of the army stand there: say so.
+	if km<=0.0 and int(bands.men)>0:
+		state_words="Bands hold the border"
+		state_ink=T.AMBER_TEXT
+		# Seven words at most (the screen's eight-word rule); km held of km given.
+		advice="%s in %d %s · %d/%d km" % [EraWords.grouped(int(bands.men)),int(bands.bands),"band" if int(bands.bands)==1 else "bands",roundi(float(bands.held_km)),roundi(float(bands.assigned_km))]
 	var condition:=VBoxContainer.new();condition.name="LineHolds";condition.add_theme_constant_override("separation",3);column.add_child(condition)
 	condition.add_child(_line(state_words,15,state_ink,true))
 	condition.add_child(_line(advice,12,T.INK_MUTED,true))
 	if km>0.0:
 		var strength:=_line("Linked crossings stopped · about %d in 100" % roundi(line_strength*100.0),12,T.INK,true);condition.add_child(strength)
 		var bar:=ShareBar.new();bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(0,7);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;condition.add_child(bar)
-	condition.tooltip_text="Only linked stretches are watched: about %d in 100 crossings are stopped there, fewer for the stealthy. Unlinked ground stays open." % roundi(line_strength*100.0)
+	if km<=0.0 and int(bands.men)>0:condition.tooltip_text="No forts are linked, so the border is held by the army's own bands under the Defend stance: %s in %d at their stations, holding %d of the %d km given them. Forts would let the home guard watch it instead." % [EraWords.grouped(int(bands.men)),int(bands.bands),roundi(float(bands.held_km)),roundi(float(bands.assigned_km))]
+	else:condition.tooltip_text="Only linked stretches are watched: about %d in 100 crossings are stopped there, fewer for the stealthy. Unlinked ground stays open." % roundi(line_strength*100.0)
 	var facts:=HBoxContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("separation",6);column.add_child(facts)
-	facts.add_child(_border_fact("Posted",compact(int(kept.posted)),"on the border","%s posted out: garrisons plus the watch along linked stretches." % EraWords.grouped(int(kept.posted)),plum))
+	facts.add_child(_border_fact("Posted",compact(on_border_all),"on the border","%s of ours on the border: %s of the home guard in the forts and along linked stretches, and %s of the army in %d %s at border stations (the Defend stance)." % [EraWords.grouped(on_border_all),EraWords.grouped(int(kept.posted)),EraWords.grouped(int(bands.men)),int(bands.bands),"band" if int(bands.bands)==1 else "bands"],plum))
 	facts.add_child(_border_fact("Garrison",compact(garrison),"in the forts","%s in the forts. Garrisons are manned first; those left watch the linked stretches." % EraWords.grouped(garrison),plum))
 	facts.add_child(_border_fact("FoodLoss",compact(roundi(float(bill.food_lost))),"food lost / day","%s food spoils or is eaten on the road each day, in addition to the rations the border watch eats. Roads and carts reduce this loss." % EraWords.grouped(roundi(float(bill.food_lost))),T.GOLD))
 	var share:=Forts.border_share()

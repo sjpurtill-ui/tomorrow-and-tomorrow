@@ -808,16 +808,27 @@ static func _station_border_band(band:Dictionary,station:Dictionary,label:String
 	station.erase("relocating")
 	band["command_status"]="Marching to the border station"
 
-static func _border_words(today:int)->String:
-	var held:=0.0;var assigned:=0.0;var men:=0;var marching:=0;var reinforcements:=0
+## The army's own bands on the border (the Defend stance's stations), as one
+## count for every screen: {men, bands, held_km, assigned_km, marching (bands
+## still on the road), reinforcing (men)}. The forts' watch (fort_border.gd)
+## is the home guard's and is counted there; the two together are everyone
+## of ours on the border.
+static func border_bands(today:int=-1)->Dictionary:
+	if today<0:today=_today()
+	var out:={"men":0,"bands":0,"held_km":0.0,"assigned_km":0.0,"marching":0,"reinforcing":0}
 	for band:Dictionary in _council_bands():
-		if band.has("border_reinforcement") and String(band.council.get("phase",""))!="home":reinforcements+=int(band.get("troops",0))
+		if band.has("border_reinforcement") and String(band.council.get("phase",""))!="home":out.reinforcing=int(out.reinforcing)+int(band.get("troops",0))
 		if not band.has("border_sector") or String(band.council.get("phase",""))=="home":continue
-		held+=BorderDefense.length(BorderDefense.coverage(band,today))
-		assigned+=BorderDefense.length(BorderDefense.points(band.border_sector.get("points",[])))
-		men+=int(band.get("troops",0))
-		if String(band.get("status",""))=="moving":marching+=1
-	return "%d deployed; %.1f of %.1f assigned border km held. %d bands taking station; %d reinforcing; %d remain at home." % [men,held,assigned,marching,reinforcements,int(_mc().home_army.get("troops",0))]
+		out.held_km=float(out.held_km)+BorderDefense.length(BorderDefense.coverage(band,today))
+		out.assigned_km=float(out.assigned_km)+BorderDefense.length(BorderDefense.points(band.border_sector.get("points",[])))
+		out.men=int(out.men)+int(band.get("troops",0))
+		out.bands=int(out.bands)+1
+		if String(band.get("status",""))=="moving":out.marching=int(out.marching)+1
+	return out
+
+static func _border_words(today:int)->String:
+	var b:=border_bands(today)
+	return "%d deployed; %.1f of %.1f assigned border km held. %d bands taking station; %d reinforcing; %d remain at home." % [int(b.men),float(b.held_km),float(b.assigned_km),int(b.marching),int(b.reinforcing),int(_mc().home_army.get("troops",0))]
 
 ## Towns we hold of theirs whose garrisons are short: men march from home.
 static func _man_garrisons(civ_id:String)->String:
