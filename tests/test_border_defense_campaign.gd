@@ -425,3 +425,37 @@ func test_peak_defense_assigns_bounded_real_bands_and_keeps_a_home_reserve() -> 
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(reserve)
 	assert_int(MilitaryCampaign.field_armies.size()).is_equal(forces)
 	assert_int(int(GameState.population_total)).is_equal(people)
+
+## The user, 2026-10-13: the War screen showed 1,368 soldiers in "Border
+## bands" at "border stations" while its Border card said "0 on the border".
+## The card counts everyone of ours on the border: the forts' watch and the
+## army's bands at their stations, from the council's one count.
+func test_the_border_card_counts_the_armys_bands_on_the_border() -> void:
+	_start_world()
+	GameState.ensure_population_total(100000)
+	GameState.border_forts={"forts":[],"border_share":0.0,"next_id":1,"seeded":true}
+	CivilizationSystem._add_revealed_area(origin,100.0,"border survey")
+	CivilizationSystem.foreign_formations.clear()
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Home army",[{"id":1,"unit":"levy","weapon":"improvised","count":20000,"equipment":20000,"training":0.8}],0.9,0.9)
+	MilitaryCampaign.home_army.provision_ratio=1.0; MilitaryCampaign.home_army.supply_level=1.0
+	assert_int(int(Council.border_bands().men)).is_equal(0)
+	Council.order(civ_id,"defend")
+	var out:=0
+	var count:=0
+	for force:Dictionary in MilitaryCampaign.field_armies:
+		if force.has("border_sector"): out+=int(force.troops); count+=1
+	assert_int(out).is_greater(0)
+	var bands:Dictionary=Council.border_bands()
+	assert_int(int(bands.men)).is_equal(out)
+	assert_int(int(bands.bands)).is_equal(count)
+	var board:VBoxContainer=auto_free(preload("res://scripts/hud/war_board.gd").new())
+	add_child(board)
+	board.setup({})
+	var card:Node=board.find_child("BorderCard",true,false)
+	assert_object(card).is_not_null()
+	var posted:Node=card.find_child("Posted",true,false)
+	assert_str((posted.find_child("Value",true,false) as Label).text).is_equal(preload("res://scripts/hud/war_board.gd").compact(int(Forts.watch().posted)+out))
+	assert_str(String((posted as Control).tooltip_text)).contains("at border stations")
+	var said:PackedStringArray=[]
+	for label in card.find_child("LineHolds",true,false).find_children("*","Label",true,false): said.append((label as Label).text)
+	assert_str(" | ".join(said)).contains("Bands hold the border").not_contains("The border is open")
