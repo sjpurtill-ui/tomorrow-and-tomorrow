@@ -5570,18 +5570,21 @@ func _score_breakdown(profile:Dictionary)->Dictionary:
 func _military_power(civ:Dictionary)->float:
 	var era_factor:=1.0+float(civ.get("military_era_tier",0))*0.07
 	var equipment_coverage:=clampf(float(civ.get("military_replacement_coverage",0.5)),0.0,1.0)
-	return maxf(1.0,float(civ.military_population)*(0.28+float(civ.military_readiness)*0.72)*(0.82+float(civ.get("command_readiness",0.4))*0.18)*(0.75+float(civ.production)*0.15+float(civ.knowledge)*0.10)*era_factor*(0.72+equipment_coverage*0.28))
+	return _power_of(float(civ.get("fighting_men",civ.military_population)),float(civ.military_readiness),float(civ.get("command_readiness",0.4)),float(civ.production),float(civ.knowledge),era_factor,equipment_coverage)
+
+
+## Military power from one people's reading: the same sum for ours and theirs.
+func _power_of(warriors:float,readiness:float,command:float,production:float,knowledge:float,era_factor:float,coverage:float)->float:
+	return maxf(1.0,warriors*(0.28+clampf(readiness,0.0,1.0)*0.72)*(0.82+clampf(command,0.0,1.0)*0.18)*(0.75+production*0.15+knowledge*0.10)*era_factor*(0.72+clampf(coverage,0.0,1.0)*0.28))
 
 
 func _player_military_power()->float:
-	var fielded:=float(WorldSimulation.military.home_army.get("troops",0)) if MilitaryCampaign!=null else 0.0
-	var recruits:=float(WorldSimulation.military.aggregate_recruits) if MilitaryCampaign!=null else 0.0
-	var trainees:=float(WorldSimulation.military._queued_trainees()) if MilitaryCampaign!=null else 0.0
-	var readiness:=float(WorldSimulation.military.home_army.get("readiness",WorldSimulation.state.simulation_metrics.get("security",0.38))) if MilitaryCampaign!=null else float(WorldSimulation.state.simulation_metrics.get("security",0.38))
-	var commander:Dictionary=WorldSimulation.military.home_army.get("commander",{}) if MilitaryCampaign!=null else {}
-	var command_factor:=0.88+clampf(float(commander.get("command",0.4)),0.0,1.0)*0.12
-	var era_tier:=int(WorldSimulation.military.military_development_snapshot().get("tier",0)) if MilitaryCampaign!=null and WorldSimulation.military.has_method("military_development_snapshot") else 0
-	return maxf(1.0,(fielded+trainees*0.65+recruits*0.35)*(0.28+clampf(readiness,0.0,1.0)*0.72)*command_factor*(1.0+float(era_tier)*0.07))
+	if MilitaryCampaign==null:return 1.0
+	# Ours by the rule theirs is read by (MilitaryCampaign.fighting_reading,
+	# and our own making and knowing): no separate sum for the god's people.
+	var fighting:Dictionary=WorldSimulation.military.fighting_reading()
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	return _power_of(float(fighting.warriors),float(fighting.readiness),float(fighting.command),clampf(float(metrics.get("material_capacity",0.12)),0.0,1.0),clampf(float(metrics.get("knowledge",0.0)),0.0,1.0),1.0+float(fighting.tier)*0.07,float(fighting.coverage))
 
 
 func _war_count(civ:Dictionary)->int:

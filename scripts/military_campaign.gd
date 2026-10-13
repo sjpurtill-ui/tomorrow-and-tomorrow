@@ -2221,6 +2221,35 @@ func military_development_snapshot()->Dictionary:
 	return era
 
 
+## ONE READING OF A PEOPLE'S FIGHTING STRENGTH, for the people in scope:
+## ours and every other people's are read by this one rule, so the two are
+## weighed on the same scale (standing.gd, the world's power reckoning, and
+## the summary each people's neighbours read: world_simulation.gd project).
+##   warriors   everyone fit to fight, at home, in the bands and holding
+##              towns, with those still drilling at 0.65 and raw recruits at
+##              0.35 (a count not yet a formation is not full strength)
+##   readiness  theirs, weighed by how many stand in each force
+##   command    the home commander's command, tactics, logistics and resolve
+##   tier       the age of their arms (military_development_snapshot)
+##   coverage   the share of their kit that is made, not still owed
+func fighting_reading()->Dictionary:
+	var home_ready:=clampf(float(home_army.get("readiness",WorldSimulation.state.simulation_metrics.get("security",0.38))),0.0,1.0)
+	var men:=maxf(0.0,float(home_army.get("troops",0)))
+	var ready:=men*home_ready
+	for army:Dictionary in field_armies:
+		var out:=maxf(0.0,float(army.get("troops",0)))
+		men+=out;ready+=out*clampf(float(army.get("readiness",home_ready)),0.0,1.0)
+	for force:Dictionary in occupation_forces:
+		var holding:=maxf(0.0,float(force.get("troops",0)))
+		men+=holding;ready+=holding*clampf(float(force.get("readiness",home_ready)),0.0,1.0)
+	var warriors:=men+float(_queued_trainees())*0.65+float(aggregate_recruits)*0.35
+	var commander:Dictionary=home_army.get("commander",{}) if home_army.get("commander") is Dictionary else {}
+	var command:=clampf((float(commander.get("command",0.4))+float(commander.get("tactics",0.4))+float(commander.get("logistics",0.4))+float(commander.get("resolve",0.4)))/4.0,0.0,1.0)
+	var backlog:=maxf(0.0,float(_equipment_backlog_work()))
+	return {"warriors":warriors,"readiness":ready/men if men>0.0 else home_ready,"command":command,
+		"tier":int(military_development_snapshot().get("tier",0)),"coverage":1.0-backlog/maxf(1.0,backlog+warriors)}
+
+
 func formation_organization_snapshot()->Dictionary:
 	var formations:Array=(home_army.get("formations",[]) as Array).duplicate(true)
 	for army in field_armies: formations.append_array((army.get("formations",[]) as Array).duplicate(true))

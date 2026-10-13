@@ -108,20 +108,21 @@ static func _walls()->float:
 
 static func _warriors()->float:
 	if WorldSimulation.military==null: return 0.0
-	var fielded:=float(WorldSimulation.military.home_army.get("troops",0))
-	var trainees:=float(WorldSimulation.military._queued_trainees()) if WorldSimulation.military.has_method("_queued_trainees") else 0.0
-	var recruits:=float(WorldSimulation.military.aggregate_recruits)
-	return fielded+trainees*0.65+recruits*0.35
+	# The one rule every people's strength is read by (ours used to leave
+	# out the bands in the field and the men holding towns; theirs did not).
+	return float(WorldSimulation.military.fighting_reading().warriors)
 
 static func _readiness()->float:
 	if WorldSimulation.military==null: return clampf(float(WorldSimulation.state.simulation_metrics.get("security",0.38)),0.0,1.0)
-	return clampf(float(WorldSimulation.military.home_army.get("readiness",WorldSimulation.state.simulation_metrics.get("security",0.38))),0.0,1.0)
+	return clampf(float(WorldSimulation.military.fighting_reading().readiness),0.0,1.0)
 
 ## Another people's fighting strength on the same scale (war_loop.ratio's).
 static func their_fighting_strength(civ:Dictionary)->float:
 	var pop:=maxf(10.0,float(civ.get("population",100.0)))
 	var readiness:=clampf(float(civ.get("military_readiness",0.45)),0.2,1.0)
-	var warriors:=clampf(float(civ.get("military_population",0.0)),0.0,pop)
+	# Their men fit to fight, by the same rule as ours (fighting_men); a
+	# people the world does not simulate has only its whole count under arms.
+	var warriors:=clampf(float(civ.get("fighting_men",civ.get("military_population",0.0))),0.0,pop)
 	return maxf(1.0,(pop-warriors)*(0.55+readiness*0.3)+warriors*(1.0+WARRIOR_WEIGHT*readiness))
 
 static func strengths()->Dictionary:
