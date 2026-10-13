@@ -576,6 +576,13 @@ static func on_refusal(audience:Dictionary,option_id:String)->Dictionary:
 
 static func _schedule(civ_id:String,due:int,cause:String,ref:String)->void:
 	var f:=front(civ_id)
+	# Nobody gathers who cannot come: no road by land, and no war fleet of
+	# theirs or ours that can cross (near_us). Without this the raid was set,
+	# our watchers "saw them gathering", and nobody ever arrived.
+	if not near_us(civ_id):
+		_log(civ_id,"stood_down","%s sent nobody: no band of theirs can reach us." % _name(civ_id),{"cause":cause})
+		_stat("raids_no_way")
+		return
 	# The quiet age (pressure_age.gd): a refusal, envy or a bolder mood sends
 	# nobody against a people that has done them no wrong.
 	if cause in UNPROVOKED_CAUSES and not may_come(civ_id):
@@ -1982,6 +1989,7 @@ static func daily(day:int)->void:
 			continue
 		var war:Dictionary=f.war
 		if war.is_empty():
+			if not (f.pending as Dictionary).is_empty() and not near_us(id): f["pending"]={}
 			var pending:Dictionary=f.pending
 			_forewarn(id,f,day)
 			if not pending.is_empty() and day>=int(pending.get("day",day)): _execute(id,day)
@@ -2600,7 +2608,7 @@ static func _grudges(day:int)->void:
 ## This month's chance that a heavy old grudge sends raiders (checked monthly
 ## by _grudges; the Standing page states it).
 static func grudge_raid_chance(civ_id:String)->float:
-	if broken(civ_id): return 0.0
+	if broken(civ_id) or not near_us(civ_id): return 0.0
 	var rival:=_rival(civ_id)
 	var weight:=float(rival.get("grudge_weight",0.0))
 	if weight<0.9: return 0.0
@@ -2608,7 +2616,7 @@ static func grudge_raid_chance(civ_id:String)->float:
 
 ## This month's chance that envy of our stores and works sends raiders.
 static func envy_raid_chance(civ_id:String,envy:float)->float:
-	if envy<=Standing.ENVY_RAID_FLOOR or broken(civ_id): return 0.0
+	if envy<=Standing.ENVY_RAID_FLOOR or broken(civ_id) or not near_us(civ_id): return 0.0
 	return clampf((envy-Standing.ENVY_RAID_FLOOR)*0.06,0.0,0.03)*(1.3 if String(_rival(civ_id).get("trait","")) in ["hunter","magpie"] else 1.0)*_league_backing(civ_id)
 
 ## Peoples bound together against us back each other's raids (fear_league.gd).
