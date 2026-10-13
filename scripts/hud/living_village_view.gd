@@ -165,7 +165,7 @@ func _refresh_state() -> void:
 	_update_words()
 
 func _update_words() -> void:
-	caption.text = "%s · %s · live from the map" % [String(state.get("name", "Our village")), Record.date(int(state.get("day", 0)))]
+	caption.text = "%s · live from the map" % String(state.get("name", "Our village"))
 	change_line.text = Record.changes(GameState.settlement_portrait_history, state)
 
 func _ready_to_record() -> bool:

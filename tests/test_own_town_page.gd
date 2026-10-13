@@ -204,13 +204,17 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	var defense:=MilitaryCampaign.settlement_defense_snapshot()
 	var home_guard:=Combat.home_defenders()
 	# The watch is the army (watch_military.gd): at home its home guard and
-	# those free for the bands, all thirty-seven of them.
-	assert_int(int(home_guard.trained)+int(home_guard.watch)).is_equal(int(MilitaryCampaign.personnel_ledger().home))
+	# those free for the bands, thirty-seven of them, less those of the home
+	# guard out on the border (counted there, not also in the town).
+	var out:=int(Combat.on_the_border(MilitaryCampaign))
+	var here:=int(MilitaryCampaign.personnel_ledger().home)-out
+	assert_int(int(MilitaryCampaign.personnel_ledger().home)).is_equal(37)
+	assert_int(int(home_guard.trained)+int(home_guard.watch)).is_equal(here)
 	assert_int(int(rows.garrison.number)).is_equal(int(defense.garrison_personnel))
-	assert_int(int(rows.garrison.number)).is_equal(37+int(home_guard.rise))
+	assert_int(int(rows.garrison.number)).is_equal(here+int(home_guard.rise))
 	assert_int(int(rows.garrison.number)).is_equal(Combat.defenders(id))
 	# Those keeping watch and the townsfolk who would rise, apart.
-	assert_str(String(rows.garrison.value)).is_equal("37 on watch, %d would take up arms" % int(home_guard.rise))
+	assert_str(String(rows.garrison.value)).is_equal("%d on watch, %d would take up arms" % [here,int(home_guard.rise)])
 	assert_str(String(rows.fortification.value)).is_equal(String(defense.short))
 	assert_int(int(rows.fortification.number)).is_equal(int(defense.stage))
 	assert_str(String(rows.fortification.note)).is_equal("needs repair")

@@ -729,6 +729,8 @@ func _grid(parent:Node,node_name:String,count:int,threshold:float)->GridContaine
 	var grid:=GridContainer.new();grid.name=node_name;grid.columns=1;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation",16);grid.add_theme_constant_override("v_separation",12)
 	grid.set_meta("wide_columns",count);grid.set_meta("wide_threshold",threshold);parent.add_child(grid)
+	# Grids of a section since redrawn are let go here, not only on a resize.
+	responsive_grids=responsive_grids.filter(func(kept:GridContainer)->bool:return is_instance_valid(kept) and not kept.is_queued_for_deletion())
 	responsive_grids.append(grid)
 	return grid
 
