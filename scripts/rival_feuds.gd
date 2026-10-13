@@ -47,7 +47,6 @@ static func tick(day:int,days:int)->void:
 			var first:Dictionary=civs[i]
 			var second:Dictionary=civs[j]
 			if not bool(first.get("alive",true)) or not bool(second.get("alive",true)): continue
-			if bool(first.get("general_campaign_owned",false)) or bool(second.get("general_campaign_owned",false)): continue
 			if not _simulated(String(first.id)) or not _simulated(String(second.id)): continue
 			var relation:Dictionary=((first.relations as Dictionary).get(String(second.id),{}) as Dictionary).duplicate(true)
 			if relation.is_empty(): continue

@@ -1430,7 +1430,6 @@ func _field_supply_advice(army:Dictionary)->String:
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
-	if WorldSimulation.campaign.active and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	var index:=_field_army_index(army_id)
 	if index<0: return {"error":"Select a valid field army."}
@@ -1503,7 +1502,6 @@ func _march_days_left(army:Dictionary,origin:Vector2)->int:
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
-	if WorldSimulation.campaign.active and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)):return {"error":"Give this army an objective through its general."}
 	if not active_siege.is_empty() and int(active_siege.army_id)==army_id: return {"error":"Lift the siege before moving its investing army."}
 	## Map-order movement to a free position on scouted ground. The caller (the
 	## map layer) validates that the point is charted, dry land before issuing;
@@ -4102,13 +4100,11 @@ func _garrison_provision_access(force:Dictionary)->float:
 
 func field_provision_delivery_ratio(required:float=-1.0,air_delivery:Dictionary={})->float:
 	var total:=int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()
-	if WorldSimulation.campaign.active:total-=int(WorldSimulation.campaign.army().get("troops",0))
 	if total<=0:return 1.0
 	var need:=float(total) if required<0.0 else required
 	var accessible:=need*float(maxi(0,int(home_army.get("troops",0))))/float(total)*_force_provision_access(home_army,true)
 	var remaining:=need
 	for force:Dictionary in field_armies:
-		if bool(force.get("general_managed",false)) and WorldSimulation.campaign.active:continue
 		var share:=need*float(maxi(0,int(force.get("troops",0))))/float(total)
 		var credit:=clampf(float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0)),0.0,share)
 		remaining-=credit
@@ -4134,7 +4130,7 @@ func record_daily_provisions(required:float,delivered:float,air_delivery:Diction
 func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictionary={})->void:
 	var need:=maxf(0.0,required)
 	var received:=clampf(delivered,0.0,need)
-	var prepaid:=int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0
+	var prepaid:=0
 	var total_active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-prepaid)
 	var credited:=float(air_delivery.get("total",0))
 	var accessible:=(need-credited)*field_provision_delivery_ratio(need,air_delivery)
@@ -4158,7 +4154,6 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 		home_army["formations"]=formations
 	for force_index in field_armies.size():
 		var force:Dictionary=field_armies[force_index]
-		if bool(force.get("general_managed",false)) and WorldSimulation.campaign.active:continue
 		var share:=float(maxi(0,int(force.get("troops",0))))/float(total_active)
 		var field_credit:=float(air_delivery.get("by_army",{}).get(int(force.get("army_id",0)),0))
 		var field_received:=minf(need*share,field_credit+maxf(0,need*share-field_credit)*_force_provision_access(force,false,false)*delivery_ratio)
@@ -7276,9 +7271,8 @@ func apply_transport_casualties(army_id:int,fraction:float,enemy:String="")->int
 
 func draw_delivered_field_rations(required:float)->Dictionary:
 	var result:={"total":0.0,"by_army":{}}
-	var active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel()-(int(WorldSimulation.campaign.army().get("troops",0)) if WorldSimulation.campaign.active else 0))
+	var active:=maxi(1,int(home_army.get("troops",0))+field_army_active_personnel()+occupation_active_personnel())
 	for army:Dictionary in field_armies:
-		if WorldSimulation.campaign.active and bool(army.get("general_managed",false)):continue
 		var needed:=maxf(0,required)*int(army.get("troops",0))/active
 		var amount:=minf(needed,maxf(0,float(army.get("delivered_field_food",0))))
 		army.delivered_field_food=maxf(0,float(army.get("delivered_field_food",0))-amount)

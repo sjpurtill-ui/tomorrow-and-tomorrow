@@ -432,7 +432,6 @@ func _wounded_back_within(force:Dictionary,days:int)->int:
 ## Why a band or garrison gets no drafts today, or "" when it may.
 func draft_block(force:Dictionary)->String:
 	if String(force.get("priority","normal"))=="last": return "last"
-	if bool(force.get("general_managed",false)) and WorldSimulation.campaign!=null and WorldSimulation.campaign.active: return "campaign"
 	if Rations.is_hungry(force): return "hungry"
 	var access:float=float(host._force_provision_access(force)) if force.has("army_id") else float(host._garrison_provision_access(force))
 	if not host.at_home_point(force) and access<=CUT_OFF: return "cut_off"

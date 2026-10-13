@@ -4,9 +4,12 @@ extends RefCounted
 ## that each missing piece starts from a safe default and the world goes on.
 ## Test-only; it writes to the given slot and nowhere else.
 
-## Whole sections an older release did not write: the general-led campaign
-## and its dialogue (release 2026.09.05.14).
-const SECTIONS:=["curated_GeneralCampaign","reflected_GeneralDialogue"]
+## Whole sections an older release did not write (none at present).
+const SECTIONS:=[]
+## Sections an older release wrote and this one no longer reads: the Alderford
+## war and its general's talk, removed 2026-10-13. They are put back in so the
+## load is shown to pass over them.
+const GONE:={"curated_GeneralCampaign":{"active":true,"state":{"army_id":3}},"reflected_GeneralDialogue":{"history":[]}}
 ## Fields inside one system's saved state that later releases added.
 const FIELDS:={
 	# Several battles at once: an older save keeps one active_engagement.
@@ -33,6 +36,7 @@ static func write(slot:String)->Dictionary:
 	var removed:Array[String]=[]
 	for section:String in SECTIONS:
 		if payload.erase(section):removed.append(section)
+	for section:String in GONE:payload[section]=(GONE[section] as Dictionary).duplicate(true)
 	for name:String in HUMAN_SECTION:
 		_strip(payload.get(HUMAN_SECTION[name]),name,"player",removed)
 	var actors:Variant=(payload.get("curated_WorldSimulation",{}) as Dictionary).get("actors",{})

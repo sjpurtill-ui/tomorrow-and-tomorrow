@@ -12,8 +12,8 @@ const SAVE_VERSION:=1
 const SOCIETY_REFLECT_SKIP:=["definitions_by_id"]
 const DEFAULT_SLOT:="quicksave"
 
-const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","GeneralCampaign","WorldSimulation"]
-const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter","PeopleDirection","HistoricalFigures","CommunityNetwork","ForeignDialogue","CivicImplementationSystem","GeneralDialogue"]
+const CURATED_SYSTEMS:Array[String]=["ProgressionSystem","MilitaryCampaign","CivilizationSystem","ForeignDiplomacy","WorldSimulation"]
+const REFLECTED_SYSTEMS:Array[String]=["GameState","DiscoverySystem","ResourceSystem","EconomySystem","SettlementModel","GovernmentPeopleSystem","WorldFacts","AdvisorSystem","FoodSystem","ConsequenceEngine","PronouncementInterpreter","PeopleDirection","HistoricalFigures","CommunityNetwork","ForeignDialogue","CivicImplementationSystem"]
 # Deterministic caches that rebuild from the seed; persisting them would bloat
 # saves and freeze stale copies of static content.
 const REFLECT_SKIP:Dictionary={
@@ -45,7 +45,6 @@ func save_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	# A world day running in bounded steps commits before capture; saves never
 	# hold a partial day, so the format needs no unfinished-work records.
 	WorldSimulation.flush_day()
-	if slot==DEFAULT_SLOT and GeneralCampaign.active:slot="river_war"
 	DirAccess.make_dir_recursive_absolute(SAVE_DIR)
 	var payload:Dictionary={
 		"version":SAVE_VERSION,

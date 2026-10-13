@@ -2,7 +2,7 @@ extends Node
 ## Compiles every script this branch touched with autoloads present.
 func _ready()->void:
 	var bad:=0
-	for path in ["res://scripts/audience_voice.gd","res://scripts/foreign_dialogue.gd","res://scripts/general_dialogue.gd","res://scripts/hud/ai_connection_panel.gd","res://scripts/hud/dock_blocks.gd","res://scripts/hud/content/dock_content_civilization.gd","res://scripts/settlement_construction.gd","res://scripts/custom_directive.gd","res://scripts/village_notables.gd"]:
+	for path in ["res://scripts/audience_voice.gd","res://scripts/foreign_dialogue.gd","res://scripts/hud/ai_connection_panel.gd","res://scripts/hud/dock_blocks.gd","res://scripts/hud/content/dock_content_civilization.gd","res://scripts/settlement_construction.gd","res://scripts/custom_directive.gd","res://scripts/village_notables.gd"]:
 		var script:=load(path) as Script
 		if script==null or not script.can_instantiate():
 			bad+=1

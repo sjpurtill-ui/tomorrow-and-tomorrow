@@ -1202,7 +1202,6 @@ static func _idle(army:Dictionary)->bool:
 	if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))!="player_home": return false
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
 	if mc.command_hierarchy.controls_army(army_id): return false
-	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
 	if _at_post(army): return false
 	# The ruler's own word stands: a band formed by an order (realm_orders.gd
 	# _form_band) waits for the ruler, and a band guarding a town of ours is

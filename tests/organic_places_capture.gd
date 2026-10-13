@@ -275,7 +275,6 @@ func _capture(key: String, description: String, target: Vector3, span: float, re
 	entry["population_exact"] = float(GameState.population_exact)
 	entry["elapsed_days"] = GameState.elapsed_days
 	entry["world_day_in_progress"] = WorldSimulation.day_in_progress()
-	entry["general_campaign_active"] = GeneralCampaign.active
 	_check(bool(entry.map_people.zero_people_batches), key + ": map contains human batches")
 	_check(is_equal_approx(float(terrain.camera.size), span), key + ": camera span changed")
 	if require_place:

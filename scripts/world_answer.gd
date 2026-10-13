@@ -322,7 +322,7 @@ static func monthly(day:int)->void:
 	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
 		var id:=String((civ as Dictionary).get("id",""))
-		if id=="" or id=="player" or bool((civ as Dictionary).get("general_campaign_owned",false)): continue
+		if id=="" or id=="player": continue
 		var relation:Dictionary=(civ as Dictionary).get("player_relation",{}) if (civ as Dictionary).get("player_relation") is Dictionary else {}
 		if int(relation.get("contact_level",0))<2: continue
 		if (a.tributaries as Dictionary).has(id) or (a.arming as Dictionary).has(id): continue

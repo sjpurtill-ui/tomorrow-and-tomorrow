@@ -40,8 +40,8 @@ func _ready()->void:
 		for arg in args:
 			if arg.begins_with("--days="):days=int(arg.trim_prefix("--days="))
 		_measure(days)
-	# Both throttled overlays must compile (they only run inside their screens).
-	for path in ["res://scripts/hud/service_world_overlay.gd","res://scripts/general_campaign_map.gd"]:
+	# The throttled overlay must compile (it only runs inside its screen).
+	for path in ["res://scripts/hud/service_world_overlay.gd"]:
 		var script:=load(path) as Script
 		check(script!=null and script.can_instantiate(),"%s does not compile" % path)
 	_assert_steady_and_changes()

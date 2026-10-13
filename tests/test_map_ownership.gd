@@ -41,8 +41,7 @@ func _map(city:Dictionary)->Node3D:
 	map.set_camera_distance_level(2);map.camera.size=map.zoom_target_size;map._update_camera()
 	return map
 
-## The fall of a town, as the general's campaign plays it: the region changes
-## hands and our band leaves a guard (general_campaign._secure_home).
+## The fall of a town: the region changes hands and our band leaves a guard.
 func _take(city:Dictionary,guard:int)->void:
 	var owner:=String(city.civ_id)
 	var index:=CivilizationSystem._civilization_index(owner)

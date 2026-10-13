@@ -557,7 +557,6 @@ func _ready() -> void:
 	_refresh_settlement_network(true)
 	_refresh_settlement_convoy_marker()
 	_trace_load("settlement and interface")
-	GeneralCampaign.bind_world.call_deferred(self)
 	_capture_preview_if_requested.call_deferred()
 
 func _exit_tree()->void:
@@ -1042,7 +1041,7 @@ func _process(delta: float) -> void:
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.start()
 	# The pace the player sees, logged once a minute while time runs (perf_meter.gd).
-	PerfMeter.frame(delta,game_speed if not GeneralCampaign.active else 0.0,_frame_sim_usec)
+	PerfMeter.frame(delta,game_speed,_frame_sim_usec)
 	# What the last frame spent beside the simulation, smoothed.
 	_frame_other_usec=lerpf(_frame_other_usec,maxf(0.0,delta*1000000.0-float(_frame_sim_usec)),0.25)
 	_frame_seconds=lerpf(_frame_seconds,clampf(delta,0.004,0.1),0.2)
@@ -1056,7 +1055,7 @@ func _process(delta: float) -> void:
 	_process_camera_navigation(delta)
 	_process_smooth_camera(delta)
 	_update_terrain_chart_build()
-	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 and not GeneralCampaign.active else 0.0,_camera_in_motion())
+	var calendar_days:=simulation_clock.take_days(Time.get_ticks_usec(),_speed_hours_per_second()/24.0 if game_speed>0.0 else 0.0,_camera_in_motion())
 	stamp=trace.mark("frame_camera",stamp)
 	_update_world_streaming()
 	stamp=trace.mark("frame_world_streaming",stamp)
@@ -1152,11 +1151,6 @@ func _process(delta: float) -> void:
 		if game_speed>0.0: _set_game_speed(0.0)
 		if not is_instance_valid(PeopleDirection.panel): PeopleDirection.open_direction()
 		return
-	if GeneralCampaign.active:
-		var committed:=GeneralCampaign.consume_time(delta)
-		if committed>0:advance_world_time(committed)
-		GeneralCampaign.after_world_time()
-		return
 	if game_speed <= 0.0:
 		return
 	if calendar_days>0.0:
@@ -1214,7 +1208,7 @@ func _world_day_behind()->bool:
 ## The frame-loop calendar. Owned worlds run each day as bounded steps across
 ## frames; legacy worlds and campaign intervals keep the synchronous path.
 func _schedule_world_time(days_advanced:float)->void:
-	if not scheduled_world_days_enabled or not WorldSimulation.enabled or GeneralCampaign.active:
+	if not scheduled_world_days_enabled or not WorldSimulation.enabled:
 		advance_world_time(days_advanced)
 		return
 	var century:=float(PeopleDirection.next_century_day())
@@ -1287,7 +1281,7 @@ func advance_world_time(days_advanced:float)->void:
 	GameState.elapsed_days = minf(GameState.elapsed_days+days_advanced,float(PeopleDirection.next_century_day()))
 	var requested_world_day:=GameState.elapsed_days
 	var current_discovery_day := int(floor(requested_world_day))
-	while last_discovery_day < current_discovery_day and (game_speed>0.0 or GeneralCampaign.active):
+	while last_discovery_day < current_discovery_day and game_speed>0.0:
 		last_discovery_day += 1
 		GameState.elapsed_days=float(last_discovery_day)
 		GameState.convoy_traveling=bool(GameState.founding_journey.get("active",false)) if WorldSimulation.enabled else travel_active
@@ -13127,7 +13121,6 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 
 
 func _restore_military_attention()->void:
-	if GeneralCampaign.active:return
 	# An older save's captives waiting on the ruler: the general settles them
 	# now, as he does after every fight; nothing waits and nothing pauses.
 	if not MilitaryCampaign.pending_aftermath.is_empty(): MilitaryCampaign.settle_pending_aftermath()
@@ -13135,7 +13128,6 @@ func _restore_military_attention()->void:
 ## Every war matter (a report's "what next", a town's war button, the
 ## Civics reports) opens the one War screen (hud/war_board.gd).
 func _open_war_planning(_tab:int=0)->void:
-	if GeneralCampaign.active:GeneralCampaign.open_screen();return
 	MilitaryCampaign.open_roster("army")
 
 func _select_army_and_focus(army_id:int)->void:
@@ -15370,11 +15362,7 @@ func _settlement_display_name() -> String:
 
 func _set_game_speed(speed: float) -> void:
 	if speed>0 and preload("res://scripts/hud/simulation_pause.gd").blocks(self):return
-	if GeneralCampaign.active and speed<=0:GeneralCampaign.pause_to_speak()
 	if speed<=0.0:calendar_bank_days=0.0
-	if GeneralCampaign.active and speed>0:
-		GeneralCampaign.resume()
-		return
 	if speed>0.0 and GameState.founding_focus=="":
 		game_speed=0.0
 		if not founding_focus_panel or not is_instance_valid(founding_focus_panel): _open_founding_focus_panel()
@@ -15541,7 +15529,6 @@ func _restart_random_world()->void:
 # Escape always dismisses exactly the topmost game screen. This prevents a
 # second dashboard or the pause menu from appearing behind an existing modal.
 func _close_topmost_game_screen()->bool:
-	if is_instance_valid(GeneralCampaign.screen) and GeneralCampaign.screen.visible:GeneralCampaign.screen.hide();return true
 	if MilitaryCommandUI and MilitaryCommandUI.modal and MilitaryCommandUI.modal.visible:
 		MilitaryCommandUI.modal.hide()
 		return true

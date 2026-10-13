@@ -1218,7 +1218,6 @@ static func _available(army:Dictionary)->bool:
 	if bool(army.get("resting",false)) or ArmyLines.unfit(army): return false
 	if army.has("court_order") and String(army.get("status",""))=="moving": return false
 	if not mc.active_siege.is_empty() and int(mc.active_siege.get("army_id",0))==id: return false
-	if WorldSimulation.campaign!=null and WorldSimulation.campaign.active and id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
 	return true
 
 static func _at_home(army:Dictionary)->bool:

@@ -8,8 +8,7 @@ extends Node
 ##
 ## Run only through tools/run_isolated_gpu_probe.ps1 with user arguments
 ##   --resume-saved --capture-dir=<absolute dir> --capture-stage=before|after
-## Optional: --inspect (print what the save holds and quit), --alderford (the
-## authored Alderford war instead of the fixture). Quits by itself.
+## Optional: --inspect (print what the save holds and quit). Quits by itself.
 ##
 ## The fixture's own armies are real MilitaryCampaign field armies (so their
 ## counters render); the enemy side is supplied as dated sightings through
@@ -24,7 +23,6 @@ var terrain:Node
 var directory:=""
 var stage:="after"
 var inspect:=false
-var alderford:=false
 var overlay:Control
 var fixture:Dictionary={}
 var home:=Vector2.ZERO
@@ -37,7 +35,6 @@ func _ready()->void:
 		if argument.begins_with("--capture-dir="): directory=argument.trim_prefix("--capture-dir=")
 		elif argument.begins_with("--capture-stage="): stage=argument.trim_prefix("--capture-stage=")
 		elif argument=="--inspect": inspect=true
-		elif argument=="--alderford": alderford=true
 	if directory=="": directory=ProjectSettings.globalize_path("res://artifacts/war_fronts_real")
 	DirAccess.make_dir_recursive_absolute(directory)
 	print("REAL CAPTURE user dir: ",OS.get_user_data_dir())
@@ -71,7 +68,6 @@ func _run()->void:
 	overlay=terrain.find_child("WarFrontOverlay",true,false) as Control
 	if overlay==null and terrain.has_method("_ensure_war_map_overlay"):
 		terrain._ensure_war_map_overlay(); overlay=terrain.find_child("WarFrontOverlay",true,false) as Control
-	if alderford: await _alderford()
 	else: await _fixture_war()
 	print("REAL CAPTURE PASS stage=%s dir=%s" % [stage,directory])
 	# Let the terrain's background bakes finish before the scene is freed.
@@ -87,10 +83,10 @@ func _summary()->void:
 		if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): at_war+=1
 	var obs:Dictionary=CivilizationSystem.local_observation_snapshot()
 	var op:Variant=MilitaryCampaign.get("joint_operations")
-	print("REAL CAPTURE SAVE day=%d settlement=%s stage=%s known=%d at_war=%d field_armies=%d visible=%d recent=%d cities_known=%d joint_forces=%d campaign=%s" % [
+	print("REAL CAPTURE SAVE day=%d settlement=%s stage=%s known=%d at_war=%d field_armies=%d visible=%d recent=%d cities_known=%d joint_forces=%d" % [
 		int(GameState.elapsed_days),GameState.settlement_name,preload("res://scripts/hud/era_words.gd").stage(),GameState.known_discoveries.size(),at_war,MilitaryCampaign.field_armies.size(),
 		(obs.get("visible",[]) as Array).size(),(obs.get("recent",[]) as Array).size(),CivilizationSystem.city_intelligence.known_cities().size(),
-		(op.state.forces as Array).size() if op!=null else -1,str(GeneralCampaign.active)])
+		(op.state.forces as Array).size() if op!=null else -1])
 
 
 static func _v2(position:Variant)->Vector2:
@@ -230,25 +226,6 @@ func _fixture_lanes(zones:Array)->Array:
 			lanes.append({"points":z.lane,"domain":"navy","escorted":true,"raided":true,"status":"outbound","invasion":false,"name":"Grain convoy"})
 			zones.erase(z)
 	return lanes
-
-
-func _alderford()->void:
-	GeneralCampaign.terrain=terrain
-	var started:Dictionary=GeneralCampaign.start_scenario()
-	print("REAL CAPTURE alderford start: ",started)
-	if is_instance_valid(GeneralCampaign.screen): GeneralCampaign.screen.hide()
-	var army:Dictionary=GeneralCampaign.army()
-	var rival:Dictionary=(GeneralCampaign.state.get("rivals",[]) as Array)[0] if not (GeneralCampaign.state.get("rivals",[]) as Array).is_empty() else {}
-	if not army.is_empty() and not rival.is_empty():
-		var there:Vector2=GeneralCampaign.world_position(rival.home)
-		var start:=Vector2(GeneralCampaign.state.origin)
-		var at:=start.lerp(there,0.45)
-		army.position={"x":at.x,"z":at.y}; army.status="moving"; army.destination_position={"x":there.x,"z":there.y}; army.destination_id=""
-		army["last_report"]={"position":army.position.duplicate(),"troops":int(army.get("troops",240)),"status":"moving","day":int(GameState.elapsed_days)}
-		GeneralCampaign.state.mission={"action":"attack","target":String(rival.id)}
-		home=start; target=there
-	fixture={}
-	await _plates([["local",40.0,home.lerp(target,0.5)]],"alderford")
 
 
 # --- Plates ---------------------------------------------------------------------

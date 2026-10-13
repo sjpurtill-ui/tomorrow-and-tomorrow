@@ -70,7 +70,6 @@ func free_to_see_to(army:Dictionary)->bool:
 	var id:=int(army.get("army_id",0))
 	if host.command_hierarchy.battle.engaged(id) or host._army_in_battle(id): return false
 	if String(army.get("status",""))=="besieging" or host._besieging(id): return false
-	if bool(army.get("general_managed",false)) and WorldSimulation.campaign!=null and WorldSimulation.campaign.active: return false
 	if host.command_hierarchy.controls_army(id): return false
 	return true
 

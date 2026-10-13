@@ -245,7 +245,6 @@ static func home_band(mc:Node,band:Dictionary)->bool:
 	var id:=int(band.get("army_id",0))
 	if mc.command_hierarchy.battle.engaged(id) or mc._army_in_battle(id) or mc._besieging(id):return false
 	if mc.command_hierarchy.controls_army(id):return false
-	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and id==int(WorldSimulation.campaign.state.get("army_id",-1)):return false
 	var errand:Variant=band.get("council")
 	if errand is Dictionary and not String((errand as Dictionary).get("phase","")) in ["","home","done"]:return false
 	return true
