@@ -917,3 +917,34 @@ func _bring_near(civ:Dictionary)->void:
 	civ["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 	for region:Dictionary in civ.get("strategic_regions",[]):
 		if String(region.get("role",""))=="capital": region["position"]=home
+
+## The user, 2026-10-13: 1,368 of the army still "Against Muurtamiut" after
+## their town was burned and one child was left alive. A people broken past
+## fighting is fought no longer: the band comes home and the word is set down.
+func test_a_band_out_against_a_broken_people_comes_home()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	Council.order(civ_id,"take",{"place":{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}})
+	var band:=_band("take")
+	assert_dict(band).is_not_empty()
+	_days(1)
+	assert_int(Council.bands_against(civ_id).size()).is_equal(1)
+	assert_str(Council.stance_of(civ_id)).is_equal("take")
+	# Their towns are ash and one of them lives.
+	var civ:Dictionary=CivilizationSystem.civilizations[0]
+	for region:Dictionary in civ.strategic_regions:
+		region["burned_day"]=int(GameState.elapsed_days); region["destroyed"]=true; region["population"]=0.0; region["settlement_founded"]=false
+	civ["population"]=1.0
+	if not WAR.broken(civ_id):
+		# However this world marks a razed town, the people must read as broken for the rule to be tried.
+		for region:Dictionary in civ.strategic_regions: region["controller"]="player"
+	assert_bool(WAR.broken(civ_id)).is_true()
+	Council.sit(int(GameState.elapsed_days)+1)
+	var live:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(band.army_id))] if MilitaryCampaign._field_army_index(int(band.army_id))>=0 else {}
+	# Called home (or home already and stood down): no longer held out against them.
+	if not live.is_empty(): assert_str(String((live.get("council",{}) as Dictionary).get("phase",""))).is_equal("home")
+	assert_str(Council.stance_of(civ_id)).is_not_equal("take")
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("leave")

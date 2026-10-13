@@ -518,7 +518,10 @@ func _forces_card(f:Dictionary)->Control:
 	var ready:Dictionary=f.ready_share
 	var gauges:=HBoxContainer.new();gauges.name="Readiness";gauges.add_theme_constant_override("separation",10);column.add_child(gauges)
 	gauges.add_child(_gauge("Drill",float(ready.drill),T.GREEN if float(ready.drill)>=0.6 else T.AMBER,"Drill: how well the watch at home is drilled, rising every day it drills at the training policy's pace."))
-	gauges.add_child(_gauge("Armed",float(ready.armed),BarModel.gear_color(float(ready.armed)),"Armed: %d%% of the weapons the watch at home needs are in their hands; the rest fight with what comes to hand. Short kit is made in the workshops (Production)." % roundi(float(ready.armed)*100.0)))
+	# One measure of "armed" everywhere: the whole army's gear in hand
+	# (strength(), the strip's own figure), never the home guard's alone.
+	var armed_all:=float(strength(MilitaryCampaign).armed)
+	gauges.add_child(_gauge("Armed",armed_all,BarModel.gear_color(armed_all),"Armed: %d%% of the gear our soldiers need is in their hands, at home and in the bands; the rest fight with what comes to hand. Short kit is made in the workshops (Production)." % roundi(armed_all*100.0)))
 	gauges.add_child(_gauge("Will",float(ready.will),BarModel.will_color(maxf(0.0,float(ready.will))),"Will to fight of the bands out, by their men. Below a third they are close to breaking." if float(ready.will)>=0.0 else "Will to fight of the bands out: nobody is out."))
 	gauges.add_child(_gauge("Fed",float(ready.fed),T.TEAL if float(ready.fed)>=0.75 else (T.AMBER if float(ready.fed)>=0.4 else T.RED),"Fed in the field: the share of the rations the bands out need that reached them." if float(ready.fed)>=0.0 else "Fed in the field: nobody is out."))
 	# How many of them stay home.

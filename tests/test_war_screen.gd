@@ -436,3 +436,23 @@ func test_each_enemy_town_is_an_objective_worth_one_to_three()->void:
 	assert_str(" / ".join(lines)).contains("worth 2 of 3")
 	assert_str(" / ".join(lines)).contains("30 to 50")
 	assert_str(" / ".join(lines)).contains("bid the war leader take it")
+
+## The user, 2026-10-13: "34% armed" on the strip and "Armed 100%" on the War
+## panel at once. One word, one measure: the whole army's gear in hand.
+func test_armed_reads_the_same_on_the_strip_and_the_war_panel()->void:
+	Law.choose(MilitaryCampaign,"some")
+	# Half the army's kit is missing.
+	for f in MilitaryCampaign.home_army.get("formations",[]):
+		(f as Dictionary)["equipment_required"]=int((f as Dictionary).get("count",0))
+		(f as Dictionary)["equipment"]=int((f as Dictionary).get("count",0))/2
+	var armed:=float(Board.strength(MilitaryCampaign).armed)
+	assert_float(armed).is_less(0.75)
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	var gauge:Node=board.find_child("Readiness",true,false).find_child("Armed",true,false)
+	assert_object(gauge).is_not_null()
+	var shown:PackedStringArray=[]
+	for label in gauge.find_children("*","Label",true,false): shown.append((label as Label).text)
+	assert_array(Array(shown)).contains(["%d%%" % roundi(armed*100.0)])
+	assert_str(String((gauge as Control).tooltip_text)).contains("at home and in the bands")

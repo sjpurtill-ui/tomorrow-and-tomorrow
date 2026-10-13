@@ -243,6 +243,12 @@ static func sit(today:int)->void:
 		if not bool((civ as Dictionary).get("alive",true)):
 			for band in bands: _send_home(band)
 			continue
+		# A people broken past fighting (war_loop.broken: no town of theirs
+		# stands and only a handful live) is fought no longer: the bands out
+		# against it come home and the word to punish or take is set down.
+		if bool(_war_loop().call("broken",id)):
+			_stand_down_broken(id,bands,today)
+			continue
 		var stance:=_stance_now(id,civ,today,plan)
 		if stance=="" and bands.is_empty(): continue
 		stances[id]=stance
@@ -945,6 +951,25 @@ static func _recall(civ_id:String,_today_day:int)->int:
 # --------------------------------------------------------------------------
 
 ## Our bands out on the council's errand against a people.
+## Nobody is left to fight: every band out against them is called home, the
+## stance against them is set down, and it is told once.
+static func _stand_down_broken(civ_id:String,bands:Array,today:int)->void:
+	var called:=0
+	for band in bands:
+		var phase:=String(((band as Dictionary).get("council",{}) as Dictionary).get("phase",""))
+		if _send_home(band) and phase!="home": called+=int((band as Dictionary).get("troops",0))
+	var had:=""
+	if _player():
+		var f:Dictionary=_war_loop().call("front",civ_id)
+		had=String(f.get("stance",""))
+		if had in ["punish","take","defend"]: f["stance"]="leave"
+	else:
+		had=String(_front(civ_id).get("stance",""))
+		_front(civ_id)["stance"]=""
+	if called<=0 or not _player(): return
+	var name:=String((_war_loop().call("_name",civ_id)))
+	_chronicle("broken_home:%s:%d" % [civ_id,today],"Our Fighters Come Home From %s" % name.substr(0,30),"Nobody of %s is left to fight: no town of theirs stands and only a handful live. The %d of ours out against them are coming home." % [name,called],civ_id)
+
 static func bands_against(civ_id:String)->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	var mc:=_mc()
