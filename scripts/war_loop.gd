@@ -648,6 +648,31 @@ static func pressure_chance(civ_id:String,day:int=-1)->float:
 	if near<=0.0: return 0.0
 	return pressure*Pressure.PER_YEAR/12.0*pressure_lean(civ_id)*lerpf(0.5,1.0,near)*_league_backing(civ_id)
 
+## PEACE MENDS (monthly). With a people we are not at war with and whose
+## feud is not hot, each side's weariness of the fighting eases by
+## RECOVER_A_MONTH and the war's tally drifts back toward even. The weariness
+## is kept in two places, the feud's own (our_exh, their_exh) and the record
+## of the pair (player_war_exhaustion, rival_war_exhaustion, which peace
+## terms and the home front read); both ease together. Only the old world
+## model ever eased them: in the living world they could only rise, so one
+## war left a people spent for good and its raiders home forever.
+const RECOVER_A_MONTH:=0.025
+const SCORE_A_MONTH:=5.0
+static func _recover(day:int)->void:
+	for civ in WorldSimulation.world.civilizations:
+		if not civ is Dictionary: continue
+		var relation:Dictionary=(civ as Dictionary).get("player_relation",{})
+		if relation.is_empty() or bool(relation.get("at_war",false)): continue
+		var id:=String((civ as Dictionary).get("id",""))
+		if hot(id,day): continue
+		for key:String in ["player_war_exhaustion","rival_war_exhaustion"]:
+			if float(relation.get(key,0.0))>0.0: relation[key]=maxf(0.0,float(relation[key])-RECOVER_A_MONTH)
+		if not is_zero_approx(float(relation.get("war_score",0.0))): relation["war_score"]=move_toward(float(relation.war_score),0.0,SCORE_A_MONTH)
+		var f:=_peek(id)
+		if f.is_empty(): continue
+		for key:String in ["our_exh","their_exh"]:
+			if float(f.get(key,0.0))>0.0: f[key]=maxf(0.0,float(f[key])-RECOVER_A_MONTH)
+
 ## THE PRESSURE (monthly). A people that leans on us and can reach us comes:
 ## peoples organised for war declare it and bring their host (war_council);
 ## smaller peoples send raiders, and the ladder climbs from there.
@@ -2018,6 +2043,7 @@ static func daily(day:int)->void:
 		preload("res://scripts/fear_league.gd").monthly(day)
 		# What each people does about us: bow, or come with everything.
 		(load("res://scripts/world_answer.gd") as GDScript).call("monthly",day)
+		_recover(day)
 		_grudges(day)
 		_pressure(day)
 		_rival_wars(day)
