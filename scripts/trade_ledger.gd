@@ -68,6 +68,7 @@ const Prices:=preload("res://scripts/trade_prices.gd")
 const STANCES_PATH:="res://scripts/trade_stances.gd"
 const WORDS_PATH:="res://scripts/trade_words.gd"
 const WAR_PATH:="res://scripts/war_loop.gd"
+const STATE_PATH:="res://scripts/war_state.gd"
 
 const VERSION:=1
 ## The goods that pass between peoples (as between our own towns:
@@ -289,15 +290,13 @@ static func opinion(a:String,b:String)->float:
 static func blocked(a:String,b:String,day:int=-1)->String:
 	if day<0: day=_day()
 	var rel:=relation(a,b)
-	if bool(rel.get("at_war",false)): return "war"
-	if a=="player" or b=="player":
-		var other:=b if a=="player" else a
-		# Our carriers need a road to walk: no goods go to a people whose home
-		# is not on our map, however we first met them.
-		if not bool(rel.get("home_location_known",false)): return "unlocated"
-		var war:=load(WAR_PATH) as GDScript
-		if war!=null and bool(war.call("hot",other,day)): return "feud"
-	elif CivilizationSystem.has_method("rival_feud_hot") and bool(CivilizationSystem.rival_feud_hot(rel,day)): return "feud"
+	# War and feud are answered in one place (war_state.gd).
+	var state:=load(STATE_PATH) as GDScript
+	if bool(state.call("at_war",a,b,CivilizationSystem)): return "war"
+	# Our carriers need a road to walk: no goods go to a people whose home
+	# is not on our map, however we first met them.
+	if (a=="player" or b=="player") and not bool(rel.get("home_location_known",false)): return "unlocated"
+	if bool(state.call("feud",a,b,day,CivilizationSystem)): return "feud"
 	if float(rel.get("opinion",0.0))<HOSTILE_OPINION: return "hostile"
 	var stances:=load(STANCES_PATH) as GDScript
 	if stances!=null:

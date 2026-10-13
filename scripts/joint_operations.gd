@@ -237,12 +237,7 @@ func disband(id:int)->Dictionary:
 	state.forces.erase(record)
 	return {"ok":true,"message":"Surviving equipment returned to reserve and crews released from service."}
 func _hostile(a:String,b:String)->bool:
-	if a==b:return false
-	if a!="player" and b!="player":
-		var index:=WorldSimulation.world._civilization_index(a)
-		return index>=0 and bool(WorldSimulation.world.civilizations[index].get("relations",{}).get(b,{}).get("at_war",false))
-	var index:=WorldSimulation.world._civilization_index(b if a=="player" else a)
-	return index>=0 and bool(WorldSimulation.world.civilizations[index].player_relation.get("at_war",false))
+	return preload("res://scripts/war_state.gd").at_war(a,b)
 func _power(record:Dictionary,key:String)->float:
 	var value:=0.0
 	for id:String in record.units:value+=float(C.UNITS[id].get(key,0))*int(record.units[id])

@@ -2380,10 +2380,7 @@ static func _host_name(kind:String,place:String)->String:
 	return ("Raiders for %s" if kind=="raid" else ("Siege host for %s" if kind=="siege" else "Host marching on %s")) % place
 
 static func _at_war(civ_id:String)->bool:
-	var index:=Hall._civ_index(civ_id)
-	if index<0: return false
-	var rel:Variant=WorldSimulation.world.civilizations[index].get("player_relation",{})
-	return rel is Dictionary and bool((rel as Dictionary).get("at_war",false))
+	return preload("res://scripts/war_state.gd").at_war("player",civ_id)
 
 ## The order carried out where the band already stands: what the blow did,
 ## from the engine's own result (a town taken, a fight won that could not
