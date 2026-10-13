@@ -223,16 +223,16 @@ func test_disbanding_the_army_sends_everyone_home_and_nobody_is_called_up_again(
 	Council.fold_idle_bands()
 	Law.keep(MilitaryCampaign,10,true)
 	assert_dict(_army(away)).is_empty()
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(0)
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(0)
 
 func test_sending_some_home_lowers_the_share_to_what_is_left()->void:
 	_train(37)
 	Law.choose(MilitaryCampaign,"some")
 	var people:=int(WorldSimulation.state.population_total)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(Law.target_men("some",people))
 	var done:=HomeOrders.perform(HomeOrders.read("send 7 of the soldiers home"))
 	assert_int(int(done.count)).is_equal(7)
-	var left:=Law.under_arms(MilitaryCampaign)
+	var left:=int(Law.reading(MilitaryCampaign).now)
 	assert_int(left).is_equal(Law.target_men("some",people)-7)
 	# The watch fell by them: those sent home are not called up again.
 	assert_int(MilitaryCampaign.watch_manpower()).is_equal(left)
@@ -241,7 +241,7 @@ func test_sending_some_home_lowers_the_share_to_what_is_left()->void:
 	# The war leader neither calls up nor sends home anyone on its account.
 	var kept:=Law.keep(MilitaryCampaign,int(GameState.elapsed_days),true)
 	assert_int(int(kept.joined)+int(kept.released)).is_equal(0)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(left)
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(left)
 
 func test_one_band_named_is_disbanded_whole()->void:
 	_train(60)

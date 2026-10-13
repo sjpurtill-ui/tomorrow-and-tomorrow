@@ -88,7 +88,9 @@ static func kit_words(blocks:Array)->String:
 ## Where the army's people come from: everyone keeping watch is one fewer at
 ## other work (watch_military.gd). {soldiers, workers (who can work), one_in}.
 static func drawn_from(mc:Node)->Dictionary:
-	var soldiers:=maxi(Law.under_arms(mc),int(mc.watch_manpower()))
+	# Everyone serving (crews of boats and aircraft too: they are away from
+	# other work like anyone else), or the watch being raised if that is more.
+	var soldiers:=maxi(int(Law.reading(mc).now),int(mc.watch_manpower()))
 	var able:=maxi(1,int(WorldSimulation.state.able_population()))
 	return {"soldiers":soldiers,"workers":able,"one_in":roundi(float(able)/float(soldiers)) if soldiers>0 else 0}
 

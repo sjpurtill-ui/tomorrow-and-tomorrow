@@ -87,13 +87,6 @@ static func target_men(id:String,population:int)->int:
 	return roundi(float(maxi(0,population))*float(entry.share))
 
 
-## Everyone under arms on land now: every soldier at home, in the bands and
-## holding towns, hurt, scattered or taken, less the crews of boats and
-## aircraft. The watch is the army: nobody is netted out for it.
-static func under_arms(mc:Node)->int:
-	return maxi(0,int(mc._mobilized_count())-int(mc.joint_operations.personnel()))
-
-
 ## The home guard (the watch kept at home and in the towns; the rest are for
 ## the bands): {target (the split's share of the watch), home (standing at
 ## home), drill (0: the watch drills at home), kept}.
