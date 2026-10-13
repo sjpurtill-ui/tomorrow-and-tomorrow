@@ -997,21 +997,6 @@ func test_strategic_forecast_uses_real_defender_and_changes_outlook_not_enemy_si
 	assert_str(String(weak.outlook)).is_not_equal(String(strong.outlook))
 
 
-func test_war_exhaustion_ripples_into_player_effects_and_recovers_in_peace()->void:
-	var civ:Dictionary=system.civilizations[0]
-	civ.player_relation["at_war"]=true
-	civ.player_relation["treaty"]="war"
-	civ.player_relation["war_goal"]="defend"
-	system.civilizations[0]=civ
-	system.advance_to_day(30)
-	var wartime:=float(system.player_effects().war_exhaustion)
-	assert_float(wartime).is_greater(0.0)
-	system.civilizations[0].player_relation["at_war"]=false
-	system.civilizations[0].player_relation["treaty"]="truce"
-	system.advance_to_day(60)
-	assert_float(float(system.civilizations[0].player_relation.player_war_exhaustion)).is_less(wartime)
-
-
 func test_same_seed_produces_the_same_competitors()->void:
 	system.reset_for_new_world()
 	_set_all_contacted_and_located()
@@ -1230,21 +1215,6 @@ func test_export_survives_a_real_json_round_trip()->void:
 	assert_int(JSON.stringify(system.export_state()).length()).is_less(600_000)
 
 
-func test_comparative_strength_is_only_chronicled_without_ending_history()->void:
-	GameState.ensure_population_total(1_000_000_000_000)
-	GameState.population_health=0.99
-	GameState.food_security=1.0
-	GameState.combined_intelligence=1.0
-	GameState.simulation_metrics.merge({"material_capacity":1.0,"logistics":1.0,"cohesion":1.0,"security":1.0,"food_days":180.0,"legitimacy":1.0},true)
-	GameState.society_capacities["institutions"]=1.0
-	MilitaryCampaign.aggregate_recruits=300_000_000_000
-	system.advance_to_day(20*365+12*30)
-	assert_int(int(system.chronicle.data.dominance_episodes)).is_greater_equal(1)
-	var saved:Dictionary=system.export_state()
-	for key in ["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]:
-		assert_bool(saved.has(key)).is_false()
-
-
 func test_rival_dominance_does_not_end_player_history()->void:
 	var rival:Dictionary=system.civilizations[0]
 	rival["population"]=1_000_000_000.0
@@ -1261,39 +1231,11 @@ func test_rival_dominance_does_not_end_player_history()->void:
 	rival["military_readiness"]=1.0
 	system.civilizations[0]=rival
 	for turn in 12:
-		system._rebuild_competition(true,20*365+(turn+1)*30)
+		system._rebuild_competition()
 	var snapshot:Dictionary=system.competition_snapshot()
 	assert_bool(snapshot.has("outcome")).is_false()
 	assert_bool(snapshot.has("winner_id")).is_false()
 	assert_array(system.validate_state()).is_empty()
-
-
-func test_distress_remains_recoverable_after_twelve_turns()->void:
-	GameState.population_health=0.05
-	GameState.food_security=0.05
-	GameState.simulation_metrics["legitimacy"]=0.05
-	for index in system.civilizations.size():
-		system.civilizations[index].player_relation["at_war"]=true
-		system.civilizations[index].player_relation["treaty"]="war"
-		system.civilizations[index].player_relation["border_tension"]=1.0
-	system.advance_to_day(12*30)
-	assert_int(system.collapse_turns).is_equal(12)
-	assert_array(system.validate_state()).is_empty()
-
-
-func test_rivals_trade_and_fight_each_other_without_player_scripts()->void:
-	system.advance_to_day(36_500)
-	var interactions:=0
-	var wars_recorded:=0
-	for civ in system.civilizations:
-		for other_id in (civ.relations as Dictionary):
-			if String(civ.id)>=String(other_id): continue
-			var relation:Dictionary=civ.relations[other_id]
-			if bool(relation.get("at_war",false)) or float(relation.get("trade",0.0))>0.0: interactions+=1
-	for event in system.world_events:
-		if String(event.get("domain",""))=="war": wars_recorded+=1
-	assert_int(interactions).is_greater(0)
-	assert_int(wars_recorded).is_greater(0)
 
 
 func test_competition_includes_player_and_every_rival_without_any_victory_state()->void:

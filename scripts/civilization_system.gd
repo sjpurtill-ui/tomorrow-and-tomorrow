@@ -30,7 +30,6 @@ const STRATEGIC_TURN_DAYS:=30
 const HISTORY_LIMIT:=240
 const INCIDENT_LIMIT:=4
 const AGE_COHORTS:=["children","youth","early_adults","established_adults","mature_adults","elders"]
-const COHORT_DURATION_TURNS:={"children":168.0,"youth":132.0,"early_adults":120.0,"established_adults":120.0,"mature_adults":180.0}
 const STRATEGIES:=["sustenance","growth","inquiry","commerce","fortification","expansion"]
 const IDENTITIES=preload("res://scripts/civilization_identity.gd")
 const LEADER_PERSONALITY=preload("res://scripts/leader_personality.gd")
@@ -77,13 +76,6 @@ const WAR_HISTORY_LIMIT:=64
 # ledger. Individual engagements are a rolling operational appendix; the total
 # battle count survives after old engagement detail is compacted.
 const WAR_BATTLE_LIMIT:=12
-const REGION_VALUE_TEXT:={
-	"frontier":"Opens the road into the rival's strategic interior and weakens its logistics.",
-	"granary":"Constrains the rival's food growth and can eventually support your provision network.",
-	"market":"Cuts exchange access and can become a valuable integrated market.",
-	"works":"Reduces rival production and can add bounded material capacity after integration.",
-	"capital":"Cripples institutions and knowledge, creates major peace leverage, and may break organized resistance."
-}
 
 var civilizations:Array[Dictionary]=[]
 var city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
@@ -2025,6 +2017,8 @@ func _scouts_read_their_signs(route:Array,day:int,at_least_km:float=0.0)->void:
 			relation["home_position"]={"x":home.x,"z":home.y}
 			relation["home_location_source"]="returned scouts saw it"
 			relation["last_observed_day"]=day
+			# Where and how the two peoples first met is kept with the meeting.
+			relation=_set_contact_provenance(relation,day,"returned_scout_report",home,"settlement","")
 			civ["player_relation"]=relation
 			civilizations[index]=civ
 			_meeting_is_mutual(civ,day,home,"a scouting party",false)
@@ -3548,7 +3542,6 @@ func _resolve_taught_knowledge(_day:int,_recruits:int,_contacts:Array)->String:
 	# Specific carried evidence is studied through the ordinary workforce.
 	return ""
 
-const SCOUT_FIND_RESOURCES:Array[String]=["Timber","Stone","Fiber Plants","Fertile Soil","Game"]
 func scout_one_way_range(duration_days:int)->float:
 	## How far a party can range: logistics staffing, established route-speed knowledge from Logistics inquiry, and —
 	## transformatively — an adopted mounted-scouting tradition.
@@ -4900,7 +4893,7 @@ func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
 	return visible
 
 
-func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->void:
+func _rebuild_competition()->void:
 	var snapshot_data:=competition_snapshot() if not civilizations.is_empty() else {}
 	if snapshot_data.is_empty(): return
 	for contender in snapshot_data.leaders:
@@ -4909,26 +4902,6 @@ func _rebuild_competition(advance_outcome:bool=false,evaluation_day:int=-1)->voi
 		if score_index>=0:
 			civilizations[score_index]["score"]=float(contender.score)
 			civilizations[score_index]["rank"]=int(contender.rank)
-	if advance_outcome:
-		var outcome_day:=evaluation_day if evaluation_day>=0 else int(WorldSimulation.state.elapsed_days)
-		# Comparative strength is a chronicle observation only; nothing is won.
-		var strong:=int(snapshot_data.player_rank)==1 and int(snapshot_data.player_domains_led)>=4 and float(snapshot_data.lead_margin)>=1.10
-		var effects:=player_effects()
-		var collapsing:=WorldSimulation.state.population_health<0.12 and WorldSimulation.state.food_security<0.12 and float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.62))<0.12 and float(effects.hostile_pressure)>0.35
-		collapse_turns=collapse_turns+1 if collapsing and not WorldSimulation.military.recovery.has_active_occupation() and WorldSimulation.military.recovery.data.remnant.is_empty() else 0
-		# Strength and distress are historical episodes; the game has no end state.
-		chronicle.observe(outcome_day,_chronicle_facts(collapsing,strong))
-
-func _chronicle_facts(crisis:bool=false,strong:bool=false)->Dictionary:
-	var contacts:=0;var trading:=false
-	for civ:Dictionary in civilizations:
-		if int(civ.player_relation.get("contact_level",0))>=2:contacts+=1
-		if float(civ.player_relation.get("trade",0))>0:trading=true
-	var discoveries:=0
-	for value in WorldSimulation.state.discovery_adoption.values():
-		if float(value)>=.5:discoveries+=1
-	return {"population":int(WorldSimulation.state.population_exact),"contacts":contacts,"discoveries":discoveries,"crisis":crisis,"healthy":WorldSimulation.state.population_health>=.65 and WorldSimulation.state.food_security>=.7,"dominant":strong,"settlement":not WorldSimulation.state.settlement_completed.is_empty(),"exchange":trading,"learning":discoveries>=12,"institutions":float(WorldSimulation.state.society_capacities.get("institutions",0))>=.6,"communities":WorldSimulation.state.settlement_nuclei.size()>1}
-
 
 func _player_profile()->Dictionary:
 	var effects:=player_effects()
