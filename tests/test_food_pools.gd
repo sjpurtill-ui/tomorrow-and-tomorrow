@@ -102,24 +102,16 @@ func test_spoilage_levers_reduce_losses()->void:
 	assert_float(float(reduced[FoodSystem.FRESH])).is_less(float(baseline[FoodSystem.FRESH]))
 	assert_float(float(reduced[FoodSystem.STORED])).is_less(float(baseline[FoodSystem.STORED]))
 
-func test_legacy_five_type_stocks_and_ledgers_fold_into_two_pools()->void:
+func test_legacy_five_type_stocks_fold_into_two_pools()->void:
 	GameState.food_stocks={"Fresh plants":10.0,"Fresh meat":5.0,"Fish":2.0,"Dry staples":40.0,"Preserved food":8.0}
-	var grain:=preload("res://scripts/grain_processing.gd").empty_state()
-	var grain_key:String=grain.stocks.keys()[0]
-	grain.stocks[grain_key]=6.0;grain.batches=[{"amount":3.0}]
-	GameState.grain_processing=grain
-	var lots:=preload("res://scripts/food_batches.gd").empty_state();lots.lots=[{"amount":4.0}]
-	GameState.food_batches=lots
 	FoodSystem.initialize()
 	assert_int(GameState.food_stocks.size()).is_equal(2)
 	assert_float(float(GameState.food_stocks[FoodSystem.FRESH])).is_equal_approx(17.0,.000001)
-	assert_float(float(GameState.food_stocks[FoodSystem.STORED])).is_equal_approx(48.0+6.0+3.0+4.0,.000001)
-	assert_float(FoodSystem.total_stored()).is_equal_approx(78.0,.000001)
-	assert_float(float(GameState.grain_processing.stocks[grain_key])).is_equal(0.0)
-	assert_array(GameState.food_batches.lots).is_empty()
+	assert_float(float(GameState.food_stocks[FoodSystem.STORED])).is_equal_approx(48.0,.000001)
+	assert_float(FoodSystem.total_stored()).is_equal_approx(65.0,.000001)
 	# Folding again adds nothing.
 	FoodSystem._fold_legacy_pools()
-	assert_float(FoodSystem._stock_total()).is_equal_approx(78.0,.000001)
+	assert_float(FoodSystem._stock_total()).is_equal_approx(65.0,.000001)
 
 func test_forecast_reports_thirty_and_ninety_days_and_the_first_shortage()->void:
 	var demand:={"total":55.0,"climate":0.0,"rationing":0.0}

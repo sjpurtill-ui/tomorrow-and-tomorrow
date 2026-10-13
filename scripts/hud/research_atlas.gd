@@ -313,12 +313,6 @@ func select(id:String,open_detail:bool=false)->void:
 			if preload("res://scripts/hud/microscopy_panel.gd").supports(String(item.id)):
 				var lab_panel:VBoxContainer=preload("res://scripts/hud/microscopy_panel.gd").new()
 				lab_panel.subject=String(item.id);detail_body.add_child(lab_panel)
-			if preload("res://scripts/food_batch_knowledge.gd").METHODS.has(String(item.id)):
-				var food_panel:VBoxContainer=preload("res://scripts/hud/food_batches_panel.gd").new()
-				food_panel.subject=String(item.id);detail_body.add_child(food_panel)
-			if not preload("res://scripts/grain_processing.gd").definition(String(item.id)).is_empty():
-				var grain_panel:VBoxContainer=preload("res://scripts/hud/grain_processing_panel.gd").new()
-				grain_panel.subject=String(item.id);detail_body.add_child(grain_panel)
 		if item.exposed:
 			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
 			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty() or not definition.get("agronomy_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),12,T.TEXT_SOFT,true)

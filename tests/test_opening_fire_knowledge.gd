@@ -3,7 +3,6 @@ extends GdUnitTestSuite
 const Paths=preload("res://scripts/knowledge_pathways.gd")
 const Requirements=preload("res://scripts/technology_requirements.gd")
 const Fire=preload("res://scripts/fire_practice.gd")
-const Meals=preload("res://scripts/food_preparation.gd")
 const FIRE_IDS=["ember_tending","friction_fire_ignition","percussion_fire_ignition","hearth_heat_retention","fuel_air_drying"]
 
 func before_test()->void:
@@ -94,7 +93,6 @@ func test_unfueled_embers_die_and_knowledge_does_not_supply_heat()->void:
 	var report:=Fire.advance(1,true,false)
 	assert_bool(report.available).is_false()
 	assert_int(int(report.extinctions)).is_equal(1)
-	assert_str(String(Meals.plan(10,20,false).method)).is_empty()
 
 func test_deliberate_ignition_restores_fire_from_actual_material()->void:
 	GameState.settlement_site_committed=true
@@ -106,9 +104,6 @@ func test_deliberate_ignition_restores_fire_from_actual_material()->void:
 	assert_str(String(report.source)).is_equal("friction")
 	assert_int(int(report.ignitions)).is_equal(1)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(.10-Fire.FRICTION_TIMBER,.000001)
-	GameState.discovery_adoption.hearth_roasting_control=1.0
-	GameState.food_stocks={"Fresh plants":20.0}
-	assert_str(String(Meals.plan(10,20,false).method)).is_equal("hearth_roasting_control")
 
 func test_failed_percussion_attempt_returns_unusable_tinder_stock()->void:
 	GameState.settlement_site_committed=true

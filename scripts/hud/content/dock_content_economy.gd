@@ -91,26 +91,12 @@ func _food_blocks(metrics:Dictionary)->Array:
 			"tip":"Rations this source gave today" if not source.has("renewable") else "Rations this source gave today. The land nearby grows back about %s rations a day of it; taking more thins the game, fish or plants until they are rested." % Plain.number(float(source.renewable)),
 		})
 	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"Today's food","note":"in rations","items":flow_items}]
-	var preparation:Dictionary=metrics.get("food_preparation",{})
 	var fire:Dictionary=metrics.get("fire_practice",{})
 	if not fire.is_empty():
 		var lit:=bool(fire.get("available",false))
 		var source:=String(fire.get("source","none")).replace("_"," ").capitalize()
 		var timber:=float(fire.get("maintenance_timber",0.0))
 		blocks.append({"type":"rows","heading":"Hearth fire","note":"how strong the embers are","items":[{"name":"Embers kept alight" if lit else "No fire","sub":String(fire.get("status","No one is keeping a fire")),"value":"%d%%" % roundi(clampf(float(fire.get("embers",0.0)),0.0,1.0)*100.0),"value_color":Tokens.GREEN if lit else Tokens.RED,"accent":Tokens.AMBER if lit else Color(0,0,0,0),"tip":"Lit by: %s. Keeping it alive burned %s wood today." % [source,Plain.number(timber)]}]})
-	if float(preparation.get("rations",0.0))>0.0:
-		var inputs:Array[String]=[]
-		for resource:String in preparation.get("inputs",{}):inputs.append("%s %s" % [Plain.number(float(preparation.inputs[resource])),resource])
-		blocks.append({"type":"rows","heading":"Meal preparation","items":[{"name":String(DiscoverySystem.discovery_definition(String(preparation.method)).get("name","Prepared meals")),"sub":"Uses "+", ".join(inputs),"value":"%.1f rations" % float(preparation.rations),"tip":"These cooked meals are part of today's food eaten. The same hands also smoke and dry food for keeping."}]})
-	var grain:Dictionary=metrics.get("grain_processing",{})
-	var grain_items:Array=[]
-	for kind:String in metrics.get("grain_stocks",{}):
-		var stored:=float(metrics.grain_stocks[kind])
-		if stored>0.001:grain_items.append({"name":kind.capitalize(),"value":"%s rations" % Plain.number(stored),"sub":"Counted in the food stores"})
-	if not grain_items.is_empty() or float(metrics.get("grain_in_process",0))>0:
-		grain_items.append({"name":"Being sprouted","value":"%s rations" % Plain.number(float(metrics.get("grain_in_process",0))),"sub":"Not ready to eat until the work is done"})
-		grain_items.append({"name":"Lost in the work today","value":"%s rations" % Plain.number(float(grain.get("loss",0))),"sub":"Some grain is always lost in threshing and sprouting"})
-		blocks.append({"type":"rows","heading":"Grain work","items":grain_items})
 	var preservation_inputs:Dictionary=metrics.get("food_preservation_inputs",{})
 	if not preservation_inputs.is_empty():
 		blocks.append({"type":"rows","heading":"Smoking fuel","items":[{"name":"Wood burned today","value":Plain.number(float(preservation_inputs.get("Timber",0.0))),"sub":"To smoke meat and fish so they keep"}]})

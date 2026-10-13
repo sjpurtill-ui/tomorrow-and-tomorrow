@@ -49,9 +49,6 @@ func refresh()->void:
 			var cells:=float(frame.cells)
 			evidence="last looked at %s: %s living cell%s seen, %s"%[Era.ago(int(frame.day)),Plain.number(cells),"" if is_equal_approx(cells,1.0) else "s","clear to read" if float(frame.contrast)>=0.5 else "hard to read"]
 		lines.append("Sample %d (%s, from source %d): %s."%[int(sample.id),String(sample.kind).replace("_"," "),int(sample.source),evidence])
-	var rejected:=0
-	for lot:Dictionary in state.food_batches.lots:
-		if lot.kind=="starter" and not Lab.starter_usable(lot,day):rejected+=1
-	lines.append("%d starter batches held back by what was seen. A sample not looked at lately proves nothing, and looking cannot tell what illness a sample carries."%rejected)
+	lines.append("A sample not looked at lately proves nothing, and looking cannot tell what illness a sample carries.")
 	details.text="\n".join(lines)
 	toggle.text="Stop using the microscope" if bool(ledger.enabled) else "Start using the microscope again"

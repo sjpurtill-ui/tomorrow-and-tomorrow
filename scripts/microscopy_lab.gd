@@ -72,20 +72,6 @@ static func prepare_section(ledger:Dictionary,sample:Dictionary,stocks:Dictionar
 	sample.amount-=.0001;sample.cells-=portion_cells
 	Samples.record(ledger,sample,day,"section",{"portion":.0001,"cells":portion_cells,"viable_fraction":float(sample.viability),"organized_fraction":float(sample.profile.get("tissue_order",0)),"tool_wear":.001,"slide":.01,"work":.1})
 	return true
-static func collect_starter(ledger:Dictionary,stocks:Dictionary,day:int)->void:
-	var batches=load("res://scripts/food_batches.gd")
-	for lot:Dictionary in batches.data().lots:
-		if lot.kind!="starter" or float(lot.amount)<.02:continue
-		var exists:=false
-		for sample:Dictionary in ledger.specimens:
-			if sample.kind=="starter" and int(sample.source)==int(lot.id) and sample.site==site():exists=true
-		if exists or ledger.specimens.size()>=Samples.LIMIT:continue
-		if not pay(ledger,stocks,{"Specimen Slides":.01,"Freshwater":.02},.05):return
-		var age:=maxi(0,day-int(lot.created))
-		var profile:={"viability":clampf(1.0-float(age)*.025,.1,1),"contamination":clampf(float(age)*.02,0,.8),"tissue_order":0.0}
-		var sample:=Samples.add(ledger,"starter",int(lot.id),int(lot.created),site(),day,.01,profile)
-		if not sample.is_empty():sample.origin=batches.withdraw(lot,.01)
-		return
 static func collect_plant(ledger:Dictionary,stocks:Dictionary,day:int)->void:
 	for trial:Dictionary in WorldSimulation.state.field_botany.trials:
 		if int(trial.age)<15 or trial.site!=site() or float(trial.seed)<.001 or day<int(trial.start_day)+int(trial.age):continue
@@ -115,7 +101,7 @@ static func advance(traveling:bool)->Dictionary:
 	Samples.expire(ledger,day)
 	prepare_station(ledger,stocks,known,day)
 	if not bool(ledger.tools.get("bench",false)):ledger.report=report;return report
-	collect_starter(ledger,stocks,day);collect_plant(ledger,stocks,day)
+	collect_plant(ledger,stocks,day)
 	for sample:Dictionary in ledger.specimens.duplicate():
 		if sample.site!=site():continue
 		var aseptic:bool="aseptic_laboratory_practice" in known and protocol_ready(ledger,String(sample.kind)) and int(ledger.tools.get("sterile_until",-1))>=day and int(ledger.tools.get("sterile_uses",0))>0
@@ -175,19 +161,6 @@ static func interpret(ledger:Dictionary,stocks:Dictionary,known:Array,day:int)->
 					if not bool(ledger.protocols[index].repeatable):ledger.protocols.remove_at(index);break
 			ledger.protocols.append({"kind":String(first.kind),"first":int(first.id),"second":int(second.id),"day":day,"repeatable":repeatable,"first_source":int(first.source),"second_source":int(second.source),"first_sample_day":int(first.day),"second_sample_day":int(second.day),"procedure":{"kind":String(first.kind),"preparation":"stained" if float(pair.first.contrast)>.8 else "unstained","view":pair.first.duplicate(true)},"replication":{"kind":String(second.kind),"preparation":"stained" if float(pair.second.contrast)>.8 else "unstained","view":pair.second.duplicate(true)},"first_viability":first_estimate,"second_viability":second_estimate})
 			return
-static func starter_usable(lot:Dictionary,day:int)->bool:
-	var ledger:Dictionary=WorldSimulation.state.microscopy
-	for sample:Dictionary in ledger.specimens:
-		if sample.kind!="starter" or sample.site!=site() or int(sample.source)!=int(lot.id) or int(sample.source_day)!=int(lot.created) or sample.history.is_empty():continue
-		if day-int(sample.history[-1].day)>3:continue
-		# A mixed parent alone is not sufficient: require an isolated line with
-		# measured growth before rejecting this particular source starter.
-		if not sample.methods.has("growth"):continue
-		for parent:Dictionary in ledger.specimens:
-			if int(parent.id)!=int(sample.parent) or parent.site!=sample.site or int(parent.source)!=int(sample.source) or not parent.methods.has("microbes"):continue
-			var observed:Dictionary=parent.methods.microbes.observation
-			if day-int(parent.methods.microbes.day)<=3 and float(observed.mixed_fraction)>.35:return false
-	return true
 static func field_evidence(cohort:int,start_day:int,day:int)->Dictionary:
 	for sample:Dictionary in WorldSimulation.state.microscopy.specimens:
 		if sample.kind!="plant" or sample.site!=site() or int(sample.source)!=cohort or int(sample.source_day)!=start_day:continue

@@ -284,8 +284,6 @@ var water_conveyance:Dictionary={"lines":[],"next_id":1,"last_day":-1,"report":{
 var water_waste_works:Dictionary=preload("res://scripts/water_waste_works_state.gd").empty()
 var civilian_care:Dictionary=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 var rail_freight:Dictionary=preload("res://scripts/rail_freight_fabric.gd").empty_state()
-var food_batches:Dictionary=preload("res://scripts/food_batches.gd").empty_state()
-var grain_processing:Dictionary=preload("res://scripts/grain_processing.gd").empty_state()
 var microscopy:Dictionary=preload("res://scripts/microscopy_samples.gd").empty_state()
 var field_botany:Dictionary=preload("res://scripts/field_botany.gd").empty_state()
 var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
@@ -646,8 +644,6 @@ func reset_for_new_world(new_seed:int)->void:
 	water_waste_works=preload("res://scripts/water_waste_works_state.gd").empty()
 	civilian_care=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 	rail_freight=preload("res://scripts/rail_freight_fabric.gd").empty_state()
-	food_batches=preload("res://scripts/food_batches.gd").empty_state()
-	grain_processing=preload("res://scripts/grain_processing.gd").empty_state()
 	microscopy=preload("res://scripts/microscopy_samples.gd").empty_state()
 	field_botany=preload("res://scripts/field_botany.gd").empty_state()
 	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}

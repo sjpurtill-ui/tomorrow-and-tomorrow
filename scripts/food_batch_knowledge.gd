@@ -435,7 +435,5 @@ static func entries()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	for id:String in METHODS:
 		var spec:Dictionary=METHODS[id]
-		result.append({"id":id,"name":spec.name,"direction":"Sustenance","day":0,"chance":.002,"requires":spec.requires_all.duplicate(),"requires_all":spec.requires_all.duplicate(),"requires_any":spec.requires_any.duplicate(true),"learning_routes":[{"id":"local","label":spec.name,"requires_all":[]}],"signals":["food","crafting","research"],"observation":spec.observation,"effects":{},"food_batch_method":id,"production_contract":"Paid equipment and shared Logistics time process finite cereal lots or consume representative samples. Inspection records apply to the examined lot; they do not provide universal safety or free food. Baking, fermentation and packaging need their actual inputs."})
-	for entry:Dictionary in result:
-		if METHODS[entry.id].mode=="selected_food":entry.production_contract="Processes only identified compatible ingredient lots with paid equipment, water, handling losses and shared Logistics time. Leached acorn meal, grated root pulp and split pulses still require their adopted cooking step before they become edible rations."
+		result.append({"id":id,"name":spec.name,"direction":"Sustenance","day":0,"chance":.002,"requires":spec.requires_all.duplicate(),"requires_all":spec.requires_all.duplicate(),"requires_any":spec.requires_any.duplicate(true),"learning_routes":[{"id":"local","label":spec.name,"requires_all":[]}],"signals":["food","crafting","research"],"observation":spec.observation,"effects":{},"production_contract":"A way of working, not a building: there is nothing to install. What it gives comes as the people take it up."})
 	return result

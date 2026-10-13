@@ -552,7 +552,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice","active_observations","simulation_trends","economy_events","currency_issued","currency_retired","founding_focus_selected_day","public_borrowed","public_debt_repaid","public_interest_accrued","material_history","resource_events","population_allocation_auto"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
+const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice","food_batches","grain_processing","active_observations","simulation_trends","economy_events","currency_issued","currency_retired","founding_focus_selected_day","public_borrowed","public_debt_repaid","public_interest_accrued","material_history","resource_events","population_allocation_auto"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy"]
 
 func capture_actor(id:String)->Dictionary:
@@ -629,10 +629,6 @@ func validate_payload(payload:Dictionary)->String:
 		if not opportunities.valid(actor.state.GameState.get("opening_opportunities",opportunities.empty_state())):return "Invalid civilization opening opportunity records."
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."
 		if not preload("res://scripts/civilian_care_state.gd").valid_state(actor.state.GameState):return "Invalid civilian clinical care records."
-		var batches=preload("res://scripts/food_batches.gd")
-		if not batches.valid(actor.state.GameState.get("food_batches",batches.empty_state())) or not batches.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization food batch records."
-		var grain=preload("res://scripts/grain_processing.gd")
-		if not grain.valid(actor.state.GameState.get("grain_processing",grain.empty_state())) or not grain.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization grain processing records."
 		var microscopy=preload("res://scripts/microscopy_samples.gd")
 		if not microscopy.valid(actor.state.GameState.get("microscopy",microscopy.empty_state())) or not microscopy.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization microscopy records."
 		var botany=preload("res://scripts/field_botany.gd")

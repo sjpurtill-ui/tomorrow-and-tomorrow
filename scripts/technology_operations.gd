@@ -142,7 +142,7 @@ static func workshop_power_demand()->float:
 		if supplied:demand+=float(recipe.daily_power)
 	return demand
 static func auxiliary_power_demand()->float:
-	return float(load("res://scripts/grain_processing.gd").power_demand())+float(load("res://scripts/household_clothing.gd").power_demand())
+	return float(load("res://scripts/household_clothing.gd").power_demand())
 static func consume_service(name:String,amount:float)->float:
 	if not is_finite(amount):return 0.0
 	var used:=minf(maxf(0,amount),service(name))
