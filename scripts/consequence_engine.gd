@@ -806,7 +806,6 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var weather:=FABRIC.weather_bonus(cold_pressure*(1.0-float(clothing.get("cold",0))),heat_pressure)
 		WorldSimulation.state.simulation_metrics["fabric_weather"]=weather
 		health_target=clampf(health_target+FABRIC.health_bonus()+weather,.02,.97)
-	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
 	WorldSimulation.state.simulation_metrics["water_days"]=float(WorldSimulation.state.water_metrics.get("days",0.0))
@@ -992,10 +991,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# Fear of being struck fades: half of it is gone in about a year.
 	if standing_reading.has("war_fear"): standing_reading["war_fear"]=float(standing_reading["war_fear"])*(1.0-SPAN.rate(WAR_FEAR_FADE))
 	WorldSimulation.state.simulation_metrics = {
-		"clothing_coverage":clothing.duplicate(),"environmental_health_cost":environmental_health_cost,
 		"health":WorldSimulation.state.population_health,"housing_ratio":housing_ratio,"housing_capacity":WorldSimulation.state.housing_capacity,"labor_efficiency":labor_efficiency,"cohesion":cohesion,"knowledge":knowledge,
 		"material_capacity":material_capacity,"logistics":logistics,"security":security,"ecology":ecology,"legitimacy":legitimacy,
-		"governance_administrative_load":administrative_load,"governance_policy_churn":policy_churn,"governance_council_support":council_support,"governance_active_policies":int(governance.active_policy_count),
+		"governance_council_support":council_support,
 		"resource_access":float(accessible_count),"settlement":settlement_score,"population":WorldSimulation.state.population_exact,
 		"annual_birth_rate":annual_birth_rate,"annual_death_rate":annual_death_rate,"traveling":traveling,
 		"mortality_components":mortality_components.duplicate(true),
@@ -1006,21 +1004,22 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		# What food security is made of (food_care.gd): the lean buffer, and
 		# what is eaten, which deaths and sickness read; and what fresh food
 		# and the carers add to health today.
-		"food_lean_buffer":lean_buffer,"food_fed_security":fed_security,"fresh_health":fresh_health,"care_health":care_health,
+		"food_lean_buffer":lean_buffer,"food_fed_security":fed_security,"fresh_health":fresh_health,
 		"care_cover":FoodCare.care_cover_of(WorldSimulation.state),
-		"water_intake_ratio":water_intake,"water_days":float(WorldSimulation.state.water_metrics.get("days",0.0)),"water_shortage_days":WorldSimulation.state.consecutive_water_shortage_days,
-		"water_collected_today":float(WorldSimulation.state.water_metrics.get("collected_today",0.0)),"water_required_today":float(WorldSimulation.state.water_metrics.get("required_today",population)),"water_source_distance_km":float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0)),
+		"water_intake_ratio":water_intake,"water_days":float(WorldSimulation.state.water_metrics.get("days",0.0)),
+		"water_collected_today":float(WorldSimulation.state.water_metrics.get("collected_today",0.0)),
 		"travel_speed_factor":_travel_speed_factor(WorldSimulation.state.population_health,WorldSimulation.state.food_security,production_ratio,food_stored,traveling),
-		"survey_capacity":surveyors*labor_efficiency*(1.0+WorldSimulation.state.founding_effect("survey_output")+WorldSimulation.progression.effect("knowledge_rate")*0.35),"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+WorldSimulation.state.founding_effect("construction_output")+WorldSimulation.progression.effect("construction_rate")),"combined_intelligence":WorldSimulation.state.combined_intelligence,
+		"construction_capacity":builders*labor_efficiency*(1.0+workshop_function*0.10)*(1.0+WorldSimulation.state.founding_effect("construction_output")+WorldSimulation.progression.effect("construction_rate")),"combined_intelligence":WorldSimulation.state.combined_intelligence,
 		"workshop_function":workshop_function,"storage_function":storage_function
 	}
 	WorldSimulation.state.simulation_metrics.merge(standing_reading)
-	for dynamic_name in WorldSimulation.state.society_capacities:
-		WorldSimulation.state.simulation_metrics["society_"+String(dynamic_name)]=WorldSimulation.state.society_capacities[dynamic_name]
 	for food_metric in food_result:
 		WorldSimulation.state.simulation_metrics[food_metric]=food_result[food_metric]
-	for material_metric in WorldSimulation.state.material_metrics:
-		WorldSimulation.state.simulation_metrics["material_"+String(material_metric)]=WorldSimulation.state.material_metrics[material_metric]
+	# The two readings of the stores the town model reads from here
+	# (settlement_model.gd); the rest of material_metrics is read where it is kept.
+	for material_metric:String in ["storage_capacity","stored_bulk"]:
+		if WorldSimulation.state.material_metrics.has(material_metric):
+			WorldSimulation.state.simulation_metrics["material_"+material_metric]=WorldSimulation.state.material_metrics[material_metric]
 	_refresh_all_policy_observations()
 	# How long we live reads a month of risks, not one day's (game_state.gd).
 	WorldSimulation.state.smooth_exceptional_hazard(SPAN.rate(1.0/30.0))

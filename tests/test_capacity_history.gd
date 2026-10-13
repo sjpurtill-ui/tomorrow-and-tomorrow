@@ -563,7 +563,7 @@ func test_small_changes_are_told_in_points_never_as_nothing()->void:
 	assert_str(Words.points(0.0)).is_equal("0")
 	assert_str(Words.amount(-0.36)).is_equal("0.4")
 	assert_str(Words.reason("upkeep",-1.2)).is_equal("More full-time keepers to feed (-1)")
-	assert_str(Words.reason("limit",0.7)).is_equal("Our age allows more (+0.7)")
+	assert_str(Words.reason("limit",0.7)).is_equal("The year allows more (+0.7)")
 	assert_str(Words.event(["crisis","the Kintara Fever",12])).is_equal("The Kintara Fever: 12 died")
 	assert_str(Words.event(["official","Marshal",""])).is_equal("No war leader now")
 	# How long a run took, as the Chronicle counts time.
