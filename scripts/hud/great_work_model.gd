@@ -34,7 +34,7 @@ static func describe(work:Dictionary)->Dictionary:
 	if work.has("fraction"):progress=_number(work.fraction)
 	elif work.has("work_id"):progress=_number(work.get("progress",0.0))
 	elif work.has("progress") and not id.is_empty():
-		progress=_number(work.progress)/maxf(.001,_number(work.get("total_work",float(definition.get("work",1.0))*_number(work.get("work_scale",1.0)))))
+		progress=_number(work.progress)/maxf(.001,_number(work.get("total_work",float((work.get("budget",{}) as Dictionary).get("work",definition.get("work",1.0)))*_number(work.get("work_scale",1.0)))))
 	progress=clampf(progress,0.0,1.0)
 	var state:="building"
 	if status in ["ruined","collapse","collapsed","folly"] or String(work.get("outcome",""))=="collapse":state="ruined"

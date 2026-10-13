@@ -49,6 +49,7 @@ static func pieces(design:Dictionary)->Array:
 			"amphitheatre":b.amphitheatre()
 			"lighthouse":b.lighthouse()
 	if b.parts.is_empty():return [] # Invalid identities never become a generic hall.
+	if bool(design.get("evolved",false)):b.processional_complex()
 	b.craft_detail()
 	b.ornament()
 	return b.parts
@@ -63,7 +64,7 @@ class Builder extends RefCounted:
 	var accent:Color
 	var seed:int
 	func _init(design:Dictionary)->void:
-		d=design;t=clampi(int(d.get("tier",0)),0,5);scale=clampf(float(d.get("scale",1.0)),.5,1.5)
+		d=design;t=clampi(int(d.get("tier",0)),0,5);scale=clampf(float(d.get("scale",1.0)),.5,4.0)
 		seed=posmod(int(d.get("seed",0)),2147483647)
 		# The recorded builder's token supplies small, persistent proportions.
 		scale*=lerpf(.98,1.02,float(seed%997)/996.0)
@@ -79,6 +80,14 @@ class Builder extends RefCounted:
 		parts.back().basis=Basis(Quaternion(Vector3.UP,direction.normalized()))
 	func roof(x:float,y:float,z:float,w:float,h:float,deep:float,yaw:float=0.0)->void:
 		var color:=Color("857050") if String(d.get("material",""))=="timber" else tone.darkened(.18)
+		if bool(d.get("evolved",false)) and t>=4:
+			# A broad glazed exhibition roof with a visible precision frame.
+			p(Vector3(x,y,z),Vector3(w,h,deep),Color("86a8af"),"roof",yaw)
+			for i in 7:
+				var at:=z+(float(i)/6.0-.5)*deep
+				beam(Vector3(x-w*.5,y,at),Vector3(x,y+h,at),.32,DARK)
+				beam(Vector3(x,y+h,at),Vector3(x+w*.5,y,at),.32,DARK)
+			return
 		p(Vector3(x,y,z),Vector3(w,h,deep),color,"roof",yaw)
 	func column(x:float,y:float,z:float,height:float,radius:float=1.0)->void:
 		roundel(x,y,z,radius*2.6,.6,radius*2.6,trim)
@@ -432,6 +441,29 @@ class Builder extends RefCounted:
 		box(0,.7,-23,2,5.5,1,trim)
 		for i in 8:box(0,1+i*.55,-22.47,1.4,.1,.08,DARK,0,false)
 
+	## Later capabilities create a landmark complex, not only a larger stone.
+	## Detail is bounded; all pieces are batched by the existing renderer.
+	func processional_complex()->void:
+		if t<2:return
+		var area:AABB=load("res://scripts/hud/great_work_architecture.gd").extent(parts)
+		var width:=area.size.x/(scale*.001)+12.0
+		var depth:=area.size.z/(scale*.001)+14.0
+		box(0,-.8,0,width,1.0,depth,trim)
+		var count:=4+t*2
+		for side in [-1,1]:
+			for i in count:
+				var z:=(float(i)/maxf(1,count-1)-.5)*depth
+				if t<4:column(side*width*.48,0,z,4.0+t,.7)
+				else:
+					box(side*width*.48,0,z,.6,6+t,.6,DARK)
+					box(side*width*.48,6+t,z,2.6,.35,1.2,trim)
+		if t>=4:
+			# Precise steel ribs and glazed entrance galleries.
+			for side in [-1,1]:
+				box(side*width*.42,0,depth*.38,width*.14,5.0,depth*.20,Color("6d929c"))
+				for i in 5:box(side*width*.42,1+i,depth*.48,width*.15,.12,.2,DARK)
+		if t>=5:
+			for i in 6:roundel((i-2.5)*width*.10,0,depth*.53,1.0,1.8,1.0,Color("d4cba7"),"cylinder",false)
 	func craft_detail()->void:
 		# The same footprint is finished with the recorded craft's joinery,
 		# dressed paving or precision joints, never the viewer's current era.

@@ -501,3 +501,37 @@ func test_renown_is_each_peoples_own()->void:
 	assert_str(said).contains("adds %.0f allure" % float(r.ceremony.allure))
 	assert_str(said).contains("+%d to how alluring" % roundi((float(after.share)-float(standing.share))*100.0))
 	assert_float(float(before.points)).is_equal(0.0)
+
+func test_new_commission_freezes_capacity_budget_and_spends_that_bill()->void:
+	var concept:=W.conceive("player",{"form":"hall","purpose":"remember_knowledge"})[0]
+	var started:=U.commission(String(city.id),concept,"grand",flat,land)
+	assert_bool(started.has("ok")).is_true()
+	var record:=U.find(city,String(started.id))
+	assert_dict(record.budget).is_not_empty()
+	var total:=U.total_work(record)
+	var quoted:=U.record_definition(record)
+	var before:=float(GameState.resource_stockpiles.Stone)
+	var amount:=minf(100.0,total*.01)
+	U._spend(GameState,quoted,amount)
+	assert_float(before-float(GameState.resource_stockpiles.Stone)).is_equal_approx(float(quoted.cost.get("Stone",0.0))*amount/float(quoted.work),0.001)
+	GameState.population_exact*=10
+	GameState.population_total*=10
+	assert_float(U.total_work(record)).is_equal(total)
+	var copied:Dictionary=bytes_to_var(var_to_bytes(record))
+	assert_float(U.total_work(copied)).is_equal(total)
+	assert_bool(U._valid_extras(copied)).is_true()
+
+func test_budget_and_rewards_survive_layer_restoration()->void:
+	var id:=_id("hall","remember_knowledge","grand","stone",2)
+	var record:=_record(city,id,1.0,"functioning")
+	record.budget=preload("res://scripts/great_work_progression.gd").budget(C.get_definition(id),3000,100,1)
+	record.progress=U.total_work(record);record.quality=record.progress
+	record.rewards={"research":0.12};record.effect={"family":"long_song","strength":2.0}
+	var total:=U.total_work(record)
+	U._push_layer(record,100)
+	record.id=_id("tower","awe_rivals","audacious","stone",2,"next")
+	U._reset_building(record,101)
+	U._revert_layer(record,102)
+	assert_float(U.total_work(record)).is_equal(total)
+	assert_float(float(record.rewards.research)).is_equal(0.12)
+	assert_float(float(record.effect.strength)).is_equal(2.0)

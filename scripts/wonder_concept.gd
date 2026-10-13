@@ -358,7 +358,7 @@ static func conceive(owner:String="player",trigger:Dictionary={},count:int=3)->A
 		taken[name]=true
 		var concept:=definition(id)
 		concept.merge({"owner":owner,"name":name,"lore":lore_for(owner,form,purpose,material,trigger,token),"motive":motive_for(owner,purpose,trigger),"trigger":trigger.duplicate(),"tradition":tradition(owner),"proposed_ambition":ambition,"token":token,"day":day,
-			"ambitions":_ambition_table(form,material,t,purpose)},true)
+			"ambitions":_ambition_table(form,material,t,purpose,s,owner)},true)
 		if trigger.has("work_id"):concept.layer_on=String(trigger.work_id);concept.city_id=String(trigger.get("city_id",""))
 		result.append(concept)
 	return result
@@ -374,9 +374,13 @@ static func _pick_material(form:String,known:Array,s:Node,roll:int)->String:
 	if weights.is_empty():return ""
 	return _weighted(weights,roll)
 
-static func _ambition_table(form:String,material:String,t:int,purpose:String)->Array:
+static func _ambition_table(form:String,material:String,t:int,purpose:String,state:Node=null,owner:String="player")->Array:
 	var rows:Array=[]
-	for ambition:String in AMBITIONS:rows.append({"ambition":ambition,"work":work_for(form,ambition,t),"cost":cost_for(form,ambition,material,t),"rewards":rewards_for(purpose,ambition,"success")})
+	for ambition:String in AMBITIONS:
+		var base:=definition(make_id(form,purpose,ambition,material,t,"preview"))
+		var budget:Dictionary=WorldSimulation.scoped(owner,func()->Dictionary:return preload("res://scripts/great_work_progression.gd").quote(base,state)) if state!=null else {}
+		var quoted:=preload("res://scripts/great_work_progression.gd").apply(base,budget)
+		rows.append({"ambition":ambition,"work":quoted.work,"cost":quoted.cost,"budget":budget,"rewards":preload("res://scripts/great_work_progression.gd").rewards(rewards_for(purpose,ambition,"success"),budget)})
 	return rows
 
 static func _pick_form(purpose:String,known:Array,wanted:String,roll:int,s:Node)->String:
@@ -390,7 +394,13 @@ static func _pick_form(purpose:String,known:Array,wanted:String,roll:int,s:Node)
 		if form_available(form,known) and (not FORMS[form].get("water",false) or wet) and not best_material(form,known).is_empty():options.append(form)
 	if options.is_empty():
 		for form:String in ["ring","mound"]:options.append(form)
-	return String(options[roll%options.size()])
+	var weighted:Dictionary={}
+	var capability:=tier(known)
+	for form:String in options:
+		# New engineering makes ambitious public infrastructure the normal pitch;
+		# early memorial forms remain possible and can still be requested.
+		weighted[form]=1.0 if capability<2 else (0.35 if form in ["ring","mound","stair"] else 1.0+capability*.6)
+	return _weighted(weighted,roll)
 
 # --- Ruler-described wonders (offline keyword mapping) ------------------------------
 const FORM_WORDS:={"tower":["tower","spire","pillar","minaret","obelisk"],"stair":["stair","steps","terrace","ziggurat","pyramid"],"ring":["ring","circle","henge","stones"],"mound":["mound","barrow","hill","tomb"],"hall":["hall","house","palace","longhouse","temple"],"cistern":["cistern","basin","well","reservoir","pool"],"granary":["granary","storehouse","barn","silo"],"bridge":["bridge","span","crossing"],"causeway":["causeway","road","dyke","levee"],"dam":["dam","barrage","weir"],"colossus":["colossus","statue","giant","idol"],"garden":["garden","grove","orchard","park"],"observatory":["observatory","sky","star","astronomy"],"gate":["gate","arch","door","threshold"],"canal":["canal","channel","waterway"],"archive":["archive","library","books","scriptorium"],"amphitheatre":["theatre","theater","amphitheatre","arena","stadium"],"lighthouse":["lighthouse","beacon","lamp"]}
@@ -458,6 +468,10 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	if s==null or parse(String(concept.get("id",""))).is_empty():return {"score":0.0,"factors":[],"spoken":"No one can say what this would take.","costs":{},"duration_estimate":0}
 	var p:=parse(String(concept.id))
 	var d:=definition(String(concept.id))
+	var record:Dictionary=extra.get("record",{})
+	var budget:Dictionary=record.get("budget",{})
+	if record.is_empty():budget=WorldSimulation.scoped(owner,func()->Dictionary:return preload("res://scripts/great_work_progression.gd").quote(d,s))
+	d=preload("res://scripts/great_work_progression.gd").apply(d,budget)
 	var m:Dictionary=s.simulation_metrics
 	var factors:Array=[]
 	var architect:Dictionary=extra.get("architect",{})
@@ -491,13 +505,15 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	var cover:=1.0
 	for resource:String in d.cost:cover=minf(cover,float(s.resource_stockpiles.get(resource,0))/maxf(1,float(d.cost[resource])))
 	factors.append({"name":"Materials","effect":snappedf(cover-1,.01),"text":"We hold %s of the %s it needs." % ["all" if cover>=1 else ("half" if cover>=.5 else "little"),String(MATERIALS[p.material].word)+" materials"]})
+	if not budget.is_empty():factors.append({"name":"Commitment","effect":0.0,"text":"A budget of 20%% of reference construction capacity over %.1f years; smaller crews take longer. Materials are paid as work advances." % float(budget.years)})
 	var shift:=float(extra.get("shift",0.0))
 	if absf(shift)>.001:factors.append({"name":"Construction so far","effect":snappedf(shift,.01),"text":"What has happened at the site %s the odds." % ("improved" if shift>0 else "worsened")})
 	var score:=clampf(engineering*.6+social*.4+shift,.02,.98)
-	var daily:=maxf(.1,builders*.2*.8)
+	var daily:=maxf(.1,float(s.effective_workers("Construction"))*.2*.8)
 	var payoff:=Fabric.great_payoff(s,gifted>0.0)
+	if not budget.is_empty():payoff*=preload("res://scripts/great_work_progression.gd").reward_scale(t)
 	return {"score":snappedf(score,.001),"engineering":snappedf(engineering,.001),"social":snappedf(social,.001),"factors":factors,"spoken":spoken(score,String(p.ambition),factors,String(architect.get("name",""))),"costs":d.cost,"work":float(d.work),"duration_estimate":roundi(float(d.work)/daily),"odds":odds(score,String(p.ambition)),
-		"builders":built,"payoff":payoff,"stated":Fabric.great_words(built,payoff,odds(score,String(p.ambition)),String(architect.get("name","")) if gifted>0.0 else "")}
+		"budget":budget,"builders":built,"payoff":payoff,"stated":Fabric.great_words(built,payoff,odds(score,String(p.ambition)),String(architect.get("name","")) if gifted>0.0 else "")+("\nBudgets 20%% of reference construction capacity over %.1f years; smaller crews take longer. Materials are charged as construction advances." % float(budget.years) if not budget.is_empty() else "")}
 
 static func _at_war(owner:String)->bool:
 	if owner!="player" and not WorldSimulation.actors.has(owner):return false

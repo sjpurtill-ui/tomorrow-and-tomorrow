@@ -82,7 +82,7 @@ static func _summary(city:Dictionary,r:Dictionary)->Dictionary:
 	var d:=Catalog.get_definition(String(r.id))
 	var concept:Dictionary=r.get("concept",{})
 	return {"work_id":String(r.id),"city_id":String(city.get("id","")),"city_name":String(city.get("name","")),"name":U.display_name(r),"lore":String(concept.get("lore",d.get("lore",""))),"ruin_lore":String(r.get("ruin_lore","")),
-		"purpose":String(d.get("purpose","")),"form":String(d.get("shape",d.get("form",""))),"visual":String(d.get("form","")),"ambition":String(d.get("ambition","grand")),"era":String(d.get("era","")),
+		"budget":r.get("budget",{}).duplicate(true),"purpose":String(d.get("purpose","")),"form":String(d.get("shape",d.get("form",""))),"visual":String(d.get("form","")),"ambition":String(d.get("ambition","grand")),"era":String(d.get("era","")),
 		"status":String(r.status),"outcome":String(r.get("outcome","")),"stage":U.stage_of(r),"progress":U.fraction(r),"idle":U.idle_words(r),"asks":U.question_words(r),"days_left":U.days_left(r),"condition":float(r.get("condition",1.0)),
 		"architect":String(r.get("architect",{}).get("name","")),"layers":(r.get("layers",[]) as Array).size(),"legacy":String(r.get("legacy","")),"occupied_by":String(city.get("occupied_by",""))}
 
