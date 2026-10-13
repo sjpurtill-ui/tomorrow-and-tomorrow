@@ -193,7 +193,7 @@ func _effects(box:VBoxContainer)->void:
 	_heading(box,"WHAT OUR KNOWLEDGE OF %s DOES NOW" % name_words.to_upper(),"%d effect%s" % [rows.size(),"" if rows.size()==1 else "s"])
 	if rows.is_empty():
 		_line(box,"Nothing known in this field acts on the world yet.",13,T.TEXT_SOFT);return
-	box.add_child(_hint("Each practice counts by how widely it is used, before what this age allows. Click a bar for everywhere it acts."))
+	box.add_child(_hint("Each practice counts by how widely it is used, before the limit the year sets on it. Click a bar for everywhere it acts."))
 	var key:="all:"+String(data.get("id",""))
 	var shown:=rows if state.has(key) or rows.size()<=FIRST_BARS+1 else rows.slice(0,FIRST_BARS)
 	_chart(box,shown,_largest(rows))

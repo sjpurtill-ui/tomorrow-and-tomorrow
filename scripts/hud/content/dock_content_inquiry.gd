@@ -260,7 +260,7 @@ func _knowledge_acts_block()->Dictionary:
 	if not inert.is_empty():
 		groups.append({"id":"inert","title":"Known, but nothing uses it yet","summary":"These effects are part of what the people know, but nothing in the simulation reads them, so they change nothing.","count":"%d" % inert.size(),"accent":Tokens.BORDER,"rows":inert})
 	return {"type":"impact","heading":"WHERE YOUR KNOWLEDGE ACTS","note":"totals now, as the engine counts them","state":effect_state,"groups":groups,
-		"intro":"Everything the people know adds up here: each practice counts in proportion to how widely it is used, and each total is held under what this age allows. The capacities named are the twelve on Culture › Society's strengths; each also counts toward the people's next scale in its field. Open a field, then an effect, to see everywhere it acts.",
+		"intro":"Everything the people know adds up here: each practice counts in proportion to how widely it is used, and each total is held under what the year allows: a limit for each effect that rises as the years pass and the people learn. The capacities named are the twelve on Culture › Society's strengths; each also counts toward the people's next scale in its field. Open a field, then an effect, to see everywhere it acts.",
 		"empty":"Nothing the people know acts on the world yet."}
 
 ## "Protection from sickness +5.3% · Diet quality +1.1% · 3 more".

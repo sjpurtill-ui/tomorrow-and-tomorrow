@@ -43,7 +43,7 @@ const PARTS:={
 	"roads":["Roads and paths","Better roads","Roads roughening"],
 	"officials":["Office holders","Office holders helping more","Office holders helping less"],
 	"values":["What we value","What we value helping more","What we value helping less"],
-	"limit":["What our age allows","Our age allows more","Held back by our age"],
+	"limit":["What the year allows","The year allows more","Held back by the year"],
 	"upkeep":["Feeding full-time lore keepers","Fewer full-time keepers to feed","More full-time keepers to feed"],
 	"watch_upkeep":["Keeping a large watch","A smaller watch to keep","A larger watch to keep"],
 	"common":["What every people knows","",""],
@@ -112,7 +112,7 @@ static func part_name(key:String)->String:
 	return _era(String((PARTS.get(key,[key.capitalize()]) as Array)[0]))
 
 ## Why a capacity moved, for one reason: "More carrying and hauling (+6)",
-## "Pack animals taken up (+4)", "Held back by our age (-1)".
+## "Pack animals taken up (+4)", "Held back by the year (-1)".
 static func reason(key:String,amount:float)->String:
 	return "%s (%s)" % [reason_words(key,amount),points(amount)]
 
