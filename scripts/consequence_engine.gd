@@ -1022,10 +1022,6 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	for material_metric in WorldSimulation.state.material_metrics:
 		WorldSimulation.state.simulation_metrics["material_"+String(material_metric)]=WorldSimulation.state.material_metrics[material_metric]
 	_refresh_all_policy_observations()
-	WorldSimulation.state.simulation_trends.clear()
-	for key in WorldSimulation.state.simulation_metrics:
-		if previous.has(key) and WorldSimulation.state.simulation_metrics[key] is float:
-			WorldSimulation.state.simulation_trends[key]=float(WorldSimulation.state.simulation_metrics[key])-float(previous[key])
 	# How long we live reads a month of risks, not one day's (game_state.gd).
 	WorldSimulation.state.smooth_exceptional_hazard(SPAN.rate(1.0/30.0))
 	WorldSimulation.state.record_health_history()

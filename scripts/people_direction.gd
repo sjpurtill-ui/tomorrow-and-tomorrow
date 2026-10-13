@@ -74,7 +74,6 @@ func choose(id:String)->Dictionary:
 	if WorldSimulation.state.founding_focus=="":
 		# Complete the old time gate without applying an unrelated survival preset.
 		WorldSimulation.state.founding_focus="collective_ambition"
-		WorldSimulation.state.founding_focus_selected_day=day
 		WorldSimulation.state.founding_banner_index=AMBITIONS.keys().find(id)%4
 	apply_inclinations(day)
 	_log(day,"Century %d: chose to %s." % [chosen_century+1,String(AMBITIONS[id].name).to_lower()])

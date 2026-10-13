@@ -37,7 +37,7 @@ func _ready() -> void:
 		game_state.elapsed_days=day
 		consequence.process_day({"traveling":false})
 	assert(game_state.population_total>900_000_000)
-	assert(game_state.food_history.size()<=370 and game_state.material_history.size()<=370 and game_state.economy_history.size()<=730)
+	assert(game_state.food_history.size()<=370 and game_state.economy_history.size()<=730)
 
 	# A million-person mobilization is represented by counts and one formation.
 	military.reset_for_new_world()

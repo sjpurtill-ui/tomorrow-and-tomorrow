@@ -329,9 +329,6 @@ func _process_local_day(context: Dictionary) -> Array[Dictionary]:
 	stamp=trace.mark("resource_material_flow",stamp)
 	events.append_array(_process_water_flow(context))
 	trace.mark("resource_water",stamp)
-	for event in events:
-		WorldSimulation.state.resource_events.push_front(event)
-	if WorldSimulation.state.resource_events.size()>120: WorldSimulation.state.resource_events.resize(120)
 	return events
 
 func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
@@ -883,8 +880,6 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var capacity_total:=0.0
 	for amount in capacities.values(): capacity_total+=float(amount)
 	WorldSimulation.state.material_metrics={"extracted_today":extracted_total/span,"delivered_today":delivered_total/span,"lost_today":lost_total/span,"losses_by_resource":loss_report.by_resource,"storage_used_by_type":loss_report.used_by_type,"at_source":at_source,"in_transit":in_transit,"stored_bulk":stored_bulk,"storage_capacity":capacity_total,"flow_ratio":delivered_total/maxf(0.01,extracted_total),"capacities":capacities,"extraction_workers":extractors,"logistics_workers":carriers,"research_workers":WorldSimulation.state.effective_workers("Knowledge"),"labor_efficiency":labor_eff,"accessible_occurrences":workable_occurrences,"active_shipments":active_shipments,"land_factor":land_factor,"per_cutter":per_cutter,"bounded":true}
-	WorldSimulation.state.material_history.append({"day":int(WorldSimulation.state.elapsed_days),"extracted":extracted_total,"delivered":delivered_total,"lost":lost_total,"at_source":at_source,"in_transit":in_transit,"stored":stored_bulk})
-	if WorldSimulation.state.material_history.size()>370: WorldSimulation.state.material_history.pop_front()
 	stamp=trace.mark("flow_summary",stamp)
 	return events
 
