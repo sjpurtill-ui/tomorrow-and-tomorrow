@@ -151,7 +151,6 @@ func create_actor(id:String,seed_value:int,origin:Vector2=Vector2.ZERO)->Diction
 		world.last_world_seed=seed_value
 		world.player_world_origin=origin
 		world.last_processed_day=0
-		world.last_turn_day=0
 		world._add_revealed_area(origin,72.0,"founding knowledge")
 		military.simulator=military.COMBAT_SIMULATOR_SCRIPT.new()
 		military.reset_for_new_world()
@@ -552,7 +551,7 @@ func submit(id:String,order:Dictionary)->Dictionary:
 const SNAPSHOT=preload("res://scripts/save_system.gd")
 ## Saved fields of systems that no longer exist; older saves may still hold
 ## them. Their contents are folded in elsewhere (see civilian_goods.gd).
-const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice","food_batches","grain_processing","active_observations","simulation_trends","economy_events","currency_issued","currency_retired","founding_focus_selected_day","public_borrowed","public_debt_repaid","public_interest_accrued","material_history","resource_events","population_allocation_auto"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner"]}
+const RETIRED_FIELDS:={"ResourceSystem":["_fronts_day","_fronts_count","_fronts_list","_fronts","_surface_front_cache"],"DiscoverySystem":["_placement_memo","_work_memo","_idle_look_key"],"GovernmentPeopleSystem":["_read_key"],"GameState":["opening_craft_practice","microscopy","food_batches","grain_processing","active_observations","simulation_trends","economy_events","currency_issued","currency_retired","founding_focus_selected_day","public_borrowed","public_debt_repaid","public_interest_accrued","material_history","resource_events","population_allocation_auto"],"FoodSystem":["_forecast_climate_cache","_environment_cache_key","_environment_cache"],"CivilizationSystem":["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id","_scout_land_cache","_scout_land_cache_owner","last_turn_day","turn_index","collapse_turns","chronicle"]}
 const CURATED:=["MilitaryCampaign","ProgressionSystem","ForeignDiplomacy"]
 
 func capture_actor(id:String)->Dictionary:
@@ -569,7 +568,6 @@ func capture_actor(id:String)->Dictionary:
 		payload["society_model"]=SNAPSHOT._capture_reflected(discovery.society_model,SNAPSHOT.SOCIETY_REFLECT_SKIP)
 		payload["city_intelligence"]=world.city_intelligence.records.duplicate(true)
 		payload["rumor_books"]=world.rumor_network.books.duplicate(true)
-		payload["chronicle"]=world.chronicle.data.duplicate(true)
 		payload["scouting_staff"]=world.scouting_staff.data.duplicate(true)
 		payload["relations"]={}
 		for civ in world.civilizations:payload.relations[String(civ.id)]=civ.player_relation.duplicate(true)
@@ -629,8 +627,6 @@ func validate_payload(payload:Dictionary)->String:
 		if not opportunities.valid(actor.state.GameState.get("opening_opportunities",opportunities.empty_state())):return "Invalid civilization opening opportunity records."
 		if not clothing.valid(actor.state.GameState.get("household_clothing",clothing.empty_state())) or not clothing.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization clothing records."
 		if not preload("res://scripts/civilian_care_state.gd").valid_state(actor.state.GameState):return "Invalid civilian clinical care records."
-		var microscopy=preload("res://scripts/microscopy_samples.gd")
-		if not microscopy.valid(actor.state.GameState.get("microscopy",microscopy.empty_state())) or not microscopy.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization microscopy records."
 		var botany=preload("res://scripts/field_botany.gd")
 		if not botany.valid(actor.state.GameState.get("field_botany",botany.empty_state())) or not botany.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization field botany records."
 		if not nutrition.valid(actor.state.GameState.get("cultivation_nutrients",nutrition.empty_state())) or not nutrition.valid_settlements(actor.state.GameState.get("player_settlements",[])):return "Invalid civilization cultivation nutrient reserves."
@@ -691,7 +687,6 @@ func _restore_state(payload:Dictionary)->Dictionary:
 			SNAPSHOT._apply_reflected(discovery.society_model,saved.state.get("society_model",{}),SNAPSHOT.SOCIETY_REFLECT_SKIP)
 			world.city_intelligence.records=saved.state.get("city_intelligence",{}).duplicate(true)
 			world.rumor_network.books=saved.state.get("rumor_books",{}).duplicate(true)
-			world.chronicle.data=saved.state.get("chronicle",world.chronicle.data).duplicate(true)
 			world.scouting_staff.restore(saved.state.get("scouting_staff",{}))
 			for other:String in saved.state.get("relations",{}):world.civilizations.append({"id":other,"player_relation":saved.state.relations[other].duplicate(true)})
 		)

@@ -284,7 +284,6 @@ var water_conveyance:Dictionary={"lines":[],"next_id":1,"last_day":-1,"report":{
 var water_waste_works:Dictionary=preload("res://scripts/water_waste_works_state.gd").empty()
 var civilian_care:Dictionary=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 var rail_freight:Dictionary=preload("res://scripts/rail_freight_fabric.gd").empty_state()
-var microscopy:Dictionary=preload("res://scripts/microscopy_samples.gd").empty_state()
 var field_botany:Dictionary=preload("res://scripts/field_botany.gd").empty_state()
 var cultivation_nutrients:Dictionary={"nitrogen":0.0,"phosphorus":0.0}
 var food_source_health := {"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
@@ -644,7 +643,6 @@ func reset_for_new_world(new_seed:int)->void:
 	water_waste_works=preload("res://scripts/water_waste_works_state.gd").empty()
 	civilian_care=preload("res://scripts/civilian_care_fabric.gd").empty_state()
 	rail_freight=preload("res://scripts/rail_freight_fabric.gd").empty_state()
-	microscopy=preload("res://scripts/microscopy_samples.gd").empty_state()
 	field_botany=preload("res://scripts/field_botany.gd").empty_state()
 	cultivation_nutrients={"nitrogen":0.0,"phosphorus":0.0}
 	food_source_health={"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94}
@@ -1914,7 +1912,7 @@ func workers_at(role:String)->float:
 ## The work a role does today, in workers: the people at it (the hurt count
 ## less, the absent and the reserved not at all), each counting for more
 ## where a great work favours it or a gifted person leads it (`include_lifts`).
-func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,include_microscopy:bool=false,include_lifts:bool=true)->float:
+func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,_unused:bool=false,include_lifts:bool=true)->float:
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
@@ -1922,7 +1920,6 @@ func effective_workers(role:String,include_military_construction:bool=false,incl
 	if role=="Construction" and not include_military_construction and WorldSimulation.military.joint_operations!=null:capacity*=1.0-WorldSimulation.military.joint_operations.construction_share(resource_settlement_id)
 	if role=="Knowledge":capacity=maxf(0,capacity-preload("res://scripts/scholar_visits.gd").absent(self,int(elapsed_days)))
 	if role=="Knowledge" and not include_clinical_care:capacity=maxf(0,capacity-preload("res://scripts/civilian_care.gd").reserved(self,capacity))
-	if role=="Knowledge" and not include_clinical_care and not include_microscopy:capacity=maxf(0,capacity-preload("res://scripts/microscopy_lab.gd").reserved(self,capacity))
 	if role=="Administration" and not include_civic_records:capacity=maxf(0,capacity-preload("res://scripts/civic_administration.gd").reserved(self,capacity))
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
 	var lifts:=1.0

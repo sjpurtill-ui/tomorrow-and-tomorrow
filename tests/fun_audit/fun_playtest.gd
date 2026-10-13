@@ -22,7 +22,6 @@ var terrain:Node
 var quiet:QuietPopup
 var seen_events:Dictionary={}
 var seen_inbox:Dictionary={}
-var seen_chron:Dictionary={}
 var seen_feed:Dictionary={}
 var last_status:=""
 var rng:=RandomNumberGenerator.new()
@@ -370,12 +369,6 @@ func _collect()->void:
 		if seen_feed.has(fk):continue
 		seen_feed[fk]=true
 		w("feed",{"tier":String(entry.get("tier","")),"kind":String(entry.get("kind","")),"title":String(entry.get("title","")),"text":String(entry.get("text","")).left(300),"entry_day":int(entry.get("day",0))})
-	if CivilizationSystem.chronicle:
-		for ch in CivilizationSystem.chronicle.data.get("chapters",[]):
-			var k:=JSON.stringify(ch).md5_text()
-			if seen_chron.has(k):continue
-			seen_chron[k]=true
-			w("chronicle",{"text":JSON.stringify(ch).left(400)})
 
 func _handle_court()->void:
 	var dir:Node=get_tree().get_first_node_in_group("court_director")

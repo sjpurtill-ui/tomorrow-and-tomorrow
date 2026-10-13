@@ -1020,8 +1020,6 @@ static func _dedicate_record(r:Dictionary,city:Dictionary,title:String,day:int,c
 	var state=WorldSimulation.state
 	state.simulation_events.push_front({"day":day,"title":"GREAT WORK DEDICATED","description":text,"domain":"culture","severity":"major"})
 	if state.simulation_events.size()>80:state.simulation_events.resize(80)
-	var world=WorldSimulation.world
-	if world!=null and "chronicle" in world and world.chronicle!=null and world.chronicle.has_method("_event"):world.chronicle._event(day,"Great Work",text)
 	state.settlement_network_revision+=1
 	return {"ok":true,"message":text,"gifts":received}
 

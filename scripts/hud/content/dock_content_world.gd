@@ -147,14 +147,6 @@ func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
 		{"type":"text","heading":Tokens.sentence_case(String(knowledge.get("title","We cannot yet compare ourselves to others"))),"text":String(knowledge.get("summary",""))},
 		{"type":"text","heading":"What would tell us more","text":String(knowledge.get("next_step",""))},
 	]
-	var history:Dictionary=CivilizationSystem.chronicle.snapshot(int(GameState.elapsed_days))
-	blocks.push_front({"type":"text","heading":Tokens.sentence_case(String(history.title)),"text":"%s · %s\n\n%s"%[EraWords.today(),String(history.summary),String(history.next)]})
-	var records:Array=[]
-	for item:Dictionary in history.recent:
-		records.append({"name":Tokens.sentence_case(String(item.kind)),"sub":EraWords.when(int(item.day)),"detail":String(item.text)})
-	if not records.is_empty():blocks.append({"type":"rows","heading":"What endured and what changed","items":records})
-	if not history.reckonings.is_empty():blocks.append({"type":"text","heading":"The chroniclers' account","text":String(history.reckonings[-1].text)})
-
 	return blocks
 
 func signature()->Array:

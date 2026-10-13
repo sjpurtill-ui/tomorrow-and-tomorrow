@@ -310,9 +310,6 @@ func select(id:String,open_detail:bool=false)->void:
 			if preload("res://scripts/clothing_knowledge.gd").METHODS.has(String(item.id)):
 				var clothing_panel:VBoxContainer=preload("res://scripts/hud/clothing_panel.gd").new()
 				clothing_panel.subject=String(item.id);detail_body.add_child(clothing_panel)
-			if preload("res://scripts/hud/microscopy_panel.gd").supports(String(item.id)):
-				var lab_panel:VBoxContainer=preload("res://scripts/hud/microscopy_panel.gd").new()
-				lab_panel.subject=String(item.id);detail_body.add_child(lab_panel)
 		if item.exposed:
 			var definition:Dictionary=WorldSimulation.discovery.discovery_definition(String(item.id))
 			if not definition.get("preservation_profile",{}).is_empty() or not definition.get("training_profile",{}).is_empty() or not definition.get("prospecting_profile",{}).is_empty() or not String(definition.get("medical_method","")).is_empty() or not definition.get("agronomy_profile",{}).is_empty():Art.label(detail_body,WorldSimulation.discovery._discovery_effect_summary(definition),12,T.TEXT_SOFT,true)

@@ -91,3 +91,27 @@ func test_explicit_empty_observer_view_survives_owned_import()->void:
 	assert_dict(WorldSimulation.human_projection).is_empty()
 	var restored:=WorldSimulation.export_state()
 	assert_bool(restored==saved).override_failure_message(str(preload("res://tools/verify_campaign_save.gd").details(saved,restored))).is_true()
+
+## Each people's saved state is checked field by field, and a field the game
+## no longer has is refused unless it is named as let go (RETIRED_FIELDS).
+## Everything removed so far must load: the turn counters and second
+## chronicle, the meal and grain ledgers, the microscope lab.
+func test_a_save_holding_fields_since_removed_still_loads()->void:
+	WorldSimulation.clear()
+	GameState.reset_for_new_world(9241)
+	GameState.opponent_count=2
+	CivilizationSystem.reset_for_new_world()
+	WorldSimulation.start_world()
+	var saved:=WorldSimulation.export_state()
+	assert_bool((saved.actors as Dictionary).is_empty()).is_false()
+	for id:String in saved.actors:
+		var state:Dictionary=saved.actors[id].state
+		(state.CivilizationSystem as Dictionary).merge({"last_turn_day":210,"turn_index":7,"collapse_turns":0,"chronicle":{"chapters":[]}},true)
+		(state.GameState as Dictionary).merge({"microscopy":{"enabled":true,"specimens":[]},"food_batches":{"lots":[]},"grain_processing":{"stocks":{}}},true)
+	assert_str(WorldSimulation.validate_payload(saved)).is_empty()
+	assert_bool(WorldSimulation.import_state(saved).get("ok",false)).is_true()
+	# A field nobody ever had is still refused.
+	var bad:=WorldSimulation.export_state()
+	(bad.actors[bad.actors.keys()[0]].state.CivilizationSystem as Dictionary)["never_was"]=1
+	assert_str(WorldSimulation.validate_payload(bad)).contains("never_was")
+
