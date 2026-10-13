@@ -283,13 +283,11 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		# can say what another split will bring (manual_work.gd outlook).
 		"food_workers":workers,
 		"clothing":clothing.coverage,
-		"clothing_workers":0.0,
 		"food_days":food_days,
 		"food_total_stock":total,
 		"food_production":production_total,
 		"food_consumption":demand,
 		"food_eaten":eaten,
-		"food_shortfall":maxf(0.0,home_need-home_eaten),
 		"food_home_need":home_need,
 		"food_home_eaten":home_eaten,
 		"food_intake_ratio":intake_ratio,
@@ -304,8 +302,6 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		# The fresh share of what was eaten leans health (food_care.gd FRESH_HEALTH),
 		# and the covers that kept food from spoiling today.
 		"food_fresh_share":float(consumed[FRESH])/eaten if eaten>0.0 else 0.0,
-		"food_carry_cover":float(_covers().carry),
-		"food_keep_cover":float(_covers().keep),
 		"fire_practice":fire_report,
 		"food_weather_factor":weather_factor,
 		"nutrition_reserve":WorldSimulation.state.nutrition_reserve,
@@ -317,14 +313,11 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_preserved":preserved,
 		"food_preservation_inputs":preservation_inputs,
 		"food_demand_breakdown":demand_breakdown,
-		"food_techniques":_technique_levers().duplicate(),
 		"army_provisions_required":army_required,
 		"army_provisions_delivered":army_delivered,
 		"army_provisions_short":maxf(0.0,army_required-army_delivered),
 		"army_provision_delivery_ratio":provision_delivery_ratio,
 		"food_sources":sources,
-		"food_kcal_required":demand*KCAL_PER_RATION,
-		"food_kcal_eaten":eaten*KCAL_PER_RATION
 	}
 	WorldSimulation.state.food_history.append({
 		"day":int(WorldSimulation.state.elapsed_days),"stored":total,"produced":production_total,
