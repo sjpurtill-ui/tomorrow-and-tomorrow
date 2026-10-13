@@ -73,11 +73,11 @@ func test_the_army_is_kept_at_the_share_the_ruler_chooses()->void:
 	var target:=Law.target_men("some",people)
 	assert_int(target).is_equal(roundi(people*0.03))
 	assert_int(MilitaryCampaign.watch_manpower()).is_equal(target)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(target)
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(target)
 	assert_str(String(result.said)).contains("keep watch")
 	# Fewer: the surplus at home goes back to work.
 	Law.choose(MilitaryCampaign,"few")
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(Law.target_men("few",people))
 	# The share is saved with the army, and the leaders keep it.
 	assert_float(float(MilitaryCampaign.export_state().watch_work_share)).is_greater(0.0)
 	# The same words at any size: a share, never a count.
@@ -125,7 +125,7 @@ func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
 func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->void:
 	var people:=int(WorldSimulation.state.population_total)
 	Law.choose(MilitaryCampaign,"few")
-	var kept:=Law.under_arms(MilitaryCampaign)
+	var kept:=int(Law.reading(MilitaryCampaign).now)
 	assert_int(kept).is_equal(Law.target_men("few",people))
 	# The ruler calls up more in court than the share keeps.
 	var more:=Law.target_men("many",people)-kept
@@ -136,7 +136,7 @@ func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->
 	assert_str(String(answer.get("says",""))).contains("called up to keep watch")
 	# The war leader's next look sends nobody home.
 	assert_int(int(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true).released)).is_equal(0)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(kept+more)
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(kept+more)
 
 func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
 	var pick:=Law.kit(MilitaryCampaign)
@@ -158,14 +158,14 @@ func test_the_watch_at_home_is_the_army()->void:
 	# the army, all of it.
 	WorldSimulation.state.population_allocations["Defense"]=5
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.5}],1,1)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(5)
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(5)
 	var people:=int(WorldSimulation.state.population_total)
 	Law.choose(MilitaryCampaign,"some")
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(Law.target_men("some",people))
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(Law.target_men("some",people))
 	# Fewer: the watch shrinks, the least drilled first.
 	Law.choose(MilitaryCampaign,"few")
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
+	assert_int(int(Law.reading(MilitaryCampaign).now)).is_equal(Law.target_men("few",people))
 	# The home guard is the split's share of it, standing at home.
 	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(mini(int(MilitaryCampaign.home_army.troops),roundi(float(MilitaryCampaign._mobilized_count())*MilitaryCampaign.watch_split())))
 	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(int(Law.watch(MilitaryCampaign).kept))
@@ -229,7 +229,7 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_str(String(home.title)).starts_with("At home in ")
 	assert_str(String(home.doing)).contains("home guard")
 	assert_str(String(home.kit)).is_not_empty()
-	assert_int(int(home.men)).is_equal(Law.under_arms(MilitaryCampaign))
+	assert_int(int(home.men)).is_equal(int(Law.reading(MilitaryCampaign).now))
 	# The board shows them as numbers: shares on the strip, and where they
 	# are on the army bar's cards (the levy at home first, with the watch
 	# and those in drill).
@@ -240,7 +240,7 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_object(board.find_child("DrawnFrom",true,false)).is_not_null()
 	var levy:Dictionary=Bar.levy_card(MilitaryCampaign)
 	assert_int(int(levy.watch)).is_equal(int(Law.watch(MilitaryCampaign).kept))
-	assert_int(int(levy.drill)+int(levy.waiting)+int(levy.ready)+int(levy.watch)).is_equal(Law.under_arms(MilitaryCampaign))
+	assert_int(int(levy.drill)+int(levy.waiting)+int(levy.ready)+int(levy.watch)).is_equal(int(Law.reading(MilitaryCampaign).now))
 	assert_str(String(Bar.war_cards(MilitaryCampaign)[0].kind)).is_equal("levy")
 	WorldSimulation.state.population_allocations.erase("Defense")
 
@@ -456,3 +456,21 @@ func test_armed_reads_the_same_on_the_strip_and_the_war_panel()->void:
 	for label in gauge.find_children("*","Label",true,false): shown.append((label as Label).text)
 	assert_array(Array(shown)).contains(["%d%%" % roundi(armed*100.0)])
 	assert_str(String((gauge as Control).tooltip_text)).contains("at home and in the bands")
+
+## The army's size is one count: the Soldiers figure, the bar of where they
+## stand and "one in N who can work" all read everyone serving, crews of
+## boats and aircraft included (they are away from other work as well).
+func test_the_armys_size_is_one_count_with_crews_serving_too()->void:
+	var Forces:=preload("res://scripts/hud/war_forces_model.gd")
+	var Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
+	WorldSimulation.state.population_allocations["Defense"]=10
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":10,"equipment":10,"training":0.5}],1,1)
+	# Seven held by the fleet (counted with its crews, joint_operations.personnel).
+	MilitaryCampaign.joint_operations.state["captured_holding"]=7
+	var now:=int(Law.reading(MilitaryCampaign).now)
+	assert_int(now).is_equal(17)
+	assert_int(int(Forces.drawn_from(MilitaryCampaign).soldiers)).is_equal(now)
+	assert_int(int(Allocation.read(MilitaryCampaign).total)).is_equal(now)
+	assert_int(preload("res://scripts/watch_military.gd").serving(MilitaryCampaign)).is_equal(now)
+	MilitaryCampaign.joint_operations.state["captured_holding"]=0
+
