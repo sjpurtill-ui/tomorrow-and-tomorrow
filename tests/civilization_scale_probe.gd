@@ -89,5 +89,5 @@ func _ready()->void:
 	var exported:=CivilizationSystem.export_state()
 	assert(JSON.stringify(exported).length()<60_000+rival_count*30_000)
 	assert(bool(CivilizationSystem.import_state(exported).get("ok",false)))
-	print("CIVILIZATION_SCALE_PASS rivals=%d regions=%d ai_occupied=%d turns=%d active_ai_wars=%d historical_wars=%d ai_trade_pairs=%d player_rank=%d state_bytes=%d" % [rival_count,rival_count*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV,ai_controlled_regions,CivilizationSystem.turn_index,ai_wars,historical_wars,ai_trade_pairs,int(competition.player_rank),JSON.stringify(exported).length()])
+	print("CIVILIZATION_SCALE_PASS rivals=%d regions=%d ai_occupied=%d active_ai_wars=%d historical_wars=%d ai_trade_pairs=%d player_rank=%d state_bytes=%d" % [rival_count,rival_count*CivilizationSystem.STRATEGIC_REGIONS_PER_CIV,ai_controlled_regions,ai_wars,historical_wars,ai_trade_pairs,int(competition.player_rank),JSON.stringify(exported).length()])
 	get_tree().quit(0)

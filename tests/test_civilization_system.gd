@@ -1259,15 +1259,16 @@ func test_legacy_save_with_removed_victory_fields_still_loads()->void:
 	var resaved:Dictionary=system.export_state()
 	for key in ["dominance_turns","contender_dominance_turns","competition_outcome","competition_winner_id"]:
 		assert_bool(resaved.has(key)).is_false()
-	# A pre-chronicle save keeps an old verdict only as history.
+	# A save from before, with an old verdict, the second chronicle and the
+	# turn counters, still loads; none of them comes back.
 	var old:Dictionary=payload.duplicate(true)
-	old.erase("chronicle")
 	old["competition_outcome"]="defeat"
 	old["competition_winner_id"]="civ_01"
+	old["chronicle"]={"chapters":[{"day":3,"kind":"Generations","text":"x"}]}
+	old["turn_index"]=7; old["last_turn_day"]=210; old["collapse_turns"]=2
 	assert_bool(bool(system.import_state(old).get("ok",false))).is_true()
-	var verdicts:Array=(system.chronicle.data.chapters as Array).filter(func(entry:Dictionary)->bool: return String(entry.kind)=="Earlier verdict")
-	assert_int(verdicts.size()).is_equal(1)
-	assert_str(String((verdicts[0] as Dictionary).text)).contains("no victory or defeat")
+	for key in ["chronicle","turn_index","last_turn_day","collapse_turns","competition_outcome"]:
+		assert_bool(system.export_state().has(key)).is_false()
 
 
 func test_billion_scale_does_not_change_record_count_or_save_size_class()->void:

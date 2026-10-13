@@ -32,7 +32,6 @@ const CITY_RESOURCE_DEFAULTS:={
 	"built_fabric":{},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
-	"microscopy":{"enabled":true,"staff_share":.25,"work_bank":0.0,"last_day":-1,"next_id":1,"specimens":[],"records":[],"protocols":[],"tools":{},"report":{}},
 	"field_botany":{"last_day":-1,"next_id":1,"lines":[],"trials":[],"vouchers":[],"applications":[],"report":{},"balance":false,"reference_seed":0.0,"reference_site":"","reference_day":-1,"reference_line":{}},
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
@@ -1205,7 +1204,7 @@ func territory_control_snapshot()->Dictionary:
 					occupations.append({"id":String(region.get("id","")),"kind":"occupied_strategic_region","name":String(region.get("name","OCCUPIED REGION")),"controller":"player","original_controller":String(region.get("original_controller",civ.get("id",""))),"population":roundi(float(region.get("population",0.0))),"role":String(region.get("role","frontier")),"integration":clampf(float(region.get("integration",0.0)),0.0,1.0),"resistance":clampf(float(region.get("resistance",0.0)),0.0,1.0),"damage":clampf(float(region.get("damage",0.0)),0.0,1.0),"occupation_turns":maxi(0,int(region.get("occupation_turns",0)))})
 	var occupied_population:=0
 	for occupation in occupations: occupied_population+=int(occupation.get("population",0))
-	return {"revision":int(network.revision)+(int(civilization_system.get("turn_index")) if civilization_system else 0),"settlement_claims":claims,"occupied_regions":occupations,"settlement_claim_count":claims.size(),"occupied_region_count":occupations.size(),"record_count":claims.size()+occupations.size(),"record_limit":MAX_PLAYER_SETTLEMENTS+MAX_OCCUPIED_STRATEGIC_REGIONS,"owned_population":roundi(WorldSimulation.state.population_exact),"occupied_population":occupied_population,"controlled_population":roundi(WorldSimulation.state.population_exact)+occupied_population,"runtime_people_entities":0,"bounded":true}
+	return {"revision":int(network.revision),"settlement_claims":claims,"occupied_regions":occupations,"settlement_claim_count":claims.size(),"occupied_region_count":occupations.size(),"record_count":claims.size()+occupations.size(),"record_limit":MAX_PLAYER_SETTLEMENTS+MAX_OCCUPIED_STRATEGIC_REGIONS,"owned_population":roundi(WorldSimulation.state.population_exact),"occupied_population":occupied_population,"controlled_population":roundi(WorldSimulation.state.population_exact)+occupied_population,"runtime_people_entities":0,"bounded":true}
 
 func _point_to_boundary_distance(point:Vector2,boundary:PackedVector2Array)->float:
 	if boundary.is_empty(): return INF

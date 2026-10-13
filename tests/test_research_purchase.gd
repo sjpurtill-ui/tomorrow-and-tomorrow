@@ -372,8 +372,6 @@ func test_microscopy_purchase_requires_paid_delivery_and_local_study_without_app
 		assert_bool(P.evidence(subject).get("research_purchase",false)).is_true()
 		assert_bool(subject in GameState.known_discoveries).is_false()
 		assert_float(P.multiplier(entry)).is_equal(2.5)
-		assert_array(GameState.microscopy.specimens).is_empty()
-		assert_dict(GameState.microscopy.tools).is_empty()
 
 func test_machine_purchase_requires_paid_delivery_and_local_study_without_tools_or_mastery()->void:
 	for entry:Dictionary in preload("res://scripts/machine_process_knowledge.gd").entries():

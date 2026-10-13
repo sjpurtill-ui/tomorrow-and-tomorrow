@@ -26,7 +26,6 @@ const SAVE_VERSION:=10
 const MIN_RIVAL_CIVILIZATIONS:=12
 const MAX_RIVAL_CIVILIZATIONS:=36
 const STRATEGIC_REGIONS_PER_CIV:=5
-const STRATEGIC_TURN_DAYS:=30
 const HISTORY_LIMIT:=240
 const INCIDENT_LIMIT:=4
 const AGE_COHORTS:=["children","youth","early_adults","established_adults","mature_adults","elders"]
@@ -85,11 +84,8 @@ var world_events:Array[Dictionary]=[]
 var pending_player_incidents:Array[Dictionary]=[]
 var last_world_seed:=-2147483648
 var last_processed_day:=0
-var last_turn_day:=0
-var turn_index:=0
 # There is no victory or defeat in this game. Comparative standing is
-# intelligence about known peoples; collapse_turns only records distress.
-var collapse_turns:=0
+# intelligence about known peoples.
 var player_territory_balance:=0.0
 var scout_missions:Array[Dictionary]=[]
 const Exchange=preload("res://scripts/society_exchange.gd")
@@ -128,7 +124,6 @@ var last_observation_day:=-1
 var war_history:Array[Dictionary]=[]
 var next_war_id:=1
 var neighborhood_generated:=false
-var chronicle:=preload("res://scripts/campaign_chronicle.gd").new()
 var scout_land_authority:Callable=Callable()
 var open_scout_plan_cache:Dictionary={}
 ## Planned voyages for every people's seat (_quoted_sea_voyage). Never saved.
@@ -159,15 +154,11 @@ func initialize()->void:
 func reset_for_new_world()->void:
 	_revealed_chart_index=null
 	open_scout_plan_cache.clear();sea_voyage_plan_cache.clear()
-	chronicle.reset()
 	neighborhood_generated=false
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
 	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
 	last_world_seed=WorldSimulation.state.world_seed
 	last_processed_day=int(floor(WorldSimulation.state.elapsed_days))
-	last_turn_day=(last_processed_day/STRATEGIC_TURN_DAYS)*STRATEGIC_TURN_DAYS
-	turn_index=0
-	collapse_turns=0
 	player_territory_balance=0.0
 	scout_missions.clear()
 	scouting_staff.reset()
@@ -4804,7 +4795,7 @@ func competition_snapshot()->Dictionary:
 	leader=contenders[0] if not contenders.is_empty() else player
 	var player_domains:=int(player.get("domains_led",0))
 	var lead_margin:=float(player.get("lead_margin",0.0))
-	return {"day":int(WorldSimulation.state.elapsed_days),"player_rank":player_rank,"contender_count":contenders.size(),"leader":leader,"leaders":contenders,"domain_leaders":domains,"player_domains_led":player_domains,"lead_margin":lead_margin,"collapse_turns":collapse_turns,"standing_note":STANDING_NOTE}
+	return {"day":int(WorldSimulation.state.elapsed_days),"player_rank":player_rank,"contender_count":contenders.size(),"leader":leader,"leaders":contenders,"domain_leaders":domains,"player_domains_led":player_domains,"lead_margin":lead_margin,"standing_note":STANDING_NOTE}
 
 
 func strategic_knowledge_snapshot()->Dictionary:
@@ -4865,7 +4856,7 @@ func known_competition_snapshot()->Dictionary:
 	var public_domains:Dictionary={}
 	if bool(strategic_knowledge.framework_known):
 		for domain in strategic_knowledge.known_domains: public_domains[String(domain)]=""
-	return {"day":int(full.day),"player_rank":-1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":{},"leaders":visible,"domain_leaders":public_domains,"player_domains_led":-1,"collapse_turns":collapse_turns,"standing_note":STANDING_NOTE,"global_rank_hidden":true,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
+	return {"day":int(full.day),"player_rank":-1,"contender_count":visible.size(),"contacted_count":maxi(0,visible.size()-1),"leader":{},"leaders":visible,"domain_leaders":public_domains,"player_domains_led":-1,"standing_note":STANDING_NOTE,"global_rank_hidden":true,"strategic_knowledge":strategic_knowledge,"exploration":exploration_status()}
 
 
 func _redact_known_foreign_profile(profile:Dictionary)->Dictionary:
@@ -5190,7 +5181,7 @@ func export_state()->Dictionary:
 		for point_key in ["point_a","point_b"]:
 			var point:Variant=exported_formations[index].get(point_key,Vector2.ZERO)
 			if point is Vector2: exported_formations[index][point_key]={"x":point.x,"y":point.y}
-	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"chronicle":chronicle.data.duplicate(true),"world_seed":last_world_seed,"last_processed_day":last_processed_day,"last_turn_day":last_turn_day,"turn_index":turn_index,"collapse_turns":collapse_turns,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"formation_memory":formation_memory.duplicate(true),"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
+	return {"version":SAVE_VERSION,"neighborhood_generated":neighborhood_generated,"world_seed":last_world_seed,"last_processed_day":last_processed_day,"player_territory_balance":player_territory_balance,"scouting_staff":scouting_staff.data.duplicate(true),"scout_missions":scout_missions.duplicate(true),"next_scout_mission_id":next_scout_mission_id,"nomad_sightings":nomad_sightings.duplicate(true),"next_nomad_sighting_id":next_nomad_sighting_id,"scout_reports":scout_reports.duplicate(true),"last_scout_outcome":last_scout_outcome.duplicate(true),"diplomatic_mission":diplomatic_mission.duplicate(true),"diplomatic_history":diplomatic_history.duplicate(true),"captured_player_scouts":captured_player_scouts.duplicate(true),"captured_foreign_scouts":captured_foreign_scouts.duplicate(true),"foreign_scout_reports_denied":foreign_scout_reports_denied,"revealed_areas":revealed_areas.duplicate(true),"fog_revision":fog_revision,"player_world_origin":{"x":player_world_origin.x,"y":player_world_origin.y},"city_intelligence":city_intelligence.records.duplicate(true),"rumor_leads":rumor_network.books.duplicate(true),"civilizations":exported_civilizations,"world_events":world_events.duplicate(true),"pending_player_incidents":pending_player_incidents.duplicate(true),"foreign_formations":exported_formations,"formation_memory":formation_memory.duplicate(true),"foreign_sightings":foreign_sightings.duplicate(true),"observation_revision":observation_revision,"last_observation_day":last_observation_day,"war_history":war_history.duplicate(true),"next_war_id":next_war_id}
 
 
 func import_state(payload:Dictionary)->Dictionary:
@@ -5487,7 +5478,6 @@ func _payload_shape_error(payload:Dictionary)->String:
 
 func _apply_state(payload:Dictionary)->void:
 	scouting_staff.restore(payload.get("scouting_staff",{}))
-	chronicle.restore(payload.get("chronicle",{}))
 	neighborhood_generated=bool(payload.get("neighborhood_generated",true))
 	city_intelligence=preload("res://scripts/city_intelligence.gd").new(self)
 	rumor_network=preload("res://scripts/rumor_network.gd").new(self)
@@ -5496,15 +5486,10 @@ func _apply_state(payload:Dictionary)->void:
 	_repair_unsourced_hearsay.call_deferred()
 	last_world_seed=int(payload.get("world_seed",WorldSimulation.state.world_seed))
 	last_processed_day=maxi(0,int(payload.get("last_processed_day",0)))
-	last_turn_day=maxi(0,int(payload.get("last_turn_day",0)))
-	turn_index=maxi(0,int(payload.get("turn_index",0)))
-	collapse_turns=maxi(0,int(payload.get("collapse_turns",0)))
 	# Older saves may carry dominance_turns, contender_dominance_turns,
 	# competition_outcome and competition_winner_id from a removed victory
-	# system. They are accepted and dropped; the game has no victory or defeat.
-	var legacy_outcome:=String(payload.get("competition_outcome","ongoing"))
-	if not payload.has("chronicle") and legacy_outcome in ["victory","defeat"]:
-		chronicle._event(last_processed_day,"Earlier verdict","An earlier ruleset recorded a %s. There is no victory or defeat; the history continues." % legacy_outcome)
+	# system, and a second chronicle, turn counters and a distress counter
+	# nothing wrote. They are accepted and dropped.
 	player_territory_balance=float(payload.get("player_territory_balance",0.0))
 	scout_missions.assign((payload.get("scout_missions",[]) as Array).duplicate(true))
 	# Older saves carried one scout_mission dictionary; wrap it into the list.
@@ -5629,8 +5614,7 @@ func validate_state()->Array[String]:
 			for field in ["military_dead","civilian_dead","wounded","captured","displaced"]:
 				if int(participant_losses.get(field,-1))<0: errors.append("War casualty totals cannot be negative.")
 	if civilizations.is_empty() or civilizations.size()>MAX_RIVAL_CIVILIZATIONS: errors.append("World must contain between 1 and %d bounded rival civilization records." % MAX_RIVAL_CIVILIZATIONS)
-	if last_processed_day<0 or last_turn_day<0 or last_turn_day>last_processed_day: errors.append("Civilization strategic clock is invalid.")
-	if turn_index<0 or collapse_turns<0: errors.append("Civilization strategic counters cannot be negative.")
+	if last_processed_day<0: errors.append("Civilization strategic clock is invalid.")
 	if not is_finite(player_territory_balance): errors.append("Player territorial balance must be finite.")
 	if not is_finite(player_world_origin.x) or not is_finite(player_world_origin.y): errors.append("Player world origin must be finite.")
 	var ids:Dictionary={}
