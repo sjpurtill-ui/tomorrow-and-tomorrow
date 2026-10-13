@@ -35,8 +35,12 @@ func test_a_rulers_watch_sits_in_the_ages_band_and_rises_at_war()->void:
 	# At war twice as many, never past the age's most.
 	assert_float(Strategy.watch_share(even,94.0,true)).is_equal_approx(2.0*Strategy.watch_share(even,94.0,false),0.0001)
 	assert_float(Strategy.watch_share(hardest,94.0,true)).is_less_equal(float(band[3])/100.0*Scale.ABLE_SHARE+0.0001)
-	# The age moves the band: by year 600 the typical share is 5 in 100 of the able.
-	assert_float(Strategy.watch_share(even,600.0,false)).is_equal_approx(0.05*Scale.ABLE_SHARE,0.0001)
+	# The age moves the band: by year 600 the typical share is 5 in 100 of the
+	# able, and past the quiet age every ruler keeps half again as many
+	# (pressure_age.gd WATCH_GAIN), never past the age's most.
+	var late:=Scale.anchors(Scale.DEFENSE_SHARE,600.0)
+	assert_float(float(late[1])).is_equal_approx(5.0,0.0001)
+	assert_float(Strategy.watch_share(even,600.0,false)).is_equal_approx(minf(7.5,float(late[3]))/100.0*Scale.ABLE_SHARE,0.0001)
 	# The plan carries it for the people's own year.
 	var plan:=Strategy.preferences(even,{"food_days":120,"food_intake_ratio":1,"at_war":false,"year":94.0})
 	assert_float(float(plan.recruit_share)).is_equal_approx(Strategy.watch_share(even,94.0,false),0.0001)

@@ -705,6 +705,11 @@ static func foreign_orders(id:String,plan:Dictionary={})->void:
 		var near:=float(preload("res://scripts/war_loop.gd").proximity(String(civ.id)))
 		var action:=STRATEGY.diplomatic_action(relationship,plan,food_days,GREAT_WORKS.known_deterrence(id,other)+preload("res://scripts/standing.gd").war_deterrence(civ)+(1.0-near)*0.3)
 		if action=="declare_war" and near<=0.0:continue
+		# The quiet age (pressure_age.gd): nobody opens a war unprovoked; the
+		# god's people are wronged or not by their own ledger (war_loop.provoked).
+		if action=="declare_war" and preload("res://scripts/pressure_age.gd").quiet():
+			var target:=String(civ.id)
+			if target!="human" or not bool(WorldSimulation.scoped("player",func()->bool:return preload("res://scripts/war_loop.gd").provoked(id))):continue
 		if action=="":continue
 		var order:={"kind":"diplomacy","target":String(civ.id),"action":action}
 		if action=="goodwill":

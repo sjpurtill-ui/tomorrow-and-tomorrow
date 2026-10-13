@@ -54,9 +54,9 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 		# cautious one waits for full stores and sends settlers well provisioned.
 		"expansion_food":FoodCare.store_gate(45+(1-risk)*40+empathy*15),"settle_distance":16+24*risk,"settle_margin_days":ESTABLISHMENT_DAYS*lerpf(1.35,.65,risk),"expansion_months":expansion_months(p),
 		"scout_days":180 if open>.75 and risk>.65 else (90 if open>.5 else 30),"scout_food":FoodCare.store_gate(22+(1-risk)*30),
-		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15,"war_food":FoodCare.store_gate(30+(1-risk)*50),
+		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15+preload("res://scripts/pressure_age.gd").OFFENCE_GAIN*preload("res://scripts/pressure_age.gd").at_year(float(situation.get("year",0.0))),"war_food":FoodCare.store_gate(30+(1-risk)*50),
 		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":FoodCare.store_gate(12+empathy*18+(1-risk)*12),
-		"offensive":assertive*.55+risk*.45>empathy*.3+(1-risk)*.35+.15}
+		"offensive":assertive*.55+risk*.45+.25*preload("res://scripts/pressure_age.gd").at_year(float(situation.get("year",0.0)))>empathy*.3+(1-risk)*.35+.15}
 
 ## A RULER'S WATCH: the share of the whole people a computer ruler holds
 ## under arms (civilization_controller.gd interim_watch; the watch is the
@@ -86,7 +86,9 @@ static func watch_share(p:Dictionary,year:float,war:bool)->float:
 		span+=absf(float(WATCH_LEAN[axis]))*.5
 	lean=clampf(lean/maxf(.0001,span),-1.0,1.0)
 	var band:=Scale.anchors(Scale.DEFENSE_SHARE,maxf(0.0,year))
-	var of_able:=clampf(float(band[1])*pow(2.0,lean)*(WATCH_AT_WAR if war else 1.0),float(band[0]),float(band[3]))
+	# After the quiet age every ruler keeps more under arms (pressure_age.gd).
+	var pressed:=1.0+preload("res://scripts/pressure_age.gd").WATCH_GAIN*preload("res://scripts/pressure_age.gd").at_year(year)
+	var of_able:=clampf(float(band[1])*pow(2.0,lean)*pressed*(WATCH_AT_WAR if war else 1.0),float(band[0]),float(band[3]))
 	return of_able/100.0*Scale.ABLE_SHARE
 
 ## A ruler's research emphasis, in the steps the player's own screen uses (0 to

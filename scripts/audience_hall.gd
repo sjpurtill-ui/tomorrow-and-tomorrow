@@ -1442,7 +1442,10 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	# No way, no envoy (passage.gd): with no land road they come in their own
 	# boats, only the share those boats bring through arrives, and over a sea
 	# too wide for them nobody is sent at all.
-	if not preload("res://scripts/passage.gd").arrives(civ_id,"player","envoy:%s:%d" % [String(occasion.get("key","")),int(state().serial)],day): return {}
+	# Only those who come to end a fight cross a shut sea, with the war fleet
+	# (war_loop.war_way): the gate below lets through nothing else of theirs.
+	if not preload("res://scripts/passage.gd").arrives(civ_id,"player","envoy:%s:%d" % [String(occasion.get("key","")),int(state().serial)],day):
+		if String(_war().call("envoy_gate",civ_id,day))!="peace" or not bool(_war().call("war_way",civ_id)): return {}
 	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
 	# They come to bow (world_answer.gd): through a feud, past their own
 	# withholding and the business a beaten people would otherwise bring.
@@ -1649,6 +1652,9 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			# A beaten people never demands; nor does one bound to peace with us
 			# (a feud they paid to end, a truce, kin by marriage).
 			if bool(_aftermath().call("defeated",civ_id)) or bool(_war().call("keeps_peace",civ_id,day)): return {}
+			# The quiet age (pressure_age.gd): no people that we have not wronged
+			# demands anything of us at spear-point.
+			if not bool(_war().call("may_come",civ_id)): return {}
 			# A threat needs a road: a people no band of theirs can bring to us has nothing to back it.
 			if rng.randf()>float(_war().call("proximity",civ_id)): return {}
 			var scale:=1.4 if situation_type=="emboldened_demand" else (0.7 if situation_type=="test_of_resolve" else 1.0)

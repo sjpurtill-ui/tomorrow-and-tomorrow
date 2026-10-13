@@ -576,12 +576,88 @@ static func on_refusal(audience:Dictionary,option_id:String)->Dictionary:
 
 static func _schedule(civ_id:String,due:int,cause:String,ref:String)->void:
 	var f:=front(civ_id)
+	# The quiet age (pressure_age.gd): a refusal, envy or a bolder mood sends
+	# nobody against a people that has done them no wrong.
+	if cause in UNPROVOKED_CAUSES and not may_come(civ_id):
+		_log(civ_id,"held_back","%s sent nobody: %s" % [_name(civ_id),Pressure.words()],{"cause":cause})
+		_stat("held_by_quiet_age")
+		return
 	var pending:Dictionary=f.pending
 	if pending.is_empty() or due<int(pending.get("day",due)):
 		f["pending"]={"day":due,"cause":cause,"ref":ref,"stack":int(pending.get("stack",0))+1}
 		_foresee(civ_id,f.pending)
 	else:
 		pending["stack"]=int(pending.get("stack",1))+1
+
+# --------------------------------------------------------------------------
+# The quiet age, and the pressure after it (pressure_age.gd)
+# --------------------------------------------------------------------------
+
+const Pressure:=preload("res://scripts/pressure_age.gd")
+## Causes that are no wrong of ours: held back through the quiet age.
+const UNPROVOKED_CAUSES:=["refusal","envy","bolder","pressure"]
+## Unsettled wrongs of this weight make a people provoked (a killing, a gift
+## seized, captives kept, a threat carried home: rival_rulers.grudge).
+const PROVOKED_WEIGHT:=0.3
+const PRESSURE_CAUSE:="our land and our stores, which they mean to have"
+## A people under this share of our fighting strength does not come of its
+## own will: it has nothing to press with (it bows or begs: world_answer.gd).
+const PRESSURE_LEAST_RATIO:=0.35
+
+## Whether we have wronged this people: wrongs they still hold against us, or
+## our own spears among them.
+static func provoked(civ_id:String)->bool:
+	var f:=_peek(civ_id)
+	if int(f.get("last_strike",-99999))>=0 or int(f.get("strikes",0))>0: return true
+	return float(_rivals().call("grudge_weight",civ_id))>=PROVOKED_WEIGHT
+
+## Whether this people may come against us at all: wronged, or the quiet age over.
+static func may_come(civ_id:String)->bool:
+	return not Pressure.quiet() or provoked(civ_id)
+
+## How hard this ruler leans toward coming against us, 0.2 to 2: an even
+## ruler, neither friend nor enemy, of our own strength leans 1. Assertive
+## rulers, peoples who dislike us and peoples stronger than us lean more.
+static func pressure_lean(civ_id:String)->float:
+	var p:Dictionary=Hall._personality(civ_id)
+	var opinion:=float(_relation(civ_id).get("opinion",0.0))
+	return clampf(1.0+(float(p.get("assertiveness",0.5))-0.5)*0.8+(float(p.get("risk_tolerance",0.5))-0.5)*0.4-(float(p.get("empathy",0.5))-0.5)*0.4-opinion*0.8+clampf(ratio(civ_id)-1.0,-0.5,1.0)*0.3,0.2,2.0)
+
+## This month's chance that they come against us of their own will: nothing
+## in the quiet age, to a people bound to peace with us, already fighting us,
+## broken, far weaker than us (PRESSURE_LEAST_RATIO), or with no way to
+## reach us; else
+##     pressure x 0.10 a year x lean x how near they live, a twelfth a month.
+static func pressure_chance(civ_id:String,day:int=-1)->float:
+	if day<0: day=_day()
+	var pressure:=Pressure.now()
+	if pressure<=0.0: return 0.0
+	var relation:=_relation(civ_id)
+	if relation.is_empty() or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)): return 0.0
+	if String(relation.get("treaty","none")) in ["non_aggression","truce","alliance","protection"]: return 0.0
+	if broken(civ_id) or keeps_peace(civ_id,day) or hot(civ_id,day): return 0.0
+	if ratio(civ_id)<PRESSURE_LEAST_RATIO: return 0.0
+	var near:=proximity(civ_id)
+	if near<=0.0: return 0.0
+	return pressure*Pressure.PER_YEAR/12.0*pressure_lean(civ_id)*lerpf(0.5,1.0,near)*_league_backing(civ_id)
+
+## THE PRESSURE (monthly). A people that leans on us and can reach us comes:
+## peoples organised for war declare it and bring their host (war_council);
+## smaller peoples send raiders, and the ladder climbs from there.
+static func _pressure(day:int)->void:
+	for civ in WorldSimulation.world.civilizations:
+		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)) or bool((civ as Dictionary).get("general_campaign_owned",false)): continue
+		var id:=String((civ as Dictionary).get("id",""))
+		var chance:=pressure_chance(id,day)
+		if chance<=0.0 or _rng("pressure:%s:%d" % [id,day]).randf()>=chance: continue
+		var f:=front(id)
+		if not (f.pending as Dictionary).is_empty(): continue
+		_stat("pressure_comings")
+		if Scale.formal(id) and day-int(f.get("last_war_end",-99999))>=WAR_COOLDOWN:
+			declare(id,day,PRESSURE_CAUSE)
+		else:
+			f["level"]=maxi(int(f.get("level",0)),1)
+			_schedule(id,day+_rng("pressure_day:%s:%d" % [id,day]).randi_range(15,60),"pressure","pressure")
 
 ## CUNNING SEES THEM COMING (standing.gd forewarn_odds, forewarn_days): when a
 ## raid is set for a day, our watchers see it coming on our cunning's odds,
@@ -701,6 +777,7 @@ static func _cause_words(civ_id:String,cause:String)->String:
 		"sided": return "your siding with their enemy"
 		"vengeance": return "the blood your fighters spilled"
 		"envy": return "our full stores, with too few to guard them"
+		"pressure": return PRESSURE_CAUSE
 	return "old wrongs"
 
 # --------------------------------------------------------------------------
@@ -1582,7 +1659,7 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 				return "We know where %s live already%s. Say what you want done there." % [name,(": "+where) if where!="" else ""]
 			return send_trackers(civ_id)
 		"war_pay":
-			if not Passage.open("player",civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
+			if not war_way(civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
 			var terms:Dictionary=war.get("terms",{})
 			var paid:=Hall._debit_player("Food",float(terms.get("amount",0.0)))
 			if paid>0.0: Hall._credit_civ(civ_id,"Food",paid)
@@ -1591,7 +1668,7 @@ static func order(civ_id:String,objective:String,auto:bool=false)->String:
 		"war_price":
 			# A blood price ends a feud; a war ends only on its own terms.
 			if at_war: return "This is a war. Only their terms, a truce or their exhaustion end it."
-			if not Passage.open("player",civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
+			if not war_way(civ_id): return "Nothing we send would reach %s. %s" % [name,Passage.words("player",civ_id)]
 			var price:=blood_price(civ_id)
 			var short:=Hall._short("Food",price)
 			if short!="": return "%s The blood price for %s's dead is %d Food." % [short,name,roundi(price)]
@@ -1650,7 +1727,7 @@ static func send_trackers(civ_id:String,asked:String="")->String:
 	if out_now.is_empty() and war.get("op") is Dictionary: out_now=war.op
 	if not out_now.is_empty():
 		return "%s is already out against %s; the trackers wait for them." % [String(out_now.get("general",gname)),name]
-	if not Passage.open("player",civ_id): return "No trackers can follow %s home. %s" % [name,Passage.words("player",civ_id)]
+	if not war_way(civ_id): return "No trackers can follow %s home. %s" % [name,Passage.words("player",civ_id)]
 	var rng:=_rng("order:%s:war_track:%d" % [civ_id,day])
 	var band:=clampi(_band_size(_our_pop(),0.02),TRACKERS_MIN,TRACKERS_MAX)
 	var due:=day+_march_days(civ_id,rng)
@@ -1671,7 +1748,7 @@ static func send_messengers(civ_id:String)->String:
 	var f:=front(civ_id)
 	var general:=_general()
 	var gname:=EraNames.given_of(String(general.get("name","The war leader"))) if not general.is_empty() else "The war leader"
-	if not Passage.open("player",civ_id): return "No messenger of ours can reach %s. %s" % [_name(civ_id),Passage.words("player",civ_id)]
+	if not war_way(civ_id): return "No messenger of ours can reach %s. %s" % [_name(civ_id),Passage.words("player",civ_id)]
 	var rng:=_rng("order:%s:war_parley:%d" % [civ_id,day])
 	var due:=day+_march_days(civ_id,rng)
 	var op:={"objective":"war_parley","start":day,"due":due,"band":2,"general_pid":int(general.get("person_id",0)),"general":gname,"auto":false}
@@ -1934,6 +2011,7 @@ static func daily(day:int)->void:
 		# What each people does about us: bow, or come with everything.
 		(load("res://scripts/world_answer.gd") as GDScript).call("monthly",day)
 		_grudges(day)
+		_pressure(day)
 		_rival_wars(day)
 	# Feuds between two other simulated peoples are fought for real.
 	preload("res://scripts/rival_feuds.gd").tick(day,TICK)
@@ -2289,6 +2367,9 @@ static func _war_to_feud(civ_id:String,day:int,keep_flag:bool=false)->void:
 ## multipliers of its condition.
 const RIVAL_WAR_BASE:=0.0018
 const RIVAL_WAR_CAP:=0.012
+## At full pressure two neighbouring peoples come to blows this many times as
+## often as the old benchmark.
+const RIVAL_PRESSURE:=4.0
 ## Two peoples are neighbours when their countries (realm_reach.gd) come
 ## within NEIGHBOUR_MARGIN_KM of meeting: about a month's march, the distance
 ## bulk goods are still worth carrying (envoy_requests.gd BULK_KM). Peoples
@@ -2307,7 +2388,7 @@ static func near_us(civ_id:String,on_foot:bool=false)->bool:
 	if civ.is_empty(): return false
 	# No land road between the two homes: nobody walks it, and boats carry a
 	# band only where the way is open to either people's (passage.gd).
-	if over_sea(civ_id) and (on_foot or sea_shut(civ_id)): return false
+	if over_sea(civ_id) and (on_foot or not fleet_links(civ_id)): return false
 	var theirs:=RealmReach.of(civ)
 	var center:Vector2=theirs.get("center",WorldSimulation.world._civilization_world_position(civ))
 	var reach:=float(theirs.get("reach",RealmReach.reach_km(float(civ.get("population",0.0)),float(civ.get("world_reach",0.0)))))
@@ -2328,7 +2409,7 @@ static func war_margin_km(civ_id:String="")->float:
 	var ours:=RealmReach.ours()
 	if civ.is_empty() or ours.is_empty():return NEIGHBOUR_MARGIN_KM
 	var there:Vector2=RealmReach.of(civ).get("center",WorldSimulation.world._civilization_world_position(civ))
-	return by_sea if Sea.links_by_sea(civ_id,ours.center,there) else NEIGHBOUR_MARGIN_KM
+	return by_sea if fleet_links(civ_id) else NEIGHBOUR_MARGIN_KM
 
 ## How close a people's country lies to ours, 0..1: 1 where the two meet,
 ## falling to 0 at war_margin_km() apart (no band can march or sail farther). The
@@ -2338,7 +2419,7 @@ static func war_margin_km(civ_id:String="")->float:
 static func proximity(civ_id:String)->float:
 	if RealmReach.ours().is_empty(): return 1.0
 	if _civ(civ_id).is_empty(): return 0.0
-	if sea_shut(civ_id): return 0.0
+	if war_shut(civ_id): return 0.0
 	return clampf(1.0-gap_km(civ_id)/war_margin_km(civ_id),0.0,1.0)
 
 const Passage:=preload("res://scripts/passage.gd")
@@ -2353,6 +2434,33 @@ static func over_sea(civ_id:String)->bool:
 static func sea_shut(civ_id:String)->bool:
 	var me:=String(WorldSimulation.actor_id)
 	return over_sea(civ_id) and not Passage.open(me,civ_id) and not Passage.open(civ_id,me)
+
+## A WAR FLEET GAMBLES where no envoy or trader goes. War crosses a sea that
+## is shut to everything else (passage.gd) wherever either people's ships can
+## carry an army over it at all (army_sea_road.gd: within four sea
+## endurances, drowning no more than half of those who embark). The men lost
+## at sea are the fleet's own, stated before it sails (field_route).
+static func fleet_links(civ_id:String)->bool:
+	var ours:=RealmReach.ours()
+	var civ:=_civ(civ_id)
+	if ours.is_empty() or civ.is_empty(): return false
+	var here:Vector2=ours.center
+	var there:Vector2=RealmReach.of(civ).get("center",WorldSimulation.world._civilization_world_position(civ))
+	var Sea:=preload("res://scripts/army_sea_road.gd")
+	if Sea.links_by_sea(civ_id,here,there): return true
+	# Their ships, asked in their own scope (we are "human" there).
+	var me:=String(WorldSimulation.actor_id)
+	if not WorldSimulation.actors.has(civ_id) or civ_id==me: return false
+	return bool(WorldSimulation.scoped(civ_id,func()->bool:return Sea.links_by_sea("human" if me=="player" else me,there,here)))
+
+## Over the sea, and no war fleet of ours or theirs can make the crossing.
+static func war_shut(civ_id:String)->bool:
+	return over_sea(civ_id) and not fleet_links(civ_id)
+
+## Whether anything of the war can still be carried to them: by the way
+## everyone uses (passage.gd), or with the war fleet.
+static func war_way(civ_id:String)->bool:
+	return Passage.open(String(WorldSimulation.actor_id),civ_id) or (over_sea(civ_id) and fleet_links(civ_id))
 
 ## The same between two other peoples.
 static func sea_shut_between(first:String,second:String)->bool:
@@ -2414,7 +2522,11 @@ static func rival_war_hazard(first:Dictionary,second:Dictionary,relation:Diction
 		var known:Variant=ForeignDiplomacy.leaders.get(String(civ.id),{})
 		var c:Variant=(known as Dictionary).get("character") if known is Dictionary else null
 		if c is Dictionary and String((c as Dictionary).get("trait","")) in ["grudge","hunter"]: factor+=0.5
-	return clampf(RIVAL_WAR_BASE*factor,0.0,RIVAL_WAR_CAP)/maxf(1.0,neighbours)
+	# The one clock (pressure_age.gd): no quarrel becomes fighting in the quiet
+	# age; after it the hazard grows to RIVAL_PRESSURE times the old one.
+	var pressure:=Pressure.now()
+	if pressure<=0.0: return 0.0
+	return clampf(RIVAL_WAR_BASE*factor,0.0,RIVAL_WAR_CAP)*lerpf(1.0,RIVAL_PRESSURE,pressure)/maxf(1.0,neighbours)
 
 static func neighbour_counts()->Dictionary:
 	var counts:={}

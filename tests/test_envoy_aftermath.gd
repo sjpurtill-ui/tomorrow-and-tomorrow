@@ -72,6 +72,9 @@ func before_test()->void:
 	tsaren["position"]=Vector2(home.x-20.0,home.y+8.0)
 	stonefield["position"]=Vector2(home.x-30.0,home.y+12.0)
 	civ["position"]=Vector2((home.x-20.0)/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,(home.y+8.0)/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+	# In the quiet age only a wronged people demands anything (pressure_age.gd):
+	# this one holds a killing against us.
+	preload("res://scripts/rival_rulers.gd").grudge(civ_id,"the fighters you killed at the ford",0.5,"test:ford")
 	# Their stores, for ransoms and prices.
 	for res in ["Food","Timber"]: Hall.EXCHANGE.receive(civ_id,res,400.0)
 

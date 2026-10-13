@@ -253,10 +253,15 @@ func test_a_peace_they_paid_for_ends_their_threats_and_our_punishing()->void:
 	# Before any feud they could demand tribute (the gate below is the peace's).
 	# (A demand also needs a road: some rolls fail on distance alone, so the
 	# rolls are seeded and any one of a few must bring a demand.)
+	# Nor does anyone demand at spear-point in the quiet age (pressure_age.gd):
+	# the check is made once it is over, and the clock set back.
 	var could:=false
+	var clock:=float(GameState.elapsed_days)
+	GameState.elapsed_days=400.0*365.0
 	for seed_value in 8:
 		var roll:=RandomNumberGenerator.new();roll.seed=seed_value
 		could=could or not Hall._candidate("tribute_demand",civ_id,{"type":"routine","civ_id":civ_id,"data":{}},roll,{},5).is_empty()
+	GameState.elapsed_days=clock
 	assert_bool(could).is_true()
 	WAR.blood_feud(civ_id,10,"old wrongs")
 	WAR.front(civ_id)["stance"]="punish"
