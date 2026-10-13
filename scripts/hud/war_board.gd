@@ -531,7 +531,7 @@ func _forces_card(f:Dictionary)->Control:
 	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
 	split.add_child(_step_button("GuardMore","+","A bigger home guard, by a tenth of the army: idle bands come home to guard.",func()->void:_step_split(1)))
 	if on_border>0:
-		var border:=_line("%s of the home guard are out on the border" % EraWords.grouped(on_border),12,T.INK_MUTED);border.name="OnBorder"
+		var border:=_line("%s of them out on the border" % EraWords.grouped(on_border),12,T.INK_MUTED);border.name="OnBorder"
 		border.tooltip_text="Posted to the border forts and the line between them (the Border card below). They are part of the home guard, not extra."
 		column.add_child(border)
 	var people:=Button.new();people.name="People";people.text="People ›";people.flat=true;people.focus_mode=Control.FOCUS_NONE

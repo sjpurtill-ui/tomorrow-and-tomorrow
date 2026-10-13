@@ -27,6 +27,18 @@ func _stock_actor(id:String,food:float,timber:float)->void:
 		WorldSimulation.food.receive_external_food(food)
 		for resource in ["Timber","Stone","Clay","Fiber Plants"]: WorldSimulation.state.resource_stockpiles[resource]=timber)
 
+## Places every people next door to ours, where the war's rules look
+## (realm_reach.gd: the people's own position and its chief town's). Peoples
+## are founded far apart, and one no band could reach neither feuds with us
+## nor makes war (war_loop.near_us).
+func _next_door()->void:
+	for index in CivilizationSystem.civilizations.size():
+		var civ:Dictionary=CivilizationSystem.civilizations[index]
+		var home:Vector2=CivilizationSystem.player_world_origin+Vector2(180.0+40.0*float(index),0.0)
+		civ["position"]=Vector2(home.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,home.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
+		for region:Dictionary in civ.get("strategic_regions",[]):
+			if String(region.get("role",""))=="capital": region["position"]=home
+
 func _refill()->void:
 	var have:=WorldSimulation.food.total_stored()
 	if have<4000: FoodSystem.receive_external_food(4000-have)

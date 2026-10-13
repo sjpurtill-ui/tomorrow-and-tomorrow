@@ -33,6 +33,7 @@ func before_test()->void:
 		civ.population=150.0
 		probe._stock_actor(String(civ.id),800,120)
 		WorldSimulation.scoped(String(civ.id),func()->void:WorldSimulation.state.ensure_population_total(150))
+	probe._next_door()
 	probe._fill_court()
 	GameState.elapsed_days=10
 	civ_id=String(CivilizationSystem.civilizations[0].id)

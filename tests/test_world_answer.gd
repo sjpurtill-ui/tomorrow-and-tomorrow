@@ -34,6 +34,7 @@ func before_test()->void:
 		relation.contact_level=2; relation.met_day=0; relation.opinion=-0.1; relation.border_tension=0.3
 		for other in civ.relations: civ.relations[other].at_war=false
 		probe._stock_actor(String(civ.id),800,120)
+	probe._next_door()
 	probe._fill_court()
 	GameState.elapsed_days=10
 	civ_id=String(CivilizationSystem.civilizations[0].id)
