@@ -33,6 +33,14 @@ func test_same_orders_and_daily_inputs_produce_identical_owned_state()->void:
 		)
 	var first:=WorldSimulation.capture_actor("alpha")
 	var second:=WorldSimulation.capture_actor("beta")
+	# Each people's old border posts stand on one ring turned to its own
+	# bearing (fort_border.seed_old_posts, seeded by the people): the same
+	# count, kind and distance out, a different turn. Compared by distance.
+	for capture:Dictionary in [first,second]:
+		for fort:Dictionary in ((capture.GameState as Dictionary).get("border_forts",{}) as Dictionary).get("forts",[]):
+			if not bool(fort.get("old_post",false)):continue
+			fort["ring_km"]=snappedf(Vector2(float(fort.x),float(fort.z)).length(),0.01)
+			fort.erase("x");fort.erase("z")
 	for name in ["GameState","MilitaryCampaign","DiscoverySystem","GovernmentPeopleSystem","EconomySystem","ProgressionSystem","society_model"]:
 		assert_bool(_simulated(first[name])==_simulated(second[name])).override_failure_message("Different owned state in "+name).is_true()
 
@@ -107,9 +115,16 @@ func test_new_world_uses_paid_founding_and_real_city_register()->void:
 		assert_array(actor.systems.GameState.player_settlements).is_empty()
 		assert_dict(actor.systems.GameState.settlement_projects).is_empty()
 	assert_array(CivilizationSystem.city_intelligence.sites(false)).is_empty()
+	# This bare world has no woods or stone to work, and the hearth circle is
+	# paid for in materials (settlement_construction.material_options): each
+	# people is given the timber its land would have yielded.
+	for actor in WorldSimulation.actors.values():
+		actor.systems.GameState.resource_stockpiles["Timber"]=20.0
 	WorldSimulation.advance_rivals(60)
 	for actor in WorldSimulation.actors.values():
 		assert_array(actor.systems.GameState.settlement_completed).contains("Hearth Circle")
+		# Paid: the timber went into it.
+		assert_float(float(actor.systems.GameState.resource_stockpiles.get("Timber",0.0))).is_less(20.0)
 		assert_int(actor.systems.GameState.player_settlements.size()).is_equal(1)
 		assert_bool(actor.systems.GameState.known_discoveries.has("service_rifle")).is_false()
 	assert_int(CivilizationSystem.city_intelligence.sites(false).size()).is_equal(2)

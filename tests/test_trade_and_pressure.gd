@@ -36,6 +36,11 @@ func before_test()->void:
 	for i in ids.size():
 		var c:Dictionary=CivilizationSystem.civilizations[i]
 		c["world_position"]=Vector2(150.0*float(i+1),0.0)
+		# The same place as the war's rules read it (realm_reach.gd): the
+		# people's own position and its chief town's.
+		c["position"]=Vector2(150.0*float(i+1)/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,0.0)
+		for region:Dictionary in c.get("strategic_regions",[]):
+			if String(region.get("role",""))=="capital": region["position"]=Vector2(150.0*float(i+1),0.0)
 		c["alive"]=true
 		(c.player_relation as Dictionary)["contact_level"]=2; (c.player_relation as Dictionary)["home_location_known"]=true
 		(c.player_relation as Dictionary)["opinion"]=0.1
