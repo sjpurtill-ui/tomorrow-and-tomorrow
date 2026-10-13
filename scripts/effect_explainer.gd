@@ -254,7 +254,7 @@ const KEYS:={
 		"what":"Wells, cisterns, channels and pipes that bring water nearer. The walk to the nearest source counts as shorter than the ground: each 1 in 100 takes 0.75 in 100 off it. Households then fetch more of their own water, even from a source that was too far to walk to, and carriers bring in more each day.",
 		"feeds":[
 			{"to":"the walk to the water source","per":-0.75,"unit":"pct","cap":"households fetch all the water they need within about 2 km of walking, less farther out and none past 6 km; carriers lose less on a shorter carry","src":"research_mechanics.gd water_walk_factor_of, resource_system.gd _process_water_flow","guards":[["research_mechanics.gd","const WATER_WALK_CUT:=0.75"],["research_mechanics.gd","return 1.0-WATER_WALK_CUT*clampf(access,WATER_ACCESS_LIMITS.x,WATER_ACCESS_LIMITS.y)"],["research_mechanics.gd",'return water_walk_factor_of(WorldSimulation.discovery.effect("water_access"))'],["resource_system.gd",'var walk_km:float=nearest_source_km*preload("res://scripts/research_mechanics.gd").water_walk_factor()'],["resource_system.gd","var distance_factor:=1.0/maxf(1.0,1.0+walk_km*0.16)"],["resource_system.gd","_household_surface_water_access_ratio(walk_km)"]]},
-			{"chain":"water_today","src":"resource_system.gd _household_surface_water_access_ratio","guards":[["resource_system.gd","return lerpf(1.18,0.38,clampf((distance_km-1.0)/5.0,0.0,1.0))"],["resource_system.gd","if distance_km<0.0 or distance_km==INF or distance_km>6.0: return 0.0"]]}]},
+			{"chain":"water_today","src":"resource_system.gd _household_surface_water_access_ratio","guards":[["resource_system.gd","return lerpf(1.18,0.38,clampf((distance_km-1.0)/5.0,0.0,1.0))"],["resource_system.gd","if distance_km<0.0 or distance_km==INF or distance_km>DRINKING_REACH_KM: return 0.0"],["resource_system.gd","const DRINKING_REACH_KM:=6.0"]]}]},
 	# --- craft and materials ----------------------------------------------------
 	"tool_quality":{"label":"Tool quality","good":1,
 		"what":"Sharper, tougher tools. The workshops can make more, and the town can reach its last building eras.",
@@ -272,7 +272,7 @@ const KEYS:={
 	"extraction_yield":{"label":"Extraction yield","good":1,
 		"what":"Better ways of digging, cutting and quarrying. Every worked deposit gives more each day.",
 		"feeds":[
-			{"to":"daily yield of every worked deposit","per":1.0,"unit":"pct","src":"resource_system.gd:636","guards":[["resource_system.gd",'var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")'],["resource_system.gd",'var knowledge_multiplier:=1.0+extraction_effect']]},
+			{"to":"daily yield of every worked deposit","per":1.0,"unit":"pct","src":"resource_system.gd:636","guards":[["resource_system.gd",'var extraction_effect:=WorldSimulation.discovery.effect("extraction_yield")'],["resource_system.gd",'knowledge_multiplier=1.0+extraction_effect']]},
 			{"steer":["production","Material supply"],"per":0.20,"src":"society_model.gd:716","guards":[["society_model.gd",'effect("extraction_yield")*0.20']]}]},
 	"metal_yield":{"label":"Ore yield","good":1,
 		"what":"Knowing good ore and how to work a seam. Every worked ore deposit gives more each day.",
@@ -282,19 +282,19 @@ const KEYS:={
 	"timber_yield":{"label":"Timber yield","good":1,
 		"what":"Felling and trimming skill. Worked woodland gives more timber each day.",
 		"feeds":[
-			{"to":"daily yield of worked timber","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+			{"to":"daily yield of worked timber","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(resource_name.to_lower().replace(" ","_")+"_yield")']]}]},
 	"stone_yield":{"label":"Stone yield","good":1,
 		"what":"Quarrying skill. Worked stone gives more each day.",
 		"feeds":[
-			{"to":"daily yield of worked stone","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+			{"to":"daily yield of worked stone","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(resource_name.to_lower().replace(" ","_")+"_yield")']]}]},
 	"clay_yield":{"label":"Clay yield","good":1,
 		"what":"Digging and sorting clay. Worked clay pits give more each day.",
 		"feeds":[
-			{"to":"daily yield of worked clay","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")']]}]},
+			{"to":"daily yield of worked clay","per":1.0,"unit":"pct","src":"resource_system.gd:649","guards":[["resource_system.gd",'WorldSimulation.discovery.effect(resource_name.to_lower().replace(" ","_")+"_yield")']]}]},
 	"fiber_yield":{"label":"Fibre yield","good":1,
 		"what":"Gathering and retting skill. Worked fibre plants give more each day.",
 		"feeds":[
-			{"to":"daily yield of worked fibre plants","per":1.0,"unit":"pct","src":"resource_system.gd:653","guards":[["resource_system.gd",'if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")']]}]},
+			{"to":"daily yield of worked fibre plants","per":1.0,"unit":"pct","src":"resource_system.gd:653","guards":[["resource_system.gd",'if resource_name=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")']]}]},
 	"fuel_efficiency":{"label":"Fuel economy","good":1,
 		"what":"Charcoal, bellows, closed ovens and kilns, chimneys and stoves, and later better engines: the same work from less fuel. Every fire the people keep burns less wood or coal: the kept hearth, the smoking fires that preserve food, and the kilns and engines they install. Each 1 in 100 saves 0.6 in 100 of the usual fuel. Workshop batches that burn charcoal or coal do not read it yet.",
 		"feeds":[
@@ -326,7 +326,7 @@ const KEYS:={
 		"feeds":[
 			{"to":"each day's building work","per":1.0,"unit":"pct","cap":"added to building decrees and the people's scale","src":"settlement_construction.gd:116","guards":[["settlement_construction.gd",'(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")']]},
 			{"to":"the town's built-up score","per":0.20,"unit":"pts","src":"settlement_model.gd:3095","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("construction_rate")*0.20']]},
-			{"text":"Once it reaches 2.5 in 100, durable homes rise to three storeys in the town's eighth building era.","src":"settlement_model.gd:2639","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("construction_rate")>=0.025: new_storeys=3']]},
+			{"text":"Once it reaches 2.5 in 100, durable homes rise to three storeys in the town's eighth building era.","src":"settlement_model.gd:2639","guards":[["settlement_model.gd",'WorldSimulation.discovery.effect("construction_rate")>=0.025:floors=3']]},
 			{"eras":"its 7th to 12th building eras","src":"settlement_model.gd:2494","guards":[["settlement_model.gd",'"construction":discovery.effect("construction_rate")']]},
 			{"capacity":"infrastructure"},
 			{"steer":["infrastructure","Construction"],"per":0.30,"src":"society_model.gd:725","guards":[["society_model.gd",'effect("construction_rate")*0.30']]}]},
@@ -348,7 +348,7 @@ const KEYS:={
 	"mining_output":{"label":"Mine output","good":1,
 		"what":"Drainage, hoists, pumps and blasting that let mines go deeper and work faster. Every mined deposit gives more each day: ores, coal, sulfur, graphite, phosphate and oil, the things dug from pits and shafts. Stone, clay, sand, salt, peat, timber and plants are cut or gathered, and do not change.",
 		"feeds":[
-			{"to":"daily yield of every mined deposit","per":1.0,"unit":"pct","cap":"added to extraction yield and ore yield","src":"research_mechanics.gd is_mined, resource_system.gd _process_material_flow","guards":[["research_mechanics.gd",'return String(profile.get("family",""))=="metal" or "mine" in (definition.get("access",[]) as Array)'],["research_mechanics.gd",'return mining_bonus_of(WorldSimulation.discovery.effect("mining_output"))'],["resource_system.gd",'var mining_effect:float=preload("res://scripts/research_mechanics.gd").mining_bonus()'],["resource_system.gd",'if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect']]},
+			{"to":"daily yield of every mined deposit","per":1.0,"unit":"pct","cap":"added to extraction yield and ore yield","src":"research_mechanics.gd is_mined, resource_system.gd _process_material_flow","guards":[["research_mechanics.gd",'return String(profile.get("family",""))=="metal" or "mine" in (definition.get("access",[]) as Array)'],["research_mechanics.gd",'return mining_bonus_of(WorldSimulation.discovery.effect("mining_output"))'],["resource_system.gd",'var mining_effect:float=preload("res://scripts/research_mechanics.gd").mining_bonus()'],["resource_system.gd",'if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(resource_name,{}),profile): knowledge_multiplier+=mining_effect']]},
 			{"chain":"mines","src":"resource_system.gd catalog access, material profiles","guards":[["resource_system.gd",'"Coal":{"family":"Fuel","renewable":false,"recognition_year":55,"access":["mine"'],["resource_system.gd",'const ORE_PROFILE:={"family":"metal"']]}]},
 	"disaster_risk":{"label":"Risk of accidents","good":-1,
 		"what":"Dangerous works: deep pits, heavy lifting, fire. Less is better; it raises deaths from accidents at work in proportion to mining and quarrying.",
