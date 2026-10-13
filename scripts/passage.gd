@@ -73,5 +73,8 @@ static func words(from:String,to:String)->String:
 	if String(w.kind)!="sea": return ""
 	var water:=roundi(float(w.open_km)+float(w.coast_km))
 	if float(w.endurance)==0.0: return "There is no land road between us and %d km of water, %d of it out of sight of land; the boats are not fit for the sea, so nobody crosses." % [water,roundi(float(w.open_km))]
-	if not bool(w.open): return "There is no land road between us and %d km of water, %d of it out of sight of land: too wide for the boats, so nobody crosses (nobody is sent at worse than %d in 100)." % [water,roundi(float(w.open_km)),roundi(LEAST*100.0)]
+	if not bool(w.open):
+		# The sea endurance (expedition.gd) at which LEAST of those sent come through.
+		var needed:=(float(w.coast_km)*Trade.SEA_COAST_WEIGHT+float(w.open_km))/(log(1.0/LEAST)/log(2.0))
+		return "There is no land road between us and %d km of water, %d of it out of sight of land: too wide for the boats, so nobody crosses (nobody is sent at worse than %d in 100). The boats last about %d km at sea; this crossing needs about %d." % [water,roundi(float(w.open_km)),roundi(LEAST*100.0),roundi(float(w.endurance)),roundi(needed/10.0)*10]
 	return "There is no land road between us: the way is %d km of water, %d of it out of sight of land, and about %d in 100 of those sent come through." % [water,roundi(float(w.open_km)),roundi(float(w.share)*100.0)]

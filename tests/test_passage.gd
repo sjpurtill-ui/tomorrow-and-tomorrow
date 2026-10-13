@@ -80,7 +80,8 @@ func test_by_land_everyone_arrives_and_by_sea_only_the_senders_boats_count()->vo
 	assert_float(Passage.share(a,"player")).is_equal(0.0)
 	assert_bool(Passage.open(a,"player")).is_false()
 	assert_str(Passage.words("player",a)).contains("650 km of water").contains("%d in 100" % roundi(ours*100.0))
-	assert_str(Passage.words(a,"player")).contains("nobody crosses")
+	# 610 km of sea to count, at 4 in 5: boats that last about 1,890 km.
+	assert_str(Passage.words(a,"player")).contains("nobody crosses").contains("The boats last about 300 km at sea; this crossing needs about 1890.")
 	# The god's people is "human" in another people's world: the same way.
 	assert_bool(Passage.open(a,"human")).is_false()
 	# Who came through is rolled once and never again; about the share arrive.
