@@ -16,6 +16,8 @@ class SheetHud extends Control:
 	func _init()->void:
 		add_child(dock);add_child(detail_dock);dock.visible=false;detail_dock.visible=false
 		section_requested.connect(func(section:String,_sub:int)->void:sections.append(section))
+	var notice_counts:Dictionary={}
+	func set_notice_counts(counts:Dictionary)->void:notice_counts=counts
 	func right_stack_top()->float:return 640.0
 
 func before_test()->void:
@@ -123,7 +125,10 @@ func test_notices_stack_at_the_top_right_and_merge_repeats()->void:
 		assert_float(rect.end.x).is_equal_approx(1280.0-Stack.RIGHT,1.0)
 		assert_bool(rect.position.y>=Stack.TOP).is_true()
 		assert_bool(rect.end.y<=640.0).is_true()
-		assert_str((row.get_meta("kicker") as Label).text).contains(Model.label(String(n.category)).to_upper())
+		# One row style: no eyebrow line; the category and date are in the pointer's words.
+		assert_bool(row.has_meta("kicker")).is_false()
+		assert_str(row.tooltip_text).contains(Model.label(String(n.category)))
+		assert_float(row.size.y).is_equal(Stack.ROW_HEIGHT)
 	assert_bool(stack.pill.visible).is_true()
 
 func test_notable_notices_fade_on_their_own_and_urgent_ones_wait()->void:
@@ -231,3 +236,103 @@ func test_the_audit_rules_retier_and_reword_the_frequent_lines()->void:
 	var find:=Model.from_chronicle({"key":"land_find:settlement_8:905:ochre","title":"Ochre earth found near Koka","text":"Searchers found ochre earth about 17 km south of Koka.","tier":"notice","kind":"economy","action":{"kind":"section","section":"economy","sub":1}})
 	assert_str(String(find.category)).is_equal("land")
 	assert_str(Model.label(String(find.category))).is_equal("Land & Finds")
+
+
+# --- What stands now: conditions and envoys, in the same column -------------------
+
+const Standing:=preload("res://scripts/hud/standing_notices.gd")
+
+func _gear()->Dictionary:
+	return Standing.from_alert({"id":"gear","glyph":"gear","tone":"amber","count":2,"title":"Short of gear","lines":PackedStringArray(["First host · 3 of 4 armed","Hill watch · 1 of 6 armed"]),"page":"support"})
+
+func _embargo()->Dictionary:
+	return Standing.from_alert({"id":"trade_against","war":"raid","tone":"red","count":1,"title":"Trade turned against us","lines":PackedStringArray(["The Saltmarsh folk will sell us no copper"]),"page":"trade","dock":["economy",3]})
+
+func test_a_condition_is_one_row_with_its_count_and_one_click_to_its_screen()->void:
+	var gear:=_gear()
+	assert_str(String(gear.key)).is_equal("standing:gear")
+	assert_str(String(gear.text)).is_equal("First host · 3 of 4 armed")
+	assert_str(String(gear.verb)).is_equal("Arm")
+	assert_int(int(gear.count)).is_equal(2)
+	assert_dict(gear.action).is_equal({"kind":"war","page":"support","label":"the War screen"})
+	assert_str(Standing.tip(gear)).contains("Hill watch · 1 of 6 armed").contains("Click to open the War screen.")
+	var embargo:=_embargo()
+	assert_str(String(embargo.category)).is_equal("trade")
+	assert_dict(embargo.action).is_equal({"kind":"section","section":"economy","sub":3,"label":"the Economy screen"})
+	assert_object(Standing.icon(gear)).is_not_null()
+	assert_object(Standing.icon(embargo)).is_not_null()
+
+func test_what_stands_stays_while_true_above_the_news_and_leaves_when_it_ends()->void:
+	var made:=await _stack();var stack:CanvasLayer=made[0];var hud:SheetHud=made[1]
+	stack._seeded.assign([_gear(),_embargo()])
+	stack._sync_standing()
+	stack.add(Model.normalize({"title":"A caravan comes home","text":"Twelve came back with salt.","category":"travel","tier":"notable"}))
+	stack.add(Model.normalize({"title":"They burned the granary","text":"Raiders from the hills.","category":"war","tier":"urgent"}))
+	for i in 3:await get_tree().process_frame
+	var keys:Array=stack.column_rows().map(func(n:Dictionary)->String:return String(n.get("key",n.get("title",""))))
+	# Urgent news, then what stands now, then the day's news.
+	# What needs the god (red), urgent news, what only wants seeing to (amber), the day's news.
+	assert_array(keys).is_equal(["standing:trade_against","They burned the granary","standing:gear","A caravan comes home"])
+	# One row style and one height for all four; a row that stands has its verb, news its ×.
+	for n:Dictionary in stack.column_rows():
+		var any_row:Control=stack._views[String(n.key) if n.has("standing") else int(n.id)]
+		assert_float(any_row.size.y).is_equal(Stack.ROW_HEIGHT)
+		assert_bool((any_row.get_meta("verb") as Button).visible).is_equal(n.has("standing"))
+		assert_bool((any_row.get_meta("close") as Button).visible).is_equal(not n.has("standing"))
+	assert_str((stack._views["standing:trade_against"].get_meta("verb") as Button).text).is_equal("Trade")
+	# The header counts what needs the god; the rail's badges are its parts.
+	assert_str(stack.pill.text).is_equal("Notices · 2 need you")
+	assert_dict(hud.notice_counts).is_equal({"economy":1})
+	var gear_row:Control=stack._views["standing:gear"]
+	assert_bool(gear_row.visible).is_true()
+	assert_str((gear_row.get_meta("title") as Label).text).is_equal("Short of gear")
+	assert_str((gear_row.get_meta("count") as Label).text).is_equal("2")
+	assert_bool((stack._views["standing:trade_against"].get_meta("count") as Label).visible).is_false()
+	# A standing row has no clock: the news leaves, it stays.
+	stack._layout(Model.NOTABLE_SECONDS+1.0)
+	assert_int(stack.standing.size()).is_equal(2)
+	assert_bool(stack.shown().any(func(n:Dictionary)->bool:return String(n.title)=="A caravan comes home")).is_false()
+	# One click opens the screen that deals with it.
+	stack.act(_embargo().action)
+	assert_array(hud.sections).contains(["economy"])
+	# The count moves where the row stands; the row leaves when the thing ends.
+	var fewer:=Standing.from_alert({"id":"gear","glyph":"gear","tone":"amber","count":1,"title":"Short of gear","lines":PackedStringArray(["Hill watch · 1 of 6 armed"]),"page":"support"})
+	stack._seeded.assign([fewer])
+	stack._sync_standing()
+	assert_object(stack._views["standing:gear"]).is_same(gear_row)
+	assert_bool((gear_row.get_meta("count") as Label).visible).is_false()
+	assert_bool(stack._views.has("standing:trade_against")).is_false()
+	stack._seeded.clear()
+	stack._sync_standing()
+	assert_array(stack.standing).is_empty()
+
+func test_an_envoy_waiting_is_a_row_that_needs_you_and_opens_the_court()->void:
+	var Hall:GDScript=load("res://scripts/audience_hall.gd")
+	var audience:Dictionary=Hall.call("_new_audience","foreign","envoy",int(GameState.elapsed_days))
+	audience["civ_name"]="the Saltmarsh folk"
+	(audience.speaker as Dictionary)["name"]="Ilen Varo"
+	(Hall.call("state").queue as Array).append(audience)
+	var rows:=Standing.waiting()
+	assert_int(rows.size()).is_equal(1)
+	assert_str(String(rows[0].title)).is_equal("Envoy of the Saltmarsh folk")
+	assert_str(String(rows[0].text)).contains("Ilen Varo waits").contains("leaves in")
+	assert_str(String((rows[0].action as Dictionary).kind)).is_equal("court")
+	# A summoned official is not a visitor: no row.
+	var own:Dictionary=Hall.call("_new_audience","court","report",int(GameState.elapsed_days))
+	(Hall.call("state").queue as Array).append(own)
+	assert_int(Standing.waiting().size()).is_equal(1)
+	var made:=await _stack();var stack:CanvasLayer=made[0]
+	stack._sync_standing()
+	for i in 2:await get_tree().process_frame
+	assert_str(String(stack.column_rows()[0].key)).starts_with("standing:envoy:")
+	assert_str(stack.pill.text).is_equal("Notices · 1 needs you")
+	assert_str((stack._views[String(stack.column_rows()[0].key)].get_meta("verb") as Button).text).is_equal("Answer")
+	# A band here in six days stands above an envoy leaving in nine.
+	var coming:=Standing.from_alert({"id":"attack","war":"band","tone":"red","count":1,"title":"Coming at us","lines":PackedStringArray(["The Reedbank raiders toward Ashford · about 40 · here in 6 days"]),"page":"wars","fact":"The Reedbank raiders · ~40 · 6 days","days":6})
+	assert_str(String(coming.text)).is_equal("The Reedbank raiders · ~40 · 6 days")
+	assert_str(String(coming.verb)).is_equal("Defend")
+	var order:Array=Standing.sorted([Standing.waiting()[0],_gear(),coming]).map(func(r:Dictionary)->String:return String(r.key).get_slice(":",1))
+	assert_array(order).is_equal(["attack","envoy","gear"])
+	assert_str(Standing.rail_of(coming)).is_equal("military")
+	assert_str(Standing.rail_of(Standing.waiting()[0])).is_equal("court")
+	(Hall.call("state").queue as Array).clear()

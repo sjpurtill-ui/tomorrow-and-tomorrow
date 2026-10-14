@@ -298,8 +298,16 @@ func test_titles_sort_and_rows_open_their_towns()->void:
 	assert_bool(bool(view.flip)).is_true()
 	# The other way round; what we do not know stays last.
 	assert_array(_people_rows(board)).is_equal(["People_b","People_player","People_a","People_c"])
-	# The sorted column shows each people's rank.
-	assert_object(board.find_child("People_b",true,false).find_child("Cell_fighters",true,false).find_child("Rank",true,false)).is_not_null()
+	# A count is a bar against ours and the figure; ranks are in the pointer, never a line on the page.
+	var fighters:Node=board.find_child("People_b",true,false).find_child("Cell_fighters",true,false)
+	assert_object(fighters.find_child("Rank",true,false)).is_null()
+	assert_object(fighters.find_child("Bar",true,false)).is_not_null()
+	assert_float(float(fighters.find_child("Bar",true,false).ours)).is_greater(0.0)
+	assert_bool(bool(board.find_child("People_player",true,false).find_child("Cell_fighters",true,false).find_child("Bar",true,false).us)).is_true()
+	# What we do not know is blank, not a question mark.
+	for label in board.find_child("People_c",true,false).find_children("Value","Label",true,false):assert_str((label as Label).text).is_empty()
+	# Crafts, learning, lives and the rest are in the row's pointer, not columns.
+	assert_object(board.find_child("Sort_crafts",true,false)).is_null()
 	# A row opens their towns; a town opens its report.
 	var click:=InputEventMouseButton.new();click.pressed=true;click.button_index=MOUSE_BUTTON_LEFT
 	(board.find_child("People_b",true,false) as Control).gui_input.emit(click)
@@ -311,7 +319,8 @@ func test_titles_sort_and_rows_open_their_towns()->void:
 	# The feud, its stance and their bands are on the page.
 	assert_str((board.find_child("People_a",true,false).find_child("Relation",true,false) as Label).text).is_equal("Hot feud")
 	assert_str((board.find_child("People_a",true,false).find_child("Stance",true,false) as Label).text).contains("Take a town")
-	assert_str((board.find_child("People_a",true,false).find_child("Envoys",true,false) as Label).text).is_equal("barred")
+	# Whether envoys pass is in the row's pointer with the rest we know of them.
+	assert_str((board.find_child("People_a",true,false) as Control).tooltip_text).contains("Envoys: barred")
 	board.toggle("a")
 	assert_str((board.find_child("Bands",true,false) as Label).text).starts_with("1 band seen")
 
@@ -359,13 +368,13 @@ func test_a_narrow_page_lets_the_least_needed_columns_give_way()->void:
 	var board:=_board(_full_model("hearth"))
 	board.size=Vector2(700,600)
 	board._layout()
-	assert_array(board._shape).contains(["crafts"])
-	assert_bool((board.find_child("Sort_crafts",true,false) as Control).visible).is_false()
+	assert_array(board._shape).contains(["seen"])
+	assert_bool((board.find_child("Head_seen",true,false) as Control).visible).is_false()
 	assert_bool((board.find_child("Sort_people",true,false) as Control).visible).is_true()
 	board.size=Vector2(1000,600)
 	board._layout()
 	assert_array(board._shape).is_empty()
-	assert_bool((board.find_child("Sort_crafts",true,false) as Control).visible).is_true()
+	assert_bool((board.find_child("Head_seen",true,false) as Control).visible).is_true()
 
 ## What a label sits on: the nearest panel's paper, laid over what is below.
 func _ground_of(node:Node)->Color:

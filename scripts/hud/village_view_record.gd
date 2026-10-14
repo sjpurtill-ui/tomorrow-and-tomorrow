@@ -70,12 +70,17 @@ static func changes(album: Dictionary, state: Dictionary) -> String:
 	for entry: Dictionary in entries:
 		if int(entry.day) <= int(state.day) - 365: previous = entry
 	if previous.is_empty(): return "The visual record begins with your first recorded visit."
-	return "Since Year %d · %s people · %s completed works · %s ha of fields" % [
-		int(previous.day) / 365 + 1, signed(int(state.population) - int(previous.population)),
-		signed(int(state.works) - int(previous.works)), "%+.2f" % (float(state.field_ha) - float(previous.field_ha))]
+	# Only what changed is said: a line of zeroes tells nothing.
+	var parts := PackedStringArray(["%s people" % signed(int(state.population) - int(previous.population))])
+	var works := int(state.works) - int(previous.works)
+	if works != 0: parts.append("%s completed %s" % [signed(works), "work" if absi(works) == 1 else "works"])
+	var fields := float(state.field_ha) - float(previous.field_ha)
+	if absf(fields) >= 0.005: parts.append("%+.2f ha of fields" % fields)
+	return "Since Year %d · %s" % [int(previous.day) / 365 + 1, " · ".join(parts)]
 
 static func signed(value: int) -> String:
-	return "+%d" % value if value > 0 else str(value)
+	var words: String = preload("res://scripts/hud/era_words.gd").grouped(value)
+	return "+" + words if value > 0 else words
 
 static func date(day: int) -> String:
 	return "Year %d · day %d" % [day / 365 + 1, posmod(day, 365) + 1]

@@ -124,11 +124,10 @@ func _check(stage:String,hud:Node)->void:
 		if stage!="court":failures.append("%s: the stack is hidden" % stage)
 		return
 	if not Rect2(Vector2.ZERO,view).encloses(rect):failures.append("%s: the stack is off the screen %s" % [stage,rect])
-	var others:={"rail":hud.rail_panel,"toolbar":hud.toolbar,"queue":hud.queue_root,"dock":hud.dock,"detail":hud.detail_dock,"kpi":hud.kpi_strip,"time":hud.time_pill}
+	var others:={"rail":hud.rail_panel,"toolbar":hud.toolbar,"dock":hud.dock,"detail":hud.detail_dock,"kpi":hud.kpi_strip,"time":hud.time_pill}
 	for key in others:
 		var other:Control=others[key]
 		if other==null or not other.is_visible_in_tree():continue
-		if key=="queue" and other.get_child_count()==0:continue
 		var o:=other.get_global_rect()
 		print("ORDER_STACK %s %s=%s" % [stage,key,o])
 		if o.intersects(rect.grow(-1.0)):failures.append("%s: the stack covers the %s (%s over %s)" % [stage,key,rect,o])

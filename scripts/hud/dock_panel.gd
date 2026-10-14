@@ -18,6 +18,22 @@ signal tab_changed(sub:int)
 
 var provider:Object
 var sub:int=0
+## The pages that share this screen (the rail's category), set by the HUD:
+## [{section, provider, labels}]. With more than one, every page's tabs stand
+## in the one row, so a category is one screen and nothing opens behind it.
+var siblings:Array=[]
+## Opens another page of the category: (section, sub).
+var open_page:Callable=Callable()
+var _flat:Array=[]
+## The rail's word for this screen ("Economy"), set by the HUD: every page of
+## a category carries it as its one title, with its tabs right under it. ""
+## for a page outside the categories (a report), which keeps its own title.
+var category_title:String=""
+## A few quiet words beside the title (the town's name on Home).
+var title_note:String=""
+var note_label:Label
+const TITLE_SIZE:=32
+const TITLE_SIZE_NARROW:=26
 
 var eyebrow_label:Label
 var title_label:Label
@@ -53,8 +69,8 @@ func _ready()->void:
 	var header:=MarginContainer.new()
 	header.add_theme_constant_override("margin_left",26)
 	header.add_theme_constant_override("margin_right",26)
-	header.add_theme_constant_override("margin_top",14)
-	header.add_theme_constant_override("margin_bottom",22)
+	header.add_theme_constant_override("margin_top",6)
+	header.add_theme_constant_override("margin_bottom",2)
 	root.add_child(header)
 	var header_row:=HBoxContainer.new()
 	header_row.add_theme_constant_override("separation",10)
@@ -68,9 +84,9 @@ func _ready()->void:
 	title_label=Tokens.make_label("",21,Tokens.INK)
 	title_column.add_child(title_label)
 	title_column.move_child(title_label,0)
-	title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	title_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	eyebrow_label.add_theme_font_override("font",Tokens.font("voice_italic"))
-	eyebrow_label.add_theme_font_size_override("font_size",17)
+	eyebrow_label.add_theme_font_size_override("font_size",15)
 	eyebrow_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var close:=Button.new()
 	close_button=close
@@ -78,16 +94,21 @@ func _ready()->void:
 	# One clear control: "Back" in the detail dock, "Close" in the main dock.
 	# Esc does the same; the tooltip says so, so no separate ESC label.
 	close.text="‹" if back_mode else "×"
-	close.custom_minimum_size=Vector2(32,40)
+	close.custom_minimum_size=Vector2(32,34)
 	close.tooltip_text="Back to the previous page (Esc)" if back_mode else "Close and return to the map (Esc)"
 	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
-	close.add_theme_font_size_override("font_size",32)
+	close.add_theme_font_size_override("font_size",28)
 	close.add_theme_font_override("font",Tokens.font("voice"))
 	close.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	close.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 	close.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,4))
 	close.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	close.pressed.connect(func()->void: close_requested.emit())
+	note_label=Tokens.make_label("",16,Tokens.GOLD_TEXT);note_label.name="TitleNote"
+	note_label.add_theme_font_override("font",Tokens.font("voice_italic"));note_label.add_theme_font_size_override("font_size",17)
+	note_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	note_label.visible=false
+	header_row.add_child(note_label)
 	header_row.add_child(close)
 	# Sub-tabs
 	var tabs_margin:=MarginContainer.new()
@@ -106,7 +127,7 @@ func _ready()->void:
 	var kpi_margin:=MarginContainer.new();kpi_margin.name="KpiMargin"
 	kpi_margin.add_theme_constant_override("margin_left",18)
 	kpi_margin.add_theme_constant_override("margin_right",18)
-	kpi_margin.add_theme_constant_override("margin_top",12)
+	kpi_margin.add_theme_constant_override("margin_top",10)
 	root.add_child(kpi_margin)
 	kpi_row=GridContainer.new()
 	kpi_row.columns=4
@@ -155,17 +176,23 @@ func rebuild()->void:
 	var meta:Dictionary=provider.meta()
 	_set_fit(bool(meta.get("fit_height",false)))
 	# Providers still pass shouted text; the dock speaks in sentence case.
-	eyebrow_label.text=Tokens.sentence_case(String(meta.get("eyebrow","")))
+	# One header on every screen: the rail's word on one line, the tabs right
+	# under it. A report outside the categories keeps its own title and line.
+	eyebrow_label.text="" if category_title!="" else Tokens.sentence_case(String(meta.get("eyebrow","")))
 	eyebrow_label.visible=eyebrow_label.text!=""
-	title_label.text=Tokens.sentence_case(String(meta.get("title","")))
-	title_label.add_theme_font_size_override("font_size",64 if size.x>=600 else 48)
+	title_label.text=category_title if category_title!="" else Tokens.sentence_case(String(meta.get("title","")))
+	title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
 	title_label.add_theme_font_override("font",Tokens.font("voice_bold"))
-	var subtabs:Array=meta.get("subtabs",[])
+	note_label.text=title_note if category_title!="" else ""
+	note_label.visible=note_label.text!=""
+	var own:Array=meta.get("subtabs",[])
+	sub=clampi(sub,0,maxi(0,own.size()-1))
+	_flat=_flat_tabs(own)
+	var subtabs:Array=_flat.map(func(entry:Dictionary)->String:return String(entry.text))
 	tabs_row.visible=subtabs.size()>1
-	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
-		tab.custom_minimum_size=Vector2(0,42)
+		tab.custom_minimum_size=Vector2(0,34)
 		tab.add_theme_font_override("font",Tokens.font("voice"))
 		tab.add_theme_font_size_override("font_size",12)
 		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
@@ -176,13 +203,15 @@ func rebuild()->void:
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()
 		if index<subtabs.size(): tab.text=String(subtabs[index]).to_upper()
-		var active:=index==sub
+		var active:=index<_flat.size() and bool(_flat[index].active)
 		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		var style:=Tokens.flat(Color.TRANSPARENT)
 		style.border_color=Tokens.GOLD if active else Folio.RULE
 		style.border_width_bottom=3 if active else 1
-		style.content_margin_left=10;style.content_margin_right=10
-		tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
+		# A category with many tabs keeps them in one row: smaller letters, closer set.
+		var many:=subtabs.size()>5
+		style.content_margin_left=4 if many else 10;style.content_margin_right=4 if many else 10
+		tab.add_theme_font_size_override("font_size",15 if many else (18 if size.x>=600 else 16))
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
@@ -194,7 +223,7 @@ func rebuild()->void:
 func rebuild_body()->void:
 	if provider==null: return
 	var data:Dictionary=provider.tab(sub)
-	if not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","") in ["materials_ledger","wealth_ledger"]:title_label.text=String(data.blocks[0].title)
+	if category_title=="" and not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","") in ["materials_ledger","wealth_ledger"]:title_label.text=String(data.blocks[0].title)
 	# Keep what the player is looking at: scroll offsets (the dock's and any
 	# nested one), the focused control, and widget page state.
 	var view:=ViewState.capture(body_scroll)
@@ -218,7 +247,7 @@ func rebuild_body()->void:
 	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
 	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
 		add_theme_stylebox_override("panel",paper)
-	if military_board:title_label.text="Recruit and deploy"
+	if military_board and category_title=="":title_label.text="Recruit and deploy"
 	_ink(title_label,"font_color",Tokens.INK)
 	_ink(eyebrow_label,"font_color",Tokens.GOLD_TEXT)
 	_ink(close_button,"font_color",Tokens.TEXT_DIM)
@@ -323,6 +352,16 @@ func _clear_body()->void:
 		body.remove_child(child);child.queue_free()
 
 
+## One row on a wide page for up to six tiles; four across beyond that.
+func _kpi_columns()->void:
+	if kpi_row==null:return
+	var count:=kpi_row.get_child_count()
+	kpi_row.columns=2 if size.x<600 else (count if count>=1 and count<=6 else 4)
+
+
+## The tiles under the tabs: {label, value, delta, tip, and optionally
+## meter (0..1, a bar under the number), meter_color, glance (true: a big
+## number and its bar, the note in the pointer), on_press (opens its page)}.
 func _rebuild_kpis(kpis:Array)->void:
 	kpi_row.get_parent().visible=not kpis.is_empty()
 	for child in kpi_row.get_children():
@@ -330,35 +369,58 @@ func _rebuild_kpis(kpis:Array)->void:
 		child.queue_free()
 	for kpi_variant in kpis:
 		var kpi:Dictionary=kpi_variant
+		var glance:=bool(kpi.get("glance",false))
 		var tile:=PanelContainer.new()
 		tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		tile.add_theme_stylebox_override("panel",Tokens.flat(Color.TRANSPARENT))
 		tile.tooltip_text=String(kpi.get("tip",""))
 		kpi_row.add_child(tile)
+		var press:Variant=kpi.get("on_press")
+		if press is Callable and (press as Callable).is_valid():
+			tile.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+			tile.gui_input.connect(func(event:InputEvent)->void:
+				if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
+					tile.accept_event();(press as Callable).call())
 		var column:=VBoxContainer.new()
 		column.add_theme_constant_override("separation",1)
+		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(column)
 		column.add_child(Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06))
 		var value_row:=HBoxContainer.new()
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
 		var value_label:=Tokens.make_label(String(kpi.get("value","")),18,Tokens.INK)
+		if glance:
+			value_label.add_theme_font_override("font",Tokens.font("voice"));value_label.add_theme_font_size_override("font_size",24)
 		value_row.add_child(value_label)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
-		if String(kpi.get("delta",""))!="":
+		if String(kpi.get("delta",""))!="" and not glance:
 			var delta:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
 			delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			value_row.add_child(delta)
 			preload("res://scripts/hud/live_value_binding.gd").attach(delta,"text",kpi.get("live_delta"))
+		if kpi.has("meter"):
+			var meter:=ProgressBar.new();meter.name="KpiMeter";meter.show_percentage=false;meter.min_value=0.0;meter.max_value=1.0
+			meter.value=clampf(float(kpi.meter),0.0,1.0);meter.custom_minimum_size=Vector2(0,6);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			var track:=Tokens.flat(Color(Tokens.INK,0.12),Color(0,0,0,0),0,2)
+			var fill:=Tokens.flat(kpi.get("meter_color",Tokens.GREEN),Color(0,0,0,0),0,2)
+			meter.add_theme_stylebox_override("background",track);meter.add_theme_stylebox_override("fill",fill)
+			column.add_child(meter)
+		# A glance tile says its few words under the bar.
+		if glance and String(kpi.get("delta",""))!="":
+			var words:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
+			words.name="KpiWords";words.clip_text=true;words.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			column.add_child(words)
 		# What the number means is written on the tile, not hidden in a tooltip.
 		var tip:=String(kpi.get("tip",""))
-		if tip!="":
+		if tip!="" and not glance:
 			var note:=Tokens.make_label(tip,12,Tokens.TEXT_DIM)
 			note.name="KpiNote"
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			note.custom_minimum_size.x=0
 			note.max_lines_visible=2
 			column.add_child(note)
+	_kpi_columns()
 
 
 func _rebuild_brief(brief:Dictionary)->void:
@@ -403,7 +465,30 @@ func _rebuild_brief(brief:Dictionary)->void:
 		row.add_child(action)
 
 
+## Every tab of the screen in one row: this page's own, and its category
+## neighbours' (a page with one tab stands as one tab under its own name).
+func _flat_tabs(own:Array)->Array:
+	var out:Array=[]
+	var shared:=siblings.size()>1 and siblings.any(func(page:Dictionary)->bool:return page.provider==provider)
+	if not shared:
+		for index in own.size():out.append({"text":String(own[index]),"mine":true,"sub":index,"active":index==sub})
+		return out
+	for page:Dictionary in siblings:
+		var mine:bool=page.provider==provider
+		var names:Array=own if mine else ((page.provider as Object).meta().get("subtabs",[]) as Array)
+		var labels:Array=page.get("labels",[])
+		for index in maxi(1,names.size()):
+			var text:=String(labels[index]) if index<labels.size() else (String(names[index]) if index<names.size() else String(page.section).capitalize())
+			out.append({"text":text,"mine":mine,"section":String(page.section),"sub":index,"active":mine and index==sub})
+	return out
+
 func _on_tab_pressed(index:int)->void:
+	if index>=_flat.size():return
+	var entry:Dictionary=_flat[index]
+	if not bool(entry.mine):
+		if open_page.is_valid():open_page.call(String(entry.section),int(entry.sub))
+		return
+	index=int(entry.sub)
 	if index==sub: return
 	body_scroll.scroll_vertical=0
 	_clear_body()
@@ -431,9 +516,9 @@ func _set_fit(enabled:bool)->void:
 
 func _on_resized()->void:
 	if title_label:
-		title_label.add_theme_font_size_override("font_size",64 if size.x>=600 else 48)
+		title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
 		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
-	if kpi_row:kpi_row.columns=4 if size.x>=600 else 2
+	_kpi_columns()
 	if _fitting:return
 	_room=size.y
 	if fit_height:call_deferred("_fit")

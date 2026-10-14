@@ -217,9 +217,11 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 				c.headline="All the work of every city in a day, in one measure."
 				c.facts.append({"text":"%.2f per person" % per})
 			else:
-				c.value="%d hands" % roundi(float(t.output))
-				c.headline="Full days of work done each day across the people."
-				c.facts.append({"text":"About %.2f of a day's work for every person" % per})
+				var at_work:int=preload("res://scripts/hud/war_forces_model.gd").at_work(MilitaryCampaign)
+				c.value=EraWords.grouped(at_work)
+				c.unit="people at work"
+				c.headline="Everyone who can work, less those in the army."
+				c.facts.append({"text":"Together they do %s full days of work each day" % EraWords.grouped(roundi(float(t.output)))})
 			c.action="Click for the %s tally" % EraWords.word("rail.wealth","Wealth")
 	return c
 

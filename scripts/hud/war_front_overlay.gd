@@ -3087,7 +3087,7 @@ func _chart_obstacles()->Dictionary:
 		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
 	var hud:Variant=terrain.get("hud") if is_instance_valid(terrain) else null
 	if hud is Control:
-		for key in ["army_bar","order_stack","queue_root","toolbar","dock","detail_dock","army_alerts"]:
+		for key in ["army_bar","order_stack","toolbar","dock","detail_dock"]:
 			var panel:Variant=hud.get(key)
 			if panel is Control and (panel as Control).is_visible_in_tree():rects.append((panel as Control).get_global_rect().grow(6.0))
 	if is_instance_valid(terrain):

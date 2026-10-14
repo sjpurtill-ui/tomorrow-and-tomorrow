@@ -126,9 +126,13 @@ func test_reference_sidebar_and_speed_controls_keep_their_actions() -> void:
 	hud.close_dock()
 	var chosen:Array=[]
 	hud.section_requested.connect(func(section:String,sub:int)->void:chosen.assign([section,sub]))
-	for target_page:Array in [["trade","economy",3],["wealth","economy",2],["materials","economy",1]]:
-		hud.rail_buttons[target_page[0]].pressed.emit()
-		assert_array(chosen).is_equal([target_page[1],target_page[2]])
+	# One button for the whole economy: it opens the category's first page,
+	# returns to the page last seen, and closes the category when it is open.
+	hud.rail_buttons.economy.pressed.emit()
+	assert_array(chosen).is_equal(["economy",0])
 	hud.open_dock("economy",3)
-	hud.rail_buttons.trade.pressed.emit()
-	assert_array(chosen).is_equal(["",3])
+	hud.rail_buttons.economy.pressed.emit()
+	assert_array(chosen).is_equal(["",0])
+	hud.close_dock()
+	hud.rail_buttons.economy.pressed.emit()
+	assert_array(chosen).is_equal(["economy",0])

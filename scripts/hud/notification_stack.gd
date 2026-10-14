@@ -4,30 +4,40 @@ extends CanvasLayer
 ##
 ##   [ Notices · 12 ]                  the log button (opens the session's log)
 ##   ┌ the Chronicle's moment card ┐   (hud/chronicle_card.gd, when one shows)
+##   ├ who waits on your answer ───┤   an envoy: stays until answered
 ##   ├ urgent notices ─────────────┤   stay until dismissed, highlighted
+##   ├ what stands now ────────────┤   short rows: gear short, men hungry, a
+##   │                             │   hot feud, trade turned against us; each
+##   │                             │   stays while it is true
 ##   └ notable notices ────────────┘   NOTABLE_SECONDS each, newest first
 ##
 ## Each notice: its category's icon and coloured label, the date, a headline
 ## and one plain sentence. A click opens what it is about (the court on a
 ## person, a report, a page of the dock, a place on the map); × sets it aside.
+## What stands (hud/standing_notices.gd) is one line with a count: a click
+## opens the screen that deals with it, and it leaves by itself when it ends.
 ## Minor notices never pop up; the log keeps them. Repeats merge into the
 ## notice still showing ("3 times"). The column stops above whatever stands at
-## the bottom right (your orders, the council's matters) and stands aside for
-## an open dock sheet or the War screen's column: when there is no room it
-## waits, and its clocks do not run.
+## the bottom right (your orders) and stands aside for an open dock sheet that
+## reaches it or the War screen's column: when there is no room it waits, and
+## its clocks do not run. The red count on the rail's War button still shows.
 ##
 ## Data: hud/notification_model.gd (categories, tiers, merging) fed by the
 ## Chronicle (Chronicle.pending_notes) and by NotificationModel.push().
 
 const Model:=preload("res://scripts/hud/notification_model.gd")
+const Standing:=preload("res://scripts/hud/standing_notices.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
 
-const WIDTH:=372.0
+const WIDTH:=preload("res://scripts/hud/order_stack.gd").WIDTH
 const MAX_ROWS:=4
-const GAP:=8.0
-const RIGHT:=16.0
+const GAP:=6.0
+const RIGHT:=T.EDGE_MARGIN
+const STANDING_SECONDS:=1.0
+## Every row is this tall: a headline and one fact line.
+const ROW_HEIGHT:=52.0
 const TOP:=T.CONTENT_TOP
 const PILL_HEIGHT:=28.0
 const LOG_ROWS:=40
@@ -38,6 +48,13 @@ var hud:Node
 var rows:Array[Dictionary]=[]
 ## Notices waiting for room, oldest first.
 var waiting:Array[Dictionary]=[]
+## What stands now (hud/standing_notices.gd rows), in the source's order.
+var standing:Array[Dictionary]=[]
+var _standing_clock:=STANDING_SECONDS
+var _standing_signature:=""
+var _needing:=""
+## Capture only ("--capture-standing"): sample rows shown beside the live ones.
+var _seeded:Array[Dictionary]=[]
 var column:Control
 var pill:Button
 var log_panel:PanelContainer
@@ -82,6 +99,7 @@ func _ready()->void:
 	column.add_child(pill)
 	get_viewport().size_changed.connect(func()->void:_signature="")
 	if "--capture-notices" in OS.get_cmdline_user_args():_capture_replay()
+	if "--capture-standing" in OS.get_cmdline_user_args():_capture_standing()
 
 
 ## Capture only ("--capture-notices", with "--resume-saved"): shows what the
@@ -110,9 +128,49 @@ func _capture_replay()->void:
 	if "--capture-notices-log" in OS.get_cmdline_user_args():toggle_log();_layout(0.0)
 
 
+## Capture only ("--capture-standing"): sample conditions in the sources' own
+## shapes (hud/army_alerts.gd, hud/trade_alerts.gd), so a capture of a quiet
+## campaign shows how standing rows read. Never part of play.
+func _capture_standing()->void:
+	var samples:Array[Dictionary]=[
+		{"id":"attack","war":"band","tone":"red","count":1,"title":"Coming at us","lines":PackedStringArray(["The Reedbank raiders toward the town · about 400 · here in 6 days"]),"page":"wars","fact":"The Reedbank raiders · ~400 · 6 days","days":6},
+		{"id":"hungry","logistics":"hungry","tone":"red","count":2,"title":"Hungry in the field","lines":PackedStringArray(["First host · 40% fed","River guard · 55% fed"]),"page":"support"},
+		{"id":"trade_against","war":"raid","tone":"red","count":1,"title":"Trade turned against us","lines":PackedStringArray(["The Saltmarsh folk sell us no copper"]),"page":"trade","dock":["economy",3]},
+		{"id":"gear","glyph":"gear","tone":"amber","count":3,"title":"Short of gear","lines":PackedStringArray(["First host · 310 of 400 armed","River guard · 90 of 120 armed","Hill watch · 20 of 60 armed"]),"page":"support"},
+	]
+	_seeded.append({"key":"standing:envoy:sample","standing":true,"kind":"waiting","tone":"gold","category":"neighbours","title":"Envoy of the Saltmarsh folk","text":"Ilen Varo waits · leaves in 9 days","verb":"Answer","days":9,"count":1,"lines":PackedStringArray(["Ilen Varo waits · leaves in 9 days"]),"action":{"kind":"court","focus":{},"label":"the court"}})
+	for alert in samples:_seeded.append(Standing.from_alert(alert))
+	Model.push({"category":"food","tier":"notable","title":"The east wells are cleared","text":"Water for 300 more each day."})
+	_sync_standing()
+	_intake()
+	_layout(0.0)
+
+
 func _process(delta:float)->void:
 	_intake()
+	_standing_clock+=delta
+	if _standing_clock>=STANDING_SECONDS:
+		_standing_clock=0.0
+		_sync_standing()
 	_layout(delta)
+
+
+## Reads what stands now and keeps one row for each: a row that is still true
+## is updated where it stands, one that ended leaves.
+func _sync_standing()->void:
+	var next:Array[Dictionary]=_seeded.duplicate()
+	if WorldSimulation.state!=null:next.append_array(Standing.rows())
+	var words:=str(next.map(func(r:Dictionary)->Array:return [r.key,r.tone,r.title,r.text,r.count]))
+	if words==_standing_signature:return
+	_standing_signature=words
+	var keep:Dictionary={}
+	for row in next:keep[String(row.key)]=true
+	for old in standing:
+		if not keep.has(String(old.key)):_drop_view(String(old.key))
+	standing=Standing.sorted(next)
+	for row in standing:_render_standing(row)
+	_refresh_pill()
+	_signature=""
 
 
 ## Takes what the Chronicle told and what other systems pushed.
@@ -144,6 +202,7 @@ func add(n:Dictionary)->void:
 	n["left"]=Model.NOTABLE_SECONDS
 	waiting.append(n)
 	_fill()
+	_refresh_pill()
 
 
 func _fill()->void:
@@ -176,8 +235,12 @@ func _sort()->void:
 
 func _drop(n:Dictionary,_remove:=true)->void:
 	rows.erase(n)
-	var view:Variant=_views.get(int(n.id))
-	_views.erase(int(n.id))
+	_drop_view(int(n.id))
+
+
+func _drop_view(key:Variant)->void:
+	var view:Variant=_views.get(key)
+	_views.erase(key)
 	if view is Control and is_instance_valid(view):
 		var control:Control=view
 		control.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -192,49 +255,80 @@ func _drop(n:Dictionary,_remove:=true)->void:
 func dismiss(n:Dictionary)->void:
 	_drop(n)
 	_fill()
+	_refresh_pill()
 
 
-## Builds or refreshes a notice's paper slip.
+## ONE ROW STYLE for everything in the column: a glyph, a headline with its
+## count, one fact line, and at the right either the one word of what to do
+## about it (a row that stands) or the × that sets news aside. Two lines,
+## the same height; the pointer has the rest.
 func _render_row(n:Dictionary)->void:
 	var view:Variant=_views.get(int(n.id))
 	var row:PanelContainer
 	if view is PanelContainer and is_instance_valid(view):
 		row=view
 	else:
-		row=_build_row(n)
+		row=_build_row(n,"Notice%d" % int(n.id))
 		_views[int(n.id)]=row
 		column.add_child(row)
 		row.modulate.a=0.0
-		if "--capture-notices" in OS.get_cmdline_user_args():row.modulate.a=1.0
+		if "--capture-notices" in OS.get_cmdline_user_args() or "--capture-standing" in OS.get_cmdline_user_args():row.modulate.a=1.0
 		var tween:=row.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		tween.tween_property(row,"modulate:a",1.0,Motion.duration(Motion.BASE))
+	row.set_meta("notice",n)
 	var category:=String(n.get("category","story"))
 	var urgent:=String(n.get("tier",""))=="urgent"
-	row.add_theme_stylebox_override("panel",_row_style(category,urgent))
-	(row.get_meta("kicker") as Label).text=_kicker(n)
-	(row.get_meta("kicker") as Label).add_theme_color_override("font_color",Model.color(category))
-	(row.get_meta("title") as Label).text=Model.headline(n)
-	var detail:=row.get_meta("detail") as Label
-	detail.text=String(n.get("text",""))
-	detail.visible=detail.text!=""
+	row.add_theme_stylebox_override("panel",_row_style(Model.color(category),urgent))
 	(row.get_meta("icon") as TextureRect).texture=Model.icon(category,48)
+	var times:=int(n.get("count",1)) if Model.count_words(n)!="" else 1
+	_fill_row(row,Model.headline(n),String(n.get("text","")),times,Model.color(category),"")
 	row.tooltip_text=_tooltip(n)
 	_signature=""
 
 
-func _kicker(n:Dictionary)->String:
-	var parts:PackedStringArray=[Model.label(String(n.get("category","story"))).to_upper()]
-	if String(n.get("tier",""))=="urgent":parts.append("NEEDS YOU")
-	parts.append(Model.date_words(int(n.get("day",0))))
-	var times:=Model.count_words(n)
-	if times!="":parts.append(times)
-	return "  ·  ".join(parts)
+## Builds or refreshes a row that stands (hud/standing_notices.gd).
+func _render_standing(n:Dictionary)->void:
+	var key:=String(n.key)
+	var view:Variant=_views.get(key)
+	var row:PanelContainer
+	if view is PanelContainer and is_instance_valid(view):row=view
+	else:
+		row=_build_row(n,"Standing_%s" % key.trim_prefix("standing:").replace(":","_"))
+		_views[key]=row
+		column.add_child(row)
+	row.set_meta("notice",n)
+	var tone:=Standing.tone_color(String(n.get("tone","amber")))
+	row.add_theme_stylebox_override("panel",_row_style(tone,String(n.get("kind",""))=="waiting"))
+	(row.get_meta("icon") as TextureRect).texture=Standing.icon(n)
+	_fill_row(row,String(n.get("title","")),String(n.get("text","")),int(n.get("count",1)),tone,String(n.get("verb","See")))
+	row.tooltip_text=Standing.tip(n)
+
+
+## Writes a row's words: `times` over one shows as the count beside the
+## headline; `verb` is the button's word ("" for news, which has the ×).
+func _fill_row(row:PanelContainer,headline:String,fact:String,times:int,tone:Color,verb:String)->void:
+	(row.get_meta("title") as Label).text=headline
+	var detail:=row.get_meta("detail") as Label
+	detail.text=fact
+	var count:=row.get_meta("count") as Label
+	count.visible=times>1
+	count.text=str(times)
+	var chip:=T.flat(tone,Color(0,0,0,0),0,8);chip.content_margin_left=6;chip.content_margin_right=6
+	count.add_theme_stylebox_override("normal",chip)
+	var act_button:=row.get_meta("verb") as Button
+	act_button.visible=verb!=""
+	act_button.text=verb
+	for state:String in ["normal","hover","pressed"]:
+		var skin:=T.flat(tone if state=="normal" else tone.darkened(0.12),Color(0,0,0,0),0,10);skin.content_margin_left=10;skin.content_margin_right=10;skin.content_margin_top=2;skin.content_margin_bottom=2
+		act_button.add_theme_stylebox_override(state,skin)
+	(row.get_meta("close") as Button).visible=verb==""
 
 
 func _tooltip(n:Dictionary)->String:
 	var action:Dictionary=n.get("action",{}) if n.get("action") is Dictionary else {}
-	var opens:=action_words(action)
-	return "%s\nClick: %s.  × sets it aside; the log keeps it." % [String(n.get("title","")),opens]
+	var head:PackedStringArray=[Model.label(String(n.get("category","story"))),Model.date_words(int(n.get("day",0)))]
+	if Model.count_words(n)!="":head.append(Model.count_words(n))
+	return "%s\n%s\n%s\nClick: %s.  × sets it aside; the log keeps it." % [" · ".join(head),Model.headline(n),String(n.get("text","")),action_words(action)]
 
 
 static func action_words(action:Dictionary)->String:
@@ -252,43 +346,61 @@ static func action_words(action:Dictionary)->String:
 	return "open the Chronicle"
 
 
-func _row_style(category:String,urgent:bool)->StyleBoxFlat:
+## A row's paper: its tone on the left edge; one that needs the god now has
+## a gold rule all round and a warm wash.
+func _row_style(tone:Color,lit:bool)->StyleBoxFlat:
 	var style:=T.paper_panel_style(true,T.RADIUS_CARD)
-	style.content_margin_left=12;style.content_margin_right=6;style.content_margin_top=8;style.content_margin_bottom=8
-	style.border_width_left=4;style.border_color=Model.color(category)
+	style.content_margin_left=10;style.content_margin_right=8;style.content_margin_top=6;style.content_margin_bottom=6
+	style.border_width_left=5;style.border_color=tone
 	style.shadow_color=Color(0.12,0.09,0.05,0.18);style.shadow_size=6;style.shadow_offset=Vector2(0,2)
-	if urgent:
-		# Highlighted: a gold rule all round and a warm wash.
+	if lit:
 		style.border_color=T.GOLD;style.set_border_width_all(2);style.border_width_left=5
 		style.bg_color=T.PAPER_RAISED.lerp(Color(T.GOLD,1.0),0.10)
 	return style
 
 
-func _build_row(n:Dictionary)->PanelContainer:
-	var row:=PanelContainer.new();row.name="Notice%d" % int(n.id)
+func _build_row(n:Dictionary,row_name:String)->PanelContainer:
+	var row:=PanelContainer.new();row.name=row_name
 	row.mouse_filter=Control.MOUSE_FILTER_STOP;row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	row.custom_minimum_size.x=WIDTH
+	row.custom_minimum_size=Vector2(WIDTH,ROW_HEIGHT)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(line)
-	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(30,30);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
-	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",1);copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
-	var kicker:=_label(copy,11,T.GOLD,false)
-	var title:=_label(copy,15,T.INK,true);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
-	title.max_lines_visible=2
-	var detail:=_label(copy,13,T.BODY,true);detail.max_lines_visible=4;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	var close:=Button.new();close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(26,26)
-	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(28,28);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
+	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",-1);copy.alignment=BoxContainer.ALIGNMENT_CENTER;copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;copy.add_child(head)
+	var title:=_label(head,16,T.INK,false);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
+	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var count:=Label.new();count.add_theme_font_override("font",T.font("ui_strong"));count.add_theme_font_size_override("font_size",12)
+	count.add_theme_color_override("font_color",Color("fbf6ea"));count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	head.add_child(count)
+	var detail:=_label(copy,13,T.BODY,false);detail.clip_text=true;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	var verb:=Button.new();verb.name="Verb";verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",13)
+	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:verb.add_theme_color_override(state,Color("fbf6ea"))
+	verb.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	verb.pressed.connect(func()->void:_press(row))
+	line.add_child(verb)
+	var close:=Button.new();close.name="Close";close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(24,24)
+	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	close.add_theme_font_override("font",T.FONT_UI);close.add_theme_font_size_override("font_size",17)
 	close.add_theme_color_override("font_color",T.INK_MUTED);close.add_theme_color_override("font_hover_color",T.INK)
 	close.tooltip_text="Set this aside. The log keeps it."
-	close.pressed.connect(func()->void:dismiss(n))
+	close.pressed.connect(func()->void:dismiss(row.get_meta("notice")))
 	line.add_child(close)
-	row.set_meta("icon",icon);row.set_meta("kicker",kicker);row.set_meta("title",title);row.set_meta("detail",detail)
+	row.set_meta("icon",icon);row.set_meta("title",title);row.set_meta("detail",detail);row.set_meta("count",count);row.set_meta("verb",verb);row.set_meta("close",close)
 	row.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
 			row.accept_event()
-			open(n))
+			_press(row))
 	return row
+
+
+## A click on a row or its button: a row that stands opens its screen and
+## stays; news opens what it is about and is set aside.
+func _press(row:PanelContainer)->void:
+	var n:Dictionary=row.get_meta("notice")
+	if bool(n.get("standing",false)):act(n.get("action",{}) if n.get("action") is Dictionary else {})
+	else:open(n)
 
 
 func _label(parent:Node,font_size:int,color:Color,wrap:bool)->Label:
@@ -311,7 +423,10 @@ func act(action:Dictionary)->void:
 			var director:Node=get_tree().get_first_node_in_group("court_director")
 			if director and director.has_method("open_ceremony"):director.call("open_ceremony",String(action.get("work_id","")))
 		"court":
-			preload("res://scripts/audience_director.gd").open_court_for(action.get("focus",{}))
+			var focus:Dictionary=action.get("focus",{}) if action.get("focus") is Dictionary else {}
+			if not preload("res://scripts/audience_director.gd").open_court_for(focus) and is_instance_valid(hud) and hud.has_method("open_court"):hud.call("open_court")
+		"war":
+			MilitaryCampaign.open_roster("army",false,String(action.get("page","forces")))
 		"prisoner":
 			preload("res://scripts/audience_director.gd").open_court_for({"prisoner_id":String(action.get("prisoner_id",""))})
 		"scout_report":
@@ -336,11 +451,11 @@ func act(action:Dictionary)->void:
 func _layout(delta:float)->void:
 	var view:=get_viewport().get_visible_rect().size
 	var right:=view.x-RIGHT
+	var y:=TOP
 	var width:=minf(WIDTH,view.x-T.RAIL_WIDTH-32.0)
 	var blocked:=_blocked_rects(view)
 	# The log button: at the top of the column, under the status strip.
-	pill.visible=not Model.history.is_empty()
-	var y:=TOP
+	pill.visible=not Model.history.is_empty() or not standing.is_empty()
 	if pill.visible:
 		pill.reset_size()
 		pill.position=Vector2(roundf(right-pill.size.x),y)
@@ -364,12 +479,13 @@ func _layout(delta:float)->void:
 	held=blocked.any(func(r:Rect2)->bool:return r.intersects(column_rect))
 	var hovered_any:=false
 	var log_open:=is_instance_valid(log_panel) and log_panel.visible
-	for n in rows.duplicate():
-		var view_node:Variant=_views.get(int(n.id))
+	for n in _ordered():
+		var is_standing:=bool(n.get("standing",false))
+		var view_node:Variant=_views.get(String(n.key) if is_standing else int(n.id))
 		if not view_node is Control or not is_instance_valid(view_node):continue
 		var row:Control=view_node
 		row.custom_minimum_size.x=width;row.size.x=width
-		row.size.y=row.get_combined_minimum_size().y
+		row.size.y=maxf(ROW_HEIGHT,row.get_combined_minimum_size().y)
 		var fits:=not held and not log_open and y+row.size.y<=bottom
 		row.visible=fits
 		if fits:
@@ -378,9 +494,38 @@ func _layout(delta:float)->void:
 			var hovered:=row.get_global_rect().has_point(row.get_global_mouse_position())
 			hovered_any=hovered_any or hovered
 			# A notable notice's clock runs only while it is seen and not pointed at.
-			if String(n.tier)!="urgent" and not hovered:
+			if not is_standing and String(n.tier)!="urgent" and not hovered:
 				n["left"]=float(n.get("left",Model.NOTABLE_SECONDS))-delta
 				if float(n.left)<=0.0:dismiss(n)
+
+
+## The column from the top: what needs the god (threats first, then by days
+## left: standing_notices.gd sorted), urgent news, what only wants seeing
+## to, then the day's news.
+func _ordered()->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	for n in standing:
+		if Standing.needs(n):out.append(n)
+	for n in rows:
+		if String(n.tier)=="urgent":out.append(n)
+	for n in standing:
+		if not Standing.needs(n):out.append(n)
+	for n in rows:
+		if String(n.tier)!="urgent":out.append(n)
+	return out
+
+
+## Everything in the column that needs the god: rows that stand red or wait
+## on an answer, and urgent news. The header's count is their number and
+## each rail button's badge is its own share of them (the HUD's
+## set_notice_counts), so the two always add up.
+func needing()->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	for n in standing:
+		if Standing.needs(n):out.append(n)
+	for n in rows:
+		if String(n.tier)=="urgent":out.append(n)
+	return out
 
 
 func _blocked_rects(view:Vector2)->Array[Rect2]:
@@ -389,6 +534,8 @@ func _blocked_rects(view:Vector2)->Array[Rect2]:
 	for sheet_name in ["dock","detail_dock"]:
 		var sheet:Variant=hud.get(sheet_name) if sheet_name in hud else null
 		if sheet is Control and (sheet as Control).is_visible_in_tree():out.append((sheet as Control).get_global_rect())
+	# The War screen is the page for what is wrong with the fighters (its
+	# column's own bars say it), and its map must stay clear: the notices wait.
 	if hud.has_method("war_open") and bool(hud.call("war_open")) and hud.has_method("_war_layout"):
 		var column_width:=float(hud.call("_war_layout","COLUMN_WIDTH"))
 		out.append(Rect2(view.x-T.EDGE_MARGIN-column_width,56.0,column_width,view.y))
@@ -396,8 +543,16 @@ func _blocked_rects(view:Vector2)->Array[Rect2]:
 
 
 func _refresh_pill()->void:
-	var urgent:=rows.filter(func(n:Dictionary)->bool:return String(n.tier)=="urgent").size()
-	pill.text="Notices · %d" % Model.history.size() if urgent==0 else "Notices · %d need%s you" % [urgent,"s" if urgent==1 else ""]
+	var need:=needing()
+	var urgent:=need.size()
+	var counts:Dictionary={}
+	for n in need:
+		var rail:=Standing.rail_of(n)
+		if rail!="":counts[rail]=int(counts.get(rail,0))+1
+	if str(counts)!=_needing:
+		_needing=str(counts)
+		if is_instance_valid(hud) and hud.has_method("set_notice_counts"):hud.call("set_notice_counts",counts)
+	pill.text=("Notices · %d" % Model.history.size() if not Model.history.is_empty() else "Notices") if urgent==0 else "Notices · %d need%s you" % [urgent,"s" if urgent==1 else ""]
 	if is_instance_valid(log_panel) and log_panel.visible:_fill_log()
 
 
@@ -465,3 +620,8 @@ func _fill_log()->void:
 ## For tests: the notices on screen, in order.
 func shown()->Array[Dictionary]:
 	return rows.duplicate()
+
+
+## For tests: the whole column from the top, standing rows included.
+func column_rows()->Array[Dictionary]:
+	return _ordered()

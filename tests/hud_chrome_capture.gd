@@ -70,7 +70,7 @@ func _ready()->void:
 	hud._update_kpi("food","0 days","shortage −99,999 days",T.RED,"")
 	hud._layout();await _frames(3)
 	if hud.kpi_strip.get_global_rect()!=old_rect:failures.append("warning resized the status strip")
-	hud.rail_buttons.overview.grab_focus()
+	hud.rail_buttons.settlement.grab_focus()
 	await _capture(dir+"%s-warning-focus.png" % ["dark" if dark else "light"])
 	await _capture(dir+"%s-closed.png" % ["dark" if dark else "light"])
 	print("HUD_CHROME_RESULT ",JSON.stringify({"failures":failures,"palette":T.color_mode}))

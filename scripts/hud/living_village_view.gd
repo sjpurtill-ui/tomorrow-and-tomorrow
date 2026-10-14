@@ -165,7 +165,8 @@ func _refresh_state() -> void:
 	_update_words()
 
 func _update_words() -> void:
-	caption.text = "%s · live from the map" % String(state.get("name", "Our village"))
+	# The page's title already names the town; the picture needs no second name.
+	caption.visible = false
 	change_line.text = Record.changes(GameState.settlement_portrait_history, state)
 
 func _ready_to_record() -> bool:

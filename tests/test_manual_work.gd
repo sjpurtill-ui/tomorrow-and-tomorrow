@@ -376,7 +376,7 @@ func test_back_to_our_leaders_restores_delegation_and_the_chips()->void:
 	assert_bool(bool(block.ruler_sets_work)).is_true()
 	var page:VBoxContainer=auto_free(TownPage.new());page.size=Vector2(940,1200);add_child(page);page.setup(block)
 	assert_object(page.find_child("AskForHands",true,false)).is_null()
-	assert_str("\n".join(_texts(page))).contains("You set the daily work yourself.").contains("You set the daily work for all our towns.")
+	assert_str("\n".join(_texts(page))).contains("You set the daily work for all our towns.").contains("You set the daily work for all our towns.")
 	(page.find_child("SetTheWork",true,false) as Button).pressed.emit()
 	assert_array(hud.opened).contains([["overview",0]])
 	(page.find_child("BackToLeaders",true,false) as Button).pressed.emit()

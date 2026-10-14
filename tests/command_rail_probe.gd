@@ -54,66 +54,6 @@ func _ready()->void:
 	terrain._set_game_speed(0.0)
 	hud.refresh()
 
-	# Decision queue: bounded to three cards regardless of inbox size.
-	for index in 6:
-		GameState.council_inbox.append({
-			"id":"probe_item_%d" % index,"advisor":"Probe Advisor","office":"Probe Office",
-			"topic":"probe","act":{"type":"warn"},"text":"Probe decision %d" % index,
-			"urgency":0.8,"day":1,"status":"unread","severity":"warning",
-			"responses":[{"label":"Act","effect":"probe"}]
-		})
-	hud._queue_signature=""
-	hud.refresh()
-	await get_tree().process_frame
-	var queue:Control=hud.find_child("DecisionQueue",true,false)
-	_expect(queue!=null,"decision queue missing")
-	var cards:=0
-	if queue:
-		for child in queue.get_children():
-			if child is PanelContainer: cards+=1
-		_expect(cards<=3,"decision queue exceeded three cards: %d" % cards)
-		_expect(cards>0,"decision queue showed no cards despite pending decisions")
-		_expect(viewport_rect.encloses((queue as Control).get_global_rect()),"decision queue outside viewport")
-
-	# Dismissal removes a card but keeps the inbox record.
-	var inbox_before:int=GameState.council_inbox.size()
-	hud.dismiss_alert("probe_item_0")
-	await get_tree().process_frame
-	_expect(GameState.council_inbox.size()==inbox_before,"dismiss deleted a council record")
-	_expect(hud.dismissed_alert_ids.has("probe_item_0"),"dismissed id was not tracked")
-
-	# Dismissing down to an empty queue must actually clear the rendered cards
-	# (regression: the stale-signature sentinel collided with the empty state).
-	for item_variant in GameState.council_inbox.duplicate():
-		hud.dismiss_alert(String((item_variant as Dictionary).get("id","")))
-	await get_tree().process_frame
-	var stale_cards:=0
-	for child in queue.get_children():
-		if child is PanelContainer: stale_cards+=1
-	_expect(stale_cards==0,"dismissing every decision left %d stale cards rendered" % stale_cards)
-
-	# A deferred food condition merges silently instead of resurfacing…
-	# Named appointment candidates require a founded settlement in the current government model.
-	GameState.settlement_site_committed=true
-	if "Hearth Circle" not in GameState.settlement_completed: GameState.settlement_completed.append("Hearth Circle")
-	SettlementModel.ensure_founded()
-	GovernmentPeopleSystem.initialize()
-	terrain._generate_leader_candidates("Steward")
-	AdvisorSystem.appoint(String(terrain.leader_candidates[0].name),"Steward")
-	var food_item:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores fail soon.","domain":"food","severity":"warning"})
-	var food_id:=String(food_item.get("id",""))
-	hud.refresh()
-	await get_tree().process_frame
-	hud.dismiss_alert(food_id)
-	var remerge:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores still fail soon.","domain":"food","severity":"warning"})
-	_expect(remerge.is_empty(),"a deferred condition resurfaced without escalating")
-	_expect(AdvisorSystem.council_decision_items(9,false).is_empty() or String((AdvisorSystem.council_decision_items(9,false)[0] as Dictionary).get("id",""))!=food_id,"deferred decision stayed in the queue")
-	# …but escalation reopens it.
-	var escalated:Dictionary=AdvisorSystem.generate_consequence_item({"condition_id":"probe_food_shortage","title":"Shortage Forecast","description":"Stores fail imminently.","domain":"food","severity":"critical"})
-	_expect(not escalated.is_empty() and String(escalated.get("status",""))=="unread","an escalated condition did not reopen the deferred decision")
-	_expect(AdvisorSystem.merged_report_items(8).size()>=0,"merged report accessor failed")
-	AdvisorSystem.defer_council_item(food_id)
-
 	# Toolbar sits inside the viewport and recenters when a section opens.
 	var toolbar:Control=hud.find_child("MapToolbar",true,false)
 	_expect(toolbar!=null,"map toolbar missing")

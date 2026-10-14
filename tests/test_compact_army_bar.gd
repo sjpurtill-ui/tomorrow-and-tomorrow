@@ -40,7 +40,7 @@ func test_idle_disclosure_opens_existing_cards_and_collapses_without_a_lingering
 	assert_bool(bar.expanded()).is_false()
 	assert_float(bar.bar_height()).is_equal(30.0)
 	assert_float(bar.disclosure.size.y).is_equal(30.0)
-	assert_str(bar.disclosure.text).contains("Armies · 2")
+	assert_str(bar.disclosure.text).contains("Armies in the field · 2")
 	assert_int(bar.strip.get_child_count()).is_equal(0)
 	bar.toggle_disclosure();bar.place(Rect2(10,10,500,bar.bar_height()))
 	assert_bool(bar.expanded()).is_true()
@@ -82,7 +82,7 @@ func test_count_and_plan_ink_follow_only_the_selected_band_or_general()->void:
 	bar.fixture.assign([{"id":"general:fith","kind":"group","army_id":1,"members":[1,2],"member_cards":[first,second],
 		"title":"Fith","short":"Fith","men":200,"general":{},"position":Vector2.INF},_card(3)])
 	bar.refresh()
-	assert_str(bar.disclosure.text).contains("Armies · 3")
+	assert_str(bar.disclosure.text).contains("Armies in the field · 3")
 	var command:=CommandStub.new()
 	assert_array(bar.selected_plan_zones(command)).is_empty()
 	bar.select_card(bar.fixture[0])

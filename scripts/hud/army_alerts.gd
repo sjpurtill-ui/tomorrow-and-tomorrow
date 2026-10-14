@@ -1,49 +1,26 @@
-extends HBoxContainer
-## HOI4's ALERTS, for our fighters: a row of small marks under the clock, at
-## the map's top left. Each mark is a glyph on paper with a count beside it:
-## red when men are starving, ready to break, or a feud is hot; amber for
-## what wants seeing to (gear short, a band under half its men). A pointer
-## over a mark lists who and how, with the same numbers the army bar and the
-## Warriors screen show. Only what is known at home counts (a band far off
-## counts by its runner's last word, as on the army bar). War itself is told
-## here too, instead of stopping time: a band coming at us, a battle being
-## fought, a battle just fought. A click opens the War screen. Nothing shows
-## while nothing is wrong.
+extends RefCounted
+## WHAT IS WRONG WITH OUR FIGHTERS, AND WAR NEWS THAT STANDS (HOI4's alerts):
+## the conditions the one notice stack keeps on screen while they last
+## (hud/standing_notices.gd turns each into a row at the top right). Red when
+## men are starving, ready to break, or a feud is hot; amber for what wants
+## seeing to (gear short, a band under half its men). Every line carries the
+## same numbers the army bar and the War screen show. Only what is known at
+## home counts (a band far off counts by its runner's last word, as on the
+## army bar). War itself is told here too, instead of stopping time: a band
+## coming at us, a battle being fought, a battle just fought. Nothing is
+## listed while nothing is wrong.
 
-const T:=preload("res://scripts/hud/hud_tokens.gd")
-const Icons:=preload("res://scripts/resource_icons.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 const Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
 const Rations:=preload("res://scripts/field_rations.gd")
-const REFRESH_SECONDS:=1.0
 ## A band under this share of its full strength is under strength.
 const UNDER_STRENGTH:=0.5
 ## A band's will under this is ready to break: within a tenth of the one
 ## break line (army_lines.gd).
 const LOW_WILL:=preload("res://scripts/hud/army_bar_model.gd").NEAR_BREAK
-## A battle stays under the clock this many days after it is fought.
+## A battle just fought stays in the stack this many days after it is fought.
 const RECENT_DAYS:=10
-const RED:=Color("#a8463a")
-const AMBER:=Color("#a8782a")
-
-var clock:=REFRESH_SECONDS
-var signature:=""
-## For tests: the alerts last shown.
-var shown:Array[Dictionary]=[]
-## Bands hungry or ready to break: the red badge on the rail's Warriors
-## button, which shows even while a dock covers this row (-1: not yet set).
-var urgent:=-1
-
-
-## What will not wait: a band coming at us, a battle being fought, bands
-## hungry in the field or ready to break. Hot feuds are a state of things,
-## not an interruption.
-static func urgent_count(list:Array)->int:
-	var count:=0
-	for alert:Dictionary in list:
-		if String(alert.id) in ["attack","battle","hungry","will"] and String(alert.tone)=="red": count+=int(alert.count)
-	return count
 
 
 ## A band coming at us: "The Reedbank raiders toward Ashford · about 40 ·
@@ -54,6 +31,13 @@ static func threat_line(threat:Dictionary,today:int)->String:
 	var days:=int(threat.get("deadline_day",today))-today
 	var size:=int(threat.get("estimated_strength",0))
 	return "%s toward %s%s · %s" % [String(threat.get("source_name","A band we cannot name")),place,(" · about %d" % size) if size>0 else "",("here in %s" % Ledger.span_words(days)) if days>0 else "here now"]
+
+
+## The same band in a few words, for a notice row: "The Reedbank raiders · ~40 · 6 days".
+static func threat_fact(threat:Dictionary,today:int)->String:
+	var days:=int(threat.get("deadline_day",today))-today
+	var size:=int(threat.get("estimated_strength",0))
+	return "%s%s · %s" % [String(threat.get("source_name","A band we cannot name")),(" · ~%s" % preload("res://scripts/hud/era_words.gd").grouped(size)) if size>0 else "",Ledger.span_words(days) if days>0 else "here now"]
 
 
 ## A battle being fought: "At Ashford · day 3 · 34 of ours against 40".
@@ -114,13 +98,20 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 		if String(e.kind)!="ended" and bool(e.get("hot",false)): hot.append("%s · %s" % [String(e.name),Ledger.subtitle(e)])
 	# War comes to us, and battles: told here; nothing stops time for them.
 	var coming:=PackedStringArray(); var fighting:=PackedStringArray(); var fought:=PackedStringArray()
+	# The soonest band coming, in a few words, and its days left (for the row and its place in the column).
+	var coming_fact:="";var coming_days:=1000000
 	if mc!=null and WorldSimulation.state!=null:
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var threat:Dictionary=mc.active_threat
-		if not threat.is_empty() and String(threat.get("campaign_mode","defensive"))!="offensive": coming.append(threat_line(threat,today))
+		var marching:Array=[]
+		if not threat.is_empty() and String(threat.get("campaign_mode","defensive"))!="offensive": marching.append(threat)
 		# Their bands the war council has seen marching on a town of ours.
 		var council:GDScript=load("res://scripts/war_council.gd")
-		for band:Dictionary in council.call("incoming"): coming.append(threat_line(band,today))
+		for band:Dictionary in council.call("incoming"): marching.append(band)
+		for band:Dictionary in marching:
+			coming.append(threat_line(band,today))
+			var left:=maxi(0,int(band.get("deadline_day",today))-today)
+			if left<coming_days: coming_days=left;coming_fact=threat_fact(band,today)
 		for engagement_variant in mc.own_engagements.values():
 			if engagement_variant is Dictionary and not (engagement_variant as Dictionary).is_empty(): fighting.append(battle_line(engagement_variant))
 		# Our home besieged: told while it lasts (it is lost only if the ruler yields it).
@@ -133,7 +124,7 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 			if today-int((record_variant as Dictionary).get("day",-100000))>RECENT_DAYS: break
 			fought.append(fought_line(record_variant))
 	var out:Array[Dictionary]=[]
-	if not coming.is_empty(): out.append({"id":"attack","war":"band","tone":"red","count":coming.size(),"title":"Coming at us","lines":coming,"page":"wars"})
+	if not coming.is_empty(): out.append({"id":"attack","war":"band","tone":"red","count":coming.size(),"title":"Coming at us","lines":coming,"page":"wars","fact":coming_fact,"days":coming_days})
 	if not fighting.is_empty(): out.append({"id":"battle","war":"feud","tone":"red","count":fighting.size(),"title":"Fighting now","lines":fighting,"page":"wars"})
 	if not hungry.is_empty(): out.append({"id":"hungry","logistics":"hungry","tone":"red","count":hungry.size(),"title":"Hungry in the field","lines":hungry,"page":"support"})
 	if not breaking.is_empty(): out.append({"id":"will","glyph":"will","tone":"red" if broken else "amber","count":breaking.size(),"title":"Ready to break","lines":breaking,"page":"forces"})
@@ -167,101 +158,3 @@ static func unpaid_alert()->Dictionary:
 	lines.append("Will down %d points" % roundi(float(last.get("will_lost",0.0))*100.0))
 	if int(last.get("deserted",0))>0: lines.append("%d went home" % int(last.deserted))
 	return {"id":"unpaid","glyph":"will","tone":"red" if months>=3 else "amber","count":months,"title":"Soldiers unpaid %d %s" % [months,"month" if months==1 else "months"],"lines":lines,"page":"forces","dock":["economy",2]}
-
-
-## The pointer's words: the title, then one line per band or people, then
-## where a click goes.
-static func tip(alert:Dictionary)->String:
-	var page:="the Wealth page" if alert.has("dock") else "the War screen"
-	return "%s\n%s\nClick to open %s." % [String(alert.title),"\n".join(alert.lines as PackedStringArray),page]
-
-
-func _ready()->void:
-	name="ArmyAlerts"
-	mouse_filter=Control.MOUSE_FILTER_IGNORE
-	add_theme_constant_override("separation",6)
-
-
-func _process(delta:float)->void:
-	clock+=delta
-	if clock<REFRESH_SECONDS: return
-	clock=0.0
-	refresh()
-
-
-func refresh()->void:
-	var next:=alerts()
-	var pressing:=urgent_count(next)
-	if pressing!=urgent:
-		urgent=pressing
-		var hud:=get_parent()
-		if hud!=null and hud.has_method("_set_badge"): hud.call("_set_badge","military",str(pressing) if pressing>0 else "",T.RED)
-	var words:=str(next)
-	if words==signature: return
-	signature=words
-	shown=next
-	for child in get_children(): remove_child(child);child.queue_free()
-	for alert:Dictionary in next:
-		var mark:=AlertMark.new()
-		mark.setup(alert)
-		add_child(mark)
-
-
-## One alert: a glyph on a paper tile rimmed in its tone, its count on a tab.
-class AlertMark extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	const Icons:=preload("res://scripts/resource_icons.gd")
-	const RED:=Color("#a8463a")
-	const AMBER:=Color("#a8782a")
-	var alert:Dictionary={}
-	var texture:Texture2D
-	var hover:=false
-
-	func setup(next:Dictionary)->void:
-		alert=next
-		var tone:=RED if String(next.tone)=="red" else AMBER
-		if next.has("war"): texture=Icons.war_texture(String(next.war),tone,64)
-		elif next.has("logistics"): texture=Icons.logistics_texture(String(next.logistics),tone.darkened(0.15),64)
-		elif next.has("resource"): texture=Icons.texture_for(String(next.resource))
-		else: texture=Icons.command_texture(String(next.glyph),tone.darkened(0.15),64)
-		name="Alert_%s" % String(next.id)
-		tooltip_text=String(next.tip) if next.has("tip") else preload("res://scripts/hud/army_alerts.gd").tip(next)
-		custom_minimum_size=Vector2(_width(),40)
-		mouse_filter=Control.MOUSE_FILTER_STOP
-		mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-		mouse_entered.connect(func()->void: hover=true;queue_redraw())
-		mouse_exited.connect(func()->void: hover=false;queue_redraw())
-
-	func _width()->float:
-		var text:=str(int(alert.get("count",0)))
-		return 40.0+T.font("ui_strong").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x+10.0
-
-	func _gui_input(event:InputEvent)->void:
-		if String(alert.get("page",""))=="trade" and _open_trade(event): return
-		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
-			var dock:Array=alert.get("dock",[]) if alert.get("dock") is Array else []
-			var hud:Variant=get_tree().current_scene.get("hud") if dock.size()==2 and get_tree().current_scene!=null else null
-			if hud!=null and hud.has_method("open_dock"): hud.call("open_dock",String(dock[0]),int(dock[1]))
-			else: MilitaryCampaign.open_roster("army",false,String(alert.get("page","forces")))
-			accept_event()
-
-	## Trade news opens the Trade page (the economy dock's fourth tab).
-	func _open_trade(event:InputEvent)->bool:
-		var click:=event as InputEventMouseButton
-		if click==null or not click.pressed or click.button_index!=MOUSE_BUTTON_LEFT: return false
-		var hud:Node=get_parent().get_parent() if get_parent()!=null else null
-		if hud==null or not hud.has_method("open_dock"): return false
-		hud.call("open_dock","economy",3)
-		accept_event()
-		return true
-
-	func _draw()->void:
-		var tone:=RED if String(alert.get("tone",""))=="red" else AMBER
-		var box:=Rect2(Vector2.ZERO,size)
-		draw_rect(Rect2(box.position+Vector2(0,2),box.size),Color(0,0,0,0.18))
-		draw_rect(box,T.PAPER_RAISED if not hover else T.PAPER)
-		draw_rect(Rect2(box.position,Vector2(4,box.size.y)),tone)
-		draw_rect(box,Color(tone,0.9),false,1.5)
-		if texture: draw_texture_rect(texture,Rect2(Vector2(8,6),Vector2(28,28)),false)
-		var font:=T.font("ui_strong")
-		draw_string(font,Vector2(40,26),str(int(alert.get("count",0))),HORIZONTAL_ALIGNMENT_LEFT,-1,15,tone.darkened(0.25))

@@ -18,15 +18,18 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
 
 ## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"towns":44,"people":72,"fighters":66,"stores":68,"crafts":60,"lore":56,"lives":74,"wealth":64,"walls":60,"between":88,"envoys":70}
-const NAME_MIN:=118
-const GAP:=3
+const WIDTHS:={"people":230,"fighters":230,"between":104,"seen":150}
+const NAME_MIN:=150
+const GAP:=10
 ## The sheet's paper margin, each side (px).
 const PAD:=14
 ## On a narrow page these columns give way, first to last.
-const SHED:=["crafts","walls","lore","lives","wealth","towns","envoys"]
-## Figures right-aligned, as a ledger keeps them.
-const FIGURES:=["towns","people","fighters","stores","crafts","lore","lives","wealth","walls"]
+const SHED:=["seen","between"]
+## The two counts drawn on the page, each a bar against ours.
+const FIGURES:=["people","fighters"]
+## The rest of what we know of a people is said in its row's pointer, and
+## town by town when the row is opened.
+const IN_POINTER:=["towns","stores","crafts","lore","lives","wealth","walls"]
 ## The opened row's town table: [part, title, width].
 const TOWN_COLUMNS:=[["people","How many",72],["fighters","Fighters",66],["stores","Stores",68],["walls","Walls",60]]
 
@@ -98,9 +101,8 @@ func shape_of()->String:
 	for row:Dictionary in _rows():
 		var cells:Dictionary=row.get("cells",{})
 		var line:Array=[String(row.civ_id),bool(row.us),String((row.get("fresh",{}) as Dictionary).get("source",""))!=""]
-		for id:String in FIGURES:line.append(_ranked(cells.get(id,{}),id))
 		var between:Dictionary=cells.get("between",{})
-		line.append_array([String(between.get("text",""))!="",String(between.get("stance",""))!="",String((cells.get("envoys",{}) as Dictionary).get("text",""))!=""])
+		line.append_array([String(between.get("text",""))!="",String(between.get("stance",""))!=""])
 		if String(view.open)==String(row.civ_id):line.append([row.get("towns",[]),row.get("bands",{}),row.get("contact",[])])
 		page.append(line)
 	return var_to_str(page)
@@ -119,7 +121,6 @@ func _build()->void:
 	var sheet:=PanelContainer.new();sheet.name="PeoplesSheet";sheet.add_theme_stylebox_override("panel",sheet_style())
 	sheet.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fit.add_child(sheet)
 	var stack:=VBoxContainer.new();stack.name="Ledger";stack.add_theme_constant_override("separation",6);sheet.add_child(stack)
-	stack.add_child(_heading())
 	stack.add_child(_header_row())
 	stack.add_child(_rule(T.RULE_STRONG))
 	var rows:=VBoxContainer.new();rows.name="Rows";rows.add_theme_constant_override("separation",0);stack.add_child(rows)
@@ -147,26 +148,15 @@ func _write()->void:
 
 # --- The heading and the column titles -------------------------------------
 
-func _heading()->Control:
-	var row:=HBoxContainer.new();row.name="Heading";row.add_theme_constant_override("separation",8)
-	var title:=T.make_label("Peoples we know",12,T.GOLD_TEXT,0.06);title.name="Title";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(title)
-	var sorted:=String(_titles().get(String(view.sort),"")).to_lower()
-	var note:=_label("as we know it · by %s" % sorted,12,T.INK_MUTED);note.name="Sorted"
-	note.add_theme_font_override("font",T.voice_font(true));note.add_theme_font_size_override("font_size",13)
-	note.tooltip_text="Our estimates of them, from what came home; older word is less sure. Our own row is our own count."
-	row.add_child(note)
-	return row
-
 func _header_row()->Control:
 	var row:=HBoxContainer.new();row.name="Header";row.add_theme_constant_override("separation",GAP)
 	var titles:=_titles()
-	for column:Dictionary in Model.COLUMNS:
-		var id:=String(column.id)
+	for id:String in ["name"]+FIGURES+["between"]:
 		var active:=String(view.sort)==id
 		var button:=Button.new();button.name="Sort_"+id;button.focus_mode=Control.FOCUS_NONE
 		button.text=String(titles.get(id,id))+((" ↑" if bool(view.flip) else " ↓") if active else "")
 		button.clip_text=true;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		button.alignment=HORIZONTAL_ALIGNMENT_RIGHT if id in FIGURES else HORIZONTAL_ALIGNMENT_LEFT
+		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text="%s Click to sort by it." % String(Model.MEANINGS.get(id,""))
 		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",12)
 		button.add_theme_color_override("font_color",T.INK if active else T.INK_MUTED)
@@ -179,6 +169,9 @@ func _header_row()->Control:
 		else:button.custom_minimum_size.x=float(WIDTHS.get(id,60))
 		button.pressed.connect(sort_by.bind(id))
 		row.add_child(button);_part(id,button)
+	var seen:=_label("Last seen",12,T.INK_MUTED,true);seen.name="Head_seen";seen.custom_minimum_size.x=float(WIDTHS.seen)
+	seen.tooltip_text="How old our newest word of them is, and who brought it."
+	row.add_child(seen);_part("seen",seen)
 	return row
 
 static func _cell_style(bg:Color)->StyleBoxFlat:
@@ -205,10 +198,11 @@ func _row(row:Dictionary)->Control:
 	var refs:={}
 	_refs[civ_id]=refs
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",GAP);panel.add_child(line)
+	refs["panel"]=panel
 	line.add_child(_name_cell(row,refs))
 	for id:String in FIGURES:line.add_child(_figure_cell(row,id,refs))
 	line.add_child(_between_cell(row,refs))
-	line.add_child(_envoys_cell(row,refs))
+	line.add_child(_seen_cell(row,refs))
 	return panel
 
 static func _clicked(event:InputEvent)->bool:
@@ -224,20 +218,25 @@ func _row_style(us:bool,open:bool,hover:bool)->StyleBoxFlat:
 		style.border_color=T.GOLD;style.border_width_left=2
 	return style
 
-## The people's name; under it how old our newest word of them is (with its
-## mark) and who brought it.
+## The people's name.
 func _name_cell(row:Dictionary,refs:Dictionary)->Control:
-	var cell:=VBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",0)
+	var cell:=HBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",6)
 	cell.custom_minimum_size.x=NAME_MIN;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);cell.add_child(top)
-	refs["name"]=_fitted(_label("",14,T.INK,true),"Name",true);top.add_child(refs.name)
-	if bool(row.us):top.add_child(_tag("us"))
+	refs["name"]=_fitted(_label("",15,T.INK,true),"Name",true);cell.add_child(refs.name)
+	if bool(row.us):cell.add_child(_tag("us"))
+	_part("name",cell)
+	return cell
+
+## How old our newest word of them is (with its mark) and who brought it.
+func _seen_cell(row:Dictionary,refs:Dictionary)->Control:
+	var cell:=VBoxContainer.new();cell.name="Cell_seen";cell.add_theme_constant_override("separation",0)
+	cell.custom_minimum_size.x=float(WIDTHS.seen);cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var when:=HBoxContainer.new();when.name="Fresh";when.add_theme_constant_override("separation",4);cell.add_child(when)
 	var mark:=FreshMark.new();mark.name="Mark";when.add_child(mark);refs["mark"]=mark
 	refs["age"]=_fitted(_label("",12,T.INK_MUTED),"Age",true);when.add_child(refs.age)
 	if String((row.get("fresh",{}) as Dictionary).get("source",""))!="":
 		refs["source"]=_fitted(_label("",12,T.INK_MUTED),"Source");cell.add_child(refs.source)
-	_part("name",cell)
+	_part("seen",cell)
 	return cell
 
 func _tag(text:String)->Control:
@@ -247,28 +246,18 @@ func _tag(text:String)->Control:
 	pill.add_child(_label(text,12,T.GOLD_TEXT,true))
 	return pill
 
-## A figure: the range as we know it, and under the headline figures (and
-## the one the page is sorted by) its rank among the peoples.
+## A count as a bar against ours: solid for what we are sure of, a faded
+## band out to the most it could be, a tick where our own count stands; the
+## figure beside it. Nothing is drawn or written for what we do not know.
 func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
-	var cell:=VBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",0)
-	cell.custom_minimum_size.x=float(WIDTHS.get(id,60))
-	var value:=_fitted(_label("",13,T.INK),"Value");value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	var cell:=HBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
+	cell.custom_minimum_size.x=float(WIDTHS.get(id,60));cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(96,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	cell.add_child(bar);refs["bar_"+id]=bar
+	var value:=_fitted(_label("",13,T.INK),"Value",true)
 	cell.add_child(value);refs["value_"+id]=value
-	if _ranked(row.cells.get(id,{}),id):
-		var rank:=_fitted(_label("",12,T.INK_MUTED),"Rank");rank.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		cell.add_child(rank);refs["rank_"+id]=rank
 	_part(id,cell)
 	return cell
-
-## Whether a figure shows its rank: the headline figures, and the column the
-## page is sorted by, once the people has a place in it.
-func _ranked(c:Dictionary,id:String)->bool:
-	return c.has("rank") and (_headline(id) or String(view.sort)==id)
-
-static func _headline(id:String)->bool:
-	for column:Dictionary in Model.COLUMNS:
-		if String(column.id)==id:return bool(column.get("headline",false))
-	return false
 
 ## Peace, feud or war; their ruler's trust; our stance on the War screen.
 func _between_cell(row:Dictionary,refs:Dictionary)->Control:
@@ -281,15 +270,6 @@ func _between_cell(row:Dictionary,refs:Dictionary)->Control:
 		if String(c.get("stance",""))!="":
 			refs["stance"]=_fitted(_label("",12,T.GOLD_TEXT),"Stance");cell.add_child(refs.stance)
 	_part("between",cell)
-	return cell
-
-func _envoys_cell(row:Dictionary,refs:Dictionary)->Control:
-	var c:Dictionary=row.cells.get("envoys",{})
-	var cell:=VBoxContainer.new();cell.name="Cell_envoys";cell.add_theme_constant_override("separation",0)
-	cell.custom_minimum_size.x=float(WIDTHS.envoys)
-	if String(c.get("text",""))!="":
-		refs["envoys"]=_fitted(_label("",13,T.INK),"Envoys");cell.add_child(refs.envoys)
-	_part("envoys",cell)
 	return cell
 
 ## A row's words and figures, written into its labels.
@@ -309,14 +289,46 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 	for id:String in FIGURES:
 		var c:Dictionary=cells.get(id,{})
 		var known:=bool(c.get("known",false))
-		_put(refs.get("value_"+id),String(c.get("text","?")),"%s: %s. %s" % [String(titles.get(id,id)),String(c.get("text","?")),String(c.get("tip",""))],T.INK if known else T.INK_MUTED)
-		_put(refs.get("rank_"+id),String(c.get("rank","")),String(c.get("rank_tip","")))
+		# Their rank among the peoples is in the pointer; our own row is never compared with itself.
+		var rank:=String(c.get("rank_tip","")) if not bool(row.us) else ""
+		_put(refs.get("value_"+id),String(c.get("text","")) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
+		var bar:RangeBar=refs.get("bar_"+id)
+		if bar!=null:
+			bar.low=float(c.get("low",0.0)) if known else -1.0
+			bar.high=float(c.get("high",0.0)) if known else -1.0
+			bar.top=_top(id);bar.ours=_ours(id)
+			bar.queue_redraw()
+	# Everything else we know of them, in the row's pointer.
+	var more:PackedStringArray=[]
+	for id:String in IN_POINTER:
+		var c:Dictionary=cells.get(id,{})
+		if bool(c.get("known",false)) and String(c.get("text",""))!="":more.append("%s: %s" % [String(titles.get(id,id)),String(c.text)])
+	var envoy_words:=String((cells.get("envoys",{}) as Dictionary).get("text",""))
+	if envoy_words!="":more.append("%s: %s" % [String(titles.get("envoys","Envoys")),envoy_words])
+	var panel:Control=refs.get("panel")
+	if panel!=null:
+		var open:=String(view.open)==String(row.civ_id)
+		panel.tooltip_text="%s\n%s" % [" · ".join(more) if not more.is_empty() else "We know little more of them yet.",("Click to hide %s." if open else "Click to show %s.") % ("our towns" if bool(row.us) else "the towns we know of theirs")]
 	var between:Dictionary=cells.get("between",{})
 	_put(refs.get("relation"),String(between.get("text","")),String(between.get("tip","")),_tone(String(between.get("tone","ink"))))
 	_put(refs.get("trust"),String(between.get("sub","")),String(between.get("tip","")))
 	_put(refs.get("stance"),"→ "+String(between.get("stance","")),"Our stance toward them on the War screen.")
-	var envoys:Dictionary=cells.get("envoys",{})
-	_put(refs.get("envoys"),String(envoys.get("text","")),String(envoys.get("tip","")),_tone(String(envoys.get("tone","ink"))))
+
+
+## The most any people may have in a column (the bars' full width), and our own count.
+func _top(id:String)->float:
+	var top:=1.0
+	for row:Dictionary in model.get("rows",[]):
+		var c:Dictionary=(row.get("cells",{}) as Dictionary).get(id,{})
+		if bool(c.get("known",false)):top=maxf(top,float(c.get("high",0.0)))
+	return top
+
+func _ours(id:String)->float:
+	for row:Dictionary in model.get("rows",[]):
+		if bool(row.us):
+			var c:Dictionary=(row.get("cells",{}) as Dictionary).get(id,{})
+			return float(c.get("high",0.0)) if bool(c.get("known",false)) else -1.0
+	return -1.0
 
 static func _contact_line(contact:Array)->String:
 	var said:=" · ".join(PackedStringArray(contact))
@@ -477,3 +489,27 @@ class FreshMark extends Control:
 			"ours":draw_colored_polygon(PackedVector2Array([c+Vector2(0,-r),c+Vector2(r,0),c+Vector2(0,r),c+Vector2(-r,0)]),T.GOLD)
 			_:
 				for i in 6:draw_arc(c,r,TAU*float(i)/6.0,TAU*(float(i)+0.5)/6.0,4,T.INK_MUTED,1.2,true)
+
+
+## One count against the largest known: ink for the least it can be, a faded
+## band out to the most, a tick at our own count (not on our own row).
+class RangeBar extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var low:=-1.0
+	var high:=-1.0
+	var top:=1.0
+	var ours:=-1.0
+	var us:=false
+	func _init()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE
+	func _draw()->void:
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.08))
+		if high<0.0 or top<=0.0:return
+		var ink:=T.GOLD if us else T.INK
+		var sure:=size.x*clampf(low/top,0.0,1.0)
+		var most:=size.x*clampf(high/top,0.0,1.0)
+		if most>sure:draw_rect(Rect2(sure,0,most-sure,size.y),Color(ink,0.28))
+		draw_rect(Rect2(0,0,maxf(sure,2.0 if high>0.0 else 0.0),size.y),ink)
+		if not us and ours>=0.0:
+			var x:=clampf(size.x*ours/top,1.0,size.x-1.0)
+			draw_line(Vector2(x,-3),Vector2(x,size.y+3),T.GOLD,2.0)

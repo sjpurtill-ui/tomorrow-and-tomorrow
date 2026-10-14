@@ -48,7 +48,7 @@ func setup(block:Dictionary)->void:
 			warned.name="SplitWarning";warned.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(warned)
 			_page_refs["warning"]=warned
 		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);add_child(yours)
-		var said:=T.make_label("You set the daily work yourself.",13,T.BODY);said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;yours.add_child(said)
+		# The leader's line above already says who sets the work: only the two ways out stand here.
 		var fix:Variant=block.get("on_food_fix")
 		if fix is Callable and (fix as Callable).is_valid() and String(warning.get("fix_text",""))!="":
 			var mend:=_button(yours,String(warning.fix_text),fix,"Every town gets as many more on getting food, each taken from the task with the most people.");mend.name="FoodFix"
@@ -75,6 +75,8 @@ func setup(block:Dictionary)->void:
 	if not works.is_empty():_works(works)
 	_rule(self)
 	var footer:=HFlowContainer.new();footer.name="Reports";footer.add_theme_constant_override("h_separation",8);add_child(footer)
+	var visit:Variant=block.get("on_visit")
+	if visit is Callable and (visit as Callable).is_valid():_button(footer,"Visit the village",visit,"Close this page and look at the town on the map").name="VisitVillage"
 	_button(footer,"Ages and families",block.get("on_population"),"How many children, workers and elders live here")
 	_button(footer,"Rename this place",block.get("on_rename"),"Change the name on the map")
 	resized.connect(_layout);_layout()

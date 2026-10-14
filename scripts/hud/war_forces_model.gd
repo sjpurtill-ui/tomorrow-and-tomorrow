@@ -95,5 +95,13 @@ static func drawn_from(mc:Node)->Dictionary:
 	return {"soldiers":soldiers,"workers":able,"one_in":roundi(float(able)/float(soldiers)) if soldiers>0 else 0}
 
 
+## How many are at work: everyone who can work less those serving. The top
+## bar's AT WORK, the Home page and the War screen all read this.
+static func at_work(mc:Node)->int:
+	if WorldSimulation.state==null or mc==null:return 0
+	var from:=drawn_from(mc)
+	return maxi(0,int(from.workers)-int(from.soldiers))
+
+
 static func _name_of(commander:Variant)->String:
 	return String((commander as Dictionary).get("name","")) if commander is Dictionary else ""

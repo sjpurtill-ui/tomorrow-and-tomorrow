@@ -25,7 +25,6 @@ class RailBare extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:
 		_build_rail()
 		_build_time_pill()
-		_build_decision_queue()
 	func _layout()->void:pass
 	func _position_toolbar()->void:pass
 
@@ -33,19 +32,6 @@ func _rail()->Control:
 	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1600,900);add_child(canvas)
 	var hud:Control=auto_free(RailBare.new());canvas.add_child(hud)
 	return hud
-
-func test_decision_queue_has_one_answer_path_and_a_season_date()->void:
-	var hud:=_rail()
-	hud._rebuild_queue([{"id":"x1","text":"The stores are low","office":"Steward","advisor":"Hena","day":34844,"severity":"warning"}])
-	var texts:Array[String]=[]
-	for node in hud.queue_root.find_children("*","Label",true,false):texts.append((node as Label).text)
-	var buttons:Array[String]=[]
-	for node in hud.queue_root.find_children("*","Button",true,false):buttons.append((node as Button).text)
-	assert_array(buttons).contains_exactly_in_any_order(["Answer","Later"])
-	var joined:=" | ".join(texts)
-	assert_str(joined).contains(hud.EraWords.when(34844))
-	assert_str(joined).not_contains("Day 34844")
-	assert_str(joined).not_contains("DECISION")
 
 func test_pause_is_one_sign_with_its_words_and_the_paces_are_named()->void:
 	# The parchment shell (approved 2026-10-04): pause is the one sign every

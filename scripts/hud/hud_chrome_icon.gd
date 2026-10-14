@@ -11,6 +11,9 @@ var icon_id:String="population":
 		icon_id=value.to_lower()
 		queue_redraw()
 var active:=false
+## Draw the small vector mark even where engraved art exists: the engraving is
+## dark ink for paper, and is lost on the olive top bar.
+var plain:=false
 var _custom_color:=Color.WHITE
 var _has_custom_color:=false
 var _ink:=Color.WHITE
@@ -39,7 +42,7 @@ func _notification(what:int)->void:
 func _draw()->void:
 	var side:=minf(size.x,size.y)
 	if side<=0.0:return
-	var art:=Folio.texture(icon_id)
+	var art:=Folio.texture(icon_id) if not plain else null
 	if art:
 		material=Folio.night_material() if Tokens.color_mode=="dark" else null
 		var extent:=art.get_size()

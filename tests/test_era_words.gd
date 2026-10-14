@@ -168,20 +168,31 @@ func test_every_top_strip_value_fits_in_full_at_1280()->void:
 			var need:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
 			assert_float(need).override_failure_message("%s %s '%s' needs %.0f, has %.0f" % [id,key,label.text,need,label.size.x]).is_less_equal(label.size.x+0.5)
 
-func test_the_rail_leads_with_the_fantasy_and_shows_every_page()->void:
+func test_the_rail_is_one_button_for_each_category()->void:
 	var rail=auto_free(RailOnly.new())
 	add_child(rail)
 	await _next_frame()
-	# The parchment shell (approved 2026-10-04) stands every page on the rail
-	# itself under a plain name: nothing folds away.
-	var ids:Array=[]
-	for spec in Rail.SECTIONS:ids.append(String(spec.id))
-	for id:String in ["overview","standing","world","military","chronicle"]:
-		assert_array(ids).contains([id])
-	assert_str((rail.rail_labels.overview as Label).text).is_equal("People")
+	# One button for each category, every one of them on screen; the pages of
+	# a category are tabs of its one screen (command_rail_hud.gd CATEGORIES).
+	var leads:Array=[]
+	for category:Dictionary in Rail.CATEGORIES:leads.append(String((category.pages as Array)[0]))
+	assert_array(rail.rail_buttons.keys()).contains_exactly_in_any_order(leads)
+	assert_int(leads.size()).is_less_equal(8)
+	assert_str((rail.rail_labels.settlement as Label).text).is_equal("Home")
 	for id in rail.rail_buttons:
 		assert_bool((rail.rail_buttons[id] as Control).is_visible_in_tree()).override_failure_message(String(id)+" is not on the rail").is_true()
-	assert_bool(rail.get("drawer_box")==null).is_true()
+	# Every page with a place on the old rail belongs to exactly one category.
+	for spec:Dictionary in Rail.SECTIONS:
+		var page:=String(spec.get("section",spec.id))
+		var homes:=0
+		for category:Dictionary in Rail.CATEGORIES:
+			if page in (category.pages as Array):homes+=1
+		assert_int(homes).override_failure_message(page+" is in %d categories" % homes).is_equal(1)
+	# A page's alert stands on its category's button, summed with its neighbours'.
+	rail._set_badge("civ","2",Rail.Tokens.RED);rail._set_badge("overview","1",Rail.Tokens.AMBER)
+	assert_str((rail.rail_badges.settlement as Label).text).is_equal("3")
+	rail._set_badge("civ","",Rail.Tokens.RED);rail._set_badge("overview","",Rail.Tokens.AMBER)
+	assert_bool((rail.rail_badges.settlement as Label).visible).is_false()
 
 func test_carts_saddles_and_bullets_wait_for_their_discoveries()->void:
 	var text:="A cartload of hides went by cart. Clay Sling Bullets and a pack saddle. Riders on horseback with guns."

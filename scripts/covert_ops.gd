@@ -1884,9 +1884,10 @@ static func eyes_on(civ_id:String)->Dictionary:
 # Court questions: "what have our spies learned?", caught spies
 # --------------------------------------------------------------------------
 
-## Recent covert news for the alert row under the clock (hud/army_alerts.gd):
-## an agent caught or killed, a strike done, their spy caught. Shaped for the
-## alert marks; they go under the clock and the chronicle, never a pop-up.
+## Recent covert news for the notice stack's standing rows
+## (hud/standing_notices.gd, by way of hud/army_alerts.gd): an agent caught or
+## killed, a strike done, their spy caught. They stand at the top right and go
+## in the chronicle, never a pop-up.
 const ALERT_DAYS:=12
 static func alerts(day:int=-1)->Array:
 	if day<0: day=_day()

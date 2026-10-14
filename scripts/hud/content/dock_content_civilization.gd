@@ -171,8 +171,6 @@ func _restore_deferred(item_id:String)->void:
 			item["day"]=int(GameState.elapsed_days)
 		break
 	if hud:
-		hud.dismissed_alert_ids.erase(item_id)
-		hud._queue_signature="__stale__"
 		hud.refresh()
 		hud.live_refresh_dock()
 

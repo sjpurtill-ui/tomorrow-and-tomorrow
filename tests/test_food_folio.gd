@@ -18,7 +18,8 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	panel.setup(block)
 	var value: Label = panel.daily_values.Net
 	assert_str(value.text).is_equal("+135")
-	assert_str(panel._refs.food.get_child(1).text).contains("135 rations added")
+	# The amount is said once (under Change); the line under the headline says which way.
+	assert_str(panel._refs.food.get_child(1).text).is_equal("Stores are growing")
 	block.flow.Net = -37.0
 	block.water.intake_ratio = 0.5
 	block.forecast90.first_shortage_day = 12
@@ -27,6 +28,13 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	assert_str(value.text).is_equal("-37")
 	assert_str(panel._refs.forecast.text).contains("food runs short")
 	assert_str(panel._refs.water.get_child(0).text).contains("5 in every 10")
+	# The row adds up: brought in less eaten, spoiled and sent, and what else moved, is what was kept.
+	var amounts: Dictionary = FoodPanel.flow_amounts({"Produced":62593.0, "Eaten":53105.0, "Spoiled":276.0, "Missions":165.0, "Net":9066.0})
+	assert_float(float(amounts.Other)).is_equal_approx(19.0, 0.001)
+	assert_float(float(amounts.Produced) - float(amounts.Eaten) - float(amounts.Spoiled) - float(amounts.Missions) + float(amounts.Other)).is_equal_approx(float(amounts.Net), 0.001)
+	# The page shows that remainder as its own cell whenever there is one.
+	assert_bool((panel.daily_values.Other.get_parent() as Control).visible).is_true()
+	assert_str(panel.daily_values.Other.text).is_equal("-172")
 	(panel.find_child("Choice_Provisions", true, false) as Button).pressed.emit()
 	assert_array(chosen).contains_exactly(["provisions"])
 

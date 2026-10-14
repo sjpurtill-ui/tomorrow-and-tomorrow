@@ -410,13 +410,12 @@ func test_a_click_opens_the_screen_where_the_order_lives()->void:
 
 
 # --------------------------------------------------------------------------
-# Where the cards stand: bottom right, the council's matters above them, and
+# Where the cards stand: bottom right, under the notices, and
 # a single line at the top right while a dock covers the bottom right
 # --------------------------------------------------------------------------
 
 class OrdersHud extends "res://scripts/hud/command_rail_hud.gd":
 	func _ready()->void:
-		_build_decision_queue()
 		dock=PanelContainer.new();dock.visible=false;add_child(dock)
 		detail_dock=PanelContainer.new();detail_dock.visible=false;add_child(detail_dock)
 		_build_order_stack()

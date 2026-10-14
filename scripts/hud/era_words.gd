@@ -82,14 +82,14 @@ const WORDS:={
 	"hearth":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Tallies",
 		"rail.inquiry":"Lore","rail.production":"Crafts","rail.military":"Warriors","rail.wealth":"Exchange",
-		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIVES","kpi.science":"LORE","kpi.gdp":"HANDS AT WORK",
+		"kpi.population":"PEOPLE","kpi.food":"FOOD","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIFE SPAN","kpi.science":"LORE","kpi.gdp":"HANDS AT WORK",
 		"scope":"All our hearths","place":"hearth","places":"hearths",
 		"chronicle.caption":"Great moments told at the fire, and smaller things remembered.","chronicle.tallies":"Show every season's tally",
 	},
 	"lettered":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Ledgers",
 		"rail.inquiry":"Learning","rail.production":"Crafts",
-		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"GOODS","kpi.health":"LIVES","kpi.science":"LEARNING","kpi.gdp":"DAILY LABOUR",
+		"kpi.population":"PEOPLE","kpi.food":"FOOD","kpi.water":"WATER","kpi.goods":"GOODS","kpi.health":"LIFE SPAN","kpi.science":"SCHOLARS","kpi.gdp":"AT WORK",
 		"scope":"All our towns","place":"town","places":"towns",
 		"chronicle.caption":"Great moments entered in the annals, and lesser things noted.","chronicle.tallies":"Show every season's register",
 	},
@@ -197,6 +197,12 @@ static func life(years:float)->String:
 		"hearth":return "%d winters" % roundi(years)
 		"lettered":return "%d years" % roundi(years)
 	return "%.1f yr" % years
+
+
+## Days of stores inside a sentence ("Food lasts 29 days"): the top bar's own
+## number (days), with the unit written out in the statistical age.
+static func days_in_words(value:float)->String:
+	return "%.1f days" % value if reckoned() and value>=0.0 else days(value)
 
 
 ## A change in how long a person born now can hope to live, in the unit that
