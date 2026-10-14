@@ -8,7 +8,6 @@ const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Society:=preload("res://scripts/society_model.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
 const Inquiry:=preload("res://scripts/hud/content/dock_content_inquiry.gd")
-const Atlas:=preload("res://scripts/hud/research_atlas.gd")
 const DiscoveryPopup:=preload("res://scripts/hud/discovery_popup.gd")
 const KNOWN:=["drainage","clean_water","wound_cleaning","food_drying","tallies","labor_rotations","cordage","herbal_classification"]
 
@@ -266,27 +265,25 @@ func test_inquiry_dock_builds_with_explanations_for_a_small_state()->void:
 	var hud:=FakeHud.new();auto_free(hud)
 	var terrain:=FakeTerrain.new();auto_free(terrain)
 	var inquiry=Inquiry.new(terrain,hud)
-	# What we know: one row per field with what its knowledge adds now.
+	# What we know: one table line per field with what its knowledge adds now.
 	var known:Dictionary=inquiry.tab(2)
-	var board:Dictionary=known.blocks[0]
-	assert_str(String(board.type)).is_equal("known_board")
+	var table:Dictionary=known.blocks[0]
+	assert_str(String(table.type)).is_equal("table")
 	var health:Dictionary={}
-	for field:Dictionary in board.fields:
-		if String(field.id)=="health":health=field
+	for row:Dictionary in table.rows:
+		if String(row.cells.field)=="Health & care":health=row
 	assert_dict(health).is_not_empty()
-	var labels:Array=(health.effects as Array).map(func(row:Dictionary)->String:return String(row.label))
-	assert_array(labels).contains(["Protection from sickness"])
-	# Opened in place: every effect, its account on hover.
+	assert_str(String(health.tip)).contains("Protection from sickness")
+	# Opened: a frame beneath with every effect, its account on hover.
 	inquiry.expanded_domains["health"]=true
+	var opened:Array=inquiry.tab(2).blocks
+	assert_str(String(opened[1].type)).is_equal("frame")
 	var box:=VBoxContainer.new();add_child(box);auto_free(box)
 	box.size=Vector2(700,900)
-	DockBlocks.render(box,inquiry.tab(2).blocks)
-	var grid:Node=box.find_child("Field_health",true,false).find_child("Effects",true,false)
-	assert_object(grid).is_not_null()
+	DockBlocks.render(box,opened)
 	var said:Array=[]
-	for cell:Control in grid.get_children():said.append(cell.tooltip_text)
-	assert_str("
-".join(said)).contains("The health the people settle toward")
+	for cell:Node in box.find_children("Fact_*","",true,false):said.append((cell as Control).tooltip_text)
+	assert_str("X".join(said)).contains("The health the people settle toward")
 	for text:String in _labels(box):_assert_plain(text,"dock label")
 	# Knowledge tree: a known question says what it does now, an open one
 	# what it would do at full use.
@@ -304,39 +301,14 @@ func test_inquiry_dock_builds_with_explanations_for_a_small_state()->void:
 		assert_str(String((would.facts as Array)[0][0])).is_equal("Would bring")
 		assert_str(String((would.facts as Array)[0][2])).contains("at full use")
 	assert_str(String(Explainer.discovery_rows("well_siting",false)[0].usage)).starts_with("at full use")
-	# The field report: what the field's knowledge does now.
-	var report:Dictionary=inquiry._domain_report("health")
-	var field_rows:Array=[]
-	for block:Dictionary in report.blocks:
-		if String(block.get("type",""))=="field_sheet":field_rows=block.rows
-	assert_array(field_rows.map(func(item:Dictionary)->String:return String(item.key))).contains(["health_protection"])
 
 func test_question_cards_say_what_they_would_bring()->void:
-	var board:VBoxContainer=auto_free(preload("res://scripts/hud/inquiry_board.gd").new())
-	board.setup({"fields":[],"investigations":[{"id":"well_siting","name":"Well Siting","dynamic":"infrastructure","progress":0.3,"research_workforce":1.5,"bottleneck":"EARLY EVIDENCE","effects":DiscoverySystem.discovery_definition("well_siting").effects}],
-		"on_tree":func():pass,"on_work":func():pass,"on_domain":func(_d:String):pass})
-	var line:Label=board.find_child("WouldBring",true,false)
-	assert_object(line).is_not_null()
-	assert_str(line.text).starts_with("Would bring: ")
-	_assert_plain(line.text,"question card")
-
-func test_research_atlas_explains_known_and_open_questions()->void:
-	GameState.population_allocations["Knowledge"]=24
-	DiscoverySystem._refresh_active_investigations()
-	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1440,900);add_child(viewport)
-	var view:=Atlas.new();viewport.add_child(view)
-	view.set_view("known");view.select("clean_water")
-	var ledger:Node=view.detail_body.find_child("ImpactLedger",true,false)
-	assert_object(ledger).is_not_null()
-	assert_str("\n".join(_labels(view.detail_body))).contains("WHAT IT DOES").contains("Safe drinking water")
-	view.set_view("tree")
-	var open:=""
-	for item:Dictionary in view.records:
-		if bool(item.exposed) and not bool(item.known) and not (item.effects as Dictionary).is_empty():open=String(item.id);break
-	if open!="":
-		view.select(open)
-		assert_str("\n".join(_labels(view.detail_body))).contains("WHAT IT WOULD DO")
-	for text:String in _labels(ledger):_assert_plain(text,"atlas label")
+	var record:={"id":"well_siting","name":"Well Siting","dynamic":"infrastructure","progress":0.3,"research_workforce":1.5,"bottleneck":"EARLY EVIDENCE","effects":DiscoverySystem.discovery_definition("well_siting").effects}
+	var words:Dictionary=preload("res://scripts/hud/inquiry_board.gd")._card_words(record)
+	assert_str(String(words.would)).starts_with("Would bring: ")
+	_assert_plain(String(words.would),"question card")
+	# The line's account on hover says what it would do at full use.
+	assert_str(String(words.tooltip)).contains("What it would do, at full use")
 
 func test_discovery_announcement_says_what_each_effect_moves()->void:
 	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1200,900);add_child(canvas)

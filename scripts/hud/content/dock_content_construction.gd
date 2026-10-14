@@ -248,7 +248,7 @@ func _fabric_rows()->Array:
 			"detail":"How fully workshops, granaries, kilns, storehouses and water works serve the town."}]
 	if bool(r.home):
 		var bonus:=float(d.get("defense_bonus",0.0))
-		rows.append({"key":"fabric_walls","fx":"walls","icon":"wall","name":"Walls and stone","sub":"%s · %d%% stone houses" % [String(d.get("short","Open ground")),roundi(float(r.stone)*100.0)],"bar":{"ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"color":Tokens.RED},"value":"+%d%%" % roundi(bonus*100.0),
+		rows.append({"key":"fabric_walls","fx":"walls","icon":"wall","name":"Walls and stone","sub":String(d.get("short","Open ground")).to_lower(),"bar":{"ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"color":Tokens.RED},"value":"+%d%%" % roundi(bonus*100.0),
 			"detail":"%s at %d%% repair, and %d in 100 of the places stone. The bar runs to a bastion network's +%d%%." % [String(d.get("short","Open ground")),roundi(float(d.get("integrity",1.0))*100.0),roundi(float(r.stone)*100.0),roundi(Fabric.BASTION_BONUS*100.0)]})
 	rows.append({"key":"fabric_craft","fx":"craft","icon":"builders","name":"Builders' craft","sub":"settles at %s" % Fabric._one(float(r.craft_settles)),"bar":{"ratio":float(r.craft)/Fabric.CRAFT_MAX,"color":Tokens.VIOLET},"value":"%s/%d" % [Fabric._one(float(r.craft)),roundi(Fabric.CRAFT_MAX)],
 		"detail":"The builders' living experience. At today's builders it settles at %s over a working life; it fades as the old builders die." % Fabric._one(float(r.craft_settles))})
@@ -740,7 +740,7 @@ func _defence_card()->Dictionary:
 		# Who would raise them, and how long they would take at today's watch.
 		var decision:Dictionary=r.decision
 		if workers>0 and float(decision.get("daily",0.0))>0.0:
-			notes.append({"text":"%d on the watch · %s" % [workers,Plain.duration_text(float(decision.days))],"tip":"%s of watch work a day: the %s would take %s." % [Plain.number(float(decision.daily)),next_name,Plain.duration_text(float(decision.days))]})
+			notes.append({"text":"%d set to keep watch · %s" % [workers,Plain.duration_text(float(decision.days))],"tip":"%s of watch work a day: the %s would take %s." % [Plain.number(float(decision.daily)),next_name,Plain.duration_text(float(decision.days))]})
 	# What stops it, each a chip; amber for a reason, red for what is missing.
 	for blocker:Dictionary in r.blockers:
 		var kind:=String(blocker.kind)
@@ -761,7 +761,7 @@ func _defence_card()->Dictionary:
 				# work to spare beyond keeping the town.
 				var standing:=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
 				if kind=="watch":item.text="No watch work spare"
-				item.tip="%s on watch · %s can rise. The works rise only by the day's watch work of those set to the watch beyond keeping the town." % [_n(int(standing.on_watch)),_n(int(standing.can_rise))]
+				item.tip="%s set to keep watch at home, who raise the works by their day's watch work beyond keeping the town. (Not the same count as %s on watch: everyone under arms standing in our towns, soldiers over the share among them.)" % [_n(int(standing.set_to_watch)),_n(int(standing.on_watch))]
 				if add>0 and not _has(actions,"Add"):actions.append({"label":"Add %d to the watch" % add,"primary":true,"on_press":_watch.bind(add),
 					"tip":"Moves %d from the busiest work to the watch.%s" % [add," You then set the daily work yourself, on The People." if not Tasks.manual() else ""]})
 			"food":

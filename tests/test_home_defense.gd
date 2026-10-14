@@ -89,7 +89,7 @@ func test_the_people_raise_the_next_stage_when_danger_and_means_allow()->void:
 	var told:=_told("Work begins on the watch posts")
 	assert_dict(told).is_not_empty()
 	assert_str(String(told.text)).contains("10 timber and 4 plant fiber set aside")
-	assert_str(String(told.text)).contains("5 on the watch raise them in about 25 days")
+	assert_str(String(told.text)).contains("5 set to keep watch raise them in about 25 days")
 	assert_str(String(told.text)).contains("The people judged the danger worth it")
 
 func test_the_gods_people_and_a_computer_ruler_decide_alike()->void:
@@ -148,7 +148,7 @@ func test_a_calm_bold_people_short_of_timber_say_why_in_numbers()->void:
 	# Nobody on the watch is named too, with the fix counted.
 	GameState.population_allocations["Defense"]=0
 	var idle:=HomeDefense.reading(plan)
-	assert_array((idle.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).contains(["Nobody on the watch"])
+	assert_array((idle.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).contains(["Nobody set to keep watch"])
 	assert_int(HomeDefense.watch_fix(1)).is_greater(0)
 	# The people want the works when the danger is enough: then only the
 	# means are short, and the town asks its other towns for twice the bill.

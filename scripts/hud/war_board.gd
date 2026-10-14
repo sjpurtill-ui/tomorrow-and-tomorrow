@@ -517,7 +517,13 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	var rise_line:=_line("%s on watch · %s can rise" % [compact(int(standing.on_watch)),compact(int(standing.can_rise))],12,T.INK_MUTED);rise_line.name="OnWatch"
 	rise_line.tooltip_text="On watch: everyone under arms standing in our towns today, the home guard there and those free to send (%s posted out on the border besides).
 Can rise: the townsfolk who take up arms beside them, untrained, when raiders come." % EraWords.grouped(int(standing.on_border))
-	var indent:=MarginContainer.new();indent.add_theme_constant_override("margin_left",17);indent.add_child(rise_line);column.add_child(indent)
+	var standing_row:=HBoxContainer.new();standing_row.add_theme_constant_override("separation",14);standing_row.add_child(rise_line)
+	# The home guard posted out, said beside it so the counts add up.
+	if int(standing.on_border)>0:
+		var posted:=_line("%s on the border" % compact(int(standing.on_border)),12,T.INK_MUTED);posted.name="OnBorderLine"
+		posted.tooltip_text="Of the home guard, posted to the forts and the line between them; not in the towns."
+		standing_row.add_child(posted)
+	var indent:=MarginContainer.new();indent.add_theme_constant_override("margin_left",17);indent.add_child(standing_row);column.add_child(indent)
 	column.add_child(_towns_rows(f))
 	return panel
 
@@ -594,7 +600,8 @@ func _makeup_row(r:Dictionary)->Control:
 	var name_label:=_line(String(r.label),13,T.INK if can else T.INK_MUTED);name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(name_label)
 	var men:=_line("%s / %s" % [compact(int(r.men)),compact(int(r.target))],12,T.INK if int(r.men)>=int(r.target) else T.AMBER_TEXT);men.mouse_filter=Control.MOUSE_FILTER_IGNORE;men.size_flags_horizontal=Control.SIZE_EXPAND_FILL;men.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;top.add_child(men)
 	var waiting:=String(r.get("waiting",""))
-	var kind:=_line(String(r.kind) if waiting=="" else "%s · waiting" % String(r.best).get_slice(" · ",0),11,T.INK_MUTED if waiting=="" else T.AMBER_TEXT);kind.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;kind.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(kind)
+	# The kind of fighter only; the kit they carry is in the tooltip.
+	var kind:=_line(String(r.kind).get_slice(" · ",0) if waiting=="" else "%s · waiting" % String(r.best).get_slice(" · ",0),11,T.INK_MUTED if waiting=="" else T.AMBER_TEXT);kind.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;kind.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(kind)
 	var bars:=HBoxContainer.new();bars.add_theme_constant_override("separation",4);bars.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(bars)
 	for pair:Array in [[float(r.armed),BarModel.gear_color(maxf(0.0,float(r.armed)))],[float(r.drill),T.GREEN if float(r.drill)>=0.6 else T.AMBER]]:
 		var bar:=ShareBar.new();bar.share=maxf(0.0,float(pair[0]));bar.ink=pair[1];bar.custom_minimum_size=Vector2(0,4);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;bars.add_child(bar)

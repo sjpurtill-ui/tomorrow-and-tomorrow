@@ -38,7 +38,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 		var section:=VBoxContainer.new()
 		section.add_theme_constant_override("separation",6)
 		container.add_child(section)
-		if String(block.get("heading",""))!="":
+		# A frame draws its own title line (dense_blocks.gd render_frame).
+		if String(block.get("heading",""))!="" and String(block.get("type",""))!="frame":
 			var heading_row:=HBoxContainer.new()
 			section.add_child(heading_row)
 			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),12,Tokens.GOLD_TEXT,0.06)
@@ -114,10 +115,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
 			"knowledge_tree":
 				var tree:=preload("res://scripts/hud/knowledge_tree_board.gd").new();section.add_child(tree);tree.setup(block)
-			"known_board":
-				var known:=preload("res://scripts/hud/known_board.gd").new();section.add_child(known);known.setup(block)
-			"field_sheet":
-				var sheet:=preload("res://scripts/hud/field_sheet.gd").new();section.add_child(sheet);sheet.setup(block)
 			"impact":
 				var ledger:=preload("res://scripts/hud/impact_ledger.gd").new();section.add_child(ledger);ledger.setup(block)
 			"recruit_deploy":

@@ -30,7 +30,7 @@ func _ready()->void:
 		var panel=hud.dock.find_child("InquiryBoard",true,false)
 		check(panel!=null,"Illustrated research is wired")
 		if panel:
-			check(panel.find_children("Lane_*","",true,false).size()==12,"All twelve fields have a lane")
+			check(panel.find_child("Fields",true,false).find_children("Row_*","",false,false).size()>=12,"All twelve fields have a line")
 			check(panel.find_child("LearningPace",true,false)!=null,"The pace header is drawn")
 			var active_count:=0
 			for field:Dictionary in panel.data.fields:active_count+=int(field.active)
@@ -56,18 +56,16 @@ func _ready()->void:
 			for i in 4:await get_tree().process_frame
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png("res://artifacts/inquiry-fields-"+str(canvas.x)+".png")
-		board.data.on_tree.call()
+		# The knowledge tree is the next tab, drawn in the dock.
+		hud.open_dock("inquiry",1,false)
 		for i in 4:await get_tree().process_frame
-		check(hud.has_meta("knowledge_atlas") and is_instance_valid(hud.get_meta("knowledge_atlas")),"Discovery tree opens")
-		if hud.has_meta("knowledge_atlas") and is_instance_valid(hud.get_meta("knowledge_atlas")):hud.get_meta("knowledge_atlas").queue_free()
+		check(hud.dock.find_child("KnowledgeTree",true,false)!=null,"The knowledge tree opens in the dock")
+		hud.open_dock("inquiry",0,false)
 		for i in 2:await get_tree().process_frame
 	var board=hud.dock.find_child("InquiryBoard",true,false)
-	board.data.fields[0].on_open.call()
-	for i in 3:await get_tree().process_frame
-	check(hud.detail_dock.visible,"Field details open")
 	var empty_data:Dictionary=board.data.duplicate();empty_data.investigations=[]
 	var empty=preload("res://scripts/hud/inquiry_board.gd").new();add_child(empty);empty.setup(empty_data)
-	check(empty.find_child("NothingUnderWay",true,false)!=null,"Empty research offers a workforce action")
+	check(empty.find_child("Fields",true,false).find_children("Row_*","",false,false).size()>=12,"With nothing under way each field still says why it waits")
 	empty.queue_free()
 	print("INQUIRY_BOARD_CHECKS: ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)

@@ -8,18 +8,20 @@ extends RefCounted
 ##         an optional thin bar, an optional verb beside the figure), flowing
 ##         into 1-3 columns as the page widens:
 ##   {type:"fact_grid", heading?, min_column? (px, 300), items:[{label,
-##    value, tone?, icon?: Texture2D, bar? (0..1), tip?, on_click?,
+##    value, tone?, icon?: Texture2D, bar? (0..1), tip?, on_click?, wrap?,
 ##    button?:{label, on_press, tip?, disabled?}}]}
 ##
 ## table   one line per item, columns aligned, the distinguishing fact first,
 ##         status as a small coloured tag, a verb button on the row:
 ##   {type:"table", heading?, note?, empty?: "one small line when no rows",
 ##    icon_size? (px, 18; 24-28 for small portraits),
+##    head?: false (continue a table split around an opened row),
 ##    columns:[{key, label, width? (px), align? ("left"|"right")}],
 ##    rows:[{cells:{key:String}, icon?: Texture2D, group?: String (a group
 ##           header line is drawn when it changes), tag?:{text, tone},
 ##           bar?:{value 0..1, tone?}, button?:{label, on_press, tip?,
-##           disabled?}, tip?, on_click?: Callable, tone?}]}
+##           disabled?}, buttons?:[button, ...], tip?, on_click?: Callable,
+##           tone?}]}
 ## costs   what a work needs against what is in store, one line, each good
 ##         an icon, "have / need" in green or red and five pips; the button
 ##         that starts it beside the cost:
@@ -147,11 +149,14 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 		var empty:=String(block.get("empty",""))
 		if empty!="":list.add_child(T.make_label(empty,12,T.INK_MUTED))
 		return list
-	var head:=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
 	var icon_size:=float(block.get("icon_size",18.0))
-	var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=icon_size;head.add_child(icon_gap)
-	for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
-	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
+	# "head":false continues a table split around an opened row (no second header).
+	var head:HBoxContainer=null
+	if bool(block.get("head",true)):
+		head=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
+		var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=icon_size;head.add_child(icon_gap)
+		for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
+		var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
 	var group:=""
 	var index:=0
 	var extras:Array[Control]=[]
@@ -171,7 +176,8 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 	for more:Control in extras:widest=maxf(widest,more.get_combined_minimum_size().x)
 	if widest>0.0:
 		for more:Control in extras:more.custom_minimum_size.x=widest
-		var gap:=Control.new();gap.name="Extras";gap.custom_minimum_size.x=widest;head.add_child(gap)
+		if head:
+			var gap:=Control.new();gap.name="Extras";gap.custom_minimum_size.x=widest;head.add_child(gap)
 	return list
 
 
@@ -210,11 +216,25 @@ static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	# gives every row's end column the same width).
 	var end:=HBoxContainer.new();end.name="Extras";end.alignment=BoxContainer.ALIGNMENT_END;end.add_theme_constant_override("separation",6);end.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(end)
 	var bar:Dictionary=row.get("bar",{}) if row.get("bar") is Dictionary else {}
-	if not bar.is_empty():end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
+	if not bar.is_empty():
+		# A blank bar keeps the column's width on a row that has none, so columns stay aligned.
+		if bool(bar.get("blank",false)):
+			var gap:=Control.new();gap.custom_minimum_size.x=56.0;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;end.add_child(gap)
+		else:end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
 	var state:Dictionary=row.get("tag",{}) if row.get("tag") is Dictionary else {}
 	if not state.is_empty():end.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
 	var button:Dictionary=row.get("button",{}) if row.get("button") is Dictionary else {}
 	if not button.is_empty():end.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
+	# Several verbs on one row (− and + beside a share).
+	for more:Variant in row.get("buttons",[]):
+		var spec:Dictionary=more if more is Dictionary else {}
+		if spec.is_empty() or bool(spec.get("blank",false)):
+			# A blank verb holds its place so the columns before it line up.
+			var gap:=Control.new();gap.custom_minimum_size.x=float(spec.get("width",26.0));gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;end.add_child(gap)
+		else:
+			var go:=verb(String(spec.get("label","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("disabled",false)))
+			if spec.has("width"):go.custom_minimum_size.x=float(spec.width)
+			end.add_child(go)
 	var click:Variant=row.get("on_click")
 	if click is Callable and (click as Callable).is_valid():
 		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND

@@ -62,17 +62,6 @@ func _ready()->void:
 	var panel=DockPanel.new();hud.add_child(panel);hud.dock=panel
 	panel.position=Vector2(40,20);panel.size=Vector2(1100,860)
 	var terrain:=StubTerrain.new();add_child(terrain)
-	if section=="atlas":
-		# The research atlas overlay, in the view named by the sub part.
-		DiscoverySystem.initialize();DiscoverySystem._refresh_active_investigations()
-		var view=preload("res://scripts/hud/research_atlas.gd").new();view.hud=hud;view.terrain=terrain;add_child(view)
-		view.set_view(["active","tree","known"][clampi(sub,0,2)])
-		for frame in 12:await get_tree().process_frame
-		await RenderingServer.frame_post_draw
-		DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out.get_base_dir()))
-		get_viewport().get_texture().get_image().save_png(out)
-		print("UX_C_CAPTURE atlas ",sub," -> ",out)
-		get_tree().quit();return
 	var provider=load(PROVIDERS.get(section,PROVIDERS.economy)).new(terrain,hud)
 	panel.present(provider,sub)
 	for frame in 10:await get_tree().process_frame
