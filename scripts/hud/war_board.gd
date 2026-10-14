@@ -95,6 +95,7 @@ var leaders_section:VBoxContainer
 var tab:="army"
 var _wide:=false
 var _laid:=false
+var leaders_kicker:Label
 var enemy_count:Label
 var feedback:Label
 var covert:Control
@@ -155,6 +156,8 @@ func setup(_block:Dictionary={})->void:
 	border_box=VBoxContainer.new();border_box.name="Border";border_box.add_theme_constant_override("separation",6);fronts_section.add_child(border_box)
 	# The leaders, then our eyes abroad.
 	var leaders_head:=_kicker_row("Leaders",leaders_section)
+	# The tab already says "Leaders": its kicker shows only beside the Fronts.
+	leaders_kicker=leaders_head.get_child(0)
 	var name_one:=_small_button("General","plus","Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
 	name_one.name="NameGeneral";name_one.pressed.connect(_name_general);leaders_head.add_child(name_one)
 	leader_box=VBoxContainer.new();leader_box.name="Leaders";leader_box.add_theme_constant_override("separation",6);leaders_section.add_child(leader_box)
@@ -323,6 +326,12 @@ func _border_card()->Control:
 	if km>0.0:
 		var bar:=ShareBar.new();bar.name="LineBar";bar.share=line_strength;bar.ink=T.TEAL if line_strength>=0.7 else (T.AMBER if line_strength>=0.4 else T.RED);bar.custom_minimum_size=Vector2(0,5);bar.mouse_filter=Control.MOUSE_FILTER_PASS
 		bar.tooltip_text=tag.tooltip_text;column.add_child(bar)
+	# No fort and nobody on it: the head and the verb, nothing more.
+	if standing+going==0 and on_border_all<=0:
+		var place:=_border_verb(Forts,true)
+		place.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		head.add_child(place)
+		return panel
 	# Who stands on it and what it costs, one line of figures.
 	var facts:=HBoxContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("separation",14);column.add_child(facts)
 	facts.add_child(_fact("Posted",compact(on_border_all),"on it","%s of ours on the border: %s of the home guard in the forts and along linked stretches, and %s of the army in %d %s at border stations (the Defend stance)." % [EraWords.grouped(on_border_all),EraWords.grouped(int(kept.posted)),EraWords.grouped(int(bands.men)),int(bands.bands),"band" if int(bands.bands)==1 else "bands"]))
@@ -338,16 +347,21 @@ func _border_card()->Control:
 	for step:int in [-1,1]:
 		var button:=_step_button("BorderLess" if step<0 else "BorderMore","−" if step<0 else "+","Send 10% fewer of the home guard to the border." if step<0 else "Send 10% more of the home guard to the border; garrisons are filled first.",func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step)*0.1,0.0,1.0));refresh(true))
 		button.disabled=share<=0.0 if step<0 else share>=1.0;split.add_child(button)
-	var open:=_small_button("Place a fort" if standing+going==0 else "Forts on map","besiege","Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
+	split.add_child(_border_verb(Forts,standing+going==0))
+	return panel
+
+
+## "Place a fort" / "Forts on map": the Border map, on the map itself.
+func _border_verb(Forts:GDScript,first:bool)->Button:
+	var open:=_small_button("Place a fort" if first else "Forts on map","besiege","Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
 	open.name="OpenBorder"
-	open.icon=Icons.chart_texture("fort:%s" % String(Forts.best_kind().id),T.INK,40)
+	open.icon=Icons.chart_texture("fort:%s" % String(Forts.call("best_kind").id),T.INK,40)
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
 		if scene==null:return
 		close_wanted.emit()
 		preload("res://scripts/hud/border_map.gd").set_shown(scene,true))
-	split.add_child(open)
-	return panel
+	return open
 
 
 ## A figure in a line: the number strong, its words muted after it.
@@ -769,8 +783,50 @@ func _build_enemies(entries:Array)->void:
 		var row:=HBoxContainer.new();row.name="Calm";row.add_theme_constant_override("separation",6);enemy_box.add_child(row)
 		row.add_child(_icon("leave",T.INK_MUTED,14))
 		var said:=_line("At peace with everyone",12,T.INK_MUTED);said.tooltip_text="No feud or war with anyone.";row.add_child(said)
+		enemy_box.add_child(_neighbours())
 		return
 	for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+
+
+## At peace, the peoples we know, nearest first, as the enemies would be
+## read: their mark, name, what lies between us, their warriors as our
+## watchers reckon them and the march to their nearest town we know.
+func _neighbours()->Control:
+	var Known:=preload("res://scripts/hud/peoples_known_model.gd")
+	var box:=VBoxContainer.new();box.name="Neighbours";box.add_theme_constant_override("separation",3)
+	var peoples:Array=Known.met_peoples(int(WorldSimulation.state.elapsed_days)) if WorldSimulation!=null and WorldSimulation.state!=null else []
+	if peoples.is_empty():return box
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var reach:={}
+	for people:Dictionary in peoples:
+		var at:Dictionary=people.get("home_position",{}) if people.get("home_position") is Dictionary else {}
+		reach[String(people.civ_id)]=home.distance_to(Vector2(float(at.get("x",0.0)),float(at.get("z",0.0)))) if not at.is_empty() else INF
+	peoples.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(reach[String(a.civ_id)])<float(reach[String(b.civ_id)]))
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
+	for spec:Array in [["Peoples we know",true],["warriors",false],["march",false]]:
+		var cell:=_line(String(spec[0]),11,T.INK_MUTED);cell.add_theme_font_override("font",T.font("ui_strong"))
+		if bool(spec[1]):cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		else:cell.custom_minimum_size=Vector2(78,0);cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		head.add_child(cell)
+	for people:Dictionary in peoples.slice(0,5):
+		var civ_id:=String(people.civ_id)
+		var e:=Allocation.enemy(civ_id,0,true)
+		var between:=Known.relation_cell(people)
+		var row:=HBoxContainer.new();row.name="Known_%s" % civ_id.validate_node_name();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
+		var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(18,18);emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(emblem)
+		var name_label:=_line(String(people.name),13,T.INK);name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
+		var tone:=String(between.get("tone","ink"))
+		var word:=_line(String(between.get("text","")),11,T.RED_TEXT if tone=="danger" else (T.AMBER_TEXT if tone=="warn" else (T.GREEN_TEXT if tone=="good" else T.INK_MUTED)));word.size_flags_horizontal=Control.SIZE_EXPAND_FILL;word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(word)
+		var theirs:=_line(Allocation.theirs_words(e),12,T.INK);theirs.add_theme_font_override("font",T.font("ui_strong"));theirs.custom_minimum_size=Vector2(78,0);theirs.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;theirs.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(theirs)
+		var nearest:Dictionary=e.nearest
+		var road:=_line(_days(int(nearest.days)) if not nearest.is_empty() else "—",12,T.INK_MUTED);road.custom_minimum_size=Vector2(78,0);road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
+		row.tooltip_text="%s: %s.
+%s
+%s" % [String(people.name),String(between.get("tip","")),"We know too little of them to count their warriors." if bool(e.unknown) else "Their warriors as our watchers reckon them: about %s (between %s and %s)." % [EraWords.grouped(int(e.theirs)),EraWords.grouped(int(e.low)),EraWords.grouped(int(e.high))],
+			("Their nearest town we know, %s, lies about %s km off: some %s on the road." % [String(nearest.name),EraWords.grouped(roundi(float(nearest.km))),_days(int(nearest.days))]) if not nearest.is_empty() else "We know of no town of theirs yet: scouts find their towns."]
+		box.add_child(row)
+	if peoples.size()>5:box.add_child(_line("+%d more peoples" % (peoples.size()-5),12,T.INK_MUTED))
+	return box
 
 
 ## One people at feud or war, as an HOI4 war card: who they are and how hot,
@@ -887,7 +943,8 @@ static func now_short(e:Dictionary)->Dictionary:
 	if not bands.is_empty():
 		var band:Dictionary=bands[0]
 		var card:Dictionary=BarModel.army_card(MilitaryCampaign,band)
-		var who:="%s · %s" % [String(card.get("short","Our band")),compact(int(card.get("men",0)))]
+		# The men stand once, on the line above (ours against theirs).
+		var who:=String(card.get("short","Our band"))
 		var more:=(" +%d" % (bands.size()-1)) if bands.size()>1 else ""
 		var state:=String(card.get("state","holding"))
 		var place:=String((band.get("council",{}) as Dictionary).get("name",band.get("destination_name",""))) if band.get("council") is Dictionary else String(band.get("destination_name",""))
@@ -1266,6 +1323,7 @@ func _apply_width(force:=false)->void:
 		army_pane.visible=tab=="army";side_pane.visible=tab!="army"
 		fronts_section.visible=tab=="fronts";leaders_section.visible=tab=="leaders"
 	for key:String in tab_buttons:(tab_buttons[key] as Button).set_pressed_no_signal(key==tab)
+	if leaders_kicker!=null:leaders_kicker.visible=now
 
 
 ## The tabs carry how many enemies there are (the kicker does on a wide
@@ -1326,6 +1384,9 @@ func _build_needs(found:Array)->void:
 	var rows:Array=found[1]
 	needs_box.visible=not rows.is_empty()
 	var Standing:=preload("res://scripts/hud/standing_notices.gd")
+	# A notice that only opens this screen is already its content here.
+	rows=rows.filter(func(n:Dictionary)->bool:return String((n.get("action",{}) if n.get("action") is Dictionary else {}).get("kind",""))!="war")
+	needs_box.visible=not rows.is_empty()
 	for n:Dictionary in rows.slice(0,3):
 		var tone:=Standing.tone_color(String(n.get("tone","amber")))
 		var row:=PanelContainer.new();row.name="Need_%s" % String(n.get("key","")).trim_prefix("standing:").replace(":","_")
