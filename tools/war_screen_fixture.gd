@@ -80,6 +80,12 @@ static func stage(_terrain:Node,mode:="war")->Dictionary:
 	if town.is_empty():town=seen
 	var town_name:=String(town.get("name","their town")).trim_prefix("Reported home of ")
 	WarLoop.blood_feud(civ_id,day-30,"the killing of their envoy")
+	# A people out of reach only keeps the grudge (WarLoop.near_us); the
+	# capture needs the feud itself, so it is written in as one begun.
+	if WarLoop.feud_view(civ_id,day).is_empty():
+		var held:Dictionary=WarLoop.front(civ_id)
+		WarLoop._begin_feud(held,day-30)
+		held.merge({"level":2,"cause":"the killing of their envoy"},true)
 	WarLoop.front(civ_id).merge({"their_dead":4,"our_dead":2,"last_harm":day-9},true)
 	var front:Dictionary=WarLoop.front(civ_id)
 	front["stance"]="take"
@@ -142,7 +148,7 @@ static func _calm()->Dictionary:
 		if order is Dictionary and not bool((order as Dictionary).get("automated_basic",false)):
 			(order as Dictionary)["progress_days"]=float((order as Dictionary).get("required_days",45.0))*0.65
 	mc.army_levy_level="few"
-	return {"mode":"calm","under_arms":preload("res://scripts/army_levy_law.gd").under_arms(mc)}
+	return {"mode":"calm","under_arms":int(preload("res://scripts/army_levy_law.gd").reading(mc).now)}
 
 
 ## Recruit, arm and drill `count` levy at home, as the court's levy would.

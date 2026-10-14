@@ -406,6 +406,11 @@ func _rebuild_kpis(kpis:Array)->void:
 			var fill:=Tokens.flat(kpi.get("meter_color",Tokens.GREEN),Color(0,0,0,0),0,2)
 			meter.add_theme_stylebox_override("background",track);meter.add_theme_stylebox_override("fill",fill)
 			column.add_child(meter)
+		# Or one bar split by share ({share, color, label, value}).
+		elif kpi.has("segments"):
+			var split:Control=preload("res://scripts/hud/buildings_board.gd").Segments.new();split.name="KpiSegments"
+			split.set("items",kpi.segments);split.custom_minimum_size=Vector2(0,6);split.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			column.add_child(split)
 		# A glance tile says its few words under the bar.
 		if glance and String(kpi.get("delta",""))!="":
 			var words:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))

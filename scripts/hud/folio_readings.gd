@@ -18,7 +18,7 @@ const CAPTION_SIZE := 10
 const VALUE_SIZE := 18
 const MARK := 17.0
 const MARK_GAP := 5.0
-const GAP := 12
+const GAP := 9
 
 signal reading_selected(section: String, sub: int)
 signal reading_created(button: Button)
