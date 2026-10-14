@@ -14,3 +14,9 @@ No simulation, calculation, save schema, or command callback changes. The provid
 Review loop: A critiqued the first actual render, requested relationship-first hierarchy, shorter empty hearsay, a clear Sort label and an explicit learning-capacity label. The revised populated profile was accepted at 1600 and 1024 in Daylight. The private GPU fixture covers 2869, 1600 and 1024, our own profile, reported foreign readings, limited intelligence, and town disclosure, in isolated Test userdata with Dummy audio. Generated captures remain in `artifacts/`.
 
 Regression coverage retains model uncertainty/ranking tests and adds selected-profile visibility, selector search/sort, bounded town pages and real callbacks, separation of estimates and regard, live focus/selection retention, both-mode contrast, and the empty-hearsay map action. The unfinished Home People/Council work is deliberately excluded from this checkpoint.
+
+## Hearsay follow-up
+
+Nonempty hearsay now uses one selected telling with a searchable selector. The selector popup is capped in height; its full route, provenance, uncertainty and previous unsuccessful searches appear together with the existing map/expedition actions. A visible match/total count explains the search. A query with no matches hides the previous telling until the search is cleared, while remembering the selection. The provider no longer truncates its presentation to six network leads/eight total tellings; the complete existing intelligence remains reachable. Long civilization and telling names cannot widen the page through the native selector's minimum size.
+
+The 21-telling native fixture checks unfiltered, filtered and no-match cases at 2869, 1600 and 1024. Tests verify late entries remain available, selection/query/focus survive updates, and original map/planning callbacks still fire. A independently critiqued the first render; the visible matching count and shorter unsuccessful-search wording address that review.

@@ -32,6 +32,7 @@ const FIND_ITEMS:=3
 ## The Peoples-we-know ledger's own view (the column it is sorted by, the
 ## other way round, whose towns are open), kept across the daily rebuilds.
 var peoples_view:Dictionary={"sort":"people","flip":false,"open":""}
+var known_world_view:Dictionary={"lead":"","query":""}
 ## World › Peoples' one counter line and its pointer, made by peoples_tab().
 var counter:=""
 var counter_tip:=""
@@ -79,7 +80,7 @@ func known_world_blocks(exploration:Dictionary)->Array:
 	var blocks:Array=[]
 	var peoples:=peoples_block()
 	if not peoples.is_empty():blocks.append(peoples)
-	blocks.append({"type":"known_world","compact":true,"model":known_world_model(exploration)})
+	blocks.append({"type":"known_world","compact":true,"model":known_world_model(exploration),"view":known_world_view})
 	return blocks
 
 ## "Peoples we know" (hud/peoples_known_board.gd); {} before we meet anyone.
@@ -428,19 +429,18 @@ func _peoples_model(encounters:Array,home:Vector2,pace:float)->Array:
 
 func _leads_model(leads:Array,home:Vector2,pace:float)->Array:
 	var result:Array=[]
-	for lead:Dictionary in leads.slice(0,6):
+	for lead:Dictionary in leads:
 		var center:=vec(lead.get("center",{}))
 		var confidence:=float(lead.get("confidence",0.0))
 		var word:="A firm telling" if confidence>=.35 else ("An uncertain telling" if confidence>=.15 else "A faint telling")
 		var direction:=compass(home,center) if center!=Vector2.INF else "unknown"
 		var distance:=walk_text(home.distance_to(center),pace) if center!=Vector2.INF else "an unknown distance"
-		result.append({"name":String(lead.get("name","")),"confidence":confidence,"word":word,
+		result.append({"id":String(lead.get("id","")),"name":String(lead.get("name","")),"confidence":confidence,"word":word,
 			"text":"%s spoke of %s, somewhere to the %s — %s." % [_first_upper(String(lead.get("via","travelers"))),preload("res://scripts/hud/known_world_board.gd").the_name(String(lead.get("name","strangers"))),direction,distance],
 			"where":"%s · %s" % [_first_upper(direction) if direction!="unknown" else "?",distance.replace("about ","~").replace(" days' walk"," days").replace("more than a season's walk","a season+").replace("within a day's walk","<1 day")],
 			"stale":String(lead.get("state",""))=="stale","searched":int(lead.get("attempts",0))})
 	for rumored:Dictionary in CivilizationSystem.rumored_civilizations_snapshot():
-		if result.size()>=8:break
-		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
+		result.append({"id":"heard:"+String(rumored.get("name",""))+":"+String(rumored.get("direction","")),"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
 			"text":"Some speak of the %s, off to the %s, %s away." % [String(rumored.get("name","strangers")),String(rumored.get("direction","an unknown direction")),String(rumored.get("distance_hint","an unknown distance"))],"stale":false,"searched":0})
 	return result
 
