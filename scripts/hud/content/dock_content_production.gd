@@ -17,6 +17,7 @@ const STORE_RESOURCES:=["Timber","Fiber Plants","Stone","Clay","Copper Ore"]
 ## Actions the screen shows by itself changing; only their errors need a note.
 const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
+var view_state:Dictionary={}
 func meta()->Dictionary:
 	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "title_size":38, "spread_tabs":true, "subtabs":["Daily work","Daily work","Workshop orders"], "hidden_subtabs":[1], "subtab_aliases":{1:0}, "fit_height":true}
 func _ensure_workshop()->void:
@@ -26,7 +27,7 @@ func tab(sub:int)->Dictionary:
 	# Two tasks: follow the day's work, or direct workshop orders. The old
 	# Civilian index is retained as a deep-link alias to the combined daily page.
 	var mode:="military" if sub>=2 else "all"
-	var block:={"type":"production_queue","mode":mode,"on_open":func(section:String,page:int)->void:
+	var block:={"type":"production_queue","mode":mode,"view_state":view_state,"on_open":func(section:String,page:int)->void:
 		if is_instance_valid(hud):hud.section_requested.emit(section,page),
 		"on_materials":func()->void:
 		if is_instance_valid(hud):hud.section_requested.emit("economy",1)}
@@ -367,7 +368,7 @@ static func recipe_list(lines:Array,stock:Array=[])->Array:
 			full=" ".join(blockers);reason=Plain.blocker_text(String(blockers[0]))
 		var category:=Logistics.category(item)
 		result.append({"item":item,"name":production.product_name(item),"group":_group(item),"category":category,"needs":text,"materials":bill,
-			"arms":Logistics.arms(item),"description":production.product_description(item),"blocker":reason,"blocker_full":full,"running":item in running,"start_target":START_TARGET,"deficit":int(short.get(item,0))})
+			"arms":Logistics.arms(item),"description":production.product_description(item),"blocker":reason,"blocker_full":full,"capacity_note":String(gate.get("error","")),"running":item in running,"start_target":START_TARGET,"deficit":int(short.get(item,0))})
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var ga:=Logistics.CATEGORY_ORDER.find(String(a.category));var gb:=Logistics.CATEGORY_ORDER.find(String(b.category))
 		return ga<gb if ga!=gb else String(a.name)<String(b.name))
@@ -560,7 +561,8 @@ static func _technique_list()->Array:
 	for id:String in goods.TECHNIQUES:
 		if id not in GameState.known_discoveries:continue
 		var adoption:=DiscoverySystem.adoption(id)
-		rows.append({"id":id,"name":String(DiscoverySystem.discovery_definition(id).get("name",id.capitalize())),"adoption":adoption,"working":adoption*goods.factor(id)})
+		var definition:Dictionary=DiscoverySystem.discovery_definition(id)
+		rows.append({"id":id,"name":String(definition.get("name",id.capitalize())),"adoption":adoption,"working":adoption*goods.factor(id),"benefit":preload("res://scripts/effect_explainer.gd").summary(definition.get("effects",{}))})
 	return rows
 
 static func _technique_rows()->Array:

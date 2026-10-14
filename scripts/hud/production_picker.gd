@@ -1,93 +1,59 @@
 extends VBoxContainer
-## The equipment cards that start a new line (HOI4's right-hand picker): one
-## card per product the people know how to make, grouped by kind, each with
-## its mark, name, materials for one item and who it arms. Clicking a card
-## starts a line; a card that cannot start says why in a few words, and in
-## full in its tooltip. Built once per shape; apply() refreshes in place.
-const Folio:=preload("res://scripts/hud/production_folio.gd")
-const T:=preload("res://scripts/hud/hud_tokens.gd")
-const Icons:=preload("res://scripts/resource_icons.gd")
-const Plain:=preload("res://scripts/hud/production_plain.gd")
-const Ledger:=preload("res://scripts/equipment_ledger.gd")
-const GROUP_NAMES:={"weapons":"Weapons","ammunition":"Ammunition","carts":"Carts","boats":"Boats","aircraft":"Aircraft"}
-
+## Browse products without creating an order until its concrete action is chosen.
+const Folio=preload("res://scripts/hud/production_folio.gd")
+const T=preload("res://scripts/hud/hud_tokens.gd")
+const Plain=preload("res://scripts/hud/production_plain.gd")
+const Ledger=preload("res://scripts/equipment_ledger.gd")
+const GROUP_NAMES={"weapons":"Weapons","ammunition":"Ammunition","carts":"Carts","boats":"Boats","aircraft":"Aircraft"}
 var screen:Node
 var cards:Dictionary={}
+var readings:Dictionary={}
 var room:Label
+var browser:Control
 
 func build(owner_screen:Node,recipes:Array,note:String)->void:
-	screen=owner_screen;name="Picker"
-	add_theme_constant_override("separation",6)
-	var head:=HBoxContainer.new();add_child(head)
-	var kicker:=Label.new();kicker.text="Start a line";T.text(kicker,"body",T.INK);kicker.add_theme_font_override("font",T.font("ui_strong"));kicker.add_theme_font_size_override("font_size",24);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
-	room=Label.new();room.name="Room";T.text(room,"small",T.INK_MUTED);room.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(room)
-	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;add_child(rule)
-	if recipes.is_empty():
-		var none:=Label.new();none.text="Your people know no workshop crafts yet.";T.text(none,"small",T.INK_MUTED);none.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(none)
-	var group:=""
+	screen=owner_screen;name="Picker";add_theme_constant_override("separation",8)
+	room=_label(self,"",15,T.INK_MUTED);room.name="Room"
+	browser=screen._selection(self,"recipes",6)
 	for recipe:Dictionary in recipes:
-		if String(recipe.category)!=group:
-			group=String(recipe.category)
-			var heading:=Label.new();heading.text=String(GROUP_NAMES.get(group,group.capitalize()));T.text(heading,"small",T.INK_MUTED)
-			heading.add_theme_font_override("font",T.font("ui_strong"));add_child(heading)
-		var card:=_card(recipe);add_child(card);cards[String(recipe.item)]=card
-	apply(recipes,note)
+		var item:=String(recipe.item)
+		var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10)
+		browser.add_record(item,String(recipe.name),String(GROUP_NAMES.get(String(recipe.category),String(recipe.category).capitalize())),content)
+		var lead:=HBoxContainer.new();lead.add_theme_constant_override("separation",14);content.add_child(lead)
+		var picture:=TextureRect.new();picture.texture=Folio.product_texture(item);picture.custom_minimum_size=Vector2(80,80);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;lead.add_child(picture)
+		var title:=_label(lead,String(recipe.name),25,T.INK);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_label(content,String(recipe.get("description","")),17,T.INK)
+		var stats:=String(Ledger.card_words(item));if not stats.is_empty():_label(content,stats,15,T.INK_MUTED)
+		var needs:=_label(content,_needs(recipe),16,T.INK);needs.name="MaterialsForOne"
+		var condition:=_label(content,"",15,T.AMBER_TEXT)
+		var action:=Button.new();action.name="Recipe_"+item;action.custom_minimum_size.y=44;T.apply_button_style(action,true);content.add_child(action);cards[item]=action
+		action.pressed.connect(func():screen.act(0,"start",0.0,item))
+		content.move_child(condition,content.get_child_count()-1)
+		readings[item]={"condition":condition,"needs":needs}
+	if recipes.is_empty():_label(self,"Your people know no workshop crafts yet.",16,T.INK_MUTED)
+	browser.refresh();apply(recipes,note)
 
 func apply(recipes:Array,note:String)->void:
-	room.text="Every workshop line is in use." if note=="ALL LINES BUSY" else note.to_lower()+" workshop places"
+	room.text="Every workshop line is in use. Review a current order to free a place." if note=="ALL LINES BUSY" else note.to_lower()+" workshop places · choose a product to see what it makes and what it needs"
 	for recipe:Dictionary in recipes:
-		var card:Button=cards.get(String(recipe.item))
-		if card==null:continue
-		var blocker:=String(recipe.get("blocker",""))
-		var running:=bool(recipe.get("running",false))
-		card.disabled=running or not blocker.is_empty()
-		var tag:Label=card.find_child("Tag",true,false)
-		# "No free line" is said once, above the cards; the card only dims. A
-		# kind the bands are short of, with no line making it, says so.
-		var deficit:=int(recipe.get("deficit",0))
-		tag.text="Making" if running else ("" if blocker.is_empty() or blocker=="No free line" else blocker)
-		if tag.text.is_empty() and deficit>0 and not running:tag.text="%d short" % deficit
-		tag.visible=not tag.text.is_empty()
-		tag.add_theme_color_override("font_color",T.GREEN_TEXT if running else T.RED_TEXT)
-		var name_label:Label=card.find_child("Title",true,false)
-		name_label.add_theme_color_override("font_color",T.INK if not card.disabled else T.INK_MUTED)
-		var tip:PackedStringArray=[String(recipe.name)+": "+String(recipe.get("description",""))]
-		# What the kit does, by the equipment ledger's own numbers.
-		var numbers:=String(Ledger.card_words(String(recipe.item)))
-		if numbers!="":tip.append(numbers)
-		tip.append(String(recipe.get("needs","")))
-		if int(recipe.get("deficit",0))>0 and not running:tip.append("The bands are %d short of these." % int(recipe.deficit))
-		if running:tip.append("A line already makes this. Give it more hands instead.")
-		elif not blocker.is_empty():tip.append(String(recipe.get("blocker_full",blocker)))
-		else:tip.append("Click to start a line that keeps %d in store." % int(recipe.get("start_target",10)))
-		card.tooltip_text="\n".join(tip)
+		var item:=String(recipe.item);var action:Button=cards.get(item)
+		if action==null:continue
+		var blocker:=String(recipe.get("blocker",""));var running:=bool(recipe.get("running",false));var deficit:=int(recipe.get("deficit",0))
+		action.disabled=running or not blocker.is_empty()
+		action.text="Already in production" if running else "Start line · keep %d in store" % int(recipe.get("start_target",10))
+		var why:="A line already makes this. Give it more hands on Current orders." if running else String(recipe.get("blocker_full",blocker)) if not blocker.is_empty() else "The line rests when its stock target is filled and resumes when goods are used."
+		var why_full:=why
+		if blocker=="No free line" and not String(recipe.get("capacity_note","")).is_empty():why=why.trim_prefix(String(recipe.capacity_note)).strip_edges()
+		readings[item].condition.visible=not why.is_empty() or deficit>0
+		readings[item].condition.text=("The bands are %d short. " % deficit if deficit>0 else "")+why
+		readings[item].needs.text=_needs(recipe)
+		action.tooltip_text=String(recipe.name)+": "+String(recipe.get("description",""))+"\n"+_needs(recipe)+"\n"+why_full
+		browser.update_record(item,String(recipe.name),"Making" if running else blocker if not blocker.is_empty() else "%d short" % deficit if deficit>0 else String(GROUP_NAMES.get(String(recipe.category),String(recipe.category).capitalize())))
 
-func _card(recipe:Dictionary)->Button:
-	var card:=Button.new();card.name="Recipe_"+String(recipe.item);card.focus_mode=Control.FOCUS_ALL
-	card.custom_minimum_size=Vector2(0,108);card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	T.apply_button_style(card)
-	var item:=String(recipe.item)
-	card.pressed.connect(func():screen.act(0,"start",0.0,item))
-	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);margin.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	for side:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+side,8 if side in ["left","right"] else 6)
-	card.add_child(margin)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;margin.add_child(row)
-	var mark:=TextureRect.new();mark.texture=Folio.product_texture(item);mark.custom_minimum_size=Vector2(56,56)
-	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
-	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
-	var top:=HBoxContainer.new();top.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(top)
-	var title:=Label.new();title.name="Title";title.text=String(recipe.name);T.text(title,"body",T.INK);title.add_theme_font_override("font",T.font("ui_strong"))
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(title)
-	var tag:=Label.new();tag.name="Tag";T.text(tag,"kicker",T.RED_TEXT);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(tag)
-	var cost:=HBoxContainer.new();cost.name="Cost";cost.add_theme_constant_override("separation",3);cost.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(cost)
-	var shown:=0
-	for material:Dictionary in recipe.get("materials",[]):
-		if shown>=4:break
-		shown+=1
-		var icon:=TextureRect.new();icon.texture=Icons.material_texture(String(material.resource),32);icon.custom_minimum_size=Vector2(16,16)
-		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;cost.add_child(icon)
-		var amount:=Label.new();amount.text=Plain.number(float(material.amount));T.text(amount,"kicker",T.BODY);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE;cost.add_child(amount)
-		var gap:=Control.new();gap.custom_minimum_size.x=4;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;cost.add_child(gap)
-	var arms:=Label.new();arms.name="Arms";arms.text=String(recipe.get("arms",""));T.text(arms,"kicker",T.INK_MUTED);arms.clip_text=true;arms.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(arms)
-	arms.visible=not arms.text.is_empty()
-	return card
+func _label(parent:Node,text:String,points:int,color:Color)->Label:
+	var label:=T.make_label(text,points,color);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(label);return label
+
+func _needs(recipe:Dictionary)->String:
+	var parts:PackedStringArray=[]
+	for material:Dictionary in recipe.get("materials",[]):parts.append("%s %s" % [Plain.number(float(material.amount)),String(material.get("name",ResourceSystem.display_name(String(material.resource)))).to_lower()])
+	return "Each needs "+", ".join(parts) if not parts.is_empty() else String(recipe.get("needs","Needs no materials"))

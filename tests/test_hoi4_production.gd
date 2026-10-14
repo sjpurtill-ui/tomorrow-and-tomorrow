@@ -243,7 +243,7 @@ func test_raised_levy_is_armed_by_staff_and_the_line_says_for_whom()->void:
 	assert_bool(auto.visible).is_true()
 	assert_str(auto.tooltip_text).starts_with("Auto:")
 
-func test_main_surface_has_no_paragraphs()->void:
+func test_compact_chrome_keeps_full_explanation_in_selected_reading()->void:
 	_room_for_lines(3);_officers();_levy_at_home(20,12)
 	for item:String in ["improvised","spear"]:MilitaryCampaign.start_production_line(item,20)
 	MilitaryCampaign.damaged_equipment={"spear":2}
@@ -256,6 +256,10 @@ func test_main_surface_has_no_paragraphs()->void:
 			elif node is Button:text=(node as Button).text
 			else:continue
 			if not (node as Control).is_visible_in_tree():continue
+			# Full explanations now belong beside one selected item, as requested.
+			if node.name in ["HouseholdReading","StockReading"]:
+				assert_int((node as Label).get_theme_font_size("font_size")).is_greater_equal(14)
+				continue
 			assert_int(text.split(" ",false).size()).override_failure_message("Too many words on the surface: "+text).is_less_equal(12)
 			if node is Label:assert_int((node as Label).get_theme_font_size("font_size")).is_greater_equal(12)
 
