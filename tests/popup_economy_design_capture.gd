@@ -64,6 +64,11 @@ func _run()->void:
 	var trade_ids:Array=[]
 	if _arg("page","all")=="trade":trade_ids=TradeFixture.prepare_fixture(_arg("state","barter"))
 	else:fixture._fixture(_arg("state","opening"))
+	if _arg("partners","")=="filled" and not trade_ids.is_empty():
+		for index in 10:
+			var contact:Dictionary=CivilizationSystem.civilizations[2].duplicate(true)
+			contact.id="word_%02d" % index;contact.name="Word people %02d" % index
+			CivilizationSystem.civilizations.append(contact)
 	if _arg("history","")=="filled":
 		var scope:=GameState.selected_player_settlement_id
 		for index in 13:
@@ -83,7 +88,11 @@ func _run()->void:
 		var home:=GameState.selected_player_settlement_id
 		GameState.society_capacities.logistics=0.45;GameState.society_capacities.institutions=0.3
 		GameState.city_trade_shipments.assign([{"source_id":home,"source_name":"Reedwater","destination_id":"river","destination_name":"Long Willow River","resource":"Timber","quantity":24.0,"arrival_day":day+5},{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Food","quantity":110.0,"arrival_day":day+1}])
+		if _arg("routes","")=="filled":
+			for index in 11:GameState.city_trade_shipments.append({"source_id":home,"source_name":"Reedwater","destination_id":"river","destination_name":"River town %02d" % index,"resource":"Stone","quantity":float(index+1)*4.0,"arrival_day":day+index+2})
 		GameState.city_trade_history.assign([{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Stone","delivered":5.0,"day":day-3,"status":"delivered"}])
+		if _arg("routes","")=="filled":
+			for index in 10:GameState.city_trade_history.append({"source_id":"river","source_name":"River town %02d" % index,"destination_id":home,"destination_name":"Reedwater","resource":"Timber","delivered":float(index+1)*3.0,"day":day-index-4,"status":"delivered"})
 	var canvases:Array[Vector2i]=[Vector2i(1440,900),Vector2i(1000,760)]
 	if _arg("canvases","")!="":
 		canvases.clear()
@@ -105,6 +114,12 @@ func _run()->void:
 				await _capture(viewport,output,"economy-%s-%s-%s-%d" % [tag,page[1],palette,canvas.x])
 				dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
 				await _capture(viewport,output,"economy-%s-%s-bottom-%s-%d" % [tag,page[1],palette,canvas.x])
+				if page[1]=="deliveries" and _arg("routes","")=="filled":
+					(dock.find_child("NextShipments",true,false) as Button).pressed.emit();dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-deliveries-next-%s-%d" % [tag,palette,canvas.x])
+					(dock.find_child("EveryArrival",true,false) as Button).pressed.emit();await _settle()
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-deliveries-archive-%s-%d" % [tag,palette,canvas.x])
 				if page[1]=="food":
 					provider.short_food=true;dock.present(provider,0);dock.body_scroll.scroll_vertical=0;await _settle()
 					await _capture(viewport,output,"economy-%s-food-shortage-%s-%d" % [tag,palette,canvas.x]);provider.short_food=false
@@ -154,11 +169,15 @@ func _run()->void:
 					provider.selected_account=""
 				if page[1]=="trade" and not trade_ids.is_empty() and _arg("state","barter")!="word":
 					var board:=dock.find_child("TradeBoard",true,false)
+					board._choose_partner(String(trade_ids[0]))
 					if not bool(board.expanded_people.get(String(trade_ids[0]),false)):board._toggle_people(String(trade_ids[0]))
 					dock.body_scroll.scroll_vertical=0;await _settle()
 					await _capture(viewport,output,"economy-%s-trade-terms-%s-%d" % [tag,palette,canvas.x])
 					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
 					await _capture(viewport,output,"economy-%s-trade-terms-bottom-%s-%d" % [tag,palette,canvas.x])
+					(board.find_child("ExchangeEvidence",true,false) as Button).pressed.emit();await _settle()
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-trade-evidence-%s-%d" % [tag,palette,canvas.x])
 					for menu_name:String in ["Stance_squeeze","BuyWithGoods"]:
 						var partner:=board.find_child("People_"+String(trade_ids[0]),true,false)
 						var menu:=partner.find_child(menu_name,true,false) as MenuButton
@@ -166,6 +185,13 @@ func _run()->void:
 						dock.body_scroll.ensure_control_visible(menu);await _settle()
 						menu.show_popup();await _settle()
 						await _capture(viewport,output,"economy-%s-trade-%s-%s-%d" % [tag,menu_name,palette,canvas.x]);menu.get_popup().hide();await _settle()
+					board._choose_partner(String(trade_ids[1]));dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-trade-blocked-%s-%d" % [tag,palette,canvas.x])
+					if _arg("partners","")=="filled":
+						board.browse_open=true;board._responsive()
+						(board.find_child("NextPartners",true,false) as Button).pressed.emit();await _settle()
+						dock.body_scroll.ensure_control_visible(board.find_child("PartnerBrowser",true,false));await _settle()
+						await _capture(viewport,output,"economy-%s-trade-partners-%s-%d" % [tag,palette,canvas.x])
 			viewport.queue_free();await get_tree().process_frame
 	fixture.free()
 	if _arg("page","all")=="trade":TradeFixture.cleanup_fixture()
