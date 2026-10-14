@@ -64,14 +64,31 @@ func founding_block()->Dictionary:
 		stage_row["tag"]={"text":"%s at %s" % [String(next.name).to_lower(),EraWords.grouped(int(next.people))],"tone":""}
 	var rows:Array=[stage_row,{"icon":preload("res://scripts/resource_icons.gd").domain_texture("infrastructure",Tokens.INK),"cells":{"place":"The seat","where":"","people":EraWords.grouped(Places.seat_people())}}]
 	var today:=int(GameState.elapsed_days)
+	# Places alike (the same site, the same number of people, the same way)
+	# are one line: "10 villages · on the sea shore · 1,606 each", their names
+	# in its pointer. A place that differs keeps its own line.
+	var alike:={}
+	var order:Array=[]
 	for place:Dictionary in Places.list():
 		var trend:=float(place.get("target",0.0))-float(place.get("share",0.0))
 		var way:="growing" if trend>0.0005 else ("shrinking" if trend<-0.0005 else "steady")
-		var tone:="good" if way=="growing" else ("warn" if way=="shrinking" else "")
-		if today<int(place.get("setback_until",-1)):way="rebuilding";tone="bad"
-		rows.append({"icon":preload("res://scripts/resource_icons.gd").domain_texture("ecology",Tokens.TEAL),"cells":{"place":String(place.get("name","")),"where":Places.site_words(String(place.get("kind",""))),"people":EraWords.grouped(Places.people(place))},
-			"tag":{"text":way,"tone":tone}})
-	return {"type":"table","heading":"Where our people live","columns":[{"key":"place","label":"Place"},{"key":"where","label":"Where","width":150},{"key":"people","label":"People","width":80,"align":"right"}],"rows":rows}
+		if today<int(place.get("setback_until",-1)):way="rebuilding"
+		var key:=[String(place.get("kind","")),Places.people(place),way]
+		var id:=str(key)
+		if not alike.has(id):alike[id]={"key":key,"names":[]};order.append(id)
+		(alike[id].names as Array).append(String(place.get("name","")))
+	for id in order:
+		var group:Dictionary=alike[id]
+		var names:Array=group.names
+		var way:=String(group.key[2])
+		var tone:="good" if way=="growing" else ("warn" if way=="shrinking" else ("bad" if way=="rebuilding" else ""))
+		var one:=names.size()==1
+		var where:=Places.site_words(String(group.key[0]))
+		var people:=EraWords.grouped(int(group.key[1]))
+		rows.append({"icon":preload("res://scripts/resource_icons.gd").domain_texture("ecology",Tokens.TEAL),
+			"cells":{"place":String(names[0]) if one else "%d villages" % names.size(),"where":where,"people":people if one else "%s each" % people},
+			"tag":{"text":way,"tone":tone},"tip":"" if one else ", ".join(PackedStringArray(names))+"."})
+	return {"type":"table","heading":"Where our people live","columns":[{"key":"place","label":"Place"},{"key":"where","label":"Where","width":150},{"key":"people","label":"People","width":96,"align":"right"}],"rows":rows}
 
 func _city_tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()

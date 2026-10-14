@@ -143,6 +143,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"table": Dense.render_table(section,block)
 			"costs": Dense.render_costs(section,block)
 			"frame": Dense.render_frame(section,block)
+			"columns": Dense.render_columns(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
 			# No talk or order boxes in a dock: every conversation happens in the

@@ -280,8 +280,9 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			# the whole people's watch at home and every town's townsfolk who rise.
 			# With more towns than one, the row says so in its name.
 			var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
-			value=untrained_words(int(standing.on_watch),int(standing.can_rise))
+			# The label says the scope: all our towns (can_rise), or home alone (can_rise_home).
 			var several:=WorldSimulation.state.player_settlements.size()>1
+			value=untrained_words(int(standing.on_watch),int(standing.can_rise) if several else int(standing.can_rise_home))
 			return {"key":key,"name":"Fighters, all our towns" if several else "Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
 				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The army at home (its home guard and those free to send), and the townsfolk who take up arms when raiders come."}
 		"fortification":

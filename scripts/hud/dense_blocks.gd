@@ -27,6 +27,8 @@ extends RefCounted
 ##         that starts it beside the cost:
 ##   {type:"costs", heading?, label?, items:[{resource, have, need}],
 ##    button?:{label, on_press, tip?, disabled?}}
+## columns  blocks side by side, equal widths, stacking when narrow:
+##   {type:"columns", stack_below? (px, 640), ratios?: [1.3, 0.9], columns:[[block, ...], [block, ...]]}
 ## frame   a ruled panel holding other blocks, its title and verbs on one
 ##         line (an inline planner, a group of rows that belong together):
 ##   {type:"frame", heading, actions?:[{label, on_press, tip?}], blocks:[...]}
@@ -297,6 +299,27 @@ class Pips extends Control:
 
 
 # --- frame -----------------------------------------------------------------------
+
+## Blocks side by side, each column as wide as the others (a wide page's
+## two or three columns); below `stack_below` px wide they stack instead.
+static func render_columns(parent:VBoxContainer,block:Dictionary)->BoxContainer:
+	var row:=BoxContainer.new();row.name="Columns";row.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation",24)
+	parent.add_child(row)
+	var ratios:Array=block.get("ratios",[])
+	var index:=0
+	for column_blocks in block.get("columns",[]):
+		var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",10)
+		# Columns share the width by `ratios` (default even).
+		if index<ratios.size():column.size_flags_stretch_ratio=float(ratios[index])
+		index+=1
+		row.add_child(column)
+		preload("res://scripts/hud/dock_blocks.gd").render(column,column_blocks)
+	var narrow:=float(block.get("stack_below",640.0))
+	var fit:=func()->void:row.vertical=row.size.x>0.0 and row.size.x<narrow
+	row.resized.connect(fit)
+	return row
+
 
 static func render_frame(parent:VBoxContainer,block:Dictionary)->PanelContainer:
 	var frame:=PanelContainer.new();frame.name="Frame";frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
