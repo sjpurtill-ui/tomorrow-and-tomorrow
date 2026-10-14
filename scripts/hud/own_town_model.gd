@@ -33,7 +33,7 @@ const OWNERS:={"life_expectancy":["health",0,"Health"],"infant_mortality":["heal
 ## Foreign towns drawn for comparison, most recently seen first.
 const MAX_TOWNS:=3
 ## The foreign field each of our rows is compared with.
-const FOREIGN_KEY:={"population":"population","life_expectancy":"life_expectancy","infant_mortality":"infant_mortality","learning":"education","garrison":"garrison","fortification":"fortification","damage":"damage","supply":"supply","production":"production","logistics":"logistics"}
+const FOREIGN_KEY:={"population":"population","life_expectancy":"life_expectancy","infant_mortality":"infant_mortality","learning":"education","garrison":"garrison","fortification":"fortification","damage":"damage","supply":"supply"}
 const TENS:=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"]
 const TEENS:=["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"]
 
@@ -119,7 +119,30 @@ static func facts(settlement:Dictionary,strong:Dictionary={})->Dictionary:
 		"hauling":GameState.material_metrics.get("flow_ratio",null),"goods":Goods.coverage(),
 		"condition":float(SettlementModel.city_form().get("condition",1.0)),"broken":broken_share(),
 		"completed":(GameState.settlement_completed as Array).duplicate(),"works_known":maxi(known,GameState.settlement_completed.size()),
-		"building":building,"strength":strong.duplicate(),"fabric":preload("res://scripts/built_fabric.gd").report()}
+		"building":building,"strength":strong.duplicate(),"fabric":preload("res://scripts/built_fabric.gd").report(),
+		"under_way":under_way(building) if primary else ([{"name":String(building.name),"state":"building" if bool(building.get("active",false)) else "waiting","progress":float(building.get("progress",0.0))}] if not building.is_empty() else []),
+		"workshops":preload("res://scripts/hud/content/dock_content_construction.gd").new(null,null)._workshops_row() if primary else {}}
+	return out
+
+## What the Buildings page shows under way, in its words: the civic work
+## (its _project reading), the defences (home_defense.gd reading) and a
+## landmark (great_works.gd), each {name, state, progress}.
+static func under_way(building:Dictionary)->Array:
+	var out:Array=[]
+	if not building.is_empty():
+		out.append({"name":String(building.name),"state":"building" if bool(building.get("active",false)) else "waiting","progress":float(building.get("progress",0.0))})
+	var defence:Dictionary=preload("res://scripts/home_defense.gd").reading()
+	var raising:Dictionary=defence.get("building",{})
+	var status:=String(defence.get("status",""))
+	var said:={"building":"building","stalled":"stopped","waiting":"waiting","held":"held","hungry":"food short"}
+	if not raising.is_empty() and said.has(status):
+		out.append({"name":String(raising.get("short","Defences")),"state":String(said[status]),"progress":float(raising.get("progress",0.0)) if raising.get("progress") is float else 0.0})
+	elif status in ["waiting","held","hungry","stalled"] and not (defence.get("next",{}) as Dictionary).is_empty():
+		out.append({"name":String((defence.next as Dictionary).get("short","Defences")),"state":String(said[status]),"progress":0.0})
+	for work:Dictionary in preload("res://scripts/great_works.gd").works():
+		if String(work.get("status","")) not in ["building","stalled"]:continue
+		out.append({"name":String(work.get("name","A landmark")),"state":"%d%%" % roundi(float(work.get("progress",0.0))*100.0) if String(work.status)=="building" else "stopped","progress":float(work.get("progress",0.0))})
+		break
 	return out
 
 ## The share of the town's buildings standing damaged or in ruins, from its
@@ -253,8 +276,13 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 					"meaning":"The home guard posted here (the watch, shared among our towns by their people), and the townsfolk who take up arms when raiders come. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
 			# Those free for the bands keep watch too: never one count with the
 			# townsfolk, who are no soldiers (the map badge sets them apart).
-			if trained>0:value=untrained_words(trained+int(s.get("watch",0)),int(s.get("rise",0)))
-			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
+			# Home's figure is War's own count (watch_military.gd home_standing):
+			# the whole people's watch at home and every town's townsfolk who rise.
+			# With more towns than one, the row says so in its name.
+			var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+			value=untrained_words(int(standing.on_watch),int(standing.can_rise))
+			var several:=WorldSimulation.state.player_settlements.size()>1
+			return {"key":key,"name":"Fighters, all our towns" if several else "Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
 				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The army at home (its home guard and those free to send), and the townsfolk who take up arms when raiders come."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
@@ -294,13 +322,25 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			return {"key":key,"name":"Water","value":value,"number":ratio,"own":maxf(ratio,0.0),"capacity":true,
 				"note_tone":String(reading.get("tone","muted")),"reading":reading,"meaning":"Who has the water they need each day."}
 		"production":
+			# The Buildings page's own figures (built_fabric.gd cover, and its
+			# workshops row's staffing), not a word of our own. `number` stays
+			# the makers' capacity a stranger's scout would count.
 			var capacity:=clampf(float(f.material),0.0,1.0)
-			return {"key":key,"name":V.label("production"),"value":V.words("production",_exact(capacity)),"number":capacity,"own":capacity,"capacity":true,
-				"meaning":"How busy our makers are."}
+			var r:Dictionary=f.get("fabric",{})
+			var shop:Dictionary=f.get("workshops",{})
+			var row:={"key":key,"name":"Work buildings","value":"%d/100" % roundi(float(r.get("cover",0.0))*100.0),"number":capacity,"own":float(r.get("cover",0.0)),"capacity":true,
+				"meaning":"How fully workshops, granaries, kilns, storehouses and water works serve the town (the Buildings page)."}
+			if not shop.is_empty() and String(shop.get("value",""))!="Fully staffed":
+				var needs:Array=shop.get("needs",[])
+				var have:=0;var need:=0
+				for one:Dictionary in needs:have+=int(one.get("have",0));need+=int(one.get("need",0))
+				row["note"]="short-handed %s / %s" % [EraWords.grouped(have),EraWords.grouped(need)];row["note_tone"]="warn"
+			return row
 		"logistics":
 			var capacity:=clampf(float(f.logistics),0.0,1.0)
-			return {"key":key,"name":V.label("logistics"),"value":V.words("logistics",_exact(capacity)),"number":capacity,"own":capacity,"capacity":true,
-				"meaning":"How easily food and goods are carried home."}
+			var r:Dictionary=f.get("fabric",{})
+			return {"key":key,"name":"Roads","value":"%d/100" % roundi(float(r.get("roads",0.0))*100.0),"number":capacity,"own":float(r.get("roads",0.0)),"capacity":true,
+				"meaning":"The road index on the Buildings page: how good the town's roads are."}
 		"roofs":
 			var people:=int(f.population);var places:=int(f.places)
 			var outside:=maxi(0,people-places)
@@ -330,17 +370,24 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 		"works":
 			var built:=(f.completed as Array).size()
 			var known:=maxi(built,int(f.works_known))
+			# Every known work standing is no news: no row.
+			if built>=known:return {}
 			return {"key":key,"name":"Works built","value":"%d of %d" % [built,known],"number":built,"own":float(built)/float(maxi(1,known)),"capacity":true,
 				"meaning":"Shared works the people have raised here, of those they know how to raise."}
 		"building":
-			var project:Dictionary=f.building
-			if project.is_empty():
-				return {"key":key,"name":"Building now","value":"nothing","number":0.0,"own":0.0,"capacity":true,"meaning":"No shared work is under way."}
-			var progress:=clampf(float(project.get("progress",0.0)),0.0,1.0)
-			var waiting:=not bool(project.get("active",false))
-			return {"key":key,"name":"Building now","value":String(project.name),"number":progress,"own":progress,"capacity":true,
-				"note":EraWords.way_along(progress) if not waiting else "waiting","note_tone":"warn" if waiting else "muted",
-				"state":String(project.get("state","")),"meaning":"It "+String(project.get("effect","serves the town"))+"."}
+			# What the Buildings page has under way: the civic work, the
+			# defences and a landmark, each with its state there. Nothing under
+			# way is no row.
+			var parts:Array=f.get("under_way",[])
+			if parts.is_empty():return {}
+			var words:PackedStringArray=[]
+			var waiting:=false
+			for part:Dictionary in parts:
+				words.append("%s %s" % [String(part.name),String(part.state)])
+				if String(part.state) in ["waiting","stopped","held","food short"]:waiting=true
+			var first:Dictionary=parts[0]
+			return {"key":key,"name":"Building now","value":" · ".join(words),"number":float(first.get("progress",0.0)),"own":float(first.get("progress",0.0)),"capacity":true,
+				"note_tone":"warn" if waiting else "","state":String(first.get("state","")),"meaning":"Under way on the Buildings page."}
 	return {}
 
 ## How well what is known is kept and passed on (the education index), said

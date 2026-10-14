@@ -102,7 +102,9 @@ func test_city_navigation_and_overview_layout()->void:
 		assert_int(panel.body.get_child_count()).is_greater(0)
 		var screen:Node=panel.body.find_child("PeopleScreen",true,false)
 		assert_object(screen).is_not_null()
-		assert_int((screen.get("columns") as GridContainer).columns).is_equal(2 if width>=1200 else 1)
+		# Two columns when wide and there are vitals beside the story; the top bar and Home carry them all now, so one.
+		var vitals_shown:bool=(screen.find_child("Vitals",true,false) as Control).visible
+		assert_int((screen.get("columns") as GridContainer).columns).is_equal(2 if width>=1200 and vitals_shown else 1)
 	panel.queue_free();hud.queue_free();await get_tree().process_frame
 
 func test_unsettled_overview_keeps_actual_carried_stores()->void:
