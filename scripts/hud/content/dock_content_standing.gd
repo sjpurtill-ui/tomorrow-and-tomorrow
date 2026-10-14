@@ -297,13 +297,13 @@ static func _rank(id:String)->int:
 static func _fix_for(id:String,our:Dictionary)->Dictionary:
 	match id:
 		"envy","tribute_demand":
-			return {"words":"More under arms and ready would make them think again (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Warriors"}
+			return {"words":"More under arms and ready would make them think again (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Raise the army"}
 		"grudge","redress_demand":
 			return {"words":"An envoy with gifts or redress can ease a grudge.","section":"","sub":0,"action":""}
 		"league":
 			return {"words":"Fear binds them: fewer warbands at their borders, gifts and kept word ease it; more spears only deepen it.","section":"","sub":0,"action":""}
 		"arming","all_in":
-			return {"words":"More under arms and ready at home meets them; a blood price or gifts sent first may turn them back (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Warriors"}
+			return {"words":"More under arms and ready at home meets them; a blood price or gifts sent first may turn them back (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Raise the army"}
 	return {"words":"","section":"","sub":0,"action":""}
 
 static func _neglect_words(id:String)->String:

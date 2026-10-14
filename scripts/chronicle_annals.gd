@@ -97,6 +97,22 @@ static func _new_acc(year:int)->Dictionary:
 		"abroad":[],"births":[],"turnings":[],"mild":[],"dry":[],"upkeep":[]}
 
 
+## THE PEOPLE THIS YEAR, the one figure Home and the Chronicle both show:
+## {start (heads when the year began), now, change, born, buried, other}.
+## `other` is the change that births and burials do not account for: those
+## who left with parties or came in, and the dead the tally did not bury.
+## {} before the year has an accumulator of its own.
+static func people_this_year(c:Dictionary,now:int=-1,day:int=-1)->Dictionary:
+	if day<0:day=int(GameState.elapsed_days)
+	if now<0:now=_people()
+	var a:Variant=c.get("year_acc")
+	if not a is Dictionary or int((a as Dictionary).get("year",-1))!=_year_of(day):return {}
+	var start:=int((a as Dictionary).get("pop0",0))
+	if start<=0 or now<=0:return {}
+	var born:=int((a as Dictionary).get("born",0));var buried:=int((a as Dictionary).get("buried",0))
+	return {"start":start,"now":now,"change":now-start,"born":born,"buried":buried,"other":(now-start)-(born-buried)}
+
+
 static func _list_of(c:Dictionary,key:String)->Array:
 	if not c.get(key) is Array:c[key]=[]
 	return c[key]

@@ -449,7 +449,8 @@ static func lead(f:Dictionary)->String:
 	if bool(f.food_reported) and days>=0.0:
 		var reading:=Words.food(days,f.flow,true)
 		if days<=0.05:parts.append("the food is gone")
-		else:parts.append(EraWords.store_span(days)+(", falling" if String(reading.trend)=="falling" else ", growing" if String(reading.trend)=="rising" else ""))
+		# The top bar's own figure for the stores, never a second rounding of it.
+		else:parts.append("food for "+EraWords.days_in_words(days)+(", falling" if String(reading.trend)=="falling" else ", growing" if String(reading.trend)=="rising" else ""))
 	var ratio:=float(Words.water(f.water).get("ratio",-1.0))
 	if ratio>=0.98:parts.append("water for all")
 	elif ratio>=0.1:parts.append("%s in ten drink enough" % spoken(roundi(ratio*10.0)))

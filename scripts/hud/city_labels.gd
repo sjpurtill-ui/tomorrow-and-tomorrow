@@ -405,9 +405,10 @@ static func held_words(count:int)->String:
 const BADGE_SIZE:=12
 const BADGE_RISE_GAP:=4.0
 
-## "+5": the townsfolk who would rise, as the badge sets them.
+## "5 can rise": the townsfolk who would take up arms, as the badge sets
+## them (never a bare "+5", which reads as growth).
 static func rise_text(rise:int)->String:
-	return "+"+EraWords.grouped(rise)
+	return "%s can rise" % EraWords.grouped(rise)
 
 ## The width of the small guard badge: a shield, the count keeping watch,
 ## and the townsfolk who would rise when there are any.

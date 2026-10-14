@@ -336,7 +336,8 @@ func test_click_finds_the_army_through_the_army_bar_and_orders_open_its_panel()-
 	# The home levy is found at home.
 	var levy:=_control(board,"home")
 	levy.panel._gui_input(click)
-	assert_str(bar.selected_id).is_equal("home")
+	# Outside the War screen the army bar keeps to armies (no card for home, test_army_counter): nothing is picked on it.
+	assert_str(bar.selected_id).is_empty()
 	assert_float(ground.camera_target.x).is_equal_approx(home.x,0.001)
 
 func test_the_home_levy_calls_up_its_empty_places()->void:

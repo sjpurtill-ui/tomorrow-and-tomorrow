@@ -20,7 +20,8 @@ static func number(value:float)->String:
 	## Rounded for reading: whole numbers from 3 up, one decimal from 1, two below.
 	var magnitude:=absf(value)
 	if magnitude>=1.0:
-		if magnitude>=3.0 or is_equal_approx(value,roundf(value)):return str(roundi(value))
+		# Whole numbers carry their thousands' separators on every page (era_words.gd grouped).
+		if magnitude>=3.0 or is_equal_approx(value,roundf(value)):return preload("res://scripts/hud/era_words.gd").grouped(roundi(value))
 		return _trim("%.1f" % value)
 	if magnitude<=0.0:return "0"
 	return _trim("%.2f" % value) if magnitude>=0.01 else "under 0.01"

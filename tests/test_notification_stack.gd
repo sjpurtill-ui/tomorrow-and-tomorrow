@@ -16,6 +16,8 @@ class SheetHud extends Control:
 	func _init()->void:
 		add_child(dock);add_child(detail_dock);dock.visible=false;detail_dock.visible=false
 		section_requested.connect(func(section:String,_sub:int)->void:sections.append(section))
+	var courts:=0
+	func open_court()->void:courts+=1
 	var notice_counts:Dictionary={}
 	func set_notice_counts(counts:Dictionary)->void:notice_counts=counts
 	func right_stack_top()->float:return 640.0
@@ -251,7 +253,8 @@ func _embargo()->Dictionary:
 func test_a_condition_is_one_row_with_its_count_and_one_click_to_its_screen()->void:
 	var gear:=_gear()
 	assert_str(String(gear.key)).is_equal("standing:gear")
-	assert_str(String(gear.text)).is_equal("First host · 3 of 4 armed")
+	# More than one is said in the line, never as a bare number beside it.
+	assert_str(String(gear.text)).is_equal("First host · 3 of 4 armed · +1 more")
 	assert_str(String(gear.verb)).is_equal("Arm")
 	assert_int(int(gear.count)).is_equal(2)
 	assert_dict(gear.action).is_equal({"kind":"war","page":"support","label":"the War screen"})
@@ -281,13 +284,18 @@ func test_what_stands_stays_while_true_above_the_news_and_leaves_when_it_ends()-
 		assert_bool((any_row.get_meta("close") as Button).visible).is_equal(not n.has("standing"))
 	assert_str((stack._views["standing:trade_against"].get_meta("verb") as Button).text).is_equal("Trade")
 	# The header counts what needs the god; the rail's badges are its parts.
+	# Header = rows with a button = the sum of the rail's badges.
 	assert_str(stack.pill.text).is_equal("Notices · 2 need you")
-	assert_dict(hud.notice_counts).is_equal({"economy":1})
+	assert_dict(hud.notice_counts).is_equal({"economy":1,"military":1})
+	var buttons:=0
+	for n:Dictionary in stack.column_rows():
+		if (stack._views[String(n.key) if n.has("standing") else int(n.id)].get_meta("verb") as Button).visible:buttons+=1
+	assert_int(buttons).is_equal(2)
 	var gear_row:Control=stack._views["standing:gear"]
 	assert_bool(gear_row.visible).is_true()
 	assert_str((gear_row.get_meta("title") as Label).text).is_equal("Short of gear")
-	assert_str((gear_row.get_meta("count") as Label).text).is_equal("2")
-	assert_bool((stack._views["standing:trade_against"].get_meta("count") as Label).visible).is_false()
+	assert_bool(gear_row.has_meta("count")).is_false()
+	assert_str((gear_row.get_meta("detail") as Label).text).ends_with("+1 more")
 	# A standing row has no clock: the news leaves, it stays.
 	stack._layout(Model.NOTABLE_SECONDS+1.0)
 	assert_int(stack.standing.size()).is_equal(2)
@@ -300,7 +308,7 @@ func test_what_stands_stays_while_true_above_the_news_and_leaves_when_it_ends()-
 	stack._seeded.assign([fewer])
 	stack._sync_standing()
 	assert_object(stack._views["standing:gear"]).is_same(gear_row)
-	assert_bool((gear_row.get_meta("count") as Label).visible).is_false()
+	assert_str((gear_row.get_meta("detail") as Label).text).is_equal("Hill watch · 1 of 6 armed")
 	assert_bool(stack._views.has("standing:trade_against")).is_false()
 	stack._seeded.clear()
 	stack._sync_standing()
@@ -334,5 +342,60 @@ func test_an_envoy_waiting_is_a_row_that_needs_you_and_opens_the_court()->void:
 	var order:Array=Standing.sorted([Standing.waiting()[0],_gear(),coming]).map(func(r:Dictionary)->String:return String(r.key).get_slice(":",1))
 	assert_array(order).is_equal(["attack","envoy","gear"])
 	assert_str(Standing.rail_of(coming)).is_equal("military")
-	assert_str(Standing.rail_of(Standing.waiting()[0])).is_equal("court")
+	# An envoy's home on the rail is World: that is where other peoples are.
+	assert_str(Standing.rail_of(Standing.waiting()[0])).is_equal("world")
 	(Hall.call("state").queue as Array).clear()
+
+
+# --- Every button does something: each verb, the envoy's row, pressed -------------
+
+func _alert_row(id:String,extra:Dictionary={})->Dictionary:
+	var alert:={"id":id,"glyph":"gear","tone":"red","count":1,"title":id,"lines":PackedStringArray(["First host"]),"page":"support"}
+	alert.merge(extra,true)
+	return Standing.from_alert(alert)
+
+func _press_verb(stack:CanvasLayer,key:String)->String:
+	var row:Control=stack._views[key]
+	var button:=row.get_meta("verb") as Button
+	assert_bool(button.visible).override_failure_message(key).is_true()
+	button.pressed.emit()
+	return button.text
+
+func _click_row(stack:CanvasLayer,key:String)->void:
+	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
+	(stack._views[key] as Control).gui_input.emit(click)
+
+func _war_screen_opened()->String:
+	var screen:Variant=MilitaryCampaign.roster_screen
+	if not is_instance_valid(screen):return ""
+	var page:=String(screen.get("page")) if "page" in screen else "open"
+	screen.free()
+	return page if page!="" else "open"
+
+func test_every_verb_button_and_the_envoys_row_open_their_screen()->void:
+	MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	var made:=await _stack();var stack:CanvasLayer=made[0];var hud:SheetHud=made[1]
+	var envoy:={"key":"standing:envoy:t","standing":true,"kind":"waiting","tone":"gold","category":"neighbours","title":"Envoy of the Saltmarsh folk","text":"waits","verb":"Answer","days":9,"count":1,"lines":PackedStringArray(["waits"]),"action":{"kind":"court","focus":{},"label":"the court"}}
+	stack._seeded.assign([_alert_row("attack",{"war":"band","page":"wars","fact":"The Reedbank raiders · ~40 · 6 days","days":6}),envoy,_alert_row("hungry",{"logistics":"hungry"}),
+		_alert_row("trade_against",{"war":"raid","page":"trade","dock":["economy",3]}),_alert_row("gear",{"tone":"amber"}),_alert_row("unpaid",{"dock":["economy",2]})])
+	stack._sync_standing()
+	for i in 2:await get_tree().process_frame
+	# Defend, Feed and Arm open the War screen.
+	for pair:Array in [["standing:attack","Defend"],["standing:hungry","Feed"],["standing:gear","Arm"]]:
+		assert_str(_press_verb(stack,String(pair[0]))).is_equal(String(pair[1]))
+		assert_str(_war_screen_opened()).override_failure_message("%s did not open the War screen" % String(pair[1])).is_not_empty()
+	# Trade and Pay open their Economy pages.
+	hud.sections.clear()
+	assert_str(_press_verb(stack,"standing:trade_against")).is_equal("Trade")
+	assert_str(_press_verb(stack,"standing:unpaid")).is_equal("Pay")
+	assert_array(hud.sections).is_equal(["economy","economy"])
+	# Answer opens the court, by its button and by a click anywhere on the row.
+	assert_str(_press_verb(stack,"standing:envoy:t")).is_equal("Answer")
+	assert_int(hud.courts).is_equal(1)
+	_click_row(stack,"standing:envoy:t")
+	assert_int(hud.courts).is_equal(2)
+	# A click on a row does what its button does, and a row that stands stays.
+	_click_row(stack,"standing:hungry")
+	assert_str(_war_screen_opened()).is_not_empty()
+	assert_int(stack.standing.size()).is_equal(6)

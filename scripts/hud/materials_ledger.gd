@@ -29,9 +29,12 @@ var _gauge:ProgressBar
 var _gauge_words:Label
 ## The searched land: how well, what it gives cutting and digging, the find odds.
 var _land:Label
+var _land_bar:ProgressBar
 var _grid:GridContainer
 ## Per material tile: {key, panel, value, trend, spark}.
 var _rows:Array=[]
+## The materials only held, as chips: {key, chip}.
+var _still_chips:Array=[]
 ## The opened material's source lines.
 var _details:Array=[]
 ## Per shipment on the road: {voice, when}.
@@ -41,10 +44,11 @@ func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="MaterialsLedger";add_theme_constant_override("separation",10)
 	_shape=shape_of(block)
 	_header()
-	var held:Array=[];var beyond:Array=[]
-	for item:Dictionary in data.rows:(beyond if out_of_reach(item) else held).append(item)
+	var held:Array=[];var beyond:Array=[];var still:Array=[]
+	for item:Dictionary in data.rows:(beyond if out_of_reach(item) else (still if idle(item) else held)).append(item)
 	_grid=GridContainer.new();_grid.name="Materials";_grid.add_theme_constant_override("h_separation",TILE_GAP);_grid.add_theme_constant_override("v_separation",TILE_GAP);add_child(_grid)
 	for item:Dictionary in held:_tile(_grid,item)
+	if not still.is_empty():_still(still)
 	if data.rows.is_empty():_line(self,"Nothing is stored or known yet. Surveys find sources of wood, stone and clay.",13,T.MUTED)
 	if not beyond.is_empty():_beyond(beyond)
 	_opened()
@@ -70,6 +74,29 @@ func setup(block:Dictionary)->void:
 	resized.connect(_arrange);_arrange()
 	_fill()
 
+## In store with nothing coming in or going out today, and not the one opened:
+## one of the compact list under the tiles.
+func idle(item:Dictionary)->bool:
+	return is_idle(item,String(data.get("selected","")))
+
+static func is_idle(item:Dictionary,selected:String)->bool:
+	return not out_of_reach(item) and float(item.get("delivered",0.0))<=0.05 and float(item.get("loss",0.0))<=0.05 and String(item.get("key",""))!=selected
+
+## The materials only held: a name and a count each, a click to open one.
+func _still(items:Array)->void:
+	_line(self,"IN STORE, NOTHING COMING IN",11,T.MUTED)
+	var flow:=HFlowContainer.new();flow.name="Still";flow.add_theme_constant_override("h_separation",6);flow.add_theme_constant_override("v_separation",6);add_child(flow)
+	for item:Dictionary in items:
+		var key:=String(item.key)
+		var chip:=Button.new();chip.name="Still_"+key.validate_node_name();chip.focus_mode=Control.FOCUS_NONE
+		chip.add_theme_font_override("font",T.FONT_UI);chip.add_theme_font_size_override("font_size",13)
+		chip.add_theme_color_override("font_color",T.INK);chip.add_theme_color_override("font_hover_color",T.INK)
+		chip.add_theme_stylebox_override("normal",T.flat(T.ROW_BG,T.BORDER_SOFT,1,T.RADIUS_CARD,6));chip.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,T.RADIUS_CARD,6))
+		chip.tooltip_text="Click for where it comes from."
+		chip.pressed.connect(func()->void:data.on_select.call(key))
+		flow.add_child(chip)
+		_still_chips.append({"key":key,"chip":chip})
+
 ## Nothing in store and nothing coming in: not yet within reach.
 static func out_of_reach(item:Dictionary)->bool:
 	return float(item.get("stock",0.0))<0.5 and float(item.get("delivered",0.0))<=0.05
@@ -89,7 +116,12 @@ func _header()->void:
 	_city=T.make_label("",12,T.MUTED);_city.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(_city)
 	_supply=_line(manager,"",12,T.BODY);_supply.name="SupplySentence"
 	if not String(Words.supply(float(data.storage),float(data.capacity),data.hauling).slows).is_empty():_slows=_line(manager,"",12,tone_color("warn"));_slows.name="SupplySlows"
-	if not String(data.get("land","")).is_empty():_land=_line(manager,"",12,T.MUTED);_land.name="SearchedLand"
+	if not String(data.get("land","")).is_empty():
+		var searched:=HBoxContainer.new();searched.add_theme_constant_override("separation",8);manager.add_child(searched)
+		_land=_line(searched,"",12,T.MUTED);_land.name="SearchedLand"
+		_land_bar=ProgressBar.new();_land_bar.name="SearchedBar";_land_bar.show_percentage=false;_land_bar.max_value=1.0;_land_bar.step=0.0;_land_bar.custom_minimum_size=Vector2(90,6);_land_bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		_land_bar.add_theme_stylebox_override("background",T.flat(T.TRACK,Color.TRANSPARENT,0,3));_land_bar.add_theme_stylebox_override("fill",T.flat(T.GOLD,Color.TRANSPARENT,0,3));_land_bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		searched.add_child(_land_bar)
 	# The stores as a gauge: what is held against the room for it.
 	var store:=VBoxContainer.new();store.name="Stores";store.custom_minimum_size.x=170;store.size_flags_vertical=Control.SIZE_SHRINK_CENTER;store.add_theme_constant_override("separation",3);head.add_child(store)
 	store.add_child(T.make_label("STORES",12,T.GOLD_TEXT,0.06))
@@ -198,7 +230,7 @@ static func shape_of(block:Dictionary)->Array:
 	var rows:Array=[]
 	for item:Dictionary in block.get("rows",[]):
 		var open:bool=block.get("selected","")==item.key
-		rows.append([String(item.key),out_of_reach(item),open,(item.get("details",[]) as Array).size() if open else -1])
+		rows.append([String(item.key),out_of_reach(item),is_idle(item,String(block.get("selected",""))),open,(item.get("details",[]) as Array).size() if open else -1])
 	var supply:=Words.supply(float(block.get("storage",0.0)),float(block.get("capacity",0.0)),block.get("hauling"))
 	var leader:Dictionary=block.get("leader",{})
 	return [Portrait.picture_key(leader) if not leader.is_empty() else [],_who(block),bool(block.get("managed",true)),String(block.get("focus","")),String(supply.slows).is_empty(),String(block.get("land","")).is_empty(),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
@@ -227,7 +259,12 @@ static func _short_words(item:Dictionary)->String:
 	if delivered>0.05:flow="+%s" % Plain.number(delivered)+(" −%s" % Plain.number(loss) if loss>0.05 else "")+" a day"
 	elif loss>0.05:flow="−%s a day" % Plain.number(loss)
 	else:flow="nothing coming in"
-	return "%s · %s" % [trend_word(String(reading.trend)),flow]
+	# None left is never "steady": everything that comes in is used the same day.
+	return "%s · %s" % ["Empty" if empty(item) else trend_word(String(reading.trend)),flow]
+
+## Nothing in store although some still comes in: used as fast as it arrives.
+static func empty(item:Dictionary)->bool:
+	return float(item.get("stock",0.0))<0.5
 
 ## Every word and figure on the page that follows the day.
 func _fill()->void:
@@ -240,14 +277,16 @@ func _fill()->void:
 	var full:=float(supply.full)
 	_gauge.value=clampf(full,0.0,1.0)
 	_gauge.add_theme_stylebox_override("fill",T.flat(T.RED if full>=0.97 else (T.AMBER if full>=0.85 else T.GREEN),Color.TRANSPARENT,0,5))
-	_put(_gauge_words,"No storage built" if float(data.capacity)<=0.0 else "%s held · room for %s" % [Plain.number(float(data.storage)),Plain.number(float(data.capacity))])
-	_gauge.tooltip_text=String(supply.sentence)
+	var over:=float(data.storage)/float(data.capacity) if float(data.capacity)>0.0 else 0.0
+	_put(_gauge_words,"No storage built" if float(data.capacity)<=0.0 else "%s held · stores hold %s%s" % [Plain.number(float(data.storage)),Plain.number(float(data.capacity)),(" · %s× over" % Plain.number(over)) if over>=1.5 else ""])
+	_gauge.tooltip_text="%s\nHeld is the bulk of every material in store, each counted by the room it takes (food and water are kept apart and not counted). What is held beyond what the stores hold lies in the open and spoils faster." % String(supply.sentence)
 	if _land!=null:
 		# The first sentence on the page (how much land is searched); the yield
 		# factors and the find odds sit in its tooltip.
 		var land:=String(data.get("land",""))
-		var cut:=land.find(". ")
-		_put(_land,land.left(cut+1) if cut>0 else land)
+		var cover:=float(ResourceSystem.land_reading().get("cover",0.0))
+		_put(_land,"Land searched %d%%" % roundi(cover*100.0))
+		if _land_bar!=null:_land_bar.value=clampf(cover,0.0,1.0)
 		_land.mouse_filter=Control.MOUSE_FILTER_PASS
 		_land.tooltip_text=land
 	var by_key:={}
@@ -257,10 +296,14 @@ func _fill()->void:
 		if item.is_empty():continue
 		var reading:=reading_of(item)
 		_put(refs.value,Plain.number(float(item.stock)))
-		_put(refs.trend,_short_words(item),tone_color(String(reading.tone)))
+		_put(refs.trend,_short_words(item),tone_color("bad" if empty(item) else String(reading.tone)))
+		(refs.value as Label).add_theme_color_override("font_color",tone_color("bad") if empty(item) else T.INK)
 		(refs.panel as Control).tooltip_text="%s: %s in store.\n%s\nClick for where it comes from." % [String(item.name),Plain.number(float(item.stock)),_reading_words(item)]
 		var spark:Control=refs.spark
 		if spark.get("points")!=item.points:spark.set("points",item.points);spark.queue_redraw()
+	for refs:Dictionary in _still_chips:
+		var item:Dictionary=by_key.get(String(refs.key),{})
+		if not item.is_empty():(refs.chip as Button).text="%s  %s" % [String(item.name),Plain.number(float(item.stock))]
 	var opened:Dictionary=by_key.get(String(data.selected),{})
 	if not opened.is_empty():
 		for d in mini(_details.size(),(opened.details as Array).size()):

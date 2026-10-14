@@ -198,7 +198,8 @@ func test_leaders_mode_is_unchanged()->void:
 	# but the ruler's forecast (manual_work.gd), and the food count writes it.
 	for path:String in _scripts("res://scripts"):
 		var text:=FileAccess.get_file_as_string(path)
-		if "\"food_workers\"" in text:assert_array(["res://scripts/food_system.gd","res://scripts/manual_work.gd"]).contains([path])
+		# army_economy.gd reads it for the War screen's cost forecast (per_getter): read only, like the ruler's forecast.
+		if "\"food_workers\"" in text:assert_array(["res://scripts/food_system.gd","res://scripts/manual_work.gd","res://scripts/army_economy.gd"]).contains([path])
 
 func _scripts(root:String)->Array[String]:
 	var out:Array[String]=[]

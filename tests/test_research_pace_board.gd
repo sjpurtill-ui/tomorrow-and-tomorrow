@@ -16,9 +16,11 @@ func _pace(extra:Dictionary={})->Dictionary:
 
 func test_the_header_states_the_pace_against_a_typical_people()->void:
 	var words:=Board.pace_words(_pace())
-	assert_str(String(words.value)).is_equal("3.4 times")
-	assert_str(String(words.words)).contains("typical people our age").contains("70 learners").contains("about 16")
-	assert_str(String(words.proofs)).contains("about 4.2 questions proven a year")
+	assert_str(String(words.value)).is_equal("3.4×")
+	# One headline: the pace against a typical people and what it proves a year; the head counts are in its pointer.
+	assert_str(String(words.words)).is_equal("a typical people our age · about 4.2 discoveries a year")
+	assert_str(String(words.tip)).contains("scholars").contains("about 16")
+	assert_str(String(words.proofs)).is_empty()
 	assert_str(String(words.limiter)).starts_with("Nothing holds the learning back much")
 	var kinds:Array=(words.chips as Array).map(func(c:Dictionary)->String:return String(c.kind))
 	assert_array(kinds).contains_exactly(["learners","goods","lead","support","pay","gifted","teachers","craft"])

@@ -555,7 +555,10 @@ func _food_resource_access() -> Dictionary:
 func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary={}) -> Dictionary:
 	# Moves part of the fresh surplus into the stored pool: drying, smoking and,
 	# later, canning. Throughput comes from Logistics and Crafting workers.
-	var result:={"dried":0.0,"smoked":0.0,"canned":0.0}
+	# `lost` is reported only: the weight drying, smoking and canning take
+	# out of the food (the same shares applied below), so the day's figures
+	# add up on the Food page.
+	var result:={"dried":0.0,"smoked":0.0,"canned":0.0,"lost":0.0}
 	if traveling: return result
 	var stocks:Dictionary=WorldSimulation.state.food_stocks
 	var capacity:=(logistics*0.16+makers*0.18)*(1.0+WorldSimulation.discovery.effect("food_storage"))*(1.0+technique_lever("preservation"))
@@ -565,6 +568,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		stocks[FRESH]=float(stocks[FRESH])-amount
 		stocks[STORED]=float(stocks.get(STORED,0.0))+amount*0.88
 		result.dried=amount
+		result.lost+=amount*(1.0-0.88)
 		capacity=maxf(0.0,capacity-amount)
 	preload("res://scripts/fire_practice.gd").ensure_initialized()
 	if "smoking" in WorldSimulation.state.known_discoveries and preload("res://scripts/fire_practice.gd").available() and capacity>0.0:
@@ -580,6 +584,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		stocks[FRESH]=float(stocks[FRESH])-amount
 		stocks[STORED]=float(stocks.get(STORED,0.0))+amount*0.82
 		result.smoked=amount
+		result.lost+=amount*(1.0-0.82)
 	# Installed canning lines add their preservation service on top.
 	var canning:=minf(float(stocks.get(FRESH,0.0)),Operations.service("food_preservation")*float(WorldSimulation.span))
 	if canning>0.0:
@@ -587,6 +592,7 @@ func _preserve(logistics: float,makers: float,traveling: bool,inputs:Dictionary=
 		stocks[STORED]=float(stocks.get(STORED,0.0))+canning*0.90
 		Operations.data().services["food_preservation"]=maxf(0.0,Operations.service("food_preservation")-canning/float(WorldSimulation.span))
 		result.canned=canning
+		result.lost+=canning*(1.0-0.90)
 	return result
 
 func _drying_weather_factor(profile:Dictionary,day:float)->float:

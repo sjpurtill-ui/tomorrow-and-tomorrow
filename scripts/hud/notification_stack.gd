@@ -260,7 +260,8 @@ func dismiss(n:Dictionary)->void:
 
 ## ONE ROW STYLE for everything in the column: a glyph, a headline with its
 ## count, one fact line, and at the right either the one word of what to do
-## about it (a row that stands) or the × that sets news aside. Two lines,
+## about it (a row that stands) or the × that sets news aside. A count is
+## said in the fact line ("· +1 more"), never as a bare number. Two lines,
 ## the same height; the pointer has the rest.
 func _render_row(n:Dictionary)->void:
 	var view:Variant=_views.get(int(n.id))
@@ -280,8 +281,9 @@ func _render_row(n:Dictionary)->void:
 	var urgent:=String(n.get("tier",""))=="urgent"
 	row.add_theme_stylebox_override("panel",_row_style(Model.color(category),urgent))
 	(row.get_meta("icon") as TextureRect).texture=Model.icon(category,48)
-	var times:=int(n.get("count",1)) if Model.count_words(n)!="" else 1
-	_fill_row(row,Model.headline(n),String(n.get("text","")),times,Model.color(category),"")
+	var fact:=String(n.get("text",""))
+	if Model.count_words(n)!="":fact=(fact+" · " if fact!="" else "")+Model.count_words(n)
+	_fill_row(row,Model.headline(n),fact,Model.color(category),"")
 	row.tooltip_text=_tooltip(n)
 	_signature=""
 
@@ -300,21 +302,15 @@ func _render_standing(n:Dictionary)->void:
 	var tone:=Standing.tone_color(String(n.get("tone","amber")))
 	row.add_theme_stylebox_override("panel",_row_style(tone,String(n.get("kind",""))=="waiting"))
 	(row.get_meta("icon") as TextureRect).texture=Standing.icon(n)
-	_fill_row(row,String(n.get("title","")),String(n.get("text","")),int(n.get("count",1)),tone,String(n.get("verb","See")))
+	_fill_row(row,String(n.get("title","")),String(n.get("text","")),tone,String(n.get("verb","See")))
 	row.tooltip_text=Standing.tip(n)
 
 
-## Writes a row's words: `times` over one shows as the count beside the
-## headline; `verb` is the button's word ("" for news, which has the ×).
-func _fill_row(row:PanelContainer,headline:String,fact:String,times:int,tone:Color,verb:String)->void:
+## Writes a row's words; `verb` is the button's word ("" for news, which has the ×).
+func _fill_row(row:PanelContainer,headline:String,fact:String,tone:Color,verb:String)->void:
 	(row.get_meta("title") as Label).text=headline
 	var detail:=row.get_meta("detail") as Label
 	detail.text=fact
-	var count:=row.get_meta("count") as Label
-	count.visible=times>1
-	count.text=str(times)
-	var chip:=T.flat(tone,Color(0,0,0,0),0,8);chip.content_margin_left=6;chip.content_margin_right=6
-	count.add_theme_stylebox_override("normal",chip)
 	var act_button:=row.get_meta("verb") as Button
 	act_button.visible=verb!=""
 	act_button.text=verb
@@ -367,12 +363,8 @@ func _build_row(n:Dictionary,row_name:String)->PanelContainer:
 	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(28,28);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",-1);copy.alignment=BoxContainer.ALIGNMENT_CENTER;copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;copy.add_child(head)
-	var title:=_label(head,16,T.INK,false);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
+	var title:=_label(copy,16,T.INK,false);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
 	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var count:=Label.new();count.add_theme_font_override("font",T.font("ui_strong"));count.add_theme_font_size_override("font_size",12)
-	count.add_theme_color_override("font_color",Color("fbf6ea"));count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	head.add_child(count)
 	var detail:=_label(copy,13,T.BODY,false);detail.clip_text=true;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var verb:=Button.new();verb.name="Verb";verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",13)
@@ -387,7 +379,7 @@ func _build_row(n:Dictionary,row_name:String)->PanelContainer:
 	close.tooltip_text="Set this aside. The log keeps it."
 	close.pressed.connect(func()->void:dismiss(row.get_meta("notice")))
 	line.add_child(close)
-	row.set_meta("icon",icon);row.set_meta("title",title);row.set_meta("detail",detail);row.set_meta("count",count);row.set_meta("verb",verb);row.set_meta("close",close)
+	row.set_meta("icon",icon);row.set_meta("title",title);row.set_meta("detail",detail);row.set_meta("verb",verb);row.set_meta("close",close)
 	row.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
 			row.accept_event()
@@ -505,27 +497,22 @@ func _layout(delta:float)->void:
 func _ordered()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	for n in standing:
-		if Standing.needs(n):out.append(n)
+		if Standing.urgent(n):out.append(n)
 	for n in rows:
 		if String(n.tier)=="urgent":out.append(n)
 	for n in standing:
-		if not Standing.needs(n):out.append(n)
+		if not Standing.urgent(n):out.append(n)
 	for n in rows:
 		if String(n.tier)!="urgent":out.append(n)
 	return out
 
 
-## Everything in the column that needs the god: rows that stand red or wait
-## on an answer, and urgent news. The header's count is their number and
-## each rail button's badge is its own share of them (the HUD's
-## set_notice_counts), so the two always add up.
+## Everything in the column that needs the god: every row that stands (each
+## has its button). The header's count is their number and each rail
+## button's badge is its own share of them (the HUD's set_notice_counts),
+## so header = rows with a button = the sum of the rail's badges.
 func needing()->Array[Dictionary]:
-	var out:Array[Dictionary]=[]
-	for n in standing:
-		if Standing.needs(n):out.append(n)
-	for n in rows:
-		if String(n.tier)=="urgent":out.append(n)
-	return out
+	return standing.duplicate()
 
 
 func _blocked_rects(view:Vector2)->Array[Rect2]:

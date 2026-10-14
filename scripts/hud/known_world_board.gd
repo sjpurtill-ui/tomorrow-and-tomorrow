@@ -45,7 +45,7 @@ func setup(block:Dictionary)->void:
 	columns=GridContainer.new();columns.name="PeoplesAndWalkers";columns.columns=2
 	columns.add_theme_constant_override("h_separation",18);columns.add_theme_constant_override("v_separation",18);add_child(columns)
 	var peoples:=_sheet(columns,"Peoples");peoples_frame=peoples.get_parent();_build_peoples(peoples)
-	var walkers:=_sheet(columns,"Walkers");walkers_frame=walkers.get_parent();_build_walkers(walkers)
+	var walkers:=_sheet(columns,"Scouts");walkers_frame=walkers.get_parent();_build_walkers(walkers)
 	_build_finds()
 	resized.connect(_layout);_layout()
 
@@ -74,7 +74,7 @@ func update_block(block:Dictionary)->bool:
 		columns.move_child(peoples_frame,at)
 	if _part(old,"walkers")!=_part(next,"walkers"):
 		var at:=_drop(walkers_frame)
-		var walkers:=_sheet(columns,"Walkers");walkers_frame=walkers.get_parent();_build_walkers(walkers)
+		var walkers:=_sheet(columns,"Scouts");walkers_frame=walkers.get_parent();_build_walkers(walkers)
 		columns.move_child(walkers_frame,at)
 	if _part(old,"finds")!=_part(next,"finds"):
 		var at:=_drop(finds_frame)
@@ -231,13 +231,14 @@ func _build_counters()->void:
 	# A note never repeats the number above it: only what differs is said.
 	var people_note:="only smoke on the horizon" if peoples==0 else ("all their homes found" if located>=peoples else ("%d home%s found" % [located,"" if located==1 else "s"] if located>0 else "no home yet found"))
 	var walker_note:="all are home by the fire" if away==0 else ("every party is out" if away>=capacity else "%d more could go" % (capacity-away))
-	var tale_note:=("none heard yet" if unread>=reports else "%d not yet told" % unread) if unread>0 else ("all have been heard" if reports>0 else "none yet")
+	var tale_note:=("of %d carried home" % reports if unread<reports else "") if unread>0 else ("all have been heard" if reports>0 else "none yet")
 	_counter("Peoples met",str(peoples),people_note,"tent",T.AMBER)
 	_counter("Scouts out","%d / %d" % [away,capacity],walker_note,"walker",T.TEAL)
-	_counter("Tales carried home",str(reports),tale_note,"spiral",T.GOLD)
+	# What waits to be heard is the number that matters; all told once heard.
+	_counter("Tales waiting" if unread>0 else "Tales carried home",str(unread if unread>0 else reports),tale_note,"spiral",T.GOLD)
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;counters_row.add_child(spacer)
 	var actions:Dictionary=model.get("actions",{})
-	plan_button=_action(counters_row,"Plan an expedition",actions.get("plan"),true,"Choose where the walkers go, how many, how long, and what they carry.")
+	plan_button=_action(counters_row,"Plan an expedition",actions.get("plan"),true,"Choose where the scouts go, how many, how long, and what they carry.")
 	plan_button.name="PlanExpedition";plan_button.custom_minimum_size=Vector2(208,50);plan_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	plan_button.add_theme_font_size_override("font_size",15)
 	plan_button.add_theme_font_override("font",DISPLAY_FONT)
@@ -258,7 +259,7 @@ func _build_peoples(stack:VBoxContainer)->void:
 	if peoples.is_empty():
 		heading(stack,"Beyond the smoke","%d telling%s" % [leads.size(),"" if leads.size()==1 else "s"] if not leads.is_empty() else "")
 		var ask:=Kit.serif(stack,"Who lives beyond the smoke?",24,T.INK,true);ask.name="BeyondTheSmoke"
-		Kit.label(stack,"No other people has been met. The walkers bring home only what they saw, and what strangers told them on the road.",13,T.TEXT_SOFT)
+		Kit.label(stack,"No other people has been met. The scouts bring home only what they saw, and what strangers told them on the road.",13,T.TEXT_SOFT)
 		if leads.is_empty():
 			Kit.serif(stack,"No one has yet spoken of other peoples.",14,T.INK_MUTED,true)
 		for lead:Dictionary in leads:stack.add_child(_lead_slip(lead))
@@ -328,10 +329,10 @@ static func regard_color(id:String)->Color:
 func _build_walkers(stack:VBoxContainer)->void:
 	var parties:Array=model.get("parties",[])
 	var counts:Dictionary=model.get("counters",{})
-	heading(stack,"Walkers abroad","%d of %d parties out" % [int(counts.get("away",0)),maxi(1,int(counts.get("capacity",1)))])
+	heading(stack,"Scouts out","%d of %d parties out" % [int(counts.get("away",0)),maxi(1,int(counts.get("capacity",1)))])
 	if parties.is_empty():
 		var home:=Kit.serif(stack,"Every walker is home by the fire.",20,T.INK,true);home.name="AllHome"
-		Kit.label(stack,"A party carries food and a few strong walkers into country no one has named. What they see comes home only with them.",13,T.TEXT_SOFT)
+		Kit.label(stack,"A party carries food and a few strong scouts into country no one has named. What they see comes home only with them.",13,T.TEXT_SOFT)
 	for party:Dictionary in parties:
 		var card:=VBoxContainer.new();card.name="Party_%d" % int(party.get("id",0));card.add_theme_constant_override("separation",4);card.tooltip_text=String(party.get("tip",""));card.mouse_filter=Control.MOUSE_FILTER_PASS;stack.add_child(card)
 		Kit.serif(card,String(party.get("title","Into unwalked country")),17)
@@ -352,7 +353,7 @@ func _build_finds()->void:
 	var unread:=int(counts.get("unread",0))
 	heading(stack,"Carried home","● %d telling%s not yet heard" % [unread,"" if unread==1 else "s"] if unread>0 else "")
 	if groups.is_empty():
-		Kit.serif(stack,"Nothing has been carried home yet. The first walkers back will lay their finds here.",15,T.TEXT_SOFT,true)
+		Kit.serif(stack,"Nothing has been carried home yet. The first scouts back will lay their finds here.",15,T.TEXT_SOFT,true)
 	else:
 		finds_grid=GridContainer.new();finds_grid.name="FindGroups";finds_grid.columns=3;finds_grid.add_theme_constant_override("h_separation",14);finds_grid.add_theme_constant_override("v_separation",14);stack.add_child(finds_grid)
 		for group:Dictionary in groups:finds_grid.add_child(_find_group(group))
@@ -362,7 +363,7 @@ func _build_finds()->void:
 	summon_button.name="SummonChiefScout";summon_button.custom_minimum_size.y=40
 	archive_button=_action(row,"Every telling · %d" % int(counts.get("reports",0)),actions.get("archive"),false,"Search and read every retained report.")
 	archive_button.name="OpenArchive";archive_button.custom_minimum_size.y=40
-	var hint:=Kit.serif(row,"The Chief Scout tells what the walkers saw.",12,T.MUTED,true);hint.autowrap_mode=TextServer.AUTOWRAP_OFF;hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var hint:=Kit.serif(row,"The Chief Scout tells what the scouts saw.",12,T.MUTED,true);hint.autowrap_mode=TextServer.AUTOWRAP_OFF;hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 
 func _find_group(group:Dictionary)->Control:
 	var frame:=PanelContainer.new();frame.name="Group_"+String(group.get("party","")).validate_node_name();frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -941,7 +942,7 @@ class InkLayer extends Control:
 			var picto:=String({"forest":"tree","mountains":"peak","river":"wave","desert":"dune"}.get(kind,"tree"))
 			var jitter:=Vector2(18,-16) if int(trail.rank)%2==0 else Vector2(-18,14)
 			KnownWorld.glyph(self,picto,far+jitter,8,Color(faint,.75),1.3)
-			chart.add_hit(far+jitter,14,"%s country, as the walkers told it" % kind.capitalize())
+			chart.add_hit(far+jitter,14,"%s country, as the scouts told it" % kind.capitalize())
 		# trails: older ones faint, the newest walked in footprints
 		for i:int in range(trails.size()-1,-1,-1):
 			var trail:Dictionary=trails[i]
@@ -967,7 +968,7 @@ class InkLayer extends Control:
 		draw_arc(home_px,19,0,TAU,40,Color(red,.7),1.4,true)
 		draw_arc(home_px,23,0,TAU,40,Color(red,.35),1.0,true)
 		label(chart.settlement,home_px+Vector2(12,6),16,line,false,false,true)
-		chart.add_hit(home_px,22,"%s · our hearth. Everything on this %s was carried home by walkers." % [chart.settlement,"chart" if paper else "hide"])
+		chart.add_hit(home_px,22,"%s · our hearth. Everything on this %s was carried home by scouts." % [chart.settlement,"chart" if paper else "hide"])
 		# peoples met
 		for people:Dictionary in chart.data.get("peoples",[]):
 			var at:=chart.to_screen(people.pos)
@@ -1007,9 +1008,9 @@ class InkLayer extends Control:
 			KnownWorld.glyph(self,"walker",at,8,red,1.6)
 			var overdue:=int(party.get("overdue",0))
 			var tag:="overdue %d days" % overdue if overdue>0 else ("home any day" if int(party.get("days",0))<=1 else "home in ~%d days" % int(party.get("days",0)))
-			var party_text:="%d walkers · %s" % [int(party.get("personnel",0)),tag]
+			var party_text:="%d scouts · %s" % [int(party.get("personnel",0)),tag]
 			if not label(party_text,at+Vector2(6,-2),13,red):label(party_text,at+Vector2(6,-2),13,red,true,false,true)
-			chart.add_hit(at,16,"%s\n%d walkers · %s\nOnly a reckoning: what they see stays with them until they return." % [String(party.get("title","")),int(party.get("personnel",0)),tag])
+			chart.add_hit(at,16,"%s\n%d scouts · %s\nOnly a reckoning: what they see stays with them until they return." % [String(party.get("title","")),int(party.get("personnel",0)),tag])
 		# places the walkers named
 		for place:Dictionary in chart.data.get("places",[]):
 			var at:=chart.to_screen(place.pos)
@@ -1055,10 +1056,10 @@ class InkLayer extends Control:
 		var plate:=Color(c("halo"),.78)
 		draw_style_box(_cartouche(plate),Rect2(Vector2(20,22),Vector2(360,46)))
 		draw_style_box(_cartouche(plate),Rect2(Vector2(22,size.y-42),Vector2(560,30)))
-		var caption:="The world as our walkers tell it" if not paper else "The known world, from the walkers' accounts"
+		var caption:="The world as our scouts tell it" if not paper else "The known world, from the scouts' accounts"
 		draw_string_outline(title_font,Vector2(30,42),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,19,4,Color(c("halo"),.8))
 		draw_string(title_font,Vector2(30,42),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,19,line)
-		var era:String=["Scratched in charcoal and ochre on a scraped hide","Painted on hide by those who walked it","Inked from the walkers' accounts","Drawn to measure from surveyed routes"][clampi(chart.tier,0,3)]
+		var era:String=["Scratched in charcoal and ochre on a scraped hide","Painted on hide by those who walked it","Inked from the scouts' accounts","Drawn to measure from surveyed routes"][clampi(chart.tier,0,3)]
 		draw_string(title_font,Vector2(30,60),era,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(faint,.95))
 		if paper:
 			draw_rect(Rect2(Vector2(8,8),size-Vector2(16,16)),Color(line,.55),false,1.4)
@@ -1083,7 +1084,7 @@ class InkLayer extends Control:
 		# key
 		var y:=size.y-26.0;var x:=34.0
 		var font_key:=Kit.italic_font()
-		var entries:=[["fire","the hearth",line],["walked","walked and returned",line],["walker","walkers abroad",red],["question","told of, unseen",yellow]]
+		var entries:=[["fire","the hearth",line],["walked","walked and returned",line],["walker","scouts out",red],["question","told of, unseen",yellow]]
 		for entry:Array in entries:
 			var kind:=String(entry[0]);var tone:Color=entry[2]
 			if kind=="walked":
@@ -1097,6 +1098,6 @@ class InkLayer extends Control:
 			draw_string(font_key,Vector2(x,y+4),text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(line,.85))
 			x+=font_key.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x+26
 		if (chart.data.get("trails",[]) as Array).is_empty():
-			var empty:="Only the hearth is known. Send walkers, and the %s will fill." % ("chart" if paper else "hide")
+			var empty:="Only the hearth is known. Send scouts, and the %s will fill." % ("chart" if paper else "hide")
 			var fw:=title_font.get_string_size(empty,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x
 			draw_string(title_font,Vector2((size.x-fw)*.5,size.y*.5+70),empty,HORIZONTAL_ALIGNMENT_LEFT,-1,15,Color(line,.8))

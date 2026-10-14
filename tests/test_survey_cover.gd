@@ -320,7 +320,8 @@ func test_the_materials_page_shows_the_searched_land()->void:
 	var label:Label=page.find_child("SearchedLand",true,false)
 	assert_object(label).is_not_null()
 	# The page says how much land is searched; the factors and odds are behind it.
-	assert_str(label.text).starts_with("Searched land").not_contains("Cutting and digging")
+	assert_str(label.text).starts_with("Land searched").ends_with("%").not_contains("Cutting and digging")
+	assert_object(page.find_child("SearchedBar",true,false)).is_not_null()
 	assert_str(label.tooltip_text).is_equal(words)
 
 
