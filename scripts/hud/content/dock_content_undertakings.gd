@@ -106,6 +106,7 @@ func _local(id:String)->Dictionary:
 				{"id":"press","label":"Press ahead","tip":"Half the builders, even through hardship.","on_press":func()->void:U.direct(id,work_id,"press");_refresh()},
 				{"id":"abandon","label":"Withdraw","tip":"Lay down the tools; the unfinished site remains.","on_press":func()->void:U.direct(id,work_id,"abandon");_refresh()}]}
 		cards.append(row)
+	cards.append_array(_next_works())
 	for warning in Works.api_list("forecast",["player"]):
 		if warning is Dictionary:cards.append({"section":"sky","key":"sky_%d" % cards.size(),"icon":"danger","name":"In %d days" % int(warning.get("in_days",0)),"sub":String(warning.get("text","")),"detail":String(warning.get("text",""))})
 	for news:Dictionary in preload("res://scripts/great_works.gd").known_foreign_works("player"):
@@ -118,9 +119,39 @@ func _local(id:String)->Dictionary:
 	var sections:=[
 		{"id":"works","heading":"Great works of %s" % String(city.get("name","the town")),"span":true,"note":"none yet" if count==0 else "",
 			"actions":[{"label":"Conceive","primary":count==0,"tip":"Call the court and hear what they dream of: a wonder conceived from who we are.","on_press":_conceive}]},
+		{"id":"next","heading":"What the people could raise next","span":true},
 		{"id":"sky","heading":"The watching sky foresees"},
 		{"id":"abroad","heading":"Other peoples' works","note":"as last heard" if cards.any(func(c:Dictionary)->bool:return String(c.section)=="abroad") else "none heard of yet"}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
+
+## The great works the people would put to the court today, as rows: each
+## idea's form, the engine's odds that it stands (wonder_concept.gd assess and
+## odds), how long it would take, and its bill against the stores as pips. The
+## court hears them in full (Conceive).
+func _next_works()->Array:
+	var Concept:=preload("res://scripts/wonder_concept.gd")
+	var rows:Array=[]
+	for concept:Dictionary in Concept.conceive("player",{},3):
+		var assessed:Dictionary=Concept.assess(concept)
+		var ambition:=String(concept.get("ambition","grand"))
+		var o:Dictionary=Concept.odds(float(assessed.get("score",0.5)),ambition)
+		var stands:=float(o.triumph)+float(o.success)+float(o.flawed)
+		var needs:Array=[]
+		var cost:Dictionary=assessed.get("costs",concept.get("cost",{}))
+		var keys:Array=cost.keys()
+		keys.sort_custom(func(x:Variant,y:Variant)->bool:return float(cost[x])>float(cost[y]))
+		for resource in keys.slice(0,3):needs.append({"resource":String(resource),"have":float(GameState.resource_stockpiles.get(String(resource),0.0)),"need":float(cost[resource])})
+		var days:=float(assessed.get("duration_estimate",0))
+		rows.append({"section":"next","key":"idea_"+String(concept.get("token","")),"texture":preload("res://scripts/resource_icons.gd").great_work_texture(String(concept.get("shape","")),"building",48),
+			"name":String(concept.get("name","A great work")),"sub":String(concept.get("title","")).to_lower(),
+			"bar":{"ratio":stands,"color":Tokens.GREEN if stands>=0.75 else (Tokens.AMBER if stands>=0.5 else Tokens.RED),"tip":"The engine's odds today: a triumph %d%%, it stands %d%%, flawed %d%%, it falls %d%%." % [roundi(float(o.triumph)*100.0),roundi(float(o.success)*100.0),roundi(float(o.flawed)*100.0),roundi(float(o.collapse)*100.0)]},
+			"value":"%d%% stands" % roundi(stands*100.0),"value_width":84,"tag":{"text":ambition.capitalize(),"tone":"note"},
+			"effects":[{"label":"Falls","value":"%d%%" % roundi(float(o.collapse)*100.0),"tone":"bad" if float(o.collapse)>=0.2 else "plain","tip":"A fall kills some of its builders and costs cohesion and legitimacy."},
+				{"label":"Takes","value":preload("res://scripts/hud/production_plain.gd").span_text(days) if days>0.0 else "unknown","tone":"plain","tip":"At today's builders."}],
+			"needs":needs,"detail":"%s
+%s" % [String(concept.get("effect_text","")),String(assessed.get("spoken",""))],
+			"actions":[{"label":"Hear it","tip":"The court puts this idea and the others to you; you choose.","on_press":_conceive}]})
+	return rows
 
 ## A work's few words beside its name: where it stands in the raising and
 ## how long to go (or why it is idle), or who built it once it stands.
