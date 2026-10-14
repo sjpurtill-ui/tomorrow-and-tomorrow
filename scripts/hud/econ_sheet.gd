@@ -11,7 +11,7 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## The shared strategy-screen blocks: their verb, tag and bar are ours too.
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_HEIGHT:=48.0
+const ROW_HEIGHT:=32.0
 const ICON_SIZE:=24.0
 
 ## A whole number with its thousands separators (era_words.gd grouped, the
@@ -43,6 +43,7 @@ static func put(l:Label,text:String,color:Variant=null)->void:
 	if l==null:return
 	if l.text!=text:l.text=text
 	if color is Color and l.get_theme_color("font_color")!=color:l.add_theme_color_override("font_color",color)
+	if l.has_meta("hide_empty"):l.visible=not text.is_empty()
 
 static func icon(key:String,size:float=ICON_SIZE,kind:String="resource")->TextureRect:
 	var rect:=TextureRect.new();rect.custom_minimum_size=Vector2(size,size)
@@ -89,13 +90,12 @@ static func verb(text:String,callback:Variant,tip:String="",chosen:=false,primar
 		b.add_theme_stylebox_override("normal",b.get_theme_stylebox("pressed").duplicate())
 	return b
 
-## A sans section head; `right` is a short
-## figure or note at the head's far end.
+## A compact section head; its supporting reading stays just below the title.
 static func head(parent:Node,text:String,right:String="",tip:String="")->Dictionary:
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);parent.add_child(box)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",4);parent.add_child(box)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);box.add_child(row)
-	var title:=label(text,24,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.tooltip_text=tip;row.add_child(title)
-	var side:=label(right,14,T.INK_MUTED);side.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(side)
+	var title:=label(text,20,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.tooltip_text=tip;row.add_child(title)
+	var side:=label(right,14,T.INK_MUTED);side.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;side.set_meta("hide_empty",true);side.visible=not right.is_empty();box.add_child(side)
 	return {"box":box,"row":row,"title":title,"side":side}
 
 ## A grid that holds rows in 1 to `most` columns by the width it is given
@@ -152,23 +152,22 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 	var panel:=PanelContainer.new();panel.name="Row_"+String(item.get("id",item.get("label",""))).validate_node_name()
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.mouse_filter=Control.MOUSE_FILTER_PASS
 	var style:=StyleBoxFlat.new();style.bg_color=Color.TRANSPARENT;style.border_width_bottom=1;style.border_color=Color(T.RULE,0.45)
-	style.content_margin_top=10;style.content_margin_bottom=10;style.content_margin_left=0;style.content_margin_right=0
+	style.content_margin_top=5;style.content_margin_bottom=5;style.content_margin_left=0;style.content_margin_right=0
 	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.custom_minimum_size.y=ROW_HEIGHT;line.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(line)
 	var key:=String(item.get("icon",""))
 	var glyph:TextureRect=null
 	if item.has("icon"):glyph=icon(key,ICON_SIZE,String(item.get("icon_kind","resource")));line.add_child(glyph)
-	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",6);line.add_child(body)
+	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",4);line.add_child(body)
 	var headline:=HBoxContainer.new();headline.add_theme_constant_override("separation",8);body.add_child(headline)
 	var name_label:=label(String(item.get("label","")),16,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	# The name is always whole (it wraps on a narrow page, never cut short);
-	# it takes its share of a wide row.
+	# Name and amount form one reading. Neither is pushed to the row's far edge.
 	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.custom_minimum_size.x=80
-	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.size_flags_stretch_ratio=float(item.get("label_width",150.0))/150.0
+	name_label.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	headline.add_child(name_label)
-	var value:=label("",20,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=minf(96.0,float(item.get("value_width",72.0)));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;headline.add_child(value)
-	var note:=label("",14,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note)
-	var signals:=HFlowContainer.new();signals.add_theme_constant_override("h_separation",12);signals.add_theme_constant_override("v_separation",6);body.add_child(signals)
+	var value:=label("",16,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.mouse_filter=Control.MOUSE_FILTER_IGNORE;headline.add_child(value)
+	var signals:=HFlowContainer.new();signals.add_theme_constant_override("h_separation",10);signals.add_theme_constant_override("v_separation",4);body.add_child(signals)
+	var note:=label("",14,T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(note)
 	var spark:Control=null
 	if item.has("points"):
 		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(spark)
@@ -182,10 +181,21 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 		var b:=verb(String(spec.get("text","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("chosen",false)),bool(spec.get("primary",false)))
 		if bool(spec.get("disabled",false)):b.disabled=true
 		actions.add_child(b);buttons.append(b)
-	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"signals":signals,"compact":false}
+	var refs:={"panel":panel,"body":body,"headline":headline,"actions":actions,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"signals":signals,"compact":false}
 	panel.set_meta("econ_row",refs)
+	body.resized.connect(_fit_row.bind(refs))
 	set_row(refs,item)
 	return refs
+
+static func _fit_row(refs:Dictionary)->void:
+	var available:=maxf(120.0,(refs.body as Control).size.x)
+	var actions:Control=refs.actions
+	var reserved:=(refs.value as Control).get_combined_minimum_size().x+8.0
+	if actions.visible and actions.get_parent()==refs.headline:reserved+=actions.get_combined_minimum_size().x+8.0
+	for entry:Array in [[refs.label,maxf(60.0,available-reserved)],[refs.note,available]]:
+		var caption:Label=entry[0]
+		var natural:=caption.get_theme_font("font").get_string_size(caption.text,HORIZONTAL_ALIGNMENT_LEFT,-1,caption.get_theme_font_size("font_size")).x+1.0
+		caption.custom_minimum_size.x=minf(natural,float(entry[1]))
 
 static func set_row(refs:Dictionary,item:Dictionary)->void:
 	put(refs.label,String(item.get("label","")),item.get("label_color",T.INK))
@@ -202,7 +212,9 @@ static func set_row(refs:Dictionary,item:Dictionary)->void:
 	var spark:Control=refs.get("spark")
 	if spark!=null and item.has("points") and spark.get("points")!=item.points:spark.set("points",item.points);spark.queue_redraw()
 	if spark!=null:spark.visible=not bool(refs.get("compact",false)) and not (spark.get("points") as Array).is_empty()
-	(refs.signals as Control).visible=meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
+	(refs.signals as Control).visible=(refs.note as Control).visible or meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
+	(refs.value as Control).visible=not String(item.get("value","")).is_empty()
+	_fit_row(refs)
 	var tip:=String(item.get("tip",""))
 	if (refs.panel as Control).tooltip_text!=tip:(refs.panel as Control).tooltip_text=tip
 
@@ -242,4 +254,4 @@ static func compact(root:Node,width:float)->void:
 		if narrow:(refs.bar as Control).visible=false
 		else:(refs.bar as Control).visible=float(refs.get("ratio",-1.0))>=0.0
 		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow and not (refs.spark.get("points") as Array).is_empty()
-		(refs.signals as Control).visible=(refs.bar as Control).visible or (refs.tag as Control).visible or (refs.get("spark")!=null and (refs.spark as Control).visible)
+		(refs.signals as Control).visible=(refs.note as Control).visible or (refs.bar as Control).visible or (refs.tag as Control).visible or (refs.get("spark")!=null and (refs.spark as Control).visible)
