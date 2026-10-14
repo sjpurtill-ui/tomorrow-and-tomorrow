@@ -33,6 +33,7 @@ func _ready()->void:
 	GameState.discovery_progress.merge({"clay_shaping":0.46,"mouths_against_store":0.63,"fruit_pulp_screening":0.2,"moon_counting":0.08,"turbidity_judging":0.3},true)
 	var terrain=load("res://local_terrain.tscn").instantiate();add_child(terrain)
 	await frames(3);terrain._set_game_speed(0.0)
+	terrain.macro_render.set_enabled(false);terrain.macro_render.cancel()
 	if is_instance_valid(terrain.founding_focus_panel):terrain.founding_focus_panel.queue_free()
 	terrain.founding_focus_panel=null
 	var hud=terrain.hud
@@ -60,7 +61,13 @@ func _ready()->void:
 				var board=hud.dock.find_child("InquiryBoard" if index==0 else "KnowledgeTree",true,false)
 				check(board.get_combined_minimum_size().x<=board.size.x+1,"Research content fits "+str(canvas.x)+" tab "+str(index))
 				if index==0:
-					check(board.find_child("Fields",true,false).get_child_count()==12,"Twelve fields remain available")
+					check(board.find_child("QuestionsHeading",true,false).size.y<80,"Questions heading uses a readable horizontal line")
+					check(board.find_child("Fields",true,false).find_children("Row_*","",true,false).size()==12,"Twelve fields remain available")
+					var active_rows:Array=board.active_fields.find_children("Row_*","",false,false)
+					check(active_rows.filter(func(row:Control)->bool:return row.visible).size()<=3,"At most three active fields are shown")
+					if board.waiting_picker:
+						board.waiting_picker.item_selected.emit(board.waiting_picker.item_count-1)
+						check(board.waiting_fields.find_children("Row_*","",false,false).filter(func(row:Control)->bool:return row.visible).size()==1,"Idle field picker shows one attention control")
 					var field:Dictionary=board.data.fields[0];var weight:=int(GameState.research_allocations[field.id]);var people:=GameState.population_total;var known:=GameState.known_discoveries.duplicate()
 					field.on_more.call();check(int(GameState.research_allocations[field.id])==weight+1,"Attention increase still works")
 					field.on_less.call();check(int(GameState.research_allocations[field.id])==weight,"Attention decrease still works")
@@ -69,6 +76,10 @@ func _ready()->void:
 					get_viewport().get_texture().get_image().save_png("res://artifacts/research-%s-%d-pace.png" % [prefix,canvas.x])
 					hud.dock.body_scroll.scroll_vertical=0
 				elif index==1:
+					check(board.question_grid.get_child_count()<=6,"Explore shows at most six questions")
+					for choice:Control in board.question_grid.get_children():check(choice.size.y<180,"Question choices size to their content")
+					board.question_query="no_such_question_abcdef";board._render_questions();check(board.question_choices.is_empty(),"Explore search filters the complete field")
+					board.question_query="";board._render_questions()
 					var before:int=board.find_children("Pill_*","Button",true,false).size()
 					for button:Button in board.find_children("*","Button",true,false):
 						if button.text.begins_with("+") and "open to a team" in button.text:
@@ -79,10 +90,7 @@ func _ready()->void:
 							if button.text=="More about this question":button.pressed.emit();break
 						check(read.visible,"Full question account can be read without hovering")
 				elif index==2:
-					board.data.on_toggle_unlearned.call();await frames()
-					board=hud.dock.find_child("KnowledgeTree",true,false)
-					check(board.archive_grid.get_child_count()==12,"All twelve archive fields are accessible")
-					board.data.on_toggle_unlearned.call();await frames()
+					check(board.archive_list.get_child_count()==12,"All twelve archive fields are accessible")
 	# Every-discovery reading card: an existing finding in this isolated fixture.
 	hud.close_dock();get_window().size=Vector2i(1280,900);get_window().content_scale_size=Vector2i(1280,900)
 	var popup=preload("res://scripts/hud/discovery_popup.gd").announce(terrain,hud,[{"id":"basketry","day":3650}])
@@ -94,4 +102,5 @@ func _ready()->void:
 		get_viewport().get_texture().get_image().save_png("res://artifacts/research-%s-discovery-narrow.png" % prefix)
 		check(popup.panel.get_global_rect().end.x<=get_viewport().get_visible_rect().size.x,"Narrow discovery card fits logical viewport")
 	print("RESEARCH_REDESIGN_CHECKS ",prefix,": ",failures)
+	terrain.set_process(false);terrain.macro_render.set_enabled(false);terrain.macro_render.cancel()
 	get_tree().quit(0 if failures.is_empty() else 1)

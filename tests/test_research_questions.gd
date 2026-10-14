@@ -138,9 +138,10 @@ func test_every_lane_names_its_field_in_full()->void:
 		# One journal entry per field, with the same full names and wrapping.
 		var table:Node=board.find_child("Fields",true,false)
 		assert_object(table).is_not_null()
-		var rows:Array=table.find_children("Row_*","",false,false)
+		var rows:Array=table.find_children("Row_*","",true,false)
 		assert_int(rows.size()).is_equal(Board.lanes_of({"investigations":records,"fields":[]}).size())
 		for row:Control in rows:
+			if not row.visible:continue
 			assert_float(row.get_global_rect().end.x).is_less_equal(float(width)+1.0)
 			# Field names are never cut; a long question name wraps.
 			var field:Button=row.find_child("FieldLabel",true,false)
