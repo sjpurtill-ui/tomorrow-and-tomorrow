@@ -434,10 +434,10 @@ func test_the_war_screen_links_to_all_peoples_we_know()->void:
 	var board:VBoxContainer=auto_free(WarBoard.new())
 	add_child(board)
 	board.setup({})
-	var box:VBoxContainer=board.enemy_box
-	var link:Button=box.get_child(box.get_child_count()-1)
-	assert_str(String(link.name)).is_equal("AllPeoples")
-	assert_str(link.text).is_equal("All peoples we know")
+	# A small link on the Enemies heading, not a box on the sheet.
+	var link:Button=board.fronts_section.find_child("AllPeoples",true,false)
+	assert_object(link).is_not_null()
+	assert_str(link.text).starts_with("All peoples")
 
 ## A people that bows to us, or gathers every spear against us
 ## (world_answer.gd), says so in the "between us" cell.

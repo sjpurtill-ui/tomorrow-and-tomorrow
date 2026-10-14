@@ -456,6 +456,5 @@ func test_the_border_card_counts_the_armys_bands_on_the_border() -> void:
 	var posted:Node=card.find_child("Posted",true,false)
 	assert_str((posted.find_child("Value",true,false) as Label).text).is_equal(preload("res://scripts/hud/war_board.gd").compact(int(Forts.watch().posted)+out))
 	assert_str(String((posted as Control).tooltip_text)).contains("at border stations")
-	var said:PackedStringArray=[]
-	for label in card.find_child("LineHolds",true,false).find_children("*","Label",true,false): said.append((label as Label).text)
-	assert_str(" | ".join(said)).contains("Bands hold the border").not_contains("The border is open")
+	# The line's state tag says the bands hold it, not that it lies open.
+	assert_str((card.find_child("LineHolds",true,false) as Label).text).contains("Bands hold").not_contains("Open")
