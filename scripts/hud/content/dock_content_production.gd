@@ -31,6 +31,7 @@ func tab(sub:int)->Dictionary:
 		if is_instance_valid(hud):hud.section_requested.emit(section,page),
 		"on_materials":func()->void:
 		if is_instance_valid(hud):hud.section_requested.emit("economy",1)}
+	block.on_assign=assign_workers("Crafting")
 	# Every page leads with the flow chart: materials into the benches, out to
 	# what the makers make (flow_model). Military needs the towns' arms too.
 	var cards:=household_cards()

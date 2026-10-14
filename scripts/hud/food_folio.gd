@@ -46,13 +46,16 @@ func setup(block:Dictionary)->void:
 	var outlook:=VBoxContainer.new();outlook.add_theme_constant_override("separation",6);operations.add_child(outlook)
 	_refs.horizon=S.voice("",24);_refs.horizon.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.horizon)
 	_refs.forecast=S.label("",14,T.INK_MUTED);_refs.forecast.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.forecast)
+	if block.get("on_assign") is Callable:
+		var assign:=S.verb("Assign workers",func():data.on_assign.call(),"Focus food gathering and farming in The People. Preview food security before applying.",true)
+		assign.name="AssignFoodWorkers";assign.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;outlook.add_child(assign)
 	if can_direct:
 		var work:=VBoxContainer.new();work.add_theme_constant_override("separation",8);outlook.add_child(work)
 		var ask:=S.label("",14,T.INK_MUTED);ask.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;work.add_child(ask);_refs.work_caption=ask
 		var choices:=HFlowContainer.new();choices.add_theme_constant_override("h_separation",8);choices.add_theme_constant_override("v_separation",8);work.add_child(choices)
 		for spec:Array in [["provisions","Food","Provisions","gathering, hunting, fishing and carrying food"],["water","Water","Water","finding, reaching and carrying water"]]:
 			var focus_id:=String(spec[0])
-			var choice:=S.verb("More hands on "+String(spec[1]).to_lower()+(" (now)" if current==focus_id else ""),func():data.on_focus.call(focus_id),"Ask %s to put more people on %s. Other work slows." % [who,String(spec[3])],current==focus_id)
+			var choice:=S.verb("Ask leader: "+String(spec[1]).to_lower()+(" (now)" if current==focus_id else ""),func():data.on_focus.call(focus_id),"Ask %s to put more people on %s. Other work slows." % [who,String(spec[3])],current==focus_id)
 			choice.name="Choice_"+String(spec[2]);choices.add_child(choice)
 		var decide:=S.verb("Let %s decide" % who+(" (now)" if current=="" else ""),func():data.on_focus.call(""),"%s spreads the work across what the place needs." % who.capitalize(),current=="")
 		decide.name="Choice_";choices.add_child(decide)
@@ -102,6 +105,9 @@ func setup(block:Dictionary)->void:
 	if not water_access.is_empty():
 		_refs.water_row=S.row(right,{"id":"water_source","icon":"Freshwater","label":"Water","value_width":84.0,
 			"buttons":[{"text":"Show","on_press":data.get("on_water_map"),"tip":"Show water on the map"}] if data.get("on_water_map") is Callable else []})
+		if block.get("on_assign_water") is Callable:
+			var carriers:=S.verb("Assign water carriers",func():data.on_assign_water.call(),"Focus Logistics in The People. These workers carry water, supplies and materials.")
+			carriers.name="AssignWaterCarriers";carriers.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;right.add_child(carriers)
 	var shipments:Array=block.get("deliveries",[])
 	if not shipments.is_empty():
 		S.head(right,"On the road")
@@ -133,7 +139,7 @@ static func shape_of(block:Dictionary)->Array:
 	for source:Dictionary in block.get("sources",[]):sources.append(String(source.get("name","")))
 	return [String(block.get("leader_name","")),rows,sources,(block.get("deliveries",[]) as Array).size(),bool(block.get("has_deliveries",false)),
 		bool(block.get("can_direct",false)),_current_focus(block),(block.get("fire",{}) as Dictionary).size()>0,
-		(block.get("water_access",{}) as Dictionary).is_empty()]
+		(block.get("water_access",{}) as Dictionary).is_empty(),block.get("on_assign") is Callable,block.get("on_assign_water") is Callable]
 
 static func _current_focus(block:Dictionary)->String:
 	var focus:=String(block.get("focus",""))
