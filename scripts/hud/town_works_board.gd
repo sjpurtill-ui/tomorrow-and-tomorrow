@@ -179,11 +179,11 @@ func _chip(item:Dictionary,tone:String)->Control:
 
 ## Who decides, as three plain choices; the chosen one is held down.
 func _choice(choice:Dictionary)->Control:
-	var row:=HBoxContainer.new();row.name="Choice";row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
+	var row:=HFlowContainer.new();row.name="Choice";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);row.mouse_filter=Control.MOUSE_FILTER_PASS
 	for option:Dictionary in choice.get("options",[]):
 		var button:=Button.new();button.name="Choose_"+String(option.get("id",""));button.text=String(option.get("label",""))
-		button.toggle_mode=true;button.button_pressed=String(option.get("id",""))==String(choice.get("selected",""));button.focus_mode=Control.FOCUS_NONE
-		button.tooltip_text=String(option.get("tip",""));button.custom_minimum_size=Vector2(0,28)
+		button.toggle_mode=true;button.button_pressed=String(option.get("id",""))==String(choice.get("selected",""));button.focus_mode=Control.FOCUS_ALL
+		button.tooltip_text=String(option.get("tip",""));T.apply_button_style(button)
 		var action:Variant=option.get("on_press")
 		button.pressed.connect(func()->void:
 			button.button_pressed=true
@@ -195,7 +195,7 @@ func _choice(choice:Dictionary)->Control:
 func _actions(actions:Array)->Control:
 	var row:=HFlowContainer.new();row.name="Actions";row.add_theme_constant_override("h_separation",6);row.add_theme_constant_override("v_separation",4);row.mouse_filter=Control.MOUSE_FILTER_PASS
 	for item:Dictionary in actions:
-		var button:=Button.new();button.name="Act";button.text=String(item.get("label",""));button.tooltip_text=String(item.get("tip",""));button.focus_mode=Control.FOCUS_NONE
+		var button:=Button.new();button.name="Act";button.text=String(item.get("label",""));button.tooltip_text=String(item.get("tip",""));button.focus_mode=Control.FOCUS_ALL
 		button.custom_minimum_size=Vector2(0,28)
 		if bool(item.get("primary",false)):
 			T.apply_button_style(button,true)
@@ -209,7 +209,7 @@ func _actions(actions:Array)->Control:
 # --- Small builders ------------------------------------------------------------------
 
 func _label(text:String,size:int,color:Color,strong:bool=false)->Label:
-	var label:=T.make_label(text,size,color)
+	var label:=T.make_label(text,maxi(14,size),color)
 	if strong:label.add_theme_font_override("font",T.font("ui_strong"))
 	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
