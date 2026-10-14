@@ -18,7 +18,8 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	panel.setup(block)
 	var value: Label = panel.daily_values.Net
 	assert_str(value.text).is_equal("+135")
-	assert_str(panel._refs.food.get_child(1).text).contains("135 rations added")
+	# The amount is said once (under Change); the line under the headline says which way.
+	assert_str(panel._refs.food.get_child(1).text).is_equal("Stores are growing")
 	block.flow.Net = -37.0
 	block.water.intake_ratio = 0.5
 	block.forecast90.first_shortage_day = 12

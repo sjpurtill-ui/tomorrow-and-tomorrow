@@ -189,7 +189,12 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_array(ids).contains(["hungry","will","men"])
 	var hungry:Dictionary=shown[ids.find("hungry")]
 	assert_str(String(hungry.tone)).is_equal("red")
-	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("War screen")
+	# The notice stack's standing row for it: who, and one click to the War screen.
+	var Standing:=preload("res://scripts/hud/standing_notices.gd")
+	var row:=Standing.from_alert(hungry)
+	assert_str(Standing.tip(row)).contains("Ennis").contains("War screen")
+	assert_str(String(row.text)).contains("Ennis")
+	assert_dict(row.action).is_equal({"kind":"war","page":"support","label":"the War screen"})
 	assert_str(String(shown[ids.find("men")].page)).is_equal("war")
 	WorldSimulation.clear()
 

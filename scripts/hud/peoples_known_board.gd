@@ -18,7 +18,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
 
 ## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"towns":44,"people":72,"fighters":66,"stores":68,"crafts":60,"lore":56,"lives":74,"wealth":64,"walls":60,"between":88,"envoys":70}
+const WIDTHS:={"towns":44,"people":72,"fighters":66,"stores":68,"crafts":78,"lore":56,"lives":74,"wealth":64,"walls":78,"between":80,"envoys":62}
 const NAME_MIN:=118
 const GAP:=3
 ## The sheet's paper margin, each side (px).

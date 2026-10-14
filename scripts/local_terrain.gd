@@ -471,8 +471,8 @@ func _ready() -> void:
 		get_tree().root.set_meta("saved_campaign_resumed",true)
 		print("SAVED_CAMPAIGN_RESUMED: ",String(restored.message),"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
 	# Grand strategy: no threat, battle or aftermath stops time or opens a
-	# panel. The map marks them, the alerts under the clock count them
-	# (hud/army_alerts.gd) and the War screen tells them.
+	# panel. The map marks them, the notices at the top right count them
+	# (hud/standing_notices.gd) and the War screen tells them.
 	_restore_military_attention.call_deferred()
 	_trace_load("ready")
 	var requested_founding_focus:=""
@@ -14231,7 +14231,7 @@ func _warfare_label_has_clear_space(label:Label3D)->bool:
 	var center:=camera.unproject_position(label.global_position)
 	var obstacles:Array=[]
 	if hud:
-		for property in ["rail_panel","time_pill","kpi_strip","toolbar","queue_root","dock","detail_dock"]:
+		for property in ["rail_panel","time_pill","kpi_strip","toolbar","dock","detail_dock"]:
 			var panel:=hud.get(property) as Control
 			if panel and panel.is_visible_in_tree() and panel.size.x>0.0 and panel.size.y>0.0:
 				obstacles.append(panel.get_global_rect())
@@ -15029,7 +15029,6 @@ func _perform_civic_leader_removal(settlement_id:String,action:String,player_tex
 	var message:=String(result.get("message",result.get("reason","Leadership did not change.")))
 	_tell(PaperKit.sentence(message),"court","notable")
 	if hud:
-		hud._queue_signature="__stale__"
 		hud.refresh()
 		hud.request_immediate_dock_refresh()
 	return result
@@ -15066,7 +15065,6 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		var withdrawal_message:=String(withdrawn.get("message",withdrawn.get("reason","There is no unresolved directive to withdraw.")))
 		_tell(PaperKit.sentence(withdrawal_message.split("\n")[0]),"court","notable")
 		if hud:
-			hud._queue_signature="__stale__"
 			hud.refresh()
 			hud.request_immediate_dock_refresh()
 		return
@@ -15081,7 +15079,6 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		AdvisorSystem.record_civic_refusal(settlement_id,text,refusal)
 		_tell(refusal,"court","notable")
 		if hud:
-			hud._queue_signature="__stale__"
 			hud.refresh()
 			hud.request_immediate_dock_refresh()
 		return

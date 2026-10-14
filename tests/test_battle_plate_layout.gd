@@ -10,11 +10,9 @@ const Counter:=preload("res://scripts/hud/army_counter.gd")
 class FakeHud extends Control:
 	var army_bar:Control
 	var order_stack:Control
-	var queue_root:Control
 	var toolbar:Control
 	var dock:Control
 	var detail_dock:Control
-	var army_alerts:Control
 
 
 class FakeTerrain extends Node3D:

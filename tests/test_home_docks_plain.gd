@@ -13,7 +13,9 @@ func _texts(node:Node)->String:
 
 func test_food_reading_has_duration_direction_and_cause()->void:
 	var falling:=Words.food(214.0,{"produced":40.0,"eaten":70.0,"spoiled":2.0,"missions":0.0})
-	assert_str(String(falling.headline)).is_equal("Food lasts about 7 months")
+	# The top bar's own words for the same days (era_words.gd days).
+	assert_str(String(falling.headline)).is_equal("Food lasts "+preload("res://scripts/hud/era_words.gd").days_in_words(214.0))
+	assert_str(String(falling.headline)).is_equal("Food lasts 214 days")
 	assert_str(String(falling.trend)).is_equal("falling")
 	assert_str(String(falling.cause)).is_equal("we eat more than comes in each day")
 	var rising:=Words.food(40.0,{"produced":90.0,"eaten":70.0,"spoiled":1.0})
@@ -58,7 +60,7 @@ func test_provisions_ledger_reads_as_sentences_and_marks_the_current_choice()->v
 		"selected":"","on_select":func(_k:String):pass,"on_focus":func(f:String):asked.append(f),
 		"on_water":func():pass,"on_sources":func():pass,"on_history":func():pass,"on_trade":func():pass})
 	var text:=_texts(ledger)
-	assert_str(text).contains("Food lasts about 7 months").contains("Falling: we eat more than comes in each day")
+	assert_str(text).contains("Food lasts 214 days").contains("Falling: we eat more than comes in each day")
 	assert_str(text).contains("8 in every 10 drink enough").contains("food runs short in about 40 days")
 	assert_str(text).contains("Water (now)").contains("Ask Tovan for more hands on")
 	assert_str(text).not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")

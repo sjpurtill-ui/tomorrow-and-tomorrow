@@ -102,18 +102,19 @@ func _fill() -> void:
 	_refs.flow.visible = false
 	for key: String in daily_values:
 		var amount := float(data.flow.get(key, 0))
-		var words := Plain.number(amount)
+		var words: String = preload("res://scripts/realm_purse.gd").number(amount)
 		if key == "Net" and amount > 0: words = "+" + words
 		_put(daily_values[key], words, tone_color("bad" if amount < 0 else "good") if key == "Net" else T.INK)
 		daily_values[key].tooltip_text = String(_refs.flow.text) + "\n" + String(_refs.flow.tooltip_text)
 	var sent := float(data.flow.get("Missions", 0))
 	_refs.missions.visible = sent > 0.05
 	_put(_refs.missions, "%s rations sent with departing parties today." % Plain.number(sent))
-	# A small gain on a large stock can be called steady by the legacy reading.
-	# The compact report instead states the exact recorded daily change.
+	# Which way the stores went today, from the recorded change (a small gain
+	# on a large stock can be called steady by the legacy reading). The amount
+	# itself is said once, under Change.
 	var net := float(data.flow.get("Net", 0))
 	if float(data.food_days) >= 0:
-		_put(_refs.food.get_child(1), "No change to stores today" if absf(net) < 0.05 else "%s rations %s today, after losses and departures" % [Plain.number(absf(net)), "added" if net >= 0 else "used from stores"])
+		_put(_refs.food.get_child(1), "No change to stores today" if absf(net) < 0.05 else ("Stores are growing" if net >= 0 else "Stores are shrinking"))
 	for index in data.rows.size():
 		var item: Dictionary = data.rows[index]
 		var refs: Dictionary = _refs.rows[index]

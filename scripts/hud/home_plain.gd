@@ -4,10 +4,12 @@ extends RefCounted
 ## and its cause, in words a new player can act on. Pure functions over values
 ## the simulation already computes; nothing here changes game state.
 ##
-## Durations and small quantities reuse the Production screen's wording
-## (production_plain.gd) so every dock says "about 7 months" the same way.
+## Small quantities reuse the Production screen's wording
+## (production_plain.gd). Days of food are said as the top bar says them
+## (era_words.gd days): one number, the same on every screen.
 
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 ## "rising", "falling" or "steady" from a daily change and the stock it moves.
 static func direction(change:float,stock:float=0.0)->String:
@@ -36,7 +38,7 @@ static func food(days:float,flow:Dictionary,reported:bool=true)->Dictionary:
 		return result
 	if days<=0.05:result.headline="The food is gone"
 	elif days>=3650.0:result.headline="Food lasts for years at this rate"
-	else:result.headline="Food lasts "+Plain.duration_text(days)
+	else:result.headline="Food lasts "+EraWords.days_in_words(days)
 	result.trend=direction(net,days*maxf(0.5,eaten))
 	match String(result.trend):
 		"rising":

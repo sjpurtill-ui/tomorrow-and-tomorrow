@@ -23,7 +23,7 @@ signal open_requested(screen:String)
 ## The stack's height settled after its labels wrapped: the HUD places it again.
 signal relayout
 
-const WIDTH:=300.0
+const WIDTH:=340.0
 const MAX_VISIBLE:=4
 ## A finished order's card stays this long on screen, then fades.
 const DONE_SHOW_MS:=9000

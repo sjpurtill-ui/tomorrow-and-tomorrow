@@ -329,7 +329,6 @@ const DOCK_DETAIL_X:=DOCK_X+DOCK_WIDTH+24.0
 const DOCK_MARGIN_Y:=8.0
 const EDGE_MARGIN:=10.0
 const CHIP_HEIGHT:=40.0
-const QUEUE_WIDTH:=400.0
 
 static func delta_color(direction:int,attention:bool=false)->Color:
 	## improving > 0, worsening < 0, neutral 0; attention overrides neutral.

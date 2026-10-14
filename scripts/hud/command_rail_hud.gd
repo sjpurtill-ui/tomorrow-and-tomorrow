@@ -61,14 +61,12 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const WaterWatch:=preload("res://scripts/hud/water_watch.gd")
 ## Time controls speak in words: Pause, then five paces from slowest to fastest.
 const SPEED_LABELS:Array[String]=["Pause","Slowest","Slow","Normal","Fast","Fastest"]
-const MAX_QUEUE_CARDS:=3
 
 var city_selector:OptionButton
 var city_selector_signature:String=""
 var terrain:Node
 
 var active_section:String=""
-var dismissed_alert_ids:Array=[]
 
 var rail_panel:PanelContainer
 var top_frame:PanelContainer
@@ -89,8 +87,6 @@ var last_running_speed:=1
 var kpi_strip:PanelContainer
 var kpi_chips:Dictionary={}
 var kpi_separators:Array[ColorRect]=[]
-var queue_root:VBoxContainer
-var queue_footer:Label
 var toolbar:PanelContainer
 var toolbar_wrap:Control
 var toolbar_action_buttons:Dictionary={}
@@ -109,7 +105,6 @@ var _dock_signature:Array=[]
 var _detail_signature:Array=[]
 var detail_history:Array=[]
 
-var _queue_signature:String=""
 var _kpi_signature:String=""
 var _badge_signature:String=""
 var _time_signature:String=""
@@ -141,10 +136,8 @@ func _ready()->void:
 	_build_rail()
 	_build_time_pill()
 	_build_kpi_strip()
-	_build_decision_queue()
 	_build_toolbar()
 	_build_army_bar()
-	_build_army_alerts()
 	_build_dock()
 	_build_order_stack()
 	dock.visibility_changed.connect(_layout)
@@ -166,8 +159,9 @@ func _layout()->void:
 	if brand_label:brand_label.visible=false
 	if brand_row:
 		brand_row.add_theme_constant_override("separation",10)
+		# The town's name stands on the bar only when there is a choice of towns.
 		var city_mark:=brand_row.get_node_or_null("TopCityIcon") as Control
-		if city_mark:city_mark.visible=view.x>=1280
+		if city_mark:city_mark.visible=view.x>=1280 and city_selector!=null and city_selector.visible
 	if city_selector:city_selector.custom_minimum_size.x=80 if view.x<1280 else 150
 	if top_actions:top_actions.position=Vector2(view.x-top_actions.get_combined_minimum_size().x-12,6)
 	if time_pill:
@@ -175,7 +169,7 @@ func _layout()->void:
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
 		if top_frame:
-			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-28.0))
+			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-12.0))
 	if kpi_strip:
 		# Retain the original formatting and hover sources; the persistent bar
 		# presents their readings instead of a second row of boxed chips.
@@ -193,25 +187,22 @@ func _layout()->void:
 		# Before writing, who ate today is told in the PEOPLE chip itself; a
 		# separate "bellies filled" count only repeated the head count.
 		if EraWords.hearth():_hide_kpi("gdp")
-		# Never over the clock and the pace buttons: the strip starts after the
-		# time pill. When a later age's chips do not fit in what is left, the
-		# least urgent go first (KPI_SHED_ORDER); food, lives and the day's
+		# Never over the clock and the pace buttons: every reading shows in
+		# full, so when the bar left of the clock is too narrow for them all,
+		# the least urgent go first (KPI_SHED_ORDER); food, lives and the day's
 		# labour always stay.
-		var left:=Folio.RAIL_WIDTH+12.0
-		var room:=view.x-Tokens.EDGE_MARGIN-left
-		for id in KPI_SHED_ORDER:
-			if kpi_strip.get_combined_minimum_size().x<=room:break
-			_hide_kpi(String(id))
+		if top_readings and top_frame:
+			var room:=top_frame.size.x-40.0
+			if city_selector!=null and city_selector.visible:room-=city_selector.custom_minimum_size.x+10.0+(36.0 if view.x>=1280 else 0.0)
+			for id in KPI_SHED_ORDER:
+				if top_readings.needed_width(kpi_readings())<=room:break
+				_hide_kpi(String(id))
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Folio.TOP_HEIGHT+8.0)
+		kpi_strip.position=Vector2(maxf(Folio.RAIL_WIDTH+12.0,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),Folio.TOP_HEIGHT+8.0)
 	if top_readings:
 		top_readings.visible=true
 		top_readings.show_readings(kpi_readings())
 	_layout_orders()
-	if queue_root:
-		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
-		# The council's waiting matters stand just above your orders.
-		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,orders_top()-queue_root.size.y)
 	if dock:
 		dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
 		# Before the first container sort, autowrap labels report inflated
@@ -222,11 +213,6 @@ func _layout()->void:
 		detail_dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
 		detail_dock.set_deferred("size",Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT))
 	_position_toolbar()
-	if army_alerts:
-		# Under the clock at the map's top left; a dock covers that corner.
-		# The War screen's strip stands there while it is open: below it.
-		army_alerts.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
-		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 
 func _work_queue_width(view_width:float)->float:
 	return Folio.page_width(view_width)
@@ -269,13 +255,6 @@ func _position_toolbar()->void:
 # --- Army bar (hud/army_bar.gd): HOI4's army cards above the map toolbar ------
 
 var army_bar:Control
-## HOI4's alerts for our fighters, under the clock (hud/army_alerts.gd).
-var army_alerts:Control
-
-func _build_army_alerts()->void:
-	army_alerts=preload("res://scripts/hud/army_alerts.gd").new()
-	add_child(army_alerts)
-
 func _build_army_bar()->void:
 	army_bar=preload("res://scripts/hud/army_bar.gd").new()
 	army_bar.terrain=terrain
@@ -294,8 +273,7 @@ func _position_army_bar()->void:
 	var help:Variant=terrain.get("map_help_button") if is_instance_valid(terrain) else null
 	if help is Control and (help as Control).is_visible_in_tree() and (help as Control).get_global_rect().end.y>bottom-height:left=maxf(left,(help as Control).get_global_rect().end.x+12.0)
 	var right:=view.x-Tokens.EDGE_MARGIN
-	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:right-=Tokens.QUEUE_WIDTH+12.0
-	elif _orders_at_bottom():right-=order_stack.size.x+12.0
+	if _orders_at_bottom():right-=order_stack.size.x+12.0
 	# The War screen's column holds the right edge while it is open.
 	if war_open():right=minf(right,view.x-Tokens.EDGE_MARGIN-_war_layout("COLUMN_WIDTH")-12.0)
 	army_bar.place(Rect2(left,bottom-height,maxf(0.0,right-left),height))
@@ -311,14 +289,13 @@ func _war_layout(key:String)->float:
 	var board:GDScript=load("res://scripts/hud/war_board.gd") as GDScript
 	return float(board.get_script_constant_map().get(key,0.0)) if board!=null else 0.0
 
-## The top of what stands at the bottom right: the council's waiting
-## matters, your orders, or the map toolbar where it reaches under the
-## right edge. The War screen's column stands down to it.
+## The top of what stands at the bottom right: your orders, or the map
+## toolbar where it reaches under the right edge. The notices and the War
+## screen's column stand down to it.
 func right_stack_top()->float:
 	var view:=get_viewport().get_visible_rect().size
 	var top:=orders_top()
-	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:top=minf(top,queue_root.position.y-8.0)
-	if toolbar!=null and toolbar.visible and toolbar.position.x+toolbar.size.x>view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH:top=minf(top,toolbar.position.y-8.0)
+	if toolbar!=null and toolbar.visible and toolbar.position.x+toolbar.size.x>view.x-Tokens.EDGE_MARGIN-OrderStackScript.WIDTH:top=minf(top,toolbar.position.y-8.0)
 	return top
 
 ## The top of what sits along the map's bottom edge (the army bar, else the
@@ -381,8 +358,7 @@ func _orders_covered(view:Vector2)->bool:
 func _orders_at_bottom()->bool:
 	return order_stack!=null and order_stack.visible and not bool(order_stack.compact)
 
-## The top of what stands at the bottom right (your orders), for the council
-## queue above it.
+## The top of what stands at the bottom right (your orders).
 func orders_top()->float:
 	var view:=get_viewport().get_visible_rect().size
 	if _orders_at_bottom():return order_stack.position.y-8.0
@@ -405,7 +381,6 @@ func _layout_orders()->void:
 		# The map toolbar too wide to stand beside the cards: they stand above it.
 		if toolbar!=null and toolbar.visible and toolbar.position.x+toolbar.size.x>view.x-Tokens.EDGE_MARGIN-size.x-4.0 and not _court_open():bottom=toolbar.position.y-8.0
 		order_stack.position=Vector2(view.x-Tokens.EDGE_MARGIN-size.x,bottom-size.y)
-	if queue_root!=null:queue_root.position.y=orders_top()-queue_root.size.y
 
 ## A card was clicked: the screen where that order lives ("military:2" is
 ## the Military screen's third page, the drill).
@@ -432,7 +407,7 @@ func _build_frame()->void:
 	brand_label=Tokens.make_label("Tomorrow and Tomorrow",24,Tokens.INK);brand_label.add_theme_font_override("font",Tokens.font("voice"));brand_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(brand_label)
 	top_readings=preload("res://scripts/hud/folio_readings.gd").new()
 	top_readings.visible=true
-	top_readings.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	top_readings.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	top_readings.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	brand_row.add_child(top_readings)
 	top_readings.reading_selected.connect(func(section:String,sub:int)->void:section_requested.emit(section,sub))
@@ -699,7 +674,7 @@ const KPI_DEFS:Array[Dictionary]=[
 
 ## Which status chips give way first when the top bar is too narrow for them
 ## all (after the age's own rules in _layout).
-const KPI_SHED_ORDER:=["goods","water","population","science"]
+const KPI_SHED_ORDER:=["goods","science","water","population"]
 
 ## Caption, value and note have separate lines within the 72 px header.
 ## Insets keep them clear of the fine frame and the semantic bottom rule.
@@ -847,133 +822,6 @@ func _kpi_width(id:String,base:float)->float:
 	# Value and note each have a full line: widths fit "1,240 souls",
 	# "2 hearths · all fed", "28 in 100 babes lost" and "115 known".
 	return float({"population":132.0,"food":112.0,"water":112.0,"goods":120.0,"health":138.0,"science":112.0,"gdp":116.0}.get(id,base))
-
-# --- Decision queue ---------------------------------------------------------
-
-func _build_decision_queue()->void:
-	queue_root=VBoxContainer.new()
-	queue_root.name="DecisionQueue"
-	queue_root.custom_minimum_size=Vector2(Tokens.QUEUE_WIDTH,0)
-	queue_root.add_theme_constant_override("separation",6)
-	add_child(queue_root)
-
-func dismiss_alert(alert_id:String)->void:
-	if not dismissed_alert_ids.has(alert_id):
-		dismissed_alert_ids.append(alert_id)
-	# Deferral is persistent: the item leaves the queue and will not return
-	# unless its condition escalates. The record stays in the council ledger.
-	AdvisorSystem.defer_council_item(alert_id)
-	_queue_signature="__stale__"
-	refresh()
-
-func _severity_color(severity:String)->Color:
-	match severity.to_lower():
-		"danger","critical": return Tokens.RED
-		"warning": return Tokens.AMBER
-	return Tokens.TEAL
-
-func _rebuild_queue(items:Array)->void:
-	for child in queue_root.get_children():
-		queue_root.remove_child(child)
-		child.queue_free()
-	queue_root.visible=not items.is_empty()
-	if items.is_empty():
-		return
-	var shown:=0
-	for item_variant in items:
-		if shown>=MAX_QUEUE_CARDS: break
-		var item:Dictionary=item_variant
-		queue_root.add_child(_make_queue_card(item))
-		shown+=1
-	# One way to answer: each card's Answer opens the court. The footer only
-	# counts; it is not a second door to the same matters.
-	# Only worth saying when some are not shown; it sits on paper, not the map.
-	var waiting:=items.size()
-	if waiting>MAX_QUEUE_CARDS:
-		var footer_row:=HBoxContainer.new()
-		footer_row.alignment=BoxContainer.ALIGNMENT_END
-		queue_root.add_child(footer_row)
-		var plate:=PanelContainer.new()
-		var plate_style:=Tokens.paper_panel_style(false,Tokens.RADIUS_CONTROL,0.0)
-		plate_style.content_margin_left=8.0;plate_style.content_margin_right=8.0;plate_style.content_margin_top=2.0;plate_style.content_margin_bottom=2.0
-		plate.add_theme_stylebox_override("panel",plate_style)
-		footer_row.add_child(plate)
-		var counts:=Tokens.make_label("%s more wait%s after these" % [EraWords.count_word(waiting-MAX_QUEUE_CARDS).capitalize(),"s" if waiting-MAX_QUEUE_CARDS==1 else ""],12,Tokens.MUTED)
-		counts.name="QueueCount"
-		plate.add_child(counts)
-	queue_root.reset_size()
-	_layout()
-
-func _make_queue_card(item:Dictionary)->PanelContainer:
-	var card:=PanelContainer.new()
-	var style:=Tokens.flat(Tokens.PANEL_BG,Tokens.BORDER_SOFT,1,3)
-	style.content_margin_top=8.0
-	style.content_margin_bottom=8.0
-	style.content_margin_right=10.0
-	card.add_theme_stylebox_override("panel",style)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",10)
-	card.add_child(row)
-	var stripe:=ColorRect.new()
-	stripe.color=_severity_color(String(item.get("severity","notice" if String(item.get("topic",""))=="" else "warning")))
-	stripe.custom_minimum_size=Vector2(4,0)
-	stripe.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	row.add_child(stripe)
-	var text_column:=VBoxContainer.new()
-	text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	text_column.add_theme_constant_override("separation",2)
-	row.add_child(text_column)
-	var title:=Tokens.make_label(String(item.get("text","Council item")).split("\n")[0],12,Tokens.INK)
-	title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	title.max_lines_visible=1
-	text_column.add_child(title)
-	var who:=String(item.get("advisor",""))
-	var subline:=Tokens.make_label("%s%s · %s" % [who+", " if who!="" else "",String(item.get("office","Council")).to_lower() if who!="" else String(item.get("office","Council")),EraWords.when(int(item.get("day",0)))],12,Tokens.MUTED)
-	subline.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	subline.max_lines_visible=1
-	text_column.add_child(subline)
-	var actions:=HBoxContainer.new()
-	actions.add_theme_constant_override("separation",6)
-	actions.alignment=BoxContainer.ALIGNMENT_CENTER
-	row.add_child(actions)
-	var decide:=Button.new()
-	decide.name="QueueAnswer"
-	decide.text="Answer"
-	decide.custom_minimum_size=Vector2(0,26)
-	decide.add_theme_font_size_override("font_size",12)
-	decide.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
-	decide.add_theme_color_override("font_hover_color",Tokens.INK)
-	decide.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
-	decide.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
-	decide.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	decide.tooltip_text="Hear %s in the court and give your answer." % (who if who!="" else "this matter")
-	decide.pressed.connect(answer_in_court.bind(item))
-	actions.add_child(decide)
-	var dismiss:=Button.new()
-	dismiss.name="QueueLater"
-	dismiss.text="Later"
-	dismiss.custom_minimum_size=Vector2(0,26)
-	dismiss.add_theme_font_size_override("font_size",12)
-	dismiss.add_theme_color_override("font_color",Tokens.MUTED)
-	dismiss.add_theme_stylebox_override("normal",Tokens.flat(Color(0,0,0,0),Tokens.BORDER_2,1,3,0.0))
-	dismiss.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,3,0.0))
-	for state:String in ["normal","hover"]:
-		var box:=dismiss.get_theme_stylebox(state) as StyleBoxFlat
-		box.content_margin_left=10.0;box.content_margin_right=10.0
-	dismiss.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	dismiss.tooltip_text="Set it aside. It comes back if the matter grows worse."
-	dismiss.pressed.connect(dismiss_alert.bind(String(item.get("id",""))))
-	actions.add_child(dismiss)
-	return card
-
-## The one path from a waiting matter to an answer: the court, turned to the
-## official who raised it (or at rest when no one holds that office).
-func answer_in_court(item:Dictionary)->void:
-	var focus:={}
-	var positions:Dictionary=GameState.leadership_positions
-	var holder:Variant=positions.get(String(item.get("office","")))
-	if holder is Dictionary and int((holder as Dictionary).get("person_id",0))>0:focus={"person_id":int(holder.person_id)}
-	if not preload("res://scripts/audience_director.gd").open_court_for(focus):open_court()
 
 # --- Map toolbar ------------------------------------------------------------
 
@@ -1358,7 +1206,6 @@ func refresh()->void:
 	_refresh_time()
 	_refresh_kpis()
 	_refresh_badges()
-	_refresh_queue()
 	_refresh_toolbar()
 
 func _refresh_time()->void:
@@ -1409,7 +1256,8 @@ func _refresh_kpis()->void:
 	var born:=int(t.get("born",0));var buried:=int(t.get("buried",0))
 	var counted:=hungry<=0 and bool(t.get("full_year",false)) and born+buried>0
 	if counted:people_note="born %d · buried %d" % [born,buried]
-	_update_kpi("population",EraWords.people(population) if not modern else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if counted and buried>born else Tokens.MUTED),"")
+	# Under PEOPLE the count needs no unit; before writing it is told in souls.
+	_update_kpi("population",EraWords.people(population) if EraWords.hearth() else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if counted and buried>born else Tokens.MUTED),"")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
@@ -1440,15 +1288,15 @@ func _refresh_kpis()->void:
 		_update_kpi("gdp","%.1f" % t.output,"%.2f per person" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"Total city output and per-city contributions")
 	else:
 		var keepers:=roundi(float(t.minds))
-		_update_kpi("science","%d known" % GameState.known_discoveries.size() if EraWords.hearth() else "%.1f" % t.science,("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d scholars" % keepers,Tokens.GOLD,"")
+		# After writing: the scholars, the Research page's own count.
+		_update_kpi("science","%d known" % GameState.known_discoveries.size() if EraWords.hearth() else EraWords.grouped(keepers),("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d known" % GameState.known_discoveries.size(),Tokens.GOLD,"")
 		# Before writing the gdp chip is hidden (who ate is in PEOPLE).
 		if not EraWords.hearth():
-			_update_kpi("gdp","%d hands" % roundi(float(t.output)),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
+			_update_kpi("gdp",EraWords.grouped(roundi(float(t.output))),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
 	kpi_strip.reset_size()
 	_layout()
 
 func _refresh_badges()->void:
-	var decisions:=AdvisorSystem.council_decision_items(9,false).size()
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 	var visible_foreign:=int(observation.get("visible_count",0))
 	var metrics:Dictionary=GameState.simulation_metrics
@@ -1459,11 +1307,10 @@ func _refresh_badges()->void:
 		if String(audience.get("origin",""))=="foreign": envoys+=1
 	# Peoples moved against us (standing.gd's monthly reading).
 	var standing_dangers:=int(metrics.get("standing_dangers",0))
-	var signature:="%d|%d|%s|%d|%d" % [decisions,visible_foreign,danger,envoys,standing_dangers]
+	var signature:="%d|%s|%d|%d" % [visible_foreign,danger,envoys,standing_dangers]
 	if signature==_badge_signature: return
 	_badge_signature=signature
 	_set_badge("court",str(envoys) if envoys>0 else "",Tokens.GOLD)
-	_set_badge("civ",str(decisions) if decisions>0 else "",Tokens.RED)
 	_set_badge("world",str(visible_foreign) if visible_foreign>0 else "",Tokens.AMBER)
 	_set_badge("standing",str(standing_dangers) if standing_dangers>0 else "",Tokens.RED)
 	_set_badge("economy","!" if danger else "",Tokens.RED)
@@ -1483,19 +1330,6 @@ func _economy_danger_active(metrics:Dictionary,water:Dictionary)->bool:
 	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)
 	var water_danger:=water_required>0.0 and GameState.consecutive_water_shortage_days>=2.0 and water_intake<0.95
 	return food_danger or water_danger
-
-func _refresh_queue()->void:
-	# Only unread decisions interrupt at the bottom right; answered history,
-	# deferred decisions, and merged routine reports live in the council dock.
-	# Deferral is tracked on the ledger item itself, so an escalated condition
-	# can legitimately reappear here even after an earlier dismissal.
-	var items:Array=AdvisorSystem.council_decision_items(9,false)
-	var signature:="sig:"
-	for item_variant in items:
-		signature+=String((item_variant as Dictionary).get("id",""))+"|"
-	if signature==_queue_signature: return
-	_queue_signature=signature
-	_rebuild_queue(items)
 
 func _refresh_toolbar()->void:
 	if distance_selector: distance_selector.select(terrain.camera_distance_level())
@@ -1583,7 +1417,8 @@ func _refresh_city_selector()->void:
 	if signature==city_selector_signature: return
 	city_selector_signature=signature
 	city_selector.clear()
-	city_selector.visible=not settlements.is_empty()
+	# One town: nothing to choose, so no name on the bar (Home carries it).
+	city_selector.visible=settlements.size()>1
 	for city in settlements:
 		city_selector.add_item(toolbar_case(String(city.get("name","Settlement"))))
 		var index:=city_selector.item_count-1

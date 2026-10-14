@@ -1,5 +1,5 @@
 extends RefCounted
-## TRADE NEWS UNDER THE CLOCK (hud/army_alerts.gd draws the marks): what
+## TRADE NEWS IN THE NOTICE STACK (a standing row, hud/standing_notices.gd): what
 ## trade between peoples did to us lately, told once each (the trade
 ## ledger's news, trade_ledger.gd, shown for NEWS_DAYS days after it
 ## happened, and once in the chronicle):
@@ -13,9 +13,9 @@ extends RefCounted
 const Ledger:=preload("res://scripts/trade_ledger.gd")
 const Words:=preload("res://scripts/trade_words.gd")
 
-## [{id, tone, count, title, lines, page, tip, dock, resource?, war?}] in the
-## alert row's shape: tip is the pointer's words, dock the page a click opens
-## (the economy dock's Trade tab).
+## [{id, tone, count, title, lines, page, dock, resource?, war?}] in the
+## shape hud/army_alerts.gd lists: dock is the page a click opens (the
+## Economy screen's Trade tab).
 static func alerts()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	var red:=PackedStringArray(); var amber:=PackedStringArray()
@@ -37,19 +37,12 @@ static func alerts()->Array[Dictionary]:
 			if amber_good=="": amber_good=String(item.get("good",""))
 	if not red.is_empty():
 		var mark:={"id":"trade_against","tone":"red","count":red.size(),"title":"Trade turned against us","lines":red,"page":"trade","dock":["economy",3]}
-		mark["tip"]=_tip(mark)
 		if red_good!="": mark["resource"]=red_good
 		else: mark["war"]="raid"
 		out.append(mark)
 	if not amber.is_empty():
 		var mark2:={"id":"trade_news","tone":"amber","count":amber.size(),"title":"Trade news","lines":amber,"page":"trade","dock":["economy",3]}
-		mark2["tip"]=_tip(mark2)
 		if amber_good!="": mark2["resource"]=amber_good
 		else: mark2["glyph"]="supply"
 		out.append(mark2)
 	return out
-
-## The pointer's words: the title, a line for each piece of news, and where a
-## click goes.
-static func _tip(mark:Dictionary)->String:
-	return "%s\n%s\nClick to open the Trade page." % [String(mark.title),"\n".join(mark.lines as PackedStringArray)]
