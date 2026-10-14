@@ -265,24 +265,24 @@ func test_inquiry_dock_builds_with_explanations_for_a_small_state()->void:
 	var hud:=FakeHud.new();auto_free(hud)
 	var terrain:=FakeTerrain.new();auto_free(terrain)
 	var inquiry=Inquiry.new(terrain,hud)
-	# What we know: one table line per field with what its knowledge adds now.
+	# What we know: a stable field index and the selected field's whole account.
+	inquiry.archive_selected="health"
 	var known:Dictionary=inquiry.tab(2)
-	var table:Dictionary=known.blocks[0]
-	assert_str(String(table.type)).is_equal("table")
+	var archive:Dictionary=known.blocks[0]
+	assert_str(String(archive.type)).is_equal("knowledge_tree")
 	var health:Dictionary={}
-	for row:Dictionary in table.rows:
-		if String(row.cells.field)=="Health & care":health=row
+	for field:Dictionary in archive.archive_fields:
+		if String(field.id)=="health":health=field
 	assert_dict(health).is_not_empty()
-	assert_str(String(health.tip)).contains("Protection from sickness")
-	# Opened: a frame beneath with every effect, its account on hover.
-	inquiry.expanded_domains["health"]=true
-	var opened:Array=inquiry.tab(2).blocks
-	assert_str(String(opened[1].type)).is_equal("frame")
+	var effect_names:Array=[]
+	for section:Dictionary in health.sections:
+		for item:Dictionary in section.items:effect_names.append(String(item.label))
+	assert_array(effect_names).contains(["Protection from sickness"])
 	var box:=VBoxContainer.new();add_child(box);auto_free(box)
 	box.size=Vector2(700,900)
-	DockBlocks.render(box,opened)
+	DockBlocks.render(box,known.blocks)
 	var said:Array=[]
-	for cell:Node in box.find_children("Fact_*","",true,false):said.append((cell as Control).tooltip_text)
+	for cell:Node in box.find_children("*","Control",true,false):said.append((cell as Control).tooltip_text)
 	assert_str("X".join(said)).contains("The health the people settle toward")
 	for text:String in _labels(box):_assert_plain(text,"dock label")
 	# Knowledge tree: a known question says what it does now, an open one
