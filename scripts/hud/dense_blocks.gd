@@ -19,7 +19,7 @@ extends RefCounted
 ##    columns:[{key, label, width? (px), align? ("left"|"right")}],
 ##    rows:[{cells:{key:String}, icon?: Texture2D, group?: String (a group
 ##           header line is drawn when it changes), tag?:{text, tone},
-##           bar?:{value 0..1, tone?}, button?:{label, on_press, tip?,
+##           bar?:{value 0..1, tone?, width? (px, 56)}, button?:{label, on_press, tip?,
 ##           disabled?}, buttons?:[button, ...], tip?, on_click?: Callable,
 ##           tone?}]}
 ## costs   what a work needs against what is in store, one line, each good
@@ -28,7 +28,7 @@ extends RefCounted
 ##   {type:"costs", heading?, label?, items:[{resource, have, need}],
 ##    button?:{label, on_press, tip?, disabled?}}
 ## columns  blocks side by side, equal widths, stacking when narrow:
-##   {type:"columns", stack_below? (px, 640), columns:[[block, ...], [block, ...]]}
+##   {type:"columns", stack_below? (px, 640), ratios?: [1.3, 0.9], columns:[[block, ...], [block, ...]]}
 ## frame   a ruled panel holding other blocks, its title and verbs on one
 ##         line (an inline planner, a group of rows that belong together):
 ##   {type:"frame", heading, actions?:[{label, on_press, tip?}], blocks:[...]}
@@ -222,7 +222,7 @@ static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 		# A blank bar keeps the column's width on a row that has none, so columns stay aligned.
 		if bool(bar.get("blank",false)):
 			var gap:=Control.new();gap.custom_minimum_size.x=56.0;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;end.add_child(gap)
-		else:end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
+		else:end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone","")),float(bar.get("width",56.0))))
 	var state:Dictionary=row.get("tag",{}) if row.get("tag") is Dictionary else {}
 	if not state.is_empty():end.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
 	var button:Dictionary=row.get("button",{}) if row.get("button") is Dictionary else {}
@@ -306,8 +306,13 @@ static func render_columns(parent:VBoxContainer,block:Dictionary)->BoxContainer:
 	var row:=BoxContainer.new();row.name="Columns";row.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation",24)
 	parent.add_child(row)
+	var ratios:Array=block.get("ratios",[])
+	var index:=0
 	for column_blocks in block.get("columns",[]):
 		var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",10)
+		# Columns share the width by `ratios` (default even).
+		if index<ratios.size():column.size_flags_stretch_ratio=float(ratios[index])
+		index+=1
 		row.add_child(column)
 		preload("res://scripts/hud/dock_blocks.gd").render(column,column_blocks)
 	var narrow:=float(block.get("stack_below",640.0))

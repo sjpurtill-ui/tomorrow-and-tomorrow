@@ -157,10 +157,11 @@ func _council_blocks()->Array:
 		var read:=String(regard.get("read",""))
 		var row:={"group":heads[group],"icon":Portrait.texture(face),
 			"cells":{"name":String(person.name),"title":String(post.title)},
-			"bar":{"value":love,"tone":"bad" if dread>=0.55 else ("good" if love>=0.55 else "")},
+			"bar":{"value":love,"tone":"bad" if dread>=0.55 else ("good" if love>=0.55 else ""),"width":36.0},
 			"tip":"%s, %s. %s.\n%s (love %d in 100, dread %d in 100).\nClick to summon them to the court." % [String(person.name),String(post.title),String(post.place),read.capitalize() if read!="" else "Not yet read",roundi(love*100.0),roundi(dread*100.0)],
 			"on_click":_open_court.bind(target)}
-		if matters>0:row["tag"]={"text":"%d %s" % [matters,"matter" if matters==1 else "matters"],"tone":"warn"}
+		# A matter to raise: the name in amber, the count in its pointer.
+		if matters>0:row["tone"]="warn";row["tip"]="%d %s to raise. %s" % [matters,"matter" if matters==1 else "matters",String(row.tip)]
 		if not by_group.has(group):by_group[group]=[]
 		(by_group[group] as Array).append(row)
 	var columns:=[{"key":"name","label":"Name","width":118},{"key":"title","label":"Office","width":150}]
@@ -178,7 +179,7 @@ func _council_blocks()->Array:
 	else:
 		var halves:Array=[[{"type":"table","icon_size":22,"rows":left,"columns":columns}]]
 		if not right.is_empty():halves.append([{"type":"table","icon_size":22,"rows":right,"columns":columns}])
-		blocks.append({"type":"columns","heading":"THE COURT","columns":halves,"stack_below":700})
+		blocks.append({"type":"columns","heading":"THE COURT","columns":halves,"ratios":[1.3,0.95],"stack_below":700})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant
