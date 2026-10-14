@@ -236,6 +236,7 @@ func apply(block:Dictionary)->void:
 	# "Draw", not "allure": Culture's Allure is our culture's own appeal; this
 	# is how strongly the whole of what we are draws other peoples (standing.gd renown).
 	renown_label.text="awe %d%% · draw %d%%" % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
+	renown_label.tooltip_text=String(block.get("renown_tip",renown_label.tooltip_text))
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
@@ -360,9 +361,10 @@ class Swatch extends Control:
 static func cause(why:String)->String:
 	var first:=why
 	# Food and water days are the top bar's; the next part is the cause here.
-	if first.begins_with("food for") or first.begins_with("water for"):
+	while first.begins_with("food for") or first.begins_with("water for"):
 		var cut:=first.find("; ")
-		if cut>0:first=first.substr(cut+2)
+		if cut<=0:break
+		first=first.substr(cut+2)
 	# A grouped number keeps its comma ("2,500 goods"): only ", " ends a part.
 	for mark:String in ["; "," (",": ",", "]:
 		var at:=first.find(mark)
@@ -549,7 +551,7 @@ class Pip extends Control:
 	var value:=0.0
 	var ink:=Color.WHITE
 	func _init()->void:
-		custom_minimum_size=Vector2(12,14);mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		custom_minimum_size=Vector2(12,14);mouse_filter=Control.MOUSE_FILTER_STOP;size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	func _draw()->void:
 		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.10))
 		var h:=size.y*clampf(value,0.0,1.0)
