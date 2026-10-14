@@ -225,7 +225,8 @@ func test_their_band_on_the_march_is_told_under_the_clock()->void:
 	var attack:Array=shown.filter(func(a:Dictionary)->bool:return String(a.id)=="attack")
 	assert_int(attack.size()).is_equal(1)
 	assert_str(String((attack[0].lines as PackedStringArray)[0])).contains("toward Ashford · about 40 · here in 6 days")
-	assert_int(Alerts.urgent_count(shown)).is_equal(1)
+	assert_str(String(attack[0].fact)).ends_with(" · ~40 · 6 days")
+	assert_int(int(attack[0].days)).is_equal(6)
 	front.erase("coming_band")
 	MilitaryCampaign.reset_for_new_world()
 	WorldSimulation.clear()
@@ -254,7 +255,6 @@ func test_war_news_is_told_under_the_clock_instead_of_stopping_time()->void:
 	var fought:PackedStringArray=shown[ids.find("fought")].lines
 	assert_int(fought.size()).is_equal(1)
 	assert_str(fought[0]).is_equal("Won at Ashford · The raiders broke")
-	assert_int(Alerts.urgent_count(shown)).is_equal(2)
 	# An attack we make ourselves is not news coming at us.
 	MilitaryCampaign.active_threat.campaign_mode="offensive"
 	assert_bool(Alerts.alerts().any(func(a:Dictionary)->bool: return String(a.id)=="attack")).is_false()
@@ -320,10 +320,3 @@ func test_men_gained_or_lost_flash_over_the_counter()->void:
 	assert_dict(by).is_equal({"home":4,"ours:4":-1})
 	overlay.free()
 
-func test_only_hungry_or_breaking_bands_badge_the_rail()->void:
-	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
-	var list:=[{"id":"hungry","tone":"red","count":2},{"id":"will","tone":"amber","count":1},{"id":"feud","tone":"red","count":2},{"id":"men","tone":"amber","count":3}]
-	assert_int(Alerts.urgent_count(list)).is_equal(2)
-	list[1]["tone"]="red"
-	assert_int(Alerts.urgent_count(list)).is_equal(3)
-	assert_int(Alerts.urgent_count([])).is_equal(0)

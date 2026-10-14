@@ -259,7 +259,7 @@ func _apply_cards(fresh:Array[Dictionary],war:bool)->void:
 	if not _all_cards().any(func(card:Dictionary)->bool:return String(card.id)==selected_id):selected_id=""
 	var shape:=str(fresh.map(func(c:Dictionary)->String:return String(c.id)))+selected_id+str(expanded())
 	visible=not cards.is_empty() and not bool(get_meta("covered",false))
-	disclosure.text="Armies · %d  %s" % [army_count(cards),"▾" if expanded() else "▸"]
+	disclosure.text="Armies in the field · %d  %s" % [army_count(cards),"▾" if expanded() else "▸"]
 	disclosure.disabled=_war_is_open
 	disclosure.tooltip_text="Army details stay open with War" if _war_is_open else ("Collapse army details and clear selection" if expanded() else "Show armies and their generals")
 	if shape!=_shape:

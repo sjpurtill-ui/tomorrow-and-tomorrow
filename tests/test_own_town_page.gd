@@ -320,7 +320,8 @@ func test_a_second_town_shows_its_own_figures_not_home()->void:
 	var health:Dictionary=Health.new(null,hud).tab(0)
 	assert_str(String(rows.life_expectancy.value)).is_equal(String(health.kpis[0].value))
 	assert_str(String(block.lead)).contains("We are %s" % Model.spoken(people))
-	assert_str(String(block.sketch.held_caption)).starts_with("Our hamlet")
+	# The town stands on the map beside the page: the page draws no second picture of it.
+	assert_dict(block.sketch).is_empty()
 
 # --------------------------------------------------------------------------
 # What stays: the leader, the hands, the New towns switch, the reports
@@ -378,29 +379,21 @@ func test_history_adds_observed_views_and_keeps_the_event_chronicle()->void:
 	assert_str(String(history[1].type)).is_equal("chronicle")
 	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
 
-func test_live_portrait_refresh_keeps_the_model_population_instead_of_raw_record_defaults()->void:
-	var block:=_block()
-	var state:Dictionary=preload("res://scripts/hud/village_view_record.gd").current(_primary_id())
-	assert_int(int(state.population)).is_equal(93)
-	assert_int(int(state.population)).is_equal(int(block.sketch.portrait.state.population))
-
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door
 # --------------------------------------------------------------------------
 
-func test_rows_light_the_drawing_and_open_the_page_that_owns_them()->void:
+func test_each_row_opens_the_page_that_owns_it()->void:
 	var page:=_page(_block())
-	var sketch:Control=page.find_child("TownSketch",true,false)
-	assert_object(sketch).is_not_null()
+	assert_object(page.find_child("TownSketch",true,false)).is_null()
+	assert_object(page.find_child("VisitVillage",true,false)).is_not_null()
 	var expected:={"life_expectancy":["health",0],"infant_mortality":["health",0],"learning":["inquiry",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
 		"supply":["economy",0],"water":["economy",0],"production":["production",0],"logistics":["economy",1],"roofs":["construction",0],"works":["construction",1],"building":["construction",1]}
 	for key:String in expected:
 		var row:=page.find_child("Row_"+key,true,false) as Control
 		assert_object(row).override_failure_message(key).is_not_null()
 		row.mouse_entered.emit()
-		assert_str(String(sketch.highlight)).override_failure_message(key).is_equal(String(Overview.OwnSketch.LIGHTS.get(key,key)))
 		row.mouse_exited.emit()
-		assert_str(String(sketch.highlight)).is_empty()
 		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
 		hud.opened.clear()
 		row.gui_input.emit(click)
@@ -414,26 +407,21 @@ func test_rows_light_the_drawing_and_open_the_page_that_owns_them()->void:
 	assert_str(people.tooltip_text).contains("ages and families")
 	assert_str((page.find_child("Row_supply",true,false) as Control).tooltip_text).contains("Opens the Food page.")
 
-func test_the_drawing_shows_what_stands()->void:
-	var block:=_block()
-	var drawing:Dictionary=block.sketch
-	# Ink for those under a roof, pencil for the thirteen without.
-	assert_float(float(drawing.fields.population.low)).is_equal(80.0)
-	assert_float(float(drawing.fields.population.high)).is_equal(93.0)
-	assert_int(int(drawing.wall_stage)).is_equal(3)
-	assert_float(float(drawing.fields.garrison.low)).is_equal(float(preload("res://scripts/civilization_combat.gd").defenders(_primary_id())))
-	assert_float(float(drawing.fields.garrison.low)).is_greater_equal(37.0)
-	assert_bool(bool(drawing.flag)).is_true()
-	assert_array(drawing.works).contains(["Hearth Circle","Storage Pits"])
-	assert_str(String(drawing.held_caption)).is_equal("Our hamlet · settled thirty-one winters ago")
-	# The stranger's sketch is not touched: no walls by stage without one.
-	var stranger:=preload("res://scripts/hud/city_dossier.gd").Sketch.new()
-	assert_bool(stranger.data.has("wall_stage")).is_false()
-	stranger.free()
-
-# --------------------------------------------------------------------------
-# Era words, short labels, and both palettes
-# --------------------------------------------------------------------------
+func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
+	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
+	var labels:=tiles.map(func(t:Dictionary)->String:return String(t.label))
+	assert_array(labels).is_equal(["PEOPLE","FOOD","WATER","HOMES","LIFE SPAN","ARMY"])
+	for tile:Dictionary in tiles:
+		assert_bool(bool(tile.glance)).is_true()
+		# Who ate their fill is not counted before the first day: no bar is drawn for a guess.
+		if String(tile.label)=="PEOPLE" and not tile.has("meter"):continue
+		assert_bool(tile.has("meter")).override_failure_message(String(tile.label)).is_true()
+		assert_float(float(tile.meter)).is_between(0.0,1.5)
+		assert_bool((tile.on_press as Callable).is_valid()).is_true()
+	# Each number is the page's own: the head count, and the top bar's words for days of food.
+	var rows:=_rows(_block())
+	assert_str(String(tiles[0].value)).is_equal(EraWords.grouped(int(rows.population.number)))
+	assert_str(String(tiles[1].value)).is_equal(EraWords.days(float(rows.supply.number)))
 
 func _words(text:String)->int:
 	return text.strip_edges().split(" ",false).size()

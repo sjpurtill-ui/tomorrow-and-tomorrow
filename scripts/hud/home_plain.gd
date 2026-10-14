@@ -79,6 +79,14 @@ static func water(water_metrics:Dictionary)->Dictionary:
 	if ratio<0.98:cause="the carriers bring in less than is needed" if collected<needed else "stores ran low before the carriers returned"
 	return {"headline":headline,"cause":cause,"tone":"good" if ratio>=0.98 else "warn" if ratio>=0.8 else "bad","ratio":ratio,"sentence":"%s: %s." % [headline,cause]}
 
+## Days of drinking water in store: what is stored against a day's need, the
+## top bar's own sum (civilization_kpi_model.gd water_days). -1 before the
+## first count.
+static func water_days(water_metrics:Dictionary)->float:
+	var need:=float(water_metrics.get("required_today",0.0))
+	if need<=0.0 or not (water_metrics.has("stored") or water_metrics.has("days")):return -1.0
+	return float(water_metrics.get("stored",float(water_metrics.get("days",0.0))*need))/need
+
 ## A material's stock, which way it moved since the last record, and why.
 ## `points` is the stock history (oldest first, value may be null).
 static func material(stock:float,delivered:float,loss:float,points:Array,blocked_reason:String="")->Dictionary:

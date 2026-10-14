@@ -23,16 +23,6 @@ const LOW_WILL:=preload("res://scripts/hud/army_bar_model.gd").NEAR_BREAK
 const RECENT_DAYS:=10
 
 
-## What will not wait: a band coming at us, a battle being fought, bands
-## hungry in the field or ready to break. Hot feuds are a state of things,
-## not an interruption.
-static func urgent_count(list:Array)->int:
-	var count:=0
-	for alert:Dictionary in list:
-		if String(alert.id) in ["attack","battle","hungry","will"] and String(alert.tone)=="red": count+=int(alert.count)
-	return count
-
-
 ## A band coming at us: "The Reedbank raiders toward Ashford · about 40 ·
 ## here in 6 days".
 static func threat_line(threat:Dictionary,today:int)->String:
@@ -41,6 +31,13 @@ static func threat_line(threat:Dictionary,today:int)->String:
 	var days:=int(threat.get("deadline_day",today))-today
 	var size:=int(threat.get("estimated_strength",0))
 	return "%s toward %s%s · %s" % [String(threat.get("source_name","A band we cannot name")),place,(" · about %d" % size) if size>0 else "",("here in %s" % Ledger.span_words(days)) if days>0 else "here now"]
+
+
+## The same band in a few words, for a notice row: "The Reedbank raiders · ~40 · 6 days".
+static func threat_fact(threat:Dictionary,today:int)->String:
+	var days:=int(threat.get("deadline_day",today))-today
+	var size:=int(threat.get("estimated_strength",0))
+	return "%s%s · %s" % [String(threat.get("source_name","A band we cannot name")),(" · ~%s" % preload("res://scripts/hud/era_words.gd").grouped(size)) if size>0 else "",Ledger.span_words(days) if days>0 else "here now"]
 
 
 ## A battle being fought: "At Ashford · day 3 · 34 of ours against 40".
@@ -101,13 +98,20 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 		if String(e.kind)!="ended" and bool(e.get("hot",false)): hot.append("%s · %s" % [String(e.name),Ledger.subtitle(e)])
 	# War comes to us, and battles: told here; nothing stops time for them.
 	var coming:=PackedStringArray(); var fighting:=PackedStringArray(); var fought:=PackedStringArray()
+	# The soonest band coming, in a few words, and its days left (for the row and its place in the column).
+	var coming_fact:="";var coming_days:=1000000
 	if mc!=null and WorldSimulation.state!=null:
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var threat:Dictionary=mc.active_threat
-		if not threat.is_empty() and String(threat.get("campaign_mode","defensive"))!="offensive": coming.append(threat_line(threat,today))
+		var marching:Array=[]
+		if not threat.is_empty() and String(threat.get("campaign_mode","defensive"))!="offensive": marching.append(threat)
 		# Their bands the war council has seen marching on a town of ours.
 		var council:GDScript=load("res://scripts/war_council.gd")
-		for band:Dictionary in council.call("incoming"): coming.append(threat_line(band,today))
+		for band:Dictionary in council.call("incoming"): marching.append(band)
+		for band:Dictionary in marching:
+			coming.append(threat_line(band,today))
+			var left:=maxi(0,int(band.get("deadline_day",today))-today)
+			if left<coming_days: coming_days=left;coming_fact=threat_fact(band,today)
 		for engagement_variant in mc.own_engagements.values():
 			if engagement_variant is Dictionary and not (engagement_variant as Dictionary).is_empty(): fighting.append(battle_line(engagement_variant))
 		# Our home besieged: told while it lasts (it is lost only if the ruler yields it).
@@ -120,7 +124,7 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 			if today-int((record_variant as Dictionary).get("day",-100000))>RECENT_DAYS: break
 			fought.append(fought_line(record_variant))
 	var out:Array[Dictionary]=[]
-	if not coming.is_empty(): out.append({"id":"attack","war":"band","tone":"red","count":coming.size(),"title":"Coming at us","lines":coming,"page":"wars"})
+	if not coming.is_empty(): out.append({"id":"attack","war":"band","tone":"red","count":coming.size(),"title":"Coming at us","lines":coming,"page":"wars","fact":coming_fact,"days":coming_days})
 	if not fighting.is_empty(): out.append({"id":"battle","war":"feud","tone":"red","count":fighting.size(),"title":"Fighting now","lines":fighting,"page":"wars"})
 	if not hungry.is_empty(): out.append({"id":"hungry","logistics":"hungry","tone":"red","count":hungry.size(),"title":"Hungry in the field","lines":hungry,"page":"support"})
 	if not breaking.is_empty(): out.append({"id":"will","glyph":"will","tone":"red" if broken else "amber","count":breaking.size(),"title":"Ready to break","lines":breaking,"page":"forces"})

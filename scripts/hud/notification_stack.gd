@@ -36,6 +36,8 @@ const MAX_ROWS:=4
 const GAP:=6.0
 const RIGHT:=T.EDGE_MARGIN
 const STANDING_SECONDS:=1.0
+## Every row is this tall: a headline and one fact line.
+const ROW_HEIGHT:=52.0
 const TOP:=T.CONTENT_TOP
 const PILL_HEIGHT:=28.0
 const LOG_ROWS:=40
@@ -50,7 +52,7 @@ var waiting:Array[Dictionary]=[]
 var standing:Array[Dictionary]=[]
 var _standing_clock:=STANDING_SECONDS
 var _standing_signature:=""
-var _urgent_badge:=-1
+var _needing:=""
 ## Capture only ("--capture-standing"): sample rows shown beside the live ones.
 var _seeded:Array[Dictionary]=[]
 var column:Control
@@ -131,12 +133,12 @@ func _capture_replay()->void:
 ## campaign shows how standing rows read. Never part of play.
 func _capture_standing()->void:
 	var samples:Array[Dictionary]=[
-		{"id":"attack","war":"band","tone":"red","count":1,"title":"Coming at us","lines":PackedStringArray(["The Reedbank raiders toward the town · about 400 · here in 6 days"]),"page":"wars"},
+		{"id":"attack","war":"band","tone":"red","count":1,"title":"Coming at us","lines":PackedStringArray(["The Reedbank raiders toward the town · about 400 · here in 6 days"]),"page":"wars","fact":"The Reedbank raiders · ~400 · 6 days","days":6},
 		{"id":"hungry","logistics":"hungry","tone":"red","count":2,"title":"Hungry in the field","lines":PackedStringArray(["First host · 40% fed","River guard · 55% fed"]),"page":"support"},
-		{"id":"trade_against","war":"raid","tone":"red","count":1,"title":"Trade turned against us","lines":PackedStringArray(["The Saltmarsh folk will sell us no copper"]),"page":"trade","dock":["economy",3]},
+		{"id":"trade_against","war":"raid","tone":"red","count":1,"title":"Trade turned against us","lines":PackedStringArray(["The Saltmarsh folk sell us no copper"]),"page":"trade","dock":["economy",3]},
 		{"id":"gear","glyph":"gear","tone":"amber","count":3,"title":"Short of gear","lines":PackedStringArray(["First host · 310 of 400 armed","River guard · 90 of 120 armed","Hill watch · 20 of 60 armed"]),"page":"support"},
 	]
-	_seeded.append({"key":"standing:envoy:sample","standing":true,"kind":"waiting","tone":"gold","category":"neighbours","title":"Envoy of the Saltmarsh folk","text":"Ilen Varo waits · leaves in 9 days","count":1,"lines":PackedStringArray(["Ilen Varo waits · leaves in 9 days"]),"action":{"kind":"court","focus":{},"label":"the court"}})
+	_seeded.append({"key":"standing:envoy:sample","standing":true,"kind":"waiting","tone":"gold","category":"neighbours","title":"Envoy of the Saltmarsh folk","text":"Ilen Varo waits · leaves in 9 days","verb":"Answer","days":9,"count":1,"lines":PackedStringArray(["Ilen Varo waits · leaves in 9 days"]),"action":{"kind":"court","focus":{},"label":"the court"}})
 	for alert in samples:_seeded.append(Standing.from_alert(alert))
 	Model.push({"category":"food","tier":"notable","title":"The east wells are cleared","text":"Water for 300 more each day."})
 	_sync_standing()
@@ -158,11 +160,6 @@ func _process(delta:float)->void:
 func _sync_standing()->void:
 	var next:Array[Dictionary]=_seeded.duplicate()
 	if WorldSimulation.state!=null:next.append_array(Standing.rows())
-	# The red count on the rail's War button shows even while this column is covered.
-	var pressing:=Standing.urgent_count(next)
-	if pressing!=_urgent_badge:
-		_urgent_badge=pressing
-		if is_instance_valid(hud) and hud.has_method("_set_badge"):hud.call("_set_badge","military",str(pressing) if pressing>0 else "",T.RED)
 	var words:=str(next.map(func(r:Dictionary)->Array:return [r.key,r.tone,r.title,r.text,r.count]))
 	if words==_standing_signature:return
 	_standing_signature=words
@@ -170,7 +167,7 @@ func _sync_standing()->void:
 	for row in next:keep[String(row.key)]=true
 	for old in standing:
 		if not keep.has(String(old.key)):_drop_view(String(old.key))
-	standing=next
+	standing=Standing.sorted(next)
 	for row in standing:_render_standing(row)
 	_refresh_pill()
 	_signature=""
@@ -205,6 +202,7 @@ func add(n:Dictionary)->void:
 	n["left"]=Model.NOTABLE_SECONDS
 	waiting.append(n)
 	_fill()
+	_refresh_pill()
 
 
 func _fill()->void:
@@ -257,108 +255,80 @@ func _drop_view(key:Variant)->void:
 func dismiss(n:Dictionary)->void:
 	_drop(n)
 	_fill()
+	_refresh_pill()
 
 
-## Builds or refreshes a notice's paper slip.
+## ONE ROW STYLE for everything in the column: a glyph, a headline with its
+## count, one fact line, and at the right either the one word of what to do
+## about it (a row that stands) or the × that sets news aside. Two lines,
+## the same height; the pointer has the rest.
 func _render_row(n:Dictionary)->void:
 	var view:Variant=_views.get(int(n.id))
 	var row:PanelContainer
 	if view is PanelContainer and is_instance_valid(view):
 		row=view
 	else:
-		row=_build_row(n)
+		row=_build_row(n,"Notice%d" % int(n.id))
 		_views[int(n.id)]=row
 		column.add_child(row)
 		row.modulate.a=0.0
-		if "--capture-notices" in OS.get_cmdline_user_args():row.modulate.a=1.0
+		if "--capture-notices" in OS.get_cmdline_user_args() or "--capture-standing" in OS.get_cmdline_user_args():row.modulate.a=1.0
 		var tween:=row.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		tween.tween_property(row,"modulate:a",1.0,Motion.duration(Motion.BASE))
+	row.set_meta("notice",n)
 	var category:=String(n.get("category","story"))
 	var urgent:=String(n.get("tier",""))=="urgent"
-	row.add_theme_stylebox_override("panel",_row_style(category,urgent))
-	(row.get_meta("kicker") as Label).text=_kicker(n)
-	(row.get_meta("kicker") as Label).add_theme_color_override("font_color",Model.color(category))
-	(row.get_meta("title") as Label).text=Model.headline(n)
-	var detail:=row.get_meta("detail") as Label
-	detail.text=String(n.get("text",""))
-	detail.visible=detail.text!=""
+	row.add_theme_stylebox_override("panel",_row_style(Model.color(category),urgent))
 	(row.get_meta("icon") as TextureRect).texture=Model.icon(category,48)
+	var times:=int(n.get("count",1)) if Model.count_words(n)!="" else 1
+	_fill_row(row,Model.headline(n),String(n.get("text","")),times,Model.color(category),"")
 	row.tooltip_text=_tooltip(n)
 	_signature=""
 
 
-## Builds or refreshes a standing row: its glyph, what it is, how many, and
-## the first of its lines (the pointer lists them all).
+## Builds or refreshes a row that stands (hud/standing_notices.gd).
 func _render_standing(n:Dictionary)->void:
 	var key:=String(n.key)
 	var view:Variant=_views.get(key)
 	var row:PanelContainer
 	if view is PanelContainer and is_instance_valid(view):row=view
 	else:
-		row=_build_standing_row(n)
+		row=_build_row(n,"Standing_%s" % key.trim_prefix("standing:").replace(":","_"))
 		_views[key]=row
 		column.add_child(row)
 	row.set_meta("notice",n)
-	var waits:=String(n.get("kind",""))=="waiting"
 	var tone:=Standing.tone_color(String(n.get("tone","amber")))
-	var style:=T.paper_panel_style(true,T.RADIUS_CARD)
-	style.content_margin_left=10;style.content_margin_right=10;style.content_margin_top=6;style.content_margin_bottom=6
-	style.border_width_left=5;style.border_color=tone
-	style.shadow_color=Color(0.12,0.09,0.05,0.18);style.shadow_size=6;style.shadow_offset=Vector2(0,2)
-	if waits:
-		style.border_color=T.GOLD;style.set_border_width_all(2);style.border_width_left=5
-		style.bg_color=T.PAPER_RAISED.lerp(Color(T.GOLD,1.0),0.10)
-	row.add_theme_stylebox_override("panel",style)
+	row.add_theme_stylebox_override("panel",_row_style(tone,String(n.get("kind",""))=="waiting"))
 	(row.get_meta("icon") as TextureRect).texture=Standing.icon(n)
-	(row.get_meta("title") as Label).text=String(n.get("title",""))
-	var detail:=row.get_meta("detail") as Label
-	detail.text=String(n.get("text",""));detail.visible=detail.text!=""
-	var count:=row.get_meta("count") as Label
-	var many:=int(n.get("count",1))
-	count.visible=many>1 or waits
-	count.text="Answer" if waits else str(many)
-	var chip:=T.flat(tone,Color(0,0,0,0),0,9);chip.content_margin_left=8;chip.content_margin_right=8;chip.content_margin_top=1;chip.content_margin_bottom=1
-	count.add_theme_stylebox_override("normal",chip)
+	_fill_row(row,String(n.get("title","")),String(n.get("text","")),int(n.get("count",1)),tone,String(n.get("verb","See")))
 	row.tooltip_text=Standing.tip(n)
 
 
-func _build_standing_row(n:Dictionary)->PanelContainer:
-	var row:=PanelContainer.new();row.name="Standing_%s" % String(n.key).trim_prefix("standing:").replace(":","_")
-	row.mouse_filter=Control.MOUSE_FILTER_STOP;row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	row.custom_minimum_size.x=WIDTH
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(line)
-	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(30,30);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
-	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",-1);copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
-	var title:=_label(copy,17,T.INK,false);title.add_theme_font_override("font",T.voice_font())
-	title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.clip_text=true
-	# The line may run to two: who, how many and when must not be cut off.
-	var detail:=_label(copy,13,T.BODY,true);detail.max_lines_visible=2;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	var count:=Label.new();count.add_theme_font_override("font",T.font("ui_strong"));count.add_theme_font_size_override("font_size",13)
-	count.add_theme_color_override("font_color",Color("fbf6ea"));count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	line.add_child(count)
-	row.set_meta("icon",icon);row.set_meta("title",title);row.set_meta("detail",detail);row.set_meta("count",count)
-	row.gui_input.connect(func(event:InputEvent)->void:
-		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
-			row.accept_event()
-			var now:Dictionary=row.get_meta("notice")
-			act(now.get("action",{}) if now.get("action") is Dictionary else {}))
-	return row
-
-
-func _kicker(n:Dictionary)->String:
-	var parts:PackedStringArray=[Model.label(String(n.get("category","story"))).to_upper()]
-	if String(n.get("tier",""))=="urgent":parts.append("NEEDS YOU")
-	parts.append(Model.date_words(int(n.get("day",0))))
-	var times:=Model.count_words(n)
-	if times!="":parts.append(times)
-	return "  ·  ".join(parts)
+## Writes a row's words: `times` over one shows as the count beside the
+## headline; `verb` is the button's word ("" for news, which has the ×).
+func _fill_row(row:PanelContainer,headline:String,fact:String,times:int,tone:Color,verb:String)->void:
+	(row.get_meta("title") as Label).text=headline
+	var detail:=row.get_meta("detail") as Label
+	detail.text=fact
+	var count:=row.get_meta("count") as Label
+	count.visible=times>1
+	count.text=str(times)
+	var chip:=T.flat(tone,Color(0,0,0,0),0,8);chip.content_margin_left=6;chip.content_margin_right=6
+	count.add_theme_stylebox_override("normal",chip)
+	var act_button:=row.get_meta("verb") as Button
+	act_button.visible=verb!=""
+	act_button.text=verb
+	for state:String in ["normal","hover","pressed"]:
+		var skin:=T.flat(tone if state=="normal" else tone.darkened(0.12),Color(0,0,0,0),0,10);skin.content_margin_left=10;skin.content_margin_right=10;skin.content_margin_top=2;skin.content_margin_bottom=2
+		act_button.add_theme_stylebox_override(state,skin)
+	(row.get_meta("close") as Button).visible=verb==""
 
 
 func _tooltip(n:Dictionary)->String:
 	var action:Dictionary=n.get("action",{}) if n.get("action") is Dictionary else {}
-	var opens:=action_words(action)
-	return "%s\nClick: %s.  × sets it aside; the log keeps it." % [String(n.get("title","")),opens]
+	var head:PackedStringArray=[Model.label(String(n.get("category","story"))),Model.date_words(int(n.get("day",0)))]
+	if Model.count_words(n)!="":head.append(Model.count_words(n))
+	return "%s\n%s\n%s\nClick: %s.  × sets it aside; the log keeps it." % [" · ".join(head),Model.headline(n),String(n.get("text","")),action_words(action)]
 
 
 static func action_words(action:Dictionary)->String:
@@ -376,43 +346,61 @@ static func action_words(action:Dictionary)->String:
 	return "open the Chronicle"
 
 
-func _row_style(category:String,urgent:bool)->StyleBoxFlat:
+## A row's paper: its tone on the left edge; one that needs the god now has
+## a gold rule all round and a warm wash.
+func _row_style(tone:Color,lit:bool)->StyleBoxFlat:
 	var style:=T.paper_panel_style(true,T.RADIUS_CARD)
-	style.content_margin_left=12;style.content_margin_right=6;style.content_margin_top=8;style.content_margin_bottom=8
-	style.border_width_left=4;style.border_color=Model.color(category)
+	style.content_margin_left=10;style.content_margin_right=8;style.content_margin_top=6;style.content_margin_bottom=6
+	style.border_width_left=5;style.border_color=tone
 	style.shadow_color=Color(0.12,0.09,0.05,0.18);style.shadow_size=6;style.shadow_offset=Vector2(0,2)
-	if urgent:
-		# Highlighted: a gold rule all round and a warm wash.
+	if lit:
 		style.border_color=T.GOLD;style.set_border_width_all(2);style.border_width_left=5
 		style.bg_color=T.PAPER_RAISED.lerp(Color(T.GOLD,1.0),0.10)
 	return style
 
 
-func _build_row(n:Dictionary)->PanelContainer:
-	var row:=PanelContainer.new();row.name="Notice%d" % int(n.id)
+func _build_row(n:Dictionary,row_name:String)->PanelContainer:
+	var row:=PanelContainer.new();row.name=row_name
 	row.mouse_filter=Control.MOUSE_FILTER_STOP;row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	row.custom_minimum_size.x=WIDTH
+	row.custom_minimum_size=Vector2(WIDTH,ROW_HEIGHT)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(line)
-	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(30,30);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
-	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",1);copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
-	var kicker:=_label(copy,11,T.GOLD,false)
-	var title:=_label(copy,15,T.INK,true);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
-	title.max_lines_visible=2
-	var detail:=_label(copy,13,T.BODY,true);detail.max_lines_visible=4;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	var close:=Button.new();close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(26,26)
-	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(28,28);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
+	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",-1);copy.alignment=BoxContainer.ALIGNMENT_CENTER;copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;copy.add_child(head)
+	var title:=_label(head,16,T.INK,false);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
+	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var count:=Label.new();count.add_theme_font_override("font",T.font("ui_strong"));count.add_theme_font_size_override("font_size",12)
+	count.add_theme_color_override("font_color",Color("fbf6ea"));count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	head.add_child(count)
+	var detail:=_label(copy,13,T.BODY,false);detail.clip_text=true;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	var verb:=Button.new();verb.name="Verb";verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",13)
+	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:verb.add_theme_color_override(state,Color("fbf6ea"))
+	verb.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	verb.pressed.connect(func()->void:_press(row))
+	line.add_child(verb)
+	var close:=Button.new();close.name="Close";close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(24,24)
+	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	close.add_theme_font_override("font",T.FONT_UI);close.add_theme_font_size_override("font_size",17)
 	close.add_theme_color_override("font_color",T.INK_MUTED);close.add_theme_color_override("font_hover_color",T.INK)
 	close.tooltip_text="Set this aside. The log keeps it."
-	close.pressed.connect(func()->void:dismiss(n))
+	close.pressed.connect(func()->void:dismiss(row.get_meta("notice")))
 	line.add_child(close)
-	row.set_meta("icon",icon);row.set_meta("kicker",kicker);row.set_meta("title",title);row.set_meta("detail",detail)
+	row.set_meta("icon",icon);row.set_meta("title",title);row.set_meta("detail",detail);row.set_meta("count",count);row.set_meta("verb",verb);row.set_meta("close",close)
 	row.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
 			row.accept_event()
-			open(n))
+			_press(row))
 	return row
+
+
+## A click on a row or its button: a row that stands opens its screen and
+## stays; news opens what it is about and is set aside.
+func _press(row:PanelContainer)->void:
+	var n:Dictionary=row.get_meta("notice")
+	if bool(n.get("standing",false)):act(n.get("action",{}) if n.get("action") is Dictionary else {})
+	else:open(n)
 
 
 func _label(parent:Node,font_size:int,color:Color,wrap:bool)->Label:
@@ -497,7 +485,7 @@ func _layout(delta:float)->void:
 		if not view_node is Control or not is_instance_valid(view_node):continue
 		var row:Control=view_node
 		row.custom_minimum_size.x=width;row.size.x=width
-		row.size.y=row.get_combined_minimum_size().y
+		row.size.y=maxf(ROW_HEIGHT,row.get_combined_minimum_size().y)
 		var fits:=not held and not log_open and y+row.size.y<=bottom
 		row.visible=fits
 		if fits:
@@ -511,18 +499,32 @@ func _layout(delta:float)->void:
 				if float(n.left)<=0.0:dismiss(n)
 
 
-## The column from the top: who waits on an answer, urgent notices, what
-## stands now, then the day's notable notices.
+## The column from the top: what needs the god (threats first, then by days
+## left: standing_notices.gd sorted), urgent news, what only wants seeing
+## to, then the day's news.
 func _ordered()->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	for n in standing:
-		if String(n.get("kind",""))=="waiting":out.append(n)
+		if Standing.needs(n):out.append(n)
 	for n in rows:
 		if String(n.tier)=="urgent":out.append(n)
 	for n in standing:
-		if String(n.get("kind",""))!="waiting":out.append(n)
+		if not Standing.needs(n):out.append(n)
 	for n in rows:
 		if String(n.tier)!="urgent":out.append(n)
+	return out
+
+
+## Everything in the column that needs the god: rows that stand red or wait
+## on an answer, and urgent news. The header's count is their number and
+## each rail button's badge is its own share of them (the HUD's
+## set_notice_counts), so the two always add up.
+func needing()->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	for n in standing:
+		if Standing.needs(n):out.append(n)
+	for n in rows:
+		if String(n.tier)=="urgent":out.append(n)
 	return out
 
 
@@ -541,7 +543,15 @@ func _blocked_rects(view:Vector2)->Array[Rect2]:
 
 
 func _refresh_pill()->void:
-	var urgent:=rows.filter(func(n:Dictionary)->bool:return String(n.tier)=="urgent").size()+standing.filter(func(n:Dictionary)->bool:return String(n.get("kind",""))=="waiting").size()
+	var need:=needing()
+	var urgent:=need.size()
+	var counts:Dictionary={}
+	for n in need:
+		var rail:=Standing.rail_of(n)
+		if rail!="":counts[rail]=int(counts.get(rail,0))+1
+	if str(counts)!=_needing:
+		_needing=str(counts)
+		if is_instance_valid(hud) and hud.has_method("set_notice_counts"):hud.call("set_notice_counts",counts)
 	pill.text=("Notices · %d" % Model.history.size() if not Model.history.is_empty() else "Notices") if urgent==0 else "Notices · %d need%s you" % [urgent,"s" if urgent==1 else ""]
 	if is_instance_valid(log_panel) and log_panel.visible:_fill_log()
 

@@ -16,6 +16,8 @@ class SheetHud extends Control:
 	func _init()->void:
 		add_child(dock);add_child(detail_dock);dock.visible=false;detail_dock.visible=false
 		section_requested.connect(func(section:String,_sub:int)->void:sections.append(section))
+	var notice_counts:Dictionary={}
+	func set_notice_counts(counts:Dictionary)->void:notice_counts=counts
 	func right_stack_top()->float:return 640.0
 
 func before_test()->void:
@@ -123,7 +125,10 @@ func test_notices_stack_at_the_top_right_and_merge_repeats()->void:
 		assert_float(rect.end.x).is_equal_approx(1280.0-Stack.RIGHT,1.0)
 		assert_bool(rect.position.y>=Stack.TOP).is_true()
 		assert_bool(rect.end.y<=640.0).is_true()
-		assert_str((row.get_meta("kicker") as Label).text).contains(Model.label(String(n.category)).to_upper())
+		# One row style: no eyebrow line; the category and date are in the pointer's words.
+		assert_bool(row.has_meta("kicker")).is_false()
+		assert_str(row.tooltip_text).contains(Model.label(String(n.category)))
+		assert_float(row.size.y).is_equal(Stack.ROW_HEIGHT)
 	assert_bool(stack.pill.visible).is_true()
 
 func test_notable_notices_fade_on_their_own_and_urgent_ones_wait()->void:
@@ -246,7 +251,8 @@ func _embargo()->Dictionary:
 func test_a_condition_is_one_row_with_its_count_and_one_click_to_its_screen()->void:
 	var gear:=_gear()
 	assert_str(String(gear.key)).is_equal("standing:gear")
-	assert_str(String(gear.text)).is_equal("First host · 3 of 4 armed  · +1 more")
+	assert_str(String(gear.text)).is_equal("First host · 3 of 4 armed")
+	assert_str(String(gear.verb)).is_equal("Arm")
 	assert_int(int(gear.count)).is_equal(2)
 	assert_dict(gear.action).is_equal({"kind":"war","page":"support","label":"the War screen"})
 	assert_str(Standing.tip(gear)).contains("Hill watch · 1 of 6 armed").contains("Click to open the War screen.")
@@ -265,7 +271,18 @@ func test_what_stands_stays_while_true_above_the_news_and_leaves_when_it_ends()-
 	for i in 3:await get_tree().process_frame
 	var keys:Array=stack.column_rows().map(func(n:Dictionary)->String:return String(n.get("key",n.get("title",""))))
 	# Urgent news, then what stands now, then the day's news.
-	assert_array(keys).is_equal(["They burned the granary","standing:gear","standing:trade_against","A caravan comes home"])
+	# What needs the god (red), urgent news, what only wants seeing to (amber), the day's news.
+	assert_array(keys).is_equal(["standing:trade_against","They burned the granary","standing:gear","A caravan comes home"])
+	# One row style and one height for all four; a row that stands has its verb, news its ×.
+	for n:Dictionary in stack.column_rows():
+		var any_row:Control=stack._views[String(n.key) if n.has("standing") else int(n.id)]
+		assert_float(any_row.size.y).is_equal(Stack.ROW_HEIGHT)
+		assert_bool((any_row.get_meta("verb") as Button).visible).is_equal(n.has("standing"))
+		assert_bool((any_row.get_meta("close") as Button).visible).is_equal(not n.has("standing"))
+	assert_str((stack._views["standing:trade_against"].get_meta("verb") as Button).text).is_equal("Trade")
+	# The header counts what needs the god; the rail's badges are its parts.
+	assert_str(stack.pill.text).is_equal("Notices · 2 need you")
+	assert_dict(hud.notice_counts).is_equal({"economy":1})
 	var gear_row:Control=stack._views["standing:gear"]
 	assert_bool(gear_row.visible).is_true()
 	assert_str((gear_row.get_meta("title") as Label).text).is_equal("Short of gear")
@@ -309,5 +326,13 @@ func test_an_envoy_waiting_is_a_row_that_needs_you_and_opens_the_court()->void:
 	for i in 2:await get_tree().process_frame
 	assert_str(String(stack.column_rows()[0].key)).starts_with("standing:envoy:")
 	assert_str(stack.pill.text).is_equal("Notices · 1 needs you")
-	assert_str((stack._views[String(stack.column_rows()[0].key)].get_meta("count") as Label).text).is_equal("Answer")
+	assert_str((stack._views[String(stack.column_rows()[0].key)].get_meta("verb") as Button).text).is_equal("Answer")
+	# A band here in six days stands above an envoy leaving in nine.
+	var coming:=Standing.from_alert({"id":"attack","war":"band","tone":"red","count":1,"title":"Coming at us","lines":PackedStringArray(["The Reedbank raiders toward Ashford · about 40 · here in 6 days"]),"page":"wars","fact":"The Reedbank raiders · ~40 · 6 days","days":6})
+	assert_str(String(coming.text)).is_equal("The Reedbank raiders · ~40 · 6 days")
+	assert_str(String(coming.verb)).is_equal("Defend")
+	var order:Array=Standing.sorted([Standing.waiting()[0],_gear(),coming]).map(func(r:Dictionary)->String:return String(r.key).get_slice(":",1))
+	assert_array(order).is_equal(["attack","envoy","gear"])
+	assert_str(Standing.rail_of(coming)).is_equal("military")
+	assert_str(Standing.rail_of(Standing.waiting()[0])).is_equal("court")
 	(Hall.call("state").queue as Array).clear()

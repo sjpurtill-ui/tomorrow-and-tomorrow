@@ -154,7 +154,10 @@ func _skin_panel()->void:
 	sheet.shadow_color=Color(0,0,0,.18 if T.is_light() else .45);sheet.shadow_size=10 if war else 18;sheet.shadow_offset=Vector2(0,4 if war else 6)
 	panel.add_theme_stylebox_override("panel",sheet)
 	T.text(heading,"title",TEXT)
-	if war:heading.add_theme_font_size_override("font_size",22)
+	# The War screen's title is the same line every category's page carries.
+	if war:
+		heading.add_theme_font_override("font",T.font("voice_bold"))
+		heading.add_theme_font_size_override("font_size",preload("res://scripts/hud/dock_panel.gd").TITLE_SIZE)
 	close_button.custom_minimum_size=Vector2(32,30) if war else Vector2(40,38)
 	(panel.get_child(0) as VBoxContainer).add_theme_constant_override("separation",8 if war else 12)
 

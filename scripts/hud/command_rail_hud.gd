@@ -44,7 +44,7 @@ const CATEGORIES:Array[Dictionary]=[
 	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
 	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
-	{"id":"world","label":"World","pages":["world","standing","eyes"],"tabs":{"world":["Known world","Expeditions","Rise & fall"],"standing":["Standing"],"eyes":["Eyes"]},"tooltip":"The world your scouts have walked, who lives in it, how they see us and what our eyes report · F6"},
+	{"id":"world","label":"World","pages":["world","standing","eyes"],"tabs":{"world":["Peoples","Expeditions","History"],"standing":["Standing"],"eyes":["Spies"]},"tooltip":"The world your scouts have walked, who lives in it, how they see us and what our eyes report · F6"},
 	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 ]
 ## The category a page belongs to ({} for none).
@@ -153,6 +153,10 @@ func _layout()->void:
 	if top_frame:
 		top_frame.position=Vector2(Folio.RAIL_WIDTH,0)
 		top_frame.size=Vector2(page_width,Folio.TOP_HEIGHT)
+	# The olive band behind the top bar spans the map in every map mode.
+	var band:=get_node_or_null("MapTopTint") as Control
+	if band:
+		band.position=Vector2(Folio.RAIL_WIDTH,0);band.size=Vector2(view.x-Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Folio.RAIL_WIDTH,view.y)
@@ -247,8 +251,15 @@ func _position_toolbar()->void:
 	# of them when it fits there (else the cards stand above it).
 	var right:=view.x
 	if _orders_at_bottom():right=view.x-Tokens.EDGE_MARGIN-OrderStackScript.WIDTH-12.0
-	if toolbar.size.x>right-free_left:right=view.x
-	toolbar.position=Vector2(free_left+(right-free_left)*0.5-toolbar.size.x*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y)
+	# The War screen's column holds the right edge: the toolbar ends at it,
+	# drawn a little smaller when it would not otherwise fit beside it.
+	var fit:=1.0
+	if war_open():
+		right=minf(right,view.x-Tokens.EDGE_MARGIN-_war_layout("COLUMN_WIDTH")-8.0)
+		fit=clampf((right-free_left-8.0)/maxf(1.0,toolbar.size.x),0.75,1.0)
+	elif toolbar.size.x>right-free_left:right=view.x
+	toolbar.scale=Vector2(fit,fit)
+	toolbar.position=Vector2(free_left+(right-free_left)*0.5-toolbar.size.x*fit*0.5,view.y-Tokens.EDGE_MARGIN-toolbar.size.y*fit)
 	_layout_orders()
 	_position_army_bar()
 
@@ -283,8 +294,8 @@ func _position_army_bar()->void:
 func war_open()->bool:
 	return preload("res://scripts/hud/army_bar.gd").war_open()
 
-## The War screen's layout numbers (hud/war_board.gd COLUMN_WIDTH,
-## STRIP_HEIGHT), read while it is open.
+## The War screen's layout numbers (hud/war_board.gd COLUMN_WIDTH), read
+## while it is open.
 func _war_layout(key:String)->float:
 	var board:GDScript=load("res://scripts/hud/war_board.gd") as GDScript
 	return float(board.get_script_constant_map().get(key,0.0)) if board!=null else 0.0
@@ -513,6 +524,18 @@ func set_active_section(id:String)->void:
 		if label:label.add_theme_color_override("font_color",Color.WHITE if active else Folio.RAIL_TEXT)
 	_position_toolbar()
 
+## How many notices of each rail category need the god
+## (hud/notification_stack.gd needing): {category id: count}. They stand on
+## the category's badge, so the notice header's total is their sum.
+var _notice_counts:Dictionary={}
+
+func set_notice_counts(counts:Dictionary)->void:
+	_notice_counts=counts.duplicate()
+	for category:Dictionary in CATEGORIES:
+		var first:=String((category.pages as Array)[0])
+		var alert:Dictionary=_page_alerts.get(first,{})
+		_set_badge(first,String(alert.get("text","")),alert.get("color",Tokens.RED))
+
 func _set_badge(id:String,text:String,color:Color)->void:
 	# A page's alert stands on its category's button, summed with its
 	# neighbours' (red if any of them is).
@@ -528,6 +551,8 @@ func _set_badge(id:String,text:String,color:Color)->void:
 			else:marks=words
 			tint=alert.color
 			urgent=urgent or alert.color==Tokens.RED
+		var needing:=int(_notice_counts.get(String(category.id),0))
+		if needing>0:count+=needing;urgent=true
 		text=str(count) if count>0 else marks
 		color=Tokens.RED if urgent else tint
 		id=String((category.pages as Array)[0])
@@ -1034,8 +1059,6 @@ func _pages_of(category:Dictionary)->Array:
 	for page:String in category.get("pages",[]):
 		if not providers.has(page):continue
 		var labels:Array=(category.get("tabs",{}) as Dictionary).get(page,[])
-		# The eyes go by the age's word: Eyes, Watchers, Spies (eyes_corps.gd).
-		if page=="eyes":labels=[preload("res://scripts/eyes_corps.gd").word("Eyes")]
 		out.append({"section":page,"provider":providers[page],"labels":labels})
 	return out
 
@@ -1053,6 +1076,9 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	var category:=category_of(section)
 	if not category.is_empty():_last_page[String(category.id)]=section
 	dock.siblings=_pages_of(category)
+	dock.category_title=String(category.get("label",""))
+	# Home says which town: its name stands quietly beside the title.
+	dock.title_note=String((providers["settlement"] as Object).meta().get("title","")) if String(category.get("id",""))=="home" and providers.has("settlement") else ""
 	dock.open_page=func(page:String,page_sub:int)->void:section_requested.emit(page,page_sub)
 	dock.present(providers[section],sub)
 	set_active_section(section)
@@ -1272,14 +1298,17 @@ func _refresh_kpis()->void:
 			var tone:=String(watch.tone)
 			if tone=="calm":
 				note=("civ total" if modern else "of drinking water") if not pending else "partial"
-				_update_kpi(id,EraWords.days(days),note,Tokens.MUTED,"")
+				_update_kpi(id,EraWords.days(days),note,Tokens.GREEN,"")
 			else:
 				_update_kpi(id,EraWords.days(float(watch.days)),_fitting_note(id,watch.notes),Tokens.RED if tone=="short" else Tokens.AMBER,"")
 			continue
 		if shortage>0:note="%d short" % shortage if modern else ("running short" if t.cities.size()<=1 else "%s short" % EraWords.places(shortage))
 		elif pending:note="partial"
 		else:note="civ total" if modern else ("of food" if id=="food" else "of drinking water")
-		_update_kpi(id,EraWords.days(days),note,Tokens.RED if shortage>0 else Tokens.MUTED,"")
+		# Food by the one rule for the stores (food_care.gd): bare red, low
+		# amber, holding green, so a short number that is safe does not read as a crisis.
+		var level:=String(preload("res://scripts/food_care.gd").store_level(days)) if id=="food" else ""
+		_update_kpi(id,EraWords.days(days),note,Tokens.RED if shortage>0 or level=="bare" else (Tokens.AMBER if level=="low" else (Tokens.GREEN if level=="holding" else Tokens.MUTED)),"")
 	var goods_short:=int(t.goods_shortages)
 	_update_kpi("goods",EraWords.goods(float(t.goods_coverage)),("%d short" % goods_short if modern else "%d in want" % goods_short) if goods_short>0 else EraWords.goods_trend(float(t.goods_net)),Tokens.RED if goods_short>0 else Tokens.MUTED,"Civilian Goods held against what households expect")
 	_update_kpi("health",EraWords.life(float(t.life)),EraWords.babes_lost_short(float(t.infant)),Tokens.MUTED,"Population-weighted health across all cities")
@@ -1292,7 +1321,10 @@ func _refresh_kpis()->void:
 		_update_kpi("science","%d known" % GameState.known_discoveries.size() if EraWords.hearth() else EraWords.grouped(keepers),("%d keeper" if keepers==1 else "%d keepers") % keepers if EraWords.hearth() else "%d known" % GameState.known_discoveries.size(),Tokens.GOLD,"")
 		# Before writing the gdp chip is hidden (who ate is in PEOPLE).
 		if not EraWords.hearth():
-			_update_kpi("gdp",EraWords.grouped(roundi(float(t.output))),"%.2f each" % (float(t.output)/maxi(1,int(t.population))),Tokens.BLUE,"")
+			# AT WORK is a head count: everyone who can work less those serving
+			# (war_forces_model.gd at_work, the War screen's own figures).
+			var Forces:=preload("res://scripts/hud/war_forces_model.gd")
+			_update_kpi("gdp",EraWords.grouped(Forces.at_work(MilitaryCampaign)),"of %s people" % EraWords.grouped(int(t.population)),Tokens.BLUE,"")
 	kpi_strip.reset_size()
 	_layout()
 

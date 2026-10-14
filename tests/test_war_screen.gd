@@ -90,7 +90,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	add_child(board)
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
-	assert_object(board.find_child("Strength",true,false)).is_not_null()
+	assert_object(board.find_child("Allocation",true,false)).is_not_null()
 	# Top to bottom: the forces, the towns, the bands.
 	var order:=["ForcesCard","TownsCard","BandsCard","Enemies","Leaders"].map(func(n:String)->int:return (board.find_child(n,true,false) as Control).get_index() if board.find_child(n,true,false).get_parent()==board else (board.find_child(n,true,false).get_parent() as Control).get_index())
 	for i in order.size()-1:assert_int(int(order[i])).is_less(int(order[i+1]))
@@ -230,8 +230,8 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_str(String(home.doing)).contains("home guard")
 	assert_str(String(home.kit)).is_not_empty()
 	assert_int(int(home.men)).is_equal(int(Law.reading(MilitaryCampaign).now))
-	# The board shows them as numbers: shares on the strip, and where they
-	# are on the army bar's cards (the levy at home first, with the watch
+	# The board shows them as numbers: shares in the forces card, and where
+	# they are on the army bar's cards (the levy at home first, with the watch
 	# and those in drill).
 	var board:VBoxContainer=auto_free(Board.new())
 	add_child(board)
@@ -245,8 +245,9 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	WorldSimulation.state.population_allocations.erase("Defense")
 
 func test_the_war_screen_keeps_the_map_as_the_screen()->void:
-	# HOI4's way: a strip of numbers under the clock, a narrow column at the
-	# right edge, and the army bar along the bottom even with no band out.
+	# HOI4's way: the map is the screen, with a narrow column at the right
+	# edge and the army bar along the bottom even with no band out. Nothing
+	# floats over the map repeating the column's numbers.
 	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
 	Law.choose(MilitaryCampaign,"some")
 	MilitaryCampaign.open_roster("army")
@@ -257,10 +258,16 @@ func test_the_war_screen_keeps_the_map_as_the_screen()->void:
 	var view:Vector2=screen.get_viewport().get_visible_rect().size
 	assert_float(screen.panel.size.x).is_equal(Board.COLUMN_WIDTH)
 	assert_float(screen.panel.position.x+screen.panel.size.x).is_equal_approx(view.x-preload("res://scripts/hud/hud_tokens.gd").EDGE_MARGIN,0.5)
-	var strip:Control=screen.body.find_child("WarStrip",true,false)
-	assert_object(strip).is_not_null()
-	assert_bool(strip.top_level).is_true()
-	assert_float(strip.position.x+strip.size.x).is_less_equal(screen.panel.position.x)
+	assert_object(screen.body.find_child("WarStrip",true,false)).is_null()
+	# Army size, armed and home guard each stand once in the column.
+	var forces:Control=screen.body.find_child("ForcesCard",true,false)
+	assert_object(forces.find_child("DrawnFrom",true,false)).is_not_null()
+	var said:PackedStringArray=[]
+	for label in forces.find_children("*","Label",true,false):said.append((label as Label).text)
+	var all:=" | ".join(said)
+	assert_int(all.count("in the army")).is_equal(1)
+	assert_int(all.count("Armed")).is_equal(1)
+	assert_int(all.to_lower().count("home guard")).is_equal(1)
 	# The army bar stands while the War screen is open, the levy leading it.
 	assert_bool(Bar.war_open()).is_true()
 	var bar:Control=auto_free(Bar.new());add_child(bar)
@@ -437,9 +444,9 @@ func test_each_enemy_town_is_an_objective_worth_one_to_three()->void:
 	assert_str(" / ".join(lines)).contains("30 to 50")
 	assert_str(" / ".join(lines)).contains("bid the war leader take it")
 
-## The user, 2026-10-13: "34% armed" on the strip and "Armed 100%" on the War
-## panel at once. One word, one measure: the whole army's gear in hand.
-func test_armed_reads_the_same_on_the_strip_and_the_war_panel()->void:
+## The user, 2026-10-13: "34% armed" in one place and "Armed 100%" in another
+## at once. One word, one measure, said once: the whole army's gear in hand.
+func test_armed_is_one_measure_on_the_war_panel()->void:
 	Law.choose(MilitaryCampaign,"some")
 	# Half the army's kit is missing.
 	for f in MilitaryCampaign.home_army.get("formations",[]):

@@ -13,6 +13,7 @@ const TopbarInk = preload("res://scripts/hud/topbar_ink.gd")
 const NavIcon = preload("res://scripts/hud/hud_chrome_icon.gd")
 const WARNING_INK = Color("ffd39b")
 const SHORTAGE_INK = Color("ffb6a8")
+const GOOD_INK = Color("cfe6a6")
 const CAPTION_SIZE := 10
 const VALUE_SIZE := 18
 const MARK := 17.0
@@ -63,6 +64,7 @@ func show_readings(readings: Array[Dictionary]) -> void:
 		var value_ink: Color = Folio.RAIL_TEXT
 		if reading.note_color == Tokens.text_for(Tokens.RED): value_ink = SHORTAGE_INK
 		elif reading.note_color == Tokens.text_for(Tokens.AMBER): value_ink = WARNING_INK
+		elif reading.note_color == Tokens.text_for(Tokens.GREEN): value_ink = GOOD_INK
 		entry.caption.add_theme_color_override("font_color", Color(Folio.RAIL_TEXT, 0.82))
 		entry.value.add_theme_color_override("font_color", value_ink)
 		entry.mark.set_icon_color(value_ink)

@@ -54,7 +54,7 @@ const RANKED:=["towns","people","fighters","stores","crafts","lore","lives","wea
 ## Titles in the people's own words, by what they know (era_words.gd stages).
 const TITLES:={
 	"hearth":{"name":"People","towns":"Hearths","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Lore","lives":"Lives","wealth":"Hands","walls":"Walls","between":"Between us","envoys":"Envoys"},
-	"lettered":{"name":"People","towns":"Towns","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Learning","lives":"Lives","wealth":"Labour","walls":"Walls","between":"Between us","envoys":"Envoys"},
+	"lettered":{"name":"People","towns":"Towns","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Scholars","lives":"Lives","wealth":"Output","walls":"Walls","between":"Between us","envoys":"Envoys"},
 	"reckoned":{"name":"People","towns":"Cities","people":"Population","fighters":"Soldiers","stores":"Food","crafts":"Production","lore":"Science","lives":"Health","wealth":"Output","walls":"Defences","between":"Relations","envoys":"Envoys"},
 }
 ## What each column means, for the header's pointer.
@@ -177,7 +177,7 @@ static func our_count()->Dictionary:
 			values["fortification"]=walls
 		towns.append({"name":String(city.get("name","Settlement")),"values":values})
 	var values:={"population":float(t.get("population",0)),"garrison":float(fighters),"production":clampf(float(GameState.simulation_metrics.get("material_capacity",0.0)),0.0,1.0),
-		"science_capacity":float(t.get("science",0.0)),"life_expectancy":float(t.get("life",0.0)),"gdp":float(t.get("output",0.0)),"fortification":walls}
+		"science_capacity":float(t.get("minds",0.0)),"life_expectancy":float(t.get("life",0.0)),"gdp":float(t.get("output",0.0)),"fortification":walls}
 	if float(t.get("food_days",-1.0))>=0.0:values["supply"]=float(t.food_days)
 	return {"name":our_name(),"values":values,"towns":towns}
 
