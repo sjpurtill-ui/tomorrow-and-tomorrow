@@ -14,6 +14,7 @@ extends RefCounted
 ## table   one line per item, columns aligned, the distinguishing fact first,
 ##         status as a small coloured tag, a verb button on the row:
 ##   {type:"table", heading?, note?, empty?: "one small line when no rows",
+##    icon_size? (px, 18; 24-28 for small portraits),
 ##    columns:[{key, label, width? (px), align? ("left"|"right")}],
 ##    rows:[{cells:{key:String}, icon?: Texture2D, group?: String (a group
 ##           header line is drawn when it changes), tag?:{text, tone},
@@ -110,7 +111,8 @@ static func _fact(item:Dictionary)->Control:
 		var mark:=TextureRect.new();mark.texture=icon;mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
 	var label:=T.make_label(String(item.get("label","")),13,T.BODY);label.name="Label"
-	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	# Never cut short: a long name wraps onto a second line.
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(label)
 	if item.has("bar"):
 		var bar:=ProgressBar.new();bar.name="Bar";bar.show_percentage=false;bar.min_value=0.0;bar.max_value=1.0;bar.value=clampf(float(item.bar),0.0,1.0)
@@ -146,7 +148,8 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 		if empty!="":list.add_child(T.make_label(empty,12,T.INK_MUTED))
 		return list
 	var head:=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
-	var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=18;head.add_child(icon_gap)
+	var icon_size:=float(block.get("icon_size",18.0))
+	var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=icon_size;head.add_child(icon_gap)
 	for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
 	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
 	var group:=""
@@ -158,7 +161,7 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 			group=this_group
 			var title:=T.make_label(group.to_upper(),11,T.GOLD_TEXT,0.06);title.name="Group_%d" % index;title.custom_minimum_size.y=22;title.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			list.add_child(title)
-		var line:=_row(row,columns);line.name="Row_%d" % index
+		var line:=_row(row,columns,icon_size);line.name="Row_%d" % index
 		list.add_child(line);index+=1
 		var more:=line.find_child("Extras",true,false) as Control
 		if more:extras.append(more)
@@ -174,23 +177,25 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 
 static func _cell(text:String,column:Dictionary,font_size:int,ink:Color,head:=false)->Label:
 	var label:=T.make_label(text,font_size,ink);label.name="Cell_"+String(column.get("key","")).validate_node_name()
-	label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	if head:label.add_theme_font_override("font",T.font("ui_strong"))
+	# No cell is ever cut short ("…"): a fixed column grows to its words, a
+	# free column wraps them onto a second line.
 	var width:=float(column.get("width",0.0))
 	if width>0.0:label.custom_minimum_size.x=width
-	else:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	else:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	if String(column.get("align",""))=="right":label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	return label
 
 
-static func _row(row:Dictionary,columns:Array)->PanelContainer:
+static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	var panel:=PanelContainer.new();panel.name="Row";panel.custom_minimum_size.y=ROW_HEIGHT;panel.tooltip_text=String(row.get("tip",""))
 	var rest:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,2);rest.content_margin_left=2;rest.content_margin_right=2;rest.border_width_bottom=1;rest.border_color=Color(T.RULE,0.4)
 	var lit:=rest.duplicate() as StyleBoxFlat;lit.bg_color=T.HOVER_BG
 	panel.add_theme_stylebox_override("panel",rest)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(line)
-	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(icon_size,icon_size);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED if icon_size<=18.0 else TextureRect.STRETCH_KEEP_ASPECT_COVERED;mark.clip_contents=true
 	mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	if row.get("icon") is Texture2D:mark.texture=row.icon
 	line.add_child(mark)
