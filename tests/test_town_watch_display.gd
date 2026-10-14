@@ -299,7 +299,10 @@ func test_two_on_watch_read_as_two_not_as_seven()->void:
 	assert_str(String(ours.badge_tip)).is_equal("2 keep watch here. If the town is attacked, about %d of its grown townsfolk would take up whatever is at hand and fight beside them (1 in 10 of the grown people). None of them is kept as the home guard: a general may lead them away in a band." % int(at_home.rise))
 	assert_str(String(town.badge_tip)).is_equal("No one keeps watch here. If the town is attacked, about %d of its grown townsfolk would take up whatever is at hand and fight (1 in 10 of the grown people)." % int(there.rise))
 	# The town page says the same, in the same words.
-	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("2 on watch · %d can rise" % int(at_home.rise))
+	# Home's row reads War's own count of the whole people (watch_military.gd home_standing).
+	var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal(Model.untrained_words(int(standing.on_watch),int(standing.can_rise)))
+	assert_int(int(standing.on_watch)).is_equal(2)
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("%d can rise" % int(there.rise))
 	var strong:=Model.strength(true,home)
 	assert_str(Model._tip(Model.row_for("garrison",{"strength":strong}),{"strength":strong})).contains("None of the 2 on watch is kept as the home guard")
@@ -391,7 +394,10 @@ func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->
 	assert_int(int(row.number)).is_equal(musters)
 	# Those keeping watch and the townsfolk apart, never one count of
 	# "fighters" that reads as soldiers.
-	assert_str(String(row.value)).is_equal("35 on watch · %d can rise" % int(parts.rise))
+	# The row is War's whole-people count: the 40 at home (20 free, 20 home guard) and every town's townsfolk.
+	var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+	assert_str(String(row.value)).is_equal("%d on watch · %d can rise" % [int(standing.on_watch),int(standing.can_rise)])
+	assert_str(String(row.name)).is_equal("Fighters, all our towns")
 	assert_str(String(row.note)).is_equal("20 free to send")
 	assert_str(Model._tip(row,{"strength":strong})).contains("Of the 35 of the army here, 20 are free to send and 15 are the home guard.")
 	# The Military ledger's garrison at home, and a scout's count, are the same muster.
@@ -412,7 +418,8 @@ func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->
 	assert_int(int(_parts(TOWN).watch)).is_equal(0)
 	assert_dict(Labels.guard_parts(home)).is_equal({"watch":55,"rise":rise,"bands":55})
 	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(55+rise)
-	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("55 on watch · %d can rise" % rise)
+	var all_towns:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("55 on watch · %d can rise" % int(all_towns.can_rise))
 
 
 func test_an_open_card_fits_its_name_and_badge_and_draws_one_badge()->void:

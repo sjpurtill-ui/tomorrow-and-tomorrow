@@ -276,8 +276,13 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 					"meaning":"The home guard posted here (the watch, shared among our towns by their people), and the townsfolk who take up arms when raiders come. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
 			# Those free for the bands keep watch too: never one count with the
 			# townsfolk, who are no soldiers (the map badge sets them apart).
-			if trained>0:value=untrained_words(trained+int(s.get("watch",0)),int(s.get("rise",0)))
-			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
+			# Home's figure is War's own count (watch_military.gd home_standing):
+			# the whole people's watch at home and every town's townsfolk who rise.
+			# With more towns than one, the row says so in its name.
+			var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+			value=untrained_words(int(standing.on_watch),int(standing.can_rise))
+			var several:=WorldSimulation.state.player_settlements.size()>1
+			return {"key":key,"name":"Fighters, all our towns" if several else "Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
 				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The army at home (its home guard and those free to send), and the townsfolk who take up arms when raiders come."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
