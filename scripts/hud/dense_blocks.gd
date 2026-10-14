@@ -45,7 +45,8 @@ static func verb(label:String,on_press:Variant,tip:String="",disabled:=false)->B
 		skin.content_margin_left=9;skin.content_margin_right=9;skin.content_margin_top=1;skin.content_margin_bottom=1
 		if state!="normal":skin.bg_color=Color(T.GOLD,0.18)
 		go.add_theme_stylebox_override(state,skin)
-	go.add_theme_stylebox_override("disabled",T.flat(Color(0,0,0,0),T.RULE,1,4))
+	var off:=T.flat(Color(0,0,0,0),T.RULE,1,4);off.content_margin_left=9;off.content_margin_right=9;off.content_margin_top=1;off.content_margin_bottom=1
+	go.add_theme_stylebox_override("disabled",off);go.add_theme_color_override("font_disabled_color",T.INK_MUTED)
 	go.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	go.add_theme_color_override("font_color",T.GOLD_TEXT);go.add_theme_color_override("font_hover_color",T.INK)
 	if on_press is Callable and (on_press as Callable).is_valid():go.pressed.connect(on_press)
