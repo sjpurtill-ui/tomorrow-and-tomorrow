@@ -1,7 +1,6 @@
 extends VBoxContainer
-## Material supply and carrying decisions lead, followed by the land's
-## condition, daily flows and individual reserves. A reserve's sources open
-## directly beneath it; unavailable materials retain their own source entry.
+## Supply decisions lead. A bounded chooser keeps the inventory compact;
+## one selected material explains its stock, daily flow and known places.
 ## Food, water and household goods have their own pages.
 ##
 ## The live refresh (update_block) keeps every node while the page's shape
@@ -12,23 +11,31 @@ const Words:=preload("res://scripts/hud/home_plain.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 ## Kept out of the yards' table: each has its own tab.
 const ELSEWHERE:=["Freshwater","Civilian Goods","Food"]
+const PAGE_SIZE:=8
 
 var data:Dictionary
 var _shape:Array=[]
 var _land:Label
 var _land_bar:Control
 var _land_note:Label
-## Per moving material: {key, refs}.
+## Bounded material choices: {key, button}.
 var _rows:Array=[]
-var _held_rows:Array=[]
 var _grid:GridContainer
-var _reserve_grid:GridContainer
 var _composition:BoxContainer
 var _inventory:VBoxContainer
+var _catalog:VBoxContainer
+var _browse_state:Dictionary={}
+var _page_label:Label
+var _previous:Button
+var _next:Button
+var _detail_offset:=0
+var _selection:Dictionary={}
+var _detail_host:VBoxContainer
+var _browser:Control
 var _hero:Label
 var _supply:Label
 var _readings:Dictionary={}
-## Per shipment on the road: {voice, when} (the row's label and note).
+## At most three incoming shipment summaries; the link opens all deliveries.
 var _incoming:Array=[]
 var _details:Array=[]
 
@@ -58,81 +65,137 @@ func setup(block:Dictionary)->void:
 		_readings[item.id]={"cell":cell,"value":value,"note":note}
 	# Land condition stays plain; exact yield factors and odds remain in its tooltip.
 	if String(block.get("land",""))!="":
-		var searched:=VBoxContainer.new();searched.name="Land";searched.add_theme_constant_override("separation",4);overview.add_child(searched)
+		var searched:=VBoxContainer.new();searched.name="Land";searched.add_theme_constant_override("separation",4);add_child(searched)
 		var reading:=HBoxContainer.new();reading.add_theme_constant_override("separation",16);searched.add_child(reading)
 		_land=S.label("",16,T.INK,true);_land.name="SearchedLand";_land.mouse_filter=Control.MOUSE_FILTER_PASS;reading.add_child(_land)
 		_land_bar=S.bar(0.0,T.INK_MUTED,96.0,5.0);_land_bar.name="SearchedBar";reading.add_child(_land_bar)
 		_land_note=S.label("",14,T.INK_MUTED);_land_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;searched.add_child(_land_note)
-	var moving:Array=[];var still:Array=[];var beyond:Array=[]
-	for item:Dictionary in block.get("rows",[]):
-		if String(item.get("key","")) in ELSEWHERE:continue
-		(beyond if out_of_reach(item) else (still if is_idle(item,"") else moving)).append(item)
-	if not moving.is_empty():S.head(_inventory,"Moving through the yards")
-	_grid=S.columns(_inventory,"Materials",320.0,3)
-	_grid.visible=not moving.is_empty()
-	for item:Dictionary in moving:
-		var key:=String(item.key)
-		var refs:=S.row(_grid,{"id":key,"icon":key,"label":String(item.name),"points":item.get("points",[]),"bar_width":64.0,"value_width":70.0,
-			"buttons":[{"text":"Close" if String(block.get("selected",""))==key else "Sources","on_press":func():data.on_select.call(key),"tip":"Where it comes from","chosen":String(block.get("selected",""))==key}]})
-		(refs.panel as Control).name="Material_"+key.validate_node_name()
-		_rows.append({"key":key,"refs":refs})
-	if moving.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened(_inventory)
-	if not still.is_empty():
-		var held:=VBoxContainer.new();held.name="Still";held.add_theme_constant_override("separation",6);_inventory.add_child(held)
-		S.head(held,"Held in reserve","No movement today")
-		_reserve_grid=S.columns(held,"Reserves",300.0,3)
-		for item:Dictionary in still:
-			var key:=String(item.key)
-			var selected:=String(data.get("selected",""))==key
-			var entry:=VBoxContainer.new();entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entry.add_theme_constant_override("separation",8);_reserve_grid.add_child(entry)
-			var refs:=S.row(entry,{"id":key,"icon":key,"label":String(item.name),"compact_actions":true,"buttons":[{"text":"Hide sources" if selected else "Sources","on_press":func():data.on_select.call(key),"tip":"Where it comes from","chosen":selected}]})
-			_held_rows.append({"key":key,"refs":refs})
-			if selected:_opened(entry,false)
-	if not beyond.is_empty():
-		var strip:=HFlowContainer.new();strip.name="NotYetInReach";strip.add_theme_constant_override("h_separation",6);strip.add_theme_constant_override("v_separation",4);_inventory.add_child(strip)
-		var lead:=S.label("Not yet within reach",16,T.INK_MUTED,true);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;strip.add_child(lead)
-		for item:Dictionary in beyond:
-			var key:=String(item.key)
-			var chip:=Button.new();chip.name="Beyond_"+key.validate_node_name();chip.text=String(item.name);chip.icon=Icons.material_texture(key,24);chip.expand_icon=false
-			T.apply_button_style(chip);chip.add_theme_constant_override("icon_max_width",20)
-			chip.tooltip_text=_reading_words(item)+"\nClick for where it could come from."
-			chip.pressed.connect(func()->void:data.on_select.call(key))
-			strip.add_child(chip)
-		if beyond.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened(_inventory)
-	var incoming:Array=block.get("incoming",[])
-	if not incoming.is_empty():
-		S.head(_inventory,"On the road")
-		var road:=S.columns(_inventory,"Incoming",400.0,2)
-		for shipment:Dictionary in incoming:
-			var refs:=S.row(road,{"id":"incoming","icon":String(shipment.get("resource","")),"label":"","value_width":60.0})
-			_incoming.append({"voice":refs.label,"when":refs.note,"refs":refs})
-		road.add_child(S.verb("All deliveries",data.get("on_trade"),"Goods on the road between your settlements, and what arrived"))
+	_build_browser()
+	_build_inventory()
 	resized.connect(_arrange)
 	_inventory.resized.connect(_arrange)
 	_fill()
 	_arrange.call_deferred()
 
-## The opened material's sources, beneath the table: one line each.
-func _opened(parent:Node=null,close_button:=true)->void:
+## Browsing state belongs to the provider, never to a save or simulation.
+func _build_browser()->void:
+	_browse_state=data.get("browse_state",{})
+	_catalog=VBoxContainer.new();_catalog.add_theme_constant_override("separation",12);_inventory.add_child(_catalog)
+
+func _browse_controls()->Control:
+	var count:=0
+	for item:Dictionary in data.get("rows",[]):
+		if String(item.get("key","")) not in ELSEWHERE:count+=1
+	var pages:=HFlowContainer.new();pages.add_theme_constant_override("h_separation",8);pages.add_theme_constant_override("v_separation",6)
+	pages.visible=count>PAGE_SIZE or not String(_browse_state.get("query","")).is_empty()
+	var search:=LineEdit.new();search.name="FindMaterial";search.placeholder_text="Find a material";search.text=String(_browse_state.get("query",""));search.custom_minimum_size=Vector2(180,40);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pages.add_child(search)
+	search.text_changed.connect(func(words:String)->void:_browse_state.query=words;_browse_state.page=0;_repage())
+	_previous=S.verb("‹",func()->void:_browse_state.page=int(_browse_state.get("page",0))-1;_repage(),"Previous materials");_previous.name="PreviousMaterials";_previous.custom_minimum_size.x=40;pages.add_child(_previous)
+	_page_label=S.label("",14,T.INK_MUTED);_page_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;pages.add_child(_page_label)
+	_next=S.verb("›",func()->void:_browse_state.page=int(_browse_state.get("page",0))+1;_repage(),"Next materials");_next.name="NextMaterials";_next.custom_minimum_size.x=40;pages.add_child(_next)
+	return pages
+
+func _page_rows()->Array:
+	var moving:Array=[];var held:Array=[];var unknown:Array=[]
+	var query:=String(_browse_state.get("query","")).strip_edges().to_lower()
+	for item:Dictionary in data.get("rows",[]):
+		if String(item.get("key","")) in ELSEWHERE:continue
+		if not query.is_empty() and not String(item.name).to_lower().contains(query):continue
+		(unknown if out_of_reach(item) else (held if is_idle(item,"") else moving)).append(item)
+	var matches:=moving+held+unknown
+	var last:=maxi(0,ceili(float(matches.size())/PAGE_SIZE)-1)
+	var page:=clampi(int(_browse_state.get("page",0)),0,last);_browse_state.page=page
+	if _page_label!=null:
+		_page_label.text="%d–%d of %d materials" % [page*PAGE_SIZE+1,mini((page+1)*PAGE_SIZE,matches.size()),matches.size()] if not matches.is_empty() else "No matching materials"
+		_previous.disabled=page==0;_next.disabled=page>=last
+	return matches.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE)
+
+func _repage()->void:
+	_build_inventory();_fill();_arrange.call_deferred()
+
+func _build_inventory()->void:
+	for child:Node in _catalog.get_children():
+		if child==_browser:continue
+		_catalog.remove_child(child);child.queue_free()
+	_rows.clear();_incoming.clear();_details.clear();_selection.clear();_detail_offset=0
+	_detail_host=VBoxContainer.new();_detail_host.add_theme_constant_override("separation",6);_catalog.add_child(_detail_host);_catalog.move_child(_detail_host,0)
+	_opened(_detail_host)
+	var choose:=S.head(_catalog,"Choose a material")
+	choose.title.add_theme_font_size_override("font_size",16);_catalog.move_child(choose.box,1)
+	if _browser==null:
+		_browser=_browse_controls();_catalog.add_child(_browser)
+	_catalog.move_child(_browser,2)
+	_grid=S.columns(_catalog,"Materials",200.0,3)
+	_grid.add_theme_constant_override("h_separation",8)
+	for item:Dictionary in _page_rows():
+		var key:=String(item.key)
+		var button:=S.verb("",func():data.on_select.call(key),"View stock, daily supply and known places for "+String(item.name),key==selected_key(data))
+		button.name="Material_"+key.validate_node_name();button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.icon=Icons.material_texture(key,24);button.add_theme_constant_override("icon_max_width",20)
+		_grid.add_child(button);_rows.append({"key":key,"button":button})
+	var incoming:Array=data.get("incoming",[])
+	if not incoming.is_empty():
+		var road:=VBoxContainer.new();road.name="Incoming";road.add_theme_constant_override("separation",4);_catalog.add_child(road)
+		for shipment:Dictionary in incoming.slice(0,3):
+			var line:=S.label("",14,T.INK_MUTED);line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;road.add_child(line);_incoming.append({"label":line})
+		road.add_child(S.verb("All %d deliveries" % incoming.size(),data.get("on_trade"),"Goods on the road between your settlements, and what arrived"))
+
+## Keep the selected material in place while browsing another inventory page.
+static func selected_key(block:Dictionary)->String:
+	var rows:Array=block.get("rows",[])
+	for row:Dictionary in rows:
+		if String(row.key)==String(block.get("selected","")):return String(row.key)
+	for row:Dictionary in rows:
+		if String(row.key) not in ELSEWHERE and empty(row) and float(row.get("delivered",0.0))>0.05:return String(row.key)
+	for row:Dictionary in rows:
+		if String(row.key) not in ELSEWHERE and not is_idle(row,"") and not out_of_reach(row):return String(row.key)
+	for row:Dictionary in rows:
+		if String(row.key) not in ELSEWHERE:return String(row.key)
+	return ""
+
+func _opened(parent:Node)->void:
 	var item:Dictionary={}
 	for row:Dictionary in data.get("rows",[]):
-		if String(row.key)==String(data.get("selected","")):item=row
-	if item.is_empty():return
-	var box:=VBoxContainer.new();box.name="Sources";box.add_theme_constant_override("separation",12);(parent if parent!=null else self).add_child(box)
-	var head:=S.head(box,"%s: where it comes from" % String(item.name))
-	if close_button:(head.row as HBoxContainer).add_child(S.verb("Close",func():data.on_select.call(String(item.key)),"Hide its sources"))
-	for detail:String in item.get("details",[]):
-		var line:=S.label("",16,T.INK_MUTED);line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(line);_details.append(line)
-	if (item.get("details",[]) as Array).is_empty():
-		var empty_sources:=S.label("No known place to dig or cut it yet. Scouts and surveys find new sources.",16,T.INK_MUTED);empty_sources.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(empty_sources)
+		if String(row.key)==selected_key(data):item=row
+	if item.is_empty():
+		parent.add_child(S.label("No materials found yet.",16,T.INK_MUTED));return
+	var head:=HFlowContainer.new();head.add_theme_constant_override("h_separation",8);parent.add_child(head)
+	head.add_child(S.icon(String(item.key),24))
+	head.add_child(S.voice(String(item.name),20))
+	var stock:=S.voice("",20);head.add_child(stock);_selection.stock=stock
+	var spark:=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(spark);_selection.spark=spark
+	var reading:=S.label("",14,T.INK_MUTED);reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(reading);_selection.reading=reading
+	var detail_toggle:=S.verb("Where it comes from",func():_browse_state.sources_open=not bool(_browse_state.get("sources_open",false));_repage(),"Show the known places supplying "+String(item.name))
+	detail_toggle.name="WhereItComesFrom";detail_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;parent.add_child(detail_toggle)
+	var details:Array=item.get("details",[])
+	var expanded:=bool(_browse_state.get("sources_open",false))
+	detail_toggle.text="Hide places" if expanded else "Where it comes from"
+	var box:=VBoxContainer.new();box.name="Sources";box.add_theme_constant_override("separation",6);parent.add_child(box)
+	if details.is_empty():
+		var empty_sources:=S.label("No known place to dig or cut it yet. Scouts and surveys find new places.",14,T.INK_MUTED);empty_sources.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(empty_sources)
+		detail_toggle.visible=false
+	else:
+		var limit:=PAGE_SIZE if expanded else 1
+		var last:=maxi(0,ceili(float(details.size())/PAGE_SIZE)-1)
+		var page:=clampi(int(_browse_state.get("sources_page",0)),0,last) if expanded else 0
+		_detail_offset=page*PAGE_SIZE
+		for detail:String in details.slice(_detail_offset,_detail_offset+limit):
+			var line:=S.label("",14,T.INK_MUTED);line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(line);_details.append(line)
+		if details.size()==1:
+			detail_toggle.visible=false
+			var place_heading:=S.label("Where it comes from",14,T.INK,true);box.add_child(place_heading);box.move_child(place_heading,0)
+		elif not expanded:
+			box.add_child(S.label("%d other known places" % (details.size()-1),14,T.INK_MUTED))
+		elif details.size()>PAGE_SIZE:
+			var pages:=HFlowContainer.new();pages.add_theme_constant_override("h_separation",8);box.add_child(pages)
+			var previous:=S.verb("Previous places",func():_browse_state.sources_page=page-1;_repage());previous.name="PreviousSources";previous.disabled=page==0;pages.add_child(previous)
+			pages.add_child(S.label("%d of %d places" % [mini(_detail_offset+PAGE_SIZE,details.size()),details.size()],14,T.INK_MUTED))
+			var next:=S.verb("Next places",func():_browse_state.sources_page=page+1;_repage());next.name="NextSources";next.disabled=page>=last;pages.add_child(next)
 
 func _arrange()->void:
 	_composition.vertical=size.x<850.0
 	S.flow(_grid,_inventory.size.x)
-	S.flow(_reserve_grid,_inventory.size.x)
-	S.compact(self,size.x)
-	var road:=_inventory.get_node_or_null("Incoming") as GridContainer
-	if road!=null:S.flow(road,_inventory.size.x)
 
 ## In store with nothing coming in or going out today, and not the one opened.
 static func is_idle(item:Dictionary,selected:String)->bool:
@@ -157,7 +220,7 @@ func update_block(block:Dictionary)->bool:
 static func shape_of(block:Dictionary)->Array:
 	var rows:Array=[]
 	for item:Dictionary in block.get("rows",[]):
-		var open:bool=block.get("selected","")==item.key
+		var open:bool=selected_key(block)==item.key
 		rows.append([String(item.key),out_of_reach(item),is_idle(item,String(block.get("selected",""))),open,(item.get("details",[]) as Array).size() if open else -1])
 	return [_who(block),_current(block),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
 
@@ -197,7 +260,7 @@ static func flow_words(item:Dictionary)->String:
 
 ## The strip's figures (the dock draws them under the tabs): the yards held
 ## against their room, what comes in a day, the carrying.
-const KPI_LABELS:={"stores":"In the yards","income":"Coming in a day","carry":"Carrying"}
+const KPI_LABELS:={"stores":"In the yards","income":"Total coming in a day","carry":"Carrying"}
 static func kpis(data:Dictionary)->Array:
 	return S.dock_kpis(kpi_items(data),KPI_LABELS)
 
@@ -252,22 +315,21 @@ func _fill()->void:
 	for entry:Dictionary in _rows:
 		var item:Dictionary=by_key.get(String(entry.key),{})
 		if item.is_empty():continue
-		var reading:=reading_of(item)
-		var dry:=empty(item)
-		S.set_row(entry.refs,{"label":String(item.name),"note":flow_words(item),"note_color":T.INK_MUTED,"value":S.n(float(item.stock)),"value_color":T.RED_TEXT if dry else T.INK,"points":item.get("points",[]),
-			"tag":"Empty" if dry else ("Blocked" if bool(item.get("blocked",false)) else trend_word(String(reading.trend))),
-			"tag_color":T.RED if dry or bool(item.get("blocked",false)) else (T.GREEN if String(reading.trend)=="rising" else (T.AMBER if String(reading.trend)=="falling" else T.MUTED)),
-			"tip":"%s: %s in store.\n%s" % [String(item.name),S.n(float(item.stock)),_reading_words(item)]})
-	for entry:Dictionary in _held_rows:
-		var item:Dictionary=by_key.get(String(entry.key),{})
-		if not item.is_empty():S.set_row(entry.refs,{"label":String(item.name),"value":S.n(float(item.stock)),"tip":"%s in store, with nothing coming in or going out today.\n%s" % [S.n(float(item.stock)),_reading_words(item)]})
-	var opened:Dictionary=by_key.get(String(data.get("selected","")),{})
+		var suffix:=" · unavailable" if out_of_reach(item) else " · "+S.n(float(item.stock))
+		(entry.button as Button).text=String(item.name)+suffix
+		(entry.button as Button).tooltip_text="%s in store. %s.\n%s" % [S.n(float(item.stock)),flow_words(item),_reading_words(item)]
+	var opened:Dictionary=by_key.get(selected_key(data),{})
 	if not opened.is_empty():
-		for d in mini(_details.size(),(opened.get("details",[]) as Array).size()):
-			S.put(_details[d],String(opened.details[d]),T.RED_TEXT if bool(opened.get("blocked",false)) else T.INK_MUTED)
+		S.put(_selection.stock,S.n(float(opened.stock))+" in store",T.RED_TEXT if empty(opened) else T.INK)
+		_selection.spark.points=opened.get("points",[]);_selection.spark.visible=not (_selection.spark.points as Array).is_empty();_selection.spark.queue_redraw()
+		var stock_reading:=reading_of(opened)
+		var since:=" · "+trend_word(String(stock_reading.trend)).to_lower()+" since latest count" if not (opened.get("points",[]) as Array).is_empty() else ""
+		S.put(_selection.reading,flow_words(opened)+since)
+		_selection.reading.tooltip_text=_reading_words(opened)
+		for d in mini(_details.size(),(opened.get("details",[]) as Array).size()-_detail_offset):
+			S.put(_details[d],String(opened.details[d+_detail_offset]),T.RED_TEXT if bool(opened.get("blocked",false)) else T.INK_MUTED)
 	var incoming:Array=data.get("incoming",[])
 	for index in mini(_incoming.size(),incoming.size()):
 		var shipment:Dictionary=incoming[index]
 		var days_left:=maxi(0,ceili(float(shipment.arrival_day)-float(data.get("day",0.0))))
-		S.set_row((_incoming[index] as Dictionary).refs,{"label":"%s %s on the way" % [S.n(float(shipment.quantity)),String(shipment.resource).to_lower()],
-			"note":"From %s; arrives %s." % [String(shipment.source_name),"today" if days_left<=0 else "in "+preload("res://scripts/hud/production_plain.gd").span_text(days_left)],"value":""})
+		S.put(_incoming[index].label,"%s %s from %s · %s" % [S.n(float(shipment.quantity)),String(shipment.resource).to_lower(),String(shipment.source_name),"arrives today" if days_left<=0 else "in "+preload("res://scripts/hud/production_plain.gd").span_text(days_left)])
