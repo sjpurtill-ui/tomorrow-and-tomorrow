@@ -1,79 +1,137 @@
 extends "res://scripts/hud/settlement_overview.gd"
-## The Research board ("Where we look"). It answers two questions:
-## - how fast are we learning, and what limits it: one header with the pace
-##   against a typical people of our age, the single biggest limiter named in
-##   plain words, and every input as an icon with its value;
-## - what is being learned: one lane per field in a fixed order, each with its
-##   attention, its questions as compact cards and its waiting lines.
-## Cards never move. A card's place is its line of study (its channel), so a
-## proof that hands the line a new question changes the card's words, not its
-## place; only the arc and the numbers change from day to day (update_block).
-## Every number comes from the engine (dock_content_inquiry.gd learning_pace,
+## The Research board ("Where we look"), one table a strategy player reads at
+## a glance:
+## - a strip of four figures: our pace against a typical people of our age,
+##   the discoveries that pace brings a year, the teams at work and how far
+##   our learning runs ahead of the calendar (the one "ahead" on the page);
+## - one bar of what speeds and slows the work on every question, each part
+##   sized by how much it moves the pace, its whole account on hover;
+## - who sets the learners, with the two orders that change it;
+## - one row per field: its attention as a bar with − and +, its question
+##   under way with the evidence as a bar and the time left to proof; a
+##   field's further questions follow on lines of their own, and a field with
+##   nothing under way says in a few words why it waits;
+## - artifact study, the same row, last.
+## A row never moves while only its numbers change (update_block). Every
+## number comes from the engine (dock_content_inquiry.gd learning_pace,
 ## waiting_lines and DiscoverySystem.active_investigation_records).
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
 const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Borders:=preload("res://scripts/nation_borders.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
-const Arc:=preload("res://scripts/hud/learning_arc.gd")
 const Catalog:=preload("res://scripts/research_600_catalog.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 ## Below this board width the free team's options stack in one column.
 const WIDE:=760.0
-## A lane holds two cards a row from this width, one below it.
-const TWO_CARDS:=540.0
-const CARD_HEIGHT:=84.0
-const ARC_SIZE:=46.0
-## An input on the header is this wide; the header fits as many a row as it can.
-const CHIP_WIDTH:=136.0
-## Lines of study in each field, in the catalog's order: a card's place in its lane.
+## From this width each row also says what its question would bring.
+const BRINGS_AT:=820.0
+## A question's line is this tall.
+const CARD_HEIGHT:=24.0
+## The table's fixed columns.
+const FIELD_W:=118.0
+const SHARE_W:=40.0
+const BAR_W:=56.0
+const TIME_W:=84.0
+## Lines of study in each field, in the catalog's order: a question's place in its field.
 const LINES:=preload("res://scripts/discovery_frontier_catalog.gd").SUBCATEGORIES
 ## Each free team's options, side by side on a wide board, stacked on a narrow one.
 var choice_grids:Array[GridContainer]=[]
-## Each lane's cards (two a row on a wide board).
-var lane_grids:Array[GridContainer]=[]
-var chip_grid:GridContainer
 ## The board's shape (update_block keeps the nodes while it holds) and the
 ## nodes the daily refresh writes into.
 var _shape:Array=[]
 var _cards:Dictionary={}
 var _lanes:Dictionary={}
-var _chips:Dictionary={}
 var _header:Dictionary={}
+var _brings:Array[Label]=[]
+var factor_bar:FactorBar
+
+
+## What speeds and slows the work on every question: one bar, centred on the
+## usual pace. Slowing parts stand left of the centre in red, speeding parts
+## right of it in green, each as wide as the share of the pace it moves (on a
+## log scale, so halving and doubling weigh the same). Each part names itself
+## where it has room; its whole account is on hover.
+class FactorBar extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var parts:Array=[]
+	var _rects:Array=[]
+	func _init()->void:
+		custom_minimum_size=Vector2(200,26)
+		size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		mouse_filter=Control.MOUSE_FILTER_STOP
+	func set_parts(items:Array)->void:
+		parts=items;queue_redraw()
+	## Each part as wide as its share of what moves the pace (6 px at least).
+	func _layout()->Array:
+		var rects:Array=[]
+		var slows:Array=parts.filter(func(p:Dictionary)->bool:return float(p.factor)<1.0)
+		var speeds:Array=parts.filter(func(p:Dictionary)->bool:return float(p.factor)>=1.0)
+		var ordered:Array=slows+speeds
+		var total:=0.0
+		for p:Dictionary in ordered:total+=absf(log(maxf(0.0001,float(p.factor))))
+		if total<=0.0 or ordered.is_empty():return rects
+		var gap:=2.0
+		var usable:=maxf(1.0,size.x-gap*float(ordered.size()-1)-4.0-6.0*float(ordered.size()))
+		var x:=0.0
+		for k in ordered.size():
+			if k==slows.size() and k>0:x+=4.0
+			var w:=6.0+usable*absf(log(maxf(0.0001,float(ordered[k].factor))))/total
+			rects.append({"rect":Rect2(x,0,w,size.y),"part":ordered[k]})
+			x+=w+gap
+		return rects
+	func _draw()->void:
+		_rects=_layout()
+		draw_rect(Rect2(Vector2.ZERO,size),T.TRACK)
+		for item:Dictionary in _rects:
+			var r:Rect2=item.rect
+			var p:Dictionary=item.part
+			var slow:=float(p.factor)<1.0
+			draw_rect(r,Color(T.RED if slow else T.GREEN,0.85 if slow else 0.8))
+		# The usual pace, between what slows and what speeds.
+		var centre:=-1.0
+		for item:Dictionary in _rects:
+			if float((item.part as Dictionary).factor)>=1.0:centre=(item.rect as Rect2).position.x-3.0;break
+		if centre<0.0 and not _rects.is_empty():centre=(_rects.back().rect as Rect2).end.x+1.0
+		if centre>=0.0:draw_line(Vector2(centre,-2),Vector2(centre,size.y+2),T.INK,2.0)
+	func _get_tooltip(at:Vector2)->String:
+		for item:Dictionary in _rects:
+			if (item.rect as Rect2).grow(1.0).has_point(at):return String((item.part as Dictionary).tip)
+		return "What speeds (green) and slows (red) the work on every question; the dark mark is the usual pace."
 
 func setup(block:Dictionary)->void:
-	data=block;name="InquiryBoard";add_theme_constant_override("separation",12)
+	data=block;name="InquiryBoard";add_theme_constant_override("separation",8)
 	var plan:=_plan(block)
 	_shape=plan.shape
-	if block.has("pace"):_pace_header(self,plan.pace)
-	else:_plain_heading(self)
-	var learning:=VBoxContainer.new();learning.name="BeingLearned";learning.add_theme_constant_override("separation",6);add_child(learning)
-	var heading:=HBoxContainer.new();learning.add_child(heading)
-	var title:=T.make_label("BEING LEARNED, FIELD BY FIELD",12,T.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
+	if block.has("pace"):_pace_header(self,plan.pace,block.get("pace",{}))
+	if block.has("hands"):_hands(self,block.hands)
+	var learning:=VBoxContainer.new();learning.name="BeingLearned";learning.add_theme_constant_override("separation",0);add_child(learning)
+	_table_head(learning)
 	for lane:Dictionary in plan.lanes:_lane(learning,lane)
 	if (data.get("investigations",[]) as Array).is_empty():_empty(learning)
+	if block.has("artifacts"):_artifact_row(learning,block.artifacts)
 	# A team freed by a proof took up the best question open to it; for a season
 	# the player may send it elsewhere (DiscoverySystem.team_choices). The choice
-	# waits on that question's own card as a badge with a floating picker, so
+	# waits on that question's own line as a badge with a floating picker, so
 	# it never pushes the board down when it arrives or goes.
 	for choice:Dictionary in data.get("choices",[]):
 		var card:Dictionary=_cards.get(String(choice.get("channel","")),{})
-		if not card.is_empty():_choice_badge(card.panel,choice)
+		if not card.is_empty():_choice_badge(card.badges,choice)
 	resized.connect(_arrange);_arrange()
 
-## The live refresh: while the board keeps its shape the header, the lanes
-## and the cards take the day's numbers in place (the arcs ease to the day's
-## evidence); otherwise the board is drawn afresh.
+## The live refresh: while the board keeps its shape the header, the rows and
+## the questions take the day's numbers in place; otherwise it is drawn afresh.
 func update_block(block:Dictionary)->bool:
 	var plan:=_plan(block)
 	if _lanes.is_empty() or plan.shape!=_shape:return false
 	data=block
-	if not _header.is_empty():_fill_header(plan.pace)
+	if not _header.is_empty():_fill_header(plan.pace,block.get("pace",{}))
 	for lane:Dictionary in plan.lanes:
 		var refs:Dictionary=_lanes.get(String(lane.id),{})
 		if refs.is_empty():continue
 		_fill_lane(refs,lane)
 		for slot:Dictionary in lane.slots:
 			var card:Dictionary=_cards.get(String(slot.key),{})
-			if not card.is_empty():_fill_card(card,slot.record,true)
+			if not card.is_empty():_fill_card(card,slot.record)
 	return true
 
 # --------------------------------------------------------------------------
@@ -302,128 +360,6 @@ static func _scholars()->String:
 static func _count(value:float)->String:
 	return preload("res://scripts/hud/production_plain.gd").number(roundf(value))
 
-func _plain_heading(parent:Node)->void:
-	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",8);parent.add_child(heading)
-	var title:=T.make_label("WHAT IS BEING LEARNED",12,T.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
-	_small_button(heading,"Who does the work",data.get("on_work"),"How many people the local leaders set to learning")
-
-func _pace_header(parent:Node,words:Dictionary)->void:
-	var panel:=PanelContainer.new();panel.name="LearningPace";parent.add_child(panel)
-	panel.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.GOLD,1,T.RADIUS_CARD,12))
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);panel.add_child(box)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",8);box.add_child(top)
-	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",2);top.add_child(left)
-	left.add_child(T.make_label("HOW FAST WE LEARN",12,T.GOLD_TEXT))
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);left.add_child(line)
-	var value:=_voice(String(words.value),28);value.name="PaceValue";value.autowrap_mode=TextServer.AUTOWRAP_OFF;value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(value)
-	var said:=T.make_label(String(words.words),13,T.BODY);said.name="PaceWords";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(said)
-	var proofs:=T.make_label(String(words.proofs),13,T.TEXT_SOFT);proofs.name="PaceProofs";left.add_child(proofs)
-	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",4);actions.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;top.add_child(actions)
-	_small_button(actions,"Who does the work",data.get("on_work"),"How many people the local leaders set to learning")
-	# The single biggest limiter, named.
-	var limit:=HBoxContainer.new();limit.name="Limiter";limit.add_theme_constant_override("separation",8);box.add_child(limit)
-	var bar:=ColorRect.new();bar.custom_minimum_size=Vector2(3,0);limit.add_child(bar)
-	var limit_text:=T.make_label("",13,T.INK);limit_text.name="LimiterText";limit_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;limit_text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;limit.add_child(limit_text)
-	# Every input, an icon with its value; its whole account on hover.
-	chip_grid=GridContainer.new();chip_grid.name="Inputs";chip_grid.add_theme_constant_override("h_separation",6);chip_grid.add_theme_constant_override("v_separation",6);box.add_child(chip_grid)
-	for chip:Dictionary in words.chips:_chip(chip_grid,chip)
-	_header={"value":value,"words":said,"proofs":proofs,"bar":bar,"limiter":limit_text}
-	_fill_header(words)
-
-func _fill_header(words:Dictionary)->void:
-	_put(_header.value,String(words.value))
-	_put(_header.words,String(words.words))
-	(_header.words as Label).tooltip_text=String(words.get("tip",""));(_header.words as Label).mouse_filter=Control.MOUSE_FILTER_PASS
-	_put(_header.proofs,String(words.proofs))
-	(_header.proofs as Label).visible=String(words.proofs)!=""
-	var tone:=String(words.limiter_tone)
-	var ink:Color=tone_color(tone) if tone!="plain" else T.INK
-	# The limiter in a few words; its whole account in the pointer.
-	var whole:=String(words.limiter)
-	var short:=whole.get_slice(":",0).get_slice(".",0)
-	_put(_header.limiter,("Held back most by: " if tone!="good" else "")+(short.left(1).to_lower()+short.substr(1) if tone!="good" else short),ink)
-	(_header.limiter as Label).tooltip_text=whole;(_header.limiter as Label).mouse_filter=Control.MOUSE_FILTER_PASS
-	(_header.bar as ColorRect).color=T.RED if tone=="bad" else (T.GREEN if tone=="good" else T.AMBER)
-	for chip:Dictionary in words.chips:
-		var refs:Dictionary=_chips.get(String(chip.kind),{})
-		if not refs.is_empty():_fill_chip(refs,chip)
-
-func _chip(parent:Node,chip:Dictionary)->void:
-	var panel:=PanelContainer.new();panel.name="Input_"+String(chip.kind);panel.custom_minimum_size=Vector2(CHIP_WIDTH,0);panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	panel.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.BORDER_SOFT,1,T.RADIUS_CONTROL,6));parent.add_child(panel)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(row)
-	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(26,26);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;icon.texture=_icon(chip.icon);row.add_child(icon)
-	var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",0);text.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(text)
-	var value:=_fixed(text,"",14,T.INK);value.name="Value"
-	var label:=_fixed(text,"",12,T.TEXT_SOFT);label.name="Label"
-	var refs:={"panel":panel,"value":value,"label":label}
-	_chips[String(chip.kind)]=refs
-	_fill_chip(refs,chip)
-
-func _fill_chip(refs:Dictionary,chip:Dictionary)->void:
-	var tone:=String(chip.get("tone","plain"))
-	_put(refs.value,String(chip.value),T.RED_TEXT if tone=="bad" else (T.TEXT_SOFT if tone=="muted" else T.INK))
-	_put(refs.label,String(chip.label),T.RED_TEXT if tone=="bad" else T.TEXT_SOFT)
-	(refs.panel as Control).tooltip_text=String(chip.tip)
-
-static func _icon(spec:Array)->Texture2D:
-	var ink:=T.GOLD
-	match String(spec[0]):
-		"people":return Icons.people_texture(String(spec[1]),ink)
-		"moment":return Icons.moment_texture(String(spec[1]),ink,56)
-		"domain":return Icons.domain_texture(String(spec[1]),ink)
-	return Icons.texture_for(String(spec[1]))
-
-# --------------------------------------------------------------------------
-# Lanes and cards
-# --------------------------------------------------------------------------
-
-## A field's lane: one line with its glyph, name, attention and waiting lines
-## (with what they lack), then its questions two a row in their places.
-func _lane(parent:Node,lane:Dictionary)->void:
-	var id:=String(lane.id)
-	var accent:=Visuals.color(id) if not id.is_empty() else T.MUTED
-	var box:=VBoxContainer.new();box.name="Lane_"+(id if not id.is_empty() else "other");box.add_theme_constant_override("separation",4);parent.add_child(box)
-	var head:=HBoxContainer.new();head.name="LaneHead";head.add_theme_constant_override("separation",6);box.add_child(head)
-	var rule:=ColorRect.new();rule.color=accent;rule.custom_minimum_size=Vector2(3,22);head.add_child(rule)
-	var glyph:=TextureRect.new();glyph.texture=Icons.domain_texture(id if not id.is_empty() else "knowledge",accent);glyph.custom_minimum_size=Vector2(22,22)
-	glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;glyph.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(glyph)
-	var field:Dictionary=lane.field
-	var title:=T.make_label(String(lane.name).to_upper(),12,T.legible(accent));title.name="FieldLabel";title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(title)
-	var attention:=T.make_label("",12,T.BODY);attention.name="Attention";attention.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(attention)
-	var wait:=_fixed(head,"",12,T.TEXT_SOFT);wait.name="Waiting";wait.size_flags_vertical=Control.SIZE_SHRINK_CENTER;wait.mouse_filter=Control.MOUSE_FILTER_STOP
-	for material:String in lane.lacks:
-		var icon:=TextureRect.new();icon.name="Lacks_"+material.validate_node_name();icon.texture=Icons.texture_for(material);icon.custom_minimum_size=Vector2(20,20)
-		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		icon.tooltip_text="Lacks %s: a question here waits until we find and work it." % material.to_lower();head.add_child(icon)
-	var refs:={"attention":attention,"waiting":wait,"title":title,"less":null}
-	if not field.is_empty():
-		refs.less=_small_button(head,"Less",field.get("on_less"),"Give one step of this field's attention to the others")
-		_small_button(head,"More",field.get("on_more"),"Move one step of attention to this field")
-		_small_button(head,"Open",field.get("on_open"),"What this field is for, what its knowledge does and what is being worked on")
-	_lanes[id]=refs
-	_fill_lane(refs,lane)
-	if (lane.slots as Array).is_empty():return
-	var grid:=GridContainer.new();grid.name="Cards";grid.columns=2;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);box.add_child(grid)
-	lane_grids.append(grid)
-	for slot:Dictionary in lane.slots:_question(grid,slot,accent)
-
-func _fill_lane(refs:Dictionary,lane:Dictionary)->void:
-	var field:Dictionary=lane.field
-	var waiting:=_waiting_words(lane)
-	if field.is_empty():
-		_put(refs.attention,"")
-	else:
-		var share:=float(field.get("share",0.0))
-		_put(refs.attention,"No attention" if share<=0.0 else "%d%% of attention" % maxi(1,roundi(share*100.0)),T.TEXT_SOFT if share<=0.0 else T.BODY)
-		(refs.title as Label).tooltip_text=String(field.get("goal","")).left(1).to_upper()+String(field.get("goal","")).substr(1)
-		(refs.attention as Label).tooltip_text=_field_words(field)
-		(refs.attention as Label).mouse_filter=Control.MOUSE_FILTER_STOP
-		if refs.less!=null:(refs.less as Button).disabled=int(field.get("weight",0))<=0
-	_put(refs.waiting,String(waiting.text),T.AMBER_TEXT if bool(waiting.lacking) else T.TEXT_SOFT)
-	(refs.waiting as Label).tooltip_text=String(waiting.tip)
-
 ## A lane's waiting lines in a few words, and their whole account: "Injury
 ## safety: next question 107 years ahead", "Tool quality lacks stone".
 static func _waiting_words(lane:Dictionary)->Dictionary:
@@ -434,7 +370,7 @@ static func _waiting_words(lane:Dictionary)->Dictionary:
 		var line:=String(info.get("line",""))
 		match String(info.get("kind","")):
 			"turn":parts.append("%s waits for a free team" % line)
-			"ahead":parts.append("%s: next question %d years ahead" % [line,roundi(float(info.get("years",0.0)))])
+			"ahead":parts.append("%s: next question too early" % line)
 			_:
 				var lacks:Array=info.get("lacks",[])
 				if not lacks.is_empty():
@@ -442,61 +378,10 @@ static func _waiting_words(lane:Dictionary)->Dictionary:
 					parts.append("%s lacks %s" % [line," and ".join(PackedStringArray(lacks.map(func(m:Variant)->String:return String(m).to_lower())))])
 				else:parts.append("%s needs earlier knowledge" % line)
 		tips.append("%s: %s" % [line,String(info.get("reason",""))])
-	var text:=" · ".join(parts)
+	# The first waiting line in a few words; every line and its reason on hover.
+	var text:=parts[0]+(" · %d more line%s waiting" % [parts.size()-1,"" if parts.size()==2 else "s"] if parts.size()>1 else "") if not parts.is_empty() else ""
 	if (lane.slots as Array).is_empty() and parts.is_empty():text="Nothing being worked on" if not (lane.field as Dictionary).is_empty() else ""
 	return {"text":text,"tip":"\n".join(tips),"lacking":lacking}
-
-## One card per question, in its line's place: the painting in its progress
-## arc; the question; who works it and its time to proof; what holds it back
-## (or its step); and what it would bring and open. Its whole account on hover;
-## a click opens its field.
-func _question(parent:Node,slot:Dictionary,accent:Color)->void:
-	var record:Dictionary=slot.record
-	var panel:=PanelContainer.new();panel.name="Question_"+String(record.get("id","")).validate_node_name()
-	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.custom_minimum_size=Vector2(0,CARD_HEIGHT)
-	panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND;parent.add_child(panel)
-	var idle:=_card_style();var hover:=_card_style(true)
-	panel.add_theme_stylebox_override("panel",idle)
-	panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",hover))
-	panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",idle))
-	var refs:={"panel":panel,"id":""}
-	panel.gui_input.connect(func(event:InputEvent)->void:
-		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and data.get("on_domain") is Callable:
-			(data.on_domain as Callable).call(String(refs.get("domain","knowledge"))))
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(row)
-	var arc:=Arc.new();arc.custom_minimum_size=Vector2(ARC_SIZE,ARC_SIZE);arc.size_flags_vertical=Control.SIZE_SHRINK_CENTER;arc.accent=accent;row.add_child(arc)
-	var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.add_theme_constant_override("separation",0);text.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(text)
-	var name_label:=_voice("",16);name_label.name="QuestionName";_clip(name_label);text.add_child(name_label)
-	refs.arc=arc;refs.name=name_label
-	refs.line=_fixed(text,"",12,T.BODY);refs.line.name="Team"
-	refs.phase=_fixed(text,"",12,T.AMBER_TEXT);refs.phase.name="Holdup"
-	refs.would=_fixed(text,"",12,T.TEXT_SOFT);refs.would.name="WouldBring"
-	_cards[String(slot.key)]=refs
-	_fill_card(refs,record,false)
-
-func _fill_card(refs:Dictionary,record:Dictionary,animate:bool)->void:
-	var words:=_card_words(record)
-	var id:=String(record.get("id",""))
-	if String(refs.id)!=id:
-		# A new question on the line: its painting (or its field's glyph).
-		refs.id=id
-		var arc:Arc=refs.arc
-		var painting:=Visuals.thumbnail_for(record,256) if has_painting(record) else null
-		var domain:=String(record.get("dynamic",record.get("direction","")))
-		arc.glyph=painting==null
-		arc.focus=Visuals.focus_for(record)
-		arc.texture=painting if painting!=null else Icons.domain_texture(domain if not domain.is_empty() else "knowledge",arc.accent)
-		(refs.panel as Control).name="Question_"+id.validate_node_name()
-		animate=false
-	refs.domain=String(record.get("dynamic",record.get("direction","")))
-	if (refs.domain as String).is_empty():refs.domain="knowledge"
-	(refs.arc as Arc).held=String(words.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE")
-	(refs.arc as Arc).set_value(float(words.progress),animate)
-	_put(refs.name,String(record.get("name","An open question")))
-	_put(refs.line,String(words.brief))
-	_put(refs.phase,String(words.status),T.AMBER_TEXT if String(words.phase)!="" else T.INK)
-	_put(refs.would,String(words.opens))
-	(refs.panel as Control).tooltip_text=String(words.tooltip)
 
 ## A question card's words from its record: its evidence (0..1), who works it
 ## and its time to proof, its step and holdup (a short name and its sentence),
@@ -557,7 +442,7 @@ static func _card_words(record:Dictionary)->Dictionary:
 	if not clock.is_empty():brief+=" · "+clock
 	var gathered:="%s (%d in 100 of the evidence)." % [Words.evidence(progress).left(1).to_upper()+Words.evidence(progress).substr(1),roundi(progress*100.0)]
 	return {"progress":progress,"evidence":evidence,"brief":brief,"step":step,"phase":phase,"why":why,"restated":restated,"status":status,"would":would,"opens":card_opens,
-		"tooltip":String(record.get("name","An open question"))+"\n"+(goal+"\n\n" if not goal.is_empty() else "\n")+evidence+". "+gathered+"\n"+holdup+("\n\n"+founding if not founding.is_empty() else "")+brings+("\n\n"+opens_words+"." if opens>0 else "")+"\n\nClick to review this field, its current investigations and what they would do."}
+		"tooltip":String(record.get("name","An open question"))+"\n"+(goal+"\n\n" if not goal.is_empty() else "\n")+evidence+". "+gathered+"\n"+holdup+("\n\n"+founding if not founding.is_empty() else "")+brings+("\n\n"+opens_words+"." if opens>0 else "")}
 
 ## The price of the furthest lead among the questions under way, once teams
 ## work five years or more ahead of the age: "Our learning runs ahead of its
@@ -568,14 +453,6 @@ static func lead_price(records:Array)->String:
 		if float(record.get("years_ahead",0.0))>=5.0 and (furthest.is_empty() or float(record.years_ahead)>float(furthest.years_ahead)):furthest=record
 	if furthest.is_empty():return ""
 	return "Our learning runs ahead of its age. %s." % Words.lead_price(float(furthest.years_ahead),float(furthest.get("work_factor",1.0)))
-
-func _empty(parent:Node)->void:
-	var panel:=PanelContainer.new();panel.name="NothingUnderWay";parent.add_child(panel)
-	panel.add_theme_stylebox_override("panel",_card_style())
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",6);panel.add_child(box)
-	box.add_child(_serif("The next question is still open",20))
-	_note(box,"Learning needs people to do it, clues to follow and earlier knowledge. Open the discovery tree to choose a question, or ask your leader for more hands on learning.")
-	_small_button(box,"Who does the work",data.get("on_work"),"How many people the local leaders set to learning")
 
 ## One option of a free team's choice in words: its time with the team, how
 ## far ahead of its age, what it would bring and what it opens.
@@ -591,7 +468,7 @@ static func option_words(option:Dictionary)->Dictionary:
 		"opens":("Opens %d more question%s." % [opens,"" if opens==1 else "s"]) if opens>0 else "Opens no further question yet."}
 
 ## The badge on a freed team's card: "Choose ▾" opens the picker beside it.
-func _choice_badge(card:PanelContainer,choice:Dictionary)->void:
+func _choice_badge(card:Control,choice:Dictionary)->void:
 	var badge:=Button.new();badge.name="ChoiceBadge";badge.text="Choose ▾";badge.focus_mode=Control.FOCUS_NONE
 	badge.size_flags_horizontal=Control.SIZE_SHRINK_END;badge.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;badge.custom_minimum_size.y=24
 	badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",T.INK);badge.add_theme_color_override("font_hover_color",T.INK)
@@ -663,26 +540,320 @@ static func _field_words(field:Dictionary)->String:
 	var share_words:="No attention" if float(field.share)<=0.0 else "About %d in 100 of our attention" % maxi(1,roundi(float(field.share)*100))
 	return "%s; %s"%[share_words,"%d question%s being worked on" % [int(field.active),"" if int(field.active)==1 else "s"] if int(field.active)>0 else "nothing being worked on"]
 
+
+# --------------------------------------------------------------------------
+# The figures, and what speeds and slows the work
+# --------------------------------------------------------------------------
+
+## What speeds and slows the work on every question, each part with its size
+## and its whole account: [{kind, label, amount, factor, tip}]. Parts that
+## move the pace less than one in a hundred are left out.
+static func pace_factors(pace:Dictionary)->Array:
+	var parts:Array=[]
+	if float(pace.get("learners",0.0))<=0.0:return parts
+	var words:=pace_words(pace)
+	var tips:Dictionary={}
+	for chip:Dictionary in words.chips:tips[String(chip.kind)]=String(chip.tip)
+	var add:=func(kind:String,label:String,factor:float,tip:String)->void:
+		if absf(log(maxf(0.0001,factor)))<0.01:return
+		parts.append({"kind":kind,"label":label,"factor":factor,"amount":factor_words(factor),"tip":tip})
+	var early:=float(pace.get("work_factor",1.0))
+	if early>1.05:
+		add.call("early","Early questions",1.0/early,"The questions under way belong to a later age than ours: on average each takes %s the usual work (each question's own price is on its line). Nearer questions go faster; fewer learners let the calendar catch up." % _times(early))
+	var goods:=float(pace.get("goods_factor",1.0))
+	if goods<0.995:add.call("goods","Short of goods",goods,tips.get("goods",""))
+	var founding:=float(pace.get("founding",1.0))
+	if founding>1.0001:add.call("young","A young people",1.0/founding,String(pace.get("founding_words","")))
+	var ratio:=float(pace.get("work",0.0))/maxf(0.000001,float(pace.get("typical_work",0.0)))
+	if float(pace.get("typical_work",0.0))>0.0 and ratio<0.95:
+		add.call("few","Few learners",ratio,"%s at learning, where a people our age keeps about %s. More hands on learning would speed every question." % [_count(float(pace.get("learners",0.0))),_count(float(pace.get("typical",0.0)))])
+	var support:=float(pace.get("support",1.0))
+	add.call("support","Fed and taught",support,tips.get("support",""))
+	var offices:=float(pace.get("offices",1.0))
+	add.call("offices","Officials",offices,"The officials over the fields' work, and our aims, set the pace of the questions under way: on average %s the usual." % _times(offices))
+	if bool(pace.get("studying",false)):add.call("artifacts","Artifact study",0.85,tips.get("artifacts",""))
+	var lacking:Array=pace.get("lacking",[])
+	if not lacking.is_empty():
+		add.call("material","Lacking material",1.0-0.25*float(lacking.size())/maxf(1.0,float(pace.get("questions",1))),"%s wait%s on a material we have not found or worked. Survey or work it." % [", ".join(PackedStringArray(lacking)),"s" if lacking.size()==1 else ""])
+	var pay:=float(pace.get("pay",1.0))
+	if pay>1.0001:add.call("pay","Scholars paid",pay,tips.get("pay",""))
+	var lift:=float(pace.get("gifted_lift",0.0))
+	if lift>0.0:add.call("gifted","Gifted scholars",1.0+lift,tips.get("gifted",""))
+	var taught:Array=pace.get("taught",[])
+	if not taught.is_empty():add.call("teachers","Visiting teacher",1.0+0.5*float(taught.size())/maxf(1.0,float(pace.get("questions",1))),tips.get("teachers",""))
+	var craft:=float(pace.get("craft",1.0))
+	if craft>1.0005:add.call("craft","Builders' craft",craft,tips.get("craft","")+" (Building questions only.)")
+	return parts
+
+## "×1.8", "+12%", "÷40", "−15%".
+static func factor_words(factor:float)->String:
+	if factor>=1.0:return ("×%s" % (str(roundi(factor)) if factor>=10.0 else _amount(factor))) if factor>=1.95 else "+%d%%" % roundi((factor-1.0)*100.0)
+	var inverse:=1.0/maxf(0.0001,factor)
+	return ("÷%s" % (str(roundi(inverse)) if inverse>=10.0 else _amount(inverse))) if inverse>=1.95 else "−%d%%" % roundi((1.0-factor)*100.0)
+
+## The strip of figures, the bar of what speeds and slows the work.
+func _pace_header(parent:Node,words:Dictionary,pace:Dictionary)->void:
+	var box:=VBoxContainer.new();box.name="LearningPace";box.add_theme_constant_override("separation",8);parent.add_child(box)
+	var strip:=HBoxContainer.new();strip.name="Figures";strip.add_theme_constant_override("separation",10);box.add_child(strip)
+	_header["pace"]=_figure(strip,"PACE")
+	_header["proofs"]=_figure(strip,"DISCOVERIES")
+	_header["teams"]=_figure(strip,"TEAMS AT WORK")
+	_header["lead"]=_figure(strip,"AHEAD OF THE CALENDAR")
+	var row:=HBoxContainer.new();row.name="Factors";row.add_theme_constant_override("separation",10);box.add_child(row)
+	var caption:=T.make_label("SPEEDS AND SLOWS",11,T.GOLD_TEXT,0.06);caption.custom_minimum_size.x=FIELD_W+30.0;caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
+	var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",4);row.add_child(stack)
+	factor_bar=FactorBar.new();factor_bar.name="FactorBar";factor_bar.custom_minimum_size.y=14;stack.add_child(factor_bar)
+	var legend:=HFlowContainer.new();legend.name="FactorLegend";legend.add_theme_constant_override("h_separation",14);legend.add_theme_constant_override("v_separation",2);stack.add_child(legend)
+	_header["legend"]=legend
+	_fill_header(words,pace)
+
+## A figure of the strip: its name, its value large, a note and, when it
+## has a stated maximum, a bar against it.
+func _figure(parent:Node,title:String)->Dictionary:
+	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.name="Figure_"+title.capitalize().replace(" ","")
+	panel.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.BORDER_SOFT,1,T.RADIUS_CONTROL,8));parent.add_child(panel)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(box)
+	box.add_child(T.make_label(title,11,T.GOLD_TEXT,0.06))
+	var value:=_voice("",24);value.autowrap_mode=TextServer.AUTOWRAP_OFF;value.name="Value";value.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(value)
+	var note:=T.make_label("",12,T.TEXT_SOFT);note.name="Note";note.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(note)
+	var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size=Vector2(0,5);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(T.GOLD));box.add_child(bar)
+	return {"panel":panel,"value":value,"note":note,"bar":bar}
+
+func _set_figure(refs:Dictionary,value:String,note:String,ratio:float,tip:String)->void:
+	_put(refs.value,value);_put(refs.note,note)
+	(refs.bar as ProgressBar).visible=ratio>=0.0
+	(refs.bar as ProgressBar).value=clampf(ratio,0.0,1.0)*100.0
+	(refs.panel as Control).tooltip_text=tip
+
+func _fill_header(words:Dictionary,pace:Dictionary)->void:
+	var learners:=float(pace.get("learners",0.0))
+	var ratio:=float(pace.get("ratio",0.0))
+	_set_figure(_header.pace,String(words.value),"of a typical people our age" if learners>0.0 else "is set to learning",ratio/3.0 if learners>0.0 else 0.0,
+		String(words.get("tip",""))+"\nThe bar runs to three times a typical people.\n\n"+String(_chip_tip(words,"goods")))
+	var proofs:=float(pace.get("proofs",0.0))
+	_set_figure(_header.proofs,"about %s" % _amount(proofs) if proofs>0.0 else "None","a year at this pace" if proofs>0.0 else "near this year",-1.0,
+		"The questions under way, each at its team's pace today, prove about this many a year.")
+	var teams:=int(pace.get("teams",0))
+	var placed:=int(pace.get("teams_at_work",teams))
+	_set_figure(_header.teams,"%d of %d" % [placed,teams],"one question each",float(placed)/maxf(1.0,float(teams)),String(_chip_tip(words,"learners")))
+	var lead:=float(pace.get("lead",0.0))
+	_set_figure(_header.lead,"%s years" % _count(lead) if lead>=0.5 else "Level",_drift_words(pace),-1.0,String(_chip_tip(words,"lead")))
+	var parts:=pace_factors(pace)
+	if factor_bar:factor_bar.set_parts(parts)
+	if _header.has("legend"):_fill_legend(_header.legend,parts)
+
+## The bar's parts by name and size, slowing first: a swatch, the name, the size.
+func _fill_legend(legend:HFlowContainer,parts:Array)->void:
+	var ordered:Array=parts.filter(func(p:Dictionary)->bool:return float(p.factor)<1.0)+parts.filter(func(p:Dictionary)->bool:return float(p.factor)>=1.0)
+	var wanted:Array=ordered.map(func(p:Dictionary)->String:return "%s %s" % [String(p.label),String(p.amount)])
+	var had:Array=legend.get_children().map(func(n:Node)->String:return String(n.get_meta("words","")))
+	if had==wanted:return
+	for child in legend.get_children():legend.remove_child(child);child.queue_free()
+	for k in ordered.size():
+		var p:Dictionary=ordered[k]
+		var slow:=float(p.factor)<1.0
+		var item:=HBoxContainer.new();item.add_theme_constant_override("separation",4);item.set_meta("words",wanted[k]);item.tooltip_text=String(p.tip);item.mouse_filter=Control.MOUSE_FILTER_PASS
+		var swatch:=ColorRect.new();swatch.color=T.RED if slow else T.GREEN;swatch.custom_minimum_size=Vector2(9,9);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(swatch)
+		var name_label:=T.make_label(String(p.label),12,T.BODY);name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(name_label)
+		var amount:=T.make_label(String(p.amount),12,T.RED_TEXT if slow else T.GREEN_TEXT);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(amount)
+		legend.add_child(item)
+
+static func _chip_tip(words:Dictionary,kind:String)->String:
+	for chip:Dictionary in words.get("chips",[]):
+		if String(chip.kind)==kind:return String(chip.tip)
+	return ""
+
+## "gaining 1 a decade", "falling back 2 a decade", "steady".
+static func _drift_words(pace:Dictionary)->String:
+	var rate:=float(pace.get("lead_rate",0.0))*10.0
+	if rate>=0.05:return "gaining %s a decade" % _amount(rate)
+	if rate<=-0.05 and float(pace.get("lead",0.0))>0.0:return "losing %s a decade" % _amount(-rate)
+	return "steady"
+
+## Who sets the learners, and the two orders that change it.
+func _hands(parent:Node,hands:Dictionary)->void:
+	var row:=HBoxContainer.new();row.name="Hands";row.add_theme_constant_override("separation",8);parent.add_child(row)
+	var caption:=T.make_label("LEARNERS",11,T.GOLD_TEXT,0.06);caption.custom_minimum_size.x=FIELD_W+30.0;caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
+	var said:=T.make_label(String(hands.get("words","")),13,T.BODY);said.name="HandsWords";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.custom_minimum_size.x=120
+	said.tooltip_text=String(hands.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(said)
+	var blocked:=bool(hands.get("occupied",false))
+	var more:=_small_button(row,"More hands on learning",null if blocked else hands.get("on_more"),"Not while the place is occupied" if blocked else "Ask the local leader to move some people to learning. It changes who works at learning, not what is found.")
+	more.name="MoreHands"
+	var free:=_small_button(row,"Let the leader decide",null if blocked else hands.get("on_free"),"Not while the place is occupied" if blocked else "Let the local leader share out the work again.")
+	free.name="LeaderDecides"
+
+# --------------------------------------------------------------------------
+# The table: one row per field
+# --------------------------------------------------------------------------
+
+func _table_head(parent:Node)->void:
+	var head:=HBoxContainer.new();head.name="TableHead";head.add_theme_constant_override("separation",8);parent.add_child(head)
+	head.custom_minimum_size.y=22
+	for spec:Array in [["FIELD",FIELD_W+38.0],["ATTENTION",_attention_width()],["UNDER WAY",0.0],["EVIDENCE",BAR_W],["TO PROOF",TIME_W]]:
+		var label:=T.make_label(String(spec[0]),11,T.GOLD_TEXT,0.06);label.size_flags_vertical=Control.SIZE_SHRINK_END
+		if float(spec[1])>0.0:label.custom_minimum_size.x=float(spec[1])
+		else:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		if String(spec[0])=="TO PROOF":label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		head.add_child(label)
+	var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;parent.add_child(rule)
+
+static func _attention_width()->float:
+	return SHARE_W+4.0+34.0+4.0+28.0+4.0+28.0
+
+## A field's row: its mark, name, attention with − and +, then its first
+## question; its further questions on lines of their own beneath.
+func _lane(parent:Node,lane:Dictionary)->void:
+	var id:=String(lane.id)
+	var accent:=Visuals.color(id) if not id.is_empty() else T.MUTED
+	var box:=VBoxContainer.new();box.name="Lane_"+(id if not id.is_empty() else "other");box.add_theme_constant_override("separation",0);parent.add_child(box)
+	var head:=_line_box(box,"LaneHead")
+	var lead:=HBoxContainer.new();lead.add_theme_constant_override("separation",6);lead.custom_minimum_size.x=FIELD_W+38.0;lead.mouse_filter=Control.MOUSE_FILTER_IGNORE;head.add_child(lead)
+	var rule:=ColorRect.new();rule.color=accent;rule.custom_minimum_size=Vector2(3,20);rule.size_flags_vertical=Control.SIZE_SHRINK_CENTER;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;lead.add_child(rule)
+	var glyph:=TextureRect.new();glyph.texture=Icons.domain_texture(id if not id.is_empty() else "knowledge",accent);glyph.custom_minimum_size=Vector2(20,20);glyph.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;glyph.size_flags_vertical=Control.SIZE_SHRINK_CENTER;lead.add_child(glyph)
+	var title:=T.make_label(String(lane.name),13,T.INK);title.name="FieldLabel";title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;title.mouse_filter=Control.MOUSE_FILTER_PASS;lead.add_child(title)
+	var field:Dictionary=lane.field
+	var attention:=HBoxContainer.new();attention.name="AttentionCell";attention.add_theme_constant_override("separation",4);attention.custom_minimum_size.x=_attention_width();head.add_child(attention)
+	var refs:={"title":title,"less":null,"share":null,"attention":null,"waiting":null}
+	if not field.is_empty():
+		var share:=ProgressBar.new();share.name="Share";share.show_percentage=false;share.custom_minimum_size=Vector2(SHARE_W,7);share.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		share.add_theme_stylebox_override("background",T.flat(T.TRACK));share.add_theme_stylebox_override("fill",T.flat(accent));share.mouse_filter=Control.MOUSE_FILTER_PASS;attention.add_child(share)
+		var pct:=T.make_label("",12,T.BODY);pct.name="Attention";pct.custom_minimum_size.x=34;pct.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;pct.size_flags_vertical=Control.SIZE_SHRINK_CENTER;pct.mouse_filter=Control.MOUSE_FILTER_PASS;attention.add_child(pct)
+		refs.share=share;refs.attention=pct
+		refs.less=_step_button(attention,"−",field.get("on_less"),"Give one step of this field's attention to the others")
+		_step_button(attention,"+",field.get("on_more"),"Move one step of attention to this field")
+	_lanes[id]=refs
+	var slots:Array=lane.slots
+	if slots.is_empty():
+		var wait:=_wrapping(head,12,T.TEXT_SOFT);wait.name="Waiting";wait.mouse_filter=Control.MOUSE_FILTER_STOP
+		refs.waiting=wait
+	else:
+		_question(head,slots[0],accent)
+		for index in range(1,slots.size()):
+			var more:=_line_box(box,"More")
+			var pad:=Control.new();pad.custom_minimum_size.x=FIELD_W+38.0+8.0+_attention_width();pad.mouse_filter=Control.MOUSE_FILTER_IGNORE;more.add_child(pad)
+			_question(more,slots[index],accent)
+	_fill_lane(refs,lane)
+
+## A line of the table: one row tall, a hairline beneath.
+func _line_box(parent:Node,line_name:String)->HBoxContainer:
+	var line:=HBoxContainer.new();line.name=line_name;line.add_theme_constant_override("separation",8);line.custom_minimum_size.y=CARD_HEIGHT;parent.add_child(line)
+	return line
+
+## The game's one small verb button (dense_blocks.gd), here − or +.
+func _step_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
+	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	button.custom_minimum_size=Vector2(22,22);button.add_theme_font_size_override("font_size",14);parent.add_child(button)
+	return button
+
+func _fill_lane(refs:Dictionary,lane:Dictionary)->void:
+	var field:Dictionary=lane.field
+	if not field.is_empty():
+		var share:=float(field.get("share",0.0))
+		(refs.share as ProgressBar).value=clampf(share,0.0,1.0)*100.0
+		_put(refs.attention,"none" if share<=0.0 else "%d%%" % maxi(1,roundi(share*100.0)),T.TEXT_SOFT if share<=0.0 else T.BODY)
+		var goal:=String(field.get("goal",""))
+		(refs.title as Label).tooltip_text=goal.left(1).to_upper()+goal.substr(1)
+		var tip:=_field_words(field)
+		(refs.attention as Label).tooltip_text=tip;(refs.share as Control).tooltip_text=tip
+		if refs.less!=null:(refs.less as Button).disabled=int(field.get("weight",0))<=0
+	if refs.waiting!=null:
+		var waiting:=_waiting_words(lane)
+		_put(refs.waiting,String(waiting.text),T.AMBER_TEXT if bool(waiting.lacking) else T.TEXT_SOFT)
+		(refs.waiting as Label).tooltip_text=String(waiting.tip)
+
+## A question's cells: its name, what holds it back (when something does),
+## what it would bring (on a wide board), its evidence as a bar and its time
+## to proof. Its whole account is on hover.
+func _question(parent:Node,slot:Dictionary,accent:Color)->void:
+	var record:Dictionary=slot.record
+	var cell:=HBoxContainer.new();cell.name="Question_"+String(record.get("id","")).validate_node_name();cell.add_theme_constant_override("separation",8)
+	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.custom_minimum_size.y=CARD_HEIGHT;cell.mouse_filter=Control.MOUSE_FILTER_STOP;parent.add_child(cell)
+	var refs:={"panel":cell,"id":""}
+	# A long name wraps to a second line rather than being cut.
+	refs.name=_wrapping(cell,13,T.INK);refs.name.name="QuestionName"
+	refs.phase=T.make_label("",12,T.AMBER_TEXT);refs.phase.name="Holdup";refs.phase.size_flags_vertical=Control.SIZE_SHRINK_CENTER;refs.phase.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(refs.phase)
+	refs.would=T.make_label("",12,T.TEXT_SOFT);refs.would.name="WouldBring";refs.would.size_flags_vertical=Control.SIZE_SHRINK_CENTER;refs.would.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(refs.would)
+	_brings.append(refs.would)
+	var bar:=ProgressBar.new();bar.name="Evidence";bar.show_percentage=false;bar.custom_minimum_size=Vector2(BAR_W,8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(accent));cell.add_child(bar)
+	refs.bar=bar
+	refs.time=T.make_label("",12,T.BODY);refs.time.name="TimeLeft";refs.time.custom_minimum_size.x=TIME_W;refs.time.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;refs.time.size_flags_vertical=Control.SIZE_SHRINK_CENTER;refs.time.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(refs.time)
+	var badges:=HBoxContainer.new();badges.name="Badges";badges.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(badges)
+	refs.badges=badges
+	_cards[String(slot.key)]=refs
+	_fill_card(refs,record)
+
+func _fill_card(refs:Dictionary,record:Dictionary)->void:
+	var words:=_card_words(record)
+	var id:=String(record.get("id",""))
+	if String(refs.id)!=id:
+		refs.id=id
+		(refs.panel as Control).name="Question_"+id.validate_node_name()
+	_put(refs.name,String(record.get("name","An open question")))
+	# What holds it back, in its short name; being early for our age is its price, told on hover.
+	var held:=String(words.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE")
+	_put(refs.phase,String(words.phase) if held else "")
+	(refs.phase as Label).visible=held
+	var effects:Dictionary=record.get("effects",{})
+	# Its largest effect in a word or two; every effect is in its account on hover.
+	_put(refs.would,("Would bring: %s" % Explainer.summary(effects,1).get_slice(" and ",0)) if not effects.is_empty() else "")
+	(refs.bar as ProgressBar).value=float(words.progress)*100.0
+	var days:=float(record.get("estimated_days",0.0))
+	var clock:=Words.Plain.span_text(days) if days>0.0 and is_finite(days) and days<=365.0*150.0 else ("—" if days<=0.0 else "no end in sight")
+	_put(refs.time,clock,T.BODY if days>0.0 else T.TEXT_SOFT)
+	(refs.panel as Control).tooltip_text=String(words.tooltip)
+	_show_brings()
+
+func _empty(parent:Node)->void:
+	var line:=_line_box(parent,"NothingUnderWay")
+	var label:=T.make_label("No question is under way: the people need clues and earlier knowledge first.",13,T.TEXT_SOFT);label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(label)
+
+## Artifact study: the same row as a field, its share of the learners' time
+## with − and +, and the collection's count.
+func _artifact_row(parent:Node,study:Dictionary)->void:
+	var box:=VBoxContainer.new();box.name="Lane_artifacts";parent.add_child(box)
+	var head:=_line_box(box,"LaneHead")
+	var lead:=HBoxContainer.new();lead.add_theme_constant_override("separation",6);lead.custom_minimum_size.x=FIELD_W+38.0;head.add_child(lead)
+	var rule:=ColorRect.new();rule.color=Color("b98a5e");rule.custom_minimum_size=Vector2(3,20);rule.size_flags_vertical=Control.SIZE_SHRINK_CENTER;lead.add_child(rule)
+	var glyph:=TextureRect.new();glyph.texture=Icons.domain_texture("culture",Color("b98a5e"));glyph.custom_minimum_size=Vector2(20,20)
+	glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;glyph.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;glyph.size_flags_vertical=Control.SIZE_SHRINK_CENTER;lead.add_child(glyph)
+	var title:=T.make_label("Artifact study",13,T.INK);title.name="FieldLabel";title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;lead.add_child(title)
+	var attention:=HBoxContainer.new();attention.add_theme_constant_override("separation",4);attention.custom_minimum_size.x=_attention_width();head.add_child(attention)
+	var share:=ProgressBar.new();share.show_percentage=false;share.custom_minimum_size=Vector2(SHARE_W,7);share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;share.value=clampf(float(study.get("share",0.0)),0.0,1.0)*100.0
+	share.add_theme_stylebox_override("background",T.flat(T.TRACK));share.add_theme_stylebox_override("fill",T.flat(Color("b98a5e")));attention.add_child(share)
+	var pct:=T.make_label("%d%%" % roundi(float(study.get("share",0.0))*100.0),12,T.BODY);pct.custom_minimum_size.x=34;pct.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;pct.size_flags_vertical=Control.SIZE_SHRINK_CENTER;attention.add_child(pct)
+	pct.tooltip_text=String(study.get("tip",""));pct.mouse_filter=Control.MOUSE_FILTER_PASS
+	var less:=_step_button(attention,"−",study.get("on_less"),"Give one step of the study's attention to the fields");less.disabled=less.disabled or int(study.get("weight",0))<=0
+	_step_button(attention,"+",study.get("on_more"),"Move one step of attention to artifact study")
+	var said:=T.make_label(String(study.get("words","")),12,T.BODY);said.name="ArtifactWords";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	said.tooltip_text=String(study.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;head.add_child(said)
+
 # --------------------------------------------------------------------------
 # Small pieces
 # --------------------------------------------------------------------------
 
-func _card_style(hover:bool=false)->StyleBoxFlat:
-	return T.flat(T.HOVER_BG if hover else T.ROW_BG,T.GOLD if hover else T.BORDER_SOFT,1,T.RADIUS_CARD,8)
 ## A one-line label whose words never change its size: too long, it ends in "…".
 func _fixed(parent:Node,value:String,font:int,ink:Color)->Label:
 	var label:=T.make_label(value,font,ink);_clip(label);parent.add_child(label);return label
+func _wrapping(parent:Node,font:int,ink:Color)->Label:
+	var label:=T.make_label("",font,ink);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.custom_minimum_size.x=60;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;parent.add_child(label);return label
 static func _clip(label:Label)->void:
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.custom_minimum_size.x=1;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.custom_minimum_size.x=1;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 func _small_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
-	var button:=_button(parent,label,callback,tip)
-	button.custom_minimum_size.y=24;button.add_theme_font_size_override("font_size",12);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	parent.add_child(button)
 	return button
+func _show_brings()->void:
+	var wide:=size.x>=BRINGS_AT
+	for label:Label in _brings:
+		if is_instance_valid(label):label.visible=wide and label.text!=""
 func _arrange()->void:
 	var wide:=size.x>=WIDE
 	for grid:GridContainer in choice_grids:
 		if is_instance_valid(grid):grid.columns=3 if wide else 1
-	for grid:GridContainer in lane_grids:
-		if is_instance_valid(grid):grid.columns=2 if size.x>=TWO_CARDS else 1
-	if chip_grid:chip_grid.columns=clampi(floori((size.x-24.0+6.0)/(CHIP_WIDTH+6.0)),1,maxi(1,chip_grid.get_child_count()))
+	_show_brings()

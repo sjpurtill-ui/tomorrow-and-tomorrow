@@ -45,7 +45,7 @@ const CATEGORIES:Array[Dictionary]=[
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
 	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
 	{"id":"world","label":"World","pages":["world","standing","eyes"],"tabs":{"world":["Peoples","Expeditions","History"],"standing":["Standing"],"eyes":["Spies"]},"tooltip":"The world your scouts have walked, who lives in it, how they see us and what our eyes report · F6"},
-	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tabs":{"chronicle":["The years","Our town","Births and deaths","What was built"]},"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
+	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tabs":{"chronicle":["The years","Births and deaths","What was built"]},"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 ]
 ## The category a page belongs to ({} for none).
 static func category_of(section:String)->Dictionary:
