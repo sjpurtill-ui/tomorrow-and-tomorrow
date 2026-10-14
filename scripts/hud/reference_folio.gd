@@ -17,13 +17,16 @@ const NOTICE_ROOM:=340.0+T.EDGE_MARGIN+14.0
 ## From this canvas width (1600 px at 125%) the page takes the window up to
 ## the notice column; narrower, it keeps its old share.
 const WIDE_FROM:=1280.0
+## Reading distance should not grow with an ultrawide monitor. Extra room
+## belongs to the living map; internal page layouts use compact task groups.
+const MAX_PAGE_WIDTH:=1120.0
 
-## The page's width for a canvas `view_width` wide: 1600 px at 125% (1280)
-## gives 838, 2000 px (1600) gives 1158, 2560 px (2048) gives 1606.
+## A 1280 px canvas gives 838 px; larger canvases stop at 1120 px so
+## related information remains within one comfortable reading area.
 static func page_width(view_width:float)->float:
 	var share:=minf(maxf(320.0,view_width*0.567),view_width-RAIL_WIDTH)
 	if view_width<WIDE_FROM:return share
-	return maxf(share,view_width-RAIL_WIDTH-NOTICE_ROOM)
+	return minf(MAX_PAGE_WIDTH,maxf(share,view_width-RAIL_WIDTH-NOTICE_ROOM))
 
 static func paper()->ColorRect:
 	var surface:=ColorRect.new();surface.name="FolioPaper"

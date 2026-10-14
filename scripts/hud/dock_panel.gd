@@ -357,7 +357,7 @@ func _clear_body()->void:
 func _kpi_columns()->void:
 	if kpi_row==null:return
 	var count:=kpi_row.get_child_count()
-	kpi_row.columns=2 if size.x<600 else (count if count>=1 and count<=6 else 4)
+	kpi_row.columns=mini(maxi(1,count),clampi(floori((size.x-40.0)/220.0),1,4))
 
 
 ## The tiles under the tabs: {label, value, delta, tip, and optionally
@@ -386,24 +386,33 @@ func _rebuild_kpis(kpis:Array)->void:
 		column.add_theme_constant_override("separation",4)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(column)
-		var caption:=Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06)
-		caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(caption)
-		var value_row:=VBoxContainer.new()
-		value_row.add_theme_constant_override("separation",6)
+		var value_row:=HBoxContainer.new()
+		value_row.add_theme_constant_override("separation",8)
 		column.add_child(value_row)
-		var value_label:=Tokens.make_label(String(kpi.get("value","")),28,Tokens.INK)
+		var value_text:=String(kpi.get("value",""))
+		var numeric:=value_text.length()<=12 and not value_text.is_empty() and value_text.left(1) in ["0","1","2","3","4","5","6","7","8","9","+","-","−"]
+		var value_label:=Tokens.make_label(value_text,24 if numeric else 16,Tokens.INK)
 		value_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		value_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value_label.add_theme_font_override("font",Tokens.font("ui_strong"))
-		if glance:
-			value_label.add_theme_font_override("font",Tokens.font("ui_strong"));value_label.add_theme_font_size_override("font_size",28)
+		if numeric:
+			value_label.custom_minimum_size.x=minf(144.0,maxf(28.0,value_label.get_theme_font("font").get_string_size(value_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,24).x))
+			value_label.minimum_size_changed.connect(func()->void:
+				var width:=minf(144.0,maxf(28.0,value_label.get_theme_font("font").get_string_size(value_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,24).x))
+				if not is_equal_approx(value_label.custom_minimum_size.x,width):value_label.custom_minimum_size.x=width)
+		else:value_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value_row.add_child(value_label)
+		var caption:=Tokens.make_label(Tokens.sentence_case(String(kpi.get("label",""))),14,Tokens.MUTED)
+		if numeric:caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		else:caption.custom_minimum_size.x=72
+		caption.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+		caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;value_row.add_child(caption)
+		if not numeric:value_row.move_child(caption,0)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="" and not glance:
 			var delta:=Tokens.make_label(String(kpi.delta),14,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
 			delta.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
-			value_row.add_child(delta)
+			column.add_child(delta)
 			preload("res://scripts/hud/live_value_binding.gd").attach(delta,"text",kpi.get("live_delta"))
 		if kpi.has("meter"):
 			var meter:=ProgressBar.new();meter.name="KpiMeter";meter.show_percentage=false;meter.min_value=0.0;meter.max_value=1.0
