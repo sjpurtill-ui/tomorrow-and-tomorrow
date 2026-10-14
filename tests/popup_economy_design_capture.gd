@@ -69,6 +69,10 @@ func _run()->void:
 		for index in 13:
 			var values:={"private_currency":11000.0+index*300.0,"hoards":1700.0+index*50.0,"aid":240.0+index*20.0}
 			preload("res://scripts/strategic_history.gd").record(GameState.strategic_history,int(GameState.elapsed_days)-360+index*30,{scope:values})
+	if _arg("towns","")=="filled":
+		var purse:=preload("res://scripts/realm_purse.gd").state();var towns:={}
+		for index in 13:towns["Town %02d" % (index+1)]={"levy":float(index+1)*10.0,"evaded":1.0,"people":300.0,"days":30.0}
+		purse.months=[{"days":30.0,"towns":towns}]
 	var output:=_arg("out",OS.get_user_data_dir())
 	var tag:=_arg("tag","capture")
 	var terrain:=CaptureTerrain.new();add_child(terrain)
@@ -120,11 +124,28 @@ func _run()->void:
 					(dock.find_child("WhereItComesFrom",true,false) as Button).pressed.emit();await _settle()
 					await _capture(viewport,output,"economy-%s-material-places-%s-%d" % [tag,palette,canvas.x])
 					provider.selected_material="";provider.abundant_materials=false;provider.material_browse_state.clear()
+				if page[1]=="wealth":
+					var buy:=dock.find_child("BuyingPower",true,false) as Button
+					if buy!=null:
+						buy.pressed.emit();dock.body_scroll.ensure_control_visible(buy);await _settle()
+						await _capture(viewport,output,"economy-%s-wealth-buying-%s-%d" % [tag,palette,canvas.x])
+					var towns:=dock.find_child("TownContributions",true,false) as Button
+					if towns!=null:
+						towns.pressed.emit();dock.body_scroll.scroll_vertical=0;await _settle()
+						var contributions:Control=dock.find_child("PurseBoard",true,false).sources_box
+						dock.body_scroll.scroll_vertical+=int(contributions.global_position.y-dock.body_scroll.global_position.y);await _settle()
+						await _capture(viewport,output,"economy-%s-wealth-towns-%s-%d" % [tag,palette,canvas.x])
+						(dock.find_child("NextContributingTowns",true,false) as Button).pressed.emit();await _settle()
+						await _capture(viewport,output,"economy-%s-wealth-towns-next-%s-%d" % [tag,palette,canvas.x])
+						(dock.find_child("TownContributions",true,false) as Button).pressed.emit()
 				if page[1]=="wealth" and _arg("state","opening")=="coin":
 					provider.selected_account="private_currency";dock.present(provider,2);await _settle()
 					var ledger:=dock.find_child("WealthLedger",true,false) as Control
 					dock.body_scroll.scroll_vertical+=int(ledger.global_position.y-dock.body_scroll.global_position.y);await _settle()
 					await _capture(viewport,output,"economy-%s-wealth-accounts-%s-%d" % [tag,palette,canvas.x])
+					var work:=dock.find_child("ShowWorkConditions",true,false) as Button
+					work.pressed.emit();await _settle();dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-wealth-work-%s-%d" % [tag,palette,canvas.x])
 					for button:Button in dock.find_children("*","Button",true,false):
 						if button.text=="Past balances":button.pressed.emit();break
 					if hud.detail_provider!=null:

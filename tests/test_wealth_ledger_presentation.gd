@@ -26,7 +26,8 @@ func test_daily_refresh_keeps_controls_and_updates_real_measurements()->void:
 	assert_bool(ledger.update_block(changed)).is_true()
 	assert_array(ledger.find_children("*","",true,false)).contains_exactly(before)
 	assert_float(float(dial.get_meta("measure"))).is_equal(1.3)
-	assert_str(_texts(ledger)).contains("Health  95%").contains("Common purse: 150").contains("130%")
+	assert_str(_texts(ledger)).contains("Health  95%").contains("150 coins held now").contains("130%")
+	assert_str(ledger._refs.accounts[0].choice.text).is_equal("Common purse: 150")
 	assert_array(ledger._refs.accounts[0].spark.points).contains_exactly(changed.accounts[0].points)
 
 func test_missing_measurements_do_not_invent_health_or_a_trend()->void:
@@ -57,7 +58,21 @@ func test_account_actions_and_open_detail_use_actual_balance()->void:
 	var ledger=auto_free(Ledger.new());ledger.setup(block)
 	assert_str(_texts(ledger)).contains("123 coins held now").contains("Common purse: 100 in every 100")
 	for child in ledger.find_children("*","Button",true,false):
-		if (child as Button).text=="Hide":(child as Button).pressed.emit()
+		if child.name=="Account_public":(child as Button).pressed.emit()
 	assert_array(calls).contains_exactly(["public"])
 	var changed:=block.duplicate();changed.stage="weighed_metal"
 	assert_bool(ledger.update_block(changed)).is_false()
+
+func test_account_selection_and_work_disclosure_preserve_live_nodes()->void:
+	var block:=_block();block.accounts.append({"key":"aid","name":"Mutual aid","balance":50.0,"points":[]})
+	var ledger=auto_free(Ledger.new());ledger.setup(block)
+	var before:Array=ledger.find_children("*","",true,false)
+	(ledger.find_child("ShowWorkConditions",true,false) as Button).pressed.emit()
+	assert_bool(ledger._work_details.visible).is_true()
+	block.selected="aid";block.accounts[1].balance=65.0
+	assert_bool(ledger.update_block(block)).is_true()
+	assert_array(ledger.find_children("*","",true,false)).contains_exactly(before)
+	assert_bool(ledger._refs.accounts[0].detail.visible).is_false()
+	assert_bool(ledger._refs.accounts[1].detail.visible).is_true()
+	assert_bool(ledger._work_details.visible).is_true()
+	assert_str(ledger._refs.accounts[1].choice.text).is_equal("Mutual aid: 65")

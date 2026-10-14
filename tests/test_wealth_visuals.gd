@@ -67,3 +67,21 @@ func test_scroll_width_reflows_the_columns_and_the_strip()->void:
 	assert_int(columns.columns).is_equal(2)
 	scroll.size.x=420;board._responsive()
 	assert_int(columns.columns).is_equal(1)
+
+func test_town_contributions_are_bounded_searchable_and_keep_exact_levies()->void:
+	var purse:=preload("res://scripts/realm_purse.gd").state()
+	var towns:={}
+	for index in 13:towns["Town %02d" % (index+1)]={"levy":float(index+1)*10.0,"evaded":1.0,"people":300.0,"days":30.0}
+	purse.months=[{"days":30.0,"towns":towns}]
+	var board:=_board()
+	assert_int(board.sources_box.find_children("Row_*","PanelContainer",true,false).size()).is_equal(0)
+	(board.find_child("TownContributions",true,false) as Button).pressed.emit()
+	assert_int(board.sources_box.find_children("Row_*","PanelContainer",true,false).size()).is_equal(8)
+	(board.find_child("NextContributingTowns",true,false) as Button).pressed.emit()
+	assert_int(board.sources_box.find_children("Row_*","PanelContainer",true,false).size()).is_equal(5)
+	var search:=board.find_child("FindContributingTown",true,false) as LineEdit
+	search.text_changed.emit("Town 13")
+	var rows:Array=board.sources_box.find_children("Row_*","PanelContainer",true,false)
+	assert_int(rows.size()).is_equal(1)
+	assert_str(rows[0].name).contains("Town 13")
+	assert_str((rows[0].get_meta("econ_row") as Dictionary).value.text).is_equal("395 a season")
