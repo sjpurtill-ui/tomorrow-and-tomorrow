@@ -8,7 +8,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_H:=23.0
+const ROW_H:=22.0
 
 ## A raised paper sheet; returns its inner column.
 static func sheet(parent:Node,node_name:String,pad:float=12.0)->VBoxContainer:

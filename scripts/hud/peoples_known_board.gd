@@ -41,6 +41,11 @@ var on_town:Callable
 ## A word with a people's ruler (the court), from the Talk button on its row.
 var on_speak:Callable
 var counter:=""
+## Every people's feelings toward us (dock_content_standing.gd board_data peoples).
+var side:Array=[]
+var side_wide:=false
+const SIDE_W:=250.0
+const SIDE_AT:=800.0
 var counter_tip:=""
 ## Each column's nodes, to let them give way on a narrow page.
 var parts:Dictionary={}
@@ -79,6 +84,8 @@ func _take(block:Dictionary)->void:
 	on_town=block.get("on_town",Callable())
 	on_speak=block.get("on_speak",Callable())
 	counter=String(block.get("counter",""));counter_tip=String(block.get("counter_tip",""))
+	var given_side:Variant=block.get("side",[])
+	side=given_side if given_side is Array else []
 
 ## Sorts by a column; the same column again sorts the other way round.
 func sort_by(column:String)->void:
@@ -128,7 +135,19 @@ func _build()->void:
 		add_child(line)
 	var fit:=ScrollContainer.new();fit.name="Fit"
 	fit.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;fit.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	fit.add_theme_stylebox_override("panel",StyleBoxEmpty.new());add_child(fit)
+	fit.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
+	# How each people sees us (standing.gd): beside the ledger on a wide page,
+	# under it on a narrow one.
+	if side.is_empty():add_child(fit)
+	elif side_wide:
+		var pair:=HBoxContainer.new();pair.name="LedgerAndFeelings";pair.add_theme_constant_override("separation",14);add_child(pair)
+		fit.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pair.add_child(fit)
+		var column:=preload("res://scripts/hud/world_ui.gd").sheet(pair,"Feelings")
+		column.get_parent().custom_minimum_size.x=SIDE_W;column.get_parent().size_flags_horizontal=Control.SIZE_SHRINK_END
+		preload("res://scripts/hud/standing_board.gd").feelings(column,side,Callable(),false)
+	else:
+		add_child(fit)
+		preload("res://scripts/hud/standing_board.gd").feelings(preload("res://scripts/hud/world_ui.gd").sheet(self,"Feelings"),side,Callable(),false)
 	var sheet:=PanelContainer.new();sheet.name="PeoplesSheet";sheet.add_theme_stylebox_override("panel",sheet_style())
 	sheet.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fit.add_child(sheet)
 	var stack:=VBoxContainer.new();stack.name="Ledger";stack.add_theme_constant_override("separation",6);sheet.add_child(stack)
@@ -490,7 +509,12 @@ func _part(column:String,node:Control)->void:
 ## never runs past its paper.
 func _layout()->void:
 	if size.x<=0.0:return
-	var room:=size.x-PAD*2.0-2.0
+	var wide:=not side.is_empty() and size.x>=SIDE_AT
+	if wide!=side_wide:
+		side_wide=wide
+		_build.call_deferred()
+		return
+	var room:=size.x-PAD*2.0-2.0-((SIDE_W+14.0) if side_wide else 0.0)
 	var need:=float(NAME_MIN)
 	for id:String in WIDTHS:need+=float(WIDTHS[id])+GAP
 	var giving:Array=[]

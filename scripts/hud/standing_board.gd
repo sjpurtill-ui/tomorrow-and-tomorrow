@@ -40,7 +40,7 @@ class Rose extends Control:
 	var others:Array=[]
 	var highlight:=-1
 	func _init()->void:
-		custom_minimum_size=Vector2(196,196)
+		custom_minimum_size=Vector2(184,184)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		mouse_exited.connect(func()->void: set_highlight(-1))
@@ -490,46 +490,64 @@ func _fill_dangers()->void:
 
 # -------------------------------------------------------------- the peoples
 
-## How each people we know sees us: one row each, six feelings as bars.
+## How each people we know sees us: six pips each (allure, awe, fear,
+## respect, trust, resentment, filled to the feeling), two peoples a line.
 func _fill_peoples()->void:
 	UI.clear(peoples)
 	var list:Array=data.get("peoples",[])
-	UI.heading(peoples,"How the peoples we know see us")
 	if list.is_empty():
+		UI.heading(peoples,"How the peoples we know see us")
 		var row:=UI.line(peoples,8);row.name="NoPeoples"
 		UI.label(row,"No other people has met us yet",12,T.INK_MUTED,false,true)
 		var scouts:Variant=data.get("on_scouts")
 		if scouts is Callable:UI.verb(row,"Send scouts",scouts as Callable,"Send scouts to find the peoples around us",true)
 		return
-	var head:=UI.line(peoples,6)
-	var first:=UI.label(head,"",12,T.INK_MUTED,true,true);first.custom_minimum_size.x=110
+	feelings(peoples,list,data.get("on_court"),true)
+
+## The feelings of every people we know toward us, drawn small (also on
+## World › Peoples beside the ledger). Each people: emblem, name, danger
+## tags, six pips and, where given, a Talk.
+static func feelings(parent:VBoxContainer,list:Array,on_court:Variant,with_talk:bool)->void:
+	var head:=UI.heading(parent,"How they see us")
+	var legend:=HBoxContainer.new();legend.add_theme_constant_override("separation",4);head.add_child(legend)
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
-		var title:=UI.cell(head,String(view.name).replace("Resentment","Resent"),62,12,T.INK_MUTED,true)
-		title.tooltip_text=String(view.means)
-	UI.cell(head,"",46,12,T.INK_MUTED)
-	var on_court:Variant=data.get("on_court")
+		var dot:=Pip.new();dot.value=1.0;dot.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")));dot.custom_minimum_size=Vector2(9,9);legend.add_child(dot)
+		dot.tooltip_text=String(view.means);dot.mouse_filter=Control.MOUSE_FILTER_PASS
+		UI.label(legend,String(view.name).replace("Resentment","resent").to_lower(),11,T.INK_MUTED).tooltip_text=String(view.means)
+	var flow:=HFlowContainer.new();flow.name="Feelings";flow.add_theme_constant_override("h_separation",18);flow.add_theme_constant_override("v_separation",2)
+	parent.add_child(flow)
 	for p:Dictionary in list:
-		var row:=UI.hot_row(peoples,"People_"+String(p.civ_id),Callable(),_people_tip(p))
-		var name_cell:=HBoxContainer.new();name_cell.add_theme_constant_override("separation",5);name_cell.custom_minimum_size.x=110;name_cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(name_cell)
-		var emblem:=TextureRect.new();emblem.texture=p.get("emblem") as Texture2D;emblem.custom_minimum_size=Vector2(18,18)
+		var row:=HBoxContainer.new();row.name="People_"+String(p.civ_id);row.add_theme_constant_override("separation",5)
+		row.custom_minimum_size.y=UI.ROW_H;row.tooltip_text=_people_tip(p);row.mouse_filter=Control.MOUSE_FILTER_PASS
+		flow.add_child(row)
+		var emblem:=TextureRect.new();emblem.texture=p.get("emblem") as Texture2D;emblem.custom_minimum_size=Vector2(16,16)
 		emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		emblem.mouse_filter=Control.MOUSE_FILTER_PASS;name_cell.add_child(emblem)
-		UI.label(name_cell,String(p.name),13,T.INK,true,true)
+		emblem.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(emblem)
+		var who:=UI.label(row,String(p.name),13,T.INK,true);who.custom_minimum_size.x=78
+		for view:Dictionary in p.get("views",[]):
+			var pip:=Pip.new();pip.value=float(view.value);pip.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")))
+			pip.tooltip_text="%s %d%%: %s.
+Why: %s." % [String(view.name),roundi(float(view.value)*100.0),String(view.means),String(view.why)]
+			row.add_child(pip)
 		for pair:Array in [["envy","envy",Standing.ENVY_RAID_FLOOR],["contempt","scorn",Standing.CONTEMPT_FLOOR]]:
 			if float(p.get(String(pair[0]),0.0))>float(pair[2]):
-				UI.tag(name_cell,String(pair[1]),"danger").tooltip_text="%s %d%%: %s" % [String(pair[0]).capitalize(),roundi(float(p.get(String(pair[0]),0.0))*100.0),String(p.get(String(pair[0])+"_why",""))]
-		for view:Dictionary in p.get("views",[]):
-			var cell:=HBoxContainer.new();cell.add_theme_constant_override("separation",3);cell.custom_minimum_size.x=62;row.add_child(cell)
-			cell.tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(float(view.value)*100.0),String(view.means),String(view.why)]
-			cell.mouse_filter=Control.MOUSE_FILTER_PASS
-			var b:=UI.bar(cell,float(view.value),UI.tone_color(String(VIEW_INK.get(String(view.id),"gold"))),30)
-			b.tooltip_text=cell.tooltip_text
-			UI.label(cell,"%d" % roundi(float(view.value)*100.0),12,T.INK).tooltip_text=cell.tooltip_text
-		var talk:=HBoxContainer.new();talk.custom_minimum_size.x=46;row.add_child(talk)
-		if on_court is Callable:
+				UI.tag(row,String(pair[1]),"danger").tooltip_text="%s %d%%: %s" % [String(pair[0]).capitalize(),roundi(float(p.get(String(pair[0]),0.0))*100.0),String(p.get(String(pair[0])+"_why",""))]
+		if with_talk and on_court is Callable:
 			var civ_id:=String(p.civ_id)
-			UI.verb(talk,"Talk",func()->void:(on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours").name="Talk"
+			UI.verb(row,"Talk",func()->void:(on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours").name="Talk"
+
+## One feeling as a small square filled from the bottom to its share.
+class Pip extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var value:=0.0
+	var ink:=Color.WHITE
+	func _init()->void:
+		custom_minimum_size=Vector2(12,14);mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	func _draw()->void:
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.10))
+		var h:=size.y*clampf(value,0.0,1.0)
+		if h>0.0:draw_rect(Rect2(0,size.y-h,size.x,h),ink)
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.35),false,1.0)
 
 static func _people_tip(p:Dictionary)->String:
 	var lines:PackedStringArray=[String(p.name)+": "+String(p.relation)]

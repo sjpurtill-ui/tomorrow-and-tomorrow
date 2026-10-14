@@ -66,6 +66,10 @@ func setup(block:Dictionary)->void:
 	top=UI.columns(self,"SendAndUnread")
 	send_box=UI.sheet(top,"Send")
 	unread_box=UI.sheet(top,"Unread")
+	# On a wide page (2000 px) the tellings stand beside the planner.
+	wide_row=HBoxContainer.new();wide_row.name="Wide";wide_row.add_theme_constant_override("separation",14);add_child(wide_row)
+	wide_left=VBoxContainer.new();wide_left.add_theme_constant_override("separation",12);wide_left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_left.size_flags_stretch_ratio=0.75;wide_row.add_child(wide_left)
+	wide_right=VBoxContainer.new();wide_right.add_theme_constant_override("separation",12);wide_right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_row.add_child(wide_right)
 	cities_box=UI.sheet(self,"ForeignTowns")
 	tellings_box=UI.sheet(self,"Tellings")
 	_build_tellings_frame()
@@ -100,8 +104,27 @@ func _take(block:Dictionary)->void:
 	for pair:Array in [["query",""],["filter",0],["order",1],["page",0]]:
 		if not view.has(String(pair[0])):view[String(pair[0])]=pair[1]
 
+const WIDE_AT:=800.0
+var wide_row:HBoxContainer
+var wide_left:VBoxContainer
+var wide_right:VBoxContainer
+var _wide:=false
+
 func _layout()->void:
-	if top!=null:top.columns=2 if size.x>=TWO_AT else 1
+	if top==null:return
+	var wide:=size.x>=WIDE_AT
+	if wide!=_wide:
+		_wide=wide
+		var send:=send_box.get_parent();var unread:=unread_box.get_parent();var tellings:=tellings_box.get_parent()
+		for frame:Node in [send,unread,tellings]:frame.get_parent().remove_child(frame)
+		if wide:
+			wide_left.add_child(send);wide_left.add_child(unread);wide_right.add_child(tellings)
+		else:
+			top.add_child(send);top.add_child(unread);add_child(tellings)
+		wide_row.visible=wide;top.visible=not wide
+		move_child(cities_box.get_parent(),get_child_count()-1)
+		if not wide:move_child(tellings,get_child_count()-1)
+	if not _wide:top.columns=2 if size.x>=TWO_AT else 1
 
 ## Draws every part from the engine as it stands now.
 func redraw()->void:
