@@ -233,6 +233,9 @@ func test_framing_buttons_reuse_model_and_ground_and_whole_town_fits_buildings()
 	var model:Node3D=widget.get("model")
 	var camera:Camera3D=widget.get("camera")
 	var view:SubViewport=widget.get("view")
+	assert_bool(widget.get("whole_town")).is_true()
+	center.emit_signal("pressed")
+	for frame in 2:await get_tree().process_frame
 	var stats:Dictionary=widget.stats()
 	var center_span:=camera.size
 	var center_transform:=camera.transform

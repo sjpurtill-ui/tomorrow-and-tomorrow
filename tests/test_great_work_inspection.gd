@@ -56,6 +56,14 @@ func test_inspection_is_live_data_without_advancing_work()->void:
 	assert_dict(record).is_equal(before)
 	assert_bool(Pause.blocks(host)).is_true()
 
+func test_closed_atlas_can_reopen_on_the_same_host()->void:
+	await _open()
+	view.close();await get_tree().process_frame;await get_tree().process_frame
+	assert_bool(Pause.blocks(host)).is_false()
+	await _open()
+	assert_object(view.find_child("DetailModel",true,false)).is_not_null()
+	assert_bool(Pause.blocks(host)).is_true()
+
 func test_watch_releases_only_its_pause_and_restores_running_speed()->void:
 	await _open()
 	view.set_watching(true)

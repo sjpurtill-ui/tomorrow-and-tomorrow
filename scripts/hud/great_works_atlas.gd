@@ -63,7 +63,7 @@ var _narrow_layout:=false
 static func open(hud_node:Node,terrain_node:Node=null,director_node:Node=null,focus:String="")->Control:
 	var host:Node=hud_node if is_instance_valid(hud_node) else (Engine.get_main_loop() as SceneTree).current_scene
 	var previous:Variant=host.get_meta("great_works_atlas") if host.has_meta("great_works_atlas") else null
-	if previous is Node and is_instance_valid(previous):(previous as Node).queue_free()
+	if is_instance_valid(previous) and previous is Node:(previous as Node).queue_free()
 	var canvas:=CanvasLayer.new();canvas.layer=86;canvas.name="GreatWorksLayer";host.add_child(canvas);host.set_meta("great_works_atlas",canvas)
 	var view:Control=load("res://scripts/hud/great_works_atlas.gd").new()
 	view.hud=hud_node;view.terrain=terrain_node;view.director=director_node;view.selected_key=focus
@@ -81,13 +81,12 @@ func _ready()->void:
 	panel=PanelContainer.new();panel.name="WorksPanel";panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	var style:=P.sheet_style(20);style.content_margin_left=26;style.content_margin_right=26;style.content_margin_top=18;style.content_margin_bottom=16
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);panel.add_child(root)
 	_build_header(root)
-	root.add_child(Kit.Flourish.new())
 	var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",8);root.add_child(tabs)
 	for spec in [["ours","Our great works"],["foreign","Works of other peoples"]]:
 		var id:=String(spec[0])
-		var button:=Button.new();button.name="Tab_"+id;button.text=String(spec[1]);button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size.y=34
+		var button:=Button.new();button.name="Tab_"+id;button.text=String(spec[1]);button.focus_mode=Control.FOCUS_ALL;T.apply_button_style(button)
 		T.text(button,"small");button.pressed.connect(func()->void:
 			if watching:set_watching(false)
 			tab=id;selected_key="";refresh())
@@ -116,12 +115,14 @@ func _fit()->void:
 		_narrow_layout=view.x<960
 		_main.vertical=_narrow_layout
 		_header.vertical=_narrow_layout
-		legacy_box.visible=view.x>=1400
 		_list_scroll.custom_minimum_size=Vector2(0,128) if _narrow_layout else Vector2(300 if view.x<1320 else 330,0)
 		_list_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow_layout else Control.SIZE_FILL
 	if panel.size!=target:panel.size=target
 	var place:=((view-panel.size)*.5).round()
 	if panel.position!=place:panel.position=place
+	# A retained model can enter the scroll's visible area after container
+	# layout settles, without a resize or visibility signal of its own.
+	if is_instance_valid(model_view) and bool(model_view.get("_dirty")):model_view.call("_request_render")
 
 func _process(delta:float)->void:
 	_fit()
@@ -149,7 +150,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 func _build_header(root:VBoxContainer)->void:
 	var header:=BoxContainer.new();_header=header;header.add_theme_constant_override("separation",24);root.add_child(header)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);header.add_child(words)
-	Kit.label(words,"WONDERS OF OUR MAKING",12,T.GOLD_TEXT,false,.12)
+	Kit.label(words,"Wonders of our making",14,T.INK_MUTED,false)
 	Kit.display(words,"Our great works",34)
 	# The same reading Standing and our allure use (great_works.gd renown).
 	var renown:=Bridge.api_dict("renown",["player"])
@@ -161,7 +162,7 @@ func _build_header(root:VBoxContainer)->void:
 	_build_legacy()
 	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",8);header.add_child(actions)
 	var conceive:=Kit.action_button(actions,"Conceive a great work",conceive_work,true,"Call the court: pitch a wonder worthy of our people")
-	conceive.name="ConceiveButton";conceive.custom_minimum_size=Vector2(230,42)
+	conceive.name="ConceiveButton";conceive.custom_minimum_size=Vector2(230,44)
 	# Master builders holding matters of their own (pitches, news, forecasts) can be called in.
 	var builders:=0
 	for entry:Dictionary in Hall.summonable():
@@ -170,9 +171,13 @@ func _build_header(root:VBoxContainer)->void:
 		var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
 		var held:=int(entry.get("matters",0))
 		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" (%d to tell you)" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them before you in the court now")
-		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,36)
+		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,40)
 	var close_button:=Kit.action_button(actions,"Close",close,false,"Close (Esc)")
 	close_button.name="CloseWorks"
+	var record:=Kit.action_button(root,"Our record of great works  ▸",func()->void:legacy_box.visible=not legacy_box.visible)
+	record.pressed.connect(func()->void:record.text="Our record of great works  "+("▾" if legacy_box.visible else "▸"))
+	record.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	legacy_box.reparent(root);legacy_box.visible=false
 
 ## One sentence of what our works command, in the engine's own numbers.
 static func renown_sentence(renown:Dictionary)->String:
@@ -239,7 +244,7 @@ func refresh()->void:
 	for id in tab_buttons:
 		var button:Button=tab_buttons[id]
 		var on:=String(id)==tab
-		button.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH if on else T.BUTTON_BG,T.GOLD if on else T.BORDER_SOFT,1,3,6))
+		button.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if on else Color.TRANSPARENT,T.GOLD if on else Color.TRANSPARENT,1 if on else 0,4,8))
 		button.add_theme_color_override("font_color",T.GOLD_TEXT if on else T.BODY)
 	for child in list_box.get_children():child.queue_free()
 	var items:Array=works_list if tab=="ours" else foreign_list
@@ -300,13 +305,14 @@ func _card(item:Dictionary,active:bool)->Control:
 	if tab=="foreign":
 		who=String(item.get("civ_name","an unknown people"))
 		var flag:=TextureRect.new();flag.texture=Identity.foreign(String(item.get("owner",""))).texture;flag.custom_minimum_size=Vector2(26,30);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(flag);row.move_child(flag,0)
-	var name_label:=Kit.serif(words,title,17,T.INK);name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var name_label:=Kit.label(words,title,18,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var line:=_status_words(item) if tab=="ours" else "%s · as of %s" % [who,EraWords.when(int(item.get("day",0)))]
 	var status:=Kit.label(words,line,12,T.text_for(_status_color(item)) if tab=="ours" else T.TEXT_SOFT,false);status.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_card_status[key]=status
 	var place:=Kit.label(words,String(item.get("city_name","")),12,T.TEXT_DIM,false);place.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	card.focus_mode=Control.FOCUS_ALL
 	card.gui_input.connect(func(event:InputEvent)->void:
-		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:select(key))
+		if (event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT) or event.is_action_pressed("ui_accept"):select(key))
 	return card
 
 # ---------------------------------------------------------------- our works
@@ -485,7 +491,7 @@ func _detail_ours(item:Dictionary)->void:
 	watch_button=Kit.action_button(time_row,"Pause to inspect" if watching else "Watch time pass",func()->void:set_watching(not watching),false,"Let the normal game clock run while you watch this site. Construction follows its real supplies and builders.")
 	watch_button.name="WatchLive"
 	watch_button.focus_mode=Control.FOCUS_ALL
-	watch_pace=OptionButton.new();watch_pace.name="WatchPace";watch_pace.custom_minimum_size.y=34
+	watch_pace=OptionButton.new();watch_pace.name="WatchPace";T.apply_button_style(watch_pace);watch_pace.custom_minimum_size.y=40
 	for pace:String in ["Slowest","Slow","Normal","Fast","Fastest"]:watch_pace.add_item(pace)
 	watch_pace.tooltip_text="The same game speeds as the settlement clock. The whole settlement continues at this pace."
 	watch_pace.item_selected.connect(_set_watch_pace);time_row.add_child(watch_pace)
@@ -581,7 +587,7 @@ func _shrine(site:Dictionary,d:Dictionary,work_id:String,city_id:String)->void:
 			if item.is_empty():item={"id":String(enshrined[index]),"name":"An enshrined object","rarity_index":0}
 			var plate_art:=Kit.mini_plate(item,96,Callable());plate_art.name="Enshrined_%d" % index;shelf.add_child(plate_art)
 		else:
-			var empty:=Button.new();empty.name="Enshrine_%d" % index;empty.text="Enshrine\na piece";T.text(empty,"small",T.INK);empty.custom_minimum_size=Vector2(96,96);empty.focus_mode=Control.FOCUS_NONE
+			var empty:=Button.new();empty.name="Enshrine_%d" % index;empty.text="Enshrine\na piece";T.text(empty,"small",T.INK);empty.custom_minimum_size=Vector2(96,96);empty.focus_mode=Control.FOCUS_ALL;T.apply_button_style(empty)
 			empty.add_theme_stylebox_override("normal",T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,4,0));empty.add_theme_stylebox_override("hover",T.flat(T.GOLD_WASH,T.GOLD,1,4,0))
 			empty.tooltip_text="Place a studied artifact here; pilgrims will come to see it"
 			empty.pressed.connect(func()->void:open_enshrine_picker(work_id,city_id))

@@ -54,22 +54,23 @@ func _ready()->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:dim.accept_event();close())
 	panel=PanelContainer.new();add_child(panel)
 	panel.add_theme_stylebox_override("panel",P.sheet_style(20))
-	outer=ScrollContainer.new();outer.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;panel.add_child(outer)
-	var body:=VBoxContainer.new();body.size_flags_horizontal=SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",10);outer.add_child(body)
-	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",12);body.add_child(header)
+	var chrome:=VBoxContainer.new();chrome.add_theme_constant_override("separation",16);panel.add_child(chrome)
+	outer=ScrollContainer.new();outer.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;outer.size_flags_vertical=SIZE_EXPAND_FILL;chrome.add_child(outer)
+	var body:=VBoxContainer.new();body.size_flags_horizontal=SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",16);outer.add_child(body)
+	var header:=HBoxContainer.new();header.add_theme_constant_override("separation",12);chrome.add_child(header);chrome.move_child(header,0)
 	var titles:=VBoxContainer.new();titles.size_flags_horizontal=SIZE_EXPAND_FILL;header.add_child(titles)
 	P.kicker(titles,"Objects, knowledge and customs")
 	label(titles,"Brought home","title",T.INK)
-	var exit:=P.button(header,"Close",close);exit.name="Close";exit.size_flags_horizontal=SIZE_SHRINK_END;exit.custom_minimum_size=Vector2(96,38)
+	var exit:=P.button(header,"Close",close);exit.name="Close";exit.size_flags_horizontal=SIZE_SHRINK_END;exit.custom_minimum_size=Vector2(96,40)
 	P.rule(body)
 	summary=label(body,"","body",T.BODY)
 	offer_box=VBoxContainer.new();offer_box.name="OfferCard";offer_box.visible=false;body.add_child(offer_box)
-	filter=OptionButton.new();filter.add_item("Everything brought home");filter.add_item("Objects and samples");filter.add_item("Knowledge");filter.add_item("Customs");filter.custom_minimum_size.y=36;filter.item_selected.connect(func(_value:int):page=0;refresh(true));body.add_child(filter)
-	search=LineEdit.new();search.placeholder_text="Find a piece or a place";search.custom_minimum_size.y=36;search.text_changed.connect(func(_text:String):page=0;refresh(true));body.add_child(search)
+	filter=OptionButton.new();filter.add_item("Everything brought home");filter.add_item("Objects and samples");filter.add_item("Knowledge");filter.add_item("Customs");T.apply_button_style(filter);filter.custom_minimum_size.y=44;filter.item_selected.connect(func(_value:int):page=0;refresh(true));body.add_child(filter)
+	search=LineEdit.new();search.placeholder_text="Find a piece or a place";search.add_theme_font_size_override("font_size",16);search.custom_minimum_size.y=44;search.text_changed.connect(func(_text:String):page=0;refresh(true));body.add_child(search)
 	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8);body.add_child(navigation)
-	previous_page=P.button(navigation,"Previous page",func():page=maxi(0,page-1);refresh(true));previous_page.size_flags_horizontal=SIZE_SHRINK_BEGIN;previous_page.custom_minimum_size.x=130
+	previous_page=P.button(navigation,"Previous",func():page=maxi(0,page-1);refresh(true));previous_page.size_flags_horizontal=SIZE_SHRINK_BEGIN;previous_page.custom_minimum_size.x=90
 	page_label=label(navigation,"","small",T.INK_MUTED);page_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	next_page=P.button(navigation,"Next page",func():page+=1;refresh(true));next_page.size_flags_horizontal=SIZE_SHRINK_END;next_page.custom_minimum_size.x=130
+	next_page=P.button(navigation,"Next",func():page+=1;refresh(true));next_page.size_flags_horizontal=SIZE_SHRINK_END;next_page.custom_minimum_size.x=90
 	cards=VBoxContainer.new();cards.size_flags_horizontal=SIZE_EXPAND_FILL;cards.add_theme_constant_override("separation",8);body.add_child(cards)
 	label(body,"Our thinkers study finds on their own, with a small share of their time. Keeping written notes makes the study faster. Once a find is understood it points toward a new idea, which still has to be worked out at home.","small",T.INK_MUTED)
 	P.rule(body)
@@ -86,7 +87,7 @@ func choice(parent:Node,caption:String,ids:Array,titles:Array,current:String,act
 	var group:=ButtonGroup.new()
 	for index in ids.size():
 		var id:=String(ids[index])
-		var option:=P.button(buttons,String(titles[index]),Callable());option.size_flags_horizontal=SIZE_SHRINK_BEGIN;option.custom_minimum_size=Vector2(0,36)
+		var option:=P.button(buttons,String(titles[index]),Callable());option.size_flags_horizontal=SIZE_SHRINK_BEGIN;option.custom_minimum_size=Vector2(0,40)
 		option.toggle_mode=true;option.button_group=group;option.button_pressed=id==current
 		option.add_theme_stylebox_override("hover_pressed",T.button_pressed_style())
 		option.pressed.connect(func():action.call(id))
@@ -139,7 +140,8 @@ func refresh(force:bool)->void:
 	var pages:=maxi(1,ceili(float(matching.size())/PAGE_SIZE))
 	page=clampi(page,0,pages-1)
 	previous_page.disabled=page==0;next_page.disabled=page>=pages-1
-	page_label.text="Page %d of %d · %d finds" % [page+1,pages,matching.size()]
+	previous_page.visible=pages>1;next_page.visible=pages>1
+	page_label.text="Page %d of %d · %d finds" % [page+1,pages,matching.size()] if pages>1 else "%d finds" % matching.size()
 	var shown:=0
 	for item:Dictionary in matching.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE):
 		var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",P.card_style(T.TEAL if float(item.study)>=1 else Color(0,0,0,0)));cards.add_child(card)
@@ -238,7 +240,7 @@ func _build_offer()->void:
 		_cancel_button(box)
 		return
 	label(box,"Who receives it?","small",T.INK_MUTED)
-	var recipient:=OptionButton.new();recipient.name="Recipient";recipient.custom_minimum_size.y=36;recipient.fit_to_longest_item=false;recipient.clip_text=true
+	var recipient:=OptionButton.new();recipient.name="Recipient";T.apply_button_style(recipient);recipient.custom_minimum_size.y=44;recipient.fit_to_longest_item=false;recipient.clip_text=true
 	recipient.add_item("Choose a people");recipient.set_item_metadata(0,"")
 	for id:String in contacts:
 		recipient.add_item(_recipient_name(id));recipient.set_item_metadata(recipient.item_count-1,id)
@@ -250,7 +252,7 @@ func _build_offer()->void:
 		return
 	var who:=_recipient_name(offer_to)
 	label(box,"How?","small",T.INK_MUTED)
-	var verbs:=HBoxContainer.new();verbs.add_theme_constant_override("separation",6);box.add_child(verbs)
+	var verbs:=HFlowContainer.new();verbs.add_theme_constant_override("h_separation",6);verbs.add_theme_constant_override("v_separation",6);box.add_child(verbs)
 	for mode:String in ["gift","sell","trade"]:
 		if mode=="sell" and not _currency():continue
 		var verb:=P.button(verbs,String(MODE_VERBS[mode]),Callable(),mode==offer_mode)
