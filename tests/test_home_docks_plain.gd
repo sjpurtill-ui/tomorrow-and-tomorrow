@@ -58,7 +58,10 @@ func test_food_page_asks_for_hands_beside_the_figures_it_moves()->void:
 		"forecast30":{},"forecast90":{"first_shortage_day":40},
 		"flow":{"Produced":40.0,"Eaten":70.0,"Spoiled":2.0,"Net":-32.0},"on_focus":func(f:String):asked.append(f),"on_trade":func():pass})
 	var text:=_texts(page)
-	assert_str(text).contains("Short in 40 days").contains("80%").contains("More (now)").contains("Let Tovan decide")
+	var strip:Array=preload("res://scripts/hud/food_folio.gd").kpis(page.data)
+	assert_str(String(strip[1].value)).is_equal("Short in 40 days")
+	assert_str(String(strip[2].value)).is_equal("80%")
+	assert_str(text).contains("Water (now)").contains("Let Tovan decide")
 	assert_str(text).not_contains("Food lasts").not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")
 	(page.find_child("Choice_Provisions",true,false) as Button).pressed.emit()
 	assert_array(asked).contains_exactly(["provisions"])
@@ -69,10 +72,13 @@ func test_materials_and_wealth_ledgers_use_words()->void:
 		"rows":[{"key":"Timber","name":"Timber","stock":40.0,"delivered":2.0,"loss":0.0,"points":[{"day":0,"value":30.0}],"details":["North wood: access not organized"],"blocked":false}],
 		"incoming":[],"day":10,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	var text:=_texts(materials)
-	assert_str(text).contains("98").contains("of 100 room").contains("Timber").contains("+2 in a day").contains("Rising")
+	assert_str(text).contains("Timber").contains("+2 in a day").contains("Rising")
+	var yards:Dictionary=preload("res://scripts/hud/materials_ledger.gd").kpis(materials.data)[0]
+	assert_str(String(yards.value)).is_equal("98")
+	assert_str(String(yards.delta)).contains("of 100 room")
 	# The whole account sits on the row's pointer; the yards' words on the strip's.
 	assert_str((materials.find_child("Material_Timber",true,false) as Control).tooltip_text).contains("Timber: 40 in store").contains("Rising since last month")
-	assert_str((materials.find_child("Kpi_stores",true,false) as Control).tooltip_text).contains("Stores are full")
+	assert_str(String(yards.tip)).contains("Stores are full")
 	assert_str(text).not_contains("›").not_contains("DELIVERED / DAY")
 	var wealth:VBoxContainer=auto_free(preload("res://scripts/hud/wealth_ledger.gd").new())
 	wealth.setup({"stage":"subsistence","city":"Ashford","leader":{},"managed":true,"economy":{"gdp":42.0,"gdp_per_capita":0.4,"productivity":0.8,"effective_workers":52.0},

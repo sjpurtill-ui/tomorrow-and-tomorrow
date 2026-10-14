@@ -165,11 +165,15 @@ func _in_use(waited_seconds:float)->bool:
 
 # --- Our trade at a glance ----------------------------------------------------
 
-func _build_summary()->void:
-	_clear(summary_box)
+## The strip's figures (the dock draws them under the tabs): goods to
+## trade, what came in and went out a season, partners, tribute.
+static func kpis()->Array:
+	return S.dock_kpis(kpi_items(),{})
+
+static func kpi_items()->Array:
 	var partners:=0;var known:=0
 	var sent:=0.0;var came:=0.0
-	for row:Dictionary in _known_rows():
+	for row:Dictionary in known_rows():
 		known+=1
 		if int(row.contact)<2:continue
 		sent+=Ledger.flow_value("player",String(row.id))
@@ -195,18 +199,28 @@ func _build_summary()->void:
 	]
 	if tribute_in>0.0 or tribute_out>0.0:
 		items.append({"id":"tribute","label":"Tribute a season","icon":"Coin","value":S.signed(tribute_in-tribute_out),"ratio":-1.0,"sub":"%s in · %s out" % [S.n(tribute_in),S.n(tribute_out)],"tip":"Tribute paid to us and by us, worth a season."})
-	var refs:=S.kpi_strip(summary_box,items,"TradeKpis")
-	_responsive.call_deferred()
-	((refs.spare as Dictionary).value as Label).name="GoodsToTrade"
-	var answer:=((refs.partners as Dictionary).sub as Label);answer.name="TradeAnswer"
-	# The season's balance, one thin bar under the strip.
+	return items
+
+## Under the strip: the season's balance, one thin bar.
+func _build_summary()->void:
+	_clear(summary_box)
+	var sent:=0.0;var came:=0.0
+	for row:Dictionary in _known_rows():
+		if int(row.contact)<2:continue
+		sent+=Ledger.flow_value("player",String(row.id))
+		came+=Ledger.flow_value(String(row.id),"player")
 	var chart:=Graphics.new();chart.name="FlowTotals";chart.compact=true;chart.values=[came*3.0,sent*3.0];summary_box.add_child(chart)
+	# The strip says the season's in and out; the bar stays for its reading only.
+	chart.visible=false
 	chart.tooltip_text="Smoothed monthly values expressed as a seasonal pace, at each sender's own prices. The bar is centered on equal exchange: left means more received, right means more sent. It compares recorded worth, not stock, coin or profit."
 
 
 # --- One row per people ---------------------------------------------------------
 
 func _known_rows()->Array:
+	return known_rows()
+
+static func known_rows()->Array:
 	var rows:Array=[]
 	for c:Dictionary in CivilizationSystem.civilizations:
 		var id:=String(c.get("id",""))
@@ -370,7 +384,7 @@ func _dependence(owner:String,from:String,need:Dictionary)->Control:
 	var days:=float(need.get("days",-1))
 	var duration:="no shortage without it" if days<0 else "%s without it" % EraWords.days(days)
 	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var refs:=S.row(box,{"id":"lean","label":("Our %s from them" if owner=="player" else "Their %s from us") % Words.good_word(String(need.good)),"note":duration,"ratio":share,"bar_color":T.TEAL if owner=="player" else T.GOLD,"bar_width":60.0,"value":"%d%%" % roundi(share*100.0),"value_width":44.0,"label_width":130.0,
+	var refs:=S.row(box,{"id":"lean","label":("Our %s from them" if owner=="player" else "Their %s from us") % Words.good_word(String(need.good)),"note":duration,"ratio":share,"bar_color":T.TEAL if owner=="player" else T.GOLD,"bar_width":60.0,"value":"%d%%" % roundi(share*100.0),"value_width":44.0,"label_width":170.0,
 		"tip":"%s: %d%% of %s supply comes from %s. %s." % [Ledger.name_of(owner),roundi(share*100.0),Words.good_word(String(need.good)),Ledger.name_of(from),_cap(duration)]})
 	(refs.panel as Control).name="OurDependence" if owner=="player" else "TheirDependence"
 	(refs.value as Label).name="Lean";(refs.bar as Control).name="SupplyShare"

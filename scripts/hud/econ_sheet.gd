@@ -9,8 +9,10 @@ extends RefCounted
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+## The shared strategy-screen blocks: their verb, tag and bar are ours too.
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_HEIGHT:=24.0
+const ROW_HEIGHT:=26.0
 const ICON_SIZE:=20.0
 
 ## A whole number with its thousands separators (era_words.gd grouped, the
@@ -64,8 +66,8 @@ static func bar(ratio:float,color:Color,width:float=0.0,height:float=6.0)->Bar:
 
 ## A small coloured state tag ("Empty", "Stalled", "Full").
 static func tag(text:String,color:Color)->Label:
-	var l:=label(text,12,T.legible(color,T.DOCK_BG),true)
-	var style:=T.flat(Color(color,0.14),Color(color,0.55),1,3,0)
+	var l:=label(text,11,T.legible(color,T.DOCK_BG),true)
+	var style:=T.flat(Color(color,0.14),Color(color,0.6),1,8,0)
 	style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=1;style.content_margin_bottom=1
 	l.add_theme_stylebox_override("normal",style)
 	l.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -77,26 +79,17 @@ static func set_tag(l:Label,text:String,color:Color)->void:
 	put(l,text,T.legible(color,T.DOCK_BG))
 	var style:=l.get_theme_stylebox("normal") as StyleBoxFlat
 	if style!=null and style.bg_color!=Color(color,0.14):
-		style=style.duplicate();style.bg_color=Color(color,0.14);style.border_color=Color(color,0.55);l.add_theme_stylebox_override("normal",style)
+		style=style.duplicate();style.bg_color=Color(color,0.14);style.border_color=Color(color,0.6);l.add_theme_stylebox_override("normal",style)
 
 ## A small verb button ("Build", "Ask", "Show"): on the row or beside the
 ## figure it changes. `chosen` marks the current one of a set of choices.
 static func verb(text:String,callback:Variant,tip:String="",chosen:=false,primary:=false)->Button:
-	var b:=Button.new();b.text=text;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_NONE
-	b.custom_minimum_size=Vector2(0,24);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	b.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	b.add_theme_font_override("font",T.font("ui_strong" if chosen or primary else "ui"))
-	b.add_theme_font_size_override("font_size",13)
-	b.add_theme_color_override("font_color",T.INK if chosen else T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
-	b.add_theme_color_override("font_disabled_color",T.DISABLED)
-	var normal:=T.flat(T.ACTIVE_BG if chosen else (T.BUTTON_BG if primary else Color.TRANSPARENT),T.GOLD if chosen or primary else T.BORDER_SOFT,1,2,0)
-	normal.content_margin_left=8;normal.content_margin_right=8;normal.content_margin_top=2;normal.content_margin_bottom=2
-	if chosen:normal.border_width_bottom=2
-	var hover:=normal.duplicate() as StyleBoxFlat;hover.bg_color=T.HOVER_BG;hover.border_color=T.GOLD
-	var disabled:=normal.duplicate() as StyleBoxFlat;disabled.border_color=T.TRACK;disabled.bg_color=Color.TRANSPARENT
-	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",hover);b.add_theme_stylebox_override("pressed",normal);b.add_theme_stylebox_override("disabled",disabled)
-	if callback is Callable and (callback as Callable).is_valid():b.pressed.connect(callback)
-	else:b.disabled=true
+	var b:=Dense.verb(text,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	if chosen or primary:
+		# The current choice is filled, as a pressed tab is.
+		var skin:=(b.get_theme_stylebox("normal") as StyleBoxFlat).duplicate() as StyleBoxFlat
+		skin.bg_color=Color(T.GOLD,0.22);skin.border_width_bottom=2
+		b.add_theme_stylebox_override("normal",skin);b.add_theme_color_override("font_color",T.INK)
 	return b
 
 ## A small gold section head with a hairline under it; `right` is a short
@@ -178,6 +171,25 @@ static func set_kpi(refs:Dictionary,item:Dictionary)->void:
 	if style.border_color!=edge:
 		style=style.duplicate();style.border_color=edge;(refs.panel as PanelContainer).add_theme_stylebox_override("panel",style);refs.style=style
 
+## A strip figure with its id, for kpi lists a provider hands the dock.
+static func kpi_item(id:String,item:Dictionary)->Dictionary:
+	var out:=item.duplicate();out.id=id
+	return out
+
+## Strip figures in the dock's own form (dock_panel.gd _rebuild_kpis): a big
+## number, its bar against the stated maximum, the few words under it, the
+## reckoning in the pointer. `labels` names each id.
+static func dock_kpis(items:Array,labels:Dictionary)->Array:
+	var out:Array=[]
+	for item:Dictionary in items:
+		var kpi:={"label":String(labels.get(String(item.get("id","")),item.get("label",""))).to_upper(),"value":String(item.get("value","")),"glance":true,"delta":String(item.get("sub","")),"tip":String(item.get("tip",""))}
+		if item.has("sub_color"):kpi.delta_color=item.sub_color
+		var ratio:=float(item.get("ratio",-1.0))
+		if ratio>=0.0:kpi.meter=clampf(ratio,0.0,1.0);kpi.meter_color=item.get("color",T.GOLD)
+		if item.get("on_press") is Callable:kpi.on_press=item.on_press
+		out.append(kpi)
+	return out
+
 # --------------------------------------------------------------------------
 # One-line rows
 # --------------------------------------------------------------------------
@@ -196,7 +208,7 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 	var key:=String(item.get("icon",""))
 	var glyph:TextureRect=null
 	if item.has("icon"):glyph=icon(key,ICON_SIZE,String(item.get("icon_kind","resource")));line.add_child(glyph)
-	var name_label:=label(String(item.get("label","")),14,T.INK);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var name_label:=label(String(item.get("label","")),13,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	# The name takes its share of a wide row and gives way on a narrow one.
 	name_label.custom_minimum_size.x=minf(70.0,float(item.get("label_width",150.0)))
@@ -208,8 +220,8 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(spark)
 		var spark_width:=float(item.get("bar_width",70.0))
 		spark.ready.connect(func()->void:spark.custom_minimum_size=Vector2(spark_width,22);spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;spark.tooltip_text="")
-	var meter:=bar(0.0,T.GOLD,float(item.get("bar_width",70.0)),6.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(meter)
-	var value:=label("",15,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(item.get("value_width",72.0));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(value)
+	var meter:=bar(0.0,T.GOLD,float(item.get("bar_width",70.0)),5.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(meter)
+	var value:=label("",13,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(item.get("value_width",72.0));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(value)
 	var state:=tag("",T.MUTED);state.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(state)
 	var buttons:Array=[]
 	for spec:Dictionary in item.get("buttons",[]):
@@ -250,7 +262,7 @@ class Bar extends Control:
 	var over:=0.0
 	func _draw()->void:
 		var r:=Rect2(Vector2.ZERO,size)
-		draw_rect(r,Color(T.TRACK,0.75))
+		draw_rect(r,Color(T.INK,0.12))
 		var w:=size.x*clampf(ratio,0.0,1.0)
 		if w>0.0:draw_rect(Rect2(0,0,maxf(1.0,w),size.y),color)
 		if over>0.0:

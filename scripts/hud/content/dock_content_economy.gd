@@ -28,15 +28,18 @@ func tab(sub:int)->Dictionary:
 
 func _local_tab(sub:int)->Dictionary:
 	match sub:
-		1:return {"blocks":[_materials_data()]}
+		1:
+			var materials:=_materials_data()
+			return {"kpis":preload("res://scripts/hud/materials_ledger.gd").kpis(materials),"blocks":[materials]}
 		2:return _wealth_tab()
-		3:return {"blocks":[{"type":"trade_board"}]}
+		3:return {"kpis":preload("res://scripts/hud/trade_board.gd").kpis(),"blocks":[{"type":"trade_board"}]}
 	return _food_tab()
 
 ## The Food & water tab: this place's food and water. The common store holds
 ## goods and lives on Wealth (hud/purse_board.gd), as the treasury does.
 func _food_tab()->Dictionary:
-	return {"blocks":[_provisions_data()]}
+	var block:=_provisions_data()
+	return {"kpis":preload("res://scripts/hud/food_folio.gd").kpis(block),"blocks":[block]}
 
 func _open_section(section:String,sub:int)->void:
 	if is_instance_valid(hud):hud.section_requested.emit(section,sub)
@@ -78,7 +81,7 @@ var selected_account:=""
 ## households' money. Trade between peoples mounts its own board between
 ## them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
-	return {"blocks":[{"type":"purse_board","mode":"wealth","on_open":_open_section,"ledger":_ledger_block()}]}
+	return {"kpis":preload("res://scripts/hud/purse_board.gd").kpis(),"blocks":[{"type":"purse_board","mode":"wealth","on_open":_open_section,"ledger":_ledger_block()}]}
 
 ## This place's day's work and its households' money (hud/wealth_ledger.gd).
 ## The realm's treasury is the purse's, above: no town keeps its own.

@@ -19,7 +19,9 @@ const ELSEWHERE:=["Freshwater","Civilian Goods","Food"]
 
 var data:Dictionary
 var _shape:Array=[]
-var _kpis:Dictionary={}
+var _land:Label
+var _land_bar:Control
+var _land_note:Label
 ## Per moving material: {key, refs}.
 var _rows:Array=[]
 var _still:Label
@@ -34,26 +36,23 @@ func setup(block:Dictionary)->void:
 	var who:=_who(block)
 	var focus:=_current(block)
 	var can_direct:=bool(block.get("can_direct",false))
-	_kpis=S.kpi_strip(self,[
-		{"id":"stores","label":"In the yards","icon":"Stone"},
-		{"id":"land","label":"Land searched","icon":"find","icon_kind":"chart"},
-		{"id":"income","label":"Coming in a day","icon":"Timber"},
-		{"id":"carry","label":"Carrying","icon":"carry","icon_kind":"people","action":{"text":"More hands" if focus!="logistics" else "More hands (now)","on_press":func():data.on_focus.call("logistics"),
-			"tip":"Ask %s to put more people on carrying loads and keeping the paths open. Other work slows." % (who if not who.is_empty() else "the leader"),"chosen":focus=="logistics"} if can_direct else null},
-	])
-	var gauge:Dictionary=_kpis.stores
-	(gauge.value as Label).name="StoresHeld"
-	var land_cell:Dictionary=_kpis.land
-	(land_cell.sub as Label).name="SearchedLand";(land_cell.bar as Control).name="SearchedBar"
-	if (_kpis.carry as Dictionary).action!=null:((_kpis.carry as Dictionary).action as Button).name="Choice_Logistics"
+	# The land searched, with its bar; the yields and the find odds behind it.
+	if String(block.get("land",""))!="":
+		var searched:=HBoxContainer.new();searched.name="Land";searched.add_theme_constant_override("separation",8);searched.custom_minimum_size.y=S.ROW_HEIGHT;add_child(searched)
+		searched.add_child(S.icon("find",S.ICON_SIZE,"chart"))
+		_land=S.label("",14,T.INK);_land.name="SearchedLand";_land.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land.mouse_filter=Control.MOUSE_FILTER_PASS;searched.add_child(_land)
+		_land_bar=S.bar(0.0,T.GOLD,160.0,6.0);_land_bar.name="SearchedBar";searched.add_child(_land_bar)
+		_land_note=S.label("",12,T.INK_MUTED);_land_note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_land_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land_note.clip_text=true;_land_note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;searched.add_child(_land_note)
 	var moving:Array=[];var still:Array=[];var beyond:Array=[]
 	for item:Dictionary in block.get("rows",[]):
 		if String(item.get("key","")) in ELSEWHERE:continue
 		(beyond if out_of_reach(item) else (still if is_idle(item,String(block.get("selected",""))) else moving)).append(item)
 	var head:=S.head(self,"Moving through the yards")
 	var row_buttons:=HBoxContainer.new();row_buttons.add_theme_constant_override("separation",6);(head.row as HBoxContainer).add_child(row_buttons)
-	if can_direct and focus!="":
-		row_buttons.add_child(S.verb("Let %s decide" % (who if not who.is_empty() else "the leader"),func():data.on_focus.call(""),"The leader spreads the work across what the place needs."))
+	if can_direct:
+		var more:=S.verb("More carriers"+(" (now)" if focus=="logistics" else ""),func():data.on_focus.call("logistics"),"Ask %s to put more people on carrying loads and keeping the paths open. Other work slows." % (who if not who.is_empty() else "the leader"),focus=="logistics")
+		more.name="Choice_Logistics";row_buttons.add_child(more)
+		if focus!="":row_buttons.add_child(S.verb("Let %s decide" % (who if not who.is_empty() else "the leader"),func():data.on_focus.call(""),"The leader spreads the work across what the place needs."))
 	row_buttons.add_child(S.verb("Show on map",data.get("on_map"),"Mark known wood, stone and clay on the map"))
 	_grid=S.columns(self,"Materials",400.0,2)
 	for item:Dictionary in moving:
@@ -170,38 +169,50 @@ static func flow_words(item:Dictionary)->String:
 	if loss>0.05:parts.append("−%s lost" % S.n(loss))
 	return " · ".join(parts)+" a day" if not parts.is_empty() else "nothing comes in"
 
-## Every word and figure on the page that follows the day.
-func _fill()->void:
+## The strip's figures (the dock draws them under the tabs): the yards held
+## against their room, what comes in a day, the carrying.
+const KPI_LABELS:={"stores":"In the yards","income":"Coming in a day","carry":"Carrying"}
+static func kpis(data:Dictionary)->Array:
+	return S.dock_kpis(kpi_items(data),KPI_LABELS)
+
+static func kpi_items(data:Dictionary)->Array:
+	var out:Array=[]
 	var who:=_who(data)
 	# The yards: held against their room, one bar, held ÷ room.
 	var held:=float(data.get("storage",0.0));var room:=float(data.get("capacity",0.0))
 	var full:=held/room if room>0.0 else -1.0
 	var counted:=String(data.get("counted",""))
-	S.set_kpi(_kpis.stores,{"value":S.n(held),"ratio":clampf(full,0.0,1.0) if full>=0.0 else -1.0,"color":T.RED if full>=0.97 else (T.AMBER if full>=0.85 else T.GREEN),"edge":T.RED if full>=1.0 else T.RULE,
+	out.append(S.kpi_item("stores",{"value":S.n(held),"ratio":clampf(full,0.0,1.0) if full>=0.0 else -1.0,"color":T.RED if full>=0.97 else (T.AMBER if full>=0.85 else T.GREEN),"edge":T.RED if full>=1.0 else T.RULE,
 		"sub":("of %s room" % S.n(room)+(" · %s× over" % S.n(full) if full>=1.5 else "")) if room>0.0 else "no yards built","sub_color":T.RED_TEXT if full>=1.0 else T.INK_MUTED,
-		"tip":"Held: every material in the yards, each counted by the room it takes%s. Food, water and household goods are kept apart and not counted.\nWhat is held beyond the room lies in the open and spoils faster.\n%s" % [(" ("+counted+")") if not counted.is_empty() else "",String(Words.supply(held,room,data.get("hauling")).sentence)]})
-	# The land searched: a share, with its bar; the yields and odds behind it.
-	var land:=String(data.get("land",""))
-	var cover:=float(data.get("cover",ResourceSystem.land_reading().get("cover",0.0) if land!="" else 0.0))
-	S.set_kpi(_kpis.land,{"value":"%d%%" % roundi(cover*100.0) if land!="" else "—","ratio":clampf(cover,0.0,1.0) if land!="" else -1.0,"color":T.GOLD,
-		"sub":"Land searched %d%%" % roundi(cover*100.0) if land!="" else "not settled yet","tip":land})
-	((_kpis.land as Dictionary).sub as Control).mouse_filter=Control.MOUSE_FILTER_PASS
-	((_kpis.land as Dictionary).sub as Control).tooltip_text=land
+		"tip":"Held: every material in the yards, each counted by the room it takes%s. Food, water and household goods are kept apart and not counted.\nWhat is held beyond the room lies in the open and spoils faster.\n%s" % [(" ("+counted+")") if not counted.is_empty() else "",String(Words.supply(held,room,data.get("hauling")).sentence)]}))
 	# What comes in a day, and what is lost.
 	var delivered:=0.0;var lost:=0.0;var count:=0
 	for item:Dictionary in data.get("rows",[]):
 		if String(item.get("key","")) in ELSEWHERE:continue
 		delivered+=float(item.get("delivered",0.0));lost+=float(item.get("loss",0.0))
 		if float(item.get("delivered",0.0))>0.05:count+=1
-	S.set_kpi(_kpis.income,{"value":"+"+S.n(delivered) if delivered>=0.5 else "0","ratio":clampf(delivered/maxf(1.0,delivered+lost),0.0,1.0) if delivered+lost>0.05 else -1.0,"color":T.GREEN,
-		"sub":"%d materials · −%s lost" % [count,S.n(lost)],"tip":"Loads brought into the yards today, every material together; and what spoiled or was lost in store. The bar: what came in against what came in and was lost."})
+	out.append(S.kpi_item("income",{"value":"+"+S.n(delivered) if delivered>=0.5 else "0","ratio":clampf(delivered/maxf(1.0,delivered+lost),0.0,1.0) if delivered+lost>0.05 else -1.0,"color":T.GREEN,
+		"sub":"%d materials · −%s lost" % [count,S.n(lost)],"tip":"Loads brought into the yards today, every material together; and what spoiled or was lost in store. The bar: what came in against what came in and was lost."}))
 	# The carrying: how much of what is dug and cut the carriers bring in.
 	var hauling:Variant=data.get("hauling")
 	var supply:=Words.supply(held,room,hauling)
 	var flow:=clampf(float(hauling),0.0,1.0) if hauling!=null else -1.0
-	S.set_kpi(_kpis.carry,{"value":"%d%%" % roundi(flow*100.0) if flow>=0.0 else "—","ratio":flow,"color":T.TEAL if flow>=0.9 else (T.AMBER if flow>=0.6 else T.RED),
+	out.append(S.kpi_item("carry",{"value":"%d%%" % roundi(flow*100.0) if flow>=0.0 else "—","ratio":flow,"color":T.TEAL if flow>=0.9 else (T.AMBER if flow>=0.6 else T.RED),
 		"sub":String(supply.slows) if not String(supply.slows).is_empty() else "of what is dug and cut is carried in","sub_color":T.AMBER_TEXT if not String(supply.slows).is_empty() else T.INK_MUTED,
-		"tip":"%s\n%s" % [String(supply.sentence),("%s decides who digs, cuts and carries." % who if not who.is_empty() else "The local leader decides who digs, cuts and carries.") if bool(data.get("managed",true)) else "You asked for extra hands on part of the work."]})
+		"tip":"%s\n%s" % [String(supply.sentence),("%s decides who digs, cuts and carries." % who if not who.is_empty() else "The local leader decides who digs, cuts and carries.") if bool(data.get("managed",true)) else "You asked for extra hands on part of the work."]}))
+	return out
+
+## Every word and figure on the page that follows the day.
+func _fill()->void:
+	var land:=String(data.get("land",""))
+	if _land!=null:
+		var cover:=float(data.get("cover",ResourceSystem.land_reading().get("cover",0.0)))
+		S.put(_land,"Land searched %d%%" % roundi(cover*100.0))
+		_land.tooltip_text=land
+		var meter:=_land_bar as S.Bar
+		meter.ratio=clampf(cover,0.0,1.0);meter.queue_redraw()
+		S.put(_land_note,land.get_slice(". ",1).strip_edges())
+		_land_note.tooltip_text=land
 	var by_key:={}
 	for item:Dictionary in data.get("rows",[]):by_key[String(item.key)]=item
 	for entry:Dictionary in _rows:

@@ -18,7 +18,7 @@ const STORE_RESOURCES:=["Timber","Fiber Plants","Stone","Clay","Copper Ore"]
 const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
 func meta()->Dictionary:
-	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "subtabs":["All","Civilian","Military"], "fit_height":true}
+	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "title_size":38, "spread_tabs":true, "subtabs":["All","Civilian","Military"], "fit_height":true}
 func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
@@ -65,7 +65,52 @@ func tab(sub:int)->Dictionary:
 			"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
 			"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
 			"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press})
-	return {"blocks":[block]}
+	return {"kpis":tab_kpis(block),"blocks":[block]}
+
+## The strip over Goods and Arms (the dock draws it under the tabs): the
+## figures the flow chart does not carry. Goods: the homes stocked, goods to
+## spare and their worth, wear a day, carts in store, crafts in use. Arms:
+## the watch armed, sets in store, still wanted, made a day, one set's cost.
+const Sheet:=preload("res://scripts/hud/econ_sheet.gd")
+func tab_kpis(block:Dictionary)->Array:
+	var T:=Tokens
+	var items:Array=[]
+	match String(block.get("mode","")):
+		"civilian":
+			var cards:Array=block.get("households",[])
+			var low:=1.0;var worn:=0.0;var spare:=0.0;var held:=0.0;var wanted:=0.0
+			for card:Dictionary in cards:
+				low=minf(low,clampf(float(card.get("coverage",0.0)),0.0,1.0));worn+=float(card.get("worn",0.0));spare+=float(card.get("spare",0.0))
+				held+=float(card.get("stock",0.0));wanted+=float(card.get("target",0.0))
+			if cards.is_empty():low=0.0
+			items.append({"id":"stocked","label":"Homes stocked","value":"%d%%" % roundi(low*100.0),"ratio":low,"color":T.GREEN if low>=0.98 else (T.AMBER if low>=0.6 else T.RED),
+				"sub":("%s wanted, all held" % Sheet.n(wanted)) if held>=wanted else ("%s held of %s wanted" % [Sheet.n(held),Sheet.n(wanted)]),"tip":"The least-stocked town's homes: goods held against what they want. Households wear goods out; the makers make them good."})
+			items.append({"id":"spare","label":"To spare","value":Sheet.n(spare),"ratio":-1.0,"sub":"worth %s rations" % Sheet.n(float(block.get("spare_worth",0.0))),"tip":"Goods beyond what the homes want, what the learners will take and what is kept back: what can change hands (the Trade tab)."})
+			items.append({"id":"wear","label":"Wear a day","value":Sheet.n(worn),"ratio":-1.0,"sub":"goods worn out in the homes","tip":"Goods the homes wear out each day, in every town."})
+			var carts:Dictionary=block.get("carts",{})
+			items.append({"id":"carts","label":"Carts","value":Sheet.n(float(carts.get("count",0))),"ratio":-1.0,"sub":"made on the workshop lines" if bool(carts.get("known",false)) else "not known yet","tip":"Carts in store. They are made on the workshop lines (the Arms tab)."})
+			var techniques:Array=block.get("techniques",[])
+			if not techniques.is_empty():
+				var mean:=0.0
+				for technique:Dictionary in techniques:mean+=float(technique.get("adoption",0.0))
+				mean/=float(techniques.size())
+				items.append({"id":"crafts","label":"Crafts known","value":Sheet.n(techniques.size()),"ratio":mean,"color":T.TEAL,"sub":"%d%% in use on average" % roundi(mean*100.0),"tip":"Crafts the makers know; the bar is how far they are in use."})
+		"military":
+			var a:Dictionary=block.get("arms",{})
+			var watch:=int(a.get("watch",0));var issued:=int(a.get("issued",0));var held_sets:=int(a.get("held",0));var wanted_sets:=int(a.get("wanted",0))
+			var go:=func()->void:
+				var open:Variant=block.get("on_open")
+				if open is Callable:(open as Callable).call("military",0)
+			items.append({"id":"watch","label":"Watch armed","value":("%s of %s" % [Sheet.n(issued),Sheet.n(watch)]) if watch>0 else "No watch","ratio":float(issued)/float(watch) if watch>0 else -1.0,"color":T.GREEN if wanted_sets<=0 else T.AMBER,
+				"sub":"click: the Warriors" ,"on_press":go,"tip":"Fighters of the watch carrying a set of arms. Click to open the Warriors: how armed each band is."})
+			items.append({"id":"held","label":"Sets in store","value":Sheet.n(held_sets),"ratio":-1.0,"sub":"made arms and the armoury's kits","tip":"Sets held count the made arms and the armoury's kits (each kind under Equipment)."})
+			items.append({"id":"wanted","label":"Still wanted","value":Sheet.n(wanted_sets),"value_color":T.AMBER_TEXT if wanted_sets>0 else T.INK,"ratio":-1.0,"sub":"none wanted" if wanted_sets<=0 else "the watch lacks them","tip":"While the watch lacks arms, %d in 100 of the makers make them (%d in 100 at war); those makers make no goods that day." % [roundi(float(a.get("share",0.0))*100.0),roundi(float(a.get("war_share",0.0))*100.0)]})
+			items.append({"id":"making","label":"Arms a day","value":Sheet.n(float(a.get("made",0.0))),"ratio":-1.0,"sub":"%s makers on arms" % Sheet.n(float(a.get("hands",0.0))),"tip":"Sets the makers made today and the makers on arms."})
+			var cost:Dictionary=a.get("cost",{})
+			var materials:PackedStringArray=[]
+			for item:String in (cost.get("materials",{}) as Dictionary):materials.append("%s %s" % [Sheet.n(float(cost.materials[item])),ResourceSystem.display_name(item).to_lower()])
+			items.append({"id":"cost","label":"One set","value":"%s days" % Sheet.n(float(cost.get("maker_days",0.0))),"ratio":-1.0,"sub":"worth %s goods" % Sheet.n(float(cost.get("worth_goods",0.0))),"tip":"Arming one fighter: %s, %s maker-days and %s." % [String(cost.get("kind","")),Sheet.n(float(cost.get("maker_days",0.0))),", ".join(materials)]})
+	return Sheet.dock_kpis(items,{})
 
 ## The All page: how the makers' hands split between the homes, the
 ## workshop lines and arms, what they make a day, who runs the workshops,

@@ -60,7 +60,6 @@ var on_open:Callable
 ## The player opened the business stance choice.
 var stances_open:=false
 var responsive_grids:Array[GridContainer]=[]
-var kpis:Dictionary={}
 ## The day's work (wealth_ledger.gd), mounted in the left column.
 var ledger:Control
 
@@ -88,17 +87,6 @@ func setup(block:Dictionary={})->void:
 	var left:VBoxContainer=self
 	var right:VBoxContainer=self
 	if mode=="wealth":
-		kpis=S.kpi_strip(self,[
-			{"id":"held","label":"Goods held","icon":"Civilian Goods"},
-			{"id":"spare","label":"To trade","icon":"Civilian Goods"},
-			{"id":"made","label":"Made a day","icon":"make","icon_kind":"people"},
-			{"id":"market","label":"To market","icon":"carry","icon_kind":"people"},
-			{"id":"treasures","label":"Treasures","icon":"find","icon_kind":"chart","action":{"text":"Give","on_press":func()->void:preload("res://scripts/hud/exchange_collection_panel.gd").open(),"tip":"Every piece, what it is worth and what it does; hand one to another people"}},
-		],"WealthKpis")
-		for pair:Array in [["held","GoodsHeld"],["spare","GoodsSpare"],["made","GoodsMade"],["market","MarketReach"],["treasures","Treasures"]]:
-			((kpis[pair[0]] as Dictionary).value as Label).name=String(pair[1])
-		((kpis.held as Dictionary).sub as Label).name="GoodsValue"
-		((kpis.treasures as Dictionary).action as Button).name="SeeTreasures"
 		add_child(feedback)
 		var grid:=_grid(self,"WealthColumns",2,700)
 		grid.add_theme_constant_override("v_separation",14)
@@ -172,7 +160,6 @@ func refresh(force:=false)->void:
 	var spare:=0.0
 	for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
 	if cards.is_empty():spare=Goods.spare()
-	_fill_kpis(held,spare,cards,forecast)
 	var people:=roundi(float(WorldSimulation.state.population_exact))
 	_rebuild("own",own_box,str([held.goods,held.coin,held.coin_word,held.worth,Goods.buys(float(held.goods),["Food","Timber","Stone","Fiber Plants"]),spare,people,int(_year())]),force,func()->void:_build_own(held,spare))
 	var e:=Business.state()
@@ -190,31 +177,44 @@ func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->voi
 
 # --- The strip ------------------------------------------------------------------------------
 
-func _fill_kpis(held:Dictionary,spare:float,cards:Array,forecast:Dictionary)->void:
+## The strip's figures (the dock draws them under the tabs): goods held,
+## goods to trade, made a day, market reach, treasures (click: give one).
+const KPI_LABELS:={"held":"Goods held","spare":"To trade","made":"Made a day","market":"To market","treasures":"Treasures"}
+static func kpis()->Array:
+	return S.dock_kpis(kpi_items(),KPI_LABELS)
+
+static func kpi_items()->Array:
+	var out:Array=[]
+	var held:=Standing.wealth_held()
+	var cards:=Production.household_cards()
+	var spare:=0.0
+	for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
+	if cards.is_empty():spare=Goods.spare()
 	var goods:=float(held.goods)
 	var people:=maxf(1.0,float(WorldSimulation.state.population_exact))
 	var typical:=float(Scale.anchors(Scale.GOODS,_year())[1])
 	var a_head:=goods/people
-	S.set_kpi(kpis.held,{"value":S.n(goods),"ratio":clampf(a_head/maxf(0.01,typical*2.0),0.0,1.0),"color":T.GREEN if a_head>=typical else T.AMBER,
+	out.append(S.kpi_item("held",{"value":S.n(goods),"ratio":clampf(a_head/maxf(0.01,typical*2.0),0.0,1.0),"color":T.GREEN if a_head>=typical else T.AMBER,
 		"sub":"Worth %s rations" % S.n(Goods.worth_in_rations(goods)),
-		"tip":"Made things our homes hold and keep for barter, in every town: tools, cord, baskets, pots. Goods are our first money.\nThe bar: goods a head against twice what a typical people of our age holds.\n%s goods a head; a typical people of our age holds %s.\nOne is worth %s rations at our own prices." % [S.n(a_head),S.n(typical),S.n(Goods.worth_in_rations(1.0))]})
-	S.set_kpi(kpis.spare,{"value":S.n(spare),"ratio":clampf(spare/maxf(1.0,goods),0.0,1.0),"color":T.TEAL,"sub":"%s kept for use" % S.n(maxf(0.0,goods-spare)),
-		"tip":"Goods beyond what the homes need, what the learners will take and what is kept back for the first workshops. With other peoples they buy food, materials, arms, and bring families who come to work (the Trade tab).\nThe bar: the share of all goods held that can change hands."})
+		"tip":"Made things our homes hold and keep for barter, in every town: tools, cord, baskets, pots. Goods are our first money.\nThe bar: goods a head against twice what a typical people of our age holds.\n%s goods a head; a typical people of our age holds %s.\nOne is worth %s rations at our own prices." % [S.n(a_head),S.n(typical),S.n(Goods.worth_in_rations(1.0))]}))
+	out.append(S.kpi_item("spare",{"value":S.n(spare),"ratio":clampf(spare/maxf(1.0,goods),0.0,1.0),"color":T.TEAL,"sub":"%s kept for use" % S.n(maxf(0.0,goods-spare)),
+		"tip":"Goods beyond what the homes need, what the learners will take and what is kept back for the first workshops. With other peoples they buy food, materials, arms, and bring families who come to work (the Trade tab).\nThe bar: the share of all goods held that can change hands."}))
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
 	var made:=float(report.get("made",0.0))
 	var worn:=0.0
 	if not cards.is_empty():
 		made=0.0
 		for card:Dictionary in cards:made+=float(card.get("made",0.0));worn+=float(card.get("worn",0.0))
-	S.set_kpi(kpis.made,{"value":S.n(made),"ratio":clampf(made/maxf(0.01,made+worn),0.0,1.0) if made+worn>0.01 else -1.0,"color":T.GREEN,"sub":"worth %s rations · %s wear out" % [S.n(Goods.worth_in_rations(made)),S.n(worn)],
-		"tip":"Goods the makers made today in every town (the Workshops tab draws how). Each maker makes about %s a day: more with the crafts the people know, and as well as people work.\nThe bar: made against made and worn out." % S.n(Goods.goods_per_maker_day())})
+	out.append(S.kpi_item("made",{"value":S.n(made),"ratio":clampf(made/maxf(0.01,made+worn),0.0,1.0) if made+worn>0.01 else -1.0,"color":T.GREEN,"sub":"worth %s rations · %s wear out" % [S.n(Goods.worth_in_rations(made)),S.n(worn)],
+		"tip":"Goods the makers made today in every town (the Workshops tab draws how). Each maker makes about %s a day: more with the crafts the people know, and as well as people work.\nThe bar: made against made and worn out." % S.n(Goods.goods_per_maker_day())}))
 	var reach:=clampf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.0,1.0)
-	S.set_kpi(kpis.market,{"value":"%d%%" % roundi(reach*100.0),"ratio":reach,"color":T.TEAL,"sub":"of what is made",
-		"tip":"%d in 100 of what is made reaches the market, where goods change hands %s. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % [roundi(reach*100.0),"by barter, for food and materials" if String(WorldSimulation.state.economy_stage)=="subsistence" else ("with weighed metal beside barter" if String(WorldSimulation.state.economy_stage)=="weighed_metal" else "for coin")]})
+	out.append(S.kpi_item("market",{"value":"%d%%" % roundi(reach*100.0),"ratio":reach,"color":T.TEAL,"sub":"of what is made",
+		"tip":"%d in 100 of what is made reaches the market, where goods change hands %s. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % [roundi(reach*100.0),"by barter, for food and materials" if String(WorldSimulation.state.economy_stage)=="subsistence" else ("with weighed metal beside barter" if String(WorldSimulation.state.economy_stage)=="weighed_metal" else "for coin")]}))
 	var count:=int(held.treasures);var worth:=float(held.treasure_worth)
 	var t_typical:=float(Scale.anchors(Scale.TREASURES,_year())[1])
-	S.set_kpi(kpis.treasures,{"value":S.n(count),"ratio":clampf((worth/people)/maxf(0.01,t_typical*2.0),0.0,1.0),"color":T.GOLD,"sub":"appraised %s goods" % S.n(worth) if count>0 else "none held yet",
-		"tip":"Old pieces found on the land or got in trade. Each is appraised by its rarity, how long we have held it and how well it is studied.\nThe bar: worth a head (%s goods) against twice a typical people of our age (%s)." % [S.n(worth/people),S.n(t_typical)]})
+	out.append(S.kpi_item("treasures",{"value":S.n(count),"ratio":clampf((worth/people)/maxf(0.01,t_typical*2.0),0.0,1.0),"color":T.GOLD,"sub":"appraised %s goods" % S.n(worth) if count>0 else "none held yet",
+		"on_press":func()->void:preload("res://scripts/hud/exchange_collection_panel.gd").open(),"tip":"Click to give, sell or swap a piece.\nOld pieces found on the land or got in trade. Each is appraised by its rarity, how long we have held it and how well it is studied.\nThe bar: worth a head (%s goods) against twice a typical people of our age (%s)." % [S.n(worth/people),S.n(t_typical)]}))
+	return out
 
 # --- The store ----------------------------------------------------------------------
 
@@ -224,16 +224,15 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	if store_kicker!=null:store_kicker.text=Purse.account_name().to_upper()
 	var trend:=_trend(float(forecast.net),float(forecast.seasons_left))
 	var rations:=Purse.buys_rations()
-	var row:=S.row(head_box,{"id":"store","icon":"Stored food" if Purse.in_kind() else "Coin","label":"Holds","note":_given_words(),"value":Purse.amount_text(float(forecast.balance)),"value_width":110.0,
+	var row:=S.row(head_box,{"id":"store","icon":"Stored food" if Purse.in_kind() else "Coin","label":"Holds","note":_trend_words(float(forecast.net),String(trend.text)).trim_suffix("."),"note_color":trend.color,"value":Purse.amount_text(float(forecast.balance)),"value_width":110.0,
 		"tag":String(trend.text).capitalize() if String(trend.text) in ["growing","steady"] else "Shrinking","tag_color":T.GREEN if String(trend.text)=="growing" else (T.MUTED if String(trend.text)=="steady" else T.RED),
 		"tip":"%s%s" % ["The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from the households' spare. The god's to spend. Goods wear out slowly here, as they do in the homes.",("\nAt today's prices it would buy %s rations." % EraWords.grouped(roundi(rations))) if rations>=0.0 else ""]})
-	(row.note as Label).name="Balance";(row.value as Label).name="StoreAnswer"
-	# Whether it grows, said on the same row (its reckoning in the pointer).
-	var verdict:=S.label(_trend_words(float(forecast.net),String(trend.text)).trim_suffix("."),12,trend.color);verdict.name="Verdict";verdict.tooltip_text=_season_words(forecast,season)
-	verdict.size_flags_vertical=Control.SIZE_SHRINK_CENTER;verdict.mouse_filter=Control.MOUSE_FILTER_PASS
-	verdict.clip_text=true;verdict.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;verdict.custom_minimum_size.x=1;verdict.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var line:=(row.panel as PanelContainer).get_child(0) as HBoxContainer
-	line.add_child(verdict);line.move_child(verdict,(row.value as Label).get_index())
+	(row.value as Label).name="StoreAnswer"
+	var verdict:=row.note as Label;verdict.name="Verdict";verdict.tooltip_text=_season_words(forecast,season);verdict.mouse_filter=Control.MOUSE_FILTER_PASS
+	# Who gives it is said in the row's pointer.
+	var given:=S.label(_given_words(),12,T.INK_MUTED);given.name="Balance";given.visible=false;head_box.add_child(given)
+	(row.panel as Control).tooltip_text=_cap(_given_words())+".
+"+(row.panel as Control).tooltip_text
 	if float(forecast.debt)>0.5:S.row(head_box,{"id":"debt","label":"Old debts","note":"repaid monthly","value":Purse.number(float(forecast.debt)),"value_color":T.RED_TEXT})
 
 ## Growing, steady, shrinking slowly, or running out: {text, color}.

@@ -430,7 +430,7 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	var wealth:=Board.new()
 	add_child(wealth)
 	wealth.setup({})
-	for part in ["GoodsHeld","GoodsValue","GoodsBuy","GoodsAHead","GoodsSpare","GoodsMade","MarketReach","Treasures","SeeTreasures","Barter","Fifths","Shares","Pressure","Balance","Levels","Line_army","StoreAnswer"]:
+	for part in ["GoodsBuy","GoodsAHead","Barter","Fifths","Shares","Pressure","Balance","Levels","Line_army","StoreAnswer"]:
 		assert_object(wealth.find_child(part,true,false)).override_failure_message("the wealth board has no %s" % part).is_not_null()
 	for gone in ["StorePointer","SeeStore","SeeMaterials","SeeArms","WealthCards"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
 	var kickers:=[]
@@ -445,7 +445,10 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
 	# What we own is the engine's count: every town's goods, at our own prices.
 	var held:=preload("res://scripts/standing.gd").wealth_held()
-	assert_str((wealth.find_child("GoodsHeld",true,false) as Label).text).is_equal(preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
+	var strip:Array=Board.kpis()
+	assert_array(strip.map(func(k:Dictionary)->String:return String(k.label))).contains_exactly(["GOODS HELD","TO TRADE","MADE A DAY","TO MARKET","TREASURES"])
+	assert_str(String(strip[0].value)).is_equal(preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
+	assert_bool(strip[4].get("on_press") is Callable).is_true()
 	# Each line of spending says what it costs a season.
 	assert_str((board.find_child("Line_army",true,false).find_child("Cost",true,false) as Label).text).contains("a season")
 	# The store's answer comes first, with whether it grows.

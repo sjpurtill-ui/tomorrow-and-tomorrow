@@ -39,24 +39,20 @@ func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="ProvisionsLedger"
 	add_theme_constant_override("separation",10)
 	_shape=shape_of(block)
-	_refs={"kpis":{},"stores":[],"sources":[],"deliveries":[]}
+	_refs={"stores":[],"sources":[],"deliveries":[]}
 	var who:=_who()
 	var current:=_current_focus(block)
 	var can_direct:=bool(block.get("can_direct",false))
-	# The strip: four figures, each with the control that moves it.
-	_refs.kpis=S.kpi_strip(self,[
-		{"id":"store","label":"Food in store","icon":"Food"},
-		{"id":"ahead","label":"In 90 days","icon":"stores","icon_kind":"people"},
-		{"id":"water","label":"Water","icon":"Freshwater","action":{"text":"More" if current!="water" else "More (now)","on_press":func():data.on_focus.call("water"),"tip":"Ask %s to put more people on finding, reaching and carrying water. Other work slows." % who,"chosen":current=="water"} if can_direct else null},
-		{"id":"hands","label":"On food","icon":"gather","icon_kind":"people","action":{"text":"More" if current!="provisions" else "More (now)","on_press":func():data.on_focus.call("provisions"),"tip":"Ask %s to put more people on gathering, hunting, fishing and carrying food. Other work slows." % who,"chosen":current=="provisions"} if can_direct else null},
-	])
-	for key:String in ["water","hands"]:
-		var action:Button=(_refs.kpis[key] as Dictionary).action
-		if action!=null:action.name="Choice_"+("Water" if key=="water" else "Provisions")
 	# The day's rations: one bar and the engine's terms under it.
 	var today:=S.head(self,"Today · rations")
 	_refs.today_side=today.side
 	if can_direct:
+		# Asking for hands, beside the strip's water and food-hands figures.
+		var ask:=S.label("More hands:",12,T.INK_MUTED);ask.size_flags_vertical=Control.SIZE_SHRINK_CENTER;(today.row as HBoxContainer).add_child(ask)
+		for spec:Array in [["provisions","Food","Provisions","gathering, hunting, fishing and carrying food"],["water","Water","Water","finding, reaching and carrying water"]]:
+			var focus_id:=String(spec[0])
+			var choice:=S.verb(String(spec[1])+(" (now)" if current==focus_id else ""),func():data.on_focus.call(focus_id),"Ask %s to put more people on %s. Other work slows." % [who,String(spec[3])],current==focus_id)
+			choice.name="Choice_"+String(spec[2]);(today.row as HBoxContainer).add_child(choice)
 		var decide:=S.verb("Let %s decide" % who+(" (now)" if current=="" else ""),func():data.on_focus.call(""),"%s spreads the work across what the place needs." % who.capitalize(),current=="")
 		decide.name="Choice_";(today.row as HBoxContainer).add_child(decide)
 	flow_bar=FlowBar.new();flow_bar.name="FlowBar";flow_bar.custom_minimum_size=Vector2(0,12);add_child(flow_bar)
@@ -137,42 +133,8 @@ func _who()->String:
 func _fill()->void:
 	var amounts:=flow_amounts(data.get("flow",{}))
 	var eaten:=maxf(0.5,float(amounts.Eaten))
-	var kpis:Dictionary=_refs.kpis
-	# Food in store against the room for it.
-	var stock:=0.0
-	for item:Dictionary in data.get("rows",[]):stock+=float(item.get("stock",0.0))
-	var room:=float(data.get("capacity",0.0))
-	var full:=stock/room if room>0.0 else -1.0
-	S.set_kpi(kpis.store,{"value":S.n(stock),"ratio":clampf(full,0.0,1.0) if full>=0.0 else -1.0,"color":T.RED if full>=0.98 else (T.AMBER if full>=0.85 else T.GREEN),
-		"sub":("of %s room" % S.n(room)) if room>0.0 else "no granary yet",
-		"tip":"Rations held in every store here. Food beyond the room the pits, granaries and sealed jars give is thrown out at the end of the day.\n%s" % String(data.get("lean",""))})
-	# The outlook in days, the same unit as the top bar's food.
-	var forecast:Dictionary=data.get("forecast90",{})
-	var shortage:=int(forecast.get("first_shortage_day",-1))
-	var ending:=float(forecast.get("ending_days",-1.0))
-	var ahead:={"value":"—","sub":"not reckoned yet","ratio":-1.0,"tip":"The 90-day outlook is reckoned each week from the season's yields, spoilage and need."}
-	if shortage>0:
-		ahead={"value":"Short in %d days" % shortage,"value_color":T.RED_TEXT,"sub":"if the seasons go as expected","ratio":clampf(float(shortage)/90.0,0.0,1.0),"color":T.RED,"edge":T.RED,
-			"tip":"At the season's yields, spoilage and need, food runs short in %s." % Plain.duration_text(float(shortage))}
-	elif not forecast.is_empty():
-		ahead={"value":preload("res://scripts/hud/era_words.gd").days_in_words(maxf(0.0,ending)) if ending>=0.0 else "—","sub":"of food left · no shortage","ratio":clampf(ending/maxf(90.0,ending),0.0,1.0) if ending>=0.0 else -1.0,"color":T.GREEN,
-			"tip":"Days of food in store 90 days from now, at the season's yields, spoilage and need. No shortage is expected before then."}
-	S.set_kpi(kpis.ahead,ahead)
-	# Water fetched against the day's need (the top bar holds the days in store).
 	var water:Dictionary=data.get("water",{})
-	var wet:=Words.water(water)
 	var need:=float(water.get("required_today",0.0))
-	if need>0.0:
-		var ratio:=clampf(float(water.get("intake_ratio",0.0)),0.0,1.0)
-		S.set_kpi(kpis.water,{"value":"%d%%" % roundi(ratio*100.0),"value_color":(T.RED_TEXT if String(wet.tone)=="bad" else T.AMBER_TEXT) if ratio<0.98 else T.INK,"ratio":ratio,"color":T.TEAL if ratio>=0.98 else (T.AMBER if ratio>=0.8 else T.RED),
-			"sub":"of %s drinks needed" % S.n(need),
-			"tip":"%s.\nYesterday %s drinks were fetched for the %s needed; %s are kept in store. One drink is one person's water for a day." % [String(wet.sentence).trim_suffix("."),S.n(float(water.get("collected_today",0.0))),S.n(need),S.n(float(water.get("stored",0.0)))]})
-	else:S.set_kpi(kpis.water,{"value":"—","sub":"counted after the first day","ratio":-1.0})
-	# The hands on food, against everyone at work.
-	var hands:=float(data.get("food_workers",0.0))
-	var share:=float(data.get("food_share",0.0))
-	S.set_kpi(kpis.hands,{"value":S.n(hands),"ratio":clampf(share,0.0,1.0),"color":T.GOLD,"sub":"%d in 100 at work" % roundi(share*100.0),
-		"tip":(String(data.get("food_plan",""))+"\n" if String(data.get("food_plan",""))!="" else "")+("%s decides the daily food work." % _who().capitalize() if bool(data.get("managed",true)) else "You asked for extra hands on part of the work.")})
 	# The day's rations.
 	for key:String in daily_values:
 		var amount:=float(amounts.get(key,0))
@@ -249,6 +211,56 @@ func _fill()->void:
 	for index in mini(shipments.size(),(_refs.deliveries as Array).size()):
 		var shipment:Dictionary=shipments[index]
 		S.set_row(_refs.deliveries[index],{"label":"%s from %s" % [String(shipment.get("resource","")).capitalize(),String(shipment.get("source_name",""))],"note":String(shipment.get("when","")),"value":S.n(float(shipment.get("quantity",0.0)))})
+
+## The strip's figures (the dock draws them under the tabs): food in store
+## against the room for it, the 90-day outlook in days, water fetched against
+## the day's need, the hands on food. The top bar's days are not repeated.
+const KPI_LABELS:={"store":"Food in store","ahead":"In 90 days","water":"Water today","hands":"Hands on food"}
+static func kpis(data:Dictionary)->Array:
+	return S.dock_kpis(kpi_items(data),KPI_LABELS)
+
+static func kpi_items(data:Dictionary)->Array:
+	var out:Array=[]
+	# Food in store against the room for it.
+	var stock:=0.0
+	for item:Dictionary in data.get("rows",[]):stock+=float(item.get("stock",0.0))
+	var room:=float(data.get("capacity",0.0))
+	var full:=stock/room if room>0.0 else -1.0
+	out.append(S.kpi_item("store",{"value":S.n(stock),"ratio":clampf(full,0.0,1.0) if full>=0.0 else -1.0,"color":T.RED if full>=0.98 else (T.AMBER if full>=0.85 else T.GREEN),
+		"sub":("of %s room" % S.n(room)) if room>0.0 else "no granary yet",
+		"tip":"Rations held in every store here. Food beyond the room the pits, granaries and sealed jars give is thrown out at the end of the day.\n%s" % String(data.get("lean",""))}))
+	# The outlook in days, the same unit as the top bar's food.
+	var forecast:Dictionary=data.get("forecast90",{})
+	var shortage:=int(forecast.get("first_shortage_day",-1))
+	var ending:=float(forecast.get("ending_days",-1.0))
+	var ahead:={"value":"—","sub":"not reckoned yet","ratio":-1.0,"tip":"The 90-day outlook is reckoned each week from the season's yields, spoilage and need."}
+	if shortage>0:
+		ahead={"value":"Short in %d days" % shortage,"value_color":T.RED_TEXT,"sub":"if the seasons go as expected","ratio":clampf(float(shortage)/90.0,0.0,1.0),"color":T.RED,"edge":T.RED,
+			"tip":"At the season's yields, spoilage and need, food runs short in %s." % Plain.duration_text(float(shortage))}
+	elif not forecast.is_empty():
+		ahead={"value":preload("res://scripts/hud/era_words.gd").days_in_words(maxf(0.0,ending)) if ending>=0.0 else "—","sub":"of food left · no shortage","ratio":clampf(ending/maxf(90.0,ending),0.0,1.0) if ending>=0.0 else -1.0,"color":T.GREEN,
+			"tip":"Days of food in store 90 days from now, at the season's yields, spoilage and need. No shortage is expected before then."}
+	out.append(S.kpi_item("ahead",ahead))
+	# Water fetched against the day's need (the top bar holds the days in store).
+	var water:Dictionary=data.get("water",{})
+	var wet:=Words.water(water)
+	var need:=float(water.get("required_today",0.0))
+	if need>0.0:
+		var ratio:=clampf(float(water.get("intake_ratio",0.0)),0.0,1.0)
+		out.append(S.kpi_item("water",{"value":"%d%%" % roundi(ratio*100.0),"value_color":(T.RED_TEXT if String(wet.tone)=="bad" else T.AMBER_TEXT) if ratio<0.98 else T.INK,"ratio":ratio,"color":T.TEAL if ratio>=0.98 else (T.AMBER if ratio>=0.8 else T.RED),
+			"sub":"of %s drinks needed" % S.n(need),
+			"tip":"%s.\nYesterday %s drinks were fetched for the %s needed; %s are kept in store. One drink is one person's water for a day." % [String(wet.sentence).trim_suffix("."),S.n(float(water.get("collected_today",0.0))),S.n(need),S.n(float(water.get("stored",0.0)))]}))
+	else:out.append(S.kpi_item("water",{"value":"—","sub":"counted after the first day","ratio":-1.0}))
+	# The hands on food, against everyone at work.
+	var hands:=float(data.get("food_workers",0.0))
+	var share:=float(data.get("food_share",0.0))
+	out.append(S.kpi_item("hands",{"value":S.n(hands),"ratio":clampf(share,0.0,1.0),"color":T.GOLD,"sub":"%d in 100 at work" % roundi(share*100.0),
+		"tip":(String(data.get("food_plan",""))+"\n" if String(data.get("food_plan",""))!="" else "")+("%s decides the daily food work." % _who_of(data).capitalize() if bool(data.get("managed",true)) else "You asked for extra hands on part of the work.")}))
+	return out
+
+static func _who_of(block:Dictionary)->String:
+	var who:=String(block.get("leader_name",""))
+	return who if not who.is_empty() else "the leader"
 
 ## The day's terms as the engine gives them.
 static func flow_amounts(flow:Dictionary)->Dictionary:
