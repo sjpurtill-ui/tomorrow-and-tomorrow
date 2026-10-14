@@ -487,10 +487,12 @@ const GUARD_MIN:=8
 ## watch, of them those at home today (at_home): they, not the soldiers
 ## standing over the share, do the day's watch work that raises the walls.
 ## {on_watch, home_guard, home_share, free_to_send, on_border, can_rise,
-## guard_need, set_to_watch}. Read from the guard ledger
+## guard_need, set_to_watch, can_rise_home}. One scope: on_watch and
+## can_rise count all our towns that keep a guard; can_rise_home is the
+## home town's own share of can_rise, for a screen about home alone. Read from the guard ledger
 ## the battles muster from (civilization_combat.gd guard_ledger).
 static func home_standing(mc:Variant)->Dictionary:
-	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed(),"set_to_watch":0}
+	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed(),"set_to_watch":0,"can_rise_home":0}
 	if mc==null:return out
 	out.set_to_watch=at_home(mc)
 	var Combat:=preload("res://scripts/civilization_combat.gd")
@@ -507,6 +509,7 @@ static func home_standing(mc:Variant)->Dictionary:
 	out.on_border=Combat.on_the_border(mc)
 	out.on_watch=in_towns+free
 	out.can_rise=rise
+	out.can_rise_home=int(Combat.home_militia(mc).rise)
 	return out
 
 ## The guard every town of the people needs together (a people with no town

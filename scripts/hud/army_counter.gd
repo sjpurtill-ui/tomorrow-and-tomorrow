@@ -68,6 +68,8 @@ static func men_words(data:Dictionary)->String:
 	if String(data.get("side","ours"))=="ours": return EraWords.grouped(maxi(0,int(data.get("troops",0))))
 	var low:=int(data.get("low",data.get("troops",0))); var high:=maxi(low,int(data.get("high",low)))
 	if high<=0: return "?"
+	# A handful is told as its range ("0–2"), never a lone "~1".
+	if high<10: return EraWords.grouped(maxi(0,low)) if low==high else "%d–%d" % [maxi(0,low),high]
 	return "~"+EraWords.grouped(roundi(float(low+high)*0.5))
 
 ## The supply dot's colour for a supply state (supply_state.state_of).
