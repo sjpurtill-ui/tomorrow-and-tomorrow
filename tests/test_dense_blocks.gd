@@ -87,11 +87,25 @@ func test_columns_stand_side_by_side_and_stack_when_narrow()->void:
 	for i in 3:await get_tree().process_frame
 	assert_bool(row.vertical).is_true()
 
-## The shell's page width: its old share on a narrow window; from 1280 wide
-## (1600 px at 125%) it runs up to the notice column.
-func test_the_page_uses_the_window_up_to_the_notices()->void:
+## A desktop page stops growing once it has room for its working layout;
+## an ultrawide monitor must not pull a label and its value metres apart.
+func test_the_page_preserves_narrow_space_and_bounds_wide_reading_distance()->void:
 	var Folio:=preload("res://scripts/hud/reference_folio.gd")
 	assert_float(Folio.page_width(1000.0)).is_equal_approx(567.0,0.5)
 	assert_float(Folio.page_width(1280.0)).is_equal_approx(1280.0-78.0-Folio.NOTICE_ROOM,0.5)
-	assert_float(Folio.page_width(1600.0)).is_equal_approx(1600.0-78.0-Folio.NOTICE_ROOM,0.5)
-	assert_float(Folio.page_width(1600.0)).is_greater(1100.0)
+	assert_float(Folio.page_width(1600.0)).is_less_equal(1120.0)
+	assert_float(Folio.page_width(2869.0)).is_equal(Folio.page_width(1600.0))
+
+func test_a_wide_fact_keeps_its_value_near_its_label_and_its_keyboard_action()->void:
+	var body:=_body()
+	var acted:=[]
+	var fact:=Dense._fact({"label":"Homes","value":"225","bar":0.76,"on_click":func():acted.append(true)})
+	body.add_child(fact)
+	for frame in 5:await get_tree().process_frame
+	var label:=fact.find_child("Label",true,false) as Label
+	var value:=fact.find_child("Value",true,false) as Label
+	assert_float(value.global_position.x-label.get_global_rect().end.x).is_less_equal(12.0)
+	assert_float(value.global_position.x-label.global_position.x).is_less(180.0)
+	var press:=InputEventAction.new();press.action="ui_accept";press.pressed=true
+	fact.gui_input.emit(press)
+	assert_array(acted).is_equal([true])
