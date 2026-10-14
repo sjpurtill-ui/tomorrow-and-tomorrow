@@ -36,7 +36,9 @@ func test_known_world_fits_narrow_and_wide_docks()->void:
 		assert_float(panel.size.x).is_less_equal(width)
 		var board:Node=panel.find_child("KnownWorldBoard",true,false)
 		assert_bool(board!=null).is_true()
-		assert_int(board.columns.columns).is_equal(1 if width==540.0 else 2)
+		# No chart of its own: the map shows the routes; the told-of list is here.
+		assert_object(board.find_child("Leads",true,false)).is_not_null()
+		assert_object(board.find_child("KnownWorldChart",true,false)).is_null()
 		panel.free()
 	hud.free();terrain.free()
 

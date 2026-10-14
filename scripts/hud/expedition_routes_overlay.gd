@@ -41,7 +41,7 @@ func _ready()->void:
 	ink=Ink.new();ink.set("overlay",self);layer.add_child(ink)
 	layer.visible=false
 
-## Whether World › Expeditions is the page on show.
+## Whether World › Peoples or Expeditions is the page on show.
 func tab_open()->bool:
 	if not is_instance_valid(hud):return false
 	var dock:Variant=hud.get("dock")
@@ -50,7 +50,7 @@ func tab_open()->bool:
 	if provider==null or not provider is Object:return false
 	var script:Variant=(provider as Object).get_script()
 	if script==null or not String((script as Script).resource_path).ends_with("dock_content_world.gd"):return false
-	return int((dock as Control).get("sub"))==1
+	return int((dock as Control).get("sub")) in [0,1]
 
 func _process(_delta:float)->void:
 	var open:=tab_open()
@@ -74,9 +74,13 @@ func frame()->void:
 	var span:=clampf(reach*2.6,260.0,9000.0)
 	var right:Vector3=terrain.call("_camera_ground_screen_right") if terrain.has_method("_camera_ground_screen_right") else Vector3.RIGHT
 	# The page covers the map's left; home sits in the middle of what is left.
-	var at:=Vector3(home.x,0.0,home.y)-right*span*0.28
+	# The view cuts straight out to the routes (no glide that a capture or a
+	# quick look would catch half-way, far from home and still close in).
+	var cam:Variant=terrain.get("camera")
+	if cam is Camera3D:(cam as Camera3D).size=span
+	terrain.set("zoom_target_size",-1.0)
+	var at:=Vector3(home.x,0.0,home.y)-right*span*0.45
 	if terrain.has_method("_set_camera_target"):terrain.call("_set_camera_target",at)
-	terrain.set("zoom_target_size",span)
 
 ## The routes drawn: [[points, return points, tone]] newest first.
 func routes()->Array:

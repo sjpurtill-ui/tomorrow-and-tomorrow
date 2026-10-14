@@ -453,7 +453,7 @@ func _fill_peoples()->void:
 	var head:=UI.line(peoples,6)
 	var first:=UI.label(head,"",12,T.INK_MUTED,true,true);first.custom_minimum_size.x=110
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
-		var title:=UI.cell(head,String(view.name),62,12,T.INK_MUTED,true)
+		var title:=UI.cell(head,String(view.name).replace("Resentment","Resent"),62,12,T.INK_MUTED,true)
 		title.tooltip_text=String(view.means)
 	UI.cell(head,"",46,12,T.INK_MUTED)
 	var on_court:Variant=data.get("on_court")

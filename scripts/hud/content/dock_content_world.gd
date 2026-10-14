@@ -52,6 +52,7 @@ func tab(sub:int)->Dictionary:
 ## only told of, strangers in sight), the ledger of every people we know, and
 ## beside the chart of the known world, the peoples told of but not met.
 func peoples_tab()->Dictionary:
+	if is_instance_valid(terrain) and terrain is Node3D:preload("res://scripts/hud/expedition_routes_overlay.gd").ensure(terrain,hud)
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
 	var encounters:Array=CivilizationSystem.contact_encounters_snapshot()
 	var located:=0
@@ -426,11 +427,11 @@ func _leads_model(leads:Array,home:Vector2,pace:float)->Array:
 		var distance:=walk_text(home.distance_to(center),pace) if center!=Vector2.INF else "an unknown distance"
 		result.append({"name":String(lead.get("name","")),"confidence":confidence,"word":word,
 			"text":"%s spoke of %s, somewhere to the %s — %s." % [_first_upper(String(lead.get("via","travelers"))),preload("res://scripts/hud/known_world_board.gd").the_name(String(lead.get("name","strangers"))),direction,distance],
-			"where":"%s · %s" % [Tokens.sentence_case(direction) if direction!="unknown" else "?",distance.replace("about ","~").replace(" days' walk"," days").replace("more than a season's walk","a season+").replace("within a day's walk","<1 day")],
+			"where":"%s · %s" % [_first_upper(direction) if direction!="unknown" else "?",distance.replace("about ","~").replace(" days' walk"," days").replace("more than a season's walk","a season+").replace("within a day's walk","<1 day")],
 			"stale":String(lead.get("state",""))=="stale","searched":int(lead.get("attempts",0))})
 	for rumored:Dictionary in CivilizationSystem.rumored_civilizations_snapshot():
 		if result.size()>=8:break
-		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [Tokens.sentence_case(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
+		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
 			"text":"Some speak of the %s, off to the %s, %s away." % [String(rumored.get("name","strangers")),String(rumored.get("direction","an unknown direction")),String(rumored.get("distance_hint","an unknown distance"))],"stale":false,"searched":0})
 	return result
 

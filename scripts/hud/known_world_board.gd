@@ -69,8 +69,6 @@ func update_block(block:Dictionary)->bool:
 		if not compact or int(next.get("tier",0))!=tier:return false
 		var old_model:=model
 		model=next
-		if _part(old_model,"chart")!=_part(next,"chart"):
-			chart.data=next.get("chart",{});chart.settlement=String(next.get("settlement","Our hearth"));chart._refit()
 		if _part(old_model,"aims")!=_part(next,"aims") or old_model.get("leads",[])!=next.get("leads",[]):
 			for child in aims_slot.get_parent().get_children():
 				if child!=aims_slot:child.get_parent().remove_child(child);child.queue_free()
@@ -193,16 +191,13 @@ func _build_aims()->void:
 		var remembered:=Kit.serif(stack,"Remembered: %s, %s" % [String(legacy.get("name","")),preload("res://scripts/hud/era_words.gd").when(int(legacy.get("day",0)))],13,T.BODY,true)
 		remembered.name="Legacy_%d" % int(legacy.get("day",0))
 
+## No chart of its own: the map beside the page shows the same ground, with
+## the scouts' routes inked on it (expedition_routes_overlay.gd).
 func _build_compact()->void:
-	columns=GridContainer.new();columns.name="ChartAndLeads";columns.columns=2
-	columns.add_theme_constant_override("h_separation",14);columns.add_theme_constant_override("v_separation",14);add_child(columns)
-	chart=Chart.new();chart.name="KnownWorldChart";chart.data=model.get("chart",{});chart.tier=tier;chart.settlement=String(model.get("settlement","Our hearth"))
-	chart.custom_minimum_size=Vector2(240,COMPACT_CHART_HEIGHT);chart.size_flags_horizontal=Control.SIZE_EXPAND_FILL;columns.add_child(chart)
-	var side:=VBoxContainer.new();side.name="Side";side.size_flags_horizontal=Control.SIZE_EXPAND_FILL;side.add_theme_constant_override("separation",12);columns.add_child(side)
+	var side:=VBoxContainer.new();side.name="Side";side.size_flags_horizontal=Control.SIZE_EXPAND_FILL;side.add_theme_constant_override("separation",12);add_child(side)
 	aims_slot=VBoxContainer.new();aims_slot.name="AimsSlot";aims_slot.add_theme_constant_override("separation",0)
 	side.add_child(aims_slot)
 	_fill_compact_side(side)
-	resized.connect(func()->void:columns.columns=2 if size.x>=560 else 1)
 
 ## The side of the chart: what we strive for, then the peoples told of.
 func _fill_compact_side(side:VBoxContainer)->void:
