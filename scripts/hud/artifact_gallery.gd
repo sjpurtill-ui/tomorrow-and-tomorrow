@@ -11,7 +11,7 @@ const CULTURE_PATH:="res://scripts/artifact_culture.gd"
 ## Inner classes reach the shared static helpers through this self-reference.
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const PAGE_SIZE:=24
-const CARD_MIN_WIDTH:=196.0
+const CARD_MIN_WIDTH:=224.0
 const CARD_GAP:=14
 const TIER_NAMES:=["Common","Unusual","Rare","Exceptional","Legendary"]
 const VIEWS:=[["all","All"],["studied","Understood"],["in_study","Being studied"],["unstudied","Not yet studied"],["exhibited","On show"],["sets","Sets"],["rumors","Rumored treasures"]]
@@ -82,6 +82,10 @@ var detail_back:Button
 var header:HBoxContainer
 var effects_column:VBoxContainer
 var detail_column:VBoxContainer
+var collection_controls:VBoxContainer
+var overview_nodes:Array[Control]=[]
+var effects_toggle:Button
+var effects_open:=false
 
 # ---------------------------------------------------------------- shared API
 
@@ -109,7 +113,7 @@ static func tier_name(item:Dictionary)->String:
 	return named if not named.is_empty() else TIER_NAMES[clampi(int(item.get("rarity_index",0)),0,4)]
 
 static func plate_color()->Color:
-	return Color("f8f1e3") if T.is_light() else Color("121b1e")
+	return T.PAPER_RAISED
 
 static func serif_font()->Font:
 	if _serif==null:_serif=preload("res://scripts/hud/hud_tokens.gd").voice_font()
@@ -159,7 +163,7 @@ static func state_text(item:Dictionary)->String:
 	return "Not yet studied" if float(item.get("study_progress",0))<=0 else "Not yet studied, %d%%" % roundi(float(item.get("study_progress",0))*100)
 
 static func label(parent:Node,text:String,size:int,color:Color,wrap:bool=true,spacing:float=0.0)->Label:
-	var node:=T.make_label(text,size,color,spacing)
+	var node:=T.make_label(text,maxi(14,size),color,spacing)
 	if wrap:node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;node.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	if parent:parent.add_child(node)
 	return node
@@ -171,17 +175,18 @@ static func serif(parent:Node,text:String,size:int,color:Color=T.INK,italic:bool
 
 static func display(parent:Node,text:String,size:int,color:Color=T.INK)->Label:
 	var node:=label(parent,text,size,color)
-	node.add_theme_font_override("font",DISPLAY_FONT)
+	node.add_theme_font_override("font",T.font("ui_strong"))
 	return node
 
 static func action_button(parent:Node,text:String,callback:Callable,primary:bool=false,tip:String="")->Button:
 	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.custom_minimum_size.y=34
-	T.text(button,"small");button.focus_mode=Control.FOCUS_NONE
+	T.text(button,"small");button.focus_mode=Control.FOCUS_ALL
 	var normal:=T.flat(T.GOLD_WASH if primary else T.BUTTON_BG,T.GOLD if primary else T.BORDER_2,1,3);normal.content_margin_left=14;normal.content_margin_right=14
 	var hover:=T.flat(T.HOVER_BG,T.GOLD,1,3);hover.content_margin_left=14;hover.content_margin_right=14
 	var disabled:=T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,3);disabled.content_margin_left=14;disabled.content_margin_right=14
 	button.add_theme_stylebox_override("normal",normal);button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover);button.add_theme_stylebox_override("disabled",disabled)
 	button.add_theme_color_override("font_color",T.GOLD_TEXT if primary else T.BODY);button.add_theme_color_override("font_hover_color",T.INK);button.add_theme_color_override("font_disabled_color",T.DISABLED)
+	T.apply_button_style(button,primary)
 	if callback.is_valid():button.pressed.connect(callback)
 	else:button.disabled=true
 	if parent:parent.add_child(button)
@@ -266,9 +271,8 @@ func _ready()->void:
 	var style:=T.flat(T.DOCK_BG,T.BORDER_2,1,6);style.content_margin_left=24;style.content_margin_right=24;style.content_margin_top=18;style.content_margin_bottom=16
 	style.shadow_color=Color(0,0,0,.35);style.shadow_size=18
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);panel.add_child(root)
 	_build_header(root)
-	root.add_child(Flourish.new())
 	_build_controls(root)
 	main=HBoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",22);root.add_child(main)
 	browse=VBoxContainer.new();browse.size_flags_horizontal=Control.SIZE_EXPAND_FILL;browse.size_flags_stretch_ratio=1.6;browse.add_theme_constant_override("separation",8);main.add_child(browse)
@@ -328,42 +332,49 @@ func api(method:String,arguments:Array=[],fallback:Variant=null)->Variant:
 
 func _build_header(root:VBoxContainer)->void:
 	header=HBoxContainer.new();header.add_theme_constant_override("separation",24);root.add_child(header)
-	seal=Seal.new();seal.name="AllureSeal";seal.custom_minimum_size=Vector2(138,138);seal.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;header.add_child(seal)
+	seal=Seal.new();seal.name="AllureSeal";seal.custom_minimum_size=Vector2(96,96);seal.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;header.add_child(seal)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_stretch_ratio=1.25;words.add_theme_constant_override("separation",4);header.add_child(words)
-	label(words,"OLD OBJECTS AND ALLURE",12,T.GOLD_TEXT,false,.12)
+	overview_nodes.append(label(words,"Collection & allure",14,T.INK_MUTED,false))
 	display(words,"Our %s" % collection_word(),34)
 	allure_title=serif(words,"",18,T.BODY,true)
 	stats_label=label(words,"",13,T.TEXT_SOFT)
 	breakdown=Breakdown.new();breakdown.custom_minimum_size=Vector2(0,10);words.add_child(breakdown)
 	breakdown_legend=HFlowContainer.new();breakdown_legend.add_theme_constant_override("h_separation",14);breakdown_legend.add_theme_constant_override("v_separation",2);words.add_child(breakdown_legend)
 	effects_column=VBoxContainer.new();effects_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;effects_column.add_theme_constant_override("separation",6);header.add_child(effects_column)
-	label(effects_column,"WHAT OUR ALLURE DOES",12,T.GOLD_TEXT,false,.12)
+	label(effects_column,"What our allure does",18,T.INK,false)
 	effects_box=VBoxContainer.new();effects_box.add_theme_constant_override("separation",6);effects_column.add_child(effects_box)
-	var close_button:=Button.new();close_button.name="CloseGallery";close_button.text="Close";close_button.custom_minimum_size=Vector2(96,38);close_button.tooltip_text="Close (Esc)";T.text(close_button,"small",T.INK);close_button.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;close_button.pressed.connect(close);header.add_child(close_button)
+	var close_button:=Button.new();close_button.name="CloseGallery";close_button.text="Close";close_button.custom_minimum_size=Vector2(96,38);close_button.tooltip_text="Close (Esc)";T.text(close_button,"small",T.INK);close_button.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;T.apply_button_style(close_button);close_button.pressed.connect(close);header.add_child(close_button)
+	effects_toggle=action_button(root,"Allure effects  ▸",func()->void:effects_open=not effects_open;_layout())
+	effects_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	effects_column.reparent(root);effects_column.visible=false
+	overview_nodes.append_array([seal,allure_title,stats_label,breakdown,breakdown_legend,effects_toggle])
 
 func _build_controls(root:VBoxContainer)->void:
-	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",12);root.add_child(controls)
+	var controls:=VBoxContainer.new();controls.add_theme_constant_override("separation",12);root.add_child(controls)
+	collection_controls=controls
 	var tabs:=HFlowContainer.new();tabs.name="GalleryTabs";tabs.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tabs.add_theme_constant_override("h_separation",6);tabs.add_theme_constant_override("v_separation",6);controls.add_child(tabs)
 	for spec:Array in VIEWS:
 		var id:=String(spec[0])
-		var button:=Button.new();button.name="Tab_"+id;button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size.y=32;T.text(button,"small")
+		var button:=Button.new();button.name="Tab_"+id;button.focus_mode=Control.FOCUS_ALL;T.apply_button_style(button)
 		button.pressed.connect(func()->void:set_view(id));tabs.add_child(button);tab_buttons[id]=button
-	search=LineEdit.new();search.name="GallerySearch";search.placeholder_text="Search the collection";search.custom_minimum_size=Vector2(250,32);search.clear_button_enabled=true;controls.add_child(search)
+	var tools:=HBoxContainer.new();tools.add_theme_constant_override("separation",12);controls.add_child(tools)
+	search=LineEdit.new();search.name="GallerySearch";search.placeholder_text="Search the collection";search.custom_minimum_size=Vector2(120,44);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;search.add_theme_font_size_override("font_size",16);search.clear_button_enabled=true;tools.add_child(search)
 	search.text_changed.connect(func(value:String)->void:search_text=value;page=0;refresh(true))
-	sort_select=OptionButton.new();sort_select.name="GallerySort";sort_select.custom_minimum_size=Vector2(170,32);sort_select.focus_mode=Control.FOCUS_NONE;controls.add_child(sort_select)
+	sort_select=OptionButton.new();sort_select.name="GallerySort";sort_select.custom_minimum_size=Vector2(170,44);sort_select.focus_mode=Control.FOCUS_ALL;T.apply_button_style(sort_select);tools.add_child(sort_select)
 	for spec:Array in SORTS:sort_select.add_item(String(spec[1]));sort_select.set_item_metadata(sort_select.item_count-1,spec[0])
 	sort_select.item_selected.connect(func(index:int)->void:sort=String(sort_select.get_item_metadata(index));page=0;refresh(true))
 
 func set_view(id:String)->void:
-	view=id;page=0;refresh(true)
+	view=id;page=0;narrow_detail=false;_layout();refresh(true)
 
 func _style_tabs()->void:
 	var counts:={"all":int(summary_data.get("collection_count",0)),"studied":int(summary_data.get("studied_count",0)),"in_study":int(summary_data.get("in_study_count",0)),"unstudied":int(summary_data.get("unstudied_count",0)),"exhibited":int(summary_data.get("exhibited_count",0))}
 	for spec:Array in VIEWS:
 		var id:=String(spec[0]);var button:Button=tab_buttons[id];var active:=id==view
 		button.text=String(spec[1])+("  %d" % int(counts[id]) if counts.has(id) else "")
-		var style:=T.flat(T.GOLD_WASH if active else Color(0,0,0,0),T.GOLD if active else T.BORDER_SOFT,1,14);style.content_margin_left=14;style.content_margin_right=14
-		var hover:=T.flat(T.HOVER_BG,T.GOLD,1,14);hover.content_margin_left=14;hover.content_margin_right=14
+		var style:=T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD,0,4);style.content_margin_left=14;style.content_margin_right=14
+		var hover:=T.flat(T.HOVER_BG,Color.TRANSPARENT,0,4);hover.content_margin_left=14;hover.content_margin_right=14
+		if active:style.border_width_bottom=2
 		button.add_theme_stylebox_override("normal",style);button.add_theme_stylebox_override("hover",hover if not active else style);button.add_theme_stylebox_override("pressed",style)
 		button.add_theme_color_override("font_color",T.GOLD_TEXT if active else T.TEXT_SOFT);button.add_theme_color_override("font_hover_color",T.INK)
 	search.editable=view!="rumors"
@@ -453,7 +464,8 @@ func _fit_columns()->void:
 
 func _browse_width()->float:
 	## Derived from the panel, not the grid, so columns never force the panel wider.
-	var width:=panel.size.x-48.0-16.0
+	var area:=get_viewport_rect().size
+	var width:=area.x-(48.0 if area.x>=900.0 else 16.0)-48.0-16.0
 	if detail_column.visible:width-=detail_column.custom_minimum_size.x+22.0
 	return maxf(CARD_MIN_WIDTH,width)
 
@@ -679,9 +691,14 @@ func _layout()->void:
 	var margin:=24.0 if area.x>=900 else 8.0
 	panel.position=Vector2(margin,margin);panel.size=Vector2(maxf(320,area.x-margin*2),maxf(320,area.y-margin*2))
 	narrow=area.x<1180
-	effects_column.visible=area.x>=1000
+	var reading:=narrow and narrow_detail and view!="rumors"
+	for node:Control in overview_nodes:node.visible=not reading
+	collection_controls.visible=not reading
+	effects_column.visible=effects_open and not reading
+	effects_toggle.text="Allure effects  "+("▾" if effects_open else "▸")
 	browse.visible=not narrow or not narrow_detail
-	detail_column.visible=not narrow or narrow_detail
+	detail_column.visible=view!="rumors" and (not narrow or narrow_detail)
+	if view=="rumors":browse.visible=true
 	detail_back.visible=narrow
 	detail_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL if narrow else Control.SIZE_FILL
 	detail_column.custom_minimum_size.x=0.0 if narrow else clampf(area.x*.3,430,560)
@@ -832,13 +849,13 @@ class ArtifactCard extends PanelContainer:
 		var art:=TextureRect.new();art.name="Art";art.texture=item.get("texture");art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);art.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		art.material=Kit.veil_material(Kit.veil_for(item),.35);art_box.add_child(art)
 		var marks:=CardMarks.new();marks.item=item;marks.tier=tier;marks.focused=focused;art_box.add_child(marks)
-		var title:=Kit.serif(column,String(item.get("name","")),14);title.max_lines_visible=2;title.custom_minimum_size.y=40;title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var title:=Kit.label(column,String(item.get("name","")),18,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.max_lines_visible=2;title.custom_minimum_size.y=40;title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var object:=String(item.get("object",""));var material:=String(item.get("material",""))
 		var sub:=Kit.label(column," · ".join(PackedStringArray([Kit.cap(material),object]).slice(0 if not material.is_empty() else 1)),12,T.TEXT_SOFT,false);sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.clip_text=true;sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var site:=String(item.get("site_name",""))
 		if not site.is_empty():
 			var where:=Kit.label(column,"From "+site,12,T.MUTED,false);where.clip_text=true;where.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;where.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var footer:=HBoxContainer.new();footer.add_theme_constant_override("separation",6);footer.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(footer)
+		var footer:=HFlowContainer.new();footer.add_theme_constant_override("h_separation",8);footer.add_theme_constant_override("v_separation",4);footer.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(footer)
 		Kit.pips(footer,int(item.get("rarity_index",0)),tier)
 		var tier_label:=Kit.label(footer,TIER_NAMES[clampi(int(item.get("rarity_index",0)),0,4)].to_upper(),12,T.legible(tier),false,.08);tier_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tier_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var state:=Kit.label(footer,Kit.state_text(item),12,T.TEAL_TEXT if String(item.get("state",""))!="unstudied" else T.MUTED,false);state.mouse_filter=Control.MOUSE_FILTER_IGNORE
