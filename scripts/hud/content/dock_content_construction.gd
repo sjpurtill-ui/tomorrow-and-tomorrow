@@ -248,7 +248,7 @@ func _fabric_rows()->Array:
 			"detail":"How fully workshops, granaries, kilns, storehouses and water works serve the town."}]
 	if bool(r.home):
 		var bonus:=float(d.get("defense_bonus",0.0))
-		rows.append({"key":"fabric_walls","fx":"walls","icon":"wall","name":"Walls and stone","sub":"%s · %d%% stone houses" % [String(d.get("short","Open ground")),roundi(float(r.stone)*100.0)],"bar":{"ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"color":Tokens.RED},"value":"+%d%%" % roundi(bonus*100.0),
+		rows.append({"key":"fabric_walls","fx":"walls","icon":"wall","name":"Walls and stone","sub":String(d.get("short","Open ground")).to_lower(),"bar":{"ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"color":Tokens.RED},"value":"+%d%%" % roundi(bonus*100.0),
 			"detail":"%s at %d%% repair, and %d in 100 of the places stone. The bar runs to a bastion network's +%d%%." % [String(d.get("short","Open ground")),roundi(float(d.get("integrity",1.0))*100.0),roundi(float(r.stone)*100.0),roundi(Fabric.BASTION_BONUS*100.0)]})
 	rows.append({"key":"fabric_craft","fx":"craft","icon":"builders","name":"Builders' craft","sub":"settles at %s" % Fabric._one(float(r.craft_settles)),"bar":{"ratio":float(r.craft)/Fabric.CRAFT_MAX,"color":Tokens.VIOLET},"value":"%s/%d" % [Fabric._one(float(r.craft)),roundi(Fabric.CRAFT_MAX)],
 		"detail":"The builders' living experience. At today's builders it settles at %s over a working life; it fades as the old builders die." % Fabric._one(float(r.craft_settles))})
