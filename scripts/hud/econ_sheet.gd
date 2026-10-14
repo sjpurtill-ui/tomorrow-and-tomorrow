@@ -200,8 +200,9 @@ static func set_row(refs:Dictionary,item:Dictionary)->void:
 	if ratio>=0.0 and (meter.ratio!=ratio or meter.color!=color):meter.ratio=ratio;meter.color=color;meter.queue_redraw()
 	set_tag(refs.tag,String(item.get("tag","")),item.get("tag_color",T.MUTED))
 	var spark:Control=refs.get("spark")
-	(refs.signals as Control).visible=meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
 	if spark!=null and item.has("points") and spark.get("points")!=item.points:spark.set("points",item.points);spark.queue_redraw()
+	if spark!=null:spark.visible=not bool(refs.get("compact",false)) and not (spark.get("points") as Array).is_empty()
+	(refs.signals as Control).visible=meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
 	var tip:=String(item.get("tip",""))
 	if (refs.panel as Control).tooltip_text!=tip:(refs.panel as Control).tooltip_text=tip
 
@@ -240,5 +241,5 @@ static func compact(root:Node,width:float)->void:
 		refs.compact=narrow
 		if narrow:(refs.bar as Control).visible=false
 		else:(refs.bar as Control).visible=float(refs.get("ratio",-1.0))>=0.0
-		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow
+		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow and not (refs.spark.get("points") as Array).is_empty()
 		(refs.signals as Control).visible=(refs.bar as Control).visible or (refs.tag as Control).visible or (refs.get("spark")!=null and (refs.spark as Control).visible)
