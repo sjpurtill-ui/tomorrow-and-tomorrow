@@ -26,7 +26,7 @@ func setup(block:Dictionary)->void:
 	data=block;name="ImpactPanel";add_theme_constant_override("separation",8)
 	if String(block.get("lead",""))!="":
 		var lead:=T.make_label(String(block.lead),13,T.BODY);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		lead.add_theme_font_override("font",T.voice_font());lead.add_theme_font_size_override("font_size",15)
+		lead.add_theme_font_override("font",T.font("ui") if bool(block.get("local_readings",false)) else T.voice_font());lead.add_theme_font_size_override("font_size",16 if bool(block.get("local_readings",false)) else 15)
 		add_child(lead);_lead=lead
 	grid=GridContainer.new();grid.name="Lines";grid.columns=1
 	grid.add_theme_constant_override("h_separation",28);grid.add_theme_constant_override("v_separation",10)
@@ -60,7 +60,7 @@ func update_block(block:Dictionary)->bool:
 static func shape_of(block:Dictionary)->Array:
 	var lines:Array=[]
 	for line:Dictionary in block.get("lines",[]):lines.append(String(line.get("words",""))!="")
-	return [String(block.get("lead",""))!="",int(block.get("columns",2)),lines,bool(block.get("compact",false))]
+	return [String(block.get("lead",""))!="",int(block.get("columns",2)),lines,bool(block.get("compact",false)),bool(block.get("local_readings",false))]
 
 
 static func _ink(line:Dictionary)->Color:
@@ -83,18 +83,19 @@ func _arrange()->void:
 func _line(line:Dictionary)->Control:
 	var ink:=_ink(line)
 	var box:=VBoxContainer.new();box.name="Line";box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",2)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);box.add_child(head)
+	var local:=bool(data.get("local_readings",false))
+	var head:Container=HFlowContainer.new() if local else HBoxContainer.new();head.add_theme_constant_override("separation",8);head.add_theme_constant_override("h_separation",8);head.add_theme_constant_override("v_separation",2);box.add_child(head)
 	var mark:=ColorRect.new();mark.color=Color(ink,0.85);mark.custom_minimum_size=Vector2(3,16);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(mark)
-	var label:=T.make_label(String(line.get("label","")),13,T.INK);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var label:=T.make_label(String(line.get("label","")),14 if local else 13,T.INK);label.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN if local else Control.SIZE_EXPAND_FILL
 	label.add_theme_font_override("font",T.font("ui_strong"));head.add_child(label)
-	var value:=T.make_label(String(line.get("value","")),14,ink);value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	var value:=T.make_label(String(line.get("value","")),14,ink);value.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT if local else HORIZONTAL_ALIGNMENT_RIGHT
 	value.add_theme_font_override("font",T.font("ui_strong"));head.add_child(value)
 	var refs:={"mark":mark,"label":label,"value":value,"words":null,"box":box}
 	if compact:
 		# The words wait in the tooltip; the line reads at a glance.
 		box.tooltip_text=String(line.get("words",""));box.mouse_filter=Control.MOUSE_FILTER_STOP
 	elif String(line.get("words",""))!="":
-		var words:=T.make_label(String(line.words),12,T.TEXT_SOFT);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		var words:=T.make_label(String(line.words),14 if local else 12,T.TEXT_SOFT);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		var inset:=MarginContainer.new();inset.add_theme_constant_override("margin_left",11);inset.add_child(words);box.add_child(inset)
 		refs.words=words
 	_lines.append(refs)

@@ -72,7 +72,7 @@ var voice_name:Label
 var voice_face:Control
 var faces_row:GridContainer
 var card:PanelContainer
-var columns:GridContainer
+var columns:BoxContainer
 var left:VBoxContainer
 var right:VBoxContainer
 var parts:Dictionary={}
@@ -81,6 +81,9 @@ var prints:Dictionary={}
 var face_slots:Dictionary={}
 ## The task whose "what this work does" is open ("" for none).
 var open_task:=""
+var selected_work:="Food"
+var work_choices:Dictionary={}
+var work_detail:VBoxContainer
 ## Parts rebuilt since setup (tests read this to prove in-place updates).
 var rebuilds:=0
 
@@ -90,21 +93,23 @@ func setup(block:Dictionary)->void:
 	add_theme_constant_override("separation",14)
 	_build_scene()
 	faces_row=GridContainer.new();faces_row.name="Faces";faces_row.columns=8
+	faces_row.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	faces_row.add_theme_constant_override("h_separation",6);faces_row.add_theme_constant_override("v_separation",6)
 	add_child(_section("FACES AT THE FIRE" if _hearth(block) else "FACES AMONG THE PEOPLE",faces_row))
 	card=PanelContainer.new();card.name="PersonCard";card.visible=false
 	card.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.GOLD,1,4,12));add_child(card)
-	columns=GridContainer.new();columns.name="Columns"
-	columns.add_theme_constant_override("h_separation",22);columns.add_theme_constant_override("v_separation",14)
+	columns=BoxContainer.new();columns.name="Columns"
+	columns.add_theme_constant_override("separation",24)
 	add_child(columns)
-	left=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",14);columns.add_child(left)
+	left=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.size_flags_stretch_ratio=1.65;left.add_theme_constant_override("separation",14);columns.add_child(left)
 	right=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",14);columns.add_child(right)
-	parts.labor=_part(self,"Labor");move_child(parts.labor,columns.get_index());parts.labor.add_theme_constant_override("separation",1)
+	parts.labor=_part(left,"Labor");parts.labor.add_theme_constant_override("separation",1)
 	parts.vitals=_part(left,"Vitals")
 	parts.story=_part(right,"Story")
-	parts.hearths=_part(self,"Hearths")
-	parts.tallies=_part(self,"Tallies")
+	parts.hearths=_part(right,"Hearths")
+	parts.tallies=_part(right,"Tallies")
 	resized.connect(_layout)
+	get_viewport().size_changed.connect(func():_layout.call_deferred())
 	apply(block)
 	_layout()
 
@@ -129,7 +134,7 @@ func apply(block:Dictionary)->void:
 
 
 func view_state()->Dictionary:
-	return {"selected":selected_id,"task":open_task}
+	return {"selected":selected_id,"task":open_task,"work":selected_work}
 
 
 func restore_view_state(state:Dictionary)->void:
@@ -139,6 +144,8 @@ func restore_view_state(state:Dictionary)->void:
 		selected_id=wanted
 		prints.erase("card");prints.erase("faces");changed=true
 	var task:=String(state.get("task",""))
+	var work:=String(state.get("work",task if task!="" else selected_work))
+	if work!=selected_work:selected_work=work;changed=true
 	if task!=open_task:
 		open_task=task;prints.erase("labor");changed=true
 	if changed:apply(data)
@@ -146,9 +153,23 @@ func restore_view_state(state:Dictionary)->void:
 
 ## Opens what a task does, or closes it when it is the one open.
 func toggle_task(role:String)->void:
+	selected_work=role
 	open_task="" if open_task==role else role
 	prints.erase("labor")
 	_rebuild_labor()
+
+func select_work(role:String)->void:
+	selected_work=role;open_task=role;prints.erase("labor");_rebuild_labor()
+
+func _show_work(labor:Dictionary)->void:
+	for row:Control in _labor_rows:row.visible=String(row.name)=="TaskBox_"+selected_work
+	for task:Dictionary in labor.get("tasks",[]):
+		var role:=String(task.get("id",""))
+		if not work_choices.has(role):continue
+		var button:Button=work_choices[role]
+		var label:=String(task.get("label",role));button.text=label.left(1).to_upper()+label.substr(1)+" · "+_share_text(task)
+		button.tooltip_text=_share_tip(task)+"\n"+_task_tip(task)
+		button.set_pressed_no_signal(role==selected_work)
 
 
 ## The labor part is drawn from the tasks and, for the one task opened, what
@@ -198,6 +219,7 @@ func _rebuild_labor()->void:
 		_labor_row_prints=row_prints
 		_labor_row_shapes=row_shapes
 		rebuilds+=1
+		_show_work(labor)
 		return
 	if String(prints.get("labor",""))!=head_print:
 		prints["labor"]=head_print
@@ -212,13 +234,15 @@ func _rebuild_labor()->void:
 		# into the row drawn, so nothing is torn down and redrawn each day.
 		if row_shapes[index]==_labor_row_shapes[index] and _write_row_numbers(stale,tasks[index]):continue
 		var at:=stale.get_index()
-		box.remove_child(stale);stale.queue_free()
+		var row_parent:=stale.get_parent()
+		row_parent.remove_child(stale);stale.queue_free()
 		var fresh:=_labor_row(labor,tasks[index])
-		box.add_child(fresh);box.move_child(fresh,at)
+		row_parent.add_child(fresh);row_parent.move_child(fresh,at)
 		_labor_rows[index]=fresh
 		rebuilds+=1
 	_labor_row_prints=row_prints
 	_labor_row_shapes=row_shapes
+	_show_work(labor)
 
 var _labor_head:Control
 var _labor_rows:Array[Control]=[]
@@ -277,7 +301,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 	for face_variant in faces:
 		var face:Dictionary=face_variant
 		var id:=String(face.get("id",""))
-		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(0,82);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(130,82);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.tooltip_text="%s · %s" % [String(face.get("name","")),String(face.get("tag","")).to_lower()]
 		var chosen:=id==selected_id
 		var accent:=T.GOLD if chosen else (T.BORDER_SOFT if bool(face.get("alive",true)) else T.DISABLED)
@@ -297,6 +321,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		given.add_theme_font_override("font",T.font("ui_strong"));given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(given)
 		var tag:=T.make_label(String(face.get("tag","")).to_lower(),14,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(tag)
+	_layout.call_deferred()
 
 
 func _assign_face_slots(faces:Array,scene:Dictionary)->void:
@@ -450,9 +475,19 @@ static func _put(label:Label,text:String,color:Variant=null)->void:
 ## (dock_content_overview.gd work_step), and the plain warnings.
 func _fill_labor(parent:Control,labor:Dictionary)->void:
 	_labor_head=_labor_header(labor);parent.add_child(_labor_head)
+	work_choices.clear()
+	var groups:=HFlowContainer.new();groups.name="WorkGroups";groups.add_theme_constant_override("h_separation",16);groups.add_theme_constant_override("v_separation",12);parent.add_child(groups)
+	for group:Array in [["Provide",["Food","Survey","Extraction"]],["Make & move",["Construction","Crafting","Logistics"]],["Learn & protect",["Knowledge","Administration","Defense"]]]:
+		var section:=VBoxContainer.new();section.add_theme_constant_override("separation",4);groups.add_child(section)
+		section.add_child(T.make_label(String(group[0]),14,T.MUTED))
+		for task:Dictionary in labor.get("tasks",[]):
+			var role:=String(task.get("id",""))
+			if not role in group[1]:continue
+			var choice:=Button.new();choice.name="ChooseWork_"+role;choice.toggle_mode=true;T.apply_button_style(choice);choice.add_theme_font_size_override("font_size",14);choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.pressed.connect(select_work.bind(role));section.add_child(choice);work_choices[role]=choice
+	work_detail=VBoxContainer.new();work_detail.name="SelectedWork";work_detail.add_theme_constant_override("separation",8);parent.add_child(work_detail)
 	_labor_rows.clear()
 	for task_variant in labor.get("tasks",[]):
-		var row:=_labor_row(labor,task_variant);parent.add_child(row);_labor_rows.append(row)
+		var row:=_labor_row(labor,task_variant);work_detail.add_child(row);_labor_rows.append(row)
 
 
 ## The labor part's head: its heading, who can work, who sets the work (the
@@ -528,7 +563,7 @@ static func _share_tip(task:Dictionary)->String:
 ## Writes a task's count, effect words and tooltip into the row drawn.
 func _write_row_numbers(row:Control,task:Dictionary)->bool:
 	var role:=String(task.get("id",""))
-	var line:=row.get_node_or_null("TaskHead/Task_%s" % role) as HBoxContainer
+	var line:=row.get_node_or_null("TaskHead/Task_%s" % role) as Control
 	var number:=line.get_node_or_null("Count") as Label if line!=null else null
 	if number==null:return false
 	number.text=_share_text(task)
@@ -568,14 +603,17 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	# The row and, under it, what the work does now and what ten more would do
 	# (role_effects.gd), kept together so an opened task's panel sits just below.
 	var head:=VBoxContainer.new();head.name="TaskHead";head.add_theme_constant_override("separation",2);parent.add_child(head)
-	var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);head.add_child(row)
+	var row:=HFlowContainer.new();row.name="Task_"+role;row.add_theme_constant_override("h_separation",6);row.add_theme_constant_override("v_separation",6);head.add_child(row)
 	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
 	for part:Array in [["now","Effect"],["plus_ten","TenMore"],["genius","Gifted"]]:
 		if String(effect.get(String(part[0]),""))=="":continue
 		var line:=Label.new();line.text=String(effect[part[0]]);line.name=String(part[1]);line.visible=false;head.add_child(line)
 	var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
+	# The selected work reads as a local heading; its original disclosure stays keyboard accessible.
+	var selected_style:=T.flat(Color.TRANSPARENT);selected_style.content_margin_left=17;selected_style.content_margin_right=4;selected_style.content_margin_top=2;selected_style.content_margin_bottom=2
+	toggle.add_theme_stylebox_override("normal",selected_style);toggle.add_theme_font_size_override("font_size",18)
 	toggle.pressed.connect(toggle_task.bind(role))
-	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
+	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_vertical=Control.SIZE_SHRINK_CENTER;crowd.clip_contents=true;row.add_child(crowd)
 	var count:=int(task.get("count",0))
 	# The food getters by what they got (plants, game, fish, fields).
 	var kinds:=_row_kinds(task,per)
@@ -584,13 +622,14 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 		figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
 	row.tooltip_text=_task_tip(task)
-	var number:=T.make_label(_share_text(task),12,T.INK);number.name="Count";number.custom_minimum_size.x=62 if bool(task.get("share_plain",false)) else 36;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;number.mouse_filter=Control.MOUSE_FILTER_PASS;number.tooltip_text=_share_tip(task);row.add_child(number)
+	var number:=T.make_label(_share_text(task),14,T.INK);number.name="Count";number.custom_minimum_size.x=62 if bool(task.get("share_plain",false)) else 36;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT;number.mouse_filter=Control.MOUSE_FILTER_PASS;number.tooltip_text=_share_tip(task);number.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(number);row.move_child(number,1)
 	if manual and on_move is Callable:
-		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),40);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
+		var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",4);row.add_child(controls)
+		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),40);less.name="Less";less.disabled=not bool(task.get("can_take",false));controls.add_child(less)
 		less.pressed.connect((on_move as Callable).bind(role,-1))
-		var more:=W.IconButton.new("plus",String(task.get("add_tip","")),40);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
+		var more:=W.IconButton.new("plus",String(task.get("add_tip","")),40);more.name="More";more.disabled=not bool(task.get("can_add",false));controls.add_child(more)
 		more.pressed.connect((on_move as Callable).bind(role,1))
-		var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
+		var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));controls.add_child(five)
 		five.pressed.connect((on_move as Callable).bind(role,5))
 	if open_task==role:_task_impact(parent,task)
 	return parent
@@ -606,7 +645,7 @@ func _task_impact(parent:Control,task:Dictionary)->void:
 	if (impact.get("lines",[]) as Array).is_empty() and String(impact.get("lead",""))=="":
 		_line(inner,"Nothing is measured for this work yet.");return
 	var panel:=ImpactPanel.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;inner.add_child(panel)
-	panel.setup({"lead":String(impact.get("lead","")),"lines":impact.get("lines",[]),"columns":1})
+	panel.setup({"lead":String(impact.get("lead","")),"lines":impact.get("lines",[]),"columns":1,"local_readings":true})
 
 
 ## A plain choice button, the current one marked (home_ledger._choices' look).
@@ -686,11 +725,16 @@ func _fill_tallies(parent:Control,tallies:Array)->void:
 # ---------------------------------------------------------------------------
 
 func _layout()->void:
-	if columns==null:return
-	var wide:=size.x>=TWO_COLUMNS_AT or (size.x<=0.0 and get_parent_area_size().x>=TWO_COLUMNS_AT)
-	# With no vitals left to show (the top bar and Home carry them), the story takes the width.
-	var vitals_shown:bool=parts.has("vitals") and (parts.vitals as Control).visible
-	columns.columns=2 if wide and vitals_shown else 1
+	if not is_inside_tree() or columns==null:return
+	var available:=minf(size.x,get_viewport_rect().size.x-global_position.x-24)
+	var wide:=available>=960
+	columns.vertical=not wide
+	faces_row.columns=mini(maxi(1,faces_row.get_child_count()),maxi(1,floori((available+6)/136)))
+	var destination:Node=right if wide else self
+	if card and card.get_parent()!=destination:card.reparent(destination)
+	if card:
+		if wide:right.move_child(card,0)
+		else:move_child(card,columns.get_index())
 
 
 func _part(parent:Node,part_name:String)->VBoxContainer:
@@ -736,9 +780,9 @@ func _section(title:String,content:Control,note:String="")->VBoxContainer:
 	return box
 
 
-func _heading(title:String,note:String="")->HBoxContainer:
-	var row:=HBoxContainer.new()
-	var head:=T.make_label(T.sentence_case(title),22,T.INK);head.add_theme_font_override("font",T.font("ui_strong"));head.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(head)
+func _heading(title:String,note:String="")->HFlowContainer:
+	var row:=HFlowContainer.new();row.add_theme_constant_override("h_separation",12)
+	var head:=T.make_label(T.sentence_case(title),20,T.INK);head.add_theme_font_override("font",T.font("ui_strong"));row.add_child(head)
 	if note!="":
 		var hint:=T.make_label(note,10,T.MUTED);hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(hint)
 	return row

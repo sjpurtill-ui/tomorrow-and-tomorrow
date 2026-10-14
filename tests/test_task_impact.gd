@@ -194,7 +194,7 @@ func test_a_task_opens_what_it_does_and_closes_again()->void:
 	var panel:=labor.find_child("TaskImpact",true,false)
 	assert_object(panel).is_not_null()
 	var text:="\n".join(_texts(panel))
-	assert_str(text).contains("WHAT KEEPING WATCH DOES").contains("What it costs")
+	assert_str(text).contains("What keeping watch does").contains("What it costs")
 	# It sits right under its own row.
 	assert_int(panel.get_index()).is_equal(labor.find_child("Task_Defense",true,false).get_index()+1)
 	assert_str(String(screen.view_state().task)).is_equal("Defense")
@@ -204,12 +204,12 @@ func test_a_task_opens_what_it_does_and_closes_again()->void:
 	# Another task opens in its place; the same one again closes it.
 	(_labor(screen).find_child("Task_Survey",true,false).find_child("Task",true,false) as Button).pressed.emit()
 	assert_int(_labor(screen).find_children("TaskImpact","",true,false).size()).is_equal(1)
-	assert_str("\n".join(_texts(_labor(screen).find_child("TaskImpact",true,false)))).contains("WHAT SEARCHING THE LAND DOES")
+	assert_str("\n".join(_texts(_labor(screen).find_child("TaskImpact",true,false)))).contains("What searching the land does")
 	(_labor(screen).find_child("Task_Survey",true,false).find_child("Task",true,false) as Button).pressed.emit()
 	assert_object(_labor(screen).find_child("TaskImpact",true,false)).is_null()
 	# A reopened dock brings the open task back.
 	screen.restore_view_state({"selected":"","task":"Food"})
-	assert_str("\n".join(_texts(_labor(screen).find_child("TaskImpact",true,false)))).contains("WHAT GETTING FOOD DOES")
+	assert_str("\n".join(_texts(_labor(screen).find_child("TaskImpact",true,false)))).contains("What getting food does")
 
 func test_the_task_names_read_well_in_both_palettes()->void:
 	_world()
@@ -230,3 +230,25 @@ func test_the_task_names_read_well_in_both_palettes()->void:
 			var ink:=(label as Label).get_theme_color("font_color")
 			assert_float(T.contrast(ink,T.DOCK_BG)).override_failure_message("'%s' in %s" % [(label as Label).text,mode]).is_greater_equal(4.5)
 	T.set_color_mode("light")
+
+
+func test_grouped_work_keeps_nine_shares_and_one_selected_reader_through_refresh()->void:
+	_world()
+	var hud:=FakeHud.new();add_child(hud);auto_free(hud)
+	var screen:=_people_view(hud)
+	assert_int(screen.work_choices.size()).is_equal(9)
+	for role:String in GameState.POPULATION_ROLES:
+		var choice:Button=screen.work_choices[role]
+		choice.pressed.emit();choice.grab_focus()
+		assert_str(screen.selected_work).is_equal(role)
+		var visible:=0
+		for row:Control in screen._labor_rows:
+			if row.visible:visible+=1;assert_str(String(row.name)).is_equal("TaskBox_"+role)
+		assert_int(visible).is_equal(1)
+		screen.update_block((Overview.new(null,hud).tab(0).blocks as Array)[0])
+		assert_object(get_viewport().gui_get_focus_owner()).is_same(choice)
+		assert_str(screen.view_state().work).is_equal(role)
+		assert_int(screen.find_children("TaskImpact","",true,false).size()).is_equal(1)
+	screen.restore_view_state({"work":"Food","task":""})
+	assert_str(screen.selected_work).is_equal("Food")
+	assert_bool(screen.find_child("TaskBox_Food",true,false).visible).is_true()
