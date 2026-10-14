@@ -20,6 +20,19 @@ controls/provider; C living scene/camera; root integration and route consolidati
 The generated village image is an art-direction concept only. Static artwork
 behind lists does not satisfy the user's dynamic scene requirement.
 
+Assembly checkpoint (worker branch only, not player delivery): the read-only
+forecast (`c9683ab1`, corrected by `3c453d62`) is in the integration worktree.
+It replays the existing allocation commands on detached systems, includes town
+food safeguards, and compares food, water evidence, learning capacity and
+construction. The renderer foundation (`0e13b2ae`) reads recorded settlement
+plots/routes in a private world. Both remain under visual integration review.
+Root routing (`e23e4f5e`) connects assignment shortcuts to category focus, gives
+only the spatial People view more room, and preserves local leader priorities.
+The combined 13 forecast, four scene, and three navigation cases pass cleanly
+(`living-people-foundation-final.log`, report_55). An additional 30 routing and
+existing Food/Materials/Production/Buildings checks pass. These checks establish
+behavior, not acceptance of the illustration, camera framing, or final controls.
+
 ## October 14 — Popup information architecture revision (IN PROGRESS)
 
 The user's later screenshots reject the first audit's interior page layouts.
