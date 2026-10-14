@@ -39,7 +39,7 @@ func _local_tab(sub:int)->Dictionary:
 ## goods and lives on Wealth (hud/purse_board.gd), as the treasury does.
 func _food_tab()->Dictionary:
 	var block:=_provisions_data()
-	return {"kpis":preload("res://scripts/hud/food_folio.gd").kpis(block),"blocks":[block]}
+	return {"kpis":[],"blocks":[block]}
 
 func _open_section(section:String,sub:int)->void:
 	if is_instance_valid(hud):hud.section_requested.emit(section,sub)
