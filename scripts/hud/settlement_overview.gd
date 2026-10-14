@@ -102,7 +102,7 @@ func update_block(block:Dictionary)->bool:
 	if _page_refs.has("places") and is_instance_valid(_page_refs.places) and _places_print(places)!=String(_page_refs.get("places_print","")):
 		var old:Control=_page_refs.places;var at:=old.get_index()
 		remove_child(old);old.queue_free()
-		var fresh:=OwnBlocks.render_table(self,places);fresh.name="Places";move_child(fresh,at)
+		var fresh:=_places_view(places);fresh.name="Places";move_child(fresh,at)
 		_page_refs["places"]=fresh;_page_refs["places_print"]=_places_print(places)
 	var works:Dictionary=block.get("works",{})
 	var progress:Array=works.get("progress",[])
@@ -286,9 +286,14 @@ func _new_towns(founding:Dictionary)->void:
 func _places(places:Dictionary)->void:
 	_rule(self)
 	var head:=T.make_label(String(places.get("heading","Where our people live")).to_upper(),12,T.GOLD_TEXT);head.name="PlacesHeading";add_child(head)
-	var table:=OwnBlocks.render_table(self,places);table.name="Places"
+	var table:=_places_view(places);table.name="Places"
 	if not _page_refs.is_empty():
 		_page_refs["places"]=table;_page_refs["places_print"]=_places_print(places)
+
+## The active Home folio supplies a compact place list; other inherited
+## boards retain the generic table. Both use the same data and callbacks.
+func _places_view(places:Dictionary)->Control:
+	return OwnBlocks.render_table(self,places)
 
 static func _places_print(places:Dictionary)->String:
 	var lines:Array=[]
