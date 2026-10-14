@@ -18,7 +18,7 @@ extends "res://scripts/hud/town_works_board.gd"
 ## Widths are the UI's own units (the game draws at a UI scale, so 1600 px
 ## wide gives this page about 665 units and 2000 px about 850).
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
-const COLUMN_MIN:=300.0
+const COLUMN_MIN:=262.0
 const BAR_WIDTH:=80.0
 
 var _specs:Array=[]
@@ -155,12 +155,16 @@ func _row(card:Dictionary)->Control:
 		var stamp:=Stamp.new();stamp.name="Stamp";stamp.text=String(card.stamp.get("text","Built"));stamp.tooltip_text=String(card.stamp.get("tip",""));stamp.custom_minimum_size=Vector2(66,24);line.add_child(stamp)
 	var bar:Variant=card.get("bar",card.get("progress",card.get("meter")))
 	if not (card.get("segments",[]) as Array).is_empty():line.add_child(_segments(card.segments))
-	elif bar is Dictionary:line.add_child(_inline_bar(bar))
+	elif bar is Dictionary and not (bar as Dictionary).is_empty():line.add_child(_inline_bar(bar))
 	if String(card.get("value",""))!="":
 		var value:=_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true);value.name="Value"
 		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(card.get("value_width",44))
 		line.add_child(value)
 	# Side by side, the state word takes the place of the row's few words.
+	# Side by side, words too long for the column wait in the tooltip, never cut.
+	if _compact and sub.text!="" and T.font("ui").get_string_size(sub.text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x>(84.0 if _columns>=3 else 120.0):
+		panel.tooltip_text=("%s\n%s" % [sub.text,panel.tooltip_text]).strip_edges()
+		sub.text=""
 	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():
 		if _compact:
 			sub.text=String(card.tag.get("text",""));sub.tooltip_text=String(card.tag.get("tip",""))
@@ -209,7 +213,7 @@ func _inline_bar(spec:Dictionary)->Control:
 	var box:=HBoxContainer.new();box.name="Bar";box.add_theme_constant_override("separation",6);box.mouse_filter=Control.MOUSE_FILTER_PASS
 	box.tooltip_text=String(spec.get("tip",""))
 	var bar:=Meter.new();bar.ratio=clampf(float(spec.get("ratio",0.0)),0.0,1.0);bar.tick=float(spec.get("tick",-1.0))
-	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2(minf(56.0,float(spec.get("width",BAR_WIDTH))) if _compact else float(spec.get("width",BAR_WIDTH)),8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2((44.0 if _columns>=3 else minf(56.0,float(spec.get("width",BAR_WIDTH)))) if _compact else float(spec.get("width",BAR_WIDTH)),8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	box.add_child(bar)
 	if String(spec.get("text",""))!="" and bool(spec.get("show_text",false)):box.add_child(_label(String(spec.text),12,T.TEXT_SOFT))
 	return box
@@ -217,7 +221,7 @@ func _inline_bar(spec:Dictionary)->Control:
 
 ## One bar split by share: the builders by job, the homes by kind.
 func _segments(items:Array)->Control:
-	var bar:=Segments.new();bar.name="Segments";bar.items=items;bar.custom_minimum_size=Vector2(80.0 if _compact else BAR_WIDTH+40.0,10)
+	var bar:=Segments.new();bar.name="Segments";bar.items=items;bar.custom_minimum_size=Vector2((56.0 if _columns>=3 else 80.0) if _compact else BAR_WIDTH+40.0,10)
 	bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_STOP
 	var tips:PackedStringArray=[]
 	for item:Dictionary in items:tips.append("%s %s" % [String(item.get("label","")),String(item.get("value",""))])

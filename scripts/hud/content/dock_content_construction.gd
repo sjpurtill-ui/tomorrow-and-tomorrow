@@ -23,11 +23,11 @@ func meta()->Dictionary:
 	return {"eyebrow":"CITIES & INFRASTRUCTURE","title":"Buildings","serif":true,"subtabs":["THE TOWN","CIVIC WORKS","INFRASTRUCTURE","LANDMARKS"]}
 func tab(sub:int)->Dictionary:
 	if sub==3:return preload("res://scripts/hud/content/dock_content_undertakings.gd").new(terrain,hud).tab(0)
-	if sub==2:return _infrastructure_tab()
 	# The defences rise at the first town and are the whole people's: read
 	# outside any one town's stores (home_defense.gd).
 	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
-	_defence=_defence_card() if sub==0 and GameState.settlement_site_committed and (picked.is_empty() or bool(picked.get("primary",false))) else {}
+	_defence=_defence_card() if sub in [0,2] and GameState.settlement_site_committed and (picked.is_empty() or bool(picked.get("primary",false))) else {}
+	if sub==2:return _infrastructure_tab()
 	var page:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
 	return page
 
@@ -82,7 +82,7 @@ func _city_tab()->Dictionary:
 		var wants:PackedStringArray=[]
 		for note:Dictionary in era.get("notes",[]):wants.append(String(note.text).get_slice(" (",0).to_lower())
 		era.erase("notes")
-		era.merge({"section":"soon","name":next_era,"sub":String(era.sub) if wants.is_empty() else ", ".join(wants.slice(0,2))+("…" if wants.size()>2 else ""),"value":"","bar":{"ratio":clampf(level-floorf(level),0.0,1.0),"color":Tokens.GOLD,"width":80}},true)
+		era.merge({"section":"soon","name":"Next: %s" % next_era,"sub":String(era.sub) if wants.is_empty() else ", ".join(wants.slice(0,2))+("…" if wants.size()>2 else ""),"value":"","bar":{"ratio":clampf(level-floorf(level),0.0,1.0),"color":Tokens.GOLD,"width":80}},true)
 		era.erase("meter")
 		cards.append(era)
 	cards.append_array(_unlock_rows())
@@ -90,7 +90,7 @@ func _city_tab()->Dictionary:
 	var total:=Construction._settlement_definitions().size()
 	var sections:=[
 		{"id":"next","heading":("%s: now and next" % String(city.get("name","The town"))) if GameState.player_settlements.size()>1 else "Building now and next","span":true,"note":("All %d civic works stand" % total) if project.is_empty() else "%d of %d civic works stand" % [done,total],"note_tip":"New civic works come as the people learn new ways to build: see Coming next."},
-		{"id":"crews","heading":"Where the builders work","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People."+(("
+		{"id":"crews","heading":"Builders by job","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People."+(("
 Ten more builders would give: %s." % _ten_more) if _ten_more!="" else ""),"on_press":jump("overview",0)}]},
 		{"id":"fabric","heading":"The town's fabric"},
 		{"id":"soon","heading":"Coming next"}]
@@ -932,7 +932,7 @@ func _civic_tab()->Dictionary:
 		cards.append({"section":"does","key":"does_"+String(line.label),"icon":"hall","name":label,"value":value,"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
 	var homes:=Impact.homes()
 	for line:Dictionary in homes.lines:
-		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(SHORT_LINES.get(String(line.label),line.label)),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
+		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(SHORT_LINES.get(String(line.label),line.label)),"value":preload("res://scripts/hud/content/dock_content_undertakings.gd")._grouped_numbers(String(line.value)),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
 	var record:=_record_rows()
 	cards.append_array(record.rows)
 	var sections:=[
@@ -968,7 +968,8 @@ func _record_rows()->Dictionary:
 		var used:PackedStringArray=[]
 		for material in row.get("materials",{}):used.append("%s %s" % [_n(roundi(float(row.materials[material]))),ResourceSystem.display_name(String(material)).to_lower()])
 		var bad:=event in ["destroyed","damaged","abandoned","vacated"]
-		rows.append({"section":"record","key":"record_%d" % int(row.get("id",index)),"icon":work_icon(String(row.get("kind",""))),"name":String(row.get("kind","Building")).replace("_"," ").capitalize(),
+		var kind:=String(row.get("kind","Building"))
+		rows.append({"section":"record","key":"record_%d" % int(row.get("id",index)),"icon":work_icon(kind),"name":kind if kind!=kind.to_lower() else kind.replace("_"," ").capitalize(),
 			"sub":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"tag":{"text":event.replace("_"," ").capitalize(),"tone":"bad" if bad else ("good" if event in ["completed","founded","infilled","rebuilt","reoccupied"] else "info")},
 			"detail":("Used %s." % ", ".join(used)) if not used.is_empty() else "Record #%d." % int(row.get("id",0))})
 	var actions:Array=[]
@@ -981,10 +982,12 @@ func _record_turn(step:int)->void:
 	record_page=maxi(0,record_page+step)
 	if is_instance_valid(hud):hud.request_immediate_dock_refresh()
 
-## Infrastructure as rows (hud/buildings_board.gd): every town's water
-## works, channels, rail, docks and plants with state and repair, then the
-## defence ladder, stage by stage, with what each gives in the engine's
-## figures (building_impact.gd defences), what stands and what is next.
+## Infrastructure as rows (hud/buildings_board.gd): the defence ladder, stage
+## by stage, with the next stage's bill, Build and who decides on its row (the
+## same row and figures as The Town: _defence_row); the roads and each kind
+## of work building with its cover and what it does (built_fabric.gd); the
+## water works, channels, rail and plants that are working; and the water
+## works the people are learning (water_waste_works.gd), with progress.
 func _infrastructure_tab()->Dictionary:
 	var cards:Array=[]
 	var many:=GameState.player_settlements.size()>1
@@ -992,31 +995,91 @@ func _infrastructure_tab()->Dictionary:
 		var id:=String(city.get("id",""))
 		var rows:Array=SettlementModel.with_city_resources(id,func()->Array:return _infrastructure_rows(id))
 		for row:Dictionary in rows:
+			# A plant waiting idle is not news on this page.
+			if String(row.get("key","")).begins_with("plant_") and String((row.get("tag",{}) as Dictionary).get("text",""))=="Idle":continue
 			row["section"]="works"
 			if many:row.sub=("%s · %s" % [String(city.get("name","")),String(row.get("sub",""))]).trim_suffix(" · ")
 			cards.append(row)
+	cards.append_array(_ladder_rows())
+	cards.append_array(_network_rows())
+	cards.append_array(_water_unlock_rows())
+	var sections:=[
+		{"id":"defences","heading":"The defences, stage by stage","span":true},
+		{"id":"network","heading":"Roads and work buildings"},
+		{"id":"works","heading":"Water, rail and plants"},
+		{"id":"water_soon","heading":"Water works not yet built"}]
+	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
+
+## The defence ladder: each stage what it gives; the next stage is The
+## Town's own defences row (one bill, one Build, one figure everywhere).
+func _ladder_rows()->Array:
+	var rows:Array=[]
 	var r:=HomeDefense.reading()
 	var here:=int(r.stage)
 	var building:Dictionary=r.building
+	var next_index:=int(building.get("index",here+1)) if not building.is_empty() else here+1
 	for stage:Dictionary in Impact.defences():
 		var index:=int(stage.stage)
 		var lines:Array=stage.lines
 		var spec:Dictionary=MilitaryCampaign.SETTLEMENT_DEFENSE_STAGES[index]
+		if index==next_index and not _defence.is_empty() and not bool(stage.built):
+			var next_row:=_defence_row(_defence)
+			next_row.merge({"key":"stage_%d" % index,"section":"defences","sub":"%s days' work" % _n(roundi(float(spec.work))),"highlight":true},true)
+			rows.append(next_row)
+			continue
 		var bill:PackedStringArray=[]
 		for material:String in (spec.materials as Dictionary):bill.append("%s %s" % [_n(roundi(float(spec.materials[material]))),ResourceSystem.display_name(material).to_lower()])
+		var effects:=[{"label":"Lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}]
 		var row:={"section":"defences","key":"stage_%d" % index,"icon":DEFENCE_ICONS[clampi(index,0,DEFENCE_ICONS.size()-1)],"name":String(stage.name),
-			"value":String(lines[0].value),"value_color":Tokens.GREEN if bool(stage.built) else Tokens.TEXT_SOFT,"sub":"%s days' work · %s" % [_n(roundi(float(spec.work))),", ".join(bill)],
-			"effects":[{"label":"Lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}],
-			"detail":"Defenders %s: %s" % [String(lines[0].value),String(lines[0].words)]}
+			"value":String(lines[0].value),"value_color":Tokens.GREEN if bool(stage.built) else Tokens.TEXT_SOFT,"sub":("%s days' work, %s" % [_n(roundi(float(spec.work))),", ".join(bill)]) if not bool(stage.built) else "",
+			"effects":effects,"detail":"Defenders %s: %s" % [String(lines[0].value),String(lines[0].words)]}
 		if bool(stage.built):row["tag"]={"text":"Built","tone":"good"}
-		elif not building.is_empty() and index==int(building.get("index",-1)):
-			row.merge({"tag":{"text":"Building","tone":"good"},"bar":{"ratio":float(building.progress),"color":Tokens.GREEN,"width":80},"highlight":true},true)
-		elif index==here+1:row.merge({"tag":{"text":"Next","tone":"warn","tip":"Its bill and the choice of who decides are on The Town."},"highlight":true},true)
-		cards.append(row)
-	var sections:=[
-		{"id":"works","heading":"Water, rail and plants","span":true,"note":"none yet" if cards.filter(func(c:Dictionary)->bool:return String(c.section)=="works").is_empty() else "","note_tip":"Builders raise water works, channels, rail and plants once their practices are adopted and materials arrive."},
-		{"id":"defences","heading":"The defences, stage by stage","span":true}]
-	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
+		rows.append(row)
+	return rows
+
+## The roads and each kind of work building: cover against the most there
+## can be, and what it does now (built_fabric.gd works_cover, effect_lines).
+const WORK_KINDS:={"workshops":["Workshops","workshop","Makers' goods"],"granaries":["Granaries","stores","Stored food rots"],"kilns":["Kilns","workshop","Kilns"],"storehouses":["Storehouses","stores","Cutting and digging"],"water":["Wells","stores","Water carried"]}
+func _network_rows()->Array:
+	if not GameState.settlement_site_committed:return []
+	var r:Dictionary=Fabric.report()
+	var by_label:Dictionary={}
+	for line:Dictionary in Fabric.effect_lines(r):by_label[String(line.label)]=line
+	var rows:Array=[]
+	var road_fx:Array=[]
+	for label in ["Hauling","Between towns","Hauls from deposits"]:
+		if by_label.has(label):road_fx.append({"label":label,"value":String(by_label[label].value),"tone":String(by_label[label].get("tone","plain")),"tip":String(by_label[label].words)})
+	rows.append({"section":"network","key":"net_roads","icon":"open","name":"Roads","sub":String(Fabric.ROAD_WORDS[int(r.road_kind)]),"bar":{"ratio":float(r.roads),"tick":float(r.road_cap),"color":Tokens.TEAL},"value":"%d/100" % roundi(float(r.roads)*100.0),
+		"effects":road_fx,"detail":"The road index; %s are the best the people know (up to %d, the tick)." % [String(Fabric.ROAD_WORDS[int(r.road_kind)]),roundi(float(r.road_cap)*100.0)]})
+	for kind:String in WORK_KINDS:
+		var spec:Array=WORK_KINDS[kind]
+		var know:=String(Fabric.WORKS_KNOW.get(kind,""))
+		var cover:=float(Fabric.works_cover(kind))
+		var line:Dictionary=by_label.get(String(spec[2]),{})
+		var row:={"section":"network","key":"net_"+kind,"icon":String(spec[1]),"name":String(spec[0]),"bar":{"ratio":cover,"color":Tokens.BLUE},"value":"%d/100" % roundi(cover*100.0),
+			"sub":("%s %s" % [String(spec[2]).to_lower(),String(line.get("value",""))]) if not line.is_empty() else "","detail":String(line.get("words","How fully %s serve the town." % String(Fabric.WORKS_WORDS[kind])))}
+		if not know.is_empty() and know not in GameState.known_discoveries:
+			row.merge({"tag":{"text":"Unknown","tone":"note","tip":"The people must first learn %s." % _discovery_name(know)},"sub":"needs %s" % _discovery_name(know),"value":""},true)
+		rows.append(row)
+	return rows
+
+## Water works the people know of but have not built, or are learning, with
+## how far the practice has come (water_waste_works.gd SPECS).
+func _water_unlock_rows()->Array:
+	var works=preload("res://scripts/water_waste_works.gd")
+	var rows:Array=[]
+	for kind:String in works.SPECS:
+		if not works.work_for(kind).is_empty():continue
+		var spec:Dictionary=works.SPECS[kind]
+		var id:=String(spec.discovery)
+		var known:=id in GameState.known_discoveries
+		var progress:=float(DiscoverySystem.adoption(id)) if known else float(GameState.discovery_progress.get(id,0.0))
+		if progress<=0.0005 and not known:continue
+		var ready:=known and progress>=0.25
+		rows.append({"section":"water_soon","key":"water_soon_"+kind,"icon":"stores","name":String(spec.name),"sub":"","bar":{} if ready else {"ratio":clampf(progress/0.25 if known else progress,0.0,1.0),"color":Tokens.TEAL},
+			"value":("Ready" if progress>=0.25 else "%d%%" % roundi(progress*100.0)) if known else "%d%%" % roundi(progress*100.0),"value_color":Tokens.GREEN if known and progress>=0.25 else Tokens.INK,
+			"detail":("The people know %s; builders raise it once its stone, timber or clay arrive." % _discovery_name(id)) if ready else ("The people know it; %d in 100 have taken it up (25 needed to build it)." % roundi(progress*100.0)) if known else ("%s: %d%% of the way to proof." % [_upper_first(_discovery_name(id)),roundi(progress*100.0)])})
+	return rows
 
 static func _infrastructure_rows(city_id:String)->Array:
 	var rows:Array=[]

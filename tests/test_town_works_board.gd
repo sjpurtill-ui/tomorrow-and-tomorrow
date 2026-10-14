@@ -183,11 +183,15 @@ func test_the_choice_and_the_fixes_work_from_the_board()->void:
 ## The board never pushes the page wider than the dock at 1600 px (665 UI units).
 func test_the_board_fits_the_dock_at_1600()->void:
 	_town()
-	var body:=_render(_page())
-	await get_tree().process_frame
-	for board:Node in _town_boards(body):
-		assert_float((board as Control).get_combined_minimum_size().x).is_less_equal(665.0)
-	body.queue_free()
+	# 1600 px is about 665 UI units (two columns), 2000 px about 850 (three).
+	for width in [665.0,850.0]:
+		var body:=VBoxContainer.new();body.size=Vector2(width,900);add_child(body)
+		Blocks.render(body,_page().blocks)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		for board:Node in _town_boards(body):
+			assert_float((board as Control).get_combined_minimum_size().x).override_failure_message("at %d" % int(width)).is_less_equal(width)
+		body.queue_free()
 
 func test_a_second_town_does_not_show_the_first_towns_defences()->void:
 	_town()

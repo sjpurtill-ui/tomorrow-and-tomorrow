@@ -298,7 +298,7 @@ func test_era_says_what_the_next_era_still_needs()->void:
 	var shown:=""
 	for tile:Dictionary in page.kpis:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
 	assert_str(shown).is_equal("Foothold")
-	assert_str(String(era.name)).is_equal("Hamlet")
+	assert_str(String(era.name)).is_equal("Next: Hamlet")
 	# Hamlet needs a year's age, three finished works and four makers.
 	assert_str(String(era.detail)).contains("Hamlet needs the town to be a year old")
 	assert_str(String(era.detail)).contains("3 finished works (2 now)")

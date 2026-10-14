@@ -97,7 +97,7 @@ func _local(id:String)->Dictionary:
 			actions.append({"label":"Hear","primary":true,"tip":String((site.decision as Dictionary).get("prompt","The master builder asks for your word.")),"on_press":func()->void:_hear(work_id,id)})
 		if ceremonies.has(work_id):
 			actions.append({"label":"Dedicate","primary":true,"tip":"Envoys wait; the work stands ready to be named.","on_press":func()->void:_dedicate(work_id)})
-		actions.append({"label":"3D","tip":"Rotate the model, see its rising courses, and watch time pass.","on_press":func()->void:_open_works("player/%s/%s" % [id,work_id])})
+		actions.append({"label":"View","tip":"Rotate the model, see its rising courses, and watch time pass.","on_press":func()->void:_open_works("player/%s/%s" % [id,work_id])})
 		row["actions"]=actions
 		if rising:
 			var policy:=String(site.get("policy","careful"))
@@ -121,7 +121,7 @@ func _local(id:String)->Dictionary:
 			"actions":[{"label":"Conceive","primary":count==0,"tip":"Call the court and hear what they dream of: a wonder conceived from who we are.","on_press":_conceive}]},
 		{"id":"next","heading":"What the people could raise next","span":true},
 		{"id":"sky","heading":"The watching sky foresees"},
-		{"id":"abroad","heading":"Other peoples' works","note":"as last heard" if cards.any(func(c:Dictionary)->bool:return String(c.section)=="abroad") else "none heard of yet"}]
+		{"id":"abroad","heading":"Other peoples' works","note":"as last heard" if cards.any(func(c:Dictionary)->bool:return String(c.section)=="abroad") else ""}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
 
 ## The great works the people would put to the court today, as rows: each
@@ -143,11 +143,10 @@ func _next_works()->Array:
 		for resource in keys.slice(0,3):needs.append({"resource":String(resource),"have":float(GameState.resource_stockpiles.get(String(resource),0.0)),"need":float(cost[resource])})
 		var days:=float(assessed.get("duration_estimate",0))
 		rows.append({"section":"next","key":"idea_"+String(concept.get("token","")),"texture":preload("res://scripts/resource_icons.gd").great_work_texture(String(concept.get("shape","")),"building",48),
-			"name":String(concept.get("name","A great work")),"sub":String(concept.get("title","")).to_lower(),
+			"name":String(concept.get("name","A great work")),"sub":_purpose_words(String(concept.get("title",""))),
 			"bar":{"ratio":stands,"color":Tokens.GREEN if stands>=0.75 else (Tokens.AMBER if stands>=0.5 else Tokens.RED),"tip":"The engine's odds today: a triumph %d%%, it stands %d%%, flawed %d%%, it falls %d%%." % [roundi(float(o.triumph)*100.0),roundi(float(o.success)*100.0),roundi(float(o.flawed)*100.0),roundi(float(o.collapse)*100.0)]},
 			"value":"%d%% stands" % roundi(stands*100.0),"value_width":84,"tag":{"text":ambition.capitalize(),"tone":"note"},
-			"effects":[{"label":"Falls","value":"%d%%" % roundi(float(o.collapse)*100.0),"tone":"bad" if float(o.collapse)>=0.2 else "plain","tip":"A fall kills some of its builders and costs cohesion and legitimacy."},
-				{"label":"Takes","value":preload("res://scripts/hud/production_plain.gd").span_text(days) if days>0.0 else "unknown","tone":"plain","tip":"At today's builders."}],
+			"effects":[{"label":"Takes","value":preload("res://scripts/hud/production_plain.gd").span_text(days) if days>0.0 else "unknown","tone":"plain","tip":"At today's builders."}],
 			"needs":needs,"detail":"%s
 %s" % [String(concept.get("effect_text","")),String(assessed.get("spoken",""))],
 			"actions":[{"label":"Hear it","tip":"The court puts this idea and the others to you; you choose.","on_press":_conceive}]})
@@ -173,7 +172,29 @@ func _row_words(item:Dictionary)->String:
 static func _clause(words:String)->String:
 	var first:=words.get_slice(";",0).strip_edges()
 	if first.contains(" · "):first=first.get_slice(" · ",1)
-	return first if first.length()<=42 else first.left(40).strip_edges()+"…"
+	# The part before a colon says it; never cut mid-word with dots.
+	if first.length()>44 and first.contains(":"):first=first.get_slice(":",0).strip_edges()
+	if first.length()>44:
+		var kept:PackedStringArray=[]
+		for word in first.split(" "):
+			if " ".join(kept+PackedStringArray([word])).length()>44:break
+			kept.append(word)
+		while not kept.is_empty() and String(kept[kept.size()-1]).to_lower() in ["for","of","to","and","the","a","with","in","on","by"]:kept.remove_at(kept.size()-1)
+		first=" ".join(kept)
+	return _grouped_numbers(first)
+
+## "Grand archive to keep what we know": its purpose, "to keep what we know"
+## (the ambition has its own tag).
+static func _purpose_words(title:String)->String:
+	var at:=title.find(" to ")
+	return title.substr(at+1) if at>=0 else title.to_lower()
+
+## "98200 rations" as "98,200 rations".
+static func _grouped_numbers(text:String)->String:
+	var digits:=RegEx.create_from_string("\\b\\d{4,}\\b")
+	var out:=text
+	for found in digits.search_all(text):out=out.replace(found.get_string(),preload("res://scripts/hud/era_words.gd").grouped(int(found.get_string())))
+	return out
 
 ## A work's tooltip: its lore, its master builder and the court's reckoning.
 func _work_detail(item:Dictionary,id:String,work_id:String)->String:
