@@ -148,10 +148,15 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	provider._header_action("hand_back")
 	assert_bool(bool(MilitaryCampaign.workshop.data.enabled)).is_true()
 	assert_bool(bool(MilitaryCampaign.equipment_queue[0].planner_managed)).is_true()
-	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("civilian")
+	# The old Civilian link still reaches all its goods and craft readings,
+	# now on Daily work alongside the overview. Workshop orders retain index 2.
+	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("all")
+	assert_array(provider.meta().hidden_subtabs).contains([1])
+	assert_int(int(provider.meta().subtab_aliases[1])).is_equal(0)
+	assert_array(provider.tab(1).blocks[0].households).is_equal(provider.tab(0).blocks[0].households)
+	assert_array(provider.tab(1).blocks[0].techniques).is_equal(provider.tab(0).blocks[0].techniques)
 	assert_bool(provider.tab(1).blocks[0].has("lines")).is_false()
-	# The three pages differ: All is an overview, not the Military page again;
-	# arms live on Military alone.
+	# The two workflows differ; direct workshop controls remain on page 2.
 	var all:Dictionary=provider.tab(0).blocks[0]
 	assert_str(String(all.mode)).is_equal("all")
 	for gone in ["lines","recipes","stock","arms"]:assert_bool(all.has(gone)).override_failure_message("All carries %s" % gone).is_false()
@@ -171,13 +176,11 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	var legend:=""
 	for label in overview.find_child("HandsLegend",true,false).find_children("*","Label",true,false):legend+=(label as Label).text+" | "
 	assert_str(legend).contains("Homes and barter").contains("Workshop lines").contains("Arms")
-	# Goods and Arms lead with the dock's strip: the figures the chart does not carry.
-	var arms_kpis:Array=provider.tab(2).get("kpis",[])
-	var arms_labels:=arms_kpis.map(func(k:Dictionary)->String:return String(k.label))
-	assert_array(arms_labels).contains(["WATCH ARMED","SETS IN STORE","STILL WANTED","ONE SET"])
-	assert_bool(arms_kpis[0].get("on_press") is Callable).is_true()
-	var goods_kpis:Array=provider.tab(1).get("kpis",[])
-	assert_array(goods_kpis.map(func(k:Dictionary)->String:return String(k.label))).contains(["HOMES' GOODS","TO SPARE","CARTS"])
+	# Readings belong to the task's narrative and local controls, avoiding a
+	# repeated five-column KPI strip on narrow screens.
+	assert_array(provider.tab(2).get("kpis",[])).is_empty()
+	assert_array(provider.tab(1).get("kpis",[])).is_empty()
+	assert_str((overview.find_child("DailyFacts",true,false) as Label).text).contains("goods spare for barter")
 	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
 	assert_object(civilian.find_child("HouseholdsHead",true,false)).is_not_null()
 	for gone:String in ["GoodsAnswer","Jar","Pile","ArmsAnswer"]:assert_object(civilian.find_child(gone,true,false)).is_null()

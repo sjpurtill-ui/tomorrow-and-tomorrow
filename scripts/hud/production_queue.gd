@@ -28,8 +28,9 @@ const Names:=preload("res://scripts/era_names.gd")
 const Flow:=preload("res://scripts/hud/production_flow.gd")
 const Pictures:=preload("res://scripts/hud/production_pictures.gd")
 const Sheet:=preload("res://scripts/hud/econ_sheet.gd")
-const PICKER_WIDTH:=300.0
-const LINES_MIN_WIDTH:=560.0
+const Folio:=preload("res://scripts/hud/production_folio.gd")
+const PICKER_WIDTH:=278.0
+const LINES_MIN_WIDTH:=466.0
 var data:Dictionary
 var _shape:=""
 var _rows:={}
@@ -54,13 +55,14 @@ func setup(block:Dictionary)->void:
 	match mode:
 		"all":
 			_build_all_head()
-			_build_flow()
+			_build_households(self,true)
 			_overview_box=VBoxContainer.new();_overview_box.name="Overview";_overview_box.add_theme_constant_override("separation",10);add_child(_overview_box)
+			_build_flow_disclosure("How today's work moves")
 		"civilian":
 			_build_flow()
 			_build_households(self,true)
 		_:
-			_build_flow()
+			_build_workshop_brief()
 			_build_header()
 			_build_stock()
 			var columns:=HFlowContainer.new();columns.name="Columns";columns.add_theme_constant_override("h_separation",16);columns.add_theme_constant_override("v_separation",16);add_child(columns)
@@ -69,6 +71,7 @@ func setup(block:Dictionary)->void:
 			_build_lines(left)
 			_picker=Picker.new();_picker.custom_minimum_size.x=PICKER_WIDTH;_picker.size_flags_horizontal=Control.SIZE_FILL;columns.add_child(_picker)
 			_picker.build(self,data.get("recipes",[]),_room_note())
+			_build_flow_disclosure("Materials & daily flow")
 			_build_footer()
 	_apply()
 
@@ -129,9 +132,35 @@ func _header_act(kind:String)->void:
 
 # --- Header strip: materials, hands, lines, boatyards, who runs it -----------------
 
+func _build_workshop_brief()->void:
+	if not data.has("arms"):return
+	var box:=VBoxContainer.new();box.name="WatchSummary";box.add_theme_constant_override("separation",5);add_child(box)
+	_arms.title=_headline(box,"WatchHeadline")
+	var line:=HFlowContainer.new();line.add_theme_constant_override("h_separation",12);line.add_theme_constant_override("v_separation",6);box.add_child(line)
+	_arms.watch=W.text_button("", "Open the bands and their equipment.");line.add_child(_arms.watch)
+	_arms.watch.pressed.connect(func():
+		var open:Variant=data.get("on_open")
+		if open is Callable:open.call("military",0))
+	_arms.figures=Folio.label("","small",T.INK_MUTED);line.add_child(_arms.figures)
+	_arms.cost=_small(box,"SetCost")
+
+func _apply_workshop_brief()->void:
+	if _arms.is_empty():return
+	var a:Dictionary=data.get("arms",{})
+	var wanted:=int(a.get("wanted",0));var watch:=int(a.get("watch",0))
+	_arms.title.text="The watch needs %d sets of arms" % wanted if wanted>0 else "Arms ready for the watch" if watch>0 else "The workshops are ready"
+	_arms.watch.text="%d in the watch · View bands" % watch if watch>0 else "View the bands"
+	_arms.figures.text="%d sets issued · %d in store · %s made today" % [int(a.get("issued",0)),int(a.get("held",0)),Plain.number(float(a.get("made",0)))]
+	_arms.figures.tooltip_text="%s makers on arms today." % Plain.number(float(a.get("hands",0)))
+	var cost:Dictionary=a.get("cost",{})
+	_arms.cost.text="One set takes %s maker-days · worth %s goods" % [Plain.number(float(cost.get("maker_days",0))),Plain.number(float(cost.get("worth_goods",0)))]
+	var materials:PackedStringArray=[]
+	for item:String in cost.get("materials",{}):materials.append("%s %s" % [Plain.number(float(cost.materials[item])),ResourceSystem.display_name(item)])
+	_arms.cost.tooltip_text="One set: "+", ".join(materials)
+
 func _build_header()->void:
 	var strip:=PanelContainer.new();strip.name="Header"
-	var style:=T.flat(T.PAPER_SUNK,T.RULE,1,T.RADIUS_CARD);style.content_margin_left=12;style.content_margin_right=10;style.content_margin_top=6;style.content_margin_bottom=6
+	var style:=Folio.rule_style(6)
 	strip.add_theme_stylebox_override("panel",style);add_child(strip)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);strip.add_child(row)
 	var materials:=HFlowContainer.new();materials.name="Materials";materials.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -144,9 +173,10 @@ func _build_header()->void:
 	# The chart above says the makers on the lines; the strip does not repeat it.
 	_header.hands.visible=false
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
+	_header.lines.visible=false
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
 	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)
-	var run_word:=Label.new();run_word.text="RUN BY";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
+	var run_word:=Label.new();run_word.text="Managed by";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
 	var run_gap:=Control.new();run_gap.custom_minimum_size.x=6;run.add_child(run_gap)
 	_header.staff=W.text_button("Staff","");_header.staff.name="RunStaff";run.add_child(_header.staff)
 	_header.staff.pressed.connect(func():_header_act("hand_back"))
@@ -232,7 +262,7 @@ func _named_lines()->Array:
 
 func _build_stock()->void:
 	var box:=VBoxContainer.new();box.name="Equipment";box.add_theme_constant_override("separation",6);add_child(box)
-	var kicker:=Label.new();kicker.text="EQUIPMENT · IN STORE / NEEDED BY THE BANDS";T.text(kicker,"kicker",T.GOLD_TEXT);box.add_child(kicker)
+	var kicker:=Label.new();kicker.text="Equipment for the bands";T.text(kicker,"kicker",T.GOLD_TEXT);box.add_child(kicker)
 	var flow:=HFlowContainer.new();flow.name="Stock";flow.add_theme_constant_override("h_separation",8);flow.add_theme_constant_override("v_separation",8);box.add_child(flow)
 	for row:Dictionary in data.get("stock",[]):
 		var chip:=PanelContainer.new();chip.name="Stock_"+String(row.item);chip.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -345,10 +375,9 @@ class StockBar extends Control:
 
 func _build_lines(parent:Node)->void:
 	var head:=HBoxContainer.new();head.name="LinesHead";parent.add_child(head)
-	var kicker:=Label.new();kicker.text="LINES";T.text(kicker,"kicker",T.GOLD_TEXT);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
+	var kicker:=Label.new();kicker.text="At the workshops";T.text(kicker,"voice",T.INK);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 	var room:=Label.new();room.name="LineRoom";T.text(room,"kicker",T.INK_MUTED);head.add_child(room);_header.line_room=room
 	var lines:Array=data.get("lines",[])
-	if not lines.is_empty():parent.add_child(_column_heads())
 	var list:=VBoxContainer.new();list.name="WorkshopLines";list.add_theme_constant_override("separation",8);parent.add_child(list)
 	for view:Dictionary in lines:
 		var row:=LineRow.new();list.add_child(row);row.build(self,view);_rows[int(view.id)]=row
@@ -380,7 +409,7 @@ func _apply_lines()->void:
 		if row!=null:row.apply(view)
 	if _header.has("line_room"):
 		var room:Label=_header.line_room
-		room.text="%d OF %d IN USE" % [lines.size(),int(data.get("capacity",lines.size()))]
+		room.text="%d of %d lines" % [lines.size(),int(data.get("capacity",lines.size()))]
 		room.tooltip_text="Line 1 gets scarce materials first. Drag a row, or use its arrows, to change the order."
 
 func _room_note()->String:
@@ -393,24 +422,31 @@ func _room_note()->String:
 ## day and, in red, what holds its makers back. Goods to spare follow as a
 ## pile with their worth, then the crafts the makers know.
 func _build_households(parent:Node,full:bool)->void:
-	var box:=VBoxContainer.new();box.name="Households";box.add_theme_constant_override("separation",0);parent.add_child(box)
-	var head:=Sheet.head(box,"The homes' stores, town by town");(head.title as Label).name="HouseholdsHead"
-	(head.title as Label).tooltip_text="Tools, baskets, pots and fittings. Households wear them out; the makers make them good."
+	var box:=VBoxContainer.new();box.name="Households";box.add_theme_constant_override("separation",8);parent.add_child(box)
+	var heading:=Folio.heading(box,"Goods for the homes");heading.name="HouseholdsHead"
+	heading.tooltip_text="Tools, baskets, pots and fittings. Households wear them out; the makers make them good."
 	var cities:Array=data.get("households",[])
-	if cities.is_empty():
-		box.add_child(Sheet.label("No settlement makes household goods yet.",12,T.INK_MUTED))
+	if cities.is_empty():box.add_child(Folio.label("No settlement makes household goods yet.","small",T.INK_MUTED))
 	for city:Dictionary in cities:
-		var refs:=Sheet.row(box,{"id":String(city.get("id","")),"icon":"shelter","icon_kind":"people","label":String(city.get("city","")),"bar_width":90.0,"value_width":56.0})
-		(refs.panel as Control).name="Household_"+String(city.get("id",""))
-		_household_rows[String(city.get("id",""))]=refs
+		var panel:=PanelContainer.new();panel.name="Household_"+String(city.get("id",""));panel.add_theme_stylebox_override("panel",Folio.rule_style(10));box.add_child(panel)
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);panel.add_child(row)
+		var jar:=Pictures.TownJar.new();jar.name="TownStoreGauge";jar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(jar)
+		var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
+		var title:=Folio.label(String(city.get("city","")),"voice");title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
+		var note:=Folio.label("","small",T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(note)
+		var amount:=Folio.label("","voice");amount.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(amount)
+		_household_rows[String(city.get("id",""))]={"panel":panel,"jar":jar,"note":note,"amount":amount}
 	if not full:return
 	var techniques:Array=data.get("techniques",[])
 	if techniques.is_empty():return
-	var crafts:=Sheet.head(box,"Crafts the makers know")
-	var flow:=HFlowContainer.new();flow.name="Techniques";flow.add_theme_constant_override("h_separation",8);flow.add_theme_constant_override("v_separation",6);box.add_child(flow)
+	Folio.heading(box,"Crafts in use")
+	var flow:=HFlowContainer.new();flow.name="Techniques";flow.add_theme_constant_override("h_separation",24);flow.add_theme_constant_override("v_separation",12);box.add_child(flow)
 	for technique:Dictionary in techniques:
-		var chip:=W.Chip.new();chip.name="Technique_"+String(technique.get("id",""));flow.add_child(chip)
-		_technique_chips[String(technique.get("id",""))]=chip
+		var column:=VBoxContainer.new();column.name="Technique_"+String(technique.get("id",""));column.custom_minimum_size.x=180;flow.add_child(column)
+		var label:=Folio.label("","small");column.add_child(label)
+		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=3
+		bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(T.TEAL));column.add_child(bar)
+		_technique_chips[String(technique.get("id",""))]={"panel":column,"label":label,"bar":bar}
 
 static func _jar_card_style(short:bool)->StyleBoxFlat:
 	var style:=T.flat(T.PAPER_RAISED,T.DANGER_BORDER if short else T.RULE,1,T.RADIUS_CARD)
@@ -426,16 +462,19 @@ func _apply_households()->void:
 		var coverage:=clampf(float(city.get("coverage",0.0)),0.0,1.0)
 		var change:=float(city.get("made",0.0))-float(city.get("worn",0.0))-float(city.get("learners",0.0))
 		var full:=coverage>=.98
-		Sheet.set_row(refs,{"label":String(city.get("city","")),"note":(String(story.held) if tone!="good" else ("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day · "+String(story.eta).to_lower()) if not full else "full; the makers keep it good",
-			"note_color":T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.INK_MUTED),"value":"%d%%" % roundi(coverage*100.0),"ratio":coverage,"bar_color":T.GREEN if full else (T.RED if tone=="bad" else T.AMBER),
-			"tag":"Full" if full else ("Short" if tone!="good" else ""),"tag_color":T.GREEN if full else T.RED,
-			"tip":"\n".join(PackedStringArray([String(city.get("city","")),String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))})
+		refs.jar.set_fill(coverage,tone)
+		refs.amount.text="%d%% stocked" % roundi(coverage*100.0)
+		refs.note.text=(String(story.held) if tone!="good" else ("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day · "+String(story.eta).to_lower()) if not full else "The makers keep the homes stocked"
+		refs.note.add_theme_color_override("font_color",T.RED_TEXT if tone=="bad" else T.AMBER_TEXT if tone=="warn" else T.INK_MUTED)
+		refs.panel.tooltip_text="\n".join(PackedStringArray([String(city.get("city","")),String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))
 	var coverage:=float((data.get("households",[{}]) as Array)[0].get("coverage",0.0)) if not (data.get("households",[]) as Array).is_empty() else 0.0
 	for technique:Dictionary in data.get("techniques",[]):
-		var chip:W.Chip=_technique_chips.get(String(technique.get("id","")))
-		if chip==null:continue
+		var refs:Dictionary=_technique_chips.get(String(technique.get("id","")),{})
+		if refs.is_empty():continue
 		var adoption:=roundi(float(technique.adoption)*100.0)
-		chip.set_reading("%s %d%%" % [String(technique.name),adoption],T.TEAL,"%s: in use by %d%%, working at %d%%. A technique helps only as far as households have goods (stores %d%% full)." % [String(technique.name),adoption,roundi(float(technique.working)*100.0),roundi(coverage*100.0)])
+		refs.label.text="%s · %d%%" % [String(technique.name),adoption]
+		refs.bar.value=adoption
+		refs.panel.tooltip_text="%s: in use by %d%%, working at %d%%. A technique helps only as far as households have goods (stores %d%% full)." % [String(technique.name),adoption,roundi(float(technique.working)*100.0),roundi(coverage*100.0)]
 
 static func household_story(city:Dictionary)->Dictionary:
 	var stock:=float(city.get("stock",0.0));var target:=maxf(.01,float(city.get("target",1.0)))
@@ -482,10 +521,10 @@ func _build_footer()->void:
 func _apply()->void:
 	if _flow!=null:_flow.set_model(data.get("flow",{}),String(data.get("mode","military")))
 	match String(data.get("mode","military")):
-		"all":_apply_all_head();_apply_overview()
+		"all":_apply_all_head();_apply_households();_apply_overview()
 		"civilian":_apply_households()
 		_:
-			_apply_header();_apply_stock();_apply_lines()
+			_apply_workshop_brief();_apply_header();_apply_stock();_apply_lines()
 			if _picker!=null:_picker.apply(data.get("recipes",[]),_room_note())
 
 func _open(page:int)->void:
@@ -516,6 +555,7 @@ static func _tone_color(tone:String)->Color:
 func _build_all_head()->void:
 	var box:=VBoxContainer.new();box.name="AllHead";box.add_theme_constant_override("separation",4);add_child(box)
 	_header.headline=_headline(box,"HandsAnswer")
+	_header.daily_facts=_small(box,"DailyFacts")
 	var needs:=HBoxContainer.new();needs.name="NeedsYouNow";needs.add_theme_constant_override("separation",10);box.add_child(needs)
 	var words:=Label.new();words.name="NeedsYouText";T.text(words,"body",T.RED_TEXT);words.add_theme_font_override("font",T.font("ui_strong"))
 	words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;needs.add_child(words)
@@ -535,12 +575,20 @@ func _apply_all_head()->void:
 	var goods:=float(o.get("goods_made",0.0));var arms:=float(o.get("arms_made",0.0))
 	var made:PackedStringArray=[]
 	if goods>=0.01:made.append("%s goods" % Plain.number(goods))
-	if arms>=0.01:made.append("%s %s of arms" % [Plain.number(arms),"set" if is_equal_approx(arms,1.0) else "sets"])
+	if arms>=0.01 and goods<0.01:made.append("%s %s of arms" % [Plain.number(arms),"set" if is_equal_approx(arms,1.0) else "sets"])
 	var headline:Label=_header.headline
 	if makers<=0:headline.text="No one is making anything yet"
 	elif made.is_empty():headline.text="Our %s makers made nothing today" % Plain.number(makers)
 	else:headline.text="Our %s %s turn out %s a day" % [Plain.number(makers),"maker" if makers==1 else "makers"," and ".join(made)]
 	headline.tooltip_text="Makers are the people on Crafting. Goods are tools, baskets, pots and fittings; a set of arms arms one fighter."
+	var spare:=0.0;var worn:=0.0
+	for town:Dictionary in data.get("households",[]):spare+=float(town.get("spare",0));worn+=float(town.get("worn",0))
+	var carts:Dictionary=data.get("carts",{})
+	var facts:PackedStringArray=["%s goods spare for barter" % Plain.number(spare),"%s worn a day" % Plain.number(worn)]
+	if bool(carts.get("known",false)):facts.append("%s carts in store" % Plain.number(float(carts.get("count",0))))
+	if arms>=0.01 and goods>=0.01:facts.append(Plain.rate_short(arms).replace(" a "," sets of arms a "))
+	_header.daily_facts.text=" · ".join(facts)
+	_header.daily_facts.tooltip_text="Spare goods are worth %s rations. %s" % [Plain.number(float(data.get("spare_worth",0))),"Carts are not known yet." if not bool(carts.get("known",false)) else "Carts are made on workshop lines."]
 	var items:Array=o.get("attention",[])
 	var words:Label=_header.needs_text
 	var go:Button=_header.needs_go
@@ -562,13 +610,22 @@ func _apply_all_head()->void:
 		words.tooltip_text=_cap(String(first.get("sub","")))
 		words.add_theme_color_override("font_color",_tone_color(String(first.get("tone","amber"))))
 		var page:=int(first.get("page",2))
-		go.visible=true;go.set_meta("page",page);go.text="Civilian" if page==1 else "Military";go.tooltip_text="Open the %s page." % go.text
+		go.visible=page!=1;go.set_meta("page",page);go.text="Materials" if page<0 else "Homes" if page==1 else "Workshop orders";go.tooltip_text="Open the %s page." % go.text
 
 ## The chart of the day's work (production_flow.gd), on every page.
 func _build_flow()->void:
 	_flow=Flow.new();_flow.name="Flow";_flow.size_flags_horizontal=Control.SIZE_EXPAND_FILL;add_child(_flow)
 
 ## Big plain words, in the chronicle's voice.
+func _build_flow_disclosure(caption:String)->void:
+	var button:=W.text_button("› "+caption,"Show or hide the materials, makers and output for today.")
+	button.name="FlowDisclosure";button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;add_child(button)
+	button.toggle_mode=true
+	_build_flow();_flow.visible=false
+	button.toggled.connect(func(expanded:bool):
+		_flow.visible=expanded
+		button.text=("⌄ " if expanded else "› ")+caption)
+
 func _headline(parent:Node,node_name:String)->Label:
 	var label:=Label.new();label.name=node_name
 	label.add_theme_font_override("font",T.voice_font());label.add_theme_font_size_override("font_size",28);label.add_theme_color_override("font_color",T.INK)
@@ -586,7 +643,7 @@ func _apply_overview()->void:
 	var lines:=float(o.get("hands_lines",0))
 	var arms:=float(o.get("hands_arms",0.0))
 	homes=maxf(0.0,homes-arms)
-	_kicker(_overview_box,"THE MAKERS","Craftspeople: those making for the homes and for barter, those on the workshop lines, and those making arms while the watch lacks them.")
+	_kicker(_overview_box,"The makers","Craftspeople: those making for the homes and for barter, those on the workshop lines, and those making arms while the watch lacks them.")
 	var parts:=[["Homes and barter",homes,T.GREEN],["Workshop lines",lines,T.GOLD],["Arms",arms,T.RED]]
 	var crowd:=Pictures.MakersRow.new();crowd.name="HandsBar";crowd.set_parts(parts)
 	crowd.tooltip_text="Homes and barter %s · workshop lines %s · arms %s" % [Plain.number(homes),Plain.number(lines),Plain.number(arms)]+("
@@ -606,7 +663,7 @@ Each figure is %d makers." % crowd.each if crowd.each>1 else "")
 	# The first is the headline's; the next two are listed here.
 	var items:Array=(o.get("attention",[]) as Array).slice(1,3)
 	if items.is_empty():return
-	_kicker(_overview_box,"ALSO NEEDS YOU")
+	_kicker(_overview_box,"Also needs attention")
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var row:=HBoxContainer.new();row.name="Attention%d" % index;row.add_theme_constant_override("separation",10);_overview_box.add_child(row)
@@ -615,7 +672,7 @@ Each figure is %d makers." % crowd.each if crowd.each>1 else "")
 		if String(item.get("sub",""))!="":
 			var sub:=Label.new();sub.text=_cap(String(item.sub));T.text(sub,"small",T.INK_MUTED);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
 		var page:=int(item.get("page",2))
-		var go:=W.text_button("Civilian" if page==1 else "Military","Open the %s page." % ("Civilian" if page==1 else "Military"));go.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(go)
+		var go:=W.text_button("Daily work" if page==1 else "Workshop orders","Open the %s page." % ("Daily work" if page==1 else "Workshop orders"));go.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(go)
 		go.pressed.connect(func()->void:_open(page))
 	if (o.get("attention",[]) as Array).size()>3:
 		var more:=_small(_overview_box,"More");more.text="And %d more on the other pages." % ((o.get("attention",[]) as Array).size()-3)

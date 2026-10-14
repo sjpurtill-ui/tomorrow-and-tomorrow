@@ -37,7 +37,7 @@ const NODE_R:=17.0
 const BENCH_R:=30.0
 
 func _init()->void:
-	custom_minimum_size=Vector2(560,250)
+	custom_minimum_size=Vector2(460,250)
 	mouse_filter=Control.MOUSE_FILTER_PASS
 	tooltip_text=" "
 	clip_contents=true
@@ -111,8 +111,10 @@ func _layout()->void:
 	_laid_for=size
 	_nodes.clear();_ribbons.clear()
 	var top:=40.0;var bottom:=size.y-16.0
-	var left_x:=minf(size.x*.26,210.0)
-	var right_x:=size.x-minf(size.x*.26,200.0)
+	# Leave a readable label column at either edge of a narrow folio.
+	var edge_share:=.36 if size.x<700.0 else .26
+	var left_x:=minf(size.x*edge_share,210.0)
+	var right_x:=size.x-minf(size.x*edge_share,200.0)
 	var mid_x:=(left_x+right_x)*.5
 	var materials:=_materials();var benches:=_benches();var outputs:=_outputs()
 	for i in materials.size():
@@ -193,10 +195,11 @@ func _draw()->void:
 		_text(font,words,Vector2(size.x*.5,size.y*.5+5.0),fit,T.INK_MUTED,HORIZONTAL_ALIGNMENT_CENTER)
 		return
 	# Column captions, like the legend on an engraved chart.
-	var captions:=[["FROM THE STORES","material"],["AT THE BENCHES","bench"],["WHAT IT MAKES","output"]]
+	var captions:=[["From the stores","material"],["At the benches","bench"],["What it makes","output"]]
 	for caption:Array in captions:
 		var x:=_column_x(String(caption[1]))
 		if x<0.0:continue
+		if size.x<700.0:x=size.x*({"material":.18,"bench":.5,"output":.82}[String(caption[1])] as float)
 		_text(strong,String(caption[0]),Vector2(x,24.0),12,T.GOLD_TEXT,HORIZONTAL_ALIGNMENT_CENTER)
 	for ribbon:Dictionary in _ribbons:_draw_ribbon(ribbon)
 	for id:String in _nodes:_draw_node(_nodes[id],font,strong)
@@ -239,9 +242,9 @@ func _draw_ribbon(ribbon:Dictionary)->void:
 		var tangent:=(points[mini(i+1,points.size()-1)]-points[maxi(i-1,0)]).normalized()
 		var normal:=Vector2(-tangent.y,tangent.x)*w*.5
 		upper.append(points[i]+normal);lower.append(points[i]-normal)
-	var shape:=upper.duplicate()
-	for i in range(lower.size()-1,-1,-1):shape.append(lower[i])
-	draw_colored_polygon(shape,Color(tint,.30))
+	# A stroke stays valid when a wide ribbon folds sharply in a narrow
+	# folio. A single outline polygon can intersect itself and fail to draw.
+	draw_polyline(points,Color(tint,.30),w,true)
 	# Inked edges, a touch darker than the wash.
 	draw_polyline(upper,Color(tint.darkened(.35),.85),1.2,true)
 	draw_polyline(lower,Color(tint.darkened(.35),.85),1.2,true)
@@ -266,11 +269,11 @@ func _draw_node(node:Dictionary,font:Font,strong:Font)->void:
 			_disc(pos,r,T.RED if low else T.RULE_STRONG)
 			_icon(Icons.material_texture(String(data.resource),48),pos,r*1.5)
 			var x:=pos.x-r-8.0
-			_text(strong,String(data.name),Vector2(x,pos.y-2),14,T.INK,HORIZONTAL_ALIGNMENT_RIGHT)
+			_text(strong,String(data.name),Vector2(x,pos.y-2),14,T.INK,HORIZONTAL_ALIGNMENT_RIGHT,x-10.0)
 			var note:=Plain.number(float(data.amount))+" in store"
 			var tone:=T.INK_MUTED
 			if low:note="runs out in "+Plain.span_text(float(data.days_left));tone=T.RED_TEXT
-			_text(font,note,Vector2(x,pos.y+14),13,tone,HORIZONTAL_ALIGNMENT_RIGHT)
+			_text(font,note,Vector2(x,pos.y+14),13,tone,HORIZONTAL_ALIGNMENT_RIGHT,x-10.0)
 		"bench":
 			var stalled:=String(data.get("stalled",""))!=""
 			draw_circle(pos,r+5.0,Color(T.GOLD,.10))
@@ -293,8 +296,8 @@ func _draw_node(node:Dictionary,font:Font,strong:Font)->void:
 			_icon(texture,pos,r*1.5)
 			var x:=pos.x+r+8.0
 			var per_day:=float(data.get("per_day",0.0))
-			_text(strong,_rate(per_day,String(data.get("unit",""))),Vector2(x,pos.y-2),14,T.INK if per_day>0.0 else T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT)
-			_text(font,String(data.name).to_lower() if kind!="gear" else String(data.name),Vector2(x,pos.y+14),13,T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT)
+			_text(strong,_rate(per_day,String(data.get("unit",""))),Vector2(x,pos.y-2),14,T.INK if per_day>0.0 else T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT,size.x-x-10.0)
+			_text(font,String(data.name).to_lower() if kind!="gear" else String(data.name),Vector2(x,pos.y+14),13,T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT,size.x-x-10.0)
 
 static func _rate(per_day:float,unit:String)->String:
 	if per_day<=0.0:return "none today"
@@ -309,7 +312,10 @@ func _icon(texture:Texture2D,pos:Vector2,side:float)->void:
 	if texture==null:return
 	draw_texture_rect(texture,Rect2(pos-Vector2(side,side)*.5,Vector2(side,side)),false)
 
-func _text(font:Font,text:String,at:Vector2,font_size:int,color:Color,align:int)->void:
+func _text(font:Font,text:String,at:Vector2,font_size:int,color:Color,align:int,max_width:float=-1.0)->void:
+	if max_width>0.0 and font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>max_width:
+		while text.length()>1 and font.get_string_size(text+"…",HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>max_width:text=text.left(-1)
+		text+="…"
 	var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x
 	var x:=at.x
 	if align==HORIZONTAL_ALIGNMENT_CENTER:x-=width*.5

@@ -18,7 +18,7 @@ func _label(text:String,font_size:int,color:Color)->Label:
 func _rebuild()->void:
 	for child:Node in get_children():remove_child(child);child.queue_free()
 	add_theme_constant_override("separation",8)
-	var tabs:=HBoxContainer.new();add_child(tabs)
+	var tabs:=HBoxContainer.new();add_child(tabs);tabs.visible=not bool(view.get("history_only",false))
 	for index:int in 3:
 		var button:=Button.new()
 		button.text=["IN PRODUCTION","FINISHED","ATTENTION"][index]
@@ -28,7 +28,7 @@ func _rebuild()->void:
 		button.pressed.connect(func():mode=index;view.get("view_state",{})["mode"]=index;_rebuild())
 		tabs.add_child(button)
 	if mode==1:
-		add_child(_label("RECORDED OUTPUT BY SETTLEMENT",14,T.GOLD))
+		add_child(_label("Finished in our settlements",22,T.INK))
 		var totals:=preload("res://scripts/workshop_steward.gd").history_totals(view.get("receipts",[]),view.get("totals",{}))
 		totals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return String(a.get("settlement_name","Settlement not recorded"))+String(a.resource)<String(b.get("settlement_name","Settlement not recorded"))+String(b.resource))
 		var previous:=""
@@ -37,7 +37,7 @@ func _rebuild()->void:
 			if city.is_empty():city="Settlement not recorded"
 			if city!=previous:add_child(_label(city,18,T.INK));previous=city
 			_receipt(receipt)
-		if totals.is_empty():add_child(_label("No completed workshop output recorded yet.",12,T.MUTED))
+		if totals.is_empty():add_child(_label("The first finished work will be recorded here.",16,T.MUTED))
 		add_child(_label("Quantities produced, including goods since issued or consumed. Repairs are listed separately. Totals begin with retained records; earlier unrecorded production cannot be reconstructed.",11,T.MUTED))
 		return
 	var count:=0
@@ -96,7 +96,7 @@ func _receipt(receipt:Dictionary)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);add_child(row)
 	row.add_child(_icon(String(receipt.item),String(receipt.kind),String(receipt.resource) if receipt.kind=="civilian" else ""))
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(body)
-	body.add_child(_label(String(receipt.resource) if receipt.kind=="civilian" else P.product_name(String(receipt.item)),13,T.INK))
+	body.add_child(_label(String(receipt.resource) if receipt.kind=="civilian" else P.product_name(String(receipt.item)),16,T.INK))
 	var day:=int(receipt.day)
-	body.add_child(_label(("Repaired · " if receipt.kind=="repair" else "Last output · ")+"Year %d, Day %d" % [day/365+1,day%365+1],10,T.MUTED))
+	body.add_child(_label(("Repaired · " if receipt.kind=="repair" else "Last output · ")+"Year %d, Day %d" % [day/365+1,day%365+1],14,T.MUTED))
 	row.add_child(T.make_label(str(snappedf(float(receipt.quantity),.001)),20,T.GREEN))
