@@ -22,6 +22,9 @@ var _land_note:Label
 var _rows:Array=[]
 var _held_rows:Array=[]
 var _grid:GridContainer
+var _reserve_grid:GridContainer
+var _composition:BoxContainer
+var _inventory:VBoxContainer
 var _hero:Label
 var _supply:Label
 var _readings:Dictionary={}
@@ -30,30 +33,32 @@ var _incoming:Array=[]
 var _details:Array=[]
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="MaterialsLedger";add_theme_constant_override("separation",24)
+	theme=T.control_theme();data=block;name="MaterialsLedger";add_theme_constant_override("separation",16)
 	_shape=shape_of(block)
 	var who:=_who(block)
 	var focus:=_current(block)
 	var can_direct:=bool(block.get("can_direct",false))
-	var overview:=VBoxContainer.new();overview.add_theme_constant_override("separation",8);add_child(overview)
-	_hero=S.voice("",32);_hero.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_hero)
-	_supply=S.label("",16,T.INK_MUTED);_supply.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_supply)
+	_composition=BoxContainer.new();_composition.vertical=true;_composition.add_theme_constant_override("separation",24);add_child(_composition)
+	var overview:=VBoxContainer.new();overview.add_theme_constant_override("separation",8);overview.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.size_flags_stretch_ratio=0.75;_composition.add_child(overview)
+	_inventory=VBoxContainer.new();_inventory.add_theme_constant_override("separation",12);_inventory.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_inventory.size_flags_stretch_ratio=1.5;_composition.add_child(_inventory)
+	_hero=S.voice("",24);_hero.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_hero)
+	_supply=S.label("",14,T.INK_MUTED);_supply.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_supply)
 	var row_buttons:=HFlowContainer.new();row_buttons.add_theme_constant_override("h_separation",8);row_buttons.add_theme_constant_override("v_separation",8);overview.add_child(row_buttons)
 	if can_direct:
 		var more:=S.verb("More carriers"+(" (now)" if focus=="logistics" else ""),func():data.on_focus.call("logistics"),"Ask %s to put more people on carrying loads and keeping the paths open. Other work slows." % (who if not who.is_empty() else "the leader"),focus=="logistics")
 		more.name="Choice_Logistics";row_buttons.add_child(more)
 		if focus!="":row_buttons.add_child(S.verb("Let %s decide" % (who if not who.is_empty() else "the leader"),func():data.on_focus.call(""),"The leader spreads the work across what the place needs."))
 	row_buttons.add_child(S.verb("Show on map",data.get("on_map"),"Mark known wood, stone and clay on the map"))
-	var readings:=HFlowContainer.new();readings.add_theme_constant_override("h_separation",32);readings.add_theme_constant_override("v_separation",16);add_child(readings)
+	var readings:=VBoxContainer.new();readings.add_theme_constant_override("separation",6);overview.add_child(readings)
 	for item:Dictionary in kpi_items(block):
-		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=136;cell.add_theme_constant_override("separation",4);readings.add_child(cell)
+		var cell:=HFlowContainer.new();cell.add_theme_constant_override("h_separation",6);cell.add_theme_constant_override("v_separation",2);readings.add_child(cell)
 		cell.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED))
-		var value:=S.voice("",24);cell.add_child(value)
+		var value:=S.voice("",16);cell.add_child(value)
 		var note:=S.label("",14,T.INK_MUTED);cell.add_child(note)
 		_readings[item.id]={"cell":cell,"value":value,"note":note}
 	# Land condition stays plain; exact yield factors and odds remain in its tooltip.
 	if String(block.get("land",""))!="":
-		var searched:=VBoxContainer.new();searched.name="Land";searched.add_theme_constant_override("separation",6);add_child(searched)
+		var searched:=VBoxContainer.new();searched.name="Land";searched.add_theme_constant_override("separation",4);overview.add_child(searched)
 		var reading:=HBoxContainer.new();reading.add_theme_constant_override("separation",16);searched.add_child(reading)
 		_land=S.label("",16,T.INK,true);_land.name="SearchedLand";_land.mouse_filter=Control.MOUSE_FILTER_PASS;reading.add_child(_land)
 		_land_bar=S.bar(0.0,T.INK_MUTED,96.0,5.0);_land_bar.name="SearchedBar";reading.add_child(_land_bar)
@@ -62,8 +67,8 @@ func setup(block:Dictionary)->void:
 	for item:Dictionary in block.get("rows",[]):
 		if String(item.get("key","")) in ELSEWHERE:continue
 		(beyond if out_of_reach(item) else (still if is_idle(item,"") else moving)).append(item)
-	if not moving.is_empty():S.head(self,"Moving through the yards")
-	_grid=S.columns(self,"Materials",400.0,2)
+	if not moving.is_empty():S.head(_inventory,"Moving through the yards")
+	_grid=S.columns(_inventory,"Materials",320.0,3)
 	_grid.visible=not moving.is_empty()
 	for item:Dictionary in moving:
 		var key:=String(item.key)
@@ -71,18 +76,20 @@ func setup(block:Dictionary)->void:
 			"buttons":[{"text":"Close" if String(block.get("selected",""))==key else "Sources","on_press":func():data.on_select.call(key),"tip":"Where it comes from","chosen":String(block.get("selected",""))==key}]})
 		(refs.panel as Control).name="Material_"+key.validate_node_name()
 		_rows.append({"key":key,"refs":refs})
-	if moving.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened()
+	if moving.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened(_inventory)
 	if not still.is_empty():
-		var held:=VBoxContainer.new();held.name="Still";held.add_theme_constant_override("separation",0);add_child(held)
+		var held:=VBoxContainer.new();held.name="Still";held.add_theme_constant_override("separation",6);_inventory.add_child(held)
 		S.head(held,"Held in reserve","No movement today")
+		_reserve_grid=S.columns(held,"Reserves",300.0,3)
 		for item:Dictionary in still:
 			var key:=String(item.key)
 			var selected:=String(data.get("selected",""))==key
-			var refs:=S.row(held,{"id":key,"icon":key,"label":String(item.name),"compact_actions":true,"buttons":[{"text":"Hide sources" if selected else "Sources","on_press":func():data.on_select.call(key),"tip":"Where it comes from","chosen":selected}]})
+			var entry:=VBoxContainer.new();entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entry.add_theme_constant_override("separation",8);_reserve_grid.add_child(entry)
+			var refs:=S.row(entry,{"id":key,"icon":key,"label":String(item.name),"compact_actions":true,"buttons":[{"text":"Hide sources" if selected else "Sources","on_press":func():data.on_select.call(key),"tip":"Where it comes from","chosen":selected}]})
 			_held_rows.append({"key":key,"refs":refs})
-			if selected:_opened(held,false)
+			if selected:_opened(entry,false)
 	if not beyond.is_empty():
-		var strip:=HFlowContainer.new();strip.name="NotYetInReach";strip.add_theme_constant_override("h_separation",6);strip.add_theme_constant_override("v_separation",4);add_child(strip)
+		var strip:=HFlowContainer.new();strip.name="NotYetInReach";strip.add_theme_constant_override("h_separation",6);strip.add_theme_constant_override("v_separation",4);_inventory.add_child(strip)
 		var lead:=S.label("Not yet within reach",16,T.INK_MUTED,true);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;strip.add_child(lead)
 		for item:Dictionary in beyond:
 			var key:=String(item.key)
@@ -91,16 +98,17 @@ func setup(block:Dictionary)->void:
 			chip.tooltip_text=_reading_words(item)+"\nClick for where it could come from."
 			chip.pressed.connect(func()->void:data.on_select.call(key))
 			strip.add_child(chip)
-		if beyond.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened()
+		if beyond.any(func(item:Dictionary)->bool:return String(item.key)==String(data.get("selected",""))):_opened(_inventory)
 	var incoming:Array=block.get("incoming",[])
 	if not incoming.is_empty():
-		S.head(self,"On the road")
-		var road:=S.columns(self,"Incoming",400.0,2)
+		S.head(_inventory,"On the road")
+		var road:=S.columns(_inventory,"Incoming",400.0,2)
 		for shipment:Dictionary in incoming:
 			var refs:=S.row(road,{"id":"incoming","icon":String(shipment.get("resource","")),"label":"","value_width":60.0})
 			_incoming.append({"voice":refs.label,"when":refs.note,"refs":refs})
 		road.add_child(S.verb("All deliveries",data.get("on_trade"),"Goods on the road between your settlements, and what arrived"))
 	resized.connect(_arrange)
+	_inventory.resized.connect(_arrange)
 	_fill()
 	_arrange.call_deferred()
 
@@ -119,10 +127,12 @@ func _opened(parent:Node=null,close_button:=true)->void:
 		var empty_sources:=S.label("No known place to dig or cut it yet. Scouts and surveys find new sources.",16,T.INK_MUTED);empty_sources.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(empty_sources)
 
 func _arrange()->void:
-	S.flow(_grid,size.x)
+	_composition.vertical=size.x<850.0
+	S.flow(_grid,_inventory.size.x)
+	S.flow(_reserve_grid,_inventory.size.x)
 	S.compact(self,size.x)
-	var road:=get_node_or_null("Incoming") as GridContainer
-	if road!=null:S.flow(road,size.x)
+	var road:=_inventory.get_node_or_null("Incoming") as GridContainer
+	if road!=null:S.flow(road,_inventory.size.x)
 
 ## In store with nothing coming in or going out today, and not the one opened.
 static func is_idle(item:Dictionary,selected:String)->bool:

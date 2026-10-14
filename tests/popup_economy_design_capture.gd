@@ -7,6 +7,7 @@ const WealthFixture=preload("res://tests/wealth_visual_acceptance_probe.gd")
 const TradeFixture=preload("res://tests/trade_visual_acceptance_probe.gd")
 const FoodFixture=preload("res://tests/test_food_folio.gd")
 const MaterialsFixture=preload("res://tests/test_materials_ledger_presentation.gd")
+var _bounds_errors:Array[String]=[]
 
 class CaptureHud extends Control:
 	signal section_requested(section:String,sub:int)
@@ -73,7 +74,12 @@ func _run()->void:
 		GameState.society_capacities.logistics=0.45;GameState.society_capacities.institutions=0.3
 		GameState.city_trade_shipments.assign([{"source_id":home,"source_name":"Reedwater","destination_id":"river","destination_name":"Long Willow River","resource":"Timber","quantity":24.0,"arrival_day":day+5},{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Food","quantity":110.0,"arrival_day":day+1}])
 		GameState.city_trade_history.assign([{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Stone","delivered":5.0,"day":day-3,"status":"delivered"}])
-	for canvas:Vector2i in [Vector2i(1440,900),Vector2i(1000,760)]:
+	var canvases:Array[Vector2i]=[Vector2i(1440,900),Vector2i(1000,760)]
+	if _arg("canvases","")!="":
+		canvases.clear()
+		for dimensions:String in _arg("canvases","").split(","):
+			canvases.append(Vector2i(int(dimensions.get_slice("x",0)),int(dimensions.get_slice("x",1))))
+	for canvas:Vector2i in canvases:
 		for palette:String in ["dark","light"]:
 			T.set_color_mode(palette)
 			var viewport:=SubViewport.new();viewport.size=canvas;viewport.gui_embed_subwindows=true;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
@@ -129,13 +135,17 @@ func _run()->void:
 			viewport.queue_free();await get_tree().process_frame
 	fixture.free()
 	if _arg("page","all")=="trade":TradeFixture.cleanup_fixture()
-	print("POPUP_ECONOMY_CAPTURE PASS")
-	get_tree().quit(0)
+	for error:String in _bounds_errors:push_error(error)
+	print("POPUP_ECONOMY_CAPTURE ","PASS" if _bounds_errors.is_empty() else "FAIL")
+	get_tree().quit(0 if _bounds_errors.is_empty() else 1)
 
 func _settle()->void:
 	for frame in 12:await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 func _capture(viewport:SubViewport,folder:String,label:String)->void:
+	var dock:=viewport.get_child(1) as Control
+	var expected:=Folio.page_width(viewport.size.x)
+	if dock.size.x>expected+1.0:_bounds_errors.append("%s dock width %.1f exceeds %.1f" % [label,dock.size.x,expected])
 	var path:=folder.path_join(label+".png")
 	viewport.get_texture().get_image().save_png(path)
 	print("CAPTURE_SAVED ",path)
