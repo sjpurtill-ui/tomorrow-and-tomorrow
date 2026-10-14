@@ -182,5 +182,5 @@ func _detail(parent:Node)->void:
 		var value:=T.make_label(String(fact[1]),12,T.BODY);value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;value.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(value)
 		if fact.size()>2:value.tooltip_text=String(fact[2]);value.mouse_filter=Control.MOUSE_FILTER_PASS
 	if chosen.has("on_research"):
-		var go:=_button(parent,String(chosen.get("research_label","Put a team on it")),chosen.on_research,"A team takes this question up; the work done on its old question is kept.",true)
-		go.name="Research";go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		var go:=preload("res://scripts/hud/dense_blocks.gd").verb(String(chosen.get("research_label","Put a team on it")),chosen.on_research,"A team takes this question up; the work done on its old question is kept.")
+		go.name="Research";go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;parent.add_child(go)

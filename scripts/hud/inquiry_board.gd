@@ -20,6 +20,7 @@ const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Borders:=preload("res://scripts/nation_borders.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Catalog:=preload("res://scripts/research_600_catalog.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 ## Below this board width the free team's options stack in one column.
 const WIDE:=760.0
 ## From this width each row also says what its question would bring.
@@ -741,13 +742,10 @@ func _line_box(parent:Node,line_name:String)->HBoxContainer:
 	var line:=HBoxContainer.new();line.name=line_name;line.add_theme_constant_override("separation",8);line.custom_minimum_size.y=CARD_HEIGHT;parent.add_child(line)
 	return line
 
+## The game's one small verb button (dense_blocks.gd), here − or +.
 func _step_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
-	var button:=_button(parent,label,callback,tip)
-	button.custom_minimum_size=Vector2(22,22);button.add_theme_font_size_override("font_size",14);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	for state:String in ["normal","hover","pressed","disabled"]:
-		var style:StyleBoxFlat=(button.get_theme_stylebox(state) as StyleBoxFlat).duplicate() if button.get_theme_stylebox(state) is StyleBoxFlat else T.flat(Color.TRANSPARENT,T.BORDER_SOFT,1,2,0)
-		style.content_margin_left=4;style.content_margin_right=4;style.content_margin_top=0;style.content_margin_bottom=0
-		button.add_theme_stylebox_override(state,style)
+	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	button.custom_minimum_size=Vector2(22,22);button.add_theme_font_size_override("font_size",14);parent.add_child(button)
 	return button
 
 func _fill_lane(refs:Dictionary,lane:Dictionary)->void:
@@ -846,8 +844,8 @@ static func _clip(label:Label)->void:
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.custom_minimum_size.x=1;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 func _small_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
-	var button:=_button(parent,label,callback,tip)
-	button.custom_minimum_size.y=24;button.add_theme_font_size_override("font_size",12);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	parent.add_child(button)
 	return button
 func _show_brings()->void:
 	var wide:=size.x>=BRINGS_AT
