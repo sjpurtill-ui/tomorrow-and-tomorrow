@@ -89,3 +89,12 @@ cover a representative 239-known state at 2869, 1600, and 1024 pixels, a
 420-pixel archive component, and work/exploration at 1600 and 1024 pixels.
 The records/search tests verify late entries remain reachable through pages.
 No discovery, allocation, or simulation mechanism changed.
+
+
+## Collection bounded browser — second structural pass
+
+The collection now opens directly on at most two rows of objects (six on desktop, two in a narrow component). A compact Allure reading keeps its complete breakdown and actual effects in an inline disclosure. The inspector puts Study, Exhibit and Exchange actions above the complete, uncropped artwork; the narrow object reader removes collection controls until Back. Short-window cards retain two-line names, material and study state above the pager.
+
+Sets show at most two sampled sets with exact held/missing counts and an explicit action to browse all held pieces. Rumors have local text search and at most four results. All collection, set and rumor records remain accessible. The real facade, allocation controls, exhibition, exchange routes, and pause restoration retain their existing contracts. No simulation or save fields changed.
+
+Validation: `tests/artifact_gallery_probe.tscn` exercises filters, all pages, search, study/exhibition actions, real facade allocation, and collections with over 2,000 items plus many sets/rumors. `tests/gallery_density_capture.tscn` captures 1600, 1024 and actual420 logical widths, asserts viewport fit and the two-row720px inventory bound. Private GPU probes in both palettes passed. Other historical screens remain subject to the second structural pass; prior visual acceptance is not current bounded-default acceptance.
