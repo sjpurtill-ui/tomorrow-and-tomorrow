@@ -57,7 +57,7 @@ func _ready()->void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	panel.offset_top=76;panel.offset_right=-16;panel.offset_left=-376
 	panel.add_theme_stylebox_override("panel",P.sheet_style(14));panel.theme=T.control_theme()
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",8);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);panel.add_child(root)
 	var heading:=_row(root);var titles:=VBoxContainer.new();titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(titles)
 	P.kicker(titles,"Our ships" if domain=="navy" else "Our flyers")
 	P.label(titles,"The navy" if domain=="navy" else "The air service","title",T.INK)
@@ -70,7 +70,7 @@ func _ready()->void:
 	pages.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CARD,10))
 	for state in ["tab_selected","tab_unselected","tab_hovered","tab_focus"]:
 		var tab:=T.flat(T.PAPER_RAISED if state=="tab_selected" else T.PAPER if state!="tab_hovered" else T.HOVER_BG,T.RULE,1,2)
-		tab.content_margin_left=12;tab.content_margin_right=12;tab.content_margin_top=6;tab.content_margin_bottom=6
+		tab.content_margin_left=12;tab.content_margin_right=12;tab.content_margin_top=12;tab.content_margin_bottom=11
 		if state=="tab_selected":tab.border_color=T.GOLD;tab.border_width_top=2
 		pages.add_theme_stylebox_override(state,tab)
 	for color in ["font_selected_color","font_hovered_color","font_focus_color"]:pages.add_theme_color_override(color,T.INK)
@@ -81,8 +81,8 @@ func _ready()->void:
 	_refresh_choices();_select_force()
 
 func _page(title:String)->VBoxContainer:
-	var scroll:=ScrollContainer.new();scroll.name=title;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;pages.add_child(scroll)
-	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",8);scroll.add_child(column);return column
+	var scroll:=ScrollContainer.new();scroll.name=title;scroll.follow_focus=true;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;pages.add_child(scroll)
+	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",16);scroll.add_child(column);return column
 
 func _build_service()->void:
 	pass
@@ -91,9 +91,10 @@ func _force_summary(force:Dictionary)->String:
 	return String(force.get("status",""))
 
 func _region_tools(column:Node)->void:
+	P.label(column,"Operating area","body",T.INK).add_theme_font_size_override("font_size",22)
 	region_label=_label(column,"Pick an area on the map, or draw a new one.",14)
 	area_name=LineEdit.new();area_name.placeholder_text="Sea area name" if domain=="navy" else "Air region name";column.add_child(area_name)
-	var row:=_row(column)
+	var row:=HFlowContainer.new();row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);column.add_child(row)
 	_button(row,"Draw an area (D)",func():map.begin_boundary();feedback.text="Click the corners of the area on the map. Enter finishes, Backspace takes back the last corner, Esc cancels.")
 	_button(row,"Finish",func():map.finish_boundary(area_name.text))
 	_button(row,"Cancel",func():map.cancel_boundary())
@@ -109,7 +110,7 @@ func _force_controls(column:Node,stand_down:String)->void:
 	setup_button=_button(column,"Go to ports" if domain=="navy" else "Go to airfields",func():pages.current_tab=1)
 	mission_controls=VBoxContainer.new();mission_controls.add_theme_constant_override("separation",7);column.add_child(mission_controls)
 	mission_picker=_option(mission_controls)
-	assign_button=_button(mission_controls,"Send them to this area",_assign)
+	assign_button=_button(mission_controls,"Send them to this area",_assign);T.apply_button_style(assign_button,true)
 	readiness_label=_label(mission_controls,"",13)
 	_button(mission_controls,stand_down,func():_report(op.assign(selected_id,{},"hold")))
 	replacement=CheckBox.new();replacement.text="Replace losses from our stores";T.text(replacement,"small",T.INK);mission_controls.add_child(replacement)
@@ -126,8 +127,8 @@ func _production_controls(column:Node,base_word:String,creation_word:String)->vo
 	_label(column,"How many to build",13)
 	quantity=SpinBox.new();quantity.min_value=1;quantity.max_value=100;quantity.value=1;column.add_child(quantity);quantity.value_changed.connect(func(_amount:float):_refresh_status())
 	recipe=_label(column,"",13)
-	_button(column,"Start building them",_produce)
-	commission_button=_button(column,creation_word,_commission)
+	T.apply_button_style(_button(column,"Start building them",_produce),true)
+	commission_button=_button(column,creation_word,_commission);T.apply_button_style(commission_button,true)
 	commission_status=_label(column,"",13)
 
 func _transport_controls(column:Node,description:String)->void:
@@ -165,7 +166,7 @@ func _process(delta:float)->void:
 	if panel==null:return
 	var view_size:=get_viewport().get_visible_rect().size
 	panel.offset_bottom=view_size.y-18
-	panel.offset_left=-minf(360,view_size.x*.4)-16
+	panel.offset_left=-minf(440,view_size.x-32)-16
 	tick+=delta
 	if tick<1 or op==null:return
 	tick=0
@@ -176,7 +177,7 @@ func _process(delta:float)->void:
 func _row(parent:Node)->HBoxContainer:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",7);parent.add_child(row);return row
 func _label(parent:Node,text:String,font_size:int)->Label:
-	var label:=Label.new();label.text=text;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;T.text(label,"value" if font_size>=17 else "body" if font_size>=14 else "small",T.INK if font_size>=17 else T.BODY);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(label);return label
+	var label:=Label.new();label.text=text;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;T.text(label,"value" if font_size>=24 else "body" if font_size>=14 else "small",T.INK if font_size>=24 else T.BODY);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(label);return label
 func _button(parent:Node,text:String,callback:Callable)->Button:
 	return P.button(parent,text,callback)
 func _option(parent:Node)->OptionButton:
