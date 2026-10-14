@@ -28,9 +28,18 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	assert_str(value.text).is_equal("-37")
 	assert_str(panel._refs.forecast.text).contains("food runs short")
 	assert_str(panel._refs.water.get_child(0).text).contains("5 in every 10")
-	# No made-up remainder: the cells are the engine's own terms, and Spoiled is the stores' lines added up.
+	# Every cell is an engine term, and they add up: in + taken - eaten - spoiled - lost in drying = kept.
 	assert_bool(panel.daily_values.has("Other")).is_false()
-	assert_str(panel.daily_values.Spoiled.text).is_equal("22")
+	var real := prepared_food()
+	real.on_focus = block.on_focus
+	real.flow = {"Produced":62593.0, "Taken":0.0, "Eaten":53105.0, "Spoiled":276.0, "Keeping":146.0, "Missions":165.0, "Net":9066.0}
+	assert_bool(panel.update_block(real)).is_true()
+	var shown := {}
+	for key: String in panel.daily_values: shown[key] = int(String(panel.daily_values[key].text).replace(",", "").replace("+", ""))
+	assert_int(int(shown.Produced) + int(shown.Taken) - int(shown.Eaten) - int(shown.Spoiled) - int(shown.Keeping)).is_equal(int(shown.Net))
+	assert_bool((panel.daily_values.Keeping.get_parent() as Control).visible).is_true()
+	assert_bool((panel.daily_values.Taken.get_parent() as Control).visible).is_false()
+	assert_str(panel._refs.missions.text).contains("165 rations went out")
 	(panel.find_child("Choice_Provisions", true, false) as Button).pressed.emit()
 	assert_array(chosen).contains_exactly(["provisions"])
 

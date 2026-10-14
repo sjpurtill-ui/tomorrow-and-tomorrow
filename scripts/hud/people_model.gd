@@ -80,7 +80,7 @@ static func headline(report:Dictionary,totals:Dictionary)->String:
 	elif stage=="lettered":parts.append("%s in %s." % [EraWords.people(count),EraWords.places(maxi(1,(report.cities as Array).size()))])
 	else:parts.append("Population %s across %s." % [EraWords.grouped(count),EraWords.places(maxi(1,(report.cities as Array).size()))])
 	var food:=float(report.food_min)
-	if food>=0.0:parts.append(_cap(EraWords.store_span(food).replace("food for","Stores for"))+".")
+	if food>=0.0:parts.append("Stores for %s." % EraWords.days_in_words(food))
 	var need:=float(totals.get("food_need",0.0))
 	var intake:=clampf(float(totals.get("food_eaten",0.0))/need,0.0,1.0) if need>0.0 else 1.0
 	var children:="The children are fed" if intake>=0.99 else "Some children sleep hungry" if intake>=0.8 else "The children go hungry"
@@ -438,7 +438,7 @@ static func needs_words(city:Dictionary)->String:
 	var issues:Array=city.get("issues",[])
 	if issues.has("Food shortfall"):parts.append("Going hungry")
 	elif food>=0.0 and food<7.0:parts.append("Stores nearly gone")
-	elif food>=0.0:parts.append(_cap(EraWords.store_span(food)))
+	elif food>=0.0:parts.append("Food for %s" % EraWords.days_in_words(food))
 	if issues.has("Water shortfall"):parts.append("short of water")
 	elif met>=0.0:parts.append("water enough")
 	var population:=int(city.get("population",0));var places:=int(city.get("places",0))

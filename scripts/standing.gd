@@ -223,7 +223,9 @@ static func _might(year:float)->Dictionary:
 	var a:=Scale.might_anchors(year)
 	var parts:=[_part("ready",Scale.score(share,a),1.0,share,a)]
 	if not _words: return _entry(parts,"")
-	var why:="%d under arms or training, ready %d%%, among %d people: %s ready to fight%s, %s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),_per_hundred(share),(" with walls and stone (x%.2f)" % lift) if walls>0.005 else "",_vs(share,a,_per_hundred(float(a[1])))]
+	# "Battle-ready" is the engine's own readiness reading (the military's fighting_reading), one figure for the whole
+	# army; the War screen's Drill and Armed are two of its parts, so the word is not "ready" beside theirs.
+	var why:="%d under arms or training, %d%% battle-ready, among %d people: %s ready to fight%s, %s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),_per_hundred(share),(" with walls and stone (x%.2f)" % lift) if walls>0.005 else "",_vs(share,a,_per_hundred(float(a[1])))]
 	return _entry(parts,why)
 
 ## GENIUS: what we know against the age (standing_scale.gd known_anchors) and
@@ -493,7 +495,8 @@ static func _endurance(year:float)->Dictionary:
 	var parts:=[_part("food",Scale.score(food_days,fa),ENDURANCE_WEIGHTS.food,food_days,fa),_part("water",Scale.score(water_days,wa),ENDURANCE_WEIGHTS.water,water_days,wa),_part("walls",Scale.score(walls,da),ENDURANCE_WEIGHTS.walls,walls,da),
 		_part("health",Scale.score_share(health,ha),ENDURANCE_WEIGHTS.health,health,ha),_part("cohesion",Scale.score_share(cohesion,ca),ENDURANCE_WEIGHTS.cohesion,cohesion,ca)]
 	if not _words: return _entry(parts,"")
-	var why:="food for %d days, %s; water for %d (typical %d); walls %s (typical %s); health %s" % [roundi(food_days),_vs(food_days,fa),roundi(water_days),roundi(float(wa[1])),_wall_words(walls),_wall_words(float(da[1])),_pct(health)]
+	# The stores and the water in the top bar's own words (era_words.gd days).
+	var why:="food for %s, %s; water for %s (typical %d); walls %s (typical %s); health %s" % [preload("res://scripts/hud/era_words.gd").days_in_words(food_days),_vs(food_days,fa),preload("res://scripts/hud/era_words.gd").days_in_words(water_days),roundi(float(wa[1])),_wall_words(walls),_wall_words(float(da[1])),_pct(health)]
 	return _entry(parts,why)
 
 static func _wall_words(bonus:float)->String:

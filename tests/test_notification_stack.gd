@@ -16,6 +16,8 @@ class SheetHud extends Control:
 	func _init()->void:
 		add_child(dock);add_child(detail_dock);dock.visible=false;detail_dock.visible=false
 		section_requested.connect(func(section:String,_sub:int)->void:sections.append(section))
+	var courts:=0
+	func open_court()->void:courts+=1
 	var notice_counts:Dictionary={}
 	func set_notice_counts(counts:Dictionary)->void:notice_counts=counts
 	func right_stack_top()->float:return 640.0
@@ -343,3 +345,57 @@ func test_an_envoy_waiting_is_a_row_that_needs_you_and_opens_the_court()->void:
 	# An envoy's home on the rail is World: that is where other peoples are.
 	assert_str(Standing.rail_of(Standing.waiting()[0])).is_equal("world")
 	(Hall.call("state").queue as Array).clear()
+
+
+# --- Every button does something: each verb, the envoy's row, pressed -------------
+
+func _alert_row(id:String,extra:Dictionary={})->Dictionary:
+	var alert:={"id":id,"glyph":"gear","tone":"red","count":1,"title":id,"lines":PackedStringArray(["First host"]),"page":"support"}
+	alert.merge(extra,true)
+	return Standing.from_alert(alert)
+
+func _press_verb(stack:CanvasLayer,key:String)->String:
+	var row:Control=stack._views[key]
+	var button:=row.get_meta("verb") as Button
+	assert_bool(button.visible).override_failure_message(key).is_true()
+	button.pressed.emit()
+	return button.text
+
+func _click_row(stack:CanvasLayer,key:String)->void:
+	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
+	(stack._views[key] as Control).gui_input.emit(click)
+
+func _war_screen_opened()->String:
+	var screen:Variant=MilitaryCampaign.roster_screen
+	if not is_instance_valid(screen):return ""
+	var page:=String(screen.get("page")) if "page" in screen else "open"
+	screen.free()
+	return page if page!="" else "open"
+
+func test_every_verb_button_and_the_envoys_row_open_their_screen()->void:
+	MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	var made:=await _stack();var stack:CanvasLayer=made[0];var hud:SheetHud=made[1]
+	var envoy:={"key":"standing:envoy:t","standing":true,"kind":"waiting","tone":"gold","category":"neighbours","title":"Envoy of the Saltmarsh folk","text":"waits","verb":"Answer","days":9,"count":1,"lines":PackedStringArray(["waits"]),"action":{"kind":"court","focus":{},"label":"the court"}}
+	stack._seeded.assign([_alert_row("attack",{"war":"band","page":"wars","fact":"The Reedbank raiders · ~40 · 6 days","days":6}),envoy,_alert_row("hungry",{"logistics":"hungry"}),
+		_alert_row("trade_against",{"war":"raid","page":"trade","dock":["economy",3]}),_alert_row("gear",{"tone":"amber"}),_alert_row("unpaid",{"dock":["economy",2]})])
+	stack._sync_standing()
+	for i in 2:await get_tree().process_frame
+	# Defend, Feed and Arm open the War screen.
+	for pair:Array in [["standing:attack","Defend"],["standing:hungry","Feed"],["standing:gear","Arm"]]:
+		assert_str(_press_verb(stack,String(pair[0]))).is_equal(String(pair[1]))
+		assert_str(_war_screen_opened()).override_failure_message("%s did not open the War screen" % String(pair[1])).is_not_empty()
+	# Trade and Pay open their Economy pages.
+	hud.sections.clear()
+	assert_str(_press_verb(stack,"standing:trade_against")).is_equal("Trade")
+	assert_str(_press_verb(stack,"standing:unpaid")).is_equal("Pay")
+	assert_array(hud.sections).is_equal(["economy","economy"])
+	# Answer opens the court, by its button and by a click anywhere on the row.
+	assert_str(_press_verb(stack,"standing:envoy:t")).is_equal("Answer")
+	assert_int(hud.courts).is_equal(1)
+	_click_row(stack,"standing:envoy:t")
+	assert_int(hud.courts).is_equal(2)
+	# A click on a row does what its button does, and a row that stands stays.
+	_click_row(stack,"standing:hungry")
+	assert_str(_war_screen_opened()).is_not_empty()
+	assert_int(stack.standing.size()).is_equal(6)

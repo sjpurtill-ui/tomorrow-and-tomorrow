@@ -308,6 +308,9 @@ func test_army_bar_click_selects_and_centres_on_the_army()->void:
 	var bar:Control=auto_free(ArmyBar.new());bar.terrain=ground;add_child(bar)
 	bar.place(Rect2(100,600,1000,bar.bar_height()))
 	bar.refresh()
+	# The bar keeps to its one line until it is opened (test_compact_army_bar): then a card for each army.
+	assert_int(bar.strip.get_child_count()).is_equal(0)
+	bar.toggle_disclosure()
 	assert_int(bar.strip.get_child_count()).is_equal(bar.cards.size())
 	var card:Dictionary={}
 	for candidate:Dictionary in bar.cards:

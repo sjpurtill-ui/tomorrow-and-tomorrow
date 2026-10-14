@@ -3,12 +3,14 @@ extends "res://scripts/hud/provisions_panel.gd"
 var summary: GridContainer
 var daily_values: Dictionary = {}
 var flow_bar: FlowBar
-## The day's figures in order: [flow key, caption, the bar's ink (null: not a
-## part of the bar)]. "Kept" is the engine's own change in the stores,
-## counted from the stores themselves (food_system.gd food_net); the engine
-## keeps no named tally of what else moved them, so none is invented here.
-const FLOW_CELLS := [["Produced", "Brought in", null], ["Eaten", "Eaten", Color("8a6118")], ["Spoiled", "Spoiled", Color("a34435")],
-	["Missions", "Sent out", Color("4d6389")], ["Net", "Kept", Color("5d6f34")]]
+## The day's count in order: [flow key, caption, the bar's ink (null: not a
+## part of the bar)]. Every term is the engine's own (food_system.gd): what
+## was gathered, what was taken in from towns we hold, what was eaten, what
+## spoiled, the weight drying, smoking and canning took out of the food
+## (food_preserved.lost), and the change in the stores (food_net). They add
+## up: in + taken - eaten - spoiled - keeping = kept.
+const FLOW_CELLS := [["Produced", "Brought in", null], ["Taken", "Taken in", null], ["Eaten", "Eaten", Color("8a6118")], ["Spoiled", "Spoiled", Color("a34435")],
+	["Keeping", "Lost in drying", Color("4d6389")], ["Net", "Kept", Color("5d6f34")]]
 
 func setup(block: Dictionary) -> void:
 	theme = T.control_theme()
@@ -90,6 +92,7 @@ func setup(block: Dictionary) -> void:
 			swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			caption.add_child(swatch)
 		_line(caption, pair[1], 12, T.MUTED)
+	_refs.missions = _line(self, "", 12, T.MUTED)
 	_rule(self)
 	_line(self, "TOWN STORES", 11, T.MUTED)
 	for item: Dictionary in data.rows:
@@ -135,20 +138,22 @@ func _fill() -> void:
 	super._fill()
 	_refs.flow.visible = false
 	var amounts := flow_amounts(data.flow)
-	# Spoiled is the stores' own lines added up, so the page's figures agree.
-	var spoiled_rows := 0
-	for item: Dictionary in data.rows: spoiled_rows += roundi(float(item.lost))
-	if not (data.rows as Array).is_empty(): amounts["Spoiled"] = float(spoiled_rows)
 	for key: String in daily_values:
 		var amount := float(amounts.get(key, 0))
 		var words: String = preload("res://scripts/realm_purse.gd").number(amount)
 		if key == "Net" and amount > 0: words = "+" + words
 		_put(daily_values[key], words, tone_color("bad" if amount < 0 else "good") if key == "Net" else T.INK)
 		daily_values[key].tooltip_text = String(_refs.flow.text) + "\n" + String(_refs.flow.tooltip_text)
-	# Nothing sent: that cell stands aside.
-	(daily_values.Missions.get_parent() as Control).visible = absf(float(amounts.Missions)) >= 0.5
-	(daily_values.Missions.get_parent() as Control).tooltip_text = "Rations sent with parties that left today."
-	(daily_values.Net.get_parent() as Control).tooltip_text = "The change in the stores today, counted from the stores themselves. Rations handed out between the day's counts (to parties, envoys, the watch abroad) are tallied apart, so this can differ a little from brought in less eaten, spoiled and sent."
+	# Nothing taken in, nothing lost in keeping: those cells stand aside.
+	for key: String in ["Taken", "Keeping"]:
+		(daily_values[key].get_parent() as Control).visible = absf(float(amounts[key])) >= 0.5
+	(daily_values.Taken.get_parent() as Control).tooltip_text = "Food taken in from towns we hold."
+	(daily_values.Keeping.get_parent() as Control).tooltip_text = "Drying, smoking and canning make fresh food keep, and take some of its weight: about an eighth dried, a sixth smoked, a tenth canned."
+	(daily_values.Net.get_parent() as Control).tooltip_text = "The change in the stores over the day's count: brought in and taken in, less eaten, spoiled and lost in drying."
+	# Rations handed to parties when they leave come out of the stores apart from the day's count.
+	var sent := float(data.flow.get("Missions", 0))
+	_refs.missions.visible = sent >= 0.5
+	_put(_refs.missions, "Also today: %s rations went out with parties that left." % preload("res://scripts/realm_purse.gd").number(sent))
 	flow_bar.amounts = amounts
 	flow_bar.queue_redraw()
 	# The headline carries the top bar's own figure for water in store.
@@ -172,7 +177,7 @@ func _fill() -> void:
 ## The day's terms as the engine gives them.
 static func flow_amounts(flow: Dictionary) -> Dictionary:
 	var out := {}
-	for key: String in ["Produced", "Eaten", "Spoiled", "Missions", "Net"]: out[key] = float(flow.get(key, 0))
+	for key: String in ["Produced", "Taken", "Eaten", "Spoiled", "Keeping", "Net"]: out[key] = float(flow.get(key, 0))
 	return out
 
 

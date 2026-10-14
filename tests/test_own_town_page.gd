@@ -485,3 +485,22 @@ func test_the_page_reads_in_light_and_dark()->void:
 		# The caption drawn on the sketch's band.
 		assert_float(T.contrast(T.GOLD_TEXT,T.PAPER_SUNK)).is_greater_equal(4.5)
 	T.set_color_mode("light")
+
+
+# --------------------------------------------------------------------------
+# Every tile is a door: pressed, it opens the page that owns its figure
+# --------------------------------------------------------------------------
+
+func test_each_home_tile_pressed_opens_its_page()->void:
+	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
+	var dock:PanelContainer=auto_free(preload("res://scripts/hud/dock_panel.gd").new())
+	add_child(dock)
+	dock._rebuild_kpis(tiles)
+	var expected:={"PEOPLE":["chronicle",0],"FOOD":["economy",0],"WATER":["economy",0],"HOMES":["construction",0],"LIFE SPAN":["overview",0],"ARMY":["military",0]}
+	assert_int(dock.kpi_row.get_child_count()).is_equal(tiles.size())
+	for index in tiles.size():
+		var label:=String(tiles[index].label)
+		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
+		hud.opened.clear()
+		(dock.kpi_row.get_child(index) as Control).gui_input.emit(click)
+		assert_array(hud.opened).override_failure_message(label).contains_exactly([expected[label]])

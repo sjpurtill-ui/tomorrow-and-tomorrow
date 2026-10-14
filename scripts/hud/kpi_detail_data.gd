@@ -148,7 +148,7 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 				if without>0:c.headline=lead+"%s went %s today." % [EraWords.grouped(without),"hungry" if food else "thirsty"]
 				else:c.headline=lead+"%s cannot meet the day's need." % EraWords.places(shortages)
 			elif days<0:c.headline="No %s has been counted yet." % ("food" if food else "water")
-			elif food:c.headline="%s at today's eating, and %s." % [_sentence_case(EraWords.store_span(days)),"more is brought in than eaten" if gaining else "we eat more than we bring in"]
+			elif food:c.headline="Food for %s at today's eating, and %s." % [EraWords.days_in_words(days),"more is brought in than eaten" if gaining else "we eat more than we bring in"]
 			else:c.headline="Water held for %s at today's drinking, and %s." % [EraWords.days(days),"more is drawn than drunk" if gaining else "we drink more than we draw"]
 			# A warning's own facts come first (the card shows four).
 			if not watch.is_empty() and String(watch.tone)!="calm":
