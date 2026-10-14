@@ -32,7 +32,7 @@ func _local_tab(sub:int)->Dictionary:
 			var materials:=_materials_data()
 			return {"kpis":[],"blocks":[materials]}
 		2:return _wealth_tab()
-		3:return {"kpis":preload("res://scripts/hud/trade_board.gd").kpis(),"blocks":[{"type":"trade_board"}]}
+		3:return {"kpis":[],"blocks":[{"type":"trade_board"}]}
 	return _food_tab()
 
 ## The Food & water tab: this place's food and water. The common store holds
@@ -53,26 +53,28 @@ func _local_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
 	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
 
-func _trade_block()->Dictionary:
+func _trade_blocks()->Array:
 	var city:=SettlementModel.selected_settlement()
 	var trade:=SettlementModel.city_trade_snapshot(String(city.get("id","")))
 	var today:=int(GameState.elapsed_days)
-	var lines:Array[String]=[]
-	if not bool(trade.capacity.ready): lines.append(String(trade.capacity.reason))
-	else: lines.append("Your settlement leaders send spare stores to each other along known paths, up to %s km away, travelling about %s km a day." % [Plain.number(float(trade.capacity.range_km)),Plain.number(float(trade.capacity.speed_km_per_day))])
+	var capacity:=String(trade.capacity.reason) if not bool(trade.capacity.ready) else "Your settlement leaders send spare stores to each other along known paths, up to %s km away, travelling about %s km a day." % [Plain.number(float(trade.capacity.range_km)),Plain.number(float(trade.capacity.speed_km_per_day))]
+	var blocks:Array=[{"type":"text","heading":"How deliveries travel","text":capacity}]
+	var on_road:Array=[]
 	for shipment in trade.shipments:
 		var left:=maxi(0,ceili(float(shipment.arrival_day))-today)
-		lines.append("%s %s on the way from %s to %s; arrives %s." % [Plain.number(float(shipment.quantity)),String(shipment.resource).to_lower(),String(shipment.source_name),String(shipment.destination_name),"today" if left<=0 else "in "+Plain.span_text(left)])
+		on_road.append({"name":"%s %s" % [Plain.number(float(shipment.quantity)),String(shipment.resource).to_lower()],"detail":"%s → %s" % [String(shipment.source_name),String(shipment.destination_name)],"value":"Arrives today" if left<=0 else "In "+Plain.span_text(left),"icon":preload("res://scripts/resource_icons.gd").material_texture(String(shipment.resource),48)})
+	if on_road.is_empty():blocks.append({"type":"text","heading":"On the road","text":"Nothing is on the road just now."})
+	else:blocks.append({"type":"rows","heading":"On the road","items":on_road})
 	var shown:=0
+	var arrived:Array=[]
 	for entry in trade.history:
 		if String(entry.status)!="delivered": continue
 		var ago:=maxi(0,today-int(entry.day))
-		lines.append("%s %s arrived at %s from %s, %s." % [Plain.number(float(entry.delivered)),String(entry.resource).to_lower(),String(entry.destination_name),String(entry.source_name),"today" if ago<=0 else Plain.span_text(ago)+" ago"])
+		arrived.append({"name":"%s %s delivered" % [Plain.number(float(entry.delivered)),String(entry.resource).to_lower()],"detail":"%s → %s" % [String(entry.source_name),String(entry.destination_name)],"value":"Today" if ago<=0 else Plain.span_text(ago)+" ago","icon":preload("res://scripts/resource_icons.gd").material_texture(String(entry.resource),48)})
 		shown+=1
 		if shown>=5: break
-	if trade.shipments.is_empty(): lines.append("Nothing is on the road just now.")
-	return {"type":"text","heading":"Deliveries between places","text":"
-".join(lines)}
+	if not arrived.is_empty():blocks.append({"type":"rows","heading":"Recently arrived","items":arrived})
+	return blocks
 
 var selected_account:=""
 ## The Wealth tab: what the people own and can trade, goods first, and the
@@ -104,7 +106,7 @@ func open_expanded_tab(sub:int)->bool:
 
 ## Deliveries between this people's places, on the road and arrived.
 func _economy_report(_kind:String)->Dictionary:
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return {"blocks":[_trade_block()]})
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return {"blocks":_trade_blocks()})
 
 var selected_food:=""
 var show_priorities:=false
