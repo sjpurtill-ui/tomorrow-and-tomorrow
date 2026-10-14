@@ -76,6 +76,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
 			"council_reader":
 				var panel:=preload("res://scripts/hud/council_reader.gd").new();section.add_child(panel);panel.setup(block)
+			"civilization_people":
+				var screen:=preload("res://scripts/hud/civilization_people_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"people":
 				var screen:=preload("res://scripts/hud/people_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"settlement_overview":
