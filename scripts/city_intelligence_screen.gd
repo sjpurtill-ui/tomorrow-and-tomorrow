@@ -71,15 +71,15 @@ func _ready()->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:dismiss.accept_event();_close())
 	panel=PanelContainer.new();panel.set_anchors_and_offsets_preset(PRESET_RIGHT_WIDE);add_child(panel)
 	panel.add_theme_stylebox_override("panel",P.sheet_style(16))
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",8);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);panel.add_child(root)
 	var top:=HBoxContainer.new();root.add_child(top)
 	var eyebrow:=P.kicker(top,"City report");eyebrow.size_flags_horizontal=SIZE_EXPAND_FILL;eyebrow.size_flags_vertical=SIZE_SHRINK_CENTER
-	var close:=P.button(top,"Close",_close);close.name="Close";close.size_flags_horizontal=SIZE_SHRINK_END;close.custom_minimum_size=Vector2(88,34);close.tooltip_text="Close (Esc, or click the map)"
+	var close:=P.button(top,"Close",_close);close.name="Close";close.size_flags_horizontal=SIZE_SHRINK_END;close.custom_minimum_size=Vector2(88,40);close.tooltip_text="Close (Esc, or click the map)"
 	var identity:=HBoxContainer.new();identity.add_theme_constant_override("separation",10);root.add_child(identity)
 	flag=TextureRect.new();flag.custom_minimum_size=Vector2(48,42);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;identity.add_child(flag)
 	var names:=VBoxContainer.new();names.size_flags_horizontal=SIZE_EXPAND_FILL;names.add_theme_constant_override("separation",0);identity.add_child(names)
-	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.clip_text=true;selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;selector.custom_minimum_size.y=38
-	T.text(selector,"voice",T.INK)
+	selector=OptionButton.new();selector.fit_to_longest_item=false;selector.clip_text=true;selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;selector.custom_minimum_size.y=44
+	T.text(selector,"title",T.INK)
 	selector.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT,Color.TRANSPARENT,0,2));selector.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color.TRANSPARENT,0,2))
 	selector.tooltip_text="Other cities of theirs our scouts have reported"
 	names.add_child(selector)
@@ -103,11 +103,11 @@ func _ready()->void:
 	var actions:=VBoxContainer.new();actions.name="Actions";actions.add_theme_constant_override("separation",6);root.add_child(actions)
 	scout_actions=actions
 	held_actions=VBoxContainer.new();held_actions.name="HeldActions";held_actions.add_theme_constant_override("separation",6);held_actions.hide();root.add_child(held_actions)
-	var held_row:=HBoxContainer.new();held_row.add_theme_constant_override("separation",6);held_actions.add_child(held_row)
+	var held_row:=HFlowContainer.new();held_row.add_theme_constant_override("h_separation",6);held_row.add_theme_constant_override("v_separation",6);held_actions.add_child(held_row)
 	held_talk=P.button(held_row,"Speak to our war leader",_speak_about_held,true);held_talk.name="SpeakAboutTown"
 	P.button(held_row,"Show on the map",_show_map)
 	P.kicker(actions,"Talk it over in court")
-	var talk_row:=HBoxContainer.new();talk_row.add_theme_constant_override("separation",6);actions.add_child(talk_row)
+	var talk_row:=HFlowContainer.new();talk_row.add_theme_constant_override("h_separation",6);talk_row.add_theme_constant_override("v_separation",6);actions.add_child(talk_row)
 	talk_ruler=P.button(talk_row,"Talk to their ruler",_talk_to_ruler,true);talk_ruler.name="TalkRuler"
 	talk_general=P.button(talk_row,"Talk to our war leader",_talk_to_general);talk_general.name="TalkGeneral"
 	war_box=VBoxContainer.new();war_box.add_theme_constant_override("separation",6);actions.add_child(war_box)

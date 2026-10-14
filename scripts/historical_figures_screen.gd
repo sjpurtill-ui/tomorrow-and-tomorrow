@@ -1,24 +1,24 @@
 extends Control
-## People and legacies: one remarkable person at a time, in paper and ink.
+## People and legacies: one remarkable person and their complete record.
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const ChronicleScript:=preload("res://scripts/chronicle.gd")
+const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 var index:=0
-var chapter:=0
+var displayed_person:=""
+var portrait:TextureRect
+var reader:ScrollContainer
 var title:Label
 var subtitle:Label
 var body:Label
 var effect:Label
 var feedback:Label
 var patron:Button
-var page:Label
 var person_page:Label
 var previous:Button
 var next:Button
-var chapter_previous:Button
-var chapter_next:Button
 var refresh_clock:=0.0
 
 func _ready()->void:
@@ -28,35 +28,36 @@ func _ready()->void:
 	var margin:=MarginContainer.new(); margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]: margin.add_theme_constant_override("margin_"+edge,28)
 	add_child(margin)
-	var layout:=VBoxContainer.new(); layout.add_theme_constant_override("separation",12); margin.add_child(layout)
+	var layout:=VBoxContainer.new(); layout.add_theme_constant_override("separation",16); margin.add_child(layout)
 	var header:=HBoxContainer.new(); header.add_theme_constant_override("separation",8); layout.add_child(header)
 	var heading:=P.label(header,"People and legacies","title",T.INK,false); heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_button(header,"Our course",func(): WorldSimulation.direction.open_direction())
 	_button(header,"Close",func(): queue_free())
-	P.rule(layout)
 	var nav:=HBoxContainer.new(); nav.add_theme_constant_override("separation",8); layout.add_child(nav)
-	previous=_button(nav,"Previous person",func(): index-=1; chapter=0; _refresh())
+	previous=_button(nav,"Previous person",func(): index-=1; _refresh())
 	person_page=P.label(nav,"","small",T.INK_MUTED); person_page.size_flags_horizontal=Control.SIZE_EXPAND_FILL; person_page.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	next=_button(nav,"Next person",func(): index+=1; chapter=0; _refresh())
-	title=P.label(layout,"","title",T.INK)
-	subtitle=P.label(layout,"","body",T.BODY)
-	effect=P.label(layout,"","body",T.TEAL_TEXT)
-	var chapter_nav:=HBoxContainer.new(); chapter_nav.add_theme_constant_override("separation",8); layout.add_child(chapter_nav)
-	chapter_previous=_button(chapter_nav,"Previous page",func(): chapter-=1; _refresh())
-	page=P.label(chapter_nav,"","kicker",T.INK_MUTED); page.size_flags_horizontal=Control.SIZE_EXPAND_FILL; page.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	chapter_next=_button(chapter_nav,"Next page",func(): chapter+=1; _refresh())
-	body=P.label(layout,"","voice_small",T.INK); body.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	next=_button(nav,"Next person",func(): index+=1; _refresh())
+	reader=ScrollContainer.new();reader.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;reader.size_flags_vertical=Control.SIZE_EXPAND_FILL;layout.add_child(reader)
+	var record:=VBoxContainer.new();record.size_flags_horizontal=Control.SIZE_EXPAND_FILL;record.add_theme_constant_override("separation",20);reader.add_child(record)
+	var hero:=HBoxContainer.new();hero.add_theme_constant_override("separation",24);record.add_child(hero)
+	portrait=Portrait.picture({},112,140);portrait.visible=false;hero.add_child(portrait)
+	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.add_theme_constant_override("separation",8);hero.add_child(identity)
+	title=P.label(identity,"","title",T.INK)
+	subtitle=P.label(identity,"","body",T.BODY)
+	effect=P.label(record,"","body",T.TEAL_TEXT)
+	body=P.label(record,"","voice_small",T.INK)
 	var actions:=HBoxContainer.new(); layout.add_child(actions)
 	patron=_button(actions,"Support their work",func():
 		var result:Dictionary=WorldSimulation.figures.support(String(WorldSimulation.figures.people[index].id))
 		feedback.text=String(result.get("error","Your support has changed.")); _refresh())
 	patron.custom_minimum_size.x=220
+	T.apply_button_style(patron,true)
 	feedback=P.label(layout,"","body",T.INK)
 	P.label(layout,"You can support up to three living people at once. Patronage quickens our discoveries in their field, makes a general lead better and makes a gifted person's gift a fifth stronger. Their early lives are imagined; their deeds are what happened in your game.","small",T.INK_MUTED)
 	_refresh()
 
 func _button(parent:Node,text:String,action:Callable)->Button:
-	var b:=P.button(parent,text,action); b.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN; b.custom_minimum_size=Vector2(140,36); return b
+	var b:=P.button(parent,text,action); b.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN; b.custom_minimum_size=Vector2(140,40); return b
 
 func _process(delta:float)->void:
 	refresh_clock+=delta
@@ -87,17 +88,23 @@ static func field_name(domain:String)->String:
 
 func _refresh()->void:
 	var roster:Array=WorldSimulation.figures.people
-	if roster.is_empty(): return
+	if roster.is_empty():
+		title.text="Their stories are still beginning";subtitle.text="Remarkable people will appear as their work shapes our world.";body.text="";effect.text="";person_page.text="No recorded people yet"
+		previous.disabled=true;next.disabled=true;patron.disabled=true;portrait.visible=false
+		return
 	index=clampi(index,0,roster.size()-1)
 	var p:Dictionary=roster[index]
+	if displayed_person!=String(p.id):
+		displayed_person=String(p.id);reader.scroll_vertical=0
+		portrait.texture=Portrait.texture(p);portrait.flip_h=Portrait.mirrored(p);portrait.visible=portrait.texture!=null
 	var day:=int(WorldSimulation.state.elapsed_days) if p.status!="dead" else int(p.death_day)
 	var age:=maxi(0,(day-int(p.born))/365)
 	var renown:=int(p.renown)
 	var standing:="Great" if renown>=60 else ("Renowned" if renown>=20 else "Rising")
-	title.text="%s, %s %s" % [p.name,standing.to_lower(),String(p.role).to_lower()]
+	title.text=String(p.name)
 	var status_words:String="died at %d" % age if p.status=="dead" else ("%s, aged %d" % [String(p.status).replace("_"," "),age])
 	var fame:="Spoken of far beyond our homes." if renown>=60 else ("Known across our people. More great work could make their name last for ages." if renown>=20 else "Known to those who work beside them. Recorded work and victories will spread their name.")
-	subtitle.text="%s of the %s tradition, %s.\n%s" % [T.sentence_case(String(p.role)),String(p.tradition),status_words,fame]
+	subtitle.text="%s %s · %s tradition · %s\n%s" % [standing,String(p.role).to_lower(),String(p.tradition),status_words,fame]
 	var count:=0
 	for other in roster:
 		if other.status!="dead" and other.supported: count+=1
@@ -106,12 +113,9 @@ func _refresh()->void:
 	patron.disabled=p.status!="living" and not p.supported
 	patron.text="Withdraw support" if p.supported else "Support their work"
 	effect.text=patronage_text(p)
-	var pages:=1+ceili(float(p.events.size())/3.0)
-	chapter=clampi(chapter,0,pages-1); chapter_previous.disabled=chapter==0; chapter_next.disabled=chapter==pages-1
-	page.text="Their early life" if chapter==0 else "What they did · page %d of %d" % [chapter,pages-1]
-	if chapter==0: body.text=WorldSimulation.figures.biography(p)
-	else:
-		var lines:PackedStringArray=[]
-		for event:Dictionary in p.events.slice((chapter-1)*3,chapter*3):
+	var lines:PackedStringArray=["Their early life",WorldSimulation.figures.biography(p)]
+	if not p.events.is_empty():
+		lines.append("Recorded deeds")
+		for event:Dictionary in p.events:
 			lines.append("%s. %s" % [EraWords.when(int(event.day)),String(event.text)])
-		body.text="\n\n".join(lines)
+	body.text="\n\n".join(lines)

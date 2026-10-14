@@ -97,7 +97,7 @@ func _ready()->void:
 	var title:=Label.new(); title.text="Map of hearsay"; T.text(title,"title",T.INK); title.size_flags_horizontal=Control.SIZE_EXPAND_FILL; toolbar.add_child(title)
 	var fit:=_button("Show all",toolbar)
 	var back:=_button("Close",toolbar); back.tooltip_text="Close the map (Esc)"; back.pressed.connect(close)
-	var navigation:=HBoxContainer.new(); navigation.add_theme_constant_override("separation",8); root.add_child(navigation)
+	var navigation:=HFlowContainer.new();navigation.add_theme_constant_override("h_separation",8);navigation.add_theme_constant_override("v_separation",8);root.add_child(navigation)
 	var group:=ButtonGroup.new()
 	for index in FILTER_WORDS.size():
 		var toggle:=_button(FILTER_WORDS[index],navigation); toggle.toggle_mode=true; toggle.button_group=group; toggle.button_pressed=index==filter_mode
@@ -114,6 +114,7 @@ func _ready()->void:
 	var footer:=HBoxContainer.new(); root.add_child(footer)
 	details=Label.new(); details.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; details.size_flags_horizontal=Control.SIZE_EXPAND_FILL; details.custom_minimum_size=Vector2(0,125); T.text(details,"body",T.BODY); footer.add_child(details)
 	investigate=_button("Send scouts to look",footer); investigate.custom_minimum_size=Vector2(175,44); investigate.size_flags_vertical=Control.SIZE_SHRINK_CENTER; investigate.pressed.connect(_investigate)
+	T.apply_button_style(investigate,true)
 	refresh()
 	await get_tree().process_frame
 	plot.fit()
@@ -165,6 +166,7 @@ func _button(text:String,parent:Node)->Button:
 	var button:=Button.new(); button.text=text; T.text(button,"small",T.INK)
 	button.add_theme_stylebox_override("normal",T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CONTROL,8))
 	button.add_theme_stylebox_override("hover",T.flat(T.PAPER,T.RULE_STRONG,1,T.RADIUS_CONTROL,8))
+	T.apply_button_style(button);button.focus_mode=Control.FOCUS_ALL
 	parent.add_child(button)
 	return button
 
