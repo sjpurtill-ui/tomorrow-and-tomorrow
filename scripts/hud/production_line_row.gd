@@ -62,7 +62,8 @@ func build(owner_screen:Node,first:Dictionary)->void:
 	rank_box.add_theme_stylebox_override("panel",StyleBoxEmpty.new());top.add_child(rank_box)
 	rank=Folio.label("","small",T.INK_MUTED);rank.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;rank.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;rank_box.add_child(rank)
 	title=Button.new();title.name="Name";title.flat=true;title.focus_mode=Control.FOCUS_ALL;title.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	T.text(title,"voice",T.INK);title.add_theme_font_override("font",T.font("voice_bold"));title.add_theme_color_override("font_hover_color",T.GOLD_TEXT)
+	T.text(title,"voice",T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_color_override("font_hover_color",T.GOLD_TEXT)
+	title.custom_minimum_size.y=40
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.clip_text=true
 	title.add_theme_stylebox_override("focus",Folio.focus_style())
 	title.pressed.connect(func():screen.act(int(view.id),"detail",0.0));top.add_child(title)
@@ -126,8 +127,9 @@ func apply(next:Dictionary)->void:
 	var paused:=bool(view.paused)
 	var look:=String(view.look)
 	var tone:={"good":T.GREEN,"warn":T.AMBER,"bad":T.RED}.get(look,T.RULE_STRONG) as Color
-	var style:=Folio.rule_style(14)
-	style.content_margin_left=2;style.content_margin_right=2
+	var style:=T.flat(T.PAPER_RAISED,T.BORDER,0,T.RADIUS_CARD)
+	style.content_margin_top=16;style.content_margin_bottom=16
+	style.content_margin_left=16;style.content_margin_right=16
 	add_theme_stylebox_override("panel",style)
 	_left_rule=Color.TRANSPARENT;queue_redraw()
 	var condition:=find_child("Condition",true,false) as Label
