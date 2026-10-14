@@ -12,7 +12,8 @@ func _ready()->void:
 	var canvas:=ColorRect.new();canvas.color=Color("111e28");canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(canvas)
 	town=View.new();town.position=Vector2(30,45);town.size=Vector2(1540,800);add_child(town)
 	DirAccess.make_dir_recursive_absolute("res://artifacts/popup-modern-c/people-living")
-	for year in [0,1800]:
+	var focus_only:="--focus-only" in OS.get_cmdline_user_args()
+	for year in ([1800] if focus_only else [0,1800]):
 		maker._world("early" if year==0 else "late")
 		terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 		GameState.settlement_founded_at=terrain._find_world_start_position()
@@ -37,6 +38,9 @@ func _ready()->void:
 		print("PEOPLE_SCENE ",year," origin=",GameState.settlement_founded_at," kinds=",kinds," meshes=",town.model.get_child_count()," ground=",town._bounds)
 		assert(before==var_to_bytes([GameState.settlement_plots,GameState.settlement_routes]),"Renderer wrote simulation records")
 		for index in 30:await get_tree().process_frame
+		if focus_only:
+			town.focus_role("Construction");await get_tree().create_timer(.8).timeout
+			await _capture("mature-construction-outline");break
 		await _capture("early-overview" if year==0 else "mature-overview")
 		if year>0:
 			for role:String in ["Crafting","Construction","Administration"]:
