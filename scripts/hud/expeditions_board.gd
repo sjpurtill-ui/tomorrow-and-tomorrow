@@ -68,7 +68,7 @@ func setup(block:Dictionary)->void:
 	unread_box=UI.sheet(top,"Unread")
 	# On a wide page (2000 px) the tellings stand beside the planner.
 	wide_row=HBoxContainer.new();wide_row.name="Wide";wide_row.add_theme_constant_override("separation",14);add_child(wide_row)
-	wide_left=VBoxContainer.new();wide_left.add_theme_constant_override("separation",12);wide_left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_left.size_flags_stretch_ratio=0.75;wide_row.add_child(wide_left)
+	wide_left=VBoxContainer.new();wide_left.add_theme_constant_override("separation",12);wide_left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_left.size_flags_stretch_ratio=0.7;wide_row.add_child(wide_left)
 	wide_right=VBoxContainer.new();wide_right.add_theme_constant_override("separation",12);wide_right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_row.add_child(wide_right)
 	cities_box=UI.sheet(self,"ForeignTowns")
 	tellings_box=UI.sheet(self,"Tellings")
@@ -450,7 +450,7 @@ func _build_tellings_frame()->void:
 	next=UI.verb(bar,"›",func()->void:view.page=int(view.page)+1;_fill_rows(),"Older page");next.name="NextReports"
 	var columns:=UI.line(tellings_box)
 	columns.name="Columns"
-	for spec:Array in [["When",104],["",22],["What came home",0],["Party",84],["Where",110],["",76]]:
+	for spec:Array in [["When",96],["",22],["What came home",0],["Where",96],["",64]]:
 		var title:=UI.cell(columns,String(spec[0]),float(spec[1]),12,T.INK_MUTED,true)
 		if int(spec[1])==0:title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	results=VBoxContainer.new();results.name="ReportResults";results.add_theme_constant_override("separation",0);tellings_box.add_child(results)
@@ -499,12 +499,12 @@ func _fill_rows()->void:
 	for item:Dictionary in visible_items:
 		var report:Dictionary=item.report
 		var row:=UI.hot_row(results,"Report_%s" % str(report.get("mission_id",0)),func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.place),String(item.detail)])
-		UI.cell(row,Archive.calendar_date(int(item.day)),104,12,T.INK_MUTED)
+		UI.cell(row,Archive.calendar_date(int(item.day)),96,12,T.INK_MUTED)
 		UI.icon(row,_kind(item),T.RED if int(item.losses)>0 else (T.GOLD if bool(item.meaningful) else T.INK_MUTED),18)
 		UI.label(row,String(item.title),13,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
-		UI.cell(row,"%d scouts" % int(report.get("personnel",0)) if int(report.get("personnel",0))>1 else String(item.party),84,12,T.BODY).tooltip_text=String(item.party)
-		UI.cell(row,String(item.place).replace("Out to the ","").replace(" and back",""),110,12,T.BODY)
-		var state:=HBoxContainer.new();state.custom_minimum_size.x=76;state.alignment=BoxContainer.ALIGNMENT_END;row.add_child(state)
+		# Who went is in the row's pointer: the title gets the width.
+		UI.cell(row,String(item.place).replace("Out to the ","").replace(" and back",""),96,12,T.BODY).tooltip_text=String(item.party)
+		var state:=HBoxContainer.new();state.custom_minimum_size.x=64;state.alignment=BoxContainer.ALIGNMENT_END;row.add_child(state)
 		if int(item.losses)>0:UI.tag(state,"lost %d" % int(item.losses),"danger")
 		elif String(item.review)=="UNREAD":UI.tag(state,"unread","gold")
 	if visible_items.is_empty():UI.label(results,"No telling matches",12,T.INK_MUTED)

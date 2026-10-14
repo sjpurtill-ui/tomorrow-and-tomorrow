@@ -44,7 +44,7 @@ var counter:=""
 ## Every people's feelings toward us (dock_content_standing.gd board_data peoples).
 var side:Array=[]
 var side_wide:=false
-const SIDE_W:=250.0
+const SIDE_W:=230.0
 const SIDE_AT:=800.0
 var counter_tip:=""
 ## Each column's nodes, to let them give way on a narrow page.
@@ -257,7 +257,7 @@ func _name_cell(row:Dictionary,refs:Dictionary)->Control:
 	refs["name"]=_fitted(_label("",15,T.INK,true),"Name",true);cell.add_child(refs.name)
 	# A long name takes a second line rather than an ellipsis (rows are two lines high).
 	var name_label:Label=refs.name
-	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.max_lines_visible=2
+	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	name_label.custom_minimum_size.x=60
 	if bool(row.us):cell.add_child(_tag("us"))
 	_part("name",cell)
@@ -338,7 +338,12 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 		# Their rank among the peoples is in the pointer; our own row is never compared with itself.
 		var rank:=String(c.get("rank_tip","")) if not bool(row.us) else ""
 		# One figure beside the bar (its middle); the bar draws the band and the range is in the pointer.
-		_put(refs.get("value_"+id),_middle_text(c) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
+		# Their fighters are the one estimate War shows too (enemy_strength.gd).
+		if id=="fighters" and not bool(row.us):
+			var est:Dictionary=preload("res://scripts/enemy_strength.gd").fighters(String(row.civ_id))
+			known=bool(est.get("known",false))
+			c={"known":known,"low":float(est.get("low",0.0)),"high":float(est.get("high",0.0)),"text":String(est.get("range","")),"exact":false,"point":String(est.get("text","?")),"tip":String(est.get("tip",""))}
+		_put(refs.get("value_"+id),(String(c.point) if c.has("point") else _middle_text(c)) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
 		var bar:RangeBar=refs.get("bar_"+id)
 		if bar!=null:
 			bar.low=float(c.get("low",0.0)) if known else -1.0

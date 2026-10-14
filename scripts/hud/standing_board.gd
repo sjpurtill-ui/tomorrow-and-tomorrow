@@ -308,10 +308,13 @@ func _build_hero()->void:
 	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	top.add_child(name_label)
 	posture_label=Label.new();posture_label.name="Posture"
-	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",16)
+	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",15)
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	top.add_child(posture_label)
+	posture_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	posture_label.tooltip_text="Each row: the strength, a bar against the peoples of our age (the tick is a typical people), its value, its change in a year and its biggest cause."
+	# The words our shape makes of us head the nine rows (see _fill_strengths).
+	UI.spacer(top)
 	renown_label=UI.label(top,"",12,T.INK_MUTED);renown_label.name="Renown"
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; draw from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	var body:=HBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",12);column.add_child(body)
@@ -374,13 +377,10 @@ func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
 	var year_ago:Dictionary=data.get("year_ago",{})
 	rose.configure(items,year_ago)
+	if posture_label.get_parent()!=null:posture_label.get_parent().remove_child(posture_label)
 	UI.clear(strength_list)
-	var head:=UI.line(strength_list,8);head.name="Header"
-	UI.cell(head,"",72,12,T.INK_MUTED,true)
-	UI.cell(head,"vs the age",70,12,T.INK_MUTED)
-	UI.cell(head,"",34,12,T.INK_MUTED)
-	UI.cell(head,"a year" if not year_ago.is_empty() else "",34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
-	UI.label(head,"biggest cause",12,T.INK_MUTED,false,true)
+	posture_label.name="Header"
+	strength_list.add_child(posture_label)
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var id:=String(item.id)
@@ -509,7 +509,11 @@ func _fill_peoples()->void:
 ## tags, six pips and, where given, a Talk.
 static func feelings(parent:VBoxContainer,list:Array,on_court:Variant,with_talk:bool)->void:
 	var head:=UI.heading(parent,"How they see us")
-	var legend:=HBoxContainer.new();legend.add_theme_constant_override("separation",4);head.add_child(legend)
+	# The pips' colours, after the heading on a wide sheet, under it on a narrow one.
+	var legend:=HFlowContainer.new();legend.name="PipLegend";legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",0)
+	if with_talk:
+		legend.size_flags_horizontal=Control.SIZE_SHRINK_END;head.add_child(legend)
+	else:parent.add_child(legend)
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
 		var dot:=Pip.new();dot.value=1.0;dot.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")));dot.custom_minimum_size=Vector2(9,9);legend.add_child(dot)
 		dot.tooltip_text=String(view.means);dot.mouse_filter=Control.MOUSE_FILTER_PASS

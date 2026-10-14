@@ -1060,6 +1060,8 @@ func _pages_of(category:Dictionary)->Array:
 	for page:String in category.get("pages",[]):
 		if not providers.has(page):continue
 		var labels:Array=(category.get("tabs",{}) as Dictionary).get(page,[])
+		# The spies' tab speaks the age's word, as War's link does (eyes_corps.gd).
+		if page=="eyes":labels=[preload("res://scripts/eyes_corps.gd").word("Eyes")]
 		out.append({"section":page,"provider":providers[page],"labels":labels})
 	return out
 
