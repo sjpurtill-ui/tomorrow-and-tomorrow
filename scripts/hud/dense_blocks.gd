@@ -116,28 +116,41 @@ static func _fact(item:Dictionary)->Control:
 		var mark:=TextureRect.new();mark.texture=icon;mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
 	var label:=T.make_label(String(item.get("label","")),14,T.BODY);label.name="Label"
-	# Never cut short: a long name wraps onto a second line.
-	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	# A fact reads as one phrase. Keep its value beside its label instead of
+	# separating them by the full width of a large monitor.
+	label.custom_minimum_size.x=minf(160.0,maxf(48.0,label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x))
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(label)
+	var value:=T.make_label(String(item.get("value","")),18,tone_color(String(item.get("tone","")),T.INK));value.name="Value"
+	value.add_theme_font_override("font",T.font("ui_strong"));value.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT
+	value.size_flags_horizontal=Control.SIZE_EXPAND_FILL;value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(value)
 	if item.has("bar"):
 		var bar:=ProgressBar.new();bar.name="Bar";bar.show_percentage=false;bar.min_value=0.0;bar.max_value=1.0;bar.value=clampf(float(item.bar),0.0,1.0)
 		bar.custom_minimum_size=Vector2(56,5);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		bar.add_theme_stylebox_override("background",T.flat(Color(T.INK,0.12),Color(0,0,0,0),0,2))
 		bar.add_theme_stylebox_override("fill",T.flat(tone_color(String(item.get("tone","")),T.GOLD),Color(0,0,0,0),0,2))
 		row.add_child(bar)
-	var value:=T.make_label(String(item.get("value","")),18,tone_color(String(item.get("tone","")),T.INK));value.name="Value"
-	value.add_theme_font_override("font",T.font("ui_strong"));value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(value)
 	var button:Dictionary=item.get("button",{}) if item.get("button") is Dictionary else {}
 	if not button.is_empty():row.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
+	var fit_label:=func()->void:
+		var occupied:=16.0+8.0*float(maxi(0,row.get_child_count()-1))
+		for other:Control in row.get_children():
+			if other!=label and other!=value:occupied+=other.get_combined_minimum_size().x
+		var natural:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
+		label.custom_minimum_size.x=minf(clampf(natural,48.0,160.0),maxf(48.0,cell.size.x-occupied-72.0))
+	cell.resized.connect(fit_label)
 	var click:Variant=item.get("on_click")
 	if click is Callable and (click as Callable).is_valid():
+		cell.focus_mode=Control.FOCUS_ALL
 		cell.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 		cell.mouse_entered.connect(func()->void:cell.add_theme_stylebox_override("panel",lit))
 		cell.mouse_exited.connect(func()->void:cell.add_theme_stylebox_override("panel",rest))
+		cell.focus_entered.connect(func()->void:cell.add_theme_stylebox_override("panel",lit))
+		cell.focus_exited.connect(func()->void:cell.add_theme_stylebox_override("panel",rest))
 		cell.gui_input.connect(func(event:InputEvent)->void:
 			var mouse:=event as InputEventMouseButton
-			if mouse and mouse.pressed and mouse.button_index==MOUSE_BUTTON_LEFT:cell.accept_event();(click as Callable).call())
+			if (mouse and mouse.pressed and mouse.button_index==MOUSE_BUTTON_LEFT) or event.is_action_pressed("ui_accept"):cell.accept_event();(click as Callable).call())
 	return cell
 
 
