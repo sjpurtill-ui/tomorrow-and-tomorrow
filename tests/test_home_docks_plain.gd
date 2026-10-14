@@ -145,7 +145,7 @@ func test_health_and_research_docks_build_plain_pages()->void:
 	var text:=JSON.stringify(page)
 	assert_str(text).contains("Care of the sick").not_contains("Care duty:").not_contains("population equivalents")
 	var inquiry=preload("res://scripts/hud/content/dock_content_inquiry.gd").new(null,hud)
-	assert_array(inquiry.meta().subtabs).contains_exactly(["Where we look","Knowledge tree","What we know"])
+	assert_array(inquiry.meta().subtabs).contains_exactly(["Work under way","Explore knowledge","What we know"])
 	var board:VBoxContainer=auto_free(preload("res://scripts/hud/inquiry_board.gd").new())
 	board.setup({"fields":[{"id":"health","goal":"keeping people well","weight":2,"share":0.25,"active":1,"on_open":func():pass,"on_more":func():pass,"on_less":func():pass}],
 		"investigations":[{"name":"Wound cleaning","dynamic":"health","progress":0.5,"research_workforce":0.5,"estimated_days":400,"bottleneck":"RESEARCH WORKFORCE — a thin team: less than one person at it, where a people of our size would put about 3 on one question"}],
@@ -155,7 +155,10 @@ func test_health_and_research_docks_build_plain_pages()->void:
 	assert_str(words).contains("Health & care").contains("25%").contains("Wound cleaning").contains("13 months").contains("thin team")
 	assert_str(words).not_contains("in 100 of our attention").not_contains("researchers")
 	# Who works it and its clock are in its account on hover.
-	assert_str((board.find_child("Row_0",true,false) as Control).tooltip_text).contains("One person, part of the time").contains("about 13 months to proof")
+	var account:=""
+	for item:Control in board.find_child("Row_health",true,false).find_children("*","Control",true,false):
+		account+="\n"+item.tooltip_text
+	assert_str(account).contains("One person, part of the time").contains("about 13 months to proof")
 
 func test_economy_dock_titles_follow_the_rail()->void:
 	_prepare_settled()
