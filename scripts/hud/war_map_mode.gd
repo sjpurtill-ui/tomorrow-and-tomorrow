@@ -700,6 +700,10 @@ func draw_top(canvas:Control)->void:
 	var view:=Rect2(Vector2.ZERO,canvas.size)
 	# What the war chart drew (bands' counters, battles) is never covered.
 	var taken:Array=_chart_rects()
+	# Every band of ours out, as HOI4 draws a division: its counter stands
+	# just above where it is, and nothing else is laid over it.
+	var bands:=_band_counters(view,0.9)
+	for b:Dictionary in bands:taken.append((b.rect as Rect2).grow(4.0))
 	var found:Array=[]
 	var font:=T.font("voice")
 	var fs:=14
@@ -750,6 +754,11 @@ func draw_top(canvas:Control)->void:
 		var low:=roundi(float(fighters)*(1.0-_spread(bool(e.stale)))); var high:=roundi(float(fighters)*(1.0+_spread(bool(e.stale))))
 		items.append({"at":at,"civ_id":String(e.civ_id),"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
 	var free:=_free_rect(canvas.size)
+	for b:Dictionary in bands:
+		canvas.draw_line(b.at,(b.spot as Vector2)+((b.at as Vector2)-(b.spot as Vector2)).limit_length((b.rect as Rect2).size.y*0.5),Color(INK,0.6),1.4,true)
+		canvas.draw_circle(b.at,2.6,Color(PAPER,0.9));canvas.draw_circle(b.at,1.8,Color(INK,0.95))
+		var plate:=Counter.draw(canvas,b.spot,b.data,k)
+		found.push_front({"rect":plate,"civ_id":"","lines":b.tip})
 	for item:Dictionary in items:
 		var at:Vector2=item.at
 		if not view.grow(80).has_point(at): continue
@@ -881,6 +890,28 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 		var side:=Vector2(-way.y,way.x)
 		canvas.draw_colored_polygon(PackedVector2Array([edge+way*10.0,edge+side*6.0,edge-side*6.0]),Color(WAR_RED if hot else INK,0.9))
 	return box
+
+
+## Our bands out (army_bar_model.gd army_card, the army bar's own numbers):
+## [{at, spot, rect, data, tip}], each counter set just above its band.
+func _band_counters(view:Rect2,k:float)->Array:
+	var out:Array=[]
+	var BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+	for army in MilitaryCampaign.field_armies:
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+		var card:Dictionary=BarModel.army_card(MilitaryCampaign,army)
+		if bool(card.get("unknown",false)) or bool(card.get("home",false)): continue
+		var at:=_screen(_v2(card.get("position",{})))
+		if not at.is_finite() or not view.grow(60).has_point(at): continue
+		var men:=int(card.get("men",0))
+		var data:={"side":"ours","troops":men,"strength":clampf(float(men)/float(maxi(1,int(card.get("full",men)))),0.0,1.0),"will":clampf(float(card.get("will",0.6)),0.0,1.0),
+			"glyph":Counter.main_glyph((army as Dictionary).get("formations",[])),"supply":String(card.get("supply_state","")),"state":String(card.get("state","")),
+			"accent":preload("res://scripts/leader_commands.gd").color(preload("res://scripts/leader_commands.gd").leader_of(army)),"stale":int(card.get("report_age",0))>=preload("res://scripts/hud/army_marks.gd").STALE_DAYS}
+		var plate:=Counter.plate_size(k,data)
+		var spot:=at+Vector2(0.0,-plate.y*0.5-14.0)
+		var tip:=PackedStringArray([String(card.get("title","Our band")),"%s of %s men · will %d%%" % [EraWords.grouped(men),EraWords.grouped(int(card.get("full",men))),roundi(float(card.get("will",0.6))*100.0)],String(card.get("doing","")),String(card.get("supply_words",""))])
+		out.append({"at":at,"spot":spot,"rect":Rect2(spot-plate*0.5,plate),"data":data,"tip":_lines(tip)})
+	return out
 
 
 ## The war chart's own marks on screen (war_front_overlay.gd): its counters

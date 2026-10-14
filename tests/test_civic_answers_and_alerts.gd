@@ -57,8 +57,8 @@ func test_battle_reports_name_opponent_place_and_outcome()->void:
 	for required in ["Dawngate","Reedbank Confederacy","drove off","14 still with the band","six out of the fight"]: assert_str(text).contains(required)
 
 func test_proposal_is_not_a_leader_refusal_or_an_order_underway()->void:
-	var content:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)
-	assert_str(String(content._directive_state({"status":"proposal","leader_stance":"advises"}))).is_equal("PROPOSAL RECORDED")
+	# The state words are the court's own (court_civic.gd), the one place they are kept.
+	assert_str(String(preload("res://scripts/hud/court_civic.gd").state({"status":"proposal","leader_stance":"advises"}))).is_equal("PROPOSAL RECORDED")
 
 func test_administrative_execution_is_never_grounded_as_repression()->void:
 	for request in ["Execute on this.", "Execute the plan.", "Please execute our family support policy.", "The executive council should support families."]:

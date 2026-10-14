@@ -75,8 +75,8 @@ const RISE_WORDS:="When raiders come, about 1 in 10 of the town's grown people t
 static func untrained_words(watch:int,rise:int)->String:
 	var parts:PackedStringArray=[]
 	if watch>0:parts.append("%s on watch" % EraWords.grouped(watch))
-	if rise>0:parts.append("%s would take up arms" % EraWords.grouped(rise))
-	return ", ".join(parts) if not parts.is_empty() else "no one"
+	if rise>0:parts.append("%s can rise" % EraWords.grouped(rise))
+	return " · ".join(parts) if not parts.is_empty() else "no one"
 
 ## The first town's name, lettered as the map letters it (city_labels.gd
 ## chart_name of the home label): where our trained fighters live. "home"
@@ -469,21 +469,3 @@ static func since(days:int)->String:
 		return "a winter ago" if winters==1 else "%s winters ago" % spoken(winters)
 	return Plain.span_text(float(days))+" ago"
 
-## The sketch's inputs, from exact figures: houses for those under a roof in
-## ink and pencil ones for those without, the walls by what stands, the levy
-## at the gate, the stores, the well and the works. Our banner flies at the gate.
-static func sketch_data(f:Dictionary,caption:String)->Dictionary:
-	var people:=float(f.population);var housed:=minf(people,float(f.places))
-	var fields:={"population":{"low":housed,"high":people,"observed_low":housed,"observed_high":people}}
-	if float(f.broken)>0.0:fields["damage"]=_exact(clampf(float(f.broken),0.0,1.0))
-	var s:Dictionary=f.get("strength",{})
-	if int(s.get("defenders",0))>0:fields["garrison"]=_exact(float(s.defenders))
-	if bool(f.food_reported) and float(f.food_days)>=0.0:fields["supply"]=_exact(float(f.food_days))
-	if float(f.material)>0.0:fields["production"]=_exact(clampf(float(f.material),0.0,1.0))
-	if float(f.logistics)>0.0:fields["logistics"]=_exact(clampf(float(f.logistics),0.0,1.0))
-	var water:=float(Words.water(f.water).get("ratio",-1.0))
-	return {"city_id":"own:"+String(f.id),"fields":fields,"fresh_level":5,"fresh_status":"","caption":"","held_caption":caption,
-		"architecture_tier":float(SettlementModel.city_form().get("tier",0.0)),
-		"flag":String(f.get("occupied",""))=="","wall_stage":int(s.get("wall_stage",0)) if not s.is_empty() else 0,
-		"wall_integrity":float(s.get("wall_integrity",1.0)) if not s.is_empty() else 1.0,"water":water,
-		"works":(f.completed as Array).duplicate(),"food_days":float(f.food_days)}

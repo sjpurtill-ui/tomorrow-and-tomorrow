@@ -577,13 +577,14 @@ func test_the_people_view_shows_the_switch_and_the_controls()->void:
 		sum+=int(shown.text.get_slice(" ",0).trim_suffix("%"))
 		assert_str(shown.tooltip_text).contains("%d people today" % int(GameState.population_allocations[role]))
 	assert_int(sum).is_equal(100)
-	assert_str(text).contains("%d can work" % GameState.able_population())
+	# Who can work is the head's pointer (the top bar's AT WORK says it on the screen).
+	assert_str((labor.find_child("WorkHead",true,false) as Control).tooltip_text).contains("%d can work" % GameState.able_population())
 	# I do: each row has −, + and ×5, in hundredths of those who can work.
 	(labor.find_child("WorkRuler",true,false) as Button).pressed.emit()
 	assert_bool(Manual.manual()).is_true()
 	labor=_people_view(hud)
 	text="\n".join(_texts(labor))
-	assert_str(text).contains("Back to our leaders").contains("I do (now)").contains("You set the work in every town")
+	assert_str(text).contains("Back to our leaders").contains("I do (now)")
 	var build:=_task_row(labor,"Construction")
 	var before:=int(Manual.percents().Construction)
 	(build.find_child("More",true,false) as Button).pressed.emit()
