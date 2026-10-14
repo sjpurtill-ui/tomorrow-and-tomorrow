@@ -52,10 +52,10 @@ func _ready()->void:
 	shade=ColorRect.new();shade.color=Color(0.03,.025,.02,.82);shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);surface.add_child(shade)
 	shade.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:close())
-	panel=PanelContainer.new();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.flat(Color("101e25"),T.GOLD,1,4,24));surface.add_child(panel)
+	panel=PanelContainer.new();panel.theme=T.control_theme();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.RULE,1,4,24));surface.add_child(panel)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
 	var top:=HBoxContainer.new();column.add_child(top)
-	counter=Art.label(top,"SOMETHING NEW IS KNOWN",12,T.GOLD);counter.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	counter=Art.label(top,"SOMETHING NEW IS KNOWN",12,T.GOLD_TEXT);counter.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	Art.button(top,"×",close).tooltip_text="Dismiss all · Escape or click outside"
 	# Reserve the scrollbar gutter: a bar that appears and vanishes as wrapped
 	# text reflows can flip the layout back and forth and crash the engine.
@@ -107,7 +107,7 @@ func render()->void:
 	hero=Art.paint_hero(introduction,current,HERO_MIN_HEIGHT,HERO_HEIGHT);hero.clip_contents=true
 	# The ink veil: dark paper over the painting that draws back to the right.
 	veil=Control.new();veil.name="InkVeil";veil.mouse_filter=Control.MOUSE_FILTER_IGNORE;veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);hero.add_child(veil)
-	var dark:=ColorRect.new();dark.color=Color("101e25") if not T.is_light() else T.PANEL_BG;dark.color.a=1.0;dark.mouse_filter=Control.MOUSE_FILTER_IGNORE;dark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);dark.offset_left=64;veil.add_child(dark)
+	var dark:=ColorRect.new();dark.color=T.PAPER_RAISED;dark.color.a=1.0;dark.mouse_filter=Control.MOUSE_FILTER_IGNORE;dark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);dark.offset_left=64;veil.add_child(dark)
 	var edge:=TextureRect.new();edge.mouse_filter=Control.MOUSE_FILTER_IGNORE;edge.stretch_mode=TextureRect.STRETCH_SCALE;edge.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	var fade:=Gradient.new();fade.set_color(0,Color(dark.color,0.0));fade.set_color(1,dark.color)
 	var ramp:=GradientTexture2D.new();ramp.gradient=fade;ramp.width=64;ramp.height=4;edge.texture=ramp
@@ -115,7 +115,7 @@ func render()->void:
 	discovery_summary=VBoxContainer.new();discovery_summary.size_flags_horizontal=Control.SIZE_EXPAND_FILL;discovery_summary.add_theme_constant_override("separation",8);introduction.add_child(discovery_summary)
 	var day:=int(current.get("day",0))
 	var known_since:=("Known since the %s winter" % _ordinal(day/365+1)) if EraWords.hearth() else ("Known since Year %d" % (day/365+1))
-	kicker=Art.label(discovery_summary,(Art.name_for(domain)+"  ·  "+known_since).to_upper(),12,Art.color(domain),true)
+	kicker=Art.label(discovery_summary,(Art.name_for(domain)+"  ·  "+known_since).to_upper(),12,Art.text_color(domain),true)
 	heading=Art.label(discovery_summary,String(current.get("name","New discovery")),34,T.INK,true)
 	heading.add_theme_font_override("font",Art.display_font())
 	title_rule=ColorRect.new();title_rule.color=T.GOLD;title_rule.custom_minimum_size=Vector2(0,1);title_rule.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;title_rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;discovery_summary.add_child(title_rule)
@@ -127,7 +127,7 @@ func render()->void:
 	if String(current.get("scene",""))!="" and rest!="":Art.label(discovery_summary,rest,14,T.TEXT_SOFT,true)
 	var effects:Dictionary=current.get("effects",{})
 	if not effects.is_empty():
-		Art.label(body,"WHAT CHANGES",12,T.GOLD)
+		Art.label(body,"WHAT CHANGES",12,T.GOLD_TEXT)
 		var cards:=GridContainer.new();benefits=cards;cards.columns=2;cards.add_theme_constant_override("h_separation",8);cards.add_theme_constant_override("v_separation",8);body.add_child(cards)
 		for key:String in effects:
 			var value:=float(effects[key])
@@ -135,15 +135,16 @@ func render()->void:
 			# direction for every key), and the first thing it moves in the game.
 			var said:=Explainer.describe(key,value,1.0)
 			var tone:=Explainer.tone(key,value);var beneficial:bool=tone>0
-			var ink:=T.BLUE if bool(said.inert) or tone==0 else (T.GREEN if tone>0 else T.AMBER)
-			var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_stylebox_override("panel",T.flat(Color("172830"),ink.darkened(.35),1,4,12));cards.add_child(card)
+			var ink:=T.BLUE_TEXT if bool(said.inert) or tone==0 else (T.GREEN_TEXT if tone>0 else T.AMBER_TEXT)
+			var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+			var face:=T.flat(Color.TRANSPARENT,T.RULE,0,0,12);face.border_color=T.RULE;face.border_width_top=1;card.add_theme_stylebox_override("panel",face);cards.add_child(card)
 			var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
 			var amount:=Art.label(row,percent(value),24,ink);amount.custom_minimum_size.x=72
 			var names:=VBoxContainer.new();names.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(names)
 			Art.label(names,String(said.label),13,T.INK,true)
 			Art.label(names,"No effect yet" if bool(said.inert) else ("Benefit" if tone>0 else ("Trade-off" if tone<0 else "Change")),12,ink)
 			var meaning:=Explainer.meaning(said)
-			var means:=Art.label(names,meaning.left(1).to_upper()+meaning.substr(1),12,T.legible(T.TEXT_SOFT,Color("172830")),true);means.name="Meaning"
+			var means:=Art.label(names,meaning.left(1).to_upper()+meaning.substr(1),13,T.TEXT_SOFT,true);means.name="Meaning"
 			effect_cards[key]={"value":amount,"beneficial":beneficial,"meaning":means}
 		Art.label(body,"These are the discovery’s effects at full adoption. Their contribution grows as people put the new practice to use; the Research page shows everywhere each one acts.",12,T.TEXT_SOFT,true)
 	else:Art.label(body,"This finding adds to your civilization’s established knowledge. Its practical uses depend on the resources and earlier discoveries your people can combine with it.",13,T.TEXT_SOFT,true)

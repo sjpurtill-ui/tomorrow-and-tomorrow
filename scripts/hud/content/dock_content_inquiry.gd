@@ -47,12 +47,13 @@ var tree_domain:String="nutrition"
 var tree_selected:=""
 ## Fields opened on What we know.
 var expanded_domains:Dictionary={}
+var show_unlearned:=false
 
 func meta()->Dictionary:
 	return {
 		"eyebrow":"What the people know and are learning",
 		"title":"Research",
-		"subtabs":["Where we look","Knowledge tree","What we know"],
+		"subtabs":["Work under way","Explore knowledge","What we know"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -74,8 +75,12 @@ func _toggle_domain(domain:String)->void:
 	else: expanded_domains[domain]=true
 	hud.request_immediate_dock_refresh()
 
+func _toggle_unlearned()->void:
+	show_unlearned=not show_unlearned
+	hud.request_immediate_dock_refresh()
+
 func signature()->Array:
-	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
+	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_domains.duplicate(),show_unlearned,GovernmentPeopleSystem.revision]
 
 ## The knowledge tree as lanes in the dock (knowledge_tree_board.gd): the
 ## chosen field's lines of study, what is known, under way, open and waiting
@@ -150,12 +155,7 @@ func _known_page()->Dictionary:
 		else:(by_line.get_or_add(String(row.line),[]) as Array).append(row)
 	var today:=int(GameState.elapsed_days)
 	var this_year:=0
-	var newest:Dictionary={}
-	var newest_day:=-1
-	var lines:Array=[]
-	var frames_by:Dictionary={}
-	var most:=1
-	for domain:String in DOMAIN_COLORS:most=maxi(most,int(total_by.get(domain,0)))
+	var archive_fields:Array=[]
 	for domain:String in DOMAIN_COLORS:
 		var found:Array=findings_by.get(domain,[])
 		found.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(days.get(String(a.id),-1))>int(days.get(String(b.id),-1)))
@@ -171,10 +171,8 @@ func _known_page()->Dictionary:
 		var adds:=" · ".join(parts)+(" · %d more" % (effect_rows.size()-1) if effect_rows.size()>1 else "")
 		var open:=expanded_domains.has(domain)
 		var total:=int(total_by.get(domain,0))
-		lines.append({"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS[domain]),"cells":{"field":Visuals.name_for(domain),"adds":adds if adds!="" else "Nothing yet; it opens later knowledge","known":"%s of %s" % [EraWords.grouped(found.size()),EraWords.grouped(total)]},
-			# The row itself opens and closes the field (its frame sits beneath it).
-			"bar":{"value":float(found.size())/maxf(1.0,float(total)),"width":120},"on_click":_toggle_domain.bind(domain),
-			"tip":("Click to close."+"\n" if open else "Click for every effect and finding."+"\n")+"\n".join(effect_rows.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))})
+		var archive_field:={"name":Visuals.name_for(domain),"known":found.size(),"count":"%s of %s" % [EraWords.grouped(found.size()),EraWords.grouped(total)],"summary":adds if adds!="" else "No measured benefit yet; discoveries can open later knowledge.","open":open,"on_toggle":_toggle_domain.bind(domain),"sections":[]}
+		archive_fields.append(archive_field)
 		if not open:continue
 		var effects:Array=[]
 		for row:Dictionary in effect_rows:
@@ -184,17 +182,8 @@ func _known_page()->Dictionary:
 		var inner:Array=[]
 		if not effects.is_empty():inner.append({"type":"fact_grid","heading":"What it adds now","min_column":240,"items":effects})
 		if not listed.is_empty():inner.append({"type":"fact_grid","heading":"Findings, newest first"+(" (the newest 36 of %d)" % listed.size() if listed.size()>36 else ""),"min_column":240,"items":listed.slice(0,36)})
-		frames_by[Visuals.name_for(domain)]=({"type":"frame","heading":Visuals.name_for(domain),"actions":[{"label":"Close","on_press":_toggle_domain.bind(domain)}],"blocks":inner})
-	# The table, split around each opened field so its frame sits under its line.
-	var columns:=[{"key":"field","label":"FIELD","width":140},{"key":"adds","label":"WHAT IT ADDS NOW","wrap":true},{"key":"known","label":"KNOWN","width":90,"align":"right"}]
-	var blocks:Array=[]
-	var run:Array=[]
-	for line:Dictionary in lines:
-		run.append(line)
-		if frames_by.has(String(line.cells.field)):
-			blocks.append({"type":"table","head":blocks.is_empty(),"columns":columns,"rows":run});run=[]
-			blocks.append(frames_by[String(line.cells.field)])
-	if not run.is_empty() or blocks.is_empty():blocks.append({"type":"table","head":blocks.is_empty(),"columns":columns,"rows":run})
+		archive_field.sections=inner
+	var blocks:Array=[{"type":"knowledge_tree","archive":true,"archive_fields":archive_fields,"show_unlearned":show_unlearned,"on_toggle_unlearned":_toggle_unlearned}]
 	if not inert.is_empty():
 		blocks.append({"type":"fact_grid","items":[{"label":"Known effects nothing uses yet","value":str(inert.size()),"tip":"Part of what the people know, but nothing in the world reads them yet:\n"+"\n".join(inert.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))}]})
 	var kpis:Array=[
@@ -212,7 +201,7 @@ func _tree_chosen(row:Dictionary,next:Dictionary)->Dictionary:
 	var status:=String(row.status)
 	var known:=status=="DISCOVERED"
 	var effects:Dictionary=row.get("effects",{})
-	var chosen:={"name":String(row.name),"facts":[]}
+	var chosen:={"name":String(row.name),"facts":[],"art":{"id":id,"dynamic":String(row.get("dynamic","")),"exposed":bool(row.get("exposed",true))}}
 	match status:
 		"DISCOVERED":
 			var day:=preload("res://scripts/hud/atlas_data.gd")._discovered_day(id)
@@ -310,7 +299,7 @@ func _discovery_board(investigations:Array)->Dictionary:
 		var count:=0
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
-		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
+		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
 	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"pace":learning_pace(investigations),"waiting":_waiting_lines(),"on_choose":_choose_team_question,
 		"hands":_hands(),"artifacts":_artifact_study()}
 

@@ -1,14 +1,13 @@
 extends "res://scripts/hud/settlement_overview.gd"
-## The Research board ("Where we look"). Its four figures (pace, discoveries a
+## The Research board ("Work under way"). Its four figures (pace, discoveries a
 ## year, teams at work, how far our learning runs ahead of the calendar) are
 ## the dock's own strip (figures(), read by dock_content_inquiry.gd). Below it:
-## - one bar of what speeds and slows the work on every question, each part
+## - a quiet bar of what speeds and slows the work on every question, each part
 ##   sized by how much it moves the pace, named with its size beneath;
 ## - who sets the learners, with the two orders that change it;
-## - the game's one table (dense_blocks.gd): a line per field with its
-##   question under way, the evidence, the time to proof and its share of
-##   attention with − and +; a field's further questions on lines of their
-##   own; a field with nothing under way says why it waits; artifact study last.
+## - journal entries for every field: a painted question, evidence and time
+##   to proof beside its attention controls. Waiting fields remain compact;
+##   a field title leads directly to its knowledge. Artifact study comes last.
 ## Every number comes from the engine (dock_content_inquiry.gd learning_pace,
 ## waiting_lines and DiscoverySystem.active_investigation_records).
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
@@ -29,6 +28,7 @@ var _header:Dictionary={}
 var factor_bar:FactorBar
 ## The free team's picker, opened from its question's line.
 var _pickers:Dictionary={}
+var field_grid:GridContainer
 
 
 ## What speeds and slows the work on every question: one bar, centred on the
@@ -84,10 +84,10 @@ class FactorBar extends Control:
 		return "What speeds (green) and slows (red) the work on every question; the dark mark is the usual pace."
 
 func setup(block:Dictionary)->void:
-	data=block;name="InquiryBoard";add_theme_constant_override("separation",8)
+	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",16)
 	var plan:=_plan(block)
-	if block.has("pace"):_pace_header(self,plan.pace,block.get("pace",{}))
 	if block.has("hands"):_hands(self,block.hands)
+	if block.has("pace"):_pace_header(self,plan.pace,block.get("pace",{}))
 	# A team freed by a proof took up the best question open to it; for a season
 	# the player may send it elsewhere (DiscoverySystem.team_choices): "Choose"
 	# on that question's line opens the options in a floating picker.
@@ -95,8 +95,7 @@ func setup(block:Dictionary)->void:
 		var popup:=PopupPanel.new();popup.name="ChoicePicker";popup.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG_SOLID,T.GOLD,1,T.RADIUS_CARD,0))
 		add_child(popup);_choice_card(popup,choice)
 		_pickers[String(choice.get("channel",""))]=popup
-	var table:=Dense.render_table(self,table_block(block,plan.lanes,_pickers.keys(),_open_picker))
-	table.name="Fields"
+	_field_spread(plan.lanes)
 	resized.connect(_arrange);_arrange()
 	# Capture only: "--capture-picker" opens the first free team's picker.
 	if "--capture-picker" in OS.get_cmdline_user_args() and not _pickers.is_empty():_open_picker.call_deferred(String(_pickers.keys()[0]))
@@ -104,6 +103,79 @@ func setup(block:Dictionary)->void:
 ## The board is drawn afresh on each refresh; its rows are cheap.
 func update_block(_block:Dictionary)->bool:
 	return false
+
+## Each field reads as a small entry in a field journal. Evidence belongs to
+## its question; attention controls remain beside the field they change.
+## The table model below remains available to reports and existing consumers.
+func _field_spread(lanes:Array)->void:
+	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",12);add_child(heading)
+	var title:=_voice("Questions taking shape",24);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
+	var hint:=T.make_label("− / + shares attention",12,T.TEXT_SOFT);hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(hint)
+	field_grid=GridContainer.new();field_grid.name="Fields";field_grid.columns=2
+	field_grid.add_theme_constant_override("h_separation",28);field_grid.add_theme_constant_override("v_separation",12);add_child(field_grid)
+	for lane:Dictionary in lanes:
+		_field_entry(lane)
+	if data.has("artifacts"):
+		var study:Dictionary=data.artifacts
+		var row:=HBoxContainer.new();row.name="ArtifactStudy";row.add_theme_constant_override("separation",12);add_child(row)
+		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
+		text.add_child(_voice("Learning from objects",20))
+		_line(text,String(study.get("words","")),13,T.BODY).tooltip_text=String(study.get("tip",""))
+		_attention(row,study)
+
+func _field_entry(lane:Dictionary)->void:
+	var field:Dictionary=lane.field
+	var box:=VBoxContainer.new();box.name="Row_"+String(lane.id);box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	box.add_theme_constant_override("separation",6);field_grid.add_child(box)
+	var rule:=ColorRect.new();rule.color=Color(T.BORDER_SOFT,0.7);rule.custom_minimum_size.y=1;box.add_child(rule)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
+	var label:=Button.new();label.name="FieldLabel";label.text=String(lane.name);label.alignment=HORIZONTAL_ALIGNMENT_LEFT;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	label.add_theme_font_size_override("font_size",13);label.add_theme_color_override("font_color",T.GOLD_TEXT)
+	label.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT));label.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG));label.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG))
+	label.tooltip_text=String(field.get("goal",""))+"\nExplore this field's knowledge."
+	if field.get("on_open") is Callable:label.pressed.connect(field.on_open)
+	head.add_child(label)
+	if not field.is_empty():_attention(head,field)
+	var slots:Array=lane.slots
+	if slots.is_empty():
+		var wait:=_waiting_words(lane)
+		var waiting:=_line(box,String(wait.text),14,T.TEXT_SOFT);waiting.tooltip_text=String(wait.tip);waiting.mouse_filter=Control.MOUSE_FILTER_PASS
+		return
+	var lead:Dictionary=slots[0]
+	var teams:=0
+	for slot:Dictionary in slots:
+		teams+=maxi(1,int((slot.record as Dictionary).get("teams_on",1)))
+		if float((slot.record as Dictionary).get("progress",0))>float((lead.record as Dictionary).get("progress",0)):lead=slot
+	var record:Dictionary=lead.record
+	var body:=HBoxContainer.new();body.add_theme_constant_override("separation",12);box.add_child(body)
+	if has_painting(record):
+		var painting:=Visuals.paint_discovery(body,record,78);painting.custom_minimum_size.x=100;painting.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;painting.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);body.add_child(words)
+	var title:=_voice(String(record.get("name","An open question")),21);title.name="Question_"+String(record.get("id",""));words.add_child(title)
+	var cells:={"cells":{}}
+	_question_cells(cells,record)
+	var progress:=float(record.get("progress",0))
+	_bar(words,progress,Visuals.color(String(lane.id)))
+	var caption:="%d%% proven · %s to proof" % [roundi(progress*100),String(cells.cells.time)]
+	if String(cells.cells.time) in ["—","stalled"]:caption="%d%% proven · %s" % [roundi(progress*100),"gathering evidence" if String(cells.cells.time)=="—" else "work is stalled"]
+	var status:=_card_words(record)
+	if String(status.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE"):caption+=" · "+String(status.phase).to_lower()
+	var detail:=_line(words,caption,12,T.BODY);detail.tooltip_text=String(cells.tip);detail.mouse_filter=Control.MOUSE_FILTER_PASS
+	var extra:="%d team%s" % [teams,"" if teams==1 else "s"]
+	if slots.size()>1:extra+=" · %d other question%s" % [slots.size()-1,"" if slots.size()==2 else "s"]
+	var foot:=HFlowContainer.new();foot.add_theme_constant_override("h_separation",8);words.add_child(foot)
+	var count:=T.make_label(extra,12,T.TEXT_SOFT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_PASS
+	var all:Array[String]=[]
+	for slot:Dictionary in slots:all.append("%s · %d%% proven" % [String(slot.record.get("name","")),roundi(float(slot.record.get("progress",0))*100)])
+	count.tooltip_text="\n".join(all);foot.add_child(count)
+	for slot:Dictionary in slots:
+		if _pickers.has(String(slot.key)):_small_button(foot,"Choose question",_open_picker.bind(String(slot.key)),"A team is free: keep this question or take up another.");break
+
+func _attention(parent:Node,field:Dictionary)->void:
+	var less:=_small_button(parent,"−",field.get("on_less"),"Give one step of attention to the other fields")
+	less.disabled=int(field.get("weight",0))<=0;less.custom_minimum_size=Vector2(28,28)
+	var share:=T.make_label("%d%%" % roundi(float(field.get("share",0))*100),13,T.INK);share.custom_minimum_size.x=36;share.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;parent.add_child(share)
+	var more:=_small_button(parent,"+",field.get("on_more"),"Move one step of attention to this field");more.custom_minimum_size=Vector2(28,28)
 
 ## The table of fields (dense_blocks.gd): one line per field and per further
 ## question, columns aligned, the field's share of attention with − and + last.
@@ -606,8 +678,9 @@ static func factor_words(factor:float)->String:
 func _pace_header(parent:Node,words:Dictionary,pace:Dictionary)->void:
 	# The bar across the page, its key beneath (what each part is is on hover).
 	var box:=VBoxContainer.new();box.name="LearningPace";box.add_theme_constant_override("separation",4);parent.add_child(box)
+	box.add_child(T.make_label("WHAT SETS THE PACE",12,T.GOLD_TEXT))
 	var stack:=box
-	factor_bar=FactorBar.new();factor_bar.name="FactorBar";factor_bar.custom_minimum_size.y=14;stack.add_child(factor_bar)
+	factor_bar=FactorBar.new();factor_bar.name="FactorBar";factor_bar.custom_minimum_size.y=5;stack.add_child(factor_bar)
 	var legend:=HFlowContainer.new();legend.name="FactorLegend";legend.add_theme_constant_override("h_separation",14);legend.add_theme_constant_override("v_separation",2);stack.add_child(legend)
 	_header["legend"]=legend
 	_fill_header(words,pace)
@@ -708,5 +781,6 @@ func _open_picker(channel:String)->void:
 
 func _arrange()->void:
 	var wide:=size.x>=WIDE
+	if field_grid:field_grid.columns=2 if size.x>=700.0 else 1
 	for grid:GridContainer in choice_grids:
 		if is_instance_valid(grid):grid.columns=3 if wide else 1

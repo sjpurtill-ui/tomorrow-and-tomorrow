@@ -135,7 +135,7 @@ func test_every_lane_names_its_field_in_full()->void:
 	for width:int in [1120,600]:
 		var board:=_board(records,width)
 		for i in 5:await get_tree().process_frame
-		# One table line per field, in the shared table (dense_blocks.gd).
+		# One journal entry per field, with the same full names and wrapping.
 		var table:Node=board.find_child("Fields",true,false)
 		assert_object(table).is_not_null()
 		var rows:Array=table.find_children("Row_*","",false,false)
@@ -143,11 +143,12 @@ func test_every_lane_names_its_field_in_full()->void:
 		for row:Control in rows:
 			assert_float(row.get_global_rect().end.x).is_less_equal(float(width)+1.0)
 			# Field names are never cut; a long question name wraps.
-			var field:Label=row.find_child("Cell_field",true,false)
+			var field:Button=row.find_child("FieldLabel",true,false)
 			if field.text!="":
 				var needed:=field.get_theme_font("font").get_string_size(field.text,HORIZONTAL_ALIGNMENT_LEFT,-1,field.get_theme_font_size("font_size")).x
 				assert_float(field.size.x+1.0).is_greater_equal(needed)
-			assert_int((row.find_child("Cell_question",true,false) as Label).autowrap_mode).is_equal(TextServer.AUTOWRAP_WORD_SMART)
+			var questions:Array=row.find_children("Question_*","Label",true,false)
+			for question:Label in questions:assert_int(question.autowrap_mode).is_equal(TextServer.AUTOWRAP_WORD_SMART)
 
 func test_the_table_follows_the_evidence()->void:
 	var records:=_records()
