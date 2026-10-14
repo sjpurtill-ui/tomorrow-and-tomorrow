@@ -23,13 +23,19 @@ class CaptureTerrain extends Node:
 class FoodProvider extends "res://scripts/hud/content/dock_content_economy.gd":
 	var short_food:=false
 	var prepared_materials:=false
+	var abundant_materials:=false
 	func _materials_data()->Dictionary:
 		var result:=super._materials_data()
-		if prepared_materials:
-			var fixture:=MaterialsFixture.prepared_materials()
+		if prepared_materials or abundant_materials:
+			var fixture:=MaterialsFixture.abundant_materials() if abundant_materials else MaterialsFixture.prepared_materials()
+			if abundant_materials:
+				fixture.storage=1426.0;fixture.capacity=918.0;fixture.hauling=0.64
+				fixture.rows[0].stock=0.0;fixture.rows[0].delivered=178.0;fixture.rows[0].loss=15.0
+				fixture.rows[0].points=[{"day":0,"value":90.0},{"day":30,"value":55.0},{"day":60,"value":0.0}]
 			for key:String in fixture:
 				if not key.begins_with("on_"):result[key]=fixture[key]
 			result.selected=selected_material
+			result.browse_state=material_browse_state
 		return result
 	func _provisions_data()->Dictionary:
 		var result:=super._provisions_data()
@@ -107,6 +113,13 @@ func _run()->void:
 					await _capture(viewport,output,"economy-%s-material-active-sources-%s-%d" % [tag,palette,canvas.x])
 					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
 					await _capture(viewport,output,"economy-%s-material-active-sources-bottom-%s-%d" % [tag,palette,canvas.x]);provider.selected_material="";provider.prepared_materials=false
+					provider.abundant_materials=true;provider.selected_material="Timber";dock.present(provider,1);dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-material-chooser-%s-%d" % [tag,palette,canvas.x])
+					(dock.find_child("NextMaterials",true,false) as Button).pressed.emit();await _settle()
+					await _capture(viewport,output,"economy-%s-material-next-%s-%d" % [tag,palette,canvas.x])
+					(dock.find_child("WhereItComesFrom",true,false) as Button).pressed.emit();await _settle()
+					await _capture(viewport,output,"economy-%s-material-places-%s-%d" % [tag,palette,canvas.x])
+					provider.selected_material="";provider.abundant_materials=false;provider.material_browse_state.clear()
 				if page[1]=="wealth" and _arg("state","opening")=="coin":
 					provider.selected_account="private_currency";dock.present(provider,2);await _settle()
 					var ledger:=dock.find_child("WealthLedger",true,false) as Control
