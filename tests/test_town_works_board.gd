@@ -169,6 +169,7 @@ func test_the_choice_and_the_fixes_work_from_the_board()->void:
 	(fix[0] as Button).pressed.emit()
 	assert_int(int(GameState.population_allocations.Defense)).is_equal(add)
 	body.queue_free()
+	await get_tree().process_frame
 	# Build now, from the choice: the works start at once, paid from the store.
 	body=_render(_page())
 	var build:Array=_find(body,"Act_Build")
@@ -179,6 +180,7 @@ func test_the_choice_and_the_fixes_work_from_the_board()->void:
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(30.0,0.0001)
 	assert_str(String(terrain.reports.back().message)).is_equal("Work begins on the watch posts.")
 	body.queue_free()
+	await get_tree().process_frame
 
 ## The board never pushes the page wider than the dock at 1600 px (665 UI units).
 func test_the_board_fits_the_dock_at_1600()->void:
@@ -240,6 +242,11 @@ func _long_texts(root:Node)->Array:
 	for node in nodes:
 		if not (node is Label or node is Button):continue
 		if not (node as Control).is_visible_in_tree():continue
+		# The selected work now explains its purpose inline; only its summary
+		# and index labels retain the short-label constraint.
+		if node.name=="WhatItDoes":
+			assert_int((node as Label).get_theme_font_size("font_size")).is_greater_equal(14)
+			continue
 		var text:String=(node as Label).text if node is Label else (node as Button).text
 		var words:=RegEx.create_from_string("[A-Za-z0-9']+").search_all(text).size()
 		if words>12:long.append("%s: %s" % [node.name,text])
@@ -279,7 +286,7 @@ func _town_boards(body:Node)->Array:
 	var nodes:Array=[];_walk(body,nodes)
 	return nodes.filter(func(n:Node)->bool:return n is TownBoard)
 
-func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
+func test_summaries_are_short_selected_explanations_readable_and_both_palettes_read()->void:
 	for mode:String in ["light","dark"]:
 		T.set_color_mode(mode)
 		MilitaryCampaign.reset_for_new_world()
@@ -290,7 +297,7 @@ func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
 			var body:=_render(_page())
 			await get_tree().process_frame
 			var boards:=_town_boards(body)
-			# One board: the whole town as rows.
+			# One board: bounded choices and one selected explanation.
 			assert_int(boards.size()).is_equal(1)
 			for board:Node in boards:
 				assert_array(_long_texts(board)).override_failure_message("%s %s" % [mode,state]).is_empty()

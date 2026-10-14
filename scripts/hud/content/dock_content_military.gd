@@ -464,8 +464,9 @@ func _equipment_catalog()->Dictionary:
 	var names:Array=MilitaryCampaign.PersistentProduction.available_products(MilitaryCampaign)
 	var items:Array=[]
 	for key:String in names:
-		items.append(focused_action(MilitaryCampaign.PersistentProduction.product_name(key),MilitaryCampaign.PersistentProduction.product_description(key),_equipment_order_report.bind(key)))
-	return {"blocks":[{"type":"text","text":"Choose what to make, then set a stock target or a fixed batch. Every known product is listed here."},{"type":"actions","heading":"Known products","items":items}]}
+		var choice:=focused_action(MilitaryCampaign.PersistentProduction.product_name(key),MilitaryCampaign.PersistentProduction.product_description(key),_equipment_order_report.bind(key))
+		choice.item=key;items.append(choice)
+	return {"blocks":[{"type":"text","text":"Choose what to make, then set a stock target or a fixed batch. Review what it makes before ordering."},{"type":"production_catalog","verb":"Set order","items":items}]}
 
 func _equipment_order_report(item:String)->Dictionary:return _supply_order_report("transport" if item=="transport_cart" else ("ammunition" if item in MilitaryCampaign.CONSUMABLE_KNOWLEDGE else "equipment"),item)
 func _ammunition_catalog()->Dictionary:
@@ -651,5 +652,5 @@ func _retool_report(id:int)->Dictionary:
 	for item:String in products:
 		var recipe:=MilitaryCampaign.PersistentProduction.recipe(MilitaryCampaign,item)
 		if recipe.has("error"):continue
-		actions.append({"label":MilitaryCampaign.PersistentProduction.product_name(item).to_upper(),"sub":MilitaryCampaign.PersistentProduction.product_description(item),"on_press":func():_production_result(MilitaryCampaign.retool_production_line(id,item))})
-	return {"blocks":[{"type":"text","text":"Retooling keeps finished stocks and the line's target and priority. It discards unfinished work and retains 65% efficiency for the same production category, 35% across categories (minimum 10%)."},{"type":"actions","heading":"Choose the new product","items":actions}]}
+		actions.append({"item":item,"label":MilitaryCampaign.PersistentProduction.product_name(item),"sub":MilitaryCampaign.PersistentProduction.product_description(item),"on_press":func():_production_result(MilitaryCampaign.retool_production_line(id,item))})
+	return {"blocks":[{"type":"text","text":"Retooling keeps finished stocks and the line's target and priority. It discards unfinished work and retains 65% efficiency for the same production category, 35% across categories (minimum 10%)."},{"type":"production_catalog","verb":"Change to","items":actions}]}

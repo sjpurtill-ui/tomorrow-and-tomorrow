@@ -91,7 +91,7 @@ func test_columns_stand_side_by_side_and_stack_when_narrow()->void:
 ## an ultrawide monitor must not pull a label and its value metres apart.
 func test_the_page_preserves_narrow_space_and_bounds_wide_reading_distance()->void:
 	var Folio:=preload("res://scripts/hud/reference_folio.gd")
-	assert_float(Folio.page_width(1000.0)).is_equal_approx(567.0,0.5)
+	assert_float(Folio.page_width(1000.0)).is_equal_approx(1000.0-Folio.RAIL_WIDTH-T.EDGE_MARGIN,0.5)
 	assert_float(Folio.page_width(1280.0)).is_equal_approx(1280.0-78.0-Folio.NOTICE_ROOM,0.5)
 	assert_float(Folio.page_width(1600.0)).is_less_equal(1120.0)
 	assert_float(Folio.page_width(2869.0)).is_equal(Folio.page_width(1600.0))

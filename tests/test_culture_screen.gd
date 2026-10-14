@@ -74,3 +74,22 @@ func test_the_page_draws_what_culture_does_and_holds_still_between_days()->void:
 	var first:=panel.get_child(0)
 	assert_bool(panel.update_block(_block())).is_true()
 	assert_object(panel.get_child(0)).is_same(first)
+
+func test_selected_value_keeps_ten_choices_and_exact_gap_through_refresh()->void:
+	var panel:Control=auto_free(CulturePanel.new());add_child(panel)
+	var block:=_block();block.culture.values[1].lived=0.2;block.culture.values[1].official=0.8;block.culture.values[1].gap=0.6;panel.setup(block)
+	assert_int(panel.value_picker.item_count).is_equal(10)
+	panel.value_picker.select(1);panel.value_picker.item_selected.emit(1)
+	assert_str(panel.find_child("ValueReadings",true,false).text).is_equal("People live 20 · upheld 80")
+	panel.value_picker.grab_focus();var saved:Dictionary=panel.view_state()
+	block.culture.values[1].lived=0.3;block.culture.values[1].gap=0.5;panel.update_block(block)
+	assert_str(panel.selected_value).is_equal(String(saved.value))
+	assert_str(panel.find_child("ValueReadings",true,false).text).is_equal("People live 30 · upheld 80")
+	assert_object(get_viewport().gui_get_focus_owner()).is_same(panel.value_picker)
+
+func test_condition_units_are_points_and_output_units_remain_percent()->void:
+	assert_str(CulturePanel.effect_amount("cohesion",0.06)).is_equal("+6 pts")
+	assert_str(CulturePanel.effect_amount("institutions",0.05)).is_equal("+5 pts")
+	assert_str(CulturePanel.effect_amount("health",-0.01)).is_equal("−1 pts")
+	assert_str(CulturePanel.effect_amount("trade",0.08)).is_equal("+8 pts")
+	assert_str(CulturePanel.effect_amount("building",0.15)).is_equal("+15%")

@@ -1,3 +1,25 @@
+## October 14 — Living People screen (IN PROGRESS, latest direction)
+
+The user rejected the four list-based Town concepts and approved the illustrated
+village direction specifically as the People screen. This supersedes acceptance
+of selected-reader layouts as the final graphical design. Prior reader work is
+bounded access and behavior cleanup, not completion of the visual request.
+
+The People screen must show a living civilization whose actual footprint,
+buildings, roads, construction and condition change with development. Selecting
+a work category zooms into that physical area. Its workforce controls and
+graphical current/proposed consequences appear inside the focused zone. Each
+work area has Assign workers, and a clear return to the civilization overview.
+Assignment previews must expose food balance, reserve depletion and starvation
+risk where calculable, as well as the selected work's other effects. Previewing
+must never advance or mutate live simulation state, and application retains the
+existing labor rules. Relevant assignment routes should converge on this screen.
+
+Implementation ownership: A read-only workforce forecast; B graphical People
+controls/provider; C living scene/camera; root integration and route consolidation.
+The generated village image is an art-direction concept only. Static artwork
+behind lists does not satisfy the user's dynamic scene requirement.
+
 ## October 14 — Popup information architecture revision (IN PROGRESS)
 
 The user's later screenshots reject the first audit's interior page layouts.
@@ -93,8 +115,30 @@ buildings. Year overview counts are scoped to that year. Root accepted the
 chooser/reader revision; three integrated bounded-reader cases pass (eight
 worker Chronicle cases and 24 private GPU views in both palettes).
 
-HELD: Production/Exchange, Home detail/Buildings, and Figures/notices. These are not claimed as
-delivered. No game rules are changed.
+This checkpoint adds accepted Production choices/readings, Exchange (`8effe71a`,
+worker `36b310cd`) and Figures/notices (`f72c4b78`, worker `8eda0ae8`). Production
+has four order choices, six product/store/craft choices (four narrow), one live
+reading, complete product purpose/cost/blocker, and bounded formation evidence.
+A accepted the revised rendered interiors. Thirty-one distinct focused Production
+cases pass across the final runs; the private GPU pass covers 60 states at three
+widths in both palettes. Eleven shared width/cache cases pass. Narrow docks now
+use available room beside the rail; the wide 1120 px cap is unchanged.
+
+Exchange has six searchable choices, one illustrated piece and explicit policies
+with Back; all 79 integrated Artifact/Exchange cases pass. Figures keeps three
+recent deeds and a six-record archive; notices also have a bounded archive.
+Twenty integrated Figures/notices cases pass; the worker's 24 private GPU views
+passed independent review. Opening trade-access gains now correctly say points,
+matching the existing additive effect. No game rules are changed.
+
+Integrated as access/behavior baselines in this checkpoint: Production History
+(`802166c8`, source `018ebcc8`), Home details (`89c9976e`, source `4999f91c`),
+Buildings (`cee822fa`), War fronts/leaders (`083f738c`, source `69cf1a67`) and
+Chronicle persistence (`931cd4bf`, source `f4dfd40c`). Fifty-four combined cases
+pass with zero errors, failures, skips or orphans (report_52). The Buildings
+private GPU runs verify actual View/Conceive routes and enabled disclosure
+open/close behavior. These improvements do not complete the living graphical
+People screen requested above; that implementation remains in progress.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)

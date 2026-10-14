@@ -74,6 +74,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var folio:=preload("res://scripts/hud/covert_board.gd").new();section.add_child(folio);folio.setup()
 			"culture":
 				var panel:=preload("res://scripts/hud/culture_panel.gd").new();section.add_child(panel);panel.setup(block)
+			"council_reader":
+				var panel:=preload("res://scripts/hud/council_reader.gd").new();section.add_child(panel);panel.setup(block)
 			"people":
 				var screen:=preload("res://scripts/hud/people_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"settlement_overview":
@@ -117,6 +119,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"production_board":
 				var board:=preload("res://scripts/hud/production_board.gd").new()
 				section.add_child(board);board.setup(block)
+			"production_catalog":
+				var catalog:=preload("res://scripts/hud/production_catalog.gd").new();section.add_child(catalog);catalog.setup(block)
 			"inquiry_board":
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
 			"knowledge_tree":

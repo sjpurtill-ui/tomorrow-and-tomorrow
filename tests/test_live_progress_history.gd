@@ -60,3 +60,68 @@ func test_history_board_shows_old_recorded_quantities_under_settlement_names()->
 	for label in board.find_children("*","Label",true,false):text+=label.text+"\n"
 	assert_str(text).contains("Alder").contains("12").contains("Simple levy weapons")
 	assert_str(text).not_contains("LATEST 30 DAYS")
+
+static func many_history_totals()->Dictionary:
+	var totals:Dictionary={}
+	for index in 13:
+		var receipt:={"day":7300+index,"item":"improvised","resource":"improvised","kind":"repair" if index==12 else "production","quantity":float(index+1)+0.375,"settlement_id":"town%d" % index,"settlement_name":"Town %02d" % index}
+		totals[JSON.stringify([receipt.settlement_id,receipt.kind,receipt.resource])]=receipt
+	return totals
+
+func test_history_reader_pages_all_totals_and_updates_selected_repair()->void:
+	var board:Control=auto_free(preload("res://scripts/hud/production_board.gd").new());add_child(board);board.size=Vector2(1000,600)
+	var totals:=many_history_totals()
+	board.setup({"history_only":true,"totals":totals})
+	assert_int(board.history_choices.get_child_count()).is_equal(6)
+	board.history_next.pressed.emit();board.history_next.pressed.emit()
+	assert_int(board.history_choices.get_child_count()).is_equal(1)
+	board.history_choices.get_child(0).pressed.emit()
+	var text:=""
+	for label:Node in board.history_detail.find_children("*","Label",true,false):text+=label.text+"\n"
+	assert_str(text).contains("Town 12").contains("Repaired 13.375").contains("Last repair").contains("separately")
+	board.history_search.text="repair";board.history_search.text_changed.emit("repair")
+	assert_int(board.history_choices.get_child_count()).is_equal(1)
+	var selected:=String(board.history_state.selected)
+	var changed:=totals.duplicate(true);changed[selected].quantity=99.125
+	assert_bool(board.update_block({"history_only":true,"totals":changed})).is_true()
+	assert_str(String(board.history_state.selected)).is_equal(selected)
+	assert_str(board.history_search.text).is_equal("repair")
+	text=""
+	for label:Node in board.history_detail.find_children("*","Label",true,false):text+=label.text+"\n"
+	assert_str(text).contains("Repaired 99.125")
+	board.history_search.text="absent";board.history_search.text_changed.emit("absent")
+	assert_bool(board.history_reader.visible).is_false()
+	assert_str(board.history_counter.text).is_equal("No matching totals")
+	assert_bool(board.history_previous.get_parent().visible).is_false()
+
+func test_history_narrow_reader_and_chooser_preserve_page()->void:
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(600,700);add_child(viewport)
+	var board:=preload("res://scripts/hud/production_board.gd").new();board.size=Vector2(550,600);viewport.add_child(board)
+	board.setup({"history_only":true,"totals":many_history_totals()})
+	for frame in 6:await get_tree().process_frame
+	assert_bool(board.history_reader.visible).is_true()
+	assert_bool(board.history_index.visible).is_false()
+	board.history_back.pressed.emit();board.history_next.pressed.emit()
+	assert_bool(board.history_index.visible).is_true()
+	board.history_choices.get_child(2).pressed.emit()
+	assert_bool(board.history_reader.visible).is_true()
+	assert_bool(board.history_index.visible).is_false()
+	var selected:=String(board.history_state.selected)
+	board.history_back.pressed.emit()
+	assert_int(int(board.history_state.page)).is_equal(1)
+	board.history_return.pressed.emit()
+	assert_str(String(board.history_state.selected)).is_equal(selected)
+	assert_bool(board.history_reader.visible).is_true()
+
+func test_history_keeps_made_and_repaired_totals_distinct_for_same_place_product()->void:
+	var made:={"day":2,"item":"improvised","resource":"improvised","kind":"production","quantity":12.0,"settlement_id":"a","settlement_name":"Alder"}
+	var repaired:=made.duplicate(true);repaired.kind="repair";repaired.quantity=3.5
+	var board:Control=auto_free(preload("res://scripts/hud/production_board.gd").new());add_child(board)
+	board.setup({"history_only":true,"receipts":[made,repaired]})
+	assert_int(board.history_choices.get_child_count()).is_equal(2)
+	assert_str(board.history_choices.get_child(0).text).contains("Made 12")
+	assert_str(board.history_choices.get_child(1).text).contains("Repaired 3.5")
+	board.history_choices.get_child(1).pressed.emit()
+	var text:=""
+	for label:Node in board.history_detail.find_children("*","Label",true,false):text+=label.text+"\n"
+	assert_str(text).contains("Alder").contains("Repaired 3.5").not_contains("15.5")

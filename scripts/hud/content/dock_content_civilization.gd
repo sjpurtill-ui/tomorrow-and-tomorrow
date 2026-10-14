@@ -3,6 +3,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## and standing orders live in the court (court_office_dossier.gd).
 
 var culture_view_state:Dictionary={"roots_open":false}
+var council_view:Dictionary={"person":"","query":"","order":"","order_query":""}
 ## Tests may point the showcase at a stand-in facade; play uses artifact_culture.gd.
 var artifact_source:Variant=null
 const ArtifactGallery:=preload("res://scripts/hud/artifact_gallery.gd")
@@ -155,7 +156,7 @@ func _council_blocks()->Array:
 		var group:=String(post.group) if heads.has(String(post.group)) else "council"
 		var love:=float(regard.get("love",0.5));var dread:=float(regard.get("dread",0.2))
 		var read:=String(regard.get("read",""))
-		var row:={"group":heads[group],"icon":Portrait.texture(face),
+		var row:={"id":String(person.name)+"|"+JSON.stringify(target),"group":heads[group],"icon":Portrait.texture(face),"office":String(post.title),"place":String(post.place),"read":read if read!="" else "Not yet read","love":love,"dread":dread,"matters":matters,
 			"cells":{"name":String(person.name),"title":String(post.title)+("\n"+read.capitalize() if read!="" else "")},
 			"bar":{"value":love,"tone":"bad" if dread>=0.55 else ("good" if love>=0.55 else ""),"width":36.0},
 			"tip":"%s, %s. %s.\n%s (love %d in 100, dread %d in 100).\nClick to summon them to the court." % [String(person.name),String(post.title),String(post.place),read.capitalize() if read!="" else "Not yet read",roundi(love*100.0),roundi(dread*100.0)],
@@ -167,7 +168,6 @@ func _council_blocks()->Array:
 			row.cells.title+="\n%d %s to raise" % [matters,"matter" if matters==1 else "matters"]
 		if not by_group.has(group):by_group[group]=[]
 		(by_group[group] as Array).append(row)
-	var columns:=[{"key":"name","label":"Name"},{"key":"title","label":"Office","width":180}]
 	var total:=0
 	for group in by_group:total+=(by_group[group] as Array).size()
 	# One roster keeps each person's identity, current office and court action
@@ -176,20 +176,14 @@ func _council_blocks()->Array:
 	for group in office_order:
 		if not by_group.has(group):continue
 		roster.append_array(by_group[group])
-	var blocks:Array=[]
-	if total==0:blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
-	else:
-		blocks.append({"type":"table","heading":"People you can call","head":false,"icon_size":40,"rows":roster,"columns":columns})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant
 		var state:=String(order.get("state","accepted"))
 		if state in ["done","refused","called_off"]:continue
-		open.append({"label":String(order.get("words","")),"value":String(Stack.STATE_WORDS.get(state,state)),"tone":"bad" if state in ["stalled","nothing"] else "",
+		open.append({"id":str(order.get("id",open.size())),"label":String(order.get("words","")),"value":String(Stack.STATE_WORDS.get(state,state)),"tone":"bad" if state in ["stalled","nothing"] else "",
 			"tip":Stack.status_words(order),"on_click":_open_court.bind({})})
-		if open.size()>=12:break
-	if not open.is_empty():blocks.append({"type":"fact_grid","heading":"ORDERS STILL OPEN","items":open,"min_column":300})
-	return blocks
+	return [{"type":"council_reader","people":roster,"orders":open,"view":council_view}]
 
 ## Every talk, order and decision opens the court, focused on that person.
 func _open_court(focus:Dictionary)->void:
