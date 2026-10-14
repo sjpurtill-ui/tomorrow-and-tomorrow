@@ -136,7 +136,7 @@ func test_seanstone_room_is_explained_by_the_tents_carried()->void:
 	assert_str(String(homes.value)).is_equal("%d to go" % (192-int(GameState.population_total)))
 	assert_int(Construction.housing_trigger_people()).is_equal(192)
 	assert_str(String(homes.sub)).is_equal("Builders start more once over 192 people live here")
-	assert_str(String(homes.detail)).is_equal("Then 8 builders add about 24 places every %s." % Plain.span_text(Construction.HOUSING_BATCH_WORK/Construction.housing_work_per_day()))
+	assert_str(String(homes.detail)).starts_with("Then 8 builders add about 24 places every %s." % Plain.span_text(Construction.HOUSING_BATCH_WORK/Construction.housing_work_per_day()))
 	assert_bool(Construction.housing_under_way()).is_false()
 	GameState.population_total=193
 	assert_bool(Construction.housing_under_way()).is_true()

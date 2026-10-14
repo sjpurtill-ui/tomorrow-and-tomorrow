@@ -13,6 +13,8 @@ var history_filter:=""
 var history:RefCounted
 ## The defences card for this refresh (tab), read outside the town's stores.
 var _defence:Dictionary={}
+## What ten more builders would buy, for the "Set builders" tooltip.
+var _ten_more:=""
 
 ## Individual buildings are drawn from each city's population and construction
 ## era; this dock shows what builders actually work on: the city's capacity and
@@ -63,7 +65,10 @@ func _city_tab()->Dictionary:
 	var just:=_just_built(city)
 	if not just.is_empty():cards.append(_as_row(just,"next"))
 	if not _defence.is_empty():cards.append(_defence_row(_defence))
-	cards.append(_as_row(_new_homes_row(housing,crews),"next"))
+	var homes_row:=_as_row(_new_homes_row(housing,crews),"next")
+	for gain:Dictionary in homes_row.get("gains",[]):homes_row.detail="%s %s: %s → %s." % [String(homes_row.get("detail","")),String(gain.label),String(gain.before),String(gain.after)]
+	homes_row.erase("gains")
+	cards.append(homes_row)
 	cards.append_array(_landmark_rows())
 	cards.append_array(_crew_rows(crews))
 	cards.append_array(_fabric_rows())
@@ -74,7 +79,10 @@ func _city_tab()->Dictionary:
 		var level:=float(SettlementModel.city_form().get("tier",0.0))
 		var next_era:=String(ERAS[mini(clampi(floori(level),0,ERAS.size()-1)+1,ERAS.size()-1)])
 		# What it still needs rides as chips on the row's second line.
-		era.merge({"section":"soon","name":next_era,"sub":String(era.sub) if (era.get("notes",[]) as Array).is_empty() else "the next building era","value":"","bar":{"ratio":clampf(level-floorf(level),0.0,1.0),"color":Tokens.GOLD,"width":80}},true)
+		var wants:PackedStringArray=[]
+		for note:Dictionary in era.get("notes",[]):wants.append(String(note.text).get_slice(" (",0).to_lower())
+		era.erase("notes")
+		era.merge({"section":"soon","name":next_era,"sub":String(era.sub) if wants.is_empty() else ", ".join(wants.slice(0,2))+("…" if wants.size()>2 else ""),"value":"","bar":{"ratio":clampf(level-floorf(level),0.0,1.0),"color":Tokens.GOLD,"width":80}},true)
 		era.erase("meter")
 		cards.append(era)
 	cards.append_array(_unlock_rows())
@@ -82,7 +90,8 @@ func _city_tab()->Dictionary:
 	var total:=Construction._settlement_definitions().size()
 	var sections:=[
 		{"id":"next","heading":("%s: now and next" % String(city.get("name","The town"))) if GameState.player_settlements.size()>1 else "Building now and next","span":true,"note":("All %d civic works stand" % total) if project.is_empty() else "%d of %d civic works stand" % [done,total],"note_tip":"New civic works come as the people learn new ways to build: see Coming next."},
-		{"id":"crews","heading":"Where the builders work","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People.","on_press":jump("overview",0)}]},
+		{"id":"crews","heading":"Where the builders work","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People."+(("
+Ten more builders would give: %s." % _ten_more) if _ten_more!="" else ""),"on_press":jump("overview",0)}]},
 		{"id":"fabric","heading":"The town's fabric"},
 		{"id":"soon","heading":"Coming next"}]
 	var page:={"kpis":_glance(housing,crews),"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
@@ -199,8 +208,7 @@ func _crew_rows(crews:Dictionary)->Array:
 	for line:Dictionary in Fabric.plus_lines(10.0).slice(1):
 		if nothing.search(String(line.value))!=null or more.size()>=3:continue
 		more.append({"label":String(line.label),"value":String(line.value),"tone":String(line.get("tone","plain")),"tip":String(line.get("words",""))})
-	if not more.is_empty():
-		rows.append({"section":"crews","key":"crew_more","icon":"builders","icon_color":Color(1,1,1,0.6),"name":"Ten more builders","sub":"would give","effects":more,"detail":"What ten more builders would buy now, in the engine's numbers."})
+	_ten_more=", ".join(PackedStringArray(more.map(func(m:Dictionary)->String:return "%s %s" % [String(m.label).to_lower(),String(m.value)])))
 	return rows
 
 ## The built fabric as rows with bars: homes by kind (one split bar), roads,
@@ -327,7 +335,7 @@ func _unlock_rows()->Array:
 			"detail":("The people know it; %d in 100 have taken it up (10 needed)." % roundi(best_progress*100.0)) if bool(group.get("adopting",false)) else ("%s: %d%% of the way to proof%s. It opens %s." % [_upper_first(_discovery_name(best)),roundi(best_progress*100.0)," and a team is on it" if best_on else ", no team on it yet",String(group.opens)])+(" "+String(group.tip) if group.has("tip") else ""),
 			"_rank":(2.0 if best_on or bool(group.get("adopting",false)) else 0.0)+best_progress})
 	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a._rank)>float(b._rank))
-	rows=rows.slice(0,6)
+	rows=rows.slice(0,3)
 	for row:Dictionary in rows:
 		row.erase("_rank")
 		if (row.tag as Dictionary).is_empty():row.erase("tag")
