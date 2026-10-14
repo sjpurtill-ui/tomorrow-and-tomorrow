@@ -206,7 +206,8 @@ func refresh(force:=false)->void:
 	_rebuild("watch",[manpower_box],str([forces,general,makeup.map(func(r:Dictionary)->Array:return [r.share,r.kind,r.men,r.target,snappedf(float(r.armed),0.02),snappedf(float(r.drill),0.02)]),pay_words(),Forces.drawn_from(MilitaryCampaign),int(Purse.state().get("unpaid_months",0))]),force,func()->void:_build_watch(forces,general,makeup))
 	_rebuild("border",border_box,str(border_signature()),force,func()->void:_clear(border_box);border_box.add_child(_border_card()))
 	_set_tab_counts(forces)
-	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
+	# A people broken past fighting (no town of its own left) is off the fronts.
+	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended" and not WarLoop.broken(String(e.civ_id)))
 	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
 		var front:Dictionary=WarLoop.front(String(e.civ_id))
 		return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),front.get("stance",""),front.get("general",""),e.get("strength",1.0),now_words(e)])),force,func()->void:_build_enemies(entries))
@@ -514,9 +515,10 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	# Who stands at home and who would rise, in the words every screen uses
 	# (watch_military.gd home_standing).
 	var standing:=Watch.home_standing(MilitaryCampaign)
-	var rise_line:=_line("%s on watch · %s can rise" % [compact(int(standing.on_watch)),compact(int(standing.can_rise))],12,T.INK_MUTED);rise_line.name="OnWatch"
-	rise_line.tooltip_text="On watch: everyone under arms standing in our towns today, the home guard there and those free to send (%s posted out on the border besides).
-Can rise: the townsfolk who take up arms beside them, untrained, when raiders come." % EraWords.grouped(int(standing.on_border))
+	var rise_line:=_line("%s on watch, %s can rise, all towns" % [compact(int(standing.on_watch)),compact(int(standing.can_rise))],12,T.INK_MUTED);rise_line.name="OnWatch"
+	rise_line.tooltip_text="Counted over all our towns that keep a guard (home alone: %s can rise).
+On watch: everyone under arms standing in our towns today, the home guard there and those free to send (%s posted out on the border besides).
+Can rise: the townsfolk who take up arms beside them, untrained, when raiders come." % [EraWords.grouped(int(standing.can_rise_home)),EraWords.grouped(int(standing.on_border))]
 	var standing_row:=HBoxContainer.new();standing_row.add_theme_constant_override("separation",14);standing_row.add_child(rise_line)
 	# The home guard posted out, said beside it so the counts add up.
 	if int(standing.on_border)>0:
@@ -661,9 +663,13 @@ func _cost_card(f:Dictionary)->Control:
 		"Up to %s can keep watch at no extra cost (5 in 100 of the people, or the towns' guard if more). Past that every one more costs births, work and weariness, as an extra learner does: %s over now, %s with %s more." % [EraWords.grouped(int(now.free)),EraWords.grouped(roundi(float(now.over))),EraWords.grouped(roundi(float(more.over))),EraWords.grouped(extra)],float(now.births)>0.05)
 	var income:=maxf(0.0,float(now.income_season))
 	var pay_now:=_pay_share(float(now.pay_season),income);var pay_more:=_pay_share(float(more.pay_season),income)
-	_cost_row(column,"Pay, share of income",pay_now,pay_more,T.RED_TEXT if pay_more.begins_with("over") else T.INK,
+	# Past all the realm brings in, the figures themselves: pay against income.
+	var over_now:=pay_now.begins_with("over");var over_more:=pay_more.begins_with("over")
+	if over_now or over_more:
+		pay_now=_pay_against(float(now.pay_season),income);pay_more=_pay_against(float(more.pay_season),income)
+	_cost_row(column,"Pay a season, of income" if (over_now or over_more) else "Pay, share of income",pay_now,pay_more,T.RED_TEXT if over_more else T.INK,
 		"Soldiers' pay against what the realm brings in a season (%s): %s now, %s with %s more.%s" % [Purse.amount_text(income),Purse.amount_text(float(now.pay_season)),Purse.amount_text(float(more.pay_season)),EraWords.grouped(extra),
-			" The pay is more than all the realm brings in: it comes out of the stores, and unpaid soldiers lose will." if pay_more.begins_with("over") else ""],pay_now.begins_with("over"))
+			" The pay is more than all the realm brings in: it comes out of the stores, and unpaid soldiers lose will." if over_more else ""],over_now)
 	var gear_tip:=PackedStringArray()
 	for row:Dictionary in now.gear:gear_tip.append("%s %s: %s maker-days%s" % [EraWords.grouped(int(row.sets)),String(row.name).to_lower(),EraWords.grouped(roundi(float(row.days))),(" · "+Economy.materials_words(row.materials)) if not (row.materials as Dictionary).is_empty() else ""])
 	_cost_row(column,"Gear, maker-days",compact(roundi(float(now.gear_days))) if float(now.gear_days)>=0.5 else "none",compact(roundi(float(more.gear_days))),T.INK,
@@ -691,6 +697,11 @@ func _cost_cell(text:String,ink:Color,width:float,strong:=false)->Label:
 static func _signed_compact(v:float)->String:
 	if absf(v)<0.5:return "0"
 	return ("+" if v>=0.0 else "−")+compact(roundi(absf(v)))
+
+
+## Pay against income, the figures themselves: "40 of 1".
+static func _pay_against(pay:float,income:float)->String:
+	return "%s of %s" % [compact(roundi(pay)),compact(roundi(income))]
 
 
 ## Pay as a share of what the realm brings in, never a runaway figure: past
@@ -870,7 +881,7 @@ func _enemy_row(e:Dictionary)->Control:
 	words.add_child(_line("%s · %s" % ["War" if String(e.kind)=="war" else "Feud","begun today" if since<=0 else Ledger.span_words(since)],12,T.INK_MUTED))
 	var trade_line:=String(preload("res://scripts/trade_words.gd").war_line(civ_id))
 	words.tooltip_text="%s.%s" % [Ledger.subtitle(e),("\n"+trade_line) if trade_line!="" else ""]
-	var dead_word:=_line("Dead",11,T.INK_MUTED);dead_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dead_word.tooltip_text="The dead of it all told: ours on the left, theirs on the right.";head.add_child(dead_word)
+	var dead_word:=_line("Fallen",11,T.INK_MUTED);dead_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dead_word.tooltip_text="The dead of it all told: ours on the left, theirs on the right.";head.add_child(dead_word)
 	var dead:=DeadStrip.new();dead.name="Dead";dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(104,26);dead.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	dead.tooltip_text="The dead of it all told: %s of ours (left, in our ink), %s of theirs (right, in red)." % [EraWords.grouped(int(e.our_dead)),EraWords.grouped(int(e.their_dead))];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);chip.tooltip_text=Ledger.clock_words(e) if String(e.kind)=="feud" else "At war since %s." % Ledger.span_words(since);head.add_child(chip)
