@@ -7,9 +7,14 @@ const U=preload("res://scripts/undertaking_system.gd")
 const Works=preload("res://scripts/great_works_audience.gd")
 const STATUS_WORDS:={"building":"Rising","stalled":"Idle","functioning":"Standing","ruined":"A ruin","abandoned":"Abandoned"}
 
+var view_states:Dictionary={}
+
 func tab(_sub:int)->Dictionary:
 	var id:=GameState.selected_player_settlement_id
-	return SettlementModel.with_city_resources(id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local(id)))
+	var page:Dictionary=SettlementModel.with_city_resources(id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _local(id)))
+	if not view_states.has(id):view_states[id]={}
+	for block:Dictionary in page.get("blocks",[]):block.view_state=view_states[id]
+	return page
 func _refresh()->void:hud.request_immediate_dock_refresh()
 
 func _director()->Node:
@@ -83,10 +88,10 @@ func _local(id:String)->Dictionary:
 			row["value_note"]="condition"
 		var effects:Array=[]
 		for line:Dictionary in _impact(item,site):
-			# The same for every work: told in the row's tooltip, not on it.
+			# Fixed background rules follow the selected work in a disclosure.
 			if String(line.label) in ["Materials","A ruin","Upkeep"]:
-				row.detail=String(row.detail)+"
-%s: %s" % [String(line.label),String(line.get("words",""))]
+				row["further"]=String(row.get("further",""))+"%s: %s\n" % [String(line.label),String(line.get("words",""))]
+				row["further_label"]="Materials, upkeep and risk"
 				continue
 			# Standing, its repair is the row's figure: each gift says its first clause.
 			var value:=String(line.value)
@@ -251,11 +256,11 @@ func _impact(item:Dictionary,site:Dictionary)->Array:
 		if assessment.has("score"):
 			var odds:Dictionary=preload("res://scripts/wonder_concept.gd").odds(float(assessment.score),String(item.get("ambition","grand")))
 			if assessment.get("odds") is Dictionary and not (assessment.odds as Dictionary).is_empty():odds=assessment.odds
-			lines.append({"label":"When it is finished","value":"%d%% falls" % roundi(float(odds.get("collapse",0.0))*100.0),
+			lines.append({"label":"Chance to fall","value":"%d%%" % roundi(float(odds.get("collapse",0.0))*100.0),
 				"words":"The engine's odds today: a triumph %d%%, it stands %d%%, it stands flawed %d%%, it falls %d%%. A fall kills some of its builders and costs cohesion and legitimacy; a triumph raises both." % [roundi(float(odds.get("triumph",0.0))*100.0),roundi(float(odds.get("success",0.0))*100.0),roundi(float(odds.get("flawed",0.0))*100.0),roundi(float(odds.get("collapse",0.0))*100.0)],"tone":"bad" if float(odds.get("collapse",0.0))>=0.2 else "plain"})
 			# The builders' share of the odds and the payoff, stated (built_fabric.gd).
 			if String(assessment.get("stated",""))!="":
-				lines.append({"label":"The builders","value":"x%.2f if it stands" % float(assessment.get("payoff",1.0)),"words":String(assessment.stated),"tone":"plain"})
+				lines.append({"label":"Strength, rewards & renown","value":"×%.2f if it stands" % float(assessment.get("payoff",1.0)),"words":String(assessment.stated),"tone":"plain"})
 		lines.append({"label":"Materials","value":"as it rises","words":"Stone, timber and the rest are drawn from the stores as the work is done; when they run out it stalls, and after five idle years it is abandoned.","tone":"plain"})
 	elif status=="functioning":
 		for key in ["reward_text","effect_text"]:
