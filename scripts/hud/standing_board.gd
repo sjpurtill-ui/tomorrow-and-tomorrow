@@ -40,7 +40,7 @@ class Rose extends Control:
 	var others:Array=[]
 	var highlight:=-1
 	func _init()->void:
-		custom_minimum_size=Vector2(196,196)
+		custom_minimum_size=Vector2(184,184)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		mouse_exited.connect(func()->void: set_highlight(-1))
@@ -209,7 +209,7 @@ var home:HFlowContainer
 func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",12)
+	add_theme_constant_override("separation",8)
 	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",0);add_child(dangers)
 	_build_hero()
 	peoples=UI.sheet(self,"Peoples")
@@ -242,7 +242,7 @@ func apply(block:Dictionary)->void:
 	_refill("dangers",block.get("warnings",[]),_fill_dangers)
 	_refill("peoples",block.get("peoples",[]),_fill_peoples)
 	_refill("races",_races_print(block.get("races",[])),_fill_races)
-	_refill("arts",block.get("arts",{}),_fill_arts)
+	_refill("arts",[block.get("arts",{}),block.get("strengths",[])],_fill_arts)
 	_refill("home",block.get("home",{}),_fill_home)
 
 func _refill(part:String,value:Variant,fill:Callable)->void:
@@ -308,10 +308,13 @@ func _build_hero()->void:
 	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	top.add_child(name_label)
 	posture_label=Label.new();posture_label.name="Posture"
-	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",16)
+	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",14)
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	top.add_child(posture_label)
+	posture_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	posture_label.tooltip_text="Each row: the strength, a bar against the peoples of our age (the tick is a typical people), its value, its change in a year and its biggest cause."
+	# The words our shape makes of us head the nine rows (see _fill_strengths).
+	UI.spacer(top)
 	renown_label=UI.label(top,"",12,T.INK_MUTED);renown_label.name="Renown"
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; draw from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	var body:=HBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",12);column.add_child(body)
@@ -374,13 +377,10 @@ func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
 	var year_ago:Dictionary=data.get("year_ago",{})
 	rose.configure(items,year_ago)
+	if posture_label.get_parent()!=null:posture_label.get_parent().remove_child(posture_label)
 	UI.clear(strength_list)
-	var head:=UI.line(strength_list,8);head.name="Header"
-	UI.cell(head,"",72,12,T.INK_MUTED,true)
-	UI.cell(head,"vs the age",70,12,T.INK_MUTED)
-	UI.cell(head,"",34,12,T.INK_MUTED)
-	UI.cell(head,"a year" if not year_ago.is_empty() else "",34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
-	UI.label(head,"biggest cause",12,T.INK_MUTED,false,true)
+	posture_label.name="Header"
+	strength_list.add_child(posture_label)
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var id:=String(item.id)
@@ -478,6 +478,7 @@ func _fill_dangers()->void:
 	var offered:={}
 	for warning:Dictionary in warnings.slice(0,5):
 		var row:=UI.line(dangers,8)
+		row.custom_minimum_size.y=20.0
 		row.tooltip_text=String(warning.words)
 		var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(warning.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(dot)
 		var title:=UI.label(row,String(warning.title),13,T.text_for(_tone_color(String(warning.tone))),true,true)
@@ -490,46 +491,70 @@ func _fill_dangers()->void:
 
 # -------------------------------------------------------------- the peoples
 
-## How each people we know sees us: one row each, six feelings as bars.
+## How each people we know sees us: six pips each (allure, awe, fear,
+## respect, trust, resentment, filled to the feeling), two peoples a line.
 func _fill_peoples()->void:
 	UI.clear(peoples)
 	var list:Array=data.get("peoples",[])
-	UI.heading(peoples,"How the peoples we know see us")
 	if list.is_empty():
+		UI.heading(peoples,"How the peoples we know see us")
 		var row:=UI.line(peoples,8);row.name="NoPeoples"
 		UI.label(row,"No other people has met us yet",12,T.INK_MUTED,false,true)
 		var scouts:Variant=data.get("on_scouts")
 		if scouts is Callable:UI.verb(row,"Send scouts",scouts as Callable,"Send scouts to find the peoples around us",true)
 		return
-	var head:=UI.line(peoples,6)
-	var first:=UI.label(head,"",12,T.INK_MUTED,true,true);first.custom_minimum_size.x=110
+	feelings(peoples,list,data.get("on_court"),true)
+
+## The feelings of every people we know toward us, drawn small (also on
+## World › Peoples beside the ledger). Each people: emblem, name, danger
+## tags, six pips and, where given, a Talk.
+static func feelings(parent:VBoxContainer,list:Array,on_court:Variant,with_talk:bool)->void:
+	var head:=UI.heading(parent,"How they see us")
+	# The pips' colours, after the heading on a wide sheet, under it on a narrow one.
+	var legend:Container
+	if with_talk:
+		legend=HBoxContainer.new();legend.add_theme_constant_override("separation",4);head.add_child(legend)
+	else:
+		legend=HFlowContainer.new();legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",0);parent.add_child(legend)
+	legend.name="PipLegend"
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
-		var title:=UI.cell(head,String(view.name).replace("Resentment","Resent"),62,12,T.INK_MUTED,true)
-		title.tooltip_text=String(view.means)
-	UI.cell(head,"",46,12,T.INK_MUTED)
-	var on_court:Variant=data.get("on_court")
+		var dot:=Pip.new();dot.value=1.0;dot.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")));dot.custom_minimum_size=Vector2(9,9);legend.add_child(dot)
+		dot.tooltip_text=String(view.means);dot.mouse_filter=Control.MOUSE_FILTER_PASS
+		UI.label(legend,String(view.name).replace("Resentment","resent").to_lower(),11,T.INK_MUTED).tooltip_text=String(view.means)
+	var flow:=HFlowContainer.new();flow.name="Feelings";flow.add_theme_constant_override("h_separation",18);flow.add_theme_constant_override("v_separation",2)
+	parent.add_child(flow)
 	for p:Dictionary in list:
-		var row:=UI.hot_row(peoples,"People_"+String(p.civ_id),Callable(),_people_tip(p))
-		var name_cell:=HBoxContainer.new();name_cell.add_theme_constant_override("separation",5);name_cell.custom_minimum_size.x=110;name_cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(name_cell)
-		var emblem:=TextureRect.new();emblem.texture=p.get("emblem") as Texture2D;emblem.custom_minimum_size=Vector2(18,18)
+		var row:=HBoxContainer.new();row.name="People_"+String(p.civ_id);row.add_theme_constant_override("separation",5)
+		row.custom_minimum_size.y=UI.ROW_H;row.tooltip_text=_people_tip(p);row.mouse_filter=Control.MOUSE_FILTER_PASS
+		flow.add_child(row)
+		var emblem:=TextureRect.new();emblem.texture=p.get("emblem") as Texture2D;emblem.custom_minimum_size=Vector2(16,16)
 		emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		emblem.mouse_filter=Control.MOUSE_FILTER_PASS;name_cell.add_child(emblem)
-		UI.label(name_cell,String(p.name),13,T.INK,true,true)
+		emblem.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(emblem)
+		var who:=UI.label(row,String(p.name),13,T.INK,true);who.custom_minimum_size.x=78
+		for view:Dictionary in p.get("views",[]):
+			var pip:=Pip.new();pip.value=float(view.value);pip.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")))
+			pip.tooltip_text="%s %d%%: %s.
+Why: %s." % [String(view.name),roundi(float(view.value)*100.0),String(view.means),String(view.why)]
+			row.add_child(pip)
 		for pair:Array in [["envy","envy",Standing.ENVY_RAID_FLOOR],["contempt","scorn",Standing.CONTEMPT_FLOOR]]:
 			if float(p.get(String(pair[0]),0.0))>float(pair[2]):
-				UI.tag(name_cell,String(pair[1]),"danger").tooltip_text="%s %d%%: %s" % [String(pair[0]).capitalize(),roundi(float(p.get(String(pair[0]),0.0))*100.0),String(p.get(String(pair[0])+"_why",""))]
-		for view:Dictionary in p.get("views",[]):
-			var cell:=HBoxContainer.new();cell.add_theme_constant_override("separation",3);cell.custom_minimum_size.x=62;row.add_child(cell)
-			cell.tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(float(view.value)*100.0),String(view.means),String(view.why)]
-			cell.mouse_filter=Control.MOUSE_FILTER_PASS
-			var b:=UI.bar(cell,float(view.value),UI.tone_color(String(VIEW_INK.get(String(view.id),"gold"))),30)
-			b.tooltip_text=cell.tooltip_text
-			UI.label(cell,"%d" % roundi(float(view.value)*100.0),12,T.INK).tooltip_text=cell.tooltip_text
-		var talk:=HBoxContainer.new();talk.custom_minimum_size.x=46;row.add_child(talk)
-		if on_court is Callable:
+				UI.tag(row,String(pair[1]),"danger").tooltip_text="%s %d%%: %s" % [String(pair[0]).capitalize(),roundi(float(p.get(String(pair[0]),0.0))*100.0),String(p.get(String(pair[0])+"_why",""))]
+		if with_talk and on_court is Callable:
 			var civ_id:=String(p.civ_id)
-			UI.verb(talk,"Talk",func()->void:(on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours").name="Talk"
+			UI.verb(row,"Talk",func()->void:(on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours").name="Talk"
+
+## One feeling as a small square filled from the bottom to its share.
+class Pip extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var value:=0.0
+	var ink:=Color.WHITE
+	func _init()->void:
+		custom_minimum_size=Vector2(12,14);mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	func _draw()->void:
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.10))
+		var h:=size.y*clampf(value,0.0,1.0)
+		if h>0.0:draw_rect(Rect2(0,size.y-h,size.x,h),ink)
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.35),false,1.0)
 
 static func _people_tip(p:Dictionary)->String:
 	var lines:PackedStringArray=[String(p.name)+": "+String(p.relation)]
@@ -579,16 +604,24 @@ func _fill_races()->void:
 ## What our cunning and persuasion do this month: every effect in the pointer.
 func _fill_arts()->void:
 	UI.clear(arts)
-	var at_work:Dictionary=data.get("arts",{})
-	arts.visible=not at_work.is_empty()
-	if at_work.is_empty():return
-	_caption(arts,"At work")
-	for pair:Array in [["cunning","Cunning"],["persuasion","Persuasion"]]:
-		var effects:Array=at_work.get(String(pair[0]),[])
+	# What cunning and persuasion do is in their strength rows' pointers.
+	arts.visible=false
+	_fold_arts(data.get("arts",{}))
+
+func _fold_arts(at_work:Dictionary)->void:
+	for id:String in ["cunning","persuasion"]:
+		var row:=strength_list.find_child("Strength_"+id,false,false) as Control
+		if row==null:continue
 		var lines:PackedStringArray=[]
-		for e:Dictionary in effects:lines.append("· %s%s" % [String(e.words),(" — "+String(e.detail)) if String(e.get("detail",""))!="" else ""])
-		var cell:=UI.label(arts,"%s: %s" % [String(pair[1]),String((effects[0] as Dictionary).words) if not effects.is_empty() else "nothing yet"],12,T.BODY)
-		cell.name="Arts_"+String(pair[0]);cell.tooltip_text="\n".join(lines)
+		for e:Dictionary in at_work.get(id,[]):lines.append("· %s" % String(e.words))
+		var base:=row.tooltip_text.get_slice("
+
+At work:",0)
+		row.tooltip_text=base+("
+
+At work:
+"+"
+".join(lines) if not lines.is_empty() else "")
 
 ## Our own people: pride, love and dread of the god, trust in the chiefs.
 func _fill_home()->void:
