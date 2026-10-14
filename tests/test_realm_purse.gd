@@ -430,23 +430,22 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	var wealth:=Board.new()
 	add_child(wealth)
 	wealth.setup({})
-	for part in ["GoodsHeld","GoodsBuy","GoodsAHead","GoodsSpare","GoodsMade","Treasures","SeeTreasures","Materials","SeeMaterials","Barter","Fifths","Shares","Pressure","Balance","Levels","Line_army","StoreAnswer"]:
+	for part in ["GoodsHeld","GoodsValue","GoodsBuy","GoodsAHead","GoodsSpare","GoodsMade","MarketReach","Treasures","SeeTreasures","Barter","Fifths","Shares","Pressure","Balance","Levels","Line_army","StoreAnswer"]:
 		assert_object(wealth.find_child(part,true,false)).override_failure_message("the wealth board has no %s" % part).is_not_null()
-	for gone in ["StorePointer","SeeStore"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
+	for gone in ["StorePointer","SeeStore","SeeMaterials","SeeArms","WealthCards"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
 	var kickers:=[]
 	for child in wealth.find_children("*","Label",true,false):
 		if child.get_meta("wealth_section",false):kickers.append((child as Label).text)
-	assert_str(String(kickers[0])).is_equal("WHAT WE OWN")
-	assert_int(kickers.find("WHAT WE MAKE")).is_less(kickers.find("TREASURES"))
-	assert_int(kickers.find("TREASURES")).is_less(kickers.find("MATERIALS IN STORE"))
-	assert_int(kickers.find("MATERIALS IN STORE")).is_less(kickers.find("THE COMMON STORE"))
-	assert_int(kickers.find("THE COMMON STORE")).is_less(kickers.find("TRADE AND BUSINESS"))
-	# Arms live on the Production screen: Wealth only points there.
+	# The strip carries what we own; the rows lead with the common store.
+	assert_str(String(kickers[0])).is_equal("THE COMMON STORE")
+	assert_int(kickers.find("THE COMMON STORE")).is_less(kickers.find("WHAT OUR GOODS BUY"))
+	assert_int(kickers.find("WHAT OUR GOODS BUY")).is_less(kickers.find("TRADE AND BUSINESS"))
+	assert_int(kickers.find("TRADE AND BUSINESS")).is_less(kickers.find("WHO HOLDS THE WEALTH"))
+	# Arms live on the Arms tab.
 	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
-	assert_object(wealth.find_child("SeeArms",true,false)).is_not_null()
 	# What we own is the engine's count: every town's goods, at our own prices.
 	var held:=preload("res://scripts/standing.gd").wealth_held()
-	assert_str((wealth.find_child("GoodsHeld",true,false) as Label).text).contains("%s goods" % preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
+	assert_str((wealth.find_child("GoodsHeld",true,false) as Label).text).is_equal(preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
 	# Each line of spending says what it costs a season.
 	assert_str((board.find_child("Line_army",true,false).find_child("Cost",true,false) as Label).text).contains("a season")
 	# The store's answer comes first, with whether it grows.
@@ -666,11 +665,11 @@ func test_the_board_says_where_the_silver_comes_from()->void:
 	var said:=PackedStringArray()
 	for node in board.find_children("*","Label",true,false): said.append((node as Label).text)
 	var text:=" | ".join(said)
-	assert_str(text).contains("Given by the households of %s" % String(GameState.settlement_name))
+	assert_str(text).contains("given by the households of %s" % String(GameState.settlement_name))
 	assert_str(text).not_contains("WHERE IT COMES FROM")
 	# A season at the pace of the days levied: about three months of it.
 	assert_float(float(home.levy)).is_greater(25.0*float(Purse.quote("heavy").rate)*150.0/Purse.goods_price())
-	assert_str(text).contains("hide their dues")
+	assert_str(text).contains("hide dues")
 	await await_idle_frame()
 	remove_child(board)
 	board.free()

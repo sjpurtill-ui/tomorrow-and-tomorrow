@@ -41,74 +41,9 @@ func _food_tab()->Dictionary:
 func _open_section(section:String,sub:int)->void:
 	if is_instance_valid(hud):hud.section_requested.emit(section,sub)
 
-func _food_blocks(metrics:Dictionary)->Array:
-	var produced:=float(metrics.get("food_production",0.0))
-	var weather:=roundi(float(metrics.get("food_weather_factor",1.0))*100.0)
-	var eaten:=float(metrics.get("food_eaten",0.0))
-	var spoiled:=float(metrics.get("food_spoilage",0.0))
-	var issued:=FoodSystem.issued_on_day(int(GameState.elapsed_days))
-	var net:=float(metrics.get("food_net",0.0))
-	var top:=maxf(1.0,maxf(produced,maxf(eaten,spoiled)))
-	var flow_items:Array=[
-		{"name":"Came in","value":"+%s" % Plain.number(produced),"ratio":produced/top,"color":Tokens.GREEN,"tip":"Rations gathered, hunted, fished or harvested today. The weather allows about %d%% of a normal day's yield." % weather},
-		{"name":"Eaten","value":"−%s" % Plain.number(eaten),"ratio":eaten/top,"color":Tokens.TEAL,"tip":"Rations eaten today"},
-		{"name":"Spoiled","value":"−%s" % Plain.number(spoiled),"ratio":spoiled/top,"color":Tokens.RED,"tip":"Rations that went bad in store today"},
-		{"name":"Sent with parties","value":"−%s" % Plain.number(issued) if issued>0.0 else "none","ratio":issued/top,"color":Tokens.MUTED,"tip":"Rations carried away by parties leaving today"},
-		{"name":"Change to stores","value":("+" if net>=0.0 else "−")+Plain.number(absf(net)),"ratio":absf(net)/top,"color":Tokens.GREEN if net>=0.0 else Tokens.RED,"tip":"How much the stores grew or shrank today"},
-	]
-	var stocks:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
-	var spoilage_by_type:Dictionary=metrics.get("food_spoilage_by_type",{})
-	var eaten_per_day:=maxf(0.5,eaten)
-	var stock_items:Array=[]
-	for food_type in FoodSystem.FOOD_TYPES:
-		var amount:=float(stocks.get(food_type,0.0))
-		var lost:=float(spoilage_by_type.get(food_type,0.0))
-		if amount<=0.05 and lost<=0.05 and String(food_type) not in ["Fresh food","Stored food"]: continue
-		var days_of_kind:=amount/eaten_per_day
-		var sub_text:="enough alone for years" if days_of_kind>999.0 else "enough alone for "+Plain.span_text(days_of_kind)
-		if amount<=0.05: sub_text="none made yet" if String(food_type)=="Stored food" else "none left"
-		stock_items.append({
-			"name":String(food_type),"sub":sub_text+("; %s spoil a day" % Plain.number(lost) if lost>0.05 else ""),
-			"value":"%s rations" % Plain.number(amount),
-			"value_color":Tokens.BODY_2 if amount>0.05 else Tokens.MUTED,
-			"accent":Tokens.GREEN if amount>0.05 else Color(0,0,0,0),
-			"tip":"Rations of this kind in store, and how long they would feed everyone on their own",
-		})
-	var source_items:Array=[]
-	for source_variant in (metrics.get("food_sources",[]) as Array):
-		var source:Dictionary=source_variant
-		var amount:=float(source.get("produced",0.0))
-		var sub:=String(source.get("access","unknown")).capitalize()
-		var ground:=float(source.get("source_health",1.0))
-		if source.has("renewable") and ground<0.95:sub+="; the land holds about %d in 10 of what it once did" % roundi(ground*10.0)
-		if bool(source.get("overused",false)):sub+="; we take more than grows back"
-		source_items.append({
-			"name":String(source.get("name","Source")).capitalize(),
-			"sub":sub,
-			"value":"+%s a day" % Plain.number(amount) if amount>0.05 else "nothing today",
-			"value_color":(Tokens.AMBER if bool(source.get("overused",false)) else Tokens.GREEN) if amount>0.05 else Tokens.MUTED,
-			"accent":Tokens.GREEN if amount>0.05 else Color(0,0,0,0),
-			"tip":"Rations this source gave today" if not source.has("renewable") else "Rations this source gave today. The land nearby grows back about %s rations a day of it; taking more thins the game, fish or plants until they are rested." % Plain.number(float(source.renewable)),
-		})
-	var blocks:Array=[Charts.reserves(GameState.selected_player_settlement_id),Charts.food_flow(GameState.selected_player_settlement_id),{"type":"bars","heading":"Today's food","note":"in rations","items":flow_items}]
-	var fire:Dictionary=metrics.get("fire_practice",{})
-	if not fire.is_empty():
-		var lit:=bool(fire.get("available",false))
-		var source:=String(fire.get("source","none")).replace("_"," ").capitalize()
-		var timber:=float(fire.get("maintenance_timber",0.0))
-		blocks.append({"type":"rows","heading":"Hearth fire","note":"how strong the embers are","items":[{"name":"Embers kept alight" if lit else "No fire","sub":String(fire.get("status","No one is keeping a fire")),"value":"%d%%" % roundi(clampf(float(fire.get("embers",0.0)),0.0,1.0)*100.0),"value_color":Tokens.GREEN if lit else Tokens.RED,"accent":Tokens.AMBER if lit else Color(0,0,0,0),"tip":"Lit by: %s. Keeping it alive burned %s wood today." % [source,Plain.number(timber)]}]})
-	var preservation_inputs:Dictionary=metrics.get("food_preservation_inputs",{})
-	if not preservation_inputs.is_empty():
-		blocks.append({"type":"rows","heading":"Smoking fuel","items":[{"name":"Wood burned today","value":Plain.number(float(preservation_inputs.get("Timber",0.0))),"sub":"To smoke meat and fish so they keep"}]})
-	if not stock_items.is_empty():
-		blocks.append({"type":"rows","heading":"Stores by kind","items":stock_items})
-	if not source_items.is_empty():
-		blocks.append({"type":"rows","heading":"Food production","items":source_items})
-	return blocks
-
 func signature()->Array:
 	var result:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,_local_signature)
-	result.append_array([selected_account,show_work,GameState.economy_stage,GameState.public_treasury,GameState.private_currency,GameState.currency_hoards,GameState.mutual_aid_reserve,GameState.weighed_metal_circulation,selected_material,materials_priorities,selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
+	result.append_array([selected_account,GameState.economy_stage,GameState.public_treasury,GameState.private_currency,GameState.currency_hoards,GameState.mutual_aid_reserve,GameState.weighed_metal_circulation,selected_material,materials_priorities,selected_food,show_priorities,GameState.settlement_network_revision,GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.city_trade_shipments.size(),GameState.city_trade_history.size(),GovernmentPeopleSystem.revision])
 	return result
 
 func _local_signature()->Array:
@@ -137,17 +72,13 @@ func _trade_block()->Dictionary:
 ".join(lines)}
 
 var selected_account:=""
-var show_work:=false
 ## The Wealth tab: what the people own and can trade, goods first, and the
 ## treasury once it is coin (hud/purse_board.gd, which reads the realm itself
 ## and refreshes on its own), then this place's day's work and its
 ## households' money. Trade between peoples mounts its own board between
 ## them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
-	var blocks:Array=[{"type":"purse_board","mode":"wealth","on_open":_open_section}]
-	# Trade between peoples (econ-trade) mounts its board here.
-	blocks.append(_ledger_block())
-	return {"blocks":blocks}
+	return {"blocks":[{"type":"purse_board","mode":"wealth","on_open":_open_section,"ledger":_ledger_block()}]}
 
 ## This place's day's work and its households' money (hud/wealth_ledger.gd).
 ## The realm's treasury is the purse's, above: no town keeps its own.
@@ -161,48 +92,26 @@ func _ledger_block()->Dictionary:
 		var points:Array=[]
 		for row:Dictionary in history:points.append({"day":row.day,"value":row.get(definition[0],null)})
 		accounts.append({"key":definition[0],"name":definition[1],"balance":float(definition[2]),"art":definition[3],"points":points})
-	return {"type":"wealth_ledger","title":"Wealth","stage":stage,"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(GameState.selected_player_settlement_id),"managed":city.get("auto_manage",true),"economy":Indicators.economy(),"history":GameState.economy_history.slice(maxi(0,GameState.economy_history.size()-12)),"conditions":{"health":float(GameState.population_health),"cohesion":float(GameState.simulation_metrics.get("cohesion",1.0)),"housing":float(GameState.simulation_metrics.get("housing_ratio",1.0))},"accounts":accounts,"selected":selected_account,"show_work":show_work,"on_select":func(key:String):selected_account="" if selected_account==key else key;hud.request_immediate_dock_refresh(),"on_work":func():show_work=not show_work;hud.request_immediate_dock_refresh(),"on_history":focused_action("Past balances","",func()->Dictionary:return {"blocks":[Charts.finance(GameState.selected_player_settlement_id)]}).on_press,"on_stores":jump("economy",1),"on_policy":court({})}
+	var block:={"type":"wealth_ledger","title":"Wealth","stage":stage,"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(GameState.selected_player_settlement_id),"managed":city.get("auto_manage",true),"economy":Indicators.economy(),"history":GameState.economy_history.slice(maxi(0,GameState.economy_history.size()-12)),"conditions":{"health":float(GameState.population_health),"cohesion":float(GameState.simulation_metrics.get("cohesion",1.0)),"housing":float(GameState.simulation_metrics.get("housing_ratio",1.0))},"accounts":accounts,"selected":selected_account,"on_select":func(key:String):selected_account="" if selected_account==key else key;hud.request_immediate_dock_refresh()}
+	if not accounts.is_empty():block.on_history=focused_action("Past balances","",func()->Dictionary:return {"blocks":[Charts.finance(GameState.selected_player_settlement_id)]}).on_press
+	return block
 
 func open_expanded_tab(sub:int)->bool:
 	return false
 
-func _economy_report(kind:String)->Dictionary:
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:
-		return SettlementModel.with_local_population(func()->Dictionary:
-			if kind=="trade":return {"blocks":[_trade_block()]}
-			var blocks:=_food_blocks(GameState.simulation_metrics)
-			if kind=="outlook":return {"blocks":[blocks[0]]}
-			if kind=="flow":return {"blocks":[blocks[1],blocks[2]]}
-			return {"blocks":blocks.slice(3)}))
-
-func _open_water()->void:
-	hud.open_detail(preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,"Water",String(meta().title),_water_report,signature))
-
-func _water_report()->Dictionary:
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:
-		var water:Dictionary=GameState.water_metrics
-		var access:=ResourceSystem.water_access_snapshot(terrain._discovery_context())
-		var id:=GameState.selected_player_settlement_id
-		var management:=GovernmentPeopleSystem.settlement_management(id)
-		var leader:=String(management.get("leader",{}).get("name","the leader")).get_slice(" ",0)
-		var recognized:=bool(access.get("recognized",false))
-		var text:="No stream, spring or lake is known near here. More carriers cannot make water appear: scouts or a closer look at the map may find a source."
-		if recognized:text="%s, %s km away. %s"%[String(access.source_kind).capitalize(),Plain.number(float(access.distance_km)),"Close enough to fetch every day; households and carriers bring it in." if bool(access.accessible) else "Too far to fetch every day. More carriers will not bring it closer."]
-		var daily:="Water is counted at the end of each day. Let a day pass for the first count."
-		if float(water.get("required_today",0))>0:
-			var reading:=preload("res://scripts/hud/home_plain.gd").water(water)
-			daily="%s. Yesterday %s drinks were fetched for the %s needed each day, and %s are kept in store. One drink here is one person's water for a day." % [String(reading.headline),Plain.number(float(water.get("collected_today",0))),Plain.number(float(water.required_today)),Plain.number(float(water.get("stored",0)))]
-		var water_focus:=not bool(management.get("auto_manage",true)) and String(management.get("focus",""))=="water"
-		return {"brief":{"title":("You asked %s for more hands on water" % leader) if water_focus else ("%s decides the water work" % leader.capitalize() if bool(management.get("auto_manage",true)) else "You asked %s for more hands on other work" % leader),"why":String(management.get("focus_effect","The Hearth Circle must be finished before you can ask the leader for anything."))},"blocks":[{"type":"text","heading":"Where the water comes from","text":text},{"type":"text","heading":"Fetching and storing","text":daily},{"type":"actions","items":[{"label":"More hands on water"+(" (now)" if water_focus else ""),"sub":"Finish the Hearth Circle first" if management.is_empty() else "Ask %s to put more people on water" % leader,"disabled":management.is_empty(),"primary":water_focus,"on_press":func()->void:
-			var result:=GovernmentPeopleSystem.set_settlement_focus(id,"water")
-			if not bool(result.get("ok",false)):terrain._report_military_action({"message":String(result.get("reason","That cannot be asked just now."))})
-			hud.request_immediate_dock_refresh()},{"label":"Let %s decide" % leader+(" (now)" if bool(management.get("auto_manage",true)) else ""),"sub":"The leader spreads the work across what the place needs","disabled":management.is_empty(),"primary":bool(management.get("auto_manage",true)),"on_press":func()->void:GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]}]})
+## Deliveries between this people's places, on the road and arrived.
+func _economy_report(_kind:String)->Dictionary:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return {"blocks":[_trade_block()]})
 
 var selected_food:=""
 var show_priorities:=false
+## The Food tab's one block (hud/food_folio.gd): the stores and the day's
+## rations, the outlook, the water, the hands on food, where the food comes
+## from, the fire and the deliveries on the road, all the engine's numbers.
 func _provisions_data()->Dictionary:
 	var metrics:Dictionary=GameState.simulation_metrics
-	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var id:=GameState.selected_player_settlement_id
+	var city:=SettlementModel.settlement_record(id)
 	var rows:Array=[]
 	var stocks:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
 	# Who keeps each store from spoiling (food_care.gd): carriers the fresh,
@@ -210,14 +119,26 @@ func _provisions_data()->Dictionary:
 	var FoodCare:=preload("res://scripts/food_care.gd")
 	var people:=maxf(1.0,GameState.population_exact)
 	var hands:={"Fresh food":FoodCare.carrying_sentence(FoodCare.carry_cover_of(GameState),people),"Stored food":FoodCare.keeping_sentence(FoodCare.keep_cover_of(GameState),people)}
-	for group in [["Fresh food"],["Stored food"]]:
-		var stock:=0.0;var lost:=0.0;var parts:Array[String]=[]
-		for kind:String in group:
-			var amount:=float(stocks.get(kind,0));var waste:=float(metrics.get("food_spoilage_by_type",{}).get(kind,0))
-			stock+=amount;lost+=waste;parts.append("%s: %s rations in store, %s spoiled today. %s" % [kind,Plain.number(amount),Plain.number(waste),String(hands.get(kind,""))])
-		rows.append({"name":"Meat & fish" if group.size()>1 else group[0],"stock":stock,"lost":lost,"detail":"\n".join(parts)})
-	var management:=GovernmentPeopleSystem.settlement_management(GameState.selected_player_settlement_id)
-	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),"water":GameState.water_metrics.duplicate(true),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),"flow":{"Produced":metrics.get("food_production",0),"Taken":(metrics.get("food_harvest",{}) as Dictionary).get("Transferred",0.0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Keeping":(metrics.get("food_preserved",{}) as Dictionary).get("lost",0.0),"Missions":FoodSystem.issued_on_day(int(GameState.elapsed_days)),"Net":metrics.get("food_net",0)},"selected":selected_food,"priorities":show_priorities,"on_select":func(kind:String):selected_food="" if kind==selected_food else kind;hud.request_immediate_dock_refresh(),"on_toggle":func():show_priorities=not show_priorities;hud.request_immediate_dock_refresh(),"on_focus":_provisions_focus,"on_water":_open_water,"has_deliveries":_has_food_deliveries(),"on_sources":focused_action("Gathering & preparation","",_economy_report.bind("sources")).on_press,"on_history":focused_action("Past seasons","",_economy_report.bind("outlook")).on_press,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	for kind:String in ["Fresh food","Stored food"]:
+		var amount:=float(stocks.get(kind,0));var waste:=float(metrics.get("food_spoilage_by_type",{}).get(kind,0))
+		rows.append({"name":kind,"stock":amount,"lost":waste,"detail":String(hands.get(kind,""))})
+	var management:=GovernmentPeopleSystem.settlement_management(id)
+	var fire:Dictionary=metrics.get("fire_practice",{})
+	var fuel:Dictionary=metrics.get("food_preservation_inputs",{})
+	var deliveries:Array=[]
+	var today:=int(GameState.elapsed_days)
+	for shipment:Dictionary in GameState.city_trade_shipments:
+		if String(shipment.get("destination_id",""))!=id or String(shipment.get("status",""))!="in_transit":continue
+		var left:=maxi(0,ceili(float(shipment.get("arrival_day",today)))-today)
+		deliveries.append({"resource":String(shipment.get("resource","")),"source_name":String(shipment.get("source_name","")),"quantity":float(shipment.get("quantity",0.0)),"when":"arrives today" if left<=0 else "arrives in "+Plain.span_text(left)})
+	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),
+		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),
+		"capacity":FoodSystem._food_storage_capacity(),"food_workers":float(metrics.get("food_workers",0.0)),"food_share":float(metrics.get("food_labor_share",0.0)),
+		"water":GameState.water_metrics.duplicate(true),"water_access":ResourceSystem.water_access_snapshot(),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),
+		"sources":(metrics.get("food_sources",[]) as Array).duplicate(true),"fire":fire.duplicate(),"fuel":float(fuel.get("Timber",0.0)) if not fuel.is_empty() else -1.0,
+		"history":_material_points(id,["food_days"]).get("food_days",[]),"deliveries":deliveries,
+		"flow":{"Produced":metrics.get("food_production",0),"Taken":(metrics.get("food_harvest",{}) as Dictionary).get("Transferred",0.0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Keeping":(metrics.get("food_preserved",{}) as Dictionary).get("lost",0.0),"Missions":FoodSystem.issued_on_day(today),"Net":metrics.get("food_net",0)},
+		"on_focus":_provisions_focus,"has_deliveries":_has_food_deliveries(),"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
 func _has_food_deliveries()->bool:
 	var trade:=SettlementModel.city_trade_snapshot(GameState.selected_player_settlement_id)
 	return not (trade.get("shipments",[]) as Array).is_empty() or not (trade.get("history",[]) as Array).is_empty()
@@ -280,4 +201,7 @@ func _materials_data()->Dictionary:
 	var incoming:Array=[]
 	for shipment:Dictionary in GameState.city_trade_shipments:
 		if String(shipment.get("destination_id",""))==id and String(shipment.get("status",""))=="in_transit":incoming.append(shipment.duplicate(true))
-	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"land":ResourceSystem.land_words(),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"priorities":materials_priorities,"on_select":func(key:String):selected_material="" if selected_material==key else key;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	var counted:PackedStringArray=[]
+	for key:String in GameState.resource_stockpiles:
+		if key!="Food" and float(GameState.resource_stockpiles[key])>=0.5 and ResourceSystem._is_material_resource(key):counted.append(ResourceSystem.display_name(key).to_lower())
+	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"land":ResourceSystem.land_words(),"cover":float(ResourceSystem.land_reading().get("cover",0.0)),"counted":", ".join(counted),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"priorities":materials_priorities,"on_select":func(key:String):selected_material="" if selected_material==key else key;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}

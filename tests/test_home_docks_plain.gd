@@ -49,22 +49,18 @@ func test_words_for_people_numbers()->void:
 	assert_str(String(care.choice)).is_equal("standard")
 	assert_str(String(care.second)).contains("3 sick people are waiting").contains("too few carers")
 
-func test_provisions_ledger_reads_as_sentences_and_marks_the_current_choice()->void:
-	var ledger:VBoxContainer=auto_free(preload("res://scripts/hud/provisions_panel.gd").new())
+func test_food_page_asks_for_hands_beside_the_figures_it_moves()->void:
+	var page:VBoxContainer=auto_free(preload("res://scripts/hud/food_folio.gd").new())
 	var asked:Array=[]
-	ledger.setup({"city":"Ashford","leader_name":"Tovan","managed":false,"focus":"water","can_direct":true,
+	page.setup({"city":"Ashford","leader_name":"Tovan","managed":false,"focus":"water","can_direct":true,
 		"rows":[{"name":"Fresh food","stock":400.0,"lost":3.0,"detail":"Fresh food: 400 rations in store."}],
 		"food_days":214.0,"water":{"required_today":100.0,"collected_today":80.0,"intake_ratio":0.8},
 		"forecast30":{},"forecast90":{"first_shortage_day":40},
-		"flow":{"Produced":40.0,"Eaten":70.0,"Spoiled":3.0,"Missions":0.0,"Net":-33.0},
-		"selected":"","on_select":func(_k:String):pass,"on_focus":func(f:String):asked.append(f),
-		"on_water":func():pass,"on_sources":func():pass,"on_history":func():pass,"on_trade":func():pass})
-	var text:=_texts(ledger)
-	assert_str(text).contains("Food lasts 214 days").contains("Falling: we eat more than comes in each day")
-	assert_str(text).contains("8 in every 10 drink enough").contains("food runs short in about 40 days")
-	assert_str(text).contains("Water (now)").contains("Ask Tovan for more hands on")
-	assert_str(text).not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")
-	(ledger.find_child("Choice_Provisions",true,false) as Button).pressed.emit()
+		"flow":{"Produced":40.0,"Eaten":70.0,"Spoiled":2.0,"Net":-32.0},"on_focus":func(f:String):asked.append(f),"on_trade":func():pass})
+	var text:=_texts(page)
+	assert_str(text).contains("Short in 40 days").contains("80%").contains("More (now)").contains("Let Tovan decide")
+	assert_str(text).not_contains("Food lasts").not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")
+	(page.find_child("Choice_Provisions",true,false) as Button).pressed.emit()
 	assert_array(asked).contains_exactly(["provisions"])
 
 func test_materials_and_wealth_ledgers_use_words()->void:
@@ -73,16 +69,19 @@ func test_materials_and_wealth_ledgers_use_words()->void:
 		"rows":[{"key":"Timber","name":"Timber","stock":40.0,"delivered":2.0,"loss":0.0,"points":[{"day":0,"value":30.0}],"details":["North wood: access not organized"],"blocked":false}],
 		"incoming":[],"day":10,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	var text:=_texts(materials)
-	assert_str(text).contains("Stores are full").contains("Storage is what slows us").contains("Timber").contains("Rising · +2 a day")
-	# The whole account sits on the tile.
+	assert_str(text).contains("98").contains("of 100 room").contains("Timber").contains("+2 in a day").contains("Rising")
+	# The whole account sits on the row's pointer; the yards' words on the strip's.
 	assert_str((materials.find_child("Material_Timber",true,false) as Control).tooltip_text).contains("Timber: 40 in store").contains("Rising since last month")
+	assert_str((materials.find_child("Kpi_stores",true,false) as Control).tooltip_text).contains("Stores are full")
 	assert_str(text).not_contains("›").not_contains("DELIVERED / DAY")
 	var wealth:VBoxContainer=auto_free(preload("res://scripts/hud/wealth_ledger.gd").new())
 	wealth.setup({"stage":"subsistence","city":"Ashford","leader":{},"managed":true,"economy":{"gdp":42.0,"gdp_per_capita":0.4,"productivity":0.8,"effective_workers":52.0},
 		"history":[],"conditions":{"health":0.5,"cohesion":0.9,"housing":1.0},"accounts":[],"selected":"","show_work":false,
 		"on_select":func(_k:String):pass,"on_work":func():pass,"on_history":func():pass,"on_stores":func():pass,"on_policy":func():pass})
 	text=_texts(wealth)
-	assert_str(text).contains("equals about 42 people working at their best").contains("sickness holds them back most")
+	assert_str((wealth.find_child("WorkEquivalent",true,false) as Label).text).is_equal("42")
+	assert_str((wealth.find_child("Row_work",true,false) as Control).tooltip_text).contains("equals about 42 people working at their best")
+	assert_str(text).contains("ickness holds them back most")
 	assert_str(text).not_contains("worker-days").not_contains("⌄")
 
 func test_settlement_overview_has_one_ask_row_and_no_override_grid()->void:
@@ -169,6 +168,6 @@ func test_a_shipment_on_the_way_reads_across_the_row()->void:
 	var voice:Control=materials._incoming[0].voice
 	var when:Control=materials._incoming[0].when
 	assert_str(_texts(materials)).contains("3 medicinal plants on the way").contains("From Seanstone")
-	assert_float(voice.size.x).is_greater(400.0)
-	assert_float(when.size.x).is_greater(400.0)
-	assert_float(voice.size.y).is_less(80.0)
+	assert_float(voice.size.x).is_greater(100.0)
+	assert_float(when.size.x).is_greater(100.0)
+	assert_float(voice.size.y).is_less(40.0)

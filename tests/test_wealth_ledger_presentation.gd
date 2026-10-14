@@ -19,40 +19,37 @@ func test_daily_refresh_keeps_controls_and_updates_real_measurements()->void:
 	var ledger=auto_free(Ledger.new());var block:=_block();ledger.setup(block)
 	var before:Array=ledger.find_children("*","",true,false)
 	var dial:Control=ledger.find_child("WorkerEffectiveness",true,false)
-	assert_float(float(dial.get("measure"))).is_equal(0.8)
-	assert_str(_texts(ledger)).contains("Shelter  110%").contains("Health  50%")
+	assert_float(float(dial.get_meta("measure"))).is_equal(0.8)
+	assert_str(_texts(ledger)).contains("Shelter  110%").contains("Health  50%").contains("80%")
 	var changed:=block.duplicate(true);changed.economy.productivity=1.3;changed.economy.gdp=67.6;changed.conditions.health=0.95;changed.accounts[0].balance=150.0
 	changed.accounts[0].points.append({"day":60,"value":150.0})
 	assert_bool(ledger.update_block(changed)).is_true()
 	assert_array(ledger.find_children("*","",true,false)).contains_exactly(before)
-	assert_float(float(dial.get("measure"))).is_equal(1.3)
-	assert_str(_texts(ledger)).contains("Health  95%").contains("Common purse: 150")
+	assert_float(float(dial.get_meta("measure"))).is_equal(1.3)
+	assert_str(_texts(ledger)).contains("Health  95%").contains("Common purse: 150").contains("130%")
 	assert_array(ledger._refs.accounts[0].spark.points).contains_exactly(changed.accounts[0].points)
 
 func test_missing_measurements_do_not_invent_health_or_a_trend()->void:
 	var block:=_block();block.conditions={};block.economy.erase("productivity")
 	var ledger=auto_free(Ledger.new());ledger.setup(block)
-	assert_that(ledger.find_child("WorkerEffectiveness",true,false).get("measure")).is_null()
+	assert_that(ledger.find_child("WorkerEffectiveness",true,false).get_meta("measure")).is_null()
 	assert_str(_texts(ledger)).contains("Health  Not measured").contains("Some working conditions have not been measured.").not_contains("Steady:")
 	block.history=[{"day":0,"output_per_capita":0.3},{"day":30,"output_per_capita":0.4}]
 	assert_bool(ledger.update_block(block)).is_true()
 	assert_str(_texts(ledger)).contains("Rising:")
 
-func test_narrow_layout_reflows_in_place_in_both_palettes()->void:
+func test_narrow_layout_fits_in_both_palettes()->void:
 	var original:=Tokens.color_mode
 	for mode:String in ["light","dark"]:
 		Tokens.set_color_mode(mode)
-		var ledger=auto_free(Ledger.new());var block:=_block();block.leader={"name":"Tovan","person_id":17};ledger.setup(block)
-		add_child(ledger);ledger.size=Vector2(800,0);ledger._arrange()
+		var ledger=auto_free(Ledger.new());var block:=_block();ledger.setup(block)
+		add_child(ledger);ledger.size=Vector2(800,0)
 		var before:Array=ledger.find_children("*","",true,false)
-		assert_bool((ledger.find_child("WorkLayout",true,false) as BoxContainer).vertical).is_false()
-		ledger.size=Vector2(320,0);ledger._arrange()
+		ledger.size=Vector2(320,0)
 		for frame in 3:await get_tree().process_frame
-		assert_bool((ledger.find_child("WorkLayout",true,false) as BoxContainer).vertical).is_true()
 		assert_array(ledger.find_children("*","",true,false)).contains_exactly(before)
 		assert_float(ledger.get_combined_minimum_size().x).is_less_equal(320.0)
-		assert_float((ledger.find_child("Portrait",true,false) as Control).custom_minimum_size.y).is_equal(124.0)
-		assert_str(_texts(ledger)).contains("Tovan")
+		assert_str(_texts(ledger)).contains("Ashford")
 	Tokens.set_color_mode(original)
 
 func test_account_actions_and_open_detail_use_actual_balance()->void:
