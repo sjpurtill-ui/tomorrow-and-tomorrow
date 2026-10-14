@@ -378,6 +378,8 @@ class KeyCard extends Control:
 	const STARVE:=Color("#9a4236")
 	const S:=preload("res://scripts/supply_state.gd")
 	const TIP_WIDTH:=300.0
+	const TIP_BODY_SIZE:=16
+	const TIP_NOTE_SIZE:=14
 	var troops:=30
 	var tip:Dictionary={}
 	var tip_at:=Vector2.ZERO
@@ -420,22 +422,22 @@ class KeyCard extends Control:
 			y+=21.0
 		y+=3.0
 		var x0:=origin.x+14.0
-		draw_line(Vector2(x0,y-5),Vector2(x0+22,y-5),Color(INK,0.8),2.4,true)
+		draw_line(Vector2(x0,y-5),Vector2(x0+22,y-5),Color(T.INK,0.8),2.4,true)
 		draw_string(ui,Vector2(origin.x+46,y),"Our roads, and supply lines",HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK)
 		y+=20.0
-		for k in 3: draw_circle(Vector2(x0+3.0+float(k)*8.0,y-5),1.5,Color(INK,0.75))
+		for k in 3: draw_circle(Vector2(x0+3.0+float(k)*8.0,y-5),1.5,Color(T.INK,0.75))
 		draw_string(ui,Vector2(origin.x+46,y),"How far the carts reach",HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK)
 		y+=22.0
-		draw_string(ui,Vector2(origin.x+14,y),"Shaded for a band of %d" % troops,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
+		draw_string(ui,Vector2(origin.x+14,y),"Shaded for a band of %d" % troops,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.MUTED)
 
 	func _draw_tip()->void:
 		var ui:=T.font("ui")
 		var title:=String(tip.get("title",""))
 		var text:=String(tip.get("text",""))
 		var lines:PackedStringArray=tip.get("lines",PackedStringArray())
-		var body:=ui.get_multiline_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,14)
+		var body:=ui.get_multiline_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_BODY_SIZE)
 		var extra:=0.0
-		for l in lines: extra+=ui.get_multiline_string_size("· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,13).y
+		for l in lines: extra+=ui.get_multiline_string_size("· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_NOTE_SIZE).y
 		var has_bar:=tip.has("ratio")
 		var height:=16.0+20.0+(10.0 if has_bar else 0.0)+body.y+(6.0+extra if extra>0.0 else 0.0)+12.0
 		var box_size:=Vector2(TIP_WIDTH+24.0,height)
@@ -463,8 +465,8 @@ class KeyCard extends Control:
 			draw_line(Vector2(x,bar.position.y-2),Vector2(x,bar.end.y+2),Color(T.INK,0.6),1.0)
 			y+=10.0
 		y+=10.0
-		draw_multiline_string(ui,Vector2(origin.x+14,y+ui.get_ascent(14)),text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,14,-1,T.BODY)
+		draw_multiline_string(ui,Vector2(origin.x+14,y+ui.get_ascent(TIP_BODY_SIZE)),text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_BODY_SIZE,-1,T.BODY)
 		y+=body.y+6.0
 		for l in lines:
-			draw_multiline_string(ui,Vector2(origin.x+14,y+ui.get_ascent(13)),"· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,13,-1,T.MUTED)
-			y+=ui.get_multiline_string_size("· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,13).y
+			draw_multiline_string(ui,Vector2(origin.x+14,y+ui.get_ascent(TIP_NOTE_SIZE)),"· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_NOTE_SIZE,-1,T.MUTED)
+			y+=ui.get_multiline_string_size("· "+l,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_NOTE_SIZE).y

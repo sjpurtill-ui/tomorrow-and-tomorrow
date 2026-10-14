@@ -17,6 +17,7 @@ and saved data retain their existing owners. No save migration is required.
 | People and legacies | Biography, every recorded deed, person navigation, support | Removes arbitrary three-event chapter pages. One continuous reader keeps person navigation and support visible. |
 | Our direction | Our course, Our character | Keeps two meaningful tasks. Selected page has a visible fill and underline. Confirmation remains the primary action. |
 | Great Works | Ours, foreign works, model inspection, legacy record, shrine slots, ceremony | Model/artwork and existing story remain central. Legacy record becomes an inline disclosure available on narrow layouts. Model controls use the shared 40 px / 14 px contract. |
+| Supply map callouts | Legend and hovered supply account | Theme-aware road/reach symbols stay visible in Night. Hover copy uses 16 px body and 14 px supporting text, measured at its rendered size. Geographic chart inks and supply readings are unchanged. |
 
 ## Independent review and revision
 
@@ -48,6 +49,11 @@ the view now validates that reference before checking its type.
   exhibit and exchange paths; populated exchange at 960x720 and 340x640;
   nested reports, empty/populated route, hearsay and planner at 1024x720;
   Direction, figures and Great Works layouts in both themes.
+- Final source entry-point audit found the Supply legend/hover and the AI
+  forget-connection confirmation. Supply received both-theme before/after
+  captures; the integrator owns the native confirmation treatment. Dormant
+  community-network, research-purchase, technology-operations and clothing
+  panels have no current runtime opener and are outside reachable coverage.
 - The comprehensive Great Works experience probe retains one existing failure:
   the second dedication ceremony can omit its architect speech. A baseline
   run using the unchanged ceremony/director reproduced the same failure.
