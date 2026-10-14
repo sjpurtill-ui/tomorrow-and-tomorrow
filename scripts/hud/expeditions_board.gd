@@ -179,6 +179,7 @@ func _fill_send()->void:
 	status.tooltip_text=String(staff.get("status",""))
 	if String(staff.get("focus",""))=="recruitment":_reception_line(send_box,staff)
 	_parties(send_box)
+	_last_back(send_box)
 
 func _control_row(parent:Node,caption:String)->HBoxContainer:
 	var row:=UI.line(parent,6)
@@ -219,6 +220,23 @@ func _parties(parent:Node)->void:
 		UI.cell(row,"%d" % int(party.get("personnel",0)),34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT).tooltip_text="Scouts in the party"
 		var due:=int(party.get("days_remaining",0))
 		UI.cell(row,("late %s" % When.span(overdue)) if overdue>0 else ("home in %s" % When.span(due) if due>1 else "home any day"),104,12,T.AMBER_TEXT if overdue>0 else T.TEAL_TEXT)
+
+## The latest parties home, one line each, under the planner: who went, where,
+## when, and any lost.
+func _last_back(parent:Node)->void:
+	var reports:=_reports()
+	if reports.is_empty():return
+	UI.rule(parent)
+	UI.heading(parent,"Last back")
+	var shown:=0
+	for item:Dictionary in select(reports,"",0,false):
+		if shown>=5:break
+		shown+=1
+		var report:Dictionary=item.report
+		var row:=UI.hot_row(parent,"Back_%d" % shown,func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.party),String(item.detail)])
+		UI.cell(row,Archive.calendar_date(int(item.day)).replace("Year ",""),74,12,T.INK_MUTED)
+		UI.label(row,"%d scouts · %s" % [int(report.get("personnel",0)),String(item.place).replace("Out to the ","").replace(" and back","").to_lower()],12,T.BODY,false,true)
+		if int(item.losses)>0:UI.tag(row,"lost %d" % int(item.losses),"danger")
 
 static func _party_title(party:Dictionary)->String:
 	return preload("res://scripts/hud/content/dock_content_world.gd").party_title(String(party.get("target_label","")),String(party.get("planned_heading","")))
@@ -267,6 +285,12 @@ static func unread_groups(reports:Array)->Array:
 		return int(a.day)>int(b.day))
 	return groups
 
+## A telling's title for one line: the name before any " · " gloss, the
+## whole in the row's pointer ("The sound stone hung on a root · a smaller
+## working contact" -> "The sound stone hung on a root").
+static func short_title(title:String)->String:
+	return title.get_slice(" · ",0).strip_edges()
+
 ## The moment icon a telling is drawn with.
 static func _kind(item:Dictionary)->String:
 	if int(item.get("losses",0))>0:return "death"
@@ -303,7 +327,7 @@ func _fill_unread()->void:
 		var read:=func()->void:open_report(newest)
 		var row:=UI.hot_row(unread_box,"Group_%d" % index,read,"%s\n%d unread · newest %s\nRead opens the newest; each one read leaves this list." % [String(group.title),reports.size(),Archive.calendar_date(int(group.day))])
 		UI.icon(row,String(group.kind),T.RED if int(group.losses)>0 else T.GOLD,18)
-		UI.label(row,String(group.title),13,T.INK,true,true)
+		UI.label(row,short_title(String(group.title)),13,T.INK,true,true)
 		if reports.size()>1:UI.label(row,"×%d" % reports.size(),12,T.GOLD_TEXT,true)
 		UI.cell(row," · ".join(PackedStringArray((group.places as Array).slice(0,3))),70,12,T.INK_MUTED)
 		UI.verb(row,"Read",read).name="Read"
@@ -326,7 +350,7 @@ func _fill_cities()->void:
 	city_rows.clear()
 	var cities:Array[Dictionary]=Orders.rival_cities()
 	cities_box.get_parent().visible=not cities.is_empty()
-	var head:=UI.heading(cities_box,"Foreign towns","%d of %d watched" % [Orders.watch_count(),Orders.MAX_WATCHES])
+	var head:=UI.heading(cities_box,"Foreign towns","watching %d · up to %d at once" % [Orders.watch_count(),Orders.MAX_WATCHES])
 	cities_note=head.get_node("Note") as Label
 	cities_empty=UI.label(cities_box,"No foreign town reported yet",12,T.INK_MUTED)
 	cities_empty.visible=cities.is_empty()
@@ -501,7 +525,7 @@ func _fill_rows()->void:
 		var row:=UI.hot_row(results,"Report_%s" % str(report.get("mission_id",0)),func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.place),String(item.detail)])
 		UI.cell(row,Archive.calendar_date(int(item.day)),96,12,T.INK_MUTED)
 		UI.icon(row,_kind(item),T.RED if int(item.losses)>0 else (T.GOLD if bool(item.meaningful) else T.INK_MUTED),18)
-		UI.label(row,String(item.title),13,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
+		UI.label(row,short_title(String(item.title)),13,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
 		# Who went is in the row's pointer: the title gets the width.
 		UI.cell(row,String(item.place).replace("Out to the ","").replace(" and back",""),96,12,T.BODY).tooltip_text=String(item.party)
 		var state:=HBoxContainer.new();state.custom_minimum_size.x=64;state.alignment=BoxContainer.ALIGNMENT_END;row.add_child(state)
