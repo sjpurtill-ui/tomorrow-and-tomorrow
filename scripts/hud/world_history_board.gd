@@ -110,7 +110,9 @@ func _row(entry:Dictionary)->void:
 	said.add_theme_font_size_override("normal_font_size",12);said.add_theme_font_size_override("bold_font_size",13)
 	said.add_theme_color_override("default_color",T.INK_MUTED)
 	var first:=_first_sentence(text)
-	said.text="[color=#%s][b]%s[/b][/color]%s" % [T.INK.to_html(false),_escape(String(entry.get("title",""))),("  "+_escape(first)) if first!="" else ""]
+	# One line: the event's title; its telling is in the row's pointer.
+	said.text="[color=#%s]%s[/color]" % [T.INK.to_html(false),("[b]%s[/b]" if bool(entry.get("weighty",false)) else "%s") % _escape(String(entry.get("title","")))]
+	said.add_theme_font_size_override("normal_font_size",13)
 	row.add_child(said)
 	if int(entry.get("count",1))>1:UI.tag(row,"×%d" % int(entry.count),"muted")
 
