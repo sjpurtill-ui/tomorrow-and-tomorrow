@@ -1,15 +1,8 @@
 extends "res://scripts/hud/settlement_overview.gd"
-## THE CULTURE SCREEN, seen at a glance (hud/culture_model.gd). Pictures and
-## numbers on the page; every explanation in its tooltip.
-##   who we are: the picture, our name, our temper and how far our values agree;
-##   what our ways do: a tile per lever (icon, word, bar either side of zero,
-##     the number; hover for course vs values);
-##   our course: one ribbon of the remembered courses by share;
-##   what we live by: ten slim lines, lived (gold) and upheld (ring);
-##   our leaders' temper: a five-pointed chart;
-##   how others see us: the allure seal, its parts in one bar, and what it
-##     brings (envoys, settlers, visitors).
-## The daily refresh keeps the page while its rounded figures hold.
+## Culture's current course and exact effects, followed by one selected value.
+## All ten lived/upheld readings remain available without ten repeated rows.
+## The leaders' temper and allure context keep their original model and actions.
+## Updates preserve the selected value and focused control.
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
 const Model:=preload("res://scripts/hud/culture_model.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -122,9 +115,12 @@ class Seal extends Control:
 
 var _print:Array=[]
 var _columns:Array[GridContainer]=[]
+var selected_value:=""
+var value_picker:OptionButton
+var value_reader:VBoxContainer
 
 func setup(block:Dictionary)->void:
-	data=block;name="CulturePanel";add_theme_constant_override("separation",24)
+	data=block;name="CulturePanel";add_theme_constant_override("separation",16)
 	_print=page_print(block)
 	_build()
 	resized.connect(_layout)
@@ -135,12 +131,14 @@ func update_block(block:Dictionary)->bool:
 	data=block
 	if next==_print: return true
 	_print=next
+	var saved_view:=preload("res://scripts/hud/view_state.gd").capture(self)
 	# Hold the page's height while it is drawn again, so the reader's place
 	# (the dock's scroll) is not lost to a moment's empty page.
 	custom_minimum_size.y=size.y
 	for child in get_children(): remove_child(child);child.queue_free()
 	_columns.clear()
 	_build()
+	preload("res://scripts/hud/view_state.gd").restore(self,saved_view)
 	(func()->void: custom_minimum_size.y=0.0).call_deferred()
 	return true
 
@@ -165,14 +163,15 @@ func _build()->void:
 	_who(c)
 	_course(c)
 	_ways(c)
-	_values(c)
-	var lower:=BoxContainer.new();lower.name="TemperAndOthers";lower.add_theme_constant_override("separation",24);add_child(lower)
+	var lower:=BoxContainer.new();lower.name="ValuesAndTemper";lower.add_theme_constant_override("separation",24);add_child(lower)
+	var values:=VBoxContainer.new();values.size_flags_horizontal=Control.SIZE_EXPAND_FILL;values.size_flags_stretch_ratio=1.4;values.add_theme_constant_override("separation",12);lower.add_child(values)
+	_values(c,values)
 	_temper(lower,c)
-	_others(lower,c)
+	_others(self,c)
 	_layout()
 
 func _layout()->void:
-	var lower:=get_node_or_null("TemperAndOthers") as BoxContainer
+	var lower:=get_node_or_null("ValuesAndTemper") as BoxContainer
 	if lower:lower.vertical=size.x<700
 	for grid in _columns:
 		if not is_instance_valid(grid): continue
@@ -216,41 +215,52 @@ func _who(c:Dictionary)->void:
 	var leaders:Dictionary=c.get("leaders",{})
 	_chip(chips,"Temper: %s" % String(leaders.get("temperament","")).to_lower(),"Our people's temper, read from the values they live by. Our leaders act by it wherever you do not decide.")
 	var a:Dictionary=c.get("alignment",{})
-	_chip(chips,"Values agree %d in 100" % roundi(float(a.get("alignment",0.0))*100.0),"How far what the people live by matches what is upheld over them: cohesion %s, legitimacy %s." % [Model.pct(float(a.get("cohesion",0.0))),Model.pct(float(a.get("legitimacy",0.0)))])
+	_chip(chips,"Values agree %d in 100" % roundi(float(a.get("alignment",0.0))*100.0),"How far what the people live by matches what is upheld over them: cohesion %s, legitimacy %s." % [effect_amount("cohesion",float(a.get("cohesion",0.0))),effect_amount("legitimacy",float(a.get("legitimacy",0.0)))])
 	# Our ways' own allure: one named part of Standing's draw (World shows the draw, this among its parts).
 	_chip(chips,"Our ways' allure %d" % roundi(float((c.get("others",{}) as Dictionary).get("allure",0.0))*100.0),"How much our ways themselves make other peoples want to come to us, trade with us and learn from us (of 100). It is one named part of Standing's draw (World shows the draw and each of its parts).")
 
 # --- What our ways do --------------------------------------------------------------
 
+static func effect_amount(id:String,amount:float)->String:
+	# These readings add to normalized condition/capacity targets, rather than
+	# multiplying output. Display units only; the model's amount is unchanged.
+	var text:=Model.pct(amount)
+	return text.replace("%"," pts") if id in ["cohesion","legitimacy","institutions","security","health","carrying","trade"] else text
+
 func _ways(c:Dictionary)->void:
-	_kicker(self,"WHAT OUR WAYS DO","Every lever our course and our values move now. Hover a tile for where it comes from.")
+	_kicker(self,"WHAT OUR WAYS DO","Current effects of our course and values. Hover an effect for its source.")
 	var rows:Array=c.get("ledger",[])
 	if rows.is_empty():
 		_plain(self,"Nothing yet",13,T.MUTED);return
-	var span:=0.05
-	for r:Dictionary in rows: span=maxf(span,absf(float(r.total)))
-	var grid:=GridContainer.new();grid.name="Ledger";grid.add_theme_constant_override("h_separation",18);grid.add_theme_constant_override("v_separation",8);add_child(grid);_columns.append(grid)
+	var grid:=HFlowContainer.new();grid.name="Ledger";grid.add_theme_constant_override("h_separation",20);grid.add_theme_constant_override("v_separation",8);add_child(grid)
+	var tendencies:PackedStringArray=[]
 	for r:Dictionary in rows:
-		var tile:=HBoxContainer.new();tile.add_theme_constant_override("separation",8);tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tile.mouse_filter=Control.MOUSE_FILTER_STOP
+		var inactive_values:=String(r.id) in ["adoption","trade"]
+		var amount:=float(r.course) if inactive_values else float(r.total)
+		if inactive_values and absf(float(r.values))>=0.004:tendencies.append("%s %s" % [r.short,Model.pct(float(r.values))])
+		if inactive_values and absf(amount)<0.004:continue
+		var tile:=HBoxContainer.new();tile.add_theme_constant_override("separation",8);tile.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;tile.mouse_filter=Control.MOUSE_FILTER_STOP
 		var parts:PackedStringArray=[]
-		if absf(float(r.course))>=0.004: parts.append("course %s" % Model.pct(float(r.course)))
-		if absf(float(r.values))>=0.004: parts.append("values %s" % Model.pct(float(r.values)))
-		tile.tooltip_text="%s %s: %s." % [String(r.label),Model.pct(float(r.total)),", ".join(parts)]
+		if absf(float(r.course))>=0.004:parts.append("course %s" % effect_amount(String(r.id),float(r.course)))
+		if not inactive_values and absf(float(r.values))>=0.004:parts.append("values %s" % effect_amount(String(r.id),float(r.values)))
+		tile.tooltip_text="%s %s: %s." % [String(r.label),effect_amount(String(r.id),amount),", ".join(parts)]
 		grid.add_child(tile)
-		var gain:=float(r.total)>=0.0
+		var gain:=amount>=0.0
 		var icon:=TextureRect.new();icon.texture=Icons.domain_texture(String(r.icon),T.GREEN if gain else T.RED);icon.custom_minimum_size=Vector2(22,22)
 		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;tile.add_child(icon)
-		var word:=_plain(tile,String(r.short),14,T.INK);word.custom_minimum_size.x=84
-		var bar:=Diverging.new();bar.value=float(r.total);bar.span=span;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tile.add_child(bar)
-		var number:=_plain(tile,Model.pct(float(r.total)),14,T.GREEN_TEXT if gain else T.RED_TEXT);number.custom_minimum_size.x=46;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		_plain(tile,String(r.short),14,T.INK)
+		_plain(tile,effect_amount(String(r.id),amount),16,T.GREEN_TEXT if gain else T.RED_TEXT)
+	if not tendencies.is_empty():
+		var note:=_plain(self,"Values lean toward: %s. These tendencies have no current bonus." % " · ".join(tendencies),14,T.MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 
 # --- Our course ----------------------------------------------------------------------
 
 func _course(c:Dictionary)->void:
 	var course:Dictionary=c.get("course",{})
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);add_child(head)
+	var section:=VBoxContainer.new();section.add_theme_constant_override("separation",4);add_child(section)
+	var head:=HFlowContainer.new();head.add_theme_constant_override("h_separation",12);head.add_theme_constant_override("v_separation",6);section.add_child(head)
 	var k:=_kicker(head,"OUR COURSE");k.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var name:=_serif(String(course.get("name","")),20);name.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name.tooltip_text=String(course.get("vision",""));name.mouse_filter=Control.MOUSE_FILTER_PASS;head.add_child(name)
+	var name:=_serif(String(course.get("name","")),20);name.autowrap_mode=TextServer.AUTOWRAP_OFF;name.tooltip_text=String(course.get("vision",""));name.mouse_filter=Control.MOUSE_FILTER_PASS;head.add_child(name)
 	if data.get("on_direction") is Callable:
 		_button(head,"Review",data.on_direction,"The century's course: chosen again at each century's turn")
 		(head.get_child(head.get_child_count()-1) as Control).size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -258,7 +268,7 @@ func _course(c:Dictionary)->void:
 	if remembered.is_empty(): return
 	if remembered.size()==1:
 		var memory:Dictionary=remembered[0]
-		var share:=_plain(self,"%d in 100 of our memory follows this course" % roundi(float(memory.share)*100.0),14,T.MUTED)
+		var share:=_plain(section,"%d in 100 of our memory follows this course" % roundi(float(memory.share)*100.0),14,T.MUTED)
 		share.mouse_filter=Control.MOUSE_FILTER_PASS;share.tooltip_text="%s · older courses fade by half every 60 years.\nAt full strength: %s" % [String(memory.name),String(memory.does)]
 		return
 	var colors:=ribbon_colors()
@@ -272,20 +282,52 @@ func _course(c:Dictionary)->void:
 		var swatch:=ColorRect.new();swatch.color=colors[i];swatch.custom_minimum_size=Vector2(10,10);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(swatch)
 		_plain(item,"%s %d" % [String(r.name),roundi(float(r.share)*100.0)],13,T.INK if bool(r.current) else T.MUTED)
 		legend.add_child(item)
-	add_child(ribbon);add_child(legend)
+	section.add_child(ribbon);section.add_child(legend)
 
 # --- What we live by ---------------------------------------------------------------
 
-func _values(c:Dictionary)->void:
-	_kicker(self,"WHAT WE LIVE BY","Gold: where the people live. Ring: what is upheld over them. A red stretch is a gap that costs cohesion and trust in those who rule.")
-	var grid:=GridContainer.new();grid.name="Values";grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",6);add_child(grid);_columns.append(grid)
-	for v:Dictionary in c.get("values",[]):
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.mouse_filter=Control.MOUSE_FILTER_STOP
-		line.tooltip_text="%s (%s to %s): %s" % [String(v.name),String(v.low).to_lower(),String(v.high).to_lower(),String(v.meaning)]
-		grid.add_child(line)
-		var lo:=_plain(line,String(v.get("low_word",_word(String(v.low)))),12,T.MUTED);lo.custom_minimum_size.x=78
-		var bar:=Spectrum.new();bar.lived=float(v.lived);bar.official=float(v.official);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(bar)
-		var hi:=_plain(line,String(v.get("high_word",_word(String(v.high)))),12,T.MUTED);hi.custom_minimum_size.x=78;hi.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+func view_state()->Dictionary:
+	return {"value":selected_value}
+
+func restore_view_state(state:Dictionary)->void:
+	selected_value=String(state.get("value",selected_value));_fill_value()
+	if value_picker:
+		for index in value_picker.item_count:
+			if String(value_picker.get_item_metadata(index))==selected_value:value_picker.select(index);break
+
+func _values(c:Dictionary,parent:Node)->void:
+	_kicker(parent,"WHAT WE LIVE BY")
+	var head:=HFlowContainer.new();head.add_theme_constant_override("h_separation",16);parent.add_child(head)
+	value_picker=OptionButton.new();value_picker.name="ChooseValue";value_picker.fit_to_longest_item=false;value_picker.clip_text=true;value_picker.custom_minimum_size.x=240;T.apply_button_style(value_picker);head.add_child(value_picker);value_picker.get_popup().max_size.y=320
+	var values:Array=c.get("values",[])
+	var widest:Dictionary={}
+	for v:Dictionary in values:
+		if widest.is_empty() or float(v.gap)>float(widest.gap):widest=v
+	if selected_value=="" and not widest.is_empty():selected_value=String(widest.axis)
+	for v:Dictionary in values:
+		value_picker.add_item(String(v.name));var index:=value_picker.item_count-1;value_picker.set_item_metadata(index,String(v.axis))
+		if String(v.axis)==selected_value:value_picker.select(index)
+	_plain(head,"10 values · lived and upheld",14,T.MUTED)
+	value_reader=VBoxContainer.new();value_reader.name="Values";value_reader.add_theme_constant_override("separation",8);parent.add_child(value_reader)
+	value_picker.item_selected.connect(func(index:int):selected_value=String(value_picker.get_item_metadata(index));_fill_value())
+	_fill_value()
+
+func _fill_value()->void:
+	if value_reader==null:return
+	for child in value_reader.get_children():value_reader.remove_child(child);child.queue_free()
+	var chosen:Dictionary={}
+	for v:Dictionary in data.get("culture",{}).get("values",[]):
+		if String(v.axis)==selected_value:chosen=v;break
+	if chosen.is_empty():return
+	var words:=_plain(value_reader,String(chosen.meaning),16,T.BODY);words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",12);value_reader.add_child(line)
+	_plain(line,String(chosen.low),14,T.MUTED)
+	var bar:=Spectrum.new();bar.lived=float(chosen.lived);bar.official=float(chosen.official);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(bar)
+	_plain(line,String(chosen.high),14,T.MUTED)
+	var readings:=HFlowContainer.new();readings.add_theme_constant_override("h_separation",20);readings.add_theme_constant_override("v_separation",6);value_reader.add_child(readings)
+	_plain(readings,"People live %d · upheld %d" % [roundi(float(chosen.lived)*100),roundi(float(chosen.official)*100)],14,T.INK).name="ValueReadings"
+	_plain(readings,"Gap %d in 100" % roundi(float(chosen.gap)*100),14,T.RED_TEXT if float(chosen.gap)>0.05 else T.MUTED)
+	value_reader.tooltip_text="Gold dot: where people live. Ring: what is upheld over them. The gap costs cohesion and trust in those who rule. Values run from 0 at %s to 100 at %s." % [chosen.low,chosen.high]
 
 ## One word for a pole: its last word, which carries it ("Equal Standing").
 static func _word(pole:String)->String:
@@ -296,10 +338,10 @@ static func _word(pole:String)->String:
 
 func _temper(parent:Node,c:Dictionary)->void:
 	var leaders:Dictionary=c.get("leaders",{})
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",4);parent.add_child(box)
+	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",4);parent.add_child(box)
 	_kicker(box,"OUR LEADERS' TEMPER","Where you do not decide, our leaders act by this temper: the daily work, what is studied, how fast we grow.")
 	var chart:=Temper.new();chart.name="TemperChart";chart.sides=leaders.get("sides",[]);box.add_child(chart)
-	var work:=_plain(box,_short_work(String(leaders.get("work",""))),13,T.BODY)
+	var work:=_plain(box,_short_work(String(leaders.get("work",""))),14,T.BODY);work.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	work.tooltip_text=String(leaders.get("work_tip",""));work.mouse_filter=Control.MOUSE_FILTER_PASS
 
 ## "Our leaders keep the work balanced, favouring no one task." -> "Keep the
@@ -326,7 +368,7 @@ func _others(parent:Node,c:Dictionary)->void:
 		_plain(item,"%s +%d" % [String(spec[0]),roundi(float(p.value)*100.0)],12,T.INK)
 		legend.add_child(item)
 	# What allure brings: three figures.
-	var tiles:=HBoxContainer.new();tiles.add_theme_constant_override("separation",10);box.add_child(tiles)
+	var tiles:=HFlowContainer.new();tiles.add_theme_constant_override("h_separation",24);tiles.add_theme_constant_override("v_separation",8);box.add_child(tiles)
 	for e:Dictionary in o.get("effects",[]):
 		var figure:=""
 		var label:=""
@@ -343,12 +385,9 @@ func _others(parent:Node,c:Dictionary)->void:
 		if open is Callable: _button(box,"Open the collection",open,"The pieces we hold, study and exhibit")
 
 func _tile(parent:Node,figure:String,label:String,tip:String,warn:bool=false)->void:
-	var tile:=PanelContainer.new();tile.tooltip_text=tip;tile.mouse_filter=Control.MOUSE_FILTER_STOP;tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	tile.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.RED if warn else T.BORDER_SOFT,1,T.RADIUS_CONTROL,8.0))
-	parent.add_child(tile)
-	var col:=VBoxContainer.new();col.add_theme_constant_override("separation",0);tile.add_child(col)
-	var big:=_plain(col,figure,20,T.RED_TEXT if warn else T.INK);big.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	var small:=_plain(col,label.to_upper(),12,T.MUTED);small.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	var tile:=HBoxContainer.new();tile.add_theme_constant_override("separation",8);tile.tooltip_text=tip;tile.mouse_filter=Control.MOUSE_FILTER_STOP;parent.add_child(tile)
+	_plain(tile,label,14,T.MUTED)
+	_plain(tile,figure,20,T.RED_TEXT if warn else T.INK)
 
 func _serif(value:String,font_size:int)->Label:
 	var label:=T.make_label(value,font_size,T.INK);label.add_theme_font_override("font",T.font("ui_strong"));label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

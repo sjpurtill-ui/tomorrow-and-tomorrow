@@ -12,6 +12,7 @@ var selected_project:=""
 var history_filter:=""
 var history:RefCounted
 var landmarks:RefCounted
+var view_states:Dictionary={}
 ## The defences card for this refresh (tab), read outside the town's stores.
 var _defence:Dictionary={}
 ## What ten more builders would buy, for the "Set builders" tooltip.
@@ -31,8 +32,15 @@ func tab(sub:int)->Dictionary:
 	# outside any one town's stores (home_defense.gd).
 	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	_defence=_defence_card() if sub in [0,2] and GameState.settlement_site_committed and (picked.is_empty() or bool(picked.get("primary",false))) else {}
-	if sub==2:return _infrastructure_tab()
+	if sub==2:return _with_view(_infrastructure_tab(),sub)
 	var page:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
+	return _with_view(page,sub)
+
+func _with_view(page:Dictionary,sub:int)->Dictionary:
+	var key:=String(GameState.selected_player_settlement_id)+":"+str(sub)
+	if not view_states.has(key):view_states[key]={}
+	for block:Dictionary in page.get("blocks",[]):
+		if bool(block.get("board",false)):block.view_state=view_states[key]
 	return page
 
 const ERAS:=["Founding","Foothold","Hamlet","Village","Local centre","Town","Mature town","Urban system","City","Historic city","Regional system","Industrial age","Metropolitan age"]
@@ -375,6 +383,12 @@ func _defence_row(card:Dictionary)->Dictionary:
 	# The verb on the row: Build (the god's word "build now"); who else may
 	# decide rides small on the second line, with any fix.
 	var word:=String(r.word)
+	row["needs_label"]="In store / reserve for people to decide (2× cost)" if word=="people" else "In store / build cost"
+	var detail_lines:=String(row.get("detail","")).split("\n",false)
+	if detail_lines.size()>1:
+		row["reading"]=detail_lines[0]+("\n"+detail_lines[-1] if detail_lines.size()>2 else "")
+		row["further"]=detail_lines[1]
+		row["further_label"]="How the building policy works"
 	if row.get("choice") is Dictionary:
 		var others:Array=[]
 		var short_labels:={"people":"People decide","hold":"Hold off"}
@@ -889,7 +903,6 @@ func _civic_tab()->Dictionary:
 	var projects:Array=[]
 	var cards:Array=[]
 	var built:=0
-	var folded:PackedStringArray=[]
 	for definition:Dictionary in Construction._settlement_definitions():
 		var title:=String(definition.name)
 		var done:=title in GameState.settlement_completed
@@ -898,17 +911,12 @@ func _civic_tab()->Dictionary:
 		var project:=_project(definition,current,done)
 		if not unknown:projects.append(project)
 		if done:built+=1
-		# The name and its figures say what it is; the sentence waits in the tooltip.
+		# The selected work keeps its purpose beside its figures and controls.
 		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":"","detail":"It %s." % _gain(definition),"effects":_effects(project.impact)}
 		if done:
-			# A work built long ago folds into one line; a fresh one keeps its stamp.
+			# Completed works remain individual searchable entries, with their effects.
 			var ago:=int(project.finished_ago)
-			if ago<0 or ago>JUST_BUILT_DAYS:
-				var said:PackedStringArray=[]
-				for effect:Dictionary in row.effects:said.append("%s %s" % [String(effect.label),String(effect.value)])
-				folded.append("%s: %s" % [title,", ".join(said)])
-				continue
-			row["stamp"]={"text":"Built","tip":"Finished %s." % String(project.finished_words)}
+			row["stamp"]={"text":"Built","tip":"Finished %s." % String(project.finished_words) if ago>=0 else "Completed work"}
 		elif unknown:
 			var progress:=float(GameState.discovery_progress.get(discovery,0.0))
 			row.merge({"tag":{"text":"Unknown","tone":"note","tip":"The people must first learn %s." % _discovery_name(discovery)},"bar":{"ratio":progress,"color":Tokens.TEAL,"width":80,"tip":"%s: %d%% of the way to proof." % [_upper_first(_discovery_name(discovery)),roundi(progress*100.0)]},
@@ -927,17 +935,11 @@ func _civic_tab()->Dictionary:
 				row["actions"]=[{"label":"Back to leader","tip":"The leader chooses what to build again.","on_press":_priority.bind("")}] if title==priority else [{"label":"Build first","tip":"The builders take this up as soon as it can start, and work on what they can until then.","on_press":_priority.bind(title)}]
 			if title==priority:row["highlight"]=true
 		cards.append(row)
-	if not folded.is_empty():
-		var total:=Construction._settlement_definitions().size()
-		cards.push_front({"section":"works","key":"works_built","icon":"hall","name":"Built works","sub":"",
-			"bar":{"ratio":float(built)/float(maxi(1,total)),"color":Tokens.GREEN},"value":"%d of %d" % [built,total],"value_width":60,
-			"detail":"What each does now, in the engine's figures:
-"+"
-".join(folded)})
+
 	# Available priorities precede future discoveries; built evidence follows.
 	cards.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
-		var ar:=0 if a.has("actions") else (2 if String(a.get("key",""))=="works_built" else 1)
-		var br:=0 if b.has("actions") else (2 if String(b.get("key",""))=="works_built" else 1)
+		var ar:=0 if a.has("actions") else (2 if a.has("stamp") else 1)
+		var br:=0 if b.has("actions") else (2 if b.has("stamp") else 1)
 		return ar<br)
 	# What the homes and the works do now, in the engine's figures.
 	var titles:Array=Construction._settlement_definitions().map(func(d:Dictionary)->String:return String(d.name))
@@ -1005,14 +1007,14 @@ func _ladder_rows()->Array:
 			# Its bill, its fixes and who decides live on The Town: here one line.
 			var full:=_defence_row(_defence)
 			var pointer:={"key":"stage_%d" % index,"section":"defences","icon":String(full.get("icon","palisade")),"name":String(full.name),"sub":"next · bill and orders on The Town","highlight":true,
-				"value":String(lines[0].value),"tag":full.get("tag",{}),"detail":String(full.get("detail","")),"actions":(full.get("actions",[]) as Array).slice(0,1)+[{"label":"View town","tip":"The Town: its bill, what stops it and who decides.","on_press":jump("construction",0)}]}
+				"effects":[{"label":"Defenders","value":String(lines[0].value),"tip":String(lines[0].words)}],"tag":full.get("tag",{}),"detail":String(full.get("detail","")),"reading":String(full.get("reading",full.get("detail",""))),"further":String(full.get("further","")),"further_label":"How the building policy works","actions":(full.get("actions",[]) as Array).slice(0,1)+[{"label":"View town","tip":"The Town: its bill, what stops it and who decides.","on_press":jump("construction",0)}]}
 			rows.append(pointer)
 			continue
 		var bill:PackedStringArray=[]
 		for material:String in (spec.materials as Dictionary):bill.append("%s %s" % [_n(roundi(float(spec.materials[material]))),ResourceSystem.display_name(material).to_lower()])
-		var effects:=[{"label":"Walls' lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}]
+		var effects:=[{"label":"Defenders","value":String(lines[0].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[0].words)},{"label":"Walls' lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}]
 		var row:={"section":"defences","key":"stage_%d" % index,"icon":DEFENCE_ICONS[clampi(index,0,DEFENCE_ICONS.size()-1)],"name":String(stage.name),
-			"value":String(lines[0].value),"value_color":Tokens.GREEN if bool(stage.built) else Tokens.TEXT_SOFT,"sub":("%s days' work, %s" % [_n(roundi(float(spec.work))),", ".join(bill)]) if not bool(stage.built) else "",
+			"sub":("%s days' work, %s" % [_n(roundi(float(spec.work))),", ".join(bill)]) if not bool(stage.built) else "",
 			"effects":effects,"detail":"Defenders %s: %s" % [String(lines[0].value),String(lines[0].words)]}
 		if bool(stage.built):row["tag"]={"text":"Built","tone":"good"}
 		rows.append(row)
