@@ -237,9 +237,9 @@ func test_the_war_leaders_card_reads_the_home_band()->void:
 	assert_float(float(mine.command)).is_equal_approx(float(commander.command)-float(MilitaryCampaign.command_development.get("command",0.0)),0.0001)
 
 
-func test_the_research_atlas_names_the_leaders_own_skills_and_the_pace()->void:
+func test_the_knowledge_tree_names_the_leaders_own_skills_and_the_pace()->void:
 	var holder:=GovernmentPeopleSystem.officeholder("Steward")
-	var line:String=preload("res://scripts/hud/research_atlas.gd")._leader_line({"office":"Steward","requested_office":"Steward","person_id":int(holder.person_id),"vacant":false,"skills":["Administration","Construction"]})
+	var line:String=preload("res://scripts/hud/content/dock_content_inquiry.gd").leader_line({"office":"Steward","requested_office":"Steward","person_id":int(holder.person_id),"vacant":false,"skills":["Administration","Construction"]})
 	assert_str(line).contains("administration %d" % roundi(GovernmentPeopleSystem.skill_value(holder,"Administration")))
 	assert_str(line).contains("than under an ordinary leader")
 
