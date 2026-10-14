@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## Direct city scouting orders from the scouting window and the docks.
 const Orders=preload("res://scripts/hud/city_watch_orders.gd")
-const Sheet=preload("res://scripts/hud/scouting_policy_panel.gd")
+const Board=preload("res://scripts/hud/expeditions_board.gd")
 const ForeignCity=preload("res://scripts/hud/content/dock_detail_foreign_city.gd")
 var viewport:SubViewport
 
@@ -30,7 +30,7 @@ func _city(id:String,name:String,civ:String,x:float)->Dictionary:
 
 func _sheet()->Control:
 	viewport=SubViewport.new();viewport.size=Vector2i(960,900);add_child(viewport)
-	var sheet:Control=Sheet.new();viewport.add_child(sheet)
+	var sheet:Control=Board.new();viewport.add_child(sheet);sheet.setup({"reports":[]})
 	await await_idle_frame();await await_idle_frame()
 	return sheet
 
@@ -105,15 +105,18 @@ func test_scouting_window_lists_cities_and_orders_from_the_row()->void:
 	assert_bool(sheet.city_rows.has("ours")).is_false()
 	var row:Dictionary=sheet.city_rows.near
 	assert_str(row.name.text).is_equal("Nearbrook")
-	assert_str(row.meta.text).contains("120–160 people")
-	assert_str(row.count.text).is_equal("4 scouts")
+	assert_str(row.meta.tooltip_text).contains("120–160 people")
+	assert_str(row.count.text).is_equal("4")
 	row.plus.pressed.emit()
-	assert_str(row.count.text).is_equal("5 scouts")
+	row=sheet.city_rows.near
+	assert_str(row.count.text).is_equal("5")
 	row.days[90].pressed.emit()
+	row=sheet.city_rows.near
 	assert_bool(row.days[90].button_pressed).is_true()
 	assert_str(row.cost.text).contains("5 scouts away for")
 	assert_str(row.risk.text).contains("Road danger")
 	row.keep.pressed.emit()
+	row=sheet.city_rows.near
 	var watch:=CivilizationSystem.scouting_staff.city_watch("near")
 	assert_int(int(watch.personnel)).is_equal(5)
 	assert_int(int(watch.duration_days)).is_equal(90)
@@ -137,8 +140,9 @@ func test_scouting_window_shows_disabled_reasons()->void:
 	var row:Dictionary=sheet.city_rows.near
 	assert_bool(row.keep.disabled).is_true()
 	assert_str(row.note.text).contains("Six cities")
-	for i in 8:row.minus.pressed.emit()
-	assert_str(row.count.text).is_equal("2 scouts")
+	for i in 8:sheet.city_rows.near.minus.pressed.emit()
+	row=sheet.city_rows.near
+	assert_str(row.count.text).is_equal("2")
 	assert_bool(row.minus.disabled).is_true()
 
 func test_empty_window_explains_where_cities_come_from()->void:

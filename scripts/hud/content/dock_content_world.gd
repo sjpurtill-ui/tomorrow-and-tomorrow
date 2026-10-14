@@ -1,6 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## WORLD section: The Known World / Expeditions / Rise and fall (how the
-## peoples we know have fared; how each sees us is the Standing page).
+## WORLD section: Peoples / Expeditions / History (how each people sees us
+## is the Standing page).
 ## The first tab is "the world as your people know it": a chart drawn from
 ## returned routes only, the peoples met, walkers abroad and what they carried
 ## home. Everything shown physically returned; nothing is read from hidden
@@ -15,7 +15,6 @@ const DetailCivReport:=preload("res://scripts/hud/content/dock_detail_civ_report
 const PeoplesModel:=preload("res://scripts/hud/peoples_known_model.gd")
 const ForeignCity:=preload("res://scripts/hud/content/dock_detail_foreign_city.gd")
 const Archive:=preload("res://scripts/scout_archive.gd")
-const ArchiveProvider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
 const ReportProvider:=preload("res://scripts/hud/content/dock_detail_scout_report.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
@@ -33,42 +32,43 @@ const FIND_ITEMS:=3
 ## The Peoples-we-know ledger's own view (the column it is sorted by, the
 ## other way round, whose towns are open), kept across the daily rebuilds.
 var peoples_view:Dictionary={"sort":"people","flip":false,"open":""}
+## The tellings table's search, filter, order and page (hud/expeditions_board.gd).
+var expeditions_view:Dictionary={"query":"","filter":0,"order":1,"page":0}
 
 func meta()->Dictionary:
 	return {
 		"eyebrow":"The world as our people know it",
 		"title":"The Known World",
 		"serif":true,"title_size":26,
-		"subtabs":["The known world","Expeditions","Rise and fall"],
+		"subtabs":["Peoples","Expeditions","History"],
 	}
 
 func tab(sub:int)->Dictionary:
-	# The known world and the expeditions tab show no peoples-met or lookout
-	# figures, so only Rise and fall reads those snapshots.
-	if sub==0:return {"blocks":known_world_blocks(CivilizationSystem.exploration_status())}
-	if sub==1:
-		var away:Dictionary=CivilizationSystem.exploration_status()
-		return {"kpis":[_tellings_kpi(away)],"brief":{"title":"Scouts are away" if bool(away.get("active",false)) else "Read what came home, then send the next party","why":"The day they come home is only a guess. A late party is still on the road until word or loss comes back." if bool(away.get("active",false)) else "Recent returns are below. Every telling holds all the rest."},"blocks":_scouting_blocks(away)}
-	var competition:Dictionary=CivilizationSystem.known_competition_snapshot()
-	var knowledge:Dictionary=CivilizationSystem.strategic_knowledge_snapshot()
-	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
+	if sub==1:return expeditions_tab()
+	if sub==2:return history_tab()
+	return peoples_tab()
+
+## World › Peoples: three figures (peoples met with their homes found, those
+## only told of, strangers in sight), the ledger of every people we know, and
+## beside the chart of the known world, the peoples told of but not met.
+func peoples_tab()->Dictionary:
+	if is_instance_valid(terrain) and terrain is Node3D:preload("res://scripts/hud/expedition_routes_overlay.gd").ensure(terrain,hud)
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
-	var contacts:=int(competition.get("contacted_count",0))
-	var visible_foreign:=int(observation.get("visible_count",0))
+	var encounters:Array=CivilizationSystem.contact_encounters_snapshot()
+	var located:=0
+	for encounter:Dictionary in encounters:
+		if bool(encounter.get("home_location_known",false)):located+=1
+	var home:=CivilizationSystem.player_world_origin
+	var leads:=_leads_model(CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)),home,walk_km_per_day()).size()
+	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
+	var met:=encounters.size()
 	var kpis:Array=[
-		{"label":"Peoples met","value":str(contacts),"delta":"there may be more","delta_color":Tokens.INK_MUTED,"accent":Tokens.AMBER,"tip":"Seen with our own eyes or told of by scouts who came home"},
-		{"label":"In sight","value":str(visible_foreign),"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.INK_MUTED,"accent":Tokens.TEAL,"tip":"Strangers our lookouts can see right now"},
-		_tellings_kpi(exploration),
+		{"label":"Peoples met","value":str(met),"glance":true,"meter":float(located)/float(maxi(1,met)),"meter_color":Tokens.AMBER,
+			"delta":("all homes found" if located>=met else "%d of %d homes found" % [located,met]) if met>0 else "none yet","delta_color":Tokens.INK_MUTED,"tip":"Seen with our own eyes, or met by scouts who came home; the bar is how many of their homes we have found"},
+		{"label":"Told of","value":str(leads),"glance":true,"delta":"not yet met","delta_color":Tokens.INK_MUTED,"tip":"Peoples travellers and strangers have spoken of, never seen"},
+		{"label":"In sight","value":str(int(observation.get("visible_count",0))),"glance":true,"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.INK_MUTED,"tip":"Strangers our lookouts can see right now"},
 	]
-	var brief:Dictionary
-	if bool(exploration.get("active",false)):
-		brief={"tone":"info","title":"A scouting party is away","why":String(exploration.get("message",""))}
-	elif contacts==0:
-		brief={"tone":"warn","title":"We have met no other people","why":"Only scouts who come home can tell us of new land or new peoples."}
-	else:
-		brief={"tone":"info","title":"We know of %s" % ("one other people" if contacts==1 else "%d other peoples" % contacts),"why":"We know only what our people brought home, and older word grows less certain."}
-	if sub==2: return {"kpis":kpis,"brief":brief,"blocks":_standing_blocks(knowledge,competition)}
-	return {"blocks":[{"type":"known_world","model":known_world_model(exploration)}]}
+	return {"kpis":kpis,"brief":{},"blocks":known_world_blocks(exploration)}
 
 ## The first tab: the ledger of the peoples we know (once we know any), then
 ## the world as our people know it.
@@ -76,55 +76,49 @@ func known_world_blocks(exploration:Dictionary)->Array:
 	var blocks:Array=[]
 	var peoples:=peoples_block()
 	if not peoples.is_empty():blocks.append(peoples)
-	blocks.append({"type":"known_world","model":known_world_model(exploration)})
+	blocks.append({"type":"known_world","compact":true,"model":known_world_model(exploration)})
 	return blocks
 
 ## "Peoples we know" (hud/peoples_known_board.gd); {} before we meet anyone.
 func peoples_block()->Dictionary:
 	var model:=PeoplesModel.build()
 	if int(model.get("met",0))<=0:return {}
-	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"_print":model.hash()}
+	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"_print":model.hash()}
 
 ## A town in the ledger opens its report (the city dossier).
 func open_town(city_id:String)->void:
 	if is_instance_valid(hud) and city_id!="":hud.open_detail(ForeignCity.new(terrain,hud,city_id))
 
-func _tellings_kpi(exploration:Dictionary)->Dictionary:
-	return {"label":"Tellings","value":str(int(exploration.get("report_count",0))),"delta":"brought home","delta_color":Tokens.INK_MUTED,"accent":Tokens.GREEN,"tip":"Accounts our scouts carried home"}
-
-func _scouting_blocks(exploration:Dictionary)->Array:
-	var blocks:Array=[]
-	var party_items:Array=[]
-	for party_variant in (exploration.get("parties",[]) as Array):
-		var party:Dictionary=party_variant
-		var overdue:=int(party.get("overdue_days",0))
-		party_items.append({
-			"name":String(party.get("target_label","Scout party away")),
-			"sub":"%d people · late by %s" % [int(party.get("personnel",0)),When.span(overdue)] if overdue>0 else "%d people · home in about %s" % [int(party.get("personnel",0)),When.span(int(party.get("days_remaining",0)))],
-			"value":"Late" if overdue>0 else preload("res://scripts/scout_archive.gd").calendar_date(int(party.get("return_day",0))),"value_color":Tokens.AMBER_TEXT if overdue>0 else Tokens.TEAL_TEXT,
-			"accent":Tokens.AMBER if overdue>0 else Tokens.TEAL,
-			"tip":"The road decides when they come home; a late party is not yet a lost one." if overdue>0 else String(party.get("turnback_reason","What they see stays with them until they come home.")),
-		})
-	if party_items.is_empty():
-		var latest:Dictionary=exploration.get("latest_report",{})
-		var latest_sub:="no party is away"
-		if not latest.is_empty():
-			latest_sub="Last came home " + preload("res://scripts/scout_archive.gd").calendar_date(int(latest.get("day",0)))
-		party_items.append({"name":"No party is away","sub":latest_sub,"value":"","tip":String(exploration.get("message",""))})
-	blocks.append({"type":"rows","heading":"Parties","note":"%d of %d away" % [int(exploration.get("active_count",0)),int(exploration.get("capacity",1))],"items":party_items})
-	var archive_model:=preload("res://scripts/scout_archive.gd")
-	var archive_provider:=preload("res://scripts/hud/content/dock_detail_scout_archive.gd")
-	var highlights:Array=[]
-	var newest:=newest_tellings(CivilizationSystem.scout_reports,8)
-	newest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.priority)>int(b.priority))
-	for item:Dictionary in newest.slice(0,3):
-		var saved_report:Dictionary=item.report
-		highlights.append({"name":String(item.title),"sub":"%s · %s · %s" % [archive_model.calendar_date(int(item.day)),item.party,item.place],"value":"Not yet read" if String(item.review)=="UNREAD" else "","value_color":Tokens.GOLD_TEXT,"accent":Tokens.RED if int(item.losses)>0 else Tokens.TEAL,"on_click":func()->void: hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,saved_report,archive_provider.new(terrain,hud)))})
-	blocks.append({"type":"actions","items":[{"label":"Every telling","sub":"Search and read all %d kept tellings" % CivilizationSystem.scout_reports.size(),"on_press":func()->void: hud.open_detail(archive_provider.new(terrain,hud))}]})
-	if not highlights.is_empty(): blocks.append({"type":"rows","heading":"Recent returns","note":"the most telling of the last eight","items":highlights})
-	blocks.append({"type":"actions","items":[{"label":"Plan an expedition","sub":"Where they go, how many, how long, and what they carry","primary":true,"on_press":func()->void:terrain._open_scout_dispatch_panel()}]})
-	blocks.append({"type":"text","text":"What a party sees stays with them until they come home. The people and food they take go with them, and a party that is caught may never come back. Up to %d parties can be out at once; knowing the roads, and having mounts and supplies, lets them go further." % int(exploration.get("capacity",1))})
-	return blocks
+## The Expeditions tab: three figures, then one board (hud/expeditions_board.gd)
+## that holds the sending, the unread tellings, the foreign towns and every
+## telling kept. Nothing opens another screen except a telling being read.
+func expeditions_tab()->Dictionary:
+	# Routes, parties and finds on the map while this tab shows.
+	if is_instance_valid(terrain) and terrain is Node3D:preload("res://scripts/hud/expedition_routes_overlay.gd").ensure(terrain,hud)
+	var exploration:Dictionary=CivilizationSystem.exploration_status()
+	var reports:Array=CivilizationSystem.scout_reports
+	var unread:=0
+	for report:Dictionary in reports:
+		if report.has("archive_reviewed") and not bool(report.archive_reviewed):unread+=1
+	var away:=int(exploration.get("active_count",0))
+	var capacity:=maxi(1,int(exploration.get("capacity",1)))
+	var soonest:=-1
+	for party:Dictionary in exploration.get("parties",[]):
+		var due:=int(party.get("days_remaining",0))
+		if soonest<0 or due<soonest:soonest=due
+	var latest:Dictionary=exploration.get("latest_report",{})
+	var last_day:=int(latest.get("day",-1)) if not latest.is_empty() else -1
+	var since:=int(GameState.elapsed_days)-last_day
+	var kpis:Array=[
+		{"label":"Parties away","value":"%d / %d" % [away,capacity],"glance":true,"meter":float(away)/float(capacity),"meter_color":Tokens.TEAL,
+			"delta":("next home in %s" % When.span(maxi(1,soonest))) if soonest>=0 else ("%d could go" % (capacity-away)),"delta_color":Tokens.INK_MUTED,"tip":"Parties out now, of the most the roads, mounts and stores allow at once"},
+		{"label":"Tellings","value":str(reports.size()),"glance":true,"meter":float(unread)/float(maxi(1,reports.size())),"meter_color":Tokens.GOLD,
+			"delta":("%d unread" % unread) if unread>0 else "all read","delta_color":Tokens.GOLD_TEXT if unread>0 else Tokens.INK_MUTED,"tip":"Accounts our scouts carried home; the bar is the share not yet read"},
+		{"label":"Last return","value":Archive.calendar_date(last_day) if last_day>=0 else "None yet","glance":true,
+			"delta":("%s ago" % When.span(since)) if last_day>=0 and since>0 else ("today" if last_day>=0 else ""),"delta_color":Tokens.INK_MUTED,"tip":"The day the latest party walked back in"},
+	]
+	return {"kpis":kpis,"brief":{},"blocks":[{"type":"expeditions","reports":reports,"view":expeditions_view,
+		"on_read":open_report,"on_plan":plan_expedition,"on_city_report":open_town,"_print":Archive.revision(reports)}]}
 
 ## The newest tellings exactly as scout_archive.select(reports,"",0,false)
 ## orders them (latest day first, then by identity), summarised only for the
@@ -142,12 +136,47 @@ static func newest_tellings(reports:Array,count:int)->Array:
 	for report:Dictionary in order.slice(0,count):result.append(archive.summary(report))
 	return result
 
-func _standing_blocks(knowledge:Dictionary,competition:Dictionary)->Array:
-	var blocks:Array=[
-		{"type":"text","heading":Tokens.sentence_case(String(knowledge.get("title","We cannot yet compare ourselves to others"))),"text":String(knowledge.get("summary",""))},
-		{"type":"text","heading":"What would tell us more","text":String(knowledge.get("next_step",""))},
-	]
-	return blocks
+
+## World › History: what has passed between us and the world, by year
+## (hud/world_history_board.gd). Our own towns' story is Home › History; the
+## Chronicle holds both.
+var history_view:Dictionary={"filter":"all","shown":40}
+func history_tab()->Dictionary:
+	var entries:=history_entries()
+	return {"kpis":[],"brief":{},"blocks":[{"type":"world_history","entries":entries,"view":history_view,"_print":[entries.size(),String(entries[0].get("title","")) if not entries.is_empty() else ""]}]}
+
+const WORLD_KINDS:={"contact":"contact","first_contact":"contact","envoy":"contact","diplomacy":"contact","foreign":"contact","trade":"contact","peace":"war","war":"war","battle":"war","raid":"war","scout":"scout","scouting":"scout","scout_report":"scout","scout_party":"scout"}
+## The Chronicle's notices and moments that concern the world, newest first:
+## [{day, season, title, text, group (contact|war|scout), icon, count, weighty, on_open}].
+func history_entries()->Array:
+	var Chronicle:=preload("res://scripts/chronicle.gd")
+	var out:Array=[]
+	for e:Dictionary in Chronicle.entries("notice"):
+		var kind:=String(e.get("kind",""))
+		var group:=String(WORLD_KINDS.get(kind,""))
+		if group=="" and kind in ["story","work",""]:group=String(WORLD_KINDS.get(Chronicle.kind_of(e),""))
+		if group=="":continue
+		var label:=Chronicle.date_label(int(e.get("day",0)))
+		out.append({"day":int(e.get("day",0)),"season":label.get_slice(" · ",1),"title":String(e.get("title","")),"text":String(e.get("text","")),
+			"group":group,"icon":{"contact":"contact","war":"war","scout":"scout"}.get(group,"world"),"count":int(e.get("count",1)),
+			"weighty":String(e.get("tier",""))=="moment","on_open":_history_open(e.get("action",{}))})
+	return out
+
+## Where a history row leads, if anywhere: a scout's telling, a battle, a page.
+func _history_open(action:Variant)->Callable:
+	if not action is Dictionary:return Callable()
+	var a:Dictionary=action
+	match String(a.get("kind","")):
+		"scout_report":
+			var id:=int(a.get("mission_id",-1))
+			for report:Dictionary in CivilizationSystem.scout_reports:
+				if int(report.get("mission_id",-2))==id:return open_report.bind(report)
+		"battle":
+			var seed:=int(a.get("seed",0))
+			return func()->void:preload("res://scripts/hud/battle_report_panel.gd").open(terrain,seed)
+		"section":
+			return jump(String(a.get("section","world")),int(a.get("sub",0)))
+	return Callable()
 
 func signature()->Array:
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
@@ -201,11 +230,12 @@ func known_world_model(exploration:Dictionary)->Dictionary:
 		"actions":{"plan":plan_expedition,"archive":open_archive,"rumor_map":open_rumor_map,"summon":summon_chief_scout,"summon_label":summon_label,"summon_tip":summon_tip},
 	}
 
+## A push far one way, planned on the map itself (hud/expedition_planner.gd).
 func plan_expedition()->void:
-	if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"):terrain._open_scout_dispatch_panel()
+	if is_instance_valid(terrain):preload("res://scripts/hud/expedition_planner.gd").open(terrain)
 
 func open_archive()->void:
-	if is_instance_valid(hud):hud.open_detail(ArchiveProvider.new(terrain,hud))
+	jump("world",1).call()
 
 func open_rumor_map()->void:
 	CivilizationSystem.rumor_network.open_map(terrain)
@@ -217,7 +247,7 @@ func open_record(civ_id:String)->void:
 	if is_instance_valid(hud):hud.open_detail(DetailCivReport.new(terrain,hud,civ_id))
 
 func open_report(report:Dictionary)->void:
-	if is_instance_valid(hud):hud.open_detail(ReportProvider.new(terrain,hud,report,ArchiveProvider.new(terrain,hud)))
+	if is_instance_valid(hud):hud.open_detail(ReportProvider.new(terrain,hud,report))
 
 func open_piece(id:String)->void:
 	if ResourceLoader.exists(GALLERY_PATH):(load(GALLERY_PATH) as Script).call("open",hud,terrain,id)
@@ -389,18 +419,19 @@ func _peoples_model(encounters:Array,home:Vector2,pace:float)->Array:
 
 func _leads_model(leads:Array,home:Vector2,pace:float)->Array:
 	var result:Array=[]
-	for lead:Dictionary in leads.slice(0,4):
+	for lead:Dictionary in leads.slice(0,6):
 		var center:=vec(lead.get("center",{}))
 		var confidence:=float(lead.get("confidence",0.0))
 		var word:="A firm telling" if confidence>=.35 else ("An uncertain telling" if confidence>=.15 else "A faint telling")
 		var direction:=compass(home,center) if center!=Vector2.INF else "unknown"
 		var distance:=walk_text(home.distance_to(center),pace) if center!=Vector2.INF else "an unknown distance"
 		result.append({"name":String(lead.get("name","")),"confidence":confidence,"word":word,
-			"text":"%s spoke of the %s, somewhere to the %s — %s." % [_first_upper(String(lead.get("via","travelers"))),String(lead.get("name","strangers")),direction,distance],
+			"text":"%s spoke of %s, somewhere to the %s — %s." % [_first_upper(String(lead.get("via","travelers"))),preload("res://scripts/hud/known_world_board.gd").the_name(String(lead.get("name","strangers"))),direction,distance],
+			"where":"%s · %s" % [_first_upper(direction) if direction!="unknown" else "?",distance.replace("about ","~").replace(" days' walk"," days").replace("more than a season's walk","a season+").replace("within a day's walk","<1 day")],
 			"stale":String(lead.get("state",""))=="stale","searched":int(lead.get("attempts",0))})
 	for rumored:Dictionary in CivilizationSystem.rumored_civilizations_snapshot():
-		if result.size()>=5:break
-		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay",
+		if result.size()>=8:break
+		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
 			"text":"Some speak of the %s, off to the %s, %s away." % [String(rumored.get("name","strangers")),String(rumored.get("direction","an unknown direction")),String(rumored.get("distance_hint","an unknown distance"))],"stale":false,"searched":0})
 	return result
 
