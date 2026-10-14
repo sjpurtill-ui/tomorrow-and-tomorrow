@@ -131,9 +131,14 @@ Twenty integrated Figures/notices cases pass; the worker's 24 private GPU views
 passed independent review. Opening trade-access gains now correctly say points,
 matching the existing additive effect. No game rules are changed.
 
-HELD: Production History, Home detail, Buildings, and War fronts/leaders. These
-are not claimed as delivered. The latest Buildings screenshot also prompted four
-alternative composition concepts for the user's comparison.
+Integrated as access/behavior baselines in this checkpoint: Production History
+(`802166c8`, source `018ebcc8`), Home details (`89c9976e`, source `4999f91c`),
+Buildings (`cee822fa`), War fronts/leaders (`083f738c`, source `69cf1a67`) and
+Chronicle persistence (`931cd4bf`, source `f4dfd40c`). Fifty-four combined cases
+pass with zero errors, failures, skips or orphans (report_52). The Buildings
+private GPU runs verify actual View/Conceive routes and enabled disclosure
+open/close behavior. These improvements do not complete the living graphical
+People screen requested above; that implementation remains in progress.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)
