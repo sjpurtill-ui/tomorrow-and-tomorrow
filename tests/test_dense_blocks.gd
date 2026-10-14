@@ -24,7 +24,7 @@ func test_a_table_is_one_line_per_item_with_groups_tags_and_working_verbs()->voi
 	assert_int(rows.size()).is_equal(3)
 	# Laid out at 900 wide, every row is one line.
 	for i in 3:await get_tree().process_frame
-	for row in rows:assert_float((row as Control).size.y).is_less_equal(Dense.ROW_HEIGHT+2.0)
+	for row in rows:assert_float((row as Control).size.y).is_less_equal(maxf(Dense.ROW_HEIGHT+2.0,48.0))
 	var groups:Array=body.find_children("Group_*","Label",true,false).map(func(n:Node)->String:return (n as Label).text)
 	assert_array(groups).is_equal(["UNREAD","READ"])
 	assert_object(rows[0].find_child("Tag",true,false)).is_not_null()

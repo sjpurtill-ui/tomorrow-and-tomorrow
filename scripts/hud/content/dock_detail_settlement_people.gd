@@ -19,9 +19,9 @@ func _settlement()->Dictionary:
 func meta()->Dictionary:
 	var settlement:=_settlement()
 	return {
-		"eyebrow":"SETTLEMENT · LOCAL GOVERNMENT",
+		"eyebrow":"Settlement · local government",
 		"title":"Leadership of %s" % String(settlement.get("name","Settlement")),
-		"subtabs":["NAMED PEOPLE"],
+		"subtabs":[],
 	}
 
 
@@ -43,29 +43,31 @@ func tab(_sub:int)->Dictionary:
 	var brief:Dictionary={
 		"tone":"info" if not leader.is_empty() else "warn",
 		"title":"%s currently serves as %s" % [String(leader.get("name","No one")),title] if not leader.is_empty() else "Appoint a local leader",
-		"why":"The founding leader also leads the only settlement; a second local office would be artificial at this scale." if combined_founding_office else "Leaders automatically adjust broad local labor toward water, provisions, shelter, defense, or development. Their skills modify effectiveness, but never bypass people, travel, resources, or time.",
+		"why":("Age %d. " % int(leader.get("age",0)) if not leader.is_empty() else "")+("The founding leader also looks after the only settlement. Choose who carries this responsibility." if combined_founding_office else "The local leader directs work toward water, food, shelter, defense and development. Choose by their record and reputation."),
 	}
 	var blocks:Array=[]
 	for candidate_variant in candidates:
 		var candidate:Dictionary=candidate_variant
 		var assessment:=GovernmentPeopleSystem.appointment_assessment(candidate,"SettlementLeader")
 		var is_incumbent:=int(candidate.get("person_id",0))==int(leader.get("person_id",-1))
-		blocks.append({"type":"rows","items":[{
-			"name":"%s · age %d" % [String(candidate.get("name","Unknown")),int(candidate.get("age",0))],
-			"sub":String(candidate.get("background","Settlement resident")),
+		var candidate_blocks:Array=[{"type":"rows","items":[{
+			"name":String(candidate.get("background","Settlement resident")),
 			"detail":"%s · %s\nKNOWN FOR · %s\nDOUBT · %s" % [String((candidate.get("traits",[]) as Array)[0]) if not (candidate.get("traits",[]) as Array).is_empty() else "Unrecorded",String((candidate.get("traits",[]) as Array)[1]) if (candidate.get("traits",[]) as Array).size()>1 else "",String(assessment.known_for),String(assessment.public_concern)],
 			"value":"SERVING" if is_incumbent else "%s · %s" % [String(assessment.record),String(assessment.standing)],
 			"value_color":Tokens.GREEN if is_incumbent else Tokens.BODY_2,"accent":Tokens.GREEN if is_incumbent else Tokens.BLUE,
 			"tip":"A partial local reputation, not a forecast. Their real strengths and limits emerge through service.",
-		}]} )
-		blocks.append({"type":"actions","items":[{
+		}]}]
+		candidate_blocks.append({"type":"actions","items":[{
 			"label":"KEEP IN OFFICE" if is_incumbent else "APPOINT %s" % String(candidate.get("name","THIS PERSON")).split(" ")[0].to_upper(),
 			"sub":("founding leader and %s" % title) if combined_founding_office else "%s of %s" % [title,String(settlement.get("name","the settlement"))],"primary":false,"disabled":is_incumbent,
 			"on_press":_appoint.bind(int(candidate.get("person_id",0)),combined_founding_office),"tip":"Assign this actual person to the one combined founding office." if combined_founding_office else "Assign this actual person to manage the selected settlement.",
 		}]})
+		blocks.append({"type":"frame","heading":"%s · age %d" % [String(candidate.get("name","Unknown")),int(candidate.get("age",0))],"blocks":candidate_blocks})
 	if blocks.is_empty(): blocks.append({"type":"text","text":"No living eligible person is recorded here. The bounded pool will recruit recognizable adults from the aggregate population as government grows."})
-	blocks.append({"type":"text","heading":"SCALE RULE","text":"Only politically relevant people receive durable records. Ordinary residents remain conserved aggregate cohorts, so a government of people still scales to billions."})
-	return {"kpis":kpis,"brief":brief,"blocks":blocks}
+	blocks.append({"type":"text","heading":"People known to the council","text":"The council follows %d people by name, with room to follow up to %d as government grows. Other residents are counted among the population." % [int(structure.get("living_people",0)),int(structure.get("pool_limit",96))]})
+	var readings:Array=[kpis[3],kpis[2]]
+	for reading:Dictionary in readings:reading["glance"]=true
+	return {"kpis":readings,"brief":brief,"blocks":blocks}
 
 
 func _appoint(person_id:int,combined_founding_office:bool=false)->void:

@@ -45,10 +45,10 @@ class Meter extends Control:
 class TaskToggle extends Button:
 	var open:=false
 	func _init(words:String,is_open:bool)->void:
-		text=words;open=is_open;focus_mode=Control.FOCUS_NONE;clip_text=true
-		alignment=HORIZONTAL_ALIGNMENT_LEFT;custom_minimum_size=Vector2(136,24);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		text=words;open=is_open;focus_mode=Control.FOCUS_ALL;clip_text=true
+		alignment=HORIZONTAL_ALIGNMENT_LEFT;custom_minimum_size=Vector2(160,40);size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		tooltip_text=("Close what %s does" if is_open else "What %s does, with today's numbers") % words
-		add_theme_font_size_override("font_size",12)
+		add_theme_font_size_override("font_size",14)
 		add_theme_color_override("font_color",T.INK if is_open else T.BODY)
 		for state:String in ["font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:add_theme_color_override(state,T.INK)
 		add_theme_color_override("font_disabled_color",T.DISABLED)
@@ -58,7 +58,7 @@ class TaskToggle extends Button:
 			style.content_margin_left=17;style.content_margin_right=4;style.content_margin_top=2;style.content_margin_bottom=2
 		add_theme_stylebox_override("normal",normal);add_theme_stylebox_override("hover",hover)
 		add_theme_stylebox_override("pressed",hover);add_theme_stylebox_override("hover_pressed",hover)
-		add_theme_stylebox_override("disabled",T.flat(Color(0,0,0,0)));add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		add_theme_stylebox_override("disabled",T.flat(Color(0,0,0,0)));add_theme_stylebox_override("focus",T.gold_outline_style())
 	func _draw()->void:
 		var ink:=T.INK if open or is_hovered() else T.BODY
 		var c:=Vector2(8.5,size.y*0.5);var r:=3.6
@@ -293,9 +293,9 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		var picture:=_face_picture(face,32,38);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 		column.add_child(picture)
-		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),12,T.INK);given.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),14,T.INK);given.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		given.add_theme_font_override("font",T.font("ui_strong"));given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(given)
-		var tag:=T.make_label(String(face.get("tag","")).to_lower(),10,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var tag:=T.make_label(String(face.get("tag","")).to_lower(),14,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(tag)
 
 
@@ -337,12 +337,12 @@ func _fill_card(parent:Control,value:Array)->void:
 	card.visible=not face.is_empty()
 	if face.is_empty():return
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);parent.add_child(row)
-	var picture:=_face_picture(face,96,116)
+	var picture:=_face_picture(face,112,144);picture.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 	row.add_child(picture)
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",4);row.add_child(body)
-	body.add_child(T.make_label(String(face.get("tag","")),10,T.GOLD,0.1))
-	var title:=T.make_label(String(face.get("name","")),20,T.INK);title.add_theme_font_override("font",_serif());body.add_child(title)
+	body.add_child(T.make_label(String(face.get("tag","")),12,T.GOLD,0.1))
+	var title:=T.make_label(String(face.get("name","")),24,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));body.add_child(title)
 	if bool(face.get("alive",true)):
 		var facts:PackedStringArray=[]
 		var age:=int(face.get("age",0))
@@ -356,7 +356,7 @@ func _fill_card(parent:Control,value:Array)->void:
 		_fact(body,"WANTS",String(face.get("wants","")))
 		var regard:=HBoxContainer.new();regard.add_theme_constant_override("separation",8);body.add_child(regard)
 		regard.add_child(T.make_label("THE GOD",9,T.MUTED,0.1))
-		var read:=T.make_label(_cap(String(face.get("regard","")))+".",12,T.BODY);read.size_flags_horizontal=Control.SIZE_EXPAND_FILL;regard.add_child(read)
+		var read:=T.make_label(_cap(String(face.get("regard","")))+".",14,T.BODY);read.size_flags_horizontal=Control.SIZE_EXPAND_FILL;read.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;regard.add_child(read)
 		for pair in [["LOVE",float(face.get("love",0.5)),T.GREEN],["DREAD",float(face.get("dread",0.2)),T.RED]]:
 			regard.add_child(T.make_label(String(pair[0]),9,T.MUTED,0.08))
 			var meter:=Meter.new();meter.track=T.TRACK;meter.custom_minimum_size=Vector2(56,6);meter.size_flags_vertical=Control.SIZE_SHRINK_CENTER;meter.set_value(float(pair[1]),pair[2]);regard.add_child(meter)
@@ -586,9 +586,9 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	row.tooltip_text=_task_tip(task)
 	var number:=T.make_label(_share_text(task),12,T.INK);number.name="Count";number.custom_minimum_size.x=62 if bool(task.get("share_plain",false)) else 36;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;number.mouse_filter=Control.MOUSE_FILTER_PASS;number.tooltip_text=_share_tip(task);row.add_child(number)
 	if manual and on_move is Callable:
-		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
+		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),40);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
 		less.pressed.connect((on_move as Callable).bind(role,-1))
-		var more:=W.IconButton.new("plus",String(task.get("add_tip","")),24);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
+		var more:=W.IconButton.new("plus",String(task.get("add_tip","")),40);more.name="More";more.disabled=not bool(task.get("can_add",false));row.add_child(more)
 		more.pressed.connect((on_move as Callable).bind(role,1))
 		var five:=W.text_button("×5",String(task.get("five_tip","")),false,30);five.name="Five";five.disabled=not bool(task.get("can_add",false));row.add_child(five)
 		five.pressed.connect((on_move as Callable).bind(role,5))
@@ -616,6 +616,8 @@ func _choice(parent:Node,label:String,callback:Variant,tip:String,active:bool)->
 	var normal:=T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD if active else T.BORDER_SOFT,1,2,8)
 	if active:normal.border_width_bottom=3
 	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,8));b.add_theme_stylebox_override("pressed",normal)
+	T.apply_button_style(b)
+	if active:b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG,T.ACTION,1,T.RADIUS_CONTROL,8))
 	parent.add_child(b)
 	if callback is Callable and (callback as Callable).is_valid():b.pressed.connect(callback)
 	else:b.disabled=true
@@ -623,9 +625,13 @@ func _choice(parent:Node,label:String,callback:Variant,tip:String,active:bool)->
 
 
 func _fill_story(parent:Control,story:Dictionary)->void:
-	parent.add_child(_heading(String(story.get("heading","THIS SEASON"))))
 	var items:Array=story.get("items",[])
-	if items.is_empty():_line(parent,"Nothing yet told of the people this season.")
+	if items.is_empty():
+		var quiet:=HFlowContainer.new();quiet.add_theme_constant_override("h_separation",12);parent.add_child(quiet)
+		var note:=T.make_label("No news from the people this season.",14,T.TEXT_SOFT);note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;quiet.add_child(note)
+		_button(quiet,String(story.get("link","Open the Chronicle")),story.get("on_open"),"The whole story of the people")
+		return
+	parent.add_child(_heading(String(story.get("heading","THIS SEASON"))))
 	for item_variant in items:
 		var item:Dictionary=item_variant
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
@@ -659,7 +665,7 @@ func _fill_hearths(parent:Control,hearths:Array)->void:
 		row.add_theme_constant_override("separation",10);button.add_child(row)
 		var art:=Buildings.picture(int(hearth.get("art",0)),96,76);row.add_child(art)
 		var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_theme_constant_override("separation",2);row.add_child(body)
-		var title:=T.make_label(String(hearth.get("name","")),15,T.INK);title.add_theme_font_override("font",_serif());title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(title)
+		var title:=T.make_label(String(hearth.get("name","")),18,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(title)
 		body.add_child(T.make_label(String(hearth.get("sub","")),10,T.MUTED,0.06))
 		var needs:=T.make_label(String(hearth.get("needs","")),11,T.RED if bool(hearth.get("attention",false)) else T.BODY);needs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;needs.custom_minimum_size.x=170;body.add_child(needs)
 	for action_variant in data.get("hearth_actions",[]):
@@ -732,22 +738,22 @@ func _section(title:String,content:Control,note:String="")->VBoxContainer:
 
 func _heading(title:String,note:String="")->HBoxContainer:
 	var row:=HBoxContainer.new()
-	var head:=T.make_label(title,10,T.GOLD,0.1);head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(head)
+	var head:=T.make_label(T.sentence_case(title),22,T.INK);head.add_theme_font_override("font",T.font("ui_strong"));head.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(head)
 	if note!="":
 		var hint:=T.make_label(note,10,T.MUTED);hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;row.add_child(hint)
 	return row
 
 
 func _line(parent:Node,text:String)->void:
-	var label:=T.make_label(text,12,T.BODY);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(label)
+	var label:=T.make_label(text,14,T.BODY);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(label)
 
 
 func _fact(parent:Node,head:String,text:String)->void:
 	if text.strip_edges()=="":return
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
 	if head!="":
-		var label:=T.make_label(head,9,T.MUTED,0.1);label.custom_minimum_size.x=62;label.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(label)
-	var body:=T.make_label(text,12,T.BODY);body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(body)
+		var label:=T.make_label(head,12,T.MUTED,0.1);label.custom_minimum_size.x=64;label.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(label)
+	var body:=T.make_label(text,14,T.BODY);body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(body)
 
 
 func _button(parent:Node,label:String,callback:Variant,tip:String,primary:bool=false)->void:
@@ -755,6 +761,7 @@ func _button(parent:Node,label:String,callback:Variant,tip:String,primary:bool=f
 	b.add_theme_font_size_override("font_size",12);b.add_theme_color_override("font_color",T.INK if primary else T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
 	b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if primary else Color.TRANSPARENT,T.GOLD if primary else T.BORDER_SOFT,1,3,7))
 	b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,3,7))
+	T.apply_button_style(b,primary)
 	parent.add_child(b)
 	if callback is Callable and (callback as Callable).is_valid():b.pressed.connect(callback)
 	else:b.disabled=true

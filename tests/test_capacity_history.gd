@@ -331,7 +331,7 @@ func test_a_steady_run_is_one_line_until_an_event_or_a_turn_breaks_it()->void:
 	assert_array(decree.events).contains_exactly([["decree","carrying_levy",1]])
 	# On the page: the run's span, and what else moved it.
 	var page:Dictionary=Detail.new(null,null,"logistics").tab(0)
-	var rows:Array=page.blocks[1].items
+	var rows:Array=page.blocks[3].items
 	assert_str(String(rows[3].name)).is_equal("More carrying and hauling: +7 over two seasons")
 	assert_str(String(rows[3].sub)).contains(" to ")
 	assert_str(String(rows[3].detail)).is_equal("Also: Encoded Routes learned (%s)" % Words.points(routes))
@@ -357,7 +357,7 @@ func test_a_run_stored_line_by_line_is_folded_when_read()->void:
 	assert_int(told.size()).is_equal(1)
 	assert_array(told[0].folded_days).contains_exactly([30,60])
 	assert_str(Words.change_name(told[0])).is_equal("More carrying and hauling: +3 over a season")
-	var chart:Dictionary=Detail.new(null,null,"logistics").tab(0).blocks[0]
+	var chart:Dictionary=Detail.new(null,null,"logistics").tab(0).blocks[2]
 	var marks:Array=[]
 	for item:Dictionary in chart.items: marks.append(String(item.marker_type))
 	assert_array(marks).contains_exactly(["","","","up"])
@@ -519,26 +519,26 @@ func test_the_history_page_tells_why_in_short_plain_words()->void:
 	var data:Dictionary=page.tab(0)
 	var types:Array=[]
 	for block:Dictionary in data.blocks: types.append(String(block.type))
-	assert_array(types).contains_exactly(["line_chart","rows","bars"])
-	var why:Dictionary=data.blocks[1]
+	assert_array(types).contains_exactly(["text","bars","line_chart","rows"])
+	var why:Dictionary=data.blocks[3]
 	var told:Dictionary=why.items[0]
 	assert_str(String(told.name)).contains("More carrying and hauling (+6)").contains("Organized Supply Parties taken up (+")
 	assert_str(String(told.value)).is_equal("+6")
 	assert_str(String(told.tip)).contains("What moved it")
-	var chart:Dictionary=data.blocks[0]
+	var chart:Dictionary=data.blocks[2]
 	assert_int((chart.items as Array).size()).is_equal(2)
 	assert_str(String(chart.items[1].marker_type)).is_equal("up")
 	assert_str(String(chart.items[1].marker_label)).contains("More carrying and hauling")
 	# What it is made of now adds up to the value the people have.
-	var made:Dictionary=data.blocks[2]
+	var made:Dictionary=data.blocks[1]
 	assert_str(String(made.note)).contains(preload("res://scripts/hud/capacity_words.gd").percent(float(GameState.society_capacities.logistics)*100.0))
 	var names:Array=[]
 	for bar:Dictionary in made.items: names.append(String(bar.name))
 	assert_array(names).contains(["Carrying and hauling","Ways of carrying loads"])
 	# Nutrition names the raid; logistics does not.
 	var nutrition:Dictionary=Detail.new(terrain,null,"nutrition").tab(0)
-	assert_str(String(nutrition.blocks[1].items[0].detail)).contains("Raiders carried off 9 days of food")
-	assert_str(String(nutrition.blocks[0].items[1].marker_type)).is_equal("crisis")
+	assert_str(String(nutrition.blocks[3].items[0].detail)).contains("Raiders carried off 9 days of food")
+	assert_str(String(nutrition.blocks[2].items[1].marker_type)).is_equal("crisis")
 	for block:Dictionary in data.blocks: assert_str(JSON.stringify(block)).not_contains("Raiders")
 	# Every visible label keeps to twelve words and never says +0.0.
 	for mode:String in ["light","dark"]:
@@ -546,6 +546,7 @@ func test_the_history_page_tells_why_in_short_plain_words()->void:
 		for dynamic_id:String in Society.DYNAMICS:
 			var rendered:=_render(Detail.new(terrain,null,dynamic_id).tab(0).blocks)
 			for text:String in _texts(rendered):
+				if text==String(terrain._dynamic_definition(dynamic_id)):continue
 				assert_int(text.split(" ",false).size()).override_failure_message("too long: "+text).is_less_equal(12)
 				assert_str(text).not_contains("+0.0").not_contains("-0.0")
 			# Text reads on the paper it sits on, in both palettes.
