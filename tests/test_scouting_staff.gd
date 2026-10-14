@@ -302,23 +302,20 @@ func test_exploration_can_cross_a_charted_neighborhood_to_a_more_distant_frontie
 		if Vector2(point.x,point.z).length()>near:reached=true
 	assert_bool(reached).is_true()
 
-func test_scouting_status_and_reception_shortages_fit_narrow_panel()->void:
+func test_scouting_status_and_reception_shortages_show_on_the_expeditions_tab()->void:
 	CivilizationSystem.reset_for_new_world()
 	CivilizationSystem.scouting_staff.set_policy(.05,"recruitment")
 	GameState.housing_capacity=100;GameState.population_allocations.Administration=0
 	GameState.simulation_metrics.food_days=5;GameState.water_metrics={"intake_ratio":.5}
-	var panel_script=preload("res://scripts/hud/scouting_policy_panel.gd")
-	for shape:Vector2i in [Vector2i(960,720),Vector2i(340,640)]:
-		var viewport:=SubViewport.new();viewport.size=shape;add_child(viewport)
-		var layer:=CanvasLayer.new();viewport.add_child(layer)
-		var sheet=panel_script.new();layer.add_child(sheet)
-		await await_idle_frame();await await_idle_frame()
-		assert_bool(Rect2(Vector2.ZERO,shape).encloses(sheet.panel.get_global_rect())).is_true()
-		assert_str(sheet.reception.text).contains("INVITATIONS ON HOLD")
-		assert_str(sheet.reception.text).contains("Housing:")
-		assert_bool(sheet.reception.size.x<=sheet.panel.size.x).is_true()
-		assert_str(sheet.review.text).contains("next game day")
-		viewport.queue_free();await await_idle_frame()
+	var board=preload("res://scripts/hud/expeditions_board.gd").new()
+	add_child(board);board.setup({"reports":[]})
+	await await_idle_frame()
+	var reception:Label=board.send_box.find_child("Words",true,false)
+	assert_str(reception.text).contains("invitations wait")
+	assert_str(reception.get_parent().tooltip_text).contains("Housing:")
+	var status:Label=board.send_box.find_child("Status",true,false)
+	assert_str(status.text).contains("tomorrow")
+	board.queue_free();await await_idle_frame()
 
 
 func test_staff_route_cache_uses_current_logistics_range()->void:

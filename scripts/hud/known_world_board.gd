@@ -31,12 +31,22 @@ var peoples_frame:Control
 var walkers_frame:Control
 var finds_frame:Control
 
+## Beside the ledger of peoples (World › Peoples): only the chart and, at its
+## side, the peoples told of but not met and what we strive for. Parties and
+## tellings live on the Expeditions tab.
+var compact:=false
+const COMPACT_CHART_HEIGHT:=240.0
+
 func setup(block:Dictionary)->void:
 	name="KnownWorldBoard"
 	model=block.get("model",{})
 	tier=int(model.get("tier",0))
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",18)
+	compact=bool(block.get("compact",false))
+	if compact:
+		_build_compact()
+		return
 	_build_counters()
 	aims_slot=VBoxContainer.new();aims_slot.name="AimsSlot";aims_slot.add_theme_constant_override("separation",0);add_child(aims_slot)
 	_build_aims()
@@ -55,6 +65,16 @@ func setup(block:Dictionary)->void:
 ## nodes. A board of another age (tier) is drawn afresh.
 func update_block(block:Dictionary)->bool:
 	var next:Dictionary=block.get("model",{})
+	if compact or bool(block.get("compact",false)):
+		if not compact or int(next.get("tier",0))!=tier:return false
+		var old_model:=model
+		model=next
+		if _part(old_model,"aims")!=_part(next,"aims") or old_model.get("leads",[])!=next.get("leads",[]):
+			for child in aims_slot.get_parent().get_children():
+				if child!=aims_slot:child.get_parent().remove_child(child);child.queue_free()
+			for child in aims_slot.get_children():aims_slot.remove_child(child);child.queue_free()
+			_fill_compact_side(aims_slot.get_parent() as VBoxContainer)
+		return true
 	if counters_row==null or int(next.get("tier",0))!=tier:return false
 	var old:=model
 	model=next
@@ -171,6 +191,41 @@ func _build_aims()->void:
 		var remembered:=Kit.serif(stack,"Remembered: %s, %s" % [String(legacy.get("name","")),preload("res://scripts/hud/era_words.gd").when(int(legacy.get("day",0)))],13,T.BODY,true)
 		remembered.name="Legacy_%d" % int(legacy.get("day",0))
 
+## No chart of its own: the map beside the page shows the same ground, with
+## the scouts' routes inked on it (expedition_routes_overlay.gd).
+func _build_compact()->void:
+	var side:=VBoxContainer.new();side.name="Side";side.size_flags_horizontal=Control.SIZE_EXPAND_FILL;side.add_theme_constant_override("separation",12);add_child(side)
+	aims_slot=VBoxContainer.new();aims_slot.name="AimsSlot";aims_slot.add_theme_constant_override("separation",0)
+	side.add_child(aims_slot)
+	_fill_compact_side(side)
+
+## The side of the chart: what we strive for, then the peoples told of.
+func _fill_compact_side(side:VBoxContainer)->void:
+	_build_aims()
+	var leads:Array=model.get("leads",[])
+	var UI:=preload("res://scripts/hud/world_ui.gd")
+	var stack:=UI.sheet(side,"Leads")
+	var actions:Dictionary=model.get("actions",{})
+	var head:=UI.heading(stack,"Told of, not yet met")
+	UI.verb(head,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
+	if leads.is_empty():
+		UI.label(stack,"No one has spoken of other peoples",12,T.INK_MUTED)
+	for index in leads.size():
+		var lead:Dictionary=leads[index]
+		var row:=UI.line(stack,6);row.name="Lead_%d" % index
+		var tip:="%s%s%s" % [String(lead.get("text","")),"
+"+String(lead.get("word","")),("
+Searched for %d times, not found." % int(lead.get("searched",0))) if int(lead.get("searched",0))>0 else ("
+An old telling." if bool(lead.get("stale",false)) else "")]
+		row.tooltip_text=tip
+		var dots:=Dots.new();dots.amount=clampf(float(lead.get("confidence",0.0))/.5,0,1);row.add_child(dots)
+		dots.tooltip_text=tip;dots.mouse_filter=Control.MOUSE_FILTER_PASS
+		# Where they are said to be leads the row; many tellings share a name.
+		UI.cell(row,String(lead.get("where","")),132,13,T.INK if not bool(lead.get("stale",false)) else T.INK_MUTED,true).tooltip_text=tip
+		var who:=the_name(String(lead.get("name","")))
+		UI.label(row,who.substr(0,1).to_upper()+who.substr(1),12,T.INK_MUTED,false,true).tooltip_text=tip
+		var follow:=UI.verb(row,"Follow",actions.get("plan",Callable()),"Push an expedition toward them, planned on the map");follow.name="FollowLead"
+
 class AimBar extends Control:
 	var progress:=0.0
 	var marks:Array=[]
@@ -194,7 +249,8 @@ func _layout()->void:
 ## "the Keshan", but "The Nine Fires" when the name already carries its article.
 static func the_name(people:String)->String:
 	var name_text:=people.strip_edges()
-	if name_text.to_lower().begins_with("the "):return name_text
+	var lower:=name_text.to_lower()
+	if lower.begins_with("the ") or lower.begins_with("a ") or lower.begins_with("an "):return name_text
 	return "the "+name_text
 
 
@@ -838,8 +894,7 @@ class Chart extends Control:
 class InkLayer extends Control:
 	## As the board's the_name: never "the The Nine Fires".
 	static func the_people(people:String)->String:
-		var name_text:=people.strip_edges()
-		return name_text if name_text.to_lower().begins_with("the ") else "the "+name_text
+		return KnownWorld.the_name(people)
 	var chart:Chart
 	var labels:Array[Rect2]=[]
 	func _init()->void:mouse_filter=Control.MOUSE_FILTER_PASS;tooltip_text=" "

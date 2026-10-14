@@ -15264,13 +15264,10 @@ func _cancel_placement() -> void:
 	travel_status_label.text = ""
 
 
+## Scouting is ordered on World › Expeditions (hud/expeditions_board.gd):
+## every "send scouts" button lands there.
 func _open_scout_dispatch_panel()->void:
-	if is_instance_valid(scout_dispatch_panel):scout_dispatch_panel.queue_free()
-	scout_dispatch_previous_speed=game_speed;_set_game_speed(0.0)
-	scout_dispatch_panel=preload("res://scripts/hud/scouting_policy_panel.gd").new()
-	scout_dispatch_panel.name="ScoutingPolicy";scout_dispatch_panel.z_index=70
-	scout_dispatch_panel.close_requested.connect(_close_scout_dispatch_panel)
-	interface_layer.add_child(scout_dispatch_panel)
+	_on_hud_section_requested("world",1)
 
 
 func _close_scout_dispatch_panel()->void:

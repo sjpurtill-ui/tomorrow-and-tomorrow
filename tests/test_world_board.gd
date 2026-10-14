@@ -6,7 +6,10 @@ class Terrain extends Node:
 	func _open_scout_dispatch_panel()->void:plans+=1
 	func _open_diplomat_dispatch_panel()->void:pass
 class TestHud extends Control:
+	signal section_requested(section:String,sub:int)
 	var opened:RefCounted
+	var jumped:=""
+	func _init()->void:section_requested.connect(func(section:String,sub:int)->void:jumped="%s/%d" % [section,sub])
 	func open_detail(value:RefCounted)->void:opened=value
 func test_known_world_uses_returned_reports_and_opens_archive()->void:
 	var terrain:=Terrain.new();add_child(terrain)
@@ -16,15 +19,16 @@ func test_known_world_uses_returned_reports_and_opens_archive()->void:
 	assert_str(String(data.blocks[0].type)).is_equal("known_world")
 	var model:Dictionary=data.blocks[0].model
 	assert_int(int(model.counters.reports)).is_equal(CivilizationSystem.scout_reports.size())
+	# Every telling is kept on World › Expeditions; a push is planned on the map.
 	(model.actions.archive as Callable).call()
-	assert_bool(hud.opened!=null).is_true()
-	(model.actions.plan as Callable).call()
-	assert_int(terrain.plans).is_equal(1)
+	assert_str(hud.jumped).is_equal("world/1")
+	assert_bool((model.actions.plan as Callable).is_valid()).is_true()
+	assert_bool(bool(data.blocks[0].get("compact",false))).is_true()
 	hud.free();terrain.free()
 func test_known_world_fits_narrow_and_wide_docks()->void:
 	var terrain:=Terrain.new();add_child(terrain)
 	var hud:=TestHud.new();add_child(hud)
-	for width:float in [700.0,1200.0]:
+	for width:float in [540.0,1200.0]:
 		var panel:=preload("res://scripts/hud/dock_panel.gd").new();add_child(panel)
 		panel.size=Vector2(width,850)
 		panel.present(Content.new(terrain,hud),0)
@@ -32,7 +36,9 @@ func test_known_world_fits_narrow_and_wide_docks()->void:
 		assert_float(panel.size.x).is_less_equal(width)
 		var board:Node=panel.find_child("KnownWorldBoard",true,false)
 		assert_bool(board!=null).is_true()
-		assert_int(board.columns.columns).is_equal(1 if width==700 else 2)
+		# No chart of its own: the map shows the routes; the told-of list is here.
+		assert_object(board.find_child("Leads",true,false)).is_not_null()
+		assert_object(board.find_child("KnownWorldChart",true,false)).is_null()
 		panel.free()
 	hud.free();terrain.free()
 
