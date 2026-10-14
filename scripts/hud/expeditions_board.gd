@@ -30,6 +30,7 @@ const GROUPS_SHOWN:=8
 const TWO_AT:=600.0
 
 var model:Dictionary={}
+var headline:Label
 ## Search, filter, order and page of the tellings table, kept by the World
 ## page across its daily rebuilds.
 var view:Dictionary={}
@@ -59,6 +60,9 @@ func setup(block:Dictionary)->void:
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",12)
 	_take(block)
+	# The page's counts, one line (the provider's "line").
+	headline=UI.label(self,String(block.get("line","")),13,T.INK,false,true);headline.name="Line"
+	headline.tooltip_text=String(block.get("line_tip",""))
 	top=UI.columns(self,"SendAndUnread")
 	send_box=UI.sheet(top,"Send")
 	unread_box=UI.sheet(top,"Unread")
@@ -70,6 +74,7 @@ func setup(block:Dictionary)->void:
 
 func update_block(block:Dictionary)->bool:
 	_take(block)
+	if headline!=null:headline.text=String(block.get("line",""))
 	var staff:Dictionary=CivilizationSystem.scouting_staff.snapshot()
 	var exploration:Dictionary=CivilizationSystem.exploration_status()
 	var parties:Array=[]
@@ -116,7 +121,8 @@ func _fill_send()->void:
 	var staff:Dictionary=CivilizationSystem.scouting_staff.snapshot()
 	var share:=float(staff.get("share",0.0))*100.0
 	var Words:=preload("res://scripts/hud/era_words.gd")
-	UI.heading(send_box,"Send scouts","%s of %s scouts away" % [Words.grouped(int(staff.get("away",0))),Words.grouped(int(staff.get("target",0)))])
+	var send_head:=UI.heading(send_box,"Send scouts","%s scouts out · room for %s" % [Words.grouped(int(staff.get("away",0))),Words.grouped(int(staff.get("target",0)))])
+	send_head.tooltip_text="Scouts are the people kept for scouting; they go out in parties. The share below sets how many may be kept."
 	var kept:=_control_row(send_box,"Share")
 	for preset:Array in PRESETS:
 		var amount:=float(preset[1])
