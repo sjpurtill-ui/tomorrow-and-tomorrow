@@ -209,6 +209,8 @@ func open_research()->void:
 	if not is_instance_valid(hud):close();return
 	var id:=String(current.get("id",""))
 	close()
-	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"inquiry")
-	var atlas=hud.get_meta("knowledge_atlas").get_child(0)
-	atlas.set_view("known");atlas.select(id)
+	# The discovery chosen on the knowledge tree, in the dock.
+	if hud.has_method("has_provider") and hud.has_provider("inquiry"):
+		var provider:Object=hud.providers["inquiry"]
+		if provider.has_method("show_question"):provider.show_question(id)
+	if hud.has_method("open_dock"):hud.open_dock("inquiry",1,false)

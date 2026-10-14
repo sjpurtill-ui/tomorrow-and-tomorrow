@@ -45,6 +45,8 @@ const DOMAIN_GOALS:Dictionary={
 # Discovery ids and domain ids the player has clicked open; everything else
 # stays collapsed so the established record scales to hundreds of findings.
 var tree_domain:String="nutrition"
+## The question chosen on the knowledge tree ("" follows the field's first under way).
+var tree_selected:=""
 var expanded_discoveries:Dictionary={}
 var expanded_domains:Dictionary={}
 ## Knowledge-tree questions opened to show what they would do.
@@ -61,35 +63,13 @@ func meta()->Dictionary:
 	}
 
 func tab(sub:int)->Dictionary:
-	var summary:Dictionary=DiscoverySystem.research_program_summary()
-	var observers:=int(summary.get("researchers",0))
-	var science:=Indicators.science()
-	var emphasis_total:=int(summary.get("emphasis_total",0))
-	# Questions, not lines of attention: two lines on one question count once,
-	# the same as the cards. Only the board refreshes the lines' questions.
-	var investigations:Array=DiscoverySystem.active_investigation_records() if sub==0 else []
-	var questions:=investigations.size() if sub==0 else _questions_under_way()
-	var established:=_threads().size()
-	var kpis:Array=[
-		{"label":"SCIENCE CAPACITY" if EraWords.reckoned() else ("KEEPERS OF LORE" if EraWords.hearth() else "SCHOLARS"),"value":preload("res://scripts/hud/production_plain.gd").number(float(science.capacity)) if EraWords.reckoned() else str(roundi(float(science.minds))),"delta":"about %s people at it" % preload("res://scripts/hud/production_plain.gd").number(float(science.minds)) if EraWords.reckoned() else "watching and testing","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"People at learning, weighted by how well they were taught."},
-		{"label":"AVG. EDUCATION" if EraWords.reckoned() else "HOW WELL IT IS TAUGHT","value":"%d%%" % roundi(float(science.education)*100.0) if EraWords.reckoned() else EraWords.teaching(float(science.education)),"delta":"research minds" if EraWords.reckoned() else "kept and passed on","delta_color":Tokens.MUTED,"accent":Tokens.GOLD,"tip":"How well what is known is kept and passed on."},
-		{"label":"FIELDS WATCHED","value":str(emphasis_total),"delta":"steps of attention","delta_color":Tokens.MUTED,"accent":Tokens.AMBER,"tip":"All the attention you have given out across the fields; each field gets its share of the people"},
-		{"label":"BEING LEARNED","value":str(questions),"delta":("question" if questions==1 else "questions")+(" · %d team%s" % [int(summary.get("teams",0)),"" if int(summary.get("teams",0))==1 else "s"] if int(summary.get("teams",0))>0 else ""),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Questions people are working on now. The people at learning work in teams, each on one question until it is proven; more of them field more teams."},
-		{"label":"THINGS WE KNOW","value":str(established),"delta":"kinds of knowledge","accent":Tokens.GREEN,"tip":"Each is one body of knowledge, with the tests and refinements that followed it"},
-	]
-	var brief:Dictionary
-	if observers==0:
-		brief={"tone":"warn","title":"No one is set to learning","why":"Local leaders decide who works at learning. Ask them for more hands on learning.","action_label":"Who does the work","on_action":func():_open_report("RESEARCH WORK",_research_work_report)}
-	elif questions==0:
-		brief={"tone":"warn","title":"No question is being worked on","why":"Attention alone is not enough: the people need clues and earlier knowledge first. Open a field to see what it is waiting for."}
-	else:
-		brief={"tone":"info","title":"The people are learning","why":"What they find first depends on clues, place, what they already know, and luck."}
+	# Each tab is one board: its own figures, its own table; nothing is
+	# repeated from the top bar or from another tab.
 	match sub:
-		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
-		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	# The board opens with its own reading of the pace and what limits it
-	# (inquiry_board.gd), so the page keeps its height for the lanes.
-	return {"kpis":[],"blocks":[_discovery_board(investigations),_artifact_study_block()]}
+		1: return {"kpis":[],"blocks":[_tree_block()]}
+		2: return {"kpis":[],"blocks":[_known_block()]}
+	var investigations:Array=DiscoverySystem.active_investigation_records()
+	return {"kpis":[],"blocks":[_discovery_board(investigations)]}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
@@ -348,52 +328,151 @@ func _established_effect_text(event:Dictionary)->String:
 	return Explainer.effect_lines(effects,Explainer.practice_level(id) if known else 1.0,Explainer.focus_scale(String(definition.get("dynamic",""))) if known else 1.0,known,Explainer.usage_words(id) if known else "")
 
 func signature()->Array:
-	return [tree_domain,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),expanded_tech.duplicate(),GovernmentPeopleSystem.revision]
+	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),expanded_tech.duplicate(),GovernmentPeopleSystem.revision]
 
-func _technology_blocks()->Array:
-	var blocks:Array=[]
-	var filters:Array=[]
-	for domain in DOMAIN_COLORS:
-		filters.append({"label":String(domain).capitalize(),"primary":String(domain)==tree_domain,"on_press":_choose_tree_domain.bind(String(domain))})
-	blocks.append({"type":"actions","heading":"RESEARCH BRANCHES","items":filters})
-	blocks.append({"type":"text","text":"Choose a technology to pursue. Research competes for your finite observers. Switching projects preserves unfinished work; prerequisites and material access still apply. Click a question to see what it does, or would do, in the game."})
-	var technologies:=DiscoverySystem.technology_tree(tree_domain)
-	var frontier:=DiscoverySystem.technology_frontier(technologies)
-	for technology in technologies:
-		var id:=String(technology.id)
-		var status:=String(technology.status)
-		if status=="LOCKED":
-			# Next reachable questions are named with what they wait on; deeper
-			# ones are summarized as a count below.
-			if frontier.next.has(id):blocks.append({"type":"rows","items":[{"name":String(technology.name),"sub":"NEXT · LOCKED","detail":DiscoverySystem.plain_wait_reason(technology.missing)+". The outcome is not yet known.","accent":Tokens.MUTED}]})
-			continue
-		var known:=status=="DISCOVERED"
-		var effects:Dictionary=technology.get("effects",{})
-		var open:=expanded_tech.has(id)
-		var detail:=String(technology.get("observation",""))
-		var map_note:=Borders.research_note(id)
-		if effects.is_empty(): detail+="\n"+(map_note if map_note!="" else "Changes nothing by itself; it opens the way to later knowledge.")
-		else: detail+="\n%s %s.%s%s" % ["Does:" if known else "Would bring:",Explainer.summary(effects)," Click to %s each effect." % ("hide" if open else "see"),"\n"+map_note if map_note!="" else ""]
-		var children:Array=technology.leads_to
-		if not children.is_empty(): detail+="\nOpens %d further avenues of inquiry." % children.size()
-		var prerequisites:Array=[]
-		for requirement in technology.get("requires",[]): prerequisites.append(String(DiscoverySystem.discovery_definition(String(requirement)).get("name",requirement)))
-		if not prerequisites.is_empty(): detail+="\nREQUIRES → "+", ".join(prerequisites)
-		if not (technology.missing as Array).is_empty(): detail+="\nWAITING FOR → "+", ".join(technology.missing)
-		var row:={"name":String(technology.name),"sub":status,"detail":detail,"value":"%d%%" % roundi(float(technology.progress)*100.0) if status=="RESEARCHING" else "","accent":Tokens.GREEN if status=="DISCOVERED" else (Tokens.GOLD if bool(technology.ready) else Tokens.MUTED)}
-		if not effects.is_empty():
-			row["on_click"]=_toggle_tech.bind(id)
-			row["tip"]=Explainer.amount_lines(effects,Explainer.practice_level(id) if known else 1.0,Explainer.focus_scale(String(technology.get("dynamic",""))) if known else 1.0,known)+"\n\nClick to see what each one does in the game."
-		blocks.append({"type":"rows","items":[row]})
-		if open and not effects.is_empty():
-			blocks.append({"type":"impact","state":effect_state,"rows":Explainer.discovery_rows(id,known),
-				"intro":("What it does now, at how widely it is used." if known else "What it would do once answered, at full use. Tried in a few households before it is proven, a new practice starts with about %d in 100 households and spreads over years, so its effects grow as it is taken up." % roundi(Research600.PROOF_ADOPTION*100.0))})
-		if bool(technology.ready) and status!="RESEARCHING": blocks.append({"type":"actions","items":[{"label":"RESEARCH "+String(technology.name).to_upper(),"primary":true,"on_press":_research_technology.bind(id)}]})
-	if int(frontier.beyond)>0:blocks.append({"type":"rows","items":[{"name":"%d further questions beyond" % int(frontier.beyond),"sub":"LOCKED","detail":"They open as the questions above are answered. Their outcomes are not yet known.","accent":Tokens.MUTED}]})
-	return blocks
+## The knowledge tree as lanes in the dock (knowledge_tree_board.gd): the
+## chosen field's lines of study, what is known, under way, open and waiting
+## in each, and the chosen question's account with its one order.
+func _tree_block()->Dictionary:
+	var rows:Array=_all_rows().filter(func(row:Dictionary)->bool:return String(row.get("dynamic",""))==tree_domain)
+	var frontier:=DiscoverySystem.technology_frontier(rows)
+	var known_by:=_known_by_field()
+	var active_by:Dictionary={}
+	for channel:Variant in GameState.active_investigations:
+		if String(GameState.active_investigations[channel])=="":continue
+		var domain:=String(channel).get_slice("::",0)
+		active_by[domain]=int(active_by.get(domain,0))+1
+	var fields:Array=[]
+	for id:String in DOMAIN_COLORS:fields.append({"id":id,"known":int(known_by.get(id,0)),"active":int(active_by.get(id,0))})
+	# The chosen question: the one chosen, else the field's first under way, else its first open.
+	var chosen_row:Dictionary={}
+	for row:Dictionary in rows:
+		if String(row.id)==tree_selected:chosen_row=row;break
+	if chosen_row.is_empty():
+		for status:String in ["RESEARCHING","AVAILABLE"]:
+			for row:Dictionary in rows:
+				if String(row.status)==status:chosen_row=row;break
+			if not chosen_row.is_empty():break
+	# The board gets only what it draws: each question's name, state, evidence, line and wait.
+	var slim:Array=[]
+	for row:Dictionary in rows:slim.append({"id":String(row.id),"name":String(row.name),"status":String(row.status),"progress":float(row.progress),"subcategory":String(row.get("subcategory","")),"earliest_year":float(row.get("earliest_year",0.0)),"missing":(row.get("missing",[]) as Array).duplicate()})
+	return {"type":"knowledge_tree","domain":tree_domain,"fields":fields,"rows":slim,"next":frontier.next,"selected":String(chosen_row.get("id","")),
+		"chosen":_tree_chosen(chosen_row,frontier.next),"on_field":_choose_tree_domain,"on_select":_choose_tree_question}
+
+## Every question of every field (DiscoverySystem.technology_tree), made
+## again only when what it is made from moves: the one source of the tree's
+## lanes and of every "known" count on these pages.
+func _all_rows()->Array:
+	var rows:Array=memo.take("rows",[GameState.known_discoveries.size(),GameState.active_investigations.hash(),int(GameState.elapsed_days)/30,GameState.resource_deposits.size(),GameState.discovery_progress.size()],func()->Array:return DiscoverySystem.technology_tree())
+	# The evidence moves every day: read it fresh onto the kept rows.
+	for row:Dictionary in rows:row["progress"]=float(GameState.discovery_progress.get(String(row.id),0.0))
+	return rows
+
+## Questions known in each field, from the same rows: {domain: count}.
+func _known_by_field()->Dictionary:
+	var counts:Dictionary={}
+	for row:Dictionary in _all_rows():
+		if String(row.get("status",""))=="DISCOVERED":counts[String(row.dynamic)]=int(counts.get(String(row.dynamic),0))+1
+	return counts
+
+## What we know (known_board.gd): known against every question, what was
+## learned this year and the newest finding; then each field's count, what
+## its knowledge adds now (the engine's totals) and, opened, every effect and
+## its findings newest first.
+func _known_block()->Dictionary:
+	var rows:=_all_rows()
+	var total_by:Dictionary={}
+	var findings_by:Dictionary={}
+	var known:=0
+	for row:Dictionary in rows:
+		var domain:=String(row.get("dynamic",""))
+		total_by[domain]=int(total_by.get(domain,0))+1
+		if String(row.get("status",""))!="DISCOVERED":continue
+		known+=1
+		(findings_by.get_or_add(domain,[]) as Array).append(row)
+	var days:Dictionary={}
+	for event:Variant in WorldSimulation.state.discovery_log:
+		if event is Dictionary and not days.has(String(event.get("id",""))):days[String(event.get("id",""))]=int(event.get("day",-1))
+	var by_line:Dictionary={}
+	var inert:Array=[]
+	for row:Dictionary in Explainer.total_rows():
+		if bool(row.inert):inert.append(row)
+		else:(by_line.get_or_add(String(row.line),[]) as Array).append(row)
+	var today:=int(GameState.elapsed_days)
+	var this_year:=0
+	var newest:Dictionary={}
+	var newest_day:=-1
+	var fields:Array=[]
+	for domain:String in DOMAIN_COLORS:
+		var found:Array=findings_by.get(domain,[])
+		found.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(days.get(String(a.id),-1))>int(days.get(String(b.id),-1)))
+		var listed:Array=[]
+		for row:Dictionary in found:
+			var day:=int(days.get(String(row.id),-1))
+			if day>=0 and today-day<3650:this_year+=1
+			if day>newest_day:newest_day=day;newest=row
+			var effects:Dictionary=row.get("effects",{})
+			listed.append({"name":String(row.name),"tip":"%s\n%s%s" % [String(row.name),("Learned "+EraWords.ago(day)) if day>=0 else "Known since before we set out",("\nDoes: "+Explainer.summary(effects)) if not effects.is_empty() else "\nOpens later knowledge"]})
+		var effect_rows:Array=by_line.get(domain,[])
+		var parts:Array=[]
+		for row:Dictionary in effect_rows:parts.append("%s %s" % [String(row.label),String(row.amount)])
+		fields.append({"id":domain,"known":found.size(),"total":int(total_by.get(domain,0)),"adds":parts,"effects":effect_rows,"findings":listed,
+			"open":expanded_domains.has(domain),"on_toggle":_toggle_domain.bind(domain)})
+	var figures:Array=[
+		{"title":"KNOWN","value":EraWords.grouped(known),"note":"of %s questions in all" % EraWords.grouped(rows.size()),"ratio":float(known)/maxf(1.0,float(rows.size())),"tip":"Questions the people have answered, of every question there is to answer in all the fields."},
+		{"title":"LEARNED IN TEN YEARS","value":str(this_year),"note":"since year %d" % maxi(1,today/365+1-10),"tip":"Questions answered in the last ten years."},
+		{"title":"NEWEST","value":String(newest.get("name","None yet")),"note":EraWords.ago(newest_day) if newest_day>=0 else "","tip":"The question answered most recently.","stretch":1.6},
+	]
+	return {"type":"known_board","figures":figures,"fields":fields,"inert":inert}
+
+## The chosen question's account: its state, what it does or would do, what
+## it builds on and waits for, what it opens, and the order that puts a team on it.
+func _tree_chosen(row:Dictionary,next:Dictionary)->Dictionary:
+	if row.is_empty():return {}
+	var id:=String(row.id)
+	var status:=String(row.status)
+	var known:=status=="DISCOVERED"
+	var effects:Dictionary=row.get("effects",{})
+	var chosen:={"name":String(row.name),"facts":[]}
+	match status:
+		"DISCOVERED":
+			var day:=preload("res://scripts/hud/atlas_data.gd")._discovered_day(id)
+			chosen.state="Known"+(" since %s" % EraWords.when(day) if day>=0 else " since before we set out")
+			chosen.tone="good"
+		"RESEARCHING":
+			chosen.state="Under way: %d in 100 of the evidence" % roundi(float(row.progress)*100.0)
+			chosen.progress=float(row.progress)
+		"AVAILABLE":
+			chosen.state="Open to a team now"
+		_:
+			chosen.state=("Waiting: "+DiscoverySystem.plain_wait_reason(row.get("missing",[]))) if next.has(id) else "Further along: it opens once the questions before it are answered"
+			chosen.tone="warn"
+	if not known or not effects.is_empty() or Borders.research_note(id)!="":
+		var does:=Explainer.summary(effects,4) if not effects.is_empty() else "Nothing by itself; it opens later questions"
+		var amounts:=Explainer.amount_lines(effects,Explainer.practice_level(id) if known else 1.0,Explainer.focus_scale(String(row.get("dynamic",""))) if known else 1.0,known)
+		chosen.facts.append(["Does" if known else "Would bring",does,amounts])
+	if Borders.research_note(id)!="":chosen.facts.append(["On the map",Borders.research_note(id)])
+	var builds:Array[String]=[]
+	for requirement:Variant in row.get("requires",[]):builds.append(String(DiscoverySystem.discovery_definition(String(requirement)).get("name",requirement)))
+	if not builds.is_empty():chosen.facts.append(["Builds on",", ".join(builds)])
+	if not known and not (row.get("missing",[]) as Array).is_empty() and status=="LOCKED":chosen.facts.append(["Waits for","; ".join(PackedStringArray(row.missing))])
+	if not known and float(row.get("years_ahead",0.0))>=1.0:
+		var factor:=DiscoverySystem.research_early_factor(row)
+		chosen.facts.append(["Price","%s the usual work: it belongs to a later age" % preload("res://scripts/hud/inquiry_board.gd")._times(factor),"Dated %d years after the age our learning has reached. Work on it goes slower in proportion; as our learning catches up its price falls." % roundi(float(row.years_ahead))])
+	var opens:Array=row.get("leads_to",[])
+	if not opens.is_empty():chosen.facts.append(["Opens",", ".join(PackedStringArray(opens.slice(0,4)))+(" and %d more" % (opens.size()-4) if opens.size()>4 else "")])
+	if bool(row.get("ready",false)) and status!="RESEARCHING":
+		chosen.on_research=_research_technology.bind(id)
+		chosen.research_label="Put a team on it"
+	return chosen
+
+func _choose_tree_question(id:String)->void:
+	tree_selected=id
+	hud.request_immediate_dock_refresh()
 
 func _choose_tree_domain(domain:String)->void:
 	tree_domain=domain
+	tree_selected=""
 	hud.request_immediate_dock_refresh()
 
 func _research_technology(id:String)->void:
@@ -413,10 +492,16 @@ func _latest_discovery_block()->Dictionary:
 		return {"type":"text","heading":"DISCOVERED · "+String(discovery.name),"text":description}
 	return {}
 
-func open_expanded_tab(sub:int)->bool:
-	if sub!=1:return false
-	preload("res://scripts/hud/knowledge_atlas.gd").open(terrain,hud,"inquiry")
-	return true
+## The knowledge tree is drawn in the dock (knowledge_tree_board.gd); no tab
+## opens a screen of its own.
+func open_expanded_tab(_sub:int)->bool:
+	return false
+
+## Shows a question on the knowledge tree: its field, with it chosen.
+func show_question(id:String)->void:
+	var domain:=String(DiscoverySystem.discovery_definition(id).get("dynamic",""))
+	if domain!="":tree_domain=domain
+	tree_selected=id
 
 func _open_report(title:String,reader:Callable)->void:
 	var report:=preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,"INQUIRY",reader,signature)
@@ -483,7 +568,29 @@ func _discovery_board(investigations:Array)->Dictionary:
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
 		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
-	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"pace":learning_pace(investigations),"waiting":_waiting_lines(),"on_choose":_choose_team_question,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
+	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"pace":learning_pace(investigations),"waiting":_waiting_lines(),"on_choose":_choose_team_question,
+		"hands":_hands(),"artifacts":_artifact_study()}
+
+## Who sets the learners (the local leader's work priority), in a few words,
+## and the two orders that change it.
+func _hands()->Dictionary:
+	var id:=SettlementModel._primary_settlement_id()
+	var state:=GovernmentPeopleSystem.settlement_management(id)
+	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
+	var focus:=String({"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up"}.get(String(state.get("focus","")),"everyday needs"))
+	return {"words":"The local leader favours %s" % focus,"occupied":occupied,
+		"tip":"The local leader shares out the people's time between food, water, learning and other needs. Asking for more hands on learning changes who works at learning, not what is found; essential needs can still hold it back.",
+		"on_more":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh(),
+		"on_free":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}
+
+## Artifact study as a row of the board: its share of the learners' time and the collection's count.
+func _artifact_study()->Dictionary:
+	var capacity:Dictionary=ArtifactCulture.A.study_capacity()
+	var summary:=ArtifactCulture.summary()
+	var item:=_artifact_study_item(int(capacity.total_weight),0)
+	var words:="%d waiting · %d in study · %d studied" % [int(summary.unstudied_count),int(summary.in_study_count),int(summary.studied_count)]
+	if float(capacity.researchers)>0:words+=" · %s a day" % ("%.1f study-work" % float(capacity.rate))
+	return {"share":float(capacity.weight)/maxf(1.0,float(capacity.total_weight)),"weight":int(capacity.weight),"words":words,"tip":String(item.tip),"on_less":item.on_minus,"on_more":item.on_plus}
 
 ## How fast the people learn and what limits it, every number the engine's
 ## own: the learners and their teams' work (Research600.team_capacity) against

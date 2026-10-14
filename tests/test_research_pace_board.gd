@@ -52,7 +52,8 @@ func test_waiting_lines_name_what_they_lack()->void:
 		{"line":"Tool quality","kind":"gate","lacks":["Stone"],"reason":"Needs knowledge of Stone (next: Ground Stone Axes)"},
 		{"line":"Material supply","kind":"ahead","years":68.0,"reason":"Its next question is 68 years ahead."}]}
 	var words:=Board._waiting_words(lane)
-	assert_str(String(words.text)).is_equal("Tool quality lacks stone · Material supply: next question 68 years ahead")
+	assert_str(String(words.text)).is_equal("Tool quality lacks stone · 1 more line waiting")
+	assert_str(String(words.tip)).contains("Material supply: Its next question is 68 years ahead.")
 	assert_bool(bool(words.lacking)).is_true()
 	assert_str(String(words.tip)).contains("Needs knowledge of Stone")
 

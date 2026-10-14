@@ -4,6 +4,7 @@ extends GdUnitTestSuite
 ## Build verb on the row, bills as pips, no "Details +" anywhere.
 
 const Board:=preload("res://scripts/hud/buildings_board.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
 func _block()->Dictionary:
 	var cards:Array=[]
@@ -38,6 +39,6 @@ func test_rows_carry_their_verb_and_pips_and_no_details_toggle()->void:
 	var nodes:Array=[];_walk(board,nodes)
 	var build:=nodes.filter(func(n:Node)->bool:return n is Button and (n as Button).text=="Build")
 	assert_int(build.size()).is_equal(1)
-	assert_int(nodes.filter(func(n:Node)->bool:return n is Board.Pips).size()).is_equal(1)
+	assert_int(nodes.filter(func(n:Node)->bool:return n is Dense.Pips).size()).is_equal(1)
 	assert_int(nodes.filter(func(n:Node)->bool:return n is Button and (n as Button).text.begins_with("Details")).size()).is_equal(0)
 	holder.queue_free()
