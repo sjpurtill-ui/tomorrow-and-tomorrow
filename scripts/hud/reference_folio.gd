@@ -15,7 +15,7 @@ const RULE:=Color("a59a80")
 ## the notices and a strip of map stay in view beside the page.
 const NOTICE_ROOM:=340.0+T.EDGE_MARGIN+14.0
 ## From this canvas width (1600 px at 125%) the page takes the window up to
-## the notice column; narrower, it keeps its old share.
+## the notice column. On smaller windows the open page uses the available room.
 const WIDE_FROM:=1280.0
 ## Reading distance should not grow with an ultrawide monitor. Extra room
 ## belongs to the living map; internal page layouts use compact task groups.
@@ -25,7 +25,7 @@ const MAX_PAGE_WIDTH:=1120.0
 ## related information remains within one comfortable reading area.
 static func page_width(view_width:float)->float:
 	var share:=minf(maxf(320.0,view_width*0.567),view_width-RAIL_WIDTH)
-	if view_width<WIDE_FROM:return share
+	if view_width<WIDE_FROM:return maxf(240.0,view_width-RAIL_WIDTH-T.EDGE_MARGIN)
 	return minf(MAX_PAGE_WIDTH,maxf(share,view_width-RAIL_WIDTH-NOTICE_ROOM))
 
 static func paper()->ColorRect:

@@ -19,7 +19,7 @@ const WHY:={
 }
 const SHORT:={"survey_output":"Surveying","scout_reach":"Scout reach","realm_reach":"Territorial reach","adoption_rate":"New ways spreading","food_yield":"Food yield","construction_output":"Building","resource_output":"Materials gathered","material_target":"Material quality","health_target":"Health","cohesion_target":"Social cohesion","conception_support":"Birth support","security_target":"Home safety","knowledge_gain":"Learning","training_rate":"Training","training_capacity":"Training capacity","command_development":"Command development","labor_multiplier":"Work output","trade_access":"Trade access","logistics_target":"Transport & roads"}
 const FIELDS:={"horizons":"Travel & land","makers":"Craft & building","gathering":"Culture & institutions","inquiry":"Knowledge & health","military":"Security & logistics","sustenance":"Food & land","wellbeing":"Health & population","commerce":"Production & logistics","expansion":"Logistics & population","dominion":"Security & institutions","purity":"Culture & security","dynasty":"Institutions & building","retribution":"Security & institutions","orthodoxy":"Institutions & culture"}
-const POINT_TARGETS:=["health_target","cohesion_target","security_target","material_target","logistics_target"]
+const POINT_TARGETS:=["health_target","cohesion_target","security_target","material_target","logistics_target","trade_access"]
 
 static func brief(id:String)->Dictionary:
 	var gains:PackedStringArray=[];var costs:PackedStringArray=[]

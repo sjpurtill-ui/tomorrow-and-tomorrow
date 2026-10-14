@@ -93,8 +93,25 @@ buildings. Year overview counts are scoped to that year. Root accepted the
 chooser/reader revision; three integrated bounded-reader cases pass (eight
 worker Chronicle cases and 24 private GPU views in both palettes).
 
-HELD: Production/Exchange, Home detail/Buildings, and Figures/notices. These are not claimed as
-delivered. No game rules are changed.
+This checkpoint adds accepted Production choices/readings, Exchange (`8effe71a`,
+worker `36b310cd`) and Figures/notices (`f72c4b78`, worker `8eda0ae8`). Production
+has four order choices, six product/store/craft choices (four narrow), one live
+reading, complete product purpose/cost/blocker, and bounded formation evidence.
+A accepted the revised rendered interiors. Thirty-one distinct focused Production
+cases pass across the final runs; the private GPU pass covers 60 states at three
+widths in both palettes. Eleven shared width/cache cases pass. Narrow docks now
+use available room beside the rail; the wide 1120 px cap is unchanged.
+
+Exchange has six searchable choices, one illustrated piece and explicit policies
+with Back; all 79 integrated Artifact/Exchange cases pass. Figures keeps three
+recent deeds and a six-record archive; notices also have a bounded archive.
+Twenty integrated Figures/notices cases pass; the worker's 24 private GPU views
+passed independent review. Opening trade-access gains now correctly say points,
+matching the existing additive effect. No game rules are changed.
+
+HELD: Production History, Home detail, Buildings, and War fronts/leaders. These
+are not claimed as delivered. The latest Buildings screenshot also prompted four
+alternative composition concepts for the user's comparison.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)
