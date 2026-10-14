@@ -266,7 +266,7 @@ func open_scout_report(mission_id:int)->bool:
 	if not is_instance_valid(hud) or not hud.has_method("open_detail"):return false
 	for report in CivilizationSystem.scout_reports:
 		if report is Dictionary and int((report as Dictionary).get("mission_id",-1))==mission_id:
-			hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,report,preload("res://scripts/hud/content/dock_detail_scout_archive.gd").new(terrain,hud)))
+			hud.open_detail(preload("res://scripts/hud/content/dock_detail_scout_report.gd").new(terrain,hud,report))
 			return true
 	if hud.has_signal("section_requested"):hud.emit_signal("section_requested","world",0)
 	return false

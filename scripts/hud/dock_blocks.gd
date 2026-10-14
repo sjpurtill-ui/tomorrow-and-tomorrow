@@ -1,7 +1,29 @@
 class_name DockBlocks
-## Renders the nine dock body block types from plain dictionaries. Interactive
-## items carry Callables ("on_press", "on_minus", "on_plus", "on_click",
-## "on_submit"). Block shape reference: design handoff Dock Panel.dc.html.
+## Renders the dock body blocks from plain dictionaries. Interactive items
+## carry Callables ("on_press", "on_minus", "on_plus", "on_click",
+## "on_submit").
+##
+## HOW A TAB IS BUILT (the strategy-screen language; use these, not boxes):
+##   tab(sub) returns {"kpis":[...], "blocks":[...]}.
+##   kpis       the strip under the tabs: 3-6 figures, each
+##              {label, value, glance:true, meter (0..1) + meter_color with
+##              its scale said in delta or tip, delta, tip, on_press}
+##              (dock_panel.gd _rebuild_kpis). Figures in the strip or the
+##              top bar are never repeated below.
+##   fact_grid  ordinary facts, one line each, flowing into 2-3 columns:
+##              {items:[{label, value, icon, bar, tone, tip, on_click,
+##              button:{label,on_press}}]} (dense_blocks.gd).
+##   table      lists: one line per item, aligned columns, tag, bar and a
+##              verb on the row, group headers; "empty" is one small line
+##              (dense_blocks.gd).
+##   costs      a work's cost against stock: icon, have / need green or
+##              red, pips, and its button beside it (dense_blocks.gd).
+##   frame      a ruled panel holding blocks with its verbs on its title
+##              line: an inline planner, a group of rows (dense_blocks.gd).
+##   DenseBlocks.verb() / .tag() for a lone button or state tag.
+## Never: a box whose only job is to open another screen ("actions" items
+## that call open_detail / section_requested), instruction sentences, a
+## finished or empty state as the main content.
 
 const Live:=preload("res://scripts/hud/live_value_binding.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -35,6 +57,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"peoples_known":
 				var board:=preload("res://scripts/hud/peoples_known_board.gd").new();section.add_child(board);board.setup(block)
+			"expeditions":
+				var board:=preload("res://scripts/hud/expeditions_board.gd").new();section.add_child(board);board.setup(block)
+			"world_history":
+				var board:=preload("res://scripts/hud/world_history_board.gd").new();section.add_child(board);board.setup(block)
 			"city_dossier":
 				var dossier:=preload("res://scripts/hud/city_dossier.gd").new();section.add_child(dossier);dossier.setup(block)
 			"held_town":
@@ -51,8 +77,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/overview_folio.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
-			"village_history":
-				var panel:=preload("res://scripts/hud/village_view_history.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
 			"purse_board":
@@ -72,7 +96,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var impact:=preload("res://scripts/hud/impact_panel.gd").new()
 				section.add_child(impact);impact.setup(block)
 			"town_works":
-				var works:Control=preload("res://scripts/hud/builders_town_folio.gd").new() if bool(block.get("folio",false)) else preload("res://scripts/hud/town_works_board.gd").new()
+				var works:Control=preload("res://scripts/hud/buildings_board.gd").new() if bool(block.get("board",false)) else (preload("res://scripts/hud/builders_town_folio.gd").new() if bool(block.get("folio",false)) else preload("res://scripts/hud/town_works_board.gd").new())
 				section.add_child(works);works.setup(block)
 			"construction_queue":
 				var queue:=preload("res://scripts/hud/construction_queue.gd").new()
@@ -102,12 +126,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"recruitment_brief":
 				var brief:=preload("res://scripts/hud/recruitment_brief.gd").new()
 				section.add_child(brief);brief.setup(block)
-			"scout_archive":
-				var archive:=preload("res://scripts/hud/scout_archive_widget.gd").new()
-				archive.records=block.get("reports",[])
-				archive.view_state=block.get("view_state",{})
-				archive.open_report=block.get("on_open",Callable())
-				section.add_child(archive)
 			"trend_chart":
 				var chart:=preload("res://scripts/hud/trend_chart.gd").new()
 				section.add_child(chart)
@@ -124,6 +142,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"bars": _render_bars(section,block)
 			"tiles": _render_tiles(section,block)
 			"rows": _render_rows(section,block)
+			"fact_grid": Dense.render_fact_grid(section,block)
+			"table": Dense.render_table(section,block)
+			"costs": Dense.render_costs(section,block)
+			"frame": Dense.render_frame(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
 			# No talk or order boxes in a dock: every conversation happens in the
@@ -379,6 +401,8 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			column.add_child(note)
 
+
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
 static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 	var list:=VBoxContainer.new()

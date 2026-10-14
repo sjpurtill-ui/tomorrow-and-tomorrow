@@ -91,9 +91,14 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Allocation",true,false)).is_not_null()
-	# Top to bottom: the forces, the towns, the bands.
-	var order:=["ForcesCard","TownsCard","BandsCard","Enemies","Leaders"].map(func(n:String)->int:return (board.find_child(n,true,false) as Control).get_index() if board.find_child(n,true,false).get_parent()==board else (board.find_child(n,true,false).get_parent() as Control).get_index())
-	for i in order.size()-1:assert_int(int(order[i])).is_less(int(order[i+1]))
+	# Three parts: the army (its forces with each town's guard), the fronts
+	# (the enemies and the border), the leaders. The bands out are the army
+	# bar's cards, not a list here.
+	for part in [["ArmySection",["ForcesCard","TownsCard","MakeupCard","CostCard"]],["FrontsSection",["Enemies","BorderCard"]],["LeadersSection",["Leaders"]]]:
+		var section:Node=board.find_child(String(part[0]),true,false)
+		assert_object(section).is_not_null()
+		for n in part[1]:assert_object(section.find_child(String(n),true,false)).override_failure_message(String(n)).is_not_null()
+	assert_object(board.find_child("BandsCard",true,false)).is_null()
 	for name in ["WatchMore","WatchLess","GuardMore","GuardLess","People"]:assert_object(board.find_child(name,true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
@@ -256,7 +261,7 @@ func test_the_war_screen_keeps_the_map_as_the_screen()->void:
 	await get_tree().process_frame
 	assert_bool(screen.war_mode()).is_true()
 	var view:Vector2=screen.get_viewport().get_visible_rect().size
-	assert_float(screen.panel.size.x).is_equal(Board.COLUMN_WIDTH)
+	assert_float(screen.panel.size.x).is_equal(Board.column_width(view.x))
 	assert_float(screen.panel.position.x+screen.panel.size.x).is_equal_approx(view.x-preload("res://scripts/hud/hud_tokens.gd").EDGE_MARGIN,0.5)
 	assert_object(screen.body.find_child("WarStrip",true,false)).is_null()
 	# Army size, armed and home guard each stand once in the column.

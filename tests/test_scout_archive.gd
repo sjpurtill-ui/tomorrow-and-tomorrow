@@ -22,7 +22,7 @@ func test_city_reconnaissance_prioritizes_target_evidence_over_exploration()->vo
 	assert_str(detail.meta().subtabs[0]).is_equal("What they saw of the city")
 	assert_str(detail.tab(0).blocks[0].heading).contains("target city")
 const Archive:=preload("res://scripts/scout_archive.gd")
-const Widget:=preload("res://scripts/hud/scout_archive_widget.gd")
+const Board:=preload("res://scripts/hud/expeditions_board.gd")
 const Detail:=preload("res://scripts/hud/content/dock_detail_scout_report.gd")
 
 func before_test()->void:
@@ -33,22 +33,35 @@ func record(index:int)->Dictionary:
 	return {"mission_id":index+1,"day":index*7,"personnel":8,"returned_personnel":8,"target_id":"open_world","target_label":"Open exploration","route":[{"x":0,"z":0},{"x":index+10,"z":-index-10}],"distance_km":index*2+28,"archive_reviewed":false,"discoveries":[{"kind":"knowledge","title":"A wider world, carried home","description":"Routine observations","duration_days":90}],"journal":["They walked across woodland."]}
 
 func test_full_retained_archive_is_paged_and_every_report_remains_retrievable()->void:
-	var widget:Variant=auto_free(Widget.new())
-	for index in 256: widget.records.append(record(index))
-	add_child(widget)
-	assert_int(widget.visible_items.size()).is_equal(5)
-	assert_int(widget.results.get_child_count()).is_equal(5)
+	var records:Array=[]
+	for index in 256: records.append(record(index))
+	var widget:Variant=auto_free(Board.new())
+	add_child(widget);widget.setup({"reports":records})
+	assert_int(widget.visible_items.size()).is_equal(Board.PAGE)
+	assert_int(widget.results.get_child_count()).is_equal(Board.PAGE)
 	var seen:Dictionary={}
-	for page in 52:
+	for page in 30:
 		for item:Dictionary in widget.visible_items: seen[item.id]=true
 		if not widget.next.disabled: widget.next.pressed.emit()
 	assert_int(seen.size()).is_equal(256)
-	assert_int(widget.visible_items.size()).is_equal(1)
+	assert_int(widget.visible_items.size()).is_equal(256%Board.PAGE)
 	assert_bool(widget.next.disabled).is_true()
 	widget.search.text_changed.emit("Party 173")
 	assert_int(widget.visible_items.size()).is_equal(1)
 	assert_int(int(widget.visible_items[0].report.mission_id)).is_equal(173)
-	assert_int(int(widget.view_state.page)).is_equal(0)
+	assert_int(int(widget.view.page)).is_equal(0)
+
+func test_unread_tellings_group_by_what_they_tell()->void:
+	var records:Array=[]
+	for index in 3:
+		var r:=record(index);r.discoveries=[{"kind":"intelligence","title":"Armed strangers on the road","description":"Spears"}]
+		records.append(r)
+	var read:=record(5);read.archive_reviewed=true;records.append(read)
+	var groups:=Board.unread_groups(records)
+	assert_int(groups.size()).is_equal(1)
+	assert_str(String(groups[0].title)).is_equal("Armed strangers on the road")
+	assert_int((groups[0].reports as Array).size()).is_equal(3)
+	assert_array(groups[0].places).contains(["NE"])
 
 func test_search_reaches_saved_detail_text_and_filters_routine_losses_and_unread()->void:
 	var routine:=record(0); routine.erase("archive_reviewed")
@@ -94,20 +107,21 @@ func test_detail_has_no_repeated_hero_and_art_matches_saved_terrain_only()->void
 	assert_str(JSON.stringify(detail.tab(1))).contains("Routine observations")
 	assert_str(JSON.stringify(detail.tab(1))).contains("chronicle-forest")
 
-func test_open_and_return_preserves_archive_search_filter_page_and_speed()->void:
-	var widget:Variant=auto_free(Widget.new())
-	for index in 12: widget.records.append(record(index))
-	CivilizationSystem.scout_reports.assign(widget.records)
-	widget.view_state={"query":"","filter":0,"order":1,"page":1}
+func test_reading_a_telling_keeps_the_table_page_and_speed()->void:
+	var records:Array=[]
+	for index in 30: records.append(record(index))
+	CivilizationSystem.scout_reports.assign(records)
 	var opened:Array=[]
-	widget.open_report=func(value:Dictionary)->void: opened.append(value)
+	var widget:Variant=auto_free(Board.new())
 	add_child(widget)
+	widget.setup({"reports":CivilizationSystem.scout_reports,"view":{"query":"","filter":0,"order":1,"page":1},"on_read":func(value:Dictionary)->void: opened.append(value)})
 	var terrain:Variant=auto_free(preload("res://scripts/local_terrain.gd").new())
 	terrain.game_speed=5.0
-	(widget.results.get_child(0) as Button).pressed.emit()
+	var first:Dictionary=widget.visible_items[0].report
+	widget.open_report(first)
 	assert_int(opened.size()).is_equal(1)
-	assert_bool(opened[0].archive_reviewed).is_true()
-	assert_int(int(widget.view_state.page)).is_equal(1)
+	assert_bool(bool(first.get("archive_reviewed",false))).is_true()
+	assert_int(int(widget.view.page)).is_equal(1)
 	assert_float(terrain.game_speed).is_equal(5.0)
 
 func test_legacy_findings_are_searchable_without_inventing_review_history()->void:

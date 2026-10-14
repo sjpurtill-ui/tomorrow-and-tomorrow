@@ -18,13 +18,13 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
 
 ## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"people":230,"fighters":230,"between":104,"seen":150}
-const NAME_MIN:=150
-const GAP:=10
+const WIDTHS:={"people":140,"fighters":130,"between":96,"seen":76,"talk":46}
+const NAME_MIN:=100
+const GAP:=8
 ## The sheet's paper margin, each side (px).
 const PAD:=14
 ## On a narrow page these columns give way, first to last.
-const SHED:=["seen","between"]
+const SHED:=["seen","talk","between"]
 ## The two counts drawn on the page, each a bar against ours.
 const FIGURES:=["people","fighters"]
 ## The rest of what we know of a people is said in its row's pointer, and
@@ -38,6 +38,8 @@ var model:Dictionary={}
 ## {sort: column, flip: the other way round, open: the people whose towns show}.
 var view:Dictionary={}
 var on_town:Callable
+## A word with a people's ruler (the court), from the Talk button on its row.
+var on_speak:Callable
 ## Each column's nodes, to let them give way on a narrow page.
 var parts:Dictionary={}
 ## The columns giving way at this width.
@@ -73,6 +75,7 @@ func _take(block:Dictionary)->void:
 	if not view.has("flip"):view["flip"]=false
 	if not view.has("open"):view["open"]=""
 	on_town=block.get("on_town",Callable())
+	on_speak=block.get("on_speak",Callable())
 
 ## Sorts by a column; the same column again sorts the other way round.
 func sort_by(column:String)->void:
@@ -172,6 +175,7 @@ func _header_row()->Control:
 	var seen:=_label("Last seen",12,T.INK_MUTED,true);seen.name="Head_seen";seen.custom_minimum_size.x=float(WIDTHS.seen)
 	seen.tooltip_text="How old our newest word of them is, and who brought it."
 	row.add_child(seen);_part("seen",seen)
+	var talk:=Control.new();talk.name="Head_talk";talk.custom_minimum_size.x=float(WIDTHS.talk);row.add_child(talk);_part("talk",talk)
 	return row
 
 static func _cell_style(bg:Color)->StyleBoxFlat:
@@ -203,6 +207,7 @@ func _row(row:Dictionary)->Control:
 	for id:String in FIGURES:line.add_child(_figure_cell(row,id,refs))
 	line.add_child(_between_cell(row,refs))
 	line.add_child(_seen_cell(row,refs))
+	line.add_child(_talk_cell(row))
 	return panel
 
 static func _clicked(event:InputEvent)->bool:
@@ -239,6 +244,16 @@ func _seen_cell(row:Dictionary,refs:Dictionary)->Control:
 	_part("seen",cell)
 	return cell
 
+## A word with their ruler, in the court ("Talk"); nothing on our own row.
+func _talk_cell(row:Dictionary)->Control:
+	var cell:=HBoxContainer.new();cell.name="Cell_talk";cell.custom_minimum_size.x=float(WIDTHS.talk);cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	_part("talk",cell)
+	if bool(row.us) or not on_speak.is_valid():return cell
+	var civ_id:=String(row.civ_id)
+	var b:=preload("res://scripts/hud/world_ui.gd").verb(cell,"Talk",func()->void:on_speak.call(civ_id),"Speak with their ruler in the court; our envoys carry the words.")
+	b.name="Talk"
+	return cell
+
 func _tag(text:String)->Control:
 	var pill:=PanelContainer.new();pill.name="Tag"
 	var style:=T.flat(Color(0,0,0,0),T.GOLD,1,8);style.content_margin_left=6;style.content_margin_right=6
@@ -252,7 +267,7 @@ func _tag(text:String)->Control:
 func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
 	cell.custom_minimum_size.x=float(WIDTHS.get(id,60));cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(96,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(64,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	cell.add_child(bar);refs["bar_"+id]=bar
 	var value:=_fitted(_label("",13,T.INK),"Value",true)
 	cell.add_child(value);refs["value_"+id]=value
@@ -283,7 +298,7 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 		if mark.level!=String(fresh.get("level","none")):
 			mark.level=String(fresh.get("level","none"));mark.queue_redraw()
 		mark.tooltip_text=String(fresh.get("tip",""))
-	_put(refs.get("age"),String(fresh.get("text","")),String(fresh.get("tip","")))
+	_put(refs.get("age"),_short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
 	_put(refs.get("source"),String(fresh.get("source","")),"Who brought our newest word of them.")
 	var titles:=_titles()
 	for id:String in FIGURES:
@@ -291,7 +306,8 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 		var known:=bool(c.get("known",false))
 		# Their rank among the peoples is in the pointer; our own row is never compared with itself.
 		var rank:=String(c.get("rank_tip","")) if not bool(row.us) else ""
-		_put(refs.get("value_"+id),String(c.get("text","")) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
+		# One figure beside the bar (its middle); the bar draws the band and the range is in the pointer.
+		_put(refs.get("value_"+id),_middle_text(c) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
 		var bar:RangeBar=refs.get("bar_"+id)
 		if bar!=null:
 			bar.low=float(c.get("low",0.0)) if known else -1.0
@@ -314,6 +330,16 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 	_put(refs.get("trust"),String(between.get("sub","")),String(between.get("tip","")))
 	_put(refs.get("stance"),"→ "+String(between.get("stance","")),"Our stance toward them on the War screen.")
 
+
+## "108 years ago" -> "108 yr ago", to fit its narrow column.
+static func _short_age(text:String)->String:
+	return text.replace(" years ago"," yr ago").replace(" year ago"," yr ago").replace(" months ago"," mo ago").replace(" month ago"," mo ago").replace(" days ago"," d ago")
+
+## A count's one figure: exact as it is, an estimate as "~" its middle.
+func _middle_text(c:Dictionary)->String:
+	var low:=float(c.get("low",0.0));var high:=float(c.get("high",0.0))
+	if bool(c.get("exact",false)) or is_equal_approx(low,high):return String(c.get("text",""))
+	return "~"+Model._count(float(Model.nice((low+high)*0.5)),String(model.get("stage","hearth")))+("+" if bool(c.get("partial",false)) else "")
 
 ## The most any people may have in a column (the bars' full width), and our own count.
 func _top(id:String)->float:

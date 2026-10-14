@@ -73,14 +73,9 @@ static func weather_line(celsius:float)->String:
 
 
 static func headline(report:Dictionary,totals:Dictionary)->String:
-	var count:=int(report.population)
+	# What the numbers do not say: the head count and the stores are the top
+	# bar's and the tiles'; the line says how the people fare.
 	var parts:PackedStringArray=[]
-	var stage:=EraWords.stage()
-	if stage=="hearth":parts.append("%s at the %s fires." % [EraWords.people(count),home_name()] if not GameState.player_settlements.is_empty() else "%s on the move." % EraWords.people(count))
-	elif stage=="lettered":parts.append("%s in %s." % [EraWords.people(count),EraWords.places(maxi(1,(report.cities as Array).size()))])
-	else:parts.append("Population %s across %s." % [EraWords.grouped(count),EraWords.places(maxi(1,(report.cities as Array).size()))])
-	var food:=float(report.food_min)
-	if food>=0.0:parts.append("Stores for %s." % EraWords.days_in_words(food))
 	var need:=float(totals.get("food_need",0.0))
 	var intake:=clampf(float(totals.get("food_eaten",0.0))/need,0.0,1.0) if need>0.0 else 1.0
 	var children:="The children are fed" if intake>=0.99 else "Some children sleep hungry" if intake>=0.8 else "The children go hungry"
