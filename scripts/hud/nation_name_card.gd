@@ -74,5 +74,5 @@ static func _line(column:VBoxContainer,prefill:String)->LineEdit:
 			input.text=chosen
 			input.text_changed.emit(chosen)
 			if input.is_inside_tree(): input.grab_focus()
-		Kit.quiet_button(row,chosen,pick,"Use this name").name="Suggestion"
+		Kit.button(row,chosen,false,pick,"Use this name").name="Suggestion"
 	return input

@@ -29,26 +29,26 @@ of actionable findings. Shared helpers receive a separate independent review.
 | Home | Overview, People, Culture, Council, person/office, labor and impact | Complete — B/A critique and revision, Night/Daylight recheck, 56 focused cases |
 | Health and population | Lives, sickness/disasters, population, every death | Complete — Home review includes nested care, impact, capacity and records; existing care callback verified |
 | Food and materials | Food/water/fire, resource details, priorities, deliveries | Complete — A/B critique, revision and recheck; healthy/shortage/source captures, live updates and callbacks tested |
-| Wealth and trade | Accounts, holdings, obligations, partners and actions | Awaiting design |
-| Buildings | Town, civic works, infrastructure, landmarks, queue, material bills, history | Awaiting design |
-| World | Peoples, expeditions, history, dossiers, scout findings/journey, planner, rumors | Main pages complete — C/root critique and recheck; nested reports in progress |
+| Wealth and trade | Accounts, holdings, obligations, partners, menus and Deliveries | Complete — A/B critique, revision and stress recheck; exact recorded prices, capacity and trade actions retained |
+| Buildings | Town, civic priorities, infrastructure, landmarks and linked detail/court | Complete — B/A critique, revision and later-town recheck; 24 tests, existing View/Conceive routes verified |
+| World | Peoples, expeditions, history, dossiers, scout findings/journey, planner, rumors | Complete — C/root critique, multiple revisions and recheck; recorded routes retained, empty routes compact |
 | Standing and spies | Own/foreign assessments, intelligence details, warnings and actions | Complete — C/root visual review, 43 Standing/Covert cases |
-| War and command | Army/fronts/leaders, border/fort, hierarchy orders/zones/organization, later services | Army/fronts/leaders and Orders complete; nested command final check pending |
+| War and command | Army/fronts/leaders, border/fort, hierarchy orders/zones/organization, later services | Complete — root/C critique and recheck; full command destinations, 40 px native tabs, stable border updates |
 | Battle and services | Live/replay/report, siege, occupation, recovery, navy/air/dock and transport | Complete — C/root critique, service navigation revision and recheck; 40 service captures, battle/siege/aftermath probes |
 | Court | Court roster, audiences/envoys, foreign exchange/pacts, history, receipt, office and judgment UI | Complete — root/C critique, narrow footer revision, dossier/transcript recheck; 14 presentation/decree tests clean |
-| Direction and figures | Course/character, people browser, biography/event history | Awaiting design |
-| Collections | Artifact status filters, sets/rumors, selected artifact, exchange/gift/sell/swap | Gallery complete — C/root review and narrow detail revision; exchange in progress |
-| Great works | Ours/foreign, work detail, construction, enshrine picker, dedication | Awaiting design |
-| Opening and travel | First fire/purpose/naming, founding guide, caravan/convoy/arrival, rename | First fire complete after C review; pinned confirmation and scroll on narrow. Travel pending |
-| Settings | Pause/save/load, display/audio/navigation, AI, new world, confirmations | In progress — root |
-| Records and small popups | Chronicle pages, notices, all orders, hover, map help/survey/contact/battle/border notes | Chronicle complete after C/root review; small overlays in final review |
+| Direction and figures | Course/character, people browser, biography/event history | Complete — C/root critique and recheck; continuous biography, selected-state cues and support action retained |
+| Collections | Artifact status filters, sets/rumors, selected artifact, exchange/gift/sell/swap | Complete — C/root critique, narrow detail and exchange revision, populated 960/340 px recheck |
+| Great works | Ours/foreign, work detail, construction, enshrine picker, dedication | Complete — C/root critique and first-draw/reopen revision; details and controls rechecked |
+| Opening and travel | First fire/purpose/naming, founding guide, caravan/convoy/arrival, rename | Complete — root/C critique and recheck; pinned confirmation, current travel quote and blocked reason, compact rename |
+| Settings | Pause/save/load, display/audio/navigation, AI, new world, confirmations | Complete — root/C critique, native control/contrast revisions and both-theme recheck; every disclosure and advanced field reachable |
+| Records and small popups | Chronicle, notices, all orders, hover, map help/survey/contact/battle/border/supply notes | Complete — reciprocal critique and recheck; readable text, bounded scroll, full recorded order reason and existing destination links |
 
 The baseline has seven categories and 27 declared tab destinations. War routes to
 the current roster/war board, not the compatibility provider's old forms. Scout
 dispatch routes to Expeditions; diplomat dispatch routes to the court. Research
 purchase, technology operations, clothing and scout-target legacy panels have no
 current production caller; community-network opening has no current caller or
-hotkey. Dormant code is excluded unless a reachable runtime route is demonstrated.
+hotkey. The construction provider's old queue/history ledger helpers also have no current tab dispatch. Dormant code is excluded unless a reachable runtime route is demonstrated. All four active Buildings destinations were inspected.
 
 ## Navigation decisions
 
@@ -61,6 +61,11 @@ hotkey. Dormant code is excluded unless a reachable runtime route is demonstrate
   and production actions on Forces; keep old page IDs as navigation aliases.
 - World relationships belong inside each people dossier. Retain detailed
   assessments as an inline disclosure instead of a second table of people.
+- Home groups everyday impact with its relevant task; Homes/Mood detail is inline.
+- Keep Buildings' Town, Civic priorities, Infrastructure and Landmarks as four
+  distinct tasks; put current work and existing commands ahead of effects.
+- Replace the biography's arbitrary three-event pagination with one continuous
+  readable history. Retain filtering/selection for the Collections task.
 - Replace generic modal shrinking/automatic child paging with readable overflow;
   a window size must not invent semantic subpages or reopen a collapsed section.
 
@@ -93,3 +98,33 @@ captures stay in artifacts. A source audit alone is not visual acceptance.
   recovery retains real prepare/commit/cancel behavior. Occupation's minimum
   scroll height was reduced after an 800x600 overflow; final two-size probe
   and C visual recheck pass. These changes do not alter orders or calculations.
+
+
+## Final audit and preservation boundary
+
+The source entry-point audit includes every current category route, nested detail
+provider, local-terrain modal opener, Court/military opener, explicit screen loader
+and both native confirmations. It found Supply's legend/hover and the AI Forget
+confirmation as the final missing surfaces; both are included. There are no
+remaining reachable popup families awaiting design in this audit.
+
+The changes preserve simulation rules, prices, resource arithmetic, action
+availability, callbacks and save schema. UI-only lifetime fixes keep existing
+Landmark commands callable and prevent stale Great Works preview hosts on reopen.
+Native Save/Discard/Cancel and Forget/Keep actions still use their original handlers.
+The live player/editor was not restarted or replaced with a preview.
+
+Validation uses disposable fixtures, isolated userdata and private-desktop GPU
+probes. Final menu captures assert 44 px primary and 40 px secondary native
+controls. Command captures cover all three destinations at two widths; battle
+reports cover 800, 1024 and 1600 px in both modes; the border probe passes 84
+checks across 16 captures. Order presentation keeps the whole reason already
+recorded by the tracker, and 22 tracker cases pass. Naming adds 11 passing cases.
+
+One pre-existing limitation remains outside the design work: the comprehensive
+Great Works ceremony probe's second-dedication architect-speech assertion also
+fails on the unchanged baseline. Focused Great Works UI/reopen tests pass. This
+work does not change ceremony narration or game logic to make that assertion pass.
+See POPUP_WORLD_COLLECTIONS.md and BUILDINGS_MODERN_STRATEGY.md for their detailed
+review evidence. Generated captures, import caches, credentials and saves are
+excluded from source delivery.

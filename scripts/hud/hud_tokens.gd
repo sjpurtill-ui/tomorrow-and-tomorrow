@@ -547,6 +547,36 @@ static func apply_button_style(button:Button,primary:bool=false)->Button:
 	button.add_theme_color_override("font_disabled_color",DISABLED)
 	return button
 
+## Match native confirmation controls after their existing buttons are created.
+static func style_confirmation_dialog(dialog:ConfirmationDialog)->void:
+	dialog.theme=control_theme()
+	var frame:=flat(PANEL_BG_SOLID,BORDER,1,4,8)
+	frame.expand_margin_top=float(dialog.get_theme_constant("title_height"))
+	dialog.add_theme_stylebox_override("embedded_border",frame)
+	dialog.add_theme_stylebox_override("embedded_unfocused_border",frame)
+	# Window close icons do not inherit font color. Draw the same clear cross
+	# in theme ink so the embedded title bar stays legible in Daylight too.
+	for state in ["close","close_pressed"]:
+		var icon:=Image.new()
+		var ink:=INK if state=="close" else ACTION
+		icon.load_svg_from_string('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M4 4L12 12M12 4L4 12" stroke="#%s" stroke-width="2" stroke-linecap="round"/></svg>' % ink.to_html(false))
+		dialog.add_theme_icon_override(state,ImageTexture.create_from_image(icon))
+	for label:Node in dialog.find_children("*","Label",true,false):
+		(label as Label).add_theme_color_override("font_color",INK)
+		(label as Label).add_theme_font_size_override("font_size",16)
+	for button:Node in dialog.find_children("*","Button",true,false):apply_button_style(button as Button,false)
+	apply_button_style(dialog.get_ok_button(),true)
+	# AcceptDialog resets custom minimum sizes during its layout. Put the target
+	# height in the button's intrinsic style margins so native layout retains it.
+	for button:Node in dialog.find_children("*","Button",true,false):
+		var control:=button as Button
+		var height:=44.0 if control==dialog.get_ok_button() else 40.0
+		var padding:=ceilf((height-control.get_theme_font("font").get_height(control.get_theme_font_size("font_size")))/2.0)
+		for state in ["normal","hover","pressed","hover_pressed","disabled"]:
+			var skin:=control.get_theme_stylebox(state).duplicate() as StyleBox
+			skin.content_margin_top=padding;skin.content_margin_bottom=padding
+			control.add_theme_stylebox_override(state,skin)
+
 static func brief_style(tone:String)->StyleBoxFlat:
 	var bg:=INFO_BG
 	var border:=INFO_BORDER

@@ -151,6 +151,7 @@ static func open(terrain:Node,layer:Node)->Control:
 		choice.button_pressed=count==GameState.opponent_count
 		choice.tooltip_text="How many other peoples share a new world. This game keeps its neighbours."
 		choice.add_theme_font_size_override("font_size",14)
+		T.apply_button_style(choice,false)
 		choice.pressed.connect(func()->void:
 			GameState.opponent_count=count
 			for sibling in neighbours_row.get_children():

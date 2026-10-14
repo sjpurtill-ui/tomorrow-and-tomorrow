@@ -70,21 +70,22 @@ func _ready()->void:
 	custom_minimum_size=Vector2(WIDTH,0)
 	all_panel=PanelContainer.new();all_panel.name="AllOrders";all_panel.visible=false
 	all_panel.add_theme_stylebox_override("panel",_paper(Tokens.BORDER_SOFT))
-	var scroll:=ScrollContainer.new();scroll.custom_minimum_size=Vector2(WIDTH-16,0);scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;all_panel.add_child(scroll)
+	var scroll:=ScrollContainer.new();scroll.custom_minimum_size=Vector2(WIDTH-16,0);scroll.follow_focus=true;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;all_panel.add_child(scroll)
 	all_rows=VBoxContainer.new();all_rows.size_flags_horizontal=Control.SIZE_EXPAND_FILL;all_rows.add_theme_constant_override("separation",3);scroll.add_child(all_rows)
+	all_rows.minimum_size_changed.connect(func():scroll.custom_minimum_size.y=minf(all_rows.get_combined_minimum_size().y,minf(360.0,get_viewport_rect().size.y-160.0)))
 	add_child(all_panel)
 	plate=PanelContainer.new();plate.name="OrdersPlate";plate.size_flags_horizontal=Control.SIZE_SHRINK_END
 	plate.add_theme_stylebox_override("panel",_chip(false))
 	add_child(plate)
 	header=HBoxContainer.new();header.name="OrdersHeader";header.add_theme_constant_override("separation",8);header.alignment=BoxContainer.ALIGNMENT_END
 	plate.add_child(header)
-	caption=Tokens.make_label("YOUR ORDERS",11,Tokens.GOLD_TEXT,0.1);caption.name="OrdersCaption";caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	caption=Tokens.make_label("YOUR ORDERS",14,Tokens.GOLD_TEXT,0.1);caption.name="OrdersCaption";caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	header.add_child(caption)
-	all_button=Button.new();all_button.name="AllOrdersButton";all_button.focus_mode=Control.FOCUS_NONE
-	all_button.add_theme_font_size_override("font_size",12)
+	all_button=Button.new();all_button.name="AllOrdersButton";all_button.focus_mode=Control.FOCUS_ALL
+	all_button.add_theme_font_size_override("font_size",14)
 	all_button.add_theme_color_override("font_color",Tokens.text_for(Tokens.GOLD))
 	all_button.add_theme_stylebox_override("normal",_chip(false));all_button.add_theme_stylebox_override("hover",_chip(true));all_button.add_theme_stylebox_override("pressed",_chip(true))
-	all_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	all_button.add_theme_stylebox_override("focus",Tokens.gold_outline_style());all_button.custom_minimum_size.y=40
 	all_button.tooltip_text="Every order you gave lately, and how each stands."
 	all_button.pressed.connect(toggle_all)
 	header.add_child(all_button)
@@ -172,7 +173,7 @@ func rebuild()->void:
 	_header(orders)
 	if not compact:
 		for o in list:cards.add_child(_card(o as Dictionary))
-	cards.visible=not compact
+	cards.visible=not compact and not showing_all
 	if showing_all:_fill_all()
 	all_panel.visible=showing_all
 	visible=not orders.is_empty() and not suppressed
@@ -274,7 +275,7 @@ static func status_words(o:Dictionary)->String:
 	if state=="nothing":
 		var rest:=line.trim_prefix("Nothing has happened yet: ").trim_prefix("Not carried out: ")
 		return rest.substr(0,1).to_upper()+rest.substr(1)
-	if state in ["done","refused","called_off"] and not line.begins_with(String(STATE_WORDS[state])):return Tracker.short("%s · %s" % [STATE_WORDS[state],line])
+	if state in ["done","refused","called_off"] and not line.begins_with(String(STATE_WORDS[state])):return "%s · %s" % [STATE_WORDS[state],line]
 	return line
 
 func _card(o:Dictionary)->PanelContainer:
@@ -296,14 +297,14 @@ func _card(o:Dictionary)->PanelContainer:
 	icon.custom_minimum_size=Vector2(22,22);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(icon)
 	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",1);column.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(column)
-	var title:=_line(String(o.get("words","Order")),13,Tokens.INK);title.name="OrderTitle";column.add_child(title)
+	var title:=_line(String(o.get("words","Order")),16,Tokens.INK);title.name="OrderTitle";column.add_child(title)
 	var who:=String(o.get("who",""))
 	if who!="":
 		var by:=_line("By "+who,12,Tokens.MUTED);by.name="OrderWho";column.add_child(by)
 	if state=="nothing":
 		var alarm:=_line(String(STATE_WORDS.nothing),12,Tokens.RED_TEXT,0.06);alarm.name="OrderAlarm";alarm.add_theme_font_override("font",Tokens.font("ui_strong"));column.add_child(alarm)
 	var status:=Label.new();status.name="OrderStatus";status.text=status_words(o)
-	Tokens.style_label(status,12,Tokens.text_for(colour) if state!="accepted" else Tokens.BODY_2)
+	Tokens.style_label(status,14,Tokens.text_for(colour) if state!="accepted" else Tokens.BODY_2)
 	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=6 if state=="nothing" else 2;status.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	# A set width: the wrapped words know their height before the first sort.
 	status.custom_minimum_size=Vector2(TEXT_WIDTH,0)
@@ -335,7 +336,7 @@ func _tooltip(o:Dictionary)->String:
 	return "\n".join(parts)
 
 func _line(text:String,size:int,colour:Color,spacing:float=0.0)->Label:
-	var label:=Tokens.make_label(text,size,colour,spacing)
+	var label:=Tokens.make_label(text,maxi(14,size),colour,spacing)
 	label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.max_lines_visible=1;label.clip_text=true
 	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -350,11 +351,22 @@ func _fill_all()->void:
 	for o in Tracker.orders():
 		var order:Dictionary=o
 		var state:=String(order.state)
-		var row:=Button.new();row.name="AllOrder%d" % int(order.id);row.flat=true;row.focus_mode=Control.FOCUS_NONE
-		row.alignment=HORIZONTAL_ALIGNMENT_LEFT;row.clip_text=true;row.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.text="%s — %s" % [String(order.words),status_words(order) if state!="nothing" else "NOTHING HAS HAPPENED: "+status_words(order)]
+		var row:=Button.new();row.name="AllOrder%d" % int(order.id);row.flat=true;row.focus_mode=Control.FOCUS_ALL
+		Tokens.apply_button_style(row,false);row.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		var content:=VBoxContainer.new();content.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_theme_constant_override("separation",4);row.add_child(content)
+		content.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);content.offset_left=12;content.offset_right=-12;content.offset_top=10;content.offset_bottom=-10
+		var title:=Tokens.make_label(String(order.words),16,Tokens.INK);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(title)
+		var description:=Tokens.make_label(status_words(order) if state!="nothing" else "Nothing has happened: "+status_words(order),14,Tokens.text_for(state_colour(state)) if state!="accepted" else Tokens.BODY_2)
+		description.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;description.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(description)
+		if state in ["refused","nothing","stalled"] and not String(order.get("screen","")).is_empty():
+			var destination:=String(order.screen).get_slice(":",0)
+			var hint:=Tokens.make_label("Open %s for details →" % ({"production":"Production","military":"War","court":"the court"}.get(destination,"the order")),14,Tokens.GOLD_TEXT)
+			hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(hint)
+		var fit:=func():row.custom_minimum_size.y=maxf(64,content.get_combined_minimum_size().y+20)
+		content.minimum_size_changed.connect(fit);fit.call_deferred()
 		row.tooltip_text=_tooltip(order)
-		row.add_theme_font_size_override("font_size",12)
+		row.accessibility_name=row.tooltip_text
+		row.add_theme_font_size_override("font_size",14)
 		row.add_theme_color_override("font_color",Tokens.text_for(state_colour(state)) if state!="accepted" else Tokens.BODY_2)
 		row.add_theme_color_override("font_hover_color",Tokens.INK)
 		var screen:=String(order.get("screen",""))

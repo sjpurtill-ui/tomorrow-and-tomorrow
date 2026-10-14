@@ -82,9 +82,10 @@ func _ready()->void:
 		var exported:Dictionary=preload("res://scripts/interaction_store.gd").export_bundle()
 		status.text="Saved %d conversations to %s" % [int(exported.get("count",0)),ProjectSettings.globalize_path(String(exported.get("path","")))] if bool(exported.get("ok",false)) else "Could not export the conversations.";_fit.call_deferred())
 	P.button(advanced,"Forget the saved connection",func():
-		var confirmation:=ConfirmationDialog.new();confirmation.theme=T.control_theme();confirmation.dialog_text="Remove this game's saved AI connection from this computer and stop using it now?";confirmation.ok_button_text="Forget it";confirmation.cancel_button_text="Keep it";add_child(confirmation)
+		var confirmation:=ConfirmationDialog.new();confirmation.title="Forget the saved connection?";confirmation.dialog_text="Remove this game's saved AI connection from this computer\nand stop using it now?";confirmation.ok_button_text="Forget it";confirmation.cancel_button_text="Keep it";add_child(confirmation)
+		T.style_confirmation_dialog(confirmation)
 		confirmation.confirmed.connect(func():_show_status(String(Store.forget().get("message","Could not remove the saved connection. Try again.")));confirmation.queue_free())
-		confirmation.canceled.connect(confirmation.queue_free);confirmation.popup_centered())
+		confirmation.canceled.connect(confirmation.queue_free);confirmation.popup_centered(Vector2i(520,132));T.style_confirmation_dialog.call_deferred(confirmation))
 	get_viewport().size_changed.connect(_fit);card.minimum_size_changed.connect(_fit.call_deferred);_fit.call_deferred()
 
 func _toggle_advanced()->void:

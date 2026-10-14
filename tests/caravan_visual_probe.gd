@@ -75,12 +75,8 @@ func _ready()->void:
 	terrain._refresh_settlement_network(true)
 	await frames()
 	terrain._open_caravan_formation()
-	await capture("formation-card")
-	var card:Control=terrain.caravan_formation_card
-	if not is_instance_valid(card):failures.append("formation card did not open")
-	else:
-		var choose:Button=card.find_child("ChooseDestination",true,false)
-		choose.pressed.emit()
+	await capture("choose-destination")
+	if not terrain.settlement_convoy_targeting:failures.append("destination targeting did not start")
 	await frames()
 	var destination:=Vector3.ZERO
 	for radius:float in [45.0,34.0,26.0,18.0,12.0]:
@@ -95,13 +91,16 @@ func _ready()->void:
 	else:
 		terrain._begin_settlement_convoy(destination)
 		await capture("caravan-review")
-		# The ruler enlarges the party in the review: the quote reprices in place.
-		var people:SpinBox=terrain.caravan_formation_controls.get("people")
-		if is_instance_valid(people):
-			people.value=minf(people.max_value,people.value+20.0)
-			await frames()
-			if int(terrain.settlement_convoy_pending_quote.get("population",0))!=roundi(people.value):failures.append("the review did not reprice the larger party")
-			await capture("caravan-review-60")
+		# Current flow: the leader selects the party; the player names the place
+		# and reviews the existing quote before confirming.
+		if not is_instance_valid(terrain.settlement_convoy_confirm_panel):failures.append("review card did not open")
+		# The current settlement rules can disallow a new independent town. The
+		# blocked quote must be explained visibly and must never be sent.
+		var quote:Dictionary=terrain.settlement_convoy_pending_quote
+		if not bool(quote.get("ok",false)) and not String(quote.get("reason","")).is_empty():
+			if is_instance_valid(terrain.settlement_convoy_confirm_button) and not terrain.settlement_convoy_confirm_button.disabled:failures.append("blocked quote can be sent")
+			if failures.is_empty():print("CARAVAN_VISUAL PASS founding journey and explained unavailable expansion");get_tree().quit(0);return
+		if int(quote.get("population",0))<=0:failures.append("review has no party")
 		if is_instance_valid(terrain.settlement_convoy_confirm_button) and not terrain.settlement_convoy_confirm_button.disabled:
 			terrain._confirm_settlement_convoy()
 		else:
