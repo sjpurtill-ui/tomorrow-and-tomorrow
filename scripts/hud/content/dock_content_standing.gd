@@ -34,19 +34,8 @@ func tab(_sub:int)->Dictionary:
 	var seen:=views_of(our)
 	var board:=board_data(our,seen)
 	var blocks:Array=[board]
-	# The years' chart reads the demographic ledger and the monthly record,
-	# which move only on a death, a birth tally or a month's reading.
-	var ledger:Dictionary=WorldSimulation.state.strategic_history.get("scopes",{}).get("civilization",{})
-	var chart:Dictionary=memo.take("history",[Memo.log_identity(WorldSimulation.state.demographic_ledger),Memo.log_identity(ledger.get("monthly",[])),Memo.log_identity(ledger.get("annual",[]))],func()->Dictionary:
-		return History.block("standing","How our name has grown","civilization","of 100",[
-			{"key":"standing_awe","label":"Awe","color":Tokens.GOLD},
-			{"key":"standing_allure","label":"Allure","color":Tokens.TEAL},
-			{"key":"standing_pride","label":"Pride","color":Tokens.GREEN},
-			{"key":"standing_might","label":"Might","color":Tokens.RED},
-			{"key":"standing_genius","label":"Genius","color":Tokens.BLUE}],
-			"Read once a month from what the people are and do."))
-	chart["_print"]=memo.print_of("history")
-	blocks.append(chart)
+	# The year's change of each strength is on its row (and the rose's dashes);
+	# no second chart below the page.
 	return {"brief":_brief(board),"blocks":blocks}
 
 ## Every people we have met, with its view of us: Standing.views(), read from

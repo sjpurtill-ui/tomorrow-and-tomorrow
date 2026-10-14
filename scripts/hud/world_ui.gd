@@ -6,14 +6,16 @@ extends RefCounted
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_H:=26.0
+const ROW_H:=23.0
 
 ## A raised paper sheet; returns its inner column.
 static func sheet(parent:Node,node_name:String,pad:float=12.0)->VBoxContainer:
 	var frame:=PanelContainer.new();frame.name=node_name
-	var style:=T.flat(T.PAPER_RAISED,T.BORDER_SOFT,1,T.RADIUS_CARD)
-	style.content_margin_left=pad;style.content_margin_right=pad;style.content_margin_top=pad-2.0;style.content_margin_bottom=pad
+	# The shared ruled panel (dense_blocks.gd render_frame).
+	var style:=T.flat(Color(T.PAPER_RAISED,0.5),T.RULE,1,4)
+	style.set_content_margin_all(minf(pad,10.0))
 	frame.add_theme_stylebox_override("panel",style)
 	frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	parent.add_child(frame)
@@ -23,8 +25,7 @@ static func sheet(parent:Node,node_name:String,pad:float=12.0)->VBoxContainer:
 ## "UNREAD TELLINGS ....... 62" : a kicker and a right-hand count or note.
 static func heading(parent:Node,text:String,note:String="",note_color:Color=Color(0,0,0,0))->HBoxContainer:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
-	var title:=T.make_label(text.to_upper(),12,T.GOLD_TEXT,0.06);title.name="Heading";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_override("font",T.font("ui_strong"))
+	var title:=T.make_label(text.to_upper(),11,T.GOLD_TEXT,0.06);title.name="Heading";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	row.add_child(title)
 	if note!="":
 		var aside:=T.make_label(note,12,note_color if note_color.a>0.0 else T.INK_MUTED);aside.name="Note"
@@ -79,19 +80,10 @@ static func hot_row(parent:Node,node_name:String,on_click:Callable,tip:String=""
 	panel.add_child(row)
 	return row
 
-## A small verb button ("Read", "Send", "Watch").
-static func verb(parent:Node,text:String,on_press:Callable,tip:String="",primary:bool=false)->Button:
-	var b:=Button.new();b.text=text;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_NONE
-	b.custom_minimum_size=Vector2(0,24);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	b.add_theme_font_override("font",T.font("ui_strong"));b.add_theme_font_size_override("font_size",12)
-	for key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:b.add_theme_color_override(key,T.GOLD_TEXT if primary else T.INK)
-	b.add_theme_color_override("font_disabled_color",T.DISABLED)
-	var normal:=T.flat(T.GOLD_WASH if primary else T.PAPER_SUNK,T.GOLD if primary else T.RULE,1,T.RADIUS_CONTROL);normal.content_margin_left=7;normal.content_margin_right=7
-	var hover:=T.flat(T.HOVER_BG,T.RULE_STRONG,1,T.RADIUS_CONTROL);hover.content_margin_left=7;hover.content_margin_right=7
-	var off:=T.flat(Color(T.PAPER_SUNK,0.5),Color(T.RULE,0.5),1,T.RADIUS_CONTROL);off.content_margin_left=7;off.content_margin_right=7
-	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",hover);b.add_theme_stylebox_override("pressed",hover)
-	b.add_theme_stylebox_override("disabled",off);b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-	if on_press.is_valid():b.pressed.connect(on_press)
+## A small verb button ("Read", "Send", "Watch"): the shared one
+## (dense_blocks.gd), so every category's buttons look the same.
+static func verb(parent:Node,text:String,on_press:Callable,tip:String="",_primary:bool=false)->Button:
+	var b:=Dense.verb(text,on_press,tip)
 	if parent!=null:parent.add_child(b)
 	return b
 
@@ -112,15 +104,11 @@ static func chip(parent:Node,text:String,lit:bool,on_press:Callable,tip:String="
 	if parent!=null:parent.add_child(b)
 	return b
 
-## A coloured state tag ("Unread", "Lost 3", "Watched").
+## A coloured state tag ("Unread", "Lost 3", "Watched"): the shared one.
 static func tag(parent:Node,text:String,tone:String="info")->PanelContainer:
-	var ink:=tone_color(tone)
-	var pill:=PanelContainer.new();pill.name="Tag"
-	var style:=T.flat(Color(ink,0.10),Color(ink,0.7),1,8);style.content_margin_left=6;style.content_margin_right=6
-	pill.add_theme_stylebox_override("panel",style);pill.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var pill:=Dense.tag(text,String({"danger":"bad","warn":"warn","gold":"warn","good":"good"}.get(tone,"")))
 	pill.mouse_filter=Control.MOUSE_FILTER_PASS
-	var words:=label(pill,text,12,T.text_for(ink),true)
-	words.name="Words"
+	(pill.get_child(0) as Label).name="Words"
 	if parent!=null:parent.add_child(pill)
 	return pill
 
@@ -170,12 +158,12 @@ class Bar extends Control:
 	var ghost:=-1.0
 	var color:=Color.WHITE
 	func _init()->void:
-		custom_minimum_size=Vector2(60,8);mouse_filter=Control.MOUSE_FILTER_PASS
+		custom_minimum_size=Vector2(60,5);mouse_filter=Control.MOUSE_FILTER_PASS
 		size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	func set_to(amount:float,tint:Color,typical:float=-1.0)->void:
 		value=clampf(amount,0.0,1.0);color=tint;tick=typical;queue_redraw()
 	func _draw()->void:
-		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.10))
+		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.12))
 		if high>=0.0 and high>low:
 			draw_rect(Rect2(size.x*clampf(low,0.0,1.0),0,size.x*(clampf(high,0.0,1.0)-clampf(low,0.0,1.0)),size.y),Color(color,0.25))
 		if value>0.0:draw_rect(Rect2(0,0,maxf(2.0,size.x*value),size.y),color)
@@ -187,7 +175,7 @@ class Bar extends Control:
 			draw_line(Vector2(x,-3),Vector2(x,size.y+3),T.INK,1.5)
 
 static func bar(parent:Node,amount:float,tint:Color,width:float=80.0,typical:float=-1.0)->Bar:
-	var b:=Bar.new();b.custom_minimum_size=Vector2(width,8);b.set_to(amount,tint,typical)
+	var b:=Bar.new();b.custom_minimum_size=Vector2(width,5);b.set_to(amount,tint,typical)
 	if parent!=null:parent.add_child(b)
 	return b
 

@@ -40,7 +40,7 @@ class Rose extends Control:
 	var others:Array=[]
 	var highlight:=-1
 	func _init()->void:
-		custom_minimum_size=Vector2(214,214)
+		custom_minimum_size=Vector2(196,196)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		mouse_exited.connect(func()->void: set_highlight(-1))
@@ -164,7 +164,7 @@ class Rose extends Control:
 			along+=step
 	func _index_at(at:Vector2)->int:
 		var offset:=at-_center()
-		if offset.length()<12.0 or offset.length()>_radius()+60.0: return -1
+		if offset.length()<12.0 or offset.length()>_radius()+72.0: return -1
 		var count:=strengths.size()
 		var best:=-1
 		var best_gap:=INF
@@ -197,6 +197,8 @@ var posture_label:Label
 var renown_label:Label
 var strength_list:VBoxContainer
 var compare_row:HFlowContainer
+## The rose's one-line legend, at the head of the compare line.
+var legend_label:Label
 var dangers:VBoxContainer
 var peoples:VBoxContainer
 var lower:GridContainer
@@ -246,7 +248,7 @@ func _refill(part:String,value:Variant,fill:Callable)->void:
 	fill.call()
 
 func _layout()->void:
-	if lower!=null:lower.columns=3 if size.x>=1100.0 else (2 if size.x>=TWO_AT else 1)
+	if lower!=null:lower.columns=3 if size.x>=600.0 else 1
 
 func _compare_print()->Array:
 	var out:Array=[]
@@ -304,13 +306,13 @@ func _build_hero()->void:
 	strength_list=VBoxContainer.new();strength_list.name="StrengthList"
 	strength_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strength_list.add_theme_constant_override("separation",0)
 	body.add_child(strength_list)
-	var legend:=UI.label(column,"Gold: ours · dashed: a year ago · middle ring and tick: a typical people of our age · thin lines: peoples we know",12,T.INK_MUTED)
-	legend.name="Legend";legend.clip_text=true;legend.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;legend.custom_minimum_size.x=0
-	legend.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
 	compare_row=HFlowContainer.new();compare_row.name="Compare"
 	compare_row.add_theme_constant_override("h_separation",6);compare_row.add_theme_constant_override("v_separation",4)
 	column.add_child(compare_row)
+	var legend:=UI.label(null,"Gold: ours · dashes: a year ago · tick: typical of our age",12,T.INK_MUTED)
+	legend.name="Legend"
+	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
+	legend_label=legend
 
 ## A strength's biggest cause in a few words: the first part of the engine's
 ## reason ("1 under arms or training", "food for 29 days").
@@ -366,7 +368,9 @@ func _raise(id:String)->void:
 			return
 
 func _fill_compare()->void:
+	if legend_label!=null and legend_label.get_parent()==compare_row:compare_row.remove_child(legend_label)
 	UI.clear(compare_row)
+	if legend_label!=null:compare_row.add_child(legend_label)
 	var list:Array=data.get("peoples",[])
 	var state:Dictionary=data.get("view_state",{})
 	var chosen:=String(state.get("compare",""))
@@ -382,7 +386,7 @@ func _fill_compare()->void:
 		if values.is_empty(): continue
 		overlays.append({"values":values,"color":p.get("accent",T.RED),"name":String(p.name),"chosen":String(p.civ_id)==chosen})
 	rose.overlay(overlays)
-	UI.label(compare_row,"Lay over ours:",12,T.INK_MUTED)
+	UI.label(compare_row,"· over ours:",12,T.INK_MUTED)
 	for p:Dictionary in list:
 		var comparable:=_comparable(p)
 		var civ_id:=String(p.civ_id)
@@ -426,13 +430,16 @@ func _fill_dangers()->void:
 	dangers.visible=warnings.size()>1
 	if warnings.size()<=1:return
 	var raise:Variant=data.get("on_raise")
+	# One button for each action: the brief above already carries the first's.
+	var offered:={String((warnings[0] as Dictionary).get("action","")):true}
 	for warning:Dictionary in warnings.slice(1,6):
 		var row:=UI.line(dangers,8)
 		row.tooltip_text=String(warning.words)
 		var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(warning.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(dot)
 		var title:=UI.label(row,String(warning.title),13,T.text_for(_tone_color(String(warning.tone))),true,true)
 		title.tooltip_text=String(warning.words)
-		if String(warning.get("section",""))!="" and raise is Callable:
+		if String(warning.get("section",""))!="" and raise is Callable and not offered.has(String(warning.get("action",""))):
+			offered[String(warning.get("action",""))]=true
 			var section:=String(warning.section)
 			var sub:=int(warning.get("sub",0))
 			UI.verb(row,String(warning.get("action","Open")),func()->void:(raise as Callable).call(section,sub),String(warning.words))
@@ -515,7 +522,7 @@ func _fill_races()->void:
 		lines.append("Asks: %s." % String(race.ask))
 		var row:=UI.line(races,6);row.name="Race_"+String(race.id)
 		row.tooltip_text="\n".join(lines)
-		UI.cell(row,String(race.race),92,13,T.INK,true).tooltip_text=row.tooltip_text
+		UI.cell(row,String(race.race),80,13,T.INK,true).tooltip_text=row.tooltip_text
 		var words:=UI.label(row,String(race.standing),12,T.BODY,false,true)
 		words.tooltip_text=row.tooltip_text
 
@@ -533,8 +540,8 @@ func _fill_arts()->void:
 		for e:Dictionary in effects:lines.append("· %s%s" % [String(e.words),(" — "+String(e.detail)) if String(e.get("detail",""))!="" else ""])
 		var row:=UI.line(arts,6);row.name="Arts_"+String(pair[0])
 		row.tooltip_text="\n".join(lines)
-		UI.cell(row,String(pair[1]),92,13,T.INK,true)
-		UI.bar(row,float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD,60,0.5).tooltip_text=row.tooltip_text
+		UI.cell(row,String(pair[1]),80,13,T.INK,true)
+		UI.bar(row,float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD,44,0.5).tooltip_text=row.tooltip_text
 		UI.cell(row,"%d%%" % roundi(float(pair[2])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
 		UI.label(row,String((effects[0] as Dictionary).words) if not effects.is_empty() else "",12,T.BODY,false,true).tooltip_text=row.tooltip_text
 
@@ -548,8 +555,8 @@ func _fill_home()->void:
 	for medal:Array in _home_medals(h):
 		var row:=UI.line(home,6);row.name="Home_"+String(medal[0]).replace(" ","")
 		row.tooltip_text=String(medal[4])
-		UI.cell(row,String(medal[0]),92,13,T.INK,true)
-		UI.bar(row,float(medal[1]),medal[2],60).tooltip_text=String(medal[4])
+		UI.cell(row,String(medal[0]),80,13,T.INK,true)
+		UI.bar(row,float(medal[1]),medal[2],44).tooltip_text=String(medal[4])
 		UI.cell(row,"%d%%" % roundi(float(medal[1])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
 		UI.label(row,String(medal[3]),12,T.INK_MUTED,false,true)
 	if words.has("levy"):
