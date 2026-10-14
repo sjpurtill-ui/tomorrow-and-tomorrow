@@ -209,7 +209,7 @@ var home:HFlowContainer
 func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",12)
+	add_theme_constant_override("separation",8)
 	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",0);add_child(dangers)
 	_build_hero()
 	peoples=UI.sheet(self,"Peoples")
@@ -242,7 +242,7 @@ func apply(block:Dictionary)->void:
 	_refill("dangers",block.get("warnings",[]),_fill_dangers)
 	_refill("peoples",block.get("peoples",[]),_fill_peoples)
 	_refill("races",_races_print(block.get("races",[])),_fill_races)
-	_refill("arts",block.get("arts",{}),_fill_arts)
+	_refill("arts",[block.get("arts",{}),block.get("strengths",[])],_fill_arts)
 	_refill("home",block.get("home",{}),_fill_home)
 
 func _refill(part:String,value:Variant,fill:Callable)->void:
@@ -308,7 +308,7 @@ func _build_hero()->void:
 	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	top.add_child(name_label)
 	posture_label=Label.new();posture_label.name="Posture"
-	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",15)
+	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",14)
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	posture_label.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -478,6 +478,7 @@ func _fill_dangers()->void:
 	var offered:={}
 	for warning:Dictionary in warnings.slice(0,5):
 		var row:=UI.line(dangers,8)
+		row.custom_minimum_size.y=20.0
 		row.tooltip_text=String(warning.words)
 		var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(warning.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(dot)
 		var title:=UI.label(row,String(warning.title),13,T.text_for(_tone_color(String(warning.tone))),true,true)
@@ -510,10 +511,12 @@ func _fill_peoples()->void:
 static func feelings(parent:VBoxContainer,list:Array,on_court:Variant,with_talk:bool)->void:
 	var head:=UI.heading(parent,"How they see us")
 	# The pips' colours, after the heading on a wide sheet, under it on a narrow one.
-	var legend:=HFlowContainer.new();legend.name="PipLegend";legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",0)
+	var legend:Container
 	if with_talk:
-		legend.size_flags_horizontal=Control.SIZE_SHRINK_END;head.add_child(legend)
-	else:parent.add_child(legend)
+		legend=HBoxContainer.new();legend.add_theme_constant_override("separation",4);head.add_child(legend)
+	else:
+		legend=HFlowContainer.new();legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",0);parent.add_child(legend)
+	legend.name="PipLegend"
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
 		var dot:=Pip.new();dot.value=1.0;dot.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")));dot.custom_minimum_size=Vector2(9,9);legend.add_child(dot)
 		dot.tooltip_text=String(view.means);dot.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -601,16 +604,24 @@ func _fill_races()->void:
 ## What our cunning and persuasion do this month: every effect in the pointer.
 func _fill_arts()->void:
 	UI.clear(arts)
-	var at_work:Dictionary=data.get("arts",{})
-	arts.visible=not at_work.is_empty()
-	if at_work.is_empty():return
-	_caption(arts,"At work")
-	for pair:Array in [["cunning","Cunning"],["persuasion","Persuasion"]]:
-		var effects:Array=at_work.get(String(pair[0]),[])
+	# What cunning and persuasion do is in their strength rows' pointers.
+	arts.visible=false
+	_fold_arts(data.get("arts",{}))
+
+func _fold_arts(at_work:Dictionary)->void:
+	for id:String in ["cunning","persuasion"]:
+		var row:=strength_list.find_child("Strength_"+id,false,false) as Control
+		if row==null:continue
 		var lines:PackedStringArray=[]
-		for e:Dictionary in effects:lines.append("· %s%s" % [String(e.words),(" — "+String(e.detail)) if String(e.get("detail",""))!="" else ""])
-		var cell:=UI.label(arts,"%s: %s" % [String(pair[1]),String((effects[0] as Dictionary).words) if not effects.is_empty() else "nothing yet"],12,T.BODY)
-		cell.name="Arts_"+String(pair[0]);cell.tooltip_text="\n".join(lines)
+		for e:Dictionary in at_work.get(id,[]):lines.append("· %s" % String(e.words))
+		var base:=row.tooltip_text.get_slice("
+
+At work:",0)
+		row.tooltip_text=base+("
+
+At work:
+"+"
+".join(lines) if not lines.is_empty() else "")
 
 ## Our own people: pride, love and dread of the god, trust in the chiefs.
 func _fill_home()->void:
