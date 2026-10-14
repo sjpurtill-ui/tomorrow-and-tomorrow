@@ -146,8 +146,11 @@ func test_health_and_research_docks_build_plain_pages()->void:
 		"investigations":[{"name":"Wound cleaning","dynamic":"health","progress":0.5,"research_workforce":0.5,"estimated_days":400,"bottleneck":"RESEARCH WORKFORCE — a thin team: less than one person at it, where a people of our size would put about 3 on one question"}],
 		"on_tree":func():pass,"on_work":func():pass,"on_domain":func(_d:String):pass})
 	var words:=_texts(board)
-	assert_str(words).contains("25% of attention").contains("One person, part of the time").contains("about 13 months to proof").contains("A thin team: less than one person at it")
-	assert_str(words).not_contains("−").not_contains("in 100 of our attention").not_contains("researchers")
+	# One line: the field, its attention as a bar with − and +, the question, its holdup and its time to proof.
+	assert_str(words).contains("Health & care").contains("25%").contains("Wound cleaning").contains("13 months").contains("A thin team")
+	assert_str(words).not_contains("in 100 of our attention").not_contains("researchers")
+	# Who works it and its clock are in its account on hover.
+	assert_str((board.find_child("Question_*",true,false) as Control).tooltip_text).contains("One person, part of the time").contains("about 13 months to proof")
 
 func test_economy_dock_titles_follow_the_rail()->void:
 	_prepare_settled()
