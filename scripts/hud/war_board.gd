@@ -6,15 +6,11 @@ extends VBoxContainer
 ## goes, the road, the camps, the pace, the fight). Nothing here moves a band
 ## or draws a line. KEEPING WATCH IS THE MILITARY (watch_military.gd): the
 ## watch share of the people is the manpower; there is no recruiting apart.
-##   the column  this board, in the narrow panel at the right edge
-##               (military_roster_screen.gd), top to bottom: the manpower
-##               (the watch, its share of the people and the control to
-##               change it), the home guard (the share of the watch that
-##               guards home and the towns, led by the war leader at home),
-##               the offensive troops (the rest, in bands led by the
-##               generals); then one card per people at feud or war (who is
-##               winning, the dead, what is happening now, the stance), the
-##               leaders as portrait cards, and the spies, folded;
+##   the column  one selected task: Army, Fronts, or Leaders. The Army
+##               shows manpower, home guard, readiness, costs and border.
+##               Fronts and Leaders keep a bounded chooser beside one
+##               complete card, or choose/Back within a narrow column.
+##               Spies retain their separate digest and searchable archive.
 ##   the bar     the army bar along the bottom (hud/army_bar.gd), shown with
 ##               this screen even with no band out: the levy at home, then
 ##               every band, army and garrison.
@@ -47,6 +43,7 @@ const Makeup:=preload("res://scripts/army_makeup.gd")
 const Economy:=preload("res://scripts/army_economy.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
+const ChoiceReader:=preload("res://scripts/hud/war_choice_reader.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -60,18 +57,18 @@ const STANCES:=[
 const SHORT:={"leave":"Leave","defend":"Defend","punish":"Punish","take":"Take","peace":"Peace"}
 const MARKS:={"leave":"leave","defend":"defend","punish":"raid","take":"besiege","peace":"peace","pay":"price"}
 ## The layout the HUD and the roster screen share: the column's width on a
-## narrow screen; from WIDE_VIEW on, two panes side by side (column_width).
+## narrow screen; from WIDE_VIEW on, a wider task and reader (column_width).
 const COLUMN_WIDTH:=440.0
 const WIDE_VIEW:=1520.0
 const PANE_GAP:=20
 
 
-## The column's width for a screen this wide: one pane, or two side by side.
+## The column's established width: preserve the player's map footprint.
 static func column_width(view_width:float)->float:
 	return COLUMN_WIDTH*2.0+float(PANE_GAP)-28.0 if view_width>=WIDE_VIEW else COLUMN_WIDTH
 
 
-## Whether this screen is wide enough for both panes at once.
+## Whether the viewport has room for the wider task reader.
 static func wide(view_width:float)->bool:
 	return view_width>=WIDE_VIEW
 
@@ -83,6 +80,9 @@ var offense_box:VBoxContainer
 var enemy_box:VBoxContainer
 var border_box:VBoxContainer
 var leader_box:VBoxContainer
+var front_reader:Control
+var leader_reader:Control
+var _leader_commands:Array=[]
 var needs_box:VBoxContainer
 var tabs_row:HBoxContainer
 var tab_buttons:={}
@@ -92,7 +92,7 @@ var side_pane:VBoxContainer
 var army_section:VBoxContainer
 var fronts_section:VBoxContainer
 var leaders_section:VBoxContainer
-## The part shown on a narrow screen: "army", "fronts" or "leaders".
+## The selected task at every screen width.
 var tab:="army"
 var costs_expanded:=false
 var _wide:=false
@@ -105,6 +105,7 @@ var covert:Control
 var covert_toggle:Button
 var covert_back:Button
 var _overview_scroll:=0
+var _task_scroll:={}
 var clock:=0.0
 ## Capture only ("--capture-war-scroll=<px>"): the column shown further down.
 var _capture_scroll:=-1
@@ -128,8 +129,7 @@ func setup(_block:Dictionary={})->void:
 	# needing()): the column steps aside while this screen holds the right edge,
 	# so its rows stand here, one line each, above the army.
 	needs_box=VBoxContainer.new();needs_box.name="NeedsYou";needs_box.add_theme_constant_override("separation",3);add_child(needs_box)
-	# Three parts: the army, the fronts, the leaders. Side by side on a wide
-	# screen; one at a time, by the tabs, on a narrow one.
+	# Three tasks, each using the available board width.
 	tabs_row=HBoxContainer.new();tabs_row.name="WarTabs";tabs_row.add_theme_constant_override("separation",0);add_child(tabs_row)
 	panes=HBoxContainer.new();panes.name="Panes";panes.add_theme_constant_override("separation",PANE_GAP);panes.size_flags_horizontal=Control.SIZE_EXPAND_FILL;add_child(panes)
 	army_pane=_pane("ArmyPane");panes.add_child(army_pane)
@@ -472,7 +472,7 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	var legend:=HFlowContainer.new();legend.name="Legend";legend.add_theme_constant_override("h_separation",12);legend.add_theme_constant_override("v_separation",2);column.add_child(legend)
 	var fronts:=0
 	var guard:=0
-	for part:Dictionary in f.parts:
+	for part:Dictionary in allocation_legend(f.parts):
 		var ink:=part_ink(part,fronts)
 		if String(part.ink)=="front":fronts+=1
 		if String(part.id)=="guard":guard=int(part.men);continue
@@ -736,6 +736,26 @@ static func _births_words(fewer:float)->String:
 	return "%.1f" % fewer if fewer>=0.05 else "none"
 
 
+## Keep the overview's legend bounded by allocation types. The original bar,
+## its complete tooltip and the selected Fronts cards retain each people.
+static func allocation_legend(parts:Array)->Array:
+	var fronts:=parts.filter(func(part:Dictionary)->bool:return String(part.get("ink",""))=="front")
+	if fronts.size()<2:return parts
+	var men:=0
+	var details:=PackedStringArray()
+	for part:Dictionary in fronts:
+		men+=int(part.men)
+		details.append("%s: %s" % [String(part.label),EraWords.grouped(int(part.men))])
+	var out:Array=[]
+	var added:=false
+	for part:Dictionary in parts:
+		if String(part.get("ink",""))!="front":out.append(part)
+		elif not added:
+			out.append({"id":"fronts","label":"On %d fronts" % fronts.size(),"men":men,"ink":"front","tip":"\n".join(details)})
+			added=true
+	return out
+
+
 ## The bar in words, part by part, for the pointer.
 static func allocation_words(f:Dictionary)->String:
 	var lines:=PackedStringArray(["The army: %s." % EraWords.grouped(int(f.total))])
@@ -832,16 +852,22 @@ static func _one_place(value:float)->String:
 # --- Our enemies ----------------------------------------------------------
 
 func _build_enemies(entries:Array)->void:
-	_clear(enemy_box)
 	enemy_count.text=str(entries.size()) if not entries.is_empty() else ""
 	if entries.is_empty():
-		# At peace is one small line; the border below is what can be done.
+		_clear(enemy_box);front_reader=null
 		var row:=HBoxContainer.new();row.name="Calm";row.add_theme_constant_override("separation",6);enemy_box.add_child(row)
 		row.add_child(_icon("leave",T.INK_MUTED,14))
-		var said:=_line("At peace with everyone",12,T.INK_MUTED);said.tooltip_text="No feud or war with anyone.";row.add_child(said)
+		var said:=_line("At peace with everyone",14,T.INK_MUTED);said.tooltip_text="No feud or war with anyone.";row.add_child(said)
 		enemy_box.add_child(_neighbours())
 		return
-	for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+	if not is_instance_valid(front_reader):
+		_clear(enemy_box)
+		front_reader=ChoiceReader.new();front_reader.name="FrontReader";enemy_box.add_child(front_reader)
+		front_reader.setup("front",_enemy_row)
+	var choices:Array=[]
+	for entry:Dictionary in entries:
+		choices.append({"id":String(entry.civ_id),"title":String(entry.name),"subtitle":Ledger.state_word(entry),"payload":entry})
+	front_reader.set_records(choices)
 
 
 ## At peace, the peoples we know, nearest first, as the enemies would be
@@ -1240,12 +1266,18 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 # --- Our leaders ----------------------------------------------------------
 
 func _build_leaders(commands:Array)->void:
-	_clear(leader_box)
-	for c:Dictionary in commands:leader_box.add_child(_leader_row(c,commands))
-	# Raise another general: the verb at the foot of the list it adds to.
-	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
-	var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
-	name_one.name="NameGeneral";T.apply_button_style(name_one,true);foot.add_child(name_one)
+	_leader_commands=commands
+	if not is_instance_valid(leader_reader):
+		_clear(leader_box)
+		leader_reader=ChoiceReader.new();leader_reader.name="LeaderReader";leader_box.add_child(leader_reader)
+		leader_reader.setup("commander",func(command:Dictionary)->Control:return _leader_row(command,_leader_commands))
+		var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
+		var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
+		name_one.name="NameGeneral";T.apply_button_style(name_one,true);foot.add_child(name_one)
+	var choices:Array=[]
+	for command:Dictionary in commands:
+		choices.append({"id":String(command.id),"title":String(command.leader.get("name","The war leader")),"subtitle":"War leader" if String(command.id)==Commands.WAR_LEADER else "%d bands · %d people" % [(command.bands as Array).size(),int(command.men)],"payload":command})
+	leader_reader.set_records(choices)
 
 
 func _name_general()->void:
@@ -1266,7 +1298,7 @@ func _leader_row(c:Dictionary,commands:Array=[])->Control:
 	var line:=T.paper_panel_style(true,T.RADIUS_CARD,16);line.set_border_width_all(0)
 	panel.add_theme_stylebox_override("panel",line)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);panel.add_child(row)
-	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(56,64);frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(56,64);frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	var ground:=T.flat(T.PAPER_SUNK);ground.border_color=Commands.color(String(c.id));ground.border_width_left=3;frame.add_theme_stylebox_override("panel",ground);row.add_child(frame)
 	var face:=TextureRect.new();face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	var key:=String(leader.get("figure_id","")) if String(leader.get("figure_id",""))!="" else String(leader.get("name",""))
@@ -1313,6 +1345,8 @@ func _leader_row(c:Dictionary,commands:Array=[])->Control:
 	for said:String in [GeneralRecord.lever_line(leader.get("commander",{}),String(leader.get("name","")),float(c.get("men",0))),GeneralRecord.words(record)]:
 		if said!="":told.append(said)
 	panel.tooltip_text="\n".join(told)
+	var account:=_line("\n\n".join(told),14,T.INK_MUTED)
+	account.name="CommanderAccount";account.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(account)
 	return panel
 
 
@@ -1388,14 +1422,25 @@ func _pane(pane_name:String)->VBoxContainer:
 	return box
 
 
-## One of the three parts on a narrow screen (on a wide one all show).
+## Reveal the exact enemy reached from the map, even outside the current page.
+func show_front(civ_id:String)->bool:
+	if not is_instance_valid(front_reader) or not front_reader.reveal(civ_id):return false
+	if covert!=null and covert.visible:_toggle_covert()
+	show_tab("fronts")
+	return true
+
+
+## Select one task without discarding its local reading state.
 func show_tab(key:String)->void:
+	var ancestor:=get_parent()
+	while ancestor!=null and not ancestor is ScrollContainer:ancestor=ancestor.get_parent()
+	if ancestor is ScrollContainer:_task_scroll[tab]=(ancestor as ScrollContainer).scroll_vertical
 	tab=key if key in ["army","fronts","leaders"] else "army"
 	_apply_width(true)
+	if ancestor is ScrollContainer:(ancestor as ScrollContainer).set_deferred("scroll_vertical",int(_task_scroll.get(tab,0)))
 
 
-## Lays the parts for the screen's width: both panes side by side from
-## WIDE_VIEW on, else the tabs and one part.
+## Keep the map footprint, but give the chosen task the complete board.
 func _apply_width(force:=false)->void:
 	if army_pane==null:return
 	var view_width:=get_viewport().get_visible_rect().size.x if is_inside_tree() else 0.0
@@ -1403,33 +1448,27 @@ func _apply_width(force:=false)->void:
 	if _laid and now==_wide and not force:return
 	_wide=now;_laid=true
 	var reading_intelligence:=covert!=null and covert.visible
-	tabs_row.visible=not now and not reading_intelligence
+	tabs_row.visible=not reading_intelligence
 	panes.visible=not reading_intelligence
 	if covert_back!=null:covert_back.visible=reading_intelligence
 	army_pane.custom_minimum_size.x=0.0
-	if now:
-		army_pane.visible=true;side_pane.visible=true
-		army_section.visible=true;fronts_section.visible=true;leaders_section.visible=true
-	else:
-		army_pane.visible=tab=="army";side_pane.visible=tab!="army"
-		fronts_section.visible=tab=="fronts";leaders_section.visible=tab=="leaders"
+	army_pane.visible=tab=="army";side_pane.visible=tab!="army"
+	army_section.visible=tab=="army";fronts_section.visible=tab=="fronts";leaders_section.visible=tab=="leaders"
 	for key:String in tab_buttons:(tab_buttons[key] as Button).set_pressed_no_signal(key==tab)
-	if leaders_heading!=null:leaders_heading.visible=now
-	# On a wide screen the border stands under the army (home and its edge
-	# together), on a narrow one with the fronts.
+	if leaders_heading!=null:leaders_heading.visible=false
+	# Our border belongs with the army at every width, separate from an enemy dossier.
 	if border_box!=null:
-		var want:Control=army_section if now else fronts_section
+		var want:Control=army_section
 		if border_box.get_parent()!=want:
 			border_box.get_parent().remove_child(border_box);want.add_child(border_box)
 
 
-## The tabs carry how many enemies there are (the kicker does on a wide
-## screen, where the tabs are hidden): one count, shown once.
+## The Fronts tab carries the count once, at every width.
 func _set_tab_counts(_forces:Dictionary)->void:
 	if tab_buttons.is_empty():return
 	var open:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended").size()
 	(tab_buttons.fronts as Button).text="Fronts · %d" % open if open>0 else "Fronts"
-	if enemy_count!=null:enemy_count.visible=_wide
+	if enemy_count!=null:enemy_count.visible=false
 
 
 func _notification(what:int)->void:
