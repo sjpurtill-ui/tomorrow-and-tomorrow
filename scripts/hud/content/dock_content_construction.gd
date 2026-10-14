@@ -73,7 +73,7 @@ func _city_tab()->Dictionary:
 	cards.append_array(_crew_rows(crews))
 	cards.append_array(_fabric_rows())
 	# Its counts are in its pips: the row says no number twice.
-	var workshops:=_as_row(_workshops_row(),"fabric");workshops.sub="";cards.append(workshops)
+	var workshops:=_as_row(_workshops_row(),"fabric");workshops.sub="";workshops.name="Workshops, stores";cards.append(workshops)
 	var era:=_era_row(crews)
 	if era.has("meter"):
 		var level:=float(SettlementModel.city_form().get("tier",0.0))
@@ -129,7 +129,7 @@ func _glance(h:Dictionary,crews:Dictionary)->Array:
 		segments.append({"share":float(part.heads),"color":part.color,"label":String(part.label),"value":_n(roundi(float(part.heads)))})
 		words.append("%s %s" % [_n(roundi(float(part.heads))),String(part.short)])
 	var heads:=int(crews.heads)
-	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"segments":segments,"delta":" · ".join(words.slice(0,2)) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
+	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"segments":segments,"delta":"%d per 1,000 people" % roundi(float(heads)*1000.0/maxf(1.0,float(GameState.population_total))) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
 		"tip":"\n".join(words) if heads>0 else "No one is building: works, repairs and new homes all stop.","on_press":jump("overview",0)})
 	var repair:=_condition_row()
 	tiles.append({"label":"CONDITION","value":String(repair.value),"glance":true,"meter":float((repair.meter as Dictionary).ratio),"meter_color":repair.accent,
@@ -163,7 +163,7 @@ func _crew_split(crews:Dictionary)->Array:
 		["repair","Repair","repair","repair",Tokens.MUTED,"Mending the town's works as they wear: %s builders' worth wanted." % _n(roundi(float(f.repair_want)*scale))],
 		["infra","Water and rail works","water and rail","yard",Tokens.BLUE,"Building and keeping the water works, channels and rail."],
 		["walls","On the walls","walls","palisade",Tokens.RED,"Raising and keeping the town's walls."],
-		["fabric","Fine work and upkeep","fine work","builders",Tokens.GOLD,"Keeping homes, roads, work buildings and fine works, then raising them."]]
+		["fabric","Upkeep, fine work","fine work","builders",Tokens.GOLD,"Keeping homes, roads, work buildings and fine works, then raising them."]]
 	for item in spec:
 		var n:=float(f.get(String(item[0]),0.0))*scale
 		if n<0.5:continue
@@ -253,7 +253,9 @@ func _fabric_rows()->Array:
 	rows.append({"key":"fabric_craft","fx":"craft","icon":"builders","name":"Builders' craft","sub":"settles at %s" % Fabric._one(float(r.craft_settles)),"bar":{"ratio":float(r.craft)/Fabric.CRAFT_MAX,"color":Tokens.VIOLET},"value":"%s/%d" % [Fabric._one(float(r.craft)),roundi(Fabric.CRAFT_MAX)],
 		"detail":"The builders' living experience. At today's builders it settles at %s over a working life; it fades as the old builders die." % Fabric._one(float(r.craft_settles))})
 	var kept:=float(r.paid)
-	rows.append({"key":"fabric_upkeep","icon":"repair","name":"Upkeep kept","sub":"everything kept" if declining.is_empty() else ", ".join(declining),"bar":{"ratio":kept,"color":Tokens.GREEN if kept>=0.99 else Tokens.RED},"value":"%d%%" % roundi(kept*100.0),"value_color":Tokens.INK if kept>=0.99 else Tokens.RED,
+	# All kept is the town's condition, already in the strip: the row shows
+	# only when the builders fall behind.
+	if not declining.is_empty():rows.append({"key":"fabric_upkeep","icon":"repair","name":"Upkeep kept","sub":"everything kept" if declining.is_empty() else ", ".join(declining),"bar":{"ratio":kept,"color":Tokens.GREEN if kept>=0.99 else Tokens.RED},"value":"%d%%" % roundi(kept*100.0),"value_color":Tokens.INK if kept>=0.99 else Tokens.RED,
 		"tag":{} if declining.is_empty() else {"text":"Too few builders","tone":"bad"},
 		"detail":"Every home, road, work building and fine work is kept." if declining.is_empty() else "The builders keep homes first, then the walls, work buildings, roads and fine works. Now %s. More builders, or fewer works to keep." % ", ".join(declining)})
 	for row:Dictionary in rows:
@@ -329,6 +331,8 @@ func _unlock_rows()->Array:
 			if (on and not best_on) or (on==best_on and progress>best_progress):best=String(id);best_progress=progress;best_on=on
 		if best.is_empty():continue
 		var begun:=best_progress>0.0005 or best_on
+		# A question no one has begun is not "coming next".
+		if not begun and not bool(group.get("adopting",false)):continue
 		rows.append({"section":"soon","key":"soon_"+best,"icon":String(group.icon),"name":_upper_first(String(group.opens)),"sub":_discovery_name(best),
 			"bar":{"ratio":clampf(best_progress,0.0,1.0),"color":Tokens.TEAL if best_on else Tokens.RULE_STRONG,"width":70},"value":"%d%%" % roundi(clampf(best_progress,0.0,1.0)*100.0) if begun else "",
 			"tag":{"text":"Taking up","tone":"info"} if bool(group.get("adopting",false)) else ({"text":"Studying","tone":"info"} if best_on else ({} if begun else {"text":"Not begun","tone":"note"})),
@@ -583,7 +587,7 @@ func _new_homes_row(h:Dictionary,crews:Dictionary)->Dictionary:
 		return {"key":"new_homes","icon":"homes","name":"New homes","value":"%d%%" % roundi(float(h.progress)*100.0),"value_color":Tokens.GREEN,"sub":"%s more places going up, %s" % [_n(batch),left],"detail":rule,"accent":Tokens.GREEN,"state":"building",
 			"progress":{"ratio":float(h.progress),"text":_left_words(float(h.days_left)),"color":Tokens.GREEN if float(h.days_left)>=0.0 else Tokens.RED},"gains":gains}
 	var pace:="Then %s add about %s places every %s." % [_count(roundi(float(crews.town)),"builder"),_n(batch),Plain.span_text(float(h.days_per_batch))] if float(h.days_per_batch)>0.0 else "No one is building now, so none would go up."
-	return {"key":"new_homes","icon":"homes","name":"New homes","value":"%s to go" % _n(maxi(0,trigger-int(h.people))),"value_width":70,"sub":"Builders start more once over %s people live here" % _n(trigger),"detail":pace,"accent":Tokens.RULE_STRONG,"state":"plain",
+	return {"key":"new_homes","icon":"homes","name":"New homes","value":"%s to go" % _n(maxi(0,trigger-int(h.people))),"value_width":70,"sub":"next homes at %s people" % _n(trigger),"detail":pace,"accent":Tokens.RULE_STRONG,"state":"plain",
 		"meter":{"ratio":clampf(float(h.people)/float(maxi(1,trigger)),0.0,1.0),"text":"%s of %s people" % [_n(int(h.people)),_n(trigger)],"color":Tokens.GOLD,"tip":rule},"gains":gains}
 
 ## The town's repair, from the same facts its official reads (upkeep_warnings).
@@ -873,6 +877,7 @@ func _civic_tab()->Dictionary:
 	var projects:Array=[]
 	var cards:Array=[]
 	var built:=0
+	var folded:PackedStringArray=[]
 	for definition:Dictionary in Construction._settlement_definitions():
 		var title:=String(definition.name)
 		var done:=title in GameState.settlement_completed
@@ -881,11 +886,17 @@ func _civic_tab()->Dictionary:
 		var project:=_project(definition,current,done)
 		if not unknown:projects.append(project)
 		if done:built+=1
-		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":_upper_first(_gain(definition)),"detail":"It %s." % _gain(definition),"effects":_effects(project.impact)}
+		# The name and its figures say what it is; the sentence waits in the tooltip.
+		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":"","detail":"It %s." % _gain(definition),"effects":_effects(project.impact)}
 		if done:
-			row["tag"]={"text":"Built","tone":"good","tip":"Finished %s." % String(project.finished_words) if String(project.finished_words)!="" else ""}
+			# A work built long ago folds into one line; a fresh one keeps its stamp.
 			var ago:=int(project.finished_ago)
-			if ago>=0 and ago<=JUST_BUILT_DAYS:row["stamp"]={"text":"Built","tip":"Finished %s." % String(project.finished_words)};row.erase("tag")
+			if ago<0 or ago>JUST_BUILT_DAYS:
+				var said:PackedStringArray=[]
+				for effect:Dictionary in row.effects:said.append("%s %s" % [String(effect.label),String(effect.value)])
+				folded.append("%s: %s" % [title,", ".join(said)])
+				continue
+			row["stamp"]={"text":"Built","tip":"Finished %s." % String(project.finished_words)}
 		elif unknown:
 			var progress:=float(GameState.discovery_progress.get(discovery,0.0))
 			row.merge({"tag":{"text":"Unknown","tone":"note","tip":"The people must first learn %s." % _discovery_name(discovery)},"bar":{"ratio":progress,"color":Tokens.TEAL,"width":80,"tip":"%s: %d%% of the way to proof." % [_upper_first(_discovery_name(discovery)),roundi(progress*100.0)]},
@@ -902,23 +913,37 @@ func _civic_tab()->Dictionary:
 				row["actions"]=[{"label":"Back to leader","tip":"The leader chooses what to build again.","on_press":_priority.bind("")}] if title==priority else [{"label":"Build first","tip":"The builders take this up as soon as it can start, and work on what they can until then.","on_press":_priority.bind(title)}]
 			if title==priority:row["highlight"]=true
 		cards.append(row)
+	if not folded.is_empty():
+		var total:=Construction._settlement_definitions().size()
+		cards.push_front({"section":"works","key":"works_built","icon":"hall","name":"Built works","sub":"",
+			"bar":{"ratio":float(built)/float(maxi(1,total)),"color":Tokens.GREEN},"value":"%d of %d" % [built,total],"value_width":60,
+			"detail":"What each does now, in the engine's figures:
+"+"
+".join(folded)})
 	# What the homes and the works do now, in the engine's figures.
 	var titles:Array=Construction._settlement_definitions().map(func(d:Dictionary)->String:return String(d.name))
 	for line:Dictionary in Impact.summary():
 		# A civic work's own line is its row above.
 		if String(line.label) in titles:continue
-		cards.append({"section":"does","key":"does_"+String(line.label),"icon":"hall","name":String(line.label),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":96,"detail":String(line.get("words",""))})
+		var label:=String(line.label);var value:=String(line.value)
+		# Room in store, not food in hand: said so, beside the top bar's days of food.
+		if label=="Food kept":label="Store room for food";value=value+"' worth"
+		if label=="Homes":value=value.replace(" places a person"," a person")
+		cards.append({"section":"does","key":"does_"+String(line.label),"icon":"hall","name":label,"value":value,"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
 	var homes:=Impact.homes()
 	for line:Dictionary in homes.lines:
-		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(line.label),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":96,"detail":String(line.get("words",""))})
+		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(SHORT_LINES.get(String(line.label),line.label)),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
 	var record:=_record_rows()
 	cards.append_array(record.rows)
 	var sections:=[
-		{"id":"works","heading":"Civic works","span":true,"note":("Your priority: %s" % priority) if not priority.is_empty() else "%d of %d built · the leader chooses" % [built,Construction._settlement_definitions().size()]},
 		{"id":"does","heading":"What the buildings do"},
 		{"id":"homes","heading":"What the homes do"},
+		{"id":"works","heading":"Civic works","span":true,"note":("Your priority: %s" % priority) if not priority.is_empty() else "the leader chooses"},
 		{"id":"record","heading":"Building record","note":String(record.note),"actions":record.actions}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards,"projects":projects,"completed":GameState.settlement_completed.size(),"priority":priority}]}
+
+## The homes' lines in a word or two, so a row never cuts its name.
+const SHORT_LINES:={"Deaths from age and weakness":"Deaths of age","Sickness breaking out":"Sickness","Room for newcomers":"Room to spare","Deaths of exposure":"Deaths of cold"}
 
 ## The town's building record, newest first, eight to a page, folded into
 ## the Civic works tab (GameState.building_ledger, as the old record
@@ -989,8 +1014,8 @@ func _infrastructure_tab()->Dictionary:
 		elif index==here+1:row.merge({"tag":{"text":"Next","tone":"warn","tip":"Its bill and the choice of who decides are on The Town."},"highlight":true},true)
 		cards.append(row)
 	var sections:=[
-		{"id":"works","heading":"Water, rail and plants","note":"none yet" if cards.filter(func(c:Dictionary)->bool:return String(c.section)=="works").is_empty() else "","note_tip":"Builders raise water works, channels, rail and plants once their practices are adopted and materials arrive."},
-		{"id":"defences","heading":"The defences, stage by stage"}]
+		{"id":"works","heading":"Water, rail and plants","span":true,"note":"none yet" if cards.filter(func(c:Dictionary)->bool:return String(c.section)=="works").is_empty() else "","note_tip":"Builders raise water works, channels, rail and plants once their practices are adopted and materials arrive."},
+		{"id":"defences","heading":"The defences, stage by stage","span":true}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
 
 static func _infrastructure_rows(city_id:String)->Array:

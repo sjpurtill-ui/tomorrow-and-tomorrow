@@ -20,9 +20,6 @@ extends "res://scripts/hud/town_works_board.gd"
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 const COLUMN_MIN:=300.0
 const BAR_WIDTH:=80.0
-## A row's name keeps at most this much width when the row is narrow.
-const NAME_MAX:=150.0
-const NAME_MAX_COMPACT:=120.0
 
 var _specs:Array=[]
 var _columns:=0
@@ -148,8 +145,7 @@ func _row(card:Dictionary)->Control:
 	var line:=HBoxContainer.new();line.name="Line";line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(line)
 	line.add_child(_icon(card))
 	var name_label:=_label(String(card.get("name","")),14,T.INK,true);name_label.name="Name"
-	name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.tooltip_text=name_label.text
-	name_label.custom_minimum_size.x=minf(NAME_MAX_COMPACT if _compact else NAME_MAX,T.font("ui_strong").get_string_size(name_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+2.0)
+	# A name is never cut: providers keep names short enough for a column.
 	line.add_child(name_label)
 	var sub:=_label(String(card.get("sub","")),12,T.TEXT_SOFT);sub.name="Sub"
 	sub.size_flags_horizontal=Control.SIZE_EXPAND_FILL;sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS

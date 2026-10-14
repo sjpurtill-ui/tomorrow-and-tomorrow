@@ -135,7 +135,7 @@ func test_seanstone_room_is_explained_by_the_tents_carried()->void:
 	var homes:Dictionary=rows["New homes"]
 	assert_str(String(homes.value)).is_equal("%d to go" % (192-int(GameState.population_total)))
 	assert_int(Construction.housing_trigger_people()).is_equal(192)
-	assert_str(String(homes.sub)).is_equal("Builders start more once over 192 people live here")
+	assert_str(String(homes.sub)).is_equal("next homes at 192 people")
 	assert_str(String(homes.detail)).starts_with("Then 8 builders add about 24 places every %s." % Plain.span_text(Construction.HOUSING_BATCH_WORK/Construction.housing_work_per_day()))
 	assert_bool(Construction.housing_under_way()).is_false()
 	GameState.population_total=193
@@ -309,7 +309,7 @@ func test_era_says_what_the_next_era_still_needs()->void:
 
 func test_workshops_and_stores_name_the_hands_they_need()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
-	var row:Dictionary=_rows(_page())["Workshops and stores"]
+	var row:Dictionary=_rows(_page())["Workshops, stores"]
 	assert_str(String(row.value)).is_equal("Short-handed")
 	# The counts ride in its pips, once.
 	assert_float(float(row.needs[1].have)).is_equal(6.0);assert_float(float(row.needs[1].need)).is_equal(10.0)
