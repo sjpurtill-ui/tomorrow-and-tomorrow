@@ -118,38 +118,44 @@ static func table_block(block:Dictionary,lanes:Array,choosing:Array=[],on_choose
 		var field:Dictionary=lane.field
 		var slots:Array=lane.slots
 		var share:=float(field.get("share",0.0))
-		var head:={"icon":Icons.domain_texture(id if not id.is_empty() else "knowledge",Visuals.color(id) if not id.is_empty() else T.MUTED),"cells":{"field":String(lane.name),"share":("%d%%" % maxi(1,roundi(share*100.0))) if share>0.0 else ("none" if not field.is_empty() else "")}}
+		var row:={"icon":Icons.domain_texture(id if not id.is_empty() else "knowledge",Visuals.color(id) if not id.is_empty() else T.MUTED),"cells":{"field":String(lane.name),"share":("%d%%" % maxi(1,roundi(share*100.0))) if share>0.0 else ("none" if not field.is_empty() else "")},"buttons":[]}
 		if not field.is_empty():
-			head["bar"]={"value":share/top}
-			head["buttons"]=[{"label":"−","on_press":field.get("on_less"),"tip":"Give one step of this field's attention to the others","disabled":int(field.get("weight",0))<=0,"width":26},
+			row["buttons"]=[{"label":"−","on_press":field.get("on_less"),"tip":"Give one step of this field's attention to the others","disabled":int(field.get("weight",0))<=0,"width":26},
 				{"label":"+","on_press":field.get("on_more"),"tip":"Move one step of attention to this field","width":26}]
-		else:
-			head["bar"]={"blank":true};head["buttons"]=[{},{}]
 		if slots.is_empty():
 			var waiting:=_waiting_words(lane)
-			head.cells["question"]=String(waiting.text)
-			head["tip"]=String(waiting.tip) if String(waiting.tip)!="" else _field_words(field) if not field.is_empty() else ""
-			if not choosing.is_empty():head["buttons"].append({"blank":true,"width":64})
-			rows.append(head)
-			continue
-		for index in slots.size():
-			var record:Dictionary=(slots[index] as Dictionary).record
-			var row:Dictionary=head if index==0 else {"cells":{"field":"","share":""},"bar":{"blank":true},"buttons":[{},{}]}
-			_question_cells(row,record)
-			var channel:=String((slots[index] as Dictionary).key)
-			if not choosing.is_empty():
-				if choosing.has(channel) and on_choose is Callable:(row.buttons as Array).append({"label":"Choose","on_press":(on_choose as Callable).bind(channel),"tip":"A team is free: keep it on this question or send it to another","width":64})
-				else:(row.buttons as Array).append({"blank":true,"width":64})
+			row.cells["question"]=String(waiting.text)
+			row["tip"]=String(waiting.tip) if String(waiting.tip)!="" else _field_words(field) if not field.is_empty() else ""
 			rows.append(row)
+			continue
+		# One line per field: the question nearest proof, the others counted
+		# (and named on hover); a pip for each team at work in the field.
+		var lead:Dictionary=slots[0]
+		var teams:=0
+		for slot:Dictionary in slots:
+			teams+=maxi(1,int((slot.record as Dictionary).get("teams_on",1)))
+			if float((slot.record as Dictionary).get("progress",0.0))>float((lead.record as Dictionary).get("progress",0.0)):lead=slot
+		_question_cells(row,lead.record)
+		row.cells["teams"]="●".repeat(teams)
+		if slots.size()>1:
+			var others:Array[String]=[]
+			for slot:Dictionary in slots:
+				if slot!=lead:others.append("%s: %d in 100 proven" % [String((slot.record as Dictionary).get("name","")),roundi(float((slot.record as Dictionary).get("progress",0.0))*100.0)])
+			row["tip"]=String(row.tip)+"\n\nAlso under way here:\n"+"\n".join(others)
+		var channel:=""
+		for slot:Dictionary in slots:
+			if choosing.has(String(slot.key)):channel=String(slot.key)
+		if channel!="" and on_choose is Callable:(row.buttons as Array).append({"label":"Choose","on_press":(on_choose as Callable).bind(channel),"tip":"A team is free: keep it on its question or send it to another"})
+		rows.append(row)
 	if block.has("artifacts"):
 		var study:Dictionary=block.artifacts
 		rows.append({"icon":Icons.domain_texture("culture",Color("b98a5e")),"cells":{"field":"Artifact study","question":String(study.get("words","")),"share":"%d%%" % roundi(float(study.get("share",0.0))*100.0)},
-			"bar":{"value":float(study.get("share",0.0))/top},"tip":String(study.get("tip","")),
+			"tip":String(study.get("tip","")),
 			"buttons":[{"label":"−","on_press":study.get("on_less"),"tip":"Give one step of the study's attention to the fields","disabled":int(study.get("weight",0))<=0,"width":26},
-				{"label":"+","on_press":study.get("on_more"),"tip":"Move one step of attention to artifact study","width":26}]+([{"blank":true,"width":64}] if not choosing.is_empty() else [])})
+				{"label":"+","on_press":study.get("on_more"),"tip":"Move one step of attention to artifact study","width":26}]})
 	return {"type":"table","empty":"No question is under way: the people need clues and earlier knowledge first.",
-		"columns":[{"key":"field","label":"FIELD","width":124},{"key":"question","label":"UNDER WAY","wrap":true},{"key":"evidence","label":"PROVEN","width":54,"align":"right"},
-			{"key":"time","label":"TO PROOF","width":80,"align":"right"},{"key":"share","label":"SHARE","width":40,"align":"right"}],"rows":rows}
+		"columns":[{"key":"field","label":"FIELD","width":124},{"key":"question","label":"UNDER WAY","wrap":true},{"key":"teams","label":"TEAMS","width":40},{"key":"evidence","label":"PROVEN","width":50,"align":"right"},
+			{"key":"time","label":"TO PROOF","width":74,"align":"right"},{"key":"share","label":"SHARE","width":40,"align":"right"}],"rows":rows}
 
 ## A question's cells: its name and what holds it back, the evidence gathered,
 ## its time to proof; its whole account on hover.
@@ -400,17 +406,18 @@ static func _waiting_words(lane:Dictionary)->Dictionary:
 	for info:Dictionary in lane.waiting:
 		var line:=String(info.get("line",""))
 		match String(info.get("kind","")):
-			"turn":parts.append("%s waits for a free team" % line)
-			"ahead":parts.append("%s: too early for us" % line)
+			"turn":parts.append("waits for a team")
+			"ahead":parts.append("too early for us")
 			_:
 				var lacks:Array=info.get("lacks",[])
 				if not lacks.is_empty():
 					lacking=true
-					parts.append("%s lacks %s" % [line," and ".join(PackedStringArray(lacks.map(func(m:Variant)->String:return String(m).to_lower())))])
-				else:parts.append("%s needs earlier knowledge" % line)
+					parts.append("lacks %s" % " and ".join(PackedStringArray(lacks.map(func(m:Variant)->String:return String(m).to_lower()))))
+				else:parts.append("needs earlier knowledge")
 		tips.append("%s: %s" % [line,String(info.get("reason",""))])
 	# The first waiting line in a few words; every line and its reason on hover.
-	var text:=parts[0]+(" · %d more line%s waiting" % [parts.size()-1,"" if parts.size()==2 else "s"] if parts.size()>1 else "") if not parts.is_empty() else ""
+	# The first waiting line's reason in a few words; every line and its reason on hover.
+	var text:=(parts[0].left(1).to_upper()+parts[0].substr(1))+(" · %d more" % (parts.size()-1) if parts.size()>1 else "") if not parts.is_empty() else ""
 	if (lane.slots as Array).is_empty() and parts.is_empty():text="Nothing being worked on" if not (lane.field as Dictionary).is_empty() else ""
 	return {"text":text,"tip":"\n".join(tips),"lacking":lacking}
 
@@ -562,7 +569,7 @@ static func pace_factors(pace:Dictionary)->Array:
 		parts.append({"kind":kind,"label":label,"factor":factor,"amount":factor_words(factor),"tip":tip})
 	var early:=float(pace.get("work_factor",1.0))
 	if early>1.05:
-		add.call("early","Early questions",1.0/early,"The questions under way belong to a later age than ours: on average each takes %s the usual work (each question's own price is on its line). Nearer questions go faster; fewer learners let the calendar catch up." % _times(early))
+		add.call("early","Early work",1.0/early,"The questions under way belong to a later age than ours: on average each takes %s the usual work (each question's own price is on its line). Nearer questions go faster; fewer learners let the calendar catch up." % _times(early))
 	var goods:=float(pace.get("goods_factor",1.0))
 	if goods<0.995:add.call("goods","Short of goods",goods,tips.get("goods",""))
 	var founding:=float(pace.get("founding",1.0))
@@ -571,35 +578,35 @@ static func pace_factors(pace:Dictionary)->Array:
 	if float(pace.get("typical_work",0.0))>0.0 and ratio<0.95:
 		add.call("few","Few learners",ratio,"%s at learning, where a people our age keeps about %s. More hands on learning would speed every question." % [_count(float(pace.get("learners",0.0))),_count(float(pace.get("typical",0.0)))])
 	var support:=float(pace.get("support",1.0))
-	add.call("support","Fed and taught",support,tips.get("support",""))
+	add.call("support","Fed & taught",support,tips.get("support",""))
 	var offices:=float(pace.get("offices",1.0))
 	add.call("offices","Officials",offices,"The officials over the fields' work, and our aims, set the pace of the questions under way: on average %s the usual." % _times(offices))
-	if bool(pace.get("studying",false)):add.call("artifacts","Artifact study",0.85,tips.get("artifacts",""))
+	if bool(pace.get("studying",false)):add.call("artifacts","Artifacts",0.85,tips.get("artifacts",""))
 	var lacking:Array=pace.get("lacking",[])
 	if not lacking.is_empty():
-		add.call("material","Lacking material",1.0-0.25*float(lacking.size())/maxf(1.0,float(pace.get("questions",1))),"%s wait%s on a material we have not found or worked. Survey or work it." % [", ".join(PackedStringArray(lacking)),"s" if lacking.size()==1 else ""])
+		add.call("material","Material",1.0-0.25*float(lacking.size())/maxf(1.0,float(pace.get("questions",1))),"%s wait%s on a material we have not found or worked. Survey or work it." % [", ".join(PackedStringArray(lacking)),"s" if lacking.size()==1 else ""])
 	var pay:=float(pace.get("pay",1.0))
-	if pay>1.0001:add.call("pay","Scholars paid",pay,tips.get("pay",""))
+	if pay>1.0001:add.call("pay","Paid",pay,tips.get("pay",""))
 	var lift:=float(pace.get("gifted_lift",0.0))
-	if lift>0.0:add.call("gifted","Gifted scholars",1.0+lift,tips.get("gifted",""))
+	if lift>0.0:add.call("gifted","Gifted",1.0+lift,tips.get("gifted",""))
 	var taught:Array=pace.get("taught",[])
-	if not taught.is_empty():add.call("teachers","Visiting teacher",1.0+0.5*float(taught.size())/maxf(1.0,float(pace.get("questions",1))),tips.get("teachers",""))
+	if not taught.is_empty():add.call("teachers","Teacher",1.0+0.5*float(taught.size())/maxf(1.0,float(pace.get("questions",1))),tips.get("teachers",""))
 	var craft:=float(pace.get("craft",1.0))
-	if craft>1.0005:add.call("craft","Builders' craft",craft,tips.get("craft","")+" (Building questions only.)")
+	if craft>1.0005:add.call("craft","Builders",craft,tips.get("craft","")+" (Building questions only.)")
 	return parts
 
 ## "×1.8", "+12%", "÷40", "−15%".
 static func factor_words(factor:float)->String:
 	if factor>=1.0:return ("×%s" % (str(roundi(factor)) if factor>=10.0 else _amount(factor))) if factor>=1.95 else "+%d%%" % roundi((factor-1.0)*100.0)
 	var inverse:=1.0/maxf(0.0001,factor)
-	return ("÷%s" % (str(roundi(inverse)) if inverse>=10.0 else _amount(inverse))) if inverse>=1.95 else "−%d%%" % roundi((1.0-factor)*100.0)
+	# Slowing parts carry a minus: "−40×" (forty times the work), "−15%".
+	return ("−%s×" % (str(roundi(inverse)) if inverse>=10.0 else _amount(inverse))) if inverse>=1.95 else "−%d%%" % roundi((1.0-factor)*100.0)
 
 ## The strip of figures, the bar of what speeds and slows the work.
 func _pace_header(parent:Node,words:Dictionary,pace:Dictionary)->void:
-	var box:=VBoxContainer.new();box.name="LearningPace";box.add_theme_constant_override("separation",8);parent.add_child(box)
-	var row:=HBoxContainer.new();row.name="Factors";row.add_theme_constant_override("separation",10);box.add_child(row)
-	var caption:=T.make_label("SPEEDS AND SLOWS",11,T.GOLD_TEXT,0.06);caption.custom_minimum_size.x=146.0;caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
-	var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",4);row.add_child(stack)
+	# The bar across the page, its key beneath (what each part is is on hover).
+	var box:=VBoxContainer.new();box.name="LearningPace";box.add_theme_constant_override("separation",4);parent.add_child(box)
+	var stack:=box
 	factor_bar=FactorBar.new();factor_bar.name="FactorBar";factor_bar.custom_minimum_size.y=14;stack.add_child(factor_bar)
 	var legend:=HFlowContainer.new();legend.name="FactorLegend";legend.add_theme_constant_override("h_separation",14);legend.add_theme_constant_override("v_separation",2);stack.add_child(legend)
 	_header["legend"]=legend
@@ -660,7 +667,7 @@ static func _drift_words(pace:Dictionary)->String:
 ## Who sets the learners, and the two orders that change it.
 func _hands(parent:Node,hands:Dictionary)->void:
 	var row:=HBoxContainer.new();row.name="Hands";row.add_theme_constant_override("separation",8);parent.add_child(row)
-	var caption:=T.make_label("LEARNERS",11,T.GOLD_TEXT,0.06);caption.custom_minimum_size.x=146.0;caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
+	var caption:=T.make_label("LEARNERS",11,T.GOLD_TEXT,0.06);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
 	var said:=T.make_label(String(hands.get("words","")),13,T.BODY);said.name="HandsWords";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.custom_minimum_size.x=120
 	said.tooltip_text=String(hands.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(said)
