@@ -94,9 +94,8 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	# Three parts: the army (its forces with each town's guard), the fronts
 	# (the enemies and the border), the leaders. The bands out are the army
 	# bar's cards, not a list here.
-	# The border stands with the fronts on a narrow screen, under the army on
-	# a wide one (home and its edge together).
-	var border_in:="ArmySection" if Board.wide(board.get_viewport().get_visible_rect().size.x) else "FrontsSection"
+	# The global border stays with the Army task at every width.
+	var border_in:="ArmySection"
 	assert_object(board.find_child(border_in,true,false).find_child("BorderCard",true,false)).is_not_null()
 	for part in [["ArmySection",["ForcesCard","TownsCard","MakeupCard","CostCard"]],["FrontsSection",["Enemies"]],["LeadersSection",["Leaders"]]]:
 		var section:Node=board.find_child(String(part[0]),true,false)
@@ -193,6 +192,7 @@ func test_an_open_menu_is_never_rebuilt_under_the_rulers_hand()->void:
 	var board:VBoxContainer=auto_free(Board.new())
 	add_child(board)
 	board.setup({})
+	board.show_tab("fronts")
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	var take:MenuButton=row.find_child("Stance_take",true,false)
 	# Their dead change while the ruler has a menu of that row open.
@@ -512,3 +512,23 @@ func test_home_standing_counts_on_watch_once()->void:
 	var standing:Dictionary=Watch.home_standing(MilitaryCampaign)
 	for key in ["on_watch","home_guard","free_to_send","on_border","can_rise","guard_need"]:assert_bool(standing.has(key)).is_true()
 	assert_int(int(standing.on_watch)).is_greater_equal(int(standing.free_to_send))
+
+func test_map_click_selects_a_front_not_currently_built_by_the_bounded_reader()->void:
+	for civ:Dictionary in CivilizationSystem.civilizations:WAR.blood_feud(String(civ.id),10,"a border raid")
+	MilitaryCampaign.open_roster("army")
+	await get_tree().process_frame
+	var board=MilitaryCampaign.roster_screen.body.get_node("WarBoard")
+	var wanted:=String(board.front_reader.records.back().id)
+	board.front_reader.search.text="no matching front"
+	board.front_reader.search.text_changed.emit(board.front_reader.search.text)
+	board.show_tab("leaders");board._toggle_covert()
+	assert_object(board.find_child("Enemy_%s" % wanted,true,false)).is_null()
+	var mode:Control=auto_free(MapMode.new());add_child(mode)
+	assert_bool(mode.show_card(wanted)).is_true()
+	await get_tree().process_frame
+	assert_str(board.tab).is_equal("fronts")
+	assert_str(board.front_reader.selected_id).is_equal(wanted)
+	assert_str(board.front_reader.query).is_empty()
+	assert_bool(board.covert.visible).is_false()
+	assert_bool(board.find_child("Enemy_%s" % wanted,true,false).is_visible_in_tree()).is_true()
+	assert_bool(mode.show_card("not-a-front")).is_false()

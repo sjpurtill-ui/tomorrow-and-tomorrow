@@ -28,6 +28,17 @@ func _ready()->void:
 			await _capture_view(["town","civic","infrastructure","landmarks"][sub],canvas.x,mode)
 			var board=hud.dock.find_child("BuildingsBoard",true,false)
 			if board and board.get_combined_minimum_size().x>board.size.x+1:failures.append("Content overflows tab%d at%d"%[sub,canvas.x])
+			if board and sub in [0,3]:
+				var full=board.find_children("FullExplanation","Label",true,false)
+				for explanation:Label in full:
+					if not explanation.get_parent().is_visible_in_tree():continue
+					var toggle=explanation.get_parent().get_child(explanation.get_index()-1) as Button
+					if toggle.disabled:failures.append("Selected explanation disclosure is disabled");continue
+					toggle.button_pressed=true;await _frames(2)
+					if not explanation.is_visible_in_tree():failures.append("Disclosure did not open")
+					await _capture_view("explanation-%d"%sub,canvas.x,mode)
+					toggle.button_pressed=false;await _frames(2)
+					if explanation.is_visible_in_tree():failures.append("Disclosure did not close")
 			hud.dock.body_scroll.scroll_vertical=100000;await _frames(6);await _capture_view(["town","civic","infrastructure","landmarks"][sub]+"-lower",canvas.x,mode)
 	if "--late" in OS.get_cmdline_user_args():
 		var view=hud.dock.find_child("Act_View",true,false) as Button

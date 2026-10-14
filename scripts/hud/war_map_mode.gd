@@ -171,10 +171,12 @@ func _unhandled_input(event:InputEvent)->void:
 func show_card(civ_id:String)->bool:
 	var screen:Variant=MilitaryCampaign.roster_screen
 	if not is_instance_valid(screen): return false
+	var board:Node=(screen as Node).find_child("WarBoard",true,false)
+	if board!=null and board.has_method("show_front") and not board.call("show_front",civ_id):return false
 	var card:=(screen as Node).find_child("Enemy_%s" % civ_id,true,false) as Control
 	if card==null: return false
 	var scroll:Variant=(screen as Node).get("scroll")
-	if scroll is ScrollContainer: (scroll as ScrollContainer).ensure_control_visible(card)
+	if scroll is ScrollContainer:(scroll as ScrollContainer).call_deferred("ensure_control_visible",card)
 	card.modulate=Color(1.18,1.1,0.86)
 	var tween:=card.create_tween()
 	tween.tween_property(card,"modulate",Color.WHITE,0.9)

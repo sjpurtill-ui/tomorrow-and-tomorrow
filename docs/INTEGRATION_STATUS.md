@@ -1,3 +1,25 @@
+## October 14 — Living People screen (IN PROGRESS, latest direction)
+
+The user rejected the four list-based Town concepts and approved the illustrated
+village direction specifically as the People screen. This supersedes acceptance
+of selected-reader layouts as the final graphical design. Prior reader work is
+bounded access and behavior cleanup, not completion of the visual request.
+
+The People screen must show a living civilization whose actual footprint,
+buildings, roads, construction and condition change with development. Selecting
+a work category zooms into that physical area. Its workforce controls and
+graphical current/proposed consequences appear inside the focused zone. Each
+work area has Assign workers, and a clear return to the civilization overview.
+Assignment previews must expose food balance, reserve depletion and starvation
+risk where calculable, as well as the selected work's other effects. Previewing
+must never advance or mutate live simulation state, and application retains the
+existing labor rules. Relevant assignment routes should converge on this screen.
+
+Implementation ownership: A read-only workforce forecast; B graphical People
+controls/provider; C living scene/camera; root integration and route consolidation.
+The generated village image is an art-direction concept only. Static artwork
+behind lists does not satisfy the user's dynamic scene requirement.
+
 ## October 14 — Popup information architecture revision (IN PROGRESS)
 
 The user's later screenshots reject the first audit's interior page layouts.
@@ -109,9 +131,14 @@ Twenty integrated Figures/notices cases pass; the worker's 24 private GPU views
 passed independent review. Opening trade-access gains now correctly say points,
 matching the existing additive effect. No game rules are changed.
 
-HELD: Production History, Home detail, Buildings, and War fronts/leaders. These
-are not claimed as delivered. The latest Buildings screenshot also prompted four
-alternative composition concepts for the user's comparison.
+Integrated as access/behavior baselines in this checkpoint: Production History
+(`802166c8`, source `018ebcc8`), Home details (`89c9976e`, source `4999f91c`),
+Buildings (`cee822fa`), War fronts/leaders (`083f738c`, source `69cf1a67`) and
+Chronicle persistence (`931cd4bf`, source `f4dfd40c`). Fifty-four combined cases
+pass with zero errors, failures, skips or orphans (report_52). The Buildings
+private GPU runs verify actual View/Conceive routes and enabled disclosure
+open/close behavior. These improvements do not complete the living graphical
+People screen requested above; that implementation remains in progress.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)

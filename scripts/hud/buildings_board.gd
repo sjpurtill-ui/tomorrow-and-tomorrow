@@ -1,6 +1,6 @@
 extends "res://scripts/hud/town_works_board.gd"
-## Buildings: current work and decisions first, with exact costs and effects
-## beneath each work. Supporting sections use one or two readable columns.
+## Buildings: one selected work with its actual costs, effects and controls.
+## Section filters and bounded search keep every work available in a compact index.
 ## Presentation only: every reading and action arrives from the providers
 ## (hud/content/dock_content_construction.gd and dock_content_undertakings.gd).
 ##
@@ -15,10 +15,14 @@ extends "res://scripts/hud/town_works_board.gd"
 
 ## Widths are the UI's own units (the game draws at a UI scale, so 1600 px
 ## wide gives this page about 665 units and 2000 px about 850).
+const Selection=preload("res://scripts/hud/production_selection.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 const COLUMN_MIN:=360.0
 const BAR_WIDTH:=80.0
 
+var view_state:Dictionary={}
+var browser:Control
+var category:OptionButton
 var _specs:Array=[]
 var _columns:=0
 ## Supporting sections use shorter bars when arranged side by side.
@@ -26,9 +30,9 @@ var _compact:=false
 
 
 func setup(block:Dictionary)->void:
-	data=block;name="BuildingsBoard"
+	data=block;view_state=block.get("view_state",{});name="BuildingsBoard"
 	theme=_theme()
-	add_theme_constant_override("separation",28)
+	add_theme_constant_override("separation",10)
 	var by_section:Dictionary={}
 	for card:Dictionary in block.get("cards",[]):
 		var id:=String(card.get("section","main"))
@@ -43,46 +47,25 @@ func setup(block:Dictionary)->void:
 	_fit.call_deferred()
 
 
-func _fit()->void:
-	if size.x<=0.0:return
-	var count:=clampi(floori((size.x+28.0)/(COLUMN_MIN+28.0)),1,2)
-	if count!=_columns:_layout(count)
+func _fit()->void:pass
 
-
-## Lay the sections out in `count` columns: a span section takes the whole
-## width; consecutive narrow ones share a band, each dealt to the shortest
-## column. Rows are drawn afresh for the width they get.
-func _layout(count:int)->void:
-	_columns=count
-	_compact=count>1
-	for child in get_children():
-		remove_child(child);child.free()
-	var bands:Array=[]
-	var band:Array=[]
+## Sections are filters on one reading, not a wall of independent cards.
+func _layout(_count:int)->void:
+	for child in get_children():remove_child(child);child.queue_free()
+	if _specs.is_empty():add_child(_label("No building work is recorded here yet.",16,T.INK_MUTED));return
+	if not (data.get("readings",[]) as Array).is_empty():add_child(_context_readings(data.readings))
+	var selected:=String(view_state.get("section",String(_specs[0].section.id)))
+	if not _specs.any(func(spec:Dictionary)->bool:return String(spec.section.id)==selected):selected=String(_specs[0].section.id)
+	view_state.section=selected
+	var nav:=HBoxContainer.new();nav.add_theme_constant_override("separation",10);nav.visible=_specs.size()>1;add_child(nav)
+	nav.add_child(_label("View",14,T.INK_MUTED))
+	category=OptionButton.new();category.name="SectionChoice";category.custom_minimum_size.y=40;category.size_flags_horizontal=Control.SIZE_EXPAND_FILL;category.fit_to_longest_item=false;nav.add_child(category)
+	for i in _specs.size():
+		var spec:Dictionary=_specs[i];category.add_item("%s · %d" % [String(spec.section.heading),spec.cards.size()])
+		if String(spec.section.id)==selected:category.select(i)
+	category.item_selected.connect(func(index:int):view_state.section=String(_specs[index].section.id);_layout(1))
 	for spec:Dictionary in _specs:
-		if bool((spec.section as Dictionary).get("span",false)):
-			if not band.is_empty():bands.append(band);band=[]
-			bands.append([spec])
-		else:band.append(spec)
-	if not band.is_empty():bands.append(band)
-	for each:Array in bands:
-		var row:=HBoxContainer.new();row.name="Band";row.add_theme_constant_override("separation",28);add_child(row)
-		var spanned:=each.size()==1 and bool((each[0].section as Dictionary).get("span",false))
-		var n:=1 if spanned else mini(count,each.size())
-		var was:=_compact
-		if spanned:_compact=false
-		var columns:Array=[];var heights:Array=[]
-		for i in n:
-			var column:=VBoxContainer.new();column.name="Column%d" % i;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			column.add_theme_constant_override("separation",28);row.add_child(column);columns.append(column);heights.append(0.0)
-		if n==1:_compact=false
-		for spec:Dictionary in each:
-			var best:=0
-			for i in n:if float(heights[i])<float(heights[best]):best=i
-			(columns[best] as VBoxContainer).add_child(_section(spec.section,spec.cards))
-			heights[best]=float(heights[best])+_weight(spec.cards)
-		_compact=was
-		if each==bands[0] and not (data.get("readings",[]) as Array).is_empty():add_child(_context_readings(data.readings))
+		if String(spec.section.id)==selected:add_child(_section(spec.section,spec.cards));break
 
 
 static func _weight(cards:Array)->float:
@@ -105,16 +88,35 @@ static func _has_second_line(card:Dictionary)->bool:
 func _section(section:Dictionary,cards:Array)->Control:
 	var box:=VBoxContainer.new();box.name="Section_"+String(section.get("id",""));box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation",10)
-	var title:=T.make_label(String(section.get("heading","")),26,T.INK)
-	title.add_theme_font_override("font",T.font("ui_strong"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(title)
+	if _specs.size()==1:
+		var title:=T.make_label(String(section.get("heading","")),26,T.INK)
+		title.add_theme_font_override("font",T.font("ui_strong"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(title)
 	if String(section.get("note",""))!="":
 		var note:=_label(String(section.note),14,T.TEXT_SOFT);note.name="Note";note.tooltip_text=String(section.get("note_tip",""));note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		note.mouse_filter=Control.MOUSE_FILTER_STOP if note.tooltip_text!="" else Control.MOUSE_FILTER_IGNORE;box.add_child(note)
 	if not (section.get("actions",[]) as Array).is_empty():
 		var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);box.add_child(actions)
 		for item:Dictionary in section.actions:actions.add_child(_button(item))
+	var id:=String(section.get("id",""))
+	if not view_state.has(id):view_state[id]={}
+	browser=Selection.new();box.add_child(browser);browser.setup(view_state[id],6)
 	for i in cards.size():
-		box.add_child(_row(cards[i]))
+		var card:Dictionary=cards[i]
+		var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10)
+		var key:=str(card.get("key",i))
+		var status:=String(card.get("sub",""))
+		if status.is_empty():status=String(card.get("tag",{}).get("text",card.get("value","")))
+		browser.add_record(key,String(card.get("name","Work")),status,content)
+		content.add_child(_row(card))
+		var detail:=String(card.get("reading",card.get("detail",""))).replace("\r","").replace("\n\n","\n")
+		if not detail.is_empty():
+			var words:=_label(detail,16,T.INK);words.name="WhatItDoes";words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;content.add_child(words)
+		var further:=String(card.get("further",""))
+		if not further.is_empty():
+			var disclosure:=_button({"label":String(card.get("further_label","How it works"))});disclosure.disabled=false;disclosure.toggle_mode=true;content.add_child(disclosure)
+			var explanation:=_label(further.replace("\r","").replace("\n\n","\n"),15,T.TEXT_SOFT);explanation.name="FullExplanation";explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;explanation.visible=false;content.add_child(explanation)
+			disclosure.toggled.connect(func(open:bool):explanation.visible=open)
+	browser.refresh()
 	return box
 
 
@@ -158,7 +160,12 @@ func _row(card:Dictionary)->Control:
 		var second:=HFlowContainer.new();second.name="Second";second.add_theme_constant_override("h_separation",16);second.add_theme_constant_override("v_separation",8);second.mouse_filter=Control.MOUSE_FILTER_PASS
 		for gain:Dictionary in card.get("gains",[]):second.add_child(_gain_chip(gain))
 		for effect:Dictionary in card.get("effects",[]):second.add_child(_effect_chip(effect))
-		for need:Dictionary in card.get("needs",[]):second.add_child(_pips(need))
+		if not (card.get("needs",[]) as Array).is_empty():
+			var needs:=VBoxContainer.new();needs.add_theme_constant_override("separation",5)
+			needs.add_child(_label(String(card.get("needs_label","In store / build cost")),14,T.TEXT_SOFT))
+			var bill:=HFlowContainer.new();bill.add_theme_constant_override("h_separation",16);needs.add_child(bill)
+			for need:Dictionary in card.needs:bill.add_child(_pips(need))
+			second.add_child(needs)
 		for blocker:Dictionary in card.get("blockers",[]):second.add_child(_chip(blocker,String(blocker.get("tone","bad"))))
 		for note:Dictionary in card.get("notes",[]):second.add_child(_chip(note,"note"))
 		for item:Dictionary in card.get("actions2",[]):second.add_child(_button(item))
@@ -283,16 +290,13 @@ class Segments extends Control:
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE_STRONG,false,1.0)
 
 func _context_readings(readings:Array)->Control:
-	var grid:=GridContainer.new();grid.name="ContextReadings";grid.columns=2;grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",16)
+	var flow:=HFlowContainer.new();flow.name="ContextReadings";flow.add_theme_constant_override("h_separation",18);flow.add_theme_constant_override("v_separation",8)
 	for reading:Dictionary in readings:
-		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.tooltip_text=String(reading.get("tip",""));cell.add_theme_constant_override("separation",4);grid.add_child(cell)
-		var caption:=_label(String(reading.get("label","")).capitalize(),14,T.TEXT_SOFT);cell.add_child(caption)
-		var value:=_label(String(reading.get("value","")),24,T.INK,true);value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;cell.add_child(value)
-		var note:=_label(String(reading.get("delta","")),14,T.legible(reading.get("delta_color",T.TEXT_SOFT),T.PAPER));note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;cell.add_child(note)
-		if reading.has("meter"):cell.add_child(_inline_bar({"ratio":reading.meter,"color":reading.get("meter_color",T.TEAL),"width":90}))
-		if reading.has("segments"):cell.add_child(_segments(reading.segments))
+		var cell:=HBoxContainer.new();cell.add_theme_constant_override("separation",6);cell.tooltip_text=String(reading.get("delta",""))+"\n"+String(reading.get("tip",""));flow.add_child(cell)
+		cell.add_child(_label(String(reading.get("label","")).capitalize(),14,T.INK_MUTED))
+		cell.add_child(_label(String(reading.get("value","")),16,T.INK,true))
 		var press:Variant=reading.get("on_press")
 		if press is Callable and (press as Callable).is_valid():
 			cell.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND;cell.gui_input.connect(func(event:InputEvent)->void:
 				if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:(press as Callable).call())
-	return grid
+	return flow

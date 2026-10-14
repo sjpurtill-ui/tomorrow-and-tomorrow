@@ -117,19 +117,29 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 	assert_int(feed.visible_entries().size()).is_equal(total-1)
 	feed.tallies_check.button_pressed=true
 	assert_int(feed.visible_entries().size()).is_equal(total)
-	# Open older tales; a refresh must not fold them away again.
-	feed.shown+=feed.PAGE;feed._fill()
+	# The default is bounded now. Open a later archive page and read one full
+	# account; incoming unrelated tales must not discard this reading state.
+	feed.browse_toggle.pressed.emit()
+	feed.archive_search.text="ford";feed.archive_search.text_changed.emit("ford")
+	feed.next_page.pressed.emit();feed.next_page.pressed.emit()
+	feed.event_choices.get_child(0).get_node("Line").pressed.emit()
 	await _frames(6)
-	var middle:int=await _scroll_deep()
+	assert_int(feed.archive_page).is_equal(2)
+	assert_str(String(feed.open_key)).is_not_empty()
+	var reading:Dictionary=feed.view_state().duplicate(true)
+	var search:LineEdit=feed.archive_search
 	var signature:Array=panel.provider.signature().duplicate(true)+[panel.sub]
 	for day in 4:
 		GameState.elapsed_days=100.0+day
 		Chronicle.record({"key":"new:%d" % day,"title":"A new tale %d" % day,"text":"Told today.","tier":"notice","kind":"story","day":100+day})
 		signature=_live_tick(signature)
 		await _frames(4)
-		assert_int(absi(panel.body_scroll.scroll_vertical-middle)).is_less_equal(3)
-	feed=panel.body.find_child("ChronicleFeed",true,false)
-	assert_int(int(feed.shown)).is_equal(int(feed.PAGE)*2)
+		var current:Node=panel.body.find_child("ChronicleFeed",true,false)
+		assert_object(current).is_same(feed)
+		assert_object(current.archive_search).is_same(search)
+		assert_dict(current.view_state()).is_equal(reading)
+		assert_int(current.event_choices.get_children().filter(func(node:Node)->bool:return node.get_node_or_null("Line")!=null).size()).is_equal(6)
+		assert_object(current.find_child("Reading",true,false)).is_not_null()
 	assert_bool(feed.show_tallies).is_true()
 
 func test_the_people_update_in_place_keeping_scene_card_and_place()->void:
