@@ -137,7 +137,7 @@ func test_the_defence_card_shows_the_engines_own_numbers()->void:
 	var reading:=HomeDefense.reading()
 	# (A material short shows once, red in its pips, not again as a chip.)
 	var others:Array=(reading.blockers as Array).filter(func(b:Dictionary)->bool:return String(b.kind)!="material")
-	assert_array((card.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).is_equal(others.map(func(b:Dictionary)->String:return String(b.text)))
+	assert_array((card.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).is_equal(others.map(func(b:Dictionary)->String:return "No watch work spare" if String(b.kind)=="watch" else String(b.text)))
 	assert_array((reading.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).contains(["Timber 2 of 20"])
 	var timber:Array=(card.needs as Array).filter(func(n:Dictionary)->bool:return String(n.resource)=="Timber")
 	assert_bool(float(timber[0].have)<float(timber[0].need)).is_true()
@@ -164,7 +164,7 @@ func test_the_choice_and_the_fixes_work_from_the_board()->void:
 	var body:=_render(_page())
 	# Nobody on the watch: the fix is one click, by the rule's own count.
 	var add:=HomeDefense.watch_fix(1)
-	var fix:Array=_find(body,"Act","Put %d on the watch" % add)
+	var fix:Array=_find(body,"Act","Add %d to the watch" % add)
 	assert_int(fix.size()).is_equal(1)
 	(fix[0] as Button).pressed.emit()
 	assert_int(int(GameState.population_allocations.Defense)).is_equal(add)

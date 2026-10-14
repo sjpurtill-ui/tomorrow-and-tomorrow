@@ -162,7 +162,7 @@ func _row(card:Dictionary)->Control:
 		line.add_child(value)
 	# Side by side, the state word takes the place of the row's few words.
 	# Side by side, words too long for the column wait in the tooltip, never cut.
-	if _compact and sub.text!="" and T.font("ui").get_string_size(sub.text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x>(84.0 if _columns>=3 else 120.0):
+	if _compact and sub.text!="" and T.font("ui").get_string_size(sub.text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x>(60.0 if _columns>=3 else 90.0):
 		panel.tooltip_text=("%s\n%s" % [sub.text,panel.tooltip_text]).strip_edges()
 		sub.text=""
 	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():

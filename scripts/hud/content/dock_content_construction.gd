@@ -720,7 +720,7 @@ func _defence_card()->Dictionary:
 		var now:Dictionary=r.now;var after:Dictionary=next.after
 		card["gains"]=[
 			{"label":"Defenders","icon":"shield","before":"+%d%%" % roundi(float(now.defense_bonus)*100.0),"after":"+%d%%" % roundi(float(after.defense_bonus)*100.0),"tone":"good","tip":"Our side fights at home as if the ground were this much more defensible; attackers need more men to ring the town."},
-			{"label":"Lookout","icon":"lookout","before":"%d km" % roundi(float(now.lookout_km)),"after":"%d km" % roundi(float(after.lookout_km)),"tone":"good","tip":"How far off an approaching band is seen."},
+			{"label":"Walls' lookout","icon":"lookout","before":"%d km" % roundi(float(now.lookout_km)),"after":"%d km" % roundi(float(after.lookout_km)),"tone":"good","tip":"How far off the defences let an approaching band be seen; the watch adds its own reach on top (the total is on the World page)."},
 			{"label":"Stores safe","icon":"stores","before":"%d%%" % roundi(float(now.stores_safe)*100.0),"after":"%d%%" % roundi(float(after.stores_safe)*100.0),"tone":"good","tip":"The share of the stores raiders cannot carry away."}]
 	var controller:=load("res://scripts/civilization_controller.gd")
 	var spare:=float(controller.DEFENSE_SPARE) if word=="people" else 1.0
@@ -756,8 +756,13 @@ func _defence_card()->Dictionary:
 				elif word=="build" and not _has(actions,"See materials"):actions.append({"label":"See materials","tip":"Where our materials come from and what holds them up.","on_press":jump("economy",1)})
 			"watch","slow":
 				var add:=HomeDefense.watch_fix(int(next.get("index",stage+1)))
-				item.tip="The works rise only by the day's watch work."
-				if add>0 and not _has(actions,"Put"):actions.append({"label":"Put %d on the watch" % add,"primary":true,"on_press":_watch.bind(add),
+				# Who keeps watch is the one count Home and War read
+				# (watch_military.gd home_standing); the works need watch
+				# work to spare beyond keeping the town.
+				var standing:=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+				if kind=="watch":item.text="No watch work spare"
+				item.tip="%s on watch · %s can rise. The works rise only by the day's watch work of those set to the watch beyond keeping the town." % [_n(int(standing.on_watch)),_n(int(standing.can_rise))]
+				if add>0 and not _has(actions,"Add"):actions.append({"label":"Add %d to the watch" % add,"primary":true,"on_press":_watch.bind(add),
 					"tip":"Moves %d from the busiest work to the watch.%s" % [add," You then set the daily work yourself, on The People." if not Tasks.manual() else ""]})
 			"food":
 				item.tip="Our people raise no works while food is short."
@@ -1029,7 +1034,7 @@ func _ladder_rows()->Array:
 			continue
 		var bill:PackedStringArray=[]
 		for material:String in (spec.materials as Dictionary):bill.append("%s %s" % [_n(roundi(float(spec.materials[material]))),ResourceSystem.display_name(material).to_lower()])
-		var effects:=[{"label":"Lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}]
+		var effects:=[{"label":"Walls' lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}]
 		var row:={"section":"defences","key":"stage_%d" % index,"icon":DEFENCE_ICONS[clampi(index,0,DEFENCE_ICONS.size()-1)],"name":String(stage.name),
 			"value":String(lines[0].value),"value_color":Tokens.GREEN if bool(stage.built) else Tokens.TEXT_SOFT,"sub":("%s days' work, %s" % [_n(roundi(float(spec.work))),", ".join(bill)]) if not bool(stage.built) else "",
 			"effects":effects,"detail":"Defenders %s: %s" % [String(lines[0].value),String(lines[0].words)]}
