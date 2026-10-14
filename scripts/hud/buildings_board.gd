@@ -17,6 +17,7 @@ extends "res://scripts/hud/town_works_board.gd"
 
 ## Widths are the UI's own units (the game draws at a UI scale, so 1600 px
 ## wide gives this page about 665 units and 2000 px about 850).
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 const COLUMN_MIN:=300.0
 const BAR_WIDTH:=80.0
 ## A row's name keeps at most this much width when the row is narrow.
@@ -228,30 +229,27 @@ func _segments(items:Array)->Control:
 	return bar
 
 
+## State tags and verbs are the shared strategy-screen pieces (dense_blocks.gd).
 func _tag(tag:Dictionary)->Control:
-	var tone:=String(tag.get("tone","note"))
-	var chip:=PanelContainer.new();chip.name="Tag";chip.tooltip_text=String(tag.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP;chip.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var ground:Color={"good":Color(T.GREEN,0.14),"bad":T.DANGER_BG,"warn":T.WARN_BG,"info":T.INFO_BG}.get(tone,Color(0,0,0,0))
-	var rule:Color={"good":T.GREEN,"bad":T.DANGER_BORDER,"warn":T.WARN_BORDER,"info":T.INFO_BORDER}.get(tone,T.RULE)
-	var style:=T.flat(ground,rule,1,3);style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=0;style.content_margin_bottom=1
-	chip.add_theme_stylebox_override("panel",style)
-	chip.add_child(_label(String(tag.get("text","")),12,tone_ink(tone) if tone!="note" and tone!="info" else (T.TEAL_TEXT if tone=="info" else T.TEXT_SOFT),true))
-	return chip
+	var tone:=String(tag.get("tone",""))
+	var pill:=Dense.tag(String(tag.get("text","")),tone if tone in ["good","warn","bad"] else "")
+	pill.tooltip_text=String(tag.get("tip",""))
+	if pill.tooltip_text!="":pill.mouse_filter=Control.MOUSE_FILTER_STOP
+	return pill
 
 
 func _button(item:Dictionary)->Button:
-	var button:=Button.new();button.name="Act_"+String(item.get("label","")).replace(" ","_");button.text=String(item.get("label",""))
-	button.tooltip_text=String(item.get("tip",""));button.focus_mode=Control.FOCUS_NONE
-	button.custom_minimum_size=Vector2(0,24);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	button.add_theme_font_size_override("font_size",12)
-	if bool(item.get("primary",false)):
-		button.add_theme_stylebox_override("normal",T.action_button_style(true));button.add_theme_color_override("font_color",T.GOLD_TEXT)
-	if bool(item.get("pressed",false)):
-		button.toggle_mode=true;button.set_pressed_no_signal(true)
+	var label:=String(item.get("label",""))
 	var action:Variant=item.get("on_press")
-	if action is Callable and (action as Callable).is_valid():button.pressed.connect(func()->void:(action as Callable).call())
-	else:button.disabled=true
-	return button
+	var valid:=action is Callable and (action as Callable).is_valid()
+	var go:=Dense.verb(label,action if valid else null,String(item.get("tip","")),not valid)
+	go.name="Act_"+label.replace(" ","_")
+	if bool(item.get("primary",false)):
+		var skin:=(go.get_theme_stylebox("normal") as StyleBoxFlat).duplicate() as StyleBoxFlat
+		skin.bg_color=Color(T.GOLD,0.22);go.add_theme_stylebox_override("normal",skin)
+	if bool(item.get("pressed",false)):
+		go.add_theme_stylebox_override("normal",go.get_theme_stylebox("pressed"))
+	return go
 
 
 ## Who decides, as small toggles on the row's second line; the chosen one is held down.
@@ -278,21 +276,23 @@ func _effect_chip(effect:Dictionary)->Control:
 	return chip
 
 
-## Have against need as five pips: filled by the share in store, green when
-## the bill is met, red when short; the counts beside them.
+## Have against need: a good's icon, have / need in green or red and five
+## pips (dense_blocks.gd cost_chip); hands (makers, carriers) by name.
 func _pips(need:Dictionary)->Control:
 	var have:=float(need.get("have",0.0));var wanted:=maxf(0.0001,float(need.get("need",0.0)))
-	var short:=have+0.0001<wanted
-	var chip:=HBoxContainer.new();chip.name="Need";chip.add_theme_constant_override("separation",4);chip.mouse_filter=Control.MOUSE_FILTER_STOP
 	var resource:=String(need.get("resource",""))
-	var title:=preload("res://scripts/resource_names.gd").label(resource) if resource!="" else String(need.get("label",""))
-	chip.tooltip_text=String(need.get("tip","")) if String(need.get("tip",""))!="" else "%s: %s in store, %s needed" % [title,_n(have),_n(wanted)]
+	var chip:HBoxContainer
 	if resource!="":
-		var mark:=TextureRect.new();mark.texture=Icons.material_texture(resource,40);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		mark.custom_minimum_size=Vector2(16,16);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(mark)
-	if resource=="":chip.add_child(_label(title,12,T.TEXT_SOFT))
-	var pips:=Pips.new();pips.ratio=clampf(have/wanted,0.0,1.0);pips.fill=T.RED if short else T.GREEN;chip.add_child(pips)
-	chip.add_child(_label("%s/%s" % [_n(have),_n(wanted)],12,T.RED_TEXT if short else T.INK,short))
+		chip=Dense.cost_chip(resource,have,wanted)
+	else:
+		var short:=have+0.0001<wanted
+		chip=HBoxContainer.new();chip.add_theme_constant_override("separation",4)
+		chip.add_child(_label(String(need.get("label","")),12,T.TEXT_SOFT))
+		chip.add_child(_label("%s / %s" % [_n(have),_n(wanted)],12,T.RED_TEXT if short else T.GREEN_TEXT,true))
+		var pips:=Dense.Pips.new();pips.share=clampf(have/wanted,0.0,1.0);pips.ink=T.RED_TEXT if short else T.GREEN_TEXT
+		pips.custom_minimum_size=Vector2(35,8);pips.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(pips)
+	chip.name="Need";chip.mouse_filter=Control.MOUSE_FILTER_STOP
+	if String(need.get("tip",""))!="":chip.tooltip_text=String(need.tip)
 	return chip
 
 
@@ -311,19 +311,3 @@ class Segments extends Control:
 				x+=w
 				if x<size.x-1.0:draw_line(Vector2(x,0),Vector2(x,size.y),T.PAPER,1.0)
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE_STRONG,false,1.0)
-
-
-class Pips extends Control:
-	var ratio:=0.0
-	var fill:=Color.WHITE
-	const COUNT:=5
-	func _init()->void:
-		custom_minimum_size=Vector2(COUNT*8+2,10);mouse_filter=MOUSE_FILTER_IGNORE;size_flags_vertical=SIZE_SHRINK_CENTER
-	func _draw()->void:
-		var lit:=roundi(ratio*COUNT)
-		if ratio>0.0 and lit==0:lit=1
-		if ratio<1.0 and lit==COUNT:lit=COUNT-1
-		for i in COUNT:
-			var box:=Rect2(1+i*8,1,6,8)
-			draw_rect(box,fill if i<lit else Color(T.TRACK,0.8))
-			draw_rect(box,Color(T.RULE_STRONG,0.8),false,1.0)
