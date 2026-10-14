@@ -15421,6 +15421,7 @@ func _request_quit()->void:
 	_open_world_menu()
 	if is_instance_valid(quit_dialog):
 		quit_dialog.dialog_text="Save your current progress before quitting?"
+		HudTokens.style_confirmation_dialog(quit_dialog)
 		quit_dialog.popup_centered()
 		return
 	quit_dialog=ConfirmationDialog.new()
@@ -15430,13 +15431,15 @@ func _request_quit()->void:
 	quit_dialog.ok_button_text="Save and quit"
 	quit_dialog.cancel_button_text="Keep playing"
 	quit_dialog.add_button("Quit without saving",false,"discard")
+	HudTokens.style_confirmation_dialog(quit_dialog)
 	quit_dialog.confirmed.connect(_save_and_quit)
 	quit_dialog.custom_action.connect(func(action:String):
 		if action=="discard":_finish_quit())
 	quit_dialog.canceled.connect(_close_world_menu)
 	quit_dialog.unresizable=true
 	add_child(quit_dialog)
-	quit_dialog.popup_centered(Vector2i(520,180))
+	quit_dialog.popup_centered(Vector2i(520,132))
+	HudTokens.style_confirmation_dialog.call_deferred(quit_dialog)
 
 func _save_and_quit()->void:
 	var result:Dictionary=_save_before_quit()

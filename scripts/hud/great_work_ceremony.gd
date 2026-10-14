@@ -169,18 +169,18 @@ func _build()->void:
 	var cream:=Tokens.INK;var gold:=Tokens.GOLD
 	var eyebrow:=_label("THE DEDICATION OF A GREAT WORK · %s" % String(ceremony.get("city_name",record.get("city_name",""))).to_upper(),12,Tokens.INK_MUTED,.18)
 	eyebrow.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(eyebrow)
-	title_label=_label(_title(),26,cream);title_label.name="CeremonyTitle";title_label.add_theme_font_override("font",DISPLAY_FONT)
+	title_label=_label(_title(),32,cream);title_label.name="CeremonyTitle";title_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	title_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;shell.add_child(title_label)
 	var sub:=VBoxContainer.new();sub.add_theme_constant_override("separation",4);column.add_child(sub)
 	var purpose:=_label(_purpose_line(),16,Tokens.BODY);purpose.add_theme_font_override("font",_italic);purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;purpose.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;sub.add_child(purpose)
-	var badge:=PanelContainer.new();var badge_style:=Tokens.flat(Color(gold,.16),gold,1,12,0);badge_style.content_margin_left=12;badge_style.content_margin_right=12;badge_style.content_margin_top=2;badge_style.content_margin_bottom=3
+	var badge:=PanelContainer.new();var badge_style:=Tokens.flat(Tokens.ACTIVE_BG,Color.TRANSPARENT,0,4,0);badge_style.content_margin_left=12;badge_style.content_margin_right=12;badge_style.content_margin_top=2;badge_style.content_margin_bottom=3
 	badge.add_theme_stylebox_override("panel",badge_style);badge.name="OutcomeBadge";badge.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;sub.add_child(badge)
 	badge.add_child(_label(String(OUTCOME_WORDS[_outcome()]),14,Tokens.GOLD_TEXT))
 	var middle:=BoxContainer.new();_middle=middle;middle.size_flags_vertical=Control.SIZE_EXPAND_FILL;middle.add_theme_constant_override("separation",14);shell.add_child(middle)
 	# The work itself and its lore.
 	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.size_flags_stretch_ratio=2.6;left.add_theme_constant_override("separation",10);middle.add_child(left)
 	var frame:=PanelContainer.new();frame.name="PlateFrame";frame.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	var frame_style:=Tokens.flat(Tokens.PAPER_RAISED,gold,1,4,6);frame_style.shadow_color=Color(1,.8,.35,.25);frame_style.shadow_size=18
+	var frame_style:=Tokens.flat(Tokens.PAPER_RAISED,gold,1,4,6);frame_style.shadow_color=Color(0,0,0,.20);frame_style.shadow_size=12
 	frame.add_theme_stylebox_override("panel",frame_style);left.add_child(frame)
 	var work_view:=record.duplicate(true)
 	work_view["work_id"]=work_id
@@ -266,7 +266,7 @@ func _envoy_card(attendee:Dictionary)->Control:
 	return card
 
 func _label(text:String,font_size:int,colour:Color,spacing:float=0.0)->Label:
-	var node:=Tokens.make_label(text,font_size,colour,spacing)
+	var node:=Tokens.make_label(text,maxi(14,font_size),colour,spacing)
 	return node
 
 # ---------------------------------------------------------------- theatre

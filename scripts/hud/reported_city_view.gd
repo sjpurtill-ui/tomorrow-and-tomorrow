@@ -16,7 +16,7 @@ var _control_note:Label
 var _visit_button:Button
 var _center_button:Button
 var _whole_button:Button
-var whole_town:=false
+var whole_town:=true
 var frozen_report:Dictionary={}
 var _geometry_key:Array=[]
 var _terrain:Node
@@ -71,10 +71,10 @@ func setup(block:Dictionary)->void:
 	var framing:=HBoxContainer.new();framing.name="ReportFraming"
 	framing.add_theme_constant_override("separation",8);add_child(framing)
 	_center_button=Button.new();_center_button.name="TownCenter";_center_button.text="Town center"
-	_center_button.toggle_mode=true;_center_button.set_pressed_no_signal(true)
+	_center_button.toggle_mode=true;T.apply_button_style(_center_button);_center_button.set_pressed_no_signal(false)
 	_center_button.pressed.connect(func()->void:set_whole_town(false));framing.add_child(_center_button)
 	_whole_button=Button.new();_whole_button.name="WholeTown";_whole_button.text="Whole town"
-	_whole_button.toggle_mode=true
+	_whole_button.toggle_mode=true;T.apply_button_style(_whole_button);_whole_button.set_pressed_no_signal(true)
 	_whole_button.pressed.connect(func()->void:set_whole_town(true));framing.add_child(_whole_button)
 	caption=T.make_label("",15,T.GOLD_TEXT)
 	caption.name="ObservationCaption";caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

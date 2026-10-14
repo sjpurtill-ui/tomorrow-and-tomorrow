@@ -7,6 +7,7 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 var opening:=false
 var ambition_buttons:Array[Button]=[]
 var pages:Array[Control]=[]
+var page_buttons:Array[Button]=[]
 var summary:Label
 var status:Label
 var council:VBoxContainer
@@ -46,11 +47,15 @@ func _ready()->void:
 	var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",8);layout.add_child(tabs)
 	for index in 2:
 		var tab_index:=index
-		_button(tabs,["Our course","Our character"][index],func():_show_page(tab_index))
+		var tab:=_button(tabs,["Our course","Our character"][index],func():_show_page(tab_index))
+		tab.toggle_mode=true
+		var active:=T.flat(T.ACTIVE_BG,T.GOLD,0,4,10);active.border_width_bottom=2
+		tab.add_theme_stylebox_override("pressed",active);tab.add_theme_stylebox_override("hover_pressed",active)
+		page_buttons.append(tab)
 	P.rule(layout)
 	var body:=VBoxContainer.new();body.size_flags_vertical=SIZE_EXPAND_FILL;layout.add_child(body)
 	var focus_page:=VBoxContainer.new();focus_page.size_flags_vertical=SIZE_EXPAND_FILL;focus_page.add_theme_constant_override("separation",8);body.add_child(focus_page);pages.append(focus_page)
-	var cards_scroll:=ScrollContainer.new();cards_scroll.size_flags_vertical=SIZE_EXPAND_FILL;focus_page.add_child(cards_scroll)
+	var cards_scroll:=ScrollContainer.new();cards_scroll.size_flags_vertical=SIZE_EXPAND_FILL;cards_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;focus_page.add_child(cards_scroll)
 	grid=GridContainer.new();grid.columns=4;grid.size_flags_vertical=SIZE_EXPAND_FILL;grid.size_flags_horizontal=SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);cards_scroll.add_child(grid)
 	var index:=0
@@ -68,7 +73,7 @@ func _ready()->void:
 		var result:Dictionary=WorldSimulation.direction.choose(selected_focus)
 		status.text=String(result.get("error","Course chosen. Resume time when ready."))
 		if not result.has("error"):queue_free())
-	confirm.name="ConfirmFocus";confirm.custom_minimum_size.y=44;T.text(confirm,"body",T.INK)
+	confirm.name="ConfirmFocus";T.apply_button_style(confirm,true)
 	council=null
 	var traditions_scroll:=ScrollContainer.new();traditions_scroll.size_flags_vertical=SIZE_EXPAND_FILL;traditions_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;body.add_child(traditions_scroll);pages.append(traditions_scroll)
 	traditions=VBoxContainer.new();traditions.size_flags_horizontal=SIZE_EXPAND_FILL;traditions_scroll.add_child(traditions)
@@ -84,12 +89,13 @@ func _label(parent:Node,text:String,role:String,color:Color=Color(0,0,0,0))->Lab
 func _button(parent:Node,text:String,action:Callable)->Button:
 	var button:=P.button(parent,text,action)
 	button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-	button.custom_minimum_size=Vector2(120,36)
+	button.custom_minimum_size=Vector2(120,40)
 	return button
 
 func _show_page(index:int)->void:
 	page_index=clampi(index,0,pages.size()-1)
 	for i in pages.size(): pages[i].visible=i==page_index
+	for i in page_buttons.size():page_buttons[i].set_pressed_no_signal(i==page_index)
 	if page_index==1: _traditions_page()
 	_refresh()
 

@@ -77,7 +77,7 @@ func setup(world:Node3D,position:Vector3,is_later:bool)->void:
 	search_status=_label(site_header,13);search_status.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;search_status.add_theme_color_override("font_color",T.INK_MUTED)
 	options=HBoxContainer.new();options.add_theme_constant_override("separation",8);body.add_child(options)
 	var find_sites:=Kit.button(body,"Look again nearby",false,_search,"Search the known ground around this spot for dry land near water")
-	find_sites.custom_minimum_size.y=32
+	find_sites.custom_minimum_size.y=40
 	action=Kit.button(root,"",true,_act);action.custom_minimum_size.y=44;action.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	update_site(position)
 	_layout()
@@ -89,7 +89,7 @@ func _label(parent:Node,font_size:int)->Label:
 	label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF
 	label.add_theme_font_override("font",T.FONT_UI)
-	label.add_theme_font_size_override("font_size",maxi(12,font_size));label.add_theme_color_override("font_color",T.BODY);parent.add_child(label);return label
+	label.add_theme_font_size_override("font_size",maxi(14,font_size));label.add_theme_color_override("font_color",T.BODY);parent.add_child(label);return label
 
 ## A label that wraps onto more lines instead of trimming to "...".
 func _wrapping(label:Label,width:float)->Label:

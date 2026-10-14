@@ -83,17 +83,17 @@ func _ready()->void:
 	banner=Painting.new();banner.name="Banner";banner.fit_whole_width=true;banner.min_height=96.0;banner.max_height=BANNER_MAX_HEIGHT
 	banner.mouse_filter=Control.MOUSE_FILTER_IGNORE;banner.visible=false;stack.add_child(banner)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);stack.add_child(row)
-	picture=TextureRect.new();picture.custom_minimum_size=Vector2(112,112);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	picture=TextureRect.new();picture.custom_minimum_size=Vector2(48,48);picture.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(picture)
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",4);row.add_child(copy)
-	eyebrow=_label(copy,"",11,T.GOLD)
+	eyebrow=_label(copy,"",14,T.INK_MUTED,true)
 	title_label=_label(copy,"",21,T.INK,true)
-	var serif:Font=preload("res://scripts/hud/hud_tokens.gd").voice_font()
+	var serif:Font=T.font("ui_strong")
 	title_label.add_theme_font_override("font",serif)
 	caption=_label(copy,"",13,T.BODY,true);caption.max_lines_visible=3;caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var actions:=HBoxContainer.new();actions.add_theme_constant_override("separation",6);copy.add_child(actions)
 	action_button=_button(actions,"",_act,true);action_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var close_button:=_button(actions,"×",dismiss);close_button.custom_minimum_size.x=32;close_button.tooltip_text="Set this aside · it stays in the Chronicle"
+	var close_button:=_button(actions,"×",dismiss);close_button.custom_minimum_size.x=40;close_button.clip_text=false;close_button.tooltip_text="Set this aside · it stays in the Chronicle"
 	player=AudioStreamPlayer.new();player.volume_db=-9.0
 	if AudioServer.get_bus_index("Music")>=0:player.bus="Music"
 	add_child(player)
@@ -104,14 +104,14 @@ func _ready()->void:
 
 func _label(parent:Node,value:String,font_size:int,color:Color,wrap:=false)->Label:
 	var label:=Label.new();label.text=value;label.add_theme_font_override("font",UI_FONT)
-	label.add_theme_font_size_override("font_size",font_size);label.add_theme_color_override("font_color",color)
+	label.add_theme_font_size_override("font_size",maxi(14,font_size));label.add_theme_color_override("font_color",color)
 	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART if wrap else TextServer.AUTOWRAP_OFF
 	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	parent.add_child(label);return label
 
 
 func _button(parent:Node,value:String,callback:Callable,primary:=false)->Button:
-	var button:=Button.new();button.text=value;button.clip_text=true;button.custom_minimum_size.y=28;button.focus_mode=Control.FOCUS_NONE
+	var button:=Button.new();button.text=value;button.clip_text=true;button.custom_minimum_size.y=28;button.focus_mode=Control.FOCUS_ALL
 	button.add_theme_font_override("font",UI_FONT);button.add_theme_font_size_override("font_size",12)
 	T.apply_button_style(button,primary);button.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	button.pressed.connect(callback);parent.add_child(button);return button
@@ -142,7 +142,7 @@ func set_top(y:float)->void:
 func sheet_rect()->Rect2:
 	var covered:=Rect2()
 	if not is_instance_valid(hud):return covered
-	for sheet_name in ["dock","detail_dock"]:
+	for sheet_name in ["dock","detail_dock","order_stack"]:
 		var sheet:Variant=hud.get(sheet_name) if sheet_name in hud else null
 		if sheet is Control and (sheet as Control).is_visible_in_tree():
 			var rect:=(sheet as Control).get_global_rect()

@@ -116,7 +116,9 @@ func tab(_sub:int)->Dictionary:
 	for finding:Dictionary in report.get("discoveries",[]):
 		if Archive.routine_finding(finding) and String(finding.get("kind",""))!="landmark":
 			blocks.append({"type":"text","heading":String(finding.get("title","Field notes")),"text":String(finding.get("description",""))+" "+String(finding.get("consequence",""))})
-	blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
+	if (report.get("route",[]) as Array).size()>=2:
+		blocks.append({"type":"expedition_chart","route":report.get("route",[]),"discoveries":report.get("discoveries",[])})
+	else:blocks.append({"type":"text","text":"They brought back no drawing of their road."})
 	var journal:Array=report.get("journal",[])
 	if not journal.is_empty():
 		var journal_lines:Array[String]=[]

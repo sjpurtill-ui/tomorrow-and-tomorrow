@@ -80,7 +80,7 @@ func _ready()->void:
 	_bind_scroll.call_deferred();configure(_description);_resize_view()
 
 func _button(parent:Node,text:String,callback:Callable)->Button:
-	var button:=Button.new();button.text=text;button.custom_minimum_size.y=30;button.add_theme_font_size_override("font_size",13)
+	var button:=Button.new();button.text=text;T.apply_button_style(button);button.focus_mode=Control.FOCUS_ALL
 	button.pressed.connect(callback);parent.add_child(button)
 	return button
 
