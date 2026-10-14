@@ -11,10 +11,11 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const W:=preload("res://scripts/hud/production_widgets.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const Folio:=preload("res://scripts/hud/production_folio.gd")
 const Pictures:=preload("res://scripts/hud/production_pictures.gd")
 ## Column widths, shared with the column heads above the list.
-const ART_WIDTH:=44.0
-const BAR_MIN_WIDTH:=140.0
+const ART_WIDTH:=88.0
+const BAR_MIN_WIDTH:=120.0
 const HANDS_WIDTH:=124.0
 const TARGET_WIDTH:=100.0
 const SKILL_WIDTH:=72.0
@@ -55,63 +56,67 @@ func build(owner_screen:Node,first:Dictionary)->void:
 	screen=owner_screen;view=first
 	name="Line%d" % int(first.id)
 	mouse_filter=Control.MOUSE_FILTER_STOP
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);column.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(column)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",8);top.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(top)
-	rank_box=PanelContainer.new();rank_box.name="Rank";rank_box.custom_minimum_size=Vector2(24,24);rank_box.mouse_filter=Control.MOUSE_FILTER_PASS
-	rank_box.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK,T.RULE,1,T.RADIUS_CONTROL));top.add_child(rank_box)
-	rank=Label.new();T.text(rank,"small",T.INK);rank.add_theme_font_override("font",T.font("ui_strong"));rank.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;rank.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;rank_box.add_child(rank)
-	title=Button.new();title.name="Name";title.flat=true;title.focus_mode=Control.FOCUS_NONE;title.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	T.text(title,"body",T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_color_override("font_hover_color",T.GOLD_TEXT)
-	title.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",10);add_child(column)
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",8);column.add_child(top)
+	rank_box=PanelContainer.new();rank_box.name="Rank";rank_box.custom_minimum_size=Vector2(24,26)
+	rank_box.add_theme_stylebox_override("panel",StyleBoxEmpty.new());top.add_child(rank_box)
+	rank=Folio.label("","small",T.INK_MUTED);rank.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;rank.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;rank_box.add_child(rank)
+	title=Button.new();title.name="Name";title.flat=true;title.focus_mode=Control.FOCUS_ALL;title.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	T.text(title,"voice",T.INK);title.add_theme_font_override("font",T.font("voice_bold"));title.add_theme_color_override("font_hover_color",T.GOLD_TEXT)
+	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.clip_text=true
+	title.add_theme_stylebox_override("focus",Folio.focus_style())
 	title.pressed.connect(func():screen.act(int(view.id),"detail",0.0));top.add_child(title)
-	badge=W.Chip.new();badge.name="Badge";top.add_child(badge)
-	auto=W.text_button("Auto","");auto.name="Auto";auto.toggle_mode=false;top.add_child(auto)
-	auto.pressed.connect(func():screen.act(int(view.id),"auto",0.0 if bool(view.managed) else 1.0))
-	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;spacer.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(spacer)
-	up=W.IconButton.new("up","",24,true);up.name="Up";top.add_child(up)
+	up=W.IconButton.new("up","",28,true);up.name="Up";top.add_child(up)
 	up.pressed.connect(func():screen.act(int(view.id),"move",-1.0))
-	down=W.IconButton.new("down","",24,true);down.name="Down";top.add_child(down)
+	down=W.IconButton.new("down","",28,true);down.name="Down";top.add_child(down)
 	down.pressed.connect(func():screen.act(int(view.id),"move",1.0))
-	pause=W.IconButton.new("pause","",24,true);pause.name="Pause";top.add_child(pause)
+	pause=W.IconButton.new("pause","",28,true);pause.name="Pause";top.add_child(pause)
 	pause.pressed.connect(func():screen.act(int(view.id),"pause",0.0))
-	close=W.IconButton.new("close","",24,true);close.name="Close";close.danger=true;top.add_child(close)
-	close.pressed.connect(_on_close)
-	var body:=HBoxContainer.new();body.name="Body";body.add_theme_constant_override("separation",COLUMN_GAP);body.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(body)
-	var art:=Control.new();art.name="Picture";art.custom_minimum_size=Vector2(ART_WIDTH,40);art.mouse_filter=Control.MOUSE_FILTER_PASS;body.add_child(art)
+	close=W.IconButton.new("close","",28,true);close.name="Close";close.danger=true;top.add_child(close);close.pressed.connect(_on_close)
+	var body:=HBoxContainer.new();body.name="Body";body.add_theme_constant_override("separation",16);column.add_child(body)
+	var art:=Control.new();art.name="Picture";art.custom_minimum_size=Vector2(ART_WIDTH,76);body.add_child(art)
 	picture=TextureRect.new();picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);picture.offset_right=-8;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;art.add_child(picture)
-	stock=Label.new();stock.name="Stock";T.text(stock,"kicker",T.INK);stock.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-	stock.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT);stock.grow_horizontal=Control.GROW_DIRECTION_BEGIN;stock.grow_vertical=Control.GROW_DIRECTION_BEGIN
-	stock.add_theme_color_override("font_outline_color",T.PAPER_RAISED);stock.add_theme_constant_override("outline_size",4);stock.mouse_filter=Control.MOUSE_FILTER_IGNORE;art.add_child(stock)
-	bar=W.OutputBar.new(BAR_MIN_WIDTH);bar.name="Output";bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_child(bar)
-	var hands:=HBoxContainer.new();hands.name="Hands";hands.custom_minimum_size.x=HANDS_WIDTH;hands.alignment=BoxContainer.ALIGNMENT_CENTER
-	hands.add_theme_constant_override("separation",3);hands.size_flags_vertical=Control.SIZE_SHRINK_CENTER;body.add_child(hands)
-	hands_down=W.IconButton.new("minus","",24);hands_down.name="HandsDown";hands.add_child(hands_down)
+	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;art.add_child(picture)
+	var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.add_theme_constant_override("separation",3);body.add_child(reading)
+	var state:=Folio.label("","small",T.INK_MUTED);state.name="Condition";reading.add_child(state)
+	bar=W.OutputBar.new(BAR_MIN_WIDTH);bar.name="Output";bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.custom_minimum_size.y=32;reading.add_child(bar)
+	badge=W.Chip.new();badge.name="Badge";reading.add_child(badge)
+	var store:=VBoxContainer.new();store.custom_minimum_size.x=86;store.add_theme_constant_override("separation",0);body.add_child(store)
+	stock=Folio.label("","voice",T.INK);stock.name="Stock";stock.add_theme_font_size_override("font_size",32);stock.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;store.add_child(stock)
+	var stock_word:=Folio.label("in store","small",T.INK_MUTED);stock_word.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;store.add_child(stock_word)
+	var controls:=HFlowContainer.new();controls.name="LineControls";controls.add_theme_constant_override("h_separation",22);controls.add_theme_constant_override("v_separation",10);column.add_child(controls)
+	var hands_group:=Folio.group(controls,"Makers")
+	var hands:=HBoxContainer.new();hands.name="Hands";hands.add_theme_constant_override("separation",4);hands_group.add_child(hands)
+	hands_down=W.IconButton.new("minus","",28);hands_down.name="HandsDown";hands.add_child(hands_down)
 	hands_down.pressed.connect(func():screen.act(int(view.id),"hands",-float(view.hands_step)))
-	hands_value=Label.new();hands_value.name="HandsValue";T.text(hands_value,"body",T.INK);hands_value.add_theme_font_override("font",T.font("ui_strong"))
-	hands_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;hands_value.custom_minimum_size.x=34;hands_value.mouse_filter=Control.MOUSE_FILTER_PASS;hands.add_child(hands_value)
-	hands_up=W.IconButton.new("plus","",24);hands_up.name="HandsUp";hands.add_child(hands_up)
+	hands_value=Folio.label("","body");hands_value.name="HandsValue";hands_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;hands_value.custom_minimum_size.x=30;hands.add_child(hands_value)
+	hands_up=W.IconButton.new("plus","",28);hands_up.name="HandsUp";hands.add_child(hands_up)
 	hands_up.pressed.connect(func():screen.act(int(view.id),"hands",float(view.hands_step)))
 	hands_five=W.text_button("×5","",false,30);hands_five.name="HandsFive";hands.add_child(hands_five)
 	hands_five.pressed.connect(func():screen.act(int(view.id),"hands",5.0*float(view.hands_step)))
-	var keep:=HBoxContainer.new();keep.name="Keep";keep.custom_minimum_size.x=TARGET_WIDTH;keep.alignment=BoxContainer.ALIGNMENT_CENTER
-	keep.add_theme_constant_override("separation",3);keep.size_flags_vertical=Control.SIZE_SHRINK_CENTER;body.add_child(keep)
+	var keep_group:=Folio.group(controls,"Keep in store" if not bool(first.get("ship",false)) else "Build")
+	var keep:=HBoxContainer.new();keep.name="Keep";keep.add_theme_constant_override("separation",4);keep_group.add_child(keep)
 	if bool(first.get("ship",false)):
 		repeat_one=W.text_button("1","",false,34);repeat_one.name="RepeatOne";keep.add_child(repeat_one)
 		repeat_one.pressed.connect(func():screen.act(int(view.id),"target",float(int(view.stock)+1)))
 		repeat_always=W.text_button("∞","",false,34);repeat_always.name="RepeatAlways";keep.add_child(repeat_always)
 		repeat_always.pressed.connect(func():screen.act(int(view.id),"target",0.0))
 	else:
-		keep_down=W.IconButton.new("minus","",24);keep_down.name="KeepDown";keep.add_child(keep_down)
+		keep_down=W.IconButton.new("minus","",28);keep_down.name="KeepDown";keep.add_child(keep_down)
 		keep_down.pressed.connect(func():screen.act(int(view.id),"target",float(Plain.step_target(int(view.target),-1))))
-		keep_value=Label.new();keep_value.name="KeepValue";T.text(keep_value,"body",T.INK);keep_value.add_theme_font_override("font",T.font("ui_strong"))
-		keep_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;keep_value.custom_minimum_size.x=40;keep_value.mouse_filter=Control.MOUSE_FILTER_PASS;keep.add_child(keep_value)
-		keep_up=W.IconButton.new("plus","",24);keep_up.name="KeepUp";keep.add_child(keep_up)
+		keep_value=Folio.label("","body");keep_value.name="KeepValue";keep_value.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;keep_value.custom_minimum_size.x=40;keep.add_child(keep_value)
+		keep_up=W.IconButton.new("plus","",28);keep_up.name="KeepUp";keep.add_child(keep_up)
 		keep_up.pressed.connect(func():screen.act(int(view.id),"target",float(Plain.step_target(int(view.target),1))))
-	skill=W.SkillGraph.new();skill.name="Skill";skill.custom_minimum_size.x=SKILL_WIDTH;body.add_child(skill)
-	# The store against its target, one mark an item, the next one's arc.
-	var marks:=MarginContainer.new();marks.add_theme_constant_override("margin_left",int(ART_WIDTH)+COLUMN_GAP);marks.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(marks)
-	target_row=Pictures.TargetRow.new();target_row.name="TargetRow";marks.add_child(target_row)
+	var skill_group:=Folio.group(controls,"Practice")
+	skill=W.SkillGraph.new();skill.name="Skill";skill_group.add_child(skill)
+	var auto_group:=Folio.group(controls,"Managed by")
+	auto=W.text_button("Auto","");auto.name="Auto";auto.toggle_mode=false;auto_group.add_child(auto)
+	auto.pressed.connect(func():screen.act(int(view.id),"auto",0.0 if bool(view.managed) else 1.0))
+	auto_group.visible=bool(first.get("auto",false))
+	target_row=Pictures.TargetRow.new();target_row.name="TargetRow";column.add_child(target_row)
+	# The store and explicit target above already communicate the same count.
+	# Keep this visual available to existing callers without repeating every item.
+	target_row.visible=false
 	apply(first)
 
 func apply(next:Dictionary)->void:
@@ -121,11 +126,15 @@ func apply(next:Dictionary)->void:
 	var paused:=bool(view.paused)
 	var look:=String(view.look)
 	var tone:={"good":T.GREEN,"warn":T.AMBER,"bad":T.RED}.get(look,T.RULE_STRONG) as Color
-	var style:=T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CARD)
-	style.border_color=T.RULE;style.border_width_left=4
-	style.content_margin_left=PAD_LEFT;style.content_margin_right=PAD_RIGHT;style.content_margin_top=6;style.content_margin_bottom=8
+	var style:=Folio.rule_style(14)
+	style.content_margin_left=2;style.content_margin_right=2
 	add_theme_stylebox_override("panel",style)
-	_left_rule=tone;queue_redraw()
+	_left_rule=Color.TRANSPARENT;queue_redraw()
+	var condition:=find_child("Condition",true,false) as Label
+	condition.text=String(view.get("short","Working"))
+	if condition.text.begins_with("Short of ") and float(view.get("rate",0))>0.0:
+		condition.text=condition.text.trim_prefix("Short of ").capitalize()+" won't cover the target"
+	condition.add_theme_color_override("font_color",T.text_for(tone) if look in ["bad","warn"] else T.INK_MUTED)
 	rank.text=str(int(view.rank))
 	var count:=int(view.get("count",1))
 	rank_box.tooltip_text="Line %d of %d. Scarce materials go to line 1 first, then down the list. Drag the row or use the arrows to reorder." % [int(view.rank),count]
@@ -144,7 +153,7 @@ func apply(next:Dictionary)->void:
 	pause.set_glyph("play" if paused else "pause","Resume this line." if paused else "Pause this line. Work in progress is kept.")
 	close.tooltip_text=_close_tip()
 	if not _arm_close:close.set_glyph("close")
-	picture.texture=Icons.equipment_texture(String(view.item),T.INK,T.GOLD,64)
+	picture.texture=Folio.product_texture(String(view.item))
 	var deficit:=int(view.get("deficit",0))
 	stock.text=str(int(view.stock))
 	stock.add_theme_color_override("font_color",T.RED_TEXT if deficit>0 else T.INK)
@@ -184,7 +193,7 @@ func apply(next:Dictionary)->void:
 	skill.set_reading(float(view.efficiency),String(view.get("skill_tip","")))
 	var keep_count:=int(view.get("target",0)) if persistent else int(view.get("ordered",0))
 	var have:=int(view.stock) if persistent else int(view.get("completed",0))
-	target_row.visible=keep_count>0 and not bool(view.get("ship",false))
+	target_row.visible=false
 	target_row.set_row(have,keep_count,float(view.get("next",0.0)) if not paused else 0.0,tone)
 	target_row.tooltip_text=("%d in store of %d to keep; the open marks are still to make, the arc is the next one." % [have,keep_count]) if persistent else ("%d of %d made." % [have,keep_count])
 	tooltip_text=""

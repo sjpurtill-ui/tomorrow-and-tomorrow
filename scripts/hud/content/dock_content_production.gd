@@ -1,5 +1,5 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## Production dock, HOI4-style. One "production_queue" block carries every
+## Production folio. One "production_queue" block carries every
 ## number the screen shows: materials with their trend, workshop hands, the
 ## equipment the bands have against what they need, each line as a compact
 ## row view, and the cards that start a line. The controls call the existing
@@ -18,17 +18,14 @@ const STORE_RESOURCES:=["Timber","Fiber Plants","Stone","Clay","Copper Ore"]
 const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
 func meta()->Dictionary:
-	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "title_size":38, "spread_tabs":true, "subtabs":["All","Civilian","Military"], "fit_height":true}
+	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "title_size":38, "spread_tabs":true, "subtabs":["Daily work","Daily work","Workshop orders"], "hidden_subtabs":[1], "subtab_aliases":{1:0}, "fit_height":true}
 func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
 	_ensure_workshop()
-	# Three distinct pages: All is a short overview (how the makers' hands
-	# split, and the one or two things that need the god); Civilian is what
-	# the makers make for the homes and for barter (one Civilian Goods stock);
-	# Military is arms, the workshop lines and war gear, the one place arms
-	# live.
-	var mode:=String(["all","civilian","military"][clampi(sub,0,2)])
+	# Two tasks: follow the day's work, or direct workshop orders. The old
+	# Civilian index is retained as a deep-link alias to the combined daily page.
+	var mode:="military" if sub>=2 else "all"
 	var block:={"type":"production_queue","mode":mode,"on_open":func(section:String,page:int)->void:
 		if is_instance_valid(hud):hud.section_requested.emit(section,page),
 		"on_materials":func()->void:
@@ -41,7 +38,7 @@ func tab(sub:int)->Dictionary:
 	var snapshot:=MilitaryCampaign.production_lines_snapshot()
 	var pool:=P.hands(MilitaryCampaign)
 	block.flow=flow_model(cards,snapshot.get("lines",[]),pool)
-	if mode=="civilian":
+	if mode!="military":
 		# Goods to spare and their worth in rations, priced in the realm's own
 		# scope (pricing inside a town's scope would leave its prices behind).
 		var spare:=0.0
@@ -65,7 +62,7 @@ func tab(sub:int)->Dictionary:
 			"on_add":focused_action("ADD PRODUCTION LINE","Known products",workshop._equipment_catalog).on_press,
 			"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
 			"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press})
-	return {"kpis":tab_kpis(block),"blocks":[block]}
+	return {"blocks":[block]}
 
 ## The strip over Goods and Arms (the dock draws it under the tabs): the
 ## figures the flow chart does not carry. Goods: the homes stocked, goods to
@@ -76,7 +73,7 @@ func tab_kpis(block:Dictionary)->Array:
 	var T:=Tokens
 	var items:Array=[]
 	match String(block.get("mode","")):
-		"civilian":
+		"civilian","all":
 			var cards:Array=block.get("households",[])
 			var low:=1.0;var worn:=0.0;var spare:=0.0;var held:=0.0;var wanted:=0.0
 			for card:Dictionary in cards:
@@ -132,7 +129,7 @@ static func overview(cards:Array,stock:Array,pool:Dictionary,snapshot:Dictionary
 	for material:Dictionary in flow.get("materials",[]):
 		if material.has("days_left") and float(material.days_left)<RUNS_OUT_DAYS and (soonest.is_empty() or float(material.days_left)<float(soonest.days_left)):soonest=material
 	if not soonest.is_empty():
-		attention.append({"text":"%s runs out in %s" % [String(soonest.name),Plain.span_text(float(soonest.days_left))],"sub":"%s in store, falling about %s a day" % [Plain.number(float(soonest.amount)),Plain.number(-float(soonest.trend))],"tone":"red" if float(soonest.days_left)<30.0 else "amber","page":1})
+		attention.append({"text":"%s runs out in %s" % [String(soonest.name),Plain.span_text(float(soonest.days_left))],"sub":"%s in store, falling about %s a day" % [Plain.number(float(soonest.amount)),Plain.number(-float(soonest.trend))],"tone":"red" if float(soonest.days_left)<30.0 else "amber","page":-1})
 	for row:Dictionary in stock:
 		var deficit:=int(row.get("deficit",0))
 		if deficit<=0:continue
@@ -304,7 +301,7 @@ func _report(result:Dictionary)->void:
 	if terrain!=null:terrain._report_military_action(result)
 	if hud!=null:hud.request_immediate_dock_refresh()
 func _history()->Dictionary:
-	return {"blocks":[{"type":"production_board","lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"totals":MilitaryCampaign.workshop.data.totals,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
+	return {"blocks":[{"type":"production_board","history_only":true,"lines":[],"receipts":MilitaryCampaign.workshop.data.receipts,"totals":MilitaryCampaign.workshop.data.totals,"day":int(GameState.elapsed_days),"view_state":{"mode":1}}]}
 func signature()->Array:
 	return [MilitaryCampaign.production_lines_snapshot(),GameState.elapsed_days,MilitaryCampaign.workshop.data.enabled,workshop_owner(),MilitaryCampaign.workshop.data.status,MilitaryCampaign.damaged_equipment,MilitaryCampaign.production_labor_share]
 

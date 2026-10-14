@@ -11,14 +11,14 @@ class IconButton extends Button:
 	var bare:=false
 	func _init(kind:String="plus",tip:String="",side:float=26.0,borderless:bool=false)->void:
 		glyph=kind;tooltip_text=tip;bare=borderless
-		custom_minimum_size=Vector2(side,side);focus_mode=Control.FOCUS_NONE
+		custom_minimum_size=Vector2(side,side);focus_mode=Control.FOCUS_ALL
 		size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		restyle()
 	func restyle()->void:
 		var normal:=T.flat(Color(0,0,0,0) if bare else T.PAPER_RAISED,T.RULE,0 if bare else 1,T.RADIUS_CONTROL)
 		var hover:=T.flat(T.HOVER_BG,T.GOLD,1,T.RADIUS_CONTROL)
 		var off:=T.flat(Color(0,0,0,0),T.BORDER_SOFT,0 if bare else 1,T.RADIUS_CONTROL)
-		for state:String in ["normal","focus"]:add_theme_stylebox_override(state,normal if state=="normal" else StyleBoxEmpty.new())
+		for state:String in ["normal","focus"]:add_theme_stylebox_override(state,normal if state=="normal" else T.flat(Color.TRANSPARENT,T.GOLD_TEXT,2,T.RADIUS_CONTROL))
 		add_theme_stylebox_override("hover",hover)
 		add_theme_stylebox_override("pressed",T.button_pressed_style())
 		add_theme_stylebox_override("hover_pressed",T.button_pressed_style())
@@ -52,7 +52,7 @@ class IconButton extends Button:
 
 ## A button with a word on it, in the screen's small type.
 static func text_button(label:String,tip:String,active:bool=false,min_width:float=0.0)->Button:
-	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_NONE
+	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_ALL
 	b.custom_minimum_size=Vector2(min_width,26);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	style_text_button(b,active)
 	return b
@@ -66,7 +66,7 @@ static func style_text_button(b:Button,active:bool)->void:
 	var off:=T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,T.RADIUS_CONTROL);off.content_margin_left=8;off.content_margin_right=8
 	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",hover)
 	b.add_theme_stylebox_override("pressed",T.button_pressed_style());b.add_theme_stylebox_override("disabled",off)
-	b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	b.add_theme_stylebox_override("focus",T.flat(Color.TRANSPARENT,T.GOLD_TEXT,2,T.RADIUS_CONTROL))
 
 ## A small label in a tinted pill, for badges ("for Rovik's levy") and tags.
 class Chip extends PanelContainer:
@@ -108,18 +108,13 @@ class OutputBar extends Control:
 		# tinted text on a tinted fill falls under 4.5:1.
 		return T.INK
 	func _draw()->void:
-		# The whole bar carries the line's condition as a light wash (HOI4's
-		# green or yellow bar); the darker part is how far along it is.
-		var box:=T.flat(T.PAPER_SUNK,Color(tone,0.7) if look!="idle" else T.RULE,1,T.RADIUS_CONTROL)
-		draw_style_box(box,Rect2(Vector2.ZERO,size))
-		if look!="idle":draw_rect(Rect2(Vector2(1,1),size-Vector2(2,2)),Color(tone,0.12))
-		var width:=(size.x-2.0)*ratio
-		if width>0.5:
-			draw_rect(Rect2(Vector2(1,1),Vector2(width,size.y-2.0)),Color(tone,0.26))
-			draw_rect(Rect2(Vector2(1,size.y-3.0),Vector2(width,2.0)),tone)
-		var font:=T.font("ui_strong");var font_size:=14
-		var text_width:=font.get_string_size(reading,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x
-		draw_string(font,Vector2(maxf(6.0,(size.x-text_width)*0.5),size.y*0.5+font_size*0.36),reading,HORIZONTAL_ALIGNMENT_LEFT,size.x-8.0,font_size,text_color())
+		# The number is output; only the fine underline is progress to the
+		# target. A full-tinted rectangle made a blocked order look productive.
+		var track_y:=size.y-4.0
+		draw_rect(Rect2(Vector2(0,track_y),Vector2(size.x,3)),T.TRACK)
+		if ratio>0.0:draw_rect(Rect2(Vector2(0,track_y),Vector2(size.x*ratio,3)),tone)
+		var font:=T.font("ui_strong");var font_size:=16
+		draw_string(font,Vector2(0,minf(size.y-8.0,18.0)),reading,HORIZONTAL_ALIGNMENT_LEFT,size.x,font_size,text_color())
 
 ## Skill (production efficiency) as a small ramp: the climb from a new
 ## line's 20% to today's skill in ink, the rest of the way to full skill
