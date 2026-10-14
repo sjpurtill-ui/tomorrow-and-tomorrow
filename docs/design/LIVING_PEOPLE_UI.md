@@ -41,3 +41,24 @@ runs. Actual private GPU process 13448 exited 0 with nine captures across 2869,
 bounds checks. Artifacts stay local under artifacts/people-living-b. Additional
 safeguard/shortage visual proofs and the renderer's art revision remain pending.
 No save schema or simulation formula changed.
+
+Follow-up validation: eight isolated UI cases now cover stable scene height while
+scrolling, unchanged stale-preview refresh without takeover, and the original
+whole-percent bounds for fractional starting shares. An unchanged zoom shows
+single current readings; comparisons appear only after a draft change. Detailed
+shortage warnings remain in tooltips with concise on-scene risk statements.
+Extraction and Crafting explicitly state why numerical output is not forecast.
+
+The real shortage fixture uses empty stores and food grounds at the engine's
+0.12 health floor, then requests fewer food workers. The existing safeguard
+redirects workers toward food, yet the actual representative-day calculation
+still reports a current shortage. Private GPU processes 64128 and 53472 both
+exited 0 across 1024, 1600 and 2869 widths; the latter also checked all nine
+marker bounds and overlap. The combined closer-camera process 54032 exited 0
+with nine normal-state captures and the same containment/no-mutation checks.
+The final combined risk process 13644 exited 0 with twelve captures, including
+unchanged readings before making a request, through the same isolated actual
+HUD/provider/preview path. All marker overlap, containment and preview
+no-mutation checks passed. A foreground tree can obscure the selected food
+area in this fixture; that camera/scene sightline finding is owned by the
+renderer and is separate from this UI checkpoint.

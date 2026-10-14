@@ -150,7 +150,7 @@ func _rebuild_labor()->void:
 		if not markers.has(role):continue
 		(markers[role].number as Label).text="%s workers" % preload("res://scripts/hud/era_words.gd").grouped(int(task.count))
 		(markers[role].node as Control).tooltip_text=_share_text(task)+" of the work · "+_task_tip(task)
-	if not draft.is_empty():draft_stale=_draft_revision!=data.get("workforce_revision",[])
+	if not draft.is_empty():draft_stale=draft_stale or bool(forecast.get("stale",false)) or _draft_revision!=data.get("workforce_revision",[])
 	_refresh_focus()
 
 func _api(method:String,arguments:Array=[])->Variant:
@@ -206,7 +206,7 @@ func _refresh_focus()->void:
 		if String(change.get("role",""))==active_role:continue
 		transfers.append("%s %d → %d" % [String(change.role),int(change.before),int(change.after)])
 	transfer_reading.text="Requested: "+" · ".join(transfers) if not transfers.is_empty() else ""
-	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")))
+	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")),bool(draft.get("has_changes",not commands.is_empty())))
 	forecast_reading.text=_forecast_words()
 	var warnings:=_warning_words()
 	var food:Dictionary=forecast.get("after",{}).get("food",{})
@@ -215,18 +215,22 @@ func _refresh_focus()->void:
 	elif not bool(forecast.get("ok",false)):warnings.insert(0,String(forecast.get("reason","A forecast is not available yet.")))
 	risk_reading.text="\n".join(warnings)
 	apply_button.text="Refresh preview" if draft_stale else ("Apply assignment" if bool(data.get("labor",{}).get("manual",false)) else "Take control & apply")
-	apply_button.disabled=commands.is_empty() or (not draft_stale and not bool(forecast.get("ok",false)))
+	apply_button.disabled=not draft_stale and (commands.is_empty() or not bool(forecast.get("ok",false)))
 	cancel_button.disabled=commands.is_empty()
-	decrease_button.disabled=draft.is_empty() or int(draft.get("shares",{}).get(active_role,0))<=0
-	increase_button.disabled=draft.is_empty() or int(draft.get("shares",{}).get(active_role,0))>=100;five_button.disabled=increase_button.disabled
+	var normalized:Dictionary=preload("res://scripts/manual_work.gd").percents(draft.get("shares",{})) if not draft.is_empty() else {}
+	decrease_button.disabled=draft.is_empty() or int(normalized.get(active_role,0))<=0
+	increase_button.disabled=draft.is_empty() or int(normalized.get(active_role,0))>=100;five_button.disabled=increase_button.disabled
 	_fit_scene.call_deferred()
 
 func _warning_words()->PackedStringArray:
 	var all:Array=forecast.get("warnings",[])
 	var complete:PackedStringArray=[]
-	for warning:Dictionary in all:complete.append(String(warning.get("text","")))
+	for warning:Dictionary in all:complete.append(String(warning.get("text","")).replace("currently puts extra hands on food","would put extra hands on food with this draft"))
 	risk_reading.tooltip_text="\n".join(complete)
-	if all.size()<=2:return complete
+	if all.size()<=2:
+		var brief:PackedStringArray=[]
+		for warning:Dictionary in all:brief.append(_brief_warning(warning))
+		return brief
 	var groups:={}
 	for warning:Dictionary in all:
 		var kind:=String(warning.get("kind","other"))
@@ -236,7 +240,7 @@ func _warning_words()->PackedStringArray:
 	for kind:String in ["starvation","food_shortage","water","safeguard","other"]:
 		var items:Array=groups.get(kind,[])
 		if items.is_empty():continue
-		if items.size()==1:summary.append(String(items[0].text));continue
+		if items.size()==1:summary.append(_brief_warning(items[0]));continue
 		match kind:
 			"starvation":summary.append("%d settlements cannot feed everyone now; continued shortfall risks starvation." % items.size())
 			"food_shortage":
@@ -248,12 +252,23 @@ func _warning_words()->PackedStringArray:
 			_:summary.append("%d other conditions affect this estimate." % items.size())
 	return summary
 
+func _brief_warning(warning:Dictionary)->String:
+	var town:=String(warning.get("town","This settlement"))
+	match String(warning.get("kind","")):
+		"starvation":return "%s: food is short now. Continued shortfall risks starvation." % town
+		"food_shortage":return "%s: food may run short in about %d days." % [town,int(warning.get("days",0))]
+		"water":return "%s: drinking water falls short of daily needs." % town
+		"safeguard":return "Food protection overrides part of this draft."
+	return String(warning.get("text",""))
+
 func _forecast_words()->String:
 	if forecast.is_empty():return ""
 	var new_food:Dictionary=forecast.get("after",{}).get("food",{})
 	if new_food.is_empty():return ""
+	if active_role=="Extraction":return "Output is not forecast. "+String(forecast.get("after",{}).get("materials",{}).get("reason","It also depends on deposits, carrying and demand."))
+	if active_role=="Crafting":return "Goods output is not forecast; it also depends on supplies and demand."
 	if active_role=="Logistics" and not bool(forecast.get("after",{}).get("water",{}).get("known",false)):return "Water collection is not measured yet. Food assumes today’s conditions."
-	return "Estimated from today’s conditions; towns may protect food work."
+	return "Estimate with today’s conditions held steady."
 
 func _apply_draft()->void:
 	if draft.is_empty():return
@@ -327,7 +342,7 @@ func _fit_scene()->void:
 		marker.position=rect.position;occupied.append(rect)
 		if bool(anchor_info.get(role,{}).get("physical",false)):
 			lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))})
-	if connections!=null:connections.lines=lines;connections.visible=active_role=="";connections.queue_redraw()
+	if connections!=null:connections.lines=lines;connections.visible=true;connections.queue_redraw()
 	if focus_panel!=null:
 		var point:Vector2=anchors.get(active_role,Vector2(width*0.5,stage.size.y*0.5))
 		var control_width:=minf(280,width*0.32)
@@ -338,6 +353,12 @@ func _fit_scene()->void:
 		evidence_panel.size.y=evidence_panel.get_combined_minimum_size().y
 		focus_panel.position=Vector2(clampf(point.x-control_width-70,12,maxf(12,width-control_width-12)),clampf(point.y-focus_panel.size.y*.5,12,maxf(12,stage.size.y-focus_panel.size.y-12)))
 		evidence_panel.position=Vector2(clampf(point.x+80,12,maxf(12,width-evidence_width-12)),clampf(point.y-evidence_panel.size.y*.5,12,maxf(12,stage.size.y-evidence_panel.size.y-12)))
+		if active_role!="" and connections!=null:
+			connections.lines=[]
+			if bool(anchor_info.get(active_role,{}).get("physical",false)):
+				var rect:=focus_panel.get_rect()
+				connections.lines=[{"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))}]
+			connections.queue_redraw()
 
 func view_state()->Dictionary:
 	# A preview contains detached system/catalog snapshots. Dock memory retains
@@ -385,14 +406,15 @@ class WorkEffectGraphic extends Control:
 	var readings:Array=[]
 	var food_path:Array=[]
 	var food_change:=""
+	var comparing:=false
 	func _init()->void:
 		custom_minimum_size=Vector2(260,72);mouse_filter=Control.MOUSE_FILTER_IGNORE
-	func show_forecast(result:Dictionary,role:String,settlement_id:String="")->void:
-		readings.clear();food_path.clear();food_change=""
+	func show_forecast(result:Dictionary,role:String,settlement_id:String="",has_changes:=false)->void:
+		readings.clear();food_path.clear();food_change="";comparing=has_changes
 		var before:Dictionary=result.get("before",{});var after:Dictionary=result.get("after",{})
 		var old_food:Dictionary=before.get("food",{});var food:Dictionary=after.get("food",{})
 		if food.has("net"):
-			food_change="Needs %.1f → %.1f/day\nStores %+.1f → %+.1f rations/day" % [float(old_food.get("required",0)),float(food.get("required",0)),float(old_food.get("net",0)),float(food.net)]
+			food_change="Needs %.1f → %.1f/day\nStores %+.1f → %+.1f rations/day" % [float(old_food.get("required",0)),float(food.get("required",0)),float(old_food.get("net",0)),float(food.net)] if comparing else "Needs %.1f/day\nStores %+.1f rations/day" % [float(food.get("required",0)),float(food.net)]
 			tooltip_text="Food eaten %.1f → %.1f; spoiled %.1f → %.1f rations/day. Grey shows current work; coral shows this draft." % [float(old_food.get("eaten",0)),float(food.get("eaten",0)),float(old_food.get("spoilage",0)),float(food.get("spoilage",0))]
 		if food.has("production"):readings.append({"label":"Food each day","before":float(old_food.get("production",0)),"after":float(food.production),"need":float(food.get("required",0)),"unit":"rations"})
 		if role=="Knowledge":
@@ -400,19 +422,21 @@ class WorkEffectGraphic extends Control:
 			if next.has("effective_work"):
 				var prior:=float(old.get("effective_work",0));var proposed:=float(next.effective_work)
 				var words:="%+.0f%% effort · %d teams" % [(proposed/prior-1)*100,int(next.get("teams",0))] if prior>0 else "%d teams · no earlier work capacity" % int(next.get("teams",0))
+				if not comparing:words="%d teams · current supplies" % int(next.get("teams",0))
 				readings.append({"label":"Research pace · current supplies","before":prior,"after":proposed,"words":words,"unit":""})
 		elif role=="Construction":
 			var old:=_housing(before,settlement_id);var next:=_housing(after,settlement_id)
 			if bool(next.get("building",false)) and float(next.get("work_per_day",0))>0 and float(next.get("days_left",-1))>=0:
 				var prior:=maxf(0,float(old.get("days_left",0)));var proposed:=float(next.days_left)
 				var words:="%d places · about %.0f → %.0f days" % [int(next.get("batch",0)),prior,proposed] if bool(old.get("building",false)) and float(old.get("work_per_day",0))>0 else "%d places · about %.0f days with this crew" % [int(next.get("batch",0)),proposed]
+				if not comparing:words="%d places · about %.0f days" % [int(next.get("batch",0)),proposed]
 				readings.append({"label":"Next homes here · estimate","before":prior,"after":proposed,"lower_better":true,"words":words,"unit":""})
 			elif after.get("construction",{}).has("builders"):
 				readings.append({"label":"Effective building crew","before":float(before.get("construction",{}).get("builders",0)),"after":float(after.construction.builders),"unit":"worker equivalents"})
 		elif role=="Logistics":
 			var old:Dictionary=before.get("water",{});var next:Dictionary=after.get("water",{})
 			if bool(old.get("known",false)) and bool(next.get("known",false)):readings.append({"label":"Drinking needs met · estimate","before":float(old.ratio)*100,"after":float(next.ratio)*100,"need":100.0,"unit":"%"})
-		else:
+		elif role!="Food":
 			var old:Dictionary=before.get("effective_workers",{});var next:Dictionary=after.get("effective_workers",{})
 			if next.has(role):readings.append({"label":"Effective work crew","before":float(old.get(role,0)),"after":float(next[role]),"unit":"worker equivalents"})
 		if food.has("stock"):
@@ -420,7 +444,7 @@ class WorkEffectGraphic extends Control:
 			for day:int in [30,90]:
 				var old:Dictionary=old_food.get("forecast%d"%day,{});var next:Dictionary=food.get("forecast%d"%day,{})
 				if old.has("ending_rations") and next.has("ending_rations"):food_path.append({"day":day,"before":float(old.ending_rations),"after":float(next.ending_rations)})
-		custom_minimum_size.y=readings.size()*64.0+(38 if food_change!="" else 0)+(96 if food_path.size()>1 else 0);visible=not readings.is_empty();queue_redraw()
+		custom_minimum_size.y=readings.size()*64.0+(38 if food_change!="" else 0)+(112 if food_path.size()>1 else 0);visible=not readings.is_empty();queue_redraw()
 	func _housing(plan:Dictionary,settlement_id:String)->Dictionary:
 		var construction:Dictionary=plan.get("construction",{})
 		if not (construction.get("housing",{}) as Dictionary).is_empty():return construction.housing
@@ -436,9 +460,9 @@ class WorkEffectGraphic extends Control:
 			var ink:=T.RED_TEXT if need>0 and after<need else (T.AMBER_TEXT if after<before else T.GREEN_TEXT)
 			if bool(reading.get("lower_better",false)):ink=T.GREEN_TEXT if after<=before else T.AMBER_TEXT
 			draw_string(strong,Vector2(0,y+15),String(reading.label),HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK)
-			draw_string(font,Vector2(0,y+34),String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit])),HORIZONTAL_ALIGNMENT_LEFT,-1,14,ink)
+			draw_string(font,Vector2(0,y+34),String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit] if comparing else "%.1f %s" % [after,reading.unit])),HORIZONTAL_ALIGNMENT_LEFT,-1,14,ink)
 			draw_rect(Rect2(0,y+43,size.x,12),T.TRACK)
-			draw_rect(Rect2(0,y+43,size.x*before/scale,4),T.MUTED)
+			if comparing:draw_rect(Rect2(0,y+43,size.x*before/scale,4),T.MUTED)
 			draw_rect(Rect2(0,y+48,size.x*after/scale,7),ink)
 			if need>0:
 				var x:=size.x*need/scale;draw_line(Vector2(x,y+40),Vector2(x,y+58),T.INK,2)
@@ -446,7 +470,7 @@ class WorkEffectGraphic extends Control:
 				draw_string(font,Vector2(maxf(0,size.x-text_width),y+15),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
 		var y:=readings.size()*64.0
 		if food_change!="":
-			for line:String in food_change.split("\n"):draw_string(font,Vector2(0,y+14),line,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.AMBER_TEXT if line.begins_with("Stores") and line.contains("→ -") else T.BODY);y+=18
+			for line:String in food_change.split("\n"):draw_string(font,Vector2(0,y+14),line,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.AMBER_TEXT if line.begins_with("Stores") and (line.contains("→ -") or line.begins_with("Stores -")) else T.BODY);y+=18
 			y+=2
 		if food_path.size()>1:_draw_food_path(y,font,strong)
 	func _draw_food_path(y:float,font:Font,strong:Font)->void:
@@ -456,12 +480,16 @@ class WorkEffectGraphic extends Control:
 		var prior_before:=Vector2.ZERO;var prior_after:=Vector2.ZERO
 		for i in food_path.size():
 			var point:Dictionary=food_path[i];var x:=20+(size.x-48)*float(point.day)/90.0
-			var before:=Vector2(x,y+73-float(point.before)/maximum*30);var after:=Vector2(x,y+73-float(point.after)/maximum*30)
-			if i>0:draw_line(prior_before,before,T.MUTED,1.5,true);draw_line(prior_after,after,T.ACTION,2.5,true)
+			var before:=Vector2(x,y+89-float(point.before)/maximum*30);var after:=Vector2(x,y+89-float(point.after)/maximum*30)
+			if i>0:
+				if comparing:draw_line(prior_before,before,T.MUTED,1.5,true)
+				draw_line(prior_after,after,T.ACTION,2.5,true)
 			draw_circle(after,3,T.ACTION)
 			var caption:="Now" if int(point.day)==0 else "%dd" % int(point.day)
-			draw_string(font,Vector2(x-12,y+90),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
+			draw_string(font,Vector2(x-12,y+106),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
 			prior_before=before;prior_after=after
 		var end:Dictionary=food_path.back()
-		var words:="90d: current %.0f → draft %.0f rations" % [float(end.before),float(end.after)]
-		draw_string(font,Vector2(0,y+32),words,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.MUTED)
+		var words:="%s → %s rations" % [preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.before)))),preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.after))))]
+		if not comparing:words="%s rations" % preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.after))))
+		draw_string(font,Vector2(0,y+32),"At 90 days · current work → draft" if comparing else "At 90 days · current work",HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.MUTED)
+		draw_string(font,Vector2(0,y+49),words,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.BODY)

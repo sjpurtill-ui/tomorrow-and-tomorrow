@@ -143,3 +143,35 @@ func test_scrolling_records_does_not_grow_the_living_scene()->void:
 	screen._fit_scene()
 	assert_float(screen.stage.custom_minimum_size.y).is_equal(height)
 	screen.reparent(self);scroll.free()
+
+func test_unchanged_preview_can_refresh_after_world_changes_without_takeover()->void:
+	screen.focus_work("Food")
+	assert_bool(screen.effect_graph.comparing).is_false()
+	revision+=1;current=false;screen.update_block(_block())
+	assert_str(screen.apply_button.text).is_equal("Refresh preview")
+	assert_bool(screen.apply_button.disabled).is_false()
+	screen.apply_button.pressed.emit()
+	assert_array(commits).is_empty()
+	assert_bool(screen.draft_stale).is_false()
+	assert_array(screen.draft.commands).is_empty()
+	assert_int(screen.draft.token).is_equal(revision)
+	assert_bool(screen.apply_button.disabled).is_true()
+	screen.forecast={"ok":false,"stale":true}
+	screen.update_block(_block())
+	assert_bool(screen.draft_stale).is_true()
+	assert_bool(screen.apply_button.disabled).is_false()
+	screen.apply_button.pressed.emit()
+	assert_bool(screen.draft_stale).is_false()
+	assert_array(commits).is_empty()
+
+func test_fractional_starting_share_uses_original_whole_percent_button_bounds()->void:
+	screen.focus_work("Knowledge")
+	var shares:={}
+	for role:String in Manual.ROLES:shares[role]=0.0
+	shares.Food=99.9;shares.Knowledge=0.1
+	screen.draft.shares=shares
+	screen._refresh_focus()
+	assert_int(Manual.percents(shares).Knowledge).is_equal(1)
+	assert_bool(screen.decrease_button.disabled).is_false()
+	assert_bool(screen.increase_button.disabled).is_false()
+	assert_array(commits).is_empty()
