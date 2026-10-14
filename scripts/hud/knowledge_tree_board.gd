@@ -24,7 +24,7 @@ var detail:VBoxContainer
 var archive_grid:GridContainer
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="KnowledgeTree";add_theme_constant_override("separation",18)
+	theme=T.control_theme();data=block;name="KnowledgeTree";add_theme_constant_override("separation",24)
 	if bool(data.get("archive",false)):
 		_archive(self)
 		resized.connect(_arrange);_arrange()
@@ -50,7 +50,7 @@ func _arrange()->void:
 		var painting:=spread.find_child("QuestionPainting",false,false) as Control
 		if painting:painting.custom_minimum_size=Vector2(0 if spread.vertical else (112 if size.x<650 else 220),110 if size.x<650 else 160)
 		var title:=spread.find_child("ChosenName",true,false) as Label
-		if title:title.add_theme_font_size_override("font_size",25 if size.x<650 else 30)
+		if title:title.add_theme_font_size_override("font_size",28 if size.x<650 else 34)
 
 # --- Fields ---------------------------------------------------------------------
 
@@ -58,8 +58,8 @@ func _arrange()->void:
 ## chosen field is marked.
 func _fields(parent:Node)->void:
 	var row:=HFlowContainer.new();row.name="Fields";row.add_theme_constant_override("h_separation",16);row.add_theme_constant_override("v_separation",6);parent.add_child(row)
-	var label:=T.make_label("Explore a field",20,T.INK);label.add_theme_font_override("font",T.voice_font());label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
-	var picker:=OptionButton.new();picker.name="FieldPicker";picker.custom_minimum_size=Vector2(260,36);picker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;picker.add_theme_font_size_override("font_size",15);row.add_child(picker)
+	var label:=T.make_label("Explore a field",24,T.INK);label.add_theme_font_override("font",T.font("ui_strong"));label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
+	var picker:=OptionButton.new();picker.name="FieldPicker";picker.custom_minimum_size=Vector2(260,40);picker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;picker.add_theme_font_size_override("font_size",16);row.add_child(picker)
 	var ids:Array[String]=[]
 	for field:Dictionary in data.get("fields",[]):
 		var id:=String(field.id)
@@ -101,7 +101,7 @@ func _lanes(parent:Node)->void:
 	var domain:=String(data.get("domain",""))
 	var accent:=Visuals.color(domain)
 	var head:=VBoxContainer.new();head.name="PathsHeading";head.add_theme_constant_override("separation",4);parent.add_child(head)
-	head.add_child(_voice("Paths of discovery",22))
+	head.add_child(_voice("Paths of discovery",24))
 	_line(head,"Choose a question to read its promise, foundations and next steps.",13,T.TEXT_SOFT)
 	var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size.y=1;parent.add_child(rule)
 	var lanes:=lanes_of(data.get("rows",[]),domain,data.get("next",{}))
@@ -146,7 +146,7 @@ func _pill(parent:Node,item:Dictionary,kind:String,accent:Color)->void:
 	var id:=String(item.id)
 	var chosen:=id==String(data.get("selected",""))
 	var pill:=Button.new();pill.name="Pill_"+id.validate_node_name();pill.text=String(item.name)
-	pill.custom_minimum_size.y=32;pill.add_theme_font_size_override("font_size",13)
+	T.apply_button_style(pill)
 	var ink:Color=T.INK if kind!="next" else T.TEXT_SOFT
 	pill.add_theme_color_override("font_color",ink);pill.add_theme_color_override("font_hover_color",T.INK);pill.add_theme_color_override("font_pressed_color",T.INK)
 	var fill:Color=Color(accent,0.22) if kind=="active" else (T.PAPER_RAISED if kind=="ready" else Color.TRANSPARENT)
@@ -167,6 +167,7 @@ func _more(parent:Node,items:Array,words:String,kind:String="ready")->void:
 	var names:Array[String]=[]
 	for item:Dictionary in items:names.append(String(item.name))
 	var more:=Button.new();more.text="+%d %s" % [items.size(),words];more.add_theme_font_size_override("font_size",13);more.add_theme_color_override("font_color",T.GOLD_TEXT);more.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	T.apply_button_style(more)
 	more.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT));more.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG));more.tooltip_text="Show these questions here:\n"+"\n".join(names);parent.add_child(more)
 	more.pressed.connect(func()->void:
 		var at:=more.get_index()
@@ -202,12 +203,12 @@ func _detail(parent:Node)->void:
 	for fact:Array in chosen.get("facts",[]):
 		if fact.size()>2 and String(fact[2])!=String(fact[1]) and not String(fact[2]).is_empty():_line(notes,String(fact[0])+" · "+String(fact[2]),13,T.BODY)
 	if notes.get_child_count()>0:
-		var read:=_button(text,"More about this question",func()->void:notes.visible=not notes.visible,"Read the full effects, foundations and people behind this question.");read.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		var read:=_button(text,"More about this question",func()->void:notes.visible=not notes.visible,"Read the full effects, foundations and people behind this question.");read.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;T.apply_button_style(read)
 		text.add_child(notes)
 	else:notes.queue_free()
 	if chosen.has("on_research"):
 		var go:=preload("res://scripts/hud/dense_blocks.gd").verb(String(chosen.get("research_label","Put a team on it")),chosen.on_research,"A team takes this question up; the work done on its old question is kept.")
-		go.name="Research";go.custom_minimum_size.y=34;go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;text.add_child(go)
+		go.name="Research";T.apply_button_style(go,true);go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;text.add_child(go)
 
 ## The accumulated benefits are a readable index with details expanded in
 ## place. A field never opens a second modal or loses its position in the book.
@@ -223,8 +224,8 @@ func _archive(parent:Node)->void:
 		var entry:=VBoxContainer.new();entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entry.add_theme_constant_override("separation",4);archive_grid.add_child(entry)
 		_rule(entry)
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);entry.add_child(row)
-		var heading:=Button.new();heading.text=String(field.name);heading.alignment=HORIZONTAL_ALIGNMENT_LEFT;heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_theme_font_override("font",T.voice_font());heading.add_theme_font_size_override("font_size",20)
-		heading.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT));heading.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG));heading.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG));heading.custom_minimum_size.y=32
+		var heading:=Button.new();heading.text=String(field.name);heading.alignment=HORIZONTAL_ALIGNMENT_LEFT;heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;T.apply_button_style(heading);heading.add_theme_font_override("font",T.font("ui_strong"));heading.add_theme_font_size_override("font_size",24)
+		heading.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT));heading.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG));heading.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG))
 		heading.tooltip_text="Close this field" if bool(field.open) else "Read this field's effects and discoveries";heading.pressed.connect(field.on_toggle);row.add_child(heading)
 		var count:=T.make_label("%s  %s" % [String(field.count),"−" if bool(field.open) else "+"],13,T.GOLD_TEXT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.tooltip_text="Questions known, of all questions in this field";row.add_child(count)
 		_line(entry,String(field.summary),14,T.BODY)
@@ -234,4 +235,9 @@ func _archive(parent:Node)->void:
 			for item:Dictionary in section.get("items",[]):
 				var fact:=_line(entry,String(item.label)+" · "+String(item.value),14,tone_color(String(item.get("tone",""))) if String(item.get("tone",""))!="" else T.BODY);fact.tooltip_text=String(item.get("tip",""));fact.mouse_filter=Control.MOUSE_FILTER_PASS
 	if not unexplored.is_empty():
-		var show:=_button(parent,("Hide" if bool(data.get("show_unlearned",false)) else "Show")+" fields still to explore (%d)" % unexplored.size(),data.get("on_toggle_unlearned"),"Read every field, including those with no known discovery yet.");show.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		var show:=_button(parent,("Hide" if bool(data.get("show_unlearned",false)) else "Show")+" fields still to explore (%d)" % unexplored.size(),data.get("on_toggle_unlearned"),"Read every field, including those with no known discovery yet.");show.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;T.apply_button_style(show)
+
+func _voice(text:String,font_size:int)->Label:
+	var label:=super._voice(text,font_size)
+	label.add_theme_font_override("font",T.font("ui_strong"))
+	return label
