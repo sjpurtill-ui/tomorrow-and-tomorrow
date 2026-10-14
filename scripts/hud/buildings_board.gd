@@ -129,6 +129,14 @@ func _section(section:Dictionary,cards:Array)->Control:
 # --- A row -----------------------------------------------------------------------
 
 func _row(card:Dictionary)->Control:
+	# Side by side, a row keeps to one line: what it does waits in its tooltip.
+	if _compact and not (card.get("effects",[]) as Array).is_empty():
+		card=card.duplicate()
+		var said:PackedStringArray=[]
+		for effect:Dictionary in card.effects:said.append("%s %s" % [String(effect.get("label","")),String(effect.get("value",""))])
+		card.detail=("%s
+%s" % [String(card.get("detail","")),", ".join(said)]).strip_edges()
+		card.erase("effects")
 	var panel:=PanelContainer.new();panel.name="Card_"+String(card.get("key",card.get("name","row"))).replace(" ","_")
 	var style:=T.flat(Color(0,0,0,0));style.content_margin_top=4;style.content_margin_bottom=4;style.content_margin_left=2;style.content_margin_right=2
 	if bool(card.get("highlight",false)):style.bg_color=T.GOLD_WASH
@@ -155,21 +163,29 @@ func _row(card:Dictionary)->Control:
 		var value:=_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true);value.name="Value"
 		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(card.get("value_width",44))
 		line.add_child(value)
-	var tagged:=card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty()
-	if tagged and not _compact:line.add_child(_tag(card.tag))
+	# Side by side, the state word takes the place of the row's few words.
+	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():
+		if _compact:
+			sub.text=String(card.tag.get("text",""));sub.tooltip_text=String(card.tag.get("tip",""))
+			var tone:=String(card.tag.get("tone","note"))
+			sub.add_theme_color_override("font_color",tone_ink(tone) if tone in ["good","bad","warn"] else (T.TEAL_TEXT if tone=="info" else T.TEXT_SOFT))
+		else:line.add_child(_tag(card.tag))
 	for item:Dictionary in card.get("actions",[]):line.add_child(_button(item))
-	if _has_second_line(card) or (tagged and _compact):
+	# Full width, who decides sits beside the verb; side by side, below it.
+	var chose_here:=card.get("choice") is Dictionary and not _compact
+	if chose_here:line.add_child(_small_choice(card.choice))
+	var rest:=card.duplicate();if chose_here:rest.erase("choice")
+	if _has_second_line(rest):
 		var second:=HFlowContainer.new();second.name="Second";second.add_theme_constant_override("h_separation",16);second.add_theme_constant_override("v_separation",3)
 		second.mouse_filter=Control.MOUSE_FILTER_PASS
 		var indent:=Control.new();indent.custom_minimum_size=Vector2(22,0);indent.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(indent)
-		if tagged and _compact:second.add_child(_tag(card.tag))
 		for gain:Dictionary in card.get("gains",[]):second.add_child(_gain_chip(gain))
 		for effect:Dictionary in card.get("effects",[]):second.add_child(_effect_chip(effect))
 		for need:Dictionary in card.get("needs",[]):second.add_child(_pips(need))
 		for blocker:Dictionary in card.get("blockers",[]):second.add_child(_chip(blocker,String(blocker.get("tone","bad"))))
 		for note:Dictionary in card.get("notes",[]):second.add_child(_chip(note,"note"))
 		for item:Dictionary in card.get("actions2",[]):second.add_child(_button(item))
-		if card.get("choice") is Dictionary:second.add_child(_small_choice(card.choice))
+		if card.get("choice") is Dictionary and not chose_here:second.add_child(_small_choice(card.choice))
 		lines.add_child(second)
 	var press:Variant=card.get("on_press")
 	if press is Callable and (press as Callable).is_valid():
@@ -274,7 +290,7 @@ func _pips(need:Dictionary)->Control:
 	if resource!="":
 		var mark:=TextureRect.new();mark.texture=Icons.material_texture(resource,40);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		mark.custom_minimum_size=Vector2(16,16);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(mark)
-	chip.add_child(_label(title,12,T.TEXT_SOFT))
+	if resource=="":chip.add_child(_label(title,12,T.TEXT_SOFT))
 	var pips:=Pips.new();pips.ratio=clampf(have/wanted,0.0,1.0);pips.fill=T.RED if short else T.GREEN;chip.add_child(pips)
 	chip.add_child(_label("%s/%s" % [_n(have),_n(wanted)],12,T.RED_TEXT if short else T.INK,short))
 	return chip
