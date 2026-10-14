@@ -54,6 +54,7 @@ static func verb(label:String,on_press:Variant,tip:String="",disabled:=false)->B
 	go.add_theme_stylebox_override("disabled",off);go.add_theme_color_override("font_disabled_color",T.INK_MUTED)
 	go.add_theme_stylebox_override("focus",T.gold_outline_style())
 	go.add_theme_color_override("font_color",T.GOLD_TEXT);go.add_theme_color_override("font_hover_color",T.INK)
+	T.apply_button_style(go)
 	if on_press is Callable and (on_press as Callable).is_valid():go.pressed.connect(on_press)
 	return go
 

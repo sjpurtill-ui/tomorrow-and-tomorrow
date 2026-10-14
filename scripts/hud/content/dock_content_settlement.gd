@@ -105,7 +105,9 @@ func _city_tab(sub:int)->Dictionary:
 			if traveling:items.push_front({"label":"Stop here","sub":"Hold the party where it stands","primary":false,"on_press":terrain._halt_founding_convoy_to_forage,"tip":"The caravan leader usually decides when to camp. This makes the party stop and wait (going to water first if there is none here) until you tell it to go on."})
 			elif led_mode in ["held","watering","foraging","resting","provisioning"]:items.push_front({"label":"Go on","sub":"Break camp and keep travelling","primary":led_mode=="held","on_press":func()->void:terrain._on_caravan_override("founding","resume"),"tip":"The caravan leader moves on by themself once water, food and health allow. This tells them to go on now."})
 		return {"brief":{"tone":String(travel_advice.get("tone","info")),"title":"A home is taking shape" if committed else String(travel_advice.get("status","Choose a home")).capitalize(),"why":"Let time run with the controls above. The people build the Hearth Circle as they go about their work; once it stands, the local leader takes charge of daily work." if committed else String(travel_advice.get("reason","The party can walk into unknown land and camp to forage on the way."))+" Settling makes the place where the party stands our home."},"blocks":[{"type":"actions","items":items}]}
-	return {"kpis":_glance_tiles(settlement),"blocks":_overview_blocks(settlement)}
+	var blocks:=_overview_blocks(settlement)
+	blocks[0]["readings"]=_glance_tiles(settlement)
+	return {"blocks":blocks}
 
 
 ## Home at a glance, right under the tabs: four numbers with bars, each from

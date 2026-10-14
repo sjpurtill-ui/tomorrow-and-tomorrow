@@ -15,8 +15,11 @@ const Model:=preload("res://scripts/hud/culture_model.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 
 ## Course colours, in ribbon order.
-const RIBBON:=[Color("8a6118"),Color("356f66"),Color("695587"),Color("4d6389"),Color("805d1d"),Color("536d32")]
-const PARTS:={"collection":["Collection",Color("8a6118")],"culture":["Shared ways",Color("356f66")],"values":["Open values",Color("4d6389")],"works":["Great works",Color("695587")]}
+static func ribbon_colors()->Array[Color]:
+	return [T.GOLD,T.TEAL,T.VIOLET,T.BLUE,T.AMBER,T.GREEN]
+
+static func allure_parts()->Dictionary:
+	return {"collection":["Collection",T.GOLD],"culture":["Shared ways",T.TEAL],"values":["Open values",T.BLUE],"works":["Great works",T.VIOLET]}
 
 ## A bar either side of a middle line: gains right (green), costs left (red).
 class Diverging extends Control:
@@ -112,7 +115,7 @@ class Seal extends Control:
 		var r:=minf(size.x,size.y)*0.5-6.0
 		draw_arc(c,r,0.0,TAU,64,T.TRACK,7.0,true)
 		draw_arc(c,r,-PI*0.5,-PI*0.5+TAU*clampf(value,0.0,1.0),64,T.GOLD,7.0,true)
-		var font:=T.font("display")
+		var font:=T.font("ui_strong")
 		var text:=str(roundi(value*100.0))
 		var w:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,26).x
 		draw_string(font,c+Vector2(-w*0.5,9),text,HORIZONTAL_ALIGNMENT_LEFT,-1,26,T.INK)
@@ -121,7 +124,7 @@ var _print:Array=[]
 var _columns:Array[GridContainer]=[]
 
 func setup(block:Dictionary)->void:
-	data=block;name="CulturePanel";add_theme_constant_override("separation",16)
+	data=block;name="CulturePanel";add_theme_constant_override("separation",24)
 	_print=page_print(block)
 	_build()
 	resized.connect(_layout)
@@ -160,19 +163,21 @@ static func page_print(block:Dictionary)->Array:
 func _build()->void:
 	var c:Dictionary=data.get("culture",{})
 	_who(c)
-	_ways(c)
 	_course(c)
+	_ways(c)
 	_values(c)
-	var lower:=HBoxContainer.new();lower.name="TemperAndOthers";lower.add_theme_constant_override("separation",24);add_child(lower)
+	var lower:=BoxContainer.new();lower.name="TemperAndOthers";lower.add_theme_constant_override("separation",24);add_child(lower)
 	_temper(lower,c)
 	_others(lower,c)
 	_layout()
 
 func _layout()->void:
+	var lower:=get_node_or_null("TemperAndOthers") as BoxContainer
+	if lower:lower.vertical=size.x<700
 	for grid in _columns:
 		if not is_instance_valid(grid): continue
 		if String(grid.name)=="Values": grid.columns=2 if size.x>=560 else 1
-		else: grid.columns=3 if size.x>=760 else (2 if size.x>=480 else 1)
+		else: grid.columns=3 if size.x>=900 else (2 if size.x>=640 else 1)
 
 func _kicker(parent:Node,text:String,tip:String="")->Label:
 	var label:=T.make_label(text,12,T.GOLD_TEXT)
@@ -189,9 +194,9 @@ func _plain(parent:Node,text:String,size:int,color:Color)->Label:
 
 func _chip(parent:Node,text:String,tip:String)->void:
 	var chip:=PanelContainer.new();chip.tooltip_text=tip;chip.mouse_filter=Control.MOUSE_FILTER_STOP
-	chip.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.BORDER_SOFT,1,T.RADIUS_CONTROL,6.0))
+	chip.add_theme_stylebox_override("panel",T.flat(Color.TRANSPARENT,T.BORDER_SOFT,0,0,0))
 	parent.add_child(chip)
-	_plain(chip,text,13,T.INK)
+	_plain(chip,text,14,T.MUTED)
 
 # --- Who we are ------------------------------------------------------------------
 
@@ -206,8 +211,8 @@ func _who(c:Dictionary)->void:
 	image.tooltip_text="Most of all: %s." % String(identity.get("summary","")).to_lower()
 	row.add_child(image)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.alignment=BoxContainer.ALIGNMENT_CENTER;words.add_theme_constant_override("separation",10);row.add_child(words)
-	var name:=_serif(String(identity.get("name","")).capitalize(),26);name.tooltip_text=image.tooltip_text;name.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(name)
-	var chips:=HFlowContainer.new();chips.add_theme_constant_override("h_separation",8);chips.add_theme_constant_override("v_separation",6);words.add_child(chips)
+	var name:=_serif(String(identity.get("name","")).capitalize(),32);name.tooltip_text=image.tooltip_text;name.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(name)
+	var chips:=HFlowContainer.new();chips.add_theme_constant_override("h_separation",20);chips.add_theme_constant_override("v_separation",8);words.add_child(chips)
 	var leaders:Dictionary=c.get("leaders",{})
 	_chip(chips,"Temper: %s" % String(leaders.get("temperament","")).to_lower(),"Our people's temper, read from the values they live by. Our leaders act by it wherever you do not decide.")
 	var a:Dictionary=c.get("alignment",{})
@@ -251,14 +256,20 @@ func _course(c:Dictionary)->void:
 		(head.get_child(head.get_child_count()-1) as Control).size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var remembered:Array=course.get("remembered",[])
 	if remembered.is_empty(): return
-	var ribbon:=Ribbon.new();ribbon.name="CourseRibbon";ribbon.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	if remembered.size()==1:
+		var memory:Dictionary=remembered[0]
+		var share:=_plain(self,"%d in 100 of our memory follows this course" % roundi(float(memory.share)*100.0),14,T.MUTED)
+		share.mouse_filter=Control.MOUSE_FILTER_PASS;share.tooltip_text="%s · older courses fade by half every 60 years.\nAt full strength: %s" % [String(memory.name),String(memory.does)]
+		return
+	var colors:=ribbon_colors()
+	var ribbon:=Ribbon.new();ribbon.name="CourseRibbon";ribbon.custom_minimum_size.y=5;ribbon.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var legend:=HFlowContainer.new();legend.add_theme_constant_override("h_separation",16)
-	for i in mini(remembered.size(),RIBBON.size()):
+	for i in mini(remembered.size(),colors.size()):
 		var r:Dictionary=remembered[i]
-		ribbon.parts.append([float(r.share),RIBBON[i]])
+		ribbon.parts.append([float(r.share),colors[i]])
 		var item:=HBoxContainer.new();item.add_theme_constant_override("separation",6);item.mouse_filter=Control.MOUSE_FILTER_STOP
 		item.tooltip_text="%s · %d in 100 of our memory (older courses fade by half every 60 years).\nAt full strength: %s" % [String(r.name),roundi(float(r.share)*100.0),String(r.does)]
-		var swatch:=ColorRect.new();swatch.color=RIBBON[i];swatch.custom_minimum_size=Vector2(10,10);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(swatch)
+		var swatch:=ColorRect.new();swatch.color=colors[i];swatch.custom_minimum_size=Vector2(10,10);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(swatch)
 		_plain(item,"%s %d" % [String(r.name),roundi(float(r.share)*100.0)],13,T.INK if bool(r.current) else T.MUTED)
 		legend.add_child(item)
 	add_child(ribbon);add_child(legend)
@@ -308,7 +319,7 @@ func _others(parent:Node,c:Dictionary)->void:
 	var ribbon:=Ribbon.new();ribbon.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_child(ribbon)
 	var legend:=HFlowContainer.new();legend.add_theme_constant_override("h_separation",12);right.add_child(legend)
 	for p:Dictionary in o.get("parts",[]):
-		var spec:Array=PARTS.get(String(p.source),[String(p.source),T.MUTED])
+		var spec:Array=allure_parts().get(String(p.source),[String(p.source),T.MUTED])
 		ribbon.parts.append([float(p.value),spec[1]])
 		var item:=HBoxContainer.new();item.add_theme_constant_override("separation",5);item.mouse_filter=Control.MOUSE_FILTER_STOP;item.tooltip_text=String(p.text)
 		var swatch:=ColorRect.new();swatch.color=spec[1];swatch.custom_minimum_size=Vector2(10,10);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;item.add_child(swatch)
@@ -338,3 +349,10 @@ func _tile(parent:Node,figure:String,label:String,tip:String,warn:bool=false)->v
 	var col:=VBoxContainer.new();col.add_theme_constant_override("separation",0);tile.add_child(col)
 	var big:=_plain(col,figure,20,T.RED_TEXT if warn else T.INK);big.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	var small:=_plain(col,label.to_upper(),12,T.MUTED);small.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+
+func _serif(value:String,font_size:int)->Label:
+	var label:=T.make_label(value,font_size,T.INK);label.add_theme_font_override("font",T.font("ui_strong"));label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	return label
+
+func _button(parent:Node,label:String,callback:Variant,tip:String,active:bool=false)->Button:
+	return T.apply_button_style(super._button(parent,label,callback,tip,active))

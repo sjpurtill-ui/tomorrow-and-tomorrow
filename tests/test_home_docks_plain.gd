@@ -61,7 +61,7 @@ func test_food_page_asks_for_hands_beside_the_figures_it_moves()->void:
 	var strip:Array=preload("res://scripts/hud/food_folio.gd").kpis(page.data)
 	assert_str(String(strip[1].value)).is_equal("Short in 40 days")
 	assert_str(String(strip[2].value)).is_equal("80%")
-	assert_str(text).contains("Water (now)").contains("Let Tovan decide")
+	assert_str(text).contains("More hands on water (now)").contains("Let Tovan decide")
 	assert_str(text).not_contains("Food lasts").not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")
 	(page.find_child("Choice_Provisions",true,false) as Button).pressed.emit()
 	assert_array(asked).contains_exactly(["provisions"])

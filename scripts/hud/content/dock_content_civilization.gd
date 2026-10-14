@@ -156,30 +156,30 @@ func _council_blocks()->Array:
 		var love:=float(regard.get("love",0.5));var dread:=float(regard.get("dread",0.2))
 		var read:=String(regard.get("read",""))
 		var row:={"group":heads[group],"icon":Portrait.texture(face),
-			"cells":{"name":String(person.name),"title":String(post.title)},
+			"cells":{"name":String(person.name),"title":String(post.title)+("\n"+read.capitalize() if read!="" else "")},
 			"bar":{"value":love,"tone":"bad" if dread>=0.55 else ("good" if love>=0.55 else ""),"width":36.0},
 			"tip":"%s, %s. %s.\n%s (love %d in 100, dread %d in 100).\nClick to summon them to the court." % [String(person.name),String(post.title),String(post.place),read.capitalize() if read!="" else "Not yet read",roundi(love*100.0),roundi(dread*100.0)],
-			"on_click":_open_court.bind(target)}
+			"on_click":_open_court.bind(target),
+			"button":{"label":"Summon","on_press":_open_court.bind(target),"tip":"Speak with %s at court" % String(person.name)}}
 		# A matter to raise: the name in amber, the count in its pointer.
-		if matters>0:row["tone"]="warn";row["tip"]="%d %s to raise. %s" % [matters,"matter" if matters==1 else "matters",String(row.tip)]
+		if matters>0:
+			row["tone"]="warn";row["tip"]="%d %s to raise. %s" % [matters,"matter" if matters==1 else "matters",String(row.tip)]
+			row.cells.title+="\n%d %s to raise" % [matters,"matter" if matters==1 else "matters"]
 		if not by_group.has(group):by_group[group]=[]
 		(by_group[group] as Array).append(row)
-	var columns:=[{"key":"name","label":"Name","width":118},{"key":"title","label":"Office","width":150}]
+	var columns:=[{"key":"name","label":"Name"},{"key":"title","label":"Office","width":180}]
 	var total:=0
 	for group in by_group:total+=(by_group[group] as Array).size()
-	# Two columns, whole groups in each, as even as the groups allow.
-	var left:Array=[];var right:Array=[]
+	# One roster keeps each person's identity, current office and court action
+	# together. Repeating table headings across two halves obscured the action.
+	var roster:Array=[]
 	for group in office_order:
 		if not by_group.has(group):continue
-		var fits:=left.is_empty() or (right.is_empty() and left.size()+(by_group[group] as Array).size()<=ceili(total*0.6))
-		if fits:left.append_array(by_group[group])
-		else:right.append_array(by_group[group])
+		roster.append_array(by_group[group])
 	var blocks:Array=[]
 	if total==0:blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
 	else:
-		var halves:Array=[[{"type":"table","icon_size":22,"rows":left,"columns":columns}]]
-		if not right.is_empty():halves.append([{"type":"table","icon_size":22,"rows":right,"columns":columns}])
-		blocks.append({"type":"columns","heading":"THE COURT","columns":halves,"ratios":[1.3,0.95],"stack_below":700})
+		blocks.append({"type":"table","heading":"People you can call","head":false,"icon_size":40,"rows":roster,"columns":columns})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant
