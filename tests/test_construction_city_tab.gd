@@ -330,7 +330,7 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 		count+=1
 		# A name, a figure or a bar, and a meaning in its tooltip.
 		assert_str(String(item.name)).is_not_empty()
-		assert_bool(String(item.get("value",""))!="" or item.has("bar") or item.has("progress") or item.has("meter") or item.has("segments") or item.has("effects")).override_failure_message(String(item.name)).is_true()
+		assert_bool(String(item.get("value",""))!="" or item.has("bar") or item.has("progress") or item.has("meter") or item.has("segments") or item.has("effects") or not (item.get("notes",[]) as Array).is_empty()).override_failure_message(String(item.name)).is_true()
 		assert_str(String(item.get("detail",""))).override_failure_message(String(item.name)).is_not_empty()
 		assert_bool(String(item.get("value","")).contains("·")).override_failure_message(String(item.get("value",""))).is_false()
 		for text:String in [String(item.name),String(item.get("value","")),String(item.get("sub",""))]:

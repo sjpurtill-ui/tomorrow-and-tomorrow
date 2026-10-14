@@ -106,7 +106,9 @@ func _local(id:String)->Dictionary:
 				{"id":"press","label":"Press ahead","tip":"Half the builders, even through hardship.","on_press":func()->void:U.direct(id,work_id,"press");_refresh()},
 				{"id":"abandon","label":"Withdraw","tip":"Lay down the tools; the unfinished site remains.","on_press":func()->void:U.direct(id,work_id,"abandon");_refresh()}]}
 		cards.append(row)
-	cards.append_array(_next_works())
+	var ideas:=_next_works()
+	cards.append_array(ideas)
+	cards.append_array(_toward(ideas))
 	for warning in Works.api_list("forecast",["player"]):
 		if warning is Dictionary:cards.append({"section":"sky","key":"sky_%d" % cards.size(),"icon":"danger","name":"In %d days" % int(warning.get("in_days",0)),"sub":String(warning.get("text","")),"detail":String(warning.get("text",""))})
 	for news:Dictionary in preload("res://scripts/great_works.gd").known_foreign_works("player"):
@@ -120,6 +122,7 @@ func _local(id:String)->Dictionary:
 		{"id":"works","heading":"Great works of %s" % String(city.get("name","the town")),"span":true,"tiles":true,"note":"none yet" if count==0 else "",
 			"actions":[{"label":"Conceive","primary":count==0,"tip":"Call the court and hear what they dream of: a wonder conceived from who we are.","on_press":_conceive}]},
 		{"id":"next","heading":"What the people could raise next","span":true,"tiles":true},
+		{"id":"toward","heading":"What a new work would take"},
 		{"id":"sky","heading":"The watching sky foresees"},
 		{"id":"abroad","heading":"Other peoples' works","note":"as last heard" if cards.any(func(c:Dictionary)->bool:return String(c.section)=="abroad") else ""}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
@@ -150,6 +153,29 @@ func _next_works()->Array:
 			"needs":needs,"detail":"%s
 %s" % [String(concept.get("effect_text","")),String(assessed.get("spoken",""))],
 			"actions":[{"label":"Hear it","tip":"The court puts this idea and the others to you; you choose.","on_press":_conceive}]})
+	return rows
+
+## What stands between the people and a new work, from the ideas above: each
+## material the largest idea needs against the store (the biggest bill, so a
+## yes to any idea is covered), and the builders' craft that lifts the odds
+## (built_fabric.gd effect_lines "Great works").
+func _toward(ideas:Array)->Array:
+	var needs:Dictionary={}
+	for idea:Dictionary in ideas:
+		for need:Dictionary in idea.get("needs",[]):
+			var resource:=String(need.resource)
+			needs[resource]=maxf(float(needs.get(resource,0.0)),float(need.need))
+	var rows:Array=[]
+	for resource:String in needs:
+		var have:=float(GameState.resource_stockpiles.get(resource,0.0));var want:=float(needs[resource])
+		var short:=have+0.001<want
+		rows.append({"section":"toward","key":"toward_"+resource,"icon":"res:"+resource,"name":preload("res://scripts/resource_names.gd").label(resource),
+			"bar":{"ratio":clampf(have/maxf(1.0,want),0.0,1.0),"color":Tokens.RED if short else Tokens.GREEN},"value":"%s / %s" % [preload("res://scripts/hud/era_words.gd").grouped(floori(have)),preload("res://scripts/hud/era_words.gd").grouped(ceili(want))],"value_width":120,"value_color":Tokens.RED if short else Tokens.GREEN,
+			"tag":{"text":"Short","tone":"bad"} if short else {"text":"Enough","tone":"good"},"detail":"In store against the most any of the ideas above needs."})
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	for line:Dictionary in Fabric.effect_lines():
+		if String(line.label)!="Great works":continue
+		rows.append({"section":"toward","key":"toward_craft","icon":"builders","name":"Builders' craft","bar":{"ratio":float(Fabric.craft())/Fabric.CRAFT_MAX,"color":Tokens.VIOLET},"value":String(line.value),"value_width":80,"detail":String(line.get("words",""))})
 	return rows
 
 ## A work's few words beside its name: where it stands in the raising and
