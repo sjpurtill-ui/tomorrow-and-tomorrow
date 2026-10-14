@@ -52,11 +52,12 @@ static func _read(civ_id:String,day:int)->Dictionary:
 static func shaped(cell:Dictionary,towns_known:int)->Dictionary:
 	if not bool(cell.get("known",false)):
 		return {"known":false,"value":-1,"low":-1,"high":-1,"towns":0,"of":towns_known,"bands":0,"partial":false,"text":"?","range":"","tip":String(cell.get("tip","We know too little of them to count their warriors."))}
-	var low:=float(cell.get("low",0.0));var high:=maxf(low,float(cell.get("high",low)))
+	var low:=maxf(0.0,float(cell.get("low",0.0)));var high:=maxf(low,float(cell.get("high",low)))
 	var value:=Known.nice((low+high)*0.5)
 	var a:=Known.nice(low);var b:=maxi(a,Known.nice(high))
 	var partial:=bool(cell.get("partial",false))
 	var range_words:=EraWords.grouped(a) if a==b else "%s–%s" % [EraWords.grouped(a),EraWords.grouped(b)]
 	return {"known":true,"value":value,"low":a,"high":b,"towns":int(cell.get("of",0)),"of":towns_known,"bands":int(cell.get("bands",0)),"partial":partial,
-		"text":"~%s%s" % [EraWords.grouped(value),"+" if partial else ""],"range":range_words,
+		# A handful is told as its range ("0–2"), never a lone "~1".
+		"text":(range_words if b<10 else "~%s" % EraWords.grouped(value))+("+" if partial else ""),"range":range_words,
 		"tip":"About %s fighters, somewhere between %s, as our reports and lookouts saw them.%s\n%s" % [EraWords.grouped(value),range_words,(" Some of their towns gave no count, so there may be more.") if partial else "",String(cell.get("tip",""))]}
