@@ -1,7 +1,7 @@
 extends RefCounted
 ## A disposable allocation draft and a read-only consequence preview.
-## No setter, order, event publisher, clock tick, save or live ledger write is
-## called here. Existing rules run synchronously on detached system instances.
+## No live setter, order, clock tick, save or live ledger write is called here.
+## Existing commands and rules run synchronously on detached system instances.
 ## Apply belongs to the provider: check is_current, confirm taking control,
 ## then replay commands through the original Manual.move_share interface.
 
@@ -24,6 +24,7 @@ static var _busy := false
 # still independently copied for each evaluation and checked by the token.
 const DEFINITIONS := ["catalog", "technology_catalog", "technology_limits", "catalog_by_id", "catalog_by_channel", "definitions_by_id"]
 const DEFINITION_INDICES := ["technology_catalog", "catalog_by_id", "catalog_by_channel", "definitions_by_id"]
+const TRANSIENT_READERS := ["_candidate_index", "_scan", "_today"]
 static var _before_token := 0
 static var _before_result: Dictionary = {}
 
@@ -124,7 +125,7 @@ static func evaluate(draft: Dictionary) -> Dictionary:
 
 static func _read_plan(proposed: bool, draft: Dictionary) -> Dictionary:
 	var guards: Dictionary = {}
-	if proposed: guards = _lay_requested_split(draft.shares)
+	if proposed: guards = _replay(draft)
 	var state = WorldSimulation.state
 	var counts := _counts(state)
 	var effective: Dictionary = {}
@@ -175,9 +176,21 @@ static func _read_plan(proposed: bool, draft: Dictionary) -> Dictionary:
 ## itself only publishes when WorldSimulation.state == the live GameState,
 ## so this scope cannot write a Chronicle entry or call an external narrator.
 static func _lay_requested_split(shares: Dictionary) -> Dictionary:
+	if not _busy or WorldSimulation.state == GameState: return {}
 	WorldSimulation.direction.automatic_work = false
 	WorldSimulation.direction.work_baseline = shares.duplicate(true)
 	WorldSimulation.government._lay_ruler_split()
+	return _guards()
+
+static func _replay(draft: Dictionary) -> Dictionary:
+	if not _busy or WorldSimulation.state == GameState: return {}
+	var previous_relaid: bool = Manual.relaid
+	if not Manual.manual(): Manual.set_manual(true)
+	for command: Dictionary in draft.commands: Manual.move_share(String(command.role), int(command.points))
+	Manual.relaid = previous_relaid
+	return _guards()
+
+static func _guards() -> Dictionary:
 	var applied := Manual.applied_percentages()
 	var guards: Dictionary = {}
 	for city: Dictionary in WorldSimulation.state.player_settlements:
@@ -300,7 +313,7 @@ static func _freeze_object(source: Object, depth: int = 0, signature_only: bool 
 	for property: Dictionary in source.get_property_list():
 		if not int(property.usage) & PROPERTY_USAGE_SCRIPT_VARIABLE: continue
 		var name := String(property.name)
-		if "cache" in name or "memo" in name or name == "_candidate_index": continue
+		if "cache" in name or "memo" in name or name in TRANSIENT_READERS: continue
 		if signature_only and name in DEFINITIONS: continue
 		var value: Variant = source.get(name)
 		# Discovery indices point back into the same authored catalog. Preserve
