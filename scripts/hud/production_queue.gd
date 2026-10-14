@@ -141,6 +141,8 @@ func _build_header()->void:
 	materials.visible=false
 	var workshop:=HBoxContainer.new();workshop.name="Workshop";workshop.add_theme_constant_override("separation",14);row.add_child(workshop)
 	_header.hands=_fact(workshop,null,"Hands","HANDS")
+	# The chart above says the makers on the lines; the strip does not repeat it.
+	_header.hands.visible=false
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
 	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)

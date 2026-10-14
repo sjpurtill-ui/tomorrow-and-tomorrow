@@ -44,12 +44,13 @@ func setup(block:Dictionary)->void:
 		if money:
 			var share:=HBoxContainer.new();share.name="Composition";share.add_theme_constant_override("separation",8);share.custom_minimum_size.y=S.ROW_HEIGHT;add_child(share)
 			var lead:=S.label("Where the money is",14,T.INK);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;share.add_child(lead)
-			_refs.composition=S.label("",12,T.INK_MUTED);_refs.composition.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_refs.composition.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_refs.composition.clip_text=true;share.add_child(_refs.composition)
+			_refs.composition=S.label("",12,T.INK_MUTED);_refs.composition.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_refs.composition.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_refs.composition.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.add_child(_refs.composition)
 	_fill()
+	resized.connect(_arrange)
 
-## Kept for callers that reflow on resize: rows reflow by themselves.
+## On a narrow page the rows keep their names and figures only.
 func _arrange()->void:
-	pass
+	S.compact(self,size.x)
 
 ## The live refresh: the same nodes take the day's figures while the page
 ## keeps its shape; a page of another shape is drawn afresh.

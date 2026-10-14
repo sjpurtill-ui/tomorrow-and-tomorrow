@@ -177,7 +177,7 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	assert_array(arms_labels).contains(["WATCH ARMED","SETS IN STORE","STILL WANTED","ONE SET"])
 	assert_bool(arms_kpis[0].get("on_press") is Callable).is_true()
 	var goods_kpis:Array=provider.tab(1).get("kpis",[])
-	assert_array(goods_kpis.map(func(k:Dictionary)->String:return String(k.label))).contains(["HOMES STOCKED","TO SPARE","CARTS"])
+	assert_array(goods_kpis.map(func(k:Dictionary)->String:return String(k.label))).contains(["HOMES' GOODS","TO SPARE","CARTS"])
 	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
 	assert_object(civilian.find_child("HouseholdsHead",true,false)).is_not_null()
 	for gone:String in ["GoodsAnswer","Jar","Pile","ArmsAnswer"]:assert_object(civilian.find_child(gone,true,false)).is_null()

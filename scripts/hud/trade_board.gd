@@ -188,14 +188,14 @@ static func kpi_items()->Array:
 	var spare:=Goods.spare()
 	var unit:=Ledger.purse_unit("player")
 	var items:Array=[
-		{"id":"spare","label":"Goods to trade","icon":"Civilian Goods","value":S.n(spare),"ratio":-1.0,"sub":("%s %s to pay with" % [S.n(Ledger.purse_balance("player")),unit]) if unit!="" else "after homes, workshops",
+		{"id":"spare","label":"Goods to trade","icon":"Civilian Goods","value":S.n(spare),"ratio":-1.0,"sub":("%s %s too" % [S.n(Ledger.purse_balance("player")),unit]) if unit!="" else "spare goods",
 			"tip":"Goods beyond household use and workshop reserves, available to buy what other peoples can spare. This is the same balance used by Buy with goods."},
 		{"id":"came","label":"In a season","icon":"carry","icon_kind":"people","value":S.n(came*3.0),"ratio":clampf(came/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.TEAL,"sub":"received, at their prices",
 			"tip":"What other peoples sent us, smoothed monthly and reckoned for a season, at each sender's own prices. The bar: its share of all that passed."},
 		{"id":"sent","label":"Out a season","icon":"carry","icon_kind":"people","value":S.n(sent*3.0),"ratio":clampf(sent/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.GOLD,"sub":"sent, at our prices",
 			"tip":"What we sent other peoples, smoothed monthly and reckoned for a season, at our own prices. The bar: its share of all that passed."},
 		{"id":"partners","label":"Partners","icon":"walker","icon_kind":"chart","value":"%d of %d" % [partners,known],"ratio":float(partners)/float(known) if known>0 else -1.0,"color":T.GREEN,
-			"sub":"recent trade" if partners>0 else ("little recent trade" if sent+came>0.0 else "no trade recorded yet"),"tip":"Peoples we know with whom goods passed recently, of all the peoples we know."},
+			"sub":"recent trade" if partners>0 else ("little trade" if sent+came>0.0 else "no trade yet"),"tip":"Peoples we know with whom goods passed recently, of all the peoples we know."},
 	]
 	if tribute_in>0.0 or tribute_out>0.0:
 		items.append({"id":"tribute","label":"Tribute a season","icon":"Coin","value":S.signed(tribute_in-tribute_out),"ratio":-1.0,"sub":"%s in · %s out" % [S.n(tribute_in),S.n(tribute_out)],"tip":"Tribute paid to us and by us, worth a season."})
@@ -282,12 +282,12 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",6);panel.add_child(column)
 	var head:=HBoxContainer.new();head.name="PartnerIdentity";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_child(head)
 	var art:=_partner_art(civ_id,contact);head.add_child(art)
-	var title:=S.label(name,15,T.INK,true);title.name="Name";title.tooltip_text=name;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;title.custom_minimum_size.x=60;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;head.add_child(title)
+	var title:=S.label(name,15,T.INK,true);title.name="Name";title.tooltip_text=name;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.custom_minimum_size.x=90;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(title)
 	var p:=Ledger.pair("player",civ_id)
 	var subtitle:="known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "met; no goods have passed yet")
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
 	if blocked!="":subtitle=Ledger.sea_words("player",civ_id) if blocked=="sea" else _blocked_words(blocked)
-	var form_label:=S.label(subtitle.left(1).to_lower()+subtitle.substr(1),12,T.RED_TEXT if blocked!="" else T.INK_MUTED);form_label.name="Form";form_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;form_label.size_flags_stretch_ratio=1.4;form_label.custom_minimum_size.x=1;form_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;form_label.clip_text=true;form_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;form_label.tooltip_text=subtitle;head.add_child(form_label)
+	var form_label:=S.label(subtitle.left(1).to_lower()+subtitle.substr(1),12,T.RED_TEXT if blocked!="" else T.INK_MUTED);form_label.name="Form";form_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;form_label.size_flags_stretch_ratio=1.4;form_label.custom_minimum_size.x=80;form_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;form_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;form_label.tooltip_text=subtitle;head.add_child(form_label)
 	if contact<2:
 		head.add_child(S.tag("Not met",T.MUTED))
 		return panel
@@ -539,7 +539,7 @@ func _build_others()->void:
 	if rows.is_empty():
 		others_box.add_child(S.label("We know of no trade between other peoples.",13,T.INK_MUTED))
 		return
-	for row:Dictionary in rows.slice(0,6):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":110.0})
+	for row:Dictionary in rows.slice(0,6):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":4.0})
 
 
 func _met(id:String)->bool:
@@ -599,6 +599,11 @@ func _responsive()->void:
 	if strip!=null:
 		var across:=clampi(floori((available+10.0)/120.0),2,strip.get_child_count())
 		if strip.columns!=across:strip.columns=across
+	S.compact(self,available)
+	# A narrow page keeps each people's name, balance and Terms on its line.
+	for head:Node in find_children("PartnerIdentity","HBoxContainer",true,false):
+		for child in head.get_children():
+			if child.name=="Form" or child is PanelContainer or (child is Label and child.has_theme_stylebox_override("normal")):(child as Control).visible=available>=S.COMPACT_BELOW
 	var retained:Array[GridContainer]=[]
 	for grid:GridContainer in responsive_grids:
 		if not is_instance_valid(grid) or not grid.is_inside_tree():continue

@@ -24,7 +24,7 @@ const Plain:=preload("res://scripts/hud/production_plain.gd")
 ## (food_preserved.lost), and the change in the stores (food_net). They add
 ## up: in + taken - eaten - spoiled - keeping = kept.
 const FLOW_CELLS := [["Produced", "Brought in", null], ["Taken", "Taken in", null], ["Eaten", "Eaten", Color("8a6118")], ["Spoiled", "Spoiled", Color("a34435")],
-	["Keeping", "Lost in drying", Color("4d6389")], ["Net", "Kept", Color("5d6f34")]]
+	["Keeping", "Lost in drying", Color("4d6389")], ["Net", "Into store", Color("5d6f34")]]
 ## What each food source is drawn with (resource_icons.gd people glyphs).
 const SOURCE_ICONS := {"Wild gathering":"gather", "Hunting":"hunt", "Fishing":"fish", "Cultivation":"tend"}
 
@@ -103,6 +103,7 @@ func setup(block:Dictionary)->void:
 
 func _layout()->void:
 	for grid:GridContainer in _grids:S.flow(grid,size.x)
+	S.compact(self,size.x)
 
 func update_block(block:Dictionary)->bool:
 	if _refs.is_empty() or shape_of(block)!=_shape:return false
@@ -235,7 +236,7 @@ static func kpi_items(data:Dictionary)->Array:
 	var ending:=float(forecast.get("ending_days",-1.0))
 	var ahead:={"value":"—","sub":"not reckoned yet","ratio":-1.0,"tip":"The 90-day outlook is reckoned each week from the season's yields, spoilage and need."}
 	if shortage>0:
-		ahead={"value":"Short in %d days" % shortage,"value_color":T.RED_TEXT,"sub":"if the seasons go as expected","ratio":clampf(float(shortage)/90.0,0.0,1.0),"color":T.RED,"edge":T.RED,
+		ahead={"value":"Short in %d days" % shortage,"value_color":T.RED_TEXT,"sub":"at the season's yields","ratio":clampf(float(shortage)/90.0,0.0,1.0),"color":T.RED,"edge":T.RED,
 			"tip":"At the season's yields, spoilage and need, food runs short in %s." % Plain.duration_text(float(shortage))}
 	elif not forecast.is_empty():
 		ahead={"value":preload("res://scripts/hud/era_words.gd").days_in_words(maxf(0.0,ending)) if ending>=0.0 else "—","sub":"of food left · no shortage","ratio":clampf(ending/maxf(90.0,ending),0.0,1.0) if ending>=0.0 else -1.0,"color":T.GREEN,

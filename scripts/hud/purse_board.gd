@@ -205,8 +205,8 @@ static func kpi_items()->Array:
 	if not cards.is_empty():
 		made=0.0
 		for card:Dictionary in cards:made+=float(card.get("made",0.0));worn+=float(card.get("worn",0.0))
-	out.append(S.kpi_item("made",{"value":S.n(made),"ratio":clampf(made/maxf(0.01,made+worn),0.0,1.0) if made+worn>0.01 else -1.0,"color":T.GREEN,"sub":"worth %s rations · %s wear out" % [S.n(Goods.worth_in_rations(made)),S.n(worn)],
-		"tip":"Goods the makers made today in every town (the Workshops tab draws how). Each maker makes about %s a day: more with the crafts the people know, and as well as people work.\nThe bar: made against made and worn out." % S.n(Goods.goods_per_maker_day())}))
+	out.append(S.kpi_item("made",{"value":S.n(made),"ratio":clampf(made/maxf(0.01,made+worn),0.0,1.0) if made+worn>0.01 else -1.0,"color":T.GREEN,"sub":"%s wear out" % S.n(worn),
+		"tip":"Goods the makers made today in every town (the Workshops tab draws how). Worth %s rations at our own prices.\nEach maker makes about %s a day: more with the crafts the people know, and as well as people work.\nThe bar: made against made and worn out." % [S.n(Goods.worth_in_rations(made)),S.n(Goods.goods_per_maker_day())]}))
 	var reach:=clampf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.0,1.0)
 	out.append(S.kpi_item("market",{"value":"%d%%" % roundi(reach*100.0),"ratio":reach,"color":T.TEAL,"sub":"of what is made",
 		"tip":"%d in 100 of what is made reaches the market, where goods change hands %s. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % [roundi(reach*100.0),"by barter, for food and materials" if String(WorldSimulation.state.economy_stage)=="subsistence" else ("with weighed metal beside barter" if String(WorldSimulation.state.economy_stage)=="weighed_metal" else "for coin")]}))
@@ -547,6 +547,7 @@ func _responsive()->void:
 		var columns:=int(grid.get_meta("wide_columns")) if available>=float(grid.get_meta("wide_threshold")) else 1
 		if grid.columns!=columns:grid.columns=columns
 	responsive_grids=retained
+	S.compact(self,available)
 	# Five figures across a wide page; three, then two, as it narrows.
 	var strip:=get_node_or_null("WealthKpis") as GridContainer
 	if strip!=null:

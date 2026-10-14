@@ -42,7 +42,7 @@ func setup(block:Dictionary)->void:
 		searched.add_child(S.icon("find",S.ICON_SIZE,"chart"))
 		_land=S.label("",14,T.INK);_land.name="SearchedLand";_land.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land.mouse_filter=Control.MOUSE_FILTER_PASS;searched.add_child(_land)
 		_land_bar=S.bar(0.0,T.GOLD,160.0,6.0);_land_bar.name="SearchedBar";searched.add_child(_land_bar)
-		_land_note=S.label("",12,T.INK_MUTED);_land_note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_land_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land_note.clip_text=true;_land_note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;searched.add_child(_land_note)
+		_land_note=S.label("",12,T.INK_MUTED);_land_note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_land_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;searched.add_child(_land_note)
 	var moving:Array=[];var still:Array=[];var beyond:Array=[]
 	for item:Dictionary in block.get("rows",[]):
 		if String(item.get("key","")) in ELSEWHERE:continue
@@ -105,6 +105,7 @@ func _opened()->void:
 
 func _arrange()->void:
 	S.flow(_grid,size.x)
+	S.compact(self,size.x)
 	var road:=get_node_or_null("Incoming") as GridContainer
 	if road!=null:S.flow(road,size.x)
 
@@ -198,7 +199,7 @@ static func kpi_items(data:Dictionary)->Array:
 	var supply:=Words.supply(held,room,hauling)
 	var flow:=clampf(float(hauling),0.0,1.0) if hauling!=null else -1.0
 	out.append(S.kpi_item("carry",{"value":"%d%%" % roundi(flow*100.0) if flow>=0.0 else "—","ratio":flow,"color":T.TEAL if flow>=0.9 else (T.AMBER if flow>=0.6 else T.RED),
-		"sub":String(supply.slows) if not String(supply.slows).is_empty() else "of what is dug and cut is carried in","sub_color":T.AMBER_TEXT if not String(supply.slows).is_empty() else T.INK_MUTED,
+		"sub":"storage slows us" if not String(supply.slows).is_empty() else "of what is dug is carried","sub_color":T.AMBER_TEXT if not String(supply.slows).is_empty() else T.INK_MUTED,
 		"tip":"%s\n%s" % [String(supply.sentence),("%s decides who digs, cuts and carries." % who if not who.is_empty() else "The local leader decides who digs, cuts and carries.") if bool(data.get("managed",true)) else "You asked for extra hands on part of the work."]}))
 	return out
 

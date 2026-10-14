@@ -1,7 +1,6 @@
 extends RefCounted
 ## The Economy pages' shared parts, so every tab reads the same way:
-##   a KPI strip (3 to 6 figures across the top, each with a bar against a
-##   stated maximum), one-line rows (icon, label, value, small bar, coloured
+##   strip figures in the dock's own form (dock_kpis), one-line rows (icon, label, value, small bar, coloured
 ##   tag, small verb buttons on the row), small gold section heads, and grids
 ##   that flow rows into two or three columns on a wide page.
 ## Every builder returns the nodes a live refresh writes into, so a page can
@@ -120,57 +119,6 @@ static func flow(grid:GridContainer,width:float)->void:
 # The KPI strip
 # --------------------------------------------------------------------------
 
-## The strip across the top of a tab: one cell a figure. Each item is
-## {id, label, value, sub, ratio (-1: no bar), color, tip, icon, icon_kind,
-## value_color, action:{text, on_press, tip}}. Returns {id: cell refs}.
-static func kpi_strip(parent:Node,items:Array,node_name:String="Kpis")->Dictionary:
-	var strip:=GridContainer.new();strip.name=node_name;strip.columns=maxi(1,items.size());strip.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	strip.add_theme_constant_override("h_separation",10);strip.add_theme_constant_override("v_separation",8)
-	parent.add_child(strip)
-	var refs:={}
-	for item:Dictionary in items:refs[String(item.get("id",item.get("label","")))]=kpi_cell(strip,item)
-	return refs
-
-static func kpi_cell(parent:Node,item:Dictionary)->Dictionary:
-	var panel:=PanelContainer.new();panel.name="Kpi_"+String(item.get("id",item.get("label",""))).validate_node_name()
-	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.mouse_filter=Control.MOUSE_FILTER_PASS
-	var style:=T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CARD,0)
-	style.content_margin_left=9;style.content_margin_right=9;style.content_margin_top=5;style.content_margin_bottom=5
-	style.border_width_top=2;style.border_color=T.RULE
-	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",1);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(box)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",5);top.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(top)
-	var key:=String(item.get("icon",""))
-	if not key.is_empty():top.add_child(icon(key,16,String(item.get("icon_kind","resource"))))
-	var caption:=label(String(item.get("label","")).to_upper(),11,T.INK_MUTED,true);caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL;caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;caption.clip_text=true;caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;caption.custom_minimum_size.x=40;caption.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(caption)
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",4);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(line)
-	var value:=voice("",24);value.mouse_filter=Control.MOUSE_FILTER_IGNORE;value.size_flags_horizontal=Control.SIZE_EXPAND_FILL;value.clip_text=true;value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;value.custom_minimum_size.x=48;line.add_child(value)
-	var action:Button=null
-	if item.get("action") is Dictionary:
-		var a:Dictionary=item.action
-		action=verb(String(a.get("text","")),a.get("on_press"),String(a.get("tip","")),bool(a.get("chosen",false)));action.custom_minimum_size.y=20;action.add_theme_font_size_override("font_size",12);line.add_child(action)
-	var meter:=bar(0.0,T.GOLD,0.0,5.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(meter)
-	var sub:=label("",12,T.INK_MUTED);sub.mouse_filter=Control.MOUSE_FILTER_IGNORE;sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;sub.custom_minimum_size.x=60;box.add_child(sub)
-	var refs:={"panel":panel,"value":value,"bar":meter,"sub":sub,"caption":caption,"action":action,"style":style}
-	set_kpi(refs,item)
-	return refs
-
-static func set_kpi(refs:Dictionary,item:Dictionary)->void:
-	var color:Color=item.get("color",T.GOLD)
-	put(refs.value,String(item.get("value","")),item.get("value_color",T.INK))
-	put(refs.sub,String(item.get("sub","")),item.get("sub_color",T.INK_MUTED))
-	(refs.sub as Control).visible=String(item.get("sub",""))!=""
-	var ratio:=float(item.get("ratio",-1.0))
-	var meter:Bar=refs.bar
-	meter.visible=ratio>=0.0
-	if ratio>=0.0 and (meter.ratio!=ratio or meter.color!=color):meter.ratio=ratio;meter.color=color;meter.queue_redraw()
-	var tip:=String(item.get("tip",""))
-	if (refs.panel as Control).tooltip_text!=tip:(refs.panel as Control).tooltip_text=tip
-	var style:StyleBoxFlat=refs.style
-	var edge:Color=item.get("edge",T.RULE)
-	if style.border_color!=edge:
-		style=style.duplicate();style.border_color=edge;(refs.panel as PanelContainer).add_theme_stylebox_override("panel",style);refs.style=style
-
 ## A strip figure with its id, for kpi lists a provider hands the dock.
 static func kpi_item(id:String,item:Dictionary)->Dictionary:
 	var out:=item.duplicate();out.id=id
@@ -209,12 +157,12 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 	var glyph:TextureRect=null
 	if item.has("icon"):glyph=icon(key,ICON_SIZE,String(item.get("icon_kind","resource")));line.add_child(glyph)
 	var name_label:=label(String(item.get("label","")),13,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	# The name takes its share of a wide row and gives way on a narrow one.
-	name_label.custom_minimum_size.x=minf(70.0,float(item.get("label_width",150.0)))
+	# The name is always whole (it wraps on a narrow page, never cut short);
+	# it takes its share of a wide row.
+	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.custom_minimum_size.x=80
 	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.size_flags_stretch_ratio=float(item.get("label_width",150.0))/150.0
 	line.add_child(name_label)
-	var note:=label("",12,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.size_flags_stretch_ratio=1.6;note.custom_minimum_size.x=1;note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note.clip_text=true;note.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(note)
+	var note:=label("",12,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.size_flags_stretch_ratio=1.6;note.custom_minimum_size.x=float(item.get("note_width",90.0));note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(note)
 	var spark:Control=null
 	if item.has("points"):
 		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(spark)
@@ -228,7 +176,8 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 		var b:=verb(String(spec.get("text","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("chosen",false)),bool(spec.get("primary",false)))
 		if bool(spec.get("disabled",false)):b.disabled=true
 		line.add_child(b);buttons.append(b)
-	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark}
+	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"compact":false}
+	panel.set_meta("econ_row",refs)
 	set_row(refs,item)
 	return refs
 
@@ -238,7 +187,8 @@ static func set_row(refs:Dictionary,item:Dictionary)->void:
 	put(refs.value,String(item.get("value","")),item.get("value_color",T.INK))
 	var ratio:=float(item.get("ratio",-1.0))
 	var meter:Bar=refs.bar
-	meter.visible=ratio>=0.0
+	meter.visible=ratio>=0.0 and not bool(refs.get("compact",false))
+	(refs.note as Control).visible=not bool(refs.get("compact",false))
 	var color:Color=item.get("bar_color",T.GOLD)
 	if ratio>=0.0 and (meter.ratio!=ratio or meter.color!=color):meter.ratio=ratio;meter.color=color;meter.queue_redraw()
 	set_tag(refs.tag,String(item.get("tag","")),item.get("tag_color",T.MUTED))
@@ -268,3 +218,19 @@ class Bar extends Control:
 		if over>0.0:
 			var ow:=size.x*clampf(over,0.0,1.0-clampf(ratio,0.0,1.0))
 			draw_rect(Rect2(w,0,ow,size.y),Color(T.RED,0.55))
+
+## On a narrow page each row keeps its name, figure, tag and buttons; its
+## note, bar and spark go to the row's pointer. Call from the page's resize.
+const COMPACT_BELOW:=460.0
+static func compact(root:Node,width:float)->void:
+	if width<=0.0:return
+	var narrow:=width<COMPACT_BELOW
+	for node in root.find_children("*","PanelContainer",true,false):
+		if not node.has_meta("econ_row"):continue
+		var refs:Dictionary=node.get_meta("econ_row")
+		if bool(refs.get("compact",false))==narrow:continue
+		refs.compact=narrow
+		(refs.note as Control).visible=not narrow
+		if narrow:(refs.bar as Control).visible=false
+		else:(refs.bar as Control).visible=float((refs.bar as Bar).ratio)>0.0 or (refs.bar as Control).visible
+		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow
