@@ -135,30 +135,51 @@ func _council_blocks()->Array:
 	# they are now (person_posts.gd: the same words Home and War use).
 	var office_order:=["council","settlement","war","scouts","builders","gifted"]
 	var heads:={"council":"Officials","settlement":"Town leaders","war":"War leaders","scouts":"Scouts","builders":"Master builders","gifted":"The gifted"}
-	var rows:Array=[]
+	# One line each: their face, name and full office, and how they regard
+	# the god as a small bar (love) with a tag only for a matter to raise; a
+	# click on the line summons them. Where they are now is in its pointer.
+	var Divine:=preload("res://scripts/divine_regard.gd")
+	var by_group:={}
 	for person:Dictionary in Roster.people():
 		if String(person.get("group","")) in ["prisoners","won_over","folk"]:continue
 		var post:=Posts.of(person,commands)
 		var matters:=int(person.get("matters",0))
-		var regard:Dictionary=person.get("regard",{}) if person.get("regard") is Dictionary else {}
-		var fact:="%d %s to raise" % [matters,"matter" if matters==1 else "matters"] if matters>0 else String(regard.get("read",""))
+		var regard:Dictionary=person.get("regard",{}) if person.get("regard") is Dictionary and not (person.regard as Dictionary).is_empty() else {}
+		# Figures of note (generals, builders, the gifted) are read by the same rule as officials.
+		if regard.is_empty() and person.get("figure") is Dictionary:regard=Divine.regard(person.figure)
 		var target:Dictionary=person.get("target",{})
 		var face:Dictionary=(person.get("person",{}) as Dictionary).duplicate()
 		if int(face.get("person_id",0))<=0:
 			var key:=String(target.get("figure_id","")) if String(target.get("figure_id",""))!="" else String(person.name)
 			face["person_id"]=absi(key.hash())%997+1
 		var group:=String(post.group) if heads.has(String(post.group)) else "council"
-		rows.append({"group":heads[group],"rank":office_order.find(group),"icon":Portrait.texture(face),
-			"cells":{"name":String(person.name),"title":String(post.title),"place":String(post.place),"fact":fact},"tone":"",
-			"tip":"%s, %s. %s. Summon them to talk, give orders or replace them." % [String(person.name),String(post.title),String(post.place)],
-			"button":{"label":"Summon","on_press":_open_court.bind(target),"tip":"Call %s to the court." % String(person.name)}})
-	rows.sort_custom(func(x:Dictionary,y:Dictionary)->bool:return int(x.rank)<int(y.rank))
-	for row:Dictionary in rows:
-		row.erase("rank")
+		var love:=float(regard.get("love",0.5));var dread:=float(regard.get("dread",0.2))
+		var read:=String(regard.get("read",""))
+		var row:={"group":heads[group],"icon":Portrait.texture(face),
+			"cells":{"name":String(person.name),"title":String(post.title)},
+			"bar":{"value":love,"tone":"bad" if dread>=0.55 else ("good" if love>=0.55 else ""),"width":36.0},
+			"tip":"%s, %s. %s.\n%s (love %d in 100, dread %d in 100).\nClick to summon them to the court." % [String(person.name),String(post.title),String(post.place),read.capitalize() if read!="" else "Not yet read",roundi(love*100.0),roundi(dread*100.0)],
+			"on_click":_open_court.bind(target)}
+		# A matter to raise: the name in amber, the count in its pointer.
+		if matters>0:row["tone"]="warn";row["tip"]="%d %s to raise. %s" % [matters,"matter" if matters==1 else "matters",String(row.tip)]
+		if not by_group.has(group):by_group[group]=[]
+		(by_group[group] as Array).append(row)
+	var columns:=[{"key":"name","label":"Name","width":118},{"key":"title","label":"Office","width":150}]
+	var total:=0
+	for group in by_group:total+=(by_group[group] as Array).size()
+	# Two columns, whole groups in each, as even as the groups allow.
+	var left:Array=[];var right:Array=[]
+	for group in office_order:
+		if not by_group.has(group):continue
+		var fits:=left.is_empty() or (right.is_empty() and left.size()+(by_group[group] as Array).size()<=ceili(total*0.6))
+		if fits:left.append_array(by_group[group])
+		else:right.append_array(by_group[group])
 	var blocks:Array=[]
-	if rows.is_empty():blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
-	else:blocks.append({"type":"table","heading":"THE COURT","icon_size":26,"rows":rows,
-		"columns":[{"key":"name","label":"Name"},{"key":"title","label":"Office"},{"key":"place","label":"Where now"},{"key":"fact","label":"Regard"}]})
+	if total==0:blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
+	else:
+		var halves:Array=[[{"type":"table","icon_size":22,"rows":left,"columns":columns}]]
+		if not right.is_empty():halves.append([{"type":"table","icon_size":22,"rows":right,"columns":columns}])
+		blocks.append({"type":"columns","heading":"THE COURT","columns":halves,"ratios":[1.3,0.95],"stack_below":700})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant

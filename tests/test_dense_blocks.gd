@@ -72,3 +72,26 @@ func test_a_frame_holds_other_blocks_and_its_verbs_on_its_title_line()->void:
 	assert_object(frame.find_child("FactGrid",true,false)).is_not_null()
 	(frame.find_child("Verb_Send",true,false) as Button).pressed.emit()
 	assert_array(sent).is_equal([1])
+
+func test_columns_stand_side_by_side_and_stack_when_narrow()->void:
+	var body:=_body()
+	Blocks.render(body,[{"type":"columns","columns":[[{"type":"table","columns":[{"key":"a","label":"A"}],"rows":[{"cells":{"a":"left"}}]}],
+		[{"type":"table","columns":[{"key":"a","label":"A"}],"rows":[{"cells":{"a":"right"}}]}]]}])
+	for i in 3:await get_tree().process_frame
+	var row:=body.find_child("Columns",true,false) as BoxContainer
+	assert_object(row).is_not_null()
+	assert_int(row.get_child_count()).is_equal(2)
+	assert_bool(row.vertical).is_false()
+	assert_float((row.get_child(1) as Control).position.x).is_greater(300.0)
+	body.size.x=500
+	for i in 3:await get_tree().process_frame
+	assert_bool(row.vertical).is_true()
+
+## The shell's page width: its old share on a narrow window; from 1280 wide
+## (1600 px at 125%) it runs up to the notice column.
+func test_the_page_uses_the_window_up_to_the_notices()->void:
+	var Folio:=preload("res://scripts/hud/reference_folio.gd")
+	assert_float(Folio.page_width(1000.0)).is_equal_approx(567.0,0.5)
+	assert_float(Folio.page_width(1280.0)).is_equal_approx(1280.0-78.0-Folio.NOTICE_ROOM,0.5)
+	assert_float(Folio.page_width(1600.0)).is_equal_approx(1600.0-78.0-Folio.NOTICE_ROOM,0.5)
+	assert_float(Folio.page_width(1600.0)).is_greater(1100.0)

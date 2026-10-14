@@ -233,7 +233,8 @@ var _labor_row_shapes:Array[String]=[]
 func _build_scene()->void:
 	# One line: a face among the people and what they said. The headline that
 	# restated the top bar's numbers, and the painted hall behind it, are gone.
-	var voice:=HBoxContainer.new();voice.name="Scene";voice.add_theme_constant_override("separation",10);add_child(voice)
+	# The quote is off the screen too (critic round 4): the faces lead the page.
+	var voice:=HBoxContainer.new();voice.name="Scene";voice.visible=false;voice.add_theme_constant_override("separation",10);add_child(voice)
 	voice_face=Control.new();voice_face.custom_minimum_size=Vector2(28,34);voice_face.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_face)
 	voice_line=T.make_label("",13,T.BODY);voice_line.name="VoiceLine";voice_line.add_theme_font_override("font",_serif(true))
 	voice_line.size_flags_horizontal=Control.SIZE_EXPAND_FILL;voice_line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;voice_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_line)
@@ -460,7 +461,7 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 	var parent:=VBoxContainer.new();parent.name="WorkHead";parent.add_theme_constant_override("separation",7)
 	var per:=maxi(1,int(labor.get("per_figure",1)))
 	var manual:=bool(labor.get("manual",false))
-	parent.add_child(_heading(String(labor.get("heading","WHAT THEY ARE DOING NOW")),"each figure is %s" % ("one person" if per==1 else "%d people" % per)))
+	parent.add_child(_heading(String(labor.get("heading","WHAT THEY ARE DOING NOW")),"1 figure · %s" % ("1 person" if per==1 else "%s people" % preload("res://scripts/hud/era_words.gd").grouped(per))))
 	# How many can work: the rows below add up to them.
 	if String(labor.get("note",""))!="":parent.tooltip_text=String(labor.note)
 	# Who sets the daily work: one plain switch, the current side marked.

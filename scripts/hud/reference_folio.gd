@@ -10,8 +10,20 @@ const GOLD:=Color("c5b582")
 const RAIL_TEXT:=Color("eee4c9")
 const RULE:=Color("a59a80")
 
+## Room kept at the right for the notice column (order_stack.gd WIDTH 340,
+## the edge margin and a gap): on a wide window the page runs up to it, so
+## the notices and a strip of map stay in view beside the page.
+const NOTICE_ROOM:=340.0+T.EDGE_MARGIN+14.0
+## From this canvas width (1600 px at 125%) the page takes the window up to
+## the notice column; narrower, it keeps its old share.
+const WIDE_FROM:=1280.0
+
+## The page's width for a canvas `view_width` wide: 1600 px at 125% (1280)
+## gives 838, 2000 px (1600) gives 1158, 2560 px (2048) gives 1606.
 static func page_width(view_width:float)->float:
-	return minf(maxf(320.0,view_width*0.567),view_width-RAIL_WIDTH)
+	var share:=minf(maxf(320.0,view_width*0.567),view_width-RAIL_WIDTH)
+	if view_width<WIDE_FROM:return share
+	return maxf(share,view_width-RAIL_WIDTH-NOTICE_ROOM)
 
 static func paper()->ColorRect:
 	var surface:=ColorRect.new();surface.name="FolioPaper"
