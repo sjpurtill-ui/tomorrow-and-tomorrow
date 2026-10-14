@@ -5,6 +5,7 @@ const People=preload("res://scripts/hud/people_model.gd")
 const Buildings=preload("res://scripts/hud/construction_art.gd")
 const Manual=preload("res://scripts/manual_work.gd")
 const TaskImpact=preload("res://scripts/task_impact.gd")
+const WorkforcePreview=preload("res://scripts/hud/workforce_preview.gd")
 ## THE PEOPLE: the god looking down on their people. One living scene (the
 ## settlement at this hour, a headline and one voice from the fires), the
 ## faces of named people, the vitals as meters with a trend and a cause, what
@@ -13,8 +14,8 @@ const TaskImpact=preload("res://scripts/task_impact.gd")
 ## click away. Drawn by hud/people_screen.gd; the data is people_model.gd.
 
 func meta()->Dictionary:
-	if EraWords.reckoned():return {"eyebrow":"CIVILIZATION · ALL SETTLEMENTS","title":"The People","subtabs":["OVERVIEW"]}
-	return {"eyebrow":"THE PEOPLE · ALL OUR %s" % EraWords.word("places","hearths").to_upper(),"title":"The People","subtabs":["THE PEOPLE"]}
+	if EraWords.reckoned():return {"spatial_view":true,"eyebrow":"CIVILIZATION · ALL SETTLEMENTS","title":"The People","subtabs":["OVERVIEW"]}
+	return {"spatial_view":true,"eyebrow":"THE PEOPLE · ALL OUR %s" % EraWords.word("places","hearths").to_upper(),"title":"The People","subtabs":["THE PEOPLE"]}
 
 func tab(_sub:int)->Dictionary:
 	var report:=Overview.snapshot()
@@ -44,9 +45,12 @@ func tab(_sub:int)->Dictionary:
 	var hearth_actions:Array=[]
 	if hearths.is_empty():hearth_actions.append({"label":"Choose a home","sub":"Choose a home and establish your first settlement","on_press":jump("settlement",0)})
 	var tallies:Array=[{"label":"Food & water","on_press":jump("economy",0)},{"label":EraWords.word("rail.wealth","Wealth"),"on_press":jump("economy",2)},{"label":EraWords.word("rail.inquiry","Research"),"on_press":jump("inquiry",0)},{"label":EraWords.word("rail.production","Production"),"on_press":jump("production",0)},{"label":"Buildings","on_press":jump("construction",0)}]
-	var block:={"type":"people","scene":scene,"faces":faces,"vitals":People.vitals(report,totals),"labor":labor,"story":story,"hearths":hearths,"hearth_actions":hearth_actions,"tallies":tallies,
+	var block:={"type":"civilization_people","scene":scene,"faces":faces,"vitals":People.vitals(report,totals),"labor":labor,"story":story,"hearths":hearths,"hearth_actions":hearth_actions,"tallies":tallies,
 		"vitals_heading":"HOW THEY FARE" if not modern else "VITAL STATISTICS","hearths_heading":("OUR %s" % EraWords.word("places","hearths").to_upper()) if not modern else "CITIES & SETTLEMENTS",
-		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon}
+		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon,
+		"settlement_view":{"settlement_id":primary,"name":People.home_name(),"terrain":terrain,"population":int(GameState.population_total)},
+		"workforce_revision":signature(),"world_running":is_instance_valid(terrain) and float(terrain.get("game_speed"))>0.0,"pause_to_plan":pause_to_plan,
+		"workforce":{"capture":WorkforcePreview.capture,"step":WorkforcePreview.step,"evaluate":WorkforcePreview.evaluate,"is_current":WorkforcePreview.is_current,"commit":commit_workforce}}
 	return {"blocks":[block]}
 
 ## WHAT THE PEOPLE ARE DOING TODAY, and who sets it (manual_work.gd). Our
@@ -88,6 +92,27 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 		# What a task does, with today's numbers: asked for only for the task
 		# the player has opened (people_screen.gd), not all nine every day.
 		"impact_of":task_impact}
+
+## Only the explicit Apply action may change work. A running-world change is
+## returned to the reader for a new preview; no stale estimate is committed.
+func commit_workforce(draft:Dictionary,confirm_take_control:bool=false)->Dictionary:
+	if not WorkforcePreview.is_current(draft):return {"ok":false,"stale":true}
+	var commands:Array=draft.get("commands",[])
+	if commands.is_empty():return {"ok":false,"reason":"No assignment changes."}
+	if not bool(draft.get("has_changes",false)):return {"ok":false,"reason":"The assignment is unchanged."}
+	for command:Variant in commands:
+		if not command is Dictionary or not Manual.ROLES.has(String(command.get("role",""))) or int(command.get("points",0))==0:
+			return {"ok":false,"reason":"This assignment is not valid. Refresh the preview."}
+	if not Manual.manual() and not confirm_take_control:return {"ok":false,"reason":"Taking control needs an explicit Apply."}
+	if not Manual.manual():Manual.set_manual(true)
+	for command:Dictionary in commands:Manual.move_share(String(command.role),int(command.points))
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
+	return {"ok":true,"counts":Manual.counts()}
+
+func pause_to_plan()->void:
+	if is_instance_valid(hud) and hud.has_method("_on_speed_pressed"):
+		hud._on_speed_pressed(0)
+		if hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
 ## What one daily task does, with today's numbers (task_impact.gd).
 func task_impact(role:String)->Dictionary:

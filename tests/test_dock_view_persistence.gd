@@ -145,9 +145,9 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 func test_the_people_update_in_place_keeping_scene_card_and_place()->void:
 	var provider:=PeopleDock.new(null,hud)
 	await _open(provider)
-	var screen:Node=panel.body.find_child("PeopleScreen",true,false)
+	var screen:Node=panel.body.find_child("CivilizationPeopleScreen",true,false)
 	assert_object(screen).is_not_null()
-	var scene:Node=screen.find_child("Scene",true,false)
+	var scene:Node=screen.find_child("LivingPeopleScene",true,false)
 	# Open the oldest one's card, then read deep into the screen.
 	var oldest:=""
 	for face:Dictionary in screen.data.faces:

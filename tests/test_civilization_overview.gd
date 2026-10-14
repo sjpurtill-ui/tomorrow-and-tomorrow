@@ -49,7 +49,7 @@ func test_content_reads_city_changes_without_reopening_and_links_every_city()->v
 	var content:=Content.new(null,null)
 	var first:Dictionary=content.tab(0)
 	var people:Dictionary=first.blocks[0]
-	assert_str(String(people.type)).is_equal("people")
+	assert_str(String(people.type)).is_equal("civilization_people")
 	assert_int(people.hearths.size()).is_equal(2)
 	assert_bool(people.hearths[0].on_click is Callable).is_true()
 	SettlementModel.with_city_resources("second",func()->void:
@@ -100,11 +100,12 @@ func test_city_navigation_and_overview_layout()->void:
 		for frame in 6:await get_tree().process_frame
 		assert_float(panel.size.x).is_less_equal(float(width))
 		assert_int(panel.body.get_child_count()).is_greater(0)
-		var screen:Node=panel.body.find_child("PeopleScreen",true,false)
+		var screen:Node=panel.body.find_child("CivilizationPeopleScreen",true,false)
 		assert_object(screen).is_not_null()
-		# Two columns when wide and there are vitals beside the story; the top bar and Home carry them all now, so one.
-		var vitals_shown:bool=(screen.find_child("Vitals",true,false) as Control).visible
-		assert_int((screen.get("columns") as GridContainer).columns).is_equal(2 if width>=1200 and vitals_shown else 1)
+		# The actual route now shows one live scene with all real assignment roles.
+		assert_int(screen.markers.size()).is_equal(9)
+		assert_bool((screen.find_child("LivingPeopleScene",true,false) as Control).visible).is_true()
+		assert_bool(content.meta().spatial_view).is_true()
 	panel.queue_free();hud.queue_free();await get_tree().process_frame
 
 func test_unsettled_overview_keeps_actual_carried_stores()->void:
