@@ -94,7 +94,11 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	# Three parts: the army (its forces with each town's guard), the fronts
 	# (the enemies and the border), the leaders. The bands out are the army
 	# bar's cards, not a list here.
-	for part in [["ArmySection",["ForcesCard","TownsCard","MakeupCard","CostCard"]],["FrontsSection",["Enemies","BorderCard"]],["LeadersSection",["Leaders"]]]:
+	# The border stands with the fronts on a narrow screen, under the army on
+	# a wide one (home and its edge together).
+	var border_in:="ArmySection" if Board.wide(board.get_viewport().get_visible_rect().size.x) else "FrontsSection"
+	assert_object(board.find_child(border_in,true,false).find_child("BorderCard",true,false)).is_not_null()
+	for part in [["ArmySection",["ForcesCard","TownsCard","MakeupCard","CostCard"]],["FrontsSection",["Enemies"]],["LeadersSection",["Leaders"]]]:
 		var section:Node=board.find_child(String(part[0]),true,false)
 		assert_object(section).is_not_null()
 		for n in part[1]:assert_object(section.find_child(String(n),true,false)).override_failure_message(String(n)).is_not_null()

@@ -46,6 +46,7 @@ const Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
 const Makeup:=preload("res://scripts/army_makeup.gd")
 const Economy:=preload("res://scripts/army_economy.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -96,6 +97,7 @@ var tab:="army"
 var _wide:=false
 var _laid:=false
 var leaders_kicker:Label
+var leaders_heading:Control
 var enemy_count:Label
 var feedback:Label
 var covert:Control
@@ -158,8 +160,7 @@ func setup(_block:Dictionary={})->void:
 	var leaders_head:=_kicker_row("Leaders",leaders_section)
 	# The tab already says "Leaders": its kicker shows only beside the Fronts.
 	leaders_kicker=leaders_head.get_child(0)
-	var name_one:=_small_button("General","plus","Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
-	name_one.name="NameGeneral";name_one.pressed.connect(_name_general);leaders_head.add_child(name_one)
+	leaders_heading=leaders_head
 	leader_box=VBoxContainer.new();leader_box.name="Leaders";leader_box.add_theme_constant_override("separation",6);leaders_section.add_child(leader_box)
 	# Spies and assassins (covert_board.gd): folded until asked for; it only
 	# informs, the god gives covert orders at court.
@@ -353,9 +354,8 @@ func _border_card()->Control:
 
 ## "Place a fort" / "Forts on map": the Border map, on the map itself.
 func _border_verb(Forts:GDScript,first:bool)->Button:
-	var open:=_small_button("Place a fort" if first else "Forts on map","besiege","Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
+	var open:=Dense.verb("Place a fort" if first else "Forts on map",null,"Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
 	open.name="OpenBorder"
-	open.icon=Icons.chart_texture("fort:%s" % String(Forts.call("best_kind").id),T.INK,40)
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
 		if scene==null:return
@@ -793,7 +793,7 @@ func _build_enemies(entries:Array)->void:
 ## watchers reckon them and the march to their nearest town we know.
 func _neighbours()->Control:
 	var Known:=preload("res://scripts/hud/peoples_known_model.gd")
-	var box:=VBoxContainer.new();box.name="Neighbours";box.add_theme_constant_override("separation",3)
+	var box:=VBoxContainer.new();box.name="Neighbours";box.add_theme_constant_override("separation",0)
 	var peoples:Array=Known.met_peoples(int(WorldSimulation.state.elapsed_days)) if WorldSimulation!=null and WorldSimulation.state!=null else []
 	if peoples.is_empty():return box
 	var home:Vector2=CivilizationSystem.player_world_origin
@@ -802,31 +802,20 @@ func _neighbours()->Control:
 		var at:Dictionary=people.get("home_position",{}) if people.get("home_position") is Dictionary else {}
 		reach[String(people.civ_id)]=home.distance_to(Vector2(float(at.get("x",0.0)),float(at.get("z",0.0)))) if not at.is_empty() else INF
 	peoples.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(reach[String(a.civ_id)])<float(reach[String(b.civ_id)]))
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
-	for spec:Array in [["Peoples we know",0],["between us",64],["warriors",78],["march",78]]:
-		var cell:=_line(String(spec[0]),11,T.INK_MUTED);cell.add_theme_font_override("font",T.font("ui_strong"))
-		if int(spec[1])==0:cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		else:
-			cell.custom_minimum_size=Vector2(float(spec[1]),0)
-			if int(spec[1])!=64:cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		head.add_child(cell)
+	var rows:Array=[]
 	for people:Dictionary in peoples.slice(0,5):
 		var civ_id:=String(people.civ_id)
 		var e:=Allocation.enemy(civ_id,0,true)
 		var between:=Known.relation_cell(people)
-		var row:=HBoxContainer.new();row.name="Known_%s" % civ_id.validate_node_name();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
-		var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(18,18);emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(emblem)
-		var name_label:=_line(String(people.name),13,T.INK);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
-		var tone:=String(between.get("tone","ink"))
-		var word:=_line(String(between.get("text","")),11,T.RED_TEXT if tone=="danger" else (T.AMBER_TEXT if tone=="warn" else (T.GREEN_TEXT if tone=="good" else T.INK_MUTED)));word.custom_minimum_size=Vector2(64,0);word.clip_text=true;word.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(word)
-		var theirs:=_line(Allocation.theirs_words(e),12,T.INK);theirs.add_theme_font_override("font",T.font("ui_strong"));theirs.custom_minimum_size=Vector2(78,0);theirs.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;theirs.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(theirs)
 		var nearest:Dictionary=e.nearest
-		var road:=_line(_days(int(nearest.days)) if not nearest.is_empty() else "—",12,T.INK_MUTED);road.custom_minimum_size=Vector2(78,0);road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
-		row.tooltip_text="%s: %s.
+		var tone:=String(between.get("tone","ink"))
+		rows.append({"icon":Identity.emblem(civ_id),"cells":{"name":String(people.name),"warriors":Allocation.theirs_words(e),"march":_days(int(nearest.days)) if not nearest.is_empty() else "—"},
+			"tag":{"text":String(between.get("text","")),"tone":{"danger":"bad","warn":"warn","good":"good"}.get(tone,"")},
+			"tip":"%s: %s
 %s
 %s" % [String(people.name),String(between.get("tip","")),"We know too little of them to count their warriors." if bool(e.unknown) else "Their warriors as our watchers reckon them: about %s (between %s and %s)." % [EraWords.grouped(int(e.theirs)),EraWords.grouped(int(e.low)),EraWords.grouped(int(e.high))],
-			("Their nearest town we know, %s, lies about %s km off: some %s on the road." % [String(nearest.name),EraWords.grouped(roundi(float(nearest.km))),_days(int(nearest.days))]) if not nearest.is_empty() else "We know of no town of theirs yet: scouts find their towns."]
-		box.add_child(row)
+				("Their nearest town we know, %s, lies about %s km off: some %s on the road." % [String(nearest.name),EraWords.grouped(roundi(float(nearest.km))),_days(int(nearest.days))]) if not nearest.is_empty() else "We know of no town of theirs yet: scouts find their towns."]})
+	Dense.render_table(box,{"columns":[{"key":"name","label":"Peoples we know"},{"key":"warriors","label":"warriors","width":84,"align":"right"},{"key":"march","label":"march","width":66,"align":"right"}],"rows":rows})
 	if peoples.size()>5:box.add_child(_line("+%d more peoples" % (peoples.size()-5),12,T.INK_MUTED))
 	return box
 
@@ -1196,6 +1185,10 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
 	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
+	# Raise another general: the verb at the foot of the list it adds to.
+	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
+	var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
+	name_one.name="NameGeneral";foot.add_child(name_one)
 
 
 func _name_general()->void:
@@ -1331,7 +1324,13 @@ func _apply_width(force:=false)->void:
 		army_pane.visible=tab=="army";side_pane.visible=tab!="army"
 		fronts_section.visible=tab=="fronts";leaders_section.visible=tab=="leaders"
 	for key:String in tab_buttons:(tab_buttons[key] as Button).set_pressed_no_signal(key==tab)
-	if leaders_kicker!=null:leaders_kicker.visible=now
+	if leaders_heading!=null:leaders_heading.visible=now
+	# On a wide screen the border stands under the army (home and its edge
+	# together), on a narrow one with the fronts.
+	if border_box!=null:
+		var want:Control=army_section if now else fronts_section
+		if border_box.get_parent()!=want:
+			border_box.get_parent().remove_child(border_box);want.add_child(border_box)
 
 
 ## The tabs carry how many enemies there are (the kicker does on a wide
