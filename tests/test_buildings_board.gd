@@ -1,7 +1,6 @@
 extends GdUnitTestSuite
-## The Buildings page's board (hud/buildings_board.gd): one-line rows in
-## sections that flow into two columns at 1600 px (665 UI units), three at 2000 px (850), a
-## Build verb on the row, bills as pips, no "Details +" anywhere.
+## Buildings keeps commands and exact costs together, with supporting
+## sections flowing into one or two readable columns.
 
 const Board:=preload("res://scripts/hud/buildings_board.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
@@ -23,8 +22,8 @@ func _walk(node:Node,out:Array)->void:
 	out.append(node)
 	for child in node.get_children():_walk(child,out)
 
-func test_sections_flow_into_two_or_three_columns_by_width()->void:
-	for pair in [[665.0,[1,2]],[850.0,[1,3]],[500.0,[1,1]]]:
+func test_sections_use_readable_one_or_two_columns_by_width()->void:
+	for pair in [[665.0,[1,1]],[850.0,[1,2]],[500.0,[1,1]]]:
 		var holder:=VBoxContainer.new();holder.size=Vector2(float(pair[0]),900);add_child(holder)
 		var board:=Board.new();board.setup(_block());holder.add_child(board)
 		await get_tree().process_frame

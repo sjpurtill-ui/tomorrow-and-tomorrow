@@ -262,7 +262,7 @@ func test_builders_row_counts_who_builds_and_the_actions_open_the_owning_pages()
 	assert_str(String(builders.value)).is_equal("8")
 	assert_str(String(builders.sub)).is_equal("All on the town's works")
 	# The builders' figure and the "Set builders" verb open The People.
-	for tile:Dictionary in page.kpis:
+	for tile:Dictionary in page.blocks[0].readings:
 		if String(tile.label)=="BUILDERS":(tile.on_press as Callable).call()
 	for section:Dictionary in (page.blocks[0] as Dictionary).sections:
 		for action:Dictionary in section.get("actions",[]):(action.on_press as Callable).call()
@@ -296,7 +296,7 @@ func test_era_says_what_the_next_era_still_needs()->void:
 	var page:=_page()
 	var era:Dictionary=_keyed(page).era
 	var shown:=""
-	for tile:Dictionary in page.kpis:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
+	for tile:Dictionary in page.blocks[0].readings:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
 	assert_str(shown).is_equal("Foothold")
 	assert_str(String(era.name)).is_equal("Next: Hamlet")
 	# Hamlet needs a year's age, three finished works and four makers.
@@ -338,7 +338,7 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 			assert_int(text.split(" ",false).size()).override_failure_message(text).is_less_equal(12)
 	# What goes up, who builds, the fabric and what comes next, as rows.
 	assert_int(count).is_greater_equal(10)
-	var tiles:Array=page.kpis
+	var tiles:Array=page.blocks[0].readings
 	assert_int(tiles.size()).is_greater_equal(4)
 	for tile:Dictionary in tiles:
 		assert_bool(tile.has("meter") or tile.has("segments")).override_failure_message(String(tile.label)).is_true()
@@ -414,3 +414,24 @@ static func _old_supported(day:int)->int:
 	if craftspeople>=350 and logisticians>=220 and administrators>=120 and construction_effect+route_effect+craft_effect+standardization+tool_quality>=0.34: support=11
 	if craftspeople>=600 and logisticians>=400 and administrators>=250 and construction_effect+route_effect+craft_effect+standardization+tool_quality+state_capacity>=0.50: support=12
 	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
+
+class LandmarkDirector extends Node:
+	var opened:=0
+	func open_conception()->void:opened+=1
+
+func test_landmarks_keep_their_presenter_and_route_conception()->void:
+	_found(97,["Hearth Circle","Lean-to Shelters"],240)
+	var director:=LandmarkDirector.new();director.name="AudienceDirector";terrain.add_child(director)
+	var provider:=Provider.new(terrain,hud)
+	var page:Dictionary=provider.tab(3)
+	await get_tree().process_frame
+	var action:Callable=page.blocks[0].sections[0].actions[0].on_press
+	assert_bool(action.is_valid()).is_true()
+	action.call()
+	assert_int(director.opened).is_equal(1)
+	# The same retained presenter serves a later refresh.
+	var refreshed:Dictionary=provider.tab(3)
+	var refreshed_action:Callable=refreshed.blocks[0].sections[0].actions[0].on_press
+	assert_bool(refreshed_action.is_valid()).is_true()
+	refreshed_action.call()
+	assert_int(director.opened).is_equal(2)
