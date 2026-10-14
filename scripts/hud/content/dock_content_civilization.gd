@@ -140,7 +140,7 @@ func _council_blocks()->Array:
 			"button":{"label":"Summon","on_press":_open_court.bind(target),"tip":"Call %s to the court." % String(person.name)}})
 	var blocks:Array=[]
 	if court.is_empty():blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
-	else:blocks.append({"type":"fact_grid","heading":"THE COURT","items":court,"min_column":380})
+	else:blocks.append({"type":"fact_grid","heading":"THE COURT","items":court,"min_column":300})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant
@@ -149,7 +149,7 @@ func _council_blocks()->Array:
 		open.append({"label":String(order.get("words","")),"value":String(Stack.STATE_WORDS.get(state,state)),"tone":"bad" if state in ["stalled","nothing"] else "",
 			"tip":Stack.status_words(order),"on_click":_open_court.bind({})})
 		if open.size()>=12:break
-	if not open.is_empty():blocks.append({"type":"fact_grid","heading":"ORDERS STILL OPEN","items":open,"min_column":380})
+	if not open.is_empty():blocks.append({"type":"fact_grid","heading":"ORDERS STILL OPEN","items":open,"min_column":300})
 	return blocks
 
 ## Every talk, order and decision opens the court, focused on that person.

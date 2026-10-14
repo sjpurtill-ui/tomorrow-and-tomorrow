@@ -1,7 +1,29 @@
 class_name DockBlocks
-## Renders the nine dock body block types from plain dictionaries. Interactive
-## items carry Callables ("on_press", "on_minus", "on_plus", "on_click",
-## "on_submit"). Block shape reference: design handoff Dock Panel.dc.html.
+## Renders the dock body blocks from plain dictionaries. Interactive items
+## carry Callables ("on_press", "on_minus", "on_plus", "on_click",
+## "on_submit").
+##
+## HOW A TAB IS BUILT (the strategy-screen language; use these, not boxes):
+##   tab(sub) returns {"kpis":[...], "blocks":[...]}.
+##   kpis       the strip under the tabs: 3-6 figures, each
+##              {label, value, glance:true, meter (0..1) + meter_color with
+##              its scale said in delta or tip, delta, tip, on_press}
+##              (dock_panel.gd _rebuild_kpis). Figures in the strip or the
+##              top bar are never repeated below.
+##   fact_grid  ordinary facts, one line each, flowing into 2-3 columns:
+##              {items:[{label, value, icon, bar, tone, tip, on_click,
+##              button:{label,on_press}}]} (fact_grid.gd).
+##   table      lists: one line per item, aligned columns, tag, bar and a
+##              verb on the row, group headers; "empty" is one small line
+##              (dense_blocks.gd).
+##   costs      a work's cost against stock: icon, have / need green or
+##              red, pips, and its button beside it (dense_blocks.gd).
+##   frame      a ruled panel holding blocks with its verbs on its title
+##              line: an inline planner, a group of rows (dense_blocks.gd).
+##   DenseBlocks.verb() / .tag() for a lone button or state tag.
+## Never: a box whose only job is to open another screen ("actions" items
+## that call open_detail / section_requested), instruction sentences, a
+## finished or empty state as the main content.
 
 const Live:=preload("res://scripts/hud/live_value_binding.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -119,6 +141,9 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"tiles": _render_tiles(section,block)
 			"rows": _render_rows(section,block)
 			"fact_grid": FactGrid.render(section,block)
+			"table": Dense.render_table(section,block)
+			"costs": Dense.render_costs(section,block)
+			"frame": Dense.render_frame(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
 			# No talk or order boxes in a dock: every conversation happens in the
@@ -376,6 +401,7 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 
 
 const FactGrid:=preload("res://scripts/hud/fact_grid.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
 static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 	var list:=VBoxContainer.new()

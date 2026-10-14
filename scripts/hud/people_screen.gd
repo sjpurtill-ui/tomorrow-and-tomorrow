@@ -26,7 +26,7 @@ const W:=preload("res://scripts/hud/production_widgets.gd")
 ## What a task does, line by line (the Buildings page's panel).
 const ImpactPanel:=preload("res://scripts/hud/impact_panel.gd")
 
-const SCENE_HEIGHT:=210.0
+const SCENE_HEIGHT:=120.0
 const TWO_COLUMNS_AT:=700.0
 const FIGURES_PER_ROW:=14  # hard cap; the model scales figures to 12
 
@@ -306,7 +306,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 	for face_variant in faces:
 		var face:Dictionary=face_variant
 		var id:=String(face.get("id",""))
-		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(96,134)
+		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(80,104)
 		button.tooltip_text="%s · %s" % [String(face.get("name","")),String(face.get("tag","")).to_lower()]
 		var chosen:=id==selected_id
 		var accent:=T.GOLD if chosen else (T.BORDER_SOFT if bool(face.get("alive",true)) else T.DISABLED)
@@ -317,7 +317,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		parent.add_child(button)
 		var column:=VBoxContainer.new();column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,5)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",2);button.add_child(column)
-		var picture:=_face_picture(face,82,82);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+		var picture:=_face_picture(face,60,60);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
 		column.add_child(picture)
 		var tag:=T.make_label(String(face.get("tag","")),12,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED,0.06);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.mouse_filter=Control.MOUSE_FILTER_IGNORE

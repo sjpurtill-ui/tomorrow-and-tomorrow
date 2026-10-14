@@ -182,8 +182,9 @@ static func _known_signature()->int:
 const FOCUS_WORDS:={"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
 ## The choices offered on the Settlement dock, in the order shown.
 const ASKABLE:=["water","provisions","shelter","research","defense"]
-## The town's figures that stand as tiles under the tabs (_glance_tiles).
-const IN_TILES:=["population","life_expectancy","supply","water","roofs"]
+## The town's figures that stand as tiles under the tabs (_glance_tiles),
+## and the scholars, which the top bar counts: no row restates them.
+const IN_TILES:=["population","life_expectancy","supply","water","roofs","learning"]
 
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
