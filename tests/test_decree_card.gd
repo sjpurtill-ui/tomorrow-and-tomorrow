@@ -77,6 +77,9 @@ func test_the_card_stays_to_be_read_then_folds_to_a_seal()->void:
 	assert_bool(card.folded).is_false()
 	assert_object(card.find_child("DecreeTitle",true,false)).is_not_null()
 	card.queue_free()
+	# Folding rebuilds child controls with queue_free; drain them before the
+	# harness checks for orphans at the end of this case.
+	await await_idle_frame()
 
 
 func test_in_the_court_a_law_and_its_receipt_raise_the_card_never_a_caption()->void:

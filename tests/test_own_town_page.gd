@@ -174,8 +174,8 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_str(String(rows.population.value)).is_equal(EraWords.people(int(local.population)))
 	# How long we live and babes lost: the Health page's own figures.
 	var health:Dictionary=Health.new(null,hud).tab(0)
-	assert_str(String(rows.life_expectancy.value)).is_equal(String(health.kpis[0].value))
-	assert_str(String(rows.infant_mortality.value)).is_equal(String(health.kpis[1].value))
+	assert_str(String(rows.life_expectancy.value)).is_equal(String(health.readings[0].value))
+	assert_str(String(rows.infant_mortality.value)).is_equal(String(health.readings[1].value))
 	assert_float(float(rows.life_expectancy.number)).is_equal_approx(float(local.life),0.0001)
 	# Food put by and water: the Food page's stores and water.
 	var food:Dictionary=(Economy.new(null,hud).tab(0).blocks as Array)[0]
@@ -318,7 +318,7 @@ func test_a_second_town_shows_its_own_figures_not_home()->void:
 	assert_str(String(rows.fortification.value)).is_equal("none")
 	# The Health page, opened on this town, agrees.
 	var health:Dictionary=Health.new(null,hud).tab(0)
-	assert_str(String(rows.life_expectancy.value)).is_equal(String(health.kpis[0].value))
+	assert_str(String(rows.life_expectancy.value)).is_equal(String(health.readings[0].value))
 	assert_str(String(block.lead)).contains("We are %s" % Model.spoken(people))
 	# The town stands on the map beside the page: the page draws no second picture of it.
 	assert_dict(block.sketch).is_empty()
@@ -368,7 +368,7 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	assert_array(Array(_texts(page))).not_contains(["Who does what"])
 	(page.find_child("Places",true,false).find_child("Verb_Rename",true,false) as Button).pressed.emit()
 	assert_array(terrain.naming).contains_exactly([id])
-	((Provider.new(terrain,hud).tab(0).kpis as Array)[0].on_press as Callable).call()
+	((Provider.new(terrain,hud).tab(0).blocks[0].readings as Array)[0].on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
 	# The asked-for hands show as the current choice on the next build.
 	var text:="\n".join(_texts(_page(_block())))
@@ -426,7 +426,7 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 		row.gui_input.emit(click)
 		assert_array(hud.opened).override_failure_message(key).contains_exactly([expected[key]])
 	# The town's own ages and families open from the GROWTH tile.
-	var growth:Dictionary=(Provider.new(terrain,hud).tab(0).kpis as Array)[0]
+	var growth:Dictionary=(Provider.new(terrain,hud).tab(0).blocks[0].readings as Array)[0]
 	(growth.on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
 	# Work buildings and roads read the Buildings page's own figures, not words of ours.
@@ -438,8 +438,8 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 	# Each row says where it leads, in its tooltip.
 	assert_str((page.find_child("Row_logistics",true,false) as Control).tooltip_text).contains("Opens the Materials page.")
 
-func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
-	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
+func test_home_keeps_four_readings_with_their_actions_and_bars()->void:
+	var tiles:Array=Provider.new(terrain,hud).tab(0).blocks[0].readings
 	var labels:=tiles.map(func(t:Dictionary)->String:return String(t.label))
 	# Only what the top bar lacks: it has the head count, food, water and life span.
 	assert_array(labels).is_equal(["GROWTH","HOMES","MOOD","ARMY"])
@@ -518,18 +518,16 @@ func test_the_page_reads_in_light_and_dark()->void:
 # --------------------------------------------------------------------------
 
 func test_each_home_tile_pressed_opens_its_page()->void:
-	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
-	var dock:PanelContainer=auto_free(preload("res://scripts/hud/dock_panel.gd").new())
-	add_child(dock)
-	dock._rebuild_kpis(tiles)
+	var tiles:Array=Provider.new(terrain,hud).tab(0).blocks[0].readings
+	var page:=_page(_block())
 	var expected:={"HOMES":["construction",0],"MOOD":["overview",0],"ARMY":["military",0]}
-	assert_int(dock.kpi_row.get_child_count()).is_equal(tiles.size())
+	assert_int(page._reading_refs.size()).is_equal(tiles.size())
 	for index in tiles.size():
 		var label:=String(tiles[index].label)
 		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
 		hud.opened.clear()
 		var before:=hud.details.size()
-		(dock.kpi_row.get_child(index) as Control).gui_input.emit(click)
+		(page._reading_refs[label].row as Control).gui_input.emit(click)
 		# GROWTH opens the town's ages and families.
 		if label=="GROWTH":assert_int(hud.details.size()).is_equal(before+1);continue
 		assert_array(hud.opened).override_failure_message(label).contains_exactly([expected[label]])

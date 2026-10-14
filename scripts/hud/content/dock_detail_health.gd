@@ -14,6 +14,7 @@ const Card:=preload("res://scripts/hud/chronicle_card.gd")
 ## Lines of the log shown at once, and the page being read.
 const HARDSHIP_PAGE_SIZE:=10
 var hardship_page:=0
+var show_record_help:=false
 
 func meta()->Dictionary:
 	if not EraWords.reckoned():return {"eyebrow":"Life and death","title":"How long we live","subtabs":["Lives","Sickness & disasters"]}
@@ -50,7 +51,9 @@ func _hardships()->Dictionary:
 	var blocks:Array=[]
 	if lines.is_empty():
 		blocks.append({"type":"text","heading":"Nothing written yet","text":"No sickness or disaster has struck the people since this log began. Each one is written here as it happens."})
-		return {"kpis":kpis,"brief":brief,"blocks":blocks}
+		blocks.append({"type":"actions","items":[{"label":"Hide about this record" if show_record_help else "About this record","on_press":func():show_record_help=not show_record_help;hud.request_immediate_dock_refresh()}]})
+		if show_record_help:blocks.append({"type":"text","text":String(brief.why)})
+		return {"blocks":blocks}
 	# Crises whose matter waits at court, by their line's id ("<crisis>@<start>"):
 	# their line can summon the holder.
 	var waiting:Dictionary={}
@@ -66,7 +69,10 @@ func _hardships()->Dictionary:
 		blocks.append({"type":"actions","heading":"Page %d of %d" % [hardship_page+1,pages],"items":[
 			{"label":"Newer","disabled":hardship_page==0,"on_press":func():_turn_hardship_page(-1)},
 			{"label":"Older","disabled":hardship_page==pages-1,"on_press":func():_turn_hardship_page(1)}]})
-	return {"kpis":kpis,"brief":brief,"blocks":blocks}
+	for reading:Dictionary in kpis:reading["glance"]=true
+	blocks.append({"type":"actions","items":[{"label":"Hide about this record" if show_record_help else "About this record","on_press":func():show_record_help=not show_record_help;hud.request_immediate_dock_refresh()}]})
+	if show_record_help:blocks.append({"type":"text","text":String(brief.why)})
+	return {"kpis":kpis,"blocks":blocks}
 
 ## One line of the log as a dock row. `waiting`: its crisis, when a matter
 ## about it waits at court (the row then summons the holder).
@@ -109,12 +115,12 @@ func _city_health()->Dictionary:
 		{"label":"MEAN AGE AT DEATH" if EraWords.reckoned() else "AGE OF THE DEAD","value":("%.1f years" % observed_age if EraWords.reckoned() else EraWords.life(observed_age)) if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"The average age of those who died so far."},
 	]
 	var brief:=_health_brief(expectancy,expectancy_delta,water_intake,housing)
-	var blocks:Array=[{
+	var history_block:Dictionary={
 		"type":"line_chart","heading":"Life expectancy over the years" if EraWords.reckoned() else "How long we live, over the years","note":"counted each month, up to 40 years back","items":history,
 		"tip":"Projected life expectancy recorded from the simulation. Gold diamonds mark health-related discoveries; circles mark meaningful changes without a health discovery."
-	}]
+	}
+	var blocks:Array=[]
 	var care_rows:=_care_rows()
-	if not care_rows.is_empty():blocks.append({"type":"rows","heading":"What decides who survives","note":"what we know and what we eat","items":care_rows})
 	var Care:=preload("res://scripts/civilian_care.gd")
 	var care_city:=GameState.resource_settlement_id
 	var care_words:=preload("res://scripts/hud/home_plain.gd").care(float(Care.data().staff_share),Care.staff(),Care.data().report,preload("res://scripts/civilian_care_fabric.gd").outstanding(Care.data()),bool(Care.methods(WorldSimulation.state).get("rounds",false)))
@@ -128,6 +134,11 @@ func _city_health()->Dictionary:
 			{"label":"None"+(" (now)" if choice=="none" else ""),"sub":"The sick are looked after at home","primary":choice=="none","on_press":set_share.bind(0.0)},
 			{"label":"A quarter of them"+(" (now)" if choice=="standard" else ""),"sub":"The usual share","primary":choice=="standard","on_press":set_share.bind(0.25)},
 			{"label":"Half of them"+(" (now)" if choice=="more" else ""),"sub":"More care, slower learning","primary":choice=="more","on_press":set_share.bind(0.5)}]})
+	blocks.append(history_block)
+	var readings:Array=[]
+	for reading:Dictionary in kpis:readings.append({"label":reading.label,"value":reading.value,"note":reading.get("delta",""),"tip":reading.get("tip","")})
+	blocks.append({"type":"tiles","heading":"The current readings","items":readings})
+	if not care_rows.is_empty():blocks.append({"type":"rows","heading":"What decides who survives","note":"what we know and what we eat","items":care_rows})
 	var changes:Array=[]
 	for index in range(history.size()-1,-1,-1):
 		var point:Dictionary=history[index]
@@ -161,7 +172,7 @@ func _city_health()->Dictionary:
 		{"label":"Enough to drink","value":"%d in 10" % roundi(water_intake/10.0),"note":"everyone drinks enough" if water_intake>=98 else "some go thirsty","note_color":Tokens.GREEN_TEXT if water_intake>=98 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many drink as much as they need each day"},
 		{"label":"A roof at night","value":"%d in 10" % mini(10,roundi(housing/10.0)),"note":"everyone is sheltered" if housing>=95 else "some sleep in the open","note_color":Tokens.GREEN_TEXT if housing>=95 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many have shelter"},
 	]})
-	return {"kpis":kpis,"brief":brief,"blocks":blocks}
+	return {"readings":kpis,"brief":brief,"blocks":blocks}
 
 ## The hard times' bar on "What is killing people now" (crisis_background.gd).
 const HARD_TIMES_NAME:="Sickness, floods and lean seasons (a usual year)"
@@ -249,7 +260,7 @@ func _health_brief(expectancy:float,delta:float,water_intake:int,housing:int)->D
 func signature()->Array:
 	var sig:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
 	# The log's lines change as troubles run their course.
-	sig.append_array([Hardships.revision(),hardship_page])
+	sig.append_array([Hardships.revision(),hardship_page,show_record_help])
 	return sig
 
 func _city_signature()->Array:

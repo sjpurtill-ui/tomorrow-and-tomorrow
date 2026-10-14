@@ -37,6 +37,9 @@ func _ready()->void:
 		get_window().size=Vector2i(1920,1080);get_window().content_scale_size=Vector2i(1920,1080)
 		await _frames(2)
 	for mode in (["dark","light"] if capture else ["light"]):
+		# Each visual theme starts from the same fixture; outcomes in the first
+		# pass must not suppress the second pass's audiences.
+		_setup_world()
 		HudTokens.set_color_mode(mode)
 		await _exercise_kind(director,terrain,"threat",mode)
 		await _exercise_kind(director,terrain,"gift",mode)
@@ -88,6 +91,8 @@ func _setup_world()->void:
 	CivilizationSystem.civilizations.append(_civ("rival_b","Varrow",420,18,"fortification",0.8,-0.3,0.65,Vector2(0,30)))
 	CivilizationSystem.civilizations.append(_civ("rival_c","Isle of Mora",150,9,"expansion",0.4,0.0,0.3,Vector2(-30,0)))
 	GameState.elapsed_days=1
+	# A threat is truthful only after a grievance in the quiet opening age.
+	preload("res://scripts/war_loop.gd").blood_feud("rival_b",1,"a capture-fixture border raid")
 
 func _frames(count:int)->void:
 	for i in count:await get_tree().process_frame
