@@ -401,6 +401,7 @@ func _refresh_vitals(all_vitals:Array)->void:
 
 func _fill_vitals(parent:Control,vitals:Array)->void:
 	parent.visible=not vitals.is_empty()
+	_layout()
 	if vitals.is_empty():return
 	parent.add_child(_heading(String(data.get("vitals_heading","HOW THEY FARE"))))
 	_vital_rows.clear()
@@ -680,7 +681,9 @@ func _fill_tallies(parent:Control,tallies:Array)->void:
 func _layout()->void:
 	if columns==null:return
 	var wide:=size.x>=TWO_COLUMNS_AT or (size.x<=0.0 and get_parent_area_size().x>=TWO_COLUMNS_AT)
-	columns.columns=2 if wide else 1
+	# With no vitals left to show (the top bar and Home carry them), the story takes the width.
+	var vitals_shown:bool=parts.has("vitals") and (parts.vitals as Control).visible
+	columns.columns=2 if wide and vitals_shown else 1
 
 
 func _part(parent:Node,part_name:String)->VBoxContainer:

@@ -150,15 +150,11 @@ func _council_blocks()->Array:
 		var group:=String(post.group) if heads.has(String(post.group)) else "council"
 		rows.append({"group":heads[group],"rank":office_order.find(group),"icon":Portrait.texture(face),
 			"cells":{"name":String(person.name),"title":String(post.title),"place":String(post.place),"fact":fact},"tone":"",
-			"tag":{"text":fact,"tone":"warn"} if matters>0 else {},
 			"tip":"%s, %s. %s. Summon them to talk, give orders or replace them." % [String(person.name),String(post.title),String(post.place)],
 			"button":{"label":"Summon","on_press":_open_court.bind(target),"tip":"Call %s to the court." % String(person.name)}})
 	rows.sort_custom(func(x:Dictionary,y:Dictionary)->bool:return int(x.rank)<int(y.rank))
 	for row:Dictionary in rows:
 		row.erase("rank")
-		# A matter to raise is a tag; regard is the plain last column.
-		if (row.tag as Dictionary).is_empty():row.erase("tag")
-		else:(row.cells as Dictionary)["fact"]=""
 	var blocks:Array=[]
 	if rows.is_empty():blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
 	else:blocks.append({"type":"table","heading":"THE COURT","icon_size":26,"rows":rows,

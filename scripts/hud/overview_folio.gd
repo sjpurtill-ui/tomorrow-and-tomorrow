@@ -68,4 +68,4 @@ func _fill_row(refs: Dictionary, row: Dictionary) -> void:
 func _layout() -> void:
 	if spread: spread.vertical = false
 	# Three columns from a 1800-wide window at 125% (the page is ~880 wide).
-	if grid: grid.columns = 3 if size.x >= 860 else (2 if size.x >= 520 else 1)
+	if grid: grid.columns = 3 if size.x >= 800 else (2 if size.x >= 520 else 1)
