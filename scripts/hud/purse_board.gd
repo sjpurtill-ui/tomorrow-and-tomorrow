@@ -59,6 +59,10 @@ var signatures:={}
 var on_open:Callable
 ## The player opened the business stance choice.
 var stances_open:=false
+var sources_open:=false
+var source_query:=""
+var source_page:=0
+var buying_open:=false
 var responsive_grids:Array[GridContainer]=[]
 ## The day's work (wealth_ledger.gd), mounted in the left column.
 var ledger:Control
@@ -82,14 +86,14 @@ func setup(block:Dictionary={})->void:
 	kind_at_setup=Purse.in_kind()
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	theme=T.control_theme()
-	add_theme_constant_override("separation",24)
+	add_theme_constant_override("separation",16)
 	feedback=S.label("",16,T.GOLD_TEXT);feedback.name="Said";feedback.visible=false;feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var left:VBoxContainer=self
 	var right:VBoxContainer=self
 	if mode=="wealth":
 		add_child(feedback)
 		var grid:=_grid(self,"WealthColumns",2,700)
-		grid.add_theme_constant_override("v_separation",32)
+		grid.add_theme_constant_override("v_separation",24)
 		left=_column(grid,"WealthLeft");right=_column(grid,"WealthRight")
 	# The common store (the treasury after coinage).
 	var store_head:=S.head(left,Purse.account_name())
@@ -111,7 +115,7 @@ func setup(block:Dictionary={})->void:
 	_responsive()
 
 func _column(parent:Node,node_name:String)->VBoxContainer:
-	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",24);parent.add_child(column)
+	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",16);parent.add_child(column)
 	return column
 
 ## A part of the store's rows.
@@ -226,7 +230,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	var trend:=_trend(float(forecast.net),float(forecast.seasons_left))
 	var rations:=Purse.buys_rations()
 	head_box.add_theme_constant_override("separation",8)
-	var balance:=S.voice(Purse.amount_text(float(forecast.balance)),32);balance.name="StoreAnswer";head_box.add_child(balance)
+	var balance:=S.voice(Purse.amount_text(float(forecast.balance)),24);balance.name="StoreAnswer";head_box.add_child(balance)
 	balance.tooltip_text="%s%s" % ["The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from the households' spare. The god's to spend. Goods wear out slowly here, as they do in the homes.",("\nAt today's prices it would buy %s rations." % EraWords.grouped(roundi(rations))) if rations>=0.0 else ""]
 	var verdict:=S.label(_trend_words(float(forecast.net),String(trend.text)),16,trend.color);verdict.name="Verdict";verdict.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;verdict.tooltip_text=_season_words(forecast,season);head_box.add_child(verdict)
 	# Who gives it is said in the row's pointer.
@@ -270,14 +274,27 @@ func _season_words(forecast:Dictionary,season:Dictionary)->String:
 	return "A season at today's settings, in %s.\nIn: %s.\nOut: %s.\nLast season %s came in and %s went out." % [Purse.unit_word(),", ".join(ins),", ".join(outs) if not outs.is_empty() else "nothing",Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
 
 ## Only with several towns: who gives most, one row each.
-func _build_sources(sources:Dictionary)->void:
+func _build_sources(sources:Dictionary,refocus:=false)->void:
 	_clear(sources_box)
 	var towns:Array=sources.towns
 	sources_box.visible=towns.size()>1
 	if not sources_box.visible:return
+	var toggle:=S.verb("Town contributions"+(" · hide" if sources_open else " · %d towns" % towns.size()),func():sources_open=not sources_open;_build_sources(Purse.sources()),"What each town contributes to the levy")
+	toggle.name="TownContributions";toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;sources_box.add_child(toggle)
+	if not sources_open:return
+	var search:=LineEdit.new();search.name="FindContributingTown";search.placeholder_text="Find a town";search.text=source_query;search.custom_minimum_size.y=40;sources_box.add_child(search)
+	search.text_changed.connect(func(words:String):source_query=words;source_page=0;_build_sources(Purse.sources(),true))
+	if refocus:search.grab_focus();search.caret_column=source_query.length()
+	var matches:=towns.filter(func(t:Dictionary):return source_query.is_empty() or String(t.name).to_lower().contains(source_query.to_lower()))
+	var last:=maxi(0,ceili(float(matches.size())/8)-1);source_page=clampi(source_page,0,last)
+	if matches.size()>8 or not source_query.is_empty():
+		var pages:=HFlowContainer.new();pages.add_theme_constant_override("h_separation",8);sources_box.add_child(pages)
+		var previous:=S.verb("Previous",func():source_page-=1;_build_sources(Purse.sources()));previous.name="PreviousContributingTowns";previous.disabled=source_page==0;pages.add_child(previous)
+		pages.add_child(S.label("%d towns · page %d/%d" % [matches.size(),source_page+1,last+1],14,T.INK_MUTED))
+		var next:=S.verb("Next",func():source_page+=1;_build_sources(Purse.sources()));next.name="NextContributingTowns";next.disabled=source_page>=last;pages.add_child(next)
 	var most:=0.0
 	for t:Dictionary in towns:most=maxf(most,float(t.levy))
-	for t:Dictionary in towns:
+	for t:Dictionary in matches.slice(source_page*8,(source_page+1)*8):
 		S.row(sources_box,{"id":String(t.name),"icon":"shelter","icon_kind":"people","label":String(t.name),"note":"%s people" % EraWords.grouped(int(t.people)),"ratio":float(t.levy)/maxf(0.01,most),"bar_width":60.0,"value":"%s a season" % Purse.number(float(t.levy)),"value_width":110.0,
 			"tip":"The levy on what %s people make; %s hidden by households." % [EraWords.grouped(int(t.people)),Purse.number(float(t.evaded))]})
 
@@ -308,7 +325,7 @@ func _choose_levy(level:String)->void:
 ## What the store pays for: one row a line, its cost and a switch on the row.
 func _build_lines(forecast:Dictionary,purse:Dictionary)->void:
 	_clear(lines_box)
-	var title:=S.label("Spending",24,T.INK,true);title.name="PaysAnswer";lines_box.add_child(title)
+	var title:=S.label("Spending",20,T.INK,true);title.name="PaysAnswer";lines_box.add_child(title)
 	for line:String in Purse.LINES:
 		# Food is bought for a hungry town from another of ours: never with one town.
 		if line=="relief" and _town_count()<=1 and not Purse.line_on("relief"):continue
@@ -334,7 +351,8 @@ func _line_row(line:String,forecast:Dictionary,purse:Dictionary)->void:
 	toggle.set_pressed_no_signal(on)
 	toggle.tooltip_text="%s: %s." % [String(Purse.LINE_NAMES[line]),"switch it off" if on else "switch it on"]
 	toggle.pressed.connect(func()->void:_toggle(line,not on))
-	((refs.panel as PanelContainer).get_child(0) as HBoxContainer).add_child(toggle)
+	(refs.actions as Control).reparent(refs.headline);refs.actions.visible=true;refs.actions.add_child(toggle)
+	S._fit_row(refs)
 
 ## What a line does now, in the engine's numbers, in a few words.
 func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->String:
@@ -381,19 +399,16 @@ func _buy_now()->void:
 func _build_own(held:Dictionary,_spare:float,readings:Array)->void:
 	_clear(own_box)
 	own_box.add_theme_constant_override("separation",12)
-	var figures:=HFlowContainer.new();figures.add_theme_constant_override("h_separation",24);figures.add_theme_constant_override("v_separation",16);own_box.add_child(figures)
 	for item:Dictionary in readings:
-		if item.id not in ["held","spare"]:continue
-		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=160;cell.add_theme_constant_override("separation",4);figures.add_child(cell)
-		cell.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED));cell.add_child(S.voice(String(item.value),24));cell.add_child(S.label(String(item.sub),14,T.INK_MUTED));cell.tooltip_text=String(item.tip)
-	for item:Dictionary in readings:
-		if item.id not in ["made","market"]:continue
-		S.row(own_box,{"id":item.id,"label":String(KPI_LABELS[item.id]),"note":String(item.sub),"value":String(item.value),"tip":String(item.tip)})
+		if item.id not in ["held","spare","made","market"]:continue
+		var line:=HFlowContainer.new();line.add_theme_constant_override("h_separation",6);line.add_theme_constant_override("v_separation",2);line.tooltip_text=String(item.tip);own_box.add_child(line)
+		line.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED));line.add_child(S.voice(String(item.value),16));line.add_child(S.label(String(item.sub),14,T.INK_MUTED))
 	var goods:=float(held.goods)
 	var buys:=Goods.buys(goods,["Timber","Stone","Fiber Plants"])
 	var head:=S.label("All goods would buy",16,T.INK);head.name="GoodsBuy"
 	head.tooltip_text="All %s goods would buy %s timber, %s stone OR %s fibre at our own prices. These are alternatives, not additional holdings." % [EraWords.grouped(roundi(goods)),EraWords.grouped(roundi(float(buys.Timber))),EraWords.grouped(roundi(float(buys.Stone))),EraWords.grouped(roundi(float(buys["Fiber Plants"])))]
-	var row:=HFlowContainer.new();row.name="GoodsEquivalents";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",2);row.custom_minimum_size.y=S.ROW_HEIGHT;own_box.add_child(row)
+	var buy_toggle:=S.verb("What these goods could buy",func():buying_open=not buying_open;own_box.get_node("GoodsEquivalents").visible=buying_open,"Compare the same goods at our own prices");buy_toggle.name="BuyingPower";buy_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;own_box.add_child(buy_toggle)
+	var row:=HFlowContainer.new();row.visible=buying_open;row.name="GoodsEquivalents";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",2);row.custom_minimum_size.y=S.ROW_HEIGHT;own_box.add_child(row)
 	head.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(head)
 	for index in 3:
 		var spec:Array=[["Timber","timber"],["Stone","stone"],["Fiber Plants","fibre"]][index]
@@ -408,7 +423,7 @@ func _build_own(held:Dictionary,_spare:float,readings:Array)->void:
 		(coin.panel as Control).name="CoinHeld"
 	for item:Dictionary in readings:
 		if item.id!="treasures":continue
-		S.row(own_box,{"id":"treasures","label":"Treasures","note":String(item.sub),"value":String(item.value),"tip":String(item.tip),"buttons":[{"text":"Open the collection","on_press":item.on_press,"tip":"Give, sell or swap a piece"}]})
+		S.row(own_box,{"id":"treasures","compact_actions":true,"label":"Treasures","note":String(item.sub),"value":String(item.value),"tip":String(item.tip),"buttons":[{"text":"Open the collection","on_press":item.on_press,"tip":"Give, sell or swap a piece"}]})
 
 static func _year()->float:
 	return maxf(0.0,float(WorldSimulation.state.elapsed_days)/365.0)
@@ -465,7 +480,7 @@ func _build_business()->void:
 	# The stance: one at a time, set like the levy.
 	var current:=Business.stance()
 	var shown:=matters or stances_open
-	var stance_row:=HBoxContainer.new();stance_row.add_theme_constant_override("separation",6);stance_row.custom_minimum_size.y=S.ROW_HEIGHT;panel.add_child(stance_row)
+	var stance_row:=HBoxContainer.new();stance_row.name="BusinessDecisions";stance_row.add_theme_constant_override("separation",6);stance_row.custom_minimum_size.y=S.ROW_HEIGHT;panel.add_child(stance_row)
 	var stance_label:=S.label("Stance",14,T.INK);stance_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;stance_row.add_child(stance_label)
 	var toggle:=S.verb(("%s · hide" if shown else "%s · change") % Business.stance_name(current),func()->void:stances_open=not shown;refresh(true),"How the god treats business: guarded, chartered or open. It matters little while business is this small.")
 	toggle.name="StanceToggle";toggle.visible=not matters;stance_row.add_child(toggle)
@@ -482,6 +497,7 @@ func _build_business()->void:
 	var odds:=S.label("busts %s" % String(Business.odds_words(Business.bust_year())).to_lower(),12,T.INK_MUTED);odds.name="BustOdds"
 	odds.tooltip_text=String(q.words)+".\nA bust cuts business by a third at once, slows all work 4% for 6 to 12 months, writes off debts, and costs the rich and the people's unity. Honest books (double-entry ledgers, audited accounts, a central bank) make busts rarer."
 	choice.add_child(odds)
+	panel.move_child(stance_row,1)
 
 ## "bust 1 in 40 yrs" for a stance button.
 static func _short_odds(year:float)->String:

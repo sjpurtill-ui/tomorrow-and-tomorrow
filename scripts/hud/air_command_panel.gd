@@ -12,7 +12,7 @@ func _build_service()->void:
 	_production_controls(bases,"airfield","Form a wing from our stores")
 	var airlift:=_page("Airlift")
 	_transport_controls(airlift,"Transport aircraft carry supplies, or soldiers trained to drop from the air. A drop on enemy ground needs control of the air there. Supply flights keep our armies in that area fed.")
-	reports=_label(_page("Reports"),"",13)
+	_build_reports(_page("Reports"))
 
 func _force_summary(force:Dictionary)->String:
 	var base:Dictionary=op.base(int(force.base_id))

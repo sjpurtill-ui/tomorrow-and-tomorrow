@@ -1,604 +1,348 @@
 extends VBoxContainer
-## PEOPLES WE KNOW, drawn: one ranked ledger of every people we have met, our
-## own row among them, at the head of the Known World (the rows are made by
-## hud/peoples_known_model.gd). Paper and ink. Every foreign figure is a range
-## as we know it, with how old our word is (a mark: recent, aging, stale) and
-## who brought it; under the headline figures, each people's rank, or "about
-## level" where what we know cannot tell two peoples apart.
-##
-## A column's title sorts by it (again: the other way round). A row opens the
-## towns we know of theirs; a town opens its report. Clicks inform; nothing
-## here gives an order.
-##
-## The page refreshes daily while open: while the ledger keeps its shape (the
-## same rows in the same order, the same row open), the day's figures are
-## written into the labels it already has; any other change draws it afresh.
-
+## One selected civilization, its reported capabilities, and its regard for us.
+## Foreign readings come only from the existing intelligence/Standing estimates.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
-
-## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"people":112,"fighters":104,"between":96,"seen":72,"talk":42}
-const NAME_MIN:=100
-const GAP:=8
-## The sheet's paper margin, each side (px).
-const PAD:=14
-## On a narrow page these columns give way, first to last.
-const SHED:=["seen","talk","between"]
-## The two counts drawn on the page, each a bar against ours.
-const FIGURES:=["people","fighters"]
-## The rest of what we know of a people is said in its row's pointer, and
-## town by town when the row is opened.
-const IN_POINTER:=["towns","stores","crafts","lore","lives","wealth","walls"]
-## The opened row's town table: [part, title, width].
-const TOWN_COLUMNS:=[["people","How many",72],["fighters","Fighters",66],["stores","Stores",68],["walls","Walls",60]]
-
+const Standing:=preload("res://scripts/standing.gd")
+const TOWN_PAGE:=4
+const GROUPS:=[
+	["Learning","lore",["genius"]],
+	["Making & prosperity","crafts,wealth,stores",["wealth","reach"]],
+	["People & security","people,lives,fighters,walls,towns",["might","endurance","cunning"]],
+	["Culture & society","",["splendor","order","persuasion"]]
+]
 var model:Dictionary={}
-## The page's own view, kept by the World page across its daily rebuilds:
-## {sort: column, flip: the other way round, open: the people whose towns show}.
 var view:Dictionary={}
+var side:Array=[]
+var own:Dictionary={}
 var on_town:Callable
-## A word with a people's ruler (the court), from the Talk button on its row.
 var on_speak:Callable
 var counter:=""
-## Every people's feelings toward us (dock_content_standing.gd board_data peoples).
-var side:Array=[]
-var side_wide:=false
-const SIDE_W:=230.0
-const SIDE_AT:=1200.0
 var counter_tip:=""
-## Each column's nodes, to let them give way on a narrow page.
-var parts:Dictionary={}
-## The columns giving way at this width.
-var _shape:Array=[]
-## Each row's labels, where a new day's figures are written: {civ_id: {key: node}}.
-var _refs:Dictionary={}
-## What the drawn ledger's shape was made from.
+var _labels:Dictionary={}
+var _bars:Dictionary={}
+var _profile:VBoxContainer
+var _columns:BoxContainer
+var _picker:OptionButton
+var _search:LineEdit
+var _counter:Label
 var _page_shape:=""
-## The note naming the towns of peoples we cannot tell.
-var _unplaced:Label
+var _town_rows:VBoxContainer
 
 func setup(block:Dictionary)->void:
 	name="PeoplesKnownBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",16)
+	add_theme_constant_override("separation",12)
 	_take(block)
 	_build()
 	resized.connect(_layout)
-
-## The day's ledger: written into the labels already drawn while its shape
-## holds, else drawn afresh (the World page's live refresh).
-func update_block(block:Dictionary)->bool:
-	_take(block)
-	if not _refs.is_empty() and shape_of()==_page_shape:_write()
-	else:_build()
-	return true
+	get_viewport().size_changed.connect(func():_layout.call_deferred())
 
 func _take(block:Dictionary)->void:
 	model=block.get("model",{})
-	var given:Variant=block.get("view")
+	var given:Variant=block.get("view",{})
 	view=given if given is Dictionary else {}
-	if not view.has("sort"):view["sort"]="people"
-	if not view.has("flip"):view["flip"]=false
-	if not view.has("open"):view["open"]=""
-	on_town=block.get("on_town",Callable())
-	on_speak=block.get("on_speak",Callable())
+	for pair:Array in [["sort","people"],["flip",false],["open",""],["selected",""],["query",""],["town_page",0]]:
+		if not view.has(pair[0]):view[pair[0]]=pair[1]
+	side=block.get("side",[]);own=block.get("own",{})
+	on_town=block.get("on_town",Callable());on_speak=block.get("on_speak",Callable())
 	counter=String(block.get("counter",""));counter_tip=String(block.get("counter_tip",""))
-	var given_side:Variant=block.get("side",[])
-	side=given_side if given_side is Array else []
+	if _row(String(view.selected)).is_empty():
+		var old:=String(view.open)
+		if not _row(old).is_empty():view.selected=old
+		else:
+			var ordered:=_rows()
+			view.selected=String(ordered[0].civ_id) if not ordered.is_empty() else ""
+			for candidate:Dictionary in ordered:
+				if not bool(candidate.us):view.selected=String(candidate.civ_id);break
 
-## Sorts by a column; the same column again sorts the other way round.
-func sort_by(column:String)->void:
-	if String(view.sort)==column:view["flip"]=not bool(view.flip)
-	else:
-		view["sort"]=column
-		view["flip"]=false
-	_build()
-
-## Opens a people's towns, or closes them.
-func toggle(civ_id:String)->void:
-	view["open"]="" if String(view.open)==civ_id else civ_id
-	_build()
-
-func _titles()->Dictionary:
-	return Model.titles(String(model.get("stage","hearth")))
+func update_block(block:Dictionary)->bool:
+	_take(block)
+	_refresh_picker()
+	if _page_shape==_shape():_write()
+	else:_build_profile()
+	return true
 
 func _rows()->Array:
 	return Model.order(model.get("rows",[]),String(view.sort),bool(view.flip))
 
-## Everything the drawn nodes are made from except the words and figures
-## written into them: the rows and their order, which cells carry a rank or
-## a stance, the open row's towns. The same shape takes a new day in place.
-func shape_of()->String:
-	var page:Array=[String(model.get("stage","")),String(view.sort),bool(view.flip),String(view.open),(model.get("unplaced",[]) as Array).size()]
-	for row:Dictionary in _rows():
-		var cells:Dictionary=row.get("cells",{})
-		var line:Array=[String(row.civ_id),bool(row.us),String((row.get("fresh",{}) as Dictionary).get("source",""))!=""]
-		var between:Dictionary=cells.get("between",{})
-		line.append_array([String(between.get("text",""))!="",String(between.get("stance",""))!=""])
-		if String(view.open)==String(row.civ_id):line.append([row.get("towns",[]),row.get("bands",{}),row.get("contact",[])])
-		page.append(line)
-	return var_to_str(page)
+func _row(id:String)->Dictionary:
+	for row:Dictionary in model.get("rows",[]):
+		if String(row.civ_id)==id:return row
+	return {}
+
+func _selected()->Dictionary:return _row(String(view.selected))
+
+func _side()->Dictionary:
+	for item:Dictionary in side:
+		if String(item.get("civ_id",""))==String(view.selected):return item
+	return {}
+
+func sort_by(column:String)->void:
+	if String(view.sort)==column:view.flip=not bool(view.flip)
+	else:view.sort=column;view.flip=false
+	_refresh_picker()
+	_write()
+
+func select_people(id:String)->void:
+	if _row(id).is_empty():return
+	view.selected=id;view.open="";view.town_page=0
+	_refresh_picker();_build_profile()
+
+## Retained entry for callers that previously opened a people's towns.
+func toggle(id:String)->void:
+	if String(view.selected)!=id:view.selected=id;view.open=id
+	else:view.open="" if String(view.open)==id else id
+	view.town_page=0
+	_refresh_picker();_build_profile()
 
 func _build()->void:
-	for child in get_children():
-		remove_child(child);child.queue_free()
-	parts.clear();_refs.clear();_unplaced=null
-	# The page's width rules the ledger, not the other way round: this holder
-	# does not pass the columns' width up, so the board takes the dock's width
-	# and _layout lets columns give way to fit it (it scrolls sideways only if
-	# even the fewest do not fit).
-	# The page's counts, one line over the ledger (the provider's "counter").
-	if counter!="":
-		var line:=_label(counter,14,T.INK_MUTED);line.name="Counter";line.tooltip_text=counter_tip
-		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		add_child(line)
-	var fit:=ScrollContainer.new();fit.name="Fit"
-	fit.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;fit.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	fit.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
-	# How each people sees us (standing.gd): beside the ledger on a wide page,
-	# under it on a narrow one.
-	add_child(fit)
-	var sheet:=PanelContainer.new();sheet.name="PeoplesSheet";sheet.add_theme_stylebox_override("panel",sheet_style())
-	sheet.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fit.add_child(sheet)
-	var stack:=VBoxContainer.new();stack.name="Ledger";stack.add_theme_constant_override("separation",16);sheet.add_child(stack)
-	stack.add_child(_header_row())
-	var rows:=VBoxContainer.new();rows.name="Rows";rows.add_theme_constant_override("separation",12);stack.add_child(rows)
+	for child in get_children():remove_child(child);child.queue_free()
+	_counter=_label(counter,14,T.INK_MUTED);_counter.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(_counter)
+	var choose:=HBoxContainer.new();choose.name="CivilizationChooser";choose.add_theme_constant_override("separation",8);add_child(choose)
+	_search=LineEdit.new();_search.name="FindPeople";_search.placeholder_text="Find a people";_search.text=String(view.query);_search.custom_minimum_size=Vector2(140,40);_search.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_search.size_flags_stretch_ratio=0.7;_search.add_theme_font_size_override("font_size",14);choose.add_child(_search)
+	_search.text_changed.connect(func(text:String):view.query=text;_refresh_picker())
+	_picker=OptionButton.new();_picker.name="SelectPeople";_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_picker.size_flags_stretch_ratio=1.3;_picker.custom_minimum_size.y=40;T.apply_button_style(_picker,false);choose.add_child(_picker)
+	_picker.fit_to_longest_item=false;_picker.clip_text=true;_picker.custom_minimum_size.x=120
+	_picker.get_popup().max_size.y=340
+	_picker.item_selected.connect(func(index:int):select_people(String(_picker.get_item_metadata(index))))
+	var order:=MenuButton.new();order.name="SortPeople";order.text="Sort";T.apply_button_style(order,false);choose.add_child(order)
+	for id:String in ["name","people","fighters","between","lore","wealth"]:
+		order.get_popup().add_item(String(_titles().get(id,id)))
+		order.get_popup().set_item_metadata(order.get_popup().item_count-1,id)
+	order.get_popup().id_pressed.connect(func(index:int):sort_by(String(order.get_popup().get_item_metadata(index))))
+	order.tooltip_text="Order the civilization selector by a known reading. Choose the same reading again to reverse it; unknown readings remain last."
+	_profile=VBoxContainer.new();_profile.name="SelectedProfile";_profile.add_theme_constant_override("separation",10);add_child(_profile)
+	_refresh_picker();_build_profile()
+
+func _refresh_picker()->void:
+	if not is_instance_valid(_picker):return
+	_picker.clear()
+	var matched_selected:=false
+	var query:=String(view.query).strip_edges().to_lower()
 	for row:Dictionary in _rows():
-		rows.add_child(_row(row))
-		if String(view.open)==String(row.civ_id):rows.add_child(_towns(row))
-	if not (model.get("unplaced",[]) as Array).is_empty():
-		_unplaced=_label("",12,T.INK_MUTED);_unplaced.name="Unplaced"
-		stack.add_child(_unplaced)
-	_write()
-	_page_shape=shape_of()
-	_apply_shape()
+		if query!="" and not query in String(row.name).to_lower():continue
+		_picker.add_item(String(row.name)+(" · us" if bool(row.us) else ""))
+		var index:=_picker.item_count-1;_picker.set_item_metadata(index,String(row.civ_id))
+		if String(row.civ_id)==String(view.selected):_picker.select(index);matched_selected=true
+	if _picker.item_count==0:_picker.add_item("No matching peoples");_picker.set_item_disabled(0,true)
+	elif not matched_selected:_picker.select(-1);_picker.text="Choose matching people"
+	_picker.tooltip_text="Choose one civilization. Ordered by "+String(_titles().get(String(view.sort),view.sort))+(" (reversed)." if bool(view.flip) else ".")
 
-## Writes the day's words and figures into the drawn ledger.
+func _shape()->String:
+	var row:=_selected()
+	return var_to_str([String(view.selected),bool(row.get("us",false)),String(view.open),int(view.town_page),on_speak.is_valid(),on_town.is_valid(),row.get("towns",[]),(side.map(func(p:Dictionary):return [p.get("civ_id",""),p.get("views",[]).size()])),own.keys()])
+
+func _build_profile()->void:
+	var focus:=get_viewport().gui_get_focus_owner()
+	var focus_name:=String(focus.name) if focus!=null and is_ancestor_of(focus) else ""
+	for child in _profile.get_children():_profile.remove_child(child);child.queue_free()
+	_labels.clear();_bars.clear()
+	var row:=_selected()
+	if row.is_empty():return
+	var header:=HFlowContainer.new();header.name="People_"+String(row.civ_id).validate_node_name();header.add_theme_constant_override("h_separation",14);header.add_theme_constant_override("v_separation",6);_profile.add_child(header)
+	var title:=_label(String(row.name),26,T.INK,true);title.name="CivilizationName";header.add_child(title);_labels.name=title
+	if bool(row.us):header.add_child(_label("our people",14,T.TEAL_TEXT))
+	elif on_speak.is_valid():_button(header,"Talk",func():on_speak.call(String(view.selected)),true,"Talk")
+	var fresh:=_label("",14,T.INK_MUTED);fresh.name="Freshness";fresh.size_flags_vertical=Control.SIZE_SHRINK_CENTER;header.add_child(fresh);_labels.fresh=fresh
+	var between:=_label("",14,T.INK);between.name="BetweenUs";between.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_profile.add_child(between);_labels.between=between
+	# Independent stacks; their heights never force blank equal grid rows.
+	_columns=BoxContainer.new();_columns.name="KnowledgeGroups";_columns.add_theme_constant_override("separation",24);_profile.add_child(_columns)
+	var left:=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",18);_columns.add_child(left)
+	var right:=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",18);_columns.add_child(right)
+	for index in [0,1,2,3]:
+		var spec:Array=GROUPS[index]
+		var group:=_section(left if index<2 else right,String(spec[0]))
+		for id:String in String(spec[1]).split(",",false):_fact(group,id)
+		var arts:=HFlowContainer.new();arts.name="StrengthEstimates";arts.add_theme_constant_override("h_separation",18);arts.add_theme_constant_override("v_separation",5);group.add_child(arts)
+		for id:String in spec[2]:
+			var name_text:=id.capitalize()
+			_reading(arts,"art_"+id,name_text,16)
+		var unknown:=_label("",14,T.INK_MUTED);unknown.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;group.add_child(unknown);_labels["unknown_"+str(index)]=unknown
+		if index==3:
+			var note:=_label("Ways and customs have not been reported.",14,T.INK_MUTED);note.name="CultureEvidence";note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;group.add_child(note);_labels.culture=note
+	var estimates:=_label("",14,T.INK_MUTED);estimates.name="EstimateContext";estimates.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_profile.add_child(estimates);_labels.estimates=estimates
+	if not bool(row.us):
+		var regard:=VBoxContainer.new();regard.name="TheirRegard";regard.add_theme_constant_override("separation",6);_profile.add_child(regard)
+		_profile.move_child(regard,_columns.get_index())
+		var regard_head:=HFlowContainer.new();regard_head.add_theme_constant_override("h_separation",12);regard_head.add_theme_constant_override("v_separation",4);regard.add_child(regard_head)
+		regard_head.add_child(_label("Their view of us",16,T.INK_MUTED))
+		var summary:=_label("",18,T.INK,true);regard_head.add_child(summary);_labels.regard=summary
+		_button(regard_head,"What this means",func():view["regard_details"]=not bool(view.get("regard_details",false));_write(),false,"RegardDetails")
+		var views:=HFlowContainer.new();views.add_theme_constant_override("h_separation",18);views.add_theme_constant_override("v_separation",8);regard.add_child(views)
+		for spec:Array in Standing.VIEWS:_reading(views,"view_"+String(spec[0]),String(spec[1]),16)
+		for id:String in ["envy","contempt"]:_reading(views,"view_"+id,id.capitalize(),16)
+		var note:=_label("",14,T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;regard.add_child(note);_labels.consequences=note
+	var town_head:=HFlowContainer.new();town_head.add_theme_constant_override("h_separation",12);_profile.add_child(town_head)
+	_button(town_head,"Hide towns" if String(view.open)==String(view.selected) else "Known towns",func():toggle(String(view.selected)),false,"ShowTowns")
+	var contact:=_label("",14,T.INK_MUTED);contact.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_profile.add_child(contact);_labels.contact=contact
+	_town_rows=VBoxContainer.new();_town_rows.name="Towns_"+String(row.civ_id).validate_node_name();_town_rows.add_theme_constant_override("separation",10);_profile.add_child(_town_rows)
+	_write();_write_towns();_page_shape=_shape();_layout.call_deferred()
+	if focus_name!="":
+		var next:=find_child(focus_name,true,false) as Control
+		if next!=null:next.grab_focus()
+
+func _section(parent:Node,title:String)->VBoxContainer:
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",6);parent.add_child(box)
+	box.add_child(_label(title,20,T.INK,true))
+	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
+	return box
+
+func _reading(parent:Node,key:String,caption:String,value_size:int)->void:
+	var line:=HBoxContainer.new();line.name="Reading_"+key;line.add_theme_constant_override("separation",6);parent.add_child(line)
+	line.add_child(_label(caption,14,T.INK_MUTED))
+	var value:=_label("",value_size,T.INK,true);value.name="Value";line.add_child(value);_labels[key]=value
+
+func _fact(parent:Node,id:String)->void:
+	var line:=HFlowContainer.new();line.name="Cell_"+id;line.add_theme_constant_override("h_separation",8);line.add_theme_constant_override("v_separation",2);parent.add_child(line)
+	var caption:=_label(String(_titles().get(id,id)),14,T.INK_MUTED);line.add_child(caption);_labels["caption_"+id]=caption
+	var value:=_label("",18,T.INK,true);value.name="Value";line.add_child(value);_labels["cell_"+id]=value
+	if id in ["people","fighters"]:
+		var bar:=RangeBar.new();bar.name="Bar";bar.custom_minimum_size=Vector2(40,5);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(bar);_bars[id]=bar
+
 func _write()->void:
-	for row:Dictionary in model.get("rows",[]):
-		var refs:Dictionary=_refs.get(String(row.civ_id),{})
-		if not refs.is_empty():_write_row(row,refs)
-	var unplaced:Array=model.get("unplaced",[])
-	if _unplaced!=null and not unplaced.is_empty():
-		var names:=PackedStringArray()
-		for town:Dictionary in unplaced:names.append(String(town.name))
-		_put(_unplaced,"%d town%s seen whose people we do not know" % [unplaced.size(),"" if unplaced.size()==1 else "s"],", ".join(names)+". Closer looks would tell whose they are.")
-
-# --- The heading and the column titles -------------------------------------
-
-func _header_row()->Control:
-	var row:=HFlowContainer.new();row.name="Header";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8)
-	var caption:=_label("Sort by",14,T.INK_MUTED);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
-	var titles:=_titles()
-	titles=titles.duplicate()
-	titles["name"]="People";titles["people"]="Population";titles["between"]="Relationship"
-	for id:String in ["name"]+FIGURES+["between"]:
-		var active:=String(view.sort)==id
-		var button:=Button.new();button.name="Sort_"+id;button.focus_mode=Control.FOCUS_ALL
-		button.text=String(titles.get(id,id))+((" ↑" if bool(view.flip) else " ↓") if active else "")
-
-		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		button.tooltip_text="%s Click to sort by it." % String(Model.MEANINGS.get(id,""))
-		T.apply_button_style(button)
-		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",14)
-		button.add_theme_color_override("font_color",T.INK if active else T.INK_MUTED)
-		button.add_theme_color_override("font_hover_color",T.INK);button.add_theme_color_override("font_pressed_color",T.INK)
-		button.add_theme_stylebox_override("normal",_cell_style(T.ACTIVE_BG if active else Color(0,0,0,0)))
-		button.pressed.connect(sort_by.bind(id))
-		row.add_child(button);_part(id,button)
-	return row
-
-static func _cell_style(bg:Color)->StyleBoxFlat:
-	var style:=T.flat(bg,Color(0,0,0,0),0,2)
-	style.content_margin_left=10;style.content_margin_right=10;style.content_margin_top=8;style.content_margin_bottom=8
-	return style
-
-# --- One people's row ------------------------------------------------------
-
-func _row(row:Dictionary)->Control:
-	var civ_id:=String(row.civ_id)
-	var us:=bool(row.us)
-	var open:=String(view.open)==civ_id
-	var panel:=PanelContainer.new();panel.name="People_"+civ_id.validate_node_name()
-	panel.add_theme_stylebox_override("panel",_row_style(us,open,false))
-	panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	panel.focus_mode=Control.FOCUS_ALL
-	panel.tooltip_text=("Hide %s." if open else "Show %s.") % ("our towns" if us else "the towns we know of theirs")
-	panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,true)))
-	panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,false)))
-	panel.focus_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,true)))
-	panel.focus_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,false)))
-	panel.gui_input.connect(func(event:InputEvent)->void:
-		if _clicked(event):
-			panel.accept_event()
-			toggle(civ_id))
-	var refs:={}
-	_refs[civ_id]=refs
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);panel.add_child(stack)
-	refs["panel"]=panel
-	if us:
-		stack.add_child(_name_cell(row,refs))
-		var comparison:=HFlowContainer.new();comparison.add_theme_constant_override("h_separation",24);comparison.add_theme_constant_override("v_separation",12);stack.add_child(comparison)
-		for id:String in FIGURES:comparison.add_child(_figure_cell(row,id,refs))
-		comparison.add_child(_seen_cell(row,refs))
-		return panel
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",16);stack.add_child(line)
-	line.add_child(_name_cell(row,refs))
-	line.add_child(_talk_cell(row))
-	var facts:=HFlowContainer.new();facts.name="Facts";facts.add_theme_constant_override("h_separation",24);facts.add_theme_constant_override("v_separation",16);stack.add_child(facts)
-	for id:String in FIGURES:facts.add_child(_figure_cell(row,id,refs))
-	facts.add_child(_between_cell(row,refs))
-	facts.add_child(_seen_cell(row,refs))
-	_add_feelings(stack,civ_id,refs)
-	return panel
-
-## Relationship detail belongs with its people, alongside the existing Talk.
-func _add_feelings(parent:Node,civ_id:String,refs:Dictionary)->void:
-	for people:Dictionary in side:
-		if String(people.get("civ_id",""))!=civ_id:continue
-		var UI:=preload("res://scripts/hud/world_ui.gd")
-		var flow:=HFlowContainer.new();flow.name="Feelings";flow.add_theme_constant_override("h_separation",20);flow.add_theme_constant_override("v_separation",8)
-		var opened:Dictionary=view.get("feelings",{})
-		flow.visible=bool(opened.get(civ_id,false))
-		var button:=UI.verb(parent,"How they see us  "+("▾" if flow.visible else "▸"),Callable())
-		button.name="ShowFeelings";button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-		refs["feelings_summary"]=button
-		button.pressed.connect(func()->void:
-			flow.visible=not flow.visible
-			opened[civ_id]=flow.visible;view["feelings"]=opened
-			button.text="How they see us  "+("▾" if flow.visible else "▸"))
-		parent.add_child(flow)
-		refs["feelings"]={}
-		for feeling:Dictionary in people.get("views",[]):
-			var words:=UI.label(flow,"",14,T.INK_MUTED)
-			refs.feelings[String(feeling.id)]=words
-		return
-
-static func _clicked(event:InputEvent)->bool:
-	var click:=event as InputEventMouseButton
-	return (click!=null and click.pressed and click.button_index==MOUSE_BUTTON_LEFT) or event.is_action_pressed("ui_accept")
-
-func _row_style(us:bool,open:bool,hover:bool)->StyleBoxFlat:
-	# An opened row sits on the same sunk paper as the towns under it.
-	var bg:=T.HOVER_BG if hover else (T.GOLD_WASH if us else (T.PAPER_SUNK if open else T.PAPER_RAISED))
-	var style:=T.flat(bg,Color(0,0,0,0),0,8)
-	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=16;style.content_margin_bottom=16
-	if us:
-		style.border_color=T.GOLD;style.border_width_left=2
-	return style
-
-## The people's name.
-func _name_cell(row:Dictionary,refs:Dictionary)->Control:
-	var cell:=HBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",6)
-	cell.custom_minimum_size.x=NAME_MIN;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	refs["name"]=_fitted(_label("",22,T.INK,true),"Name",true);cell.add_child(refs.name)
-	# A long name takes a second line rather than an ellipsis (rows are two lines high).
-	var name_label:Label=refs.name
-	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	name_label.custom_minimum_size.x=60
-	if bool(row.us):cell.add_child(_tag("us"))
-	_part("name",cell)
-	return cell
-
-## How old our newest word of them is (with its mark) and who brought it.
-func _seen_cell(row:Dictionary,refs:Dictionary)->Control:
-	var cell:=VBoxContainer.new();cell.name="Cell_seen";cell.add_theme_constant_override("separation",4)
-	cell.custom_minimum_size.x=140;cell.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
-	cell.add_child(_label("Last word",14,T.INK_MUTED))
-	var when:=HBoxContainer.new();when.name="Fresh";when.add_theme_constant_override("separation",4);cell.add_child(when)
-	var mark:=FreshMark.new();mark.name="Mark";when.add_child(mark);refs["mark"]=mark
-	refs["age"]=_fitted(_label("",12,T.INK_MUTED),"Age",true);when.add_child(refs.age)
-	if String((row.get("fresh",{}) as Dictionary).get("source",""))!="":
-		refs["source"]=_fitted(_label("",12,T.INK_MUTED),"Source");cell.add_child(refs.source)
-	_part("seen",cell)
-	return cell
-
-## A word with their ruler, in the court ("Talk"); nothing on our own row.
-func _talk_cell(row:Dictionary)->Control:
-	var cell:=HBoxContainer.new();cell.name="Cell_talk";cell.custom_minimum_size.x=float(WIDTHS.talk);cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	_part("talk",cell)
-	if bool(row.us) or not on_speak.is_valid():return cell
-	var civ_id:=String(row.civ_id)
-	var b:=preload("res://scripts/hud/world_ui.gd").verb(cell,"Talk",func()->void:on_speak.call(civ_id),"Speak with their ruler in the court; our envoys carry the words.")
-	b.name="Talk"
-	return cell
-
-func _tag(text:String)->Control:
-	var pill:=PanelContainer.new();pill.name="Tag"
-	var style:=T.flat(Color(0,0,0,0),T.GOLD,1,8);style.content_margin_left=6;style.content_margin_right=6
-	pill.add_theme_stylebox_override("panel",style);pill.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	pill.add_child(_label(text,12,T.GOLD_TEXT,true))
-	return pill
-
-## A count as a bar against ours: solid for what we are sure of, a faded
-## band out to the most it could be, a tick where our own count stands; the
-## figure beside it. Nothing is drawn or written for what we do not know.
-func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
-	var cell:=VBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
-	cell.custom_minimum_size.x=140;cell.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
-	cell.add_child(_label(String(_titles().get(id,id)),14,T.INK_MUTED))
-	var figure:=HBoxContainer.new();figure.add_theme_constant_override("separation",12);cell.add_child(figure)
-	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(48,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	figure.add_child(bar);refs["bar_"+id]=bar
-	var value:=_fitted(_label("",20,T.INK,true),"Value",true)
-	figure.add_child(value);refs["value_"+id]=value
-	_part(id,cell)
-	return cell
-
-## Peace, feud or war; their ruler's trust; our stance on the War screen.
-func _between_cell(row:Dictionary,refs:Dictionary)->Control:
-	var c:Dictionary=row.cells.get("between",{})
-	var cell:=VBoxContainer.new();cell.name="Cell_between";cell.add_theme_constant_override("separation",4)
-	cell.custom_minimum_size.x=160
-	if String(c.get("text",""))!="":
-		refs["relation"]=_fitted(_label("",16,T.INK,true),"Relation");cell.add_child(refs.relation)
-		refs["trust"]=_fitted(_label("",12,T.INK_MUTED),"Trust");cell.add_child(refs.trust)
-		if String(c.get("stance",""))!="":
-			refs["stance"]=_fitted(_label("",12,T.GOLD_TEXT),"Stance");cell.add_child(refs.stance)
-	_part("between",cell)
-	return cell
-
-## A row's words and figures, written into its labels.
-func _write_row(row:Dictionary,refs:Dictionary)->void:
-	var cells:Dictionary=row.get("cells",{})
-	var contact:Array=row.get("contact",[])
-	_put(refs.get("name"),String(row.name),String(row.name)+("" if contact.is_empty() else ". "+_contact_line(contact)))
+	var row:=_selected()
+	if row.is_empty():return
+	_counter.text=counter;_counter.tooltip_text=counter_tip;_counter.visible=counter!=""
+	var us:=bool(row.us);var info:=_side()
+	_put("name",String(row.name))
 	var fresh:Dictionary=row.get("fresh",{})
-	var mark:FreshMark=refs.get("mark")
-	if mark!=null:
-		if mark.level!=String(fresh.get("level","none")):
-			mark.level=String(fresh.get("level","none"));mark.queue_redraw()
-		mark.tooltip_text=String(fresh.get("tip",""))
-	_put(refs.get("age"),"our count" if bool(row.us) else _short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
-	_put(refs.get("source"),"our count" if bool(row.us) else String(fresh.get("source","")),"Who brought our newest word of them." if not bool(row.us) else String(fresh.get("source","")))
-	var titles:=_titles()
-	for id:String in FIGURES:
-		var c:Dictionary=cells.get(id,{})
-		var known:=bool(c.get("known",false))
-		# Their rank among the peoples is in the pointer; our own row is never compared with itself.
-		var rank:=String(c.get("rank_tip","")) if not bool(row.us) else ""
-		# One figure beside the bar (its middle); the bar draws the band and the range is in the pointer.
-		# Their fighters are the one estimate War shows too (enemy_strength.gd).
-		if id=="fighters" and not bool(row.us):
-			var est:Dictionary=preload("res://scripts/enemy_strength.gd").fighters(String(row.civ_id))
-			known=bool(est.get("known",false))
-			c={"known":known,"low":float(est.get("low",0.0)),"high":float(est.get("high",0.0)),"text":String(est.get("range","")),"exact":false,"point":String(est.get("text","?")),"tip":String(est.get("tip",""))}
-		_put(refs.get("value_"+id),(String(c.point) if c.has("point") else _middle_text(c)) if known else "","%s: %s. %s%s" % [String(titles.get(id,id)),String(c.get("text","not known")) if known else "not known",String(c.get("tip","")),(" "+rank) if rank!="" else ""])
-		var bar:RangeBar=refs.get("bar_"+id)
-		if bar!=null:
-			bar.low=float(c.get("low",0.0)) if known else -1.0
-			bar.high=float(c.get("high",0.0)) if known else -1.0
-			bar.top=_top(id);bar.ours=_ours(id)
-			bar.queue_redraw()
-	# Everything else we know of them, in the row's pointer.
-	var more:PackedStringArray=[]
-	for id:String in IN_POINTER:
-		var c:Dictionary=cells.get(id,{})
-		if bool(c.get("known",false)) and String(c.get("text",""))!="":more.append("%s: %s" % [String(titles.get(id,id)),String(c.text)])
-	var envoy_words:=String((cells.get("envoys",{}) as Dictionary).get("text",""))
-	if envoy_words!="":more.append("%s: %s" % [String(titles.get("envoys","Envoys")),envoy_words])
-	var panel:Control=refs.get("panel")
-	if panel!=null:
-		var open:=String(view.open)==String(row.civ_id)
-		panel.tooltip_text="%s\n%s" % [" · ".join(more) if not more.is_empty() else "We know little more of them yet.",("Click to hide %s." if open else "Click to show %s.") % ("our towns" if bool(row.us) else "the towns we know of theirs")]
-	var between:Dictionary=cells.get("between",{})
-	_put(refs.get("relation"),String(between.get("text","")),String(between.get("tip","")),_tone(String(between.get("tone","ink"))))
-	_put(refs.get("trust"),String(between.get("sub","")),String(between.get("tip","")))
-	_put(refs.get("stance"),"→ "+String(between.get("stance","")),"Our stance toward them on the War screen.")
-	for people:Dictionary in side:
-		if String(people.get("civ_id",""))!=String(row.civ_id):continue
-		var summary:Button=refs.get("feelings_summary")
-		if summary!=null:
-			summary.tooltip_text=preload("res://scripts/hud/standing_board.gd")._people_tip(people)
-			for feeling_name:String in ["envy","contempt"]:
-				summary.tooltip_text+="\n%s %d%%: %s" % [feeling_name.capitalize(),roundi(float(people.get(feeling_name,0.0))*100.0),String(people.get(feeling_name+"_why",""))]
-		for feeling:Dictionary in people.get("views",[]):
-			var target:Variant=(refs.get("feelings",{}) as Dictionary).get(String(feeling.id))
-			_put(target,"%s  %d%%" % [String(feeling.name),roundi(float(feeling.value)*100.0)],"%s. Why: %s" % [String(feeling.means),String(feeling.why)])
+	_put("fresh","Our own count · today" if us else "Reported "+String(fresh.get("text",""))+(" · "+String(fresh.source) if String(fresh.get("source",""))!="" else ""),String(fresh.get("tip","")))
+	var between:Dictionary=(row.get("cells",{}) as Dictionary).get("between",{})
+	var words:=PackedStringArray()
+	for key:String in ["text","sub","stance"]:
+		if String(between.get(key,""))!="":words.append(String(between[key]))
+	var envoys:Dictionary=row.cells.get("envoys",{})
+	if String(envoys.get("text",""))!="":words.append("Envoys: "+String(envoys.text))
+	_put("between"," · ".join(words),String(between.get("tip","")));(_labels.between as Label).visible=not words.is_empty()
+	for id:String in Model.RANKED:
+		var cell:Dictionary=row.cells.get(id,{})
+		var rank_tip:=String(cell.get("rank_tip",""))
+		if id=="fighters" and not us:
+			var est:=preload("res://scripts/enemy_strength.gd").fighters(String(row.civ_id))
+			cell={"known":bool(est.get("known",false)),"text":String(est.get("range","")),"low":float(est.get("low",0)),"high":float(est.get("high",0)),"tip":String(est.get("tip",""))}
+		var known:=bool(cell.get("known",false))
+		_put("cell_"+id,String(cell.get("text","Unknown")) if known else "Unknown",String(Model.MEANINGS.get(id,""))+" "+String(cell.get("tip",""))+" "+rank_tip)
+		if id=="lives":_put("caption_lives","Health" if String(cell.get("unit","main"))=="index" else String(_titles().get("lives","Lives")))
+		if id=="lore":_put("caption_lore","Learning capacity" if String(cell.get("unit","main"))=="main" else "Learning")
+		if _bars.has(id):
+			var bar:RangeBar=_bars[id];bar.low=float(cell.get("low",0)) if known else -1;bar.high=float(cell.get("high",0)) if known else -1;bar.top=_top(id);bar.ours=_ours(id);bar.us=us;bar.queue_redraw()
+	var strengths:Dictionary=own if us else info.get("theirs",{})
+	for art:Array in Standing.STRENGTHS:
+		var id:=String(art[0]);var reading:Dictionary=strengths.get(id,{})
+		var known:=not reading.is_empty() and not bool(reading.get("unknown",false))
+		var text:="Unknown"
+		if known:text="%d%%" % roundi(float(reading.get("value",0))*100) if us or bool(reading.get("exact",false)) else "~%d%%" % roundi(float(reading.get("value",0))*100)
+		var tip:=String(art[2]).capitalize()+". "
+		if known:tip+=String(reading.get("why","Our own reading.")) if us else Standing.estimate_words(reading)+". "+String(info.get("known_words",""))
+		else:tip+="We know too little of them to estimate this."
+		_put("art_"+id,text,tip)
+		(_labels["art_"+id] as Label).get_parent().visible=known
+	for index in GROUPS.size():
+		var unknown:=PackedStringArray()
+		for id:String in GROUPS[index][2]:
+			var reading:Dictionary=strengths.get(id,{})
+			if reading.is_empty() or bool(reading.get("unknown",false)):unknown.append(id.capitalize())
+		_put("unknown_"+str(index),", ".join(unknown)+": unknown" if not unknown.is_empty() else "")
+		(_labels["unknown_"+str(index)] as Label).visible=not unknown.is_empty()
+	_put("estimates","Strength readings compare us with the age." if us else "Strengths marked ~ are our watchers' estimates; point for their ranges.",String(info.get("known_words","")))
+	_put("culture","Our ways and their effects are in Home · Culture." if us else "Ways and customs have not been reported.")
+	if not us:
+		var context:=PackedStringArray()
+		for key:String in ["relation","ruler","strength","known_words"]:
+			if String(info.get(key,""))!="":context.append(String(info[key]))
+		var spies:Dictionary=info.get("spies",{})
+		if String(spies.get("words",""))!="":context.append(String(spies.words))
+		for memory:Dictionary in info.get("memories",[]):context.append(String(memory.get("text","")))
+		_put("regard",String(info.get("headline","Their regard is not yet known.")),"\n".join(context))
+		for spec:Array in Standing.VIEWS:
+			var id:=String(spec[0]);var feeling:Dictionary={}
+			for candidate:Dictionary in info.get("views",[]):
+				if String(candidate.id)==id:feeling=candidate;break
+			_put("view_"+id,"%d%%" % roundi(float(feeling.value)*100) if not feeling.is_empty() else "Unknown",String(feeling.get("means",spec[2]))+". "+String(feeling.get("why","")))
+		for id:String in ["envy","contempt"]:_put("view_"+id,"%d%%" % roundi(float(info[id])*100) if info.has(id) else "Unknown",String(info.get(id+"_why","")))
+		var consequences:=PackedStringArray()
+		for effect:Dictionary in info.get("consequences",[]):consequences.append(String(effect.get("words","")))
+		_put("consequences"," · ".join(consequences))
+		(_labels.consequences as Label).visible=not consequences.is_empty() and bool(view.get("regard_details",false))
+		var details:=find_child("RegardDetails",true,false) as Button
+		if details!=null:details.visible=not consequences.is_empty();details.text="Hide meaning" if bool(view.get("regard_details",false)) else "What this means"
+	var contacts:=PackedStringArray(row.get("contact",[]))
+	var bands:Dictionary=row.get("bands",{})
+	if not bands.is_empty():contacts.append("%d band%s seen in the field: %s" % [int(bands.count),"" if int(bands.count)==1 else "s",Model.count_text(float(bands.low),float(bands.high),false,false,String(model.get("stage","hearth")))])
+	var unplaced:int=(model.get("unplaced",[]) as Array).size()
+	if unplaced>0:contacts.append("%d towns of unidentified peoples" % unplaced)
+	var unidentified:=PackedStringArray()
+	for town:Dictionary in model.get("unplaced",[]):unidentified.append(String(town.get("name","Unidentified settlement")))
+	_put("contact"," · ".join(contacts),"\n".join(unidentified));(_labels.contact as Label).visible=not contacts.is_empty()
 
+func _write_towns()->void:
+	for child in _town_rows.get_children():_town_rows.remove_child(child);child.queue_free()
+	_town_rows.visible=String(view.open)==String(view.selected)
+	if not _town_rows.visible:return
+	var towns:Array=_selected().get("towns",[])
+	if towns.is_empty():_town_rows.add_child(_label("No town has been seen yet.",14,T.INK_MUTED));return
+	var page:=clampi(int(view.town_page),0,maxi(0,ceili(float(towns.size())/TOWN_PAGE)-1));view.town_page=page
+	var controls:=HFlowContainer.new();controls.add_theme_constant_override("h_separation",10);_town_rows.add_child(controls)
+	var previous:=_button(controls,"Previous",func():view.town_page=maxi(0,int(view.town_page)-1);_build_profile(),false,"PreviousTowns");previous.disabled=page==0
+	controls.add_child(_label("%d–%d of %d known towns" % [page*TOWN_PAGE+1,mini((page+1)*TOWN_PAGE,towns.size()),towns.size()],14,T.INK_MUTED))
+	var next:=_button(controls,"Next",func():view.town_page=int(view.town_page)+1;_build_profile(),false,"NextTowns");next.disabled=(page+1)*TOWN_PAGE>=towns.size()
+	for town:Dictionary in towns.slice(page*TOWN_PAGE,(page+1)*TOWN_PAGE):
+		var item:=VBoxContainer.new();item.name="Town_"+String(town.get("city_id",town.name)).validate_node_name();item.add_theme_constant_override("separation",4);_town_rows.add_child(item)
+		var head:=HFlowContainer.new();head.add_theme_constant_override("h_separation",10);item.add_child(head);head.add_child(_label(String(town.name)+(" · home" if bool(town.get("home",false)) else ""),16,T.INK,true))
+		if bool(town.get("open",false)) and on_town.is_valid():
+			var city_id:=String(town.city_id);_button(head,"Read report",func():on_town.call(city_id),false,"Read_"+city_id.validate_node_name())
+		var facts:=HFlowContainer.new();facts.add_theme_constant_override("h_separation",12);item.add_child(facts)
+		for id:String in ["people","fighters","stores","walls"]:facts.add_child(_label(String(_titles().get(id,id))+" "+String(town.cells.get(id,"?")),14,T.INK))
+		var fresh:Dictionary=town.get("fresh",{})
+		var note:=_label("Held by "+String(town.get("held",""))+" · "+String(fresh.get("text",""))+" · "+String(fresh.get("source","")),14,T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;item.add_child(note)
 
-## "108 years ago" -> "108 yr ago", to fit its narrow column.
-static func _short_age(text:String)->String:
-	return text.replace(" years ago"," yr ago").replace(" year ago"," yr ago").replace(" months ago"," mo ago").replace(" month ago"," mo ago").replace(" days ago"," d ago")
+func _put(key:String,text:String,tip:="")->void:
+	var target:=_labels.get(key) as Label
+	if target!=null:target.text=text;target.tooltip_text=tip
 
-## A count's one figure: exact as it is, an estimate as "~" its middle.
-func _middle_text(c:Dictionary)->String:
-	var low:=float(c.get("low",0.0));var high:=float(c.get("high",0.0))
-	if bool(c.get("exact",false)) or is_equal_approx(low,high):return String(c.get("text",""))
-	return "~"+Model._count(float(Model.nice((low+high)*0.5)),String(model.get("stage","hearth")))+("+" if bool(c.get("partial",false)) else "")
+func _layout()->void:
+	if not is_inside_tree() or not is_instance_valid(_columns):return
+	var available:=minf(size.x,get_viewport_rect().size.x-global_position.x-24)
+	_columns.vertical=available<460
 
-## The most any people may have in a column (the bars' full width), and our own count.
+func _titles()->Dictionary:return Model.titles(String(model.get("stage","hearth")))
+
 func _top(id:String)->float:
 	var top:=1.0
 	for row:Dictionary in model.get("rows",[]):
-		var c:Dictionary=(row.get("cells",{}) as Dictionary).get(id,{})
-		if bool(c.get("known",false)):top=maxf(top,float(c.get("high",0.0)))
+		var cell:Dictionary=row.cells.get(id,{})
+		if bool(cell.get("known",false)):top=maxf(top,float(cell.get("high",0)))
 	return top
 
 func _ours(id:String)->float:
 	for row:Dictionary in model.get("rows",[]):
 		if bool(row.us):
-			var c:Dictionary=(row.get("cells",{}) as Dictionary).get(id,{})
-			return float(c.get("high",0.0)) if bool(c.get("known",false)) else -1.0
-	return -1.0
+			var cell:Dictionary=row.cells.get(id,{})
+			return float(cell.get("high",-1)) if bool(cell.get("known",false)) else -1
+	return -1
 
-static func _contact_line(contact:Array)->String:
-	var said:=" · ".join(PackedStringArray(contact))
-	return said.substr(0,1).to_upper()+said.substr(1)+"."
-
-## A label's words, pointer note and ink, set only where they changed.
-static func _put(node:Variant,text:String,tip:String,ink:Color=Color(0,0,0,0))->void:
-	var label:=node as Label
-	if label==null:return
-	if label.text!=text:label.text=text
-	if label.tooltip_text!=tip:label.tooltip_text=tip
-	if ink.a>0.0 and label.get_theme_color("font_color")!=ink:label.add_theme_color_override("font_color",ink)
-
-static func _tone(tone:String)->Color:
-	match tone:
-		"danger":return T.RED_TEXT
-		"warn":return T.AMBER_TEXT
-		"good":return T.GREEN_TEXT
-		"info":return T.TEAL_TEXT
-		"muted":return T.INK_MUTED
-	return T.INK
-
-# --- An opened row: the towns we know of theirs ----------------------------
-
-func _towns(row:Dictionary)->Control:
-	var panel:=PanelContainer.new();panel.name="Towns_"+String(row.civ_id).validate_node_name()
-	var style:=T.flat(T.PAPER_SUNK,Color(0,0,0,0),0,4);style.content_margin_left=10;style.content_margin_right=10;style.content_margin_top=8;style.content_margin_bottom=8
-	panel.add_theme_stylebox_override("panel",style)
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",4);panel.add_child(stack)
-	var facts:=HFlowContainer.new();facts.name="Facts";facts.add_theme_constant_override("h_separation",14);facts.add_theme_constant_override("v_separation",2);stack.add_child(facts)
-	for said:String in row.get("contact",[]):facts.add_child(_label(said.substr(0,1).to_upper()+said.substr(1),12,T.INK_MUTED))
-	var bands:Dictionary=row.get("bands",{})
-	if not bands.is_empty():
-		var seen:=_label("%d band%s seen in the field: %s" % [int(bands.count),"" if int(bands.count)==1 else "s",Model.count_text(float(bands.low),float(bands.high),false,false,String(model.get("stage","hearth")))],12,T.INK_MUTED)
-		seen.name="Bands";seen.tooltip_text="Counted with their fighters; our lookouts can only guess their number."
-		facts.add_child(seen)
-	var towns:Array=row.get("towns",[])
-	if towns.is_empty():
-		stack.add_child(_label("No town of theirs has been seen yet.",12,T.INK_MUTED))
-		return panel
-	stack.add_child(_label("Our towns" if bool(row.us) else "Known towns",18,T.INK,true))
-	for town:Dictionary in towns:stack.add_child(_town_row(town))
-	return panel
-
-func _town_header(us:bool)->Control:
-	var line:=HBoxContainer.new();line.name="TownHeader";line.add_theme_constant_override("separation",GAP)
-	var first:=_label("Our towns" if us else "Town",12,T.INK_MUTED,true);first.custom_minimum_size.x=120;first.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(first)
-	var titles:=_titles()
-	for spec:Array in TOWN_COLUMNS:
-		var title:=_fitted(_label(String(titles.get(String(spec[0]),spec[1])),12,T.INK_MUTED,true),"");title.custom_minimum_size.x=float(spec[2]);title.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		line.add_child(title)
-	for pair:Array in [["Seen",128],["Held by",84]]:
-		var title:=_label(String(pair[0]),12,T.INK_MUTED,true);title.custom_minimum_size.x=float(pair[1]);line.add_child(title)
-	return line
-
-func _town_row(town:Dictionary)->Control:
-	var city_id:=String(town.get("city_id",""))
-	var panel:=PanelContainer.new();panel.name="Town_"+(city_id if city_id!="" else String(town.name)).validate_node_name()
-	var openable:=bool(town.get("open",false)) and city_id!="" and on_town.is_valid()
-	panel.add_theme_stylebox_override("panel",_cell_style(Color(0,0,0,0)))
-	panel.mouse_filter=Control.MOUSE_FILTER_STOP if openable else Control.MOUSE_FILTER_PASS
-	if openable:
-		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-		panel.tooltip_text="Read our report of %s." % String(town.name)
-		panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",_cell_style(T.HOVER_BG)))
-		panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",_cell_style(Color(0,0,0,0))))
-		panel.gui_input.connect(func(event:InputEvent)->void:
-			if _clicked(event):
-				panel.accept_event()
-				on_town.call(city_id))
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",8);panel.add_child(stack)
-	var line:=HFlowContainer.new();line.add_theme_constant_override("h_separation",16);line.add_theme_constant_override("v_separation",8)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);head.custom_minimum_size.x=120;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(head)
-	var name_label:=_fitted(_label(String(town.name),18,T.INK,true),"TownName",true);head.add_child(name_label)
-	if bool(town.get("home",false)):head.add_child(_tag("home"))
-	stack.add_child(line)
-	var details:=HFlowContainer.new();details.add_theme_constant_override("h_separation",20);details.add_theme_constant_override("v_separation",8);stack.add_child(details)
-	var cells:Dictionary=town.get("cells",{})
-	for spec:Array in TOWN_COLUMNS:
-		var text:=String(cells.get(String(spec[0]),"?"))
-		var value:=_label("%s  %s" % [String(_titles().get(String(spec[0]),spec[1])),text],14,T.INK if text not in ["?","—"] else T.INK_MUTED)
-		value.tooltip_text=text;details.add_child(value)
-	var fresh:Dictionary=town.get("fresh",{})
-	var seen:=HBoxContainer.new();seen.name="Seen";seen.custom_minimum_size.x=128;seen.add_theme_constant_override("separation",4);stack.add_child(seen)
-	var mark:=FreshMark.new();mark.level=String(fresh.get("level","none"));seen.add_child(mark)
-	var said:=String(fresh.get("text",""))+(" · "+String(fresh.source) if String(fresh.get("source",""))!="" else "")
-	var when:=_fitted(_label(said,12,T.INK_MUTED),"",true);when.tooltip_text=said;seen.add_child(when)
-	var held:=_label(String(town.get("held","")),14,T.INK_MUTED);held.name="Held";held.tooltip_text="Who holds it, as we last heard.";line.add_child(held)
-	return panel
-
-# --- Pieces ------------------------------------------------------------------
-
-static func sheet_style()->StyleBoxFlat:
-	var style:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,0)
-	style.content_margin_left=0;style.content_margin_right=0;style.content_margin_top=0;style.content_margin_bottom=0
-	return style
-
-static func _rule(color:Color)->ColorRect:
-	var rule:=ColorRect.new();rule.color=color;rule.custom_minimum_size=Vector2(0,1);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	return rule
+static func _button(parent:Node,text:String,callback:Callable,primary:bool,node_name:String)->Button:
+	var button:=Button.new();button.name=node_name;button.text=text;T.apply_button_style(button,primary);button.pressed.connect(callback);parent.add_child(button);return button
 
 static func _label(text:String,size:int,color:Color,strong:=false)->Label:
-	var label:=Label.new();label.text=text;label.mouse_filter=Control.MOUSE_FILTER_PASS
-	label.add_theme_font_override("font",T.font("ui_strong" if strong else "ui"))
-	label.add_theme_font_size_override("font_size",maxi(14,size))
-	label.add_theme_color_override("font_color",color)
-	return label
+	var label:=Label.new();label.text=text;label.add_theme_font_override("font",T.font("ui_strong" if strong else "ui"));label.add_theme_font_size_override("font_size",size);label.add_theme_color_override("font_color",color);return label
 
-## A label kept to its cell: what does not fit ends in an ellipsis (its full
-## words are in its pointer note).
-static func _fitted(label:Label,node_name:String,expand:=false)->Label:
-	if node_name!="":label.name=node_name
-	# Never an ellipsis: what does not fit takes a second line.
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.custom_minimum_size.x=maxf(label.custom_minimum_size.x,24.0)
-	if expand:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	return label
-
-func _part(column:String,node:Control)->void:
-	if not parts.has(column):parts[column]=[]
-	(parts[column] as Array).append(node)
-
-## On a narrow page the least needed columns give way (SHED), so the ledger
-## never runs past its paper.
-func _layout()->void:
-	if size.x<=0.0:return
-	# Facts wrap as a unit; freshness and the Talk action stay reachable.
-	_shape=[]
-	_apply_shape()
-
-func _apply_shape()->void:
-	for id:String in parts:
-		for node:Variant in parts[id]:
-			if is_instance_valid(node):(node as Control).visible=not id in _shape
-
-## How old our word is, at a glance: a full ring of ink for recent word, half
-## for aging, an empty ring for stale, a broken one for undated; a gold
-## diamond for our own count.
-class FreshMark extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var level:="none"
-	func _init()->void:
-		custom_minimum_size=Vector2(12,12);mouse_filter=Control.MOUSE_FILTER_PASS;size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	func _draw()->void:
-		var c:=size*0.5
-		var r:=4.5
-		match level:
-			"recent":draw_circle(c,r,T.GREEN)
-			"aging":
-				draw_arc(c,r,0.0,TAU,24,T.AMBER,1.5,true)
-				var half:=PackedVector2Array()
-				for i in 13:half.append(c+Vector2(cos(PI*float(i)/12.0),sin(PI*float(i)/12.0))*r)
-				draw_colored_polygon(half,T.AMBER)
-			"stale":draw_arc(c,r,0.0,TAU,24,T.RED,1.5,true)
-			"ours":draw_colored_polygon(PackedVector2Array([c+Vector2(0,-r),c+Vector2(r,0),c+Vector2(0,r),c+Vector2(-r,0)]),T.GOLD)
-			_:
-				for i in 6:draw_arc(c,r,TAU*float(i)/6.0,TAU*(float(i)+0.5)/6.0,4,T.INK_MUTED,1.2,true)
-
-
-## One count against the largest known: ink for the least it can be, a faded
-## band out to the most, a tick at our own count (not on our own row).
+## A small uncertainty band; the gold tick is our own comparable count.
 class RangeBar extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	var low:=-1.0
 	var high:=-1.0
 	var top:=1.0
 	var ours:=-1.0
 	var us:=false
-	func _init()->void:
-		mouse_filter=Control.MOUSE_FILTER_IGNORE
+	func _init()->void:mouse_filter=Control.MOUSE_FILTER_IGNORE
 	func _draw()->void:
 		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.08))
-		if high<0.0 or top<=0.0:return
-		var ink:=T.GOLD if us else T.INK
-		var sure:=size.x*clampf(low/top,0.0,1.0)
-		var most:=size.x*clampf(high/top,0.0,1.0)
+		if high<0 or top<=0:return
+		var ink:=T.TEAL if us else T.INK_MUTED
+		var sure:=size.x*clampf(low/top,0,1);var most:=size.x*clampf(high/top,0,1)
 		if most>sure:draw_rect(Rect2(sure,0,most-sure,size.y),Color(ink,0.28))
-		draw_rect(Rect2(0,0,maxf(sure,2.0 if high>0.0 else 0.0),size.y),ink)
-		if not us and ours>=0.0:
-			var x:=clampf(size.x*ours/top,1.0,size.x-1.0)
-			draw_line(Vector2(x,-3),Vector2(x,size.y+3),T.GOLD,2.0)
+		draw_rect(Rect2(0,0,sure,size.y),ink)
+		if not us and ours>=0:
+			var x:=clampf(size.x*ours/top,1,size.x-1);draw_line(Vector2(x,-2),Vector2(x,size.y+2),T.GOLD,1)

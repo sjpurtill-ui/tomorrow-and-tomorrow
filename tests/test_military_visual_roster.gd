@@ -73,7 +73,7 @@ func test_roster_and_policy_wrap_at_small_sizes_and_keep_close_and_navigation_re
 			assert_bool(screen.panel.get_global_rect().encloses(screen.close_button.get_global_rect())).is_true()
 			assert_bool(screen.panel.get_global_rect().encloses(screen.management_button.get_global_rect())).is_true()
 			assert_float(screen.body.get_combined_minimum_size().x).is_less_equal(screen.scroll.size.x)
-			if policy:assert_int(screen.policy_grid.columns).is_equal(4 if screen.panel.size.x>=920 else 2)
+			if policy:assert_int(screen.policy_grid.columns).is_equal(4 if screen.panel.size.x>=1100 else 2)
 
 func test_unknown_field_report_uses_no_model_or_invented_readiness()->void:
 	MilitaryCampaign.create_field_army(2)

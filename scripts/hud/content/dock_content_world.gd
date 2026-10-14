@@ -32,6 +32,7 @@ const FIND_ITEMS:=3
 ## The Peoples-we-know ledger's own view (the column it is sorted by, the
 ## other way round, whose towns are open), kept across the daily rebuilds.
 var peoples_view:Dictionary={"sort":"people","flip":false,"open":""}
+var known_world_view:Dictionary={"lead":"","query":""}
 ## World › Peoples' one counter line and its pointer, made by peoples_tab().
 var counter:=""
 var counter_tip:=""
@@ -79,21 +80,23 @@ func known_world_blocks(exploration:Dictionary)->Array:
 	var blocks:Array=[]
 	var peoples:=peoples_block()
 	if not peoples.is_empty():blocks.append(peoples)
-	blocks.append({"type":"known_world","compact":true,"model":known_world_model(exploration)})
+	blocks.append({"type":"known_world","compact":true,"model":known_world_model(exploration),"view":known_world_view})
 	return blocks
 
 ## "Peoples we know" (hud/peoples_known_board.gd); {} before we meet anyone.
 func peoples_block()->Dictionary:
 	var model:=PeoplesModel.build()
 	if int(model.get("met",0))<=0:return {}
-	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"counter":counter,"counter_tip":counter_tip,"side":feelings(),"_print":[model.hash(),counter,int(GameState.elapsed_days)/30]}
+	var our:=preload("res://scripts/standing.gd").strengths()
+	var regard:=feelings(our)
+	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"counter":counter,"counter_tip":counter_tip,"side":regard,"own":our,"_print":[model.hash(),regard.hash(),our.hash(),counter,int(GameState.elapsed_days)/30]}
 
 ## How each people we know sees us, as the Standing page reckons it
 ## (dock_content_standing.gd: the same rows, the same six feelings).
-func feelings()->Array:
+func feelings(our:Dictionary={})->Array:
 	var StandingPage:=preload("res://scripts/hud/content/dock_content_standing.gd")
 	var Standing:=preload("res://scripts/standing.gd")
-	var our:=Standing.strengths()
+	if our.is_empty():our=Standing.strengths()
 	var page=StandingPage.new(terrain,hud)
 	return (page.board_data(our,StandingPage.views_of(our)) as Dictionary).get("peoples",[])
 
@@ -147,10 +150,12 @@ static func newest_tellings(reports:Array,count:int)->Array:
 ## World › History: what has passed between us and the world, by year
 ## (hud/world_history_board.gd). Our own towns' story is Home › History; the
 ## Chronicle holds both.
-var history_view:Dictionary={"filter":"all","shown":40}
+var history_view:Dictionary={"filter":"all","archive":false,"query":"","page":0,"selected":"","reader_open":false}
 func history_tab()->Dictionary:
 	var entries:=history_entries()
-	return {"kpis":[],"brief":{},"blocks":[{"type":"world_history","entries":entries,"view":history_view,"_print":[entries.size(),String(entries[0].get("title","")) if not entries.is_empty() else ""]}]}
+	var evidence:Array=[]
+	for entry:Dictionary in entries:evidence.append([entry.day,entry.title,entry.text,entry.count])
+	return {"kpis":[],"brief":{},"blocks":[{"type":"world_history","entries":entries,"view":history_view,"_print":hash(evidence)}]}
 
 const WORLD_KINDS:={"contact":"contact","first_contact":"contact","envoy":"contact","diplomacy":"contact","foreign":"contact","trade":"contact","peace":"war","war":"war","battle":"war","raid":"war","scout":"scout","scouting":"scout","scout_report":"scout","scout_party":"scout"}
 ## The Chronicle's notices and moments that concern the world, newest first:
@@ -164,9 +169,11 @@ func history_entries()->Array:
 		if group=="" and kind in ["story","work",""]:group=String(WORLD_KINDS.get(Chronicle.kind_of(e),""))
 		if group=="":continue
 		var label:=Chronicle.date_label(int(e.get("day",0)))
+		var action:Variant=e.get("action",{})
+		var action_kind:=String(action.get("kind","")) if action is Dictionary else ""
 		out.append({"day":int(e.get("day",0)),"season":label.get_slice(" · ",1),"title":String(e.get("title","")),"text":String(e.get("text","")),
 			"group":group,"icon":{"contact":"contact","war":"war","scout":"scout"}.get(group,"world"),"count":int(e.get("count",1)),
-			"weighty":String(e.get("tier",""))=="moment","on_open":_history_open(e.get("action",{}))})
+			"weighty":String(e.get("tier",""))=="moment","on_open":_history_open(action),"action_label":{"scout_report":"Read scout report","battle":"Battle report"}.get(action_kind,"Open related page")})
 	return out
 
 ## Where a history row leads, if anywhere: a scout's telling, a battle, a page.
@@ -426,19 +433,18 @@ func _peoples_model(encounters:Array,home:Vector2,pace:float)->Array:
 
 func _leads_model(leads:Array,home:Vector2,pace:float)->Array:
 	var result:Array=[]
-	for lead:Dictionary in leads.slice(0,6):
+	for lead:Dictionary in leads:
 		var center:=vec(lead.get("center",{}))
 		var confidence:=float(lead.get("confidence",0.0))
 		var word:="A firm telling" if confidence>=.35 else ("An uncertain telling" if confidence>=.15 else "A faint telling")
 		var direction:=compass(home,center) if center!=Vector2.INF else "unknown"
 		var distance:=walk_text(home.distance_to(center),pace) if center!=Vector2.INF else "an unknown distance"
-		result.append({"name":String(lead.get("name","")),"confidence":confidence,"word":word,
+		result.append({"id":String(lead.get("id","")),"name":String(lead.get("name","")),"confidence":confidence,"word":word,
 			"text":"%s spoke of %s, somewhere to the %s — %s." % [_first_upper(String(lead.get("via","travelers"))),preload("res://scripts/hud/known_world_board.gd").the_name(String(lead.get("name","strangers"))),direction,distance],
 			"where":"%s · %s" % [_first_upper(direction) if direction!="unknown" else "?",distance.replace("about ","~").replace(" days' walk"," days").replace("more than a season's walk","a season+").replace("within a day's walk","<1 day")],
 			"stale":String(lead.get("state",""))=="stale","searched":int(lead.get("attempts",0))})
 	for rumored:Dictionary in CivilizationSystem.rumored_civilizations_snapshot():
-		if result.size()>=8:break
-		result.append({"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
+		result.append({"id":"heard:"+String(rumored.get("name",""))+":"+String(rumored.get("direction","")),"name":String(rumored.get("name","")),"confidence":.2,"word":"Hearsay","where":"%s · %s" % [_first_upper(String(rumored.get("direction","?"))),String(rumored.get("distance_hint","?"))],
 			"text":"Some speak of the %s, off to the %s, %s away." % [String(rumored.get("name","strangers")),String(rumored.get("direction","an unknown direction")),String(rumored.get("distance_hint","an unknown distance"))],"stale":false,"searched":0})
 	return result
 

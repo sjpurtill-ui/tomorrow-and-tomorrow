@@ -92,6 +92,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"materials_ledger":
 				var panel:=preload("res://scripts/hud/materials_ledger.gd").new()
 				section.add_child(panel);panel.setup(block)
+			"deliveries_board":
+				var board:=preload("res://scripts/hud/deliveries_board.gd").new();section.add_child(board);board.setup(block)
 			"trade_board":
 				var trade:=preload("res://scripts/hud/trade_board.gd").new();section.add_child(trade);trade.setup(block)
 			"provisions":

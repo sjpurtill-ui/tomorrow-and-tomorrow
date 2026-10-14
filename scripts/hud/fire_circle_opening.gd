@@ -19,6 +19,7 @@ const Lines:=preload("res://scripts/fire_circle_voice.gd")
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const Brief:=preload("res://scripts/hud/course_choice_brief.gd")
 const SERIF:="res://assets/fonts/cinzel/Cinzel.ttf"
 const UI_FONT:="res://assets/fonts/battle/Barlow-Medium.ttf"
 
@@ -34,6 +35,12 @@ var echo:Label
 var answers:VBoxContainer
 var more_button:Button
 var more_grid:GridContainer
+var more_page:=0
+var more_pager:HBoxContainer
+var more_count:Label
+var more_previous:Button
+var more_next:Button
+var payoff:Label
 var typed:LineEdit
 var confirm:Button
 var name_input:LineEdit
@@ -91,20 +98,30 @@ func _ready()->void:
 
 func _build_purpose(column:VBoxContainer)->void:
 	speech.text="“%s”" % Lines.say(person,"ask")
+	var stakes:=_label("Shape your people's first 100 years. Choose strengths worth developing and the trade-offs you can live with. You choose again each century; earlier traditions live on.",14,T.INK_MUTED)
+	stakes.name="ChoiceStakes";stakes.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(stakes)
+	var research_note:=_label("Each path boosts two research fields by 25%; other research is 5% slower.",14,T.INK_MUTED);research_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(research_note)
 	answers=VBoxContainer.new();answers.add_theme_constant_override("separation",8);column.add_child(answers)
 	var profile:=PlanetEnvironment.profile_at(CivilizationSystem.player_world_origin)
 	var first:=Lines.offered(profile,int(GameState.world_seed))
 	# Four cards suited to the land; every other answer waits behind one toggle.
-	var offered_row:=GridContainer.new();offered_grid=offered_row;offered_row.columns=4;offered_row.add_theme_constant_override("h_separation",12);offered_row.add_theme_constant_override("v_separation",12);answers.add_child(offered_row)
+	var offered_row:=GridContainer.new();offered_grid=offered_row;offered_row.columns=2;offered_row.add_theme_constant_override("h_separation",12);offered_row.add_theme_constant_override("v_separation",12);answers.add_child(offered_row)
 	for id in first: _answer(offered_row,id,true,false)
-	more_button=Button.new();more_button.name="OtherAnswers";more_button.text="Other answers…";more_button.flat=true;more_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	more_button=Button.new();more_button.name="OtherAnswers";more_button.text="Explore 10 other paths";more_button.flat=true;more_button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	more_button.add_theme_color_override("font_color",T.INK_MUTED);more_button.add_theme_font_size_override("font_size",14)
 	T.apply_button_style(more_button,false)
 	more_button.pressed.connect(func()->void:_show_more(not more_grid.visible))
 	answers.add_child(more_button)
-	more_grid=GridContainer.new();more_grid.name="MoreAnswers";more_grid.columns=5;more_grid.visible=false
+	more_grid=GridContainer.new();more_grid.name="MoreAnswers";more_grid.columns=2;more_grid.visible=false
 	more_grid.add_theme_constant_override("h_separation",8);more_grid.add_theme_constant_override("v_separation",8);answers.add_child(more_grid)
 	for id in Lines.others(first): _answer(more_grid,id,false,true)
+	more_pager=HBoxContainer.new();more_pager.visible=false;more_pager.add_theme_constant_override("separation",8);answers.add_child(more_pager)
+	more_previous=Button.new();more_previous.name="PreviousAnswers";more_previous.text="Previous";T.apply_button_style(more_previous);more_pager.add_child(more_previous)
+	more_previous.pressed.connect(func()->void:more_page-=1;_show_more(true))
+	more_count=_label("",14,T.INK_MUTED);more_count.size_flags_horizontal=Control.SIZE_EXPAND_FILL;more_count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;more_pager.add_child(more_count)
+	more_next=Button.new();more_next.name="NextAnswers";more_next.text="Next";T.apply_button_style(more_next);more_pager.add_child(more_next)
+	more_next.pressed.connect(func()->void:more_page+=1;_show_more(true))
+	payoff=_label("",14,T.INK);payoff.name="SelectionPayoff";payoff.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;payoff.visible=false;answers.add_child(payoff)
 	if _online():
 		typed=LineEdit.new();typed.name="OwnWords";typed.placeholder_text="Or say it in your own words…";typed.max_length=240;typed.custom_minimum_size.y=32
 		typed.add_theme_font_size_override("font_size",14)
@@ -120,30 +137,23 @@ func _build_purpose(column:VBoxContainer)->void:
 
 func _show_more(open:bool)->void:
 	more_grid.visible=open
+	offered_grid.visible=not open
+	more_pager.visible=open
+	var others:=ambition_buttons.filter(func(button:Button)->bool:return bool(button.get_meta("more",false)))
+	more_page=clampi(more_page,0,maxi(0,ceili(others.size()/4.0)-1))
 	for button in ambition_buttons:
-		if bool(button.get_meta("more",false)): button.visible=open or String(button.get_meta("ambition"))==selected_focus
-	more_button.text="Fewer answers" if open else "Other answers…"
+		button.visible=(open and others.find(button)/4==more_page) if bool(button.get_meta("more",false)) else not open
+	more_count.text="%d–%d of %d other paths" % [more_page*4+1,mini(more_page*4+4,others.size()),others.size()]
+	more_previous.disabled=more_page==0;more_next.disabled=(more_page+1)*4>=others.size()
+	more_button.text="Back to the first four" if open else "Explore %d other paths" % others.size()
 	_layout.call_deferred()
 
 func _answer(parent:Container,id:String,shown:bool,small:bool)->void:
-	## One answer as a card: an icon and a few words. The full sentence is the
-	## tooltip, and is what the god is heard to say once it is chosen.
-	var button:=Button.new();button.name="Answer_"+id
-	button.text=String(Lines.LABELS.get(id,PeopleDirection.AMBITIONS[id].name))
-	button.icon=Lines.icon(id,T.GOLD_TEXT,36 if small else 48)
-	button.icon_alignment=HORIZONTAL_ALIGNMENT_CENTER;button.vertical_icon_alignment=VERTICAL_ALIGNMENT_TOP
-	button.expand_icon=false;button.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	button.custom_minimum_size=Vector2(0,72) if small else Vector2(0,104)
+	var button:=preload("res://scripts/hud/course_choice_card.gd").new();button.name="Answer_"+id
+	button.course_id=id;button.caption=String(Lines.LABELS.get(id,PeopleDirection.AMBITIONS[id].name));button.art_index=PeopleDirection.AMBITIONS.keys().find(id)
 	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	T.apply_button_style(button,false)
-	button.add_theme_font_size_override("font_size",14 if small else 16)
-	button.add_theme_constant_override("icon_max_width",36 if small else 48)
 	button.set_meta("ambition",id);button.set_meta("more",small);button.visible=shown
-	button.add_theme_stylebox_override("normal",_box(T.PAPER_RAISED,T.RULE,12))
-	button.add_theme_stylebox_override("hover",_box(T.HOVER_BG,T.ACTION,12))
-	button.add_theme_stylebox_override("pressed",_box(T.ACTIVE_BG,T.ACTION,12))
-	button.add_theme_stylebox_override("focus",T.gold_outline_style())
-	button.tooltip_text=String(Lines.ANSWERS.get(id,PeopleDirection.AMBITIONS[id].vision))
+	button.tooltip_text=String(Lines.ANSWERS.get(id,PeopleDirection.AMBITIONS[id].vision))+"\n"+Brief.full(id)
 	button.pressed.connect(func()->void:typed_words="";_select(id))
 	parent.add_child(button);ambition_buttons.append(button)
 
@@ -152,14 +162,15 @@ func _select(id:String)->void:
 	selected_focus=id
 	for button in ambition_buttons:
 		var mine:=String(button.get_meta("ambition"))==id
-		if mine and bool(button.get_meta("more",false)) and not more_grid.visible: _show_more(true)
-		button.add_theme_color_override("font_color",T.GOLD_TEXT if mine else T.INK)
-		button.add_theme_stylebox_override("normal",_box(T.ACTIVE_BG if mine else T.PAPER_RAISED,T.ACTION if mine else T.RULE,12))
+		if mine and bool(button.get_meta("more",false)):
+			more_page=ambition_buttons.filter(func(other:Button)->bool:return bool(other.get_meta("more",false))).find(button)/4;_show_more(true)
+		button.select(mine)
 	var said:=typed_words if typed_words!="" else String(Lines.ANSWERS.get(id,""))
 	echo.text="You: “%s”\n%s: “%s”" % [said,String(person.get("name","The Hearth Chief")).get_slice(" ",0),Lines.say(person,"reply")]
 	echo.visible=true
+	payoff.text="You gain: "+String(Brief.brief(id).full_gains)+".";payoff.visible=true
 	confirm.disabled=false
-	confirm.text="So it will be · set out"
+	confirm.text="Choose %s · begin our first century" % String(Lines.LABELS.get(id,id))
 	_layout.call_deferred()
 
 func _begin()->void:
@@ -211,9 +222,9 @@ func named_line(chosen:String)->String:
 func _layout()->void:
 	if not is_instance_valid(card): return
 	var extent:=get_viewport().get_visible_rect().size
-	card.custom_minimum_size=Vector2(minf(960.0,extent.x-32.0),0)
-	if is_instance_valid(offered_grid):offered_grid.columns=4 if extent.x>=1100 else 2
-	if is_instance_valid(more_grid):more_grid.columns=5 if extent.x>=1100 else 3
+	card.custom_minimum_size=Vector2(minf(1200.0 if mode=="purpose" else 960.0,extent.x-32.0),0)
+	if is_instance_valid(offered_grid):offered_grid.columns=2
+	if is_instance_valid(more_grid):more_grid.columns=2
 	if is_instance_valid(body_scroll):body_scroll.custom_minimum_size.y=minf(body_row.get_combined_minimum_size().y,maxf(200,extent.y-(204 if mode=="purpose" else 144)))
 
 func _box(bg:Color,border:Color,pad:float)->StyleBoxFlat:

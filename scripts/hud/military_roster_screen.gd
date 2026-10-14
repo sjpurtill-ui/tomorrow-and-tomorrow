@@ -44,6 +44,11 @@ var hero_values:Dictionary={}
 var policy_shortcut:Button
 var policy_grid:GridContainer
 var roster_filter:="all"
+var service_page:=0
+var service_query:=""
+var service_selected:=""
+var service_choices:Dictionary={}
+const SERVICE_PAGE_SIZE:=4
 var summary_costs:Dictionary={}
 var layout_size:=Vector2.ZERO
 var roster_button:Button
@@ -85,7 +90,7 @@ func _ready()->void:
 	if service not in services:service="army"
 	for domain:String in services:
 		var choice:=domain
-		var button:=_button(header,_service_name(domain),func():service=choice;page="war" if choice=="army" else ("forces" if page=="war" else page);selected_row={};roster_filter="all";scroll.scroll_vertical=0;_build_body())
+		var button:=_button(header,_service_name(domain),func():service=choice;page="war" if choice=="army" else ("forces" if page=="war" else page);selected_row={};roster_filter="all";service_page=0;service_query="";service_selected="";scroll.scroll_vertical=0;_build_body())
 		button.icon=Art.symbol(domain,accent(domain),22)
 		button.toggle_mode=true;service_buttons[domain]=button
 		# A lone land force needs no service switch; nor does the War screen
@@ -204,7 +209,8 @@ func _layout()->void:
 	if view!=layout_size:
 		layout_size=view
 		var inset:=maxf(16,view.x*.045)
-		panel.position=Vector2(inset,T.CONTENT_TOP);panel.size=Vector2(view.x-inset*2,view.y-100)
+		var width:=minf(1200,view.x-inset*2) if service!="army" else view.x-inset*2
+		panel.position=Vector2((view.x-width)*.5,T.CONTENT_TOP);panel.size=Vector2(width,view.y-100)
 		for board:Node in [forces_board,readiness_board]:
 			if is_instance_valid(board):board.call("set_available_width",_body_width())
 	if is_instance_valid(body):
@@ -213,7 +219,7 @@ func _layout()->void:
 		for child:Control in column.get_children():
 			if child!=scroll:content_height+=child.get_combined_minimum_size().y
 		panel.size.y=clampf(content_height+2,300,maxf(300,view.y-100))
-	if is_instance_valid(policy_grid):policy_grid.columns=4 if panel.size.x>=920 else 2
+	if is_instance_valid(policy_grid):policy_grid.columns=4 if panel.size.x>=1100 else 2
 
 func _production()->void:
 	var scene:=get_tree().current_scene
@@ -299,8 +305,12 @@ func _support()->void:
 		readiness_board.close_wanted.connect(queue_free)
 		support_labels=readiness_board.chips
 		return
-	var grid:=GridContainer.new();grid.columns=2 if panel.size.x>=760 else 1;grid.add_theme_constant_override("h_separation",12);grid.add_theme_constant_override("v_separation",12);body.add_child(grid)
+	var service_rows:=_rows();rows_signature=_signature(service_rows)
+	var spread:=_service_spread()
+	var selected:=_service_index(service_rows,spread[0])
+	var grid:VBoxContainer=spread[1]
 	for item:Dictionary in _support_data():
+		if String(item.id)!="empty" and (selected.is_empty() or String(item.id)!=String(selected.id)):continue
 		var card:=PanelContainer.new();card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;card.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,16));grid.add_child(card)
 		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
 		_kicker(column,String(item.label))
@@ -315,10 +325,12 @@ func _body_width()->float:
 	return maxf(0.0,panel.size.x-72.0)
 
 func _update_support()->void:
+	var rows:=_rows()
+	if _signature(rows)!=rows_signature:_build_body();return
+	_update_service_choices(rows)
 	var items:=_support_data()
-	if items.size()!=support_labels.size():_build_body();return
 	for item:Dictionary in items:
-		if not support_labels.has(item.id):_build_body();return
+		if not support_labels.has(item.id):continue
 		support_labels[item.id].value.text=String(item.value)
 		support_labels[item.id].note.text=String(item.note);support_labels[item.id].note.tooltip_text=String(item.note)
 
@@ -326,7 +338,7 @@ func _management(sub:int)->void:
 	_show_page("support" if sub==3 else "recruitment")
 
 func _show_page(value:String)->void:
-	page=value;training_view=page=="training";selected_row={};editor_id=-1
+	page="forces" if service!="army" and value=="support" else value;training_view=page=="training";selected_row={};editor_id=-1
 	scroll.scroll_vertical=0;_build_body()
 
 func _map_command()->void:
@@ -370,7 +382,10 @@ func _process(delta:float)->void:
 	var rows:=_rows();_update_hero(rows)
 	var visible:=_filtered(rows)
 	if _signature(visible)!=rows_signature:_build_body();return
-	for i in mini(visible.size(),bindings.size()):_update_row(bindings[i],visible[i])
+	_update_service_choices(visible)
+	for binding:Dictionary in bindings:
+		for current:Dictionary in visible:
+			if String(current.id)==String(binding.row.id):_update_row(binding,current);break
 	for row:Dictionary in rows:
 		if row.id==selected_row.get("id",""):selected_row=row;_update_inspection();break
 
@@ -395,7 +410,7 @@ func _bar(parent:Node,color:Color,mode:String="segments")->ProgressBar:
 func _clear()->void:
 	if is_instance_valid(forces_board) and not bool(forces_board.strip_only):army_filter=String(forces_board.filter)
 	for child in body.get_children():body.remove_child(child);child.queue_free()
-	bindings.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();support_labels={};policy_grid=null;notice_label=null
+	bindings.clear();service_choices.clear();policy_buttons.clear();policy_cards.clear();service_indicators.clear();hero_values.clear();summary_costs.clear();inspection_labels.clear();support_labels={};policy_grid=null;notice_label=null
 	forces_board=null;readiness_board=null
 
 func _build_body()->void:
@@ -411,7 +426,7 @@ func _build_body()->void:
 	if training_view:page="training"
 	# Fleet and air preparation were only doorways. Keep old navigation targets
 	# working while placing those same actions directly with the forces.
-	if service!="army" and page in ["leaders","wars","recruitment"]:page="forces"
+	if service!="army" and page in ["leaders","wars","recruitment","support"]:page="forces"
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
 	# The army is grand strategy on one page: how many serve, our enemies and
 	# what to do about each, and our leaders (hud/war_board.gd). No tabs. Every
@@ -421,11 +436,12 @@ func _build_body()->void:
 	if is_instance_valid(nav_row):nav_row.visible=not war
 	# Boats and wings keep their own pages; the leaders and the wars are the
 	# War screen's.
-	for key in ["leaders","wars","recruitment"]:
+	for key in ["leaders","wars","recruitment","support"]:
 		if page_buttons.has(key):page_buttons[key].visible=service=="army"
 	if war:
 		_war();return
 	if service!="army" and page in ["leaders","wars"]:page="forces"
+	body.add_theme_constant_override("separation",12 if service!="army" else 24)
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
 	if page=="wars":_wars();return
@@ -437,14 +453,11 @@ func _build_body()->void:
 		scroll.set_deferred("scroll_vertical",saved_scroll);return
 	var rows:=_rows();_hero(rows)
 	if training_view:_policy();scroll.set_deferred("scroll_vertical",saved_scroll);return
-	var prepare:=HFlowContainer.new();prepare.add_theme_constant_override("h_separation",8);prepare.add_theme_constant_override("v_separation",8);body.add_child(prepare)
-	prepare.tooltip_text="Crews and craft are organized through command. New craft are made in Production."
-	_button(prepare,"Service command",_map_command)
-	_button(prepare,"Military production ↗",_production)
-	var filters:=HBoxContainer.new();filters.add_theme_constant_override("separation",6);body.add_child(filters)
+	var filters:=HFlowContainer.new();filters.add_theme_constant_override("h_separation",6);filters.add_theme_constant_override("v_separation",6);body.add_child(filters)
 	for definition:Array in [["all","All forces"],["attention","Need your attention"],["training","In training"]]:
-		var choice:=String(definition[0]);var button:=_button(filters,String(definition[1]),func():roster_filter=choice;_build_body())
+		var choice:=String(definition[0]);var button:=_button(filters,String(definition[1]),func():roster_filter=choice;service_page=0;selected_row={};_build_body())
 		button.toggle_mode=true;button.set_pressed_no_signal(roster_filter==choice)
+	_button(filters,"Military production ↗",_production)
 	notice_label=_wrapped(body,notice,14,T.GOLD);notice_label.visible=not notice.is_empty()
 	var visible:=_filtered(rows);rows_signature=_signature(visible)
 	if rows.is_empty():
@@ -453,11 +466,55 @@ func _build_body()->void:
 		T.text(_label(content,{"navy":"No boats are in service yet","air":"No aircraft are in service yet"}[service]),"voice",TEXT)
 		_wrapped(content,{"navy":"Build a base and commission craft through service command.","air":"Build a field and commission aircraft through service command."}[service])
 		_button(content,"Service command",_map_command,true)
-	elif visible.is_empty():_wrapped(body,"No forces match this filter.")
-	for data:Dictionary in visible:
-		_unit_card(data)
-		if data.id==selected_row.get("id",""):selected_row=data;_inspection()
+		return
+	elif visible.is_empty():
+		_wrapped(body,"No forces match this filter.")
+		return
+	var spread:=_service_spread()
+	var chosen:=_service_index(visible,spread[0])
+	if not chosen.is_empty():
+		_unit_card(chosen,spread[1])
+		if chosen.id==selected_row.get("id",""):selected_row=chosen;_inspection(spread[1])
 	scroll.set_deferred("scroll_vertical",saved_scroll)
+
+## A compact, bounded force index with one detailed force, shared with readiness.
+func _service_spread()->Array[VBoxContainer]:
+	var spread:=BoxContainer.new();spread.vertical=_body_width()<780;spread.add_theme_constant_override("separation",14);body.add_child(spread)
+	var index:=VBoxContainer.new();index.custom_minimum_size.x=280;index.add_theme_constant_override("separation",8);spread.add_child(index)
+	var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.add_theme_constant_override("separation",10);spread.add_child(reading)
+	return [index,reading]
+
+func _service_index(rows:Array[Dictionary],host:VBoxContainer)->Dictionary:
+	var search_row:=HBoxContainer.new();search_row.add_theme_constant_override("separation",8);host.add_child(search_row)
+	var search:=LineEdit.new();search.name="FindServiceForce";search.placeholder_text="Find a force";search.text=service_query;search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;search_row.add_child(search)
+	var apply:=func()->void:service_query=search.text;service_page=0;selected_row={};_build_body()
+	search.text_submitted.connect(func(_value:String)->void:apply.call());_button(search_row,"Find",apply)
+	if not service_query.is_empty():_button(search_row,"Clear",func()->void:service_query="";service_page=0;_build_body())
+	var matching:=rows.filter(func(row:Dictionary)->bool:return service_query.strip_edges().is_empty() or (String(row.name)+" "+String(row.get("location",""))+" "+String(row.get("activity",""))).to_lower().contains(service_query.strip_edges().to_lower()))
+	service_page=clampi(service_page,0,maxi(0,ceili(matching.size()/float(SERVICE_PAGE_SIZE))-1))
+	var pager:=HBoxContainer.new();pager.add_theme_constant_override("separation",8);host.add_child(pager)
+	var count:=_label(pager,"%d–%d of %d" % [service_page*SERVICE_PAGE_SIZE+1 if not matching.is_empty() else 0,mini((service_page+1)*SERVICE_PAGE_SIZE,matching.size()),matching.size()],14,MUTED);count.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var previous:=_button(pager,"‹",func()->void:service_page-=1;selected_row={};_build_body());previous.name="PreviousServiceForces";previous.tooltip_text="Previous forces";previous.custom_minimum_size.x=40;previous.disabled=service_page==0
+	var next:=_button(pager,"›",func()->void:service_page+=1;selected_row={};_build_body());next.name="NextServiceForces";next.tooltip_text="Next forces";next.custom_minimum_size.x=40;next.disabled=(service_page+1)*SERVICE_PAGE_SIZE>=matching.size()
+	var page_rows:=matching.slice(service_page*SERVICE_PAGE_SIZE,(service_page+1)*SERVICE_PAGE_SIZE)
+	if not page_rows.any(func(row:Dictionary)->bool:return String(row.id)==service_selected):service_selected=String(page_rows[0].id) if not page_rows.is_empty() else ""
+	var choices:=GridContainer.new();choices.name="ServiceForceChoices";choices.columns=1;choices.add_theme_constant_override("v_separation",6);host.add_child(choices)
+	var chosen:Dictionary={}
+	for row:Dictionary in page_rows:
+		var id:=String(row.id)
+		var choice:=_button(choices,"",func()->void:service_selected=id;selected_row={};_build_body());choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.clip_text=true;choice.toggle_mode=true;choice.set_pressed_no_signal(id==service_selected)
+		service_choices[id]=choice
+		if id==service_selected:chosen=row
+	_update_service_choices(page_rows)
+	if page_rows.is_empty():_wrapped(host,"No forces match this search." if not service_query.is_empty() else "No forces to inspect.")
+	return chosen
+
+func _update_service_choices(rows:Array)->void:
+	for row:Dictionary in rows:
+		if not service_choices.has(String(row.id)):continue
+		var button:Button=service_choices[String(row.id)]
+		button.text="%s\n%s" % [Story.sentence_name(String(row.name)),"No report yet" if bool(row.get("unknown",false)) else "%d%% condition" % roundi(float(row.get("condition",0))*100)]
+		button.tooltip_text=button.text+"\n"+_place_words(row)
 
 ## The army's Forces page, HOI4's army overview (hud/forces_board.gd); over
 ## the Training page only its strip of totals.
@@ -469,28 +526,16 @@ func _forces(strip_only:bool=false)->void:
 	forces_board.command_opened.connect(_command_opened)
 
 func _hero(rows:Array[Dictionary])->void:
-	var hero:=PanelContainer.new();hero.custom_minimum_size.y=128;hero.clip_contents=true
-	hero.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,0));body.add_child(hero)
-	var layout:=HBoxContainer.new();layout.add_theme_constant_override("separation",16);hero.add_child(layout)
-	var margin:=MarginContainer.new();margin.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	for edge:String in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,16)
-	layout.add_child(margin)
-	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",4);words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;margin.add_child(words)
-	_kicker(words,"Your "+{"army":"forces","navy":"craft","air":"air service"}[service])
-	var counts:=HBoxContainer.new();counts.add_theme_constant_override("separation",10);words.add_child(counts)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",4);body.add_child(words)
+	var counts:=HFlowContainer.new();counts.add_theme_constant_override("h_separation",10);words.add_child(counts)
 	hero_values.formations=_label(counts,"");T.text(hero_values.formations,"voice",TEXT)
 	var dot:=_label(counts,"·");T.text(dot,"voice",MUTED)
 	hero_values.strength=_label(counts,"");T.text(hero_values.strength,"voice",TEXT)
 	hero_values.strength.tooltip_text="Counts include dated field reports; unreported strength is not guessed."
 	hero_values.strength.mouse_filter=Control.MOUSE_FILTER_PASS
 	hero_values.attention=_wrapped(words,"",14,TEXT)
-	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);words.add_child(controls)
-	policy_shortcut=_button(controls,"",func():training_view=true;page="training";_build_body())
+	policy_shortcut=_button(counts,"",func():training_view=true;page="training";_build_body())
 	policy_shortcut.tooltip_text="How much your forces drill, and what it costs"
-	var image:=TextureRect.new();image.texture=Art.artwork(service);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	image.custom_minimum_size=Vector2(minf(300,panel.size.x*.26),128);layout.add_child(image)
-	if Art.Early.active():image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_update_hero(rows)
 
 func _story(row:Dictionary)->Dictionary:
@@ -505,7 +550,7 @@ func _update_hero(rows:Array[Dictionary])->void:
 	var summary:=Story.summary(rows,told,service,EraWords.stage())
 	hero_values.formations.text=String(summary.forces);hero_values.strength.text=String(summary.fighters)
 	hero_values.attention.text=String(summary.attention)
-	hero_values.attention.add_theme_color_override("font_color",T.AMBER if int(summary.needing)>0 else T.GREEN)
+	hero_values.attention.add_theme_color_override("font_color",T.AMBER_TEXT if int(summary.needing)>0 else T.GREEN_TEXT)
 	policy_shortcut.text="Training: %s ›" % String(MilitaryCampaign.training_staff.policy(service).label).to_lower()
 
 func _training_level(drill:float)->String:
@@ -539,30 +584,32 @@ func _place_words(data:Dictionary)->String:
 		"report":return String(data.get("location","")).replace(" · report "," · report ").replace("d old"," days old")
 	return "In the field"
 
-func _unit_card(data:Dictionary)->void:
+func _unit_card(data:Dictionary,host:VBoxContainer)->void:
 	var selected:bool=data.id==selected_row.get("id","")
-	var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",_card_style(false,selected));body.add_child(card)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);card.add_child(row)
-	var art:=PanelContainer.new();art.custom_minimum_size=Vector2(112,112);art.clip_contents=true;art.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	var card:=PanelContainer.new();card.add_theme_stylebox_override("panel",_card_style(false,selected));host.add_child(card)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);card.add_child(stack)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);stack.add_child(row)
+	var art:=PanelContainer.new();art.custom_minimum_size=Vector2(88,88);art.clip_contents=true;art.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	art.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,0));row.add_child(art)
 	var portrait:Control=portraits.portrait(String(data.get("type_id","")),service,bool(data.get("unknown",false)));art.add_child(portrait)
 	if "backdrop" in portrait:portrait.backdrop=T.PAPER_SUNK
-	if Art.Early.active() and Art.EARLY_UNITS.has(String(data.get("type_id",""))):art.custom_minimum_size=Vector2(128,96)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",6);row.add_child(words)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);words.add_child(top)
-	var title:=_label(top,Story.sentence_name(String(data.name)));T.text(title,"value",TEXT)
+	var top:=VBoxContainer.new();top.add_theme_constant_override("separation",4);words.add_child(top)
+	var title:=_wrapped(top,Story.sentence_name(String(data.name)),22,TEXT)
 	var location:=_kicker(top,_place_words(data));location.size_flags_vertical=Control.SIZE_SHRINK_CENTER;location.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	location.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	var headline:=_wrapped(words,"",18,TEXT);T.text(headline,"voice_small",TEXT)
 	var binding:Dictionary={"title":title,"location":location,"card":card,"portrait":portrait,"headline":headline}
-	var facts:=GridContainer.new();facts.columns=2;facts.add_theme_constant_override("h_separation",12);facts.add_theme_constant_override("v_separation",5);words.add_child(facts)
+	binding.readiness=_wrapped(words,"",14,T.BODY)
+	words.move_child(binding.readiness,1)
+	var facts:=GridContainer.new();facts.columns=2;facts.add_theme_constant_override("h_separation",12);facts.add_theme_constant_override("v_separation",5);stack.add_child(facts)
 	for key:String in ["people","arms","drill","condition"]:
 		var kicker:=_kicker(facts,{"people":"People","arms":"Weapons","drill":"Drill","condition":"Shape"}[key]);kicker.custom_minimum_size.x=78
 		var text:=_wrapped(facts,"",14,T.BODY);text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		binding[key]=text;binding[key+"_kicker"]=kicker
 	binding.condition.add_theme_color_override("font_color",T.RED)
 	binding.activity_bar=_bar(words,accent());binding.activity_bar.custom_minimum_size=Vector2(160,18);binding.activity_bar.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;binding.activity_bar.marks=10
-	var side:=VBoxContainer.new();side.add_theme_constant_override("separation",8);side.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;side.custom_minimum_size.x=150;row.add_child(side)
+	var side:=HFlowContainer.new();side.add_theme_constant_override("h_separation",8);side.add_theme_constant_override("v_separation",8);stack.add_child(side)
 	binding.action=_button(side,"",func():_act(binding),true)
 	var chosen:=data.duplicate(true)
 	var select:=func():selected_row={} if selected else chosen;_build_body()
@@ -583,6 +630,7 @@ func _update_row(binding:Dictionary,data:Dictionary)->void:
 	binding.row=data;binding.story=story
 	binding.title.text=Story.sentence_name(String(data.name));binding.location.text=_place_words(data).to_upper()
 	binding.headline.text=String(story.headline)
+	binding.readiness.text="%d %s · %s · %d%% condition" % [int(data.get("count",0)),"boats" if service=="navy" else "aircraft",String(data.get("equipment_note","")),roundi(float(data.get("condition",0))*100)]
 	for key:String in ["people","arms","drill","condition"]:
 		var text:=String(story.get(key,""))
 		binding[key].text=text;binding[key].visible=not text.is_empty();binding[key+"_kicker"].visible=not text.is_empty()
@@ -642,8 +690,8 @@ func _raw_rows()->Array[Dictionary]:
 		result.append({"id":"%s:%s" % [service,unit.id],"kind":"service","service_equipment":missing_equipment,"auto_replace":bool(unit.get("auto_replace",true)),"crew_short":int(unit.get("crew_shortfall",0)),"type_id":type_id,"purpose":String(op.C.UNITS.get(type_id,{}).get("purpose","")),"name":unit.name,"glyph":"⚓" if service=="navy" else "✈","location":op.base(int(unit.base_id)).get("name","Base unavailable"),"count":op.hardware(unit),"authorized":authorized,"condition":float(unit.condition),"equipment":float(op.hardware(unit))/maxf(1,authorized),"equipment_note":"%d crew" % op.crew(unit),"skill":float(unit.get("proficiency",.45 if float(unit.training)>=1 else 0)),"experience":float(unit.experience),"in_training":staff_report.group=="training","activity":activity,"progress":float(unit.training) if float(unit.training)<1.0 else 0.0,"training_note":note})
 	return result
 
-func _inspection()->void:
-	var panel_detail:=PanelContainer.new();panel_detail.add_theme_stylebox_override("panel",_skin(T.PAPER,T.RULE_STRONG,16));body.add_child(panel_detail)
+func _inspection(host:VBoxContainer)->void:
+	var panel_detail:=PanelContainer.new();panel_detail.add_theme_stylebox_override("panel",_skin(T.PAPER,T.RULE_STRONG,16));host.add_child(panel_detail)
 	var layout:=VBoxContainer.new();layout.add_theme_constant_override("separation",8);panel_detail.add_child(layout)
 	_kicker(layout,{"army":"Who serves in it","navy":"The craft in it","air":"The aircraft in it"}[service])
 	inspection_labels.name=_label(layout,Story.sentence_name(String(selected_row.name)));T.text(inspection_labels.name,"voice",TEXT)
@@ -673,7 +721,13 @@ func _policy()->void:
 	## (how many drill at a time, the skill they aim for) and its cost; the
 	## explanations are in the tooltips.
 	var Icons:=preload("res://scripts/resource_icons.gd")
-	policy_grid=GridContainer.new();policy_grid.columns=4 if panel.size.x>=920 else 2
+	var investment:=HFlowContainer.new();investment.add_theme_constant_override("h_separation",24);body.add_child(investment)
+	for definition:Array in [["food","supply","extra food eaten","Food eaten by drill beyond ordinary rations. Staff always keep seven days of food for everyone else."],["materials","gear","materials used","Materials worn out in drill."],["time","date","first drill","First drill counts only days with food and gear to practise with; shortages pause it. Longer exercises take 72 to 252 such days."]]:
+		var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",8);chip.tooltip_text=String(definition[3]);chip.mouse_filter=Control.MOUSE_FILTER_PASS;investment.add_child(chip)
+		var icon:=TextureRect.new();icon.texture=Icons.command_texture(String(definition[1]),T.INK,48);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.custom_minimum_size=Vector2(22,22);icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(icon)
+		summary_costs[definition[0]]=_label(chip,"",20);summary_costs[definition[0]].add_theme_font_override("font",T.font("ui_strong"));summary_costs[definition[0]].mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var word:=_label(chip,String(definition[2]),13,MUTED);word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	policy_grid=GridContainer.new();policy_grid.columns=4 if panel.size.x>=1100 else 2
 	policy_grid.add_theme_constant_override("h_separation",10);policy_grid.add_theme_constant_override("v_separation",10);body.add_child(policy_grid)
 	for id:String in MilitaryCampaign.training_staff.POLICIES:
 		var definition:Dictionary=MilitaryCampaign.training_staff.POLICIES[id]
@@ -687,6 +741,7 @@ func _policy()->void:
 		for meter:Array in [["drilling",float(definition.share),"%d%% drill at a time" % roundi(float(definition.share)*100)],["drill",float(definition.target),"Aim for %d%% skill" % roundi(float(definition.target)*100)]]:
 			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);line.tooltip_text=String(meter[2]);line.mouse_filter=Control.MOUSE_FILTER_PASS;card.add_child(line)
 			var mark:=TextureRect.new();mark.texture=Icons.command_texture(String(meter[0]),T.INK_MUTED,32);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.custom_minimum_size=Vector2(16,16);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(mark)
+			var caption:=_label(line,"Drill at once" if String(meter[0])=="drilling" else "Skill target",14,MUTED);caption.custom_minimum_size.x=82;caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			var bar:ProgressBar=_bar(line,accent(),"segments");bar.marks=10;bar.value=float(meter[1])*100;bar.custom_minimum_size=Vector2(70,18);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			var value:=_label(line,"%d%%" % roundi(float(meter[1])*100),14,TEXT);value.add_theme_font_override("font",T.font("ui_strong"));value.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var effort:=_kicker(card,{"suspended":"Saves stores","maintain":"Light cost","regular":"Steady cost","intensive":"Heavy cost"}[id])
@@ -699,12 +754,6 @@ func _policy()->void:
 			var bar:=_bar(card,definition[2]);service_indicators[definition[0]]={"value":value,"bar":bar,"card":card}
 	policy_status=_label(body,"",14,TEXT);policy_status.clip_text=true;policy_status.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	policy_status.mouse_filter=Control.MOUSE_FILTER_PASS
-	var investment:=HFlowContainer.new();investment.add_theme_constant_override("h_separation",24);body.add_child(investment)
-	for definition:Array in [["food","supply","extra food eaten","Food eaten by drill beyond ordinary rations. Staff always keep seven days of food for everyone else."],["materials","gear","materials used","Materials worn out in drill."],["time","date","first drill","First drill counts only days with food and gear to practise with; shortages pause it. Longer exercises take 72 to 252 such days."]]:
-		var chip:=HBoxContainer.new();chip.add_theme_constant_override("separation",8);chip.tooltip_text=String(definition[3]);chip.mouse_filter=Control.MOUSE_FILTER_PASS;investment.add_child(chip)
-		var icon:=TextureRect.new();icon.texture=Icons.command_texture(String(definition[1]),T.INK,48);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.custom_minimum_size=Vector2(22,22);icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(icon)
-		summary_costs[definition[0]]=_label(chip,"",20);summary_costs[definition[0]].add_theme_font_override("font",T.font("ui_strong"));summary_costs[definition[0]].mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var word:=_label(chip,String(definition[2]),13,MUTED);word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	_update_policy()
 func _update_policy()->void:
 	var state:Dictionary=MilitaryCampaign.training_staff.snapshot(service)
