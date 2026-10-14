@@ -28,7 +28,7 @@ const Annals:=preload("res://scripts/chronicle_annals.gd")
 ## Lines of the list before "Earlier years" (each press shows this many more).
 const PAGE:=40
 ## The count's side.
-const COUNT_SIDE:=176.0
+const COUNT_SIDE:=150.0
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 ## A telling's line: its title (wrapping, never cut) and its season.
 const LINE_COLUMNS:=[{"key":"title","wrap":true},{"key":"season","width":60,"align":"right"}]
@@ -591,11 +591,22 @@ func _render_chips()->void:
 		chip.add_theme_stylebox_override("normal",face);chip.add_theme_stylebox_override("pressed",face);chip.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,6))
 		chip.pressed.connect(func()->void:filter=id;open_key="";shown=PAGE;_render_list())
 		chips.add_child(chip)
+	# Back from one year to every year.
+	if _one_year():
+		var back:=func()->void:
+			selected=-1;open_key=""
+			count.choose(_chosen_index());_render_folio();_render_list()
+		var every:=Dense.verb("Every year",back,"Show every year again, newest first")
+		every.name="EveryYear";chips.add_child(every)
 	chips.add_child(tallies_check)
 
 
 ## What is told, from the chosen year back: each year's line, then its
 ## tellings one line each, until the page is full.
+## True when an earlier year than the newest is chosen: the list shows it alone.
+func _one_year()->bool:
+	return selected>=0 and _chosen_index()>=0 and _chosen_index()<years.size()-1
+
 func _render_list()->void:
 	_render_chips()
 	for child in list.get_children():list.remove_child(child);child.queue_free()
@@ -603,7 +614,10 @@ func _render_list()->void:
 	var listed:=0
 	var start:=chosen if chosen>=0 else years.size()-1
 	var more:=false
+	# A year chosen on the count (or with the steps) shows that year alone.
+	var alone:=_one_year()
 	for i in range(start,-1,-1):
+		if alone and i!=chosen:break
 		var year:Dictionary=years[i]
 		var lines:=_year_lines(year)
 		if lines.is_empty() and i!=chosen:continue

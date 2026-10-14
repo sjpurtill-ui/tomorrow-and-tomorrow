@@ -172,8 +172,9 @@ func _known_page()->Dictionary:
 		var open:=expanded_domains.has(domain)
 		var total:=int(total_by.get(domain,0))
 		lines.append({"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS[domain]),"cells":{"field":Visuals.name_for(domain),"adds":adds if adds!="" else "Nothing yet; it opens later knowledge","known":"%s of %s" % [EraWords.grouped(found.size()),EraWords.grouped(total)]},
-			"bar":{"value":float(found.size())/maxf(1.0,float(total))},"button":{"label":"Close" if open else "Open","on_press":_toggle_domain.bind(domain),"tip":"Every effect %s adds, and its findings" % Visuals.name_for(domain).to_lower()},
-			"tip":"\n".join(effect_rows.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))})
+			# The row itself opens and closes the field (its frame sits beneath it).
+			"bar":{"value":float(found.size())/maxf(1.0,float(total)),"width":120},"on_click":_toggle_domain.bind(domain),
+			"tip":("Click to close."+"\n" if open else "Click for every effect and finding."+"\n")+"\n".join(effect_rows.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))})
 		if not open:continue
 		var effects:Array=[]
 		for row:Dictionary in effect_rows:
@@ -226,25 +227,25 @@ func _tree_chosen(row:Dictionary,next:Dictionary)->Dictionary:
 			chosen.state=("Waiting: "+DiscoverySystem.plain_wait_reason(row.get("missing",[]))) if next.has(id) else "Further along: it opens once the questions before it are answered"
 			chosen.tone="warn"
 	if not known or not effects.is_empty() or Borders.research_note(id)!="":
-		var does:=Explainer.summary(effects,4) if not effects.is_empty() else "Nothing by itself; it opens later questions"
+		var does:=Explainer.summary(effects,1) if not effects.is_empty() else "Nothing by itself"
 		var amounts:=Explainer.amount_lines(effects,Explainer.practice_level(id) if known else 1.0,Explainer.focus_scale(String(row.get("dynamic",""))) if known else 1.0,known)
 		chosen.facts.append(["Does" if known else "Would bring",does,amounts])
-	if Borders.research_note(id)!="":chosen.facts.append(["On the map",Borders.research_note(id)])
+	if Borders.research_note(id)!="":chosen.facts.append(["On the map","changes it",Borders.research_note(id)])
 	var builds:Array[String]=[]
 	for requirement:Variant in row.get("requires",[]):builds.append(String(DiscoverySystem.discovery_definition(String(requirement)).get("name",requirement)))
-	if not builds.is_empty():chosen.facts.append(["Builds on",", ".join(builds)])
-	if not known and not (row.get("missing",[]) as Array).is_empty() and status=="LOCKED":chosen.facts.append(["Waits for","; ".join(PackedStringArray(row.missing))])
+	if not builds.is_empty():chosen.facts.append(["Builds on",builds[0]+(" +%d" % (builds.size()-1) if builds.size()>1 else ""),", ".join(builds)])
+	if not known and not (row.get("missing",[]) as Array).is_empty() and status=="LOCKED":chosen.facts.append(["Waits for","%d condition%s" % [(row.missing as Array).size(),"" if (row.missing as Array).size()==1 else "s"],"\n".join(PackedStringArray(row.missing))])
 	if not known and float(row.get("years_ahead",0.0))>=1.0:
 		var factor:=DiscoverySystem.research_early_factor(row)
-		chosen.facts.append(["Price","%s the usual work: it belongs to a later age" % preload("res://scripts/hud/inquiry_board.gd")._times(factor),"Dated %d years after the age our learning has reached. Work on it goes slower in proportion; as our learning catches up its price falls." % roundi(float(row.years_ahead))])
+		chosen.facts.append(["Price","%s the work" % preload("res://scripts/hud/inquiry_board.gd")._times(factor),"Dated %d years after the age our learning has reached. Work on it goes slower in proportion; as our learning catches up its price falls." % roundi(float(row.years_ahead))])
 	# Who leads its line, and how their skills set its pace (office_levers.research_pace).
 	if not known:
 		var assignment:Dictionary=DiscoverySystem.research_assignment(row)
 		var leader:Dictionary=assignment.get("leader",{}) if assignment.get("leader") is Dictionary else {}
 		if not leader.is_empty():
-			chosen.facts.append(["Led by",("Nobody: the office of %s is empty" % String(leader.get("requested_office",leader.get("office",""))).to_lower()) if bool(leader.get("vacant",false)) else "%s, %s" % [String(leader.get("name","")),String(leader.get("office","")).to_lower()],leader_line(leader)])
+			chosen.facts.append(["Led by","nobody" if bool(leader.get("vacant",false)) else String(leader.get("name","")),("The office of %s is empty. " % String(leader.get("requested_office",leader.get("office",""))).to_lower() if bool(leader.get("vacant",false)) else "%s, %s. " % [String(leader.get("name","")),String(leader.get("office",""))])+leader_line(leader)])
 	var opens:Array=row.get("leads_to",[])
-	if not opens.is_empty():chosen.facts.append(["Opens",", ".join(PackedStringArray(opens.slice(0,4)))+(" and %d more" % (opens.size()-4) if opens.size()>4 else "")])
+	if not opens.is_empty():chosen.facts.append(["Opens","%d question%s" % [opens.size(),"" if opens.size()==1 else "s"],", ".join(PackedStringArray(opens))])
 	if bool(row.get("ready",false)) and status!="RESEARCHING":
 		chosen.on_research=_research_technology.bind(id)
 		chosen.research_label="Put a team on it"
@@ -330,8 +331,12 @@ func _artifact_study()->Dictionary:
 	var capacity:Dictionary=ArtifactCulture.A.study_capacity()
 	var summary:=ArtifactCulture.summary()
 	var item:=_artifact_study_item(int(capacity.total_weight),0)
-	var words:="%d waiting · %d in study · %d studied" % [int(summary.unstudied_count),int(summary.in_study_count),int(summary.studied_count)]
-	if float(capacity.researchers)>0:words+=" · %s a day" % ("%.1f study-work" % float(capacity.rate))
+	# Only what is not nothing: "3 waiting · 56 studied".
+	var bits:Array[String]=[]
+	if int(summary.unstudied_count)>0:bits.append("%d waiting" % int(summary.unstudied_count))
+	if int(summary.in_study_count)>0:bits.append("%d in study" % int(summary.in_study_count))
+	bits.append("%d studied" % int(summary.studied_count))
+	var words:=" · ".join(bits)
 	return {"share":float(capacity.weight)/maxf(1.0,float(capacity.total_weight)),"weight":int(capacity.weight),"words":words,"tip":String(item.tip),"on_less":item.on_minus,"on_more":item.on_plus}
 
 ## How fast the people learn and what limits it, every number the engine's

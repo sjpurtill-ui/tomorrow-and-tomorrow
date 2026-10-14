@@ -56,7 +56,8 @@ func _lives_blocks()->Array:
 		{"label":"Newborns died, first month","value":_n(int(GameState.lifetime_neonatal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Babies who died in their first month, since the people set out."},
 	]
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	var groups:=[["Working","productive","gathering, making, building","work"],["Tending others","support","care and keeping order","ceremony"],["Children and elders","dependent","looked after by the rest","birth"],["Away","away","on the road or under arms","scout"]]
+	# Those at work are the top bar's AT WORK (war_forces_model.gd at_work); not repeated here.
+	var groups:=[["Tending others","support","care and keeping order","ceremony"],["Children and elders","dependent","looked after by the rest","birth"],["Away","away","on the road or under arms","scout"]]
 	var everyone:=0
 	for key:String in ["productive","support","dependent","absent","mobilized"]:everyone+=int(profile.get(key,0))
 	var where:Array=[]
@@ -64,8 +65,8 @@ func _lives_blocks()->Array:
 		var count:=int(profile.get("absent",0))+int(profile.get("mobilized",0)) if spec[1]=="away" else int(profile.get(String(spec[1]),0))
 		where.append({"label":String(spec[0]),"value":_n(count),"bar":float(count)/maxf(1.0,float(everyone)),"icon":_mark(String(spec[3])),"tip":"%s: %s." % [String(spec[0]),String(spec[2])]})
 	var workforce:=GameState.workforce_capacity_snapshot()
-	where.append({"label":"Work done, at full strength","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
-		"tip":"Those at work get done what this many people at full strength would.%s" % ((" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else "")})
+	where.append({"label":"Their work, in full-strength hands","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
+		"tip":"A different measure from AT WORK on the top bar: what everyone at work gets done, counted as people at full strength (the skilled count for more, the hurt and weary for less).%s" % ((" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else "")})
 	var blocks:Array=[{"type":"fact_grid","heading":"Since we set out","min_column":250,"items":lifetime},{"type":"fact_grid","heading":"Where everyone is","min_column":250,"items":where}]
 	var killing:Dictionary=Health.mortality_block("How many people this cause kills each year at the present rate")
 	if not killing.is_empty():blocks.append(killing)
@@ -105,8 +106,8 @@ func _works_blocks()->Array:
 		{"label":"Works recorded","value":_n(records.size()),"icon":_mark("work"),"tip":"Building, infill, renewal, damage and loss; routine days are not kept."},
 		{"label":"Building phases","value":_n(phases),"icon":_mark("settlement"),"tip":"Founded, built, infilled and renewed."},
 		{"label":"Material used","value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(used),"icon":_mark("work"),"tip":"Every unit of material taken from the stores for building, infill and rebuilding."},
-		{"label":"Damaged or destroyed","value":("%d · %d destroyed" % [damaged+destroyed,destroyed]) if damaged+destroyed>0 else "None","icon":_mark("fire"),"tone":"bad" if destroyed>0 else "","tip":"Recorded damage and destruction."},
 	]
+	if damaged+destroyed>0:facts.append({"label":"Damaged or destroyed","value":"%d · %d destroyed" % [damaged+destroyed,destroyed],"icon":_mark("fire"),"tone":"bad" if destroyed>0 else "","tip":"Recorded damage and destruction."})
 	var rows:Array=[]
 	var ordered:=records.duplicate()
 	ordered.reverse()

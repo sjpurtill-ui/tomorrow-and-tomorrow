@@ -123,7 +123,7 @@ func test_scouting_window_lists_cities_and_orders_from_the_row()->void:
 	assert_str(row.status.text).is_equal("Watched")
 	assert_bool(row.stop.visible).is_true()
 	assert_bool(row.keep.visible).is_false()
-	assert_str(sheet.cities_note.text).contains("1 of 6 watched")
+	assert_str(sheet.cities_note.text).contains("watching 1")
 	row.stop.pressed.emit()
 	assert_dict(CivilizationSystem.scouting_staff.city_watch("near")).is_empty()
 	sheet.city_rows.far.once.pressed.emit()

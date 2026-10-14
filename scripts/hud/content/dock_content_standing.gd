@@ -91,7 +91,7 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	var names:={}
 	for p:Dictionary in peoples: names[String(p.civ_id)]=String(p.name)
 	return {"type":"standing","races":Races.races(our,names),"people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
-		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,"arts":Standing.arts_at_work(),
+		"renown_tip":renown_tip(our),"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,"arts":Standing.arts_at_work(),
 		"on_raise":func(section:String,sub:int)->void: jump(section,sub).call(),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),
 		"on_scouts":func()->void: if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"): terrain.call("_open_scout_dispatch_panel"),
@@ -117,6 +117,18 @@ static func might_words(why:String)->String:
 	if armed>=0.0:parts.append("armed %d%%" % roundi(armed*100.0))
 	if not parts.is_empty():head+=" (%s)" % ", ".join(parts)
 	return head+": "+tail
+
+## What awe and draw are made of, so "draw 30%" is not mistaken for the
+## Culture page's Allure (our ways' own appeal, one part of draw).
+static func renown_tip(our:Dictionary)->String:
+	var r:=Standing.renown(our)
+	var ways:=float(preload("res://scripts/artifact_culture.gd").allure_report(false).get("allure",0.0)) if ResourceLoader.exists("res://scripts/artifact_culture.gd") else -1.0
+	var pct:=func(id:String)->String: return "%d%%" % roundi(float((our.get(id,{}) as Dictionary).get("value",0.0))*100.0)
+	var lines:PackedStringArray=["Awe %d%%: from might (%s), great works (%s) and learning (%s)." % [roundi(float(r.awe)*100.0),pct.call("might"),pct.call("splendor"),pct.call("genius")],
+		"Draw %d%%: how strongly the whole of what we are pulls other peoples. Its parts: our works (%s), our ways, plenty (%s), learning (%s), order (%s) and our envoys' words (%s), less any fear our warbands cause." % [roundi(float(r.allure)*100.0),pct.call("splendor"),pct.call("wealth"),pct.call("genius"),pct.call("order"),pct.call("persuasion")]]
+	if ways>=0.0:lines.append("Our ways' allure (%d on the Culture page) is one part of draw, so the two figures differ." % roundi(ways*100.0))
+	lines.append(String(r.get("allure_why","")))
+	return "\n".join(lines)
 
 ## Our row's name: the nation's once named, else the people of the first town.
 func _our_name()->String:

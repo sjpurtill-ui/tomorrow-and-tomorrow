@@ -135,11 +135,11 @@ func test_every_lane_names_its_field_in_full()->void:
 	for width:int in [1120,600]:
 		var board:=_board(records,width)
 		for i in 5:await get_tree().process_frame
-		# One table line per question, in the shared table (dense_blocks.gd).
+		# One table line per field, in the shared table (dense_blocks.gd).
 		var table:Node=board.find_child("Fields",true,false)
 		assert_object(table).is_not_null()
 		var rows:Array=table.find_children("Row_*","",false,false)
-		assert_int(rows.size()).is_equal(records.size())
+		assert_int(rows.size()).is_equal(Board.lanes_of({"investigations":records,"fields":[]}).size())
 		for row:Control in rows:
 			assert_float(row.get_global_rect().end.x).is_less_equal(float(width)+1.0)
 			# Field names are never cut; a long question name wraps.

@@ -176,11 +176,10 @@ func _detail(parent:Node)->void:
 	var title:=_voice(String(chosen.name),20);title.name="ChosenName";parent.add_child(title)
 	var state:=T.make_label(String(chosen.state),12,tone_color(String(chosen.get("tone",""))) if String(chosen.get("tone",""))!="" else T.BODY);state.name="ChosenState";state.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(state)
 	if chosen.has("progress"):_bar(parent,float(chosen.progress),Visuals.color(String(data.get("domain",""))))
-	for fact:Array in chosen.get("facts",[]):
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
-		var label:=T.make_label(String(fact[0]),12,T.TEXT_SOFT);label.custom_minimum_size.x=78;label.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(label)
-		var value:=T.make_label(String(fact[1]),12,T.BODY);value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;value.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(value)
-		if fact.size()>2:value.tooltip_text=String(fact[2]);value.mouse_filter=Control.MOUSE_FILTER_PASS
+	# One line per fact, in the game's shared fact grid; the whole of each on hover.
+	var items:Array=[]
+	for fact:Array in chosen.get("facts",[]):items.append({"label":String(fact[0]),"value":String(fact[1]),"tip":String(fact[2]) if fact.size()>2 else String(fact[1])})
+	if not items.is_empty():preload("res://scripts/hud/dense_blocks.gd").render_fact_grid(parent,{"items":items,"min_column":220})
 	if chosen.has("on_research"):
 		var go:=preload("res://scripts/hud/dense_blocks.gd").verb(String(chosen.get("research_label","Put a team on it")),chosen.on_research,"A team takes this question up; the work done on its old question is kept.")
 		go.name="Research";go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;parent.add_child(go)

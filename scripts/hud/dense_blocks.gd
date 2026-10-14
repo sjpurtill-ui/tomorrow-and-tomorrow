@@ -19,7 +19,7 @@ extends RefCounted
 ##    columns:[{key, label, width? (px), align? ("left"|"right")}],
 ##    rows:[{cells:{key:String}, icon?: Texture2D, group?: String (a group
 ##           header line is drawn when it changes), tag?:{text, tone},
-##           bar?:{value 0..1, tone?, width? (px, 56)}, button?:{label, on_press, tip?,
+##           bar?:{value 0..1, tone?, width? (56)}, button?:{label, on_press, tip?,
 ##           disabled?}, buttons?:[button, ...], tip?, on_click?: Callable,
 ##           tone?}]}
 ## costs   what a work needs against what is in store, one line, each good
@@ -221,7 +221,7 @@ static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	if not bar.is_empty():
 		# A blank bar keeps the column's width on a row that has none, so columns stay aligned.
 		if bool(bar.get("blank",false)):
-			var gap:=Control.new();gap.custom_minimum_size.x=56.0;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;end.add_child(gap)
+			var gap:=Control.new();gap.custom_minimum_size.x=float(bar.get("width",56.0));gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;end.add_child(gap)
 		else:end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone","")),float(bar.get("width",56.0))))
 	var state:Dictionary=row.get("tag",{}) if row.get("tag") is Dictionary else {}
 	if not state.is_empty():end.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
