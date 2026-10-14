@@ -150,10 +150,12 @@ static func newest_tellings(reports:Array,count:int)->Array:
 ## World › History: what has passed between us and the world, by year
 ## (hud/world_history_board.gd). Our own towns' story is Home › History; the
 ## Chronicle holds both.
-var history_view:Dictionary={"filter":"all","shown":40}
+var history_view:Dictionary={"filter":"all","archive":false,"query":"","page":0,"selected":"","reader_open":false}
 func history_tab()->Dictionary:
 	var entries:=history_entries()
-	return {"kpis":[],"brief":{},"blocks":[{"type":"world_history","entries":entries,"view":history_view,"_print":[entries.size(),String(entries[0].get("title","")) if not entries.is_empty() else ""]}]}
+	var evidence:Array=[]
+	for entry:Dictionary in entries:evidence.append([entry.day,entry.title,entry.text,entry.count])
+	return {"kpis":[],"brief":{},"blocks":[{"type":"world_history","entries":entries,"view":history_view,"_print":hash(evidence)}]}
 
 const WORLD_KINDS:={"contact":"contact","first_contact":"contact","envoy":"contact","diplomacy":"contact","foreign":"contact","trade":"contact","peace":"war","war":"war","battle":"war","raid":"war","scout":"scout","scouting":"scout","scout_report":"scout","scout_party":"scout"}
 ## The Chronicle's notices and moments that concern the world, newest first:
@@ -167,9 +169,11 @@ func history_entries()->Array:
 		if group=="" and kind in ["story","work",""]:group=String(WORLD_KINDS.get(Chronicle.kind_of(e),""))
 		if group=="":continue
 		var label:=Chronicle.date_label(int(e.get("day",0)))
+		var action:Variant=e.get("action",{})
+		var action_kind:=String(action.get("kind","")) if action is Dictionary else ""
 		out.append({"day":int(e.get("day",0)),"season":label.get_slice(" · ",1),"title":String(e.get("title","")),"text":String(e.get("text","")),
 			"group":group,"icon":{"contact":"contact","war":"war","scout":"scout"}.get(group,"world"),"count":int(e.get("count",1)),
-			"weighty":String(e.get("tier",""))=="moment","on_open":_history_open(e.get("action",{}))})
+			"weighty":String(e.get("tier",""))=="moment","on_open":_history_open(action),"action_label":{"scout_report":"Read scout report","battle":"Battle report"}.get(action_kind,"Open related page")})
 	return out
 
 ## Where a history row leads, if anywhere: a scout's telling, a battle, a page.
