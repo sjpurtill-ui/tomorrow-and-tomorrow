@@ -37,10 +37,13 @@ func test_full_retained_archive_is_paged_and_every_report_remains_retrievable()-
 	for index in 256: records.append(record(index))
 	var widget:Variant=auto_free(Board.new())
 	add_child(widget);widget.setup({"reports":records})
+	assert_int(widget.visible_items.size()).is_equal(3)
+	(widget.find_child("BrowseReports",true,false) as Button).pressed.emit()
+	assert_bool(widget.top.visible).is_false()
 	assert_int(widget.visible_items.size()).is_equal(Board.PAGE)
 	assert_int(widget.results.get_child_count()).is_equal(Board.PAGE)
 	var seen:Dictionary={}
-	for page in 30:
+	for page in ceili(256.0/Board.PAGE):
 		for item:Dictionary in widget.visible_items: seen[item.id]=true
 		if not widget.next.disabled: widget.next.pressed.emit()
 	assert_int(seen.size()).is_equal(256)
@@ -114,7 +117,7 @@ func test_reading_a_telling_keeps_the_table_page_and_speed()->void:
 	var opened:Array=[]
 	var widget:Variant=auto_free(Board.new())
 	add_child(widget)
-	widget.setup({"reports":CivilizationSystem.scout_reports,"view":{"query":"","filter":0,"order":1,"page":1},"on_read":func(value:Dictionary)->void: opened.append(value)})
+	widget.setup({"reports":CivilizationSystem.scout_reports,"view":{"query":"","filter":0,"order":1,"page":1,"archive":true},"on_read":func(value:Dictionary)->void: opened.append(value)})
 	var terrain:Variant=auto_free(preload("res://scripts/local_terrain.gd").new())
 	terrain.game_speed=5.0
 	var first:Dictionary=widget.visible_items[0].report

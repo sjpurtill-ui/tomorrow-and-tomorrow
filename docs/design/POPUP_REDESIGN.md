@@ -1,5 +1,27 @@
 # Popup redesign audit — October 14, 2026
 
+## Current acceptance: reopened
+
+The user's subsequent screenshots reject the interior composition of the first
+Modern Strategy pass. The complete statuses below record that earlier pass;
+they do not certify the current information architecture. Every affected family
+is being reviewed again for concise decisions, compact meaningful groups and
+selected details. No default page may dump an entire history or catalogue.
+Use a short recent digest and explicit search/filter/pagination for full records.
+Default readings must expose the relevant game dynamics, including research,
+culture and regard, while preserving intelligence uncertainty and all callbacks.
+
+Current accepted revisions: shared width/fact/KPI foundation (`03fe036e`), Home
+overview (`dfec602e`), Food/Materials grouping (`13e405ef`), War intelligence
+(`a63c4fc3`) and the Materials chooser/source reader (`763275db`). This checkpoint
+adds bounded Court roster/foreign contact, selected Standing strengths and regard,
+and Expeditions' recent digest/selected town/searchable archive (`4772bdc1`).
+Research's three selected/bounded readers are delivered at `43bcd72a`; Great Works
+adds a compact command header and six-work searchable chooser in this checkpoint.
+World Peoples and the remaining families are still in review; see INTEGRATION_STATUS.md
+for delivery state. The reciprocal render/critique/revise
+loop remains mandatory, and bounds checks alone do not establish good design.
+
 Scope: every reachable popup and its subpages. Presentation, information hierarchy,
 navigation and readability only; simulation, availability rules, action callbacks
 and saved state remain owned by their existing systems.

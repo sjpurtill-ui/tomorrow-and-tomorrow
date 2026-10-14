@@ -20,19 +20,18 @@ func test_live_readings_preserve_controls_and_reserve_source_action()->void:
 	data.on_select=func(key:String):calls.append(key)
 	panel.setup(data)
 	var before:Array=panel.find_children("*","",true,false)
-	assert_str(_texts(panel)).contains("Held in reserve").contains("12").contains("+3 in · −1 lost a day").not_contains("×1.00")
+	assert_str(_texts(panel)).contains("Choose a material").contains("7 in store").contains("+3 in · −1 lost a day").not_contains("×1.00")
 	assert_str(panel._land.tooltip_text).contains("×1.00").contains("365 days")
-	var reserve=panel.find_child("Row_Timber",true,false)
-	(reserve.find_children("*","Button",true,false)[0] as Button).pressed.emit()
+	(panel.find_child("Material_Timber",true,false) as Button).pressed.emit()
 	assert_array(calls).contains_exactly(["Timber"])
 	data.rows[0].stock=17.0
 	assert_bool(panel.update_block(data)).is_true()
 	assert_array(panel.find_children("*","",true,false)).contains_exactly(before)
-	assert_str(_texts(panel)).contains("17")
+	assert_str((panel.find_child("Material_Timber",true,false) as Button).text).contains("17")
 	data.selected="Timber"
 	assert_bool(panel.update_block(data)).is_false()
 	var opened=auto_free(Materials.new());opened.setup(data)
-	assert_str(_texts(opened)).contains("Timber: where it comes from").contains("Near woodland: carrying is slow")
+	assert_str(_texts(opened)).contains("Timber").contains("17 in store").contains("Near woodland: carrying is slow")
 
 func test_source_details_and_controls_fit_narrow_in_both_palettes()->void:
 	var prior:=T.color_mode
@@ -47,3 +46,33 @@ func test_source_details_and_controls_fit_narrow_in_both_palettes()->void:
 		assert_array(calls).contains_exactly(["logistics"])
 	T.set_color_mode(prior)
 
+
+static func abundant_materials()->Dictionary:
+	var data:=prepared_materials();data.selected="Timber";data.browse_state={"query":"","page":0,"sources_page":0}
+	for name:String in ["Clay","Fiber Plants","Iron Ore","Tin Ore","Coal","Salt","Gold Ore","Silver Ore","Oil","Sand","Limestone"]:
+		data.rows.append({"key":name,"name":name,"stock":42.0,"delivered":0.0,"loss":0.0,"details":[],"points":[]})
+	for index in 12:data.rows[0].details.append("Woodland %d: carrying is slow" % (index+1))
+	return data
+
+func test_bounded_inventory_search_pages_and_live_selected_detail()->void:
+	var panel=auto_free(Materials.new());var data:=abundant_materials();panel.setup(data)
+	assert_int(panel._rows.size()).is_equal(8)
+	assert_str(_texts(panel)).contains("Near woodland").not_contains("Woodland 12")
+	(panel.find_child("NextMaterials",true,false) as Button).pressed.emit()
+	assert_int(panel._rows.size()).is_equal(6)
+	assert_int(data.browse_state.page).is_equal(1)
+	assert_str(_texts(panel)).contains("12 in store")
+	var search:=panel.find_child("FindMaterial",true,false) as LineEdit
+	search.text="limestone";search.text_changed.emit(search.text)
+	assert_int(panel._rows.size()).is_equal(1)
+	assert_str(panel._rows[0].key).is_equal("Limestone")
+	assert_str(_texts(panel)).contains("12 in store")
+	(panel.find_child("WhereItComesFrom",true,false) as Button).pressed.emit()
+	assert_int(panel._details.size()).is_equal(8)
+	assert_str(_texts(panel)).not_contains("Woodland 12")
+	(panel.find_child("NextSources",true,false) as Button).pressed.emit()
+	assert_int(panel._details.size()).is_equal(5)
+	assert_str(_texts(panel)).contains("Woodland 12")
+	data.rows[0].stock=19.0;data.rows[0].details[12]="Last woodland: now carrying freely"
+	assert_bool(panel.update_block(data)).is_true()
+	assert_str(_texts(panel)).contains("19 in store").contains("Last woodland: now carrying freely")

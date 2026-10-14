@@ -531,3 +531,26 @@ func test_each_home_tile_pressed_opens_its_page()->void:
 		# GROWTH opens the town's ages and families.
 		if label=="GROWTH":assert_int(hud.details.size()).is_equal(before+1);continue
 		assert_array(hud.opened).override_failure_message(label).contains_exactly([expected[label]])
+
+func test_live_home_refresh_keeps_focused_action_and_every_reading_with_its_source()->void:
+	var block:Dictionary=Provider.new(terrain,hud).tab(0).blocks[0]
+	var page:=_page(block)
+	var talk:=page.find_child("TalkWithLeader",true,false) as Button
+	talk.grab_focus()
+	var next:=block.duplicate(true)
+	for group:Dictionary in next.groups:
+		for row:Dictionary in group.rows:row.value="changed "+String(row.key)
+	for reading:Dictionary in next.readings:
+		reading.value="changed "+String(reading.label)
+		reading.delta="new supporting words"
+	assert_bool(page.update_block(next)).is_true()
+	assert_object(page.find_child("TalkWithLeader",true,false)).is_equal(talk)
+	assert_bool(talk.has_focus()).is_true()
+	for group:Dictionary in next.groups:
+		for row:Dictionary in group.rows:
+			var control:=page.find_child("Row_"+String(row.key),true,false)
+			assert_str((control.find_child("Value",true,false) as Label).text).is_equal(String(row.value))
+	for reading:Dictionary in next.readings:
+		var control:Control=page._reading_refs[String(reading.label)].row
+		assert_str((control.find_child("Value",true,false) as Label).text).is_equal(String(reading.value))
+		assert_str((page._reading_refs[String(reading.label)].note as Label).text).is_equal(String(reading.delta))
