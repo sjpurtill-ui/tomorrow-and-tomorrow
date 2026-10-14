@@ -69,8 +69,8 @@ func _ready()->void:
 	var header:=MarginContainer.new()
 	header.add_theme_constant_override("margin_left",26)
 	header.add_theme_constant_override("margin_right",26)
-	header.add_theme_constant_override("margin_top",6)
-	header.add_theme_constant_override("margin_bottom",2)
+	header.add_theme_constant_override("margin_top",14)
+	header.add_theme_constant_override("margin_bottom",10)
 	root.add_child(header)
 	var header_row:=HBoxContainer.new()
 	header_row.add_theme_constant_override("separation",10)
@@ -102,7 +102,7 @@ func _ready()->void:
 	close.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	close.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
 	close.add_theme_stylebox_override("hover",Tokens.flat(Tokens.CLOSE_HOVER_BG,Tokens.BORDER_2,1,4))
-	close.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	close.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 	close.pressed.connect(func()->void: close_requested.emit())
 	note_label=Tokens.make_label("",16,Tokens.GOLD_TEXT);note_label.name="TitleNote"
 	note_label.add_theme_font_override("font",Tokens.font("voice_italic"));note_label.add_theme_font_size_override("font_size",17)
@@ -116,8 +116,8 @@ func _ready()->void:
 	tabs_margin.add_theme_constant_override("margin_right",26)
 	root.add_child(tabs_margin)
 	tabs_row=HFlowContainer.new()
-	tabs_row.add_theme_constant_override("h_separation",0)
-	tabs_row.add_theme_constant_override("v_separation",0)
+	tabs_row.add_theme_constant_override("h_separation",4)
+	tabs_row.add_theme_constant_override("v_separation",4)
 	tabs_margin.add_child(tabs_row)
 	var tabs_rule:=ColorRect.new();tabs_rule.name="TabRule"
 	tabs_rule.color=Tokens.BORDER
@@ -125,9 +125,9 @@ func _ready()->void:
 	root.add_child(tabs_rule)
 	# KPI row
 	var kpi_margin:=MarginContainer.new();kpi_margin.name="KpiMargin"
-	kpi_margin.add_theme_constant_override("margin_left",18)
-	kpi_margin.add_theme_constant_override("margin_right",18)
-	kpi_margin.add_theme_constant_override("margin_top",10)
+	kpi_margin.add_theme_constant_override("margin_left",26)
+	kpi_margin.add_theme_constant_override("margin_right",26)
+	kpi_margin.add_theme_constant_override("margin_top",18)
 	root.add_child(kpi_margin)
 	kpi_row=GridContainer.new()
 	kpi_row.columns=4
@@ -155,7 +155,7 @@ func _ready()->void:
 	body_scroll.add_child(body_margin)
 	body=VBoxContainer.new()
 	body.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation",14)
+	body.add_theme_constant_override("separation",24)
 	body_margin.add_child(body)
 	resized.connect(_on_resized)
 	body.minimum_size_changed.connect(func()->void:
@@ -192,28 +192,29 @@ func rebuild()->void:
 	tabs_row.visible=subtabs.size()>1
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
-		tab.custom_minimum_size=Vector2(0,34)
-		tab.add_theme_font_override("font",Tokens.font("voice"))
+		tab.custom_minimum_size=Vector2(0,38)
+		tab.add_theme_font_override("font",Tokens.font("ui"))
 		tab.add_theme_font_size_override("font_size",12)
-		tab.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		tab.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 		tab.pressed.connect(_on_tab_pressed.bind(tab_buttons.size()))
 		tabs_row.add_child(tab)
 		tab_buttons.append(tab)
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()
-		if index<subtabs.size(): tab.text=String(subtabs[index]).to_upper()
+		if index<subtabs.size(): tab.text=Tokens.sentence_case(String(subtabs[index]))
 		var active:=index<_flat.size() and bool(_flat[index].active)
-		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		var style:=Tokens.flat(Color.TRANSPARENT)
-		style.border_color=Tokens.GOLD if active else Folio.RULE
-		style.border_width_bottom=3 if active else 1
-		# A category with many tabs keeps them in one row: smaller letters, closer set.
+		tab.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		var style:=Tokens.flat(Tokens.GOLD_WASH if active else Color.TRANSPARENT)
+		style.border_color=Tokens.GOLD
+		style.border_width_bottom=2 if active else 0
+		# Tabs wrap at a readable size instead of squeezing a long category.
 		var many:=subtabs.size()>5
-		style.content_margin_left=4 if many else 10;style.content_margin_right=4 if many else 10
-		tab.add_theme_font_size_override("font_size",15 if many else (18 if size.x>=600 else 16))
+		style.content_margin_left=10;style.content_margin_right=10
+		tab.add_theme_font_size_override("font_size",15 if many else 16)
 		tab.add_theme_stylebox_override("normal",style)
-		tab.add_theme_stylebox_override("hover",style)
+		var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=Tokens.HOVER_BG
+		tab.add_theme_stylebox_override("hover",hover)
 		tab.add_theme_stylebox_override("pressed",style)
 		tab.add_theme_color_override("font_color",Tokens.INK if active else Tokens.TEXT_DIM)
 		tab.add_theme_color_override("font_hover_color",Tokens.INK)
@@ -382,16 +383,17 @@ func _rebuild_kpis(kpis:Array)->void:
 				if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
 					tile.accept_event();(press as Callable).call())
 		var column:=VBoxContainer.new()
-		column.add_theme_constant_override("separation",1)
+		column.add_theme_constant_override("separation",4)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(column)
 		column.add_child(Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06))
 		var value_row:=HBoxContainer.new()
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
-		var value_label:=Tokens.make_label(String(kpi.get("value","")),18,Tokens.INK)
+		var value_label:=Tokens.make_label(String(kpi.get("value","")),28,Tokens.INK)
+		value_label.add_theme_font_override("font",Tokens.font("voice_bold"))
 		if glance:
-			value_label.add_theme_font_override("font",Tokens.font("voice"));value_label.add_theme_font_size_override("font_size",24)
+			value_label.add_theme_font_override("font",Tokens.font("voice_bold"));value_label.add_theme_font_size_override("font_size",28)
 		value_row.add_child(value_label)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="" and not glance:
@@ -449,21 +451,24 @@ func _rebuild_brief(brief:Dictionary)->void:
 	text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	text_column.add_theme_constant_override("separation",2)
 	row.add_child(text_column)
-	text_column.add_child(Tokens.make_label(Tokens.sentence_case(String(brief.get("title",""))),13,Tokens.INK))
-	var why:=Tokens.make_label(String(brief.get("why","")),12,Tokens.TEXT_SOFT)
+	var brief_title:=Tokens.make_label(Tokens.sentence_case(String(brief.get("title",""))),20,Tokens.INK)
+	brief_title.add_theme_font_override("font",Tokens.font("voice_bold"))
+	brief_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	text_column.add_child(brief_title)
+	var why:=Tokens.make_label(String(brief.get("why","")),14,Tokens.TEXT_SOFT)
 	why.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	text_column.add_child(why)
 	if String(brief.get("action_label",""))!="":
 		var action:=Button.new()
 		action.name="BriefAction"
 		action.text=Tokens.sentence_case(String(brief.action_label))
-		action.custom_minimum_size=Vector2(0,28)
+		action.custom_minimum_size=Vector2(0,34)
 		action.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		action.add_theme_font_size_override("font_size",12)
+		action.add_theme_font_size_override("font_size",14)
 		action.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
 		action.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
 		action.add_theme_stylebox_override("hover",Tokens.gold_outline_style())
-		action.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		action.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 		var on_action:Variant=brief.get("on_action")
 		if on_action is Callable:
 			action.pressed.connect(on_action)
@@ -476,15 +481,22 @@ func _flat_tabs(own:Array)->Array:
 	var out:Array=[]
 	var shared:=siblings.size()>1 and siblings.any(func(page:Dictionary)->bool:return page.provider==provider)
 	if not shared:
-		for index in own.size():out.append({"text":String(own[index]),"mine":true,"sub":index,"active":index==sub})
+		var meta:Dictionary=provider.meta()
+		var aliases:Dictionary=meta.get("subtab_aliases",{})
+		for index in own.size():
+			if index in meta.get("hidden_subtabs",[]):continue
+			out.append({"text":String(own[index]),"mine":true,"sub":index,"active":index==int(aliases.get(sub,sub))})
 		return out
 	for page:Dictionary in siblings:
 		var mine:bool=page.provider==provider
-		var names:Array=own if mine else ((page.provider as Object).meta().get("subtabs",[]) as Array)
+		var meta:Dictionary=(page.provider as Object).meta()
+		var aliases:Dictionary=meta.get("subtab_aliases",{})
+		var names:Array=own if mine else (meta.get("subtabs",[]) as Array)
 		var labels:Array=page.get("labels",[])
 		for index in maxi(1,names.size()):
+			if index in meta.get("hidden_subtabs",[]):continue
 			var text:=String(labels[index]) if index<labels.size() else (String(names[index]) if index<names.size() else String(page.section).capitalize())
-			out.append({"text":text,"mine":mine,"section":String(page.section),"sub":index,"active":mine and index==sub})
+			out.append({"text":text,"mine":mine,"section":String(page.section),"sub":index,"active":mine and index==int(aliases.get(sub,sub))})
 	return out
 
 func _on_tab_pressed(index:int)->void:
@@ -522,7 +534,7 @@ func _set_fit(enabled:bool)->void:
 func _on_resized()->void:
 	if title_label:
 		title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
-		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
+		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",15 if _flat.size()>5 else 16)
 	_kpi_columns()
 	if _fitting:return
 	_room=size.y

@@ -36,13 +36,15 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 	for block_variant in blocks:
 		var block:Dictionary=block_variant
 		var section:=VBoxContainer.new()
-		section.add_theme_constant_override("separation",6)
+		section.add_theme_constant_override("separation",12)
 		container.add_child(section)
 		# A frame draws its own title line (dense_blocks.gd render_frame).
 		if String(block.get("heading",""))!="" and String(block.get("type",""))!="frame":
 			var heading_row:=HBoxContainer.new()
 			section.add_child(heading_row)
-			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),12,Tokens.GOLD_TEXT,0.06)
+			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),22,Tokens.INK)
+			heading.add_theme_font_override("font",Tokens.font("voice_bold"))
+			heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			if bool(block.get("folio",false)):
 				heading.add_theme_font_override("font",Tokens.font("voice"))
 				heading.add_theme_font_size_override("font_size",26)
