@@ -205,8 +205,10 @@ func test_freshness_and_age_marks()->void:
 	# The board draws the mark beside each people's name.
 	var board:=_board({"stage":"hearth","rows":rows,"unplaced":[]})
 	await get_tree().process_frame
-	assert_str(String(board.find_child("People_a",true,false).find_child("Mark",true,false).level)).is_equal("recent")
-	assert_str(String(board.find_child("People_c",true,false).find_child("Mark",true,false).level)).is_equal("stale")
+	board.select_people("a")
+	assert_str((board.find_child("Freshness",true,false) as Label).tooltip_text).contains("Recent")
+	board.select_people("c")
+	assert_str((board.find_child("Freshness",true,false) as Label).tooltip_text).contains("Stale")
 
 func test_our_own_row()->void:
 	GameState.settlement_name="Oakford"
@@ -226,9 +228,9 @@ func test_our_own_row()->void:
 	# The board marks our row "us".
 	var board:=_board(Model.build())
 	await get_tree().process_frame
-	var row:Node=board.find_child("People_player",true,false)
-	assert_object(row).is_not_null()
-	assert_str(String((row.find_child("Tag",true,false).get_child(0) as Label).text)).is_equal("us")
+	board.select_people("player")
+	assert_object(board.find_child("People_player",true,false)).is_not_null()
+	assert_str((board.find_child("Freshness",true,false) as Label).text).is_equal("Our own count · today")
 
 # ---------------------------------------------------------------------------
 # The board
@@ -256,129 +258,121 @@ func _walk(node:Node,out:Array)->void:
 	out.append(node)
 	for child in node.get_children():_walk(child,out)
 
-func _long_texts(root:Node)->Array:
-	var nodes:Array=[];_walk(root,nodes)
-	var long:Array=[]
-	for node in nodes:
-		if not (node is Label or node is Button):continue
-		if not (node as Control).is_visible_in_tree():continue
-		var text:String=(node as Label).text if node is Label else (node as Button).text
-		var words:=RegEx.create_from_string("[A-Za-z0-9']+").search_all(text).size()
-		if words>12:long.append("%s: %s" % [node.name,text])
-	return long
-
-func test_the_board_builds_with_labels_of_at_most_twelve_words()->void:
+func test_selected_profile_exposes_known_fields_without_rendering_every_people()->void:
 	GameState.elapsed_days=TODAY
-	for stage:String in ["hearth","lettered","reckoned"]:
-		var view:={"sort":"people","flip":false,"open":"a"}
-		var board:=_board(_full_model(stage),view)
-		await get_tree().process_frame
-		assert_object(board.find_child("Towns_a",true,false)).is_not_null()
-		assert_object(board.find_child("Unplaced",true,false)).is_not_null()
-		assert_array(_long_texts(board)).override_failure_message(stage).is_empty()
-		# Our own towns, opened, too.
-		board.toggle("player")
-		assert_array(_long_texts(board)).override_failure_message(stage+" ours").is_empty()
+	var board:=_board(_full_model("reckoned"),{"selected":"a"})
+	await get_tree().process_frame
+	assert_int(board.find_children("People_*","",true,false).size()).is_equal(1)
+	for id:String in Model.RANKED:
+		assert_object(board.find_child("Cell_"+id,true,false)).is_not_null()
+	for id:String in ["lore","crafts","wealth","lives","walls","stores"]:
+		var value:Label=board.find_child("Cell_"+id,true,false).find_child("Value",true,false)
+		assert_str(value.text).is_not_equal("Unknown")
+	board.select_people("c")
+	assert_str((board.find_child("Cell_lore",true,false).find_child("Value",true,false) as Label).text).is_equal("Unknown")
+	assert_object(board.find_child("People_a",true,false)).is_null()
+	board.select_people("a")
+	assert_str((board._labels.caption_lore as Label).text).is_equal("Learning capacity")
 
-func test_titles_sort_and_rows_open_their_towns()->void:
+func test_selector_sort_search_and_town_callbacks_are_preserved()->void:
 	GameState.elapsed_days=TODAY
 	var opened:=[]
-	var view:={}
-	var board:=_board(_full_model("reckoned"),view,func(id:String)->void:opened.append(id))
+	var view:={"selected":"a"}
+	var board:=_board(_full_model("reckoned"),view,func(id:String):opened.append(id))
 	await get_tree().process_frame
-	# Ranked by how many at first (us 420, the Ashen about 250 in two towns,
-	# the Briar about 200, the Cinder unknown); our row among them.
-	assert_array(_people_rows(board)).is_equal(["People_player","People_a","People_b","People_c"])
-	(board.find_child("Sort_fighters",true,false) as Button).pressed.emit()
-	assert_str(String(view.sort)).is_equal("fighters")
-	assert_str((board.find_child("Sort_fighters",true,false) as Button).text).ends_with("↓")
-	# The Ashen's towns and their band in the field outnumber our 30.
-	assert_array(_people_rows(board)).is_equal(["People_a","People_player","People_b","People_c"])
-	(board.find_child("Sort_fighters",true,false) as Button).pressed.emit()
+	var picker:OptionButton=board.find_child("SelectPeople",true,false)
+	assert_str(String(_board(_full_model("reckoned")).view.selected)).is_equal("a")
+	assert_str(String(picker.get_item_metadata(0))).is_equal("player")
+	board.sort_by("fighters")
+	assert_str(String(picker.get_item_metadata(0))).is_equal("a")
+	assert_str(String(view.selected)).is_equal("a")
+	board.sort_by("fighters")
 	assert_bool(bool(view.flip)).is_true()
-	# The other way round; what we do not know stays last.
-	assert_array(_people_rows(board)).is_equal(["People_b","People_player","People_a","People_c"])
-	# A count is a bar against ours and the figure; ranks are in the pointer, never a line on the page.
-	var fighters:Node=board.find_child("People_b",true,false).find_child("Cell_fighters",true,false)
-	assert_object(fighters.find_child("Rank",true,false)).is_null()
-	assert_object(fighters.find_child("Bar",true,false)).is_not_null()
-	assert_float(float(fighters.find_child("Bar",true,false).ours)).is_greater(0.0)
-	assert_bool(bool(board.find_child("People_player",true,false).find_child("Cell_fighters",true,false).find_child("Bar",true,false).us)).is_true()
-	# What we do not know is blank, not a question mark.
-	for label in board.find_child("People_c",true,false).find_children("Value","Label",true,false):assert_str((label as Label).text).is_empty()
-	# Crafts, learning, lives and the rest are in the row's pointer, not columns.
-	assert_object(board.find_child("Sort_crafts",true,false)).is_null()
-	# A row opens their towns; a town opens its report.
-	var click:=InputEventMouseButton.new();click.pressed=true;click.button_index=MOUSE_BUTTON_LEFT
-	(board.find_child("People_b",true,false) as Control).gui_input.emit(click)
-	assert_str(String(view.open)).is_equal("b")
-	var town:Control=board.find_child("Town_b1",true,false)
-	assert_object(town).is_not_null()
-	town.gui_input.emit(click)
+	assert_str(String(picker.get_item_metadata(0))).is_equal("b")
+	var search:LineEdit=board.find_child("FindPeople",true,false)
+	search.text="Briar";search.text_changed.emit(search.text)
+	assert_int(picker.item_count).is_equal(1)
+	assert_str(String(picker.get_item_metadata(0))).is_equal("b")
+	picker.item_selected.emit(0)
+	assert_str(String(view.selected)).is_equal("b")
+	board.toggle("b")
+	(board.find_child("Read_b1",true,false) as Button).pressed.emit()
 	assert_array(opened).is_equal(["b1"])
-	# The feud, its stance and their bands are on the page.
-	assert_str((board.find_child("People_a",true,false).find_child("Relation",true,false) as Label).text).is_equal("Hot feud")
-	assert_str((board.find_child("People_a",true,false).find_child("Stance",true,false) as Label).text).contains("Take a town")
-	# Whether envoys pass is in the row's pointer with the rest we know of them.
-	assert_str((board.find_child("People_a",true,false) as Control).tooltip_text).contains("Envoys: barred")
-	board.toggle("a")
-	assert_str((board.find_child("Bands",true,false) as Label).text).starts_with("1 band seen")
+	assert_str(String(view.open)).is_equal("b")
+	board.select_people("a")
+	assert_str((board.find_child("BetweenUs",true,false) as Label).text).contains("Hot feud")
+	assert_str((board.find_child("BetweenUs",true,false) as Label).text).contains("Envoys: barred")
 
-func _people_rows(board:Node)->Array:
-	var names:Array=[]
-	for child in board.find_child("Rows",true,false).get_children():
-		if String(child.name).begins_with("People_") and not child.is_queued_for_deletion():names.append(String(child.name))
-	return names
+func test_town_reader_is_bounded_and_every_report_remains_reachable()->void:
+	var data:=_full_model("reckoned")
+	var row:=row_of(data.rows,"a")
+	for index in 9:
+		var town:Dictionary=row.towns[0].duplicate(true);town.city_id="extra_"+str(index);town.name="Extra "+str(index);row.towns.append(town)
+	var opened:=[]
+	var view:={"selected":"a","open":"a"}
+	var board:=_board(data,view,func(id:String):opened.append(id))
+	await get_tree().process_frame
+	assert_int(board.find_children("Town_*","VBoxContainer",true,false).size()).is_equal(Board.TOWN_PAGE)
+	(board.find_child("NextTowns",true,false) as Button).pressed.emit()
+	assert_int(int(view.town_page)).is_equal(1)
+	assert_int(board.find_children("Town_*","VBoxContainer",true,false).size()).is_equal(Board.TOWN_PAGE)
+	(board.find_child("Read_extra_2",true,false) as Button).pressed.emit()
+	assert_array(opened).is_equal(["extra_2"])
+	(board.find_child("NextTowns",true,false) as Button).pressed.emit()
+	assert_int(board.find_children("Town_*","VBoxContainer",true,false).size()).is_equal(3)
+	assert_bool((board.find_child("NextTowns",true,false) as Button).disabled).is_true()
 
-## What a drawn ledger shows: every node's words, inks, pointer notes,
-## visibility and marks, in order.
-func _snap(node:Node,out:=PackedStringArray(),depth:=0)->PackedStringArray:
-	if node.is_queued_for_deletion():return out
-	var line:=node.get_class()
-	if not String(node.name).contains("@"):line+="#"+String(node.name)
-	if node is CanvasItem:line+=" vis=%s" % (node as CanvasItem).visible
-	if node is Control:line+=" tip=%s min=%s" % [(node as Control).tooltip_text,(node as Control).custom_minimum_size]
-	if node is Label:line+=" text=%s ink=%s" % [(node as Label).text,(node as Label).get_theme_color("font_color")]
-	elif node is Button:line+=" text=%s" % (node as Button).text
-	if "level" in node:line+=" level=%s" % node.get("level")
-	out.append("  ".repeat(depth)+line)
-	for child in node.get_children():_snap(child,out,depth+1)
-	return out
+func test_regard_and_estimates_are_distinct_and_unknown_is_not_zero()->void:
+	var board:=_board(_full_model("reckoned"),{"selected":"a"})
+	var views:=[]
+	for spec:Array in Board.Standing.VIEWS:views.append({"id":spec[0],"name":spec[1],"value":0.42,"means":spec[2],"why":"fixture"})
+	var side:=[{"civ_id":"a","headline":"They trust our word.","ruler":"Hearth Chief Alen","memories":[{"text":"They remember the peace."}],"theirs":{"genius":{"value":0.62,"low":0.5,"high":0.7,"unknown":false,"exact":false}},"views":views,"envy":0.2,"contempt":0.1}]
+	board.update_block({"model":_full_model("reckoned"),"view":board.view,"side":side})
+	assert_str((board._labels.art_genius as Label).text).is_equal("~62%")
+	assert_str((board._labels.art_genius as Label).tooltip_text).contains("50 to 70")
+	assert_str((board._labels.art_splendor as Label).text).is_equal("Unknown")
+	assert_str((board._labels.view_awe as Label).text).is_equal("42%")
+	assert_str((board._labels.view_envy as Label).text).is_equal("20%")
+	assert_str((board._labels.view_contempt as Label).text).is_equal("10%")
+	assert_str((board._labels.regard as Label).text).is_equal("They trust our word.")
+	assert_str((board._labels.regard as Label).tooltip_text).contains("Hearth Chief Alen")
+	assert_str((board._labels.regard as Label).tooltip_text).contains("They remember the peace.")
+	board.select_people("c")
+	assert_str((board._labels.view_awe as Label).text).is_equal("Unknown")
 
-func test_a_new_day_is_written_in_place_and_reads_as_drawn_fresh()->void:
+func test_live_profile_updates_preserve_selection_and_focus()->void:
 	GameState.elapsed_days=TODAY
-	var view:={"sort":"people","flip":false,"open":""}
+	var view:={"selected":"player","sort":"people","flip":false}
 	var board:=_board(_full_model("hearth"),view)
-	var row:Node=board.find_child("People_a",true,false)
-	# A day on: our count and their ageing ranges move; the ledger's shape holds.
+	await get_tree().process_frame
+	var picker:OptionButton=board.find_child("SelectPeople",true,false)
+	picker.grab_focus()
 	var next:=_full_model("hearth",431.0,0.08)
-	board.update_block({"model":next,"view":view,"on_town":Callable()})
-	assert_bool(board.find_child("People_a",true,false)==row).override_failure_message("the same shape keeps its nodes").is_true()
-	var fresh:=_board(next,view.duplicate())
-	assert_array(_snap(board.get_child(0))).is_equal(_snap(fresh.get_child(0)))
-	assert_str((board.find_child("People_player",true,false).find_child("Cell_people",true,false).find_child("Value",true,false) as Label).text).is_equal("431")
-	# A new order is a new shape: drawn afresh, the same as fresh again.
-	var reordered:=_full_model("hearth",100.0,0.08)
-	board.update_block({"model":reordered,"view":view,"on_town":Callable()})
-	var redrawn:=_board(reordered,view.duplicate())
-	assert_array(_snap(board.get_child(0))).is_equal(_snap(redrawn.get_child(0)))
+	board.update_block({"model":next,"view":view})
+	assert_bool(board.find_child("SelectPeople",true,false)==picker).is_true()
+	assert_bool(picker.has_focus()).is_true()
+	assert_str((board.find_child("Cell_people",true,false).find_child("Value",true,false) as Label).text).is_equal("431")
+	assert_str(String(view.selected)).is_equal("player")
+	var talked:=[]
+	board.update_block({"model":next,"view":view,"on_speak":func(id:String):talked.append(id)})
+	board.select_people("a")
+	var talk:Button=board.find_child("Talk",true,false);talk.grab_focus()
+	var changed:=_full_model("hearth",440.0,0.1)
+	board.update_block({"model":changed,"view":view,"on_speak":func(id:String):talked.append(id)})
+	assert_bool((board.find_child("Talk",true,false) as Button).has_focus()).is_true()
+	(board.find_child("Talk",true,false) as Button).pressed.emit()
+	assert_array(talked).is_equal(["a"])
 
-func test_a_narrow_page_keeps_freshness_and_actions_in_wrapping_cards()->void:
+func test_a_narrow_profile_wraps_without_hiding_facts_or_actions()->void:
 	GameState.elapsed_days=TODAY
-	var board:=_board(_full_model("hearth"))
-	board.size=Vector2(560,600)
-	board._layout()
-	assert_array(board._shape).is_empty()
-	assert_bool((board.find_child("Cell_seen",true,false) as Control).visible).is_true()
-	assert_bool((board.find_child("Cell_talk",true,false) as Control).visible).is_true()
-	assert_object(board.find_child("Facts",true,false)).is_instanceof(HFlowContainer)
-	assert_bool((board.find_child("Sort_people",true,false) as Control).visible).is_true()
-	board.size=Vector2(1000,600)
-	board._layout()
-	assert_array(board._shape).is_empty()
-	assert_bool((board.find_child("Cell_seen",true,false) as Control).visible).is_true()
+	var board:=_board(_full_model("hearth"),{"selected":"a"})
+	board.size=Vector2(420,600);board._layout()
+	await get_tree().process_frame
+	assert_bool(board._columns.vertical).is_true()
+	assert_bool((board.find_child("Freshness",true,false) as Control).visible).is_true()
+	assert_int((board.find_child("SelectPeople",true,false) as OptionButton).get_popup().max_size.y).is_equal(340)
+	for id:String in Model.RANKED:assert_bool((board.find_child("Cell_"+id,true,false) as Control).visible).is_true()
 
-## What a label sits on: the nearest panel's paper, laid over what is below.
 func _ground_of(node:Node)->Color:
 	var parent:=node.get_parent()
 	while parent!=null:
@@ -429,7 +423,9 @@ func test_the_known_world_leads_with_the_ledger_once_a_people_is_met()->void:
 	panel.present(content,0)
 	await get_tree().process_frame
 	assert_object(panel.find_child("PeoplesKnownBoard",true,false)).is_not_null()
+	panel.find_child("PeoplesKnownBoard",true,false).select_people(String(civ().id))
 	assert_object(panel.find_child("People_"+String(civ().id).validate_node_name(),true,false)).is_not_null()
+	await get_tree().process_frame
 	panel.free();hud.free();terrain.free()
 
 func test_the_war_screen_links_to_all_peoples_we_know()->void:
@@ -440,6 +436,15 @@ func test_the_war_screen_links_to_all_peoples_we_know()->void:
 	var link:Button=board.fronts_section.find_child("AllPeoples",true,false)
 	assert_object(link).is_not_null()
 	assert_str(link.text).starts_with("All peoples")
+
+func test_empty_hearsay_is_compact_and_keeps_the_map_action()->void:
+	var opened:=[]
+	var board:Control=auto_free(preload("res://scripts/hud/known_world_board.gd").new())
+	add_child(board)
+	board.setup({"model":{"leads":[],"actions":{"rumor_map":func():opened.append(true)}}})
+	assert_object(board.find_child("Leads",true,false)).is_instanceof(HFlowContainer)
+	(board.find_child("RumorMap",true,false) as Button).pressed.emit()
+	assert_array(opened).is_equal([true])
 
 ## A people that bows to us, or gathers every spear against us
 ## (world_answer.gd), says so in the "between us" cell.

@@ -80,15 +80,18 @@ func _fill_compact_side(side:VBoxContainer)->void:
 	_build_aims()
 	var leads:Array=model.get("leads",[])
 	var UI:=preload("res://scripts/hud/world_ui.gd")
-	var stack:=UI.sheet(side,"Leads")
 	var actions:Dictionary=model.get("actions",{})
+	if leads.is_empty():
+		var empty:=HFlowContainer.new();empty.name="Leads";empty.add_theme_constant_override("h_separation",12);empty.add_theme_constant_override("v_separation",4);side.add_child(empty)
+		UI.label(empty,"No other peoples have been told of.",14,T.INK_MUTED)
+		UI.verb(empty,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
+		return
+	var stack:=UI.sheet(side,"Leads")
 	var names:={}
 	for lead:Dictionary in leads:names[String(lead.get("name",""))]=true
 	var shared:=String(names.keys()[0]) if names.size()==1 else ""
 	var head:=UI.heading(stack,"Told of, not yet met"+((": "+the_name(shared)) if shared!="" else ""))
 	UI.verb(head,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
-	if leads.is_empty():
-		UI.label(stack,"No one has spoken of other peoples",12,T.INK_MUTED)
 	for index in leads.size():
 		var lead:Dictionary=leads[index]
 		var row:=UI.line(stack,6);row.name="Lead_%d" % index
