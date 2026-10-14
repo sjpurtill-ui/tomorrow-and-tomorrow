@@ -38,7 +38,7 @@ func tab(_sub:int)->Dictionary:
 	# which move only on a death, a birth tally or a month's reading.
 	var ledger:Dictionary=WorldSimulation.state.strategic_history.get("scopes",{}).get("civilization",{})
 	var chart:Dictionary=memo.take("history",[Memo.log_identity(WorldSimulation.state.demographic_ledger),Memo.log_identity(ledger.get("monthly",[])),Memo.log_identity(ledger.get("annual",[]))],func()->Dictionary:
-		return History.block("standing","HOW OUR NAME HAS GROWN","civilization","of 100",[
+		return History.block("standing","How our name has grown","civilization","of 100",[
 			{"key":"standing_awe","label":"Awe","color":Tokens.GOLD},
 			{"key":"standing_allure","label":"Allure","color":Tokens.TEAL},
 			{"key":"standing_pride","label":"Pride","color":Tokens.GREEN},
@@ -83,8 +83,11 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	for row:Array in Standing.STRENGTHS:
 		var id:=String(row[0])
 		var value:=float((our[id] as Dictionary).value)
-		var entry:={"id":id,"name":String(row[1]),"means":String(row[2]),"value":value,"why":String((our[id] as Dictionary).why),
-			"section":String(row[3]),"sub":int(row[4]),"section_name":String(row[5]),"cost":String(row[6]),"parts":_parts_words(our[id] as Dictionary)}
+		var place:Array=RAISE.get(id,[String(row[3]),int(row[4]),String(row[5])])
+		var why:=String((our[id] as Dictionary).why)
+		if id=="might":why=might_words(why)
+		var entry:={"id":id,"name":String(row[1]),"means":String(row[2]),"value":value,"why":why,
+			"section":String(place[0]),"sub":int(place[1]),"section_name":String(row[5]),"verb":String(place[2]),"cost":String(row[6]),"parts":_parts_words(our[id] as Dictionary)}
 		if year_ago.has(id): entry["change"]=roundf(value*100.0)-float(year_ago[id])
 		strengths.append(entry)
 	var peoples:Array=[]
@@ -104,6 +107,25 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 		# A people's strengths are reckoned in their own scope only when laid
 		# over our rose; the board asks for them when one is chosen.
 		"their_strengths":their_strengths}
+
+## Where each strength is raised, and the verb that says it: [section, tab, verb].
+const RAISE:={"might":["military",0,"Raise the army"],"endurance":["economy",0,"Store food"],"wealth":["economy",2,"Make goods"],
+	"reach":["world",1,"Send scouts"],"persuasion":["court",0,"Send envoys"],"splendor":["construction",3,"Build works"],
+	"genius":["inquiry",0,"Research"],"cunning":["eyes",0,"Set spies"],"order":["court",0,"Hold court"]}
+
+## Might's reason with the War screen's own readiness figures (Drill and
+## Armed, war_board.gd) instead of a third "ready" number of its own.
+static func might_words(why:String)->String:
+	var tail:=why.substr(why.find(": ")+2) if why.find(": ")>=0 else why
+	var drill:=float(preload("res://scripts/watch_military.gd").reading(MilitaryCampaign).get("drill",-1.0))
+	var armed:=float(preload("res://scripts/hud/war_board.gd").strength(MilitaryCampaign).get("armed",-1.0))
+	var warriors:=roundi(float(MilitaryCampaign.fighting_reading().get("warriors",0.0)))
+	var head:="%s under arms or training" % EraWords.grouped(warriors)
+	var parts:PackedStringArray=[]
+	if drill>=0.0:parts.append("drill %d%%" % roundi(drill*100.0))
+	if armed>=0.0:parts.append("armed %d%%" % roundi(armed*100.0))
+	if not parts.is_empty():head+=" (%s)" % ", ".join(parts)
+	return head+": "+tail
 
 ## Our row's name: the nation's once named, else the people of the first town.
 func _our_name()->String:
@@ -255,21 +277,36 @@ static func _told_at_home()->String:
 ## will do about what they see, then what the shape of our strengths risks.
 func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 	var warnings:Array=[]
+	# One line for each kind of danger, naming every people it comes from.
+	var by_kind:Dictionary={}
+	var kinds:Array=[]
 	for p:Dictionary in peoples:
 		for c:Dictionary in p.consequences:
 			if String(c.tone)!="danger": continue
-			var title:=""
-			match String(c.id):
-				"arming": title="%s is gathering every spear against us" % String(p.name)
-				"all_in": title="%s may come at us with everything" % String(p.name)
-				"league": title="%s stand together against us" % String(p.name)
-				"envy": title="%s envy our goods" % String(p.name)
-				"grudge": title="%s nurse a grudge against us" % String(p.name)
-				"tribute_demand": title="%s think us easy to push" % String(p.name)
-				"redress_demand": title="%s want old wrongs righted" % String(p.name)
-				_: title="%s may move against us" % String(p.name)
-			var fix:=_fix_for(String(c.id),our)
-			warnings.append({"tone":"danger","title":title,"words":String(c.words)+". "+String(fix.words),"civ_id":String(p.civ_id),"section":String(fix.section),"sub":int(fix.sub),"action":String(fix.action),"rank":_rank(String(c.id))})
+			var id:=String(c.id)
+			if not by_kind.has(id):
+				by_kind[id]={"names":[],"words":[],"civ_id":String(p.civ_id)}
+				kinds.append(id)
+			(by_kind[id].names as Array).append(String(p.name))
+			(by_kind[id].words as Array).append("%s: %s" % [String(p.name),String(c.words)])
+	for id:String in kinds:
+		var group:Dictionary=by_kind[id]
+		var names:Array=group.names
+		var who:=String(names[0]) if names.size()==1 else ", ".join(PackedStringArray(names.slice(0,names.size()-1)))+" and "+String(names[-1])
+		var one:=names.size()==1
+		var title:=""
+		match id:
+			"arming": title="%s %s gathering every spear against us" % [who,"is" if one else "are"]
+			"all_in": title="%s may come at us with everything" % who
+			"league": title="%s stand together against us" % who
+			"envy": title="%s envy our goods" % who
+			"grudge": title="%s nurse a grudge against us" % who
+			"tribute_demand": title="%s think us easy to push" % who
+			"redress_demand": title="%s want old wrongs righted" % who
+			_: title="%s may move against us" % who
+		var fix:=_fix_for(id,our)
+		var said:=String((group.words as Array)[0]).substr(String(names[0]).length()+2) if one else "\n".join(PackedStringArray(group.words))
+		warnings.append({"tone":"danger","title":title,"words":said+". "+String(fix.words),"civ_id":String(group.civ_id),"section":String(fix.section),"sub":int(fix.sub),"action":String(fix.action),"rank":_rank(id)})
 	# Households leaving us on their own for a people whose life looks better
 	# (society_exchange.gd drawn_households), with why and what would hold them.
 	var Exchange:=preload("res://scripts/society_exchange.gd")
@@ -281,12 +318,12 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 			reasons.append(String(lines[0]));fixes.append(String(lines[1]))
 		var words:="Life there looks better than here by %d in 100; under %d they would stay" % [roundi(float(row.advantage)*100.0),roundi(Exchange.MINIMUM_ATTRACTION_ADVANTAGE*100.0)]
 		if not reasons.is_empty():words="%s: %s. %s" % [words," and ".join(reasons),". ".join(fixes)]
-		warnings.append({"tone":"danger","title":"%s of our people left for %s this year" % [EraWords.grouped(int(row.count)),String(row.to)],"words":words+".","section":"overview","sub":0,"action":"People","rank":2})
+		warnings.append({"tone":"danger","title":"%s of our people left for %s this year" % [EraWords.grouped(int(row.count)),String(row.to)],"words":words+".","section":"overview","sub":0,"action":"See our people","rank":2})
 	if bool(posture.get("lopsided",false)):
 		var low:Dictionary=posture.low
 		for row:Array in Standing.STRENGTHS:
 			if String(row[0])!=String(low.id): continue
-			warnings.append({"tone":"warning","title":"%s is neglected" % String(row[1]),"words":"%s stands at %d%%, far below our %s at %d%%. %s." % [String(row[1]),roundi(float(low.value)*100.0),String(posture.top.name),roundi(float(posture.top.value)*100.0),_neglect_words(String(row[0]))],"section":String(row[3]),"sub":int(row[4]),"action":String(row[5]),"rank":9})
+			warnings.append({"tone":"warning","title":"%s is neglected" % String(row[1]),"words":"%s stands at %d%%, far below our %s at %d%%. %s." % [String(row[1]),roundi(float(low.value)*100.0),String(posture.top.name),roundi(float(posture.top.value)*100.0),_neglect_words(String(row[0]))],"section":String((RAISE.get(String(row[0]),[row[3]]) as Array)[0]),"sub":int((RAISE.get(String(row[0]),[0,row[4]]) as Array)[1]),"action":String((RAISE.get(String(row[0]),["","",row[5]]) as Array)[2]),"rank":9})
 	warnings.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.rank)<int(b.rank))
 	return warnings
 

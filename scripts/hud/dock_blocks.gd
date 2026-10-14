@@ -35,6 +35,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"peoples_known":
 				var board:=preload("res://scripts/hud/peoples_known_board.gd").new();section.add_child(board);board.setup(block)
+			"expeditions":
+				var board:=preload("res://scripts/hud/expeditions_board.gd").new();section.add_child(board);board.setup(block)
+			"world_history":
+				var board:=preload("res://scripts/hud/world_history_board.gd").new();section.add_child(board);board.setup(block)
 			"city_dossier":
 				var dossier:=preload("res://scripts/hud/city_dossier.gd").new();section.add_child(dossier);dossier.setup(block)
 			"held_town":
@@ -98,12 +102,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"recruitment_brief":
 				var brief:=preload("res://scripts/hud/recruitment_brief.gd").new()
 				section.add_child(brief);brief.setup(block)
-			"scout_archive":
-				var archive:=preload("res://scripts/hud/scout_archive_widget.gd").new()
-				archive.records=block.get("reports",[])
-				archive.view_state=block.get("view_state",{})
-				archive.open_report=block.get("on_open",Callable())
-				section.add_child(archive)
 			"trend_chart":
 				var chart:=preload("res://scripts/hud/trend_chart.gd").new()
 				section.add_child(chart)

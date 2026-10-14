@@ -1,65 +1,28 @@
 extends VBoxContainer
-## THE STANDING BOARD: the heart of the game on one page.
+## THE STANDING BOARD: the heart of the game on one page, dense.
 ##
-##   ┌ what we are: our seal, the words the shape of our strengths makes of us,
-##   │ the rose of nine strengths (last year's shape faint behind it, and any
-##   │ people we know laid over it) beside the nine, each with its reason,
-##   │ its change in a year and the place that raises it
-##   ├ dangers: what the peoples we know will do about what they see, with the
-##   │ engine's own odds, and what answers each
-##   ├ how each people we know sees us: six feelings, what they make them do,
-##   │ what they remember, and a word with them in the court
+##   ┌ what we are: our seal and name, the words our shape makes of us, the
+##   │ rose of nine strengths beside the nine as one-line rows (name, a bar
+##   │ with the age's typical value ticked, the value, the year's change and
+##   │ the biggest cause; the rest in each row's pointer), a one-line legend
+##   │ and the peoples whose shape can be laid over ours
+##   ├ dangers beyond the first (the page's brief): one line each, a verb
+##   ├ how each people we know sees us: a table of six feelings, with a Talk
+##   ├ who leads the four races, what our cunning and persuasion do
 ##   └ our own people: pride, love and dread of the god, trust in the chiefs
 ##
-## Data: content/dock_content_standing.gd. The live refresh updates this
-## widget in place (update_block), so the page never jumps under the reader.
+## Data: content/dock_content_standing.gd (standing.gd, the one ledger). The
+## live refresh updates this widget in place (update_block): a part is drawn
+## again only when what it is drawn from changed.
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
-const Kit:=preload("res://scripts/hud/paper_kit.gd")
+const UI:=preload("res://scripts/hud/world_ui.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Standing:=preload("res://scripts/standing.gd")
-## A people's tongue and look, small, under its name.
-const IdentityLine:=preload("res://scripts/hud/people_identity_line.gd")
 
-const WIDE_AT:=620.0
-const TWO_CARDS_AT:=700.0
-
-## A thin ink bar.
-class Meter extends Control:
-	var fill:=0.0
-	var color:=Color.WHITE
-	func _init()->void:
-		custom_minimum_size=Vector2(40,6)
-		mouse_filter=Control.MOUSE_FILTER_IGNORE
-		size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	func set_value(value:float,tint:Color)->void:
-		fill=clampf(value,0.0,1.0);color=tint;queue_redraw()
-	func _draw()->void:
-		draw_rect(Rect2(Vector2.ZERO,size),T.PAPER_SUNK)
-		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
-		if fill>0.0: draw_rect(Rect2(Vector2.ZERO,Vector2(maxf(2.0,size.x*fill),size.y)),color)
-
-## A round gauge with its value in the middle.
-class Medallion extends Control:
-	var value:=0.0
-	var color:=Color.WHITE
-	func _init()->void:
-		custom_minimum_size=Vector2(76,76)
-		mouse_filter=Control.MOUSE_FILTER_IGNORE
-		size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-	func set_value(amount:float,tint:Color)->void:
-		value=clampf(amount,0.0,1.0);color=tint;queue_redraw()
-	func _draw()->void:
-		var center:=size*0.5
-		var radius:=minf(size.x,size.y)*0.5-5.0
-		draw_circle(center,radius+3.0,T.PAPER_RAISED)
-		draw_arc(center,radius,0.0,TAU,64,T.PAPER_SUNK,6.0,true)
-		if value>0.0: draw_arc(center,radius,-PI*0.5,-PI*0.5+TAU*value,64,color,6.0,true)
-		draw_arc(center,radius+3.5,0.0,TAU,64,T.RULE,1.0,true)
-		var text:="%d%%" % roundi(value*100.0)
-		var font:=T.font("ui_strong")
-		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x
-		draw_string(font,center+Vector2(-width*0.5,7.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,18,T.INK)
+## Below this width the parts under the rose stand in one column.
+const TWO_AT:=820.0
+const VIEW_INK:={"allure":"teal","awe":"gold","fear":"danger","respect":"info","trust":"good","resentment":"danger"}
 
 ## The rose of our nine strengths, drawn like a chart's wind rose. Its rings
 ## are the age's yardstick (standing_scale.gd): the middle ring a typical
@@ -77,7 +40,7 @@ class Rose extends Control:
 	var others:Array=[]
 	var highlight:=-1
 	func _init()->void:
-		custom_minimum_size=Vector2(330,330)
+		custom_minimum_size=Vector2(214,214)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		mouse_exited.connect(func()->void: set_highlight(-1))
@@ -105,7 +68,7 @@ class Rose extends Control:
 	func _center()->Vector2:
 		return size*0.5
 	func _radius()->float:
-		return maxf(40.0,minf(size.x,size.y)*0.5-58.0)
+		return maxf(40.0,minf(size.x,size.y)*0.5-40.0)
 	func _angle(index:int)->float:
 		return -PI*0.5+TAU*float(index)/float(maxi(1,strengths.size()))
 	func _point(index:int,amount:float)->Vector2:
@@ -175,23 +138,20 @@ class Rose extends Control:
 		for i in count:
 			var item:Dictionary=strengths[i]
 			var direction:=Vector2.from_angle(_angle(i))
-			var anchor:=center+direction*(radius+16.0)
+			var anchor:=center+direction*(radius+10.0)
 			var name:=String(item.name)
 			var value:="%d%%" % roundi(float(item.value)*100.0)
-			var name_size:=strong.get_string_size(name,HORIZONTAL_ALIGNMENT_LEFT,-1,14)
-			var value_size:=plain.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,13)
+			var name_size:=strong.get_string_size(name,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
+			var value_size:=plain.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
 			var block_width:=maxf(name_size.x,value_size.x)
 			var x:=anchor.x-block_width*0.5
 			if direction.x>0.35: x=anchor.x
 			elif direction.x<-0.35: x=anchor.x-block_width
 			var y:=anchor.y-2.0
-			if direction.y<-0.6: y=anchor.y-18.0
+			if direction.y<-0.6: y=anchor.y-15.0
 			elif direction.y>0.6: y=anchor.y+10.0
-			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.GOLD_TEXT if i==highlight else T.INK)
-			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y+15.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK_MUTED)
-		if their_name!="" and not theirs.is_empty():
-			var note:=("- - %s as our watchers reckon them; shaded: how unsure" % their_name) if _estimated(theirs) else ("%s, as we know them" % their_name)
-			draw_string(plain,Vector2(8.0,size.y-8.0),note,HORIZONTAL_ALIGNMENT_LEFT,size.x-16.0,12,T.text_for(their_color) if their_color!=Color.WHITE else T.INK_MUTED)
+			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.GOLD_TEXT if i==highlight else T.INK)
+			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y+13.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 	func _dashes(from:Vector2,to:Vector2,color:Color,width:float,dash:float)->void:
 		var length:=from.distance_to(to)
 		if length<0.5: return
@@ -235,30 +195,26 @@ var seal:TextureRect
 var name_label:Label
 var posture_label:Label
 var renown_label:Label
-var hero_body:GridContainer
 var strength_list:VBoxContainer
-var strength_rows:Array[Control]=[]
 var compare_row:HFlowContainer
 var dangers:VBoxContainer
+var peoples:VBoxContainer
+var lower:GridContainer
 var races:VBoxContainer
 var arts:VBoxContainer
-var peoples_heading:Label
-var peoples:GridContainer
 var home:VBoxContainer
 
 func setup(block:Dictionary)->void:
 	name="StandingBoard"
-	add_theme_constant_override("separation",18)
+	size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	add_theme_constant_override("separation",12)
 	_build_hero()
-	races=VBoxContainer.new();races.name="WhoLeads";races.add_theme_constant_override("separation",10);add_child(races)
-	arts=VBoxContainer.new();arts.name="ArtsAtWork";arts.add_theme_constant_override("separation",8);add_child(arts)
-	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",8);add_child(dangers)
-	var peoples_box:=VBoxContainer.new();peoples_box.name="Peoples";peoples_box.add_theme_constant_override("separation",10);add_child(peoples_box)
-	peoples_heading=Kit.label(peoples_box,"How the peoples we know see us","kicker")
-	peoples=GridContainer.new();peoples.name="PeopleCards";peoples.columns=2
-	peoples.add_theme_constant_override("h_separation",14);peoples.add_theme_constant_override("v_separation",14)
-	peoples_box.add_child(peoples)
-	home=VBoxContainer.new();home.name="Home";home.add_theme_constant_override("separation",10);add_child(home)
+	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",2);add_child(dangers)
+	peoples=UI.sheet(self,"Peoples")
+	lower=UI.columns(self,"Lower")
+	races=UI.sheet(lower,"WhoLeads")
+	arts=UI.sheet(lower,"Arts")
+	home=UI.sheet(lower,"Home")
 	resized.connect(_layout)
 	apply(block)
 	_layout()
@@ -273,14 +229,14 @@ func apply(block:Dictionary)->void:
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
 	var renown:Dictionary=block.get("renown",{})
-	renown_label.text="Our name commands awe %d%% and allure %d%%." % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
+	renown_label.text="awe %d%% · allure %d%%" % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
-	_refill("races",_races_print(block.get("races",[])),_fill_races)
-	_refill("arts",block.get("arts",{}),_fill_arts)
 	_refill("dangers",block.get("warnings",[]),_fill_dangers)
 	_refill("peoples",block.get("peoples",[]),_fill_peoples)
+	_refill("races",_races_print(block.get("races",[])),_fill_races)
+	_refill("arts",block.get("arts",{}),_fill_arts)
 	_refill("home",block.get("home",{}),_fill_home)
 
 func _refill(part:String,value:Variant,fill:Callable)->void:
@@ -289,13 +245,15 @@ func _refill(part:String,value:Variant,fill:Callable)->void:
 	prints[part]=print
 	fill.call()
 
+func _layout()->void:
+	if lower!=null:lower.columns=3 if size.x>=1100.0 else (2 if size.x>=TWO_AT else 1)
+
 func _compare_print()->Array:
 	var out:Array=[]
 	for p:Dictionary in data.get("peoples",[]): out.append([String(p.civ_id),not _comparable(p),p.get("theirs",{})])
 	return out
 
-## Whether a people's strengths can be laid over ours (the provider says so
-## without reckoning them; older data carries the strengths themselves).
+## Whether a people's strengths can be laid over ours.
 static func _comparable(p:Dictionary)->bool:
 	return bool(p.get("comparable",not (p.get("theirs",{}) as Dictionary).is_empty()))
 
@@ -310,38 +268,6 @@ func _theirs(p:Dictionary)->Dictionary:
 			p["theirs"]=theirs
 	return theirs
 
-func _layout()->void:
-	if hero_body: hero_body.columns=2 if size.x>=WIDE_AT else 1
-	var arts_grid:=find_child("ArtsGrid",true,false) as GridContainer
-	if arts_grid: arts_grid.columns=2 if size.x>=WIDE_AT else 1
-	if peoples: peoples.columns=2 if size.x>=TWO_CARDS_AT else 1
-
-static func _card(accent:Color=Color(0,0,0,0),pad:float=16.0)->PanelContainer:
-	var card:=PanelContainer.new()
-	var style:=T.paper_panel_style(true,T.RADIUS_CARD,pad)
-	if accent.a>0.0:
-		style.border_color=accent
-		style.border_width_top=3
-	card.add_theme_stylebox_override("panel",style)
-	card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	return card
-
-static func _voice(parent:Node,text:String,size:int=20,italic:bool=true,color:Color=Color(0,0,0,0))->Label:
-	var label:=Label.new()
-	label.text=text
-	label.add_theme_font_override("font",T.voice_font(italic))
-	label.add_theme_font_size_override("font_size",size)
-	label.add_theme_color_override("font_color",color if color.a>0.0 else T.INK)
-	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	parent.add_child(label)
-	return label
-
-static func _clear(node:Node)->void:
-	for child in node.get_children():
-		node.remove_child(child)
-		child.queue_free()
-
 static func _tone_color(tone:String)->Color:
 	match tone:
 		"danger": return T.RED
@@ -352,155 +278,84 @@ static func _tone_color(tone:String)->Color:
 # ----------------------------------------------------------------- the hero
 
 func _build_hero()->void:
-	var card:=_card(T.GOLD,20.0)
-	card.name="WhatWeAre"
-	add_child(card)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",14);card.add_child(column)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",16);column.add_child(top)
+	var column:=UI.sheet(self,"WhatWeAre",14.0)
+	column.add_theme_constant_override("separation",6)
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);column.add_child(top)
 	seal=TextureRect.new();seal.name="Seal"
-	seal.custom_minimum_size=Vector2(76,76)
-	seal.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-	seal.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	seal.custom_minimum_size=Vector2(34,34);seal.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	seal.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	top.add_child(seal)
-	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",4);top.add_child(words)
-	Kit.label(words,"What we are","kicker")
 	name_label=Label.new();name_label.name="PeopleName"
-	T.text(name_label,"title",T.INK)
-	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	words.add_child(name_label)
-	posture_label=_voice(words,"",21)
-	posture_label.name="Posture"
-	renown_label=Kit.label(words,"","note")
-	renown_label.name="Renown"
-	renown_label.mouse_filter=Control.MOUSE_FILTER_PASS
+	name_label.add_theme_font_override("font",T.voice_font(false));name_label.add_theme_font_size_override("font_size",22)
+	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	top.add_child(name_label)
+	posture_label=Label.new();posture_label.name="Posture"
+	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",16)
+	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.clip_text=true;posture_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	top.add_child(posture_label)
+	renown_label=UI.label(top,"",12,T.INK_MUTED);renown_label.name="Renown"
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; allure from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
-	hero_body=GridContainer.new();hero_body.name="Strengths";hero_body.columns=2
-	hero_body.add_theme_constant_override("h_separation",18);hero_body.add_theme_constant_override("v_separation",12)
-	column.add_child(hero_body)
+	var body:=HBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",12);column.add_child(body)
 	rose=Rose.new();rose.name="Rose"
-	# Beside the first strengths, not adrift in the middle of a long list.
-	rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	rose.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	rose.picked.connect(_raise)
-	hero_body.add_child(rose)
+	body.add_child(rose)
 	strength_list=VBoxContainer.new();strength_list.name="StrengthList"
-	strength_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	strength_list.add_theme_constant_override("separation",4)
-	hero_body.add_child(strength_list)
+	strength_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strength_list.add_theme_constant_override("separation",0)
+	body.add_child(strength_list)
+	var legend:=UI.label(column,"Gold: ours · dashed: a year ago · middle ring and tick: a typical people of our age · thin lines: peoples we know",12,T.INK_MUTED)
+	legend.name="Legend";legend.clip_text=true;legend.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;legend.custom_minimum_size.x=0
+	legend.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
 	compare_row=HFlowContainer.new();compare_row.name="Compare"
-	compare_row.add_theme_constant_override("h_separation",8);compare_row.add_theme_constant_override("v_separation",6)
+	compare_row.add_theme_constant_override("h_separation",6);compare_row.add_theme_constant_override("v_separation",4)
 	column.add_child(compare_row)
 
-## The strengths keep their rows while the same strengths are shown (and the
-## same ones carry a year's change): the day's values and reasons are written
-## into them. Otherwise the list is drawn again.
-var _strength_shape:Array=[]
-var _strength_refs:Array=[]
-## WHO LEADS: the four plain races between peoples, each laid in order. Ours
-## is exact; theirs carry the band our watchers' knowledge allows, and a people
-## we know too little of is unknown, never guessed (standing_races.gd).
-## What the races draw, so a day's small moves in a value redraw nothing.
-static func _races_print(list:Array)->Array:
-	var out:Array=[]
-	for race:Dictionary in list:
-		var rows:Array=[]
-		for row:Dictionary in race.rows:rows.append([String(row.name),String(row.text),String(row.get("said","")),String(row.get("source","")),bool(row.unknown),roundi(float(row.value)*20.0) if float(row.value)<=1.0 else roundi(log(maxf(1.0,float(row.value)))*8.0)])
-		out.append([String(race.id),String(race.standing),rows])
-	return out
-
-func _fill_races()->void:
-	_clear(races)
-	var list:Array=data.get("races",[])
-	if list.is_empty(): return
-	Kit.label(races,"Who leads","kicker")
-	Kit.label(races,"Each people as our watchers read it. Envoys, scouts and years narrow the bands; what we have not learned stays unknown.","note")
-	var grid:=GridContainer.new();grid.name="RaceCards";grid.columns=2 if size.x>=TWO_CARDS_AT else 1
-	grid.add_theme_constant_override("h_separation",14);grid.add_theme_constant_override("v_separation",14)
-	races.add_child(grid)
-	for race:Dictionary in list:
-		var card:=_card()
-		card.name="Race_"+String(race.id)
-		grid.add_child(card)
-		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
-		Kit.label(column,String(race.race),"heading")
-		Kit.label(column,String(race.standing),"note")
-		var top:=0.0
-		for row:Dictionary in race.rows:
-			if not bool(row.unknown): top=maxf(top,float(row.high))
-		for row:Dictionary in race.rows:
-			var line:=VBoxContainer.new();line.add_theme_constant_override("separation",2);column.add_child(line)
-			var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);line.add_child(head)
-			var who:=Kit.label(head,String(row.name),"heading",Color(0,0,0,0),false);who.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			if bool(row.ours): who.add_theme_color_override("font_color",T.GOLD_TEXT)
-			var words:=Kit.label(head,String(row.text),"note",Color(0,0,0,0),false)
-			words.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-			if not bool(row.unknown) and top>0.0:
-				var meter:=Meter.new();line.add_child(meter)
-				meter.set_value(float(row.value)/top,T.GOLD if bool(row.ours) else T.TEAL)
-			if String(row.get("source",""))!="": Kit.label(line,String(row.source),"note")
-			if String(row.get("said",""))!="": Kit.label(line,String(row.said),"note")
-		Kit.label(column,"Asks: %s." % String(race.ask),"note")
+## A strength's biggest cause in a few words: the first part of the engine's
+## reason ("1 under arms or training", "food for 29 days").
+static func cause(why:String)->String:
+	var first:=why
+	# A grouped number keeps its comma ("2,500 goods"): only ", " ends a part.
+	for mark:String in ["; "," (",": ",", "]:
+		var at:=first.find(mark)
+		if at>0:first=first.substr(0,at)
+	var words:=first.strip_edges().split(" ",false)
+	if words.size()>6:return " ".join(words.slice(0,6))+"…"
+	return " ".join(words)
 
 func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
-	rose.configure(items,data.get("year_ago",{}))
-	var shape:Array=[(data.get("year_ago",{}) as Dictionary).is_empty()]
-	for item:Dictionary in items:shape.append([String(item.id),String(item.name),item.has("change")])
-	if shape==_strength_shape and _strength_refs.size()==items.size():
-		for index in items.size():_fill_strength(_strength_refs[index],items[index])
-		return
-	_strength_shape=shape
-	_clear(strength_list)
-	strength_rows.clear()
-	_strength_refs.clear()
-	Kit.label(strength_list,"Each against the peoples of our age: 50% (the rose's middle ring) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen.","note")
-	Kit.label(strength_list,"Faint dashes on the rose: a year ago. Click a strength to raise it." if not (data.get("year_ago",{}) as Dictionary).is_empty() else "Click a strength to raise it.","note")
+	var year_ago:Dictionary=data.get("year_ago",{})
+	rose.configure(items,year_ago)
+	UI.clear(strength_list)
+	var head:=UI.line(strength_list,8);head.name="Header"
+	UI.cell(head,"",72,12,T.INK_MUTED,true)
+	UI.cell(head,"against the age",70,12,T.INK_MUTED)
+	UI.cell(head,"",34,12,T.INK_MUTED)
+	UI.cell(head,"a year" if not year_ago.is_empty() else "",34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+	UI.label(head,"biggest cause",12,T.INK_MUTED,false,true)
 	for index in items.size():
-		strength_list.add_child(_strength_row(items[index],index))
-
-func _strength_row(item:Dictionary,index:int)->Control:
-	var row:=PanelContainer.new()
-	row.name="Strength_"+String(item.id)
-	row.mouse_filter=Control.MOUSE_FILTER_STOP
-	row.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
-	var calm:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,T.RADIUS_CONTROL,6.0)
-	var lit:=T.flat(T.GOLD_WASH,T.RULE,1,T.RADIUS_CONTROL,6.0)
-	row.add_theme_stylebox_override("panel",calm)
-	row.mouse_entered.connect(func()->void: row.add_theme_stylebox_override("panel",lit);rose.set_highlight(index))
-	row.mouse_exited.connect(func()->void: row.add_theme_stylebox_override("panel",calm);rose.set_highlight(-1))
-	row.gui_input.connect(func(event:InputEvent)->void:
-		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT: _raise(String(item.id)))
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",3);column.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(column)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(head)
-	var name:=Kit.label(head,String(item.name),"heading",Color(0,0,0,0),false);name.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	name.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var refs:={"row":row,"moved":null}
-	if item.has("change"):
-		var moved:=T.make_label("",12,T.MUTED);moved.mouse_filter=Control.MOUSE_FILTER_IGNORE;moved.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(moved)
-		refs.moved=moved
-	var value:=Kit.label(head,"","value",Color(0,0,0,0),false);value.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var meter:=Meter.new();column.add_child(meter)
-	var why:=Kit.label(column,"","note");why.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	refs.value=value;refs.meter=meter;refs.why=why
-	_strength_refs.append(refs)
-	_fill_strength(refs,item)
-	return row
-
-## One strength's value, year's change and reason, for the first drawing and
-## every refresh.
-func _fill_strength(refs:Dictionary,item:Dictionary)->void:
-	(refs.row as Control).tooltip_text="%s: %s.\n%s.%s\n50%% is a typical people of our age, 100%% the most the age has seen.\nRaised through %s; it costs %s. Click to open %s." % [String(item.name),String(item.means),_sentence(String(item.why)),("\nAgainst the age: %s." % String(item.parts)) if String(item.get("parts",""))!="" else "",String(item.section_name),String(item.cost),String(item.section_name)]
-	if refs.moved!=null:
-		var change:=float(item.change)
-		var words:="steady over the year" if absf(change)<1.0 else ("%s%d in a year" % ["+" if change>0.0 else "−",roundi(absf(change))])
-		_put(refs.moved,words,T.MUTED if absf(change)<1.0 else (T.GREEN_TEXT if change>0.0 else T.RED_TEXT))
-	_put(refs.value,"%d%%" % roundi(float(item.value)*100.0))
-	(refs.meter as Meter).set_value(float(item.value),T.GOLD)
-	_put(refs.why,_sentence(String(item.why)))
-
-static func _put(label:Label,text:String,color:Variant=null)->void:
-	if label.text!=text:label.text=text
-	if color is Color and label.get_theme_color("font_color")!=color:label.add_theme_color_override("font_color",color)
+		var item:Dictionary=items[index]
+		var id:=String(item.id)
+		var tip:="%s %d%%: %s.\n%s.%s\nRaised through %s; it costs %s. Click to open it." % [String(item.name),roundi(float(item.value)*100.0),String(item.means),_sentence(String(item.why)),("\nAgainst the age: %s." % String(item.parts)) if String(item.get("parts",""))!="" else "",String(item.section_name),String(item.cost)]
+		var row:=UI.hot_row(strength_list,"Strength_"+id,_raise.bind(id),tip)
+		var panel:=row.get_parent() as Control
+		panel.mouse_entered.connect(func()->void:rose.set_highlight(index))
+		panel.mouse_exited.connect(func()->void:rose.set_highlight(-1))
+		UI.cell(row,String(item.name),72,13,T.INK,true)
+		var bar:=UI.bar(row,float(item.value),T.GOLD,70,0.5)
+		if year_ago.has(id):bar.ghost=clampf(float(year_ago[id])/100.0,0.0,1.0)
+		bar.tooltip_text=tip
+		UI.cell(row,"%d%%" % roundi(float(item.value)*100.0),34,13,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
+		var change_text:=""
+		var change_ink:=T.INK_MUTED
+		if item.has("change"):
+			var change:=float(item.change)
+			change_text="·" if absf(change)<1.0 else ("%s%d" % ["+" if change>0.0 else "−",roundi(absf(change))])
+			change_ink=T.INK_MUTED if absf(change)<1.0 else (T.GREEN_TEXT if change>0.0 else T.RED_TEXT)
+		UI.cell(row,change_text,34,12,change_ink,true,HORIZONTAL_ALIGNMENT_RIGHT)
+		UI.label(row,cause(String(item.why)),12,T.BODY,false,true)
 
 func _raise(id:String)->void:
 	var raise:Variant=data.get("on_raise")
@@ -511,7 +366,7 @@ func _raise(id:String)->void:
 			return
 
 func _fill_compare()->void:
-	_clear(compare_row)
+	UI.clear(compare_row)
 	var list:Array=data.get("peoples",[])
 	var state:Dictionary=data.get("view_state",{})
 	var chosen:=String(state.get("compare",""))
@@ -520,7 +375,6 @@ func _fill_compare()->void:
 		rose.compare({},Color.WHITE,"")
 		rose.overlay([])
 		return
-	# Every people we know, faint beside ours; the chosen one drawn stronger.
 	var overlays:Array=[]
 	for p:Dictionary in list:
 		if not _comparable(p): continue
@@ -528,37 +382,23 @@ func _fill_compare()->void:
 		if values.is_empty(): continue
 		overlays.append({"values":values,"color":p.get("accent",T.RED),"name":String(p.name),"chosen":String(p.civ_id)==chosen})
 	rose.overlay(overlays)
-	var caption:=Kit.label(compare_row,"Beside ours, as we know them:","note",Color(0,0,0,0),false)
-	caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	UI.label(compare_row,"Lay over ours:",12,T.INK_MUTED)
 	for p:Dictionary in list:
 		var comparable:=_comparable(p)
-		var chip:=Button.new()
-		chip.name="Compare_"+String(p.civ_id)
-		chip.toggle_mode=true
-		chip.text=String(p.name)
-		chip.icon=_dot(p.get("accent",T.RED)) if comparable else null
-		chip.disabled=not comparable
-		chip.tooltip_text="We know too little of them yet: our watchers cannot say how strong they are." if not comparable else "Draw %s's strengths, as our watchers reckon them, stronger beside ours. %s" % [String(p.name),String(p.get("known_words",""))]
-		chip.button_pressed=String(p.civ_id)==chosen
-		chip.add_theme_font_size_override("font_size",13)
-		chip.add_theme_color_override("font_color",T.INK)
-		chip.add_theme_color_override("font_pressed_color",T.INK)
-		chip.add_theme_color_override("font_hover_color",T.INK)
-		chip.add_theme_stylebox_override("normal",T.flat(T.PAPER_SUNK,T.RULE,1,T.RADIUS_CONTROL,6.0))
-		chip.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.RULE,1,T.RADIUS_CONTROL,6.0))
-		chip.add_theme_stylebox_override("pressed",T.flat(T.GOLD_WASH,T.GOLD,1,T.RADIUS_CONTROL,6.0))
-		chip.add_theme_stylebox_override("disabled",T.flat(T.PAPER_SUNK,T.RULE,1,T.RADIUS_CONTROL,6.0))
 		var civ_id:=String(p.civ_id)
-		chip.pressed.connect(func()->void:
+		var toggle:=func()->void:
 			state["compare"]="" if String(state.get("compare",""))==civ_id else civ_id
 			prints.erase("compare")
-			_fill_compare())
-		compare_row.add_child(chip)
-		if String(p.civ_id)==chosen and comparable:
+			_fill_compare()
+		var chip_tip:="We know too little of them yet: our watchers cannot say how strong they are." if not comparable else "Draw %s's strengths, as our watchers reckon them, stronger over ours. %s" % [String(p.name),String(p.get("known_words",""))]
+		var chip:=UI.chip(compare_row,String(p.name),civ_id==chosen,toggle,chip_tip)
+		chip.name="Compare_"+civ_id
+		chip.icon=_dot(p.get("accent",T.RED)) if comparable else null
+		chip.disabled=not comparable
+		if civ_id==chosen and comparable:
 			var theirs:=_theirs(p)
 			if theirs.is_empty():continue
-			var tint:Color=p.get("accent",T.RED)
-			rose.compare(theirs,tint,String(p.name))
+			rose.compare(theirs,p.get("accent",T.RED),String(p.name))
 			shown=true
 	if not shown: rose.compare({},Color.WHITE,"")
 
@@ -577,277 +417,149 @@ static func _dot(tint:Color)->Texture2D:
 	_dots[key]=texture
 	return texture
 
-# ------------------------------------------- cunning and persuasion at work
-
-## What our cunning and persuasion do this month, with the engine's numbers
-## (standing.gd arts_at_work): two columns, each a heading and its rows; the
-## detail of each row in its tooltip.
-func _fill_arts()->void:
-	_clear(arts)
-	var at_work:Dictionary=data.get("arts",{})
-	if at_work.is_empty():
-		arts.visible=false
-		return
-	arts.visible=true
-	Kit.label(arts,"What our cunning and persuasion do","kicker")
-	var card:=_card(T.TEAL,16.0)
-	card.name="Arts"
-	arts.add_child(card)
-	var grid:=GridContainer.new();grid.columns=2 if size.x>=WIDE_AT else 1
-	grid.name="ArtsGrid"
-	grid.add_theme_constant_override("h_separation",22);grid.add_theme_constant_override("v_separation",12)
-	card.add_child(grid)
-	for pair:Array in [["cunning","Cunning",float(at_work.get("cunning_value",0.5))],["persuasion","Persuasion",float(at_work.get("persuasion_value",0.5))]]:
-		var column:=VBoxContainer.new();column.name="Arts_"+String(pair[0]);column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",5)
-		grid.add_child(column)
-		var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);column.add_child(head)
-		var title:=_voice(head,String(pair[1]),20,false)
-		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		Kit.label(head,"%d%%" % roundi(float(pair[2])*100.0),"value",Color(0,0,0,0),false)
-		var meter:=Meter.new();meter.set_value(float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD);column.add_child(meter)
-		Kit.label(column,"Half is a typical people of our age; each effect below is the engine's own, the same for every people."+(" Between spies, their cunning counts against ours by the same rule." if String(pair[0])=="cunning" else ""),"note")
-		for row:Dictionary in at_work.get(String(pair[0]),[]):
-			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_PASS;column.add_child(line)
-			var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(6,6);dot.color=T.INK_MUTED;dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dot.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(dot)
-			var words:=Kit.label(line,String(row.words),"body")
-			words.tooltip_text=String(row.get("detail",""))
-			words.mouse_filter=Control.MOUSE_FILTER_PASS
-
 # -------------------------------------------------------------- the dangers
 
+## The dangers after the first (the page's brief already says that one).
 func _fill_dangers()->void:
-	_clear(dangers)
+	UI.clear(dangers)
 	var warnings:Array=data.get("warnings",[])
-	dangers.visible=true
-	Kit.label(dangers,"What they will do about it","kicker")
-	if warnings.is_empty():
-		var calm:=_card(T.TEAL)
-		dangers.add_child(calm)
-		var text:="No people we know is moved against us by what it sees." if not (data.get("peoples",[]) as Array).is_empty() else "No people knows us yet, so none can envy us or think us weak."
-		Kit.label(calm,text,"body")
-		return
-	for warning:Dictionary in warnings.slice(0,5):
-		var card:=_card(_tone_color(String(warning.tone)),12.0)
-		dangers.add_child(card)
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);card.add_child(row)
-		var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",2);row.add_child(words)
-		Kit.label(words,String(warning.title),"heading",_tone_color(String(warning.tone)))
-		Kit.label(words,String(warning.words),"body")
-		var raise:Variant=data.get("on_raise")
+	dangers.visible=warnings.size()>1
+	if warnings.size()<=1:return
+	var raise:Variant=data.get("on_raise")
+	for warning:Dictionary in warnings.slice(1,6):
+		var row:=UI.line(dangers,8)
+		row.tooltip_text=String(warning.words)
+		var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(warning.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(dot)
+		var title:=UI.label(row,String(warning.title),13,T.text_for(_tone_color(String(warning.tone))),true,true)
+		title.tooltip_text=String(warning.words)
 		if String(warning.get("section",""))!="" and raise is Callable:
 			var section:=String(warning.section)
 			var sub:=int(warning.get("sub",0))
-			var button:=Kit.button(row,String(warning.get("action","Open")),false,func()->void: (raise as Callable).call(section,sub),"Open %s" % String(warning.get("action","")))
-			button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+			UI.verb(row,String(warning.get("action","Open")),func()->void:(raise as Callable).call(section,sub),String(warning.words))
 
 # -------------------------------------------------------------- the peoples
 
-## The peoples keep their cards while the same peoples show the same parts
-## (a ruler, the danger badges, how many doings and memories): the day's
-## feelings and words are written into them. Otherwise the cards are drawn
-## again.
-var _people_shape:Array=[]
-var _people_refs:Array=[]
+## How each people we know sees us: one row each, six feelings as bars.
 func _fill_peoples()->void:
+	UI.clear(peoples)
 	var list:Array=data.get("peoples",[])
-	var shape:Array=[list.is_empty(),data.get("on_court") is Callable]
-	for p:Dictionary in list:shape.append(_people_card_shape(p))
-	if shape==_people_shape and _people_refs.size()==list.size():
-		for index in list.size():_fill_people_card(_people_refs[index],list[index])
-		return
-	_people_shape=shape
-	_people_refs.clear()
-	_clear(peoples)
+	UI.heading(peoples,"How the peoples we know see us")
 	if list.is_empty():
-		var card:=_card()
-		card.name="NoPeoples"
-		peoples.add_child(card)
-		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);card.add_child(column)
-		_voice(column,"No other people has met us yet.",20,false)
-		Kit.label(column,"When our scouts or theirs cross paths, each people will come to see us in its own way: drawn to us, in awe, afraid, respectful, trusting or resentful, by what we are and by what we do to them.","body")
+		var row:=UI.line(peoples,8);row.name="NoPeoples"
+		UI.label(row,"No other people has met us yet",12,T.INK_MUTED,false,true)
 		var scouts:Variant=data.get("on_scouts")
-		if scouts is Callable: Kit.button(column,"Send scouts",true,scouts as Callable,"Send scouts to find the peoples around us")
+		if scouts is Callable:UI.verb(row,"Send scouts",scouts as Callable,"Send scouts to find the peoples around us",true)
 		return
-	for p:Dictionary in list: peoples.add_child(_people_card(p))
-
-func _people_card(p:Dictionary)->Control:
-	var accent:Color=p.get("accent",T.GOLD)
-	var card:=_card(accent)
-	card.name="People_"+String(p.civ_id)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);card.add_child(column)
-	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",12);column.add_child(top)
-	var emblem:=TextureRect.new()
-	emblem.texture=p.get("emblem") as Texture2D
-	emblem.custom_minimum_size=Vector2(48,48)
-	emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-	emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	top.add_child(emblem)
-	var title:=VBoxContainer.new();title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.add_theme_constant_override("separation",1);top.add_child(title)
-	_voice(title,String(p.name),22,false)
-	var refs:={"ruler":null,"badges":[],"doings":[],"memories":[],"feelings":[]}
-	refs.relation=Kit.label(title,String(p.relation),"note")
-	if String(p.get("ruler",""))!="": refs.ruler=Kit.label(title,String(p.ruler),"note")
-	IdentityLine.build(title,String(p.civ_id))
-	refs.headline=_voice(column,String(p.headline),18)
-	var grid:=GridContainer.new();grid.columns=2
-	grid.add_theme_constant_override("h_separation",16);grid.add_theme_constant_override("v_separation",6)
-	column.add_child(grid)
-	for view:Dictionary in p.get("views",[]):
-		grid.add_child(_feeling(view))
-		(refs.feelings as Array).append(_feeling_refs)
-	var strength:=Kit.label(column,String(p.strength)+".","body")
-	strength.tooltip_text="Fighting strength: everyone who can defend the homes, and warriors trained and ready counted three times over."
-	strength.mouse_filter=Control.MOUSE_FILTER_PASS
-	refs.strength=strength
-	# Spies between us: the covert odds, cunning against cunning (standing.gd spies_words).
-	var spies:Dictionary=p.get("spies",{})
-	refs.spies=null
-	if not spies.is_empty():
-		var tone:=String(spies.get("tone","calm"))
-		var line:=Kit.label(column,String(spies.words)+".","note",_tone_color(tone) if tone!="calm" else Color(0,0,0,0))
-		line.tooltip_text=String(spies.get("detail",""))
-		line.mouse_filter=Control.MOUSE_FILTER_PASS
-		refs.spies=line
-	for pair:Array in [["envy","Envy",Standing.ENVY_RAID_FLOOR],["contempt","Contempt",Standing.CONTEMPT_FLOOR]]:
-		var amount:=float(p.get(String(pair[0]),0.0))
-		if amount<=float(pair[2]): continue
-		var danger:=HBoxContainer.new();danger.add_theme_constant_override("separation",8);column.add_child(danger)
-		var badge:=T.make_label("%s %d%%" % [String(pair[1]),roundi(amount*100.0)],12,T.RED_TEXT)
-		badge.add_theme_stylebox_override("normal",T.flat(T.DANGER_BG,T.DANGER_BORDER,1,T.RADIUS_CONTROL,4.0))
-		danger.add_child(badge)
-		var why:=Kit.label(danger,String(p.get(String(pair[0])+"_why","")),"note")
-		why.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		(refs.badges as Array).append([String(pair[0]),String(pair[1]),badge,why])
-	var doings:Array=p.get("consequences",[])
-	if not doings.is_empty():
-		Kit.label(column,"What it makes them do","kicker")
-		for c:Dictionary in doings:
-			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);column.add_child(line)
-			var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(c.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(dot)
-			var words:=Kit.label(line,String(c.words),"body")
-			words.tooltip_text=String(c.get("detail",""))
-			words.mouse_filter=Control.MOUSE_FILTER_PASS
-			(refs.doings as Array).append(words)
-	var memories:Array=p.get("memories",[])
-	if not memories.is_empty():
-		Kit.label(column,"What they remember","kicker")
-		for memory:Dictionary in memories:
-			(refs.memories as Array).append(Kit.label(column,String(memory.text),"note",_tone_color(String(memory.tone))))
-	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);column.add_child(actions)
+	var head:=UI.line(peoples,6)
+	var first:=UI.label(head,"",12,T.INK_MUTED,true,true);first.custom_minimum_size.x=110
+	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
+		var title:=UI.cell(head,String(view.name),62,12,T.INK_MUTED,true)
+		title.tooltip_text=String(view.means)
+	UI.cell(head,"",46,12,T.INK_MUTED)
 	var on_court:Variant=data.get("on_court")
-	var civ_id:=String(p.civ_id)
-	if on_court is Callable: Kit.button(actions,"Send word",false,func()->void: (on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours")
-	_people_refs.append(refs)
-	return card
+	for p:Dictionary in list:
+		var row:=UI.hot_row(peoples,"People_"+String(p.civ_id),Callable(),_people_tip(p))
+		var name_cell:=HBoxContainer.new();name_cell.add_theme_constant_override("separation",5);name_cell.custom_minimum_size.x=110;name_cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(name_cell)
+		var emblem:=TextureRect.new();emblem.texture=p.get("emblem") as Texture2D;emblem.custom_minimum_size=Vector2(18,18)
+		emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		emblem.mouse_filter=Control.MOUSE_FILTER_PASS;name_cell.add_child(emblem)
+		UI.label(name_cell,String(p.name),13,T.INK,true,true)
+		for pair:Array in [["envy","envy",Standing.ENVY_RAID_FLOOR],["contempt","scorn",Standing.CONTEMPT_FLOOR]]:
+			if float(p.get(String(pair[0]),0.0))>float(pair[2]):
+				UI.tag(name_cell,String(pair[1]),"danger").tooltip_text="%s %d%%: %s" % [String(pair[0]).capitalize(),roundi(float(p.get(String(pair[0]),0.0))*100.0),String(p.get(String(pair[0])+"_why",""))]
+		for view:Dictionary in p.get("views",[]):
+			var cell:=HBoxContainer.new();cell.add_theme_constant_override("separation",3);cell.custom_minimum_size.x=62;row.add_child(cell)
+			cell.tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(float(view.value)*100.0),String(view.means),String(view.why)]
+			cell.mouse_filter=Control.MOUSE_FILTER_PASS
+			var b:=UI.bar(cell,float(view.value),UI.tone_color(String(VIEW_INK.get(String(view.id),"gold"))),30)
+			b.tooltip_text=cell.tooltip_text
+			UI.label(cell,"%d" % roundi(float(view.value)*100.0),12,T.INK).tooltip_text=cell.tooltip_text
+		var talk:=HBoxContainer.new();talk.custom_minimum_size.x=46;row.add_child(talk)
+		if on_court is Callable:
+			var civ_id:=String(p.civ_id)
+			UI.verb(talk,"Talk",func()->void:(on_court as Callable).call(civ_id),"Open the court to receive their envoy or send ours").name="Talk"
 
-## What a people's card is made of: who, their colours and emblem, the
-## feelings shown, whether a ruler and each danger badge are named, and the
-## tones of what they do and remember.
-static func _people_card_shape(p:Dictionary)->Array:
-	var views:Array=[]
-	for view:Dictionary in p.get("views",[]):views.append([String(view.id),String(view.name)])
-	var doings:Array=[]
-	for c:Dictionary in p.get("consequences",[]):doings.append(String(c.tone))
-	var memories:Array=[]
-	for memory:Dictionary in p.get("memories",[]):memories.append(String(memory.tone))
-	return [String(p.civ_id),p.get("accent",T.GOLD),p.get("emblem"),String(p.name),String(p.get("ruler",""))!="",views,String((p.get("spies",{}) as Dictionary).get("tone","")),
-		float(p.get("envy",0.0))>Standing.ENVY_RAID_FLOOR,float(p.get("contempt",0.0))>Standing.CONTEMPT_FLOOR,doings,memories]
+static func _people_tip(p:Dictionary)->String:
+	var lines:PackedStringArray=[String(p.name)+": "+String(p.relation)]
+	if String(p.get("ruler",""))!="":lines.append(String(p.ruler))
+	if String(p.get("headline",""))!="":lines.append(String(p.headline))
+	lines.append(String(p.get("strength",""))+".")
+	var spies:Dictionary=p.get("spies",{})
+	if not spies.is_empty():lines.append(String(spies.get("words",""))+".")
+	for c:Dictionary in p.get("consequences",[]):lines.append("· "+String(c.words))
+	for memory:Dictionary in p.get("memories",[]):lines.append(String(memory.text))
+	if String(p.get("known_words",""))!="":lines.append(String(p.known_words))
+	return "\n".join(lines)
 
-## A people's card takes the day's feelings and words in place.
-func _fill_people_card(refs:Dictionary,p:Dictionary)->void:
-	_put(refs.relation,String(p.relation))
-	if refs.ruler!=null:_put(refs.ruler,String(p.ruler))
-	_put(refs.headline,String(p.headline))
-	var views:Array=p.get("views",[])
-	for index in mini(views.size(),(refs.feelings as Array).size()):_fill_feeling(refs.feelings[index],views[index])
-	_put(refs.strength,String(p.strength)+".")
-	if refs.get("spies")!=null:
-		var spies:Dictionary=p.get("spies",{})
-		_put(refs.spies,String(spies.get("words",""))+".")
-		(refs.spies as Label).tooltip_text=String(spies.get("detail",""))
-	for badge:Array in refs.badges:
-		_put(badge[2],"%s %d%%" % [String(badge[1]),roundi(float(p.get(String(badge[0]),0.0))*100.0)])
-		_put(badge[3],String(p.get(String(badge[0])+"_why","")))
-	var doings:Array=p.get("consequences",[])
-	for index in mini(doings.size(),(refs.doings as Array).size()):
-		var words:Label=refs.doings[index]
-		_put(words,String(doings[index].words))
-		words.tooltip_text=String((doings[index] as Dictionary).get("detail",""))
-	var memories:Array=p.get("memories",[])
-	for index in mini(memories.size(),(refs.memories as Array).size()):_put(refs.memories[index],String(memories[index].text))
+# ------------------------------------------------- who leads, arts, our people
 
-## The labels of the feeling _feeling made last, for the live refresh.
-var _feeling_refs:Dictionary={}
-func _feeling(view:Dictionary)->Control:
-	var cell:=VBoxContainer.new()
-	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	cell.add_theme_constant_override("separation",2)
-	cell.mouse_filter=Control.MOUSE_FILTER_PASS
-	var head:=HBoxContainer.new();head.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(head)
-	var name:=Kit.label(head,String(view.name),"body",Color(0,0,0,0),false);name.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var amount:=Kit.label(head,"","value",Color(0,0,0,0),false);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var meter:=Meter.new()
-	cell.add_child(meter)
-	_feeling_refs={"cell":cell,"amount":amount,"meter":meter}
-	_fill_feeling(_feeling_refs,view)
-	return cell
+## What the races draw, so a day's small moves in a value redraw nothing.
+static func _races_print(list:Array)->Array:
+	var out:Array=[]
+	for race:Dictionary in list:
+		var rows:Array=[]
+		for row:Dictionary in race.rows:rows.append([String(row.name),String(row.text),String(row.get("said","")),String(row.get("source","")),bool(row.unknown),roundi(float(row.value)*20.0) if float(row.value)<=1.0 else roundi(log(maxf(1.0,float(row.value)))*8.0)])
+		out.append([String(race.id),String(race.standing),rows])
+	return out
 
-func _fill_feeling(refs:Dictionary,view:Dictionary)->void:
-	var value:=float(view.value)
-	(refs.cell as Control).tooltip_text="%s %d%%: %s.\nWhy: %s." % [String(view.name),roundi(value*100.0),String(view.means),String(view.why)]
-	_put(refs.amount,"%d%%" % roundi(value*100.0))
-	(refs.meter as Meter).set_value(value,{"allure":T.TEAL,"awe":T.GOLD,"fear":T.RED,"respect":T.BLUE,"trust":T.GREEN,"resentment":T.RED}.get(String(view.id),T.GOLD))
+func _fill_races()->void:
+	UI.clear(races)
+	var list:Array=data.get("races",[])
+	races.get_parent().visible=not list.is_empty()
+	if list.is_empty(): return
+	UI.heading(races,"Who leads")
+	for race:Dictionary in list:
+		var lines:PackedStringArray=[]
+		for row:Dictionary in race.rows:lines.append("%s: %s%s" % [String(row.name),String(row.text),(" (%s)" % String(row.source)) if String(row.get("source",""))!="" else ""])
+		lines.append("Asks: %s." % String(race.ask))
+		var row:=UI.line(races,6);row.name="Race_"+String(race.id)
+		row.tooltip_text="\n".join(lines)
+		UI.cell(row,String(race.race),92,13,T.INK,true).tooltip_text=row.tooltip_text
+		var words:=UI.label(row,String(race.standing),12,T.BODY,false,true)
+		words.tooltip_text=row.tooltip_text
 
-# ------------------------------------------------------------ our own people
+## What our cunning and persuasion do this month: one row each, every effect
+## in its pointer (standing.gd arts_at_work).
+func _fill_arts()->void:
+	UI.clear(arts)
+	var at_work:Dictionary=data.get("arts",{})
+	arts.get_parent().visible=not at_work.is_empty()
+	if at_work.is_empty():return
+	UI.heading(arts,"Cunning and persuasion at work")
+	for pair:Array in [["cunning","Cunning",float(at_work.get("cunning_value",0.5))],["persuasion","Persuasion",float(at_work.get("persuasion_value",0.5))]]:
+		var effects:Array=at_work.get(String(pair[0]),[])
+		var lines:PackedStringArray=[]
+		for e:Dictionary in effects:lines.append("· %s%s" % [String(e.words),(" — "+String(e.detail)) if String(e.get("detail",""))!="" else ""])
+		var row:=UI.line(arts,6);row.name="Arts_"+String(pair[0])
+		row.tooltip_text="\n".join(lines)
+		UI.cell(row,String(pair[1]),92,13,T.INK,true)
+		UI.bar(row,float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD,60,0.5).tooltip_text=row.tooltip_text
+		UI.cell(row,"%d%%" % roundi(float(pair[2])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
+		UI.label(row,String((effects[0] as Dictionary).words) if not effects.is_empty() else "",12,T.BODY,false,true).tooltip_text=row.tooltip_text
 
-## Our own people keep their medallions and lines while the same lines are
-## shown; the month's figures are written into them.
-var _home_shape:Array=[]
-var _home_refs:Dictionary={}
+## Our own people: four short rows and what they tell.
 func _fill_home()->void:
+	UI.clear(home)
 	var h:Dictionary=data.get("home",{})
-	var shape:=_home_shape_of(h)
-	if shape==_home_shape and not _home_refs.is_empty():
-		_fill_home_words(h)
-		return
-	_home_shape=shape
-	_home_refs={"medals":[]}
-	_clear(home)
-	Kit.label(home,"Our own people","kicker")
-	var card:=_card(T.GREEN)
-	home.add_child(card)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);card.add_child(column)
-	var row:=HFlowContainer.new();row.alignment=FlowContainer.ALIGNMENT_CENTER;row.add_theme_constant_override("h_separation",26);row.add_theme_constant_override("v_separation",12);column.add_child(row)
-	for medal:Array in _home_medals(h):
-		row.add_child(_medallion(String(medal[0]),float(medal[1]),medal[2],String(medal[3]),String(medal[4])))
-		(_home_refs.medals as Array).append(_medal_refs)
 	var words:=_home_words(h)
-	if String(h.get("regard_words",""))!="":
-		var said:=_voice(column,String(words.regard),18)
-		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		_home_refs.regard=said
-	if String(h.get("told",""))!="":
-		var told:=Kit.label(column,String(h.told),"note")
-		told.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		_home_refs.told=told
-	var note:=Kit.label(column,String(words.note),"note")
-	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	_home_refs.note=note
-	# Our own tongue and look.
-	IdentityLine.build(column,"player")
-	if words.has("god"):
-		var god:=Kit.label(column,String(words.god),"note")
-		god.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		_home_refs.god=god
+	var head:=UI.heading(home,"Our own people")
+	head.tooltip_text=String(words.note)+("\n"+String(words.god) if words.has("god") else "")+("\n"+String(words.forgiving) if words.has("forgiving") else "")
+	for medal:Array in _home_medals(h):
+		var row:=UI.line(home,6);row.name="Home_"+String(medal[0]).replace(" ","")
+		row.tooltip_text=String(medal[4])
+		UI.cell(row,String(medal[0]),92,13,T.INK,true)
+		UI.bar(row,float(medal[1]),medal[2],60).tooltip_text=String(medal[4])
+		UI.cell(row,"%d%%" % roundi(float(medal[1])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
+		UI.label(row,String(medal[3]),12,T.INK_MUTED,false,true)
 	if words.has("levy"):
-		var heavy:=Kit.label(column,String(words.levy),"note",T.RED)
-		heavy.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		_home_refs.levy=heavy
-	if words.has("forgiving"):
-		var line:=Kit.label(column,String(words.forgiving),"note",T.GREEN if float((h.get("effects",{}) as Dictionary).get("forgiveness",0.0))>0.0 else T.RED)
-		line.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		_home_refs.forgiving=line
+		var heavy:=UI.label(home,"Heavy levy: %d%% under arms" % roundi(float((h.get("effects",{}) as Dictionary).get("under_arms",0.0))*100.0),12,T.RED_TEXT,true)
+		heavy.tooltip_text=String(words.levy)
+	if String(h.get("regard_words",""))!="":
+		var said:=Label.new();said.text=String(words.regard);said.add_theme_font_override("font",T.voice_font(true));said.add_theme_font_size_override("font_size",15)
+		said.add_theme_color_override("font_color",T.BODY);said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		said.tooltip_text=String(h.get("told",""));said.mouse_filter=Control.MOUSE_FILTER_PASS
+		home.add_child(said)
 
 ## The four medallions: [title, value, ink, word, tip].
 static func _home_medals(h:Dictionary)->Array:
@@ -858,7 +570,7 @@ static func _home_medals(h:Dictionary)->Array:
 		["Dread of you",float(h.get("dread",0.0)),T.RED,_band(float(h.get("dread",0.0))),"How much our people dread their god's wrath."],
 		["Trust in chiefs",trust,T.TEAL,_band(trust),"How much our people trust those who lead them."]]
 
-## The lines under the medallions: our regard, the month's effects, a heavy
+## The words about our own people: our regard, the month's effects, a heavy
 ## levy and forgiveness (the last two only when they apply).
 static func _home_words(h:Dictionary)->Dictionary:
 	var words:={"regard":_sentence(String(h.get("regard_words","")))+"."}
@@ -884,28 +596,6 @@ static func _home_words(h:Dictionary)->Dictionary:
 		words["forgiving"]=("A proud people forgives: the blame its chiefs carry for hard orders, constant change and failed aims is %d%% lighter." % roundi(forgiving*100.0)) if forgiving>0.0 else ("A people ashamed of itself blames its chiefs %d%% more for hard orders, constant change and failed aims." % roundi(-forgiving*100.0))
 	return words
 
-## Which of our people's lines are shown, and forgiveness's ink.
-static func _home_shape_of(h:Dictionary)->Array:
-	var effects:Dictionary=h.get("effects",{})
-	var forgiving:=float(effects.get("forgiveness",0.0))
-	return [String(h.get("regard_words",""))!="",String(h.get("told",""))!="",_home_words(h).has("god"),float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
-
-## Our people's medallions and lines take the month's figures in place.
-func _fill_home_words(h:Dictionary)->void:
-	var medals:=_home_medals(h)
-	for index in mini(medals.size(),(_home_refs.medals as Array).size()):
-		var refs:Dictionary=_home_refs.medals[index];var medal:Array=medals[index]
-		(refs.column as Control).tooltip_text=String(medal[4])
-		(refs.gauge as Medallion).set_value(float(medal[1]),medal[2])
-		_put(refs.word,String(medal[3]))
-	var words:=_home_words(h)
-	if _home_refs.has("regard"):_put(_home_refs.regard,String(words.regard))
-	if _home_refs.has("told"):_put(_home_refs.told,String(h.get("told","")))
-	if _home_refs.has("god"):_put(_home_refs.god,String(words.get("god","")))
-	_put(_home_refs.note,String(words.note))
-	if _home_refs.has("levy"):_put(_home_refs.levy,String(words.get("levy","")))
-	if _home_refs.has("forgiving"):_put(_home_refs.forgiving,String(words.get("forgiving","")))
-
 ## First letter up, the rest as written.
 static func _sentence(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1) if text!="" else text
@@ -916,16 +606,3 @@ static func _band(value:float)->String:
 	if value<0.6: return "some"
 	if value<0.8: return "much"
 	return "great"
-
-## The parts of the medallion _medallion made last, for the live refresh.
-var _medal_refs:Dictionary={}
-func _medallion(title:String,value:float,tint:Color,word:String,tip:String)->Control:
-	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",4)
-	column.mouse_filter=Control.MOUSE_FILTER_PASS
-	column.tooltip_text=tip
-	var gauge:=Medallion.new();gauge.set_value(value,tint);column.add_child(gauge)
-	var name:=Kit.label(column,title,"heading",Color(0,0,0,0),false);name.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var said:=Kit.label(column,word,"note",Color(0,0,0,0),false);said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;said.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	_medal_refs={"column":column,"gauge":gauge,"word":said}
-	return column

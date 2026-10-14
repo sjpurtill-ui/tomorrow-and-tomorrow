@@ -54,7 +54,7 @@ const RANKED:=["towns","people","fighters","stores","crafts","lore","lives","wea
 ## Titles in the people's own words, by what they know (era_words.gd stages).
 const TITLES:={
 	"hearth":{"name":"People","towns":"Hearths","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Lore","lives":"Lives","wealth":"Hands","walls":"Walls","between":"Between us","envoys":"Envoys"},
-	"lettered":{"name":"People","towns":"Towns","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Scholars","lives":"Lives","wealth":"Output","walls":"Walls","between":"Between us","envoys":"Envoys"},
+	"lettered":{"name":"People","towns":"Towns","people":"How many","fighters":"Fighters","stores":"Stores","crafts":"Crafts","lore":"Learning","lives":"Lives","wealth":"Output","walls":"Walls","between":"Between us","envoys":"Envoys"},
 	"reckoned":{"name":"People","towns":"Cities","people":"Population","fighters":"Soldiers","stores":"Food","crafts":"Production","lore":"Science","lives":"Health","wealth":"Output","walls":"Defences","between":"Relations","envoys":"Envoys"},
 }
 ## What each column means, for the header's pointer.
@@ -65,7 +65,7 @@ const MEANINGS:={
 	"fighters":"Armed people seen guarding their towns, and their bands seen in the field.",
 	"stores":"How long their food would last if cut off.",
 	"crafts":"How busy their crafts and workshops looked.",
-	"lore":"How many of them work at learning.",
+	"lore":"How much learning they do, weighted by schooling; not a head count of scholars.",
 	"lives":"How long their people usually live.",
 	"wealth":"What their people make in a day, in working hands.",
 	"walls":"How hard their towns would be to break into.",
