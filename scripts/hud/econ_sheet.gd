@@ -113,6 +113,11 @@ static func columns(parent:Node,node_name:String,min_column:float=380.0,most:int
 static func flow(grid:GridContainer,width:float)->void:
 	if grid==null or not is_instance_valid(grid):return
 	var columns:=clampi(floori((width+22.0)/(float(grid.get_meta("min_column",380.0))+22.0)),1,int(grid.get_meta("most",2)))
+	# Never more columns than the widest row allows: the page is never pushed wider.
+	var widest:=0.0
+	for child in grid.get_children():
+		if child is Control and (child as Control).visible:widest=maxf(widest,(child as Control).get_combined_minimum_size().x)
+	while columns>1 and widest*columns+22.0*(columns-1)>width:columns-=1
 	if grid.columns!=columns:grid.columns=columns
 
 # --------------------------------------------------------------------------
