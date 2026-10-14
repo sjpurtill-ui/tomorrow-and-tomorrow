@@ -23,7 +23,7 @@ const Catalog:=preload("res://scripts/research_600_catalog.gd")
 ## Below this board width the free team's options stack in one column.
 const WIDE:=760.0
 ## From this width each row also says what its question would bring.
-const BRINGS_AT:=1000.0
+const BRINGS_AT:=820.0
 ## A question's line is this tall.
 const CARD_HEIGHT:=24.0
 ## The table's fixed columns.
@@ -726,7 +726,7 @@ func _lane(parent:Node,lane:Dictionary)->void:
 	_lanes[id]=refs
 	var slots:Array=lane.slots
 	if slots.is_empty():
-		var wait:=_fixed(head,"",12,T.TEXT_SOFT);wait.name="Waiting";wait.mouse_filter=Control.MOUSE_FILTER_STOP
+		var wait:=_wrapping(head,12,T.TEXT_SOFT);wait.name="Waiting";wait.mouse_filter=Control.MOUSE_FILTER_STOP
 		refs.waiting=wait
 	else:
 		_question(head,slots[0],accent)
@@ -774,7 +774,8 @@ func _question(parent:Node,slot:Dictionary,accent:Color)->void:
 	var cell:=HBoxContainer.new();cell.name="Question_"+String(record.get("id","")).validate_node_name();cell.add_theme_constant_override("separation",8)
 	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.custom_minimum_size.y=CARD_HEIGHT;cell.mouse_filter=Control.MOUSE_FILTER_STOP;parent.add_child(cell)
 	var refs:={"panel":cell,"id":""}
-	refs.name=_fixed(cell,"",13,T.INK);refs.name.name="QuestionName"
+	# A long name wraps to a second line rather than being cut.
+	refs.name=_wrapping(cell,13,T.INK);refs.name.name="QuestionName"
 	refs.phase=T.make_label("",12,T.AMBER_TEXT);refs.phase.name="Holdup";refs.phase.size_flags_vertical=Control.SIZE_SHRINK_CENTER;refs.phase.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(refs.phase)
 	refs.would=T.make_label("",12,T.TEXT_SOFT);refs.would.name="WouldBring";refs.would.size_flags_vertical=Control.SIZE_SHRINK_CENTER;refs.would.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(refs.would)
 	_brings.append(refs.would)
@@ -838,6 +839,9 @@ func _artifact_row(parent:Node,study:Dictionary)->void:
 ## A one-line label whose words never change its size: too long, it ends in "…".
 func _fixed(parent:Node,value:String,font:int,ink:Color)->Label:
 	var label:=T.make_label(value,font,ink);_clip(label);parent.add_child(label);return label
+func _wrapping(parent:Node,font:int,ink:Color)->Label:
+	var label:=T.make_label("",font,ink);label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.custom_minimum_size.x=60;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;parent.add_child(label);return label
 static func _clip(label:Label)->void:
 	label.autowrap_mode=TextServer.AUTOWRAP_OFF;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.custom_minimum_size.x=1;label.mouse_filter=Control.MOUSE_FILTER_IGNORE

@@ -153,8 +153,9 @@ func test_cards_are_one_size_and_fit_the_board()->void:
 		var cards:Array=board.find_children("Question_*","",true,false)
 		assert_int(cards.size()).is_equal(5)
 		for card:Control in cards:
-			# Each question is one line of the table.
-			assert_float(card.size.y).is_equal_approx(Board.CARD_HEIGHT,1.0)
+			# Each question is one line of the table; a long name wraps rather than being cut.
+			if width>=1120:assert_float(card.size.y).is_equal_approx(Board.CARD_HEIGHT,1.0)
+			else:assert_float(card.size.y).is_less_equal(Board.CARD_HEIGHT*3.2)
 			assert_float(card.get_global_rect().end.x).is_less_equal(float(width)+1.0)
 
 func test_cards_hold_still_while_the_evidence_builds()->void:

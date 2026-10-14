@@ -420,7 +420,7 @@ func _known_block()->Dictionary:
 			"open":expanded_domains.has(domain),"on_toggle":_toggle_domain.bind(domain)})
 	var figures:Array=[
 		{"title":"KNOWN","value":EraWords.grouped(known),"note":"of %s questions in all" % EraWords.grouped(rows.size()),"ratio":float(known)/maxf(1.0,float(rows.size())),"tip":"Questions the people have answered, of every question there is to answer in all the fields."},
-		{"title":"LEARNED IN TEN YEARS","value":str(this_year),"note":"the last ten years","tip":"Questions answered in the last ten years."},
+		{"title":"LEARNED IN TEN YEARS","value":str(this_year),"note":"since year %d" % maxi(1,today/365+1-10),"tip":"Questions answered in the last ten years."},
 		{"title":"NEWEST","value":String(newest.get("name","None yet")),"note":EraWords.ago(newest_day) if newest_day>=0 else "","tip":"The question answered most recently.","stretch":1.6},
 	]
 	return {"type":"known_board","figures":figures,"fields":fields,"inert":inert}
