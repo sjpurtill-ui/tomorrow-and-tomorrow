@@ -12,7 +12,7 @@ class_name DockBlocks
 ##              top bar are never repeated below.
 ##   fact_grid  ordinary facts, one line each, flowing into 2-3 columns:
 ##              {items:[{label, value, icon, bar, tone, tip, on_click,
-##              button:{label,on_press}}]} (fact_grid.gd).
+##              button:{label,on_press}}]} (dense_blocks.gd).
 ##   table      lists: one line per item, aligned columns, tag, bar and a
 ##              verb on the row, group headers; "empty" is one small line
 ##              (dense_blocks.gd).
@@ -140,7 +140,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"bars": _render_bars(section,block)
 			"tiles": _render_tiles(section,block)
 			"rows": _render_rows(section,block)
-			"fact_grid": FactGrid.render(section,block)
+			"fact_grid": Dense.render_fact_grid(section,block)
 			"table": Dense.render_table(section,block)
 			"costs": Dense.render_costs(section,block)
 			"frame": Dense.render_frame(section,block)
@@ -400,7 +400,6 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 			column.add_child(note)
 
 
-const FactGrid:=preload("res://scripts/hud/fact_grid.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
 static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:

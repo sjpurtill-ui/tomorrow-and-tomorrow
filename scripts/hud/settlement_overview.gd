@@ -164,7 +164,7 @@ func _leader(block:Dictionary,parent:Node)->void:
 	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	controls.add_theme_constant_override("h_separation",6);controls.add_theme_constant_override("v_separation",6);row.add_child(controls)
 	var talk:=_button(controls,"Talk with %s" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
-	talk.name="TalkWithLeader"
+	talk.name="TalkWithLeader";talk.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 
 static func _office_words(leader:Dictionary)->String:
 	return ("%s, age %d" % [String(leader.get("title","Local leader")),int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
@@ -274,18 +274,19 @@ func _works(works:Dictionary)->void:
 	for line:String in works.get("progress",[]):
 		var said:=_line(box,line,13,T.BODY)
 		if not _page_refs.is_empty():(_page_refs.progress as Array).append(said)
-	if (works.get("progress",[]) as Array).is_empty():
-		var none:=_line(box,"Nothing is built yet.",13,T.MUTED)
-		none.tooltip_text="Clean water, and waste kept apart from it, mean fewer sick.";none.mouse_filter=Control.MOUSE_FILTER_PASS
+	# Each work one line: its name, what it costs or what stops it, and its
+	# button beside them; what it does is in the line's pointer.
 	for offer:Dictionary in works.get("offers",[]):
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);box.add_child(row)
-		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
-		var title:=_voice(String(offer.title),18);text.add_child(title)
-		var sentence:=_line(text,String(offer.sentence),13,T.BODY)
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);row.custom_minimum_size.y=30;box.add_child(row)
+		var title:=T.make_label(String(offer.title),13,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.custom_minimum_size.x=150;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(title)
+		var sentence:=Label.new();sentence.visible=false;sentence.text=String(offer.sentence);row.add_child(sentence)
 		var ready:=String(offer.get("blocked","")).is_empty()
-		var cost:=_line(text,String(offer.cost) if ready else String(offer.blocked),13,T.MUTED if ready else tone_color("warn"))
-		var start:=_button(row,String(offer.action),offer.get("on_press"),String(offer.cost) if ready else String(offer.blocked))
-		start.name="Start_"+String(offer.id).replace(":","_");start.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var cost:=T.make_label(String(offer.cost) if ready else String(offer.blocked),12,T.MUTED if ready else tone_color("warn"))
+		cost.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;cost.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(cost)
+		row.tooltip_text="%s\n%s" % [String(offer.sentence),String(offer.cost) if ready else String(offer.blocked)];row.mouse_filter=Control.MOUSE_FILTER_PASS
+		var start:=preload("res://scripts/hud/dense_blocks.gd").verb(String(offer.action),offer.get("on_press"),String(offer.cost) if ready else String(offer.blocked),not ready)
+		row.add_child(start)
+		start.name="Start_"+String(offer.id).replace(":","_")
 		if not _page_refs.is_empty():(_page_refs.offers as Array).append({"title":title,"sentence":sentence,"cost":cost,"start":start})
 
 # --------------------------------------------------------------------------

@@ -1,8 +1,15 @@
 extends RefCounted
 ## THE STRATEGY-SCREEN BLOCKS: dense, glyph-and-number pieces every provider
 ## builds its tabs from, so a tab reads like a game panel, not a slide.
-## dock_blocks.gd routes "table", "costs" and "frame" here; "fact_grid" lives
-## in fact_grid.gd and the KPI strip is the dock's own row (a tab's "kpis").
+## dock_blocks.gd routes "fact_grid", "table", "costs" and "frame" here; the
+## KPI strip is the dock's own row (a tab's "kpis", dock_panel.gd).
+##
+## fact_grid  ordinary facts, one line each (mark, name, value at the right,
+##         an optional thin bar, an optional verb beside the figure), flowing
+##         into 1-3 columns as the page widens:
+##   {type:"fact_grid", heading?, min_column? (px, 300), items:[{label,
+##    value, tone?, icon?: Texture2D, bar? (0..1), tip?, on_click?,
+##    button?:{label, on_press, tip?, disabled?}}]}
 ##
 ## table   one line per item, columns aligned, the distinguishing fact first,
 ##         status as a small coloured tag, a verb button on the row:
@@ -25,6 +32,7 @@ extends RefCounted
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const ROW_HEIGHT:=28.0
+const FACT_HEIGHT:=30.0
 
 
 ## A small verb button: the one action on a row or beside a figure.
@@ -69,6 +77,60 @@ static func _bar(value:float,tone:String,width:float=56.0)->ProgressBar:
 	bar.add_theme_stylebox_override("background",T.flat(Color(T.INK,0.12),Color(0,0,0,0),0,2))
 	bar.add_theme_stylebox_override("fill",T.flat(tone_color(tone,T.GOLD) if tone!="" else T.GOLD,Color(0,0,0,0),0,2))
 	return bar
+
+
+# --- fact grid -------------------------------------------------------------------
+
+static func render_fact_grid(parent:VBoxContainer,block:Dictionary)->GridContainer:
+	var grid:=GridContainer.new();grid.name="FactGrid"
+	grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",2)
+	grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	parent.add_child(grid)
+	var widest:=float(block.get("min_column",300.0))
+	var fit:=func()->void:
+		if grid.size.x>0.0:grid.columns=clampi(floori((grid.size.x+24.0)/(widest+24.0)),1,3)
+	grid.resized.connect(fit)
+	grid.columns=2
+	for item:Dictionary in block.get("items",[]):grid.add_child(_fact(item))
+	return grid
+
+
+static func _fact(item:Dictionary)->Control:
+	var cell:=PanelContainer.new();cell.name="Fact_"+String(item.get("label","")).validate_node_name()
+	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.custom_minimum_size.y=FACT_HEIGHT
+	var rest:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,3);rest.content_margin_left=4;rest.content_margin_right=4
+	rest.border_width_bottom=1;rest.border_color=Color(T.RULE,0.45)
+	var lit:=rest.duplicate() as StyleBoxFlat;lit.bg_color=T.HOVER_BG
+	cell.add_theme_stylebox_override("panel",rest)
+	cell.tooltip_text=String(item.get("tip",""))
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(row)
+	var icon:Variant=item.get("icon")
+	if icon is Texture2D:
+		var mark:=TextureRect.new();mark.texture=icon;mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
+	var label:=T.make_label(String(item.get("label","")),13,T.BODY);label.name="Label"
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(label)
+	if item.has("bar"):
+		var bar:=ProgressBar.new();bar.name="Bar";bar.show_percentage=false;bar.min_value=0.0;bar.max_value=1.0;bar.value=clampf(float(item.bar),0.0,1.0)
+		bar.custom_minimum_size=Vector2(56,5);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		bar.add_theme_stylebox_override("background",T.flat(Color(T.INK,0.12),Color(0,0,0,0),0,2))
+		bar.add_theme_stylebox_override("fill",T.flat(tone_color(String(item.get("tone","")),T.GOLD),Color(0,0,0,0),0,2))
+		row.add_child(bar)
+	var value:=T.make_label(String(item.get("value","")),13,tone_color(String(item.get("tone","")),T.INK));value.name="Value"
+	value.add_theme_font_override("font",T.font("ui_strong"));value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+	value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(value)
+	var button:Dictionary=item.get("button",{}) if item.get("button") is Dictionary else {}
+	if not button.is_empty():row.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
+	var click:Variant=item.get("on_click")
+	if click is Callable and (click as Callable).is_valid():
+		cell.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+		cell.mouse_entered.connect(func()->void:cell.add_theme_stylebox_override("panel",lit))
+		cell.mouse_exited.connect(func()->void:cell.add_theme_stylebox_override("panel",rest))
+		cell.gui_input.connect(func(event:InputEvent)->void:
+			var mouse:=event as InputEventMouseButton
+			if mouse and mouse.pressed and mouse.button_index==MOUSE_BUTTON_LEFT:cell.accept_event();(click as Callable).call())
+	return cell
 
 
 # --- table ---------------------------------------------------------------------

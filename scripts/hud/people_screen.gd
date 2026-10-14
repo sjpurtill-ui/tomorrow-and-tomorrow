@@ -19,14 +19,12 @@ extends VBoxContainer
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
-const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
 ## The Production screen's hands controls (−, +, ×5), for the daily work.
 const W:=preload("res://scripts/hud/production_widgets.gd")
 ## What a task does, line by line (the Buildings page's panel).
 const ImpactPanel:=preload("res://scripts/hud/impact_panel.gd")
 
-const SCENE_HEIGHT:=120.0
 const TWO_COLUMNS_AT:=700.0
 const FIGURES_PER_ROW:=14  # hard cap; the model scales figures to 12
 
@@ -69,10 +67,6 @@ class TaskToggle extends Button:
 
 var data:Dictionary={}
 var selected_id:=""
-var backdrop:Control
-var season_label:Label
-var headline_label:Label
-var register_label:Label
 var voice_line:Label
 var voice_name:Label
 var voice_face:Control
@@ -237,42 +231,16 @@ var _labor_row_shapes:Array[String]=[]
 # ---------------------------------------------------------------------------
 
 func _build_scene()->void:
-	var frame:=PanelContainer.new();frame.name="Scene";frame.clip_contents=true
-	frame.custom_minimum_size.y=SCENE_HEIGHT
-	frame.add_theme_stylebox_override("panel",T.flat(Color("2a241c"),T.BORDER,1,4))
-	add_child(frame)
-	backdrop=Backdrop.new();backdrop.name="Backdrop"
-	backdrop.configure(Backdrop.current_tier(),not T.is_light())
-	frame.add_child(backdrop)
-	var shade:=TextureRect.new();shade.name="Shade";shade.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var gradient:=Gradient.new();gradient.set_color(0,Color(0.04,0.03,0.02,0.45));gradient.set_color(1,Color(0.04,0.03,0.02,0.86))
-	var ramp:=GradientTexture2D.new();ramp.gradient=gradient;ramp.fill_from=Vector2(0,0);ramp.fill_to=Vector2(0,1);ramp.width=4;ramp.height=64
-	shade.texture=ramp;shade.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;shade.stretch_mode=TextureRect.STRETCH_SCALE
-	frame.add_child(shade)
-	var pad:=MarginContainer.new()
-	for side in ["left","right","top","bottom"]:pad.add_theme_constant_override("margin_"+side,16 if side!="top" else 12)
-	frame.add_child(pad)
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);pad.add_child(stack)
-	var top:=HBoxContainer.new();stack.add_child(top)
-	season_label=T.make_label("",12,Color("f1e3c4"),0.08);season_label.name="Season";season_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(season_label)
-	register_label=T.make_label("",12,Color("e0c27e"),0.12);register_label.name="Register";top.add_child(register_label)
-	var spacer:=Control.new();spacer.size_flags_vertical=Control.SIZE_EXPAND_FILL;stack.add_child(spacer)
-	headline_label=T.make_label("",21,Color("fbf4e4"));headline_label.name="Headline"
-	headline_label.add_theme_font_override("font",_serif());headline_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	headline_label.add_theme_color_override("font_shadow_color",Color(0,0,0,0.6));headline_label.add_theme_constant_override("shadow_offset_y",1)
-	stack.add_child(headline_label)
-	var voice:=HBoxContainer.new();voice.name="Voice";voice.add_theme_constant_override("separation",10);stack.add_child(voice)
-	voice_face=Control.new();voice_face.custom_minimum_size=Vector2(40,48);voice.add_child(voice_face)
-	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);voice.add_child(words)
-	voice_line=T.make_label("",14,Color("f6ead2"));voice_line.name="VoiceLine";voice_line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	voice_line.add_theme_font_override("font",_serif(true));words.add_child(voice_line)
-	voice_name=T.make_label("",10,Color("e0c27e"),0.08);voice_name.name="VoiceName";words.add_child(voice_name)
+	# One line: a face among the people and what they said. The headline that
+	# restated the top bar's numbers, and the painted hall behind it, are gone.
+	var voice:=HBoxContainer.new();voice.name="Scene";voice.add_theme_constant_override("separation",10);add_child(voice)
+	voice_face=Control.new();voice_face.custom_minimum_size=Vector2(28,34);voice_face.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_face)
+	voice_line=T.make_label("",13,T.BODY);voice_line.name="VoiceLine";voice_line.add_theme_font_override("font",_serif(true))
+	voice_line.size_flags_horizontal=Control.SIZE_EXPAND_FILL;voice_line.clip_text=true;voice_line.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;voice_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_line)
+	voice_name=T.make_label("",11,T.GOLD_TEXT,0.06);voice_name.name="VoiceName";voice_name.clip_text=true;voice_name.custom_minimum_size.x=0;voice_name.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_name)
 
 
 func _fill_scene(scene:Dictionary)->void:
-	season_label.text=String(scene.get("season","")).to_upper()
-	register_label.text=String(scene.get("register",""))
-	headline_label.text=String(scene.get("headline",""))
 	var voice:Dictionary=scene.get("voice",{})
 	var face:Dictionary=voice.get("face",{})
 	voice_line.text="“%s”" % String(voice.get("line","")) if String(voice.get("line",""))!="" else ""
@@ -282,7 +250,8 @@ func _fill_scene(scene:Dictionary)->void:
 		voice_face.set_meta("face_id",key)
 		for child in voice_face.get_children():child.queue_free()
 		if not face.is_empty():
-			var picture:=_face_picture(face,40,48);picture.set_anchors_preset(Control.PRESET_FULL_RECT);voice_face.add_child(picture)
+			var picture:=_face_picture(face,28,34);picture.set_anchors_preset(Control.PRESET_FULL_RECT);voice_face.add_child(picture)
+	voice_line.tooltip_text=String(scene.get("headline",""))
 
 
 # ---------------------------------------------------------------------------
@@ -408,7 +377,11 @@ func _fill_card(parent:Control,value:Array)->void:
 ## The vitals keep their rows while the same vitals are shown under the same
 ## heading: each day's figures, trends and causes are written into them.
 var _vital_rows:Array=[]
-func _refresh_vitals(vitals:Array)->void:
+## Figures the top bar and Home's tiles already carry: not repeated here.
+const SHOWN_ELSEWHERE:=["stores","water","shelter","life"]
+
+func _refresh_vitals(all_vitals:Array)->void:
+	var vitals:=all_vitals.filter(func(v:Dictionary)->bool:return String(v.get("id","")) not in SHOWN_ELSEWHERE)
 	var shape:Array=[String(data.get("vitals_heading","HOW THEY FARE"))]
 	for vital:Dictionary in vitals:shape.append(String(vital.get("id","")))
 	if prints.get("vitals_shape")==shape and _vital_rows.size()==vitals.size():
@@ -428,19 +401,17 @@ func _fill_vitals(parent:Control,vitals:Array)->void:
 	_vital_rows.clear()
 	for vital_variant in vitals:
 		var vital:Dictionary=vital_variant
-		var row:=HBoxContainer.new();row.name="Vital_"+String(vital.get("id",""));row.add_theme_constant_override("separation",10);parent.add_child(row)
+		var row:=HBoxContainer.new();row.name="Vital_"+String(vital.get("id",""));row.add_theme_constant_override("separation",8);row.custom_minimum_size.y=28;parent.add_child(row)
 		var icon:=TextureRect.new()
-		icon.custom_minimum_size=Vector2(36,36);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;row.add_child(icon)
-		var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",2);row.add_child(body)
-		var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);body.add_child(top)
-		var label:=T.make_label("",12,T.MUTED,0.1);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(label)
-		var value:=T.make_label("",14,T.INK);value.add_theme_font_override("font",_serif());top.add_child(value)
-		var arrow:=T.make_label("",12,T.MUTED)
-		arrow.tooltip_text="Compared with last season"
-		arrow.mouse_filter=Control.MOUSE_FILTER_PASS;body.add_child(arrow)
-		var meter:=Meter.new();meter.track=T.TRACK;meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_child(meter)
-		var cause:=T.make_label("",12,T.TEXT_SOFT);cause.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(cause)
+		icon.custom_minimum_size=Vector2(20,20);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(icon)
+		var label:=T.make_label("",13,T.BODY);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
+		var meter:=Meter.new();meter.track=T.TRACK;meter.custom_minimum_size=Vector2(80,6);meter.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(meter)
+		var value:=T.make_label("",13,T.INK);value.add_theme_font_override("font",T.font("ui_strong"));value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(value)
+		var arrow:=T.make_label("",13,T.MUTED);arrow.custom_minimum_size.x=14;arrow.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		arrow.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(arrow)
+		var cause:=Label.new();cause.visible=false;row.add_child(cause)
+		row.mouse_filter=Control.MOUSE_FILTER_PASS
 		var refs:={"icon":icon,"label":label,"value":value,"arrow":arrow,"meter":meter,"cause":cause}
 		_vital_rows.append(refs)
 		_fill_vital(refs,vital)
@@ -453,9 +424,11 @@ func _fill_vital(refs:Dictionary,vital:Dictionary)->void:
 	_put(refs.label,String(vital.get("label","")))
 	_put(refs.value,String(vital.get("value","")))
 	var trend:=int(vital.get("trend",0))
-	_put(refs.arrow,"better this season" if trend>0 else ("worse this season" if trend<0 else "steady this season"),T.GREEN_TEXT if trend>0 else (T.RED_TEXT if trend<0 else T.MUTED))
+	_put(refs.arrow,"↑" if trend>0 else ("↓" if trend<0 else "·"),T.GREEN_TEXT if trend>0 else (T.RED_TEXT if trend<0 else T.MUTED))
+	(refs.arrow as Label).tooltip_text="better this season" if trend>0 else ("worse this season" if trend<0 else "steady this season")
 	(refs.meter as Meter).set_value(fill,tint)
 	_put(refs.cause,String(vital.get("cause","")))
+	(refs.label as Label).get_parent().set("tooltip_text",String(vital.get("cause","")))
 
 ## Words (and their ink) set only when they differ.
 static func _put(label:Label,text:String,color:Variant=null)->void:
@@ -473,7 +446,6 @@ func _fill_labor(parent:Control,labor:Dictionary)->void:
 	_labor_rows.clear()
 	for task_variant in labor.get("tasks",[]):
 		var row:=_labor_row(labor,task_variant);parent.add_child(row);_labor_rows.append(row)
-	var hint:=T.make_label("Click a task to see what that work does.",11,T.TEXT_SOFT);hint.name="WorkHint";parent.add_child(hint)
 
 
 ## The labor part's head: its heading, who can work, who sets the work (the
@@ -484,8 +456,7 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 	var manual:=bool(labor.get("manual",false))
 	parent.add_child(_heading(String(labor.get("heading","WHAT THEY ARE DOING NOW")),"each figure is %s" % ("one person" if per==1 else "%d people" % per)))
 	# How many can work: the rows below add up to them.
-	if String(labor.get("note",""))!="":
-		var note:=T.make_label(String(labor.note),11,T.TEXT_SOFT);note.name="WorkNote";note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(note)
+	if String(labor.get("note",""))!="":parent.tooltip_text=String(labor.note)
 	# Who sets the daily work: one plain switch, the current side marked.
 	if labor.get("on_leaders") is Callable:
 		var switch:=HFlowContainer.new();switch.name="WorkSwitch";switch.add_theme_constant_override("h_separation",6);switch.add_theme_constant_override("v_separation",6);parent.add_child(switch)
@@ -499,7 +470,6 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 		var said:=T.make_label(String(line.get("text","")),12,T.BODY);said.name="WorkWho";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		said.tooltip_text=String(line.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(said)
 	if manual:
-		var yours:=T.make_label("You set the work in every town; the leaders keep to it.",12,T.BODY);yours.name="WorkYours";yours.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(yours)
 		for warning_variant in labor.get("warnings",[]):
 			var warning:Dictionary=warning_variant
 			var tone:=String(warning.get("tone",""))

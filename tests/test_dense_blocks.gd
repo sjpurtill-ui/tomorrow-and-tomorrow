@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## The shared strategy-screen blocks (hud/dense_blocks.gd, hud/fact_grid.gd):
+## The shared strategy-screen blocks (hud/dense_blocks.gd):
 ## one line per item, verbs that act, costs against stock, frames that hold
 ## other blocks.
 const Blocks:=preload("res://scripts/hud/dock_blocks.gd")

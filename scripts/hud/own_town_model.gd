@@ -75,8 +75,8 @@ const RISE_WORDS:="When raiders come, about 1 in 10 of the town's grown people t
 static func untrained_words(watch:int,rise:int)->String:
 	var parts:PackedStringArray=[]
 	if watch>0:parts.append("%s on watch" % EraWords.grouped(watch))
-	if rise>0:parts.append("%s would take up arms" % EraWords.grouped(rise))
-	return ", ".join(parts) if not parts.is_empty() else "no one"
+	if rise>0:parts.append("%s can rise" % EraWords.grouped(rise))
+	return " · ".join(parts) if not parts.is_empty() else "no one"
 
 ## The first town's name, lettered as the map letters it (city_labels.gd
 ## chart_name of the home label): where our trained fighters live. "home"

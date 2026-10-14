@@ -198,7 +198,7 @@ func _chip(parent:Node,text:String,tip:String)->void:
 func _who(c:Dictionary)->void:
 	var identity:Dictionary=c.get("identity",{})
 	var row:=HBoxContainer.new();row.name="Who";row.add_theme_constant_override("separation",18);add_child(row)
-	var image:=TextureRect.new();image.texture=Visuals.art("culture");image.custom_minimum_size=Vector2(132,104)
+	var image:=TextureRect.new();image.texture=Visuals.art("culture");image.custom_minimum_size=Vector2(56,44)
 	image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	if Portrait.Early.active():
 		image.texture=Portrait.Early.civic_scene(data.get("lived_values",{}))

@@ -1248,7 +1248,9 @@ func _refresh_time()->void:
 	var signature:="%s|%d|%s" % [date,speed,temperature_text]
 	if signature==_time_signature: return
 	_time_signature=signature
-	time_text.text="[b][color=#%s]%s[/color][/b][color=#%s] · %s[/color]" % [Folio.RAIL_TEXT.to_html(false),date,Folio.RAIL_TEXT.to_html(false),temperature_text]
+	# The date alone: the weather is in the clock's hover card (_time_card), so
+	# the top bar has room for every reading, GOODS included.
+	time_text.text="[b][color=#%s]%s[/color][/b]" % [Folio.RAIL_TEXT.to_html(false),date]
 	_style_speed_controls(speed)
 	time_pill.reset_size()
 	_layout()
