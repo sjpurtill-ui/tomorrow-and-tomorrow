@@ -779,8 +779,8 @@ func _building_words(item:Dictionary)->String:
 	var Visual=preload("res://scripts/undertaking_map_visual.gd")
 	var idle:=String(item.get("idle",""))
 	var stage:=String(Bridge.STAGE_WORDS.get(String(item.get("stage","")),""))
-	var line:="Idle" if idle!="" else "Rising"
-	if stage!="":line+=" · "+stage
+	var line:="Idle" if idle!="" else (stage if stage!="" else "Rising")
+	if idle!="" and stage!="":line+=" · "+stage
 	line+=" · "+Visual.percent_words(float(item.get("progress",0)))
 	var asks:=String(item.get("asks",""))
 	var why:=idle if idle!="" else (asks if asks!="" else Visual.time_left_words(int(item.get("days_left",-1))))
