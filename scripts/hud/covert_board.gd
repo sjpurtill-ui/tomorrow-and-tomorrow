@@ -242,7 +242,7 @@ func refresh(force:=false)->void:
 	_networks(rows,view)
 	_home(view)
 	var grid:=UI.columns(box,"Records")
-	grid.columns=3 if size.x>=800.0 else 2
+	grid.columns=3 if size.x>=800.0 else 1
 	for section:Dictionary in data:_records(grid,section)
 	if data.is_empty():UI.label(box,"Nothing has come back yet",12,T.INK_MUTED)
 
@@ -359,7 +359,9 @@ func _records(parent:Node,section:Dictionary)->void:
 		var row:=UI.line(column,6);row.tooltip_text=full
 		var said:=full.get_slice(" — ",0).get_slice(" (",0)
 		var age:=full.get_slice(" — ",1) if " — " in full else (full.get_slice(" (",1).trim_suffix(")") if " (" in full else "")
-		said=said.get_slice(": ",0) if said.length()>58 else said
+		# The first clause: "Agikajuaq is held by about 33 fighters, up from about 30" -> before ", ".
 		said=said.get_slice(". ",0).trim_suffix(".")
+		if said.length()>48:said=said.get_slice(", ",0)
+		if said.length()>48:said=said.get_slice(": ",0)
 		UI.label(row,said,12,T.BODY,false,true).tooltip_text=full
 		if age!="":UI.cell(row,age.replace(" years ago"," yr").replace(" year ago"," yr"),54,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)

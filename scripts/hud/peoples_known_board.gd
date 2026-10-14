@@ -329,7 +329,7 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 		if mark.level!=String(fresh.get("level","none")):
 			mark.level=String(fresh.get("level","none"));mark.queue_redraw()
 		mark.tooltip_text=String(fresh.get("tip",""))
-	_put(refs.get("age"),_short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
+	_put(refs.get("age"),"our count" if bool(row.us) else _short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
 	_put(refs.get("source"),"our count" if bool(row.us) else String(fresh.get("source","")),"Who brought our newest word of them." if not bool(row.us) else String(fresh.get("source","")))
 	var titles:=_titles()
 	for id:String in FIGURES:

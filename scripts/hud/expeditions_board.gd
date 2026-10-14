@@ -31,6 +31,7 @@ const TWO_AT:=600.0
 
 var model:Dictionary={}
 var headline:Label
+var last_box:VBoxContainer
 ## Search, filter, order and page of the tellings table, kept by the World
 ## page across its daily rebuilds.
 var view:Dictionary={}
@@ -65,7 +66,8 @@ func setup(block:Dictionary)->void:
 	headline.tooltip_text=String(block.get("line_tip",""))
 	top=UI.columns(self,"SendAndUnread")
 	send_box=UI.sheet(top,"Send")
-	unread_box=UI.sheet(top,"Unread")
+	last_box=UI.sheet(top,"LastBack")
+	unread_box=UI.sheet(self,"Unread")
 	# On a wide page (2000 px) the tellings stand beside the planner.
 	wide_row=HBoxContainer.new();wide_row.name="Wide";wide_row.add_theme_constant_override("separation",14);add_child(wide_row)
 	wide_left=VBoxContainer.new();wide_left.add_theme_constant_override("separation",12);wide_left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;wide_left.size_flags_stretch_ratio=0.7;wide_row.add_child(wide_left)
@@ -86,6 +88,7 @@ func update_block(block:Dictionary)->bool:
 	_redraw_if("send",[staff.get("share"),staff.get("focus"),staff.get("origin_city_id"),staff.get("away"),staff.get("target"),staff.get("review_in"),parties],_fill_send)
 	var revision:=Archive.revision(_reports())
 	_redraw_if("unread",revision,_fill_unread)
+	_redraw_if("last",revision,_fill_last)
 	_redraw_if("cities",[int(GameState.elapsed_days)/7,Orders.watch_count(),CivilizationSystem.scout_missions.size(),city_feedback.size()],_fill_cities)
 	_redraw_if("tellings",[revision,view.duplicate()],_fill_tellings)
 	return true
@@ -115,12 +118,12 @@ func _layout()->void:
 	var wide:=size.x>=WIDE_AT
 	if wide!=_wide:
 		_wide=wide
-		var send:=send_box.get_parent();var unread:=unread_box.get_parent();var tellings:=tellings_box.get_parent()
-		for frame:Node in [send,unread,tellings]:frame.get_parent().remove_child(frame)
+		var send:=send_box.get_parent();var last:=last_box.get_parent();var unread:=unread_box.get_parent();var tellings:=tellings_box.get_parent()
+		for frame:Node in [send,last,unread,tellings]:frame.get_parent().remove_child(frame)
 		if wide:
-			wide_left.add_child(send);wide_left.add_child(unread);wide_right.add_child(tellings)
+			wide_left.add_child(send);wide_left.add_child(last);wide_left.add_child(unread);wide_right.add_child(tellings)
 		else:
-			top.add_child(send);top.add_child(unread);add_child(tellings)
+			top.add_child(send);top.add_child(last);add_child(unread);move_child(unread,top.get_index()+1);add_child(tellings)
 		wide_row.visible=wide;top.visible=not wide
 		move_child(cities_box.get_parent(),get_child_count()-1)
 		if not wide:move_child(tellings,get_child_count()-1)
@@ -179,7 +182,7 @@ func _fill_send()->void:
 	status.tooltip_text=String(staff.get("status",""))
 	if String(staff.get("focus",""))=="recruitment":_reception_line(send_box,staff)
 	_parties(send_box)
-	_last_back(send_box)
+	_fill_last()
 
 func _control_row(parent:Node,caption:String)->HBoxContainer:
 	var row:=UI.line(parent,6)
@@ -223,10 +226,13 @@ func _parties(parent:Node)->void:
 
 ## The latest parties home, one line each, under the planner: who went, where,
 ## when, and any lost.
-func _last_back(parent:Node)->void:
+func _fill_last()->void:
+	if last_box==null:return
+	UI.clear(last_box)
+	var parent:=last_box
 	var reports:=_reports()
+	last_box.get_parent().visible=not reports.is_empty()
 	if reports.is_empty():return
-	UI.rule(parent)
 	UI.heading(parent,"Last back")
 	var shown:=0
 	for item:Dictionary in select(reports,"",0,false):
