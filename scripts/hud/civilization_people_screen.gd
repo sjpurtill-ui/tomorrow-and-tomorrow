@@ -2,6 +2,7 @@ extends "res://scripts/hud/people_screen.gd"
 ## Living settlement/work view. Drafts are read-only until the provider's guarded
 ## commit calls the original ManualWork commands. Person/city actions are inherited.
 const ROLE_NAMES:={"Food":"Food grounds","Survey":"Surveying","Extraction":"Wood & stone","Construction":"Building","Crafting":"Workshops","Logistics":"Water & carrying","Knowledge":"Learning","Administration":"Keeping & caring","Defense":"The watch"}
+const ROLE_PURPOSE:={"Food":"Gather, hunt, fish and grow food.","Survey":"Find resources in the nearby land.","Extraction":"Bring timber, stone and ore out of the land.","Construction":"Raise homes and works; repair what stands.","Crafting":"Make tools, equipment and everyday goods.","Logistics":"Carry supplies and bring drinking water home.","Knowledge":"Learn, teach and pursue current studies.","Administration":"Keep, distribute and care for the people.","Defense":"Keep watch and prepare our defenders."}
 
 var settlement_view:Control
 var stage:Control
@@ -121,7 +122,7 @@ func _build_focus()->void:
 	risk_reading=T.make_label("",14,T.AMBER_TEXT);risk_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_actions.add_child(risk_reading)
 	var commands:=HFlowContainer.new();commands.add_theme_constant_override("h_separation",8);commands.add_theme_constant_override("v_separation",6);focus_actions.add_child(commands)
 	apply_button=_scene_button(commands,"Apply assignment",_apply_draft,true);apply_button.name="ApplyWorkDraft"
-	cancel_button=_scene_button(commands,"Cancel changes",_cancel_draft);cancel_button.name="CancelWorkDraft"
+	cancel_button=_scene_button(commands,"Cancel",_cancel_draft);cancel_button.name="CancelWorkDraft"
 
 func _fill_scene(scene:Dictionary)->void:
 	if settlement_view==null:return
@@ -168,8 +169,8 @@ func focus_work(role:String)->void:
 	settlement_view.call("focus_role",role)
 	var impact_callback:Variant=data.get("labor",{}).get("impact_of")
 	var impact:Dictionary=(impact_callback as Callable).call(role) if impact_callback is Callable else {}
-	focus_purpose.text=String(impact.get("lead",""))
-	var details:PackedStringArray=[]
+	focus_purpose.text=String(ROLE_PURPOSE.get(role,impact.get("lead","")))
+	var details:PackedStringArray=[String(impact.get("lead",""))]
 	for line:Dictionary in impact.get("lines",[]):details.append("%s: %s. %s" % [line.get("label",""),line.get("value",""),line.get("words","")])
 	focus_purpose.tooltip_text="\n".join(details)
 	_refresh_focus()
@@ -203,8 +204,8 @@ func _refresh_focus()->void:
 	var transfers:PackedStringArray=[]
 	for change:Dictionary in draft.get("changes",[]):
 		if String(change.get("role",""))==active_role:continue
-		transfers.append("%s %d → %d" % [ROLE_NAMES.get(String(change.role),String(change.role)),int(change.before),int(change.after)])
-	transfer_reading.text="Requested transfers: "+" · ".join(transfers) if not transfers.is_empty() else ""
+		transfers.append("%s %d → %d" % [String(change.role),int(change.before),int(change.after)])
+	transfer_reading.text="Requested: "+" · ".join(transfers) if not transfers.is_empty() else ""
 	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")))
 	forecast_reading.text=_forecast_words()
 	var warnings:=_warning_words()
@@ -267,7 +268,10 @@ func _apply_draft()->void:
 		_evaluate();preview_rebased=true;_refresh_focus();return
 	var result:Variant=_api("commit",[draft,not bool(data.get("labor",{}).get("manual",false))])
 	if result is Dictionary and bool(result.get("ok",false)):
-		draft={};forecast={};draft_stale=false;preview_rebased=false;focus_work(active_role)
+		draft={};forecast={};draft_stale=false;preview_rebased=false;_refresh_focus()
+		# The provider queued its live update first. Capture the next plan only
+		# after that update so its cheap UI revision matches the new allocation.
+		focus_work.call_deferred(active_role)
 	else:
 		draft_stale=true;_refresh_focus()
 
@@ -294,7 +298,14 @@ func _anchors_changed(next:Dictionary)->void:
 func _fit_scene()->void:
 	if stage==null or not is_inside_tree():return
 	var width:=maxf(300,stage.size.x)
-	stage.custom_minimum_size.y=clampf(minf(width*0.66,get_viewport_rect().size.y-stage.global_position.y-18),420,760)
+	var top:=stage.global_position.y
+	var ancestor:Node=stage.get_parent()
+	while ancestor!=null:
+		if ancestor is ScrollContainer:
+			top+=float((ancestor as ScrollContainer).scroll_vertical)
+			break
+		ancestor=ancestor.get_parent()
+	stage.custom_minimum_size.y=clampf(minf(width*0.66,get_viewport_rect().size.y-top-18),420,760)
 	var occupied:Array[Rect2]=[]
 	var lines:Array=[]
 	var anchor_info:Dictionary=settlement_view.call("role_anchor_metadata") if settlement_view.has_method("role_anchor_metadata") else {}
