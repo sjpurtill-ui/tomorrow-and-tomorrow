@@ -92,7 +92,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var impact:=preload("res://scripts/hud/impact_panel.gd").new()
 				section.add_child(impact);impact.setup(block)
 			"town_works":
-				var works:Control=preload("res://scripts/hud/builders_town_folio.gd").new() if bool(block.get("folio",false)) else preload("res://scripts/hud/town_works_board.gd").new()
+				var works:Control=preload("res://scripts/hud/buildings_board.gd").new() if bool(block.get("board",false)) else (preload("res://scripts/hud/builders_town_folio.gd").new() if bool(block.get("folio",false)) else preload("res://scripts/hud/town_works_board.gd").new())
 				section.add_child(works);works.setup(block)
 			"construction_queue":
 				var queue:=preload("res://scripts/hud/construction_queue.gd").new()
