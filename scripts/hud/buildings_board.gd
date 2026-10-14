@@ -206,16 +206,23 @@ func _row(card:Dictionary)->Control:
 		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(card.get("value_width",44))
 		line.add_child(value)
 	# Side by side, the state word takes the place of the row's few words.
-	# Side by side, words too long for the column wait in the tooltip, never cut.
-	if _compact and sub.text!="" and T.font("ui").get_string_size(sub.text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x>(60.0 if _columns>=3 else 90.0):
-		panel.tooltip_text=("%s\n%s" % [sub.text,panel.tooltip_text]).strip_edges()
-		sub.text=""
 	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():
 		if _compact:
 			sub.text=String(card.tag.get("text",""));sub.tooltip_text=String(card.tag.get("tip",""))
 			var tone:=String(card.tag.get("tone","note"))
 			sub.add_theme_color_override("font_color",tone_ink(tone) if tone in ["good","bad","warn"] else (T.TEAL_TEXT if tone=="info" else T.TEXT_SOFT))
 		else:line.add_child(_tag(card.tag))
+	# Words that do not fit the room the row leaves them wait in the
+	# tooltip, never cut: checked once the row has its width.
+	sub.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
+	var words:=sub.text
+	if words!="":
+		panel.tooltip_text=("%s\n%s" % [words,panel.tooltip_text]).strip_edges()
+		var width:=T.font("ui").get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+		sub.resized.connect(func()->void:
+			if sub.size.x<=0.0:return
+			var fits:=width<=sub.size.x+1.0
+			if fits!=(sub.text!=""):sub.text=words if fits else "")
 	for item:Dictionary in card.get("actions",[]):line.add_child(_button(item))
 	# Full width, who decides sits beside the verb; side by side, below it.
 	var chose_here:=card.get("choice") is Dictionary and not _compact
