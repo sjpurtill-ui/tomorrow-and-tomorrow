@@ -26,6 +26,11 @@ func test_a_table_is_one_line_per_item_with_groups_tags_and_working_verbs()->voi
 	var groups:Array=body.find_children("Group_*","Label",true,false).map(func(n:Node)->String:return (n as Label).text)
 	assert_array(groups).is_equal(["UNREAD","READ"])
 	assert_object(rows[0].find_child("Tag",true,false)).is_not_null()
+	# Tags, bars and verbs share one end column, so every cell stands under its heading.
+	var ends:Array=rows.map(func(r:Node)->float:return (r.find_child("Extras",true,false) as Control).custom_minimum_size.x)
+	assert_float(float(ends[0])).is_greater(0.0)
+	assert_array(ends).is_equal([ends[0],ends[0],ends[0]])
+	assert_float((body.find_child("Head",true,false).find_child("Extras",false,false) as Control).custom_minimum_size.x).is_equal(float(ends[0]))
 	(rows[0].find_child("Verb_Read",true,false) as Button).pressed.emit()
 	assert_array(pressed).is_equal(["read"])
 	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true

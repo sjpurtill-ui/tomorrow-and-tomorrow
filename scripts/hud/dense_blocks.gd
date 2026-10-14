@@ -151,6 +151,7 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
 	var group:=""
 	var index:=0
+	var extras:Array[Control]=[]
 	for row:Dictionary in rows:
 		var this_group:=String(row.get("group",""))
 		if this_group!="" and this_group!=group:
@@ -159,6 +160,15 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 			list.add_child(title)
 		var line:=_row(row,columns);line.name="Row_%d" % index
 		list.add_child(line);index+=1
+		var more:=line.find_child("Extras",true,false) as Control
+		if more:extras.append(more)
+	# The bars, tags and verbs at a row's end share one column, as wide as the
+	# widest, so every row's cells stand under their own headings.
+	var widest:=0.0
+	for more:Control in extras:widest=maxf(widest,more.get_combined_minimum_size().x)
+	if widest>0.0:
+		for more:Control in extras:more.custom_minimum_size.x=widest
+		var gap:=Control.new();gap.name="Extras";gap.custom_minimum_size.x=widest;head.add_child(gap)
 	return list
 
 
@@ -191,12 +201,15 @@ static func _row(row:Dictionary,columns:Array)->PanelContainer:
 		var label:=_cell(String(cells.get(String(column.get("key","")),"")),column,13,ink)
 		if first:label.add_theme_font_override("font",T.font("ui_strong"))
 		line.add_child(label);first=false
+	# Bar, tag and verb sit right-aligned in the row's end column (render_table
+	# gives every row's end column the same width).
+	var end:=HBoxContainer.new();end.name="Extras";end.alignment=BoxContainer.ALIGNMENT_END;end.add_theme_constant_override("separation",6);end.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(end)
 	var bar:Dictionary=row.get("bar",{}) if row.get("bar") is Dictionary else {}
-	if not bar.is_empty():line.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
+	if not bar.is_empty():end.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
 	var state:Dictionary=row.get("tag",{}) if row.get("tag") is Dictionary else {}
-	if not state.is_empty():line.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
+	if not state.is_empty():end.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
 	var button:Dictionary=row.get("button",{}) if row.get("button") is Dictionary else {}
-	if not button.is_empty():line.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
+	if not button.is_empty():end.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
 	var click:Variant=row.get("on_click")
 	if click is Callable and (click as Callable).is_valid():
 		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND

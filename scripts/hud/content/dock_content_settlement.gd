@@ -268,9 +268,10 @@ func _overview_blocks(settlement:Dictionary)->Array:
 		"groups":groups,"tile_rows":tile_rows,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":{},
+		"places":_founding,
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":on_population,
-		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]+([_founding] if not _founding.is_empty() else [])
+		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
 
 func _visit_village()->void:
 	if is_instance_valid(hud) and hud.has_method("close_dock"):hud.close_dock()

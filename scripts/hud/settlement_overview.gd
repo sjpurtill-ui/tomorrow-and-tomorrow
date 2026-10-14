@@ -9,6 +9,7 @@ extends "res://scripts/hud/home_ledger.gd"
 ## water and waste works and the town's own reports follow.
 ## The rows come from own_town_model.gd; nothing here reads the ledger.
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 ## The painted plates the culture, inquiry and chronicle boards draw from
 ## (they extend this page for its shared pieces).
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
@@ -43,7 +44,7 @@ func setup(block:Dictionary)->void:
 			var warned:=T.make_label(String(warning.get("text","")),13,tone_color(String(warning.get("tone","warn"))))
 			warned.name="SplitWarning";warned.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(warned);move_child(warned,spread.get_index()+1)
 			_page_refs["warning"]=warned
-		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);controls.add_child(yours)
+		var yours:=controls
 		# The leader's line above already says who sets the work: only the two ways out stand here.
 		var fix:Variant=block.get("on_food_fix")
 		if fix is Callable and (fix as Callable).is_valid() and String(warning.get("fix_text",""))!="":
@@ -65,6 +66,8 @@ func setup(block:Dictionary)->void:
 				(chip as Button).add_theme_font_size_override("font_size",12)
 	var groups:Array=block.get("groups",[])
 	if not groups.is_empty():_groups(groups,block.get("legend",[]),String(block.get("town_name","")))
+	var places:Dictionary=block.get("places",{})
+	if not places.is_empty():_places(places)
 	var founding:Dictionary=block.get("founding",{})
 	if not founding.is_empty():_new_towns(founding)
 	var works:Dictionary=block.get("works",{})
@@ -95,6 +98,13 @@ func update_block(block:Dictionary)->bool:
 	for index in mini(rows.size(),(_page_refs.rows as Array).size()):_fill_row(_page_refs.rows[index],rows[index])
 	var founding:Dictionary=block.get("founding",{})
 	if _page_refs.has("founding"):_put(_page_refs.founding,String(founding.get("words","")))
+	# The places table is redrawn alone, where it stands, when its lines move.
+	var places:Dictionary=block.get("places",{})
+	if _page_refs.has("places") and is_instance_valid(_page_refs.places) and _places_print(places)!=String(_page_refs.get("places_print","")):
+		var old:Control=_page_refs.places;var at:=old.get_index()
+		remove_child(old);old.queue_free()
+		var fresh:=Dense.render_table(self,places);fresh.name="Places";move_child(fresh,at)
+		_page_refs["places"]=fresh;_page_refs["places_print"]=_places_print(places)
 	var works:Dictionary=block.get("works",{})
 	var progress:Array=works.get("progress",[])
 	for index in mini(progress.size(),(_page_refs.progress as Array).size()):_put(_page_refs.progress[index],String(progress[index]))
@@ -122,6 +132,7 @@ static func shape_of(block:Dictionary)->Array:
 		rows.append(keys)
 	var founding:Dictionary=block.get("founding",{})
 	var founding_shape:Array=[] if founding.is_empty() else [founding.get("options",[]),bool(founding.get("on",true))]
+	founding_shape.append((block.get("places",{}) as Dictionary).is_empty())
 	var works:Dictionary=block.get("works",{})
 	var works_shape:Array=[]
 	if not works.is_empty():
@@ -158,7 +169,9 @@ func _leader(block:Dictionary,parent:Node)->void:
 	var office:=T.text(Label.new(),"small",T.INK_MUTED) as Label
 	office.text=_office_words(leader);named.add_child(office)
 	if not _page_refs.is_empty():_page_refs["office"]=office
+	named.custom_minimum_size.x=250
 	var direction:=_line(named,String(block.get("direction","")),12,T.BODY)
+	direction.autowrap_mode=TextServer.AUTOWRAP_OFF;direction.clip_text=true;direction.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;direction.custom_minimum_size.x=250
 	direction.name="Direction";direction.tooltip_text=String(block.get("direction_tip",""));direction.mouse_filter=Control.MOUSE_FILTER_PASS
 	if not _page_refs.is_empty():_page_refs["direction"]=direction
 	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -265,11 +278,26 @@ func _new_towns(founding:Dictionary)->void:
 	if not (founding.get("options",[]) as Array).is_empty():
 		_choices(box,"",founding.get("options",[]),"leaders" if bool(founding.get("on",true)) else "ruler").name="NewTownsChoice"
 
+## Where our people live (dock_content_settlement.founding_block): the seat's
+## stage and each place its families settled, one table line each, kept high
+## on the page so it is seen without scrolling.
+func _places(places:Dictionary)->void:
+	_rule(self)
+	var head:=T.make_label(String(places.get("heading","Where our people live")).to_upper(),12,T.GOLD_TEXT);head.name="PlacesHeading";add_child(head)
+	var table:=Dense.render_table(self,places);table.name="Places"
+	if not _page_refs.is_empty():
+		_page_refs["places"]=table;_page_refs["places_print"]=_places_print(places)
+
+static func _places_print(places:Dictionary)->String:
+	var lines:Array=[]
+	for row:Dictionary in places.get("rows",[]):lines.append([row.get("cells",{}),row.get("tag",{}),row.get("bar",{})])
+	return str(lines)
+
 ## Water and waste works: what is built, and what can be started, each with
 ## its cost and time and one verb.
 func _works(works:Dictionary)->void:
 	_rule(self)
-	var box:=VBoxContainer.new();box.name="WaterWorks";box.add_theme_constant_override("separation",8);add_child(box)
+	var box:=VBoxContainer.new();box.name="WaterWorks";box.add_theme_constant_override("separation",0);add_child(box)
 	box.add_child(T.make_label("WATER AND WASTE WORKS",12,T.GOLD_TEXT))
 	for line:String in works.get("progress",[]):
 		var said:=_line(box,line,13,T.BODY)
@@ -277,7 +305,7 @@ func _works(works:Dictionary)->void:
 	# Each work one line: its name, what it costs or what stops it, and its
 	# button beside them; what it does is in the line's pointer.
 	for offer:Dictionary in works.get("offers",[]):
-		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);row.custom_minimum_size.y=30;box.add_child(row)
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);row.custom_minimum_size.y=28;box.add_child(row)
 		var title:=T.make_label(String(offer.title),13,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.custom_minimum_size.x=150;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(title)
 		var sentence:=Label.new();sentence.visible=false;sentence.text=String(offer.sentence);row.add_child(sentence)
 		var ready:=String(offer.get("blocked","")).is_empty()

@@ -329,11 +329,26 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var court:=FakeCourt.new();court.add_to_group(Director.GROUP);add_child(court)
 	var id:=_primary_id()
 	var page:=_page(_block())
-	# Where the people live is a table after the overview: the seat's stage and every place, one line each.
-	var spread:Dictionary=Provider.new(terrain,hud).tab(0).blocks.back()
+	# Where the people live is a table right under the facts, above the works:
+	# the seat's stage and every place, one line each.
+	var block:=Provider.new(terrain,hud).tab(0).blocks[0] as Dictionary
+	var spread:Dictionary=block.places
 	assert_str(String(spread.type)).is_equal("table")
 	assert_str(String(spread.heading)).is_equal("Where our people live")
 	assert_str(String(spread.rows[0].tip)).contains("district by district")
+	var places:=page.find_child("Places",true,false) as Control
+	assert_object(places).is_not_null()
+	var works:=page.find_child("WaterWorks",true,false)
+	if works:assert_int(places.get_index()).is_less(works.get_index())
+	var at:=places.get_index()
+	# A day on, the table takes its new lines where it stands.
+	var moved:=block.duplicate(true)
+	(moved.places.rows[0].cells as Dictionary)["people"]="1"
+	assert_bool(page.update_block(moved)).is_true()
+	var redrawn:=page.find_child("Places",false,false) as Control
+	assert_object(redrawn).is_not_null()
+	assert_bool(redrawn==places).is_false()
+	assert_int(redrawn.get_index()).is_equal(at)
 	assert_object(page.find_child("Choice_Ruler",true,false)).is_null()
 	# The one way to ask for more hands.
 	var ask:=page.find_child("AskForHands",true,false)

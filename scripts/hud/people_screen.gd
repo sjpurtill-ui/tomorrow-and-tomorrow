@@ -90,8 +90,8 @@ func setup(block:Dictionary)->void:
 	add_theme_constant_override("separation",14)
 	_build_scene()
 	faces_row=HFlowContainer.new();faces_row.name="Faces"
-	faces_row.add_theme_constant_override("h_separation",8);faces_row.add_theme_constant_override("v_separation",8)
-	add_child(_section("FACES AT THE FIRE" if _hearth(block) else "FACES AMONG THE PEOPLE",faces_row,"Click a face to see who they are"))
+	faces_row.add_theme_constant_override("h_separation",6);faces_row.add_theme_constant_override("v_separation",6)
+	add_child(_section("FACES AT THE FIRE" if _hearth(block) else "FACES AMONG THE PEOPLE",faces_row))
 	card=PanelContainer.new();card.name="PersonCard";card.visible=false
 	card.add_theme_stylebox_override("panel",T.flat(T.TILE_BG,T.GOLD,1,4,12));add_child(card)
 	columns=GridContainer.new();columns.name="Columns"
@@ -275,7 +275,7 @@ func _fill_faces(parent:Control,faces:Array)->void:
 	for face_variant in faces:
 		var face:Dictionary=face_variant
 		var id:=String(face.get("id",""))
-		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(80,104)
+		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(146,42)
 		button.tooltip_text="%s · %s" % [String(face.get("name","")),String(face.get("tag","")).to_lower()]
 		var chosen:=id==selected_id
 		var accent:=T.GOLD if chosen else (T.BORDER_SOFT if bool(face.get("alive",true)) else T.DISABLED)
@@ -284,15 +284,17 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		button.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG,T.GOLD,2,4))
 		button.pressed.connect(_select.bind(id))
 		parent.add_child(button)
-		var column:=VBoxContainer.new();column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,5)
-		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",2);button.add_child(column)
-		var picture:=_face_picture(face,60,60);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+		var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,3)
+		line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",6);button.add_child(line)
+		var picture:=_face_picture(face,30,36);picture.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
-		column.add_child(picture)
-		var tag:=T.make_label(String(face.get("tag","")),12,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED,0.06);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		tag.clip_text=true;column.add_child(tag)
-		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),12,T.INK);given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;given.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		given.clip_text=true;column.add_child(given)
+		line.add_child(picture)
+		var column:=VBoxContainer.new();column.alignment=BoxContainer.ALIGNMENT_CENTER;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",-2);line.add_child(column)
+		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),13,T.INK);given.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		given.add_theme_font_override("font",T.font("ui_strong"));given.clip_text=true;column.add_child(given)
+		var tag:=T.make_label(String(face.get("tag","")).to_lower(),11,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		tag.clip_text=true;tag.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(tag)
 
 
 func _assign_face_slots(faces:Array,scene:Dictionary)->void:
@@ -465,16 +467,24 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 		leaders.name="WorkLeaders"
 		var ruler:=_choice(switch,"I do (now)" if manual else "I do",labor.get("on_ruler"),String(labor.get("ruler_tip","")),manual)
 		ruler.name="WorkRuler"
+	# No lines of prose under the switch: who sets the work and why, and a
+	# split that holds, are in the head's pointer. Only a split that will
+	# hurt is said on the screen, one line in its colour.
+	var more:PackedStringArray=[]
+	if parent.tooltip_text!="":more.append(parent.tooltip_text)
 	for line_variant in labor.get("who",[]):
 		var line:Dictionary=line_variant
-		var said:=T.make_label(String(line.get("text","")),12,T.BODY);said.name="WorkWho";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		said.tooltip_text=String(line.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(said)
+		var said:=Label.new();said.name="WorkWho";said.text=String(line.get("text",""));said.visible=false;parent.add_child(said)
+		more.append(said.text)
 	if manual:
 		for warning_variant in labor.get("warnings",[]):
 			var warning:Dictionary=warning_variant
 			var tone:=String(warning.get("tone",""))
-			var ink:=T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.GREEN_TEXT)
-			var warn:=T.make_label(String(warning.get("text","")),12,ink);warn.name="WorkWarning";warn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(warn)
+			if tone not in ["bad","warn"]:more.append(String(warning.get("text","")));continue
+			var warn:=T.make_label(String(warning.get("text","")),12,T.RED_TEXT if tone=="bad" else T.AMBER_TEXT);warn.name="WorkWarning"
+			warn.clip_text=true;warn.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;warn.tooltip_text=warn.text;warn.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(warn)
+	parent.tooltip_text="
+".join(more)
 	return parent
 
 
@@ -522,12 +532,24 @@ func _write_row_numbers(row:Control,task:Dictionary)->bool:
 	for part:Array in [["now","Effect"],["plus_ten","TenMore"],["genius","Gifted"]]:
 		var label:=row.get_node_or_null("TaskHead/%s" % String(part[1])) as Label
 		if label!=null:label.text=String(effect.get(String(part[0]),""))
+	line.tooltip_text=_task_tip(task)
+	return true
+
+
+## A task row's pointer: who does it, then what it does now and what ten more
+## would do (role_effects.gd), so the row itself stays one line.
+static func _task_tip(task:Dictionary)->String:
+	var tip:PackedStringArray=[]
 	var parts:PackedStringArray=[]
 	for pair in task.get("mix",[]):parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
 	if not parts.is_empty():
 		var words:=", ".join(parts)
-		line.tooltip_text=words.left(1).to_upper()+words.substr(1)+"."
-	return true
+		tip.append(words.left(1).to_upper()+words.substr(1)+".")
+	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
+	for key in ["now","plus_ten","genius"]:
+		if String(effect.get(key,""))!="":tip.append(String(effect[key]))
+	return "
+".join(tip)
 
 
 func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
@@ -545,7 +567,7 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
 	for part:Array in [["now","Effect"],["plus_ten","TenMore"],["genius","Gifted"]]:
 		if String(effect.get(String(part[0]),""))=="":continue
-		var line:=T.make_label(String(effect[part[0]]),11,T.TEXT_SOFT);line.name=String(part[1]);line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(line)
+		var line:=Label.new();line.text=String(effect[part[0]]);line.name=String(part[1]);line.visible=false;head.add_child(line)
 	var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
 	toggle.pressed.connect(toggle_task.bind(role))
 	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)
@@ -556,10 +578,7 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 		var figure:=TextureRect.new();figure.texture=Icons.people_texture(kind,T.BODY_2 if T.is_light() else Color("e7dcc6"),40,false)
 		figure.custom_minimum_size=Vector2(20,22);figure.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;figure.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		figure.mouse_filter=Control.MOUSE_FILTER_IGNORE;crowd.add_child(figure)
-	if not (task.get("mix",[]) as Array).is_empty():
-		var parts:PackedStringArray=[]
-		for pair in task.mix:parts.append("%s %d" % [String({"gather":"gathering","hunt":"hunting","fish":"fishing","tend":"tending fields"}.get(String(pair[0]),String(pair[0]))),int(pair[1])])
-		row.tooltip_text=", ".join(parts).capitalize().left(1)+", ".join(parts).substr(1)+"."
+	row.tooltip_text=_task_tip(task)
 	var number:=T.make_label(_share_text(task),12,T.INK);number.name="Count";number.custom_minimum_size.x=62 if bool(task.get("share_plain",false)) else 36;number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;number.mouse_filter=Control.MOUSE_FILTER_PASS;number.tooltip_text=_share_tip(task);row.add_child(number)
 	if manual and on_move is Callable:
 		var less:=W.IconButton.new("minus",String(task.get("take_tip","")),24);less.name="Less";less.disabled=not bool(task.get("can_take",false));row.add_child(less)
