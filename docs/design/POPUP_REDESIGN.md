@@ -128,3 +128,10 @@ work does not change ceremony narration or game logic to make that assertion pas
 See POPUP_WORLD_COLLECTIONS.md and BUILDINGS_MODERN_STRATEGY.md for their detailed
 review evidence. Generated captures, import caches, credentials and saves are
 excluded from source delivery.
+
+
+Final merged acceptance: 33 focused cases pass without errors, failures, skips
+or orphans (report_20). Home's 47 Night captures and Economy's 68 two-theme
+captures pass independent narrow-layout rechecks. Native dialog frame, title,
+close glyph and 44/40 px controls pass the final C/root visual loop. Runtime
+checkpoint `79438388` is delivered to canonical main and remotely verified.
