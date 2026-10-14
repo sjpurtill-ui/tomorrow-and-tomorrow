@@ -58,18 +58,18 @@ func _init()->void:
 
 func _ready()->void:
 	add_theme_stylebox_override("panel",_box(Tokens.PAPER,Tokens.RULE,1,Tokens.RADIUS_CARD,14,10))
-	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);add_child(stack)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);add_child(stack)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",10);stack.add_child(head)
 	var kicker:=_kicker("Your envoy carries",Tokens.GOLD);kicker.size_flags_vertical=SIZE_SHRINK_CENTER;head.add_child(kicker)
 	groups_row=HFlowContainer.new();groups_row.name="Groups";groups_row.size_flags_horizontal=SIZE_EXPAND_FILL;groups_row.add_theme_constant_override("h_separation",4);head.add_child(groups_row)
 	purposes_row=HFlowContainer.new();purposes_row.name="Purposes";purposes_row.add_theme_constant_override("h_separation",6);purposes_row.add_theme_constant_override("v_separation",6);stack.add_child(purposes_row)
-	options_scroll=ScrollContainer.new();options_scroll.name="Options";options_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	options_scroll=ScrollContainer.new();options_scroll.name="Options";options_scroll.follow_focus=true;options_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	options_scroll.custom_minimum_size.y=0;stack.add_child(options_scroll)
 	options=VBoxContainer.new();options.size_flags_horizontal=SIZE_EXPAND_FILL;options.add_theme_constant_override("separation",6);options_scroll.add_child(options)
 	words_edit=TextEdit.new();words_edit.name="WordsEdit";words_edit.custom_minimum_size=Vector2(0,54);words_edit.wrap_mode=TextEdit.LINE_WRAPPING_BOUNDARY
 	words_edit.add_theme_stylebox_override("normal",_box(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CONTROL,10,6))
 	words_edit.add_theme_stylebox_override("focus",_box(Tokens.PAPER_RAISED,Tokens.GOLD,1,Tokens.RADIUS_CONTROL,10,6))
-	words_edit.add_theme_font_override("font",Tokens.voice_font(false));words_edit.add_theme_font_size_override("font_size",17);words_edit.add_theme_color_override("font_color",Tokens.INK)
+	words_edit.add_theme_font_override("font",Tokens.font("ui"));words_edit.add_theme_font_size_override("font_size",16);words_edit.add_theme_color_override("font_color",Tokens.INK)
 	words_edit.text_changed.connect(func()->void:
 		if purpose=="leader_parley" and civ_id!="":ForeignDialogue.thread(civ_id)["next_brief"]=words_edit.text.substr(0,1500)
 		_fill_footer())
@@ -85,7 +85,7 @@ func _ready()->void:
 	aside_button=_button("Set aside");aside_button.name="SetAsideReply";aside_button.size_flags_vertical=SIZE_SHRINK_CENTER
 	aside_button.tooltip_text="Set the unanswered exchange aside. No agreement was made."
 	aside_button.pressed.connect(func()->void:ForeignDialogue.set_aside_reply(civ_id);refresh(true));foot.add_child(aside_button)
-	send_button=_button("Send the envoy",true);send_button.name="Send";send_button.custom_minimum_size=Vector2(170,38);send_button.size_flags_vertical=SIZE_SHRINK_CENTER
+	send_button=_button("Send the envoy",true);send_button.name="Send";send_button.custom_minimum_size=Vector2(170,44);send_button.size_flags_vertical=SIZE_SHRINK_CENTER
 	send_button.pressed.connect(send);foot.add_child(send_button)
 	var thread:Dictionary=ForeignDialogue.thread(civ_id) if civ_id!="" else {}
 	words_edit.text=String(thread.get("next_brief",""))
@@ -104,27 +104,19 @@ func _voice(text:String,size:int=17,color:Color=Tokens.INK,italic:bool=false)->L
 	return label
 
 func _kicker(text:String,color:Color=Tokens.INK_MUTED)->Label:
-	return Tokens.make_label(text.to_upper(),12,color,.12)
+	return Tokens.make_label(text.to_upper(),14,color,.08)
 
 func _box(bg:Color,border:Color,width:int=1,radius:int=Tokens.RADIUS_CONTROL,pad_x:float=12,pad_y:float=6)->StyleBoxFlat:
 	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(width);style.set_corner_radius_all(radius)
 	style.content_margin_left=pad_x;style.content_margin_right=pad_x;style.content_margin_top=pad_y;style.content_margin_bottom=pad_y
 	return style
 
-func _button(text:String,primary:bool=false,selected:bool=false,small:bool=false)->Button:
-	var button:=Button.new();button.text=text;button.focus_mode=FOCUS_NONE
-	Tokens.text(button,"small" if small else "body",Tokens.INK)
-	var ink:=Tokens.GOLD if primary or selected else Tokens.RULE_STRONG
-	var normal:=_box(Tokens.GOLD_WASH if primary or selected else Tokens.PAPER_RAISED,ink,1,Tokens.RADIUS_CONTROL,10 if small else 14,3 if small else 5)
-	if selected:normal.border_width_bottom=3
-	button.add_theme_stylebox_override("normal",normal)
-	var hover:=_box(Tokens.PAPER_SUNK,Tokens.GOLD,1,Tokens.RADIUS_CONTROL,10 if small else 14,3 if small else 5)
-	if selected:hover.border_width_bottom=3
-	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover)
-	button.add_theme_stylebox_override("disabled",_box(Tokens.PAPER_SUNK,Tokens.RULE,1,Tokens.RADIUS_CONTROL,10 if small else 14,3 if small else 5))
-	for key:String in ["font_color","font_hover_color","font_pressed_color"]:button.add_theme_color_override(key,Tokens.GOLD_BRIGHT if primary or selected else Tokens.INK)
-	button.add_theme_color_override("font_disabled_color",Tokens.INK_MUTED)
-	button.custom_minimum_size.y=28 if small else 34
+func _button(text:String,primary:bool=false,selected:bool=false,_small:bool=false)->Button:
+	var button:=Button.new();button.text=text;button.focus_mode=FOCUS_ALL
+	Tokens.apply_button_style(button,primary)
+	if selected and not primary:
+		button.add_theme_stylebox_override("normal",Tokens.button_pressed_style())
+		button.add_theme_stylebox_override("hover",Tokens.button_pressed_style())
 	return button
 
 func _clear(node:Node)->void:

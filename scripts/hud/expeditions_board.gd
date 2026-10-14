@@ -27,7 +27,7 @@ const PRESETS:=[["Off",0.0],["Little",2.0],["Regular",5.0],["A lot",10.0]]
 const FOCUSES:=[["exploration","Explore"],["recruitment","Find bands"],["prospecting","Prospect"]]
 const PAGE:=12
 const GROUPS_SHOWN:=8
-const TWO_AT:=600.0
+const TWO_AT:=1000.0
 
 var model:Dictionary={}
 var headline:Label
@@ -107,7 +107,7 @@ func _take(block:Dictionary)->void:
 	for pair:Array in [["query",""],["filter",0],["order",1],["page",0]]:
 		if not view.has(String(pair[0])):view[String(pair[0])]=pair[1]
 
-const WIDE_AT:=800.0
+const WIDE_AT:=1400.0
 var wide_row:HBoxContainer
 var wide_left:VBoxContainer
 var wide_right:VBoxContainer
@@ -163,8 +163,9 @@ func _fill_send()->void:
 		var b:=UI.chip(seek,String(focus[1]),String(staff.get("focus",""))==key,func()->void:set_focus(key),String(tip))
 		b.name="Focus_"+key
 	var from:=_control_row(send_box,"From")
-	origin_selector=OptionButton.new();origin_selector.name="ScoutOrigin";origin_selector.focus_mode=Control.FOCUS_NONE
-	origin_selector.custom_minimum_size=Vector2(170,24);origin_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL;origin_selector.clip_text=true;origin_selector.add_theme_font_size_override("font_size",12)
+	origin_selector=OptionButton.new();origin_selector.name="ScoutOrigin";origin_selector.focus_mode=Control.FOCUS_ALL
+	T.apply_button_style(origin_selector)
+	origin_selector.custom_minimum_size=Vector2(170,44);origin_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL;origin_selector.clip_text=true;origin_selector.add_theme_font_size_override("font_size",16)
 	origin_selector.add_theme_color_override("font_color",T.INK)
 	from.add_child(origin_selector)
 	var chosen:=String(staff.get("origin_city_id",""))
@@ -322,6 +323,7 @@ static func _place_word(report:Dictionary)->String:
 func _fill_unread()->void:
 	UI.clear(unread_box)
 	var groups:=unread_groups(_reports())
+	unread_box.get_parent().visible=not groups.is_empty()
 	var unread:=0
 	for group:Dictionary in groups:unread+=(group.reports as Array).size()
 	UI.heading(unread_box,"Unread tellings","" if unread>0 else "all read")
@@ -361,10 +363,6 @@ func _fill_cities()->void:
 	cities_empty=UI.label(cities_box,"No foreign town reported yet",12,T.INK_MUTED)
 	cities_empty.visible=cities.is_empty()
 	if cities.is_empty():return
-	var header:=UI.line(cities_box)
-	for spec:Array in [["Town",96],["People",64],["Away · seen",100],["Scouts",82],["Visit",136],["",100]]:
-		var title:=UI.cell(header,String(spec[0]),float(spec[1]),12,T.INK_MUTED,true)
-		if String(spec[0])=="Town":title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	for city:Dictionary in cities:
 		var id:=String(city.city_id)
 		if not city_choice.has(id):
@@ -385,16 +383,20 @@ func _city_row(id:String,row_model:Dictionary)->void:
 	var tip:="%s · %s · %.0f km away · %s
 Click for what we know of it." % [String(row_model.name),people,float(row_model.distance_km),String(row_model.seen)]
 	var row:=UI.hot_row(cities_box,"City_"+id.validate_node_name(),open,tip)
+	var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",12);row.add_child(stack)
 	var name_cell:=HBoxContainer.new();name_cell.add_theme_constant_override("separation",6);name_cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	name_cell.custom_minimum_size.x=96;name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(name_cell)
-	var name_label:=UI.label(name_cell,String(row_model.name),13,T.INK,true,true)
+	name_cell.custom_minimum_size.x=96;name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;stack.add_child(name_cell)
+	var name_label:=UI.label(name_cell,String(row_model.name),20,T.INK,true,true)
 	var status:=UI.label(name_cell,"Watched" if bool(row_model.watching) else ("Party away" if bool(row_model.away) else ""),12,T.GREEN_TEXT if bool(row_model.watching) else T.GOLD_TEXT,true)
 	status.tooltip_text=String(row_model.status)
-	var meta:=UI.cell(row,people.trim_suffix(" people"),64,12,T.BODY)
+	var facts:=HFlowContainer.new();facts.add_theme_constant_override("h_separation",20);facts.add_theme_constant_override("v_separation",8);stack.add_child(facts)
+	var meta:=UI.label(facts,people,14,T.BODY)
 	meta.tooltip_text=tip
 	var seen:=_seen_short(String(row_model.seen))
-	UI.cell(row,"%.0f km · %s" % [float(row_model.distance_km),String(seen[0]).trim_suffix(" ago")],100,12,T.AMBER_TEXT if bool(seen[1]) else T.BODY).tooltip_text="%.0f km away · %s" % [float(row_model.distance_km),String(row_model.seen)]
-	var party:=HBoxContainer.new();party.add_theme_constant_override("separation",2);party.custom_minimum_size.x=82;row.add_child(party)
+	UI.label(facts,"%.0f km away · seen %s" % [float(row_model.distance_km),String(seen[0])],14,T.AMBER_TEXT if bool(seen[1]) else T.BODY).tooltip_text="%.0f km away · %s" % [float(row_model.distance_km),String(row_model.seen)]
+	var controls:=HFlowContainer.new();controls.add_theme_constant_override("h_separation",20);controls.add_theme_constant_override("v_separation",12);stack.add_child(controls)
+	var party:=HBoxContainer.new();party.add_theme_constant_override("separation",4);party.custom_minimum_size.x=82;controls.add_child(party)
+	UI.label(party,"Scouts",14,T.INK_MUTED)
 	var personnel:=int(row_model.personnel)
 	var minus:=UI.verb(party,"−",func()->void:_choose(id,"personnel",int(city_choice[id].personnel)-1),"One scout fewer (at least %d)" % Orders.MIN_PARTY);minus.name="FewerScouts"
 	minus.disabled=personnel<=Orders.MIN_PARTY
@@ -402,13 +404,14 @@ Click for what we know of it." % [String(row_model.name),people,float(row_model.
 	count.tooltip_text="%d scouts in the party" % personnel
 	var plus:=UI.verb(party,"+",func()->void:_choose(id,"personnel",int(city_choice[id].personnel)+1),"One scout more (at most %d)" % Orders.MAX_PARTY);plus.name="MoreScouts"
 	plus.disabled=personnel>=Orders.MAX_PARTY
-	var visit:=HBoxContainer.new();visit.add_theme_constant_override("separation",2);visit.custom_minimum_size.x=136;row.add_child(visit)
+	var visit:=HBoxContainer.new();visit.add_theme_constant_override("separation",4);visit.custom_minimum_size.x=136;controls.add_child(visit)
+	UI.label(visit,"Journey",14,T.INK_MUTED)
 	var days_buttons:Dictionary={}
 	for days:int in CivilizationSystem.SCOUT_DURATIONS:
 		var choice:=UI.chip(visit,"1 yr" if days==365 else "%dd" % days,days==int(row_model.days),func()->void:_choose(id,"days",days),"Whole journey: out, watching and back")
 		choice.name="Days%d" % days
 		days_buttons[days]=choice
-	var acts:=HBoxContainer.new();acts.add_theme_constant_override("separation",4);acts.custom_minimum_size.x=100;acts.alignment=BoxContainer.ALIGNMENT_END;row.add_child(acts)
+	var acts:=HBoxContainer.new();acts.add_theme_constant_override("separation",8);acts.custom_minimum_size.x=100;stack.add_child(acts)
 	var once_blocked:=String(row_model.once_blocked)
 	var watch:Dictionary=row_model.watch
 	var changed:=bool(row_model.watching) and (int(watch.get("duration_days",0))!=int(row_model.days) or int(watch.get("personnel",0))!=personnel)
@@ -464,26 +467,21 @@ func _build_tellings_frame()->void:
 	counter=head.get_node("Note") if head.has_node("Note") else null
 	if counter==null:
 		counter=T.make_label("",12,T.INK_MUTED);counter.name="Note";head.add_child(counter)
-	var bar:=UI.line(tellings_box,6)
 	search=LineEdit.new();search.name="ReportSearch";search.placeholder_text="Search a place, a find or a people";search.clear_button_enabled=true
-	search.custom_minimum_size=Vector2(110,26);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	search.add_theme_font_size_override("font_size",13);search.add_theme_color_override("font_color",T.INK)
+	search.custom_minimum_size=Vector2(110,44);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	search.add_theme_font_size_override("font_size",16);search.add_theme_color_override("font_color",T.INK)
 	var field:=T.flat(T.FIELD_BG,T.RULE,1,T.RADIUS_CONTROL);field.content_margin_left=8
 	search.add_theme_stylebox_override("normal",field);search.add_theme_stylebox_override("focus",T.flat(T.FIELD_BG,T.GOLD,1,T.RADIUS_CONTROL,8))
 	search.text=String(view.get("query",""))
-	bar.add_child(search)
+	tellings_box.add_child(search)
 	search.text_changed.connect(func(value:String)->void:view.query=value;view.page=0;_fill_rows())
+	var bar:=HFlowContainer.new();bar.add_theme_constant_override("h_separation",12);bar.add_theme_constant_override("v_separation",8);tellings_box.add_child(bar)
 	var filters:=HBoxContainer.new();filters.name="Filters";filters.add_theme_constant_override("separation",4);bar.add_child(filters)
 	var order:=UI.chip(bar,"Newest",int(view.get("order",1))==1,func()->void:view.order=0 if int(view.get("order",1))==1 else 1;view.page=0;_fill_tellings(),"Newest first, or the weightiest first")
 	order.name="Order"
 	previous=UI.verb(bar,"‹",func()->void:view.page=int(view.page)-1;_fill_rows(),"Newer page");previous.name="PreviousReports"
 	next=UI.verb(bar,"›",func()->void:view.page=int(view.page)+1;_fill_rows(),"Older page");next.name="NextReports"
-	var columns:=UI.line(tellings_box)
-	columns.name="Columns"
-	for spec:Array in [["When",96],["",22],["What came home",0],["Where",96],["",64]]:
-		var title:=UI.cell(columns,String(spec[0]),float(spec[1]),12,T.INK_MUTED,true)
-		if int(spec[1])==0:title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	results=VBoxContainer.new();results.name="ReportResults";results.add_theme_constant_override("separation",0);tellings_box.add_child(results)
+	results=VBoxContainer.new();results.name="ReportResults";results.add_theme_constant_override("separation",12);tellings_box.add_child(results)
 
 func _fill_tellings()->void:
 	if tellings_box==null:return
@@ -529,11 +527,11 @@ func _fill_rows()->void:
 	for item:Dictionary in visible_items:
 		var report:Dictionary=item.report
 		var row:=UI.hot_row(results,"Report_%s" % str(report.get("mission_id",0)),func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.place),String(item.detail)])
-		UI.cell(row,Archive.calendar_date(int(item.day)),96,12,T.INK_MUTED)
 		UI.icon(row,_kind(item),T.RED if int(item.losses)>0 else (T.GOLD if bool(item.meaningful) else T.INK_MUTED),18)
-		UI.label(row,short_title(String(item.title)),13,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
+		var entry:=VBoxContainer.new();entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entry.add_theme_constant_override("separation",6);row.add_child(entry)
+		UI.label(entry,short_title(String(item.title)),18,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
 		# Who went is in the row's pointer: the title gets the width.
-		UI.cell(row,String(item.place).replace("Out to the ","").replace(" and back",""),96,12,T.BODY).tooltip_text=String(item.party)
+		UI.label(entry,"%s · %s" % [Archive.calendar_date(int(item.day)),String(item.place).replace("Out to the ","").replace(" and back","")],14,T.INK_MUTED,false,true).tooltip_text=String(item.party)
 		var state:=HBoxContainer.new();state.custom_minimum_size.x=64;state.alignment=BoxContainer.ALIGNMENT_END;row.add_child(state)
 		if int(item.losses)>0:UI.tag(state,"lost %d" % int(item.losses),"danger")
 		elif String(item.review)=="UNREAD":UI.tag(state,"unread","gold")

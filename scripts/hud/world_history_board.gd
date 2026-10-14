@@ -17,7 +17,7 @@ const PAGE:=40
 
 var model:Dictionary={}
 var view:Dictionary={}
-var chips:HBoxContainer
+var chips:HFlowContainer
 var list:VBoxContainer
 var more:Button
 ## Where the next rows go (the list, or one of its two columns).
@@ -26,12 +26,11 @@ var target:Control
 func setup(block:Dictionary)->void:
 	name="WorldHistoryBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",8)
+	add_theme_constant_override("separation",16)
 	_take(block)
-	var top:=UI.line(self,6)
-	chips=HBoxContainer.new();chips.name="Filters";chips.add_theme_constant_override("separation",4);top.add_child(chips)
+	chips=HFlowContainer.new();chips.name="Filters";chips.add_theme_constant_override("h_separation",8);chips.add_theme_constant_override("v_separation",8);add_child(chips)
 	var frame:=UI.sheet(self,"Years")
-	list=VBoxContainer.new();list.name="List";list.add_theme_constant_override("separation",0);frame.add_child(list)
+	list=VBoxContainer.new();list.name="List";list.add_theme_constant_override("separation",16);frame.add_child(list)
 	more=UI.verb(frame,"Earlier years",func()->void:view.shown=int(view.get("shown",PAGE))+PAGE;redraw(),"Show forty more")
 	more.name="Earlier";more.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 	redraw()
@@ -76,7 +75,7 @@ func redraw()->void:
 	var shown:=entries.slice(0,int(view.get("shown",PAGE)))
 	var year:=-1
 	# On a wide page the years run on in a second column.
-	var two:=size.x>=800.0
+	var two:=false
 	var holder:Control=list
 	var columns:HBoxContainer=null
 	if two:
@@ -90,8 +89,7 @@ func redraw()->void:
 			if two and columns.get_child_count()==1 and index>=shown.size()/2:target=_column(columns)
 			year=y
 			var head:=UI.line(target,8);head.name="Year_%d" % y
-			UI.label(head,"Year %d" % y,13,T.GOLD_TEXT,true).name="Year"
-			var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size=Vector2(0,1);rule.size_flags_horizontal=Control.SIZE_EXPAND_FILL;rule.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(rule)
+			UI.label(head,"Year %d" % y,24,T.INK,true).name="Year"
 		_row(entry)
 	if entries.is_empty():UI.label(list,"Nothing has passed between us and the world yet",12,T.INK_MUTED)
 	more.visible=entries.size()>shown.size()
@@ -101,19 +99,21 @@ func _row(entry:Dictionary)->void:
 	var text:=String(entry.get("text",""))
 	var row:=UI.hot_row(target,"Entry_%d" % target.get_child_count(),open if open is Callable else Callable(),"%s\n%s" % [String(entry.get("title","")),text])
 	UI.icon(row,String(entry.get("icon","world")),_tint(String(entry.get("group",""))),18)
-	UI.cell(row,String(entry.get("season","")),58,12,T.INK_MUTED)
+	var story:=VBoxContainer.new();story.size_flags_horizontal=Control.SIZE_EXPAND_FILL;story.add_theme_constant_override("separation",6);row.add_child(story)
+	UI.label(story,String(entry.get("season","")),14,T.INK_MUTED)
 	# The title and its first sentence, wrapped: nothing is cut off.
 	var said:=RichTextLabel.new();said.bbcode_enabled=true;said.fit_content=true;said.scroll_active=false
 	said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.custom_minimum_size.x=80
 	said.mouse_filter=Control.MOUSE_FILTER_PASS
 	said.add_theme_font_override("normal_font",T.font("ui"));said.add_theme_font_override("bold_font",T.font("ui_strong"))
-	said.add_theme_font_size_override("normal_font_size",12);said.add_theme_font_size_override("bold_font_size",13)
+	said.add_theme_font_size_override("normal_font_size",16);said.add_theme_font_size_override("bold_font_size",18)
 	said.add_theme_color_override("default_color",T.INK_MUTED)
 	var first:=_first_sentence(text)
 	# One line: the event's title; its telling is in the row's pointer.
 	said.text="[color=#%s]%s[/color]" % [T.INK.to_html(false),("[b]%s[/b]" if bool(entry.get("weighty",false)) else "%s") % _escape(String(entry.get("title","")))]
-	said.add_theme_font_size_override("normal_font_size",13)
-	row.add_child(said)
+	said.add_theme_font_size_override("normal_font_size",18)
+	story.add_child(said)
+	if first!="" and first!=String(entry.get("title","")):UI.label(story,first,16,T.INK_MUTED,false,true)
 	if int(entry.get("count",1))>1:UI.tag(row,"×%d" % int(entry.count),"muted")
 
 static func _column(parent:Node)->VBoxContainer:

@@ -116,12 +116,14 @@ func _works_blocks()->Array:
 		var parts:Array[String]=[]
 		for material:Variant in row.get("materials",{}):parts.append("%s %s" % [preload("res://scripts/hud/production_plain.gd").number(float(row.materials[material])),String(material).to_lower()])
 		var detail:=String(row.get("note",""))
-		rows.append({"cells":{"work":String(row.get("kind","Building")).replace("_"," ").capitalize(),"when":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"used":", ".join(parts) if not parts.is_empty() else "—"},
-			"icon":_mark("fire" if event in ["damaged","destroyed"] else "work"),"tag":{"text":event.replace("_"," ").capitalize(),"tone":"bad" if event=="destroyed" else ("warn" if event=="damaged" else "good")},
-			"tip":(detail.left(1).to_upper()+detail.substr(1)) if detail!="" else String(row.get("settlement_name",""))})
+		var record_blocks:Array=[{"type":"text","text":"%s · %s" % [preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),event.replace("_"," ").capitalize()]},
+			{"type":"text","text":"Material used: %s" % (", ".join(parts) if not parts.is_empty() else "none recorded")}]
+		if detail!="":record_blocks.append({"type":"text","text":detail.left(1).to_upper()+detail.substr(1)})
+		elif String(row.get("settlement_name",""))!="":record_blocks.append({"type":"text","text":String(row.settlement_name)})
+		rows.append({"type":"frame","heading":String(row.get("kind","Building")).replace("_"," ").capitalize(),"blocks":record_blocks})
 	var blocks:Array=[{"type":"fact_grid","min_column":250,"items":facts},
-		{"type":"table","heading":"Every work, newest first","note":("the newest %d of %d" % [WORKS_SHOWN,records.size()]) if records.size()>WORKS_SHOWN else "","empty":"Nothing has been built yet.",
-			"columns":[{"key":"work","label":"WORK"},{"key":"when","label":"WHEN","width":120},{"key":"used","label":"MATERIAL USED","width":280}],"rows":rows}]
+		{"type":"text","heading":"Every work, newest first","text":("The newest %d of %d." % [WORKS_SHOWN,records.size()]) if records.size()>WORKS_SHOWN else ("Nothing has been built yet." if records.is_empty() else "")}]
+	blocks.append_array(rows)
 	if not materials.is_empty():
 		var names:Array=materials.keys()
 		names.sort_custom(func(a:Variant,b:Variant)->bool:return float(materials[a])>float(materials[b]))

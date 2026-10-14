@@ -84,10 +84,10 @@ class FactorBar extends Control:
 		return "What speeds (green) and slows (red) the work on every question; the dark mark is the usual pace."
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",16)
+	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",24)
 	var plan:=_plan(block)
+	if block.has("pace"):_readings(self,block.pace,[2,0])
 	if block.has("hands"):_hands(self,block.hands)
-	if block.has("pace"):_pace_header(self,plan.pace,block.get("pace",{}))
 	# A team freed by a proof took up the best question open to it; for a season
 	# the player may send it elsewhere (DiscoverySystem.team_choices): "Choose"
 	# on that question's line opens the options in a floating picker.
@@ -96,6 +96,7 @@ func setup(block:Dictionary)->void:
 		add_child(popup);_choice_card(popup,choice)
 		_pickers[String(choice.get("channel",""))]=popup
 	_field_spread(plan.lanes)
+	if block.has("pace"):_pace_header(self,plan.pace,block.get("pace",{}))
 	resized.connect(_arrange);_arrange()
 	# Capture only: "--capture-picker" opens the first free team's picker.
 	if "--capture-picker" in OS.get_cmdline_user_args() and not _pickers.is_empty():_open_picker.call_deferred(String(_pickers.keys()[0]))
@@ -112,7 +113,7 @@ func _field_spread(lanes:Array)->void:
 	var title:=_voice("Questions taking shape",24);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
 	var hint:=T.make_label("− / + shares attention",12,T.TEXT_SOFT);hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(hint)
 	field_grid=GridContainer.new();field_grid.name="Fields";field_grid.columns=2
-	field_grid.add_theme_constant_override("h_separation",28);field_grid.add_theme_constant_override("v_separation",12);add_child(field_grid)
+	field_grid.add_theme_constant_override("h_separation",28);field_grid.add_theme_constant_override("v_separation",24);add_child(field_grid)
 	for lane:Dictionary in lanes:
 		_field_entry(lane)
 	if data.has("artifacts"):
@@ -130,7 +131,7 @@ func _field_entry(lane:Dictionary)->void:
 	var rule:=ColorRect.new();rule.color=Color(T.BORDER_SOFT,0.7);rule.custom_minimum_size.y=1;box.add_child(rule)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
 	var label:=Button.new();label.name="FieldLabel";label.text=String(lane.name);label.alignment=HORIZONTAL_ALIGNMENT_LEFT;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	label.add_theme_font_size_override("font_size",13);label.add_theme_color_override("font_color",T.GOLD_TEXT)
+	T.apply_button_style(label);label.add_theme_color_override("font_color",T.GOLD_TEXT)
 	label.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT));label.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG));label.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG))
 	label.tooltip_text=String(field.get("goal",""))+"\nExplore this field's knowledge."
 	if field.get("on_open") is Callable:label.pressed.connect(field.on_open)
@@ -151,7 +152,7 @@ func _field_entry(lane:Dictionary)->void:
 	if has_painting(record):
 		var painting:=Visuals.paint_discovery(body,record,78);painting.custom_minimum_size.x=100;painting.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;painting.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);body.add_child(words)
-	var title:=_voice(String(record.get("name","An open question")),21);title.name="Question_"+String(record.get("id",""));words.add_child(title)
+	var title:=_voice(String(record.get("name","An open question")),24);title.name="Question_"+String(record.get("id",""));words.add_child(title)
 	var cells:={"cells":{}}
 	_question_cells(cells,record)
 	var progress:=float(record.get("progress",0))
@@ -173,9 +174,9 @@ func _field_entry(lane:Dictionary)->void:
 
 func _attention(parent:Node,field:Dictionary)->void:
 	var less:=_small_button(parent,"−",field.get("on_less"),"Give one step of attention to the other fields")
-	less.disabled=int(field.get("weight",0))<=0;less.custom_minimum_size=Vector2(28,28)
+	less.disabled=int(field.get("weight",0))<=0;less.custom_minimum_size=Vector2(40,40)
 	var share:=T.make_label("%d%%" % roundi(float(field.get("share",0))*100),13,T.INK);share.custom_minimum_size.x=36;share.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;parent.add_child(share)
-	var more:=_small_button(parent,"+",field.get("on_more"),"Move one step of attention to this field");more.custom_minimum_size=Vector2(28,28)
+	var more:=_small_button(parent,"+",field.get("on_more"),"Move one step of attention to this field");more.custom_minimum_size=Vector2(40,40)
 
 ## The table of fields (dense_blocks.gd): one line per field and per further
 ## question, columns aligned, the field's share of attention with − and + last.
@@ -588,7 +589,7 @@ func _choice_card(parent:Node,choice:Dictionary)->void:
 	box.add_child(T.make_label("A TEAM IS FREE",12,T.GOLD_TEXT))
 	var options:Array=choice.get("options",[])
 	var taken_name:=String((options[0] as Dictionary).get("name","")) if not options.is_empty() else ""
-	box.add_child(_serif("%s is proven. Its team took up %s." % [String(choice.get("proved","A question")),taken_name],19))
+	box.add_child(_voice("%s is proven. Its team took up %s." % [String(choice.get("proved","A question")),taken_name],24))
 	var left:=int(choice.get("days_left",0))
 	_note(box,"Keep them on it, or send them to another question instead%s. They stay with what they take until it is proven; the work already done on a question is never lost." % (" (about %s left to choose)" % Words.Plain.span_text(float(left)) if left>=1 else ""))
 	var grid:=GridContainer.new();grid.name="Options";grid.columns=3;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);box.add_child(grid)
@@ -601,7 +602,7 @@ func _choice_card(parent:Node,choice:Dictionary)->void:
 		var text:=VBoxContainer.new();text.add_theme_constant_override("separation",4);tile.add_child(text)
 		var domain:=String(option.get("dynamic",""))
 		var kicker:=T.make_label((field_name(option)+(" · TAKEN UP" if taken else "")).to_upper(),12,T.legible(Visuals.color(domain)));text.add_child(kicker)
-		text.add_child(_serif(String(option.get("name","")),17))
+		text.add_child(_voice(String(option.get("name","")),20))
 		var words:=option_words(option)
 		if String(words.time)!="":_line(text,String(words.time),13,T.BODY)
 		if String(words.ahead)!="":_line(text,String(words.ahead),12,T.AMBER_TEXT)
@@ -616,6 +617,7 @@ func _choice_card(parent:Node,choice:Dictionary)->void:
 			(pick as Callable).call()
 		var button:=_button(text,"Keep them on it" if taken else "Take this up instead",press,"They keep %s until it is proven." % String(option.get("name","")) if taken else "The team leaves %s (its work is kept) and takes up %s until it is proven." % [taken_name,String(option.get("name",""))],taken)
 		button.name="Choose"
+		T.apply_button_style(button,taken)
 
 ## A field's attention in words: its share and what is being worked on.
 static func _field_words(field:Dictionary)->String:
@@ -678,12 +680,24 @@ static func factor_words(factor:float)->String:
 func _pace_header(parent:Node,words:Dictionary,pace:Dictionary)->void:
 	# The bar across the page, its key beneath (what each part is is on hover).
 	var box:=VBoxContainer.new();box.name="LearningPace";box.add_theme_constant_override("separation",4);parent.add_child(box)
+	_readings(box,pace,[1,3])
 	box.add_child(T.make_label("WHAT SETS THE PACE",12,T.GOLD_TEXT))
 	var stack:=box
 	factor_bar=FactorBar.new();factor_bar.name="FactorBar";factor_bar.custom_minimum_size.y=5;stack.add_child(factor_bar)
 	var legend:=HFlowContainer.new();legend.name="FactorLegend";legend.add_theme_constant_override("h_separation",14);legend.add_theme_constant_override("v_separation",2);stack.add_child(legend)
 	_header["legend"]=legend
 	_fill_header(words,pace)
+
+## Two readings at a time: the current work first, forecast evidence below.
+func _readings(parent:Node,pace:Dictionary,indices:Array)->void:
+	var row:=HBoxContainer.new();row.name="ResearchReadings";row.add_theme_constant_override("separation",24);parent.add_child(row)
+	var readings:=figures(pace)
+	for index:int in indices:
+		var reading:Dictionary=readings[index]
+		var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",4);box.tooltip_text=String(reading.tip);box.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(box)
+		_line(box,T.sentence_case(String(reading.label)),14,T.TEXT_SOFT)
+		box.add_child(_voice(String(reading.value),28))
+		_line(box,String(reading.delta),14,T.TEXT_SOFT)
 
 func _fill_header(_words:Dictionary,pace:Dictionary)->void:
 	var parts:=pace_factors(pace)
@@ -739,15 +753,18 @@ static func _drift_words(pace:Dictionary)->String:
 
 ## Who sets the learners, and the two orders that change it.
 func _hands(parent:Node,hands:Dictionary)->void:
-	var row:=HBoxContainer.new();row.name="Hands";row.add_theme_constant_override("separation",8);parent.add_child(row)
+	var group:=VBoxContainer.new();group.name="Hands";group.add_theme_constant_override("separation",8);parent.add_child(group)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);group.add_child(row)
 	var caption:=T.make_label("LEARNERS",11,T.GOLD_TEXT,0.06);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
 	var said:=T.make_label(String(hands.get("words","")),13,T.BODY);said.name="HandsWords";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.custom_minimum_size.x=120
 	said.tooltip_text=String(hands.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(said)
 	var blocked:=bool(hands.get("occupied",false))
-	var more:=_small_button(row,"More hands on learning",null if blocked else hands.get("on_more"),"Not while the place is occupied" if blocked else "Ask the local leader to move some people to learning. It changes who works at learning, not what is found.")
+	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);group.add_child(actions)
+	var more:=_small_button(actions,"More hands on learning",null if blocked else hands.get("on_more"),"Not while the place is occupied" if blocked else "Ask the local leader to move some people to learning. It changes who works at learning, not what is found.")
+	T.apply_button_style(more,true)
 	more.name="MoreHands"
-	var free:=_small_button(row,"Let the leader decide",null if blocked else hands.get("on_free"),"Not while the place is occupied" if blocked else "Let the local leader share out the work again.")
+	var free:=_small_button(actions,"Let the leader decide",null if blocked else hands.get("on_free"),"Not while the place is occupied" if blocked else "Let the local leader share out the work again.")
 	free.name="LeaderDecides"
 
 # --------------------------------------------------------------------------
@@ -760,8 +777,15 @@ func _hands(parent:Node,hands:Dictionary)->void:
 
 func _small_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
 	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	T.apply_button_style(button)
 	parent.add_child(button)
 	return button
+
+## Interface titles use the shared sans face; spoken quotations keep their voice.
+func _voice(text:String,font_size:int)->Label:
+	var label:=super._voice(text,font_size)
+	label.add_theme_font_override("font",T.font("ui_strong"))
+	return label
 
 ## Opens a free team's picker under the pointer, kept on screen and as tall as
 ## its options once they have wrapped at its width.

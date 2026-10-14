@@ -25,7 +25,7 @@ var _page_shape:Array=[]
 var _page_refs:Dictionary={}
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="SettlementOverview";add_theme_constant_override("separation",14)
+	theme=T.control_theme();data=block;name="SettlementOverview";add_theme_constant_override("separation",24)
 	_page_shape=shape_of(block)
 	_page_refs={"rows":[],"progress":[],"offers":[]}
 	spread=BoxContainer.new();spread.name="Spread";spread.add_theme_constant_override("separation",22);add_child(spread)
@@ -52,17 +52,16 @@ func setup(block:Dictionary)->void:
 			_page_refs["fix"]=mend
 		_button(yours,"Back to our leaders",block.get("on_leaders"),"Each town's leader shares out the work again, food and water first.").name="BackToLeaders"
 		for chip in yours.get_children():
-			if chip is Button:
-				(chip as Button).custom_minimum_size.y=26
-				(chip as Button).add_theme_font_size_override("font_size",12)
+			if chip is Button:T.apply_button_style(chip)
 	elif bool(block.get("can_direct",false)):
 		var ask:=_choices(controls,"More hands on",block.get("choices",[]),String(block.get("current","")))
 		ask.name="AskForHands"
-		# One compact row under the leader's word.
+		# The work choices use the full row below the leader's account.
 		for chip in ask.get_children():
 			if chip is Button:
-				(chip as Button).custom_minimum_size.y=26
-				(chip as Button).add_theme_font_size_override("font_size",12)
+				var selected:bool=(chip as Button).text.ends_with(" (now)")
+				T.apply_button_style(chip)
+				if selected:chip.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG,T.ACTION,1,T.RADIUS_CONTROL,8))
 	var groups:Array=block.get("groups",[])
 	if not groups.is_empty():_groups(groups,block.get("legend",[]),String(block.get("town_name","")))
 	var places:Dictionary=block.get("places",{})
@@ -161,23 +160,24 @@ static func shape_of(block:Dictionary)->Array:
 func _leader(block:Dictionary,parent:Node)->void:
 	var leader:Dictionary=block.get("leader",{})
 	var first:=String(leader.get("name","")).get_slice(" ",0)
-	var row:=HBoxContainer.new();row.name="Leader";row.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_theme_constant_override("separation",12);parent.add_child(row)
+	var group:=VBoxContainer.new();group.name="Leader";group.size_flags_horizontal=Control.SIZE_EXPAND_FILL;group.add_theme_constant_override("separation",12);parent.add_child(group)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);group.add_child(row)
 	if not leader.is_empty():
 		var face:=Portrait.picture(leader,46,54);face.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(face)
-	var named:=VBoxContainer.new();named.size_flags_vertical=Control.SIZE_SHRINK_CENTER;named.add_theme_constant_override("separation",0);row.add_child(named)
-	var who:=_voice(String(leader.get("name","No leader yet")),18);who.autowrap_mode=TextServer.AUTOWRAP_OFF;named.add_child(who)
+	var named:=VBoxContainer.new();named.size_flags_horizontal=Control.SIZE_EXPAND_FILL;named.size_flags_vertical=Control.SIZE_SHRINK_CENTER;named.add_theme_constant_override("separation",4);row.add_child(named)
+	var who:=_voice(String(leader.get("name","No leader yet")),24);who.add_theme_font_override("font",T.font("ui_strong"));named.add_child(who)
 	var office:=T.text(Label.new(),"small",T.INK_MUTED) as Label
 	office.text=_office_words(leader);named.add_child(office)
 	if not _page_refs.is_empty():_page_refs["office"]=office
-	named.custom_minimum_size.x=250
 	# Who sets the work is no line of prose: it is in the name's pointer, and
 	# the switch beside it (Back to our leaders) shows it.
 	who.tooltip_text=String(block.get("direction",""))+"\n"+String(block.get("direction_tip",""));who.mouse_filter=Control.MOUSE_FILTER_PASS
 	if not _page_refs.is_empty():_page_refs["direction"]=who
-	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	controls.add_theme_constant_override("h_separation",6);controls.add_theme_constant_override("v_separation",6);row.add_child(controls)
-	var talk:=_button(controls,"Talk with %s" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
+	var talk:=_button(row,"Talk with %s" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
+	T.apply_button_style(talk,true)
 	talk.name="TalkWithLeader";talk.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var controls:Container=HFlowContainer.new() if bool(block.get("ruler_sets_work",false)) else VBoxContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	controls.add_theme_constant_override("h_separation",8);controls.add_theme_constant_override("v_separation",8);group.add_child(controls)
 
 static func _office_words(leader:Dictionary)->String:
 	# The title every screen gives this person (person_posts.gd).

@@ -31,13 +31,13 @@ func tab(_sub:int)->Dictionary:
 	]
 	var killing:Dictionary=preload("res://scripts/hud/content/dock_detail_health.gd").mortality_block("How many people this cause kills each year at the present rate")
 	var blocks:Array=[
-		Charts.population("civilization"),
 		{"type":"tiles","heading":"Mothers and babies","items":maternity_items},
 	]
+	for reading:Dictionary in kpis:reading["glance"]=true
 	var records:=grouped_deaths(GameState.demographic_ledger)
 	if _sub==1:
 		records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
-		return {"kpis":kpis,"brief":{},"blocks":_death_pages(records,false)}
+		return {"blocks":_death_pages(records,false)}
 	blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
 	if not killing.is_empty():
 		blocks.append(killing)
@@ -50,6 +50,7 @@ func tab(_sub:int)->Dictionary:
 	]})
 	var workforce:=GameState.workforce_capacity_snapshot()
 	blocks.append({"type":"text","heading":"How much work gets done","text":"%d people are at work, and between them they get done what %s people at full strength would.%s" % [int(workforce.people),preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),(" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else ""]})
+	blocks.append(Charts.population("civilization"))
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:

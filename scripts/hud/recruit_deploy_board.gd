@@ -97,7 +97,7 @@ func _skin(bg:Color,border:Color,pad:int=10)->StyleBoxFlat:
 
 
 func _icon_button(parent:Node,icon:String,text:String,action:Callable,tip:String="")->Button:
-	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.focus_mode=Control.FOCUS_NONE
+	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.focus_mode=Control.FOCUS_ALL
 	button.icon=Icons.command_texture(icon,T.INK,40);button.expand_icon=false
 	button.add_theme_constant_override("icon_max_width",16);button.add_theme_constant_override("h_separation",5)
 	button.custom_minimum_size=Vector2(30 if text=="" else 0,30)
@@ -333,11 +333,11 @@ func _line_card(item:Dictionary)->void:
 	var repeat:=_icon_button(head,"repeat","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"repeat",not bool(MilitaryCampaign.recruit_deploy.line(id).get("repeat",false)))),"Keep raising bands until stopped.")
 	repeat.toggle_mode=true;repeat.name="Repeat"
 	var priority:=_icon_button(head,"prio1","",func():report(MilitaryCampaign.recruit_deploy.configure(id,"priority",(int(MilitaryCampaign.recruit_deploy.line(id).get("priority",1))+1)%3)),"");priority.name="Priority"
-	var automatic:=CheckButton.new();automatic.name="AutoDeploy";automatic.text="Auto";automatic.focus_mode=Control.FOCUS_NONE
+	var automatic:=CheckButton.new();automatic.name="AutoDeploy";automatic.text="Auto";automatic.focus_mode=Control.FOCUS_ALL
 	automatic.icon=Icons.command_texture("deploy",T.INK,40);automatic.add_theme_constant_override("icon_max_width",16)
 	automatic.tooltip_text="Send each band off as soon as it is trained and armed."
 	automatic.toggled.connect(func(on:bool):report(MilitaryCampaign.recruit_deploy.configure(id,"auto_deploy",on)));head.add_child(automatic)
-	var destination:=OptionButton.new();destination.name="Destination";destination.fit_to_longest_item=false;destination.custom_minimum_size.x=128;destination.clip_text=true;destination.focus_mode=Control.FOCUS_NONE
+	var destination:=OptionButton.new();destination.name="Destination";destination.fit_to_longest_item=false;destination.custom_minimum_size.x=128;destination.clip_text=true;destination.focus_mode=Control.FOCUS_ALL
 	destination.add_item("New band",0)
 	# Only a band at home can take new men in (they cannot teleport); bands away
 	# are listed greyed so the choice is plain.

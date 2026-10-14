@@ -209,7 +209,7 @@ func _build_plain_orders(parent:VBoxContainer)->void:
 	var answer_row:=_row(answer_column)
 	insist_button=_button(answer_row,"Insist",func():_give(true));insist_button.hide()
 	insist_button.tooltip_text="Give the order again. They will go, whatever they think of it."
-	whole_command=CheckButton.new();whole_command.name="WholeCommand";whole_command.button_pressed=true;whole_command.focus_mode=Control.FOCUS_NONE;whole_command.visible=false
+	whole_command=CheckButton.new();whole_command.name="WholeCommand";whole_command.button_pressed=true;whole_command.focus_mode=Control.FOCUS_ALL;whole_command.visible=false
 	whole_command.tooltip_text="Give the order to every band under this leader. Each goes by its own road; their leader sees to the pace and the camps.";parent.add_child(whole_command)
 	var action:=_row(parent)
 	give_button=_button(action,"Give the order",func():_give(false))
@@ -863,7 +863,7 @@ func _build_organization()->void:
 
 func _install_command_theme()->void:
 	var theme:=Theme.new()
-	theme.default_font=T.FONT_UI;theme.default_font_size=15
+	theme.default_font=T.FONT_UI;theme.default_font_size=16
 	for type:String in ["Label","Button","OptionButton","LineEdit","Tree","TabBar","TabContainer","PopupMenu"]:
 		for state:String in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color","font_selected_color","font_unselected_color","font_hovered_color"]:theme.set_color(state,type,T.INK)
 		theme.set_color("font_disabled_color",type,T.DISABLED)
@@ -905,7 +905,7 @@ func _heading(parent:Node,title:String,explanation:String)->Label:
 	return head
 
 func _zone_card(parent:Node)->VBoxContainer:
-	var frame:=PanelContainer.new();var style:=T.flat(T.ROW_BG,T.BORDER_SOFT,1,4,8);style.content_margin_top=5;style.content_margin_bottom=5;frame.add_theme_stylebox_override("panel",style);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(frame)
+	var frame:=PanelContainer.new();var style:=T.flat(T.ROW_BG,T.BORDER_SOFT,0,8,12);style.content_margin_top=5;style.content_margin_bottom=5;frame.add_theme_stylebox_override("panel",style);frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(frame)
 	var content:=VBoxContainer.new();content.add_theme_constant_override("separation",4);frame.add_child(content)
 	return content
 
@@ -942,9 +942,9 @@ func _update_preparation()->void:
 		preparation_note.tooltip_text=unavailable+"\n\n"+String(prepared.tooltip);preparation_note.add_theme_color_override("font_color",T.RED_TEXT)
 	preparation_box.tooltip_text=String(prepared.tooltip)
 func _label(parent:Node,text:String,size:int=15)->Label:
-	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));result.add_theme_color_override("font_color",T.INK);parent.add_child(result);return result
+	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",maxi(14,size));result.add_theme_color_override("font_color",T.INK);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
-	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.focus_mode=Control.FOCUS_NONE
+	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.focus_mode=Control.FOCUS_ALL
 	T.apply_button_style(result,false);result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.button_pressed_style());result.add_theme_stylebox_override("hover_pressed",T.button_pressed_style());result.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:result.add_theme_color_override(state,T.INK)
 	result.add_theme_color_override("font_disabled_color",T.DISABLED)

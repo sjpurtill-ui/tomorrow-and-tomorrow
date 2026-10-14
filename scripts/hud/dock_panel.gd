@@ -244,7 +244,7 @@ func rebuild_body()->void:
 	var paper:=Folio.page_style()
 	var surface:=get_node_or_null("FolioPaper") as ColorRect
 	if surface and surface.material is ShaderMaterial:
-		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER if Tokens.color_mode=="dark" else Color("f2ebdc"))
+		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER)
 	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
 	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
 		add_theme_stylebox_override("panel",paper)
@@ -386,18 +386,22 @@ func _rebuild_kpis(kpis:Array)->void:
 		column.add_theme_constant_override("separation",4)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		tile.add_child(column)
-		column.add_child(Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06))
-		var value_row:=HBoxContainer.new()
+		var caption:=Tokens.make_label(String(kpi.get("label","")),12,Tokens.MUTED,0.06)
+		caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(caption)
+		var value_row:=VBoxContainer.new()
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
 		var value_label:=Tokens.make_label(String(kpi.get("value","")),28,Tokens.INK)
+		value_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		value_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		value_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 		if glance:
 			value_label.add_theme_font_override("font",Tokens.font("ui_strong"));value_label.add_theme_font_size_override("font_size",28)
 		value_row.add_child(value_label)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="" and not glance:
-			var delta:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
+			var delta:=Tokens.make_label(String(kpi.delta),14,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
+			delta.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			delta.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			value_row.add_child(delta)
 			preload("res://scripts/hud/live_value_binding.gd").attach(delta,"text",kpi.get("live_delta"))
@@ -415,17 +419,17 @@ func _rebuild_kpis(kpis:Array)->void:
 			column.add_child(split)
 		# A glance tile says its few words under the bar.
 		if glance and String(kpi.get("delta",""))!="":
-			var words:=Tokens.make_label(String(kpi.delta),12,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
-			words.name="KpiWords";words.clip_text=true;words.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			var words:=Tokens.make_label(String(kpi.delta),14,Tokens.text_for(kpi.get("delta_color",Tokens.MUTED)))
+			words.name="KpiWords";words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			column.add_child(words)
 		# What the number means is written on the tile, not hidden in a tooltip.
 		var tip:=String(kpi.get("tip",""))
 		if tip!="" and not glance:
-			var note:=Tokens.make_label(tip,12,Tokens.TEXT_DIM)
+			var note:=Tokens.make_label(tip,14,Tokens.TEXT_DIM)
 			note.name="KpiNote"
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			note.custom_minimum_size.x=0
-			note.max_lines_visible=2
+			note.max_lines_visible=-1
 			column.add_child(note)
 	_kpi_columns()
 

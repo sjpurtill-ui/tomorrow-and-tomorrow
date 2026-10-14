@@ -233,6 +233,8 @@ var filter:="all"
 var show_tallies:=false
 ## Lines listed (PAGE more each "Earlier years").
 var shown:=PAGE
+var count_toggle:Button
+var show_count:=false
 var hero:BoxContainer
 var count:YearCount
 var count_caption:Label
@@ -256,31 +258,42 @@ func setup(block:Dictionary)->void:
 	intro=T.make_label(_intro_text(),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;intro.visible=false;add_child(intro)
 	# Two columns: the count, its key and the chosen year's figures on the
 	# left; the year's label, the filters and what is told on the right.
-	hero=HBoxContainer.new();hero.name="Hero";hero.add_theme_constant_override("separation",18);add_child(hero)
+	count_toggle=Button.new();count_toggle.name="ExploreYears";count_toggle.text="Explore the count of years  ▸";T.apply_button_style(count_toggle);add_child(count_toggle)
+	count_toggle.pressed.connect(func()->void:show_count=not show_count;_layout())
+	hero=BoxContainer.new();hero.name="Hero";hero.add_theme_constant_override("separation",24);add_child(hero)
 	var left:=VBoxContainer.new();left.name="Count";left.add_theme_constant_override("separation",6);left.custom_minimum_size.x=COUNT_SIDE;left.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;hero.add_child(left)
 	count=YearCount.new();count.name="YearCount";count.custom_minimum_size=Vector2(COUNT_SIDE,COUNT_SIDE);count.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;count.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;left.add_child(count)
 	count.picked.connect(func(index:int)->void:_choose(int((years[index] as Dictionary).get("n",-1))))
 	count.hovered.connect(_on_count_hover)
-	count_caption=T.make_label("",12,T.INK);count_caption.name="CountCaption";count_caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	count_caption=T.make_label("",14,T.INK);count_caption.name="CountCaption";count_caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	count_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;count_caption.custom_minimum_size.x=COUNT_SIDE;left.add_child(count_caption)
 	_legend(left)
 	facts=VBoxContainer.new();facts.name="YearFigures";facts.add_theme_constant_override("separation",6);left.add_child(facts)
-	var right:=VBoxContainer.new();right.name="Told";right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",8);hero.add_child(right)
+	var right:=VBoxContainer.new();right.name="Told";right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",16);hero.add_child(right)
 	folio=facts
 	var bar:=HBoxContainer.new();bar.name="Filters";bar.add_theme_constant_override("separation",8);right.add_child(bar)
 	chips=HFlowContainer.new();chips.size_flags_horizontal=Control.SIZE_EXPAND_FILL;chips.add_theme_constant_override("h_separation",4);chips.add_theme_constant_override("v_separation",4);bar.add_child(chips)
 	tallies_check=CheckBox.new();tallies_check.name="ShowTallies"
 	tallies_check.text=_tallies_text();tallies_check.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	tallies_check.add_theme_font_size_override("font_size",12);tallies_check.add_theme_color_override("font_color",T.TEXT_SOFT)
+	tallies_check.custom_minimum_size.y=40;tallies_check.add_theme_font_size_override("font_size",14);tallies_check.add_theme_color_override("font_color",T.TEXT_SOFT)
 	tallies_check.button_pressed=show_tallies
 	tallies_check.toggled.connect(func(on:bool)->void:show_tallies=on;_render_list())
 	chips.add_child(tallies_check)
-	list=VBoxContainer.new();list.name="Years";list.add_theme_constant_override("separation",0);right.add_child(list)
+	list=VBoxContainer.new();list.name="Years";list.add_theme_constant_override("separation",12);right.add_child(list)
 	# Capture only: "--capture-telling" opens the chosen year's newest telling.
 	if "--capture-telling" in OS.get_cmdline_user_args() and _chosen_index()>=0:
 		var told:=_year_lines(years[_chosen_index()])
 		if not told.is_empty():open_key=String((told[0] as Dictionary).get("key",""))
 	_fill()
+	resized.connect(_layout);_layout()
+
+func _layout()->void:
+	if hero==null:return
+	var narrow:=size.x<700.0
+	hero.vertical=narrow
+	count_toggle.visible=narrow
+	count_toggle.text="Explore the count of years  "+("▾" if show_count else "▸")
+	hero.get_node("Count").visible=not narrow or show_count
 
 
 ## The count's key: a picture for a named year, a bead for trouble or
@@ -290,7 +303,7 @@ func _legend(parent:Node)->void:
 	for spec:Array in [["named","named year"],["bead","trouble, learning"],["quiet","quiet year"],["now","this year"]]:
 		var item:=HBoxContainer.new();item.add_theme_constant_override("separation",4);grid.add_child(item)
 		item.add_child(LegendMark.new(String(spec[0])))
-		var words:=T.make_label(String(spec[1]),11,T.TEXT_SOFT);words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;item.add_child(words)
+		var words:=T.make_label(String(spec[1]),14,T.TEXT_SOFT);words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;item.add_child(words)
 
 
 func _voice()->Dictionary:
@@ -343,15 +356,15 @@ func _make_list_print()->Array:
 
 ## Kept across a live refresh (see view_state.gd).
 func view_state()->Dictionary:
-	return {"selected":selected,"open":open_key,"filter":filter,"tallies":show_tallies,"shown":shown}
+	return {"selected":selected,"open":open_key,"filter":filter,"tallies":show_tallies,"shown":shown,"count":show_count}
 
 
 func restore_view_state(state:Dictionary)->void:
 	var wanted:={"selected":int(state.get("selected",-1)),"open":String(state.get("open","")),"filter":String(state.get("filter","all")),
-		"tallies":bool(state.get("tallies",false)),"shown":int(state.get("shown",PAGE))}
+		"tallies":bool(state.get("tallies",false)),"shown":int(state.get("shown",PAGE)),"count":bool(state.get("count",false))}
 	if wanted==view_state():return
 	selected=int(wanted.selected);open_key=String(wanted.open);filter=String(wanted.filter)
-	show_tallies=bool(wanted.tallies);shown=int(wanted.shown)
+	show_tallies=bool(wanted.tallies);shown=int(wanted.shown);show_count=bool(wanted.count);_layout()
 	if tallies_check!=null:tallies_check.set_pressed_no_signal(show_tallies)
 	_fill()
 
@@ -425,7 +438,7 @@ func _folio_head(parent:Node,year:Dictionary,index:int)->void:
 	var medal:=TextureRect.new();medal.name="Mark";medal.custom_minimum_size=Vector2(30,30);medal.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	medal.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;medal.texture=Page.mark_texture(String(year.get("glyph","quiet")),96);head.add_child(medal)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);head.add_child(words)
-	var kicker:=T.make_label(("YEAR %d" % int(year.get("n",0)))+("" if bool(year.get("closed",true)) else " · SO FAR"),15,T.GOLD,0.12)
+	var kicker:=T.make_label(("Year %d" % int(year.get("n",0)))+("" if bool(year.get("closed",true)) else " · so far"),24,T.INK)
 	kicker.add_theme_font_override("font",T.font("display"));kicker.name="Kicker";words.add_child(kicker)
 	var name:=String(year.get("name",""))
 	if name!="" or bool(year.get("closed",true)):
@@ -434,7 +447,7 @@ func _folio_head(parent:Node,year:Dictionary,index:int)->void:
 	var nav:=HBoxContainer.new();nav.add_theme_constant_override("separation",2);nav.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;head.add_child(nav)
 	for step in [[-1,"‹","The year before"],[1,"›","The year after"]]:
 		var go:=Button.new();go.text=String(step[1]);go.flat=true;go.tooltip_text=String(step[2]);go.name="Older" if int(step[0])<0 else "Newer"
-		go.add_theme_font_size_override("font_size",22);go.add_theme_color_override("font_color",T.GOLD);go.custom_minimum_size=Vector2(30,30)
+		T.apply_button_style(go);go.add_theme_font_size_override("font_size",22);go.add_theme_color_override("font_color",T.GOLD);go.custom_minimum_size=Vector2(40,40)
 		var target:=index+int(step[0])
 		go.disabled=target<0 or target>=years.size()
 		if not go.disabled:go.pressed.connect(_choose.bind(int((years[target] as Dictionary).get("n",-1))))
@@ -477,13 +490,13 @@ func _folio_facts(year:Dictionary)->void:
 
 
 func _chip(row:Node,glyph:String,text:String)->void:
-	var chip:=PanelContainer.new();chip.name="Fact";chip.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK,T.RULE,1,10,0))
+	var chip:=PanelContainer.new();chip.name="Fact";chip.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,Color.TRANSPARENT,0,4,0))
 	var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_left",3);margin.add_theme_constant_override("margin_right",9)
 	margin.add_theme_constant_override("margin_top",2);margin.add_theme_constant_override("margin_bottom",2);chip.add_child(margin)
 	var inner:=HBoxContainer.new();inner.add_theme_constant_override("separation",5);margin.add_child(inner)
 	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(20,20);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	mark.texture=Page.mark_texture(glyph,40);inner.add_child(mark)
-	var label:=T.make_label(text,12,T.BODY);label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;inner.add_child(label)
+	var label:=T.make_label(text,14,T.BODY);label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;inner.add_child(label)
 	row.add_child(chip)
 
 
@@ -504,7 +517,7 @@ func _folio_telling(parent:Node,year:Dictionary)->void:
 	var key:="telling:%d" % int(year.get("n",0))
 	var toggle:=Button.new();toggle.name="Telling";toggle.flat=true;toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	toggle.text=("▾ " if open_key==key else "▸ ")+("The year as it is told at the fire" if era=="tally" else "The year as the keepers wrote it")
-	toggle.add_theme_color_override("font_color",T.GOLD);toggle.add_theme_font_size_override("font_size",13)
+	T.apply_button_style(toggle);toggle.add_theme_color_override("font_color",T.GOLD_TEXT);toggle.add_theme_font_size_override("font_size",14)
 	toggle.pressed.connect(func()->void:open_key="" if open_key==key else key;_render_list())
 	parent.add_child(toggle)
 	if open_key==key:
@@ -582,13 +595,13 @@ func _render_chips()->void:
 		var n:=int(counts.get(id,0))
 		if n==0 and id!="all":continue
 		var on:=id==filter
-		var chip:=Button.new();chip.name="Filter_"+id;chip.focus_mode=Control.FOCUS_NONE;chip.text="%s  %s" % [String(spec[1]),EraWords.grouped(n)]
+		var chip:=Button.new();chip.name="Filter_"+id;chip.focus_mode=Control.FOCUS_ALL;chip.text="%s  %s" % [String(spec[1]),EraWords.grouped(n)]
 		chip.add_theme_constant_override("icon_max_width",16);chip.icon=Page.mark_texture(String(spec[2]),32)
-		chip.add_theme_font_size_override("font_size",12);chip.custom_minimum_size.y=26
+		T.apply_button_style(chip);chip.add_theme_font_size_override("font_size",14);chip.custom_minimum_size.y=40
 		chip.add_theme_color_override("font_color",T.INK if on else T.BODY);chip.add_theme_color_override("font_hover_color",T.INK)
-		var face:=T.flat(T.ACTIVE_BG if on else Color.TRANSPARENT,T.GOLD if on else T.BORDER_SOFT,1,2,6)
+		var face:=T.flat(T.ACTIVE_BG if on else Color.TRANSPARENT,T.GOLD,0,4,8)
 		if on:face.border_width_bottom=3
-		chip.add_theme_stylebox_override("normal",face);chip.add_theme_stylebox_override("pressed",face);chip.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,6))
+		chip.add_theme_stylebox_override("normal",face);chip.add_theme_stylebox_override("pressed",face);chip.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color.TRANSPARENT,0,4,8))
 		chip.pressed.connect(func()->void:filter=id;open_key="";shown=PAGE;_render_list())
 		chips.add_child(chip)
 	# Back from one year to every year.
@@ -624,7 +637,7 @@ func _render_list()->void:
 		if listed>=shown:more=true;break
 		if i==chosen:
 			# The chosen year's one label, its steps either side and its telling.
-			var head:=PanelContainer.new();head.name="Year%d" % int(year.get("n",0));head.add_theme_stylebox_override("panel",T.flat(T.GOLD_WASH,T.GOLD,1,3,6));list.add_child(head)
+			var head:=PanelContainer.new();head.name="Year%d" % int(year.get("n",0));head.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,Color.TRANSPARENT,0,8,16));list.add_child(head)
 			var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);head.add_child(stack)
 			_folio_head(stack,year,i)
 			_folio_telling(stack,year)
@@ -636,7 +649,7 @@ func _render_list()->void:
 			var none:=T.make_label("Nothing of this kind told this year." if filter!="all" else "Nothing told yet this year.",12,T.TEXT_SOFT);none.custom_minimum_size.y=24;list.add_child(none)
 	if more:
 		var earlier:=Button.new();earlier.name="EarlierYears";earlier.flat=true;earlier.text="Earlier years";earlier.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		earlier.add_theme_color_override("font_color",T.GOLD)
+		T.apply_button_style(earlier);earlier.add_theme_color_override("font_color",T.GOLD_TEXT)
 		earlier.pressed.connect(func()->void:shown+=PAGE;_render_list())
 		list.add_child(earlier)
 	_list_print=_make_list_print()
@@ -645,14 +658,14 @@ func _render_list()->void:
 ## A year's line in the list: its number, its name (or its plain words) and
 ## its change in people; choosing it opens the year above.
 func _year_row(year:Dictionary,chosen:bool,told:int)->Button:
-	var row:=Button.new();row.name="Year%d" % int(year.get("n",0));row.custom_minimum_size=Vector2(0,26);row.flat=true;row.focus_mode=Control.FOCUS_NONE
+	var row:=Button.new();row.name="Year%d" % int(year.get("n",0));row.custom_minimum_size=Vector2(0,48);row.flat=true;row.focus_mode=Control.FOCUS_ALL;T.apply_button_style(row)
 	row.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color(0,0,0,0),0,2,0))
 	var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);line.offset_left=2;line.offset_right=-4
 	line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",10)
 	# The shared table's group line: the year and its name in small gold capitals.
 	var name:=String(year.get("name",""))
-	var words:=("YEAR %d · " % int(year.get("n",0)))+(Page._cap(name) if name!="" else Page._cap(Model.unnamed_words(year))).to_upper()
-	var label:=T.make_label(words,11,T.GOLD_TEXT,0.06);label.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
+	var words:=("Year %d · " % int(year.get("n",0)))+(Page._cap(name) if name!="" else Page._cap(Model.unnamed_words(year)))
+	var label:=T.make_label(words,18,T.INK);label.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_FILL;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(label)
 	var change:Variant=year.get("dpop")
 	if change!=null and int(change)!=0:
@@ -697,10 +710,10 @@ static func tile_caption(entry:Dictionary)->String:
 
 
 func _reading(parent:Node,entry:Dictionary)->void:
-	var pane:=MarginContainer.new();pane.name="Reading";pane.add_theme_constant_override("margin_left",80);pane.add_theme_constant_override("margin_right",8);pane.add_theme_constant_override("margin_bottom",6);parent.add_child(pane)
-	var copy:=VBoxContainer.new();copy.add_theme_constant_override("separation",4);pane.add_child(copy)
+	var pane:=MarginContainer.new();pane.name="Reading";pane.add_theme_constant_override("margin_left",28);pane.add_theme_constant_override("margin_right",8);pane.add_theme_constant_override("margin_bottom",6);parent.add_child(pane)
+	var copy:=VBoxContainer.new();copy.add_theme_constant_override("separation",12);pane.add_child(copy)
 	if String(entry.get("text",""))!="":
-		var text:=T.make_label(String(entry.text),13,T.BODY);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.add_theme_font_override("font",T.voice_font());text.add_theme_font_size_override("font_size",15);copy.add_child(text)
+		var text:=T.make_label(String(entry.text),13,T.BODY);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.add_theme_font_override("font",T.voice_font());text.add_theme_font_size_override("font_size",16);copy.add_child(text)
 	_battle_links(copy,entry)
 	_court_link(copy,entry)
 
@@ -730,7 +743,7 @@ func _battle_links(copy:VBoxContainer,entry:Dictionary)->void:
 	var row:=HBoxContainer.new();row.name="BattleLinks";row.add_theme_constant_override("separation",12);copy.add_child(row)
 	for link in ([["Read the report","report"],["Watch the battle","watch"]] if reported else [["Watch the battle","watch"]]):
 		var button:=Button.new();button.text=String(link[0]);button.flat=true;button.name=String(link[1]).capitalize()
-		button.add_theme_color_override("font_color",T.GOLD);button.add_theme_font_size_override("font_size",13)
+		T.apply_button_style(button);button.add_theme_color_override("font_color",T.GOLD_TEXT);button.add_theme_font_size_override("font_size",14)
 		button.pressed.connect(_open_battle.bind(String(link[1]),seed))
 		row.add_child(button)
 
@@ -743,13 +756,13 @@ func _court_link(copy:VBoxContainer,entry:Dictionary)->void:
 		var id:=String(action.get("prisoner_id",""))
 		if not preload("res://scripts/captured_agents.gd").is_held(id):return
 		var bring:=Button.new();bring.name="BringPrisoner";bring.text="Bring them before you";bring.flat=true;bring.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		bring.add_theme_color_override("font_color",T.GOLD);bring.add_theme_font_size_override("font_size",13)
+		T.apply_button_style(bring);bring.add_theme_color_override("font_color",T.GOLD_TEXT);bring.add_theme_font_size_override("font_size",14)
 		bring.pressed.connect(func()->void:preload("res://scripts/audience_director.gd").open_court_for({"prisoner_id":id}))
 		copy.add_child(bring)
 		return
 	if String(action.get("kind",""))!="court":return
 	var go:=Button.new();go.name="ToCourt";go.text="Go to the court";go.flat=true;go.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	go.add_theme_color_override("font_color",T.GOLD);go.add_theme_font_size_override("font_size",13)
+	T.apply_button_style(go);go.add_theme_color_override("font_color",T.GOLD_TEXT);go.add_theme_font_size_override("font_size",14)
 	var focus:Dictionary=action.get("focus",{}) if action.get("focus") is Dictionary else {}
 	go.pressed.connect(func()->void:preload("res://scripts/audience_director.gd").open_court_for(focus))
 	copy.add_child(go)

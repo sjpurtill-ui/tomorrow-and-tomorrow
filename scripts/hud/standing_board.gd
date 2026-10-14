@@ -196,6 +196,7 @@ var name_label:Label
 var posture_label:Label
 var renown_label:Label
 var strength_list:VBoxContainer
+var strength_toggle:Button
 var compare_row:HFlowContainer
 ## The rose's one-line legend, at the head of the compare line.
 var legend_label:Control
@@ -209,7 +210,7 @@ var home:HFlowContainer
 func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",8)
+	add_theme_constant_override("separation",16)
 	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",0);add_child(dangers)
 	_build_hero()
 	peoples=UI.sheet(self,"Peoples")
@@ -230,6 +231,9 @@ func update_block(block:Dictionary)->bool:
 
 func apply(block:Dictionary)->void:
 	data=block
+	var view:Dictionary=block.get("view_state",{})
+	strength_list.visible=bool(view.get("strength_details",false))
+	strength_toggle.text="Exact strengths and causes  "+("▾" if strength_list.visible else "▸")
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
 	var renown:Dictionary=block.get("renown",{})
@@ -297,38 +301,46 @@ static func _tone_color(tone:String)->Color:
 # ----------------------------------------------------------------- the hero
 
 func _build_hero()->void:
-	var column:=UI.sheet(self,"WhatWeAre",14.0)
-	column.add_theme_constant_override("separation",6)
+	var column:=UI.sheet(self,"WhatWeAre",20.0)
+	column.add_theme_constant_override("separation",16)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);column.add_child(top)
 	seal=TextureRect.new();seal.name="Seal"
 	seal.custom_minimum_size=Vector2(34,34);seal.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	seal.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	top.add_child(seal)
 	name_label=Label.new();name_label.name="PeopleName"
-	name_label.add_theme_font_override("font",T.voice_font(false));name_label.add_theme_font_size_override("font_size",22)
+	name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.add_theme_font_size_override("font_size",32)
 	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	top.add_child(name_label)
 	posture_label=Label.new();posture_label.name="Posture"
-	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",14)
+	posture_label.add_theme_font_override("font",T.font("ui"));posture_label.add_theme_font_size_override("font_size",18)
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	posture_label.mouse_filter=Control.MOUSE_FILTER_PASS
 	posture_label.tooltip_text="Each row: the strength, a bar against the peoples of our age (the tick is a typical people), its value, its change in a year and its biggest cause."
 	# The words our shape makes of us head the nine rows (see _fill_strengths).
-	UI.spacer(top)
-	renown_label=UI.label(top,"",12,T.INK_MUTED);renown_label.name="Renown"
+	renown_label=UI.label(column,"",14,T.INK_MUTED);renown_label.name="Renown"
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; draw from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
-	var body:=HBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",12);column.add_child(body)
+	column.add_child(posture_label)
+	var body:=VBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",16);column.add_child(body)
 	rose=Rose.new();rose.name="Rose"
-	rose.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	rose.custom_minimum_size=Vector2(310,310)
+	rose.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	rose.picked.connect(_raise)
 	body.add_child(rose)
 	strength_list=VBoxContainer.new();strength_list.name="StrengthList"
 	strength_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strength_list.add_theme_constant_override("separation",0)
-	body.add_child(strength_list)
 	compare_row=HFlowContainer.new();compare_row.name="Compare"
 	compare_row.add_theme_constant_override("h_separation",6);compare_row.add_theme_constant_override("v_separation",4)
 	column.add_child(compare_row)
+	strength_toggle=UI.verb(column,"Exact strengths and causes  ▸",func()->void:
+		strength_list.visible=not strength_list.visible
+		var state:Dictionary=data.get("view_state",{})
+		state["strength_details"]=strength_list.visible;data["view_state"]=state
+		strength_toggle.text="Exact strengths and causes  "+("▾" if strength_list.visible else "▸"))
+	strength_toggle.name="ShowStrengthDetails";strength_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	column.add_child(strength_list)
 	var legend:=_swatches()
 	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
 	legend_label=legend
@@ -379,10 +391,7 @@ func _fill_strengths()->void:
 	var items:Array=data.get("strengths",[])
 	var year_ago:Dictionary=data.get("year_ago",{})
 	rose.configure(items,year_ago)
-	if posture_label.get_parent()!=null:posture_label.get_parent().remove_child(posture_label)
 	UI.clear(strength_list)
-	posture_label.name="Header"
-	strength_list.add_child(posture_label)
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var id:=String(item.id)

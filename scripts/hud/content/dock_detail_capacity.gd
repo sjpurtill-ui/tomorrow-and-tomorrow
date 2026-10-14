@@ -25,7 +25,9 @@ func tab(_sub:int)->Dictionary:
 	var now:=float(ledger.value)*100.0
 	var recorded:=History.months(dynamic_id)
 	var told:=History.changes(dynamic_id,6)
-	return {"kpis":_kpis(now,recorded),"blocks":[_chart(recorded,told,model),_why(told),_made_of(ledger,model)]}
+	var readings:=_kpis(now,recorded)
+	for reading:Dictionary in readings:reading["glance"]=true
+	return {"kpis":readings,"blocks":[{"type":"text","text":_definition()},_made_of(ledger,model),_chart(recorded,told,model),_why(told)]}
 
 func _kpis(now:float,recorded:Array[Dictionary])->Array:
 	var change:=History.change_over(dynamic_id,365)

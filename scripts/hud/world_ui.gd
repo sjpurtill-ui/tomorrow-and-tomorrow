@@ -8,34 +8,36 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_H:=22.0
+const ROW_H:=40.0
 
 ## A raised paper sheet; returns its inner column.
-static func sheet(parent:Node,node_name:String,pad:float=12.0)->VBoxContainer:
+static func sheet(parent:Node,node_name:String,pad:float=20.0)->VBoxContainer:
 	var frame:=PanelContainer.new();frame.name=node_name
 	# The shared ruled panel (dense_blocks.gd render_frame).
-	var style:=T.flat(Color(T.PAPER_RAISED,0.5),T.RULE,1,4)
-	style.set_content_margin_all(minf(pad,10.0))
+	var style:=T.flat(T.PAPER_RAISED,Color.TRANSPARENT,0,T.RADIUS_CARD)
+	style.set_content_margin_all(pad)
 	frame.add_theme_stylebox_override("panel",style)
 	frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL;frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	parent.add_child(frame)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);frame.add_child(column)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);frame.add_child(column)
 	return column
 
 ## "UNREAD TELLINGS ....... 62" : a kicker and a right-hand count or note.
 static func heading(parent:Node,text:String,note:String="",note_color:Color=Color(0,0,0,0))->HBoxContainer:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);parent.add_child(row)
-	var title:=T.make_label(text.to_upper(),11,T.GOLD_TEXT,0.06);title.name="Heading";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var title:=T.make_label(T.sentence_case(text),22,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.name="Heading";title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	row.add_child(title)
 	if note!="":
-		var aside:=T.make_label(note,12,note_color if note_color.a>0.0 else T.INK_MUTED);aside.name="Note"
+		var aside:=T.make_label(note,14,note_color if note_color.a>0.0 else T.INK_MUTED);aside.name="Note"
+		aside.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;aside.custom_minimum_size.x=64;aside.size_flags_horizontal=Control.SIZE_EXPAND_FILL;aside.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(aside)
 	return row
 
-static func label(parent:Node,text:String,size:int=13,color:Color=Color(0,0,0,0),strong:bool=false,expand:bool=false)->Label:
+static func label(parent:Node,text:String,size:int=16,color:Color=Color(0,0,0,0),strong:bool=false,expand:bool=false)->Label:
 	var node:=Label.new();node.text=text;node.mouse_filter=Control.MOUSE_FILTER_PASS
 	node.add_theme_font_override("font",T.font("ui_strong" if strong else "ui"))
-	node.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size))
+	node.add_theme_font_size_override("font_size",maxi(14,size))
 	node.add_theme_color_override("font_color",color if color.a>0.0 else T.BODY)
 	node.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	if expand:
@@ -68,13 +70,16 @@ static func hot_row(parent:Node,node_name:String,on_click:Callable,tip:String=""
 	panel.tooltip_text=tip
 	parent.add_child(panel)
 	if on_click.is_valid():
+		panel.focus_mode=Control.FOCUS_ALL
 		panel.mouse_filter=Control.MOUSE_FILTER_STOP
 		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 		panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",lit))
 		panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",calm))
+		panel.focus_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",lit))
+		panel.focus_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",calm))
 		panel.gui_input.connect(func(event:InputEvent)->void:
 			var click:=event as InputEventMouseButton
-			if click!=null and click.pressed and click.button_index==MOUSE_BUTTON_LEFT:
+			if (click!=null and click.pressed and click.button_index==MOUSE_BUTTON_LEFT) or event.is_action_pressed("ui_accept"):
 				panel.accept_event();on_click.call())
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);row.custom_minimum_size.y=ROW_H
 	row.mouse_filter=Control.MOUSE_FILTER_PASS
@@ -85,22 +90,25 @@ static func hot_row(parent:Node,node_name:String,on_click:Callable,tip:String=""
 ## (dense_blocks.gd), so every category's buttons look the same.
 static func verb(parent:Node,text:String,on_press:Callable,tip:String="",_primary:bool=false)->Button:
 	var b:=Dense.verb(text,on_press,tip)
+	T.apply_button_style(b,_primary)
+	b.focus_mode=Control.FOCUS_ALL
 	if parent!=null:parent.add_child(b)
 	return b
 
 ## A choice chip; a lit one is the choice in force.
 static func chip(parent:Node,text:String,lit:bool,on_press:Callable,tip:String="")->Button:
-	var b:=Button.new();b.text=text;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_NONE;b.toggle_mode=true
+	var b:=Button.new();b.text=text;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_ALL;b.toggle_mode=true
+	T.apply_button_style(b)
 	b.set_pressed_no_signal(lit)
-	b.custom_minimum_size=Vector2(0,24);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	b.add_theme_font_override("font",T.font("ui_strong" if lit else "ui"));b.add_theme_font_size_override("font_size",12)
+	b.custom_minimum_size=Vector2(0,40);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	b.add_theme_font_override("font",T.font("ui_strong" if lit else "ui"));b.add_theme_font_size_override("font_size",14)
 	for key in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:b.add_theme_color_override(key,T.INK)
-	var off:=T.flat(Color(0,0,0,0),T.RULE,1,10);off.content_margin_left=7;off.content_margin_right=7
-	var on:=T.flat(T.GOLD_WASH,T.GOLD,1,10);on.content_margin_left=7;on.content_margin_right=7
-	var hover:=T.flat(T.HOVER_BG,T.RULE_STRONG,1,10);hover.content_margin_left=7;hover.content_margin_right=7
+	var off:=T.flat(Color.TRANSPARENT,Color.TRANSPARENT,0,T.RADIUS_CONTROL,8)
+	var on:=T.flat(T.ACTIVE_BG,T.ACTION,0,T.RADIUS_CONTROL,8);on.border_width_bottom=2
+	var hover:=T.flat(T.HOVER_BG,Color.TRANSPARENT,0,T.RADIUS_CONTROL,8)
 	b.add_theme_stylebox_override("normal",off);b.add_theme_stylebox_override("hover",hover)
 	b.add_theme_stylebox_override("pressed",on);b.add_theme_stylebox_override("hover_pressed",on)
-	b.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	b.add_theme_stylebox_override("focus",T.gold_outline_style())
 	if on_press.is_valid():b.pressed.connect(on_press)
 	if parent!=null:parent.add_child(b)
 	return b

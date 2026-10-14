@@ -40,7 +40,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 		container.add_child(section)
 		# A frame draws its own title line (dense_blocks.gd render_frame).
 		if String(block.get("heading",""))!="" and String(block.get("type",""))!="frame":
-			var heading_row:=HBoxContainer.new()
+			var heading_row:=VBoxContainer.new();heading_row.add_theme_constant_override("separation",4)
 			section.add_child(heading_row)
 			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),22,Tokens.INK)
 			heading.add_theme_font_override("font",Tokens.font("ui_strong"))
@@ -52,8 +52,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			heading.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			heading_row.add_child(heading)
 			if String(block.get("note",""))!="":
-				var note:=Tokens.make_label(String(block.note),12,Tokens.MUTED)
-				note.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+				var note:=Tokens.make_label(String(block.note),14,Tokens.MUTED)
+				note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
 			"known_world":
@@ -170,7 +170,7 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 	frame.add_child(column)
 	var heading:=String(block.get("kind","discovery")).capitalize()
 	if block.has("distance_km"): heading+=" · %s km from home" % str(int(block.distance_km))
-	column.add_child(Tokens.make_label(heading,12,Tokens.text_for(accent),0.06))
+	column.add_child(Tokens.make_label(heading,14,Tokens.text_for(accent),0.06))
 	var discovery_id:=String(block.get("discovery_id",""))
 	if discovery_id!="":
 		var definition:=DiscoverySystem.discovery_definition(discovery_id)
@@ -185,7 +185,7 @@ static func _render_discovery(parent:VBoxContainer,block:Dictionary)->void:
 		var text:=String(block.get(key,""))
 		if text.is_empty(): continue
 		if key=="consequence": text="What this opens up: "+text
-		var label:=Tokens.make_label(text,13 if key=="description" else 12,Tokens.BODY if key=="description" else Tokens.TEXT_SOFT)
+		var label:=Tokens.make_label(text,16 if key=="description" else 14,Tokens.BODY if key=="description" else Tokens.TEXT_SOFT)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		column.add_child(label)
 
@@ -211,14 +211,14 @@ static func _render_line_chart(parent:VBoxContainer,block:Dictionary)->void:
 			var pair:=HBoxContainer.new()
 			pair.add_theme_constant_override("separation",5)
 			pair.add_child(HealthHistoryChart.Glyph.new(String(entry.get("kind","")),float(entry.get("delta",0.0))))
-			pair.add_child(Tokens.make_label(String(entry.get("text","")),12,Tokens.MUTED))
+			pair.add_child(Tokens.make_label(String(entry.get("text","")),14,Tokens.MUTED))
 			keyed.add_child(pair)
 		return
 	var legend:=HBoxContainer.new()
 	legend.add_theme_constant_override("separation",14)
 	parent.add_child(legend)
-	legend.add_child(Tokens.make_label("◆ a health discovery",12,Tokens.GOLD_TEXT))
-	legend.add_child(Tokens.make_label("● living conditions changed",12,Tokens.MUTED))
+	legend.add_child(Tokens.make_label("◆ a health discovery",14,Tokens.GOLD_TEXT))
+	legend.add_child(Tokens.make_label("● living conditions changed",14,Tokens.MUTED))
 
 
 static func _render_segments(parent:VBoxContainer,block:Dictionary)->void:
@@ -248,18 +248,18 @@ static func _render_segments(parent:VBoxContainer,block:Dictionary)->void:
 		key.add_theme_constant_override("separation",0)
 		key.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		captions.add_child(key)
-		var count:=Tokens.make_label(String(item.get("value","")),12,Tokens.INK)
+		var count:=Tokens.make_label(String(item.get("value","")),14,Tokens.INK)
 		count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		count.clip_text=true
 		count.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		key.add_child(count)
-		var caption:=Tokens.make_label(String(item.get("label","")),12,Tokens.MUTED)
+		var caption:=Tokens.make_label(String(item.get("label","")),14,Tokens.MUTED)
 		caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		caption.clip_text=true
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		key.add_child(caption)
 	if String(block.get("legend",""))!="":
-		var legend:=Tokens.make_label(String(block.legend),12,Tokens.MUTED)
+		var legend:=Tokens.make_label(String(block.legend),14,Tokens.MUTED)
 		legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		parent.add_child(legend)
 
@@ -296,15 +296,15 @@ static func _render_alloc(parent:VBoxContainer,block:Dictionary)->void:
 		swatch.custom_minimum_size=Vector2(10,10)
 		swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		row.add_child(swatch)
-		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY)
+		var name_label:=Tokens.make_label(String(item.get("name","")),16,Tokens.BODY)
 		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		name_label.tooltip_text=String(item.get("tip",""))
 		row.add_child(name_label)
 		if String(item.get("pct",""))!="":
-			var pct_label:=Tokens.make_label(String(item.pct),12,Tokens.MUTED)
+			var pct_label:=Tokens.make_label(String(item.pct),14,Tokens.MUTED)
 			row.add_child(pct_label)
 			Live.attach(pct_label,"text",item.get("live_pct"))
-		var count_label:=Tokens.make_label(String(item.count_text) if item.has("count_text") else str(int(item.get("count",0))),13,Tokens.INK)
+		var count_label:=Tokens.make_label(String(item.count_text) if item.has("count_text") else str(int(item.get("count",0))),14,Tokens.INK)
 		count_label.custom_minimum_size=Vector2(40,0)
 		count_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(count_label)
@@ -318,7 +318,7 @@ static func _step_button(glyph:String,action:Variant,tip:String)->Button:
 	button.text=glyph
 	button.custom_minimum_size=Vector2(0,24)
 	button.tooltip_text=tip
-	button.add_theme_font_size_override("font_size",12)
+	button.add_theme_font_size_override("font_size",14)
 	button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.BUTTON_BG,Tokens.BORDER_2,1,3))
 	button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.BUTTON_BG,Tokens.GOLD,1,3))
@@ -355,9 +355,9 @@ static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
 		row.add_theme_constant_override("separation",10)
 		row.tooltip_text=String(item.get("tip",""))
 		parent.add_child(row)
-		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
-		name_label.custom_minimum_size=Vector2(130,0)
-		name_label.clip_text=true
+		var name_label:=Tokens.make_label(String(item.get("name","")),16,Tokens.BODY_2)
+		name_label.custom_minimum_size=Vector2(180,0)
+		name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		row.add_child(name_label)
 		var track:=ColorRect.new()
 		track.color=Tokens.TRACK
@@ -371,7 +371,7 @@ static func _render_bars(parent:VBoxContainer,block:Dictionary)->void:
 		fill.anchor_bottom=1.0
 		fill.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		track.add_child(fill)
-		var value_label:=Tokens.make_label(String(item.get("value","")),12,Tokens.text_for(color))
+		var value_label:=Tokens.make_label(String(item.get("value","")),14,Tokens.text_for(color))
 		value_label.custom_minimum_size=Vector2(72,0)
 		value_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(value_label)
@@ -394,10 +394,10 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 		var column:=VBoxContainer.new()
 		column.add_theme_constant_override("separation",2)
 		tile.add_child(column)
-		column.add_child(Tokens.make_label(String(item.get("label","")),12,Tokens.MUTED,0.06))
+		column.add_child(Tokens.make_label(String(item.get("label","")),14,Tokens.MUTED,0.06))
 		column.add_child(Tokens.make_label(String(item.get("value","")),18,Tokens.INK))
 		if String(item.get("note",""))!="":
-			var note:=Tokens.make_label(String(item.note),12,Tokens.text_for(item.get("note_color",Tokens.MUTED)))
+			var note:=Tokens.make_label(String(item.note),14,Tokens.text_for(item.get("note_color",Tokens.MUTED)))
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			column.add_child(note)
 
@@ -432,7 +432,7 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		text_column.add_theme_constant_override("separation",1)
 		inner.add_child(text_column)
-		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.INK)
+		var name_label:=Tokens.make_label(String(item.get("name","")),16,Tokens.INK)
 		name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		text_column.add_child(name_label)
 		Live.attach(name_label,"text",item.get("live_name"))
@@ -442,12 +442,12 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 			text_column.add_child(sub_label)
 			Live.attach(sub_label,"text",item.get("live_sub"))
 		if String(item.get("detail",""))!="":
-			var detail_label:=Tokens.make_label(String(item.detail),12,Tokens.TEXT_SOFT)
+			var detail_label:=Tokens.make_label(String(item.detail),16,Tokens.TEXT_SOFT)
 			detail_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			text_column.add_child(detail_label)
 			Live.attach(detail_label,"text",item.get("live_detail"))
 		if String(item.get("value",""))!="":
-			var value_label:=Tokens.make_label(String(item.value),12,Tokens.text_for(item.get("value_color",Tokens.BODY_2)))
+			var value_label:=Tokens.make_label(String(item.value),14,Tokens.text_for(item.get("value_color",Tokens.BODY_2)))
 			value_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 			inner.add_child(value_label)
 			Live.attach(value_label,"text",item.get("live_value"))
@@ -490,7 +490,7 @@ static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:
 		var top:=HBoxContainer.new()
 		top.add_theme_constant_override("separation",6)
 		cell.add_child(top)
-		var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
+		var name_label:=Tokens.make_label(String(item.get("name","")),16,Tokens.BODY_2)
 		name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		name_label.tooltip_text=String(item.get("tip",""))
 		top.add_child(name_label)
@@ -498,8 +498,8 @@ static func _render_caps(parent:VBoxContainer,block:Dictionary)->void:
 		var trend:=String(item.get("trend","—"))
 		var trend_word:="rising" if trend in ["▲","↑","up"] else "falling" if trend in ["▼","↓","down"] else ""
 		if trend_word!="":
-			top.add_child(Tokens.make_label(trend_word,12,Tokens.GREEN_TEXT if trend_word=="rising" else Tokens.RED_TEXT))
-		var pct_label:=Tokens.make_label("%d%%" % roundi(pct),13,Tokens.text_for(color))
+			top.add_child(Tokens.make_label(trend_word,14,Tokens.GREEN_TEXT if trend_word=="rising" else Tokens.RED_TEXT))
+		var pct_label:=Tokens.make_label("%d%%" % roundi(pct),14,Tokens.text_for(color))
 		pct_label.custom_minimum_size=Vector2(34,0)
 		pct_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		top.add_child(pct_label)
@@ -536,7 +536,7 @@ static func _capacity_row(item:Dictionary)->Control:
 	var top:=HBoxContainer.new()
 	top.add_theme_constant_override("separation",8)
 	column.add_child(top)
-	var name_label:=Tokens.make_label(String(item.get("name","")),12,Tokens.BODY_2)
+	var name_label:=Tokens.make_label(String(item.get("name","")),16,Tokens.BODY_2)
 	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	top.add_child(name_label)
 	var history:Array=Array(item.get("history",[]))
@@ -554,7 +554,7 @@ static func _capacity_row(item:Dictionary)->Control:
 		change_label.custom_minimum_size=Vector2(52,0)
 		change_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		top.add_child(change_label)
-	var pct_label:=Tokens.make_label("%d%%" % roundi(pct),13,Tokens.text_for(color))
+	var pct_label:=Tokens.make_label("%d%%" % roundi(pct),14,Tokens.text_for(color))
 	pct_label.custom_minimum_size=Vector2(38,0)
 	pct_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	top.add_child(pct_label)
@@ -598,7 +598,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		var primary:=bool(item.get("primary",false))
 		var disabled:=bool(item.get("disabled",false))
 		var button:=Button.new()
-		button.custom_minimum_size=Vector2(0,38)
+		button.custom_minimum_size=Vector2(0,40)
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.disabled=disabled
 		button.tooltip_text=String(item.get("tip",""))
@@ -617,7 +617,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		column.add_theme_constant_override("separation",1)
 		column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		button.add_child(column)
-		column.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(38,column.get_combined_minimum_size().y+8))
+		column.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(40,column.get_combined_minimum_size().y+8))
 		if item.get("texture") is Texture2D:
 			var plate:=TextureRect.new();plate.texture=item.texture;plate.custom_minimum_size.y=160
 			plate.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;plate.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -651,7 +651,7 @@ static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 	var supplied:Texture2D=block.get("texture") as Texture2D
 	if supplied==null and (path=="" or not ResourceLoader.exists(path)):
 		if String(block.get("fallback",""))!="":
-			var fallback:=Tokens.make_label(String(block.fallback),12,Tokens.MUTED)
+			var fallback:=Tokens.make_label(String(block.fallback),14,Tokens.MUTED)
 			fallback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			parent.add_child(fallback)
 		return
@@ -666,7 +666,7 @@ static func _render_image(parent:VBoxContainer,block:Dictionary)->void:
 
 
 static func _render_text(parent:VBoxContainer,block:Dictionary)->void:
-	var body:=Tokens.make_label(String(block.get("text","")),12,Tokens.TEXT_SOFT)
+	var body:=Tokens.make_label(String(block.get("text","")),16,Tokens.TEXT_SOFT)
 	body.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	parent.add_child(body)
 	Live.attach(body,"text",block.get("live_text"))

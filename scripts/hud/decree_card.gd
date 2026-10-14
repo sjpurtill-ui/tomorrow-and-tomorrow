@@ -118,16 +118,17 @@ func _build()->void:
 	if folded:
 		add_theme_stylebox_override("panel",StyleBoxEmpty.new())
 		custom_minimum_size=Vector2(0,0)
-		_chip=Button.new();_chip.name="DecreeChip";_chip.focus_mode=Control.FOCUS_NONE
+		_chip=Button.new();_chip.name="DecreeChip";_chip.focus_mode=Control.FOCUS_ALL
 		_chip.text="Decreed:  "+_short(String(info.get("title","")),34)+"   ▸"
 		_chip.tooltip_text="Open what you decreed and what it does."
-		_chip.custom_minimum_size=Vector2(0,34)
+		_chip.custom_minimum_size=Vector2(0,40)
 		_chip.add_theme_font_size_override("font_size",14)
 		_chip.add_theme_color_override("font_color",Tokens.GOLD_TEXT)
 		_chip.add_theme_color_override("font_hover_color",Tokens.INK)
 		_chip.add_theme_stylebox_override("normal",_chip_style(false))
 		_chip.add_theme_stylebox_override("hover",_chip_style(true))
 		_chip.add_theme_stylebox_override("pressed",_chip_style(true))
+		_chip.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 		_chip.pressed.connect(unfold)
 		add_child(_chip)
 		reset_size()
@@ -141,16 +142,17 @@ func _build()->void:
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);head.mouse_filter=Control.MOUSE_FILTER_IGNORE;_open_box.add_child(head)
 	var seal:=Seal.new();seal.custom_minimum_size=Vector2(34,34);seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER;seal.mouse_filter=Control.MOUSE_FILTER_IGNORE;head.add_child(seal)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;head.add_child(words)
-	var kicker:=_label(kicker_text(info),11,Tokens.GOLD_TEXT,.14);kicker.name="DecreeKicker"
+	var kicker:=_label(kicker_text(info),14,Tokens.GOLD_TEXT,.14);kicker.name="DecreeKicker"
 	words.add_child(kicker)
 	var title:=_label("“%s”" % String(info.get("title","Your decree")).strip_edges().trim_suffix("."),21,Tokens.INK)
 	title.name="DecreeTitle";title.add_theme_font_override("font",Tokens.voice_font(true))
 	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.tooltip_text=String(info.get("title",""));title.mouse_filter=Control.MOUSE_FILTER_PASS
 	words.add_child(title)
-	var close:=Button.new();close.name="DecreeFold";close.text="Fold";close.flat=true;close.focus_mode=Control.FOCUS_NONE
+	var close:=Button.new();close.name="DecreeFold";close.text="Fold";close.flat=true;close.focus_mode=Control.FOCUS_ALL
 	close.tooltip_text="Fold it to a small seal; it stays in the corner, and in Earlier."
 	close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	close.add_theme_font_size_override("font_size",13);close.add_theme_color_override("font_color",Tokens.INK_MUTED);close.add_theme_color_override("font_hover_color",Tokens.INK)
+	Tokens.apply_button_style(close,false)
 	close.pressed.connect(fold);head.add_child(close)
 	var by:=by_text(info)
 	if by!="":

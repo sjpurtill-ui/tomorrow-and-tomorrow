@@ -68,7 +68,9 @@ func tab(sub:int)->Dictionary:
 			return _known_page()
 	var investigations:Array=DiscoverySystem.active_investigation_records()
 	var board:=_discovery_board(investigations)
-	return {"kpis":preload("res://scripts/hud/inquiry_board.gd").figures(board.pace),"blocks":[board]}
+	# The board keeps teams and pace beside the decision, with forecasts in
+	# its explanatory section, rather than four equally weighted headline tiles.
+	return {"kpis":[],"blocks":[board]}
 
 func _toggle_domain(domain:String)->void:
 	if expanded_domains.has(domain): expanded_domains.erase(domain)

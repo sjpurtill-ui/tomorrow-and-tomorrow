@@ -40,9 +40,9 @@ func _init()->void:
 	name="PactsAndLeagues"
 
 func _ready()->void:
-	horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	follow_focus=true;horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	size_flags_vertical=SIZE_EXPAND_FILL;size_flags_horizontal=SIZE_EXPAND_FILL
-	stack=VBoxContainer.new();stack.size_flags_horizontal=SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",20);add_child(stack)
+	stack=VBoxContainer.new();stack.size_flags_horizontal=SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",24);add_child(stack)
 	league_box=_section("League","Your league")
 	called_box=_section("CalledUpon","Promises called upon")
 	exchange_box=_section("Exchanges","Standing exchanges")
@@ -63,7 +63,7 @@ func _voice(text:String,size:int=18,color:Color=Tokens.INK,italic:bool=false)->L
 	return label
 
 func _kicker(text:String,color:Color=Tokens.INK_MUTED)->Label:
-	return Tokens.make_label(text.to_upper(),12,color,.12)
+	return Tokens.make_label(text.to_upper(),14,color,.08)
 
 func _box(bg:Color,border:Color,width:int=1,radius:int=Tokens.RADIUS_CONTROL,pad_x:float=12,pad_y:float=8)->StyleBoxFlat:
 	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(width);style.set_corner_radius_all(radius)
@@ -71,15 +71,8 @@ func _box(bg:Color,border:Color,width:int=1,radius:int=Tokens.RADIUS_CONTROL,pad
 	return style
 
 func _button(text:String,primary:bool=false)->Button:
-	var button:=Button.new();button.text=text;button.focus_mode=FOCUS_NONE
-	Tokens.text(button,"small",Tokens.INK)
-	button.add_theme_stylebox_override("normal",_box(Tokens.GOLD_WASH if primary else Tokens.PAPER_RAISED,Tokens.GOLD if primary else Tokens.RULE_STRONG,1,Tokens.RADIUS_CONTROL,12,4))
-	var hover:=_box(Tokens.PAPER_SUNK,Tokens.GOLD,1,Tokens.RADIUS_CONTROL,12,4)
-	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover)
-	button.add_theme_stylebox_override("disabled",_box(Tokens.PAPER_SUNK,Tokens.RULE,1,Tokens.RADIUS_CONTROL,12,4))
-	for key:String in ["font_color","font_hover_color","font_pressed_color"]:button.add_theme_color_override(key,Tokens.GOLD_BRIGHT if primary else Tokens.INK)
-	button.add_theme_color_override("font_disabled_color",Tokens.INK_MUTED)
-	button.custom_minimum_size.y=30;button.size_flags_horizontal=SIZE_SHRINK_BEGIN
+	var button:=Button.new();button.text=text;button.focus_mode=FOCUS_ALL
+	Tokens.apply_button_style(button,primary);button.size_flags_horizontal=SIZE_SHRINK_BEGIN
 	return button
 
 func _icon(texture:Texture2D,size:float=22.0)->TextureRect:
@@ -90,7 +83,7 @@ func _icon(texture:Texture2D,size:float=22.0)->TextureRect:
 
 func _section(node_name:String,heading:String)->VBoxContainer:
 	var box:=VBoxContainer.new();box.name=node_name;box.add_theme_constant_override("separation",8);stack.add_child(box)
-	box.add_child(_kicker(heading,Tokens.GOLD))
+	var title:=_label(heading,"body",Tokens.INK);title.add_theme_font_override("font",Tokens.font("ui_strong"));title.add_theme_font_size_override("font_size",24);box.add_child(title)
 	var rule:=ColorRect.new();rule.color=Tokens.RULE;rule.custom_minimum_size=Vector2(0,1);box.add_child(rule)
 	var body:=VBoxContainer.new();body.name=node_name+"Body";body.add_theme_constant_override("separation",8);box.add_child(body)
 	return body

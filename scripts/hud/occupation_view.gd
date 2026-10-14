@@ -38,7 +38,7 @@ func _ready()->void:
 	var close:=P.button(top,"Close",queue_free);close.name="Close";close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.custom_minimum_size=Vector2(96,38);close.tooltip_text="Close (Esc)"
 	alert=P.label(column,"","body",T.BODY)
 	P.rule(column)
-	var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.custom_minimum_size.y=260;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
+	var scroll:=ScrollContainer.new();scroll.follow_focus=true;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.custom_minimum_size.y=100;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
 	rows=VBoxContainer.new();rows.size_flags_horizontal=Control.SIZE_EXPAND_FILL;rows.add_theme_constant_override("separation",10);scroll.add_child(rows)
 	detail=P.label(column,"","small",T.BODY)
 	P.rule(column)
@@ -53,7 +53,7 @@ func _ready()->void:
 func _layout()->void:
 	if panel==null:return
 	var screen:=get_viewport().get_visible_rect().size
-	var width:=minf(560,screen.x-24);panel.position=Vector2(screen.x-width-12,12);panel.size=Vector2(width,minf(panel.get_combined_minimum_size().y,screen.y-24))
+	var width:=minf(560,screen.x-24);panel.position=Vector2(screen.x-width-12,12);panel.size=Vector2(width,minf(680,screen.y-24))
 func _unhandled_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:queue_free();get_viewport().set_input_as_handled()
 func _process(delta:float)->void:

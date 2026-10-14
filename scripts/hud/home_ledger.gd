@@ -29,6 +29,8 @@ func _button(parent:Node,label:String,callback:Variant,tip:String,active:bool=fa
 	var normal:=T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD if active else T.BORDER_SOFT,1,2,8)
 	if active:normal.border_width_bottom=3
 	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,2,8));b.add_theme_stylebox_override("pressed",normal)
+	T.apply_button_style(b)
+	if active:b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG,T.ACTION,1,T.RADIUS_CONTROL,8))
 	parent.add_child(b)
 	if callback is Callable and (callback as Callable).is_valid():b.pressed.connect(callback)
 	else:b.disabled=true
