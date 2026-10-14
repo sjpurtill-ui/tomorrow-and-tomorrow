@@ -8,14 +8,16 @@ var buttons:Array[Button]=[]
 const RANGES:=[365,3650,36500,0]
 func setup(value:Dictionary)->void:
 	data=value
-	add_theme_constant_override("separation",8)
-	var controls:=HBoxContainer.new()
+	add_theme_constant_override("separation",12)
+	var controls:=HFlowContainer.new()
+	controls.add_theme_constant_override("h_separation",8)
+	controls.add_theme_constant_override("v_separation",8)
 	add_child(controls)
 	for index in RANGES.size():
 		var button:=Button.new()
 		button.text=["Last year","Last 10 years","Last 100 years","Everything"][index]
 		button.toggle_mode=true
-		button.add_theme_font_size_override("font_size",12)
+		Tokens.apply_button_style(button)
 		button.pressed.connect(_select.bind(index))
 		controls.add_child(button)
 		buttons.append(button)
@@ -24,8 +26,8 @@ func setup(value:Dictionary)->void:
 	var legend:=HFlowContainer.new()
 	legend.add_theme_constant_override("h_separation",14)
 	add_child(legend)
-	for line in data.series: legend.add_child(Tokens.make_label("● "+String(line.label),12,Tokens.text_for(line.color)))
-	var note:=Tokens.make_label(String(data.get("description","")),12,Tokens.MUTED)
+	for line in data.series: legend.add_child(Tokens.make_label("● "+String(line.label),14,Tokens.text_for(line.color)))
+	var note:=Tokens.make_label(String(data.get("description","")),14,Tokens.MUTED)
 	note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	add_child(note)
 	_select(int(selected_ranges.get(data.id,1)))

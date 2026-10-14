@@ -17,7 +17,7 @@ var _shape:Array=[]
 var _refs:Dictionary={}
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="WealthLedger";add_theme_constant_override("separation",0)
+	theme=T.control_theme();data=block;name="WealthLedger";add_theme_constant_override("separation",16)
 	_shape=shape_of(block)
 	_refs={"accounts":[]}
 	var money:=String(block.stage)=="currency";var metal:=String(block.stage)=="weighed_metal"
@@ -35,16 +35,16 @@ func setup(block:Dictionary)->void:
 		if block.get("on_history") is Callable:(accounts_head.row as HBoxContainer).add_child(S.verb("Past balances",block.on_history,"How these holdings changed over past months"))
 		for item:Dictionary in block.accounts:
 			var open:bool=block.selected==item.key
-			var refs:=S.row(self,{"id":String(item.key),"icon":"Coin","label":String(item.name),"points":item.get("points",[]),"bar_width":90.0,"value_width":4.0,
+			var refs:=S.row(self,{"id":String(item.key),"icon":"Coin","label":String(item.name),"points":item.get("points",[]),"bar_width":90.0,"value_width":4.0,"compact_actions":true,
 				"buttons":[{"text":"Hide" if open else "Details","on_press":func():data.on_select.call(String(item.key)),"tip":"What this account holds","chosen":open}]})
 			refs.balance=refs.label
-			if open:refs.held=S.label("",13,T.INK_MUTED);add_child(refs.held)
+			if open:refs.held=S.label("",16,T.INK_MUTED);refs.held.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(refs.held)
 			else:refs.held=null
 			(_refs.accounts as Array).append(refs)
 		if money:
-			var share:=HBoxContainer.new();share.name="Composition";share.add_theme_constant_override("separation",8);share.custom_minimum_size.y=S.ROW_HEIGHT;add_child(share)
+			var share:=VBoxContainer.new();share.name="Composition";share.add_theme_constant_override("separation",8);share.custom_minimum_size.y=S.ROW_HEIGHT;add_child(share)
 			var lead:=S.label("Where the money is",14,T.INK);lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;share.add_child(lead)
-			_refs.composition=S.label("",12,T.INK_MUTED);_refs.composition.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_refs.composition.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_refs.composition.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.add_child(_refs.composition)
+			_refs.composition=S.label("",14,T.INK_MUTED);_refs.composition.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_refs.composition.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;share.add_child(_refs.composition)
 	_fill()
 	resized.connect(_arrange)
 

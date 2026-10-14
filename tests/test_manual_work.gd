@@ -197,6 +197,8 @@ func test_leaders_mode_is_unchanged()->void:
 	# The count's food_workers is read only: nothing in the simulation reads it
 	# but the ruler's forecast (manual_work.gd), and the food count writes it.
 	for path:String in _scripts("res://scripts"):
+		# HUDs display this read-only count; the guard concerns simulation dependencies.
+		if path.begins_with("res://scripts/hud/"):continue
 		var text:=FileAccess.get_file_as_string(path)
 		# army_economy.gd reads it for the War screen's cost forecast (per_getter): read only, like the ruler's forecast.
 		if "\"food_workers\"" in text:assert_array(["res://scripts/food_system.gd","res://scripts/manual_work.gd","res://scripts/army_economy.gd"]).contains([path])

@@ -1,7 +1,7 @@
 extends VBoxContainer
-## THE WEALTH TAB, one page. A strip of five figures across the top (goods
-## held, goods to trade, goods made a day, the common store, treasures), then
-## two columns of one-line rows:
+## THE WEALTH TAB, one page. The realm account and its decisions lead;
+## household holdings, business and distribution follow. Two columns on
+## wide pages become one sequence on narrow pages:
 ##   left   the common store (the treasury after coinage): who gives it and
 ##          whether it grows, the levy as three choices on its row, each line
 ##          of spending with its cost and a switch on its row;
@@ -82,36 +82,36 @@ func setup(block:Dictionary={})->void:
 	kind_at_setup=Purse.in_kind()
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	theme=T.control_theme()
-	add_theme_constant_override("separation",10)
-	feedback=S.label("",13,T.GOLD_TEXT);feedback.name="Said";feedback.visible=false;feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	add_theme_constant_override("separation",24)
+	feedback=S.label("",16,T.GOLD_TEXT);feedback.name="Said";feedback.visible=false;feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var left:VBoxContainer=self
 	var right:VBoxContainer=self
 	if mode=="wealth":
 		add_child(feedback)
 		var grid:=_grid(self,"WealthColumns",2,700)
-		grid.add_theme_constant_override("v_separation",14)
+		grid.add_theme_constant_override("v_separation",32)
 		left=_column(grid,"WealthLeft");right=_column(grid,"WealthRight")
 	# The common store (the treasury after coinage).
 	var store_head:=S.head(left,Purse.account_name())
 	store_kicker=store_head.title;store_kicker.set_meta("wealth_section",true)
 	head_box=_part(left)
 	if mode=="store":add_child(feedback)
-	sources_box=_part(left)
 	levy_box=_part(left)
 	lines_box=_part(left)
+	sources_box=_part(left)
 	if mode=="wealth":
-		own_box=_section("What our goods buy",right,"OwnCard")
+		own_box=_section("Household wealth",right,"OwnCard")
 		business_box=_section("Trade and business",right,"BusinessCard")
 		wealth_box=_section("Who holds the wealth",right,"DistributionCard")
 		var block_ledger:Variant=block.get("ledger")
 		if block_ledger is Dictionary:
-			ledger=Ledger.new();right.add_child(ledger);ledger.setup(block_ledger)
+			ledger=Ledger.new();left.add_child(ledger);ledger.setup(block_ledger)
 	resized.connect(_responsive)
 	refresh(true)
 	_responsive()
 
 func _column(parent:Node,node_name:String)->VBoxContainer:
-	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",4);parent.add_child(column)
+	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",24);parent.add_child(column)
 	return column
 
 ## A part of the store's rows.
@@ -121,7 +121,7 @@ func _part(parent:VBoxContainer)->VBoxContainer:
 
 ## A section of the right column: its small gold head, then its rows.
 func _section(title:String,parent:VBoxContainer,node_name:String)->VBoxContainer:
-	var holder:=VBoxContainer.new();holder.name=node_name;holder.add_theme_constant_override("separation",0);parent.add_child(holder)
+	var holder:=VBoxContainer.new();holder.name=node_name;holder.add_theme_constant_override("separation",12);parent.add_child(holder)
 	var head:=S.head(holder,title);(head.title as Label).set_meta("wealth_section",true)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",0);box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;holder.add_child(box)
 	return box
@@ -161,7 +161,8 @@ func refresh(force:=false)->void:
 	for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
 	if cards.is_empty():spare=Goods.spare()
 	var people:=roundi(float(WorldSimulation.state.population_exact))
-	_rebuild("own",own_box,str([held.goods,held.coin,held.coin_word,held.worth,Goods.buys(float(held.goods),["Food","Timber","Stone","Fiber Plants"]),spare,people,int(_year())]),force,func()->void:_build_own(held,spare))
+	var own_readings:=kpi_items()
+	_rebuild("own",own_box,str([held.goods,held.coin,held.coin_word,held.worth,Goods.buys(float(held.goods),["Food","Timber","Stone","Fiber Plants"]),spare,people,int(_year()),own_readings.map(func(item:Dictionary)->Array:return [item.id,item.value,item.sub])]),force,func()->void:_build_own(held,spare,own_readings))
 	var e:=Business.state()
 	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices().map(func(id:String)->Array:var q:=Business.quote(id);return [id,Purse.number(float(q.purse_now)),Purse.number(float(q.purse_season))]),Business.next_needs(),Purse.unit_word(),stances_open,String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01)]),force,func()->void:_build_business())
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
@@ -221,18 +222,16 @@ static func kpi_items()->Array:
 ## Who gives the store and whether it grows; old debts if any.
 func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	_clear(head_box)
-	if store_kicker!=null:store_kicker.text=Purse.account_name().to_upper()
+	if store_kicker!=null:store_kicker.text=_cap(Purse.account_name())
 	var trend:=_trend(float(forecast.net),float(forecast.seasons_left))
 	var rations:=Purse.buys_rations()
-	var row:=S.row(head_box,{"id":"store","icon":"Stored food" if Purse.in_kind() else "Coin","label":"Holds","note":_trend_words(float(forecast.net),String(trend.text)).trim_suffix("."),"note_color":trend.color,"value":Purse.amount_text(float(forecast.balance)),"value_width":110.0,
-		"tag":String(trend.text).capitalize() if String(trend.text) in ["growing","steady"] else "Shrinking","tag_color":T.GREEN if String(trend.text)=="growing" else (T.MUTED if String(trend.text)=="steady" else T.RED),
-		"tip":"%s%s" % ["The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from the households' spare. The god's to spend. Goods wear out slowly here, as they do in the homes.",("\nAt today's prices it would buy %s rations." % EraWords.grouped(roundi(rations))) if rations>=0.0 else ""]})
-	(row.value as Label).name="StoreAnswer"
-	var verdict:=row.note as Label;verdict.name="Verdict";verdict.tooltip_text=_season_words(forecast,season);verdict.mouse_filter=Control.MOUSE_FILTER_PASS
+	head_box.add_theme_constant_override("separation",8)
+	var balance:=S.voice(Purse.amount_text(float(forecast.balance)),32);balance.name="StoreAnswer";head_box.add_child(balance)
+	balance.tooltip_text="%s%s" % ["The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Goods the levy took from the households' spare. The god's to spend. Goods wear out slowly here, as they do in the homes.",("\nAt today's prices it would buy %s rations." % EraWords.grouped(roundi(rations))) if rations>=0.0 else ""]
+	var verdict:=S.label(_trend_words(float(forecast.net),String(trend.text)),16,trend.color);verdict.name="Verdict";verdict.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;verdict.tooltip_text=_season_words(forecast,season);head_box.add_child(verdict)
 	# Who gives it is said in the row's pointer.
 	var given:=S.label(_given_words(),12,T.INK_MUTED);given.name="Balance";given.visible=false;head_box.add_child(given)
-	(row.panel as Control).tooltip_text=_cap(_given_words())+".
-"+(row.panel as Control).tooltip_text
+	balance.tooltip_text=_cap(_given_words())+".\n"+balance.tooltip_text
 	if float(forecast.debt)>0.5:S.row(head_box,{"id":"debt","label":"Old debts","note":"repaid monthly","value":Purse.number(float(forecast.debt)),"value_color":T.RED_TEXT})
 
 ## Growing, steady, shrinking slowly, or running out: {text, color}.
@@ -309,7 +308,7 @@ func _choose_levy(level:String)->void:
 ## What the store pays for: one row a line, its cost and a switch on the row.
 func _build_lines(forecast:Dictionary,purse:Dictionary)->void:
 	_clear(lines_box)
-	var title:=S.label("It pays for",12,T.INK_MUTED,true);title.name="PaysAnswer";lines_box.add_child(title)
+	var title:=S.label("Spending",24,T.INK,true);title.name="PaysAnswer";lines_box.add_child(title)
 	for line:String in Purse.LINES:
 		# Food is bought for a hungry town from another of ours: never with one town.
 		if line=="relief" and _town_count()<=1 and not Purse.line_on("relief"):continue
@@ -379,11 +378,20 @@ func _buy_now()->void:
 
 ## What all the goods held are worth and would buy at our own prices
 ## (trade_prices.gd), one row each; coin and weighed metal once known.
-func _build_own(held:Dictionary,_spare:float)->void:
+func _build_own(held:Dictionary,_spare:float,readings:Array)->void:
 	_clear(own_box)
+	own_box.add_theme_constant_override("separation",12)
+	var figures:=HFlowContainer.new();figures.add_theme_constant_override("h_separation",24);figures.add_theme_constant_override("v_separation",16);own_box.add_child(figures)
+	for item:Dictionary in readings:
+		if item.id not in ["held","spare"]:continue
+		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=160;cell.add_theme_constant_override("separation",4);figures.add_child(cell)
+		cell.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED));cell.add_child(S.voice(String(item.value),24));cell.add_child(S.label(String(item.sub),14,T.INK_MUTED));cell.tooltip_text=String(item.tip)
+	for item:Dictionary in readings:
+		if item.id not in ["made","market"]:continue
+		S.row(own_box,{"id":item.id,"label":String(KPI_LABELS[item.id]),"note":String(item.sub),"value":String(item.value),"tip":String(item.tip)})
 	var goods:=float(held.goods)
 	var buys:=Goods.buys(goods,["Timber","Stone","Fiber Plants"])
-	var head:=S.label("All goods would buy",13,T.INK);head.name="GoodsBuy"
+	var head:=S.label("All goods would buy",16,T.INK);head.name="GoodsBuy"
 	head.tooltip_text="All %s goods would buy %s timber, %s stone OR %s fibre at our own prices. These are alternatives, not additional holdings." % [EraWords.grouped(roundi(goods)),EraWords.grouped(roundi(float(buys.Timber))),EraWords.grouped(roundi(float(buys.Stone))),EraWords.grouped(roundi(float(buys["Fiber Plants"])))]
 	var row:=HFlowContainer.new();row.name="GoodsEquivalents";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",2);row.custom_minimum_size.y=S.ROW_HEIGHT;own_box.add_child(row)
 	head.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(head)
@@ -398,6 +406,9 @@ func _build_own(held:Dictionary,_spare:float)->void:
 	if float(held.coin)>=0.5:
 		var coin:=S.row(own_box,{"id":"coin","icon":"Coin","label":"Coin held","note":"in %s" % String(held.coin_word),"value":"worth %s goods" % S.n(float(held.worth)-goods),"value_width":130.0,"tip":"What households, their hoards and the treasury hold, at our own prices."})
 		(coin.panel as Control).name="CoinHeld"
+	for item:Dictionary in readings:
+		if item.id!="treasures":continue
+		S.row(own_box,{"id":"treasures","label":"Treasures","note":String(item.sub),"value":String(item.value),"tip":String(item.tip),"buttons":[{"text":"Open the collection","on_press":item.on_press,"tip":"Give, sell or swap a piece"}]})
 
 static func _year()->float:
 	return maxf(0.0,float(WorldSimulation.state.elapsed_days)/365.0)
@@ -438,10 +449,10 @@ func _build_business()->void:
 	var e:=Business.state()
 	var share:=Business.share()
 	var goal:=float(e.get("target",Business.target()))
-	var held:=S.row(panel,{"id":"share","label":"Holds workers","note":"heading for %s" % Business.in_100(goal),"ratio":clampf(share/maxf(0.0001,goal),0.0,1.0),"bar_width":60.0,"value":Business.in_100(share),"value_width":90.0,
+	var held:=S.row(panel,{"id":"share","label":"People in business","note":"heading for %s" % Business.in_100(goal),"ratio":clampf(share/maxf(0.0001,goal),0.0,1.0),"bar_width":60.0,"value":Business.in_100(share),"value_width":90.0,
 		"tip":"Growing takes decades; failures are fast. This rung can hold up to %s of the workers." % Business.in_100(float((Business.RUNGS[r] as Dictionary).cap))})
 	(held.panel as Control).name="ShareWords"
-	var effect:=S.row(panel,{"id":"effect","label":"Effect","note":"%s to all work and goods" % Business.percent(work),"note_color":T.GREEN_TEXT if matters else T.INK_MUTED,"value":"reach +%d" % roundi(float(x.trade)*100.0),"value_width":90.0,
+	var effect:=S.row(panel,{"id":"effect","label":"Business effect","note":"%s to all work and goods" % Business.percent(work),"note_color":T.GREEN_TEXT if matters else T.INK_MUTED,"value":"reach +%d" % roundi(float(x.trade)*100.0),"value_width":90.0,
 		"tip":"What business does now, at its size today: all work (harvests, within what the land yields; building, digging, hauling and learning) and the goods made go this much faster, trade reaches this much further, and the richest fifth settle %d parts in 100 higher." % roundi(float(x.rich)*100.0)})
 	(effect.note as Label).name="BusinessEffect"
 	var left:=Business.bust_left()
@@ -492,11 +503,11 @@ func _build_wealth()->void:
 	_clear(wealth_box)
 	var shares:Array=WorldSimulation.state.wealth_shares
 	if shares.size()!=5:shares=[0.08,0.13,0.19,0.25,0.35]
-	var fifths:=FifthsBar.new();fifths.name="Fifths";fifths.values=shares.duplicate();fifths.custom_minimum_size=Vector2(0,22)
+	var fifths:=FifthsBar.new();fifths.name="Fifths";fifths.values=shares.duplicate();fifths.custom_minimum_size=Vector2(0,28)
 	fifths.tooltip_text="Each fifth of our households, poorest to richest, and its part of all we have."
 	var top:=roundi(float(shares[4])*100.0)
-	var said:=S.label("Richest fifth %d in 100 · poorest %d" % [top,roundi(float(shares[0])*100.0)],14,T.INK,true);said.name="Shares"
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;wealth_box.add_child(head)
+	var said:=S.label("Richest fifth %d in 100 · poorest %d" % [top,roundi(float(shares[0])*100.0)],16,T.INK,true);said.name="Shares";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	var head:=VBoxContainer.new();head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;wealth_box.add_child(head)
 	said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(said)
 	fifths.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fifths.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(fifths)
 	var bounds:Array=preload("res://scripts/economy_system.gd").WEALTH_BOUNDS.get(String(WorldSimulation.state.economy_stage),[0.28,0.55,0.38])
@@ -546,6 +557,9 @@ func _responsive()->void:
 		retained.append(grid)
 		var columns:=int(grid.get_meta("wide_columns")) if available>=float(grid.get_meta("wide_threshold")) else 1
 		if grid.columns!=columns:grid.columns=columns
+		if grid.name=="WealthColumns" and ledger!=null:
+			var destination:=grid.get_node("WealthRight" if columns==1 else "WealthLeft")
+			if ledger.get_parent()!=destination:ledger.reparent(destination)
 	responsive_grids=retained
 	S.compact(self,available)
 	# Five figures across a wide page; three, then two, as it narrows.
@@ -575,21 +589,24 @@ class FifthsBar extends Control:
 		for v in values:total+=maxf(0.0,float(v))
 		if total<=0.0:return
 		var x:=0.0
-		var inks:=[Color(T.GOLD,0.30),Color(T.GOLD,0.45),Color(T.GOLD,0.60),Color(T.GOLD,0.78),T.GOLD]
+		var inks:=[Color(T.TEAL,0.30),Color(T.TEAL,0.45),Color(T.TEAL,0.60),Color(T.TEAL,0.78),T.TEAL]
 		var face:=T.font("ui")
 		for i in values.size():
 			var w:=size.x*maxf(0.0,float(values[i]))/total
 			draw_rect(Rect2(x,0,maxf(1.0,w-1.0),size.y),inks[mini(i,4)])
 			var words:="%d" % roundi(float(values[i])*100.0)
-			draw_string(face,Vector2(x+4,size.y-6),words,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK if i<3 else T.PAPER_RAISED)
+			var background:=T.PAPER.lerp(T.TEAL,float(inks[mini(i,4)].a))
+			draw_string(face,Vector2(x+4,size.y-7),words,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.legible(T.INK,background))
 			x+=w
 
 ## A small switch, gold when on (a spending line's).
 class Switch extends Button:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	func _init()->void:
-		toggle_mode=true;flat=true;focus_mode=Control.FOCUS_NONE
-		custom_minimum_size=Vector2(46,24);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		toggle_mode=true;flat=true;focus_mode=Control.FOCUS_ALL
+		custom_minimum_size=Vector2(48,40);size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var focus:=T.flat(Color.TRANSPARENT,T.GOLD,2,4,0)
+		add_theme_stylebox_override("focus",focus)
 		mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	func _draw()->void:
 		var on:=button_pressed
