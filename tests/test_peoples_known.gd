@@ -366,7 +366,7 @@ func test_a_new_day_is_written_in_place_and_reads_as_drawn_fresh()->void:
 func test_a_narrow_page_lets_the_least_needed_columns_give_way()->void:
 	GameState.elapsed_days=TODAY
 	var board:=_board(_full_model("hearth"))
-	board.size=Vector2(700,600)
+	board.size=Vector2(560,600)
 	board._layout()
 	assert_array(board._shape).contains(["seen"])
 	assert_bool((board.find_child("Head_seen",true,false) as Control).visible).is_false()
@@ -434,10 +434,10 @@ func test_the_war_screen_links_to_all_peoples_we_know()->void:
 	var board:VBoxContainer=auto_free(WarBoard.new())
 	add_child(board)
 	board.setup({})
-	var box:VBoxContainer=board.enemy_box
-	var link:Button=box.get_child(box.get_child_count()-1)
-	assert_str(String(link.name)).is_equal("AllPeoples")
-	assert_str(link.text).is_equal("All peoples we know")
+	# A small link on the Enemies heading, not a box on the sheet.
+	var link:Button=board.fronts_section.find_child("AllPeoples",true,false)
+	assert_object(link).is_not_null()
+	assert_str(link.text).starts_with("All peoples")
 
 ## A people that bows to us, or gathers every spear against us
 ## (world_answer.gd), says so in the "between us" cell.

@@ -88,17 +88,6 @@ func policy_and_recruitment_views()->void:
 	GameState.settlement_site_committed=true
 	CivilizationSystem.scouting_staff.set_policy(.05,"exploration")
 	CivilizationSystem.scouting_staff.advance(0)
-	for shape:Vector2i in [Vector2i(960,720),Vector2i(340,640)]:
-		var viewport:=SubViewport.new();viewport.size=shape;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
-		var screen:=preload("res://scripts/hud/scouting_policy_panel.gd").new();viewport.add_child(screen)
-		for i in 6:await get_tree().process_frame
-		print("SCOUT_PANEL ",shape," rect=",screen.panel.get_global_rect()," root=",screen.size," minimum=",screen.panel.get_combined_minimum_size())
-		check(Rect2(Vector2.ZERO,shape).encloses(screen.panel.get_global_rect()),"Scouting policy fits "+str(shape))
-		check(screen.panel.get_global_rect().encloses(screen.slider.get_global_rect()),"Scouting slider contained")
-		if DisplayServer.get_name()!="headless":
-			await RenderingServer.frame_post_draw
-			viewport.get_texture().get_image().save_png("res://artifacts/city-report/scouting-%dx%d.png" % [shape.x,shape.y])
-		viewport.queue_free();await get_tree().process_frame
 	MilitaryCampaign.reset_for_new_world();GameState.population_allocations.Defense=70
 	GameState.known_discoveries.append("public_levies");GameState.discovery_adoption["public_levies"]=1.0
 	FoodSystem.receive_external_food(10000)

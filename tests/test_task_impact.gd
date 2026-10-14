@@ -186,7 +186,8 @@ func test_a_task_opens_what_it_does_and_closes_again()->void:
 	var screen:=_people_view(hud)
 	var labor:=_labor(screen)
 	assert_object(labor.find_child("TaskImpact",true,false)).is_null()
-	assert_str("\n".join(_texts(labor))).contains("Click a task to see what that work does.")
+	# No instruction line: a task row is a button, and pressing it opens what that work does.
+	assert_str("\n".join(_texts(labor))).not_contains("Click a task")
 	var watch:=labor.find_child("Task_Defense",true,false)
 	(watch.find_child("Task",true,false) as Button).pressed.emit()
 	labor=_labor(screen)

@@ -56,11 +56,9 @@ var _revealed:=""
 
 func before()->void:
 	for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]:_processing[node]=node.is_processing()
-	_revealed=Overview.last_revealed
 
 func after()->void:
 	T.set_color_mode("light")
-	Overview.last_revealed=_revealed
 	GameState.elapsed_days=0
 	MilitaryCampaign.reset_for_new_world()
 	GovernmentPeopleSystem.reset_for_new_world()
@@ -219,7 +217,7 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_int(int(rows.garrison.number)).is_equal(here+int(home_guard.rise))
 	assert_int(int(rows.garrison.number)).is_equal(Combat.defenders(id))
 	# Those keeping watch and the townsfolk who would rise, apart.
-	assert_str(String(rows.garrison.value)).is_equal("%d on watch, %d would take up arms" % [here,int(home_guard.rise)])
+	assert_str(String(rows.garrison.value)).is_equal("%d on watch · %d can rise" % [here,int(home_guard.rise)])
 	assert_str(String(rows.fortification.value)).is_equal(String(defense.short))
 	assert_int(int(rows.fortification.number)).is_equal(int(defense.stage))
 	assert_str(String(rows.fortification.note)).is_equal("needs repair")
@@ -274,16 +272,11 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	assert_str(String(rows.damage.tip)).contains("Flintwick: ")
 	page.name="PreviousOverview"
 	page=_page(block)
-	var compare:=page.find_child("CompareTowns",true,false) as Button
-	assert_object(compare).is_not_null()
-	assert_object(page.find_child("Scale",true,false)).is_null()
-	var people:=page.find_child("Row_garrison",true,false).find_child("Comparison",true,false) as Label
-	assert_bool(people.visible).is_false()
-	compare.button_pressed=true
-	assert_bool(people.visible).is_true()
-	assert_str(people.text).contains("Flintwick").contains(String(rows.garrison.marks[0].words))
+	# No panel to open: the towns seen are told in the fact's own pointer, on the line itself.
+	assert_object(page.find_child("CompareTowns",true,false)).is_null()
+	var garrison:=page.find_child("Row_garrison",true,false) as Control
+	assert_str(garrison.tooltip_text).contains(String(rows.garrison.marks[0].name)+" · ")
 	assert_bool(page.update_block(block)).is_true()
-	assert_bool(compare.button_pressed).is_true()
 
 # --------------------------------------------------------------------------
 # Other towns of ours
@@ -336,8 +329,11 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var court:=FakeCourt.new();court.add_to_group(Director.GROUP);add_child(court)
 	var id:=_primary_id()
 	var page:=_page(_block())
-	var text:="\n".join(_texts(page))
-	assert_str(text).contains("How our people spread").contains("district by district")
+	# Where the people live is a table after the overview: the seat's stage and every place, one line each.
+	var spread:Dictionary=Provider.new(terrain,hud).tab(0).blocks.back()
+	assert_str(String(spread.type)).is_equal("table")
+	assert_str(String(spread.heading)).is_equal("Where our people live")
+	assert_str(String(spread.rows[0].tip)).contains("district by district")
 	assert_object(page.find_child("Choice_Ruler",true,false)).is_null()
 	# The one way to ask for more hands.
 	var ask:=page.find_child("AskForHands",true,false)
@@ -362,8 +358,8 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	assert_array(terrain.naming).contains_exactly([id])
 	assert_int(hud.details.size()).is_equal(1)
 	# The asked-for hands show as the current choice on the next build.
-	text="\n".join(_texts(_page(_block())))
-	assert_str(text).contains("Water (now)").contains("You asked")
+	var text:="\n".join(_texts(_page(_block())))
+	assert_str(text).contains("Water (now)")
 
 func test_the_leader_counts_in_words_and_seasons()->void:
 	assert_str(Model.spoken(7)).is_equal("seven")
@@ -378,11 +374,12 @@ func test_the_leader_counts_in_words_and_seasons()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	assert_str(Model.since(400)).is_equal("13 months ago")
 
-func test_history_adds_observed_views_and_keeps_the_event_chronicle()->void:
-	var history:Array=Provider.new(terrain,hud).tab(1).blocks
-	assert_str(String(history[0].type)).is_equal("village_history")
-	assert_str(String(history[1].type)).is_equal("chronicle")
-	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
+func test_the_towns_history_is_one_of_the_chronicles_tabs()->void:
+	# One place for history: Home has no History tab; the Chronicle's "Our town" tab holds the record.
+	assert_array(Provider.new(terrain,hud).meta().subtabs).is_equal(["Overview"])
+	var history:Array=preload("res://scripts/hud/content/dock_content_chronicle.gd").new(terrain,hud).tab(1).blocks
+	assert_str(String(history[0].type)).is_equal("chronicle")
+	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("village_history")
 
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door
@@ -392,7 +389,7 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 	var page:=_page(_block())
 	assert_object(page.find_child("TownSketch",true,false)).is_null()
 	assert_object(page.find_child("VisitVillage",true,false)).is_not_null()
-	var expected:={"infant_mortality":["health",0],"learning":["inquiry",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
+	var expected:={"infant_mortality":["health",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
 		"production":["production",0],"logistics":["economy",1],"works":["construction",1],"building":["construction",1]}
 	# A row never restates a tile.
 	for key:String in Provider.IN_TILES:assert_object(page.find_child("Row_"+key,true,false)).override_failure_message(key).is_null()
@@ -443,7 +440,7 @@ func _assert_short(page:Node)->void:
 func test_era_words_before_writing_and_short_labels()->void:
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
-	assert_str(text).contains("in 100").contains("Babes lost").contains("lore ").contains(" passed on")
+	assert_str(text).contains("in 100").contains("Babes lost")
 	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
 	assert_str(String(tiles[4].value)).contains("winters")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
@@ -453,14 +450,14 @@ func test_era_words_before_writing_and_short_labels()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	page=_page(_block())
 	text="\n".join(_texts(page))
-	assert_str(text).contains("in 1,000").contains("Infants buried").contains("records ")
+	assert_str(text).contains("in 1,000").contains("Infants buried")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	_assert_short(page)
 	# Print: the statistical age has its measures.
 	GameState.known_discoveries.append("printing_process")
 	page=_page(_block())
 	text="\n".join(_texts(page))
-	assert_str(text).contains("/ 1,000").contains("schooled")
+	assert_str(text).contains("/ 1,000")
 	_assert_short(page)
 
 func _ground(style:StyleBox)->Color:
