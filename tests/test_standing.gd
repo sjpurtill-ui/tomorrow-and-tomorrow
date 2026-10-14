@@ -166,8 +166,12 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	board.size=Vector2(900,1600)
 	board.setup(page.tab(0).blocks[0])
 	assert_object(board.find_child("Rose",true,false)).is_not_null()
-	# A header line, then the nine, one row each.
-	assert_int(board.find_child("StrengthList",true,false).get_child_count()).is_equal(10)
+	# The chart leads; its nine exact factors remain available in one disclosure.
+	var strengths:Control=board.find_child("StrengthList",true,false)
+	assert_int(strengths.get_child_count()).is_equal(9)
+	assert_bool(strengths.visible).is_false()
+	(board.find_child("ShowStrengthDetails",true,false) as Button).pressed.emit()
+	assert_bool(strengths.visible).is_true()
 	assert_object(board.find_child("Arts",true,false)).is_not_null()
 	assert_object(board.find_child("People_"+id,true,false)).is_not_null()
 	assert_object(board.find_child("Home",true,false)).is_not_null()
@@ -177,6 +181,7 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	assert_bool(chip.disabled).is_true()
 	# The daily refresh updates in place.
 	assert_bool(board.update_block(page.tab(0).blocks[0])).is_true()
+	assert_bool(strengths.visible).is_true()
 	# Drawn for real: the rose, the meters and the medallions paint without error.
 	var rose:Control=board.find_child("Rose",true,false)
 	rose.size=Vector2(420,420)

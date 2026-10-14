@@ -363,18 +363,20 @@ func test_a_new_day_is_written_in_place_and_reads_as_drawn_fresh()->void:
 	var redrawn:=_board(reordered,view.duplicate())
 	assert_array(_snap(board.get_child(0))).is_equal(_snap(redrawn.get_child(0)))
 
-func test_a_narrow_page_lets_the_least_needed_columns_give_way()->void:
+func test_a_narrow_page_keeps_freshness_and_actions_in_wrapping_cards()->void:
 	GameState.elapsed_days=TODAY
 	var board:=_board(_full_model("hearth"))
 	board.size=Vector2(560,600)
 	board._layout()
-	assert_array(board._shape).contains(["seen"])
-	assert_bool((board.find_child("Head_seen",true,false) as Control).visible).is_false()
+	assert_array(board._shape).is_empty()
+	assert_bool((board.find_child("Cell_seen",true,false) as Control).visible).is_true()
+	assert_bool((board.find_child("Cell_talk",true,false) as Control).visible).is_true()
+	assert_object(board.find_child("Facts",true,false)).is_instanceof(HFlowContainer)
 	assert_bool((board.find_child("Sort_people",true,false) as Control).visible).is_true()
 	board.size=Vector2(1000,600)
 	board._layout()
 	assert_array(board._shape).is_empty()
-	assert_bool((board.find_child("Head_seen",true,false) as Control).visible).is_true()
+	assert_bool((board.find_child("Cell_seen",true,false) as Control).visible).is_true()
 
 ## What a label sits on: the nearest panel's paper, laid over what is below.
 func _ground_of(node:Node)->Color:
