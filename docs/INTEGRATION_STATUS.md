@@ -37,8 +37,20 @@ resources in use; the separate rendered Court navigation probe exits cleanly.
 The older full Court probe contains unrelated stale civic/era assertions and is
 not claimed as passing. All player callbacks and simulation rules remain intact.
 
-HELD in worker/integration worktrees: Research archive/question browser, richer
-World civilization profiles, Wealth and the remaining family review. These are
+Research is delivered at `43bcd72a` (source `e896ee78`): selected-field overview
+with three recent findings, explicit searchable archive with six records, six
+questions per Explore page with exact effects, three active fields and a selected
+idle field. Root accepted all three rendered subpages after revisions; 21 affected
+cases pass on integration (32 across the worker's wider Research checks).
+
+This checkpoint also adds Great Works' compact heading/actions and six-work
+searchable chooser beside the selected model. C accepted 1600/1024 composition;
+the record disclosure contains only fixed aggregate counts. Eight private GPU
+captures pass both palettes; 32 Great Works/inspection cases pass, including
+search/paging without rebuilding the selected model and selecting the last work.
+
+HELD in worker/integration worktrees: richer World civilization profiles, Wealth,
+Direction and the remaining family review. These are
 not claimed as delivered. No game rules are changed.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 

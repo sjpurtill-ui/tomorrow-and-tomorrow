@@ -150,3 +150,26 @@ func test_ruined_list_illustrations_keep_triangulable_silhouettes()->void:
 				var polygon:PackedVector2Array=plate._ruin(part[0],70.0)
 				assert_int(Geometry2D.triangulate_polygon(polygon).size()).is_greater_equal(3)
 	plate.free()
+
+func test_work_chooser_pages_and_searches_without_rebuilding_selected_model()->void:
+	for index in 15:
+		var extra:Dictionary=record.duplicate(true)
+		extra.id=W.make_id("ring","honor_dead","modest","stone",0,"dense%d" % index)
+		extra.custom_name="River Work %02d" % index
+		city.undertakings.append(extra)
+	await _open()
+	var model:Control=view.model_view
+	assert_int(view.list_box.get_child_count()).is_equal(6)
+	(view.find_child("NextWorks",true,false) as Button).pressed.emit()
+	assert_int(view.list_page).is_equal(1)
+	assert_int(view.list_box.get_child_count()).is_equal(6)
+	var search:LineEdit=view.find_child("FindWork",true,false)
+	search.text="River Work 14";search.text_changed.emit(search.text)
+	assert_int(view.list_box.get_child_count()).is_equal(1)
+	assert_int(view.list_page).is_equal(0)
+	assert_object(view.model_view).is_same(model)
+	var press:=InputEventAction.new();press.action="ui_accept";press.pressed=true
+	view.list_box.get_child(0).gui_input.emit(press)
+	await get_tree().process_frame
+	assert_str(view.selected_key).contains("dense14")
+	assert_int(view.works_list.size()).is_equal(16)

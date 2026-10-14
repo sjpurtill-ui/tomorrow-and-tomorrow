@@ -58,6 +58,14 @@ var _card_status:Dictionary={}
 var _main:BoxContainer
 var _header:BoxContainer
 var _list_scroll:ScrollContainer
+var _list_sidebar:VBoxContainer
+var _list_search:LineEdit
+var _list_count:Label
+var _list_previous:Button
+var _list_next:Button
+var list_query:=""
+var list_page:=0
+const LIST_PAGE:=6
 var _narrow_layout:=false
 
 static func open(hud_node:Node,terrain_node:Node=null,director_node:Node=null,focus:String="")->Control:
@@ -81,7 +89,7 @@ func _ready()->void:
 	panel=PanelContainer.new();panel.name="WorksPanel";panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	var style:=P.sheet_style(20);style.content_margin_left=26;style.content_margin_right=26;style.content_margin_top=18;style.content_margin_bottom=16
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);panel.add_child(root)
 	_build_header(root)
 	var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",8);root.add_child(tabs)
 	for spec in [["ours","Our great works"],["foreign","Works of other peoples"]]:
@@ -89,12 +97,19 @@ func _ready()->void:
 		var button:=Button.new();button.name="Tab_"+id;button.text=String(spec[1]);button.focus_mode=Control.FOCUS_ALL;T.apply_button_style(button)
 		T.text(button,"small");button.pressed.connect(func()->void:
 			if watching:set_watching(false)
-			tab=id;selected_key="";refresh())
+			tab=id;selected_key="";list_page=0;list_query="";_list_search.text="";refresh())
 		tabs.add_child(button);tab_buttons[id]=button
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tabs.add_child(spacer)
 	toast=Kit.label(tabs,"",13,T.TEXT_SOFT,false);toast.name="Toast"
 	var main:=BoxContainer.new();_main=main;main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",22);root.add_child(main)
-	var list_scroll:=ScrollContainer.new();_list_scroll=list_scroll;list_scroll.custom_minimum_size.x=330;list_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(list_scroll)
+	_list_sidebar=VBoxContainer.new();_list_sidebar.add_theme_constant_override("separation",8);main.add_child(_list_sidebar)
+	_list_search=LineEdit.new();_list_search.name="FindWork";_list_search.placeholder_text="Find a work, place or people";_list_sidebar.add_child(_list_search)
+	_list_search.text_changed.connect(func(value:String)->void:list_query=value;list_page=0;_fill_work_list())
+	var pager:=HBoxContainer.new();pager.add_theme_constant_override("separation",6);_list_sidebar.add_child(pager)
+	_list_count=Kit.label(pager,"",13,T.TEXT_SOFT,false);_list_count.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_list_previous=Kit.action_button(pager,"Previous",func()->void:list_page-=1;_fill_work_list());_list_previous.name="PreviousWorks"
+	_list_next=Kit.action_button(pager,"Next",func()->void:list_page+=1;_fill_work_list());_list_next.name="NextWorks"
+	var list_scroll:=ScrollContainer.new();_list_scroll=list_scroll;list_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;list_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;_list_sidebar.add_child(list_scroll)
 	list_box=VBoxContainer.new();list_box.name="WorkList";list_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;list_box.add_theme_constant_override("separation",8);list_scroll.add_child(list_box)
 	detail_scroll=ScrollContainer.new();detail_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;main.add_child(detail_scroll)
 	detail=VBoxContainer.new();detail.name="WorkDetail";detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail.add_theme_constant_override("separation",10);detail_scroll.add_child(detail)
@@ -110,13 +125,12 @@ func _fit()->void:
 	var view:=get_viewport().get_visible_rect().size
 	# Autowrapped labels report inflated heights before their first sort and a
 	# container never shrinks by itself; re-assert the panel size every frame.
-	var target:=Vector2(minf(1560,view.x-40),minf(960,view.y-40))
+	var target:=Vector2(minf(1280,view.x-40),minf(960,view.y-40))
 	if is_instance_valid(_main):
 		_narrow_layout=view.x<960
 		_main.vertical=_narrow_layout
-		_header.vertical=_narrow_layout
-		_list_scroll.custom_minimum_size=Vector2(0,128) if _narrow_layout else Vector2(300 if view.x<1320 else 330,0)
-		_list_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow_layout else Control.SIZE_FILL
+		_list_sidebar.custom_minimum_size=Vector2(0,180) if _narrow_layout else Vector2(300,0)
+		_list_sidebar.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow_layout else Control.SIZE_FILL
 	if panel.size!=target:panel.size=target
 	var place:=((view-panel.size)*.5).round()
 	if panel.position!=place:panel.position=place
@@ -148,21 +162,21 @@ func _unhandled_key_input(event:InputEvent)->void:
 # ---------------------------------------------------------------- header
 
 func _build_header(root:VBoxContainer)->void:
-	var header:=BoxContainer.new();_header=header;header.add_theme_constant_override("separation",24);root.add_child(header)
+	var header:=BoxContainer.new();_header=header;header.add_theme_constant_override("separation",12);root.add_child(header)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);header.add_child(words)
-	Kit.label(words,"Wonders of our making",14,T.INK_MUTED,false)
-	Kit.display(words,"Our great works",34)
+	Kit.display(words,"Our great works",28)
 	# The same reading Standing and our allure use (great_works.gd renown).
 	var renown:=Bridge.api_dict("renown",["player"])
-	var summary:=Kit.serif(words,"Every work is our own idea, raised or failed by our own hands. %s" % renown_sentence(renown),16,T.BODY,true)
+	var summary:=Kit.label(words,"%.0f allure · +%d cultural allure · +%d Splendor" % [float(renown.get("points",0)),roundi(float(renown.get("share",0))*100),roundi(STANDING.works_splendor(float(renown.get("points",0)))*100)],14,T.BODY,true)
 	summary.name="AllureSummary"
-	summary.tooltip_text=renown_tip(renown)
+	summary.tooltip_text=renown_sentence(renown)+"\n\n"+renown_tip(renown)
 	summary.mouse_filter=Control.MOUSE_FILTER_PASS
-	legacy_box=HBoxContainer.new();legacy_box.name="Legacy";legacy_box.add_theme_constant_override("separation",16);header.add_child(legacy_box)
+	var close_button:=Kit.action_button(header,"Close",close,false,"Close (Esc)");close_button.name="CloseWorks";close_button.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	legacy_box=HBoxContainer.new();legacy_box.name="Legacy";legacy_box.add_theme_constant_override("separation",16);root.add_child(legacy_box)
 	_build_legacy()
-	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",8);header.add_child(actions)
+	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",6);root.add_child(actions)
 	var conceive:=Kit.action_button(actions,"Conceive a great work",conceive_work,true,"Call the court: pitch a wonder worthy of our people")
-	conceive.name="ConceiveButton";conceive.custom_minimum_size=Vector2(230,44)
+	conceive.name="ConceiveButton";conceive.custom_minimum_size.y=40
 	# Master builders holding matters of their own (pitches, news, forecasts) can be called in.
 	var builders:=0
 	for entry:Dictionary in Hall.summonable():
@@ -171,13 +185,11 @@ func _build_header(root:VBoxContainer)->void:
 		var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
 		var held:=int(entry.get("matters",0))
 		var call:=Kit.action_button(actions,"Summon %s%s" % [String(entry.get("name","the master builder")),(" (%d to tell you)" % held) if held>0 else ""],func()->void:_summon(target),false,"Call them before you in the court now")
-		call.name="SummonBuilder%d" % builders;call.custom_minimum_size=Vector2(230,40)
-	var close_button:=Kit.action_button(actions,"Close",close,false,"Close (Esc)")
-	close_button.name="CloseWorks"
-	var record:=Kit.action_button(root,"Our record of great works  ▸",func()->void:legacy_box.visible=not legacy_box.visible)
-	record.pressed.connect(func()->void:record.text="Our record of great works  "+("▾" if legacy_box.visible else "▸"))
+		call.name="SummonBuilder%d" % builders;call.custom_minimum_size.y=40
+	var record:=Kit.action_button(actions,"Our record  ▸",func()->void:legacy_box.visible=not legacy_box.visible)
+	record.pressed.connect(func()->void:record.text="Our record  "+("▾" if legacy_box.visible else "▸"))
 	record.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-	legacy_box.reparent(root);legacy_box.visible=false
+	root.move_child(legacy_box,root.get_child_count()-1);legacy_box.visible=false
 
 ## One sentence of what our works command, in the engine's own numbers.
 static func renown_sentence(renown:Dictionary)->String:
@@ -246,16 +258,9 @@ func refresh()->void:
 		var on:=String(id)==tab
 		button.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if on else Color.TRANSPARENT,T.GOLD if on else Color.TRANSPARENT,1 if on else 0,4,8))
 		button.add_theme_color_override("font_color",T.GOLD_TEXT if on else T.BODY)
-	for child in list_box.get_children():child.queue_free()
 	var items:Array=works_list if tab=="ours" else foreign_list
-	if items.is_empty():
-		var empty:=Kit.serif(list_box,"No great work has been attempted yet. Call the court and hear what they dream of." if tab=="ours" else "No word has reached us of other peoples' great works. Scouts, envoys and travelers bring such news home.",15,T.TEXT_SOFT,true)
-		empty.name="EmptyNote"
-	for item in items:
-		if not item is Dictionary:continue
-		var key:=_key(item)
-		if selected_key.is_empty():selected_key=key
-		list_box.add_child(_card(item,key==selected_key))
+	if not items.is_empty() and selected_key.is_empty():selected_key=_key(items[0])
+	_fill_work_list()
 	for child in detail.get_children():child.queue_free()
 	for item in items:
 		if item is Dictionary and _key(item)==selected_key:
@@ -266,6 +271,24 @@ func refresh()->void:
 		_retained_model.free()
 		_retained_model=null
 	toast.text=message
+
+func _fill_work_list()->void:
+	for child in list_box.get_children():list_box.remove_child(child);child.queue_free()
+	_card_status.clear()
+	var items:Array=works_list if tab=="ours" else foreign_list
+	var query:=list_query.strip_edges().to_lower()
+	var matches:=items.filter(func(item:Dictionary)->bool:
+		return query.is_empty() or (String(item.get("name",item.get("title","")))+" "+String(item.get("city_name",""))+" "+String(item.get("civ_name",""))+" "+_status_words(item)).to_lower().contains(query))
+	list_page=clampi(list_page,0,maxi(0,ceili(matches.size()/float(LIST_PAGE))-1))
+	var first:=list_page*LIST_PAGE
+	for index in range(first,mini(first+LIST_PAGE,matches.size())):list_box.add_child(_card(matches[index],_key(matches[index])==selected_key))
+	_list_count.text="%d–%d of %d" % [first+1,mini(first+LIST_PAGE,matches.size()),matches.size()] if not matches.is_empty() else "No matching works"
+	_list_previous.disabled=list_page==0;_list_next.disabled=first+LIST_PAGE>=matches.size()
+	_list_search.visible=items.size()>LIST_PAGE or not query.is_empty()
+	_list_previous.visible=items.size()>LIST_PAGE;_list_next.visible=items.size()>LIST_PAGE
+	if items.is_empty():
+		var empty:=Kit.serif(list_box,"No great work has been attempted yet. Call the court and hear what they dream of." if tab=="ours" else "No word has reached us of other peoples' great works. Scouts, envoys and travelers bring such news home.",15,T.TEXT_SOFT,true)
+		empty.name="EmptyNote"
 
 func _key(item:Dictionary)->String:
 	return "%s/%s/%s" % [String(item.get("owner","player")),String(item.get("city_id",item.get("local_city_id",""))),String(item.get("work_id",item.get("id",item.get("title",""))))]
@@ -298,7 +321,7 @@ func _card(item:Dictionary,active:bool)->Control:
 	style.content_margin_left=8;style.content_margin_right=10;style.content_margin_top=6;style.content_margin_bottom=6
 	card.add_theme_stylebox_override("panel",style)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(row)
-	var art:=Plate.make(item,76);art.custom_minimum_size=Vector2(112,76);row.add_child(art)
+	var art:=Plate.make(item,60);art.custom_minimum_size=Vector2(80,60);row.add_child(art)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
 	var title:=String(item.get("name",item.get("title","A great work")))
 	var who:=""

@@ -15,8 +15,10 @@ Current accepted revisions: shared width/fact/KPI foundation (`03fe036e`), Home
 overview (`dfec602e`), Food/Materials grouping (`13e405ef`), War intelligence
 (`a63c4fc3`) and the Materials chooser/source reader (`763275db`). This checkpoint
 adds bounded Court roster/foreign contact, selected Standing strengths and regard,
-and Expeditions' recent digest/selected town/searchable archive. Research, World
-Peoples and the remaining families are still in review; see INTEGRATION_STATUS.md
+and Expeditions' recent digest/selected town/searchable archive (`4772bdc1`).
+Research's three selected/bounded readers are delivered at `43bcd72a`; Great Works
+adds a compact command header and six-work searchable chooser in this checkpoint.
+World Peoples and the remaining families are still in review; see INTEGRATION_STATUS.md
 for delivery state. The reciprocal render/critique/revise
 loop remains mandatory, and bounds checks alone do not establish good design.
 
