@@ -13,7 +13,7 @@ func _build_service()->void:
 	_button(ports,"Build timber-vessel dock access",func():_report(op.build_dock(int(_selected(base_picker)))))
 	var transport:=_page("Transports")
 	_transport_controls(transport,"Ships carry soldiers and food along open sea routes. Gather the soldiers at the port first. Landing on a hostile shore needs control of the sea there; ashore, the general takes command.")
-	reports=_label(_page("Reports"),"",13)
+	_build_reports(_page("Reports"))
 
 func _force_summary(force:Dictionary)->String:
 	var base:Dictionary=op.base(int(force.base_id))

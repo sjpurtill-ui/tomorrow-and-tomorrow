@@ -15,8 +15,7 @@ const Card:=preload("res://scripts/hud/chronicle_card.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Population:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd")
 const Health:=preload("res://scripts/hud/content/dock_detail_health.gd")
-## Lines of the record of works shown before "and N earlier".
-const WORKS_SHOWN:=60
+## The complete record is read through the bounded Chronicle works browser.
 
 func meta()->Dictionary:
 	var voice:=Chronicle.voice()
@@ -109,29 +108,17 @@ func _works_blocks()->Array:
 	]
 	if damaged+destroyed>0:facts.append({"label":"Damaged or destroyed","value":"%d · %d destroyed" % [damaged+destroyed,destroyed],"icon":_mark("fire"),"tone":"bad" if destroyed>0 else "","tip":"Recorded damage and destruction."})
 	var rows:Array=[]
-	var ordered:=records.duplicate()
-	ordered.reverse()
-	for row:Dictionary in ordered.slice(0,WORKS_SHOWN):
-		var event:=String(row.get("event","recorded"))
+	var ordered:=records.duplicate();ordered.reverse()
+	for row:Dictionary in ordered:
 		var parts:Array[String]=[]
 		for material:Variant in row.get("materials",{}):parts.append("%s %s" % [preload("res://scripts/hud/production_plain.gd").number(float(row.materials[material])),String(material).to_lower()])
-		var detail:=String(row.get("note",""))
-		var record_blocks:Array=[{"type":"text","text":"%s · %s" % [preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),event.replace("_"," ").capitalize()]},
-			{"type":"text","text":"Material used: %s" % (", ".join(parts) if not parts.is_empty() else "none recorded")}]
-		if detail!="":record_blocks.append({"type":"text","text":detail.left(1).to_upper()+detail.substr(1)})
-		elif String(row.get("settlement_name",""))!="":record_blocks.append({"type":"text","text":String(row.settlement_name)})
-		rows.append({"type":"frame","heading":String(row.get("kind","Building")).replace("_"," ").capitalize(),"blocks":record_blocks})
-	var blocks:Array=[{"type":"fact_grid","min_column":250,"items":facts},
-		{"type":"text","heading":"Every work, newest first","text":("The newest %d of %d." % [WORKS_SHOWN,records.size()]) if records.size()>WORKS_SHOWN else ("Nothing has been built yet." if records.is_empty() else "")}]
-	blocks.append_array(rows)
-	if not materials.is_empty():
-		var names:Array=materials.keys()
-		names.sort_custom(func(a:Variant,b:Variant)->bool:return float(materials[a])>float(materials[b]))
-		var biggest:=maxf(0.001,float(materials[names[0]]))
-		var items:Array=[]
-		for material:Variant in names:items.append({"label":String(material),"value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(float(materials[material])),"bar":float(materials[material])/biggest,"icon":Icons.texture_for(String(material)),"tip":"All %s taken from the stores for building." % String(material).to_lower()})
-		blocks.append({"type":"fact_grid","heading":"Material used by all building","min_column":250,"items":items})
-	return blocks
+		rows.append({"key":str(row.get("id",[row.get("day",0),row.get("event",""),row.get("kind","")])),"title":String(row.get("kind","Building")).replace("_"," ").capitalize(),
+			"date":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"event":String(row.get("event","recorded")).replace("_"," ").capitalize(),
+			"materials":", ".join(parts) if not parts.is_empty() else "none recorded","note":String(row.get("note","")),"place":String(row.get("settlement_name",""))})
+	var material_rows:Array=[]
+	var names:Array=materials.keys();names.sort_custom(func(a:Variant,b:Variant)->bool:return float(materials[a])>float(materials[b]))
+	for material:Variant in names:material_rows.append({"label":String(material),"value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(float(materials[material]))})
+	return [{"type":"chronicle_works","facts":facts,"records":rows,"materials":material_rows}]
 
 func signature()->Array:
 	var entries:Array=GameState.chronicle.get("entries",[])

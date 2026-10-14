@@ -177,8 +177,9 @@ func test_the_page_draws_every_year_and_opens_the_one_chosen()->void:
 	var kicker:Label=feed.find_child("Kicker",true,false)
 	assert_str(kicker.text).contains("Year 4")
 	assert_object(feed.find_child("Moment",true,false)).is_not_null()
-	# The years are listed, newest first.
-	assert_object(feed.find_child("Year2",true,false)).is_not_null()
+	# The default is a selected-year overview, with an explicit archive.
+	assert_int(feed.find_children("Moment","",true,false).size()).is_less_equal(3)
+	assert_object(feed.find_child("BrowseChronicle",true,false)).is_not_null()
 	# Choosing a year opens it: its name, its facts as tokens, its moment.
 	feed._choose(2)
 	kicker=feed.find_child("Kicker",true,false)

@@ -80,6 +80,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/overview_folio.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
+			"chronicle_works":
+				var works:=preload("res://scripts/hud/chronicle_works_reader.gd").new();section.add_child(works);works.setup(block)
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
 			"purse_board":
@@ -115,6 +117,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"production_board":
 				var board:=preload("res://scripts/hud/production_board.gd").new()
 				section.add_child(board);board.setup(block)
+			"production_catalog":
+				var catalog:=preload("res://scripts/hud/production_catalog.gd").new();section.add_child(catalog);catalog.setup(block)
 			"inquiry_board":
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
 			"knowledge_tree":
