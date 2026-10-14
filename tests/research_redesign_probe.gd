@@ -11,7 +11,7 @@ func _ready()->void:
 	# during _ready, so set the palette only in this probe's isolated user data.
 	if not "Test" in OS.get_user_data_dir():
 		push_error("Research probe needs an isolated Test user directory");get_tree().quit(1);return
-	var config:=ConfigFile.new();config.set_value("display","color_theme","dark" if "--dark" in OS.get_cmdline_user_args() else "light");config.save("user://display.cfg")
+	var config:=ConfigFile.new();config.set_value("display","visual_system",1);config.set_value("display","color_theme","dark" if "--dark" in OS.get_cmdline_user_args() else "light");config.save("user://display.cfg")
 	GameState.reset_for_new_world(991704);GovernmentPeopleSystem.reset_for_new_world()
 	GameState.civic_api_enabled=false;GameState.initialize_population_model()
 	GameState.settlement_name="SeanTown";GameState.settlement_site_committed=true
@@ -37,7 +37,7 @@ func _ready()->void:
 	terrain.founding_focus_panel=null
 	var hud=terrain.hud
 	var baseline:="--baseline" in OS.get_cmdline_user_args()
-	var prefix:="baseline" if baseline else "redesign"
+	var prefix:="baseline" if baseline else "modern"
 	if "--dark" in OS.get_cmdline_user_args():prefix+="-dark"
 	for canvas in [Vector2i(1600,1000),Vector2i(1024,720)]:
 		get_window().size=canvas;get_window().content_scale_size=canvas
@@ -65,6 +65,9 @@ func _ready()->void:
 					field.on_more.call();check(int(GameState.research_allocations[field.id])==weight+1,"Attention increase still works")
 					field.on_less.call();check(int(GameState.research_allocations[field.id])==weight,"Attention decrease still works")
 					check(GameState.population_total==people and GameState.known_discoveries==known,"Presentation preserves population and knowledge")
+					hud.dock.body_scroll.scroll_vertical=100000;await frames()
+					get_viewport().get_texture().get_image().save_png("res://artifacts/research-%s-%d-pace.png" % [prefix,canvas.x])
+					hud.dock.body_scroll.scroll_vertical=0
 				elif index==1:
 					var before:int=board.find_children("Pill_*","Button",true,false).size()
 					for button:Button in board.find_children("*","Button",true,false):
