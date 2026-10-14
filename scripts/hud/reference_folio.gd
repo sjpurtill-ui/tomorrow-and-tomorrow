@@ -31,17 +31,12 @@ static func paper()->ColorRect:
 	var shader:=Shader.new()
 	shader.code="""shader_type canvas_item;
 render_mode unshaded;
-uniform vec4 paper_color : source_color = vec4(0.947, 0.916, 0.855, 1.0);
-float grain(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+uniform vec4 paper_color : source_color = vec4(0.067, 0.118, 0.157, 1.0);
 void fragment() {
-	vec2 p = FRAGCOORD.xy;
-	float fleck = (grain(p) - 0.5) * 0.032;
-	float cloud = (grain(floor(p / 17.0)) - 0.5) * 0.009;
-	float fibre = sin(p.x * 0.16 + sin(p.y * 0.037) * 6.0) * 0.003;
-	COLOR = vec4(paper_color.rgb + vec3(fleck + cloud + fibre), 1.0);
+	COLOR = paper_color;
 }"""
 	var material:=ShaderMaterial.new();material.shader=shader
-	material.set_shader_parameter("paper_color",T.PAPER if T.color_mode=="dark" else Color("f2ebdc"))
+	material.set_shader_parameter("paper_color",T.PAPER)
 	surface.material=material
 	return surface
 
@@ -63,5 +58,5 @@ static func rail_style(active:bool,hover:=false)->StyleBoxFlat:
 
 static func page_style()->StyleBoxFlat:
 	var style:=T.flat(Color.TRANSPARENT)
-	style.border_color=RULE;style.border_width_right=1
+	style.border_color=T.RULE;style.border_width_right=1
 	return style

@@ -61,9 +61,9 @@ const SHORT:={"leave":"Leave","defend":"Defend","punish":"Punish","take":"Take",
 const MARKS:={"leave":"leave","defend":"defend","punish":"raid","take":"besiege","peace":"peace","pay":"price"}
 ## The layout the HUD and the roster screen share: the column's width on a
 ## narrow screen; from WIDE_VIEW on, two panes side by side (column_width).
-const COLUMN_WIDTH:=400.0
+const COLUMN_WIDTH:=440.0
 const WIDE_VIEW:=1520.0
-const PANE_GAP:=14
+const PANE_GAP:=20
 
 
 ## The column's width for a screen this wide: one pane, or two side by side.
@@ -94,6 +94,7 @@ var fronts_section:VBoxContainer
 var leaders_section:VBoxContainer
 ## The part shown on a narrow screen: "army", "fronts" or "leaders".
 var tab:="army"
+var costs_expanded:=false
 var _wide:=false
 var _laid:=false
 var leaders_kicker:Label
@@ -136,13 +137,13 @@ func setup(_block:Dictionary={})->void:
 	leaders_section=_pane("LeadersSection");side_pane.add_child(leaders_section)
 	for spec:Array in [["army","Army",army_section],["fronts","Fronts",fronts_section],["leaders","Leaders",leaders_section]]:
 		var key:=String(spec[0])
-		var tab_button:=Button.new();tab_button.name="Tab_%s" % key;tab_button.text=String(spec[1]);tab_button.toggle_mode=true;tab_button.focus_mode=Control.FOCUS_NONE
-		tab_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tab_button.custom_minimum_size=Vector2(0,30)
-		tab_button.add_theme_font_override("font",T.font("ui_strong"));tab_button.add_theme_font_size_override("font_size",13)
+		var tab_button:=Button.new();tab_button.name="Tab_%s" % key;tab_button.text=String(spec[1]);tab_button.toggle_mode=true;tab_button.focus_mode=Control.FOCUS_ALL
+		tab_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tab_button.custom_minimum_size=Vector2(0,40)
+		tab_button.add_theme_font_override("font",T.font("ui_strong"));tab_button.add_theme_font_size_override("font_size",14)
 		for state:String in ["font_color","font_hover_color","font_focus_color"]:tab_button.add_theme_color_override(state,T.INK_MUTED)
 		for state:String in ["font_pressed_color","font_hover_pressed_color"]:tab_button.add_theme_color_override(state,T.INK)
 		for state:String in ["normal","hover","pressed","hover_pressed"]:tab_button.add_theme_stylebox_override(state,_tab_style(state.contains("pressed"),state.contains("hover")))
-		tab_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		tab_button.add_theme_stylebox_override("focus",T.gold_outline_style())
 		tab_button.pressed.connect(func()->void:show_tab(key))
 		tabs_row.add_child(tab_button);tab_buttons[key]=tab_button
 	# The army, top to bottom: how many and where they stand, the home guard
@@ -164,8 +165,8 @@ func setup(_block:Dictionary={})->void:
 	leader_box=VBoxContainer.new();leader_box.name="Leaders";leader_box.add_theme_constant_override("separation",6);leaders_section.add_child(leader_box)
 	# Spies and assassins (covert_board.gd): folded until asked for; it only
 	# informs, the god gives covert orders at court.
-	covert_toggle=Button.new();covert_toggle.name="CovertToggle";covert_toggle.flat=true;covert_toggle.focus_mode=Control.FOCUS_NONE
-	covert_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;covert_toggle.add_theme_font_override("font",T.font("ui_strong"));covert_toggle.add_theme_font_size_override("font_size",12)
+	covert_toggle=Button.new();covert_toggle.name="CovertToggle";covert_toggle.flat=true;covert_toggle.focus_mode=Control.FOCUS_ALL
+	covert_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;covert_toggle.add_theme_font_override("font",T.font("ui_strong"));covert_toggle.custom_minimum_size.y=40;covert_toggle.add_theme_font_size_override("font_size",14)
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:covert_toggle.add_theme_color_override(state,T.INK_MUTED)
 	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Their own page on the rail (F3) sets how hard we watch each people and our own."
 	leaders_section.add_child(covert_toggle)
@@ -376,13 +377,13 @@ func _fact(fact_name:String,value:String,caption:String,tip:String,ink:=T.INK)->
 func _card()->PanelContainer:
 	# A section of the sheet, not a box on it: a hairline above, no paper.
 	var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",_section_style())
-	var column:=VBoxContainer.new();column.name="Column";column.add_theme_constant_override("separation",5);panel.add_child(column)
+	var column:=VBoxContainer.new();column.name="Column";column.add_theme_constant_override("separation",12);panel.add_child(column)
 	return panel
 
 
 static func _section_style()->StyleBoxFlat:
-	var style:=StyleBoxFlat.new();style.bg_color=Color(0,0,0,0);style.border_color=T.RULE;style.border_width_top=1
-	style.content_margin_top=8.0;style.content_margin_bottom=2.0;style.content_margin_left=0.0;style.content_margin_right=2.0
+	var style:=T.paper_panel_style(true,T.RADIUS_CARD,16)
+	style.set_border_width_all(0)
 	return style
 
 
@@ -390,15 +391,15 @@ static func _section_style()->StyleBoxFlat:
 func _headline(parent:Control,mark:String,number:int,words:String,tip:String)->HBoxContainer:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS;row.tooltip_text=tip
 	row.add_child(_icon(mark,T.INK,20))
-	var big:=_line(compact(number),20,T.INK);big.name="Number";big.add_theme_font_override("font",T.font("ui_strong"));big.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(big)
+	var big:=_line(compact(number),32,T.INK);big.name="Number";big.add_theme_font_override("font",T.font("ui_strong"));big.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(big)
 	var said:=_line(words,13,T.INK_MUTED);said.name="Words";said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.clip_text=true;said.text_overrun_behavior=TextServer.OVERRUN_TRIM_WORD;row.add_child(said)
 	parent.add_child(row)
 	return row
 
 
 func _step_button(button_name:String,text:String,tip:String,action:Callable)->Button:
-	var button:=Button.new();button.name=button_name;button.text=text;button.focus_mode=Control.FOCUS_NONE;button.tooltip_text=tip
-	button.custom_minimum_size=Vector2(28,26);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_font_size_override("font_size",14);_compact_skin(button,6.0)
+	var button:=Button.new();button.name=button_name;button.text=text;button.focus_mode=Control.FOCUS_ALL;button.tooltip_text=tip
+	button.custom_minimum_size=Vector2(40,40);button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_font_size_override("font_size",14);_compact_skin(button,6.0)
 	button.pressed.connect(action)
 	return button
 
@@ -434,7 +435,7 @@ func _forces_card(f:Dictionary,general:="")->Control:
 		var gap:=_line(("+%s more than asked" % compact(total-watch)) if total>watch else ("%s still joining" % compact(watch-total)),12,T.AMBER_TEXT)
 		gap.name="Over" if total>watch else "Under";gap.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		gap.tooltip_text=("You asked for %s. %s more are in the army: away in the field, holding towns, hurt, or kept on because so few are over the share that sending them home is not worth it. Those beyond the share go back to their work when they come home." % [EraWords.grouped(watch),EraWords.grouped(total-watch)]) if total>watch else ("You asked for %s: %s more are still joining." % [EraWords.grouped(watch),EraWords.grouped(watch-total)])
-		head.add_child(gap)
+		column.add_child(gap)
 	head.add_child(_step_button("WatchLess","−","A smaller army: one in a hundred of the people fewer. The least drilled at home go back to their work.",func()->void:_step_watch(-1)))
 	head.add_child(_step_button("WatchMore","+","A bigger army: one in a hundred of the people more. They leave other work and join at home.",func()->void:_step_watch(1)))
 	# The quick shares, as plain shares of the people (army_levy_law LEVELS).
@@ -444,14 +445,14 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	var now_cost:=Economy.cost(0)
 	for i in count:
 		var id:=String((Law.LEVELS[i] as Dictionary).id)
-		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(38,26);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_ALL
+		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(38,40);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",13)
 		for state:String in ["font_color","font_hover_color","font_focus_color"]:button.add_theme_color_override(state,T.INK_MUTED)
 		for state:String in ["font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(state,T.INK)
 		button.add_theme_stylebox_override("normal",_segment(false,false,i,count));button.add_theme_stylebox_override("hover",_segment(false,true,i,count))
 		button.add_theme_stylebox_override("pressed",_segment(true,false,i,count));button.add_theme_stylebox_override("hover_pressed",_segment(true,true,i,count))
-		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("focus",T.gold_outline_style())
 		button.set_pressed_no_signal(id==now_level)
 		var at_level:=Law.target_men(id,int(f.population))
 		var effect:=Economy.step_words(now_cost,Economy.cost(at_level-watch)) if at_level>watch else PackedStringArray()
@@ -497,17 +498,18 @@ func _forces_card(f:Dictionary,general:="")->Control:
 		paid.tooltip_text="%s\nSoldiers are paid from %s on top of their rations. Unpaid, they lose will each month, are slower to muster, and some go home. The Wealth page sets it." % [pay,Purse.account_name()]
 		facts.add_child(paid)
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;spacer.mouse_filter=Control.MOUSE_FILTER_IGNORE;facts.add_child(spacer)
-	var people:=Button.new();people.name="People";people.text="People ›";people.flat=true;people.focus_mode=Control.FOCUS_NONE
+	var people:=Button.new();people.name="People";people.text="People ›";people.flat=true;people.focus_mode=Control.FOCUS_ALL
 	people.add_theme_font_size_override("font_size",12);people.add_theme_color_override("font_color",T.GOLD_TEXT);people.add_theme_color_override("font_hover_color",T.INK)
 	people.tooltip_text="Who works at what, keeping watch among the rest (the People view)."
 	people.pressed.connect(_open_people)
 	facts.add_child(people)
 	# The home guard: its share of the army with the control, how many now
 	# (said once, here), and each town's guard against what it needs.
+	var guard_title:=_line("Home guard",20,T.INK);guard_title.add_theme_font_override("font",T.font("ui_strong"));column.add_child(guard_title)
 	var split:=HBoxContainer.new();split.name="Split";split.add_theme_constant_override("separation",6);column.add_child(split)
 	var swatch:=ColorRect.new();swatch.color=T.TEAL;swatch.custom_minimum_size=Vector2(9,9);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;split.add_child(swatch)
 	var on_border:=int(preload("res://scripts/fort_border.gd").watch().get("posted",0))
-	var split_words:=_line("Home guard · keep %d%% · %s now" % [roundi(float(f.home_share)*100.0),compact(guard)],13,T.INK);split_words.name="GuardLine";split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var split_words:=_line("Keep %d%% · %s now" % [roundi(float(f.home_share)*100.0),compact(guard)],13,T.INK);split_words.name="GuardLine";split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	split_words.tooltip_text="The home guard: the part of the army kept at home and in the towns, %s of them now%s, led by %s. The war council never sends the home guard away; everyone else is free to send. The − and + move it by a tenth of the army." % [EraWords.grouped(guard),(" (%s out on the border)" % EraWords.grouped(on_border)) if on_border>0 else "",(general+", the war leader") if general!="" else "the war leader"]
 	split.add_child(split_words)
 	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
@@ -568,7 +570,7 @@ func _towns_rows(f:Dictionary)->Control:
 func _makeup_card(rows:Array)->Control:
 	var panel:=_card();panel.name="MakeupCard"
 	var column:=panel.get_node("Column") as VBoxContainer
-	var title:=_line("Army makeup",14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"))
+	var title:=_line("Army makeup",20,T.INK);title.add_theme_font_override("font",T.font("ui_strong"))
 	title.tooltip_text="Set what the army is made of. The war leader fills each kind with the best fighters and gear our people can make, retrains a few at home each day toward it, and has the workshops make the kits and carts it needs."
 	title.mouse_filter=Control.MOUSE_FILTER_PASS
 	column.add_child(title)
@@ -637,14 +639,23 @@ func _step_makeup(id:String,direction:int)->void:
 ## the pay, the gear and the carts still to make. Red where it hurts.
 func _cost_card(f:Dictionary)->Control:
 	var panel:=_card();panel.name="CostCard"
-	var column:=panel.get_node("Column") as VBoxContainer
+	var outer:=panel.get_node("Column") as VBoxContainer
+	var toggle:=Button.new();toggle.name="CostDetails";toggle.text="Cost to the people  ▾" if costs_expanded else "Cost to the people  ›";toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT;T.apply_button_style(toggle,false);outer.add_child(toggle)
+	var column:=VBoxContainer.new();column.name="CostComparison";column.add_theme_constant_override("separation",8);column.visible=costs_expanded;outer.add_child(column)
+	toggle.pressed.connect(func()->void:costs_expanded=not costs_expanded;column.visible=costs_expanded;toggle.text="Cost to the people  ▾" if costs_expanded else "Cost to the people  ›")
 	var now:=Economy.cost(0)
 	var population:=maxi(1,int(f.population))
 	var next_share:=(floorf(float(f.share)*100.0+0.0001)+1.0)/100.0
 	var extra:=maxi(1,roundi(float(population)*next_share)-int(now.watch))
 	var more:=Economy.cost(extra)
+	var warnings:=PackedStringArray()
+	if float(now.food_net)<0.0:warnings.append("Food: %s a day" % _signed_compact(float(now.food_net)))
+	if float(now.pay_season)>float(now.income_season):warnings.append("Army pay exceeds income")
+	if float(now.births)>0.05:warnings.append("Births lost: %s of 100" % _births_words(float(now.births)))
+	if not warnings.is_empty():
+		var warning:=_line(" · ".join(warnings),14,T.RED_TEXT,true);warning.name="CostWarning";outer.add_child(warning);outer.move_child(warning,1)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);column.add_child(head)
-	var title:=_line("Cost to the people",14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(title)
+	var title:=_line("Impact",14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(title)
 	head.add_child(_cost_cell("now",T.INK_MUTED,76));head.add_child(_cost_cell("with +%s" % compact(extra),T.INK_MUTED,76))
 	title.mouse_filter=Control.MOUSE_FILTER_PASS
 	title.tooltip_text="What keeping this army costs, from the engine's own rules: now, and with %s more under arms (%s of the people)." % [EraWords.grouped(extra),Watch.percent(next_share)]
@@ -876,7 +887,7 @@ func _enemy_row(e:Dictionary)->Control:
 	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(30,30)
 	emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(emblem)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",-2);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;head.add_child(words)
-	var title:=Label.new();title.text=String(e.name);T.text(title,"voice_small",T.INK);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(title)
+	var title:=Label.new();title.text=String(e.name);T.text(title,"body",T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_font_size_override("font_size",20);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(title)
 	var since:=int(e.get("days",0))
 	words.add_child(_line("%s · %s" % ["War" if String(e.kind)=="war" else "Feud","begun today" if since<=0 else Ledger.span_words(since)],12,T.INK_MUTED))
 	var trade_line:=String(preload("res://scripts/trade_words.gd").war_line(civ_id))
@@ -891,7 +902,7 @@ func _enemy_row(e:Dictionary)->Control:
 	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.\nWorn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	column.add_child(_forces_row(civ_id))
 	column.add_child(_now_row(e))
-	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",3);column.add_child(stances)
+	var stances:=HFlowContainer.new();stances.name="Stances";stances.add_theme_constant_override("h_separation",4);stances.add_theme_constant_override("v_separation",4);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
 	for spec:Array in STANCES:
 		var id:=String(spec[0])
@@ -901,7 +912,7 @@ func _enemy_row(e:Dictionary)->Control:
 		button.tooltip_text="%s: %s" % [String(spec[1]),String(spec[3])]
 		button.pressed.connect(func()->void:_stance(civ_id,id,String(spec[2])))
 		stances.add_child(button)
-	var foot:=HBoxContainer.new();foot.add_theme_constant_override("separation",8);column.add_child(foot)
+	var foot:=VBoxContainer.new();foot.add_theme_constant_override("separation",8);column.add_child(foot)
 	foot.add_child(_led_by(civ_id))
 	if String(e.kind)=="feud" and float(e.get("blood_price",0.0))>0.0:
 		var pay:=_stance_button("pay",false)
@@ -1004,7 +1015,7 @@ static func now_short(e:Dictionary)->Dictionary:
 
 
 func _stance_button(id:String,chosen:bool)->Button:
-	var button:=Button.new();button.name="Stance_%s" % id;button.text=String(SHORT.get(id,id.capitalize()));button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+	var button:=Button.new();button.name="Stance_%s" % id;button.text=String(SHORT.get(id,id.capitalize()));button.toggle_mode=true;button.focus_mode=Control.FOCUS_ALL
 	button.icon=Icons.command_texture(String(MARKS.get(id,"front")),T.INK,32);button.add_theme_constant_override("icon_max_width",14);button.add_theme_constant_override("h_separation",3)
 	button.add_theme_font_size_override("font_size",12);button.custom_minimum_size=Vector2(0,28);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_compact_skin(button,4.0)
@@ -1028,7 +1039,7 @@ func _yield_home(civ_id:String)->Control:
 	var said:=_line("%s besieged · day %d" % [home,days],13,T.RED_TEXT);said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	said.tooltip_text="They besiege %s: day %d. It is lost only if you yield it." % [home,days]
 	row.add_child(said)
-	var give:=Button.new();give.name="YieldHome";give.text="Yield %s" % home;give.focus_mode=Control.FOCUS_NONE;give.add_theme_font_size_override("font_size",13);_compact_skin(give)
+	var give:=Button.new();give.name="YieldHome";give.text="Yield %s" % home;give.focus_mode=Control.FOCUS_ALL;give.add_theme_font_size_override("font_size",13);_compact_skin(give)
 	give.tooltip_text="Give %s up to them. Our people there live on under their rule. It cannot be undone." % home
 	give.pressed.connect(func()->void:
 		if not give.has_meta("armed"):
@@ -1054,7 +1065,7 @@ func _led_by(civ_id:String)->Control:
 	if generals.is_empty():
 		var who:=_line("War leader",13,T.INK);who.tooltip_text="The war leader chooses who goes: no general has come forward yet.";row.add_child(who)
 		return row
-	var pick:=OptionButton.new();pick.name="General";pick.focus_mode=Control.FOCUS_NONE;pick.add_theme_font_size_override("font_size",13);pick.fit_to_longest_item=false
+	var pick:=OptionButton.new();pick.name="General";pick.focus_mode=Control.FOCUS_ALL;pick.add_theme_font_size_override("font_size",13);pick.fit_to_longest_item=false
 	pick.clip_text=true;pick.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pick.custom_minimum_size=Vector2(96,28);_compact_skin(pick)
 	pick.add_item("War leader's choice");pick.set_item_metadata(0,"")
 	pick.set_item_tooltip(0,"Whoever the war leader thinks best for the work.")
@@ -1152,7 +1163,7 @@ static func now_details(e:Dictionary)->String:
 
 
 func _take_button(civ_id:String,chosen:bool)->Control:
-	var pick:=MenuButton.new();pick.name="Stance_take";pick.text="Take ▾";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
+	var pick:=MenuButton.new();pick.name="Stance_take";pick.text="Take ▾";pick.flat=false;pick.focus_mode=Control.FOCUS_ALL
 	pick.icon=Icons.command_texture(String(MARKS.take),T.INK,32);pick.add_theme_constant_override("icon_max_width",14);pick.add_theme_constant_override("h_separation",3)
 	pick.add_theme_font_size_override("font_size",12);pick.custom_minimum_size=Vector2(0,28);pick.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_compact_skin(pick,4.0)
@@ -1225,12 +1236,11 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
-	leader_box.add_child(_pip_header())
 	for c:Dictionary in commands:leader_box.add_child(_leader_row(c,commands))
 	# Raise another general: the verb at the foot of the list it adds to.
 	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
 	var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
-	name_one.name="NameGeneral";foot.add_child(name_one)
+	name_one.name="NameGeneral";T.apply_button_style(name_one,true);foot.add_child(name_one)
 
 
 func _name_general()->void:
@@ -1248,33 +1258,37 @@ func _leader_row(c:Dictionary,commands:Array=[])->Control:
 	var war_leader:=String(c.id)==Commands.WAR_LEADER
 	var panel:=PanelContainer.new();panel.name="Leader_%s" % String(c.id)
 	# A row of the list, a hairline under it; the portrait carries the eye.
-	var line:=StyleBoxFlat.new();line.bg_color=Color(0,0,0,0);line.border_color=T.RULE;line.border_width_bottom=1
-	line.content_margin_top=4.0;line.content_margin_bottom=6.0
+	var line:=T.paper_panel_style(true,T.RADIUS_CARD,16);line.set_border_width_all(0)
 	panel.add_theme_stylebox_override("panel",line)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);panel.add_child(row)
-	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(40,48);frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(56,64);frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var ground:=T.flat(T.PAPER_SUNK);ground.border_color=Commands.color(String(c.id));ground.border_width_left=3;frame.add_theme_stylebox_override("panel",ground);row.add_child(frame)
 	var face:=TextureRect.new();face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	var key:=String(leader.get("figure_id","")) if String(leader.get("figure_id",""))!="" else String(leader.get("name",""))
 	face.texture=Portrait.texture({"name":String(leader.get("name","")),"person_id":absi(key.hash())%997+1});frame.add_child(face)
-	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",2);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(words)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",8);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(words)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);top.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(top)
-	var name_label:=_line(String(leader.get("name","The war leader")),14,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"))
+	var name_label:=_line(String(leader.get("name","The war leader")),18,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"))
 	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(name_label)
 	# Who they are and where, as the Council says it (person_posts.gd).
 	var post:=preload("res://scripts/person_posts.gd").of({"person_id":int(leader.get("person_id",0)),"figure_id":String(leader.get("figure_id",""))},commands)
 	var title:=String(post.get("title",""))
 	if title=="":title="War leader" if war_leader else "General"
-	var role:=_line(title,12,T.INK_MUTED);role.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(role)
+	var role:=_line(title,12,T.INK_MUTED);role.size_flags_vertical=Control.SIZE_SHRINK_CENTER;words.add_child(role)
 	if war_leader:
-		var other:=Button.new();other.name="NameWarLeader";other.text="Change";other.flat=true;other.focus_mode=Control.FOCUS_NONE
-		other.add_theme_font_size_override("font_size",12);other.add_theme_color_override("font_color",T.GOLD_TEXT);other.add_theme_color_override("font_hover_color",T.INK)
+		var other:=Button.new();other.name="NameWarLeader";other.text="Change";other.flat=true;other.focus_mode=Control.FOCUS_ALL
+		T.apply_button_style(other,false)
 		other.tooltip_text="The war leader at home is the Marshal among the officials, or the best of the field staff while no one holds that office. Summon the Marshal to the court to hear who could replace them."
 		other.pressed.connect(_name_war_leader)
 		top.add_child(other)
 	if not (leader.get("commander",{}) as Dictionary).is_empty():
-		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
-		pips.set_commander(leader.get("commander",{}),String(leader.get("name","")),war_leader)
+		var ratings:=HFlowContainer.new();ratings.name="Ratings";ratings.add_theme_constant_override("h_separation",12);ratings.add_theme_constant_override("v_separation",6);words.add_child(ratings)
+		var commander:Dictionary=leader.get("commander",{})
+		for skill:Array in Strips.GeneralPips.SKILLS:
+			var skill_id:=String(skill[0])
+			if not commander.has(skill_id) or (skill_id=="logistics" and not war_leader):continue
+			var rating:=_line("%s  %d/5" % [{"command":"Plan","tactics":"Fight","resolve":"Hold","logistics":"Supply"}.get(skill_id,String(skill[2])),Strips.GeneralPips.pips(float(commander[skill_id]))],14,T.GOLD_TEXT)
+			rating.tooltip_text="%s: %s." % [String(skill[2]),String(skill[3])];rating.mouse_filter=Control.MOUSE_FILTER_PASS;ratings.add_child(rating)
 	var below:=HBoxContainer.new();below.add_theme_constant_override("separation",6);below.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(below)
 	if int(c.get("men",0))>0:
 		below.add_child(_icon("men",T.INK,16))
@@ -1357,7 +1371,7 @@ func _spies_words()->void:
 # --- Panes and tabs ---------------------------------------------------------
 
 func _pane(pane_name:String)->VBoxContainer:
-	var box:=VBoxContainer.new();box.name=pane_name;box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",10)
+	var box:=VBoxContainer.new();box.name=pane_name;box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",20)
 	return box
 
 
@@ -1411,13 +1425,13 @@ static func _tab_style(pressed:bool,hover:bool)->StyleBoxFlat:
 	style.bg_color=Color(0,0,0,0) if not hover else T.HOVER_BG
 	style.border_color=T.GOLD if pressed else T.RULE
 	style.border_width_bottom=3 if pressed else 1
-	style.content_margin_left=6.0;style.content_margin_right=6.0;style.content_margin_top=2.0;style.content_margin_bottom=2.0
+	style.content_margin_left=6.0;style.content_margin_right=6.0;style.content_margin_top=6.0;style.content_margin_bottom=6.0
 	return style
 
 
 ## "All peoples ›": every people we know, ranked (the Known World).
 func _all_peoples_link()->Button:
-	var all:=Button.new();all.name="AllPeoples";all.text="All peoples ›";all.focus_mode=Control.FOCUS_NONE;all.flat=true
+	var all:=Button.new();all.name="AllPeoples";all.text="All peoples ›";all.focus_mode=Control.FOCUS_ALL;all.flat=true
 	all.tooltip_text="Every people we have met, ranked as we know them."
 	all.add_theme_font_size_override("font_size",12)
 	all.add_theme_color_override("font_color",T.GOLD_TEXT);all.add_theme_color_override("font_hover_color",T.INK);all.add_theme_color_override("font_pressed_color",T.INK)
@@ -1463,13 +1477,14 @@ func _build_needs(found:Array)->void:
 		var icon:=TextureRect.new();icon.texture=Standing.icon(n);icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 		var title:=_line(String(n.get("title","")),13,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(title)
 		var fact:=_line(String(n.get("text","")),12,T.INK_MUTED);fact.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fact.clip_text=true;fact.text_overrun_behavior=TextServer.OVERRUN_TRIM_WORD;fact.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(fact)
-		var verb:=Button.new();verb.name="Verb";verb.text=String(n.get("verb","See"));verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var verb:=Button.new();verb.name="Verb";verb.text=String(n.get("verb","See"));verb.focus_mode=Control.FOCUS_ALL;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",12)
 		for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:verb.add_theme_color_override(state,Color("fbf6ea"))
 		for state:String in ["normal","hover","pressed"]:
 			var vs:=T.flat(tone if state=="normal" else tone.darkened(0.12),Color(0,0,0,0),0,8);vs.content_margin_left=8;vs.content_margin_right=8;vs.content_margin_top=1;vs.content_margin_bottom=1
 			verb.add_theme_stylebox_override(state,vs)
-		verb.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		verb.add_theme_stylebox_override("focus",T.gold_outline_style())
+		T.apply_button_style(verb,false)
 		var action:Dictionary=n.get("action",{}) if n.get("action") is Dictionary else {}
 		verb.pressed.connect(func()->void:if is_instance_valid(stack):stack.call("act",action))
 		line.add_child(verb)
@@ -1489,7 +1504,7 @@ func _say(text:String)->void:
 ## A section's kicker with room on its right for a count or a button.
 func _kicker_row(title:String,parent:Control=null)->HBoxContainer:
 	var row:=HBoxContainer.new();row.name=title+"Head";row.add_theme_constant_override("separation",6);(parent if parent!=null else self).add_child(row)
-	var kicker:=_line(title.to_upper(),12,T.INK_MUTED);kicker.add_theme_font_override("font",T.font("ui_strong"));kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(kicker)
+	var kicker:=_line(title,22,T.INK);kicker.add_theme_font_override("font",T.font("ui_strong"));kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(kicker)
 	var count:=_line("",12,T.INK_MUTED);count.add_theme_font_override("font",T.font("ui_strong"));count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(count)
 	var gap:=Control.new();gap.size_flags_horizontal=Control.SIZE_EXPAND_FILL;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(gap)
 	row.set_meta("count",count)
@@ -1497,9 +1512,9 @@ func _kicker_row(title:String,parent:Control=null)->HBoxContainer:
 
 
 func _small_button(text:String,mark:String,tip:String)->Button:
-	var button:=Button.new();button.text=text;button.focus_mode=Control.FOCUS_NONE;button.tooltip_text=tip
+	var button:=Button.new();button.text=text;button.focus_mode=Control.FOCUS_ALL;button.tooltip_text=tip
 	button.icon=Icons.command_texture(mark,T.INK,32);button.add_theme_constant_override("icon_max_width",12);button.add_theme_constant_override("h_separation",3)
-	button.add_theme_font_size_override("font_size",12);button.custom_minimum_size=Vector2(0,24)
+	button.add_theme_font_size_override("font_size",14);button.custom_minimum_size=Vector2(0,40)
 	_compact_skin(button)
 	return button
 
@@ -1527,18 +1542,20 @@ static func _segment(pressed:bool,hover:bool,index:int,count:int)->StyleBoxFlat:
 
 static func _compact_style(pressed:bool,hover:bool,pad:=7.0)->StyleBoxFlat:
 	var style:=T.button_pressed_style() if pressed else T.action_button_style(false,hover)
-	style.content_margin_left=pad;style.content_margin_right=pad;style.content_margin_top=2.0;style.content_margin_bottom=2.0
+	style.content_margin_left=pad;style.content_margin_right=pad;style.content_margin_top=6.0;style.content_margin_bottom=6.0
 	if pressed:style.border_width_bottom=3
 	return style
 
 
 static func _compact_skin(button:Control,pad:=7.0)->void:
+	button.custom_minimum_size.y=maxf(40,button.custom_minimum_size.y)
+	button.add_theme_font_size_override("font_size",14)
 	button.add_theme_stylebox_override("normal",_compact_style(false,false,pad))
 	button.add_theme_stylebox_override("hover",_compact_style(false,true,pad))
 	button.add_theme_stylebox_override("pressed",_compact_style(true,false,pad))
 	button.add_theme_stylebox_override("hover_pressed",_compact_style(true,true,pad))
 	button.add_theme_stylebox_override("disabled",T.button_disabled_style())
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",T.gold_outline_style())
 	for state:String in ["font_color","font_hover_color","font_focus_color","font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(state,T.INK)
 	button.add_theme_color_override("font_disabled_color",T.DISABLED)
 
@@ -1548,15 +1565,15 @@ func _clear(box:Node)->void:
 
 
 static func _skin(bg:Color,border:Color,margin:int,left:int)->StyleBoxFlat:
-	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(1)
-	if left>0:style.border_width_left=left
+	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(0)
+	if left>0:style.border_width_left=3
 	style.set_corner_radius_all(T.RADIUS_CARD);style.set_content_margin_all(margin)
 	return style
 
 
 static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	var label:=Label.new();label.text=text;label.mouse_filter=Control.MOUSE_FILTER_PASS
-	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
+	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(14,size));label.add_theme_color_override("font_color",color)
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
 

@@ -102,8 +102,8 @@ func _ready()->void:
 	var map_button:=_button(nav,"Command on map ↗",_map_command)
 	map_button.tooltip_text="Give objectives to this service on the world map. Leaders execute them."
 	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;column.add_child(rule)
-	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",10);scroll.add_child(body)
+	scroll=ScrollContainer.new();scroll.follow_focus=true;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
+	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",24);scroll.add_child(body)
 	_layout();_build_body()
 	# The HUD moves its alerts and the army bar for the War screen's strip
 	# and column while it is open, and back when it closes.
@@ -156,7 +156,7 @@ func _skin_panel()->void:
 	T.text(heading,"title",TEXT)
 	# The War screen's title is the same line every category's page carries.
 	if war:
-		heading.add_theme_font_override("font",T.font("voice_bold"))
+		heading.add_theme_font_override("font",T.font("ui_strong"))
 		heading.add_theme_font_size_override("font_size",preload("res://scripts/hud/dock_panel.gd").TITLE_SIZE)
 	close_button.custom_minimum_size=Vector2(32,30) if war else Vector2(40,38)
 	# The War screen's × is every page's × (dock_panel.gd): a plain glyph.
@@ -173,7 +173,7 @@ static func _shared_close(button:Button)->void:
 	button.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT))
 	button.add_theme_stylebox_override("hover",T.flat(T.CLOSE_HOVER_BG,T.BORDER_2,1,4))
 	button.add_theme_stylebox_override("pressed",T.flat(T.CLOSE_HOVER_BG,T.BORDER_2,1,4))
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",T.gold_outline_style())
 
 ## Whether any boat or air crews of ours are raised (joint_operations forces).
 func _has_crews(services:Array[String])->bool:
@@ -375,7 +375,7 @@ func _process(delta:float)->void:
 		if row.id==selected_row.get("id",""):selected_row=row;_update_inspection();break
 
 func _label(parent:Node,text:String,size:int=16,color:Color=TEXT)->Label:
-	var node:=Label.new();node.text=text;node.add_theme_font_override("font",T.font("ui"));node.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));node.add_theme_color_override("font_color",color);parent.add_child(node);return node
+	var node:=Label.new();node.text=text;node.add_theme_font_override("font",T.font("ui"));node.add_theme_font_size_override("font_size",maxi(14,size));node.add_theme_color_override("font_color",color);parent.add_child(node);return node
 func _wrapped(parent:Node,text:String,size:int=14,color:Color=MUTED)->Label:
 	var node:=_label(parent,text,size,color);node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;return node
 func _kicker(parent:Node,text:String,color:Color=MUTED)->Label:
@@ -388,7 +388,7 @@ func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Butt
 	node.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	node.add_theme_stylebox_override("pressed",T.button_pressed_style())
 	node.add_theme_stylebox_override("disabled",T.button_disabled_style())
-	node.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	node.add_theme_stylebox_override("focus",T.gold_outline_style())
 	node.pressed.connect(callback);parent.add_child(node);return node
 func _bar(parent:Node,color:Color,mode:String="segments")->ProgressBar:
 	var bar:ProgressBar=Gauge.new();bar.ink=color;bar.mode=mode;bar.track=T.TRACK;bar.ground=T.PAPER_SUNK;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(bar);return bar
