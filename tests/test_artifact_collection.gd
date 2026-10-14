@@ -94,11 +94,15 @@ func test_populated_collection_pages_searches_and_fits()->void:
 		var view:=CollectionPanel.new();viewport.add_child(view)
 		for frame:int in range(4):await get_tree().process_frame
 		assert_float(view.panel.size.x).is_less_equal(size.x)
-		assert_int(view.cards.get_child_count()).is_equal(40)
-		view.page=2;view.refresh(true)
-		assert_int(view.cards.get_child_count()).is_equal(5)
-		view.page=0;view.search.text="no such artifact";view.refresh(true)
 		assert_int(view.cards.get_child_count()).is_equal(1)
+		view.select_piece.pressed.emit()
+		assert_int(view.choices.get_child_count()).is_equal(6)
+		view.page=14;view.refresh(true)
+		assert_int(view.choices.get_child_count()).is_equal(1)
+		view.page=0;view.search.text="no such artifact";view.refresh(true)
+		assert_int(view.choices.get_child_count()).is_equal(1)
+		assert_bool(view.choices.get_child(0) is Label).is_true()
+		assert_bool(view.cards.visible).is_false()
 
 func test_returned_artifact_card_uses_its_artifact_painting_not_subject_art()->void:
 	var record:=held();record.discovery_id="stone_sorting";record.name="Selected cutting stone";record.catalogue_id=0
@@ -106,7 +110,7 @@ func test_returned_artifact_card_uses_its_artifact_painting_not_subject_art()->v
 	var view:=CollectionPanel.new();viewport.add_child(view)
 	for frame:int in range(4):await get_tree().process_frame
 	var card:PanelContainer=view.cards.get_child(0)
-	var row:HBoxContainer=card.get_child(0)
+	var row:BoxContainer=card.get_child(0)
 	var painting:TextureRect=row.get_child(0)
 	assert_vector(painting.custom_minimum_size).is_equal(Vector2(160,160))
 	assert_str(painting.texture.resource_path).contains("artifacts/prehistoric-v1/artifact-0000")
@@ -159,3 +163,62 @@ func test_owner_explicit_exchange_moves_between_owners_with_provenance()->void:
 	assert_str(String(moved.provenance[1].from)).is_equal("neighbor")
 	assert_bool(E.valid(E.data())).is_true()
 	assert_bool(A.exchange("nobody",record.id,"player","gift").has("error")).is_true()
+
+func test_collection_offer_search_reaches_piece_beyond_first_forty_and_swaps()->void:
+	var record:=held();record.rarity=4;E.connection("neighbor")
+	var target:=E.owner_state("neighbor")
+	var last:Dictionary={}
+	for index in 50:
+		last=A.find_at(777,Vector2(index*24,900),1);last.rarity=0
+		last.name="Neighbor piece %02d" % index
+		target.society_exchange.collections[last.id]=last
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(960,720);add_child(viewport)
+	var view:=CollectionPanel.new();viewport.add_child(view)
+	for frame in 4:await get_tree().process_frame
+	view.offer_id=record.id;view.offer_to="neighbor";view.offer_mode="trade";view._build_offer()
+	var wanted:OptionButton=view.offer_box.find_child("Wanted",true,false)
+	assert_int(wanted.item_count).is_equal(51)
+	var search_field:LineEdit=view.offer_box.find_child("FindTheirPiece",true,false)
+	search_field.text="Neighbor piece 49";search_field.text_changed.emit(search_field.text)
+	await get_tree().process_frame
+	wanted=view.offer_box.find_child("Wanted",true,false)
+	assert_int(wanted.item_count).is_equal(2)
+	assert_str(String(wanted.get_item_metadata(1))).is_equal(String(last.id))
+	wanted.select(1);wanted.item_selected.emit(1)
+	await get_tree().process_frame
+	var confirm:Button=view.offer_box.find_child("ConfirmOffer",true,false)
+	assert_bool(confirm.disabled).is_false()
+	confirm.pressed.emit()
+	assert_bool(E.data().collections.has(last.id)).is_true()
+	assert_bool(target.society_exchange.collections.has(record.id)).is_true()
+	assert_bool(view.offer_box.visible).is_false()
+	assert_bool(view.cards.visible).is_true()
+
+func test_collection_policies_replace_reader_and_live_resize_keeps_selection()->void:
+	var record:=held();record.study=1.0
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(960,720);add_child(viewport)
+	var view:=CollectionPanel.new();viewport.add_child(view)
+	for frame in 6:await get_tree().process_frame
+	var selected:=view.selected_id
+	var bar:ProgressBar=view.cards.find_child("*",true,false) as ProgressBar
+	for control:Node in view.cards.find_children("*","ProgressBar",true,false):bar=control
+	assert_bool(bar.visible).is_false()
+	view.home_toggle.pressed.emit()
+	assert_bool(view.cards.visible).is_false()
+	assert_bool(view.home_box.visible).is_true()
+	assert_bool(view.reader_back.visible).is_true()
+	for button:Node in view.home_box.find_children("*","Button",true,false):
+		if button.text=="Welcome them faster":button.pressed.emit();break
+	assert_str(String(E.data().migration_policy)).is_equal("welcome")
+	view.reader_back.pressed.emit()
+	assert_bool(view.cards.visible).is_true()
+	assert_str(view.selected_id).is_equal(selected)
+	record.study=0.25;GameState.elapsed_days+=1;view.refresh(false)
+	for control:Node in view.cards.find_children("*","ProgressBar",true,false):bar=control
+	assert_bool(bar.visible).is_true()
+	assert_float(bar.value).is_equal(25.0)
+	for shape:Vector2i in [Vector2i(340,640),Vector2i(960,720)]:
+		viewport.size=shape
+		for frame in 8:await get_tree().process_frame
+		assert_bool(Rect2(Vector2.ZERO,shape).encloses(view.panel.get_global_rect())).is_true()
+		assert_str(view.selected_id).is_equal(selected)
