@@ -27,9 +27,6 @@ func tab(sub:int)->Dictionary:
 	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	_defence=_defence_card() if sub==0 and GameState.settlement_site_committed and (picked.is_empty() or bool(picked.get("primary",false))) else {}
 	var page:Dictionary=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab() if sub==0 else _civic_tab()))
-	if sub==0:
-		page.brief["folio"]=true
-		for block:Dictionary in page.blocks:block["folio"]=true
 	return page
 
 const ERAS:=["Founding","Foothold","Hamlet","Village","Local centre","Town","Mature town","Urban system","City","Historic city","Regional system","Industrial age","Metropolitan age"]
@@ -38,82 +35,341 @@ const ERAS:=["Founding","Foothold","Hamlet","Village","Local centre","Town","Mat
 # City: what goes up, what it gives, and what holds it up
 # --------------------------------------------------------------------------
 
-## The selected town's works at a glance (hud/town_works_board.gd). First
-## what goes up: the civic work in hand, the defences and new homes, each
-## with its bar and days left, what it gives as before -> after numbers,
-## have / need bars and what stops it in a few words. Then the town as it
-## stands: homes, builders, repair, era and workshops. Sentences wait in the
-## tooltips. Every figure is the engine's own: the work and housing rules
-## (settlement_construction.gd), the repair facts (upkeep_warnings.gd), the
-## town's form, era checks and capacities (SettlementModel), what each work
-## does (building_impact.gd), and the defence ledger with the rule every
-## people follows (home_defense.gd).
+## The selected town as a strategy-game panel (hud/buildings_board.gd): a
+## strip of four or five figures with bars, then one-line rows: what goes up
+## now and next (the civic work, the defences' next stage with its bill as
+## pips and a Build button, new homes, the landmark), where every builder
+## works (built_fabric.gd crews()), the built fabric with what each part
+## does, and what the people are close to learning to build. Sentences wait
+## in the tooltips. Every figure is the engine's own: the work and housing
+## rules (settlement_construction.gd), the repair facts (upkeep_warnings.gd),
+## the town's form, era checks and capacities (SettlementModel), what each
+## work does (building_impact.gd), the defence ledger with the rule every
+## people follows (home_defense.gd) and the fabric (built_fabric.gd).
 func _city_tab()->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
-	var town:=String(city.get("name","Founding camp"))
 	var housing:=Construction.housing()
 	var crews:=_crews()
 	if not GameState.settlement_site_committed or GameState.convoy_traveling:
-		return {"brief":_now_brief(city,{},housing,crews),"blocks":[{"type":"town_works","heading":town,"cards":[_home_row(housing)]}]}
+		var home:=_home_row(housing);home["section"]="next"
+		return {"brief":_now_brief(city,{},housing,crews),"blocks":[{"type":"town_works","board":true,"sections":[{"id":"next","heading":String(city.get("name","Founding camp")),"span":true}],"cards":[home]}]}
 	var project:=_now_project(city)
-	var homes:=Impact.homes()
-	var going_up:Array=_work_rows(city,project,crews)
+	var cards:Array=[]
+	# The figures in the strip travel with the page as hidden rows (their
+	# words and tooltips), read by the strip and the tests.
+	for card:Dictionary in [_home_row(housing),_builders_row(crews),_condition_row()]:
+		card["section"]="kpi";cards.append(card)
+	for card:Dictionary in _work_rows(city,project,crews):cards.append(_as_row(card,"next"))
 	var just:=_just_built(city)
-	if not just.is_empty():going_up.append(just)
-	if not _defence.is_empty():going_up.append(_defence)
-	going_up.append(_new_homes_row(housing,crews))
-	# Tiles first: homes, builders, repair, new homes, the landmark. "All
-	# built" is said once, in the lead, with the one thing to do about it;
-	# a work in hand keeps its card.
+	if not just.is_empty():cards.append(_as_row(just,"next"))
+	if not _defence.is_empty():cards.append(_defence_row(_defence))
+	cards.append(_as_row(_new_homes_row(housing,crews),"next"))
+	cards.append_array(_landmark_rows())
+	cards.append_array(_crew_rows(crews))
+	cards.append_array(_fabric_rows())
+	var workshops:=_as_row(_workshops_row(),"fabric");cards.append(workshops)
+	var era:=_era_row(crews)
+	if era.has("meter"):
+		var level:=float(SettlementModel.city_form().get("tier",0.0))
+		var next_era:=String(ERAS[mini(clampi(floori(level),0,ERAS.size()-1)+1,ERAS.size()-1)])
+		# What it still needs rides as chips on the row's second line.
+		era.merge({"section":"soon","name":next_era,"sub":String(era.sub) if (era.get("notes",[]) as Array).is_empty() else "the next building era","value":"","bar":{"ratio":clampf(level-floorf(level),0.0,1.0),"color":Tokens.GOLD,"width":80}},true)
+		era.erase("meter")
+		cards.append(era)
+	cards.append_array(_unlock_rows())
+	var done:=GameState.settlement_completed.size()
+	var total:=Construction._settlement_definitions().size()
+	var sections:=[
+		{"id":"next","heading":("%s: now and next" % String(city.get("name","The town"))) if GameState.player_settlements.size()>1 else "Building now and next","span":true,"note":("All %d civic works stand" % total) if project.is_empty() else "%d of %d civic works stand" % [done,total],"note_tip":"New civic works come as the people learn new ways to build: see Coming next."},
+		{"id":"crews","heading":"Where the builders work","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People.","on_press":jump("overview",0)}]},
+		{"id":"fabric","heading":"The town's fabric"},
+		{"id":"soon","heading":"Coming next"}]
+	var page:={"kpis":_glance(housing,crews),"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
+	# A lead line only when something is wrong; a quiet town needs none.
 	var brief:=_now_brief(city,project,housing,crews)
-	if not brief.has("action_label"):
-		if project.is_empty():brief.merge({"action_label":"Learn new works","on_action":jump("inquiry",0)})
-		else:brief.merge({"action_label":"Choose what to build","on_action":jump("construction",1)})
-	var blocks:Array=[]
-	if not project.is_empty():blocks.append({"type":"town_works","heading":town,"cards":going_up.slice(0,1)})
-	blocks.append({"type":"town_works","heading":"The town now","readings":true,"cards":[_era_row(crews),_workshops_row()]})
-	return {"kpis":_glance(housing,crews,project.is_empty()),"tile_rows":[_home_row(housing),_builders_row(crews),_condition_row()],"brief":brief,"blocks":blocks+[
-		{"type":"town_works","heading":"Around the town","cards":going_up.slice(1)}]+_fabric_blocks()+[
-		{"type":"impact_lines","heading":"What the buildings do","compact":true,"columns":3,"lines":Impact.summary()},
-		{"type":"impact_lines","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"compact":true,"columns":3,"lines":homes.lines},
-		{"type":"actions","items":[
-			{"label":"Choose what to build","sub":"Civic works: each work, what it needs, your priority","on_press":jump("construction",1)},
-			{"label":"Change who builds","sub":"The People: how many build, make and carry","on_press":jump("overview",0)}]}]}
+	page["brief"]=brief if String(brief.get("tone",""))!="info" else {}
+	return page
 
-## The page's lead: four or five numbers with bars, each the engine's own
-## (housing(), _crews(), upkeep_warnings.gd facts, great_works.gd works).
-func _glance(h:Dictionary,crews:Dictionary,all_built:bool)->Array:
+## A town_works card as a board row in `section`, its progress as the row's
+## bar and its state as a tag.
+static func _as_row(card:Dictionary,section:String)->Dictionary:
+	card["section"]=section
+	var state:=String(card.get("state",""))
+	if not card.has("tag"):
+		match state:
+			"building":card["tag"]={"text":"Building","tone":"good"}
+			"waiting":card["tag"]={"text":"Waiting","tone":"warn"}
+			"done":card["tag"]={"text":"Built","tone":"good"}
+	return card
+
+## The page's strip: homes, builders by job (one split bar), repair, the
+## building era and a landmark under way, each the engine's own
+## (housing(), crews, upkeep_warnings.gd facts, SettlementModel.city_form,
+## great_works.gd works).
+func _glance(h:Dictionary,crews:Dictionary)->Array:
 	var tiles:Array=[]
 	var home:=_home_row(h)
 	var places:=int(h.places);var people:=int(h.people);var short:=int(h.short)
-	tiles.append({"label":"HOMES FILLED","value":"%s of %s" % [_n(mini(people,places)),_n(places)],"glance":true,"meter":clampf(float(people)/float(maxi(1,places)),0.0,1.0),"meter_color":Tokens.RED if short>0 else Tokens.GREEN,
-		"delta":"%s sleep out" % _n(short) if short>0 else "%d%% full" % roundi(float(people)/float(maxi(1,places))*100.0),"delta_color":Tokens.RED if short>0 else Tokens.MUTED,"tip":"%s %s" % [String(home.sub),String(home.detail)]})
-	var heads:=int(crews.heads);var town:=roundi(float(crews.town));var landmark:=roundi(float(crews.landmark));var military:=roundi(float(crews.military))
-	var idle:=maxi(0,heads-town-landmark-military)
-	var jobs:PackedStringArray=["%s %s" % [_n(town),"upkeep" if all_built else "town works"]]
-	if landmark>0:jobs.append("%s landmark" % _n(landmark))
-	if military>0:jobs.append("%s military" % _n(military))
-	if idle>0:jobs.append("%s away or hurt" % _n(idle))
-	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"meter":clampf(float(town)/float(maxi(1,heads)),0.0,1.0),"meter_color":Tokens.GREEN if heads>0 else Tokens.RED,
-		"delta":" · ".join(jobs) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
-		"tip":"%s\nThe bar: those on the town's own work (mending, new homes%s) of all set to building. %s" % [" · ".join(jobs),"" if all_built else ", the civic work in hand",String(_builders_row(crews).detail)],"on_press":jump("overview",0)})
+	tiles.append({"label":"HOMES","value":"%s places" % _n(places),"glance":true,"meter":clampf(float(people)/float(maxi(1,places)),0.0,1.0),"meter_color":Tokens.RED if short>0 else Tokens.GREEN,
+		"delta":"%s sleep out" % _n(short) if short>0 else "%d%% filled · %s free" % [roundi(float(people)/float(maxi(1,places))*100.0),_n(maxi(0,places-people))],"delta_color":Tokens.RED if short>0 else Tokens.MUTED,"tip":"%s. %s" % [String(home.sub),String(home.detail)]})
+	var split:=_crew_split(crews)
+	var segments:Array=[]
+	var words:PackedStringArray=[]
+	for part:Dictionary in split:
+		segments.append({"share":float(part.heads),"color":part.color,"label":String(part.label),"value":_n(roundi(float(part.heads)))})
+		words.append("%s %s" % [_n(roundi(float(part.heads))),String(part.short)])
+	var heads:=int(crews.heads)
+	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"segments":segments,"delta":" · ".join(words.slice(0,2)) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
+		"tip":"\n".join(words) if heads>0 else "No one is building: works, repairs and new homes all stop.","on_press":jump("overview",0)})
 	var repair:=_condition_row()
-	tiles.append({"label":"REPAIR","value":String(repair.value),"glance":true,"meter":float((repair.meter as Dictionary).ratio),"meter_color":repair.accent,
+	tiles.append({"label":"CONDITION","value":String(repair.value),"glance":true,"meter":float((repair.meter as Dictionary).ratio),"meter_color":repair.accent,
 		"delta":String(repair.sub).get_slice(":",0),"tip":"%s. %s" % [String(repair.sub),String(repair.detail)]})
-	var trigger:=int(h.trigger)
-	if bool(h.get("building",false)):
-		tiles.append({"label":"NEW HOMES","value":"%d%%" % roundi(float(h.progress)*100.0),"glance":true,"meter":float(h.progress),"meter_color":Tokens.GREEN,"delta":_left_words(float(h.days_left)),"tip":"%s more places going up." % _n(int(h.batch))})
-	elif trigger>0:
-		tiles.append({"label":"NEW HOMES","value":"at %s" % _n(trigger),"glance":true,"meter":clampf(float(people)/float(trigger),0.0,1.0),"meter_color":Tokens.GOLD,"delta":"%s people to go" % _n(maxi(0,trigger-people)),
-			"tip":"Builders put up more homes once more than %s people live here, %d%% of the places. The bar is how near that is." % [_n(trigger),roundi(Construction.HOUSING_TRIGGER*100.0)]})
+	var form:Dictionary=SettlementModel.city_form()
+	var tier:=clampi(floori(float(form.get("tier",0.0))),0,ERAS.size()-1)
+	tiles.append({"label":"BUILDING ERA","value":ERAS[tier],"glance":true,"meter":float(tier+1)/float(ERAS.size()),"meter_color":Tokens.GOLD,
+		"delta":"%d of %d eras" % [tier+1,ERAS.size()],"tip":"Later eras give the buildings more store room and better workshops, and cost more to keep up."})
 	for work:Dictionary in preload("res://scripts/great_works.gd").works():
 		if String(work.get("status","")) not in ["building","stalled"]:continue
 		var left:=float(work.get("days_left",-1.0))
 		tiles.append({"label":"LANDMARK","value":"%d%%" % roundi(float(work.get("progress",0.0))*100.0),"glance":true,"meter":float(work.get("progress",0.0)),"meter_color":Tokens.GOLD if String(work.status)=="building" else Tokens.RED,
-			"delta":_time_left(left) if String(work.status)=="building" and left>=0.0 else "stalled","delta_color":Tokens.MUTED if String(work.status)=="building" else Tokens.RED,
+			"delta":_left_words(left) if String(work.status)=="building" and left>=0.0 else "stalled","delta_color":Tokens.MUTED if String(work.status)=="building" else Tokens.RED,
 			"tip":"%s: %s." % [String(work.get("name","A landmark")),String(work.get("stage",""))],"on_press":jump("construction",3)})
 		break
 	return tiles
+
+## Every builder by what they do today, in heads: the town's own crews as the
+## engine splits them (built_fabric.gd crews(): new homes, the civic work,
+## repair, water and rail works, the walls, then fine work and upkeep), the
+## share a landmark and military works take, and those away or hurt.
+func _crew_split(crews:Dictionary)->Array:
+	var heads:=float(crews.heads)
+	if heads<=0.0:return []
+	var town:=float(crews.town)
+	var f:=Fabric.crews()
+	var scale:=town/maxf(0.0001,float(f.builders))
+	var parts:Array=[]
+	var spec:=[["homes","Building homes","homes","homes",Tokens.GREEN,"Putting up new places while the town fills."],
+		["civic","On the civic work","civic work","hall",Tokens.TEAL,"On the civic work in hand."],
+		["repair","Repair","repair","repair",Tokens.MUTED,"Mending the town's works as they wear: %s builders' worth wanted." % _n(roundi(float(f.repair_want)*scale))],
+		["infra","Water and rail works","water and rail","yard",Tokens.BLUE,"Building and keeping the water works, channels and rail."],
+		["walls","On the walls","walls","palisade",Tokens.RED,"Raising and keeping the town's walls."],
+		["fabric","Fine work and upkeep","fine work","builders",Tokens.GOLD,"Keeping homes, roads, work buildings and fine works, then raising them."]]
+	for item in spec:
+		var n:=float(f.get(String(item[0]),0.0))*scale
+		if n<0.5:continue
+		parts.append({"key":String(item[0]),"label":String(item[1]),"short":String(item[2]),"icon":String(item[3]),"color":item[4],"tip":String(item[5]),"heads":n})
+	var landmark:=float(crews.landmark);var military:=float(crews.military)
+	if landmark>=0.5:parts.append({"key":"landmark","label":"Landmark","short":"landmark","icon":"shrine","color":Tokens.VIOLET,"tip":"Raising the great work.","heads":landmark})
+	if military>=0.5:parts.append({"key":"military","label":"Military works","short":"military","icon":"wall","color":Tokens.AMBER,"tip":"Building for the army.","heads":military})
+	var away:=heads-town-landmark-military
+	if away>=0.5:parts.append({"key":"away","label":"Away or hurt","short":"away or hurt","icon":"watchers","color":Tokens.TRACK,"tip":"Set to building but away from the town, hurt, or doing their share of other work.","heads":away})
+	parts.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.heads)>float(b.heads))
+	return parts
+
+## The builders by job as rows: count, share bar and what the job is; the
+## fine-work row says where its days went (built_fabric.gd report spent), and
+## the last row what ten more builders would buy (plus_lines).
+func _crew_rows(crews:Dictionary)->Array:
+	var rows:Array=[]
+	var heads:=float(crews.heads)
+	if heads<=0.0:
+		rows.append({"section":"crews","key":"crew_none","icon":"builders","name":"No one is building","sub":"Works, repairs and new homes all stop","value":"0","value_color":Tokens.RED,"tag":{"text":"Stopped","tone":"bad"}})
+		return rows
+	var spent:Dictionary=Fabric.report().spent
+	for part:Dictionary in _crew_split(crews):
+		var row:={"section":"crews","key":"crew_"+String(part.key),"icon":String(part.icon),"name":String(part.label),"value":_n(roundi(float(part.heads))),"value_width":56,
+			"bar":{"ratio":float(part.heads)/heads,"color":part.color,"width":90},"sub":"%d%%" % roundi(float(part.heads)/heads*100.0),"detail":String(part.tip)}
+		var share:="%d%%" % roundi(float(part.heads)/heads*100.0)
+		if String(part.key)=="fabric":
+			var total:=0.0
+			for key in ["upkeep","homes","roads","works","beauty"]:total+=float(spent.get(key,0.0))
+			if total>0.0:
+				var said:PackedStringArray=[]
+				for pair in [["upkeep","upkeep"],["homes","homes"],["roads","roads"],["works","works"],["beauty","fine"]]:
+					var part_share:=float(spent.get(String(pair[0]),0.0))/total
+					if part_share>=0.03:said.append("%s %d%%" % [String(pair[1]),roundi(part_share*100.0)])
+				row.sub="%s · %s" % [share,", ".join(said)]
+				row.detail="%s Their days lately: %s." % [String(part.tip),", ".join(said)]
+		rows.append(row)
+	var more:Array=[]
+	var nothing:=RegEx.create_from_string("^\\+?0(\\.0)?\\b|^(\\S+) to \\2$")
+	for line:Dictionary in Fabric.plus_lines(10.0).slice(1):
+		if nothing.search(String(line.value))!=null or more.size()>=3:continue
+		more.append({"label":String(line.label),"value":String(line.value),"tone":String(line.get("tone","plain")),"tip":String(line.get("words",""))})
+	if not more.is_empty():
+		rows.append({"section":"crews","key":"crew_more","icon":"builders","icon_color":Color(1,1,1,0.6),"name":"Ten more builders","sub":"would give","effects":more,"detail":"What ten more builders would buy now, in the engine's numbers."})
+	return rows
+
+## The built fabric as rows with bars: homes by kind (one split bar), roads,
+## beauty, work buildings, walls and stone, the builders' craft and the
+## upkeep kept, each with what it does now (built_fabric.gd effect_lines).
+const FABRIC_EFFECTS:={"homes":["Health","Illness deaths","Fire","Sickness breaking out","Holding together"],"roads":["Hauling","Between towns","Hauls from deposits"],
+	"beauty":["Splendor","Love of the god","Allure abroad"],"works":["Makers' goods","Stored food rots","Cutting and digging","Water carried","Kilns"],
+	"walls":["Defences","Might"],"craft":["Building knowledge","Great works"]}
+func _fabric_rows()->Array:
+	if not GameState.settlement_site_committed:return []
+	var r:Dictionary=Fabric.report()
+	var by_label:Dictionary={}
+	for line:Dictionary in Fabric.effect_lines(r):by_label[String(line.label)]=line
+	var homes:Array=r.homes
+	var segments:Array=[]
+	var kinds:PackedStringArray=[]
+	for g in Fabric.GRADES.size():
+		var share:=float(homes[g])
+		if share<0.005:continue
+		segments.append({"share":share,"color":Color(String(GRADE_INKS[g])),"label":String(Fabric.GRADE_SHORT[g]),"value":"%d%%" % roundi(share*100.0)})
+		kinds.append("%s %d%%" % [String(Fabric.GRADE_SHORT[g]),roundi(share*100.0)])
+	var best:=int(r.best)
+	var caps:Array=r.caps
+	var legend:="The best they can build now: %s, at most %d in 100 of the places at the builders' craft %s." % [String(Fabric.GRADE_WORDS[best]),roundi(float(caps[best])*100.0),Fabric._one(float(r.craft))]
+	if best<Fabric.GRADES.size()-1:
+		legend+=" %s need %s known and craft %s." % [String(Fabric.GRADE_WORDS[best+1]).capitalize(),_any_words(Fabric.GRADE_KNOW[best+1]),Fabric._one(float(Fabric.GRADE_CRAFT[best+1]))]
+	legend+=" New places go up plain; builders raise them as they have hands, and unkept homes fall a grade."
+	var declining:=Fabric.decline_words(r)
+	var d:Dictionary=r.defense
+	var rows:Array=[
+		{"key":"fabric_homes","fx":"homes","icon":"homes","name":"Homes","sub":", ".join(kinds),"segments":segments,"value":"%d/100" % roundi(float(r.quality)*100.0),"detail":"Mean quality %d of 100 (windbreaks 0, huts 30, timber 55, mudbrick 75, stone 100). %s" % [roundi(float(r.quality)*100.0),legend]},
+		{"key":"fabric_roads","fx":"roads","icon":"open","name":"Roads","sub":String(Fabric.ROAD_WORDS[int(r.road_kind)]),"bar":{"ratio":float(r.roads),"tick":float(r.road_cap),"color":Tokens.TEAL},"value":"%d/100" % roundi(float(r.roads)*100.0),
+			"detail":"The road index; %s are the best the people know (up to %d, the tick). Roads wear %d in 100 a year unkept." % [String(Fabric.ROAD_WORDS[int(r.road_kind)]),roundi(float(r.road_cap)*100.0),roundi(Fabric.ROAD_WEAR*100.0)]},
+		{"key":"fabric_beauty","fx":"beauty","icon":"shrine","name":"Beauty","sub":"","bar":{"ratio":float(r.beauty),"color":Tokens.GOLD},"value":"%d/100" % roundi(float(r.beauty)*100.0),
+			"detail":"Fine works a person. Each builder-day of fine work is worth %s with what the people know of the arts. Unkept, they weather %d in 100 a year." % [Fabric._one(float(r.artistry)),roundi(Fabric.BEAUTY_WEAR*100.0)]},
+		{"key":"fabric_works","fx":"works","icon":"workshop","name":"Work buildings","sub":"","bar":{"ratio":float(r.cover),"color":Tokens.BLUE},"value":"%d/100" % roundi(float(r.cover)*100.0),
+			"detail":"How fully workshops, granaries, kilns, storehouses and water works serve the town."}]
+	if bool(r.home):
+		var bonus:=float(d.get("defense_bonus",0.0))
+		rows.append({"key":"fabric_walls","fx":"walls","icon":"wall","name":"Walls and stone","sub":"%s · %d%% stone houses" % [String(d.get("short","Open ground")),roundi(float(r.stone)*100.0)],"bar":{"ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"color":Tokens.RED},"value":"+%d%%" % roundi(bonus*100.0),
+			"detail":"%s at %d%% repair, and %d in 100 of the places stone. The bar runs to a bastion network's +%d%%." % [String(d.get("short","Open ground")),roundi(float(d.get("integrity",1.0))*100.0),roundi(float(r.stone)*100.0),roundi(Fabric.BASTION_BONUS*100.0)]})
+	rows.append({"key":"fabric_craft","fx":"craft","icon":"builders","name":"Builders' craft","sub":"settles at %s" % Fabric._one(float(r.craft_settles)),"bar":{"ratio":float(r.craft)/Fabric.CRAFT_MAX,"color":Tokens.VIOLET},"value":"%s/%d" % [Fabric._one(float(r.craft)),roundi(Fabric.CRAFT_MAX)],
+		"detail":"The builders' living experience. At today's builders it settles at %s over a working life; it fades as the old builders die." % Fabric._one(float(r.craft_settles))})
+	var kept:=float(r.paid)
+	rows.append({"key":"fabric_upkeep","icon":"repair","name":"Upkeep kept","sub":"everything kept" if declining.is_empty() else ", ".join(declining),"bar":{"ratio":kept,"color":Tokens.GREEN if kept>=0.99 else Tokens.RED},"value":"%d%%" % roundi(kept*100.0),"value_color":Tokens.INK if kept>=0.99 else Tokens.RED,
+		"tag":{} if declining.is_empty() else {"text":"Too few builders","tone":"bad"},
+		"detail":"Every home, road, work building and fine work is kept." if declining.is_empty() else "The builders keep homes first, then the walls, work buildings, roads and fine works. Now %s. More builders, or fewer works to keep." % ", ".join(declining)})
+	for row:Dictionary in rows:
+		row["section"]="fabric"
+		if (row.get("tag",{}) as Dictionary).is_empty():row.erase("tag")
+		var effects:Array=[]
+		var more:PackedStringArray=[]
+		for label:String in FABRIC_EFFECTS.get(String(row.get("fx","")),[]):
+			if not by_label.has(label):continue
+			var line:Dictionary=by_label[label]
+			if effects.size()<2:effects.append({"label":label,"value":String(line.value),"tone":String(line.get("tone","plain")),"tip":String(line.get("words",""))})
+			else:more.append("%s %s: %s" % [label,String(line.value),String(line.get("words",""))])
+		if not effects.is_empty():row["effects"]=effects
+		if not more.is_empty():row.detail=String(row.detail)+"\n"+"\n".join(more)
+	return rows
+
+## The landmarks under way, each a row with its bar and the time left
+## (great_works.gd works); a finished one lives on the Landmarks tab.
+func _landmark_rows()->Array:
+	var rows:Array=[]
+	for work:Dictionary in preload("res://scripts/great_works.gd").works():
+		var status:=String(work.get("status",""))
+		if status not in ["building","stalled"]:continue
+		var progress:=float(work.get("progress",0.0))
+		var left:=float(work.get("days_left",-1.0))
+		var building:=status=="building"
+		rows.append({"section":"next","key":"landmark_"+String(work.get("work_id","")),"icon":"shrine","name":String(work.get("name","A great work")),
+			"sub":"%s%s" % [String(preload("res://scripts/great_works_audience.gd").STAGE_WORDS.get(String(work.get("stage","")),"Landmark")),(" · "+_left_words(left)) if building and left>=0.0 else (" · "+String(work.get("idle",""))) if not building else ""],
+			"bar":{"ratio":progress,"color":Tokens.GOLD if building else Tokens.RED},"value":"%d%%" % roundi(progress*100.0),
+			"tag":{"text":"Rising" if building else "Idle","tone":"good" if building else "bad"},
+			"actions":[{"label":"Open","tip":"The landmark's page: its odds, its builders and your choices.","on_press":jump("construction",3)}]})
+	return rows
+
+## What the people are close to learning that the builders would use: new
+## civic works, better homes, roads, work buildings, the arts that make
+## fine work worth more and new building eras, each with how far the
+## question has come (discovery_progress) and whether a team is on it.
+func _unlock_rows()->Array:
+	var groups:Array=[]
+	var known:Array=GameState.known_discoveries
+	for definition:Dictionary in Construction._settlement_definitions():
+		var id:=String(definition.get("discovery",""))
+		if id.is_empty() or String(definition.name) in GameState.settlement_completed:continue
+		if id in known:
+			if DiscoverySystem.adoption(id)<0.10:groups.append({"ids":[id],"opens":String(definition.name),"icon":work_icon(String(definition.name)),"adopting":true})
+			continue
+		groups.append({"ids":[id],"opens":String(definition.name),"icon":work_icon(String(definition.name))})
+	for g in range(1,Fabric.GRADES.size()):
+		if Fabric._knows(Fabric.GRADE_KNOW[g]):continue
+		groups.append({"ids":Fabric.GRADE_KNOW[g],"opens":String(Fabric.GRADE_WORDS[g]),"icon":"homes"})
+		break
+	var road:=Fabric.road_kind()+1
+	if road<Fabric.ROAD_KINDS.size():groups.append({"ids":Fabric.ROAD_KINDS[road][0],"opens":String(Fabric.ROAD_WORDS[road]),"icon":"open"})
+	for work:String in Fabric.WORKS_KNOW:
+		var id:=String(Fabric.WORKS_KNOW[work])
+		if not id.is_empty() and id not in known:groups.append({"ids":[id],"opens":String(Fabric.WORKS_WORDS[work]),"icon":"workshop"})
+	var arts:Array=Array(Fabric.ARTISTRY).filter(func(id:Variant)->bool:return String(id) not in known)
+	if not arts.is_empty():groups.append({"ids":arts,"opens":"Richer fine work","icon":"shrine","tip":"Each of these the people learn makes a builder-day of fine work worth +%s more." % Impact._two(Fabric.ARTISTRY_EACH)})
+	var later:Array=[]
+	for entry:Dictionary in preload("res://scripts/settlement_architecture_knowledge.gd").entries():
+		if String(entry.id) not in known:later.append(String(entry.id))
+	if not later.is_empty():groups.append({"ids":later,"opens":"Later building era","icon":"era"})
+	var studying:Dictionary={}
+	for channel in GameState.active_investigations:studying[String(GameState.active_investigations[channel])]=true
+	var rows:Array=[]
+	for group:Dictionary in groups:
+		var best:="";var best_progress:=-1.0;var best_on:=false
+		for id in group.ids:
+			var entry:Dictionary=WorldSimulation.discovery.discovery_definition(String(id)) if WorldSimulation.discovery!=null else {}
+			if entry.is_empty():continue
+			var progress:=float(DiscoverySystem.adoption(String(id))) if bool(group.get("adopting",false)) else float(GameState.discovery_progress.get(String(id),0.0))
+			var on:=studying.has(String(id))
+			if (on and not best_on) or (on==best_on and progress>best_progress):best=String(id);best_progress=progress;best_on=on
+		if best.is_empty():continue
+		var begun:=best_progress>0.0005 or best_on
+		rows.append({"section":"soon","key":"soon_"+best,"icon":String(group.icon),"name":_upper_first(String(group.opens)),"sub":_discovery_name(best),
+			"bar":{"ratio":clampf(best_progress,0.0,1.0),"color":Tokens.TEAL if best_on else Tokens.RULE_STRONG,"width":70},"value":"%d%%" % roundi(clampf(best_progress,0.0,1.0)*100.0) if begun else "",
+			"tag":{"text":"Taking up","tone":"info"} if bool(group.get("adopting",false)) else ({"text":"Studying","tone":"info"} if best_on else ({} if begun else {"text":"Not begun","tone":"note"})),
+			"detail":("The people know it; %d in 100 have taken it up (10 needed)." % roundi(best_progress*100.0)) if bool(group.get("adopting",false)) else ("%s: %d%% of the way to proof%s. It opens %s." % [_upper_first(_discovery_name(best)),roundi(best_progress*100.0)," and a team is on it" if best_on else ", no team on it yet",_lower_first(String(group.opens))])+(" "+String(group.tip) if group.has("tip") else ""),
+			"_rank":(2.0 if best_on or bool(group.get("adopting",false)) else 0.0)+best_progress})
+	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a._rank)>float(b._rank))
+	rows=rows.slice(0,6)
+	for row:Dictionary in rows:
+		row.erase("_rank")
+		if (row.tag as Dictionary).is_empty():row.erase("tag")
+	return rows
+
+## The defences' next stage as a row: what it gives (before -> after), its
+## bill as pips against the store, what stops it, and the choice of who
+## decides, Build first (home_defense.gd reading, via _defence_card).
+func _defence_row(card:Dictionary)->Dictionary:
+	var row:=card.duplicate(true)
+	row["section"]="next"
+	var r:=HomeDefense.reading()
+	var next:Dictionary=r.next
+	var building:Dictionary=r.building
+	var status:=String(r.status)
+	if not building.is_empty():row.name=String(building.get("short","Defences"))
+	elif not next.is_empty():row.name=String(next.get("short","Defences"))
+	else:row.name=String(r.short)
+	# Rising: its own words; else what stands now, the state on the tag.
+	if building.is_empty():
+		row["sub"]="Defences, now %s" % String(r.short).to_lower()
+		row.erase("value")
+	var tags:={"building":["Building","good"],"stalled":["Stopped","bad"],"ready":["Ready","good"],"waiting":["Waiting","warn"],"held":["Held","warn"],"hungry":["Food short","bad"],"complete":["Built","good"]}
+	if tags.has(status):row["tag"]={"text":String(tags[status][0]),"tone":String(tags[status][1]),"tip":_upper_first(String(card.get("sub","")))+"."}
+	# The bar: the stage rising, else the danger the people read against
+	# what the next stage needs (the tick).
+	if card.get("progress") is Dictionary:row["bar"]=card.progress
+	# The verb on the row: Build (the god's word "build now"); who else may
+	# decide rides small on the second line, with any fix.
+	var word:=String(r.word)
+	if row.get("choice") is Dictionary:
+		var others:Array=[]
+		var short_labels:={"people":"People decide","hold":"Hold off"}
+		for option:Dictionary in row.choice.options:
+			if String(option.id)=="build":continue
+			option.label=String(short_labels.get(String(option.id),option.label));others.append(option)
+		row.choice={"selected":word,"options":others}
+		row["actions"]=[{"label":"Build ordered" if word=="build" else "Build","primary":word!="build","pressed":word=="build","tip":String(HomeDefense.WORD_TIPS.build),"on_press":_set_defence_word.bind("build")}]
+	if card.has("actions"):row["actions2"]=card.actions
+	# A material short is already red in its pips: no second chip for it.
+	var short:Dictionary={}
+	for blocker:Dictionary in r.blockers:
+		if String(blocker.get("kind",""))=="material":short[String(blocker.text)]=true
+	row["blockers"]=(row.get("blockers",[]) as Array).filter(func(b:Dictionary)->bool:return not short.has(String(b.text)))
+	return row
 
 ## Who builds: the builders set to it, those on the town's own works, and the
 ## share a landmark or military works take, in heads (GameState.workers_at:
@@ -165,10 +421,9 @@ func _now_brief(city:Dictionary,project:Dictionary,_housing:Dictionary,crews:Dic
 func _work_rows(city:Dictionary,project:Dictionary,_crews_now:Dictionary)->Array:
 	var rows:Array=[]
 	var priority:=String(city.get("construction_priority",""))
-	if project.is_empty():
-		rows.append({"key":"work","icon":"hall","name":"Civic works","value":"All built","value_color":Tokens.GREEN,"sub":"Every work the people know how to build stands here",
-			"detail":"New works come as the people learn new ways to build.","accent":Tokens.GREEN,"state":"done"})
-	else:rows.append(_work_card(project,priority))
+	# Every known work built is one small note on the page, not a card.
+	if project.is_empty():return rows
+	rows.append(_work_card(project,priority))
 	if not priority.is_empty() and not project.is_empty() and priority!=String(project.name) and priority not in GameState.settlement_completed:
 		for definition:Dictionary in Construction._settlement_definitions():
 			if String(definition.name)!=priority:continue
@@ -317,7 +572,7 @@ func _new_homes_row(h:Dictionary,crews:Dictionary)->Dictionary:
 		return {"key":"new_homes","icon":"homes","name":"New homes","value":"%d%%" % roundi(float(h.progress)*100.0),"value_color":Tokens.GREEN,"sub":"%s more places going up, %s" % [_n(batch),left],"detail":rule,"accent":Tokens.GREEN,"state":"building",
 			"progress":{"ratio":float(h.progress),"text":_left_words(float(h.days_left)),"color":Tokens.GREEN if float(h.days_left)>=0.0 else Tokens.RED},"gains":gains}
 	var pace:="Then %s add about %s places every %s." % [_count(roundi(float(crews.town)),"builder"),_n(batch),Plain.span_text(float(h.days_per_batch))] if float(h.days_per_batch)>0.0 else "No one is building now, so none would go up."
-	return {"key":"new_homes","icon":"homes","name":"New homes","value":"Not needed yet","sub":"Builders start more once over %s people live here" % _n(trigger),"detail":pace,"accent":Tokens.RULE_STRONG,"state":"plain",
+	return {"key":"new_homes","icon":"homes","name":"New homes","value":"%s to go" % _n(maxi(0,trigger-int(h.people))),"value_width":70,"sub":"Builders start more once over %s people live here" % _n(trigger),"detail":pace,"accent":Tokens.RULE_STRONG,"state":"plain",
 		"meter":{"ratio":clampf(float(h.people)/float(maxi(1,trigger)),0.0,1.0),"text":"%s of %s people" % [_n(int(h.people)),_n(trigger)],"color":Tokens.GOLD,"tip":rule},"gains":gains}
 
 ## The town's repair, from the same facts its official reads (upkeep_warnings).
@@ -594,58 +849,174 @@ static func _years_words(years:float)->String:
 	if is_equal_approx(years,1.0):return "a year"
 	return "%s years" % Plain.number(years)
 
-## Civic works: the named early works, in progress and completed.
+## Civic works as one table (hud/buildings_board.gd): every work the people
+## know, built or not, a row each with its state, what it does in the
+## engine's figures, its bill as pips while it waits, what stops it and the
+## priority verb; then what the homes and works do now, and the town's
+## building record folded in (no screen behind the page).
 func _civic_tab()->Dictionary:
-	var civic:=_local_tab(0)
-	# What each finished work does now, in the engine's figures; a work
-	# finished lately carries the builders' stamp.
-	var completed:Array=[]
-	for project:Dictionary in Construction._settlement_definitions():
-		var title:=String(project.name)
-		if title not in GameState.settlement_completed:continue
-		var card:={"key":"done_"+title,"icon":work_icon(title),"name":title,"sub":_upper_first(_gain(project)),"accent":Tokens.GREEN,"state":"done",
-			"effects":_effects(Impact.work(title)),"detail":"It %s." % _gain(project)}
-		var ago:=_finished_ago(title)
-		if ago>=0 and ago<=JUST_BUILT_DAYS:card["stamp"]={"text":"Built","tip":"Finished %s." % ("today" if ago<1 else Plain.span_text(float(ago))+" ago")}
-		else:card.merge({"value":"Built","value_color":Tokens.GREEN},true)
-		completed.append(card)
-	if not completed.is_empty():civic.blocks.append({"type":"town_works","heading":"Completed civic works","cards":completed})
-	return civic
+	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	var priority:=String(city.get("construction_priority",""))
+	var current:=Construction._current_settlement_project()
+	var can_prioritize:=not city.is_empty() and String(city.get("occupied_by","")).is_empty() and GameState.settlement_site_committed
+	var projects:Array=[]
+	var cards:Array=[]
+	var built:=0
+	for definition:Dictionary in Construction._settlement_definitions():
+		var title:=String(definition.name)
+		var done:=title in GameState.settlement_completed
+		var discovery:=String(definition.get("discovery",""))
+		var unknown:=not done and not discovery.is_empty() and discovery not in GameState.known_discoveries
+		var project:=_project(definition,current,done)
+		if not unknown:projects.append(project)
+		if done:built+=1
+		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":_upper_first(_gain(definition)),"detail":"It %s." % _gain(definition),"effects":_effects(project.impact)}
+		if done:
+			row["tag"]={"text":"Built","tone":"good","tip":"Finished %s." % String(project.finished_words) if String(project.finished_words)!="" else ""}
+			var ago:=int(project.finished_ago)
+			if ago>=0 and ago<=JUST_BUILT_DAYS:row["stamp"]={"text":"Built","tip":"Finished %s." % String(project.finished_words)};row.erase("tag")
+		elif unknown:
+			var progress:=float(GameState.discovery_progress.get(discovery,0.0))
+			row.merge({"tag":{"text":"Unknown","tone":"note","tip":"The people must first learn %s." % _discovery_name(discovery)},"bar":{"ratio":progress,"color":Tokens.TEAL,"width":80,"tip":"%s: %d%% of the way to proof." % [_upper_first(_discovery_name(discovery)),roundi(progress*100.0)]},
+				"value":"%d%%" % roundi(progress*100.0),"sub":"needs %s" % _discovery_name(discovery)},true)
+		else:
+			var active:=bool(project.active)
+			row.merge({"bar":{"ratio":float(project.progress),"color":Tokens.GREEN if active else Tokens.AMBER},"value":"%d%%" % roundi(float(project.progress)*100.0),"needs":_bill(project.inputs),
+				"tag":{"text":"Building","tone":"good"} if active else {"text":"Waiting","tone":"warn","tip":"\n".join(project.blockers)},
+				"sub":_upper_first(_time_left(float(project.days_left))) if active else _first_blocker(project)},true)
+			var blockers:Array=[]
+			for blocker:String in project.blockers:blockers.append({"text":blocker,"tone":"bad"})
+			if not active and not blockers.is_empty():row["blockers"]=blockers
+			if can_prioritize:
+				row["actions"]=[{"label":"Back to leader","tip":"The leader chooses what to build again.","on_press":_priority.bind("")}] if title==priority else [{"label":"Build first","tip":"The builders take this up as soon as it can start, and work on what they can until then.","on_press":_priority.bind(title)}]
+			if title==priority:row["highlight"]=true
+		cards.append(row)
+	# What the homes and the works do now, in the engine's figures.
+	for line:Dictionary in Impact.summary():
+		cards.append({"section":"does","key":"does_"+String(line.label),"icon":"hall","name":String(line.label),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":96,"detail":String(line.get("words",""))})
+	var homes:=Impact.homes()
+	for line:Dictionary in homes.lines:
+		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(line.label),"value":String(line.value),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":96,"detail":String(line.get("words",""))})
+	var record:=_record_rows()
+	cards.append_array(record.rows)
+	var sections:=[
+		{"id":"works","heading":"Civic works","span":true,"note":("Your priority: %s" % priority) if not priority.is_empty() else "%d of %d built · the leader chooses" % [built,Construction._settlement_definitions().size()]},
+		{"id":"does","heading":"What the buildings do"},
+		{"id":"homes","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio))},
+		{"id":"record","heading":"Building record","note":String(record.note),"actions":record.actions}]
+	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards,"projects":projects,"completed":GameState.settlement_completed.size(),"priority":priority}]}
 
-## Infrastructure in every city: water works, conduits, rail, docks and plants.
+## The town's building record, newest first, eight to a page, folded into
+## the Civic works tab (GameState.building_ledger, as the old record
+## screen read it).
+const RECORD_PAGE:=8
+var record_page:=0
+func _record_rows()->Dictionary:
+	var id:=String(GameState.selected_player_settlement_id)
+	var records:Array=[]
+	for row:Dictionary in GameState.building_ledger:
+		if id.is_empty() or String(row.get("settlement_id",""))==id:records.append(row)
+	records.reverse()
+	var pages:=maxi(1,ceili(float(records.size())/RECORD_PAGE))
+	record_page=clampi(record_page,0,pages-1)
+	var losses:=0
+	for row:Dictionary in records:
+		if String(row.get("event","")) in ["damaged","destroyed"]:losses+=1
+	var rows:Array=[]
+	for index in range(record_page*RECORD_PAGE,mini(records.size(),(record_page+1)*RECORD_PAGE)):
+		var row:Dictionary=records[index]
+		var event:=String(row.get("event","recorded"))
+		var used:PackedStringArray=[]
+		for material in row.get("materials",{}):used.append("%s %s" % [_n(roundi(float(row.materials[material]))),ResourceSystem.display_name(String(material)).to_lower()])
+		var bad:=event in ["destroyed","damaged","abandoned","vacated"]
+		rows.append({"section":"record","key":"record_%d" % int(row.get("id",index)),"icon":work_icon(String(row.get("kind",""))),"name":String(row.get("kind","Building")).replace("_"," ").capitalize(),
+			"sub":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"tag":{"text":event.replace("_"," ").capitalize(),"tone":"bad" if bad else ("good" if event in ["completed","founded","infilled","rebuilt","reoccupied"] else "info")},
+			"detail":("Used %s." % ", ".join(used)) if not used.is_empty() else "Record #%d." % int(row.get("id",0))})
+	var actions:Array=[]
+	if pages>1:
+		actions.append({"label":"Newer","tip":"Newer records","on_press":_record_turn.bind(-1) if record_page>0 else Callable()})
+		actions.append({"label":"Older","tip":"Older records","on_press":_record_turn.bind(1) if record_page<pages-1 else Callable()})
+	return {"rows":rows,"actions":actions,"note":"%s records · %s losses" % [_n(records.size()),_n(losses)] if not records.is_empty() else "nothing built yet"}
+
+func _record_turn(step:int)->void:
+	record_page=maxi(0,record_page+step)
+	if is_instance_valid(hud):hud.request_immediate_dock_refresh()
+
+## Infrastructure as rows (hud/buildings_board.gd): every town's water
+## works, channels, rail, docks and plants with state and repair, then the
+## defence ladder, stage by stage, with what each gives in the engine's
+## figures (building_impact.gd defences), what stands and what is next.
 func _infrastructure_tab()->Dictionary:
-	var blocks:Array=[]
+	var cards:Array=[]
+	var many:=GameState.player_settlements.size()>1
 	for city:Dictionary in GameState.player_settlements:
 		var id:=String(city.get("id",""))
 		var rows:Array=SettlementModel.with_city_resources(id,func()->Array:return _infrastructure_rows(id))
-		if not rows.is_empty():blocks.append({"type":"rows","heading":String(city.get("name","Settlement")).to_upper(),"items":rows})
-	if blocks.is_empty():blocks.append({"type":"text","heading":"INFRASTRUCTURE","text":"No water works, conduits, rail lines, docks or plants yet. Builders raise them once their practices are adopted and materials arrive."})
-	# The defence works, stage by stage: what each gives, and which stand.
+		for row:Dictionary in rows:
+			row["section"]="works"
+			if many:row.sub=("%s · %s" % [String(city.get("name","")),String(row.get("sub",""))]).trim_suffix(" · ")
+			cards.append(row)
+	var r:=HomeDefense.reading()
+	var here:=int(r.stage)
+	var building:Dictionary=r.building
 	for stage:Dictionary in Impact.defences():
-		blocks.append({"type":"impact_lines","heading":("%s · built" if bool(stage.built) else "%s · not yet built") % String(stage.name),"lines":stage.lines,"columns":2,"compact":true})
-	return {"blocks":blocks}
+		var index:=int(stage.stage)
+		var lines:Array=stage.lines
+		var spec:Dictionary=MilitaryCampaign.SETTLEMENT_DEFENSE_STAGES[index]
+		var bill:PackedStringArray=[]
+		for material:String in (spec.materials as Dictionary):bill.append("%s %s" % [_n(roundi(float(spec.materials[material]))),ResourceSystem.display_name(material).to_lower()])
+		var row:={"section":"defences","key":"stage_%d" % index,"icon":DEFENCE_ICONS[clampi(index,0,DEFENCE_ICONS.size()-1)],"name":String(stage.name),
+			"value":String(lines[0].value),"value_color":Tokens.GREEN if bool(stage.built) else Tokens.TEXT_SOFT,"sub":"%s days' work · %s" % [_n(roundi(float(spec.work))),", ".join(bill)],
+			"effects":[{"label":"Lookout","value":String(lines[1].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[1].words)},{"label":"Stores safe","value":String(lines[2].value),"tone":"good" if bool(stage.built) else "plain","tip":String(lines[2].words)}],
+			"detail":"Defenders %s: %s" % [String(lines[0].value),String(lines[0].words)]}
+		if bool(stage.built):row["tag"]={"text":"Built","tone":"good"}
+		elif not building.is_empty() and index==int(building.get("index",-1)):
+			row.merge({"tag":{"text":"Building","tone":"good"},"bar":{"ratio":float(building.progress),"color":Tokens.GREEN,"width":80},"highlight":true},true)
+		elif index==here+1:row.merge({"tag":{"text":"Next","tone":"warn","tip":"Its bill and the choice of who decides are on The Town."},"highlight":true},true)
+		cards.append(row)
+	var sections:=[
+		{"id":"works","heading":"Water, rail and plants","note":"none yet" if cards.filter(func(c:Dictionary)->bool:return String(c.section)=="works").is_empty() else "","note_tip":"Builders raise water works, channels, rail and plants once their practices are adopted and materials arrive."},
+		{"id":"defences","heading":"The defences, stage by stage"}]
+	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}
 
 static func _infrastructure_rows(city_id:String)->Array:
 	var rows:Array=[]
 	var works=preload("res://scripts/water_waste_works.gd")
 	for work:Dictionary in works.data().get("works",[]):
 		# What it does, from its practice and its coverage (building_impact.gd).
+		var effects:Array=[]
 		var told:PackedStringArray=[]
-		for line:Dictionary in Impact.water_work(String(work.kind)).lines:told.append("%s %s: %s" % [String(line.label),String(line.value),String(line.words)])
-		rows.append({"name":String(works.SPECS.get(String(work.kind),{}).get("name",String(work.kind).capitalize())),"value":String(work.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(work.get("condition",1.0))*100.0),"detail":String.chr(10).join(told),"accent":Tokens.TEAL})
+		for line:Dictionary in Impact.water_work(String(work.kind)).lines:
+			told.append("%s %s: %s" % [String(line.label),String(line.value),String(line.words)])
+			if effects.size()<2:effects.append({"label":String(line.label),"value":String(line.value),"tone":String(line.get("tone","plain")),"tip":String(line.words)})
+		var condition:=float(work.get("condition",1.0))
+		rows.append({"key":"water_"+String(work.kind),"icon":"stores","name":String(works.SPECS.get(String(work.kind),{}).get("name",String(work.kind).capitalize())),"tag":_status_tag(String(work.get("status",""))),
+			"bar":{"ratio":condition,"color":Tokens.TEAL,"width":80,"tip":"Repair"},"value":"%d%%" % roundi(condition*100.0),"sub":"repair","effects":effects,"detail":String.chr(10).join(told)})
 	for line:Dictionary in preload("res://scripts/water_conveyance.gd").data().get("lines",[]):
-		rows.append({"name":"Water conduit","value":String(line.get("status","")).replace("_"," ").capitalize(),"sub":"Condition %d%%" % roundi(float(line.get("condition",1.0))*100.0),"accent":Tokens.TEAL})
+		var condition:=float(line.get("condition",1.0))
+		rows.append({"key":"conduit_%d" % rows.size(),"icon":"stores","name":"Water channel","tag":_status_tag(String(line.get("status",""))),"bar":{"ratio":condition,"color":Tokens.TEAL,"width":80},"value":"%d%%" % roundi(condition*100.0),"sub":"repair","detail":"A channel bringing water to the town."})
 	for line:Dictionary in preload("res://scripts/rail_freight.gd").data().get("lines",[]):
-		rows.append({"name":"Rail line","value":String(line.get("status","")).replace("_"," ").capitalize(),"sub":"%d wagons" % int(line.get("wagons",0)),"accent":Tokens.BLUE})
+		rows.append({"key":"rail_%d" % rows.size(),"icon":"yard","name":"Rail line","tag":_status_tag(String(line.get("status",""))),"value":"%d wagons" % int(line.get("wagons",0)),"value_width":80,"sub":"","detail":"A rail line and its wagons."})
 	for base:Dictionary in MilitaryCampaign.joint_operations.state.get("bases",[]):
-		if String(base.get("city_id",""))==city_id:rows.append({"name":"Naval dock","value":"Condition %d%%" % roundi(float(base.get("condition",1.0))*100.0),"accent":Tokens.BLUE})
+		if String(base.get("city_id",""))!=city_id:continue
+		var condition:=float(base.get("condition",1.0))
+		rows.append({"key":"dock_%d" % rows.size(),"icon":"yard","name":"Naval dock","bar":{"ratio":condition,"color":Tokens.BLUE,"width":80},"value":"%d%%" % roundi(condition*100.0),"sub":"repair","detail":"A dock for the fleet."})
 	var ops=preload("res://scripts/technology_operations.gd")
 	if GameState.resource_settlement_id.is_empty():
 		for plant:String in ops.data().get("plants",{}):
 			var record:Dictionary=ops.data().plants[plant]
 			if int(record.get("installed",0))+int(record.get("building",0))<=0:continue
-			rows.append({"name":String(ops.PLANTS.get(plant,{}).get("name",plant.capitalize())),"value":"%d installed" % int(record.get("installed",0)),"sub":ops.status(plant),"accent":Tokens.GOLD})
+			var status:=String(ops.status(plant))
+			var stopped:=status.to_lower().begins_with("waiting") or status.to_lower().contains("short")
+			rows.append({"key":"plant_"+plant,"icon":"workshop","name":String(ops.PLANTS.get(plant,{}).get("name",plant.capitalize())),"value":"%d installed" % int(record.get("installed",0)),"value_width":90,
+				"sub":status,"tag":{"text":"Idle" if stopped else "Working","tone":"warn" if stopped else "good","tip":status},"detail":"%s: %s." % [String(ops.PLANTS.get(plant,{}).get("name",plant.capitalize())),status]})
 	return rows
+
+static func _status_tag(status:String)->Dictionary:
+	var words:=status.replace("_"," ").capitalize()
+	if words.is_empty():return {}
+	var tone:="good" if status in ["operational","complete","active","built","running"] else ("warn" if status in ["under_construction","planned","building"] else ("bad" if status in ["damaged","failed","abandoned","ruined"] else "info"))
+	return {"text":words,"tone":tone}
 
 func _local_tab(sub:int)->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
@@ -717,7 +1088,7 @@ func _priority(title:String)->void:
 	preload("res://scripts/order_tracker.gd").building_order(title,result,String(GameState.selected_player_settlement_id))
 	terrain._report_military_action(result);hud.request_immediate_dock_refresh()
 func signature()->Array:
-	return [MilitaryCampaign.settlement_defense.duplicate(true),GameState.selected_player_settlement_id,GameState.settlement_site_committed,GameState.settlement_projects.duplicate(true),GameState.settlement_completed.duplicate(),GameState.resource_stockpiles.duplicate(),GameState.population_allocations.duplicate(),GameState.elapsed_days,GameState.settlement_network_revision,selected_project,GameState.building_ledger.size(),GameState.next_building_record_id,history_filter,history.signature() if history!=null else []]
+	return [MilitaryCampaign.settlement_defense.duplicate(true),GameState.selected_player_settlement_id,GameState.settlement_site_committed,GameState.settlement_projects.duplicate(true),GameState.settlement_completed.duplicate(),GameState.resource_stockpiles.duplicate(),GameState.population_allocations.duplicate(),GameState.elapsed_days,GameState.settlement_network_revision,selected_project,record_page,GameState.building_ledger.size(),GameState.next_building_record_id,history_filter,history.signature() if history!=null else []]
 
 func _settlements_tab()->Dictionary:
 	var blocks:Array=[{"type":"text","heading":"CONSTRUCTION BY SETTLEMENT","text":"Completed works count finished projects. A shelter project can provide several structures. History records later building changes, repairs and losses."}]

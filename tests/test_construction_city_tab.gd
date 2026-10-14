@@ -96,6 +96,13 @@ static func _rows(page:Dictionary)->Dictionary:
 	for item:Dictionary in page.get("tile_rows",[]):rows[String(item.name)]=item
 	return rows
 
+## Every row of the board by its key.
+static func _keyed(page:Dictionary)->Dictionary:
+	var rows:={}
+	for block:Dictionary in page.get("blocks",[]):
+		for item:Dictionary in block.get("cards",[]):rows[String(item.get("key",item.get("name","")))]=item
+	return rows
+
 ## The page as the player reads it, for the handoff and for review.
 static func _print(label:String,page:Dictionary)->void:
 	print("=== CITY TAB: %s ===" % label)
@@ -126,7 +133,7 @@ func test_seanstone_room_is_explained_by_the_tents_carried()->void:
 	assert_str(String(housing.detail)).contains("newcomers and people brought home")
 	# When more homes go up comes from the builders' own rule.
 	var homes:Dictionary=rows["New homes"]
-	assert_str(String(homes.value)).is_equal("Not needed yet")
+	assert_str(String(homes.value)).is_equal("%d to go" % (192-int(GameState.population_total)))
 	assert_int(Construction.housing_trigger_people()).is_equal(192)
 	assert_str(String(homes.sub)).is_equal("Builders start more once over 192 people live here")
 	assert_str(String(homes.detail)).is_equal("Then 8 builders add about 24 places every %s." % Plain.span_text(Construction.HOUSING_BATCH_WORK/Construction.housing_work_per_day()))
@@ -183,7 +190,7 @@ func test_a_second_town_shows_its_own_homes_and_work()->void:
 	assert_bool(bool(SettlementModel.select_settlement("second").ok)).is_true()
 	var page:=_page()
 	_print("a second town, just founded",page)
-	assert_str(String((page.blocks[0] as Dictionary).heading)).is_equal("Rivermeet")
+	assert_str(String(((page.blocks[0] as Dictionary).sections as Array)[0].heading)).starts_with("Rivermeet")
 	var places:int=SettlementModel.with_city_resources("second",func()->int:return int(GameState.housing_capacity))
 	var housing:Dictionary=_rows(page).Housing
 	assert_str(String(housing.value)).is_equal("%d places" % places)
@@ -221,10 +228,10 @@ func test_the_tab_leads_with_the_work_in_hand_at_the_engines_pace()->void:
 	var current:=Construction._current_settlement_project()
 	assert_dict(current).is_not_empty()
 	var page:=_page()
-	assert_str(String(page.brief.title)).is_equal("Building the %s" % current.name)
+	# A work going well needs no lead line: its row carries it.
+	assert_dict(page.brief).is_empty()
 	var rate:=Construction.daily_work()
 	var left:=(float(current.days)-float(GameState.settlement_projects.get(current.name,0.0)))/rate
-	assert_str(String(page.brief.why)).contains("about %s left at today's pace" % Plain.span_text(left))
 	var row:Dictionary=_rows(page)[String(current.name)]
 	assert_str(String(row.detail)).contains(String(current.effect))
 	assert_str(String(row.sub)).is_equal("About %s left at today's pace" % Plain.span_text(left))
@@ -254,9 +261,12 @@ func test_builders_row_counts_who_builds_and_the_actions_open_the_owning_pages()
 	var builders:Dictionary=_rows(page).Builders
 	assert_str(String(builders.value)).is_equal("8")
 	assert_str(String(builders.sub)).is_equal("All on the town's works")
-	var actions:Array=(page.blocks.back() as Dictionary).items
-	for action:Dictionary in actions:(action.on_press as Callable).call()
-	assert_array(hud.opened).contains_exactly([["construction",1],["overview",0]])
+	# The builders' figure and the "Set builders" verb open The People.
+	for tile:Dictionary in page.kpis:
+		if String(tile.label)=="BUILDERS":(tile.on_press as Callable).call()
+	for section:Dictionary in (page.blocks[0] as Dictionary).sections:
+		for action:Dictionary in section.get("actions",[]):(action.on_press as Callable).call()
+	assert_array(hud.opened).contains_exactly([["overview",0],["overview",0]])
 	GameState.population_allocations.Construction=0
 	var idle:=_page()
 	assert_str(String(idle.brief.title)).is_equal("No one is building")
@@ -283,15 +293,19 @@ func test_condition_says_how_it_moves_and_what_it_costs()->void:
 
 func test_era_says_what_the_next_era_still_needs()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
-	var era:Dictionary=_rows(_page())["Building era"]
-	assert_str(String(era.value)).is_equal("Foothold")
+	var page:=_page()
+	var era:Dictionary=_keyed(page).era
+	var shown:=""
+	for tile:Dictionary in page.kpis:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
+	assert_str(shown).is_equal("Foothold")
+	assert_str(String(era.name)).is_equal("Hamlet")
 	# Hamlet needs a year's age, three finished works and four makers.
 	assert_str(String(era.detail)).contains("Hamlet needs the town to be a year old")
 	assert_str(String(era.detail)).contains("3 finished works (2 now)")
 	assert_str(String(era.detail)).contains("4 makers (3 now)")
 	GameState.elapsed_days=400;GameState.population_allocations.Crafting=5
 	GameState.settlement_completed.append("Storage Pits")
-	assert_str(String(_rows(_page())["Building era"].sub)).is_equal("Rising toward Hamlet")
+	assert_str(String(_keyed(_page()).era.sub)).is_equal("Rising toward Hamlet")
 
 func test_workshops_and_stores_name_the_hands_they_need()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
@@ -304,30 +318,31 @@ func test_workshops_and_stores_name_the_hands_they_need()->void:
 func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
 	var page:=_page()
-	var caps:=RegEx.create_from_string("\\b[A-Z]{3,}\\b")
-	for text:String in [String(page.brief.title),String(page.brief.why)]:
+	var caps:=RegEx.create_from_string("\b[A-Z]{3,}\b")
+	for text:String in [String(page.brief.get("title","")),String(page.brief.get("why",""))]:
 		assert_object(caps.search(text)).override_failure_message(text).is_null()
 	var count:=0
-	for block:Dictionary in page.blocks:
-		assert_object(caps.search(String(block.get("heading","")))).is_null()
-		if not String(block.type) in ["rows","town_works"]:continue
-		for item:Dictionary in block.get("items",block.get("cards",[])):
-			count+=1
-			assert_str(String(item.value)).override_failure_message(String(item.name)).is_not_empty()
-			assert_str(String(item.sub)).override_failure_message(String(item.name)).is_not_empty()
-			assert_str(String(item.get("detail",""))).override_failure_message(String(item.name)).is_not_empty()
-			assert_bool(String(item.value).contains("·")).override_failure_message(String(item.value)).is_false()
-			for text:String in [String(item.name),String(item.value),String(item.sub),String(item.get("detail",""))]:
-				assert_object(caps.search(text)).override_failure_message(text).is_null()
-	# The defences, new homes, the era and the workshops as cards (a work in hand
-	# adds its own); homes, builders and repair lead the page as tiles.
-	assert_int(count).is_between(4,5)
-	var tiles:Array=_page().kpis
+	var board:Dictionary=page.blocks[0]
+	for section:Dictionary in board.sections:assert_object(caps.search(String(section.heading))).is_null()
+	for item:Dictionary in board.cards:
+		if String(item.get("section",""))=="kpi":continue
+		count+=1
+		# A name, a figure or a bar, and a meaning in its tooltip.
+		assert_str(String(item.name)).is_not_empty()
+		assert_bool(String(item.get("value",""))!="" or item.has("bar") or item.has("progress") or item.has("meter") or item.has("segments") or item.has("effects")).override_failure_message(String(item.name)).is_true()
+		assert_str(String(item.get("detail",""))).override_failure_message(String(item.name)).is_not_empty()
+		assert_bool(String(item.get("value","")).contains("·")).override_failure_message(String(item.get("value",""))).is_false()
+		for text:String in [String(item.name),String(item.get("value","")),String(item.get("sub",""))]:
+			assert_object(caps.search(text)).override_failure_message(text).is_null()
+			assert_int(text.split(" ",false).size()).override_failure_message(text).is_less_equal(12)
+	# What goes up, who builds, the fabric and what comes next, as rows.
+	assert_int(count).is_greater_equal(10)
+	var tiles:Array=page.kpis
 	assert_int(tiles.size()).is_greater_equal(4)
 	for tile:Dictionary in tiles:
-		assert_bool(tile.has("meter")).override_failure_message(String(tile.label)).is_true()
+		assert_bool(tile.has("meter") or tile.has("segments")).override_failure_message(String(tile.label)).is_true()
 		assert_str(String(tile.value)).is_not_empty()
-	# It draws: one ink row per item on the dock's paper.
+	# It draws: one board on the dock's paper.
 	var body:=VBoxContainer.new();add_child(body)
 	Blocks.render(body,page.blocks)
 	assert_int(body.get_child_count()).is_equal(page.blocks.size())

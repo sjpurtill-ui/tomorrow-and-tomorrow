@@ -115,7 +115,9 @@ func test_the_defence_card_shows_the_engines_own_numbers()->void:
 	var card:Dictionary=_cards(_page()).defences
 	var snapshot:=MilitaryCampaign.settlement_defense_snapshot()
 	var stage:Dictionary=MilitaryCampaign.SETTLEMENT_DEFENSE_STAGES[1]
-	assert_str(String(card.value)).is_equal(String(snapshot.short))
+	# The row names the next stage; what stands now is in its words.
+	assert_str(String(card.name)).is_equal(String(stage.short))
+	assert_str(String(card.sub)).contains(String(snapshot.short).to_lower())
 	# Before -> after: the ledger's figures now, the stage table's once built.
 	var gains:Array=card.gains
 	assert_str(String(gains[0].before)).is_equal("+%d%%" % roundi(float(snapshot.defense_bonus)*100.0))
@@ -133,8 +135,12 @@ func test_the_defence_card_shows_the_engines_own_numbers()->void:
 	assert_float(float(card.meter.tick)).is_equal(float(decision.need))
 	# The chips are the reading's blockers, word for word.
 	var reading:=HomeDefense.reading()
-	assert_array((card.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).is_equal((reading.blockers as Array).map(func(b:Dictionary)->String:return String(b.text)))
-	assert_array((card.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).contains(["Timber 2 of 20"])
+	# (A material short shows once, red in its pips, not again as a chip.)
+	var others:Array=(reading.blockers as Array).filter(func(b:Dictionary)->bool:return String(b.kind)!="material")
+	assert_array((card.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).is_equal(others.map(func(b:Dictionary)->String:return String(b.text)))
+	assert_array((reading.blockers as Array).map(func(b:Dictionary)->String:return String(b.text))).contains(["Timber 2 of 20"])
+	var timber:Array=(card.needs as Array).filter(func(n:Dictionary)->bool:return String(n.resource)=="Timber")
+	assert_bool(float(timber[0].have)<float(timber[0].need)).is_true()
 	# Who decides: the people, by default.
 	assert_str(String(card.choice.selected)).is_equal("people")
 
@@ -165,13 +171,22 @@ func test_the_choice_and_the_fixes_work_from_the_board()->void:
 	body.queue_free()
 	# Build now, from the choice: the works start at once, paid from the store.
 	body=_render(_page())
-	var build:Array=_find(body,"Choose_build")
+	var build:Array=_find(body,"Act_Build")
 	assert_int(build.size()).is_equal(1)
 	(build[0] as Button).pressed.emit()
 	assert_str(HomeDefense.word()).is_equal("build")
 	assert_int(int(MilitaryCampaign.settlement_defense.project_stage)).is_equal(1)
 	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(30.0,0.0001)
 	assert_str(String(terrain.reports.back().message)).is_equal("Work begins on the watch posts.")
+	body.queue_free()
+
+## The board never pushes the page wider than the dock at 1600 px.
+func test_the_board_fits_the_dock_at_1600()->void:
+	_town()
+	var body:=_render(_page())
+	await get_tree().process_frame
+	for board:Node in _town_boards(body):
+		assert_float((board as Control).get_combined_minimum_size().x).is_less_equal(860.0)
 	body.queue_free()
 
 func test_a_second_town_does_not_show_the_first_towns_defences()->void:
@@ -271,8 +286,8 @@ func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
 			var body:=_render(_page())
 			await get_tree().process_frame
 			var boards:=_town_boards(body)
-			# The town now and around the town; a work in hand adds its own board.
-			assert_int(boards.size()).is_between(2,3)
+			# One board: the whole town as rows.
+			assert_int(boards.size()).is_equal(1)
 			for board:Node in boards:
 				assert_array(_long_texts(board)).override_failure_message("%s %s" % [mode,state]).is_empty()
 				assert_array(_contrast_failures(board)).override_failure_message("%s %s" % [mode,state]).is_empty()

@@ -127,16 +127,16 @@ func test_homes_explain_births_deaths_and_crowding()->void:
 func test_the_buildings_page_shows_what_buildings_and_homes_do()->void:
 	var terrain:=StubTerrain.new()
 	var dock=Dock.new(terrain,null)
-	var town:Dictionary=dock.tab(0)
-	var kinds:Array=[]
-	for block:Dictionary in town.blocks: kinds.append(String(block.get("type","")))
-	assert_int(kinds.count("impact_lines")).is_greater_equal(2)
-	var summary:Dictionary={}
-	for block:Dictionary in town.blocks:
-		if String(block.get("heading","")).begins_with("What the buildings do"): summary=block
-	assert_array(summary.get("lines",[])).is_not_empty()
+	# The Civic works tab carries what the buildings and the homes do, a row
+	# for each of the engine's lines.
 	var civic:Dictionary=dock.tab(1)
 	var queue:Dictionary=civic.blocks[0]
+	var sections:Array=(queue.sections as Array).map(func(x:Dictionary)->String:return String(x.id))
+	assert_array(sections).contains(["does","homes"])
+	var does:Array=(queue.cards as Array).filter(func(c:Dictionary)->bool:return String(c.get("section",""))=="does")
+	var homes:Array=(queue.cards as Array).filter(func(c:Dictionary)->bool:return String(c.get("section",""))=="homes")
+	assert_int(does.size()).is_equal(Impact.summary().size())
+	assert_int(homes.size()).is_equal((Impact.homes().lines as Array).size())
 	for project:Dictionary in queue.projects:
 		assert_array((project.impact as Dictionary).lines).is_not_empty()
 	assert_str(String(dock.meta().title)).is_equal("Buildings")
