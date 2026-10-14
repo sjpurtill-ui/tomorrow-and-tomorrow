@@ -87,8 +87,13 @@ the final wide/narrow composition; 40 populated private GPU captures and eight
 existing roster cases pass. Opening condition gains now correctly say points
 rather than percentages; the underlying effect values and rules are unchanged.
 
-HELD: Production/Exchange, Home detail/Buildings, and
-Chronicle/Figures/notices. These are not claimed as
+Chronicle is delivered at `ca350fda` (worker `66c9dcc1`): three recent choices
+and a complete selected event; searchable six-record archives for events and
+buildings. Year overview counts are scoped to that year. Root accepted the
+chooser/reader revision; three integrated bounded-reader cases pass (eight
+worker Chronicle cases and 24 private GPU views in both palettes).
+
+HELD: Production/Exchange, Home detail/Buildings, and Figures/notices. These are not claimed as
 delivered. No game rules are changed.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
