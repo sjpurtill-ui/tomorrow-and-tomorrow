@@ -152,10 +152,10 @@ func test_health_and_research_docks_build_plain_pages()->void:
 		"on_tree":func():pass,"on_work":func():pass,"on_domain":func(_d:String):pass})
 	var words:=_texts(board)
 	# One line: the field, its attention as a bar with − and +, the question, its holdup and its time to proof.
-	assert_str(words).contains("Health & care").contains("25%").contains("Wound cleaning").contains("13 months").contains("Thin team")
+	assert_str(words).contains("Health & care").contains("25%").contains("Wound cleaning").contains("13 months").contains("thin team")
 	assert_str(words).not_contains("in 100 of our attention").not_contains("researchers")
 	# Who works it and its clock are in its account on hover.
-	assert_str((board.find_child("Question_*",true,false) as Control).tooltip_text).contains("One person, part of the time").contains("about 13 months to proof")
+	assert_str((board.find_child("Row_0",true,false) as Control).tooltip_text).contains("One person, part of the time").contains("about 13 months to proof")
 
 func test_economy_dock_titles_follow_the_rail()->void:
 	_prepare_settled()

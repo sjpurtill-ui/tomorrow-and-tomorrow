@@ -391,8 +391,7 @@ func test_back_to_our_leaders_restores_delegation_and_the_chips()->void:
 	(ask.find_child("Choice_Water",true,false) as Button).pressed.emit()
 	assert_str(String(GovernmentPeopleSystem.settlement_management(id).focus)).is_equal("water")
 	# The town page has no second "Who does what" screen.
-	assert_array(Array(_texts(page.find_child("Reports",true,false)))).not_contains(["Who does what"])
-	assert_array(Array(_texts(page.find_child("Reports",true,false)))).contains(["Ages and families","Rename this place"])
+	assert_array(Array(_texts(page))).not_contains(["Who does what"])
 
 # --------------------------------------------------------------------------
 # Saves

@@ -49,11 +49,11 @@ func _lives_blocks()->Array:
 		{"label":"Born","value":_n(born),"icon":_mark("birth"),"tip":"Every birth since the people set out."},
 		{"label":"Died","value":_n(int(GameState.lifetime_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Every death since the people set out."},
 		{"label":"With child now","value":_n(int(pregnancy.get("active",0))),"icon":_mark("birth"),"tip":"Women carrying a child now: about %s births in the next year." % _n(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0))))},
-		{"label":"Births expected next year","value":_n(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0)))),"icon":_mark("birth"),"tip":"From the women with child now and those likely to conceive."},
+		{"label":"Births due next year","value":_n(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0)))),"icon":_mark("birth"),"tip":"From the women with child now and those likely to conceive."},
 		{"label":"Lost before birth","value":_n(int(GameState.lifetime_pregnancy_losses)),"icon":_mark("omen"),"tone":"warn","tip":"Children lost before birth, since the people set out."},
 		{"label":"Born dead","value":_n(int(GameState.lifetime_stillbirths)),"icon":_mark("omen"),"tone":"warn","tip":"Children born dead, since the people set out."},
-		{"label":"Mothers died in childbirth","value":_n(int(GameState.lifetime_maternal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Mothers who died giving birth, since the people set out."},
-		{"label":"Newborns died in the first month","value":_n(int(GameState.lifetime_neonatal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Babies who died in their first month, since the people set out."},
+		{"label":"Mothers died giving birth","value":_n(int(GameState.lifetime_maternal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Mothers who died giving birth, since the people set out."},
+		{"label":"Newborns died, first month","value":_n(int(GameState.lifetime_neonatal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Babies who died in their first month, since the people set out."},
 	]
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
 	var groups:=[["Working","productive","gathering, making, building","work"],["Tending others","support","care and keeping order","ceremony"],["Children and elders","dependent","looked after by the rest","birth"],["Away","away","on the road or under arms","scout"]]
@@ -64,9 +64,9 @@ func _lives_blocks()->Array:
 		var count:=int(profile.get("absent",0))+int(profile.get("mobilized",0)) if spec[1]=="away" else int(profile.get(String(spec[1]),0))
 		where.append({"label":String(spec[0]),"value":_n(count),"bar":float(count)/maxf(1.0,float(everyone)),"icon":_mark(String(spec[3])),"tip":"%s: %s." % [String(spec[0]),String(spec[2])]})
 	var workforce:=GameState.workforce_capacity_snapshot()
-	where.append({"label":"Work done, as people at full strength","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
+	where.append({"label":"Work done, at full strength","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
 		"tip":"Those at work get done what this many people at full strength would.%s" % ((" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else "")})
-	var blocks:Array=[{"type":"fact_grid","heading":"Since we set out","items":lifetime},{"type":"fact_grid","heading":"Where everyone is","items":where}]
+	var blocks:Array=[{"type":"fact_grid","heading":"Since we set out","min_column":250,"items":lifetime},{"type":"fact_grid","heading":"Where everyone is","min_column":250,"items":where}]
 	var killing:Dictionary=Health.mortality_block("How many people this cause kills each year at the present rate")
 	if not killing.is_empty():blocks.append(killing)
 	# Every cause of death so far, largest first.
@@ -118,7 +118,7 @@ func _works_blocks()->Array:
 		rows.append({"cells":{"work":String(row.get("kind","Building")).replace("_"," ").capitalize(),"when":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"used":", ".join(parts) if not parts.is_empty() else "—"},
 			"icon":_mark("fire" if event in ["damaged","destroyed"] else "work"),"tag":{"text":event.replace("_"," ").capitalize(),"tone":"bad" if event=="destroyed" else ("warn" if event=="damaged" else "good")},
 			"tip":(detail.left(1).to_upper()+detail.substr(1)) if detail!="" else String(row.get("settlement_name",""))})
-	var blocks:Array=[{"type":"fact_grid","items":facts},
+	var blocks:Array=[{"type":"fact_grid","min_column":250,"items":facts},
 		{"type":"table","heading":"Every work, newest first","note":("the newest %d of %d" % [WORKS_SHOWN,records.size()]) if records.size()>WORKS_SHOWN else "","empty":"Nothing has been built yet.",
 			"columns":[{"key":"work","label":"WORK"},{"key":"when","label":"WHEN","width":120},{"key":"used","label":"MATERIAL USED","width":280}],"rows":rows}]
 	if not materials.is_empty():
@@ -127,7 +127,7 @@ func _works_blocks()->Array:
 		var biggest:=maxf(0.001,float(materials[names[0]]))
 		var items:Array=[]
 		for material:Variant in names:items.append({"label":String(material),"value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(float(materials[material])),"bar":float(materials[material])/biggest,"icon":Icons.texture_for(String(material)),"tip":"All %s taken from the stores for building." % String(material).to_lower()})
-		blocks.append({"type":"fact_grid","heading":"Material used by all building","items":items})
+		blocks.append({"type":"fact_grid","heading":"Material used by all building","min_column":250,"items":items})
 	return blocks
 
 func signature()->Array:

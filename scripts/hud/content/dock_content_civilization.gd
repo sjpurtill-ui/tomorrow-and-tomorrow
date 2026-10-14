@@ -128,19 +128,37 @@ func _council_blocks()->Array:
 	var Roster:=preload("res://scripts/hud/court_roster.gd")
 	var Tracker:=preload("res://scripts/order_tracker.gd")
 	var Stack:=preload("res://scripts/hud/order_stack.gd")
-	var court:Array=[]
+	var Posts:=preload("res://scripts/person_posts.gd")
+	var Portrait:=preload("res://scripts/hud/person_portrait.gd")
+	var commands:=Posts.commands_now()
+	# Grouped by office, each with their face, their full title and where
+	# they are now (person_posts.gd: the same words Home and War use).
+	var office_order:=["council","settlement","war","scouts","builders","gifted"]
+	var heads:={"council":"Officials","settlement":"Town leaders","war":"War leaders","scouts":"Scouts","builders":"Master builders","gifted":"The gifted"}
+	var rows:Array=[]
 	for person:Dictionary in Roster.people():
 		if String(person.get("group","")) in ["prisoners","won_over","folk"]:continue
+		var post:=Posts.of(person,commands)
 		var matters:=int(person.get("matters",0))
 		var regard:Dictionary=person.get("regard",{}) if person.get("regard") is Dictionary else {}
 		var fact:="%d %s to raise" % [matters,"matter" if matters==1 else "matters"] if matters>0 else String(regard.get("read",""))
 		var target:Dictionary=person.get("target",{})
-		court.append({"label":"%s · %s" % [String(person.name),String(person.title)],"value":fact,"tone":"warn" if matters>0 else "",
-			"tip":"%s, %s. Summon them to talk, give orders or replace them." % [String(person.name),String(person.title)],
+		var face:Dictionary=(person.get("person",{}) as Dictionary).duplicate()
+		if int(face.get("person_id",0))<=0:
+			var key:=String(target.get("figure_id","")) if String(target.get("figure_id",""))!="" else String(person.name)
+			face["person_id"]=absi(key.hash())%997+1
+		var group:=String(post.group) if heads.has(String(post.group)) else "council"
+		rows.append({"group":heads[group],"rank":office_order.find(group),"icon":Portrait.texture(face),
+			"cells":{"name":String(person.name),"title":String(post.title),"place":String(post.place),"fact":fact},"tone":"",
+			"tip":"%s, %s. %s. Summon them to talk, give orders or replace them." % [String(person.name),String(post.title),String(post.place)],
 			"button":{"label":"Summon","on_press":_open_court.bind(target),"tip":"Call %s to the court." % String(person.name)}})
+	rows.sort_custom(func(x:Dictionary,y:Dictionary)->bool:return int(x.rank)<int(y.rank))
+	for row:Dictionary in rows:
+		row.erase("rank")
 	var blocks:Array=[]
-	if court.is_empty():blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
-	else:blocks.append({"type":"fact_grid","heading":"THE COURT","items":court,"min_column":300})
+	if rows.is_empty():blocks.append({"type":"text","text":"No one holds an office yet. The government will appoint someone as soon as they can."})
+	else:blocks.append({"type":"table","heading":"THE COURT","icon_size":26,"rows":rows,
+		"columns":[{"key":"name","label":"Name"},{"key":"title","label":"Office"},{"key":"place","label":"Where now"},{"key":"fact","label":"Regard"}]})
 	var open:Array=[]
 	for order_variant in Tracker.orders():
 		var order:Dictionary=order_variant

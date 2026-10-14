@@ -46,6 +46,7 @@ const Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
 const Makeup:=preload("res://scripts/army_makeup.gd")
 const Economy:=preload("res://scripts/army_economy.gd")
 const Blocks:=preload("res://scripts/battle_blocks.gd")
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -96,6 +97,7 @@ var tab:="army"
 var _wide:=false
 var _laid:=false
 var leaders_kicker:Label
+var leaders_heading:Control
 var enemy_count:Label
 var feedback:Label
 var covert:Control
@@ -158,8 +160,7 @@ func setup(_block:Dictionary={})->void:
 	var leaders_head:=_kicker_row("Leaders",leaders_section)
 	# The tab already says "Leaders": its kicker shows only beside the Fronts.
 	leaders_kicker=leaders_head.get_child(0)
-	var name_one:=_small_button("General","plus","Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
-	name_one.name="NameGeneral";name_one.pressed.connect(_name_general);leaders_head.add_child(name_one)
+	leaders_heading=leaders_head
 	leader_box=VBoxContainer.new();leader_box.name="Leaders";leader_box.add_theme_constant_override("separation",6);leaders_section.add_child(leader_box)
 	# Spies and assassins (covert_board.gd): folded until asked for; it only
 	# informs, the god gives covert orders at court.
@@ -353,9 +354,8 @@ func _border_card()->Control:
 
 ## "Place a fort" / "Forts on map": the Border map, on the map itself.
 func _border_verb(Forts:GDScript,first:bool)->Button:
-	var open:=_small_button("Place a fort" if first else "Forts on map","besiege","Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
+	var open:=Dense.verb("Place a fort" if first else "Forts on map",null,"Open the Border map: inspect the watch, choose ground for a fort, or move an existing post.")
 	open.name="OpenBorder"
-	open.icon=Icons.chart_texture("fort:%s" % String(Forts.call("best_kind").id),T.INK,40)
 	open.pressed.connect(func()->void:
 		var scene:=get_tree().current_scene if is_inside_tree() else null
 		if scene==null:return
@@ -390,7 +390,7 @@ func _headline(parent:Control,mark:String,number:int,words:String,tip:String)->H
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS;row.tooltip_text=tip
 	row.add_child(_icon(mark,T.INK,20))
 	var big:=_line(compact(number),20,T.INK);big.name="Number";big.add_theme_font_override("font",T.font("ui_strong"));big.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(big)
-	var said:=_line(words,13,T.INK_MUTED);said.name="Words";said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.clip_text=true;said.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(said)
+	var said:=_line(words,13,T.INK_MUTED);said.name="Words";said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.clip_text=true;said.text_overrun_behavior=TextServer.OVERRUN_TRIM_WORD;row.add_child(said)
 	parent.add_child(row)
 	return row
 
@@ -430,9 +430,9 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	head.name="Total"
 	# Only when the army is not yet the size asked for: a small tag.
 	if total!=watch:
-		var gap:=_line(("+%s going home" % compact(total-watch)) if total>watch else ("%s still joining" % compact(watch-total)),12,T.AMBER_TEXT)
+		var gap:=_line(("+%s more than asked" % compact(total-watch)) if total>watch else ("%s still joining" % compact(watch-total)),12,T.AMBER_TEXT)
 		gap.name="Over" if total>watch else "Under";gap.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		gap.tooltip_text=("You asked for %s. %s more are in the army: away in the field, holding towns, hurt, or not yet sent home. They go back to their work when they come home." % [EraWords.grouped(watch),EraWords.grouped(total-watch)]) if total>watch else ("You asked for %s: %s more are still joining." % [EraWords.grouped(watch),EraWords.grouped(watch-total)])
+		gap.tooltip_text=("You asked for %s. %s more are in the army: away in the field, holding towns, hurt, or kept on because so few are over the share that sending them home is not worth it. Those beyond the share go back to their work when they come home." % [EraWords.grouped(watch),EraWords.grouped(total-watch)]) if total>watch else ("You asked for %s: %s more are still joining." % [EraWords.grouped(watch),EraWords.grouped(watch-total)])
 		head.add_child(gap)
 	head.add_child(_step_button("WatchLess","−","A smaller army: one in a hundred of the people fewer. The least drilled at home go back to their work.",func()->void:_step_watch(-1)))
 	head.add_child(_step_button("WatchMore","+","A bigger army: one in a hundred of the people more. They leave other work and join at home.",func()->void:_step_watch(1)))
@@ -511,6 +511,19 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	split.add_child(split_words)
 	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
 	split.add_child(_step_button("GuardMore","+","A bigger home guard, by a tenth of the army: idle bands come home to guard.",func()->void:_step_split(1)))
+	# Who stands at home and who would rise, in the words every screen uses
+	# (watch_military.gd home_standing).
+	var standing:=Watch.home_standing(MilitaryCampaign)
+	var rise_line:=_line("%s on watch · %s can rise" % [compact(int(standing.on_watch)),compact(int(standing.can_rise))],12,T.INK_MUTED);rise_line.name="OnWatch"
+	rise_line.tooltip_text="On watch: everyone under arms standing in our towns today, the home guard there and those free to send (%s posted out on the border besides).
+Can rise: the townsfolk who take up arms beside them, untrained, when raiders come." % EraWords.grouped(int(standing.on_border))
+	var standing_row:=HBoxContainer.new();standing_row.add_theme_constant_override("separation",14);standing_row.add_child(rise_line)
+	# The home guard posted out, said beside it so the counts add up.
+	if int(standing.on_border)>0:
+		var posted:=_line("%s on the border" % compact(int(standing.on_border)),12,T.INK_MUTED);posted.name="OnBorderLine"
+		posted.tooltip_text="Of the home guard, posted to the forts and the line between them; not in the towns."
+		standing_row.add_child(posted)
+	var indent:=MarginContainer.new();indent.add_theme_constant_override("margin_left",17);indent.add_child(standing_row);column.add_child(indent)
 	column.add_child(_towns_rows(f))
 	return panel
 
@@ -531,9 +544,9 @@ func _towns_rows(f:Dictionary)->Control:
 		var row:=HBoxContainer.new();row.name="Town_%s" % String(town.id);row.add_theme_constant_override("separation",8);row.mouse_filter=Control.MOUSE_FILTER_PASS
 		var pad:=Control.new();pad.custom_minimum_size=Vector2(9,0);pad.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(pad)
 		var short:=int(town.short)
-		var name_label:=_line(String(town.name),12,T.INK);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
+		var name_label:=_line(String(town.name),12,T.INK);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
 		var bar:=ShareBar.new();bar.share=float(town.guard)/float(maxi(1,int(town.need)));bar.ink=T.TEAL if short<=0 else T.RED;bar.custom_minimum_size=Vector2(90,5);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(bar)
-		var count:=_line("%s / %s" % [compact(int(town.guard)),compact(int(town.need))],12,T.INK if short<=0 else T.RED_TEXT);count.add_theme_font_override("font",T.font("ui_strong"));count.custom_minimum_size=Vector2(70,0);count.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;count.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(count)
+		var count:=_line("%s of %s needed" % [compact(int(town.guard)),compact(int(town.need))],12,T.INK if short<=0 else T.RED_TEXT);count.add_theme_font_override("font",T.font("ui_strong"));count.custom_minimum_size=Vector2(118,0);count.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;count.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(count)
 		row.tooltip_text="%s: %s of its %s people on guard; it needs %s (%s of its people, at least %d).%s" % [String(town.name),EraWords.grouped(int(town.guard)),EraWords.grouped(int(town.people)),EraWords.grouped(int(town.need)),Watch.percent(Watch.GUARD_SHARE),Watch.GUARD_MIN,(" %s short: raise the army or keep more at home." % EraWords.grouped(short)) if short>0 else ""]
 		box.add_child(row)
 	if towns.size()>shown.size():
@@ -587,7 +600,8 @@ func _makeup_row(r:Dictionary)->Control:
 	var name_label:=_line(String(r.label),13,T.INK if can else T.INK_MUTED);name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(name_label)
 	var men:=_line("%s / %s" % [compact(int(r.men)),compact(int(r.target))],12,T.INK if int(r.men)>=int(r.target) else T.AMBER_TEXT);men.mouse_filter=Control.MOUSE_FILTER_IGNORE;men.size_flags_horizontal=Control.SIZE_EXPAND_FILL;men.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;top.add_child(men)
 	var waiting:=String(r.get("waiting",""))
-	var kind:=_line(String(r.kind) if waiting=="" else "%s · waiting" % String(r.best).get_slice(" · ",0),11,T.INK_MUTED if waiting=="" else T.AMBER_TEXT);kind.clip_text=true;kind.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;kind.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(kind)
+	# The kind of fighter only; the kit they carry is in the tooltip.
+	var kind:=_line(String(r.kind).get_slice(" · ",0) if waiting=="" else "%s · waiting" % String(r.best).get_slice(" · ",0),11,T.INK_MUTED if waiting=="" else T.AMBER_TEXT);kind.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;kind.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(kind)
 	var bars:=HBoxContainer.new();bars.add_theme_constant_override("separation",4);bars.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(bars)
 	for pair:Array in [[float(r.armed),BarModel.gear_color(maxf(0.0,float(r.armed)))],[float(r.drill),T.GREEN if float(r.drill)>=0.6 else T.AMBER]]:
 		var bar:=ShareBar.new();bar.share=maxf(0.0,float(pair[0]));bar.ink=pair[1];bar.custom_minimum_size=Vector2(0,4);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;bars.add_child(bar)
@@ -638,14 +652,18 @@ func _cost_card(f:Dictionary)->Control:
 		"%s · 1 in %d" % [compact(int(more.watch)),int(more.one_in)],T.AMBER_TEXT if int((more.from as Dictionary).get("Food",0))>0 else T.INK,
 		"Everyone under arms is off other work: %s of %s who can work. %s more would come from %s.%s" % [EraWords.grouped(int(now.watch)),EraWords.grouped(int(now.able)),EraWords.grouped(extra),Economy.from_words(more.from),
 			" With the daily work set by hand the watch takes from the biggest task first." if manual else " The leaders take them from every task in its share."])
-	_cost_row(column,"Food a day",_signed_compact(food_now),_signed_compact(food_more),T.RED_TEXT if food_more<0.0 else T.INK,
-		"Food brought in against food eaten, a day: %s in, %s eaten (soldiers eat %s of a ration more each than at rest). With %s more: %s fewer brought in by the food getters they leave, %s more eaten.%s" % [EraWords.grouped(roundi(float(now.food_in))),EraWords.grouped(roundi(float(now.food_need))),str(Economy.Impact.EXERTION.Defense),EraWords.grouped(extra),EraWords.grouped(roundi(float(more.food_lost))),EraWords.grouped(roundi(float(more.food_need)-float(now.food_need))),
+	# Grown less eaten, before spoilage and drying: not the Economy page's
+	# "Kept" (the change in the stores after them), so not called that.
+	_cost_row(column,"Food grown less eaten",_signed_compact(food_now),_signed_compact(food_more),T.RED_TEXT if food_more<0.0 else T.INK,
+		"Food grown and gathered against food eaten, a day, before spoilage and drying (the Economy page's Kept is the stores' change after them): %s in, %s eaten (soldiers eat %s of a ration more each than at rest). With %s more: %s fewer brought in by the food getters they leave, %s more eaten.%s" % [EraWords.grouped(roundi(float(now.food_in))),EraWords.grouped(roundi(float(now.food_need))),str(Economy.Impact.EXERTION.Defense),EraWords.grouped(extra),EraWords.grouped(roundi(float(more.food_lost))),EraWords.grouped(roundi(float(more.food_need)-float(now.food_need))),
 			(" The stores hold about %s days." % EraWords.grouped(roundi(float(now.food_days)))) if float(now.food_days)>0.0 else ""],food_now<0.0)
-	_cost_row(column,"Births",_births_words(float(now.births)),_births_words(float(more.births)),T.RED_TEXT if float(more.births)>0.05 else T.INK,
+	_cost_row(column,"Births lost, of 100",_births_words(float(now.births)),_births_words(float(more.births)),T.RED_TEXT if float(more.births)>0.05 else T.INK,
 		"Up to %s can keep watch at no extra cost (5 in 100 of the people, or the towns' guard if more). Past that every one more costs births, work and weariness, as an extra learner does: %s over now, %s with %s more." % [EraWords.grouped(int(now.free)),EraWords.grouped(roundi(float(now.over))),EraWords.grouped(roundi(float(more.over))),EraWords.grouped(extra)],float(now.births)>0.05)
-	var income:=maxf(1.0,float(now.income_season))
-	_cost_row(column,"Pay, share of income",_pct(float(now.pay_season)/income),_pct(float(more.pay_season)/income),T.INK,
-		"Soldiers' pay against what the realm brings in a season (%s): %s now, %s with %s more." % [Purse.amount_text(income),Purse.amount_text(float(now.pay_season)),Purse.amount_text(float(more.pay_season)),EraWords.grouped(extra)])
+	var income:=maxf(0.0,float(now.income_season))
+	var pay_now:=_pay_share(float(now.pay_season),income);var pay_more:=_pay_share(float(more.pay_season),income)
+	_cost_row(column,"Pay, share of income",pay_now,pay_more,T.RED_TEXT if pay_more.begins_with("over") else T.INK,
+		"Soldiers' pay against what the realm brings in a season (%s): %s now, %s with %s more.%s" % [Purse.amount_text(income),Purse.amount_text(float(now.pay_season)),Purse.amount_text(float(more.pay_season)),EraWords.grouped(extra),
+			" The pay is more than all the realm brings in: it comes out of the stores, and unpaid soldiers lose will." if pay_more.begins_with("over") else ""],pay_now.begins_with("over"))
 	var gear_tip:=PackedStringArray()
 	for row:Dictionary in now.gear:gear_tip.append("%s %s: %s maker-days%s" % [EraWords.grouped(int(row.sets)),String(row.name).to_lower(),EraWords.grouped(roundi(float(row.days))),(" · "+Economy.materials_words(row.materials)) if not (row.materials as Dictionary).is_empty() else ""])
 	_cost_row(column,"Gear, maker-days",compact(roundi(float(now.gear_days))) if float(now.gear_days)>=0.5 else "none",compact(roundi(float(more.gear_days))),T.INK,
@@ -665,13 +683,22 @@ func _cost_row(parent:Control,label:String,now:String,more:String,more_ink:Color
 
 func _cost_cell(text:String,ink:Color,width:float,strong:=false)->Label:
 	var cell:=_line(text,12,ink);cell.custom_minimum_size=Vector2(width,0);cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;cell.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	cell.clip_text=true;cell.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	cell.clip_text=false
 	if strong:cell.add_theme_font_override("font",T.font("ui_strong"))
 	return cell
 
 
 static func _signed_compact(v:float)->String:
+	if absf(v)<0.5:return "0"
 	return ("+" if v>=0.0 else "−")+compact(roundi(absf(v)))
+
+
+## Pay as a share of what the realm brings in, never a runaway figure: past
+## all of it, "over all".
+static func _pay_share(pay:float,income:float)->String:
+	if pay<=0.0:return "none"
+	if income<=0.0 or pay>income:return "over all"
+	return _pct(pay/income)
 
 
 static func _pct(share:float)->String:
@@ -679,7 +706,7 @@ static func _pct(share:float)->String:
 
 
 static func _births_words(fewer:float)->String:
-	return "−%.1f in 100" % fewer if fewer>=0.05 else "no cost"
+	return "%.1f" % fewer if fewer>=0.05 else "none"
 
 
 ## The bar in words, part by part, for the pointer.
@@ -765,8 +792,10 @@ static func compact(value:int)->String:
 	return "%s billion" % _one_place(float(value)/1_000_000_000.0)
 
 
+## Travel time in the one unit the war map uses too (war_ledger_model
+## span_words): days under two months, then months, then winters.
 static func _days(count:int)->String:
-	return "1 day" if count==1 else "%d days" % count
+	return Ledger.span_words(count)
 
 
 static func _one_place(value:float)->String:
@@ -793,7 +822,7 @@ func _build_enemies(entries:Array)->void:
 ## watchers reckon them and the march to their nearest town we know.
 func _neighbours()->Control:
 	var Known:=preload("res://scripts/hud/peoples_known_model.gd")
-	var box:=VBoxContainer.new();box.name="Neighbours";box.add_theme_constant_override("separation",3)
+	var box:=VBoxContainer.new();box.name="Neighbours";box.add_theme_constant_override("separation",0)
 	var peoples:Array=Known.met_peoples(int(WorldSimulation.state.elapsed_days)) if WorldSimulation!=null and WorldSimulation.state!=null else []
 	if peoples.is_empty():return box
 	var home:Vector2=CivilizationSystem.player_world_origin
@@ -802,31 +831,20 @@ func _neighbours()->Control:
 		var at:Dictionary=people.get("home_position",{}) if people.get("home_position") is Dictionary else {}
 		reach[String(people.civ_id)]=home.distance_to(Vector2(float(at.get("x",0.0)),float(at.get("z",0.0)))) if not at.is_empty() else INF
 	peoples.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(reach[String(a.civ_id)])<float(reach[String(b.civ_id)]))
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
-	for spec:Array in [["Peoples we know",0],["between us",64],["warriors",78],["march",78]]:
-		var cell:=_line(String(spec[0]),11,T.INK_MUTED);cell.add_theme_font_override("font",T.font("ui_strong"))
-		if int(spec[1])==0:cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		else:
-			cell.custom_minimum_size=Vector2(float(spec[1]),0)
-			if int(spec[1])!=64:cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		head.add_child(cell)
+	var rows:Array=[]
 	for people:Dictionary in peoples.slice(0,5):
 		var civ_id:=String(people.civ_id)
 		var e:=Allocation.enemy(civ_id,0,true)
 		var between:=Known.relation_cell(people)
-		var row:=HBoxContainer.new();row.name="Known_%s" % civ_id.validate_node_name();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
-		var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(18,18);emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(emblem)
-		var name_label:=_line(String(people.name),13,T.INK);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
-		var tone:=String(between.get("tone","ink"))
-		var word:=_line(String(between.get("text","")),11,T.RED_TEXT if tone=="danger" else (T.AMBER_TEXT if tone=="warn" else (T.GREEN_TEXT if tone=="good" else T.INK_MUTED)));word.custom_minimum_size=Vector2(64,0);word.clip_text=true;word.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(word)
-		var theirs:=_line(Allocation.theirs_words(e),12,T.INK);theirs.add_theme_font_override("font",T.font("ui_strong"));theirs.custom_minimum_size=Vector2(78,0);theirs.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;theirs.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(theirs)
 		var nearest:Dictionary=e.nearest
-		var road:=_line(_days(int(nearest.days)) if not nearest.is_empty() else "—",12,T.INK_MUTED);road.custom_minimum_size=Vector2(78,0);road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
-		row.tooltip_text="%s: %s.
+		var tone:=String(between.get("tone","ink"))
+		rows.append({"icon":Identity.emblem(civ_id),"cells":{"name":String(people.name),"warriors":Allocation.theirs_words(e),"march":_days(int(nearest.days)) if not nearest.is_empty() else "—"},
+			"tag":{"text":String(between.get("text","")),"tone":{"danger":"bad","warn":"warn","good":"good"}.get(tone,"")},
+			"tip":"%s: %s
 %s
 %s" % [String(people.name),String(between.get("tip","")),"We know too little of them to count their warriors." if bool(e.unknown) else "Their warriors as our watchers reckon them: about %s (between %s and %s)." % [EraWords.grouped(int(e.theirs)),EraWords.grouped(int(e.low)),EraWords.grouped(int(e.high))],
-			("Their nearest town we know, %s, lies about %s km off: some %s on the road." % [String(nearest.name),EraWords.grouped(roundi(float(nearest.km))),_days(int(nearest.days))]) if not nearest.is_empty() else "We know of no town of theirs yet: scouts find their towns."]
-		box.add_child(row)
+				("Their nearest town we know, %s, lies about %s km off: some %s on the road." % [String(nearest.name),EraWords.grouped(roundi(float(nearest.km))),_days(int(nearest.days))]) if not nearest.is_empty() else "We know of no town of theirs yet: scouts find their towns."]})
+	Dense.render_table(box,{"columns":[{"key":"name","label":"Peoples we know"},{"key":"warriors","label":"warriors","width":84,"align":"right"},{"key":"march","label":"march","width":66,"align":"right"}],"rows":rows})
 	if peoples.size()>5:box.add_child(_line("+%d more peoples" % (peoples.size()-5),12,T.INK_MUTED))
 	return box
 
@@ -847,13 +865,14 @@ func _enemy_row(e:Dictionary)->Control:
 	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(30,30)
 	emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(emblem)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",-2);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;head.add_child(words)
-	var title:=Label.new();title.text=String(e.name);T.text(title,"voice_small",T.INK);title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(title)
+	var title:=Label.new();title.text=String(e.name);T.text(title,"voice_small",T.INK);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(title)
 	var since:=int(e.get("days",0))
 	words.add_child(_line("%s · %s" % ["War" if String(e.kind)=="war" else "Feud","begun today" if since<=0 else Ledger.span_words(since)],12,T.INK_MUTED))
 	var trade_line:=String(preload("res://scripts/trade_words.gd").war_line(civ_id))
 	words.tooltip_text="%s.%s" % [Ledger.subtitle(e),("\n"+trade_line) if trade_line!="" else ""]
+	var dead_word:=_line("Dead",11,T.INK_MUTED);dead_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dead_word.tooltip_text="The dead of it all told: ours on the left, theirs on the right.";head.add_child(dead_word)
 	var dead:=DeadStrip.new();dead.name="Dead";dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(104,26);dead.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	dead.tooltip_text="The dead of it all told: %s of ours (left), %s of theirs (right)." % [EraWords.grouped(int(e.our_dead)),EraWords.grouped(int(e.their_dead))];head.add_child(dead)
+	dead.tooltip_text="The dead of it all told: %s of ours (left, in our ink), %s of theirs (right, in red)." % [EraWords.grouped(int(e.our_dead)),EraWords.grouped(int(e.their_dead))];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);chip.tooltip_text=Ledger.clock_words(e) if String(e.kind)=="feud" else "At war since %s." % Ledger.span_words(since);head.add_child(chip)
 	# HOI4's read of who is winning: our share of the strength against theirs.
 	var odds:=Strips.OddsBar.new();odds.name="Odds";column.add_child(odds)
@@ -899,7 +918,7 @@ func _forces_row(civ_id:String)->Control:
 	var theirs:=_line(Allocation.theirs_words(e),14,T.RED_TEXT);theirs.name="Theirs";theirs.add_theme_font_override("font",T.font("ui_strong"));row.add_child(theirs)
 	var nearest:Dictionary=e.nearest
 	var road:=_line("%s · %s off" % [String(nearest.name),_days(int(nearest.days))] if not nearest.is_empty() else "no town of theirs known",12,T.INK_MUTED);road.name="Road"
-	road.size_flags_horizontal=Control.SIZE_EXPAND_FILL;road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.clip_text=true;road.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
+	road.size_flags_horizontal=Control.SIZE_EXPAND_FILL;road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
 	var their_words:="We know too little of them to count their warriors." if bool(e.unknown) else "Their warriors as our watchers reckon them: about %s (somewhere between %s and %s)." % [EraWords.grouped(int(e.theirs)),EraWords.grouped(int(e.low)),EraWords.grouped(int(e.high))]
 	row.tooltip_text="Ours against them: %s in bands sent against them.
 %s%s" % [EraWords.grouped(ours),their_words,("
@@ -916,7 +935,7 @@ func _now_row(e:Dictionary)->Control:
 	var row:=HBoxContainer.new();row.name="Now";row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
 	var mark:=StateMark.new();mark.state=String(said.state);mark.custom_minimum_size=Vector2(18,18);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(mark)
 	var text:=_line(String(said.text),13,T.RED_TEXT if bool(said.get("danger",false)) else T.INK);text.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	text.clip_text=true;text.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(text)
+	text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;row.add_child(text)
 	var details:=now_details(e)
 	var whole:=now_words(e)
 	row.tooltip_text=(whole.substr(0,1).to_upper()+whole.substr(1)+".\n" if whole!="" else "")+details.substr(0,1).to_upper()+details.substr(1)
@@ -1195,7 +1214,12 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
+	leader_box.add_child(_pip_header())
 	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
+	# Raise another general: the verb at the foot of the list it adds to.
+	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
+	var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
+	name_one.name="NameGeneral";foot.add_child(name_one)
 
 
 func _name_general()->void:
@@ -1225,7 +1249,7 @@ func _leader_row(c:Dictionary)->Control:
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",2);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(words)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);top.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(top)
 	var name_label:=_line(String(leader.get("name","The war leader")),14,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"))
-	name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(name_label)
+	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(name_label)
 	var role:=_line("War leader" if war_leader else "General",12,T.INK_MUTED);role.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(role)
 	if war_leader:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Change";other.flat=true;other.focus_mode=Control.FOCUS_NONE
@@ -1256,6 +1280,20 @@ func _leader_row(c:Dictionary)->Control:
 		if said!="":told.append(said)
 	panel.tooltip_text="\n".join(told)
 	return panel
+
+
+## What the four groups of pips on each leader are: one word over each, the
+## meaning on the pointer (force_strips GeneralPips SKILLS, its own layout:
+## an 18 px mark, then five pips, 71 px a group).
+func _pip_header()->Control:
+	var row:=HBoxContainer.new();row.name="PipHeader";row.add_theme_constant_override("separation",0)
+	var pad:=Control.new();pad.custom_minimum_size=Vector2(50,0);pad.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(pad)
+	for skill:Array in Strips.GeneralPips.SKILLS:
+		var word:=_line({"command":"Plan","tactics":"Fight","resolve":"Hold","logistics":"Supply"}.get(String(skill[0]),String(skill[2])),11,T.INK_MUTED)
+		word.add_theme_font_override("font",T.font("ui_strong"));word.custom_minimum_size=Vector2(71,0)
+		word.tooltip_text="%s, five pips at most: %s." % [String(skill[2]),String(skill[3])]
+		row.add_child(word)
+	return row
 
 
 ## The court, on the Marshal (the war leader at home): who else could hold
@@ -1331,7 +1369,13 @@ func _apply_width(force:=false)->void:
 		army_pane.visible=tab=="army";side_pane.visible=tab!="army"
 		fronts_section.visible=tab=="fronts";leaders_section.visible=tab=="leaders"
 	for key:String in tab_buttons:(tab_buttons[key] as Button).set_pressed_no_signal(key==tab)
-	if leaders_kicker!=null:leaders_kicker.visible=now
+	if leaders_heading!=null:leaders_heading.visible=now
+	# On a wide screen the border stands under the army (home and its edge
+	# together), on a narrow one with the fronts.
+	if border_box!=null:
+		var want:Control=army_section if now else fronts_section
+		if border_box.get_parent()!=want:
+			border_box.get_parent().remove_child(border_box);want.add_child(border_box)
 
 
 ## The tabs carry how many enemies there are (the kicker does on a wide
@@ -1403,7 +1447,7 @@ func _build_needs(found:Array)->void:
 		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(line)
 		var icon:=TextureRect.new();icon.texture=Standing.icon(n);icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 		var title:=_line(String(n.get("title","")),13,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(title)
-		var fact:=_line(String(n.get("text","")),12,T.INK_MUTED);fact.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fact.clip_text=true;fact.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;fact.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(fact)
+		var fact:=_line(String(n.get("text","")),12,T.INK_MUTED);fact.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fact.clip_text=true;fact.text_overrun_behavior=TextServer.OVERRUN_TRIM_WORD;fact.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(fact)
 		var verb:=Button.new();verb.name="Verb";verb.text=String(n.get("verb","See"));verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",12)
 		for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:verb.add_theme_color_override(state,Color("fbf6ea"))

@@ -111,11 +111,11 @@ static func read(mc:Node)->Dictionary:
 ## One people's side of the ledger: {ours, theirs, low, high, unknown,
 ## nearest:{name, km, days} or {}}.
 static func enemy(civ_id:String,ours:int,with_road:=true)->Dictionary:
-	var WarLoop:=preload("res://scripts/war_loop.gd")
-	var truth:=float(WarLoop._their_fighters(civ_id))
-	var est:Dictionary=preload("res://scripts/standing.gd").estimate(civ_id,"fighters",truth,true)
-	var out:={"ours":ours,"unknown":bool(est.get("unknown",false)),"theirs":roundi(float(est.get("value",-1.0))),
-		"low":roundi(float(est.get("low",-1.0))),"high":roundi(float(est.get("high",-1.0))),"nearest":{}}
+	# Their fighters as we know them: the one estimate (enemy_strength.gd),
+	# the same figure the World's Peoples ledger shows.
+	var est:Dictionary=preload("res://scripts/enemy_strength.gd").fighters(civ_id)
+	var out:={"ours":ours,"unknown":not bool(est.get("known",false)),"theirs":int(est.get("value",-1)),
+		"low":int(est.get("low",-1)),"high":int(est.get("high",-1)),"text":String(est.get("text","?")),"range":String(est.get("range","")),"tip":String(est.get("tip","")),"nearest":{}}
 	if not with_road:return out
 	var council:GDScript=load("res://scripts/war_council.gd")
 	var home:Vector2=CivilizationSystem.player_world_origin
@@ -165,5 +165,4 @@ static func _name(civ_id:String)->String:
 ## Their warriors in a few words: "about 240", "180–300", "unknown".
 static func theirs_words(e:Dictionary)->String:
 	if bool(e.get("unknown",true)) or int(e.get("theirs",-1))<0:return "?"
-	if int(e.high)-int(e.low)<=maxi(2,int(e.theirs)/10):return EraWords.grouped(int(e.theirs))
-	return "%s–%s" % [EraWords.grouped(int(e.low)),EraWords.grouped(int(e.high))]
+	return String(e.get("text","~"+EraWords.grouped(int(e.theirs))))

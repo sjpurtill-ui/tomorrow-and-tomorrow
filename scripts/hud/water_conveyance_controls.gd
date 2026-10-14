@@ -46,7 +46,8 @@ static func cost_words(cost:Dictionary)->String:
 static func time_words(work_required:float)->String:
 	var days:=estimate_days(work_required)
 	if days<0.0:return "no builders are free to do it yet"
-	return Plain.duration_text(days)+" of building with the builders we have"
+	# span_text can already say "about a day": say "about" once.
+	return Plain.duration_text(days).replace("about about ","about ")+" of building with the builders we have"
 
 ## Everything that is under way or finished, in plain sentences.
 static func progress_lines()->Array[String]:
