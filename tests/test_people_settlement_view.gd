@@ -52,3 +52,19 @@ func test_recorded_expansion_changes_footprint_without_population_guess()->void:
 	context.plots.append(Fixture.plot(2,Vector2(.14,.1)))
 	var second:=Data.snapshot(context);var later:=Data.bounds(second.plots,second.routes)
 	assert_bool(later.size.x>early.size.x).is_true();assert_bool(later.size.y>early.size.y).is_true()
+
+func test_water_service_is_not_painted_as_a_pond_and_people_material_is_private()->void:
+	var context:=_context()
+	context.routes=[]
+	context.plots[0].land_use="water"
+	context.plots[0].form="carried_water_point"
+	var town:Control=auto_free(View.new());add_child(town);town.size=Vector2(900,600);town.configure(context)
+	assert_object(town.model.get_node_or_null("RecordedGroundAndRoutes")).is_null()
+	assert_object(town.model.get_node_or_null("RecordedWaterCourses")).is_null()
+	var shared:ShaderMaterial=preload("res://scripts/map_life_ink.gd").material("person")
+	var visible_before:bool=shared.get_shader_parameter("map_people_visible")
+	town.update_state(_context())
+	assert_object(town._people_paint).is_not_same(shared)
+	assert_bool(town._people_paint.get_shader_parameter("map_people_visible")).is_true()
+	assert_bool(shared.get_shader_parameter("map_people_visible")).is_equal(visible_before)
+	assert_int(town.camera.projection).is_equal(Camera3D.PROJECTION_PERSPECTIVE)

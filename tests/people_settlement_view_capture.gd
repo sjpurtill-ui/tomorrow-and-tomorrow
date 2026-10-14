@@ -6,6 +6,7 @@ const TownFixture=preload("res://tests/own_town_capture.gd")
 class AuditTerrain extends "res://scripts/local_terrain.gd":
 	func _ready()->void:pass
 func _ready()->void:
+	get_window().content_scale_size=get_window().size
 	var maker:=TownFixture.new()
 	var terrain:=AuditTerrain.new();add_child(terrain);terrain.set_process(false)
 	var canvas:=ColorRect.new();canvas.color=Color("111e28");canvas.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(canvas)
@@ -43,7 +44,7 @@ func _ready()->void:
 				await get_tree().create_timer(.8).timeout
 				await _capture("mature-"+role.to_lower())
 			town.reset_view();await get_tree().create_timer(.8).timeout
-			get_window().size=Vector2i(1024,720);town.position=Vector2(20,30);town.size=Vector2(984,650)
+			get_window().size=Vector2i(1024,720);get_window().content_scale_size=Vector2i(1024,720);town.position=Vector2(20,30);town.size=Vector2(984,650)
 			await get_tree().create_timer(.4).timeout;await _capture("mature-overview-1024")
 	print("PEOPLE_SETTLEMENT_CAPTURE PASS")
 	maker.free()
