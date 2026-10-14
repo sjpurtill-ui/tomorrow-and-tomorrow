@@ -10,6 +10,8 @@ const Early=preload("res://scripts/early_settlement_visual.gd")
 const Ground=preload("res://scripts/early_settlement_ground.gd")
 const Yards=preload("res://scripts/settlement_yard_details.gd")
 const Setting=preload("res://scripts/hud/people_settlement_environment.gd")
+const Life=preload("res://scripts/map_life_ink.gd")
+const Shapes=preload("res://scripts/settlement_kit_shapes.gd")
 const MAX_PEOPLE:=48
 const GRID:=41
 var view:SubViewport
@@ -34,7 +36,7 @@ var _desired_target:=Vector3.ZERO
 var _span:=.1
 var _desired_span:=.1
 var _yaw:=-.60
-var _pitch:=.72
+var _pitch:=.51
 var _elapsed:=0.0
 var _people:MultiMeshInstance3D
 var _walks:Array[Dictionary]=[]
@@ -42,6 +44,9 @@ var _highlight:MeshInstance3D
 var _dragged:=false
 var _yards:Node3D
 var _yard_batches:=-1
+var _people_paint:ShaderMaterial
+var _building_plan:Dictionary={}
+var _people_key:=-1
 
 func configure(context:Dictionary)->void:
 	_ensure_view();update_state(context)
@@ -64,7 +69,7 @@ func _ensure_view()->void:
 	view.size=Vector2i(1024,640);view.gui_disable_input=true;view.msaa_3d=Viewport.MSAA_4X
 	view.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE;add_child(view)
 	picture.texture=view.get_texture()
-	camera=Camera3D.new();camera.name="SettlementCamera";camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	camera=Camera3D.new();camera.name="SettlementCamera";camera.projection=Camera3D.PROJECTION_PERSPECTIVE;camera.fov=38.0
 	camera.near=.0001;camera.far=10.0;camera.current=true;view.add_child(camera)
 	var world:=WorldEnvironment.new();var environment:=Environment.new();world.environment=environment
 	environment.background_mode=Environment.BG_COLOR;environment.background_color=Color("87968c")
@@ -74,7 +79,7 @@ func _ensure_view()->void:
 	var sun:=DirectionalLight3D.new();sun.name="WarmAfternoon"
 	sun.rotation_degrees=Vector3(-42,-34,0);sun.light_color=Color("fff0d5");sun.light_energy=.40
 	sun.shadow_enabled=true;sun.directional_shadow_max_distance=4.0
-	sun.shadow_bias=.02;sun.shadow_normal_bias=.2;view.add_child(sun)
+	sun.shadow_bias=.001;sun.shadow_normal_bias=.003;view.add_child(sun)
 	gui_input.connect(_input_view)
 
 func update_state(context:Dictionary)->void:
@@ -92,7 +97,7 @@ func focus_role(role:String)->void:
 	var zone:Dictionary=_zones[role];var at:Vector2=zone.center
 	_desired_target=_point(at)
 	var area:Rect2=zone.bounds
-	_desired_span=clampf(maxf(area.size.x,area.size.y)*1.35,.035,_overview_span())
+	_desired_span=clampf(maxf(area.size.x,area.size.y)*.82,.018,_overview_span())
 	_make_highlight(zone.polygons)
 	focus_changed.emit(role)
 
@@ -113,10 +118,10 @@ func role_anchor_metadata()->Dictionary:
 
 func _build_scene()->void:
 	if is_instance_valid(model):model.free()
-	_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1
+	_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
 	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
 	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
-	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*.9+.035)
+	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
 	_sample_ground();_landscape()
 	Setting.render(_terrain,snapshot,_ground_bounds,_point,model)
 	var land:=func(at:Vector2)->bool:
@@ -125,9 +130,12 @@ func _build_scene()->void:
 		return true
 	var height:=func(x:float,z:float)->float:return _height(Vector2(x,z))
 	var plan:Dictionary=Early.layout(snapshot.plots,snapshot.routes,land)
+	_building_plan=plan
+	_frame_inhabited_core(plan)
 	_worked_yards(plan)
 	Early.render(plan,Vector3.ZERO,height,model)
 	Ground.render(plan,snapshot.plots,snapshot.routes,Vector3.ZERO,height,land,model,false)
+	_workplace_props(plan)
 	_yards=Yards.new();_yards.name="OccupiedHouseholdYards";model.add_child(_yards)
 	_yards.configure(func(at:Vector2)->float:return _height(at),land)
 	var knowledge:Array=GameState.known_discoveries.duplicate()
@@ -141,6 +149,20 @@ func _build_scene()->void:
 	if _zones.has(focused_role):focus_role(focused_role)
 	else:reset_view()
 	_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
+
+func _frame_inhabited_core(plan:Dictionary)->void:
+	var points:=PackedVector2Array()
+	for record:Dictionary in plan.get("buildings",[]):
+		var plot:Dictionary=record.plot
+		if String(plot.get("status","active")) in ["ruin","reclaimed","vacant"]:continue
+		var use:=String(plot.get("land_use",""))
+		if use not in ["residential_compound","mixed_household","temporary_encampment","workshop","storage","civic"]:continue
+		var at:Vector2=record.position;var radius:=float(record.get("radius",.003))
+		points.append(at-Vector2.ONE*radius);points.append(at+Vector2.ONE*radius)
+	if points.is_empty():return
+	_bounds=Rect2(points[0],Vector2.ZERO)
+	for point in points:_bounds=_bounds.expand(point)
+	_bounds=_bounds.grow(.002)
 
 func _private_paint(node:Node)->void:
 	for child in node.get_children():
@@ -200,9 +222,10 @@ func _landscape()->void:
 		if String(plot.get("status","active"))=="reclaimed":continue
 		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
 		var use:=String(plot.get("land_use",""));var color:=Color("b5a789")
-		if use not in ["field","pasture","water","waste","dirty_industry"]:continue
+		# A water-service parcel is a well/draw point, never evidence of a pond.
+		# The recorded water object is rendered by Ground; channels by Setting.
+		if use not in ["field","pasture","dirty_industry"]:continue
 		if use in ["field","pasture"]:color=Color("a5ad63") if float(plot.get("crop_cover",.5))>.2 else Color("a58f68")
-		elif use=="water":color=Color("7f9c9e")
 		elif use in ["waste","dirty_industry"]:color=Color("968e77")
 		elif String(plot.get("status",""))=="ruin":color=Color("817a69")
 		count+=_polygon(ground,polygon,color,.00003)
@@ -241,8 +264,46 @@ func _commit(surface:SurfaceTool,label:String,transparent:bool)->MeshInstance3D:
 	node.material_override=material;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;model.add_child(node)
 	return node
 
+func _workplace_props(plan:Dictionary)->void:
+	var crafts:=Ground.known_crafts();var count:=0
+	for plot:Dictionary in snapshot.plots:
+		if count>=24:break
+		if String(plot.get("status","active")) in ["vacant","ruin","reclaimed","under_construction"]:continue
+		var form:=String(plot.get("form",""));var use:=String(plot.get("land_use",""))
+		var at:Vector2=plot.get("centroid",Vector2.ZERO)
+		if form=="open_hearth_yard" and at.length()<.005:
+			_prop("hearth_ring",at,0)
+			var fire:=MeshInstance3D.new();var cone:=CylinderMesh.new();cone.bottom_radius=.00065;cone.top_radius=0;cone.height=.0015;cone.radial_segments=7
+			fire.mesh=cone;fire.position=_point(at,.00075)
+			var glow:=StandardMaterial3D.new();glow.albedo_color=Color("ef9d48");glow.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+			fire.material_override=glow;fire.name="RecordedHearthFlame";model.add_child(fire)
+		if use!="workshop":continue
+		var choices:Array[String]=["bench","woodpile"]
+		if bool(crafts.pottery):choices.append("pots")
+		if bool(crafts.hides):choices.append("hide_frame")
+		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
+		var slot:=0
+		for kind in choices:
+			for attempt in 16:
+				var angle:=TAU*(attempt+slot*3)/16.0
+				var place:=at+Vector2.from_angle(angle)*(.003+attempt*.00025)
+				if polygon.size()>2 and not Geometry2D.is_point_in_polygon(place,polygon):continue
+				var clear:=true
+				for building:Dictionary in plan.get("buildings",[]):
+					if place.distance_to(building.position)<float(building.get("radius",.003))+.0015:clear=false;break
+				if not clear:continue
+				_prop(kind,place,angle);count+=1;slot+=1;break
+
+func _prop(kind:String,at:Vector2,yaw:float)->void:
+	var mesh:Mesh=Shapes.prop(kind)
+	if mesh==null:return
+	var node:=MeshInstance3D.new();node.name="Workplace_"+kind;node.mesh=mesh
+	node.transform=Transform3D(Basis(Vector3.UP,yaw).scaled(Vector3.ONE*.001),_point(at,.0001))
+	node.material_override=preload("res://scripts/settlement_ink.gd").material();model.add_child(node)
+
 func _worked_yards(plan:Dictionary)->void:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
+	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for building:Dictionary in plan.get("buildings",[]):
 		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))*1.4
 		for i in 14:
@@ -252,7 +313,17 @@ func _worked_yards(plan:Dictionary)->void:
 				surface.set_normal(_normal(point))
 				surface.set_color(Color(.59,.52,.37,.65) if point==at else Color(.59,.52,.37,0))
 				surface.add_vertex(_point(point,.00005));count+=1
+		var center:=at+Vector2(radius*.55,radius*.45)
+		for i in 16:
+			var a:=center+Vector2.from_angle(TAU*i/16.0)*radius*1.5
+			var b:=center+Vector2.from_angle(TAU*(i+1)/16.0)*radius*1.5
+			for point:Vector2 in [center,a,b]:
+				shade.set_color(Color(1,1,1,.60 if point==center else 0));shade.add_vertex(_point(point,.00022))
 	if count>0:_commit(surface,"WornGroundAroundRecordedBuildings",true)
+	if count>0:
+		var shadows:=_commit(shade,"DrapedBuildingContactShadows",true)
+		var shader:=Shader.new();shader.code=CONTACT_SHADER
+		var paint:=ShaderMaterial.new();paint.shader=shader;shadows.material_override=paint
 
 func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
@@ -263,6 +334,9 @@ func _make_highlight(polygons:Array)->void:
 
 func _update_people()->void:
 	if not is_instance_valid(model):return
+	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations)])
+	if key==_people_key:return
+	_people_key=key
 	if is_instance_valid(_people):_people.free()
 	_walks.clear();visual_people_count=0
 	var routes:Array=[]
@@ -273,37 +347,65 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var body:=CapsuleMesh.new();body.radius=.00027;body.height=.00165;body.radial_segments=5;body.rings=2
-	var paint:=StandardMaterial3D.new();paint.vertex_color_use_as_albedo=true;paint.vertex_color_is_srgb=true;paint.roughness=1.0
-	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.mesh=body;batch.instance_count=visual_people_count
-	_people=MultiMeshInstance3D.new();_people.name="RepresentativePeople";_people.multimesh=batch;_people.material_override=paint;model.add_child(_people)
+	var shader:=Shader.new();shader.code=Life.shader_code("person")
+	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+	# The People view explicitly requests bounded illustrative representatives.
+	# Its private shader does not change the map's global no-people policy.
+	_people_paint.set_shader_parameter("map_people_visible",true)
+	_people_paint.set_shader_parameter("min_px",9.0);_people_paint.set_shader_parameter("max_swell",1.3)
+	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true;batch.mesh=Life.quad();batch.instance_count=visual_people_count
+	_people=MultiMeshInstance3D.new();_people.name="RepresentativePeople";_people.multimesh=batch;_people.material_override=_people_paint;model.add_child(_people)
+	_people.custom_aabb=AABB(Vector3(_ground_bounds.position.x,-.1,_ground_bounds.position.y),Vector3(_ground_bounds.size.x,.2,_ground_bounds.size.y))
 	var colors:Array[Color]=[Color("e0c39b"),Color("a96d51"),Color("556e69"),Color("d1b073"),Color("6a6253")]
 	for i in visual_people_count:
 		var path:PackedVector2Array=routes[i%routes.size()]
 		_walks.append({"path":path,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
 		batch.set_instance_color(i,colors[i%colors.size()])
+		batch.set_instance_custom_data(i,Color(fmod(i*.618,1.0),0,1 if i%4==0 else 0,.75))
+	# A few members work at existing physical work areas. They are illustrative
+	# representatives, not an additional allocation or individual simulation.
+	var index:=0;var allocations:Dictionary=_context.get("allocations",GameState.population_allocations)
+	for role:String in ["Crafting","Construction","Food","Logistics","Knowledge","Defense"]:
+		if index>=mini(6,_walks.size()) or int(allocations.get(role,0))<=0 or not _zones.has(role):continue
+		var zone:Dictionary=_zones[role]
+		if not bool(zone.physical):continue
+		var at:Vector2=zone.center;var safe:=false
+		for attempt in 16:
+			var candidate:=at+Vector2.from_angle(attempt*TAU/16)*(.0025+attempt*.0002)
+			var blocked:=false
+			for building:Dictionary in _building_plan.get("buildings",[]):
+				if candidate.distance_to(building.position)<float(building.get("radius",.003))+.0005:blocked=true;break
+			if not blocked:at=candidate;safe=true;break
+		if not safe:continue
+		_walks[index]["stationary"]=at
+		var pose:=8 if role in ["Crafting","Construction"] else (1 if role=="Food" else (7 if role=="Defense" else 5))
+		batch.set_instance_custom_data(index,Color(float(index)*.17,pose,0,.7));index+=1
 	_move_people()
 
 func _move_people()->void:
 	if not is_instance_valid(_people):return
+	_people_paint.set_shader_parameter("anim_clock",_elapsed)
 	for i in _walks.size():
 		var walk:Dictionary=_walks[i];var path:PackedVector2Array=walk.path;var length:=0.0
+		if walk.has("stationary"):
+			_people.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*.001),_point(walk.stationary,.00005)));continue
 		for p in range(1,path.size()):length+=path[p-1].distance_to(path[p])
 		if length<=.00001:continue
 		var distance:=pingpong(float(walk.phase)*length*2+_elapsed*float(walk.speed),length)
-		var at:Vector2=path[0]
+		var at:Vector2=path[0];var direction:=Vector2.DOWN
 		for p in range(1,path.size()):
 			var segment:=path[p-1].distance_to(path[p])
-			if distance<=segment:at=path[p-1].lerp(path[p],distance/maxf(segment,.00001));break
+			if distance<=segment:at=path[p-1].lerp(path[p],distance/maxf(segment,.00001));direction=path[p]-path[p-1];break
 			distance-=segment
-		_people.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY,_point(at,.00086+sin(_elapsed*6+i)*.000025)))
+		_people.multimesh.set_instance_transform(i,Transform3D(Basis(Vector3.UP,atan2(direction.x,direction.y)).scaled(Vector3.ONE*.001),_point(at,.00005)))
 
 func _overview_span()->float:
 	var aspect:=maxf(.5,size.x/maxf(1.0,size.y))
-	# Include the rotated footprint, with room for role labels at the edge.
+	# Frame the inhabited center closely; remote parcels remain available
+	# through their role anchors and the reversible wheel zoom.
 	var horizontal:=absf(cos(_yaw))*_bounds.size.x+absf(sin(_yaw))*_bounds.size.y
 	var depth:=absf(sin(_yaw))*_bounds.size.x+absf(cos(_yaw))*_bounds.size.y
-	return maxf(.045,maxf(horizontal/aspect,depth*sin(_pitch)) *1.16)
+	return maxf(.036,maxf(horizontal/aspect,depth*sin(_pitch)) *.84)
 
 func _resize_view()->void:
 	if not is_instance_valid(view):return
@@ -315,7 +417,8 @@ func _position_camera()->void:
 	if not is_instance_valid(camera):return
 	camera.size=maxf(.015,_span)
 	var offset:=Vector3(sin(_yaw)*cos(_pitch),sin(_pitch),cos(_yaw)*cos(_pitch))
-	camera.position=_target+offset*maxf(.15,_span*3.0);camera.look_at(_target)
+	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
+	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
 
 func _project_anchors()->void:
@@ -367,4 +470,9 @@ float broad=noise(at.xz*30.0)*.7+noise(at.xz*120.0+vec2(6.1,2.8))*.3;
 vec3 ground=mix(vec3(.35,.39,.24),vec3(.46,.46,.31),broad);
 ALBEDO=ground*(.87+dot(photo,vec3(.2126,.7152,.0722))*.28);ROUGHNESS=1.0;
 }
+"""
+
+const CONTACT_SHADER:="""shader_type spatial;
+render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled;
+void fragment(){ALBEDO=mix(vec3(1.0),vec3(.47,.49,.43),COLOR.a);}
 """
