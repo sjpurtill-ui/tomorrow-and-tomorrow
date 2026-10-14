@@ -353,7 +353,10 @@ func _tree_block()->Dictionary:
 			for row:Dictionary in rows:
 				if String(row.status)==status:chosen_row=row;break
 			if not chosen_row.is_empty():break
-	return {"type":"knowledge_tree","domain":tree_domain,"fields":fields,"rows":rows,"next":frontier.next,"selected":String(chosen_row.get("id","")),
+	# The board gets only what it draws: each question's name, state, evidence, line and wait.
+	var slim:Array=[]
+	for row:Dictionary in rows:slim.append({"id":String(row.id),"name":String(row.name),"status":String(row.status),"progress":float(row.progress),"subcategory":String(row.get("subcategory","")),"earliest_year":float(row.get("earliest_year",0.0)),"missing":(row.get("missing",[]) as Array).duplicate()})
+	return {"type":"knowledge_tree","domain":tree_domain,"fields":fields,"rows":slim,"next":frontier.next,"selected":String(chosen_row.get("id","")),
 		"chosen":_tree_chosen(chosen_row,frontier.next),"on_field":_choose_tree_domain,"on_select":_choose_tree_question}
 
 ## Every question of every field (DiscoverySystem.technology_tree), made
