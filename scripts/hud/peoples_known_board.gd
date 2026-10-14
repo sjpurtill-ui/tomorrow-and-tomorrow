@@ -18,7 +18,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
 
 ## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"people":140,"fighters":130,"between":96,"seen":76,"talk":46}
+const WIDTHS:={"people":130,"fighters":120,"between":96,"seen":76,"talk":46}
 const NAME_MIN:=100
 const GAP:=8
 ## The sheet's paper margin, each side (px).
@@ -40,6 +40,8 @@ var view:Dictionary={}
 var on_town:Callable
 ## A word with a people's ruler (the court), from the Talk button on its row.
 var on_speak:Callable
+var counter:=""
+var counter_tip:=""
 ## Each column's nodes, to let them give way on a narrow page.
 var parts:Dictionary={}
 ## The columns giving way at this width.
@@ -76,6 +78,7 @@ func _take(block:Dictionary)->void:
 	if not view.has("open"):view["open"]=""
 	on_town=block.get("on_town",Callable())
 	on_speak=block.get("on_speak",Callable())
+	counter=String(block.get("counter",""));counter_tip=String(block.get("counter_tip",""))
 
 ## Sorts by a column; the same column again sorts the other way round.
 func sort_by(column:String)->void:
@@ -118,6 +121,11 @@ func _build()->void:
 	# does not pass the columns' width up, so the board takes the dock's width
 	# and _layout lets columns give way to fit it (it scrolls sideways only if
 	# even the fewest do not fit).
+	# The page's counts, one line over the ledger (the provider's "counter").
+	if counter!="":
+		var line:=_label(counter,12,T.INK_MUTED);line.name="Counter";line.tooltip_text=counter_tip
+		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		add_child(line)
 	var fit:=ScrollContainer.new();fit.name="Fit"
 	fit.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;fit.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	fit.add_theme_stylebox_override("panel",StyleBoxEmpty.new());add_child(fit)
@@ -158,7 +166,7 @@ func _header_row()->Control:
 		var active:=String(view.sort)==id
 		var button:=Button.new();button.name="Sort_"+id;button.focus_mode=Control.FOCUS_NONE
 		button.text=String(titles.get(id,id))+((" ↑" if bool(view.flip) else " ↓") if active else "")
-		button.clip_text=true;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text="%s Click to sort by it." % String(Model.MEANINGS.get(id,""))
 		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",12)
@@ -228,6 +236,10 @@ func _name_cell(row:Dictionary,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",6)
 	cell.custom_minimum_size.x=NAME_MIN;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	refs["name"]=_fitted(_label("",15,T.INK,true),"Name",true);cell.add_child(refs.name)
+	# A long name takes a second line rather than an ellipsis (rows are two lines high).
+	var name_label:Label=refs.name
+	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.max_lines_visible=2
+	name_label.custom_minimum_size.x=60
 	if bool(row.us):cell.add_child(_tag("us"))
 	_part("name",cell)
 	return cell
@@ -267,7 +279,7 @@ func _tag(text:String)->Control:
 func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
 	cell.custom_minimum_size.x=float(WIDTHS.get(id,60));cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(64,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(56,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	cell.add_child(bar);refs["bar_"+id]=bar
 	var value:=_fitted(_label("",13,T.INK),"Value",true)
 	cell.add_child(value);refs["value_"+id]=value
@@ -465,7 +477,8 @@ static func _label(text:String,size:int,color:Color,strong:=false)->Label:
 ## words are in its pointer note).
 static func _fitted(label:Label,node_name:String,expand:=false)->Label:
 	if node_name!="":label.name=node_name
-	label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	# Never an ellipsis: what does not fit takes a second line.
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.custom_minimum_size.x=maxf(label.custom_minimum_size.x,24.0)
 	if expand:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	return label
 
