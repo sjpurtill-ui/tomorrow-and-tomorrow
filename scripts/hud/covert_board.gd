@@ -242,6 +242,7 @@ func refresh(force:=false)->void:
 	_networks(rows,view)
 	_home(view)
 	var grid:=UI.columns(box,"Records")
+	grid.columns=3 if size.x>=800.0 else 2
 	for section:Dictionary in data:_records(grid,section)
 	if data.is_empty():UI.label(box,"Nothing has come back yet",12,T.INK_MUTED)
 
@@ -252,6 +253,22 @@ func _networks(rows:Array,view:Dictionary)->void:
 	head.tooltip_text="Choose how hard we watch each people; the Pathfinder picks who goes, replaces any who are found and teaches as many as it takes. A killing or a burning among them is a word at court: the war leader answers for it.\n"+abroad_words(view)
 	if rows.is_empty():
 		UI.label(column,"We know no other people yet",12,T.INK_MUTED)
+		return
+	# Until a network stands anywhere, no columns of zeros: each row says what
+	# its chosen level buys.
+	var standing:=false
+	for r:Dictionary in rows:standing=standing or int(r.placed)>0 or int(r.on_way)>0
+	if not standing:
+		for r:Dictionary in rows:
+			var row:=UI.line(column,6);row.name="People_"+String(r.civ_id)
+			var who:=UI.label(row,String(r.name),13,T.INK,true);who.custom_minimum_size.x=96
+			var chips:=HBoxContainer.new();chips.add_theme_constant_override("separation",3);row.add_child(chips)
+			for level in 4:
+				var civ_id:=String(r.civ_id);var chosen:=level
+				var b:=UI.chip(chips,String(Covert.NETWORK_NAMES[level]),level==int(r.level),func()->void:set_network(civ_id,chosen),_level_words(level))
+				b.name="Network_%s_%d" % [String(r.civ_id),level]
+			var buys:=UI.label(row,_level_words(int(r.level)) if String(r.barred)=="" else String(r.barred),12,T.BODY if String(r.barred)=="" else T.AMBER_TEXT,false,true)
+			buys.tooltip_text=String(r.words)
 		return
 	var titles:=UI.line(column,6)
 	UI.label(titles,"",12,T.INK_MUTED,true,true).custom_minimum_size.x=96
@@ -279,6 +296,14 @@ func _networks(rows:Array,view:Dictionary)->void:
 		UI.cell(row,"—" if int(r.placed)<=0 else ("none yet" if int(r.last_word_days)<0 else _age(int(r.last_word_days)).replace(" ago","")),80,12,T.BODY)
 		var found:=HBoxContainer.new();found.custom_minimum_size.x=54;row.add_child(found)
 		if int(r.placed)>0:UI.tag(found,_risk_short(float(r.risk)),"danger" if float(r.risk)>0.3 else ("warn" if float(r.risk)>0.12 else "muted")).tooltip_text="Risk of being found: %s" % _risk_words(float(r.risk))
+
+## What a level of watching buys, in the engine's numbers.
+static func _level_words(level:int)->String:
+	match level:
+		1:return "%d of ours kept there: a little word, little risk" % int(Covert.NETWORK_EYES[1])
+		2:return "%d kept there: steadier word, locals won over" % int(Covert.NETWORK_EYES[2])
+		3:return "%d kept there, after their crafts too: the most word, the most found" % int(Covert.NETWORK_EYES[3])
+	return "no watch among them"
 
 ## "3 of 6 ours abroad · 2 learning", for the heading.
 static func abroad_short(view:Dictionary)->String:

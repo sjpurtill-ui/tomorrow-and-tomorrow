@@ -82,7 +82,10 @@ func _fill_compact_side(side:VBoxContainer)->void:
 	var UI:=preload("res://scripts/hud/world_ui.gd")
 	var stack:=UI.sheet(side,"Leads")
 	var actions:Dictionary=model.get("actions",{})
-	var head:=UI.heading(stack,"Told of, not yet met")
+	var names:={}
+	for lead:Dictionary in leads:names[String(lead.get("name",""))]=true
+	var shared:=String(names.keys()[0]) if names.size()==1 else ""
+	var head:=UI.heading(stack,"Told of, not yet met"+((": "+the_name(shared)) if shared!="" else ""))
 	UI.verb(head,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
 	if leads.is_empty():
 		UI.label(stack,"No one has spoken of other peoples",12,T.INK_MUTED)
@@ -99,7 +102,8 @@ An old telling." if bool(lead.get("stale",false)) else "")]
 		# Where they are said to be leads the row; many tellings share a name.
 		UI.cell(row,String(lead.get("where","")),132,13,T.INK if not bool(lead.get("stale",false)) else T.INK_MUTED,true).tooltip_text=tip
 		var who:=the_name(String(lead.get("name","")))
-		UI.label(row,who.substr(0,1).to_upper()+who.substr(1),12,T.INK_MUTED,false,true).tooltip_text=tip
+		if shared=="":UI.label(row,who.substr(0,1).to_upper()+who.substr(1),12,T.INK_MUTED,false,true).tooltip_text=tip
+		else:UI.spacer(row)
 		var follow:=UI.verb(row,"Follow",actions.get("plan",Callable()),"Push an expedition toward them, planned on the map");follow.name="FollowLead"
 
 class AimBar extends Control:

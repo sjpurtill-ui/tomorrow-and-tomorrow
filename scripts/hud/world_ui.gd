@@ -39,8 +39,9 @@ static func label(parent:Node,text:String,size:int=13,color:Color=Color(0,0,0,0)
 	node.add_theme_color_override("font_color",color if color.a>0.0 else T.BODY)
 	node.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	if expand:
+		# Never an ellipsis on a name, title or number: a long one wraps.
 		node.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		node.clip_text=true;node.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;node.custom_minimum_size.x=40
 	if parent!=null:parent.add_child(node)
 	return node
 
@@ -48,7 +49,7 @@ static func label(parent:Node,text:String,size:int=13,color:Color=Color(0,0,0,0)
 static func cell(parent:Node,text:String,width:float,size:int=13,color:Color=Color(0,0,0,0),strong:bool=false,align:int=HORIZONTAL_ALIGNMENT_LEFT)->Label:
 	var node:=label(parent,text,size,color,strong)
 	node.custom_minimum_size.x=width;node.horizontal_alignment=align
-	node.clip_text=true;node.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	if width>0.0:node.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return node
 
 ## One table line.

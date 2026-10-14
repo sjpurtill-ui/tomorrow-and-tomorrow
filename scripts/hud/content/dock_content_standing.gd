@@ -36,7 +36,9 @@ func tab(_sub:int)->Dictionary:
 	var blocks:Array=[board]
 	# The year's change of each strength is on its row (and the rose's dashes);
 	# no second chart below the page.
-	return {"brief":_brief(board),"blocks":blocks}
+	# The dangers are the board's first lines (one each, its verb beside it),
+	# not a paragraph box above it.
+	return {"brief":{},"blocks":blocks}
 
 ## Every people we have met, with its view of us: Standing.views(), read from
 ## the strengths this page has already reckoned instead of reckoning them a

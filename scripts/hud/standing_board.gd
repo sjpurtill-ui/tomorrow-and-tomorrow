@@ -145,13 +145,13 @@ class Rose extends Control:
 			var value_size:=plain.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,12)
 			var block_width:=maxf(name_size.x,value_size.x)
 			var x:=anchor.x-block_width*0.5
-			if direction.x>0.35: x=anchor.x
-			elif direction.x<-0.35: x=anchor.x-block_width
+			if direction.x>0.12: x=anchor.x
+			elif direction.x<-0.12: x=anchor.x-block_width
 			var y:=anchor.y-2.0
 			if direction.y<-0.6: y=anchor.y-15.0
 			elif direction.y>0.6: y=anchor.y+10.0
-			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.GOLD_TEXT if i==highlight else T.INK)
-			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y+13.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.12 else 1.0 if direction.x<-0.12 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.GOLD_TEXT if i==highlight else T.INK)
+			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.12 else 1.0 if direction.x<-0.12 else 0.5),y+13.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
 	func _dashes(from:Vector2,to:Vector2,color:Color,width:float,dash:float)->void:
 		var length:=from.distance_to(to)
 		if length<0.5: return
@@ -198,25 +198,27 @@ var renown_label:Label
 var strength_list:VBoxContainer
 var compare_row:HFlowContainer
 ## The rose's one-line legend, at the head of the compare line.
-var legend_label:Label
+var legend_label:Control
 var dangers:VBoxContainer
 var peoples:VBoxContainer
-var lower:GridContainer
-var races:VBoxContainer
-var arts:VBoxContainer
-var home:VBoxContainer
+var summary:VBoxContainer
+var races:HFlowContainer
+var arts:HFlowContainer
+var home:HFlowContainer
 
 func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",12)
+	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",0);add_child(dangers)
 	_build_hero()
-	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",2);add_child(dangers)
 	peoples=UI.sheet(self,"Peoples")
-	lower=UI.columns(self,"Lower")
-	races=UI.sheet(lower,"WhoLeads")
-	arts=UI.sheet(lower,"Arts")
-	home=UI.sheet(lower,"Home")
+	# Who leads, our cunning and persuasion at work, and our own people: one
+	# line each, the detail in each part's pointer.
+	summary=UI.sheet(self,"Summary")
+	races=_flow(summary,"WhoLeads")
+	arts=_flow(summary,"Arts")
+	home=_flow(summary,"Home")
 	resized.connect(_layout)
 	apply(block)
 	_layout()
@@ -231,7 +233,9 @@ func apply(block:Dictionary)->void:
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
 	var renown:Dictionary=block.get("renown",{})
-	renown_label.text="awe %d%% · allure %d%%" % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
+	# "Draw", not "allure": Culture's Allure is our culture's own appeal; this
+	# is how strongly the whole of what we are draws other peoples (standing.gd renown).
+	renown_label.text="awe %d%% · draw %d%%" % [roundi(float(renown.get("awe",0.0))*100.0),roundi(float(renown.get("allure",0.0))*100.0)] if not renown.is_empty() else ""
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
@@ -248,7 +252,19 @@ func _refill(part:String,value:Variant,fill:Callable)->void:
 	fill.call()
 
 func _layout()->void:
-	if lower!=null:lower.columns=3 if size.x>=600.0 else 1
+	pass
+
+static func _flow(parent:Node,node_name:String)->HFlowContainer:
+	var flow:=HFlowContainer.new();flow.name=node_name
+	flow.add_theme_constant_override("h_separation",10);flow.add_theme_constant_override("v_separation",2)
+	flow.custom_minimum_size.y=UI.ROW_H
+	parent.add_child(flow)
+	return flow
+
+## A caption at the head of a summary line.
+static func _caption(parent:Node,text:String)->Label:
+	var l:=UI.label(parent,text,12,T.GOLD_TEXT,true);l.custom_minimum_size.x=92
+	return l
 
 func _compare_print()->Array:
 	var out:Array=[]
@@ -294,10 +310,10 @@ func _build_hero()->void:
 	posture_label=Label.new();posture_label.name="Posture"
 	posture_label.add_theme_font_override("font",T.voice_font(true));posture_label.add_theme_font_size_override("font_size",16)
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.clip_text=true;posture_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	top.add_child(posture_label)
 	renown_label=UI.label(top,"",12,T.INK_MUTED);renown_label.name="Renown"
-	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; allure from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
+	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; draw from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	var body:=HBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",12);column.add_child(body)
 	rose=Rose.new();rose.name="Rose"
 	rose.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
@@ -309,21 +325,47 @@ func _build_hero()->void:
 	compare_row=HFlowContainer.new();compare_row.name="Compare"
 	compare_row.add_theme_constant_override("h_separation",6);compare_row.add_theme_constant_override("v_separation",4)
 	column.add_child(compare_row)
-	var legend:=UI.label(null,"Gold: ours · dashes: a year ago · tick: typical of our age",12,T.INK_MUTED)
-	legend.name="Legend"
+	var legend:=_swatches()
 	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
 	legend_label=legend
+
+## The rose's legend as inked swatches: ours, a year ago, typical of the age.
+static func _swatches()->HBoxContainer:
+	var row:=HBoxContainer.new();row.name="Legend";row.add_theme_constant_override("separation",5);row.mouse_filter=Control.MOUSE_FILTER_PASS
+	for pair:Array in [["solid",T.GOLD,"ours"],["dash",T.INK_MUTED,"a year ago"],["tick",T.INK,"typical"]]:
+		var mark:=Swatch.new();mark.kind=String(pair[0]);mark.ink=pair[1];row.add_child(mark)
+		UI.label(row,String(pair[2]),12,T.INK_MUTED).mouse_filter=Control.MOUSE_FILTER_PASS
+	return row
+
+class Swatch extends Control:
+	var kind:="solid"
+	var ink:=Color.BLACK
+	func _init()->void:
+		custom_minimum_size=Vector2(18,12);mouse_filter=Control.MOUSE_FILTER_IGNORE;size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	func _draw()->void:
+		var y:=size.y*0.5
+		match kind:
+			"solid":draw_line(Vector2(0,y),Vector2(size.x,y),ink,2.6)
+			"dash":
+				for x in [0.0,7.0,14.0]:draw_line(Vector2(x,y),Vector2(minf(size.x,x+4.0),y),ink,1.4)
+			"tick":
+				draw_line(Vector2(0,y),Vector2(size.x,y),Color(ink,0.25),4.0)
+				draw_line(Vector2(size.x*0.5,1),Vector2(size.x*0.5,size.y-1),ink,1.5)
 
 ## A strength's biggest cause in a few words: the first part of the engine's
 ## reason ("1 under arms or training", "food for 29 days").
 static func cause(why:String)->String:
 	var first:=why
+	# Food and water days are the top bar's; the next part is the cause here.
+	if first.begins_with("food for") or first.begins_with("water for"):
+		var cut:=first.find("; ")
+		if cut>0:first=first.substr(cut+2)
 	# A grouped number keeps its comma ("2,500 goods"): only ", " ends a part.
 	for mark:String in ["; "," (",": ",", "]:
 		var at:=first.find(mark)
 		if at>0:first=first.substr(0,at)
 	var words:=first.strip_edges().split(" ",false)
-	if words.size()>6:return " ".join(words.slice(0,6))+"…"
+	if words.size()>6:return " ".join(words.slice(0,6))
 	return " ".join(words)
 
 func _fill_strengths()->void:
@@ -386,7 +428,7 @@ func _fill_compare()->void:
 		if values.is_empty(): continue
 		overlays.append({"values":values,"color":p.get("accent",T.RED),"name":String(p.name),"chosen":String(p.civ_id)==chosen})
 	rose.overlay(overlays)
-	UI.label(compare_row,"· over ours:",12,T.INK_MUTED)
+	UI.label(compare_row,"  Lay over ours:",12,T.INK_MUTED)
 	for p:Dictionary in list:
 		var comparable:=_comparable(p)
 		var civ_id:=String(p.civ_id)
@@ -427,12 +469,12 @@ static func _dot(tint:Color)->Texture2D:
 func _fill_dangers()->void:
 	UI.clear(dangers)
 	var warnings:Array=data.get("warnings",[])
-	dangers.visible=warnings.size()>1
-	if warnings.size()<=1:return
+	dangers.visible=not warnings.is_empty()
+	if warnings.is_empty():return
 	var raise:Variant=data.get("on_raise")
-	# One button for each action: the brief above already carries the first's.
-	var offered:={String((warnings[0] as Dictionary).get("action","")):true}
-	for warning:Dictionary in warnings.slice(1,6):
+	# One line each, worst first; each action is offered once.
+	var offered:={}
+	for warning:Dictionary in warnings.slice(0,5):
 		var row:=UI.line(dangers,8)
 		row.tooltip_text=String(warning.words)
 		var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(8,8);dot.color=_tone_color(String(warning.tone));dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(dot)
@@ -513,60 +555,54 @@ static func _races_print(list:Array)->Array:
 func _fill_races()->void:
 	UI.clear(races)
 	var list:Array=data.get("races",[])
-	races.get_parent().visible=not list.is_empty()
+	races.visible=not list.is_empty()
 	if list.is_empty(): return
-	UI.heading(races,"Who leads")
+	_caption(races,"Who leads")
 	for race:Dictionary in list:
-		var lines:PackedStringArray=[]
+		var lines:PackedStringArray=[String(race.standing)]
 		for row:Dictionary in race.rows:lines.append("%s: %s%s" % [String(row.name),String(row.text),(" (%s)" % String(row.source)) if String(row.get("source",""))!="" else ""])
 		lines.append("Asks: %s." % String(race.ask))
-		var row:=UI.line(races,6);row.name="Race_"+String(race.id)
-		row.tooltip_text="\n".join(lines)
-		UI.cell(row,String(race.race),80,13,T.INK,true).tooltip_text=row.tooltip_text
-		var words:=UI.label(row,String(race.standing),12,T.BODY,false,true)
-		words.tooltip_text=row.tooltip_text
+		var cell:=HBoxContainer.new();cell.name="Race_"+String(race.id);cell.add_theme_constant_override("separation",4);cell.mouse_filter=Control.MOUSE_FILTER_PASS
+		cell.tooltip_text="\n".join(lines)
+		races.add_child(cell)
+		UI.label(cell,String(race.race).trim_prefix("Most ").trim_prefix("Greatest "),12,T.INK).mouse_filter=Control.MOUSE_FILTER_PASS
+		var said:=String(race.standing).to_lower()
+		var tone:="muted";var word:="unknown"
+		if "lead every" in said or said.begins_with("we lead") or "we are ahead" in said:tone="good";word="ahead"
+		elif "probably ahead" in said:tone="good";word="likely ahead"
+		elif "ahead of us" in said or "behind" in said:tone="danger";word="behind"
+		elif "close" in said:tone="warn";word="close"
+		UI.tag(cell,word,tone).tooltip_text=cell.tooltip_text
 
-## What our cunning and persuasion do this month: one row each, every effect
-## in its pointer (standing.gd arts_at_work).
+## What our cunning and persuasion do this month: every effect in the pointer.
 func _fill_arts()->void:
 	UI.clear(arts)
 	var at_work:Dictionary=data.get("arts",{})
-	arts.get_parent().visible=not at_work.is_empty()
+	arts.visible=not at_work.is_empty()
 	if at_work.is_empty():return
-	UI.heading(arts,"Cunning and persuasion at work")
-	for pair:Array in [["cunning","Cunning",float(at_work.get("cunning_value",0.5))],["persuasion","Persuasion",float(at_work.get("persuasion_value",0.5))]]:
+	_caption(arts,"At work")
+	for pair:Array in [["cunning","Cunning"],["persuasion","Persuasion"]]:
 		var effects:Array=at_work.get(String(pair[0]),[])
 		var lines:PackedStringArray=[]
 		for e:Dictionary in effects:lines.append("· %s%s" % [String(e.words),(" — "+String(e.detail)) if String(e.get("detail",""))!="" else ""])
-		var row:=UI.line(arts,6);row.name="Arts_"+String(pair[0])
-		row.tooltip_text="\n".join(lines)
-		UI.cell(row,String(pair[1]),80,13,T.INK,true)
-		UI.bar(row,float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD,44,0.5).tooltip_text=row.tooltip_text
-		UI.cell(row,"%d%%" % roundi(float(pair[2])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
-		UI.label(row,String((effects[0] as Dictionary).words) if not effects.is_empty() else "",12,T.BODY,false,true).tooltip_text=row.tooltip_text
+		var cell:=UI.label(arts,"%s: %s" % [String(pair[1]),String((effects[0] as Dictionary).words) if not effects.is_empty() else "nothing yet"],12,T.BODY)
+		cell.name="Arts_"+String(pair[0]);cell.tooltip_text="\n".join(lines)
 
-## Our own people: four short rows and what they tell.
+## Our own people: pride, love and dread of the god, trust in the chiefs.
 func _fill_home()->void:
 	UI.clear(home)
 	var h:Dictionary=data.get("home",{})
 	var words:=_home_words(h)
-	var head:=UI.heading(home,"Our own people")
-	head.tooltip_text=String(words.note)+("\n"+String(words.god) if words.has("god") else "")+("\n"+String(words.forgiving) if words.has("forgiving") else "")
+	_caption(home,"Our people").tooltip_text=String(words.regard)+"\n"+String(words.note)+("\n"+String(words.god) if words.has("god") else "")+("\n"+String(words.forgiving) if words.has("forgiving") else "")+("\n"+String(h.get("told","")) if String(h.get("told",""))!="" else "")
 	for medal:Array in _home_medals(h):
-		var row:=UI.line(home,6);row.name="Home_"+String(medal[0]).replace(" ","")
-		row.tooltip_text=String(medal[4])
-		UI.cell(row,String(medal[0]),80,13,T.INK,true)
-		UI.bar(row,float(medal[1]),medal[2],44).tooltip_text=String(medal[4])
-		UI.cell(row,"%d%%" % roundi(float(medal[1])*100.0),36,12,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
-		UI.label(row,String(medal[3]),12,T.INK_MUTED,false,true)
+		var cell:=HBoxContainer.new();cell.name="Home_"+String(medal[0]).replace(" ","");cell.add_theme_constant_override("separation",4)
+		cell.tooltip_text=String(medal[4]);cell.mouse_filter=Control.MOUSE_FILTER_PASS
+		home.add_child(cell)
+		UI.label(cell,String(medal[0]),12,T.INK).mouse_filter=Control.MOUSE_FILTER_PASS
+		UI.bar(cell,float(medal[1]),medal[2],34).tooltip_text=String(medal[4])
+		UI.label(cell,"%d%%" % roundi(float(medal[1])*100.0),12,T.INK,true).mouse_filter=Control.MOUSE_FILTER_PASS
 	if words.has("levy"):
-		var heavy:=UI.label(home,"Heavy levy: %d%% under arms" % roundi(float((h.get("effects",{}) as Dictionary).get("under_arms",0.0))*100.0),12,T.RED_TEXT,true)
-		heavy.tooltip_text=String(words.levy)
-	if String(h.get("regard_words",""))!="":
-		var said:=Label.new();said.text=String(words.regard);said.add_theme_font_override("font",T.voice_font(true));said.add_theme_font_size_override("font_size",15)
-		said.add_theme_color_override("font_color",T.BODY);said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		said.tooltip_text=String(h.get("told",""));said.mouse_filter=Control.MOUSE_FILTER_PASS
-		home.add_child(said)
+		UI.tag(home,"heavy levy","danger").tooltip_text=String(words.levy)
 
 ## The four medallions: [title, value, ink, word, tip].
 static func _home_medals(h:Dictionary)->Array:
