@@ -1,4 +1,32 @@
-## October 14 — Modern Strategy popup audit complete (INTEGRATED)
+## October 14 — Popup information architecture revision (IN PROGRESS)
+
+The user's later screenshots reject the first audit's interior page layouts.
+The styling checkpoint below is historical; its completion claim does not apply
+to the current redesign. Pages must prioritize decisions and selected details,
+keep facts beside their labels, avoid tall empty rows, and never open with an
+unbounded history or catalogue. Archives need explicit search and bounded pages.
+
+Delivered and remotely verified: shared compact facts/KPIs and a 1120 px maximum
+reading width (`03fe036e`), Home overview (`dfec602e`, source `2a5a56a0`), and the
+first Food/Materials grouping pass (`13e405ef`, source `ce5d6145`). Home's 23
+integrated cases pass; Food's two and Materials' two presentation cases pass.
+Canonical main is synchronized through `13e405ef`. The live game was not restarted.
+
+War intelligence is also accepted in this checkpoint: three recent reports,
+a selected foreign network, distinct home watch, and an explicit searchable
+archive of six records per page. Reading it uses the full War popup body and
+Back restores the previous War scroll. B accepted wide/narrow rendered hierarchy;
+the private GPU probe passes both palettes at 1600/1024, including search,
+paging and returning. All 23 War and three Eyes panel cases pass. A narrow border
+facts/control overflow found by the populated fixture is fixed with wrapping.
+
+HELD in worker/integration worktrees: bounded Materials selection and source
+details, Research archive/question browser, richer World civilization profiles,
+Court/Standing/Expeditions composition, and the remaining
+family review. These are not claimed as delivered. No game rules are changed.
+The Court pacing/cast proposal remains a design discussion, separate from UI work.
+
+## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)
 
 Player code checkpoint `79438388143e4ef23bb627141f0b923f9ac4fb3b` completes the
 user-selected Modern Strategy redesign across every reachable popup and subpage.

@@ -7,7 +7,7 @@ func _ready()->void:
 		push_error("Home probe needs isolated Test user data");get_tree().quit(2);return
 	get_tree().create_timer(150.0).timeout.connect(func():get_tree().quit(3))
 	var config:=ConfigFile.new();config.set_value("display","visual_system",1);config.set_value("display","color_theme","light" if "--light" in OS.get_cmdline_user_args() else "dark");config.save("user://display.cfg")
-	_world("early")
+	_world("late" if "--late" in OS.get_cmdline_user_args() else "early")
 	GameState.select_founding_focus("provision");PeopleDirection.choose("makers")
 	audit_terrain=load("res://local_terrain.tscn").instantiate();audit_terrain.set("suppress_naming_prompt",true);add_child(audit_terrain)
 	await _frames(50);audit_terrain.call("_set_game_speed",0)
@@ -15,13 +15,17 @@ func _ready()->void:
 	if is_instance_valid(audit_terrain.get("settlement_naming_panel")):audit_terrain.get("settlement_naming_panel").queue_free()
 	await _frames(10)
 	var hud=audit_terrain.get("hud")
-	for canvas in [Vector2i(1600,1000),Vector2i(1024,720)]:
+	var canvases:Array[Vector2i]=[Vector2i(2869,1337),Vector2i(1600,1000),Vector2i(1024,720)]
+	if "--overview-only" in OS.get_cmdline_user_args():canvases.append_array([Vector2i(1600,1000),Vector2i(1024,720)])
+	for canvas in canvases:
 		get_window().size=canvas;get_window().content_scale_size=canvas
 		for entry:Array in [["overview","settlement",0],["people","overview",0],["culture","civ",0],["council","civ",1]]:
+			if "--overview-only" in OS.get_cmdline_user_args() and entry[0]!="overview":continue
 			audit_terrain.call("_on_hud_section_requested",String(entry[1]),int(entry[2]));hud.call("force_dock_layout");await _frames(10)
 			await _capture_view(String(entry[0]),canvas.x)
 			var board=hud.dock.find_child({"overview":"SettlementOverview","people":"PeopleScreen","culture":"CulturePanel"}.get(entry[0],"Missing"),true,false)
 			if board and board.get_combined_minimum_size().x>board.size.x+1:failures.append("Content overflows "+String(entry[0])+" "+str(canvas.x))
+			if board and board.get_global_rect().end.x>canvas.x+1:failures.append("Page exceeds viewport "+String(entry[0])+" "+str(canvas.x))
 			if entry[0]=="people":
 				var faces:Array=hud.dock.find_children("Face_*","Button",true,false)
 				if not faces.is_empty():faces[0].pressed.emit();await _frames(8);await _capture_view("person",canvas.x)
@@ -32,13 +36,14 @@ func _ready()->void:
 					if leaders:leaders.pressed.emit();await _frames(8)
 			if entry[0] in ["overview","people","culture"]:
 				hud.dock.body_scroll.scroll_vertical=100000;await _frames(8);await _capture_view(String(entry[0])+"-lower",canvas.x)
+		if "--overview-only" in OS.get_cmdline_user_args():continue
 		for detail:Array in [["health","dock_detail_health",0],["hardships","dock_detail_health",1],["population","dock_detail_population_ledger",0],["deaths","dock_detail_population_ledger",1],["capacity","dock_detail_capacity",0],["leadership","dock_detail_settlement_people",0]]:
 			var script=load("res://scripts/hud/content/"+String(detail[1])+".gd")
 			var provider=script.new(audit_terrain,hud,GameState.selected_player_settlement_id) if detail[0]=="leadership" else script.new(audit_terrain,hud)
 			hud.open_detail(provider,int(detail[2]));hud.force_dock_layout();await _frames(10);hud.dock.body_scroll.scroll_vertical=0;await _frames(3)
 			await _capture_view(String(detail[0]),canvas.x)
 			hud.dock.body_scroll.scroll_vertical=100000;await _frames(6);await _capture_view(String(detail[0])+"-lower",canvas.x)
-	await _record_proofs(hud)
+	if not "--overview-only" in OS.get_cmdline_user_args():await _record_proofs(hud)
 	print("HOME_REDESIGN_CHECKS ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -71,6 +76,9 @@ func _frames(count:int)->void:
 func _capture_view(label:String,width:int)->void:
 	await RenderingServer.frame_post_draw
 	var mode:="light" if "--light" in OS.get_cmdline_user_args() else "dark"
-	var path:String=ProjectSettings.globalize_path("res://artifacts/home-modern-%s-%d-%s.png" % [mode,width,label])
+	var prefix:="home-modern"
+	for argument:String in OS.get_cmdline_user_args():
+		if argument.begins_with("--prefix="):prefix=argument.trim_prefix("--prefix=")
+	var path:String=ProjectSettings.globalize_path("res://artifacts/%s-%s-%d-%s.png" % [prefix,mode,width,label])
 	get_viewport().get_texture().get_image().save_png(path)
 	print("HOME_CAPTURE ",path)

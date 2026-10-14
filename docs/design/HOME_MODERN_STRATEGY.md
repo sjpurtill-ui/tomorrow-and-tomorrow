@@ -3,6 +3,33 @@
 Modern Strategy presentation pass. No simulation, appointment, work-allocation,
 population, care, discovery or save calculations change.
 
+## Overview structure revision — 14 October 2026
+
+The user rejected the earlier spacious composition. The active renderer is
+`overview_folio.gd`; changes to its inherited legacy page alone do not change
+Home. The current Overview replaces its equal-row grid with independent People,
+Defense, and Homes and works stacks. Homes, Mood, and Growth live together with
+their exact supporting readings. Labels and values stay adjacent, and the leader's
+conversation action sits beside the identity. Places are local summaries with
+Rename and Visit next to the corresponding place, rather than full-width table
+columns. No essential readings or commands are removed or hidden.
+
+Three columns become two independent stacks and then one column as the available
+viewport narrows. The layout reads available viewport width as well as its own
+width, so a previous wide minimum cannot prevent it shrinking. Place refresh uses
+a virtual presentation hook; the source rows, callbacks, and refresh shape remain
+unchanged. A focused regression proves live values stay with their source rows and
+the focused leader action survives a refresh.
+
+Designer A critiqued the first native wide captures, requested consistent
+label-first reading order, and accepted the revision at 2869, 1600 and 1024 px.
+Later-town Daylight captures, including larger army counts and waterworks, were
+also rechecked. The private Home probe now includes those three widths, actual
+viewport bounds, a late-town option, and a repeated wide/narrow Overview cycle.
+29 focused Home/action/live-refresh/persistence tests pass with no failures,
+errors, or orphans. The full Night probe covers all four Home tabs and nested
+records; the forthcoming remaining-tab composition pass is tracked separately.
+
 ## Decisions and navigation
 
 - Overview starts with the leader, conversation command and work choices. Homes

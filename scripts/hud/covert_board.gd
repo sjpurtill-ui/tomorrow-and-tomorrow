@@ -20,8 +20,6 @@ const UI:=preload("res://scripts/hud/world_ui.gd")
 const Covert:=preload("res://scripts/covert_ops.gd")
 const Corps:=preload("res://scripts/eyes_corps.gd")
 const REFRESH_SECONDS:=1.5
-## The peoples shown at most.
-const MAX_PEOPLES:=8
 ## The society's name by age (never "spies" early).
 const SOCIETY:={"hearth":"The Listeners","lettered":"The Quiet Watch","reckoned":"The Service"}
 
@@ -30,12 +28,24 @@ var clock:=0.0
 var signature:=""
 ## The last answer to a button, shown under the buttons until the next press.
 var answer:=""
+var selected_network:=""
+var record_kind:="learned"
+var record_query:=""
+var record_page:=0
+var records_expanded:=false
+var record_data:Array=[]
+var record_entries:VBoxContainer
+var record_count:Label
+var record_previous:Button
+var record_next:Button
+var overview:BoxContainer
 
 func setup()->void:
 	name="CovertBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",8)
 	box=VBoxContainer.new(); box.add_theme_constant_override("separation",10); add_child(box)
+	resized.connect(_layout_overview)
 	if "--capture-covert-sample" in OS.get_cmdline_user_args(): capture_sample()
 	refresh(true)
 
@@ -84,24 +94,30 @@ static func corps_view()->Dictionary:
 static func sections()->Array:
 	var out:Array=[]
 	var eyes:=Corps.word("eyes")
-	var learned:=Covert.learned(10)
+	var learned:=Covert.learned(maxi(1,(Covert.state().learned as Array).size()))
 	if not learned.is_empty():
 		var rows2:Array=[]
 		for f:Dictionary in learned: rows2.append("%s — %s%s" % [String(f.fact),_age(int(f.age_days)),(" · FALSE: "+String(f.get("found_by",""))) if bool(f.get("found_false",false)) else ""])
 		out.append({"kind":"learned","title":"What they sent home","rows":rows2})
-	var outcomes:=Covert.outcomes(6)
+	var outcomes:=Covert.outcomes(maxi(1,(Covert.state().ops as Array).size()))
 	if not outcomes.is_empty():
 		var rows3:Array=[]
 		for o:Dictionary in outcomes: rows3.append("%s (%s)" % [String(o.line),_age(int(o.age_days))])
 		out.append({"kind":"outcomes","title":"How our errands ended","rows":rows3})
-	var caught:=Covert.caught_spies(6)
+	var caught:=Covert.caught_spies(maxi(1,(Covert.state().caught as Array).size()))
 	if not caught.is_empty():
 		var rows4:Array=[]
 		for c:Dictionary in caught: rows4.append("%s%s of %s, %s%s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else Corps.an_eye()),String(c.civ_name),_age(int(c.age_days)),(" · "+String(c.fate)) if String(c.fate)!="" else ""])
 		out.append({"kind":"caught","title":"Theirs we found among us","rows":rows4})
 	# Those we hold, what they said (a word our own eyes showed false is
 	# marked), and ours judged abroad (captured_agents.gd).
-	var held:=preload("res://scripts/captured_agents.gd").board_rows(6)
+	var Held:=preload("res://scripts/captured_agents.gd")
+	var held:=Held.board_rows(Held.RECORDS_MAX*(Held.SAID_MAX+1)+Held.ABROAD_MAX)
+	var held_name:=""
+	for index in held.size():
+		var line:=String(held[index])
+		if line.begins_with("   said:"):held[index]=held_name+" "+line.strip_edges()
+		else:held_name=line.get_slice(",",0)
 	if not held.is_empty(): out.append({"kind":"prisoners","title":"Those we hold, and what they said","rows":held})
 	return out
 
@@ -144,7 +160,6 @@ static func network_rows()->Array:
 			if barred!="": words+=". It cannot grow: "+barred
 		out.append({"civ_id":id,"name":String(civ.get("name",id)),"level":level,"wanted":int(Covert.NETWORK_EYES[level]),"placed":int(n.eyes),"on_way":on_way,"recruits":int(n.recruits),
 			"years":float(n.years),"strength":float(n.strength),"last_word_days":int(n.last_word_days),"risk":float(n.risk),"barred":barred,"words":words,"eyes_word":eyes})
-		if out.size()>=MAX_PEOPLES: break
 	return out
 
 
@@ -230,6 +245,8 @@ func refresh(force:=false)->void:
 	var rows:=network_rows()
 	var sig:=str([data,_rounded(view),answer,rows])
 	if not force and sig==signature: return
+	var focused:=get_viewport().gui_get_focus_owner() if is_inside_tree() else null
+	if not force and focused is LineEdit and box.is_ancestor_of(focused):return
 	# Do not rebuild under the pointer (a click is informing).
 	if not force and is_instance_valid(box) and box.get_global_rect().has_point(box.get_global_mouse_position()): return
 	signature=sig
@@ -239,26 +256,47 @@ func refresh(force:=false)->void:
 		said.add_theme_font_override("font",T.voice_font(true));said.add_theme_font_size_override("font_size",15);said.add_theme_color_override("font_color",T.BODY)
 		said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		box.add_child(said)
-	_networks(rows,view)
-	_home(view)
-	var grid:=UI.columns(box,"Records")
-	grid.columns=2 if size.x>=1000.0 else 1
-	for section:Dictionary in data:_records(grid,section)
-	if data.is_empty():UI.label(box,"Nothing has come back yet",12,T.INK_MUTED)
+	# Reading the archive gives the records the whole page. The overview keeps
+	# reports beside the two decisions, with the reports first on small windows.
+	overview=null
+	if records_expanded:
+		_record_browser(data,box)
+	else:
+		overview=BoxContainer.new();overview.name="IntelligenceOverview"
+		overview.add_theme_constant_override("separation",12);box.add_child(overview)
+		var reports:=VBoxContainer.new();reports.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview.add_child(reports)
+		_record_browser(data,reports)
+		if data.is_empty():UI.label(reports,"Nothing has come back yet",14,T.INK_MUTED,false,true)
+		var decisions:=VBoxContainer.new();decisions.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		decisions.add_theme_constant_override("separation",10);overview.add_child(decisions)
+		_networks(rows,view,decisions)
+		_home(view,decisions)
+		_layout_overview()
 
-## Our networks: one row for each people we know, one choice each.
-func _networks(rows:Array,view:Dictionary)->void:
-	var column:=UI.sheet(box,"Networks")
-	var head:=UI.heading(column,"Networks abroad",abroad_short(view))
+func _layout_overview()->void:
+	if is_instance_valid(overview):overview.vertical=size.x<720
+
+## One selected network; every known people remains in the chooser.
+func _networks(rows:Array,view:Dictionary,parent:Container)->void:
+	var column:=UI.sheet(parent,"Networks",12)
+	column.add_theme_constant_override("separation",8)
+	var head:=UI.heading(column,"Networks abroad")
 	head.tooltip_text="Choose how hard we watch each people; the Pathfinder picks who goes, replaces any who are found and teaches as many as it takes. A killing or a burning among them is a word at court: the war leader answers for it.\n"+abroad_words(view)
+	UI.label(column,abroad_short(view),14,T.INK_MUTED,false,true)
 	if rows.is_empty():
 		UI.label(column,"We know no other people yet",12,T.INK_MUTED)
 		return
+	var selector:=OptionButton.new();selector.name="NetworkPeople";T.apply_button_style(selector)
+	selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var selected_index:=0
+	for index in rows.size():
+		selector.add_item(String(rows[index].name))
+		if String(rows[index].civ_id)==selected_network:selected_index=index
+	selected_network=String(rows[selected_index].civ_id);selector.select(selected_index);column.add_child(selector)
+	selector.item_selected.connect(func(index:int)->void:selected_network=String(rows[index].civ_id);refresh(true))
 	for r:Dictionary in rows:
-		var card:=VBoxContainer.new();card.name="People_"+String(r.civ_id);card.add_theme_constant_override("separation",12);column.add_child(card)
-		var head_row:=UI.line(card,12)
-		UI.label(head_row,String(r.name),20,T.INK,true,true).tooltip_text=String(r.words)
-		if String(r.barred)!="":UI.tag(head_row,"Cannot grow","warn").tooltip_text=String(r.barred)
+		if String(r.civ_id)!=selected_network:continue
+		var card:=VBoxContainer.new();card.name="People_"+String(r.civ_id);card.add_theme_constant_override("separation",8);column.add_child(card)
 		var choices:=HFlowContainer.new();choices.add_theme_constant_override("h_separation",8);choices.add_theme_constant_override("v_separation",8);card.add_child(choices)
 		for level in 4:
 			var civ_id:=String(r.civ_id);var chosen:=level
@@ -289,7 +327,7 @@ static func _level_words(level:int)->String:
 static func abroad_short(view:Dictionary)->String:
 	var placed:=Covert._network_placed(); var wanted:=Covert.network_wanted()
 	var c:Dictionary=view.eyes
-	var parts:PackedStringArray=["%d asked for · %d there" % [wanted,placed]]
+	var parts:PackedStringArray=["%d %s abroad · %d requested" % [placed,Corps.word("eyes").to_lower(),wanted]]
 	if roundi(float(c.members))>0:parts.append("%s taught" % preload("res://scripts/hud/era_words.gd").grouped(roundi(float(c.members))))
 	if roundi(float(c.training))>0:parts.append("%d learning" % roundi(float(c.training)))
 	return " · ".join(parts)
@@ -302,16 +340,17 @@ static func _risk_short(risk:float)->String:
 	return "likely"
 
 ## The watch at home: one choice, the share watched and what it costs.
-func _home(view:Dictionary)->void:
+func _home(view:Dictionary,parent:Container)->void:
 	var c:Dictionary=view.wary
-	var column:=UI.sheet(box,"Home")
+	var column:=UI.sheet(parent,"Home",12)
+	column.add_theme_constant_override("separation",8)
 	var cost:=roundi(float(view.cohesion_cost)*100.0)
-	var head:=UI.heading(column,"%s: the watch at home" % Corps.word("Wary"),"distrust −%d" % cost if cost>0 else "",T.RED_TEXT if cost>=2 else T.INK_MUTED)
+	var head:=UI.heading(column,"Watch at home")
 	head.tooltip_text="Ours who watch for theirs among us. A harder watch catches more, but the people start wondering who reports on whom. The Pathfinder finds and teaches as many as it takes, and sends the rest back to other work. Distrust is what it costs, in points of 100 of their trust in one another."
-	var row:=VBoxContainer.new();row.add_theme_constant_override("separation",12);column.add_child(row)
-	var who:=UI.label(row,"Our own people",18,T.INK,true,true);who.custom_minimum_size.x=96
+	var row:=VBoxContainer.new();row.add_theme_constant_override("separation",8);column.add_child(row)
 	var have:=roundi(float(view.coverage)*100.0); var aim:=roundi(float(view.watch_share)*100.0)
-	var coverage:=UI.bar(row,float(view.coverage)/maxf(0.01,float(view.watch_share)) if aim>0 else 0.0,T.TEAL,64)
+	var reading:=HFlowContainer.new();reading.add_theme_constant_override("h_separation",10);row.add_child(reading)
+	var coverage:=UI.bar(reading,float(view.coverage)/maxf(0.01,float(view.watch_share)) if aim>0 else 0.0,T.TEAL,64)
 	coverage.name="Coverage"
 	coverage.tooltip_text="Watching %d in 100 of our people; this level asks for %d." % [have,aim]
 	var chips:=HFlowContainer.new();chips.add_theme_constant_override("h_separation",8);chips.add_theme_constant_override("v_separation",8);row.add_child(chips)
@@ -321,23 +360,54 @@ func _home(view:Dictionary)->void:
 		var b:=UI.chip(chips,String(watch.label),bool(watch.active),func()->void:set_watch(chosen),String(watch.words))
 		b.name="Watch_%d" % int(watch.level)
 		if bool(watch.active):lit=String(watch.words)
-	var now:=UI.label(row,"%d in 100 watched%s" % [have,("" if have==aim else (" of %d asked" % aim))],12,T.BODY,false,true)
+	var now:=UI.label(reading,"%d in 100 watched%s" % [have,("" if have==aim else (" of %d asked" % aim))],14,T.BODY)
+	if cost>0:UI.label(reading,"Trust −%d" % cost,14,T.RED_TEXT if cost>=2 else T.INK_MUTED)
 	now.name="Watching"
 	now.tooltip_text=lit+(("\nCraft %d in 100." % roundi(float(c.craft)*100.0)) if float(c.members)>0.0 else "")
 
-## One kind of record (what came back, errands, caught, held): a line each.
-func _records(parent:Node,section:Dictionary)->void:
-	var column:=UI.sheet(parent,String(section.kind).capitalize())
-	UI.heading(column,String(section.title),"%d" % (section.rows as Array).size())
-	for text in section.rows:
-		# One line each: the word itself, and how long ago at the right; the whole in the pointer.
-		var full:=String(text)
-		var row:=UI.line(column,6);row.tooltip_text=full
-		var said:=full.get_slice(" — ",0).get_slice(" (",0)
-		var age:=full.get_slice(" — ",1) if " — " in full else (full.get_slice(" (",1).trim_suffix(")") if " (" in full else "")
-		# The first clause: "Agikajuaq is held by about 33 fighters, up from about 30" -> before ", ".
-		said=said.get_slice(". ",0).trim_suffix(".")
-		if said.length()>48:said=said.get_slice(", ",0)
-		if said.length()>48:said=said.get_slice(": ",0)
-		UI.label(row,said,12,T.BODY,false,true).tooltip_text=full
-		if age!="":UI.cell(row,age.replace(" years ago"," yr").replace(" year ago"," yr"),54,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
+## A short report digest; the archive is an explicit, bounded reading mode.
+func _record_browser(data:Array,parent:Container)->void:
+	record_data=data
+	if data.is_empty():return
+	if not data.any(func(part:Dictionary)->bool:return String(part.kind)==record_kind):record_kind=String(data[0].kind)
+	var column:=UI.sheet(parent,"Records",12)
+	column.add_theme_constant_override("separation",8)
+	var head:=UI.heading(column,"Intelligence records" if records_expanded else "Latest intelligence")
+	var browse:=UI.verb(head,"Back to latest" if records_expanded else "Browse records",func()->void:
+		records_expanded=not records_expanded;record_page=0;refresh(true))
+	browse.name="BrowseRecords"
+	var categories:=HFlowContainer.new();categories.add_theme_constant_override("h_separation",8);categories.add_theme_constant_override("v_separation",4);column.add_child(categories)
+	var names:={"learned":"Reports","outcomes":"Operations","caught":"Caught here","prisoners":"In custody"}
+	for section:Dictionary in data:
+		var kind:=String(section.kind)
+		var choose:=UI.chip(categories,"%s · %d" % [String(names.get(kind,section.title)),section.rows.size()],kind==record_kind,func()->void:
+			record_kind=kind;record_page=0;refresh(true))
+		choose.name="Records_"+kind
+	if records_expanded:
+		var search:=LineEdit.new();search.name="RecordSearch";search.placeholder_text="Search these records";search.text=record_query
+		search.custom_minimum_size.y=40;column.add_child(search)
+		search.text_changed.connect(func(value:String)->void:record_query=value;record_page=0;_fill_record_entries())
+	record_entries=VBoxContainer.new();record_entries.name="RecordEntries";record_entries.add_theme_constant_override("separation",10);column.add_child(record_entries)
+	var footer:=HBoxContainer.new();footer.add_theme_constant_override("separation",8);column.add_child(footer)
+	record_count=UI.label(footer,"",14,T.INK_MUTED,false,true)
+	record_previous=UI.verb(footer,"Previous",func()->void:record_page-=1;_fill_record_entries())
+	record_next=UI.verb(footer,"Next",func()->void:record_page+=1;_fill_record_entries())
+	_fill_record_entries()
+
+func _fill_record_entries()->void:
+	UI.clear(record_entries)
+	var all:Array=[]
+	for section:Dictionary in record_data:
+		if String(section.kind)==record_kind:all=section.rows;break
+	var matching:=all.filter(func(entry:Variant)->bool:return not records_expanded or record_query.strip_edges().is_empty() or String(entry).to_lower().contains(record_query.strip_edges().to_lower()))
+	var limit:=6 if records_expanded else 3
+	var pages:=maxi(1,ceili(float(matching.size())/float(limit)))
+	record_page=clampi(record_page,0,pages-1) if records_expanded else 0
+	var start:=record_page*limit
+	for index in range(start,mini(start+limit,matching.size())):
+		var words:=UI.label(record_entries,String(matching[index]),16,T.BODY,false,true)
+		words.name="Report_%d" % index
+	if matching.is_empty():UI.label(record_entries,"No matching records",14,T.INK_MUTED)
+	record_count.text=("%d–%d of %d matching · %d total" % [start+1,mini(start+limit,matching.size()),matching.size(),all.size()]) if records_expanded and not matching.is_empty() else ("No matches · %d total" % all.size() if records_expanded else "Latest %d of %d records" % [mini(limit,matching.size()),all.size()])
+	record_previous.visible=records_expanded;record_next.visible=records_expanded
+	record_previous.disabled=record_page<=0;record_next.disabled=record_page>=pages-1
