@@ -212,7 +212,8 @@ func _who(c:Dictionary)->void:
 	_chip(chips,"Temper: %s" % String(leaders.get("temperament","")).to_lower(),"Our people's temper, read from the values they live by. Our leaders act by it wherever you do not decide.")
 	var a:Dictionary=c.get("alignment",{})
 	_chip(chips,"Values agree %d in 100" % roundi(float(a.get("alignment",0.0))*100.0),"How far what the people live by matches what is upheld over them: cohesion %s, legitimacy %s." % [Model.pct(float(a.get("cohesion",0.0))),Model.pct(float(a.get("legitimacy",0.0)))])
-	_chip(chips,"Allure %d" % roundi(float((c.get("others",{}) as Dictionary).get("allure",0.0))*100.0),"How much other peoples want to come to us, trade with us and learn from us (of 100).")
+	# Our ways' own allure: one named part of Standing's draw (World shows the draw, this among its parts).
+	_chip(chips,"Our ways' allure %d" % roundi(float((c.get("others",{}) as Dictionary).get("allure",0.0))*100.0),"How much our ways themselves make other peoples want to come to us, trade with us and learn from us (of 100). It is one named part of Standing's draw (World shows the draw and each of its parts).")
 
 # --- What our ways do --------------------------------------------------------------
 

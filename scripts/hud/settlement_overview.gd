@@ -51,7 +51,6 @@ func setup(block:Dictionary)->void:
 			var mend:=_button(yours,String(warning.fix_text),fix,"Every town gets as many more on getting food, each taken from the task with the most people.");mend.name="FoodFix"
 			_page_refs["fix"]=mend
 		_button(yours,"Back to our leaders",block.get("on_leaders"),"Each town's leader shares out the work again, food and water first.").name="BackToLeaders"
-		_button(yours,"Set who works",block.get("on_people"),"Move people between tasks in The People.").name="SetTheWork"
 		for chip in yours.get_children():
 			if chip is Button:
 				(chip as Button).custom_minimum_size.y=26
@@ -91,8 +90,7 @@ func update_block(block:Dictionary)->bool:
 	var leader:Dictionary=block.get("leader",{})
 	if _page_refs.has("office"):_put(_page_refs.office,_office_words(leader))
 	if _page_refs.has("direction"):
-		_put(_page_refs.direction,String(block.get("direction","")))
-		(_page_refs.direction as Control).tooltip_text=String(block.get("direction_tip",""))
+		(_page_refs.direction as Control).tooltip_text=String(block.get("direction",""))+"\n"+String(block.get("direction_tip",""))
 	var warning:Dictionary=block.get("work_warning",{})
 	if _page_refs.has("warning"):_put(_page_refs.warning,String(warning.get("text","")),tone_color(String(warning.get("tone","warn"))))
 	var rows:Array=[]
@@ -172,10 +170,10 @@ func _leader(block:Dictionary,parent:Node)->void:
 	office.text=_office_words(leader);named.add_child(office)
 	if not _page_refs.is_empty():_page_refs["office"]=office
 	named.custom_minimum_size.x=250
-	var direction:=_line(named,String(block.get("direction","")),12,T.BODY)
-	direction.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;direction.custom_minimum_size.x=250
-	direction.name="Direction";direction.tooltip_text=String(block.get("direction_tip",""));direction.mouse_filter=Control.MOUSE_FILTER_PASS
-	if not _page_refs.is_empty():_page_refs["direction"]=direction
+	# Who sets the work is no line of prose: it is in the name's pointer, and
+	# the switch beside it (Back to our leaders) shows it.
+	who.tooltip_text=String(block.get("direction",""))+"\n"+String(block.get("direction_tip",""));who.mouse_filter=Control.MOUSE_FILTER_PASS
+	if not _page_refs.is_empty():_page_refs["direction"]=who
 	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	controls.add_theme_constant_override("h_separation",6);controls.add_theme_constant_override("v_separation",6);row.add_child(controls)
 	var talk:=_button(controls,"Talk with %s" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
