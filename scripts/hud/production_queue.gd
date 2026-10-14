@@ -69,7 +69,6 @@ func setup(block:Dictionary)->void:
 			_build_lines(left)
 			_picker=Picker.new();_picker.custom_minimum_size.x=PICKER_WIDTH;_picker.size_flags_horizontal=Control.SIZE_FILL;columns.add_child(_picker)
 			_picker.build(self,data.get("recipes",[]),_room_note())
-			_build_footer()
 	_apply()
 
 ## True when the new block has the same lines, chips and cards: the screen
@@ -144,6 +143,8 @@ func _build_header()->void:
 	# The chart above says the makers on the lines; the strip does not repeat it.
 	_header.hands.visible=false
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
+	# The strip says the lines in use; the bar keeps who runs them.
+	_header.lines.visible=false
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
 	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)
 	var run_word:=Label.new();run_word.text="RUN BY";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
@@ -214,13 +215,14 @@ func _apply_header()->void:
 	you.tooltip_text="You run the workshops: you choose what is made. Existing lines keep running." if not managed or person.is_empty() else "Take over: you choose what is made. Existing lines keep running."
 	var status:=String(data.get("status","")).strip_edges()
 	var note:Label=_header.note
-	note.visible=not status.is_empty()
+	note.visible=false
 	# The officer by given name, as the game names people in short; the full
 	# name, office and whole note are in the tooltip.
 	status=plain_status(status)
 	note.text=((given+": ") if not person.is_empty() else "")+Plain.brief(status,11)
 	note.tooltip_text=(("%s, your %s:
 " % [String(person.name),String(person.office)]) if not person.is_empty() else "")+status
+	staff.tooltip_text+=("\n"+note.tooltip_text) if not status.is_empty() else ""
 
 func _named_lines()->Array:
 	var result:Array=[]
@@ -407,10 +409,8 @@ func _build_households(parent:Node,full:bool)->void:
 	var techniques:Array=data.get("techniques",[])
 	if techniques.is_empty():return
 	var crafts:=Sheet.head(box,"Crafts the makers know")
-	var flow:=HFlowContainer.new();flow.name="Techniques";flow.add_theme_constant_override("h_separation",8);flow.add_theme_constant_override("v_separation",6);box.add_child(flow)
-	for technique:Dictionary in techniques:
-		var chip:=W.Chip.new();chip.name="Technique_"+String(technique.get("id",""));flow.add_child(chip)
-		_technique_chips[String(technique.get("id",""))]=chip
+	var line:=Sheet.label("",13,T.INK);line.name="Techniques";line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(line)
+	_technique_chips["line"]=line
 
 static func _jar_card_style(short:bool)->StyleBoxFlat:
 	var style:=T.flat(T.PAPER_RAISED,T.DANGER_BORDER if short else T.RULE,1,T.RADIUS_CARD)
@@ -427,15 +427,18 @@ func _apply_households()->void:
 		var change:=float(city.get("made",0.0))-float(city.get("worn",0.0))-float(city.get("learners",0.0))
 		var full:=coverage>=.98
 		Sheet.set_row(refs,{"label":String(city.get("city","")),"note":(String(story.held) if tone!="good" else ("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day · "+String(story.eta).to_lower()) if not full else "full; the makers keep it good",
-			"note_color":T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.INK_MUTED),"value":"%d%%" % roundi(coverage*100.0),"ratio":coverage,"bar_color":T.GREEN if full else (T.RED if tone=="bad" else T.AMBER),
+			"note_color":T.RED_TEXT if tone=="bad" else (T.AMBER_TEXT if tone=="warn" else T.INK_MUTED),"value":"%s wanted" % Sheet.n(float(city.get("target",0.0))),"ratio":coverage,"bar_color":T.GREEN if full else (T.RED if tone=="bad" else T.AMBER),
 			"tag":"Full" if full else ("Short" if tone!="good" else ""),"tag_color":T.GREEN if full else T.RED,
 			"tip":"\n".join(PackedStringArray([String(city.get("city","")),String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))})
-	var coverage:=float((data.get("households",[{}]) as Array)[0].get("coverage",0.0)) if not (data.get("households",[]) as Array).is_empty() else 0.0
-	for technique:Dictionary in data.get("techniques",[]):
-		var chip:W.Chip=_technique_chips.get(String(technique.get("id","")))
-		if chip==null:continue
-		var adoption:=roundi(float(technique.adoption)*100.0)
-		chip.set_reading("%s %d%%" % [String(technique.name),adoption],T.TEAL,"%s: in use by %d%%, working at %d%%. A technique helps only as far as households have goods (stores %d%% full)." % [String(technique.name),adoption,roundi(float(technique.working)*100.0),roundi(coverage*100.0)])
+	var line:Label=_technique_chips.get("line")
+	if line!=null:
+		var names:PackedStringArray=[];var tips:PackedStringArray=[]
+		for technique:Dictionary in data.get("techniques",[]):
+			var adoption:=roundi(float(technique.adoption)*100.0)
+			names.append((String(technique.name)+(" (%d%%)" % adoption if adoption<100 else "")).replace(" ","\u00a0"))
+			tips.append("%s: in use by %d%%, working at %d%%." % [String(technique.name),adoption,roundi(float(technique.working)*100.0)])
+		line.text=" · ".join(names)
+		line.tooltip_text="\n".join(tips)
 
 static func household_story(city:Dictionary)->Dictionary:
 	var stock:=float(city.get("stock",0.0));var target:=maxf(.01,float(city.get("target",1.0)))
@@ -468,16 +471,6 @@ static func household_story(city:Dictionary)->Dictionary:
 	return story
 
 # --- Footer --------------------------------------------------------------------------
-
-func _build_footer()->void:
-	var row:=HFlowContainer.new();row.name="Footer";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);add_child(row)
-	for entry:Array in [["One-off orders","on_add","Make a fixed number once instead of keeping a store."],["Crafting share","on_manage","Who runs the workshops, and how much crafting labor goes to lines."],["Output history","on_history","What the workshops and households have finished."]]:
-		var button:=W.text_button(String(entry[0]),String(entry[2]));button.name=String(entry[0]).replace(" ","").replace("-","");row.add_child(button)
-		var key:=String(entry[1])
-		button.pressed.connect(func():
-			var callback:Variant=data.get(key)
-			if callback is Callable:callback.call())
-		button.disabled=not data.get(key) is Callable
 
 func _apply()->void:
 	if _flow!=null:_flow.set_model(data.get("flow",{}),String(data.get("mode","military")))

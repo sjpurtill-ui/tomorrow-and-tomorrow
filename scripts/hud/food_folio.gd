@@ -249,13 +249,13 @@ static func kpi_items(data:Dictionary)->Array:
 	if need>0.0:
 		var ratio:=clampf(float(water.get("intake_ratio",0.0)),0.0,1.0)
 		out.append(S.kpi_item("water",{"value":"%d%%" % roundi(ratio*100.0),"value_color":(T.RED_TEXT if String(wet.tone)=="bad" else T.AMBER_TEXT) if ratio<0.98 else T.INK,"ratio":ratio,"color":T.TEAL if ratio>=0.98 else (T.AMBER if ratio>=0.8 else T.RED),
-			"sub":"of %s drinks needed" % S.n(need),
-			"tip":"%s.\nYesterday %s drinks were fetched for the %s needed; %s are kept in store. One drink is one person's water for a day." % [String(wet.sentence).trim_suffix("."),S.n(float(water.get("collected_today",0.0))),S.n(need),S.n(float(water.get("stored",0.0)))]}))
+			"sub":"a drink a head",
+			"tip":"%s.\nYesterday %s drinks were fetched for the %s needed; %s are kept in store. One drink is one person's water for a day, counted at the day's start, before that day's births and deaths." % [String(wet.sentence).trim_suffix("."),S.n(float(water.get("collected_today",0.0))),S.n(need),S.n(float(water.get("stored",0.0)))]}))
 	else:out.append(S.kpi_item("water",{"value":"—","sub":"counted after the first day","ratio":-1.0}))
 	# The hands on food, against everyone at work.
 	var hands:=float(data.get("food_workers",0.0))
 	var share:=float(data.get("food_share",0.0))
-	out.append(S.kpi_item("hands",{"value":S.n(hands),"ratio":clampf(share,0.0,1.0),"color":T.GOLD,"sub":"%d in 100 at work" % roundi(share*100.0),
+	out.append(S.kpi_item("hands",{"value":S.n(hands),"ratio":clampf(share,0.0,1.0),"color":T.GOLD,"sub":"%d%% of those who can work" % roundi(share*100.0),
 		"tip":(String(data.get("food_plan",""))+"\n" if String(data.get("food_plan",""))!="" else "")+("%s decides the daily food work." % _who_of(data).capitalize() if bool(data.get("managed",true)) else "You asked for extra hands on part of the work.")}))
 	return out
 

@@ -188,8 +188,6 @@ static func kpi_items()->Array:
 	var spare:=Goods.spare()
 	var unit:=Ledger.purse_unit("player")
 	var items:Array=[
-		{"id":"spare","label":"Goods to trade","icon":"Civilian Goods","value":S.n(spare),"ratio":-1.0,"sub":("%s %s too" % [S.n(Ledger.purse_balance("player")),unit]) if unit!="" else "spare goods",
-			"tip":"Goods beyond household use and workshop reserves, available to buy what other peoples can spare. This is the same balance used by Buy with goods."},
 		{"id":"came","label":"In a season","icon":"carry","icon_kind":"people","value":S.n(came*3.0),"ratio":clampf(came/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.TEAL,"sub":"received, at their prices",
 			"tip":"What other peoples sent us, smoothed monthly and reckoned for a season, at each sender's own prices. The bar: its share of all that passed."},
 		{"id":"sent","label":"Out a season","icon":"carry","icon_kind":"people","value":S.n(sent*3.0),"ratio":clampf(sent/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.GOLD,"sub":"sent, at our prices",
@@ -244,61 +242,109 @@ func _build_peoples(force:=false)->void:
 	# with something to do; the player's own opening and closing then stand.
 	if expanded_people.is_empty():
 		for row:Dictionary in rows:
-			if int(row.contact)>=2:expanded_people[String(row.id)]=true;break
+			if int(row.contact)>=2 and not is_quiet(String(row.id),int(row.contact)):expanded_people[String(row.id)]=true;break
 	var keep:Array[String]=[]
 	var state:=Ledger.peek()
+	# Peoples nothing passes with (and not opened) share one line at the end.
+	var quiet_line:=peoples_box.get_node_or_null("QuietPeoples") as HFlowContainer
+	if quiet_line==null:
+		quiet_line=HFlowContainer.new();quiet_line.name="QuietPeoples";quiet_line.add_theme_constant_override("h_separation",6);quiet_line.add_theme_constant_override("v_separation",4);peoples_box.add_child(quiet_line)
+		var lead:=S.label("No trade with:",12,T.GOLD_TEXT,true);lead.name="QuietLead";lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;quiet_line.add_child(lead)
+	var loud:=0
 	for row:Dictionary in rows:
 		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
-		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false)]
+		var quiet:=is_quiet(id,int(row.contact)) and not bool(expanded_people.get(id,false))
+		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false),quiet]
 		if int(row.contact)>=2:
 			details.append_array([Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
 				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
 				state.get("answers",{}),state.get("tributes",{}),Ledger.revision,int(GameState.elapsed_days),Goods.spare(),Ledger.purse_balance("player")])
 		var next:=str(hash(details))
 		var old:=peoples_box.get_node_or_null(NodePath(node_name))
-		if force or old==null or next!=String(people_signatures.get(id,"")):
+		if old==null:old=quiet_line.get_node_or_null(NodePath(node_name))
+		var parent:Node=quiet_line if quiet else peoples_box
+		if force or old==null or next!=String(people_signatures.get(id,"")) or old.get_parent()!=parent:
 			var focused:=get_viewport().gui_get_focus_owner()
 			var focus_name:=String(focused.name) if focused!=null and old!=null and old.is_ancestor_of(focused) else ""
-			if old!=null:peoples_box.remove_child(old);old.queue_free()
-			old=_people_row(id,int(row.contact));peoples_box.add_child(old);people_signatures[id]=next
+			if old!=null:old.get_parent().remove_child(old);old.queue_free()
+			old=_people_row(id,int(row.contact),quiet);parent.add_child(old);people_signatures[id]=next
 			if not focus_name.is_empty():
 				var replacement:=old.find_child(focus_name,true,false) as Control
 				if replacement!=null:replacement.grab_focus.call_deferred()
-		peoples_box.move_child(old,keep.size()-1)
-	for child in peoples_box.get_children():
-		if not String(child.name) in keep:peoples_box.remove_child(child);child.queue_free()
+		if not quiet:
+			peoples_box.move_child(old,loud);loud+=1
+	peoples_box.move_child(quiet_line,peoples_box.get_child_count()-1)
+	for box:Node in [peoples_box,quiet_line]:
+		for child in box.get_children():
+			if String(child.name).begins_with("People_") and not String(child.name) in keep:box.remove_child(child);child.queue_free()
+	quiet_line.visible=quiet_line.get_child_count()>1
 	for id:String in people_signatures.keys():
 		if not "People_"+id in keep:people_signatures.erase(id)
 
+## Nothing passes either way, or no trader reaches them: a name on the
+## quiet line, not a row of its own.
+static func is_quiet(civ_id:String,contact:int)->bool:
+	if contact<2:return true
+	return Ledger.flow_value("player",civ_id)<0.5 and Ledger.flow_value(civ_id,"player")<0.5
 
-func _people_row(civ_id:String,contact:int)->Control:
+## Where goods stand with a people, in one or two words with its tone: a
+## closed route first (war, feud, hostility, embargo, the sea), then their
+## terms if they press us, then ours. [words, colour].
+static func state_words(civ_id:String,ours:Dictionary,theirs:Dictionary,blocked:String)->Array:
+	match blocked:
+		"war":return ["At war",T.RED]
+		"feud":return ["Feuding",T.RED]
+		"hostile":return ["They refuse us",T.RED]
+		"unlocated":return ["Home unknown",T.MUTED]
+		"sea":return ["Sea too wide",T.MUTED]
+	if blocked.begins_with("embargo"):return ["Embargoed",T.RED]
+	var their_id:=String(theirs.get("id","free"))
+	if their_id in Stances.COERCIVE:return ["They: "+String(Words.LABELS.get(their_id,their_id)).to_lower(),T.RED]
+	var our_id:=String(ours.get("id","free"))
+	return [String(Words.LABELS.get(our_id,our_id)),T.RED if our_id in Stances.COERCIVE else (T.GREEN if our_id in ["free","favour","gifts"] else T.GOLD)]
+
+
+func _people_row(civ_id:String,contact:int,quiet:=false)->Control:
 	var name:=Ledger.name_of(civ_id)
 	var ours:=Stances.stance("player",civ_id)
 	var theirs:=Stances.stance(civ_id,"player")
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
-	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var line_style:=StyleBoxFlat.new();line_style.bg_color=Color.TRANSPARENT;line_style.border_width_bottom=1;line_style.border_color=Color(T.RULE,0.45);line_style.content_margin_top=2;line_style.content_margin_bottom=2
+	var line_style:=StyleBoxFlat.new();line_style.bg_color=Color.TRANSPARENT
+	if not quiet:
+		panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		line_style.border_width_bottom=1;line_style.border_color=Color(T.RULE,0.45);line_style.content_margin_top=2;line_style.content_margin_bottom=2
 	panel.add_theme_stylebox_override("panel",line_style)
 	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",6);panel.add_child(column)
-	var head:=HBoxContainer.new();head.name="PartnerIdentity";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_child(head)
-	var art:=_partner_art(civ_id,contact);head.add_child(art)
-	var title:=S.label(name,15,T.INK,true);title.name="Name";title.tooltip_text=name;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.custom_minimum_size.x=90;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(title)
+	var head:=HBoxContainer.new();head.name="PartnerIdentity";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;column.add_child(head)
 	var p:=Ledger.pair("player",civ_id)
-	var subtitle:="known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "met; no goods have passed yet")
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
+	var subtitle:="known only by word: no trader reaches them" if contact<2 else (Words.form_words(String(p.get("form","gift"))) if not p.is_empty() else "met; no goods have passed yet")
 	if blocked!="":subtitle=Ledger.sea_words("player",civ_id) if blocked=="sea" else _blocked_words(blocked)
-	var form_label:=S.label(subtitle.left(1).to_lower()+subtitle.substr(1),12,T.RED_TEXT if blocked!="" else T.INK_MUTED);form_label.name="Form";form_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;form_label.size_flags_stretch_ratio=1.4;form_label.custom_minimum_size.x=80;form_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;form_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;form_label.tooltip_text=subtitle;head.add_child(form_label)
-	if contact<2:
-		head.add_child(S.tag("Not met",T.MUTED))
-		return panel
+	var title:=S.label(name,14 if quiet else 15,T.INK,true);title.name="Name";title.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	if quiet:
+		# On the quiet line: the people's name is its button.
+		var open_quiet:=S.verb(name,_toggle_people.bind(civ_id),"%s: %s. Open their record and our terms." % [name,subtitle] if contact>=2 else "%s: %s." % [name,subtitle])
+		open_quiet.name="TermsToggle";open_quiet.disabled=contact<2;head.add_child(open_quiet)
+		title.visible=false;head.add_child(title)
+		if contact<2:return panel
+	else:
+		head.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		head.add_child(_partner_art(civ_id,contact))
+		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.tooltip_text="%s: %s" % [name,subtitle];head.add_child(title)
 	var form:=String(p.get("form","gift"))
-	var bar:=Graphics.new();bar.name="Flows";bar.compact=true;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.size_flags_stretch_ratio=1.2;bar.custom_minimum_size=Vector2(60,20);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	bar.values=[Words.per_period(Ledger.flow_value(civ_id,"player"),form),Words.per_period(Ledger.flow_value("player",civ_id),form)];head.add_child(bar)
-	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more received; right means more sent. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
-	var stance_id:=String(ours.get("id","free"))
-	head.add_child(S.tag(String(Words.LABELS.get(stance_id,stance_id)),T.RED if stance_id in Stances.COERCIVE else (T.GREEN if stance_id in ["free","favour","gifts"] else T.GOLD)))
+	var state_said:=state_words(civ_id,ours,theirs,blocked)
+	var pill:=S.tag(String(state_said[0]),state_said[1]);pill.name="State";pill.tooltip_text=_cap(subtitle);pill.mouse_filter=Control.MOUSE_FILTER_PASS
+	var bar:=Graphics.new();bar.name="Flows";bar.compact=true;bar.custom_minimum_size=Vector2(150,20);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	bar.values=[Words.per_period(Ledger.flow_value(civ_id,"player"),form),Words.per_period(Ledger.flow_value("player",civ_id),form)]
+	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more received; right means more sent." % Words.period_word(form)
+	# A closed route shows no flow: what passed before is in the record.
+	bar.visible=blocked=="" and not quiet
+	if not quiet:head.add_child(pill);head.add_child(bar)
+	else:pill.visible=false;head.add_child(pill);head.add_child(bar)
 	var open:=bool(expanded_people.get(civ_id,false))
-	var toggle:=S.verb("Close" if open else "Terms",_toggle_people.bind(civ_id),"Goods each way, how much each leans on the other, and our terms",open);toggle.name="TermsToggle";head.add_child(toggle)
+	if not quiet:
+		var toggle:=S.verb("Close" if open else "Terms",_toggle_people.bind(civ_id),"Goods each way, how much each leans on the other, and our terms",open);toggle.name="TermsToggle";head.add_child(toggle)
+	var form_label:=S.label(subtitle,12,T.INK_MUTED);form_label.name="Form";form_label.visible=false;column.add_child(form_label)
 	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",2);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
 	var indent:=MarginContainer.new();indent.add_theme_constant_override("margin_left",30);indent.add_theme_constant_override("margin_bottom",6);column.add_child(indent)
 	var inner:=VBoxContainer.new();inner.add_theme_constant_override("separation",2);indent.add_child(inner);column=inner
@@ -368,7 +414,7 @@ func _flows(lead:String,items:Array,form:String)->Control:
 	row.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.custom_minimum_size.y=S.ROW_HEIGHT
 	var head:=S.label(lead+" · "+Words.period_word(form),12,T.GOLD_TEXT if lead=="We send" else T.TEAL_TEXT,true);head.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.custom_minimum_size.x=130;row.add_child(head)
 	if items.is_empty():
-		var none:=S.label("nothing recorded yet",13,T.INK_MUTED);none.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(none)
+		var none:=S.label("nothing",13,T.INK_MUTED);none.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(none)
 		return row
 	var goods:=HFlowContainer.new();goods.name="Goods";goods.size_flags_horizontal=Control.SIZE_EXPAND_FILL;goods.add_theme_constant_override("h_separation",12);goods.add_theme_constant_override("v_separation",2);row.add_child(goods)
 	for item:Array in items:
@@ -382,10 +428,10 @@ func _flows(lead:String,items:Array,form:String)->Control:
 func _dependence(owner:String,from:String,need:Dictionary)->Control:
 	var share:=clampf(float(need.share),0.0,1.0)
 	var days:=float(need.get("days",-1))
-	var duration:="no shortage without it" if days<0 else "%s without it" % EraWords.days(days)
+	var duration:="no shortage" if days<0 else EraWords.days(days)
 	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var refs:=S.row(box,{"id":"lean","label":("Our %s from them" if owner=="player" else "Their %s from us") % Words.good_word(String(need.good)),"note":duration,"ratio":share,"bar_color":T.TEAL if owner=="player" else T.GOLD,"bar_width":60.0,"value":"%d%%" % roundi(share*100.0),"value_width":44.0,"label_width":170.0,
-		"tip":"%s: %d%% of %s supply comes from %s. %s." % [Ledger.name_of(owner),roundi(share*100.0),Words.good_word(String(need.good)),Ledger.name_of(from),_cap(duration)]})
+	var refs:=S.row(box,{"id":"lean","label":("Our %s from them" if owner=="player" else "Their %s from us") % Words.good_word(String(need.good)),"note":"","tag":duration,"tag_color":T.RED if days>=0.0 and days<30.0 else T.MUTED,"ratio":share,"bar_color":T.TEAL if owner=="player" else T.GOLD,"bar_width":60.0,"value":"%d%%" % roundi(share*100.0),"value_width":44.0,"label_width":170.0,
+		"tip":"%s: %d%% of %s supply comes from %s. Without it the stores last %s." % [Ledger.name_of(owner),roundi(share*100.0),Words.good_word(String(need.good)),Ledger.name_of(from),duration]})
 	(refs.panel as Control).name="OurDependence" if owner=="player" else "TheirDependence"
 	(refs.value as Label).name="Lean";(refs.bar as Control).name="SupplyShare"
 	return box
@@ -539,7 +585,7 @@ func _build_others()->void:
 	if rows.is_empty():
 		others_box.add_child(S.label("We know of no trade between other peoples.",13,T.INK_MUTED))
 		return
-	for row:Dictionary in rows.slice(0,6):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":4.0})
+	for row:Dictionary in rows.slice(0,6):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"wrap":true,"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":4.0})
 
 
 func _met(id:String)->bool:
@@ -602,8 +648,12 @@ func _responsive()->void:
 	S.compact(self,available)
 	# A narrow page keeps each people's name, balance and Terms on its line.
 	for head:Node in find_children("PartnerIdentity","HBoxContainer",true,false):
-		for child in head.get_children():
-			if child.name=="Form" or child is PanelContainer or (child is Label and child.has_theme_stylebox_override("normal")):(child as Control).visible=available>=S.COMPACT_BELOW
+		var name_label:=head.get_node_or_null("Name") as Label
+		if name_label!=null:name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART if available<S.COMPACT_BELOW else TextServer.AUTOWRAP_OFF;name_label.custom_minimum_size.x=90 if available<S.COMPACT_BELOW else 0
+		var flows:=head.get_node_or_null("Flows") as Control
+		if flows!=null:flows.custom_minimum_size.x=80 if available<S.COMPACT_BELOW else 150
+		var state:=head.get_node_or_null("State") as Control
+		if state!=null and head.get_parent().get_parent().get_parent()==peoples_box:state.visible=available>=S.COMPACT_BELOW
 	var retained:Array[GridContainer]=[]
 	for grid:GridContainer in responsive_grids:
 		if not is_instance_valid(grid) or not grid.is_inside_tree():continue

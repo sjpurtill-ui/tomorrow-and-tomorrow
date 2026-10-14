@@ -164,10 +164,10 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 	var name_label:=label(String(item.get("label","")),13,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	# The name is always whole (it wraps on a narrow page, never cut short);
 	# it takes its share of a wide row.
-	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.custom_minimum_size.x=80
+	if bool(item.get("wrap",false)):name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.custom_minimum_size.x=80
 	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.size_flags_stretch_ratio=float(item.get("label_width",150.0))/150.0
 	line.add_child(name_label)
-	var note:=label("",12,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.size_flags_stretch_ratio=1.6;note.custom_minimum_size.x=float(item.get("note_width",90.0));note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(note)
+	var note:=label("",12,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.size_flags_stretch_ratio=1.6;note.custom_minimum_size.x=1;note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note.clip_text=true;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(note)
 	var spark:Control=null
 	if item.has("points"):
 		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(spark)
@@ -189,6 +189,7 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 static func set_row(refs:Dictionary,item:Dictionary)->void:
 	put(refs.label,String(item.get("label","")),item.get("label_color",T.INK))
 	put(refs.note,String(item.get("note","")),item.get("note_color",T.INK_MUTED))
+	(refs.note as Control).tooltip_text=String(item.get("note",""))
 	put(refs.value,String(item.get("value","")),item.get("value_color",T.INK))
 	var ratio:=float(item.get("ratio",-1.0))
 	var meter:Bar=refs.bar

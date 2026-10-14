@@ -136,12 +136,20 @@ func _provisions_data()->Dictionary:
 		deliveries.append({"resource":String(shipment.get("resource","")),"source_name":String(shipment.get("source_name","")),"quantity":float(shipment.get("quantity",0.0)),"when":"arrives today" if left<=0 else "arrives in "+Plain.span_text(left)})
 	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),
 		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),
-		"capacity":FoodSystem._food_storage_capacity(),"food_workers":float(metrics.get("food_workers",0.0)),"food_share":float(metrics.get("food_labor_share",0.0)),
+		"capacity":FoodSystem._food_storage_capacity(),"food_workers":_food_hands().x,"food_share":_food_hands().y,
 		"water":GameState.water_metrics.duplicate(true),"water_access":ResourceSystem.water_access_snapshot(),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),
 		"sources":(metrics.get("food_sources",[]) as Array).duplicate(true),"fire":fire.duplicate(),"fuel":float(fuel.get("Timber",0.0)) if not fuel.is_empty() else -1.0,
 		"history":_material_points(id,["food_days"]).get("food_days",[]),"deliveries":deliveries,
 		"flow":{"Produced":metrics.get("food_production",0),"Taken":(metrics.get("food_harvest",{}) as Dictionary).get("Transferred",0.0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Keeping":(metrics.get("food_preserved",{}) as Dictionary).get("lost",0.0),"Missions":FoodSystem.issued_on_day(today),"Net":metrics.get("food_net",0)},
 		"on_focus":_provisions_focus,"has_deliveries":_has_food_deliveries(),"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+## Those getting food and their share of those who can work, by the Home
+## People page's own reckoning (people_model.gd labor: manual_work.gd counts
+## and percents), so both screens say the same.
+func _food_hands()->Vector2:
+	for row:Dictionary in preload("res://scripts/hud/people_model.gd").labor():
+		if String(row.get("id",""))=="Food":return Vector2(float(row.get("count",0)),float(row.get("share",0))/100.0)
+	return Vector2.ZERO
+
 func _has_food_deliveries()->bool:
 	var trade:=SettlementModel.city_trade_snapshot(GameState.selected_player_settlement_id)
 	return not (trade.get("shipments",[]) as Array).is_empty() or not (trade.get("history",[]) as Array).is_empty()
@@ -204,7 +212,19 @@ func _materials_data()->Dictionary:
 	var incoming:Array=[]
 	for shipment:Dictionary in GameState.city_trade_shipments:
 		if String(shipment.get("destination_id",""))==id and String(shipment.get("status",""))=="in_transit":incoming.append(shipment.duplicate(true))
+	# Each kind of store: the bulk held in it against its room
+	# (resource_system.gd _storage_capacities, each material's profile store).
+	var held_by_kind:={}
+	for key:String in GameState.resource_stockpiles:
+		if key=="Food" or not ResourceSystem._is_material_resource(key):continue
+		var profile:=ResourceSystem.material_profile(key)
+		held_by_kind[String(profile.store)]=float(held_by_kind.get(String(profile.store),0.0))+float(GameState.resource_stockpiles[key])*float(profile.bulk)
+	var rooms:=ResourceSystem.storage_capacities()
+	var store_kinds:Array=[]
+	for kind:String in ["yard","dry","covered","sealed","secure"]:
+		if float(held_by_kind.get(kind,0.0))<0.5 and float(rooms.get(kind,0.0))<0.5:continue
+		store_kinds.append({"kind":kind,"held":float(held_by_kind.get(kind,0.0)),"room":float(rooms.get(kind,0.0))})
 	var counted:PackedStringArray=[]
 	for key:String in GameState.resource_stockpiles:
 		if key!="Food" and float(GameState.resource_stockpiles[key])>=0.5 and ResourceSystem._is_material_resource(key):counted.append(ResourceSystem.display_name(key).to_lower())
-	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"land":ResourceSystem.land_words(),"cover":float(ResourceSystem.land_reading().get("cover",0.0)),"counted":", ".join(counted),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"priorities":materials_priorities,"on_select":func(key:String):selected_material="" if selected_material==key else key;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"land":ResourceSystem.land_words(),"cover":float(ResourceSystem.land_reading().get("cover",0.0)),"counted":", ".join(counted),"store_kinds":store_kinds,"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"priorities":materials_priorities,"on_select":func(key:String):selected_material="" if selected_material==key else key;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}

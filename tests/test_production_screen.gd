@@ -174,10 +174,14 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	# Goods and Arms lead with the dock's strip: the figures the chart does not carry.
 	var arms_kpis:Array=provider.tab(2).get("kpis",[])
 	var arms_labels:=arms_kpis.map(func(k:Dictionary)->String:return String(k.label))
-	assert_array(arms_labels).contains(["WATCH ARMED","SETS IN STORE","STILL WANTED","ONE SET"])
+	assert_array(arms_labels).contains(["ON WATCH","EQUIPMENT IN STORE","LINES","ONE SET"])
+	# The strip's equipment is the cards below added up.
+	var cards:=0
+	for row:Dictionary in military.get("stock",[]):cards+=int(row.get("stock",0))
+	assert_str(String(arms_kpis[1].value)).is_equal(preload("res://scripts/hud/era_words.gd").grouped(cards))
 	assert_bool(arms_kpis[0].get("on_press") is Callable).is_true()
 	var goods_kpis:Array=provider.tab(1).get("kpis",[])
-	assert_array(goods_kpis.map(func(k:Dictionary)->String:return String(k.label))).contains(["HOMES' GOODS","TO SPARE","CARTS"])
+	assert_array(goods_kpis.map(func(k:Dictionary)->String:return String(k.label))).contains(["HOMES WANT","WEAR A DAY","TO SPARE"])
 	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
 	assert_object(civilian.find_child("HouseholdsHead",true,false)).is_not_null()
 	for gone:String in ["GoodsAnswer","Jar","Pile","ArmsAnswer"]:assert_object(civilian.find_child(gone,true,false)).is_null()

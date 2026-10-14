@@ -20,6 +20,10 @@ const ELSEWHERE:=["Freshwater","Civilian Goods","Food"]
 var data:Dictionary
 var _shape:Array=[]
 var _land:Label
+var _kind_grid:GridContainer
+var _kind_rows:Array=[]
+const KIND_NAMES:={"yard":"Open yard","dry":"Dry store","covered":"Covered store","sealed":"Sealed jars","secure":"Locked store"}
+const KIND_ICONS:={"yard":"Stone","dry":"Fiber Plants","covered":"Clay","sealed":"Bitumen","secure":"Iron Ore"}
 var _land_bar:Control
 var _land_note:Label
 ## Per moving material: {key, refs}.
@@ -43,6 +47,13 @@ func setup(block:Dictionary)->void:
 		_land=S.label("",14,T.INK);_land.name="SearchedLand";_land.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land.mouse_filter=Control.MOUSE_FILTER_PASS;searched.add_child(_land)
 		_land_bar=S.bar(0.0,T.GOLD,160.0,6.0);_land_bar.name="SearchedBar";searched.add_child(_land_bar)
 		_land_note=S.label("",12,T.INK_MUTED);_land_note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_land_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_land_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;searched.add_child(_land_note)
+	# Where the overflow is: each kind of store, held against its room.
+	var kinds:Array=block.get("store_kinds",[])
+	if not kinds.is_empty():
+		S.head(self,"Stores by kind","held / room")
+		_kind_grid=S.columns(self,"StoreKinds",300.0,2)
+		for entry:Dictionary in kinds:
+			_kind_rows.append({"kind":String(entry.kind),"refs":S.row(_kind_grid,{"id":"kind_"+String(entry.kind),"icon":String(KIND_ICONS.get(String(entry.kind),"Stone")),"label":String(KIND_NAMES.get(String(entry.kind),String(entry.kind))),"bar_width":70.0,"value_width":120.0,"note_width":0.0})})
 	var moving:Array=[];var still:Array=[];var beyond:Array=[]
 	for item:Dictionary in block.get("rows",[]):
 		if String(item.get("key","")) in ELSEWHERE:continue
@@ -105,6 +116,7 @@ func _opened()->void:
 
 func _arrange()->void:
 	S.flow(_grid,size.x)
+	S.flow(_kind_grid,size.x)
 	S.compact(self,size.x)
 	var road:=get_node_or_null("Incoming") as GridContainer
 	if road!=null:S.flow(road,size.x)
@@ -134,7 +146,9 @@ static func shape_of(block:Dictionary)->Array:
 	for item:Dictionary in block.get("rows",[]):
 		var open:bool=block.get("selected","")==item.key
 		rows.append([String(item.key),out_of_reach(item),is_idle(item,String(block.get("selected",""))),open,(item.get("details",[]) as Array).size() if open else -1])
-	return [_who(block),_current(block),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
+	var kinds:Array=[]
+	for entry:Dictionary in block.get("store_kinds",[]):kinds.append(String(entry.kind))
+	return [_who(block),_current(block),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false)),kinds]
 
 static func _current(block:Dictionary)->String:
 	var focus:=String(block.get("focus",""))
@@ -205,6 +219,14 @@ static func kpi_items(data:Dictionary)->Array:
 
 ## Every word and figure on the page that follows the day.
 func _fill()->void:
+	var kinds:Array=data.get("store_kinds",[])
+	for index in mini(kinds.size(),_kind_rows.size()):
+		var entry:Dictionary=kinds[index]
+		var held_kind:=float(entry.held);var room_kind:=float(entry.room)
+		var over:=held_kind/room_kind if room_kind>0.0 else (INF if held_kind>0.5 else 0.0)
+		S.set_row(_kind_rows[index].refs,{"label":String(KIND_NAMES.get(String(entry.kind),String(entry.kind))),"value":"%s / %s" % [S.n(held_kind),S.n(room_kind)],"ratio":clampf(held_kind/room_kind,0.0,1.0) if room_kind>0.0 else (1.0 if held_kind>0.5 else 0.0),
+			"bar_color":T.RED if over>=1.0 else (T.AMBER if over>=0.85 else T.GREEN),"tag":("%s× over" % S.n(over)) if over>=1.05 and over<INF else ("No room" if over==INF else ""),"tag_color":T.RED,
+			"tip":"Bulk held in the %s against the room it has. What does not fit lies in the open and spoils faster.\nRoom grows with the people, the town's building era and condition, and with carriers to staff the stores (up to 1 in 10 people): More carriers." % String(KIND_NAMES.get(String(entry.kind),"")).to_lower()})
 	var land:=String(data.get("land",""))
 	if _land!=null:
 		var cover:=float(data.get("cover",ResourceSystem.land_reading().get("cover",0.0)))

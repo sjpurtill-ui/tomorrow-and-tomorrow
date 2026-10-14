@@ -43,9 +43,10 @@ func test_hero_totals_convert_real_monthly_flows_once() -> void:
 		received += Ledger.flow_value(String(row.id), "player")
 	assert_array(Array(chart.values)).is_equal([received * 3.0, sent * 3.0])
 	assert_array(Array(chart.labels)).is_equal(["Received", "Sent"])
-	var spare: Dictionary = Board.kpis()[0]
-	assert_str(String(spare.label)).is_equal("GOODS TO TRADE")
-	assert_str(String(spare.value)).is_equal(EraWords.grouped(roundi(Goods.spare())))
+	# Trade's strip is the flows; the goods to spare are on the Goods tab.
+	var strip: Array = Board.kpis()
+	assert_str(String(strip[0].label)).is_equal("IN A SEASON")
+	assert_str(String(strip[1].value)).is_equal(EraWords.grouped(roundi(sent * 3.0)))
 	# The strip says the season's in and out; the bar is not drawn a second time.
 	assert_bool(chart.visible).is_false()
 

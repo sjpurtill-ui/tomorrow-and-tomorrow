@@ -100,11 +100,11 @@ func setup(block:Dictionary={})->void:
 	levy_box=_part(left)
 	lines_box=_part(left)
 	if mode=="wealth":
-		own_box=_section("What our goods buy",right,"OwnCard")
 		business_box=_section("Trade and business",right,"BusinessCard")
+		own_box=VBoxContainer.new();own_box.name="OwnCard";own_box.add_theme_constant_override("separation",0);business_box.get_parent().add_child(own_box);business_box.get_parent().move_child(own_box,business_box.get_index())
 		wealth_box=_section("Who holds the wealth",right,"DistributionCard")
 		var block_ledger:Variant=block.get("ledger")
-		if block_ledger is Dictionary:
+		if block_ledger is Dictionary and String((block_ledger as Dictionary).get("stage","")) in ["currency","weighed_metal"]:
 			ledger=Ledger.new();right.add_child(ledger);ledger.setup(block_ledger)
 	resized.connect(_responsive)
 	refresh(true)
@@ -136,7 +136,8 @@ func _process(delta:float)->void:
 ## board keeps its nodes and reads the purse again, as a fresh page would.
 func update_block(block:Dictionary)->bool:
 	if String(block.get("mode","wealth"))!=mode or Purse.in_kind()!=kind_at_setup:return false
-	if (block.get("ledger") is Dictionary)!=(ledger!=null):return false
+	var wants_ledger:=block.get("ledger") is Dictionary and String((block.ledger as Dictionary).get("stage","")) in ["currency","weighed_metal"]
+	if wants_ledger!=(ledger!=null):return false
 	if ledger!=null and not ledger.update_block(block.ledger):return false
 	if block.get("on_open") is Callable:on_open=block.on_open
 	clock=0.0
@@ -179,7 +180,7 @@ func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->voi
 
 ## The strip's figures (the dock draws them under the tabs): goods held,
 ## goods to trade, made a day, market reach, treasures (click: give one).
-const KPI_LABELS:={"held":"Goods held","spare":"To trade","made":"Made a day","market":"To market","treasures":"Treasures"}
+const KPI_LABELS:={"held":"Goods held","levy":"Levy","spending":"Spending","work":"Day's work","treasures":"Treasures"}
 static func kpis()->Array:
 	return S.dock_kpis(kpi_items(),KPI_LABELS)
 
@@ -197,19 +198,23 @@ static func kpi_items()->Array:
 	out.append(S.kpi_item("held",{"value":S.n(goods),"ratio":clampf(a_head/maxf(0.01,typical*2.0),0.0,1.0),"color":T.GREEN if a_head>=typical else T.AMBER,
 		"sub":"Worth %s rations" % S.n(Goods.worth_in_rations(goods)),
 		"tip":"Made things our homes hold and keep for barter, in every town: tools, cord, baskets, pots. Goods are our first money.\nThe bar: goods a head against twice what a typical people of our age holds.\n%s goods a head; a typical people of our age holds %s.\nOne is worth %s rations at our own prices." % [S.n(a_head),S.n(typical),S.n(Goods.worth_in_rations(1.0))]}))
-	out.append(S.kpi_item("spare",{"value":S.n(spare),"ratio":clampf(spare/maxf(1.0,goods),0.0,1.0),"color":T.TEAL,"sub":"%s kept for use" % S.n(maxf(0.0,goods-spare)),
-		"tip":"Goods beyond what the homes need, what the learners will take and what is kept back for the first workshops. With other peoples they buy food, materials, arms, and bring families who come to work (the Trade tab).\nThe bar: the share of all goods held that can change hands."}))
-	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
-	var made:=float(report.get("made",0.0))
-	var worn:=0.0
-	if not cards.is_empty():
-		made=0.0
-		for card:Dictionary in cards:made+=float(card.get("made",0.0));worn+=float(card.get("worn",0.0))
-	out.append(S.kpi_item("made",{"value":S.n(made),"ratio":clampf(made/maxf(0.01,made+worn),0.0,1.0) if made+worn>0.01 else -1.0,"color":T.GREEN,"sub":"%s wear out" % S.n(worn),
-		"tip":"Goods the makers made today in every town (the Workshops tab draws how). Worth %s rations at our own prices.\nEach maker makes about %s a day: more with the crafts the people know, and as well as people work.\nThe bar: made against made and worn out." % [S.n(Goods.worth_in_rations(made)),S.n(Goods.goods_per_maker_day())]}))
-	var reach:=clampf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.0,1.0)
-	out.append(S.kpi_item("market",{"value":"%d%%" % roundi(reach*100.0),"ratio":reach,"color":T.TEAL,"sub":"of what is made",
-		"tip":"%d in 100 of what is made reaches the market, where goods change hands %s. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % [roundi(reach*100.0),"by barter, for food and materials" if String(WorldSimulation.state.economy_stage)=="subsistence" else ("with weighed metal beside barter" if String(WorldSimulation.state.economy_stage)=="weighed_metal" else "for coin")]}))
+	# The levy and what the store pays for, a season at today's settings.
+	var forecast:=Purse.forecast()
+	var purse:=Purse.state()
+	var levy:=float(forecast.levy)
+	var out_season:=maxf(0.0,float(forecast.out))
+	out.append(S.kpi_item("levy",{"value":Purse.number(levy),"ratio":clampf(levy/maxf(0.01,levy+out_season),0.0,1.0) if levy+out_season>0.01 else -1.0,"color":T.GOLD,
+		"sub":"a season · %s" % String(Purse.LEVEL_NAMES.get(String(purse.levy),String(purse.levy))).to_lower(),
+		"tip":"What the levy brings into %s a season at today's work, after what is hidden. Set it on the levy's row.\nThe bar: the levy against the levy and the spending together." % Purse.account_name().to_lower()}))
+	var on:=0
+	for line:String in Purse.LINES:
+		if bool(((forecast.lines as Dictionary).get(line,{}) as Dictionary).get("on",false)):on+=1
+	out.append(S.kpi_item("spending",{"value":Purse.number(out_season),"ratio":clampf(out_season/maxf(0.01,levy),0.0,1.0) if levy>0.01 else -1.0,"color":T.AMBER if out_season>levy else T.TEAL,
+		"sub":"a season · %d %s on" % [on,"line" if on==1 else "lines"],"tip":"What %s pays out a season: the lines switched on below, and the wear on what it holds.\nThe bar: spending against the levy." % Purse.account_name().to_lower()}))
+	var economy:=preload("res://scripts/civilization_indicators.gd").economy()
+	var work:=float(economy.get("gdp",0.0));var effect:=float(economy.get("productivity",0.0))
+	out.append(S.kpi_item("work",{"value":S.n(work),"ratio":clampf(effect/1.5,0.0,1.0),"color":T.TEAL,"sub":"people at their best",
+		"tip":"The day's useful work equals about %s people working at their best. Each worker works at %d%% of a healthy, settled worker (the bar runs to 150%%).\nIt counts useful work only, not land, buildings, belongings or coin." % [S.n(work),roundi(effect*100.0)]}))
 	var count:=int(held.treasures);var worth:=float(held.treasure_worth)
 	var t_typical:=float(Scale.anchors(Scale.TREASURES,_year())[1])
 	out.append(S.kpi_item("treasures",{"value":S.n(count),"ratio":clampf((worth/people)/maxf(0.01,t_typical*2.0),0.0,1.0),"color":T.GOLD,"sub":"appraised %s goods" % S.n(worth) if count>0 else "none held yet",
@@ -292,7 +297,7 @@ func _build_levy(current:String)->void:
 		var lq:=Purse.quote(level)
 		buttons.append({"text":String(Purse.LEVEL_NAMES[level]),"chosen":level==current,"on_press":_choose_levy.bind(level),
 			"tip":"%s: %s of %s.\nBrings about %s a season.\nAbout 1 in %d hide what they owe.\nTrust in you −%d, holding together −%d." % [String(Purse.LEVEL_NAMES[level]),String(lq.words),Purse.harvest_word(),Purse.amount_text(float(lq.per_season)),int(lq.hidden_one_in),roundi(float(lq.trust)),roundi(float(lq.cohesion))]})
-	var row:=S.row(levy_box,{"id":"levy","icon":"Civilian Goods","label":"The levy","label_width":90.0,"note":"a season · "+("custom expects it" if trust<=0 else "trust −%d" % trust)+" · 1 in %d hide dues" % int(q.hidden_one_in),"value":Purse.number(float(q.per_season)),"value_width":64.0,"buttons":buttons,
+	var row:=S.row(levy_box,{"id":"levy","icon":"Civilian Goods","label":"The levy","label_width":90.0,"note":("custom expects it" if trust<=0 else "trust −%d" % trust)+" · 1 in %d hide dues" % int(q.hidden_one_in),"value":"","value_width":4.0,"buttons":buttons,
 		"tip":"%s of %s, at today's work, after what is hidden.\nA light levy is what custom expects. Heavier ones are resented: trust in you and how well the people hold together (−%d now) fall while it lasts, and more is hidden.\nOur hands reach %d in 100 of what is owed." % [_cap(String(q.words)),Purse.harvest_word(),roundi(float(q.cohesion)),roundi(float(q.reach)*100.0)]})
 	(row.note as Label).name="LevyCost";(row.value as Label).name="LevyNow"
 	var levels:=HBoxContainer.new();levels.name="Levels";levels.visible=false;levy_box.add_child(levels)
@@ -343,8 +348,14 @@ func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->Strin
 		"army":
 			if on and int(purse.get("unpaid_months",0))==0:return "%s · their will holds" % String(entry.get("who",""))
 			return "unpaid: their will falls, some go home"
-		"scholars":return "%s · research %d%% faster" % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0)]
-		"crews":return "%s · building %d%% faster" % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0)]
+		"scholars":
+			# The top bar's scholars (civilization_kpi_model.gd minds).
+			var minds:=roundi(float(preload("res://scripts/civilization_indicators.gd").science().minds))
+			return "%s scholars · research %d%% faster" % [EraWords.grouped(minds),roundi(Purse.SCHOLARS_MAX*100.0)]
+		"crews":
+			# The Buildings screen's builders (population_allocations Construction).
+			var builders:=maxi(0,int(WorldSimulation.state.population_allocations.get("Construction",0)))
+			return "%s builders · building %d%% faster" % [EraWords.grouped(builders),roundi(Purse.CREWS_MAX*100.0)]
 		"relief":
 			var hungry:=Purse.food_places().filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
 			if hungry==0:return "no town is hungry"
@@ -432,8 +443,10 @@ func _build_business()->void:
 	if r>=1:(where.note as Label).text=effect_word
 	var needs:=Business.next_needs(true)
 	if needs!="":
-		var next:=S.row(panel,{"id":"next","label":"Next: %s" % String((Business.RUNGS[r+1] as Dictionary).short).to_lower(),"note":"needs %s" % needs,"value":"","value_width":4.0,"tip":"%s needs %s." % [Business.rung_name(r+1),Business.next_needs()]})
-		(next.panel as Control).name="NextRung"
+		var next_words:="Next: %s" % String((Business.RUNGS[r+1] as Dictionary).short).to_lower()
+		S.set_tag(where.tag,next_words,T.MUTED)
+		(where.panel as Control).tooltip_text+="\n\n%s needs %s." % [Business.rung_name(r+1),Business.next_needs()]
+		var next:=Control.new();next.name="NextRung";next.visible=false;panel.add_child(next)
 	if r<1:return
 	var e:=Business.state()
 	var share:=Business.share()
@@ -441,8 +454,9 @@ func _build_business()->void:
 	var held:=S.row(panel,{"id":"share","label":"Holds workers","note":"heading for %s" % Business.in_100(goal),"ratio":clampf(share/maxf(0.0001,goal),0.0,1.0),"bar_width":60.0,"value":Business.in_100(share),"value_width":90.0,
 		"tip":"Growing takes decades; failures are fast. This rung can hold up to %s of the workers." % Business.in_100(float((Business.RUNGS[r] as Dictionary).cap))})
 	(held.panel as Control).name="ShareWords"
-	var effect:=S.row(panel,{"id":"effect","label":"Effect","note":"%s to all work and goods" % Business.percent(work),"note_color":T.GREEN_TEXT if matters else T.INK_MUTED,"value":"reach +%d" % roundi(float(x.trade)*100.0),"value_width":90.0,
-		"tip":"What business does now, at its size today: all work (harvests, within what the land yields; building, digging, hauling and learning) and the goods made go this much faster, trade reaches this much further, and the richest fifth settle %d parts in 100 higher." % roundi(float(x.rich)*100.0)})
+	var reach_now:=clampf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.0,1.0)
+	var effect:=S.row(panel,{"id":"effect","label":"To market","note":"%s to all work and goods" % Business.percent(work),"note_color":T.GREEN_TEXT if matters else T.INK_MUTED,"value":"%d%%" % roundi(reach_now*100.0),"ratio":reach_now,"bar_color":T.TEAL,"bar_width":60.0,"value_width":50.0,
+		"tip":"%d in 100 of what is made reaches the market; makers and carriers widen it. Trade reaches +%d further.\nWhat business does now, at its size today: all work (harvests, within what the land yields; building, digging, hauling and learning) and the goods made go this much faster, trade reaches this much further, and the richest fifth settle %d parts in 100 higher." % [roundi(reach_now*100.0),roundi(float(x.trade)*100.0),roundi(float(x.rich)*100.0)]})
 	(effect.note as Label).name="BusinessEffect"
 	var left:=Business.bust_left()
 	if left>0:

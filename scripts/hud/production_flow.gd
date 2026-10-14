@@ -293,7 +293,7 @@ func _draw_node(node:Dictionary,font:Font,strong:Font)->void:
 			_icon(texture,pos,r*1.5)
 			var x:=pos.x+r+8.0
 			var per_day:=float(data.get("per_day",0.0))
-			_text(strong,_rate(per_day,String(data.get("unit",""))),Vector2(x,pos.y-2),14,T.INK if per_day>0.0 else T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT)
+			_text(strong,_rate(per_day,String(data.get("unit",""))) if per_day>0.0 else String(data.get("idle","none today")),Vector2(x,pos.y-2),14,T.INK if per_day>0.0 else T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT)
 			_text(font,String(data.name).to_lower() if kind!="gear" else String(data.name),Vector2(x,pos.y+14),13,T.INK_MUTED,HORIZONTAL_ALIGNMENT_LEFT)
 
 static func _rate(per_day:float,unit:String)->String:

@@ -48,7 +48,6 @@ func tab(sub:int)->Dictionary:
 		for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
 		block.spare_worth=preload("res://scripts/civilian_goods.gd").worth_in_rations(spare)
 		block.techniques=_technique_list()
-		block.carts=_carts()
 	if mode!="civilian":
 		var stock:=Logistics.rows(MilitaryCampaign,snapshot)
 		if mode=="all":
@@ -77,41 +76,48 @@ func tab_kpis(block:Dictionary)->Array:
 	var items:Array=[]
 	match String(block.get("mode","")):
 		"civilian":
+			# Household supply: what the homes hold against what they want, what
+			# the makers made for them today, what wears out, and what is to spare.
 			var cards:Array=block.get("households",[])
-			var low:=1.0;var worn:=0.0;var spare:=0.0;var held:=0.0;var wanted:=0.0
+			var low:=1.0;var worn:=0.0;var spare:=0.0;var held:=0.0;var wanted:=0.0;var for_homes:=0.0
 			for card:Dictionary in cards:
 				low=minf(low,clampf(float(card.get("coverage",0.0)),0.0,1.0));worn+=float(card.get("worn",0.0));spare+=float(card.get("spare",0.0))
 				held+=float(card.get("stock",0.0));wanted+=float(card.get("target",0.0))
+				for_homes+=maxf(0.0,float(card.get("made",0.0))-float(card.get("for_barter",0.0)))
 			if cards.is_empty():low=0.0
-			var made:=0.0
-			for card:Dictionary in cards:made+=float(card.get("made",0.0))-float(card.get("for_barter",0.0))
-			items.append({"id":"stocked","label":"Homes' goods","value":Sheet.n(held),"ratio":low,"color":T.GREEN if low>=0.98 else (T.AMBER if low>=0.6 else T.RED),
-				"sub":"%s wanted" % Sheet.n(wanted),"tip":"The least-stocked town's homes: goods held against what they want. Households wear goods out; the makers make them good."})
-			items.append({"id":"spare","label":"To spare","value":Sheet.n(spare),"ratio":-1.0,"sub":"worth %s rations" % Sheet.n(float(block.get("spare_worth",0.0))),"tip":"Goods beyond what the homes want, what the learners will take and what is kept back: what can change hands (the Trade tab)."})
+			items.append({"id":"wanted","label":"Homes want","value":Sheet.n(wanted),"ratio":low,"color":T.GREEN if low>=0.98 else (T.AMBER if low>=0.6 else T.RED),
+				"sub":"all held" if low>=0.98 else "%d%% held" % roundi(low*100.0),"tip":"Goods the homes of every town want: tools, baskets, pots and fittings. The bar: the least-stocked town's share held."})
+			if for_homes>=0.5:items.append({"id":"for_homes","label":"Made for homes","value":Sheet.n(for_homes),"ratio":clampf(for_homes/maxf(0.01,worn),0.0,1.0) if worn>0.01 else -1.0,"color":T.GREEN,
+				"sub":"homes full; rest to barter" if low>=0.98 else "a day","tip":"Goods the makers made for the homes today. Once the homes are full the makers make for barter instead (the chart). The bar: made for homes against what wears out."})
 			items.append({"id":"wear","label":"Wear a day","value":Sheet.n(worn),"ratio":-1.0,"sub":"in the homes","tip":"Goods the homes wear out each day, in every town."})
-			var carts:Dictionary=block.get("carts",{})
-			items.append({"id":"carts","label":"Carts","value":Sheet.n(float(carts.get("count",0))),"ratio":-1.0,"sub":"made on the lines" if bool(carts.get("known",false)) else "not known yet","tip":"Carts in store. They are made on the workshop lines (the Arms tab)."})
-			var techniques:Array=block.get("techniques",[])
-			if not techniques.is_empty():
-				var mean:=0.0
-				for technique:Dictionary in techniques:mean+=float(technique.get("adoption",0.0))
-				mean/=float(techniques.size())
-				items.append({"id":"crafts","label":"Crafts known","value":Sheet.n(techniques.size()),"ratio":mean,"color":T.TEAL,"sub":"%d%% in use" % roundi(mean*100.0),"tip":"Crafts the makers know; the bar is how far they are in use."})
+			items.append({"id":"spare","label":"To spare","value":Sheet.n(spare),"ratio":-1.0,"sub":"worth %s rations" % Sheet.n(float(block.get("spare_worth",0.0))),"tip":"Goods beyond what the homes want, what the learners will take and what is kept back: what can change hands (the Trade tab)."})
 		"military":
+			# The watch from the guard ledger the battles muster from
+			# (watch_military.gd home_standing); arms against it; the
+			# equipment cards below summed; the lines; one set's cost.
 			var a:Dictionary=block.get("arms",{})
-			var watch:=int(a.get("watch",0));var issued:=int(a.get("issued",0));var held_sets:=int(a.get("held",0));var wanted_sets:=int(a.get("wanted",0))
+			var standing:Dictionary=preload("res://scripts/watch_military.gd").home_standing(MilitaryCampaign)
+			var on_watch:=int(standing.get("on_watch",0))
+			var issued:=int(a.get("issued",0));var wanted_sets:=int(a.get("wanted",0))
 			var go:=func()->void:
 				var open:Variant=block.get("on_open")
 				if open is Callable:(open as Callable).call("military",0)
-			items.append({"id":"watch","label":"Watch armed","value":("%s of %s" % [Sheet.n(issued),Sheet.n(watch)]) if watch>0 else "No watch","ratio":float(issued)/float(watch) if watch>0 else -1.0,"color":T.GREEN if wanted_sets<=0 else T.AMBER,
-				"sub":"click: the bands","on_press":go,"tip":"Fighters of the watch carrying a set of arms. Click to open the Warriors: how armed each band is."})
-			items.append({"id":"held","label":"Sets in store","value":Sheet.n(held_sets),"ratio":-1.0,"sub":"arms and kits","tip":"Sets held count the made arms and the armoury's kits (each kind under Equipment)."})
-			items.append({"id":"wanted","label":"Still wanted","value":Sheet.n(wanted_sets),"value_color":T.AMBER_TEXT if wanted_sets>0 else T.INK,"ratio":-1.0,"sub":"none wanted" if wanted_sets<=0 else "the watch lacks them","tip":"While the watch lacks arms, %d in 100 of the makers make them (%d in 100 at war); those makers make no goods that day." % [roundi(float(a.get("share",0.0))*100.0),roundi(float(a.get("war_share",0.0))*100.0)]})
-			items.append({"id":"making","label":"Arms a day","value":Sheet.n(float(a.get("made",0.0))),"ratio":-1.0,"sub":"%s makers on arms" % Sheet.n(float(a.get("hands",0.0))),"tip":"Sets the makers made today and the makers on arms."})
+			items.append({"id":"watch","label":"On watch","value":Sheet.n(on_watch),"ratio":clampf(float(issued)/float(on_watch),0.0,1.0) if on_watch>0 else -1.0,"color":T.GREEN if wanted_sets<=0 else T.AMBER,
+				"sub":("%s armed" % Sheet.n(issued)) if wanted_sets<=0 else ("%s lack arms" % Sheet.n(wanted_sets)),"sub_color":T.AMBER_TEXT if wanted_sets>0 else T.INK_MUTED,"on_press":go,
+				"tip":"Those keeping watch in our towns and free to send (the War screen's guard ledger); the bar: those carrying a set of arms. Click for the War screen."})
+			var cards:=0;var short:=0
+			for row:Dictionary in block.get("stock",[]):cards+=int(row.get("stock",0));short+=int(row.get("deficit",0))
+			items.append({"id":"equipment","label":"Equipment in store","value":Sheet.n(cards),"ratio":-1.0,"sub":("%s short" % Sheet.n(short)) if short>0 else "enough for the bands","sub_color":T.RED_TEXT if short>0 else T.INK_MUTED,
+				"tip":"Every kind in store, the cards below added up."})
+			var lines:Array=block.get("lines",[])
+			var capacity:=int(block.get("capacity",lines.size()))
+			items.append({"id":"lines","label":"Lines","value":"%d of %d" % [lines.size(),capacity],"ratio":float(lines.size())/float(maxi(1,capacity)),"color":T.GOLD,"sub":"in use","tip":"Workshop lines in use. More open as security, production, supply and institutions grow."})
 			var cost:Dictionary=a.get("cost",{})
 			var materials:PackedStringArray=[]
 			for item:String in (cost.get("materials",{}) as Dictionary):materials.append("%s %s" % [Sheet.n(float(cost.materials[item])),ResourceSystem.display_name(item).to_lower()])
 			items.append({"id":"cost","label":"One set","value":"%s days" % Sheet.n(float(cost.get("maker_days",0.0))),"ratio":-1.0,"sub":"worth %s goods" % Sheet.n(float(cost.get("worth_goods",0.0))),"tip":"Arming one fighter: %s, %s maker-days and %s." % [String(cost.get("kind","")),Sheet.n(float(cost.get("maker_days",0.0))),", ".join(materials)]})
+			if float(a.get("made",0.0))>=0.05:
+				items.append({"id":"making","label":"Arms a day","value":Sheet.n(float(a.get("made",0.0))),"ratio":-1.0,"sub":"%s makers on arms" % Sheet.n(float(a.get("hands",0.0))),"tip":"Sets the makers made today."})
 	return Sheet.dock_kpis(items,{})
 
 ## The All page: how the makers' hands split between the homes, the
@@ -476,7 +482,7 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 			if short.is_empty():arms_stalled="no makers free for arms"
 	# The workshop lines: what each working line draws and makes a day.
 	var outputs:Array=[
-		{"id":"homes","kind":"homes","name":"For the homes","per_day":maxf(0.0,made-barter),"unit":"goods"},
+		{"id":"homes","kind":"homes","name":"For the homes","per_day":maxf(0.0,made-barter),"unit":"goods","idle":"homes full" if made>0.01 and made-barter<0.01 else "none today"},
 		{"id":"barter","kind":"barter","name":"For barter","per_day":barter,"unit":"goods"}]
 	links.append({"from":"goods","to":"homes","per_day":maxf(0.0,made-barter)})
 	links.append({"from":"goods","to":"barter","per_day":barter})
@@ -495,7 +501,7 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 		var wants:=int(line.get("target_stock",0))<=0 or int(line.get("stock",0))<int(line.get("target_stock",0))
 		line_out+=per_day
 		var out_id:="line:%d" % int(line.get("id",0))
-		outputs.append({"id":out_id,"kind":"gear","item":item,"name":P.product_name(item),"per_day":per_day,"unit":"","stock":int(line.get("stock",0)),"target":int(line.get("target_stock",0))})
+		outputs.append({"id":out_id,"kind":"gear","item":item,"name":P.product_name(item),"per_day":per_day,"unit":"","stock":int(line.get("stock",0)),"target":int(line.get("target_stock",0)),"idle":"resting: %d in store" % int(line.get("stock",0)) if not wants else "stalled"})
 		links.append({"from":"lines","to":out_id,"per_day":per_day})
 		for input:Dictionary in line.get("materials_status",[]):
 			var resource:=String(input.get("resource",""))

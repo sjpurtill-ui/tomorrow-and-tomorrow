@@ -438,15 +438,14 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 		if child.get_meta("wealth_section",false):kickers.append((child as Label).text)
 	# The strip carries what we own; the rows lead with the common store.
 	assert_str(String(kickers[0])).is_equal("THE COMMON STORE")
-	assert_int(kickers.find("THE COMMON STORE")).is_less(kickers.find("WHAT OUR GOODS BUY"))
-	assert_int(kickers.find("WHAT OUR GOODS BUY")).is_less(kickers.find("TRADE AND BUSINESS"))
+	assert_int(kickers.find("THE COMMON STORE")).is_less(kickers.find("TRADE AND BUSINESS"))
 	assert_int(kickers.find("TRADE AND BUSINESS")).is_less(kickers.find("WHO HOLDS THE WEALTH"))
 	# Arms live on the Arms tab.
 	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
 	# What we own is the engine's count: every town's goods, at our own prices.
 	var held:=preload("res://scripts/standing.gd").wealth_held()
 	var strip:Array=Board.kpis()
-	assert_array(strip.map(func(k:Dictionary)->String:return String(k.label))).contains_exactly(["GOODS HELD","TO TRADE","MADE A DAY","TO MARKET","TREASURES"])
+	assert_array(strip.map(func(k:Dictionary)->String:return String(k.label))).contains_exactly(["GOODS HELD","LEVY","SPENDING","DAY'S WORK","TREASURES"])
 	assert_str(String(strip[0].value)).is_equal(preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
 	assert_bool(strip[4].get("on_press") is Callable).is_true()
 	# Each line of spending says what it costs a season.
