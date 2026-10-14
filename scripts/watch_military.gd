@@ -482,12 +482,17 @@ const GUARD_MIN:=8
 ## band), of whom the "home guard" (the share kept back, never sent), those
 ## "on the border" (home guard posted to the forts and the line), and "can
 ## rise" (townsfolk who take up arms untrained when raiders come). Also the
-## guard our towns need together. {on_watch, home_guard, home_share,
-## free_to_send, on_border, can_rise, guard_need}. Read from the guard ledger
+## guard our towns need together. And, named apart because it is another
+## count, "set to keep watch": the share of the people's work given to the
+## watch, of them those at home today (at_home): they, not the soldiers
+## standing over the share, do the day's watch work that raises the walls.
+## {on_watch, home_guard, home_share, free_to_send, on_border, can_rise,
+## guard_need, set_to_watch}. Read from the guard ledger
 ## the battles muster from (civilization_combat.gd guard_ledger).
 static func home_standing(mc:Variant)->Dictionary:
-	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed()}
+	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed(),"set_to_watch":0}
 	if mc==null:return out
+	out.set_to_watch=at_home(mc)
 	var Combat:=preload("res://scripts/civilization_combat.gd")
 	var in_towns:=0;var rise:=0
 	var ledger:Dictionary=Combat.guard_ledger(mc)
