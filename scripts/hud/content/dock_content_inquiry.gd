@@ -308,6 +308,7 @@ func _hands()->Dictionary:
 	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
 	var focus:=String({"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up"}.get(String(state.get("focus","")),"everyday needs"))
 	return {"words":"The local leader favours %s" % focus,"occupied":occupied,
+		"on_assign":assign_workers("Knowledge"),
 		"tip":"The local leader shares out the people's time between food, water, learning and other needs. Asking for more hands on learning changes who works at learning, not what is found; essential needs can still hold it back.",
 		"on_more":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh(),
 		"on_free":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}

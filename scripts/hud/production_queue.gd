@@ -53,14 +53,17 @@ func setup(block:Dictionary)->void:
 	match mode:
 		"all":
 			_build_all_head()
+			_build_assign_workers()
 			_build_households(self,true)
 			_overview_box=VBoxContainer.new();_overview_box.name="Overview";_overview_box.add_theme_constant_override("separation",10);add_child(_overview_box)
 			_build_flow_disclosure("How today's work moves")
 		"civilian":
 			_build_flow()
+			_build_assign_workers()
 			_build_households(self,true)
 		_:
 			_build_workshop_brief()
+			_build_assign_workers()
 			var navigation:=HFlowContainer.new();navigation.add_theme_constant_override("h_separation",8);add_child(navigation)
 			for entry:Array in [["orders","Current orders"],["recipes","Choose a product"],["stock","Equipment stores"]]:
 				var key:=String(entry[0]);var button:=W.text_button(String(entry[1]),"Show "+String(entry[1]).to_lower());button.toggle_mode=true;navigation.add_child(button);_workspace_buttons[key]=button
@@ -87,6 +90,7 @@ func update_block(block:Dictionary)->bool:
 
 static func shape_key(block:Dictionary)->String:
 	var parts:PackedStringArray=[String(block.get("mode","military"))]
+	parts.append("Assign"+str(block.get("on_assign") is Callable))
 	for line:Dictionary in block.get("lines",[]):parts.append("L%d:%s:%s:%s" % [int(line.get("id",0)),str(bool(line.get("ship",false))),str(bool(line.get("persistent",false))),str(bool(line.get("auto",false)))])
 	for recipe:Dictionary in block.get("recipes",[]):parts.append("R"+String(recipe.get("item","")))
 	for row:Dictionary in block.get("stock",[]):parts.append("S"+String(row.get("item","")))
@@ -114,6 +118,12 @@ func _prepared(block:Dictionary)->Dictionary:
 	return result
 
 # --- Actions ----------------------------------------------------------------------
+
+func _build_assign_workers()->void:
+	if not data.get("on_assign") is Callable:return
+	var button:=W.text_button("Assign workers","Focus Crafting in The People. Preview the effect of changing the craft workforce before applying.")
+	button.name="AssignCraftWorkers";button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;add_child(button)
+	button.pressed.connect(func():data.on_assign.call())
 
 func act(id:int,action:String,value:float,item:String="")->void:
 	match action:

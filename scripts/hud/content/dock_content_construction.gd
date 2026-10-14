@@ -103,8 +103,7 @@ func _city_tab()->Dictionary:
 	var total:=Construction._settlement_definitions().size()
 	var sections:=[
 		{"id":"next","heading":("%s: now and next" % String(city.get("name","The town"))) if GameState.player_settlements.size()>1 else "Building now and next","span":true,"note":("All %d civic works stand" % total) if project.is_empty() else "%d of %d civic works stand" % [done,total],"note_tip":"New civic works come as the people learn new ways to build: see Coming next."},
-		{"id":"crews","heading":"Builders by job","actions":[{"label":"Set builders","tip":"How many of the people build, make and carry: The People."+(("
-Ten more builders would give: %s." % _ten_more) if _ten_more!="" else ""),"on_press":jump("overview",0)}]},
+		{"id":"crews","heading":"Builders by job","actions":[{"label":"Assign workers","tip":"Focus construction in The People. Preview the effects on building, other work and food before applying.","on_press":assign_workers("Construction")}]},
 		{"id":"fabric","heading":"The town's fabric"},
 		{"id":"soon","heading":"Coming next"}]
 	var page:={"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards,"readings":_glance(housing,crews)}]}
@@ -143,7 +142,7 @@ func _glance(h:Dictionary,crews:Dictionary)->Array:
 		words.append("%s %s" % [_n(roundi(float(part.heads))),String(part.short)])
 	var heads:=int(crews.heads)
 	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"segments":segments,"delta":"%d per 1,000 people" % roundi(float(heads)*1000.0/maxf(1.0,float(GameState.population_total))) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
-		"tip":"\n".join(words) if heads>0 else "No one is building: works, repairs and new homes all stop.","on_press":jump("overview",0)})
+		"tip":"\n".join(words) if heads>0 else "No one is building: works, repairs and new homes all stop.","on_press":assign_workers("Construction")})
 	var repair:=_condition_row()
 	tiles.append({"label":"CONDITION","value":String(repair.value),"glance":true,"meter":float((repair.meter as Dictionary).ratio),"meter_color":repair.accent,
 		"delta":String(repair.sub).get_slice(":",0),"tip":"%s. %s" % [String(repair.sub),String(repair.detail)]})

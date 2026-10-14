@@ -25,6 +25,14 @@ func jump(section:String,sub:int)->Callable:
 	if section=="court": return court({})
 	return func()->void: hud.section_requested.emit(section,sub)
 
+## Every labor decision opens the same living People screen at its work area.
+## Opening it only prepares a draft; allocation changes require its Apply action.
+func assign_workers(role:String)->Callable:
+	return func()->void:
+		if not is_instance_valid(hud):return
+		if hud.has_method("focus_people_work"):hud.call("focus_people_work",role)
+		else:hud.section_requested.emit("overview",0)
+
 ## Opens the court, where every conversation with your people and with
 ## foreign rulers happens, focused on someone ({settlement_id}, {person_id},
 ## {civ_id}...) or at rest ({}).

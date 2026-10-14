@@ -174,6 +174,10 @@ func present(new_provider:Object,new_sub:int=0)->void:
 func rebuild()->void:
 	if provider==null: return
 	var meta:Dictionary=provider.meta()
+	var spatial:=bool(meta.get("spatial_view",false))
+	var body_margin:=body.get_parent() as MarginContainer
+	for edge in ["left","right","bottom"]:body_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
+	body_margin.add_theme_constant_override("margin_top",12 if spatial else 24)
 	_set_fit(bool(meta.get("fit_height",false)))
 	# Providers still pass shouted text; the dock speaks in sentence case.
 	# One header on every screen: the rail's word on one line, the tabs right

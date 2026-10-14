@@ -211,13 +211,18 @@ func _layout()->void:
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT))
+		dock.set_deferred("size",Vector2(_dock_width(dock,view.x),view.y-Folio.TOP_HEIGHT))
 	if detail_dock:
 		detail_dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
-		detail_dock.set_deferred("size",Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT))
+		detail_dock.set_deferred("size",Vector2(_dock_width(detail_dock,view.x),view.y-Folio.TOP_HEIGHT))
 	_position_toolbar()
 
 func _work_queue_width(view_width:float)->float:
+	return Folio.page_width(view_width)
+
+func _dock_width(panel:Control,view_width:float)->float:
+	if panel.provider and bool(panel.provider.meta().get("spatial_view",false)):
+		return minf(1600.0,maxf(280.0,view_width-Folio.RAIL_WIDTH-Tokens.EDGE_MARGIN))
 	return Folio.page_width(view_width)
 
 func force_dock_layout()->void:
@@ -227,7 +232,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(Folio.page_width(view.x),view.y-Folio.TOP_HEIGHT)
+		panel.size=Vector2(_dock_width(panel,view.x),view.y-Folio.TOP_HEIGHT)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 	# Capture only: "--capture-dock-scroll=<px>" shows a long page further down.
@@ -1053,6 +1058,19 @@ func register_provider(id:String,provider:Object)->void:
 func has_provider(id:String)->bool:
 	return providers.has(id)
 
+## Use the ordinary section route so map modes close through their owner.
+## The camera and assignment draft belong to the People screen, not the caller.
+func focus_people_work(role:String)->void:
+	section_requested.emit("overview",0)
+	_focus_people_work_area.call_deferred(role)
+
+func _focus_people_work_area(role:String)->void:
+	if not is_instance_valid(dock) or not dock.visible or active_section!="overview":return
+	var people:=dock.find_child("CivilizationPeopleScreen",true,false)
+	if is_instance_valid(people) and people.has_method("focus_work"):
+		people.call("focus_work",role)
+		dock.body_scroll.scroll_vertical=0
+
 ## The pages sharing a category's screen, for the dock's one row of tabs:
 ## [{section, provider, labels}] (only those that open in the dock).
 func _pages_of(category:Dictionary)->Array:
@@ -1196,6 +1214,9 @@ func handle_escape()->bool:
 		close_detail()
 		return true
 	if dock and dock.visible:
+		var people:=dock.find_child("CivilizationPeopleScreen",true,false)
+		if is_instance_valid(people) and people.has_method("handle_escape") and bool(people.call("handle_escape")):
+			return true
 		close_dock()
 		return true
 	if active_section!="":
