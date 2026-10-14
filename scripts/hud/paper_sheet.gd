@@ -19,7 +19,10 @@ static func sheet_style(pad:float=20.0)->StyleBoxFlat:
 	return style
 
 static func card_style(accent:Color=Color(0,0,0,0),pad:float=12.0)->StyleBoxFlat:
-	var style:=T.paper_panel_style(true,T.RADIUS_CARD,pad)
+	var style:=T.flat(Color.TRANSPARENT)
+	style.set_content_margin_all(pad)
+	style.border_color=T.RULE
+	style.border_width_top=1
 	if accent.a>0.0:
 		style.border_color=accent
 		style.border_width_left=3
@@ -79,6 +82,7 @@ static func rule(parent:Node)->void:
 ## Returns [root, sheet_box]. Escape and the close button call close_callback.
 static func modal(owner:Control,title:String,kicker_text:String,max_size:Vector2,close_callback:Callable)->VBoxContainer:
 	owner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	owner.set_meta("responsive_scroll_layout",true)
 	owner.mouse_filter=Control.MOUSE_FILTER_STOP
 	owner.theme=T.control_theme()
 	var scrim:=ColorRect.new()
@@ -95,6 +99,10 @@ static func modal(owner:Control,title:String,kicker_text:String,max_size:Vector2
 	var viewport:=owner.get_viewport_rect().size if owner.is_inside_tree() else Vector2(1600,900)
 	panel.custom_minimum_size=Vector2(minf(max_size.x,viewport.x-32),minf(max_size.y,viewport.y-32))
 	center.add_child(panel)
+	var refit:=func()->void:
+		var room:=owner.get_viewport_rect().size
+		panel.custom_minimum_size=Vector2(minf(max_size.x,maxf(1,room.x-32)),minf(max_size.y,maxf(1,room.y-32)))
+	owner.resized.connect(refit)
 	var root:=VBoxContainer.new()
 	root.add_theme_constant_override("separation",10)
 	panel.add_child(root)
@@ -107,6 +115,8 @@ static func modal(owner:Control,title:String,kicker_text:String,max_size:Vector2
 	head.add_child(titles)
 	if kicker_text!="":kicker(titles,kicker_text)
 	var heading:=label(titles,title,"title",T.INK)
+	heading.add_theme_font_override("font",T.font("voice_bold"))
+	heading.add_theme_font_size_override("font_size",32)
 	heading.name="Title"
 	var close:=button(head,"Close",close_callback)
 	close.name="Close"
@@ -120,6 +130,7 @@ static func modal(owner:Control,title:String,kicker_text:String,max_size:Vector2
 static func scroll_body(parent:Node,separation:int=12)->VBoxContainer:
 	var scroll:=ScrollContainer.new()
 	scroll.name="Body"
+	scroll.follow_focus=true
 	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	parent.add_child(scroll)

@@ -26,32 +26,42 @@ static func open(terrain:Node,layer:Node)->Control:
 	card.name="PauseMenuBody"
 	card.size=Vector2(680,minf(820,terrain.get_viewport().get_visible_rect().size.y-32))
 	root.add_child(card)
+	var layout:=VBoxContainer.new();layout.name="MenuLayout"
+	layout.add_theme_constant_override("separation",16)
+	card.add_child(layout)
+	var header:=VBoxContainer.new();header.name="MenuHeader"
+	header.add_theme_constant_override("separation",6)
+	layout.add_child(header)
 	var scroll:=ScrollContainer.new()
 	scroll.name="PauseMenuScroll"
 	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	card.add_child(scroll)
+	scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL
+	scroll.follow_focus=true
+	layout.add_child(scroll)
 	var content:=VBoxContainer.new()
 	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	content.add_theme_constant_override("separation",10)
+	content.add_theme_constant_override("separation",14)
 	scroll.add_child(content)
 
-	Kit.label(content,"Paused · version %s" % String(ProjectSettings.get_setting("application/config/version","in development")),"kicker")
-	Kit.label(content,Kit.sentence(String(terrain._settlement_display_name())),"title")
-	Kit.label(content,"%s · %d people" % [Kit.when(int(GameState.elapsed_days)),GameState.population_total],"body")
+	var paused:=Kit.label(header,"Paused","kicker")
+	paused.tooltip_text="Version %s" % String(ProjectSettings.get_setting("application/config/version","in development"))
+	Kit.label(header,Kit.sentence(String(terrain._settlement_display_name())),"title")
+	Kit.label(header,"%s · %d people" % [Kit.when(int(GameState.elapsed_days)),GameState.population_total],"body")
 	var session:=HBoxContainer.new()
 	session.add_theme_constant_override("separation",8)
-	content.add_child(session)
+	header.add_child(session)
 	var resume:=Kit.button(session,"Resume",true,Callable(terrain,"_close_world_menu"))
 	resume.name="Resume"
 	resume.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	resume.custom_minimum_size.y=42
 	var quit:=Kit.button(session,"Quit…",false,Callable(terrain,"_request_quit"),"Asks whether to save first")
-	quit.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	quit.size_flags_horizontal=Control.SIZE_SHRINK_END
+	quit.custom_minimum_size.x=96
 	quit.custom_minimum_size.y=42
 
 	# Save and load -----------------------------------------------------
 	content.add_child(HSeparator.new())
-	Kit.label(content,"Save and load","kicker")
+	Kit.label(content,"Your saved game","heading")
 	var save_status:=Kit.label(content,saved_words(SaveSystem.save_metadata()),"body")
 	save_status.name="SaveStatus"
 	var save_row:=HBoxContainer.new()
@@ -70,15 +80,22 @@ static func open(terrain:Node,layer:Node)->Control:
 		confirm(root,"Load the saved game?","Anything that happened since you last saved will be lost.","Load it",func()->void:
 			var error:String=terrain._load_saved_world()
 			if error!="":_say(save_status,error,true)))
+	# Preferences stay on this surface; opening a group never opens another page.
+	if terrain.get("display_preferences"):
+		var preferences:Node=terrain.display_preferences
+		var settings:=_disclosure(content,"Display and sound",func()->String:return "%d%% text · %s paper · %d fps" % [roundi(float(preferences.ui_scale)*100),String(preferences.color_theme).capitalize(),int(preferences.frame_limit)])
+		settings.name="DisplaySettings"
+		preferences.add_controls(settings)
+		preferences.add_navigation_controls(settings)
 
 	# AI replies ---------------------------------------------------------
-	content.add_child(HSeparator.new())
-	Kit.label(content,"How your people answer","kicker")
-	var ai_status:=Kit.label(content,"","body")
+	var answers:=_disclosure(content,"Written replies","Your people's voices and AI connection")
+	answers.name="WrittenReplies"
+	var ai_status:=Kit.label(answers,"","body")
 	ai_status.name="AiStatus"
 	var ai_row:=HBoxContainer.new()
 	ai_row.add_theme_constant_override("separation",8)
-	content.add_child(ai_row)
+	answers.add_child(ai_row)
 	var ai_toggle:=Kit.button(ai_row,"",false)
 	ai_toggle.name="AiToggle"
 	var ai_settings:=Kit.button(ai_row,"AI connection…",false,Callable(PronouncementInterpreter,"open_connection_settings"),"Set the key the game uses for written replies")
@@ -95,11 +112,11 @@ static func open(terrain:Node,layer:Node)->Control:
 		if terrain.get("hud") and terrain.hud.has_method("request_immediate_dock_refresh"):terrain.hud.request_immediate_dock_refresh())
 
 	# New world ----------------------------------------------------------
-	content.add_child(HSeparator.new())
-	Kit.label(content,"Start again","kicker")
+	var worlds:=_disclosure(content,"Start again","Restart this world or begin somewhere new")
+	worlds.name="NewWorldSettings"
 	var new_row:=HBoxContainer.new()
 	new_row.add_theme_constant_override("separation",8)
-	content.add_child(new_row)
+	worlds.add_child(new_row)
 	var restart:=Kit.button(new_row,"Restart this world",false,func()->void:
 		confirm(root,"Restart this world?","Your people start again on day one on the same land. Everything since then is lost unless you have saved it.","Restart",Callable(terrain,"_restart_world").bind(GameState.world_seed)),"Same land, a fresh start")
 	restart.name="RestartWorld"
@@ -108,16 +125,10 @@ static func open(terrain:Node,layer:Node)->Control:
 		confirm(root,"Start a new world?","A different land and different neighbours. This game is lost unless you have saved it.","Start a new world",Callable(terrain,"_restart_random_world")),"A different land")
 	fresh.name="NewWorld"
 	fresh.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var options_toggle:=Kit.quiet_button(content,"New world options ▸")
-	options_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	var options:=VBoxContainer.new()
 	options.name="NewWorldOptions"
 	options.add_theme_constant_override("separation",6)
-	options.visible=false
-	content.add_child(options)
-	options_toggle.pressed.connect(func()->void:
-		options.visible=not options.visible
-		options_toggle.text="New world options ▾" if options.visible else "New world options ▸")
+	worlds.add_child(options)
 	var seed_row:=HBoxContainer.new()
 	seed_row.add_theme_constant_override("separation",8)
 	options.add_child(seed_row)
@@ -154,16 +165,29 @@ static func open(terrain:Node,layer:Node)->Control:
 	terrain.set("world_seed_input",seed_input)
 	terrain.set("world_seed_status",seed_status)
 
-	# Display and controls -----------------------------------------------
-	content.add_child(HSeparator.new())
-	if terrain.get("display_preferences"):
-		terrain.display_preferences.add_controls(content)
-		terrain.display_preferences.add_navigation_controls(content)
-	content.add_child(HSeparator.new())
-	Kit.label(content,"Controls","kicker")
-	Kit.label(content,controls_words(GameState.settlement_site_committed),"body")
+	var controls:=_disclosure(content,"Controls","Moving around, inspecting the world and passing time")
+	controls.name="ControlsReference"
+	Kit.label(controls,controls_words(GameState.settlement_site_committed),"body")
 	resume.grab_focus.call_deferred()
 	return root
+
+static func _disclosure(parent:Node,title:String,summary:Variant)->VBoxContainer:
+	var group:=VBoxContainer.new();group.add_theme_constant_override("separation",8);parent.add_child(group)
+	group.add_child(HSeparator.new())
+	var toggle:=Kit.quiet_button(group,title+"  ›")
+	toggle.name=title.replace(" ","")+"Toggle"
+	toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	toggle.add_theme_font_override("font",T.font("voice_bold"))
+	toggle.add_theme_font_size_override("font_size",22)
+	toggle.custom_minimum_size.y=38
+	var note:=Kit.label(group,String(summary.call()) if summary is Callable else String(summary),"note")
+	var body:=VBoxContainer.new();body.visible=false;body.add_theme_constant_override("separation",12);group.add_child(body)
+	toggle.pressed.connect(func()->void:
+		body.visible=not body.visible
+		toggle.text=title+("  ⌄" if body.visible else "  ›")
+		if summary is Callable:note.text=String(summary.call())
+		note.visible=not body.visible)
+	return body
 
 static func _say(label:Label,text:String,problem:bool=false)->void:
 	if not is_instance_valid(label):return

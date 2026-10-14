@@ -239,22 +239,22 @@ func test_resource_overlay_keeps_active_supply_nodes_ahead_of_passive_hints()->v
 	assert_str(String(selected[0].visual_stage)).is_equal("active")
 
 
-func test_non_scrolling_fit_host_keeps_finite_modal_content_inside_its_viewport()->void:
+func test_modal_overflow_preserves_readable_text_and_exposes_scrollbars()->void:
 	var host:=auto_free(preload("res://scripts/viewport_fit_panel.gd").new()) as Control
 	host.size=Vector2(400,200)
 	var content:=VBoxContainer.new()
 	content.custom_minimum_size=Vector2(800,400)
 	host.add_child(content)
+	add_child(host)
 	host._fit_content()
-	assert_float(float(host.effective_scale)).is_equal_approx(0.5,0.001)
-	assert_float(content.position.x).is_greater_equal(0.0)
-	assert_float(content.position.y).is_greater_equal(0.0)
-	assert_float(content.position.x+content.size.x*content.scale.x).is_less_equal(host.size.x+0.01)
-	assert_float(content.position.y+content.size.y*content.scale.y).is_less_equal(host.size.y+0.01)
-	assert_int(host.find_children("*","ScrollContainer",true,false).size()).is_equal(0)
+	for frame in 3:await get_tree().process_frame
+	assert_float(float(host.effective_scale)).is_equal(1.0)
+	assert_float(content.scale.x).is_equal(1.0)
+	assert_bool(host.get_v_scroll_bar().visible).is_true()
+	assert_bool(host.get_h_scroll_bar().visible).is_true()
 
 
-func test_fit_host_pages_a_growing_ledger_instead_of_miniaturizing_it()->void:
+func test_modal_overflow_preserves_disclosures_without_inventing_pages()->void:
 	var host:=auto_free(preload("res://scripts/viewport_fit_panel.gd").new()) as Control
 	host.size=Vector2(520,240)
 	var ledger:=VBoxContainer.new()
@@ -263,26 +263,30 @@ func test_fit_host_pages_a_growing_ledger_instead_of_miniaturizing_it()->void:
 		var row:=PanelContainer.new()
 		row.custom_minimum_size=Vector2(500,42)
 		ledger.add_child(row)
+	var hidden:=Label.new();hidden.text="Collapsed detail";hidden.visible=false;ledger.add_child(hidden)
+	add_child(host)
 	host._fit_content()
-	assert_int(host.page_count).is_greater(1)
-	assert_float(float(host.effective_scale)).is_greater_equal(0.74)
+	for frame in 3:await get_tree().process_frame
+	assert_int(host.page_count).is_equal(1)
+	assert_float(float(host.effective_scale)).is_equal(1.0)
 	var visible_rows:=0
 	for row in ledger.get_children():
 		if (row as Control).visible: visible_rows+=1
-	assert_int(visible_rows).is_greater(0)
-	assert_int(visible_rows).is_less(24)
-	assert_int(host.find_children("ViewportPager","HBoxContainer",true,false).size()).is_equal(1)
+	assert_int(visible_rows).is_equal(24)
+	assert_bool(hidden.visible).is_false()
+	assert_bool(host.get_v_scroll_bar().visible).is_true()
+	assert_int(host.find_children("ViewportPager","HBoxContainer",true,false).size()).is_equal(0)
 
 
-func test_modal_screen_contract_caps_large_type_without_touching_map_sized_controls()->void:
+func test_modal_screen_contract_preserves_authored_type_hierarchy()->void:
 	var screen:=auto_free(Control.new()) as Control
 	screen.size=Vector2(1920,1080)
 	var title:=Label.new(); title.add_theme_font_size_override("font_size",30); screen.add_child(title)
 	var button:=Button.new(); button.add_theme_font_size_override("font_size",18); screen.add_child(button)
 	renderer._apply_modal_screen_contract(screen)
-	assert_int(title.get_theme_font_size("font_size")).is_equal(22)
-	assert_int(button.get_theme_font_size("font_size")).is_equal(12)
-	assert_int(screen.theme.default_font_size).is_equal(11)
+	assert_int(title.get_theme_font_size("font_size")).is_equal(30)
+	assert_int(button.get_theme_font_size("font_size")).is_equal(18)
+	assert_object(screen.theme).is_same(preload("res://scripts/hud/hud_tokens.gd").control_theme())
 
 
 func test_foreign_alert_arbitration_defers_without_losing_active_or_queued_events()->void:

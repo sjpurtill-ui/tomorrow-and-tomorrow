@@ -23,9 +23,9 @@ static func card_style(pad:float=16.0,accent:Color=Color(0,0,0,0))->StyleBoxFlat
 ## A sunk section inside a card (rows, grouped facts).
 static func section_style(pad:float=10.0)->StyleBoxFlat:
 	var style:=StyleBoxFlat.new()
-	style.bg_color=T.PAPER_SUNK
+	style.bg_color=Color.TRANSPARENT
 	style.border_color=T.RULE
-	style.set_border_width_all(1)
+	style.border_width_top=1
 	style.set_corner_radius_all(T.RADIUS_CONTROL)
 	style.set_content_margin_all(pad)
 	return style
@@ -55,13 +55,14 @@ static func label(parent:Node,text:String,role:String="body",color:Color=Color(0
 	var ink:=T.BODY
 	match role:
 		"kicker":size=12;ink=T.INK_MUTED;text=text.to_upper()
-		"title":size=20;ink=T.INK
-		"heading":size=16;ink=T.INK
-		"value":size=16;ink=T.INK
+		"title":size=28;ink=T.INK
+		"heading":size=20;ink=T.INK
+		"value":size=20;ink=T.INK
 		"note":size=13;ink=T.INK_MUTED
 		_:size=14;ink=T.BODY
 	node.text=text
 	node.add_theme_font_override("font",T.font("ui_strong") if role in ["kicker","title","heading","value"] else T.FONT_UI)
+	if role in ["title","heading"]:node.add_theme_font_override("font",T.font("voice_bold"))
 	node.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size))
 	node.add_theme_color_override("font_color",text_color(color) if color.a>0.0 else ink)
 	if wrap:
@@ -182,7 +183,18 @@ static func modal(host:Node,width:float,accent:Color=Color(0,0,0,0),node_name:St
 	var view:=host.get_viewport().get_visible_rect().size if host.get_viewport() else Vector2(1600,900)
 	card.custom_minimum_size.x=minf(width,view.x-32.0)
 	center.add_child(card)
+	var scroll:=ScrollContainer.new();scroll.name="ModalScroll"
+	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.follow_focus=true
+	card.add_child(scroll)
 	var column:=VBoxContainer.new()
-	column.add_theme_constant_override("separation",10)
-	card.add_child(column)
+	column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation",14)
+	scroll.add_child(column)
+	var refit:=func()->void:
+		var room:=overlay.get_viewport_rect().size
+		card.custom_minimum_size.x=minf(width,maxf(1,room.x-32))
+		scroll.custom_minimum_size.y=minf(column.get_combined_minimum_size().y,maxf(1,room.y-80))
+	overlay.resized.connect(refit)
+	column.minimum_size_changed.connect(func()->void:refit.call_deferred())
 	return [overlay,column]

@@ -12990,11 +12990,8 @@ func _apply_modal_screen_contract(screen:Control)->void:
 	# Ignore the map HUD. Blocking reports cover almost the complete viewport.
 	if screen.size.x<viewport_size.x*0.72 or screen.size.y<viewport_size.y*0.72: return
 	if not screen.has_meta("modal_screen_contract"):
-		var compact_theme:=Theme.new()
-		compact_theme.default_font_size=11
-		screen.theme=compact_theme
+		screen.theme=preload("res://scripts/hud/hud_tokens.gd").control_theme()
 		screen.set_meta("modal_screen_contract",true)
-	_compact_modal_descendants(screen)
 	# Direct modal frames always retain a safe clickable margin even when the OS
 	# reports a smaller work area than the project's reference viewport.
 	for child in screen.get_children():
@@ -13018,24 +13015,14 @@ func _ensure_modal_fit_host(modal:PanelContainer)->void:
 	modal.remove_child(content)
 	var fit_host:=FIT_CONTENT_PANEL.new()
 	fit_host.name="ViewportFitHost"
-	# The outer frame preserves the screen hierarchy. Long inner lists paginate
-	# themselves; the header, primary action, and close button never become pages.
+	# Legacy forms keep their authored size and visibility. Overflow scrolls;
+	# modern popups provide a fixed header with their own scrolling body.
 	fit_host.allow_pagination=false
 	fit_host.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	fit_host.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	modal.add_child(fit_host)
 	fit_host.add_child(content)
 	modal.set_meta("viewport_fit_hosted",true)
-
-
-func _compact_modal_descendants(root:Node)->void:
-	for child in root.get_children():
-		if child is Control:
-			var control:=child as Control
-			var cap:=22 if child is Label else 12
-			var current:=control.get_theme_font_size("font_size")
-			if current>cap: control.add_theme_font_size_override("font_size",cap)
-		_compact_modal_descendants(child)
 
 
 func _build_interface() -> void:

@@ -124,11 +124,15 @@ func add_navigation_controls(parent:Node)->void:
 	parent.add_child(slider)
 
 func _choice(parent:Node,label:String,labels:Array,current:int,callback:Callable)->OptionButton:
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
-	var text:=Label.new();text.text=label;text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
+	var row:=BoxContainer.new();row.add_theme_constant_override("separation",10);parent.add_child(row)
+	var text:=Label.new();text.text=label;text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;Tokens.text(text,"body",Tokens.BODY);row.add_child(text)
 	var options:=OptionButton.new();options.custom_minimum_size=Vector2(170,38)
+	options.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	Tokens.text(options,"small",Tokens.INK)
 	for value in labels:options.add_item(String(value))
 	options.select(current);options.item_selected.connect(callback);row.add_child(options)
+	var fit:=func()->void:row.vertical=row.size.x<480
+	row.resized.connect(fit);fit.call_deferred()
 	return options
 
 func set_color_theme(mode:String,reload_scene:bool=true)->void:

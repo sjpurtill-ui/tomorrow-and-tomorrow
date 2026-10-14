@@ -11,12 +11,23 @@ var terrain:Node
 func _ready()->void:
 	var mode:="lens"
 	var out:=""
+	var menu_section:=""
+	var ui_scale:=1.25
+	var night:=false
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--ux="):mode=argument.trim_prefix("--ux=")
 		elif argument.begins_with("--out="):out=argument.trim_prefix("--out=")
+		elif argument.begins_with("--menu-section="):menu_section=argument.trim_prefix("--menu-section=")
+		elif argument.begins_with("--ui-scale="):ui_scale=float(argument.trim_prefix("--ui-scale="))
+		elif argument=="--night":night=true
 	GameState.select_founding_focus("provision")
 	terrain=load("res://local_terrain.tscn").instantiate()
 	add_child(terrain)
+	terrain.display_preferences.ui_scale=ui_scale
+	if night:
+		terrain.display_preferences.color_theme="dark"
+		preload("res://scripts/hud/hud_tokens.gd").set_color_mode("dark")
+	terrain.display_preferences.apply()
 	for frame in 20:await get_tree().process_frame
 	if WorldSimulation.direction.needs_century_choice():WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	if is_instance_valid(PeopleDirection.panel):PeopleDirection.panel.queue_free()
@@ -36,6 +47,11 @@ func _ready()->void:
 			terrain._on_diplomatic_event({"kind":"first_contact","civ_id":"capture","day":int(GameState.elapsed_days),"title":"Strangers at the ford","description":"Our hunters met a band of strangers at the river ford, two days' walk to the east. They traded words and a little dried fish, then went their way.","position":{"x":home.x+3.0,"z":home.z}})
 		"menu":
 			terrain._open_world_menu()
+			if menu_section!="":
+				var toggle:=terrain.world_menu_panel.find_child(menu_section+"Toggle",true,false) as Button
+				if toggle:toggle.pressed.emit()
+			if "--menu-confirm" in OS.get_cmdline_user_args():
+				preload("res://scripts/hud/game_menu.gd").confirm(terrain.world_menu_panel,"Load the saved game?","Anything that happened since you last saved will be lost.","Load it",func()->void:pass)
 		"uncharted":
 			terrain._inspect_location(home+Vector3(900,0,900))
 		"settler":
@@ -58,6 +74,14 @@ func _ready()->void:
 			terrain._on_hud_section_requested("",0)
 			terrain.advance_world_time(3.0) if terrain.has_method("advance_world_time") else null
 	for frame in 12:await get_tree().process_frame
+	if mode=="menu" and "--scroll-bottom" in OS.get_cmdline_user_args():
+		var scroll:=terrain.world_menu_panel.find_child("PauseMenuScroll",true,false) as ScrollContainer
+		if scroll:scroll.scroll_vertical=100000
+		for frame in 5:await get_tree().process_frame
+		var resume:=terrain.world_menu_panel.find_child("Resume",true,false) as Button
+		var menu:=terrain.world_menu_panel.find_child("PauseMenuBody",true,false) as Control
+		if resume==null or menu==null or not menu.get_global_rect().encloses(resume.get_global_rect()):
+			push_error("Resume must remain visible while settings are scrolled")
 	RenderingServer.force_draw(true,0.0)
 	await get_tree().process_frame
 	if out!="" and DisplayServer.get_name()!="headless":

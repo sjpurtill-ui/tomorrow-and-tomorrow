@@ -15,6 +15,7 @@ var shade:ColorRect
 var remember:CheckBox
 var advanced:VBoxContainer
 var advanced_toggle:Button
+var body:VBoxContainer
 var pause=preload("res://scripts/hud/simulation_pause.gd").new()
 ## The models offered in "Who answers": [id, words].
 const VOICE_MODELS:=[["gpt-6-luna","GPT-6 Luna (OpenAI)"],["claude-haiku-5-5","Claude Haiku 5.5 (Anthropic)"]]
@@ -29,8 +30,13 @@ func _ready()->void:
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);card.add_child(root)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);root.add_child(head)
 	var title:=P.label(head,"AI connection","title",T.INK,false);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	title.add_theme_font_override("font",T.font("voice_bold"));title.add_theme_font_size_override("font_size",32)
 	var close:=P.button(head,"Close",func():queue_free());close.name="Close";close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.custom_minimum_size=Vector2(96,38)
 	P.rule(root)
+	# The connection form may grow when Advanced opens; its heading and Close
+	# remain fixed while every field and action stays reachable by scrolling.
+	body=P.scroll_body(root,14)
+	root=body
 	Store.ensure_loaded()
 	P.label(root,"With a connection you can type anything to your people and their leaders. Without one, you choose from prepared replies. Your key stays on this computer and is never written into a saved game.","body",T.BODY)
 	status=P.label(root,"","body",T.INK)
@@ -60,7 +66,7 @@ func _ready()->void:
 	advanced_toggle=P.button(root,"Show advanced settings",_toggle_advanced);advanced_toggle.name="AdvancedToggle"
 	advanced=VBoxContainer.new();advanced.name="Advanced";advanced.add_theme_constant_override("separation",8);advanced.visible=false;root.add_child(advanced)
 	key=_field(advanced,"API key","");key.secret=true;key.placeholder_text="Leave blank to keep the key you already set" if PronouncementInterpreter.configuration_status().configured else "Paste your key here";key.max_length=8192
-	remember=CheckBox.new();remember.text="Remember the key on this computer";T.text(remember,"small",T.BODY);remember.disabled=not Store.supported();remember.button_pressed=not remember.disabled
+	remember=CheckBox.new();remember.text="Remember the key on this computer";remember.custom_minimum_size.y=36;T.text(remember,"small",T.BODY);remember.disabled=not Store.supported();remember.button_pressed=not remember.disabled
 	if remember.disabled:remember.tooltip_text="This build cannot store the key safely, so it lasts until you quit."
 	advanced.add_child(remember)
 	model=_field(advanced,"Model",OS.get_environment("LEVIATHAN_AI_MODEL"))
@@ -92,11 +98,13 @@ func _show_status(text:String)->void:
 	status.text=plain if plain!="" else "Connected. People can answer in their own words."
 
 func _field(root:Node,title:String,value:String)->LineEdit:
-	P.label(root,title,"small",T.INK_MUTED,false)
+	P.label(root,title,"small",T.INK_MUTED,true)
 	var field:=LineEdit.new();field.text=value;field.custom_minimum_size.y=36;T.text(field,"small",T.INK);root.add_child(field);return field
 func _fit()->void:
 	var extent:=get_viewport().get_visible_rect().size;shade.size=extent
-	card.size=Vector2(minf(600,extent.x-40),0);card.position=(extent-card.size)*.5
+	var desired:=body.get_combined_minimum_size().y+110 if body else 500.0
+	card.size=Vector2(minf(640,extent.x-40),minf(maxf(320,desired),extent.y-40))
+	card.position=(extent-card.size)*.5
 ## Uses `id` for the voices with the key already set for its service.
 func _choose_voice(id:String)->void:
 	var address:=preload("res://scripts/ai_wire.gd").ANTHROPIC_ENDPOINT if preload("res://scripts/ai_wire.gd").is_anthropic(id) else "https://api.openai.com/v1/chat/completions"
