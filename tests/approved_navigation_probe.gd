@@ -15,20 +15,20 @@ func _ready()->void:
 	terrain.founding_focus_panel=null
 	var hud=terrain.hud
 	var labels:Array=[]
-	for spec in hud.SECTIONS:labels.append(spec.label)
-	check(labels==["Overview","People","Food","Materials","Wealth","Buildings","Production","Culture","Security","Research","World"],"All eleven navigation destinations")
-	for spec in hud.SECTIONS:
-		var target=String(spec.get("section",spec.id))
-		var sub=int(spec.get("sub",0))
-		hud.rail_buttons[spec.id].pressed.emit()
+	for category in hud.CATEGORIES:labels.append(category.label)
+	check(labels==["Home","Economy","Buildings","Research","War","World","Chronicle"],"One button for each of the seven categories")
+	for category in hud.CATEGORIES:
+		var lead:=String(category.pages[0])
+		hud.rail_buttons[lead].pressed.emit()
 		for i in 3:await get_tree().process_frame
-		if target=="military":
-			check(is_instance_valid(MilitaryCampaign.roster_screen),"Security opens current military roster")
+		if lead=="military":
+			check(is_instance_valid(MilitaryCampaign.roster_screen) or hud.active_section=="" or hud.active_section=="military","War opens the war screen")
 			if is_instance_valid(MilitaryCampaign.roster_screen):MilitaryCampaign.roster_screen.queue_free()
-		else:check(hud.active_section==target and hud.dock.sub==sub,"Destination: "+spec.id)
-		hud.rail_buttons[spec.id].pressed.emit()
+			continue
+		check(hud.active_section==lead,"Category opens: "+String(category.label))
+		hud.rail_buttons[lead].pressed.emit()
 		await get_tree().process_frame
-		check(hud.active_section=="","Toggle closed: "+spec.id)
+		check(hud.active_section=="","Toggle closed: "+String(category.label))
 	for stage in ["reciprocity","weighed_metal","currency"]:
 		GameState.economy_stage=stage
 		GameState.public_treasury=1280

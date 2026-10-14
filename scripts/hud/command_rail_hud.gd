@@ -33,6 +33,29 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 	{"id":"standing","label":"Standing","tooltip":"What we are, how every people we know sees us, and what it makes them do"},
 ]
+## ONE SCREEN PER CATEGORY. The rail holds one button for each category; the
+## pages of a category are tabs of its one screen (dock_panel.gd lays every
+## page's tabs out in a single row). `pages` are section ids, the first the
+## page the button opens; `tabs` renames a page's tabs where its own names
+## would not say enough beside their neighbours.
+const CATEGORIES:Array[Dictionary]=[
+	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview","History"],"overview":["People"],"civ":["Culture","Council"]},"tooltip":"This settlement, its people and their ways"},
+	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Workshops","Goods","Arms"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
+	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
+	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
+	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
+	{"id":"world","label":"World","pages":["world","standing","eyes"],"tabs":{"world":["Known world","Expeditions","Rise & fall"],"standing":["Standing"],"eyes":["Eyes"]},"tooltip":"The world your scouts have walked, who lives in it, how they see us and what our eyes report · F6"},
+	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
+]
+## The category a page belongs to ({} for none).
+static func category_of(section:String)->Dictionary:
+	for category:Dictionary in CATEGORIES:
+		if section in (category.pages as Array):return category
+	return {}
+## The page of each category last opened, so its button returns there.
+var _last_page:Dictionary={}
+## Alerts of every page, summed onto its category's button.
+var _page_alerts:Dictionary={}
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## The WATER tile's one reading of every town's water and the dry year.
 const WaterWatch:=preload("res://scripts/hud/water_watch.gd")
@@ -152,7 +175,7 @@ func _layout()->void:
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
 		if top_frame:
-			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-10.0))
+			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-28.0))
 	if kpi_strip:
 		# Retain the original formatting and hover sources; the persistent bar
 		# presents their readings instead of a second row of boxed chips.
@@ -439,17 +462,20 @@ func _build_rail()->void:
 	var scroll:=ScrollContainer.new();scroll.name="RailScroll";scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_SHOW_NEVER;scroll.follow_focus=true;column.add_child(scroll)
 	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",0);scroll.add_child(entries)
-	for section in SECTIONS:entries.add_child(_make_rail_button(section))
+	for category in CATEGORIES:entries.add_child(_make_rail_button(category))
 
 func _make_rail_button(section:Dictionary)->Button:
-	var id:=String(section.id)
+	# Keyed by the category's first page, whose painted icon it wears.
+	var id:=String((section.pages as Array)[0])
 	var button:=Button.new();button.name="Rail"+id.capitalize().replace(" ","")
 	if id=="civ":button.name="RailCivilization"
 	button.custom_minimum_size=Vector2(0,78);button.tooltip_text=String(section.tooltip)
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false));button.add_theme_stylebox_override("hover",_approved_rail_style(false,true));button.add_theme_stylebox_override("pressed",_approved_rail_style(true));button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(func()->void:
-		var target:=String(section.get("section",id));var target_sub:=int(section.get("sub",0))
-		section_requested.emit("" if active_section==target and dock and dock.sub==target_sub else target,target_sub))
+		# Open on a page of this category: the button closes it. Else it
+		# opens the page of the category last seen (its first, to begin with).
+		if active_section in (section.pages as Array):section_requested.emit("",0);return
+		section_requested.emit(String(_last_page.get(String(section.id),id)),0))
 	var content:=VBoxContainer.new();content.set_anchors_preset(Control.PRESET_FULL_RECT);content.alignment=BoxContainer.ALIGNMENT_CENTER;content.add_theme_constant_override("separation",2);content.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(content)
 	var symbol:=Folio.rail_icon(id);symbol.custom_minimum_size=Vector2(40,40);symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(symbol);rail_icons[id]=symbol
 	var label:=Tokens.make_label(String(section.label),14,Folio.RAIL_TEXT);label.add_theme_font_override("font",Tokens.font("voice"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label);rail_labels[id]=label
@@ -463,12 +489,9 @@ func _refresh_words()->void:
 	var signature:="%s|%s|%s" % [EraWords.stage(),EraWords.has_boats(),EraWords.has_flight()]
 	if signature==_words_signature:return
 	_words_signature=signature
-	for spec in SECTIONS:
-		var label:Label=rail_labels.get(String(spec.id))
-		if label:label.text=String(spec.label)
-	# The eyes go by the age's word: Eyes, Watchers, Spies (eyes_corps.gd).
-	var eyes_label:Label=rail_labels.get("eyes")
-	if eyes_label:eyes_label.text=preload("res://scripts/eyes_corps.gd").word("Eyes")
+	for category in CATEGORIES:
+		var label:Label=rail_labels.get(String((category.pages as Array)[0]))
+		if label:label.text=String(category.label)
 	var military:Button=rail_buttons.get("military")
 	if military:
 		var extra:=""
@@ -504,8 +527,7 @@ func set_active_section(id:String)->void:
 	active_section=id
 	for section_id in rail_buttons:
 		var button:Button=rail_buttons[section_id]
-		var target:=String(section_id);var active:bool=target==id
-		if id=="economy":active=target==["economy","materials","wealth","trade"][clampi(dock.sub if dock else 0,0,3)]
+		var active:bool=id!="" and id in (category_of(String(section_id)).get("pages",[]) as Array)
 		button.add_theme_stylebox_override("normal",_approved_rail_style(active))
 		button.add_theme_stylebox_override("hover",_approved_rail_style(active,true))
 		var icon:Control=rail_icons.get(section_id)
@@ -517,6 +539,23 @@ func set_active_section(id:String)->void:
 	_position_toolbar()
 
 func _set_badge(id:String,text:String,color:Color)->void:
+	# A page's alert stands on its category's button, summed with its
+	# neighbours' (red if any of them is).
+	var category:=category_of(id)
+	if not category.is_empty():
+		_page_alerts[id]={"text":text,"color":color}
+		var count:=0;var marks:="";var urgent:=false;var tint:=color
+		for page:String in category.pages:
+			var alert:Dictionary=_page_alerts.get(page,{})
+			var words:=String(alert.get("text",""))
+			if words=="":continue
+			if words.is_valid_int():count+=int(words)
+			else:marks=words
+			tint=alert.color
+			urgent=urgent or alert.color==Tokens.RED
+		text=str(count) if count>0 else marks
+		color=Tokens.RED if urgent else tint
+		id=String((category.pages as Array)[0])
 	var badge:Label=rail_badges.get(id)
 	if badge==null: return
 	badge.visible=text!=""
@@ -963,7 +1002,10 @@ func _build_toolbar()->void:
 	city_selector.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
 	city_selector.add_theme_stylebox_override("pressed",Folio.rail_style(false,true))
 	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
-	city_selector.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	# The name takes the room left before the clock and is cut short with an
+	# ellipsis there; it never runs under the date.
+	city_selector.clip_text=true;city_selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;city_selector.alignment=HORIZONTAL_ALIGNMENT_LEFT
+	city_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
 	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
 	var divider:=VSeparator.new();divider.custom_minimum_size=Vector2(1,24);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(divider)
@@ -1137,6 +1179,18 @@ func register_provider(id:String,provider:Object)->void:
 func has_provider(id:String)->bool:
 	return providers.has(id)
 
+## The pages sharing a category's screen, for the dock's one row of tabs:
+## [{section, provider, labels}] (only those that open in the dock).
+func _pages_of(category:Dictionary)->Array:
+	var out:Array=[]
+	for page:String in category.get("pages",[]):
+		if not providers.has(page):continue
+		var labels:Array=(category.get("tabs",{}) as Dictionary).get(page,[])
+		# The eyes go by the age's word: Eyes, Watchers, Spies (eyes_corps.gd).
+		if page=="eyes":labels=[preload("res://scripts/eyes_corps.gd").word("Eyes")]
+		out.append({"section":page,"provider":providers[page],"labels":labels})
+	return out
+
 func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	if not providers.has(section): return
 	if is_instance_valid(MilitaryCampaign.roster_screen):MilitaryCampaign.roster_screen.queue_free()
@@ -1148,6 +1202,10 @@ func open_dock(section:String,sub:int,expanded:bool=true)->void:
 	detail_dock.visible=false
 	_layout()
 	set_active_section(section)
+	var category:=category_of(section)
+	if not category.is_empty():_last_page[String(category.id)]=section
+	dock.siblings=_pages_of(category)
+	dock.open_page=func(page:String,page_sub:int)->void:section_requested.emit(page,page_sub)
 	dock.present(providers[section],sub)
 	set_active_section(section)
 	_layout()

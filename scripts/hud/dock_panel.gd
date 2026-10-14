@@ -18,6 +18,13 @@ signal tab_changed(sub:int)
 
 var provider:Object
 var sub:int=0
+## The pages that share this screen (the rail's category), set by the HUD:
+## [{section, provider, labels}]. With more than one, every page's tabs stand
+## in the one row, so a category is one screen and nothing opens behind it.
+var siblings:Array=[]
+## Opens another page of the category: (section, sub).
+var open_page:Callable=Callable()
+var _flat:Array=[]
 
 var eyebrow_label:Label
 var title_label:Label
@@ -160,9 +167,11 @@ func rebuild()->void:
 	title_label.text=Tokens.sentence_case(String(meta.get("title","")))
 	title_label.add_theme_font_size_override("font_size",64 if size.x>=600 else 48)
 	title_label.add_theme_font_override("font",Tokens.font("voice_bold"))
-	var subtabs:Array=meta.get("subtabs",[])
+	var own:Array=meta.get("subtabs",[])
+	sub=clampi(sub,0,maxi(0,own.size()-1))
+	_flat=_flat_tabs(own)
+	var subtabs:Array=_flat.map(func(entry:Dictionary)->String:return String(entry.text))
 	tabs_row.visible=subtabs.size()>1
-	sub=clampi(sub,0,maxi(0,subtabs.size()-1))
 	while tab_buttons.size()<subtabs.size():
 		var tab:=Button.new()
 		tab.custom_minimum_size=Vector2(0,42)
@@ -176,13 +185,15 @@ func rebuild()->void:
 		var tab:=tab_buttons[index]
 		tab.visible=index<subtabs.size()
 		if index<subtabs.size(): tab.text=String(subtabs[index]).to_upper()
-		var active:=index==sub
+		var active:=index<_flat.size() and bool(_flat[index].active)
 		tab.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		var style:=Tokens.flat(Color.TRANSPARENT)
 		style.border_color=Tokens.GOLD if active else Folio.RULE
 		style.border_width_bottom=3 if active else 1
-		style.content_margin_left=10;style.content_margin_right=10
-		tab.add_theme_font_size_override("font_size",18 if size.x>=600 else 16)
+		# A category with many tabs keeps them in one row: smaller letters, closer set.
+		var many:=subtabs.size()>5
+		style.content_margin_left=4 if many else 10;style.content_margin_right=4 if many else 10
+		tab.add_theme_font_size_override("font_size",15 if many else (18 if size.x>=600 else 16))
 		tab.add_theme_stylebox_override("normal",style)
 		tab.add_theme_stylebox_override("hover",style)
 		tab.add_theme_stylebox_override("pressed",style)
@@ -403,7 +414,30 @@ func _rebuild_brief(brief:Dictionary)->void:
 		row.add_child(action)
 
 
+## Every tab of the screen in one row: this page's own, and its category
+## neighbours' (a page with one tab stands as one tab under its own name).
+func _flat_tabs(own:Array)->Array:
+	var out:Array=[]
+	var shared:=siblings.size()>1 and siblings.any(func(page:Dictionary)->bool:return page.provider==provider)
+	if not shared:
+		for index in own.size():out.append({"text":String(own[index]),"mine":true,"sub":index,"active":index==sub})
+		return out
+	for page:Dictionary in siblings:
+		var mine:bool=page.provider==provider
+		var names:Array=own if mine else ((page.provider as Object).meta().get("subtabs",[]) as Array)
+		var labels:Array=page.get("labels",[])
+		for index in maxi(1,names.size()):
+			var text:=String(labels[index]) if index<labels.size() else (String(names[index]) if index<names.size() else String(page.section).capitalize())
+			out.append({"text":text,"mine":mine,"section":String(page.section),"sub":index,"active":mine and index==sub})
+	return out
+
 func _on_tab_pressed(index:int)->void:
+	if index>=_flat.size():return
+	var entry:Dictionary=_flat[index]
+	if not bool(entry.mine):
+		if open_page.is_valid():open_page.call(String(entry.section),int(entry.sub))
+		return
+	index=int(entry.sub)
 	if index==sub: return
 	body_scroll.scroll_vertical=0
 	_clear_body()
