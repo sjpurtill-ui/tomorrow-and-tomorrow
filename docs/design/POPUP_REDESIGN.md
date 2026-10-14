@@ -26,8 +26,8 @@ of actionable findings. Shared helpers receive a separate independent review.
 | Shared shell | Category tabs, detail/back, KPI strip, briefs, tables, modal fitting | Complete — Modern Strategy tokens, readable scrolling, independent contrast/visual review |
 | Production | Workshops, Goods, Arms, picker, queue, line inspector | Complete — A/B critique, revision and recheck; 39 tests, desktop/narrow captures |
 | Research | Effort, tree, known discoveries, question picker, discovery announcement | Complete — B/A critique and recheck; 20 focused tests plus 11 dock tests |
-| Home | Overview, People, Culture, Council, person/office, labor and impact | Awaiting design |
-| Health and population | Lives, sickness/disasters, population, every death | Awaiting design |
+| Home | Overview, People, Culture, Council, person/office, labor and impact | Complete — B/A critique and revision, Night/Daylight recheck, 56 focused cases |
+| Health and population | Lives, sickness/disasters, population, every death | Complete — Home review includes nested care, impact, capacity and records; existing care callback verified |
 | Food and materials | Food/water/fire, resource details, priorities, deliveries | Complete — A/B critique, revision and recheck; healthy/shortage/source captures, live updates and callbacks tested |
 | Wealth and trade | Accounts, holdings, obligations, partners and actions | Awaiting design |
 | Buildings | Town, civic works, infrastructure, landmarks, queue, material bills, history | Awaiting design |
@@ -35,13 +35,13 @@ of actionable findings. Shared helpers receive a separate independent review.
 | Standing and spies | Own/foreign assessments, intelligence details, warnings and actions | Complete — C/root visual review, 43 Standing/Covert cases |
 | War and command | Army/fronts/leaders, border/fort, hierarchy orders/zones/organization, later services | Army/fronts/leaders and Orders complete; nested command final check pending |
 | Battle and services | Live/replay/report, siege, occupation, recovery, navy/air/dock and transport | Complete — C/root critique, service navigation revision and recheck; 40 service captures, battle/siege/aftermath probes |
-| Court | Court roster, audiences/envoys, foreign exchange/pacts, history, receipt, office and judgment UI | Awaiting design |
+| Court | Court roster, audiences/envoys, foreign exchange/pacts, history, receipt, office and judgment UI | Complete — root/C critique, narrow footer revision, dossier/transcript recheck; 14 presentation/decree tests clean |
 | Direction and figures | Course/character, people browser, biography/event history | Awaiting design |
-| Collections | Artifact status filters, sets/rumors, selected artifact, exchange/gift/sell/swap | Awaiting design |
+| Collections | Artifact status filters, sets/rumors, selected artifact, exchange/gift/sell/swap | Gallery complete — C/root review and narrow detail revision; exchange in progress |
 | Great works | Ours/foreign, work detail, construction, enshrine picker, dedication | Awaiting design |
 | Opening and travel | First fire/purpose/naming, founding guide, caravan/convoy/arrival, rename | First fire complete after C review; pinned confirmation and scroll on narrow. Travel pending |
 | Settings | Pause/save/load, display/audio/navigation, AI, new world, confirmations | In progress — root |
-| Records and small popups | Chronicle pages, notices, all orders, hover, map help/survey/contact/battle/border notes | Awaiting design |
+| Records and small popups | Chronicle pages, notices, all orders, hover, map help/survey/contact/battle/border notes | Chronicle complete after C/root review; small overlays in final review |
 
 The baseline has seven categories and 27 declared tab destinations. War routes to
 the current roster/war board, not the compatibility provider's old forms. Scout

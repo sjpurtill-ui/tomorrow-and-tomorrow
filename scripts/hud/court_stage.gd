@@ -959,7 +959,7 @@ func key_for_name(person_name:String)->String:
 ## Someone joins the stage. role: "main" (the one before the god), "court"
 ## (our officials looking on) or "attendant" (who came with an envoy).
 ## enter: they walk in rather than already standing there.
-func add_figure(key:String,person:Dictionary,role:String,name_text:String="",title_text:String="",enter:=false,accent:=BUBBLE_RULE)->Figure:
+func add_figure(key:String,person:Dictionary,role:String,name_text:String="",title_text:String="",enter:=false,accent:=HudTokens.RULE_STRONG)->Figure:
 	if has_figure(key):return figure(key)
 	presentation_for(EarlyArt.owner(person))
 	var f:=Figure.new();f.key=key;f.person=person;f.role=role;f.name="Figure_"+node_key(key);f.accent=accent
@@ -1584,7 +1584,7 @@ func mutter(who:String,text:String)->void:
 	bubble_layer.add_child(bubble)
 	# Small and sidelong: 0.8 of a speech bubble's letter, a paler paper, no
 	# kicker, the tail from the side toward their mouth.
-	bubble.setup(text,HudTokens.voice_font(true),13 if compact else 15,Color("4a3d2c"),Color(ASIDE_PAPER,0.85),Color("9a8566"),minf(240.0,size.x*.22),false,"",12)
+	bubble.setup(text,HudTokens.voice_font(true),14 if compact else 16,HudTokens.INK,HudTokens.PAPER_RAISED,HudTokens.RULE_STRONG,minf(240.0,size.x*.22),false,"",12)
 	var head:=head_point(f)
 	var mouth:=Vector2(head.x,head.y+f.size.y*.10)
 	# Beside the head, away from the middle of the hall.
@@ -2307,7 +2307,7 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	var bubble:=Bubble.new();bubble.name="Speech";bubble.kind="aside" if aside else "speech";bubble.speaker=key;bubble.ref=ref
 	# In the tree first: its words are measured with the theme they will use.
 	bubble_layer.add_child(bubble)
-	bubble.setup(text,HudTokens.voice_font(aside),17 if compact else 19,BUBBLE_INK,ASIDE_PAPER if aside else BUBBLE_PAPER,f.accent,_bubble_widths(bubble)[0],false,"aside to you" if aside else "",14)
+	bubble.setup(text,HudTokens.voice_font(aside),17 if compact else 19,HudTokens.INK,HudTokens.PAPER_RAISED if aside else HudTokens.PAPER_RAISED,f.accent,_bubble_widths(bubble)[0],false,"aside to you" if aside else "",14)
 	bubble.more_pressed.connect(_on_more.bind(bubble))
 	_fit_bubble(bubble)
 	_place_bubble(bubble)
@@ -2344,7 +2344,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 	_rays=Rays.new();_rays.name="Light";god_layer.add_child(_rays);_rays.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_god=Bubble.new();_god.name="VoiceFromAbove";_god.kind="god";_god.ref=ref
 	god_layer.add_child(_god)
-	_god.setup(text,HudTokens.voice_font(true),18 if compact else 20,GOD_INK,GOD_PAPER,GOD_GOLD,_god_widths()[0],true,"",14)
+	_god.setup(text,HudTokens.voice_font(true),18 if compact else 20,HudTokens.INK,HudTokens.PAPER,HudTokens.ACTION,_god_widths()[0],true,"",14)
 	_god.more_pressed.connect(_on_more.bind(_god))
 	_god_age=0
 	_fit_bubble(_god)
@@ -2377,7 +2377,7 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="",abou
 	_caption=Bubble.new();_caption.name="Caption";_caption.kind="caption";_caption.ref=ref
 	_caption.set_meta("caption_kind",kind)
 	caption_layer.add_child(_caption)
-	_caption.setup(words,HudTokens.voice_font(kind!="receipt"),15 if compact else 17,WARN_INK if kind=="warn" else CAPTION_INK,CAPTION_PAPER,CAPTION_RULE,_caption_widths()[0],true,kicker,13)
+	_caption.setup(words,HudTokens.voice_font(kind!="receipt"),15 if compact else 17,HudTokens.RED_TEXT if kind=="warn" else HudTokens.INK,HudTokens.PAPER_RAISED,HudTokens.RULE,_caption_widths()[0],true,kicker,13)
 	_caption.more_pressed.connect(_on_more.bind(_caption))
 	_caption_age=0
 	_fit_bubble(_caption)
@@ -3695,7 +3695,7 @@ class Bubble extends Control:
 				_style.set_corner_radius_all(12);_style.set_border_width_all(2)
 		_top=_pad.y
 		if not kicker.is_empty():
-			var note:=HudTokens.make_label(kicker.to_upper() if kind!="aside" else kicker,12,Self.KICKER_INK,.1 if kind!="aside" else 0.0)
+			var note:=HudTokens.make_label(kicker.to_upper() if kind!="aside" else kicker,14,HudTokens.INK_MUTED,.1 if kind!="aside" else 0.0)
 			note.name="Kicker";note.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			if kind=="aside":note.add_theme_font_override("font",HudTokens.voice_font(true))
 			add_child(note);note.position=Vector2(_pad.x,_pad.y-2.0)
@@ -3756,7 +3756,7 @@ class Bubble extends Control:
 				_more=Button.new();_more.name="More";_more.text="more in Earlier ›";_more.flat=true;_more.focus_mode=Control.FOCUS_NONE
 				_more.mouse_filter=Control.MOUSE_FILTER_STOP;_more.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 				_more.add_theme_font_size_override("font_size",12)
-				for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:_more.add_theme_color_override(state,Self.KICKER_INK)
+				for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:_more.add_theme_color_override(state,HudTokens.INK_MUTED)
 				_more.tooltip_text="Read all of it in Earlier."
 				_more.pressed.connect(func()->void:more_pressed.emit())
 				add_child(_more)
@@ -3861,7 +3861,7 @@ class Rays extends Control:
 		if target.size.x<4.0:return
 		var apex:=Vector2(target.get_center().x,-40.0)
 		var low:=target.end.y+maxf(30.0,target.size.y*.8)
-		var gold:=Self.GOD_GOLD
+		var gold:=HudTokens.ACTION
 		for i in 7:
 			var t:=(float(i)-3.0)/3.0
 			var spread:=target.size.x*.62
@@ -3888,8 +3888,8 @@ class Glyph extends Control:
 
 	func _draw()->void:
 		var c:=size*0.5
-		var ink:=Color("3b2f22")
-		draw_circle(c,13.0,Color(Self.ASIDE_PAPER,0.94))
+		var ink:=HudTokens.INK
+		draw_circle(c,13.0,Color(HudTokens.PAPER_RAISED,0.94))
 		draw_arc(c,13.0,0.0,TAU,28,Color(ink,0.75),1.5,true)
 		var w:=1.8
 		match glyph:
