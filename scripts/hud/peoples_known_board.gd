@@ -45,7 +45,7 @@ var counter:=""
 var side:Array=[]
 var side_wide:=false
 const SIDE_W:=230.0
-const SIDE_AT:=800.0
+const SIDE_AT:=1200.0
 var counter_tip:=""
 ## Each column's nodes, to let them give way on a narrow page.
 var parts:Dictionary={}
@@ -61,7 +61,7 @@ var _unplaced:Label
 func setup(block:Dictionary)->void:
 	name="PeoplesKnownBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	add_theme_constant_override("separation",0)
+	add_theme_constant_override("separation",16)
 	_take(block)
 	_build()
 	resized.connect(_layout)
@@ -130,34 +130,23 @@ func _build()->void:
 	# even the fewest do not fit).
 	# The page's counts, one line over the ledger (the provider's "counter").
 	if counter!="":
-		var line:=_label(counter,12,T.INK_MUTED);line.name="Counter";line.tooltip_text=counter_tip
+		var line:=_label(counter,14,T.INK_MUTED);line.name="Counter";line.tooltip_text=counter_tip
 		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		add_child(line)
 	var fit:=ScrollContainer.new();fit.name="Fit"
-	fit.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_AUTO;fit.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	fit.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;fit.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	fit.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
 	# How each people sees us (standing.gd): beside the ledger on a wide page,
 	# under it on a narrow one.
-	if side.is_empty():add_child(fit)
-	elif side_wide:
-		var pair:=HBoxContainer.new();pair.name="LedgerAndFeelings";pair.add_theme_constant_override("separation",14);add_child(pair)
-		fit.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pair.add_child(fit)
-		var column:=preload("res://scripts/hud/world_ui.gd").sheet(pair,"Feelings")
-		column.get_parent().custom_minimum_size.x=SIDE_W;column.get_parent().size_flags_horizontal=Control.SIZE_SHRINK_END
-		preload("res://scripts/hud/standing_board.gd").feelings(column,side,Callable(),false)
-	else:
-		add_child(fit)
-		preload("res://scripts/hud/standing_board.gd").feelings(preload("res://scripts/hud/world_ui.gd").sheet(self,"Feelings"),side,Callable(),false)
+	add_child(fit)
 	var sheet:=PanelContainer.new();sheet.name="PeoplesSheet";sheet.add_theme_stylebox_override("panel",sheet_style())
 	sheet.size_flags_horizontal=Control.SIZE_EXPAND_FILL;fit.add_child(sheet)
-	var stack:=VBoxContainer.new();stack.name="Ledger";stack.add_theme_constant_override("separation",6);sheet.add_child(stack)
+	var stack:=VBoxContainer.new();stack.name="Ledger";stack.add_theme_constant_override("separation",16);sheet.add_child(stack)
 	stack.add_child(_header_row())
-	stack.add_child(_rule(T.RULE_STRONG))
-	var rows:=VBoxContainer.new();rows.name="Rows";rows.add_theme_constant_override("separation",0);stack.add_child(rows)
+	var rows:=VBoxContainer.new();rows.name="Rows";rows.add_theme_constant_override("separation",12);stack.add_child(rows)
 	for row:Dictionary in _rows():
 		rows.add_child(_row(row))
 		if String(view.open)==String(row.civ_id):rows.add_child(_towns(row))
-		rows.add_child(_rule(T.RULE))
 	if not (model.get("unplaced",[]) as Array).is_empty():
 		_unplaced=_label("",12,T.INK_MUTED);_unplaced.name="Unplaced"
 		stack.add_child(_unplaced)
@@ -179,35 +168,30 @@ func _write()->void:
 # --- The heading and the column titles -------------------------------------
 
 func _header_row()->Control:
-	var row:=HBoxContainer.new();row.name="Header";row.add_theme_constant_override("separation",GAP)
+	var row:=HFlowContainer.new();row.name="Header";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8)
+	var caption:=_label("Sort by",14,T.INK_MUTED);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(caption)
 	var titles:=_titles()
+	titles=titles.duplicate()
+	titles["name"]="People";titles["people"]="Population";titles["between"]="Relationship"
 	for id:String in ["name"]+FIGURES+["between"]:
 		var active:=String(view.sort)==id
-		var button:=Button.new();button.name="Sort_"+id;button.focus_mode=Control.FOCUS_NONE
+		var button:=Button.new();button.name="Sort_"+id;button.focus_mode=Control.FOCUS_ALL
 		button.text=String(titles.get(id,id))+((" ↑" if bool(view.flip) else " ↓") if active else "")
 
 		button.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		button.tooltip_text="%s Click to sort by it." % String(Model.MEANINGS.get(id,""))
-		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",12)
+		T.apply_button_style(button)
+		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",14)
 		button.add_theme_color_override("font_color",T.INK if active else T.INK_MUTED)
 		button.add_theme_color_override("font_hover_color",T.INK);button.add_theme_color_override("font_pressed_color",T.INK)
-		for state:String in ["normal","pressed","disabled"]:button.add_theme_stylebox_override(state,_cell_style(Color(0,0,0,0)))
-		button.add_theme_stylebox_override("hover",_cell_style(T.HOVER_BG))
-		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
-		if id=="name":
-			button.custom_minimum_size.x=NAME_MIN;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		else:button.custom_minimum_size.x=float(WIDTHS.get(id,60))
+		button.add_theme_stylebox_override("normal",_cell_style(T.ACTIVE_BG if active else Color(0,0,0,0)))
 		button.pressed.connect(sort_by.bind(id))
 		row.add_child(button);_part(id,button)
-	var seen:=_label("Last seen",12,T.INK_MUTED,true);seen.name="Head_seen";seen.custom_minimum_size.x=float(WIDTHS.seen)
-	seen.tooltip_text="How old our newest word of them is, and who brought it."
-	row.add_child(seen);_part("seen",seen)
-	var talk:=Control.new();talk.name="Head_talk";talk.custom_minimum_size.x=float(WIDTHS.talk);row.add_child(talk);_part("talk",talk)
 	return row
 
 static func _cell_style(bg:Color)->StyleBoxFlat:
 	var style:=T.flat(bg,Color(0,0,0,0),0,2)
-	style.content_margin_left=2;style.content_margin_right=2;style.content_margin_top=3;style.content_margin_bottom=3
+	style.content_margin_left=10;style.content_margin_right=10;style.content_margin_top=8;style.content_margin_bottom=8
 	return style
 
 # --- One people's row ------------------------------------------------------
@@ -219,33 +203,67 @@ func _row(row:Dictionary)->Control:
 	var panel:=PanelContainer.new();panel.name="People_"+civ_id.validate_node_name()
 	panel.add_theme_stylebox_override("panel",_row_style(us,open,false))
 	panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	panel.focus_mode=Control.FOCUS_ALL
 	panel.tooltip_text=("Hide %s." if open else "Show %s.") % ("our towns" if us else "the towns we know of theirs")
 	panel.mouse_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,true)))
 	panel.mouse_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,false)))
+	panel.focus_entered.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,true)))
+	panel.focus_exited.connect(func()->void:panel.add_theme_stylebox_override("panel",_row_style(us,open,false)))
 	panel.gui_input.connect(func(event:InputEvent)->void:
 		if _clicked(event):
 			panel.accept_event()
 			toggle(civ_id))
 	var refs:={}
 	_refs[civ_id]=refs
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",GAP);panel.add_child(line)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",12);panel.add_child(stack)
 	refs["panel"]=panel
+	if us:
+		stack.add_child(_name_cell(row,refs))
+		var comparison:=HFlowContainer.new();comparison.add_theme_constant_override("h_separation",24);comparison.add_theme_constant_override("v_separation",12);stack.add_child(comparison)
+		for id:String in FIGURES:comparison.add_child(_figure_cell(row,id,refs))
+		comparison.add_child(_seen_cell(row,refs))
+		return panel
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",16);stack.add_child(line)
 	line.add_child(_name_cell(row,refs))
-	for id:String in FIGURES:line.add_child(_figure_cell(row,id,refs))
-	line.add_child(_between_cell(row,refs))
-	line.add_child(_seen_cell(row,refs))
 	line.add_child(_talk_cell(row))
+	var facts:=HFlowContainer.new();facts.name="Facts";facts.add_theme_constant_override("h_separation",24);facts.add_theme_constant_override("v_separation",16);stack.add_child(facts)
+	for id:String in FIGURES:facts.add_child(_figure_cell(row,id,refs))
+	facts.add_child(_between_cell(row,refs))
+	facts.add_child(_seen_cell(row,refs))
+	_add_feelings(stack,civ_id,refs)
 	return panel
+
+## Relationship detail belongs with its people, alongside the existing Talk.
+func _add_feelings(parent:Node,civ_id:String,refs:Dictionary)->void:
+	for people:Dictionary in side:
+		if String(people.get("civ_id",""))!=civ_id:continue
+		var UI:=preload("res://scripts/hud/world_ui.gd")
+		var flow:=HFlowContainer.new();flow.name="Feelings";flow.add_theme_constant_override("h_separation",20);flow.add_theme_constant_override("v_separation",8)
+		var opened:Dictionary=view.get("feelings",{})
+		flow.visible=bool(opened.get(civ_id,false))
+		var button:=UI.verb(parent,"How they see us  "+("▾" if flow.visible else "▸"),Callable())
+		button.name="ShowFeelings";button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		refs["feelings_summary"]=button
+		button.pressed.connect(func()->void:
+			flow.visible=not flow.visible
+			opened[civ_id]=flow.visible;view["feelings"]=opened
+			button.text="How they see us  "+("▾" if flow.visible else "▸"))
+		parent.add_child(flow)
+		refs["feelings"]={}
+		for feeling:Dictionary in people.get("views",[]):
+			var words:=UI.label(flow,"",14,T.INK_MUTED)
+			refs.feelings[String(feeling.id)]=words
+		return
 
 static func _clicked(event:InputEvent)->bool:
 	var click:=event as InputEventMouseButton
-	return click!=null and click.pressed and click.button_index==MOUSE_BUTTON_LEFT
+	return (click!=null and click.pressed and click.button_index==MOUSE_BUTTON_LEFT) or event.is_action_pressed("ui_accept")
 
 func _row_style(us:bool,open:bool,hover:bool)->StyleBoxFlat:
 	# An opened row sits on the same sunk paper as the towns under it.
-	var bg:=T.GOLD_WASH if us else (T.PAPER_SUNK if open else (T.HOVER_BG if hover else Color(0,0,0,0)))
-	var style:=T.flat(bg,Color(0,0,0,0),0,3)
-	style.content_margin_left=4;style.content_margin_right=4;style.content_margin_top=6;style.content_margin_bottom=6
+	var bg:=T.HOVER_BG if hover else (T.GOLD_WASH if us else (T.PAPER_SUNK if open else T.PAPER_RAISED))
+	var style:=T.flat(bg,Color(0,0,0,0),0,8)
+	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=16;style.content_margin_bottom=16
 	if us:
 		style.border_color=T.GOLD;style.border_width_left=2
 	return style
@@ -254,7 +272,7 @@ func _row_style(us:bool,open:bool,hover:bool)->StyleBoxFlat:
 func _name_cell(row:Dictionary,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",6)
 	cell.custom_minimum_size.x=NAME_MIN;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	refs["name"]=_fitted(_label("",14,T.INK,true),"Name",true);cell.add_child(refs.name)
+	refs["name"]=_fitted(_label("",22,T.INK,true),"Name",true);cell.add_child(refs.name)
 	# A long name takes a second line rather than an ellipsis (rows are two lines high).
 	var name_label:Label=refs.name
 	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -265,8 +283,9 @@ func _name_cell(row:Dictionary,refs:Dictionary)->Control:
 
 ## How old our newest word of them is (with its mark) and who brought it.
 func _seen_cell(row:Dictionary,refs:Dictionary)->Control:
-	var cell:=VBoxContainer.new();cell.name="Cell_seen";cell.add_theme_constant_override("separation",0)
-	cell.custom_minimum_size.x=float(WIDTHS.seen);cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var cell:=VBoxContainer.new();cell.name="Cell_seen";cell.add_theme_constant_override("separation",4)
+	cell.custom_minimum_size.x=140;cell.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	cell.add_child(_label("Last word",14,T.INK_MUTED))
 	var when:=HBoxContainer.new();when.name="Fresh";when.add_theme_constant_override("separation",4);cell.add_child(when)
 	var mark:=FreshMark.new();mark.name="Mark";when.add_child(mark);refs["mark"]=mark
 	refs["age"]=_fitted(_label("",12,T.INK_MUTED),"Age",true);when.add_child(refs.age)
@@ -296,22 +315,24 @@ func _tag(text:String)->Control:
 ## band out to the most it could be, a tick where our own count stands; the
 ## figure beside it. Nothing is drawn or written for what we do not know.
 func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
-	var cell:=HBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
-	cell.custom_minimum_size.x=float(WIDTHS.get(id,60));cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var cell:=VBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
+	cell.custom_minimum_size.x=140;cell.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	cell.add_child(_label(String(_titles().get(id,id)),14,T.INK_MUTED))
+	var figure:=HBoxContainer.new();figure.add_theme_constant_override("separation",12);cell.add_child(figure)
 	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(48,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	cell.add_child(bar);refs["bar_"+id]=bar
-	var value:=_fitted(_label("",13,T.INK),"Value",true)
-	cell.add_child(value);refs["value_"+id]=value
+	figure.add_child(bar);refs["bar_"+id]=bar
+	var value:=_fitted(_label("",20,T.INK,true),"Value",true)
+	figure.add_child(value);refs["value_"+id]=value
 	_part(id,cell)
 	return cell
 
 ## Peace, feud or war; their ruler's trust; our stance on the War screen.
 func _between_cell(row:Dictionary,refs:Dictionary)->Control:
 	var c:Dictionary=row.cells.get("between",{})
-	var cell:=VBoxContainer.new();cell.name="Cell_between";cell.add_theme_constant_override("separation",0)
-	cell.custom_minimum_size.x=float(WIDTHS.between)
+	var cell:=VBoxContainer.new();cell.name="Cell_between";cell.add_theme_constant_override("separation",4)
+	cell.custom_minimum_size.x=160
 	if String(c.get("text",""))!="":
-		refs["relation"]=_fitted(_label("",13,T.INK,true),"Relation");cell.add_child(refs.relation)
+		refs["relation"]=_fitted(_label("",16,T.INK,true),"Relation");cell.add_child(refs.relation)
 		refs["trust"]=_fitted(_label("",12,T.INK_MUTED),"Trust");cell.add_child(refs.trust)
 		if String(c.get("stance",""))!="":
 			refs["stance"]=_fitted(_label("",12,T.GOLD_TEXT),"Stance");cell.add_child(refs.stance)
@@ -365,6 +386,16 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 	_put(refs.get("relation"),String(between.get("text","")),String(between.get("tip","")),_tone(String(between.get("tone","ink"))))
 	_put(refs.get("trust"),String(between.get("sub","")),String(between.get("tip","")))
 	_put(refs.get("stance"),"→ "+String(between.get("stance","")),"Our stance toward them on the War screen.")
+	for people:Dictionary in side:
+		if String(people.get("civ_id",""))!=String(row.civ_id):continue
+		var summary:Button=refs.get("feelings_summary")
+		if summary!=null:
+			summary.tooltip_text=preload("res://scripts/hud/standing_board.gd")._people_tip(people)
+			for feeling_name:String in ["envy","contempt"]:
+				summary.tooltip_text+="\n%s %d%%: %s" % [feeling_name.capitalize(),roundi(float(people.get(feeling_name,0.0))*100.0),String(people.get(feeling_name+"_why",""))]
+		for feeling:Dictionary in people.get("views",[]):
+			var target:Variant=(refs.get("feelings",{}) as Dictionary).get(String(feeling.id))
+			_put(target,"%s  %d%%" % [String(feeling.name),roundi(float(feeling.value)*100.0)],"%s. Why: %s" % [String(feeling.means),String(feeling.why)])
 
 
 ## "108 years ago" -> "108 yr ago", to fit its narrow column.
@@ -431,7 +462,7 @@ func _towns(row:Dictionary)->Control:
 	if towns.is_empty():
 		stack.add_child(_label("No town of theirs has been seen yet.",12,T.INK_MUTED))
 		return panel
-	stack.add_child(_town_header(bool(row.us)))
+	stack.add_child(_label("Our towns" if bool(row.us) else "Known towns",18,T.INK,true))
 	for town:Dictionary in towns:stack.add_child(_town_row(town))
 	return panel
 
@@ -461,29 +492,31 @@ func _town_row(town:Dictionary)->Control:
 			if _clicked(event):
 				panel.accept_event()
 				on_town.call(city_id))
-	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",GAP);panel.add_child(line)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",8);panel.add_child(stack)
+	var line:=HFlowContainer.new();line.add_theme_constant_override("h_separation",16);line.add_theme_constant_override("v_separation",8)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);head.custom_minimum_size.x=120;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(head)
-	var name_label:=_fitted(_label(String(town.name),13,T.INK,true),"TownName",true);head.add_child(name_label)
+	var name_label:=_fitted(_label(String(town.name),18,T.INK,true),"TownName",true);head.add_child(name_label)
 	if bool(town.get("home",false)):head.add_child(_tag("home"))
+	stack.add_child(line)
+	var details:=HFlowContainer.new();details.add_theme_constant_override("h_separation",20);details.add_theme_constant_override("v_separation",8);stack.add_child(details)
 	var cells:Dictionary=town.get("cells",{})
 	for spec:Array in TOWN_COLUMNS:
 		var text:=String(cells.get(String(spec[0]),"?"))
-		var value:=_fitted(_label(text,13,T.INK if text not in ["?","—"] else T.INK_MUTED),"");value.custom_minimum_size.x=float(spec[2]);value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
-		value.tooltip_text=text;line.add_child(value)
+		var value:=_label("%s  %s" % [String(_titles().get(String(spec[0]),spec[1])),text],14,T.INK if text not in ["?","—"] else T.INK_MUTED)
+		value.tooltip_text=text;details.add_child(value)
 	var fresh:Dictionary=town.get("fresh",{})
-	var seen:=HBoxContainer.new();seen.name="Seen";seen.custom_minimum_size.x=128;seen.add_theme_constant_override("separation",4);line.add_child(seen)
+	var seen:=HBoxContainer.new();seen.name="Seen";seen.custom_minimum_size.x=128;seen.add_theme_constant_override("separation",4);stack.add_child(seen)
 	var mark:=FreshMark.new();mark.level=String(fresh.get("level","none"));seen.add_child(mark)
 	var said:=String(fresh.get("text",""))+(" · "+String(fresh.source) if String(fresh.get("source",""))!="" else "")
 	var when:=_fitted(_label(said,12,T.INK_MUTED),"",true);when.tooltip_text=said;seen.add_child(when)
-	var held:=_fitted(_label(String(town.get("held","")),12,T.INK_MUTED),"Held");held.custom_minimum_size.x=84;held.tooltip_text="Who holds it, as we last heard.";line.add_child(held)
+	var held:=_label(String(town.get("held","")),14,T.INK_MUTED);held.name="Held";held.tooltip_text="Who holds it, as we last heard.";line.add_child(held)
 	return panel
 
 # --- Pieces ------------------------------------------------------------------
 
 static func sheet_style()->StyleBoxFlat:
-	var style:=T.flat(T.PAPER_RAISED,T.BORDER_SOFT,1,6)
-	style.content_margin_left=PAD;style.content_margin_right=PAD;style.content_margin_top=12;style.content_margin_bottom=12
-	style.shadow_color=Color(0,0,0,.10 if T.is_light() else .3);style.shadow_size=5;style.shadow_offset=Vector2(0,2)
+	var style:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,0)
+	style.content_margin_left=0;style.content_margin_right=0;style.content_margin_top=0;style.content_margin_bottom=0
 	return style
 
 static func _rule(color:Color)->ColorRect:
@@ -493,7 +526,7 @@ static func _rule(color:Color)->ColorRect:
 static func _label(text:String,size:int,color:Color,strong:=false)->Label:
 	var label:=Label.new();label.text=text;label.mouse_filter=Control.MOUSE_FILTER_PASS
 	label.add_theme_font_override("font",T.font("ui_strong" if strong else "ui"))
-	label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size))
+	label.add_theme_font_size_override("font_size",maxi(14,size))
 	label.add_theme_color_override("font_color",color)
 	return label
 
@@ -514,21 +547,9 @@ func _part(column:String,node:Control)->void:
 ## never runs past its paper.
 func _layout()->void:
 	if size.x<=0.0:return
-	var wide:=not side.is_empty() and size.x>=SIDE_AT
-	if wide!=side_wide:
-		side_wide=wide
-		_build.call_deferred()
-		return
-	var room:=size.x-PAD*2.0-2.0-((SIDE_W+14.0) if side_wide else 0.0)
-	var need:=float(NAME_MIN)
-	for id:String in WIDTHS:need+=float(WIDTHS[id])+GAP
-	var giving:Array=[]
-	for id:String in SHED:
-		if need<=room:break
-		giving.append(id);need-=float(WIDTHS[id])+GAP
-	if giving!=_shape:
-		_shape=giving
-		_apply_shape()
+	# Facts wrap as a unit; freshness and the Talk action stay reachable.
+	_shape=[]
+	_apply_shape()
 
 func _apply_shape()->void:
 	for id:String in parts:

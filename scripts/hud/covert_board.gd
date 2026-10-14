@@ -242,7 +242,7 @@ func refresh(force:=false)->void:
 	_networks(rows,view)
 	_home(view)
 	var grid:=UI.columns(box,"Records")
-	grid.columns=3 if size.x>=800.0 else 1
+	grid.columns=2 if size.x>=1000.0 else 1
 	for section:Dictionary in data:_records(grid,section)
 	if data.is_empty():UI.label(box,"Nothing has come back yet",12,T.INK_MUTED)
 
@@ -254,52 +254,28 @@ func _networks(rows:Array,view:Dictionary)->void:
 	if rows.is_empty():
 		UI.label(column,"We know no other people yet",12,T.INK_MUTED)
 		return
-	# Until a network stands anywhere, no columns of zeros: each row says what
-	# its chosen level buys.
-	var standing:=false
-	for r:Dictionary in rows:standing=standing or int(r.placed)>0 or int(r.on_way)>0
-	if not standing:
-		for r:Dictionary in rows:
-			var row:=UI.line(column,6);row.name="People_"+String(r.civ_id)
-			var who:=UI.label(row,String(r.name),13,T.INK,true);who.custom_minimum_size.x=96
-			var chips:=HBoxContainer.new();chips.add_theme_constant_override("separation",3);row.add_child(chips)
-			for level in 4:
-				var civ_id:=String(r.civ_id);var chosen:=level
-				var b:=UI.chip(chips,String(Covert.NETWORK_NAMES[level]),level==int(r.level),func()->void:set_network(civ_id,chosen),_level_words(level))
-				b.name="Network_%s_%d" % [String(r.civ_id),level]
-			# What the level asks for, as pills: how many, the risk, and whether any are there yet.
-			if String(r.barred)!="":UI.tag(row,"stuck","warn").tooltip_text=String(r.barred)
-			elif int(r.level)>0:
-				UI.tag(row,"%d asked" % int(r.wanted),"").tooltip_text=_level_words(int(r.level))
-				UI.tag(row,["","low risk","some risk","high risk"][int(r.level)],["","good","warn","bad"][int(r.level)]).tooltip_text=_level_words(int(r.level))
-				UI.tag(row,"none there yet","").tooltip_text=String(r.words)
-		return
-	var titles:=UI.line(column,6)
-	UI.label(titles,"",12,T.INK_MUTED,true,true).custom_minimum_size.x=96
-	UI.cell(titles,"Strength",64,12,T.INK_MUTED,true)
-	UI.cell(titles,"How hard we watch",236,12,T.INK_MUTED,true)
-	UI.cell(titles,"Ours",44,12,T.INK_MUTED,true,HORIZONTAL_ALIGNMENT_RIGHT)
-	UI.cell(titles,"Last word",80,12,T.INK_MUTED,true)
-	UI.cell(titles,"Found",54,12,T.INK_MUTED,true)
 	for r:Dictionary in rows:
-		var row:=UI.line(column,6);row.name="People_"+String(r.civ_id)
-		row.tooltip_text=String(r.words)
-		var who:=UI.label(row,String(r.name),13,T.INK,true,true);who.custom_minimum_size.x=96;who.tooltip_text=String(r.words)
-		if String(r.barred)!="":UI.tag(row,"stuck","warn").tooltip_text=String(r.barred)
-		var strength:=UI.bar(row,float(r.strength),T.TEAL,64)
-		strength.name="Strength_"+String(r.civ_id)
-		strength.tooltip_text="Network strength %d in 100. It grows with the years it has lived there and the locals it wins over." % roundi(float(r.strength)*100.0)
-		var chips:=HBoxContainer.new();chips.add_theme_constant_override("separation",3);chips.custom_minimum_size.x=236;row.add_child(chips)
+		var card:=VBoxContainer.new();card.name="People_"+String(r.civ_id);card.add_theme_constant_override("separation",12);column.add_child(card)
+		var head_row:=UI.line(card,12)
+		UI.label(head_row,String(r.name),20,T.INK,true,true).tooltip_text=String(r.words)
+		if String(r.barred)!="":UI.tag(head_row,"Cannot grow","warn").tooltip_text=String(r.barred)
+		var choices:=HFlowContainer.new();choices.add_theme_constant_override("h_separation",8);choices.add_theme_constant_override("v_separation",8);card.add_child(choices)
 		for level in 4:
 			var civ_id:=String(r.civ_id);var chosen:=level
-			var tip:String=["Keep no watch among them.","A thin network (%d of ours kept there): a little word, little risk." % int(Covert.NETWORK_EYES[1]),"A settled network (%d of ours kept there): steadier word, and locals won over." % int(Covert.NETWORK_EYES[2]),"A deep network (%d of ours kept there) that also goes after their crafts: the most word, and the most of ours found." % int(Covert.NETWORK_EYES[3])][level]
-			var b:=UI.chip(chips,String(Covert.NETWORK_NAMES[level]),level==int(r.level),func()->void:set_network(civ_id,chosen),tip)
+			var b:=UI.chip(choices,String(Covert.NETWORK_NAMES[level]),level==int(r.level),func()->void:set_network(civ_id,chosen),_level_words(level))
 			b.name="Network_%s_%d" % [String(r.civ_id),level]
-		var ours:="%d" % int(r.placed)+(("+%d" % int(r.on_way)) if int(r.on_way)>0 else "")
-		UI.cell(row,ours,44,13,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT).tooltip_text="%d of ours there%s%s" % [int(r.placed),(", %d on the way" % int(r.on_way)) if int(r.on_way)>0 else "",(", %d of theirs won over" % int(r.recruits)) if int(r.recruits)>0 else ""]
-		UI.cell(row,"—" if int(r.placed)<=0 else ("none yet" if int(r.last_word_days)<0 else _age(int(r.last_word_days)).replace(" ago","")),80,12,T.BODY)
-		var found:=HBoxContainer.new();found.custom_minimum_size.x=54;row.add_child(found)
-		if int(r.placed)>0:UI.tag(found,_risk_short(float(r.risk)),"danger" if float(r.risk)>0.3 else ("warn" if float(r.risk)>0.12 else "muted")).tooltip_text="Risk of being found: %s" % _risk_words(float(r.risk))
+		var facts:=HFlowContainer.new();facts.add_theme_constant_override("h_separation",20);facts.add_theme_constant_override("v_separation",8);card.add_child(facts)
+		if int(r.placed)>0 or int(r.on_way)>0:
+			var strength_group:=UI.line(facts)
+			UI.label(strength_group,"Strength %d%%" % roundi(float(r.strength)*100.0),14,T.INK)
+			var strength:=UI.bar(strength_group,float(r.strength),T.TEAL,72);strength.name="Strength_"+String(r.civ_id)
+			strength.tooltip_text="It grows with the years it has lived there and the locals it wins over."
+			UI.label(facts,"%d of ours · %d on the way" % [int(r.placed),int(r.on_way)],14,T.INK_MUTED).tooltip_text="%d of theirs won over" % int(r.recruits)
+			UI.label(facts,"No word yet" if int(r.last_word_days)<0 else "Last word "+_age(int(r.last_word_days)),14,T.INK_MUTED)
+			if int(r.placed)>0:UI.tag(facts,"Found: "+_risk_short(float(r.risk)),"danger" if float(r.risk)>0.3 else ("warn" if float(r.risk)>0.12 else "muted")).tooltip_text="Risk of being found: %s" % _risk_words(float(r.risk))
+		else:
+			UI.label(facts,"No watch among them" if int(r.level)==0 else "%d asked for · none there yet" % int(r.wanted),14,T.INK_MUTED)
+		if String(r.barred)!="":UI.label(card,String(r.barred),14,T.AMBER_TEXT,false,true)
 
 ## What a level of watching buys, in the engine's numbers.
 static func _level_words(level:int)->String:
@@ -332,13 +308,13 @@ func _home(view:Dictionary)->void:
 	var cost:=roundi(float(view.cohesion_cost)*100.0)
 	var head:=UI.heading(column,"%s: the watch at home" % Corps.word("Wary"),"distrust −%d" % cost if cost>0 else "",T.RED_TEXT if cost>=2 else T.INK_MUTED)
 	head.tooltip_text="Ours who watch for theirs among us. A harder watch catches more, but the people start wondering who reports on whom. The Pathfinder finds and teaches as many as it takes, and sends the rest back to other work. Distrust is what it costs, in points of 100 of their trust in one another."
-	var row:=UI.line(column,6)
-	var who:=UI.label(row,"Our own people",13,T.INK,true,true);who.custom_minimum_size.x=96
+	var row:=VBoxContainer.new();row.add_theme_constant_override("separation",12);column.add_child(row)
+	var who:=UI.label(row,"Our own people",18,T.INK,true,true);who.custom_minimum_size.x=96
 	var have:=roundi(float(view.coverage)*100.0); var aim:=roundi(float(view.watch_share)*100.0)
 	var coverage:=UI.bar(row,float(view.coverage)/maxf(0.01,float(view.watch_share)) if aim>0 else 0.0,T.TEAL,64)
 	coverage.name="Coverage"
 	coverage.tooltip_text="Watching %d in 100 of our people; this level asks for %d." % [have,aim]
-	var chips:=HBoxContainer.new();chips.add_theme_constant_override("separation",3);chips.custom_minimum_size.x=236;row.add_child(chips)
+	var chips:=HFlowContainer.new();chips.add_theme_constant_override("h_separation",8);chips.add_theme_constant_override("v_separation",8);row.add_child(chips)
 	var lit:=""
 	for watch:Dictionary in watch_rows():
 		var chosen:=int(watch.level)
