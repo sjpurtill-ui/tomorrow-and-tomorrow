@@ -242,7 +242,7 @@ func refresh(force:=false)->void:
 	_networks(rows,view)
 	_home(view)
 	var grid:=UI.columns(box,"Records")
-	grid.columns=3 if size.x>=800.0 else 2
+	grid.columns=3 if size.x>=800.0 else 1
 	for section:Dictionary in data:_records(grid,section)
 	if data.is_empty():UI.label(box,"Nothing has come back yet",12,T.INK_MUTED)
 
@@ -267,8 +267,12 @@ func _networks(rows:Array,view:Dictionary)->void:
 				var civ_id:=String(r.civ_id);var chosen:=level
 				var b:=UI.chip(chips,String(Covert.NETWORK_NAMES[level]),level==int(r.level),func()->void:set_network(civ_id,chosen),_level_words(level))
 				b.name="Network_%s_%d" % [String(r.civ_id),level]
-			var buys:=UI.label(row,_level_words(int(r.level)) if String(r.barred)=="" else String(r.barred),12,T.BODY if String(r.barred)=="" else T.AMBER_TEXT,false,true)
-			buys.tooltip_text=String(r.words)
+			# What the level asks for, as pills: how many, the risk, and whether any are there yet.
+			if String(r.barred)!="":UI.tag(row,"stuck","warn").tooltip_text=String(r.barred)
+			elif int(r.level)>0:
+				UI.tag(row,"%d asked" % int(r.wanted),"").tooltip_text=_level_words(int(r.level))
+				UI.tag(row,["","low risk","some risk","high risk"][int(r.level)],["","good","warn","bad"][int(r.level)]).tooltip_text=_level_words(int(r.level))
+				UI.tag(row,"none there yet","").tooltip_text=String(r.words)
 		return
 	var titles:=UI.line(column,6)
 	UI.label(titles,"",12,T.INK_MUTED,true,true).custom_minimum_size.x=96
@@ -309,7 +313,7 @@ static func _level_words(level:int)->String:
 static func abroad_short(view:Dictionary)->String:
 	var placed:=Covert._network_placed(); var wanted:=Covert.network_wanted()
 	var c:Dictionary=view.eyes
-	var parts:PackedStringArray=["%d of %d ours abroad" % [placed,wanted]]
+	var parts:PackedStringArray=["%d asked for · %d there" % [wanted,placed]]
 	if roundi(float(c.members))>0:parts.append("%s taught" % preload("res://scripts/hud/era_words.gd").grouped(roundi(float(c.members))))
 	if roundi(float(c.training))>0:parts.append("%d learning" % roundi(float(c.training)))
 	return " · ".join(parts)
@@ -350,6 +354,14 @@ func _records(parent:Node,section:Dictionary)->void:
 	var column:=UI.sheet(parent,String(section.kind).capitalize())
 	UI.heading(column,String(section.title),"%d" % (section.rows as Array).size())
 	for text in section.rows:
-		var line:=UI.label(column,String(text),12,T.BODY,false,true)
-		line.tooltip_text=String(text)
-		line.custom_minimum_size.y=22
+		# One line each: the word itself, and how long ago at the right; the whole in the pointer.
+		var full:=String(text)
+		var row:=UI.line(column,6);row.tooltip_text=full
+		var said:=full.get_slice(" — ",0).get_slice(" (",0)
+		var age:=full.get_slice(" — ",1) if " — " in full else (full.get_slice(" (",1).trim_suffix(")") if " (" in full else "")
+		# The first clause: "Agikajuaq is held by about 33 fighters, up from about 30" -> before ", ".
+		said=said.get_slice(". ",0).trim_suffix(".")
+		if said.length()>48:said=said.get_slice(", ",0)
+		if said.length()>48:said=said.get_slice(": ",0)
+		UI.label(row,said,12,T.BODY,false,true).tooltip_text=full
+		if age!="":UI.cell(row,age.replace(" years ago"," yr").replace(" year ago"," yr"),54,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)

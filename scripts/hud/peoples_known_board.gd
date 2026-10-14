@@ -18,7 +18,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/peoples_known_model.gd")
 
 ## Column widths (px). The name takes what is left, at least NAME_MIN.
-const WIDTHS:={"people":130,"fighters":120,"between":96,"seen":76,"talk":46}
+const WIDTHS:={"people":112,"fighters":104,"between":96,"seen":72,"talk":42}
 const NAME_MIN:=100
 const GAP:=8
 ## The sheet's paper margin, each side (px).
@@ -254,7 +254,7 @@ func _row_style(us:bool,open:bool,hover:bool)->StyleBoxFlat:
 func _name_cell(row:Dictionary,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_name";cell.add_theme_constant_override("separation",6)
 	cell.custom_minimum_size.x=NAME_MIN;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	refs["name"]=_fitted(_label("",15,T.INK,true),"Name",true);cell.add_child(refs.name)
+	refs["name"]=_fitted(_label("",14,T.INK,true),"Name",true);cell.add_child(refs.name)
 	# A long name takes a second line rather than an ellipsis (rows are two lines high).
 	var name_label:Label=refs.name
 	name_label.clip_text=false;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -298,7 +298,7 @@ func _tag(text:String)->Control:
 func _figure_cell(row:Dictionary,id:String,refs:Dictionary)->Control:
 	var cell:=HBoxContainer.new();cell.name="Cell_"+id;cell.add_theme_constant_override("separation",8)
 	cell.custom_minimum_size.x=float(WIDTHS.get(id,60));cell.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(56,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var bar:=RangeBar.new();bar.name="Bar";bar.us=bool(row.us);bar.custom_minimum_size=Vector2(48,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	cell.add_child(bar);refs["bar_"+id]=bar
 	var value:=_fitted(_label("",13,T.INK),"Value",true)
 	cell.add_child(value);refs["value_"+id]=value
@@ -329,8 +329,8 @@ func _write_row(row:Dictionary,refs:Dictionary)->void:
 		if mark.level!=String(fresh.get("level","none")):
 			mark.level=String(fresh.get("level","none"));mark.queue_redraw()
 		mark.tooltip_text=String(fresh.get("tip",""))
-	_put(refs.get("age"),_short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
-	_put(refs.get("source"),String(fresh.get("source","")),"Who brought our newest word of them.")
+	_put(refs.get("age"),"our count" if bool(row.us) else _short_age(String(fresh.get("text",""))),"%s. %s" % [String(fresh.get("text","")),String(fresh.get("tip",""))])
+	_put(refs.get("source"),"our count" if bool(row.us) else String(fresh.get("source","")),"Who brought our newest word of them." if not bool(row.us) else String(fresh.get("source","")))
 	var titles:=_titles()
 	for id:String in FIGURES:
 		var c:Dictionary=cells.get(id,{})
