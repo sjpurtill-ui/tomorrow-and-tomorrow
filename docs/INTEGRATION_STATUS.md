@@ -1,3 +1,43 @@
+## October 14 — Modern Strategy popup audit complete (INTEGRATED)
+
+Player code checkpoint `79438388143e4ef23bb627141f0b923f9ac4fb3b` completes the
+user-selected Modern Strategy redesign across every reachable popup and subpage.
+The current checkout is `C:/Users/sjpur/TomorrowandTomorrow`; the archived
+OneDrive project was not copied into it. The code was pushed to origin/main,
+remotely verified, then fast-forwarded into canonical main with ahead/behind 0/0.
+
+The foundation and all category families are now integrated: Home and population,
+Production, Food, Materials, Wealth, Trade/Deliveries, Research, Buildings, World
+and intelligence, War/command/services, Court, Collections, Direction/Figures,
+Great Works, Chronicle, opening/travel, settings and small map/status overlays.
+Every family completed independent implementation/critique/revision/recheck.
+The final source entry-point audit found no additional reachable popup families.
+Coverage, navigation decisions and dormant exclusions: `docs/design/POPUP_REDESIGN.md`.
+
+Final sources/checkpoints include Home `8713593a` → `813fcc65`, Wealth `57b5b355`
+→ `842ca6c9`, World/Collections `102156b5` → `8b901cda`, Trade `3a0512a5` →
+`1f416752`, Supply `575b6ef0` → `461f5534`, Buildings `96f8d337` → `d20219a5`,
+Great Works copy `7cb11fb8` → `3076a978`, and final root overlays/confirmations
+`79438388`. Earlier family checkpoints remain in the design ledger and Git history.
+
+Final combined headless verification: 33 cases across Buildings, Town Works,
+AI settings and popup readers; zero errors, failures, skips or orphans
+(`artifacts/popup-audit/modern-final-combined-tests.log`, report_20). The merged
+Home probe passes with 47 Night captures and no bounds errors; Economy produces
+68 captures across both themes and two widths, with independent narrow-view
+acceptance. Final native confirmations pass primary44/secondary40 checks in both
+modes. Command, battle report, border, caravan, notices and order overlays retain
+their separately reviewed probes; all private GPU processes exited normally.
+
+Rules, resource arithmetic, prices, action conditions and save schema are
+unchanged. UI lifetime fixes retain existing Landmark command presenters and
+refresh Great Works preview hosts on reopen. One pre-existing comprehensive
+Great Works second-dedication architect-speech assertion fails identically on its
+baseline; focused presentation/reopen checks pass. Narration was not changed.
+Generated captures/imports, credentials and saves are excluded. Existing unrelated
+local changes are preserved. The running player/editor was not restarted; a normal
+save/restart through the canonical launcher loads the new presentation.
+
 ## October 11 — Stable daily border popup (INTEGRATED)
 
 The open "The border" summary now updates its existing readings, bars and

@@ -1,8 +1,6 @@
 extends "res://scripts/hud/town_works_board.gd"
-## THE BUILDINGS PAGE AS A STRATEGY-GAME PANEL: sections of one-line rows
-## (icon, name, a few words, a bar, the figure, a state tag, verb buttons),
-## with a second short line only where a row carries effects, a bill or what
-## stops it. Sections flow into two or three columns as the page widens.
+## Buildings: current work and decisions first, with exact costs and effects
+## beneath each work. Supporting sections use one or two readable columns.
 ## Presentation only: every reading and action arrives from the providers
 ## (hud/content/dock_content_construction.gd and dock_content_undertakings.gd).
 ##
@@ -18,19 +16,19 @@ extends "res://scripts/hud/town_works_board.gd"
 ## Widths are the UI's own units (the game draws at a UI scale, so 1600 px
 ## wide gives this page about 665 units and 2000 px about 850).
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
-const COLUMN_MIN:=262.0
+const COLUMN_MIN:=360.0
 const BAR_WIDTH:=80.0
 
 var _specs:Array=[]
 var _columns:=0
-## Rows in side-by-side columns: shorter bars, the tag on the second line.
+## Supporting sections use shorter bars when arranged side by side.
 var _compact:=false
 
 
 func setup(block:Dictionary)->void:
 	data=block;name="BuildingsBoard"
 	theme=_theme()
-	add_theme_constant_override("separation",14)
+	add_theme_constant_override("separation",28)
 	var by_section:Dictionary={}
 	for card:Dictionary in block.get("cards",[]):
 		var id:=String(card.get("section","main"))
@@ -47,7 +45,7 @@ func setup(block:Dictionary)->void:
 
 func _fit()->void:
 	if size.x<=0.0:return
-	var count:=clampi(floori((size.x+28.0)/(COLUMN_MIN+28.0)),1,3)
+	var count:=clampi(floori((size.x+28.0)/(COLUMN_MIN+28.0)),1,2)
 	if count!=_columns:_layout(count)
 
 
@@ -76,7 +74,7 @@ func _layout(count:int)->void:
 		var columns:Array=[];var heights:Array=[]
 		for i in n:
 			var column:=VBoxContainer.new();column.name="Column%d" % i;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-			column.add_theme_constant_override("separation",14);row.add_child(column);columns.append(column);heights.append(0.0)
+			column.add_theme_constant_override("separation",28);row.add_child(column);columns.append(column);heights.append(0.0)
 		if n==1:_compact=false
 		for spec:Dictionary in each:
 			var best:=0
@@ -84,6 +82,7 @@ func _layout(count:int)->void:
 			(columns[best] as VBoxContainer).add_child(_section(spec.section,spec.cards))
 			heights[best]=float(heights[best])+_weight(spec.cards)
 		_compact=was
+		if each==bands[0] and not (data.get("readings",[]) as Array).is_empty():add_child(_context_readings(data.readings))
 
 
 static func _weight(cards:Array)->float:
@@ -105,141 +104,65 @@ static func _has_second_line(card:Dictionary)->bool:
 
 func _section(section:Dictionary,cards:Array)->Control:
 	var box:=VBoxContainer.new();box.name="Section_"+String(section.get("id",""));box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation",0)
-	var head:=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);box.add_child(head)
-	var title:=T.make_label(String(section.get("heading","")),19,T.GOLD_TEXT)
-	title.add_theme_font_override("font",T.font("voice"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	head.add_child(title)
+	box.add_theme_constant_override("separation",10)
+	var title:=T.make_label(String(section.get("heading","")),26,T.INK)
+	title.add_theme_font_override("font",T.font("ui_strong"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(title)
 	if String(section.get("note",""))!="":
-		var note:=_label(String(section.note),12,T.TEXT_SOFT);note.name="Note";note.tooltip_text=String(section.get("note_tip",""))
-		note.mouse_filter=Control.MOUSE_FILTER_STOP if note.tooltip_text!="" else Control.MOUSE_FILTER_IGNORE
-		head.add_child(note)
-	for item:Dictionary in section.get("actions",[]):head.add_child(_button(item))
-	var rule:=ColorRect.new();rule.color=T.RULE_STRONG;rule.custom_minimum_size=Vector2(0,1);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
-	# A tiles section lays its items side by side, one per column of the
-	# page when three fit (2000 px), each item a small stacked card; narrower
-	# pages keep the one-line rows.
-	if bool(section.get("tiles",false)) and _columns>=3:
-		var grid:=GridContainer.new();grid.name="Tiles";grid.columns=_columns
-		grid.add_theme_constant_override("h_separation",20);grid.add_theme_constant_override("v_separation",10)
-		for card:Dictionary in cards:grid.add_child(_tile(card))
-		box.add_child(grid)
-		return box
+		var note:=_label(String(section.note),14,T.TEXT_SOFT);note.name="Note";note.tooltip_text=String(section.get("note_tip",""));note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		note.mouse_filter=Control.MOUSE_FILTER_STOP if note.tooltip_text!="" else Control.MOUSE_FILTER_IGNORE;box.add_child(note)
+	if not (section.get("actions",[]) as Array).is_empty():
+		var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);box.add_child(actions)
+		for item:Dictionary in section.actions:actions.add_child(_button(item))
 	for i in cards.size():
 		box.add_child(_row(cards[i]))
-		if i<cards.size()-1:
-			var hair:=ColorRect.new();hair.color=Color(T.RULE,0.55);hair.custom_minimum_size=Vector2(0,1);hair.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(hair)
 	return box
-
-
-# --- A tile ----------------------------------------------------------------------
-
-## One item as a small stacked card: its mark and full name, its few words,
-## its bar, figure and state, then what it does, its bill and its verbs.
-func _tile(card:Dictionary)->Control:
-	var panel:=PanelContainer.new();panel.name="Card_"+String(card.get("key",card.get("name","tile"))).replace(" ","_")
-	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var style:=T.flat(Color(0,0,0,0),Color(T.RULE,0.7),0,0);style.border_width_bottom=1;style.content_margin_top=6;style.content_margin_bottom=8
-	if bool(card.get("highlight",false)):style.bg_color=T.GOLD_WASH
-	panel.add_theme_stylebox_override("panel",style)
-	panel.tooltip_text=String(card.get("detail",""));panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	var lines:=VBoxContainer.new();lines.add_theme_constant_override("separation",4);lines.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(lines)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);head.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(head)
-	head.add_child(_icon(card))
-	var name_label:=_label(String(card.get("name","")),14,T.INK,true);name_label.name="Name";head.add_child(name_label)
-	if String(card.get("sub",""))!="":
-		var sub:=_label(String(card.sub),12,T.TEXT_SOFT);sub.name="Sub";sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;sub.custom_minimum_size.x=120;lines.add_child(sub)
-	var figures:=HBoxContainer.new();figures.add_theme_constant_override("separation",8);figures.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(figures)
-	var bar:Variant=card.get("bar",card.get("progress",card.get("meter")))
-	if bar is Dictionary and not (bar as Dictionary).is_empty():
-		var spec:=(bar as Dictionary).duplicate();spec.width=60.0
-		var meter:=_inline_bar(spec);meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;figures.add_child(meter)
-		(meter.get_child(0) as Control).size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	if String(card.get("value",""))!="":figures.add_child(_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true))
-	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():figures.add_child(_tag(card.tag))
-	var flow:=HFlowContainer.new();flow.add_theme_constant_override("h_separation",12);flow.add_theme_constant_override("v_separation",4);flow.mouse_filter=Control.MOUSE_FILTER_PASS
-	for effect:Dictionary in card.get("effects",[]):flow.add_child(_effect_chip(effect))
-	for need:Dictionary in card.get("needs",[]):flow.add_child(_pips(need))
-	if flow.get_child_count()>0:lines.add_child(flow)
-	var verbs:=HFlowContainer.new();verbs.add_theme_constant_override("h_separation",6);verbs.mouse_filter=Control.MOUSE_FILTER_PASS
-	for item:Dictionary in card.get("actions",[]):verbs.add_child(_button(item))
-	if card.get("choice") is Dictionary:verbs.add_child(_small_choice(card.choice))
-	if verbs.get_child_count()>0:lines.add_child(verbs)
-	return panel
 
 
 # --- A row -----------------------------------------------------------------------
 
 func _row(card:Dictionary)->Control:
-	# Side by side, a row keeps to one line: what it does waits in its tooltip.
-	if _compact and not (card.get("effects",[]) as Array).is_empty():
-		card=card.duplicate()
-		var said:PackedStringArray=[]
-		for effect:Dictionary in card.effects:said.append("%s %s" % [String(effect.get("label","")),String(effect.get("value",""))])
-		card.detail=("%s
-%s" % [String(card.get("detail","")),", ".join(said)]).strip_edges()
-		card.erase("effects")
 	var panel:=PanelContainer.new();panel.name="Card_"+String(card.get("key",card.get("name","row"))).replace(" ","_")
-	var style:=T.flat(Color(0,0,0,0));style.content_margin_top=4;style.content_margin_bottom=4;style.content_margin_left=2;style.content_margin_right=2
-	if bool(card.get("highlight",false)):style.bg_color=T.GOLD_WASH
-	panel.add_theme_stylebox_override("panel",style)
-	panel.tooltip_text=String(card.get("detail",""))
-	panel.mouse_filter=Control.MOUSE_FILTER_STOP
-	var lines:=VBoxContainer.new();lines.add_theme_constant_override("separation",3);lines.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(lines)
-	var line:=HBoxContainer.new();line.name="Line";line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(line)
+	var actionable:=not (card.get("actions",[]) as Array).is_empty() or card.get("choice") is Dictionary
+	var style:=T.flat(T.PAPER_RAISED if actionable else Color.TRANSPARENT,T.RULE,0,4)
+	style.content_margin_top=12;style.content_margin_bottom=12;style.content_margin_left=12 if actionable else 0;style.content_margin_right=12 if actionable else 0
+	if not actionable:style.border_width_bottom=1;style.border_color=T.RULE
+	if bool(card.get("highlight",false)):style.border_width_left=3;style.border_color=T.GOLD
+	panel.add_theme_stylebox_override("panel",style);panel.tooltip_text=String(card.get("detail",""));panel.mouse_filter=Control.MOUSE_FILTER_STOP
+	var lines:=VBoxContainer.new();lines.add_theme_constant_override("separation",8);lines.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(lines)
+	var line:=HBoxContainer.new();line.name="Line";line.add_theme_constant_override("separation",10);line.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(line)
 	line.add_child(_icon(card))
-	var name_label:=_label(String(card.get("name","")),14,T.INK,true);name_label.name="Name"
-	# A name is never cut: providers keep names short enough for a column.
-	line.add_child(name_label)
-	var sub:=_label(String(card.get("sub","")),12,T.TEXT_SOFT);sub.name="Sub"
-	sub.size_flags_horizontal=Control.SIZE_EXPAND_FILL;sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	sub.custom_minimum_size.x=0
-	line.add_child(sub)
-	if card.get("stamp") is Dictionary:
-		var stamp:=Stamp.new();stamp.name="Stamp";stamp.text=String(card.stamp.get("text","Built"));stamp.tooltip_text=String(card.stamp.get("tip",""));stamp.custom_minimum_size=Vector2(66,24);line.add_child(stamp)
-	var bar:Variant=card.get("bar",card.get("progress",card.get("meter")))
-	if not (card.get("segments",[]) as Array).is_empty():line.add_child(_segments(card.segments))
-	elif bar is Dictionary and not (bar as Dictionary).is_empty():line.add_child(_inline_bar(bar))
+	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);line.add_child(words)
+	var name_label:=_label(String(card.get("name","")),18,T.INK,true);name_label.name="Name";name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(name_label)
+	if String(card.get("sub",""))!="":
+		var sub:=_label(String(card.sub),14,T.TEXT_SOFT);sub.name="Sub";sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
+	var figures:=VBoxContainer.new();figures.add_theme_constant_override("separation",5);figures.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(figures)
 	if String(card.get("value",""))!="":
-		var value:=_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true);value.name="Value"
-		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(card.get("value_width",44))
-		line.add_child(value)
-	# Side by side, the state word takes the place of the row's few words.
-	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():
-		if _compact:
-			sub.text=String(card.tag.get("text",""));sub.tooltip_text=String(card.tag.get("tip",""))
-			var tone:=String(card.tag.get("tone","note"))
-			sub.add_theme_color_override("font_color",tone_ink(tone) if tone in ["good","bad","warn"] else (T.TEAL_TEXT if tone=="info" else T.TEXT_SOFT))
-		else:line.add_child(_tag(card.tag))
-	# Words that do not fit the room the row leaves them wait in the
-	# tooltip, never cut: checked once the row has its width.
-	sub.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING
-	var words:=sub.text
-	if words!="":
-		panel.tooltip_text=("%s\n%s" % [words,panel.tooltip_text]).strip_edges()
-		var width:=T.font("ui").get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-		sub.resized.connect(func()->void:
-			if sub.size.x<=0.0:return
-			var fits:=width<=sub.size.x+1.0
-			if fits!=(sub.text!=""):sub.text=words if fits else "")
-	for item:Dictionary in card.get("actions",[]):line.add_child(_button(item))
-	# Full width, who decides sits beside the verb; side by side, below it.
-	var chose_here:=card.get("choice") is Dictionary and not _compact
-	if chose_here:line.add_child(_small_choice(card.choice))
-	var rest:=card.duplicate();if chose_here:rest.erase("choice")
-	if _has_second_line(rest):
-		var second:=HFlowContainer.new();second.name="Second";second.add_theme_constant_override("h_separation",16);second.add_theme_constant_override("v_separation",3)
-		second.mouse_filter=Control.MOUSE_FILTER_PASS
-		var indent:=Control.new();indent.custom_minimum_size=Vector2(22,0);indent.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(indent)
+		var value:=_label(String(card.value),20,T.legible(card.get("value_color",T.INK),T.PAPER),true);value.name="Value";value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		figures.add_child(value)
+	if String(card.get("value_note",""))!="":
+		var meaning:=_label(String(card.value_note),14,T.TEXT_SOFT);meaning.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;figures.add_child(meaning)
+	var bar:Variant=card.get("bar",card.get("progress",card.get("meter")))
+	if not (card.get("segments",[]) as Array).is_empty():figures.add_child(_segments(card.segments))
+	elif bar is Dictionary and not (bar as Dictionary).is_empty():figures.add_child(_inline_bar(bar))
+	if card.get("stamp") is Dictionary:
+		var stamp:=Stamp.new();stamp.name="Stamp";stamp.text=String(card.stamp.get("text","Built"));stamp.tooltip_text=String(card.stamp.get("tip",""));stamp.custom_minimum_size=Vector2(66,26);figures.add_child(stamp)
+	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():figures.add_child(_tag(card.tag))
+	if actionable:
+		var actions:=HFlowContainer.new();actions.name="Actions";actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);lines.add_child(actions)
+		for item:Dictionary in card.get("actions",[]):actions.add_child(_button(item))
+		if card.get("choice") is Dictionary:
+			var choices:=_small_choice(card.choice)
+			for button in choices.get_children():choices.remove_child(button);actions.add_child(button)
+			choices.free()
+	if _has_second_line(card):
+		var second:=HFlowContainer.new();second.name="Second";second.add_theme_constant_override("h_separation",16);second.add_theme_constant_override("v_separation",8);second.mouse_filter=Control.MOUSE_FILTER_PASS
 		for gain:Dictionary in card.get("gains",[]):second.add_child(_gain_chip(gain))
 		for effect:Dictionary in card.get("effects",[]):second.add_child(_effect_chip(effect))
 		for need:Dictionary in card.get("needs",[]):second.add_child(_pips(need))
 		for blocker:Dictionary in card.get("blockers",[]):second.add_child(_chip(blocker,String(blocker.get("tone","bad"))))
 		for note:Dictionary in card.get("notes",[]):second.add_child(_chip(note,"note"))
 		for item:Dictionary in card.get("actions2",[]):second.add_child(_button(item))
-		if card.get("choice") is Dictionary and not chose_here:second.add_child(_small_choice(card.choice))
-		lines.add_child(second)
+		if second.get_child_count()>0:lines.add_child(second)
 	var press:Variant=card.get("on_press")
 	if press is Callable and (press as Callable).is_valid():
 		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
@@ -256,7 +179,7 @@ func _icon(card:Dictionary)->Control:
 	elif kind.begins_with("res:"):mark.texture=Icons.material_texture(kind.trim_prefix("res:"),40)
 	else:mark.texture=Icons.town_texture(kind if kind!="" else "hall",T.INK,40)
 	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	mark.custom_minimum_size=Vector2(20,20);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	mark.custom_minimum_size=Vector2(28,28);mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	if card.has("icon_color"):mark.modulate=card.icon_color
 	return mark
 
@@ -265,9 +188,9 @@ func _inline_bar(spec:Dictionary)->Control:
 	var box:=HBoxContainer.new();box.name="Bar";box.add_theme_constant_override("separation",6);box.mouse_filter=Control.MOUSE_FILTER_PASS
 	box.tooltip_text=String(spec.get("tip",""))
 	var bar:=Meter.new();bar.ratio=clampf(float(spec.get("ratio",0.0)),0.0,1.0);bar.tick=float(spec.get("tick",-1.0))
-	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2((44.0 if _columns>=3 else minf(56.0,float(spec.get("width",BAR_WIDTH)))) if _compact else float(spec.get("width",BAR_WIDTH)),8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2((44.0 if _columns>=3 else minf(56.0,float(spec.get("width",BAR_WIDTH)))) if _compact else float(spec.get("width",BAR_WIDTH)),5);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	box.add_child(bar)
-	if String(spec.get("text",""))!="" and bool(spec.get("show_text",false)):box.add_child(_label(String(spec.text),12,T.TEXT_SOFT))
+	if String(spec.get("text",""))!="" and bool(spec.get("show_text",false)):box.add_child(_label(String(spec.text),14,T.TEXT_SOFT))
 	return box
 
 
@@ -296,9 +219,7 @@ func _button(item:Dictionary)->Button:
 	var valid:=action is Callable and (action as Callable).is_valid()
 	var go:=Dense.verb(label,action if valid else null,String(item.get("tip","")),not valid)
 	go.name="Act_"+label.replace(" ","_")
-	if bool(item.get("primary",false)):
-		var skin:=(go.get_theme_stylebox("normal") as StyleBoxFlat).duplicate() as StyleBoxFlat
-		skin.bg_color=Color(T.GOLD,0.22);go.add_theme_stylebox_override("normal",skin)
+	T.apply_button_style(go,bool(item.get("primary",false)))
 	if bool(item.get("pressed",false)):
 		go.add_theme_stylebox_override("normal",go.get_theme_stylebox("pressed"))
 	return go
@@ -306,25 +227,22 @@ func _button(item:Dictionary)->Button:
 
 ## Who decides, as small toggles on the row's second line; the chosen one is held down.
 func _small_choice(choice:Dictionary)->Control:
-	var row:=_choice(choice)
-	for button in row.get_children():
-		(button as Button).custom_minimum_size=Vector2(0,22);(button as Button).add_theme_font_size_override("font_size",12)
-	return row
+	return _choice(choice)
 
 
 func _gain_chip(gain:Dictionary)->Control:
 	var chip:=HBoxContainer.new();chip.name="Gain";chip.add_theme_constant_override("separation",4);chip.tooltip_text=String(gain.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP
 	if String(gain.get("icon",""))!="":chip.add_child(_mark(String(gain.icon),14))
-	chip.add_child(_label(String(gain.get("label","")),12,T.TEXT_SOFT))
-	chip.add_child(_label("%s → " % String(gain.get("before","")),12,T.TEXT_SOFT))
-	chip.add_child(_label(String(gain.get("after","")),13,tone_ink(String(gain.get("tone","good"))),true))
+	chip.add_child(_label(String(gain.get("label","")),14,T.TEXT_SOFT))
+	chip.add_child(_label("%s → " % String(gain.get("before","")),14,T.TEXT_SOFT))
+	chip.add_child(_label(String(gain.get("after","")),14,tone_ink(String(gain.get("tone","good"))),true))
 	return chip
 
 
 func _effect_chip(effect:Dictionary)->Control:
 	var chip:=HBoxContainer.new();chip.name="Effect";chip.add_theme_constant_override("separation",4);chip.tooltip_text=String(effect.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP
-	chip.add_child(_label(String(effect.get("label","")),12,T.TEXT_SOFT))
-	chip.add_child(_label(String(effect.get("value","")),12,tone_ink(String(effect.get("tone","plain"))),true))
+	chip.add_child(_label(String(effect.get("label","")),14,T.TEXT_SOFT))
+	chip.add_child(_label(String(effect.get("value","")),14,tone_ink(String(effect.get("tone","plain"))),true))
 	return chip
 
 
@@ -339,8 +257,8 @@ func _pips(need:Dictionary)->Control:
 	else:
 		var short:=have+0.0001<wanted
 		chip=HBoxContainer.new();chip.add_theme_constant_override("separation",4)
-		chip.add_child(_label(String(need.get("label","")),12,T.TEXT_SOFT))
-		chip.add_child(_label("%s / %s" % [_n(have),_n(wanted)],12,T.RED_TEXT if short else T.GREEN_TEXT,true))
+		chip.add_child(_label(String(need.get("label","")),14,T.TEXT_SOFT))
+		chip.add_child(_label("%s / %s" % [_n(have),_n(wanted)],14,T.RED_TEXT if short else T.GREEN_TEXT,true))
 		var pips:=Dense.Pips.new();pips.share=clampf(have/wanted,0.0,1.0);pips.ink=T.RED_TEXT if short else T.GREEN_TEXT
 		pips.custom_minimum_size=Vector2(35,8);pips.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(pips)
 	chip.name="Need";chip.mouse_filter=Control.MOUSE_FILTER_STOP
@@ -363,3 +281,18 @@ class Segments extends Control:
 				x+=w
 				if x<size.x-1.0:draw_line(Vector2(x,0),Vector2(x,size.y),T.PAPER,1.0)
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE_STRONG,false,1.0)
+
+func _context_readings(readings:Array)->Control:
+	var grid:=GridContainer.new();grid.name="ContextReadings";grid.columns=2;grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",16)
+	for reading:Dictionary in readings:
+		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.tooltip_text=String(reading.get("tip",""));cell.add_theme_constant_override("separation",4);grid.add_child(cell)
+		var caption:=_label(String(reading.get("label","")).capitalize(),14,T.TEXT_SOFT);cell.add_child(caption)
+		var value:=_label(String(reading.get("value","")),24,T.INK,true);value.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;cell.add_child(value)
+		var note:=_label(String(reading.get("delta","")),14,T.legible(reading.get("delta_color",T.TEXT_SOFT),T.PAPER));note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;cell.add_child(note)
+		if reading.has("meter"):cell.add_child(_inline_bar({"ratio":reading.meter,"color":reading.get("meter_color",T.TEAL),"width":90}))
+		if reading.has("segments"):cell.add_child(_segments(reading.segments))
+		var press:Variant=reading.get("on_press")
+		if press is Callable and (press as Callable).is_valid():
+			cell.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND;cell.gui_input.connect(func(event:InputEvent)->void:
+				if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:(press as Callable).call())
+	return grid

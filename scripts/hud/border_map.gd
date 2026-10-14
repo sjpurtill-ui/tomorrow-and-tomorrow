@@ -254,7 +254,7 @@ func open_note(id:int)->void:
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",12); column.custom_minimum_size=Vector2(320,0); note.add_child(column)
 	var head:=_heading(column,String(k.get("name","Fort")),String(fort.get("name","")),String(fort.kind),building)
 	var close:=Kit.quiet_button(head,"×",func()->void:_close_note(),"Close fort note · Esc")
-	close.name="CloseFortNote"; close.custom_minimum_size=Vector2(36,36)
+	close.name="CloseFortNote"; close.custom_minimum_size=Vector2(40,40)
 	var facts:=Kit.section(column,12)
 	facts.add_theme_constant_override("separation",8)
 	if building:
@@ -401,7 +401,7 @@ func _build_key_fields(compact:bool)->void:
 	var head:=_heading(column,"The frontier","The border","watch_camp")
 	_key_fields.seal=head.get_child(0)
 	var close:=Kit.quiet_button(head,"×",func()->void:set_shown(terrain,false),"Leave border view")
-	close.name="CloseBorder"; close.custom_minimum_size=Vector2(36,36)
+	close.name="CloseBorder"; close.custom_minimum_size=Vector2(40,40)
 	_key_fields.forts=Kit.label(column,"","note")
 	var numbers:=HBoxContainer.new(); numbers.add_theme_constant_override("separation",14); column.add_child(numbers)
 	_key_fields.posted=_metric(numbers,"Posted","")
@@ -420,7 +420,7 @@ func _build_key_fields(compact:bool)->void:
 	for step:Array in [["−",-0.1,"Fewer on the border: less food lost on the road, a thinner line."],["+",0.1,"More on the border: forts manned first, then the line between them."]]:
 		var b:=Kit.button(share_row,String(step[0]),false,func()->void:Forts.set_border_share(clampf(Forts.border_share()+float(step[1]),0.0,1.0));_changed(),String(step[2]))
 		b.name="FewerBorderWatch" if float(step[1])<0.0 else "MoreBorderWatch"
-		b.custom_minimum_size=Vector2(36,36)
+		b.custom_minimum_size=Vector2(40,40)
 		_key_fields["fewer" if float(step[1])<0.0 else "more"]=b
 	# Food kept at the forts for an army passing: the ruler sets how hard.
 	var stock_words:=VBoxContainer.new(); stock_words.add_theme_constant_override("separation",0); column.add_child(stock_words)
@@ -452,7 +452,7 @@ func _heading(parent:Node,kicker:String,title:String,kind_id:String,building:boo
 	var words:=VBoxContainer.new(); words.size_flags_horizontal=Control.SIZE_EXPAND_FILL; words.add_theme_constant_override("separation",0); row.add_child(words)
 	Kit.label(words,kicker,"kicker")
 	var name_label:=Kit.label(words,title,"title")
-	name_label.add_theme_font_override("font",T.voice_font()); name_label.add_theme_font_size_override("font_size",28)
+	name_label.add_theme_font_override("font",T.font("ui_strong")); name_label.add_theme_font_size_override("font_size",28)
 	return row
 
 func _metric(parent:Node,caption:String,value:String,tone:Color=Color.TRANSPARENT)->Label:
@@ -765,7 +765,7 @@ class BorderChart extends Control:
 
 	## A paper note beside the pointer: a title and rows [text, colour, strong].
 	func _tip(title:String,rows:Array,accent:Color,kind_id:String="",hero:Dictionary={},building:bool=true)->void:
-		var ui:=T.font("ui"); var strong:=T.font("ui_strong"); var voice:=T.voice_font()
+		var ui:=T.font("ui"); var strong:=T.font("ui_strong"); var voice:=strong
 		var view:=get_viewport_rect().size
 		var width:=minf(TIP_WIDTH,view.x-T.RAIL_WIDTH-80.0)
 		var title_width:=width-52.0 if kind_id!="" else width

@@ -176,7 +176,7 @@ static func content(spec:Dictionary)->VBoxContainer:
 	var kicker:=_label(String(spec.get("kicker","")).to_upper(),12,T.text_for(accent),0.12)
 	column.add_child(kicker)
 	var hero:=HBoxContainer.new();hero.mouse_filter=Control.MOUSE_FILTER_IGNORE;hero.add_theme_constant_override("separation",8);column.add_child(hero)
-	hero.add_child(_label(String(spec.get("value","")),20,T.INK))
+	hero.add_child(_label(String(spec.get("value","")),32,T.INK))
 	var unit:=String(spec.get("unit",""))
 	if unit!="":
 		var unit_label:=_label(unit,12,T.MUTED);unit_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -215,7 +215,7 @@ static func content(spec:Dictionary)->VBoxContainer:
 	return column
 
 static func _label(text:String,size:int,color:Color,spacing:float=0.0)->Label:
-	var label:=T.make_label(text,size,color,spacing)
+	var label:=T.make_label(text,maxi(14,size),color,spacing)
 	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	return label
 

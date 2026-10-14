@@ -1,3 +1,20 @@
+## October 14 — Modern Strategy across all reachable popups (INTEGRATED)
+
+Player code `79438388143e4ef23bb627141f0b923f9ac4fb3b` completes the full popup
+and subpage redesign. Cool Night/Daylight surfaces, coral action hierarchy,
+readable sans typography, fewer redundant destinations, inline detail and bounded
+scrolling replace the old dense presentation. All families completed reciprocal
+agent critique, revision and visual recheck. The current game checkout and remote
+main match; the archived OneDrive copy was not used for new game code.
+
+Final merged checks pass 33 focused tests and Home/Economy probes with 115
+captures. Native confirmations, command/battle, border, travel and small overlays
+also pass their focused review. Game rules, action handlers and save schema remain
+unchanged. The known baseline Great Works ceremony narration assertion remains
+outside this design task; focused UI checks pass. No running user session was
+interrupted. Full coverage, exclusions and evidence are in
+`docs/design/POPUP_REDESIGN.md` and `docs/INTEGRATION_STATUS.md`.
+
 ## October 11 — Stable daily border popup (INTEGRATED)
 
 Source `54951c19`, branch `codex/stable-border-popup`, is combined with main

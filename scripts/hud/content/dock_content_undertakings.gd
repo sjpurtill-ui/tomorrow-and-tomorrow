@@ -80,6 +80,7 @@ func _local(id:String)->Dictionary:
 		elif status=="functioning":
 			row["bar"]={"ratio":float(item.get("condition",1.0)),"color":Tokens.GREEN,"tip":"Its repair: its gifts act at this."}
 			row["value"]="%d%%" % roundi(float(item.get("condition",1.0))*100.0)
+			row["value_note"]="condition"
 		var effects:Array=[]
 		for line:Dictionary in _impact(item,site):
 			# The same for every work: told in the row's tooltip, not on it.
@@ -148,7 +149,7 @@ func _next_works()->Array:
 		rows.append({"section":"next","key":"idea_"+String(concept.get("token","")),"texture":preload("res://scripts/resource_icons.gd").great_work_texture(String(concept.get("shape","")),"building",48),
 			"name":String(concept.get("name","A great work")),"sub":_purpose_words(String(concept.get("title",""))),
 			"bar":{"ratio":stands,"color":Tokens.GREEN if stands>=0.75 else (Tokens.AMBER if stands>=0.5 else Tokens.RED),"tip":"The engine's odds today: a triumph %d%%, it stands %d%%, flawed %d%%, it falls %d%%." % [roundi(float(o.triumph)*100.0),roundi(float(o.success)*100.0),roundi(float(o.flawed)*100.0),roundi(float(o.collapse)*100.0)]},
-			"value":"%d%% stands" % roundi(stands*100.0),"value_width":84,"tag":{"text":ambition.capitalize(),"tone":"note"},
+			"value":"%d%%" % roundi(stands*100.0),"value_note":"chance to stand","value_width":84,"tag":{"text":ambition.capitalize(),"tone":"note"},
 			"effects":[{"label":"Takes","value":preload("res://scripts/hud/production_plain.gd").span_text(days) if days>0.0 else "unknown","tone":"plain","tip":"At today's builders."}],
 			"needs":needs,"detail":"%s
 %s" % [String(concept.get("effect_text","")),String(assessed.get("spoken",""))],

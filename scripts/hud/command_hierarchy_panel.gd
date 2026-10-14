@@ -29,7 +29,7 @@ const EraWords=preload("res://scripts/hud/era_words.gd")
 const Board=preload("res://scripts/hud/recruit_deploy_board.gd")
 const Strips=preload("res://scripts/hud/force_strips.gd")
 const PICK_RADIUS_PX:=26.0
-const PANEL_WIDTH:=452.0
+const PANEL_WIDTH:=520.0
 const PANEL_TOP:=T.CONTENT_TOP
 ## The orders as the grid shows them: the verb, its icon and a short label.
 const VERB_FACES:=[["attack","attack","Attack"],["siege","besiege","Besiege"],["raid","raid","Raid"],["defend","defend","Defend"],["guard","guard","Guard"],
@@ -129,7 +129,7 @@ func _ready()->void:
 	var title:=_label(heading,"Army command" if domain=="army" else "Fleet command" if domain=="navy" else "Air force command",22)
 	title.add_theme_font_override("font",T.font("ui_strong"))
 	title.autowrap_mode=TextServer.AUTOWRAP_OFF;title.clip_text=true;title.tooltip_text=_subtitle();title.mouse_filter=Control.MOUSE_FILTER_PASS
-	var close:=_button(heading,"×",queue_free);close.custom_minimum_size=Vector2(36,36);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;close.tooltip_text="Close · Escape"
+	var close:=_button(heading,"×",queue_free);close.custom_minimum_size=Vector2(40,40);close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;close.tooltip_text="Close · Escape"
 	tabs=TabContainer.new();tabs.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(tabs)
 	if domain=="army":
 		var plain:=VBoxContainer.new();plain.name="Orders";plain.add_theme_constant_override("separation",8);tabs.add_child(plain)
@@ -886,7 +886,7 @@ func _install_command_theme()->void:
 		theme.set_stylebox("panel",type,T.flat(T.DOCK_BG,Color.TRANSPARENT,0,0,6))
 		for state:String in ["tab_selected","tab_unselected","tab_hovered"]:
 			var tab:=T.flat(T.DOCK_BG if state=="tab_selected" else Color.TRANSPARENT,T.GOLD if state=="tab_selected" else T.BORDER_SOFT,0,0,10)
-			tab.content_margin_top=6;tab.content_margin_bottom=6
+			tab.content_margin_top=11;tab.content_margin_bottom=11
 			if state=="tab_selected":tab.border_width_bottom=2;tab.border_color=T.GOLD
 			theme.set_stylebox(state,type,tab)
 	for state:String in ["title_button_normal","title_button_hover","title_button_pressed"]:theme.set_stylebox(state,"Tree",T.flat(T.TILE_BG,T.BORDER_SOFT,1,2,6))
@@ -944,7 +944,7 @@ func _update_preparation()->void:
 func _label(parent:Node,text:String,size:int=15)->Label:
 	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",maxi(14,size));result.add_theme_color_override("font_color",T.INK);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
-	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.focus_mode=Control.FOCUS_ALL
+	var result:=Button.new();result.text=text;result.custom_minimum_size.y=40;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.focus_mode=Control.FOCUS_ALL
 	T.apply_button_style(result,false);result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.button_pressed_style());result.add_theme_stylebox_override("hover_pressed",T.button_pressed_style());result.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:result.add_theme_color_override(state,T.INK)
 	result.add_theme_color_override("font_disabled_color",T.DISABLED)
