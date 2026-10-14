@@ -148,7 +148,7 @@ static func tell_started(stage_index:int,by:String)->Dictionary:
 	var daily:float=mc.settlement_defense_daily_work(stage_index)
 	# Those of the watch at home raise them, not its bands away.
 	var hands:=int(mc.watch_at_home())
-	var pace:=("%d on the watch raise them in %s." % [hands,preload("res://scripts/hud/production_plain.gd").duration_text(float(stage.work)/daily)]) if daily>0.0 else "Nobody keeps the watch yet, so no one works on them."
+	var pace:=("%d set to keep watch raise them in %s." % [hands,preload("res://scripts/hud/production_plain.gd").duration_text(float(stage.work)/daily)]) if daily>0.0 else "Nobody is set to keep watch, so no one works on them."
 	var who:String={"people":"The people judged the danger worth it.","ruler":"At your word.","court":"At your word in the court."}.get(by,"")
 	return chronicle.record({"key":"defense_start:%d:%d" % [stage_index,int(WorldSimulation.state.elapsed_days)],"title":"Work begins on the %s" % name,
 		"text":("%s set aside. %s %s" % [_and(parts),pace,who]).strip_edges(),"kind":"work","tier":"notice","domain":"security",
@@ -210,7 +210,7 @@ static func reading(people_plan:Dictionary={})->Dictionary:
 		out.building={"index":int(building.stage),"short":String(building.get("short","")),"progress":float(building.progress),"days_left":float(building.get("days_left",-1.0)),"daily":float(building.get("daily_work",0.0)),"started_by":String(building.get("started_by",""))}
 		if float(building.get("daily_work",0.0))<=0.0:
 			out.status="stalled"
-			out.blockers.append({"kind":"watch","text":"Nobody on the watch","have":0,"need":1})
+			out.blockers.append({"kind":"watch","text":"Nobody set to keep watch","have":0,"need":1})
 		return out
 	if next_index>=stages.size():
 		out.status="complete"
@@ -240,9 +240,9 @@ static func reading(people_plan:Dictionary={})->Dictionary:
 		var need:=float(out.next.materials[material])*(float(_controller().DEFENSE_SPARE) if spare else 1.0)
 		if have+0.0001<need:out.blockers.append({"kind":"material","resource":material,"text":"%s %s of %s" % [_material_name(material),_count(have),_count(need)],"have":have,"need":need})
 	if int(out.workers)<=0:
-		out.blockers.append({"kind":"watch","text":"Nobody on the watch","have":0,"need":1})
+		out.blockers.append({"kind":"watch","text":"Nobody set to keep watch","have":0,"need":1})
 	elif spare and float(decision.days)>float(_controller().DEFENSE_MAX_DAYS):
-		out.blockers.append({"kind":"slow","text":"%d on the watch: %s" % [int(out.workers),preload("res://scripts/hud/production_plain.gd").span_text(float(decision.days))],"have":float(_controller().DEFENSE_MAX_DAYS),"need":float(decision.days)})
+		out.blockers.append({"kind":"slow","text":"%d set to keep watch: %s" % [int(out.workers),preload("res://scripts/hud/production_plain.gd").span_text(float(decision.days))],"have":float(_controller().DEFENSE_MAX_DAYS),"need":float(decision.days)})
 	if (out.blockers as Array).is_empty():
 		# Nothing the rule names stands in the way: it starts at the next check
 		# (the god's word: tomorrow; the people: their council).

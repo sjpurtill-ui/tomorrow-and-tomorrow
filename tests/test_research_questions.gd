@@ -135,67 +135,42 @@ func test_every_lane_names_its_field_in_full()->void:
 	for width:int in [1120,600]:
 		var board:=_board(records,width)
 		for i in 5:await get_tree().process_frame
-		var cards:Array=board.find_children("Question_*","",true,false)
-		assert_int(cards.size()).is_equal(records.size())
-		for lane:Control in board.find_children("Lane_*","",true,false):
-			var label:Label=lane.find_child("FieldLabel",true,false)
-			assert_object(label).is_not_null()
-			assert_str(label.text.strip_edges()).is_not_empty()
-			var needed:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
-			assert_float(label.size.x+1.0).is_greater_equal(needed)
-			assert_int(label.get_theme_font_size("font_size")).is_greater_equal(12)
+		# One table line per question, in the shared table (dense_blocks.gd).
+		var table:Node=board.find_child("Fields",true,false)
+		assert_object(table).is_not_null()
+		var rows:Array=table.find_children("Row_*","",false,false)
+		assert_int(rows.size()).is_equal(records.size())
+		for row:Control in rows:
+			assert_float(row.get_global_rect().end.x).is_less_equal(float(width)+1.0)
+			# Field names are never cut; a long question name wraps.
+			var field:Label=row.find_child("Cell_field",true,false)
+			if field.text!="":
+				var needed:=field.get_theme_font("font").get_string_size(field.text,HORIZONTAL_ALIGNMENT_LEFT,-1,field.get_theme_font_size("font_size")).x
+				assert_float(field.size.x+1.0).is_greater_equal(needed)
+			assert_int((row.find_child("Cell_question",true,false) as Label).autowrap_mode).is_equal(TextServer.AUTOWRAP_WORD_SMART)
 
-func test_cards_are_one_size_and_fit_the_board()->void:
-	# The dock is never narrower than about 600 (Folio.page_width at 1280 wide).
-	for width:int in [1120,600]:
-		var board:=_board(_records(),width)
-		for i in 5:await get_tree().process_frame
-		var cards:Array=board.find_children("Question_*","",true,false)
-		assert_int(cards.size()).is_equal(5)
-		for card:Control in cards:
-			# Each question is one line of the table; a long name wraps rather than being cut.
-			if width>=1120:assert_float(card.size.y).is_equal_approx(Board.CARD_HEIGHT,1.0)
-			else:assert_float(card.size.y).is_less_equal(Board.CARD_HEIGHT*3.2)
-			assert_float(card.get_global_rect().end.x).is_less_equal(float(width)+1.0)
-
-func test_cards_hold_still_while_the_evidence_builds()->void:
+func test_the_table_follows_the_evidence()->void:
 	var records:=_records()
-	var block:={"fields":[],"investigations":records,"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass}
-	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(900,2000);add_child(viewport)
-	var board=Board.new();viewport.add_child(board)
-	board.setup(block);board.position=Vector2.ZERO;board.size=Vector2(900,0)
-	for i in 4:await get_tree().process_frame
-	var places:={}
-	for card:Control in board.find_children("Question_*","",true,false):places[card.name]=[card,card.global_position,card.size]
-	# A day's evidence, people and clocks: the same cards, in the same places.
+	var block:={"fields":[],"investigations":records}
+	var before:=Board.table_block(block,Board.lanes_of(block))
 	var next:Array=[]
 	for record:Dictionary in records:
-		var day:=record.duplicate();day["progress"]=minf(1.0,float(record.progress)+0.31);day["research_workforce"]=7.5;day["estimated_days"]=40;day["bottleneck"]="VALIDATION — repeated"
+		var day:=record.duplicate();day["progress"]=minf(1.0,float(record.progress)+0.31);day["estimated_days"]=40
 		next.append(day)
-	var later:=block.duplicate();later["investigations"]=next
-	assert_bool(board.update_block(later)).is_true()
-	for i in 4:await get_tree().process_frame
-	for name:String in places:
-		var card:Control=board.find_child(name,true,false)
-		assert_object(card).is_same(places[name][0])
-		assert_vector(card.global_position).is_equal(places[name][1])
-		assert_vector(card.size).is_equal(places[name][2])
-	# A new question on the same line takes the same card.
-	next[0]["channels"]=["production::Craft capacity"]
-	var swapped:Array=next.duplicate(true)
-	swapped[0]["id"]="pottery_kiln_test";swapped[0]["name"]="A new question"
-	var lanes_before:=Board.lanes_of({"investigations":next,"fields":[]})
-	var lanes_after:=Board.lanes_of({"investigations":swapped,"fields":[]})
-	assert_array(Board._plan({"investigations":swapped,"fields":[]}).shape).is_equal(Board._plan({"investigations":next,"fields":[]}).shape)
-	assert_int(lanes_before.size()).is_equal(lanes_after.size())
+	var later:={"fields":[],"investigations":next}
+	var after:=Board.table_block(later,Board.lanes_of(later))
+	# The same lines, in the same order, with the day's evidence.
+	assert_int((after.rows as Array).size()).is_equal((before.rows as Array).size())
+	for index in (after.rows as Array).size():
+		assert_str(String(after.rows[index].cells.question).get_slice(" · ",0)).is_equal(String(before.rows[index].cells.question).get_slice(" · ",0))
+	assert_str(String(after.rows[0].cells.time)).is_equal("40 days")
 
-func test_a_holdup_is_named_on_its_card_and_explained_on_hover()->void:
-	var board:=_board(_records(),1120)
-	for i in 3:await get_tree().process_frame
+func test_a_holdup_is_named_on_its_line_and_explained_on_hover()->void:
+	var block:={"fields":[],"investigations":_records()}
+	var rows:Array=Board.table_block(block,Board.lanes_of(block)).rows
 	var sentence:=preload("res://scripts/hud/research_visuals.gd").plain_bottleneck(WORKFORCE)
 	var named:=0
-	for label:Node in board.find_children("Holdup","Label",true,false):
-		if (label as Label).text.to_lower().begins_with("thin team"):named+=1
+	for row:Dictionary in rows:
+		if String(row.cells.question).ends_with(" · thin team"):named+=1
+		if not String(row.cells.question).begins_with("Turbidity"):assert_str(String(row.tip)).contains(sentence.left(1).to_lower()+sentence.substr(1))
 	assert_int(named).is_equal(4)
-	for card:Control in board.find_children("Question_*","",true,false):
-		if card.name!="Question_turbidity_judging":assert_str(card.tooltip_text).contains(sentence.left(1).to_lower()+sentence.substr(1))

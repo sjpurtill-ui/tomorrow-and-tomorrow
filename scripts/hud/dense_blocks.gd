@@ -8,17 +8,19 @@ extends RefCounted
 ##         an optional thin bar, an optional verb beside the figure), flowing
 ##         into 1-3 columns as the page widens:
 ##   {type:"fact_grid", heading?, min_column? (px, 300), items:[{label,
-##    value, tone?, icon?: Texture2D, bar? (0..1), tip?, on_click?,
+##    value, tone?, icon?: Texture2D, bar? (0..1), tip?, on_click?, wrap?,
 ##    button?:{label, on_press, tip?, disabled?}}]}
 ##
 ## table   one line per item, columns aligned, the distinguishing fact first,
 ##         status as a small coloured tag, a verb button on the row:
 ##   {type:"table", heading?, note?, empty?: "one small line when no rows",
-##    columns:[{key, label, width? (px), align? ("left"|"right")}],
+##    head?: false (continue a table split around an opened row),
+##    columns:[{key, label, width? (px), align? ("left"|"right"), wrap?}],
 ##    rows:[{cells:{key:String}, icon?: Texture2D, group?: String (a group
 ##           header line is drawn when it changes), tag?:{text, tone},
 ##           bar?:{value 0..1, tone?}, button?:{label, on_press, tip?,
-##           disabled?}, tip?, on_click?: Callable, tone?}]}
+##           disabled?}, buttons?:[button, ...], tip?, on_click?: Callable,
+##           tone?}]}
 ## costs   what a work needs against what is in store, one line, each good
 ##         an icon, "have / need" in green or red and five pips; the button
 ##         that starts it beside the cost:
@@ -110,7 +112,10 @@ static func _fact(item:Dictionary)->Control:
 		var mark:=TextureRect.new();mark.texture=icon;mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
 	var label:=T.make_label(String(item.get("label","")),13,T.BODY);label.name="Label"
-	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	# "wrap":true breaks a long name onto a second line instead of cutting it.
+	if bool(item.get("wrap",false)):label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.custom_minimum_size.x=60
+	else:label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(label)
 	if item.has("bar"):
 		var bar:=ProgressBar.new();bar.name="Bar";bar.show_percentage=false;bar.min_value=0.0;bar.max_value=1.0;bar.value=clampf(float(item.bar),0.0,1.0)
@@ -145,10 +150,12 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 		var empty:=String(block.get("empty",""))
 		if empty!="":list.add_child(T.make_label(empty,12,T.INK_MUTED))
 		return list
-	var head:=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
-	var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=18;head.add_child(icon_gap)
-	for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
-	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
+	# "head":false continues a table split around an opened row (no second header).
+	if bool(block.get("head",true)):
+		var head:=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
+		var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=18;head.add_child(icon_gap)
+		for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
+		var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
 	var group:=""
 	var index:=0
 	for row:Dictionary in rows:
@@ -164,7 +171,10 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 
 static func _cell(text:String,column:Dictionary,font_size:int,ink:Color,head:=false)->Label:
 	var label:=T.make_label(text,font_size,ink);label.name="Cell_"+String(column.get("key","")).validate_node_name()
-	label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	# A column marked wrap breaks a long name onto a second line instead of cutting it.
+	if bool(column.get("wrap",false)) and not head:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.custom_minimum_size.x=60
+	else:label.clip_text=true;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	if head:label.add_theme_font_override("font",T.font("ui_strong"))
 	var width:=float(column.get("width",0.0))
@@ -192,11 +202,25 @@ static func _row(row:Dictionary,columns:Array)->PanelContainer:
 		if first:label.add_theme_font_override("font",T.font("ui_strong"))
 		line.add_child(label);first=false
 	var bar:Dictionary=row.get("bar",{}) if row.get("bar") is Dictionary else {}
-	if not bar.is_empty():line.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
+	if not bar.is_empty():
+		# A blank bar keeps the column's width on a row that has none, so columns stay aligned.
+		if bool(bar.get("blank",false)):
+			var gap:=Control.new();gap.custom_minimum_size.x=56.0;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(gap)
+		else:line.add_child(_bar(float(bar.get("value",0.0)),String(bar.get("tone",""))))
 	var state:Dictionary=row.get("tag",{}) if row.get("tag") is Dictionary else {}
 	if not state.is_empty():line.add_child(tag(String(state.get("text","")),String(state.get("tone",""))))
 	var button:Dictionary=row.get("button",{}) if row.get("button") is Dictionary else {}
 	if not button.is_empty():line.add_child(verb(String(button.get("label","")),button.get("on_press"),String(button.get("tip","")),bool(button.get("disabled",false))))
+	# Several verbs on one row (− and + beside a share).
+	for more:Variant in row.get("buttons",[]):
+		var spec:Dictionary=more if more is Dictionary else {}
+		if spec.is_empty() or bool(spec.get("blank",false)):
+			# A blank verb holds its place so the columns before it line up.
+			var gap:=Control.new();gap.custom_minimum_size.x=float(spec.get("width",26.0));gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(gap)
+		else:
+			var go:=verb(String(spec.get("label","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("disabled",false)))
+			if spec.has("width"):go.custom_minimum_size.x=float(spec.width)
+			line.add_child(go)
 	var click:Variant=row.get("on_click")
 	if click is Callable and (click as Callable).is_valid():
 		panel.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND

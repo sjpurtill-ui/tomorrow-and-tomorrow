@@ -11,7 +11,6 @@ const DOMAIN_COLORS:Dictionary={
 }
 
 const ResourceIcons:=preload("res://scripts/resource_icons.gd")
-const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const ArtifactCulture:=preload("res://scripts/artifact_culture.gd")
 const Explainer:=preload("res://scripts/effect_explainer.gd")
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
@@ -42,18 +41,12 @@ const DOMAIN_GOALS:Dictionary={
 	"culture":"Aims at cohesion and the spread of new practices — how fast change takes hold.",
 }
 
-# Discovery ids and domain ids the player has clicked open; everything else
-# stays collapsed so the established record scales to hundreds of findings.
+## The field shown on the knowledge tree.
 var tree_domain:String="nutrition"
 ## The question chosen on the knowledge tree ("" follows the field's first under way).
 var tree_selected:=""
-var expanded_discoveries:Dictionary={}
+## Fields opened on What we know.
 var expanded_domains:Dictionary={}
-## Knowledge-tree questions opened to show what they would do.
-var expanded_tech:Dictionary={}
-## Effect rows and field groups opened in the impact ledgers (impact_ledger.gd
-## toggles these itself, so opening one never rebuilds the page).
-var effect_state:Dictionary={}
 
 func meta()->Dictionary:
 	return {
@@ -67,268 +60,22 @@ func tab(sub:int)->Dictionary:
 	# repeated from the top bar or from another tab.
 	match sub:
 		1: return {"kpis":[],"blocks":[_tree_block()]}
-		2: return {"kpis":[],"blocks":[_known_block()]}
+		2:
+			# Capture only: "--capture-open=<field>" opens that field on What we know.
+			for argument:String in OS.get_cmdline_user_args():
+				if argument.begins_with("--capture-open=") and not has_meta("captured"):set_meta("captured",true);expanded_domains[argument.trim_prefix("--capture-open=")]=true
+			return _known_page()
 	var investigations:Array=DiscoverySystem.active_investigation_records()
-	return {"kpis":[],"blocks":[_discovery_board(investigations)]}
-
-func _attention_blocks()->Array:
-	var latest:=_latest_discovery_block()
-	var items:Array=[]
-	var allocations:Dictionary=GameState.research_allocations
-	var observers:=maxi(0,int(GameState.population_allocations.get("Knowledge",0)))
-	var total_weight:=ArtifactCulture.study_weight()
-	for value in allocations.values(): total_weight+=maxi(0,int(value))
-	var domains:Array=allocations.keys()
-	domains.sort_custom(func(a,b)->bool: return int(allocations[b])<int(allocations[a]))
-	for domain in domains:
-		var id:=String(domain)
-		var weight:=maxi(0,int(allocations[id]))
-		var share:=float(weight)/maxf(1.0,float(total_weight))
-		items.append({
-			"name":id.capitalize(),"count":weight,
-			"pct":"%d%%" % roundi(share*100.0),
-			"color":DOMAIN_COLORS.get(id,Tokens.MUTED),
-			"tip":"%s\nWeight %d of %d — about %.1f observers follow this domain automatically." % [String(DOMAIN_GOALS.get(id,"")),weight,total_weight,share*float(observers)],
-			"on_minus":terrain._change_research_domain_allocation.bind(id,-1),
-			"on_plus":terrain._change_research_domain_allocation.bind(id,1),
-		})
-	items.append(_artifact_study_item(total_weight,observers))
-	var blocks:Array=[]
-	if not latest.is_empty(): blocks.append(latest)
-	blocks.append_array([
-		{"type":"alloc","heading":"ATTENTION BY DOMAIN","note":"weights · observers follow the shares","items":items},
-		{"type":"text","text":"Weights are shares, not people. Every observer is always working; raising a weight simply shifts more of them toward that domain."},
-	])
-	return blocks
-
-func _investigation_blocks(domain_filter:String="")->Array:
-	var records:Array=DiscoverySystem.active_investigation_records()
-	var items:Array=[]
-	var unlock_lines:Array[String]=[]
-	for record_variant in records:
-		var record:Dictionary=record_variant
-		if domain_filter!="" and String(record.get("dynamic",""))!=domain_filter:continue
-		var progress:=roundi(clampf(float(record.get("progress",0.0)),0.0,1.0)*100.0)
-		var domain:=String(record.get("dynamic",""))
-		var effects:Dictionary=record.get("effects",{})
-		# Plain words for the team, its clock and its step or holdup.
-		var bottleneck:=String(record.get("bottleneck",""))
-		var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":float(record.get("research_workforce",0.0))}}})
-		var clock:=Plain.clock(float(record.get("estimated_days",0.0)))
-		var team_line:=Plain.team(float(record.get("research_workforce",0.0)),int(record.get("teams_on",1)))+("; "+clock if not clock.is_empty() else "")+"."
-		items.append({
-			"name":String(record.get("name","Investigation")),
-			"sub":"%s · %s" % [Visuals.name_for(domain),phase if not phase.is_empty() else "under way"],
-			"detail":team_line+" "+Visuals.plain_bottleneck(bottleneck)+(" Would bring: %s." % Explainer.summary(effects) if not effects.is_empty() else "")+(" "+Borders.research_note(String(record.get("id",""))) if Borders.research_note(String(record.get("id","")))!="" else ""),
-			"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS.get(domain,Tokens.TEAL)),
-			"value":"%d%%" % progress,"value_color":DOMAIN_COLORS.get(domain,Tokens.TEAL),
-			"accent":DOMAIN_COLORS.get(domain,Tokens.TEAL),
-			# A young people's slow learning beside its clock (DiscoverySystem.founding_words).
-			"tip":"%s\n%s\n%s%s%s" % [String(DOMAIN_GOALS.get(domain,"")),String(record.get("project_goal","")),String(record.get("project_method","")),("\n\n"+String(record.founding_note)) if not String(record.get("founding_note","")).is_empty() else "","\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false) if not effects.is_empty() else ""],
-		})
-		if unlock_lines.size()<3:
-			# The line of inquiry, what it has seen, and what answering it would
-			# do in the game (the engine's own readings, at full use).
-			unlock_lines.append("%s → %s%s" % [String(record.get("subcategory","An open question")).capitalize(),String(record.get("observation","")),(" Would bring: %s." % Explainer.summary(effects)) if not effects.is_empty() else ""])
-	# A staffed line with nothing to study says why instead of looking empty.
-	for domain_variant in GameState.research_subcategory_allocations:
-		var domain:=String(domain_variant)
-		if domain_filter!="" and domain!=domain_filter:continue
-		var subs:Dictionary=GameState.research_subcategory_allocations[domain_variant]
-		var rows:Array=[]
-		for sub_variant in subs:
-			var sub:=String(sub_variant)
-			if int(subs[sub_variant])<=0 or String(GameState.active_investigations.get(DiscoverySystem._channel_key(domain,sub),""))!="":continue
-			if rows.is_empty():rows=DiscoverySystem.technology_tree(domain)
-			var reason:=DiscoverySystem.line_wait_reason(domain,sub,rows)
-			if reason=="":continue
-			items.append({"name":sub,"sub":"%s · waiting" % domain.capitalize(),"detail":reason,"icon":ResourceIcons.domain_texture(domain,Tokens.MUTED),"value":"—","value_color":Tokens.MUTED,"accent":Tokens.MUTED,"tip":reason})
-	if items.is_empty():
-		return [{"type":"text","heading":"CURRENT INVESTIGATIONS","text":"No viable investigation is running. Attention without supporting evidence waits; explore, work, and observe to create clues."}]
-	var blocks:Array=[{"type":"rows","heading":"CURRENT INVESTIGATIONS","note":"evidence","items":items}]
-	if not unlock_lines.is_empty():
-		blocks.append({"type":"text","heading":"WHAT COMPLETION UNLOCKS","text":"\n".join(unlock_lines)})
-	return blocks
-
-## What the people know, one entry per body of knowledge
-## (DiscoverySystem.established_knowledge_threads, a deep copy of its own
-## cache on every call): made again only when the discovery log moves, and a
-## logged discovery is never edited afterwards.
-func _threads()->Array:
-	return memo.take("threads",[Memo.log_identity(WorldSimulation.state.discovery_log)],func()->Array:return DiscoverySystem.established_knowledge_threads())
-
-func _established_blocks()->Array:
-	var log:Array=_threads()
-	var blocks:Array=[_knowledge_acts_block()]
-	if log.is_empty():
-		blocks.append({"type":"text","heading":"ESTABLISHED KNOWLEDGE","text":"Nothing has yet been tried, used and remembered long enough to count as known."})
-		return blocks
-	# Group by domain, newest finding first inside each group. Domains collapse
-	# to one aggregate row so fifty findings read as a dozen lines; an opened
-	# finding is followed by its effects, one row each.
-	var by_domain:Dictionary={}
-	var domain_order:Array[String]=[]
-	for index in log.size():
-		var event:Dictionary=log[index]
-		var domain:=String(event.get("dynamic",""))
-		if not by_domain.has(domain):
-			by_domain[domain]=[]
-			domain_order.append(domain)
-		(by_domain[domain] as Array).append(event)
-	var items:Array=[]
-	var rows_block:Dictionary={"type":"rows","heading":"ESTABLISHED KNOWLEDGE","note":"%d things known, in %d fields" % [log.size(),domain_order.size()]}
-	for domain in domain_order:
-		var events:Array=by_domain[domain]
-		var accent:Color=DOMAIN_COLORS.get(domain,Tokens.GREEN)
-		var domain_open:bool=expanded_domains.has(domain)
-		items.append({
-			"name":Visuals.name_for(domain),
-			"sub":"%d thing%s known · latest %s" % [events.size(),"" if events.size()==1 else "s",EraWords.ago(int((events[0] as Dictionary).get("day",0)))],
-			"detail":_domain_aggregate_text(domain),
-			"icon":ResourceIcons.domain_texture(domain,accent),
-			"value":"Hide" if domain_open else "Show","value_color":Tokens.MUTED,
-			"accent":accent,
-			"on_click":_toggle_domain.bind(domain),
-			"tip":"Click to %s this domain's findings." % ("collapse" if domain_open else "list"),
-		})
-		if not domain_open: continue
-		for event_variant in events:
-			var event:Dictionary=event_variant
-			var entry_key:=String(event.get("id","%s_%d" % [String(event.get("name","")),int(event.get("day",0))]))
-			var expanded:bool=expanded_discoveries.has(entry_key)
-			var description:=String(event.get("description",event.get("observation","")))
-			var id:=String(event.get("id",""))
-			var effects:Dictionary=DiscoverySystem.discovery_definition(id).get("effects",event.get("effects",{}))
-			var detail_lines:Array[String]=[]
-			if expanded and description!="": detail_lines.append(description)
-			detail_lines.append(_known_summary(id,effects))
-			items.append({
-				"name":"    %s" % String(event.get("name","Discovery")),
-				"sub":"    "+String(event.get("record_summary","Discovered once")),
-				"detail":"\n".join(detail_lines),
-				"value":"Less" if expanded else "More","value_color":Tokens.MUTED,
-				"accent":Color(accent,0.35),
-				"on_click":_toggle_discovery.bind(entry_key),
-				"tip":"Click to %s the full account and what each of its effects does." % ("collapse" if expanded else "read"),
-			})
-			if expanded and not effects.is_empty():
-				# The finding's effects, one row each, right under it.
-				rows_block["items"]=items
-				blocks.append(rows_block)
-				blocks.append({"type":"impact","state":effect_state,"rows":Explainer.discovery_rows(id,true),
-					"intro":"What %s does now. Open an effect to see everywhere it acts." % String(event.get("name","this finding"))})
-				items=[]
-				rows_block={"type":"rows"}
-	if not items.is_empty():
-		rows_block["items"]=items
-		blocks.append(rows_block)
-	return blocks
-
-## "Where your knowledge acts": every effect total the people's knowledge adds
-## up to now, as the engine holds it, grouped by field; nothing-reads-it keys last.
-func _knowledge_acts_block()->Dictionary:
-	var by_line:Dictionary={}
-	var inert:Array=[]
-	for row:Dictionary in Explainer.total_rows():
-		if bool(row.inert): inert.append(row)
-		else: (by_line.get_or_add(String(row.line),[]) as Array).append(row)
-	var groups:Array=[]
-	for domain:String in DOMAIN_COLORS:
-		if not by_line.has(domain): continue
-		var rows:Array=by_line[domain]
-		groups.append({"id":domain,"title":Visuals.name_for(domain),"summary":_rows_summary(rows),"count":"%d effect%s" % [rows.size(),"" if rows.size()==1 else "s"],"accent":Visuals.color(domain),"rows":rows})
-	if not inert.is_empty():
-		groups.append({"id":"inert","title":"Known, but nothing uses it yet","summary":"These effects are part of what the people know, but nothing in the simulation reads them, so they change nothing.","count":"%d" % inert.size(),"accent":Tokens.BORDER,"rows":inert})
-	return {"type":"impact","heading":"WHERE YOUR KNOWLEDGE ACTS","note":"totals now, as the engine counts them","state":effect_state,"groups":groups,
-		"intro":"Everything the people know adds up here: each practice counts in proportion to how widely it is used, and each total is held under what the year allows: a limit for each effect that rises as the years pass and the people learn. The capacities named are the twelve on Culture › Society's strengths; each also counts toward the people's next scale in its field. Open a field, then an effect, to see everywhere it acts.",
-		"empty":"Nothing the people know acts on the world yet."}
-
-## "Protection from sickness +5.3% · Diet quality +1.1% · 3 more".
-static func _rows_summary(rows:Array,limit:int=3)->String:
-	var parts:Array[String]=[]
-	for index in mini(limit,rows.size()):
-		var row:Dictionary=rows[index]
-		parts.append("%s %s" % [String(row.label),String(row.amount)])
-	if rows.size()>limit: parts.append("%d more" % (rows.size()-limit))
-	return " · ".join(parts)
-
-## A known finding in one line: what it adds now, and how widely it is used.
-func _known_summary(id:String,effects:Dictionary)->String:
-	# What it changes on the map itself, when it does (nation_borders.gd).
-	var map_note:=Borders.research_note(id)
-	if effects.is_empty(): return map_note if map_note!="" else "Changes nothing by itself; it opens the way to later knowledge."
-	var usage:=Explainer.usage_words(id)
-	return "Does: %s. %s. Open it to see each effect.%s" % [Explainer.summary(effects),usage.left(1).to_upper()+usage.substr(1)," "+map_note if map_note!="" else ""]
-
-## What a field's known practices add now, before the age's limits.
-func _domain_aggregate_text(domain:String)->String:
-	var totals:=Explainer.field_totals(domain)
-	if totals.is_empty():
-		return "Changes nothing by itself; it opens the way to later knowledge."
-	var effect_ids:Array=totals.keys()
-	effect_ids.sort_custom(func(a,b)->bool: return absf(float(totals[b]))<absf(float(totals[a])))
-	var parts:Array[String]=[]
-	for effect_id in effect_ids.slice(0,4):
-		parts.append("%s %s" % [Explainer.label(String(effect_id)),Explainer.percent(float(totals[effect_id]))])
-	var text:="Adds now: "+", ".join(parts)
-	if effect_ids.size()>4: text+=" and %d more" % (effect_ids.size()-4)
-	return text+"."
-
-## The field's contributions as ledger rows: what counts now. Where
-## everything known about an effect adds up past the limit the year sets
-## (effect_explainer.totals), each field's part is cut in the same measure,
-## so the bars add up to what the engine uses; the row says what was cut.
-func _field_rows(domain:String)->Array:
-	var totals:=Explainer.field_totals(domain)
-	var all:={}
-	for total:Dictionary in Explainer.totals():all[String(total.key)]=total
-	var rows:Array=[]
-	var counted:={}
-	for key:String in totals:
-		var whole:Dictionary=all.get(key,{})
-		var raw:=float(whole.get("raw",0.0))
-		var used:=float(whole.get("total",raw))-float(whole.get("upkeep",0.0))
-		var before:=float(totals[key])
-		var now:=before*used/raw if absf(raw)>absf(used)+0.000001 and absf(raw)>0.000001 else before
-		counted[key]=now
-		var row:=Explainer.ledger_row(key,now,1.0,1.0,"total")
-		row["id"]="field:%s:%s" % [domain,key]
-		row["usage"]="now, from this field's practices"
-		row["value"]=now
-		if absf(before-now)>0.0005:
-			(row.notes as Array).push_front("This field's practices add up to %s; %s of it counts now, the rest waits on the year's limit." % [Explainer.percent(before),Explainer.percent(now)])
-		rows.append(row)
-	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return absf(float(counted[a.key]))>absf(float(counted[b.key])))
-	return rows
+	var board:=_discovery_board(investigations)
+	return {"kpis":preload("res://scripts/hud/inquiry_board.gd").figures(board.pace),"blocks":[board]}
 
 func _toggle_domain(domain:String)->void:
 	if expanded_domains.has(domain): expanded_domains.erase(domain)
 	else: expanded_domains[domain]=true
 	hud.request_immediate_dock_refresh()
 
-func _toggle_discovery(entry_key:String)->void:
-	if expanded_discoveries.has(entry_key): expanded_discoveries.erase(entry_key)
-	else: expanded_discoveries[entry_key]=true
-	hud.request_immediate_dock_refresh()
-
-func _toggle_tech(id:String)->void:
-	if expanded_tech.has(id): expanded_tech.erase(id)
-	else: expanded_tech[id]=true
-	hud.request_immediate_dock_refresh()
-
-## Each effect of a finding on its own line: its size, what it adds now (known)
-## or at full use (not yet), and the first thing it moves in the game.
-func _established_effect_text(event:Dictionary)->String:
-	var id:=String(event.get("id",""))
-	var effects:Dictionary=event.get("effects",{})
-	if effects.is_empty():
-		effects=DiscoverySystem.discovery_definition(id).get("effects",{})
-	var known:=id in GameState.known_discoveries
-	var definition:=DiscoverySystem.discovery_definition(id)
-	return Explainer.effect_lines(effects,Explainer.practice_level(id) if known else 1.0,Explainer.focus_scale(String(definition.get("dynamic",""))) if known else 1.0,known,Explainer.usage_words(id) if known else "")
-
 func signature()->Array:
-	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_discoveries.duplicate(),expanded_domains.duplicate(),expanded_tech.duplicate(),GovernmentPeopleSystem.revision]
+	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),expanded_domains.duplicate(),GovernmentPeopleSystem.revision]
 
 ## The knowledge tree as lanes in the dock (knowledge_tree_board.gd): the
 ## chosen field's lines of study, what is known, under way, open and waiting
@@ -375,16 +122,19 @@ func _known_by_field()->Dictionary:
 		if String(row.get("status",""))=="DISCOVERED":counts[String(row.dynamic)]=int(counts.get(String(row.dynamic),0))+1
 	return counts
 
-## What we know (known_board.gd): known against every question, what was
-## learned this year and the newest finding; then each field's count, what
-## its knowledge adds now (the engine's totals) and, opened, every effect and
-## its findings newest first.
-func _known_block()->Dictionary:
+## What we know, on the game's shared blocks (dense_blocks.gd): the dock's
+## strip (known against every question, learned in ten years, open to a team
+## now); one table line per field with what its knowledge adds now (the
+## engine's totals) and how much of it is known; each opened field beneath in
+## a frame: every effect it adds and its findings, newest first.
+func _known_page()->Dictionary:
 	var rows:=_all_rows()
 	var total_by:Dictionary={}
 	var findings_by:Dictionary={}
 	var known:=0
+	var open_now:=0
 	for row:Dictionary in rows:
+		if String(row.get("status",""))=="AVAILABLE":open_now+=1
 		var domain:=String(row.get("dynamic",""))
 		total_by[domain]=int(total_by.get(domain,0))+1
 		if String(row.get("status",""))!="DISCOVERED":continue
@@ -402,7 +152,10 @@ func _known_block()->Dictionary:
 	var this_year:=0
 	var newest:Dictionary={}
 	var newest_day:=-1
-	var fields:Array=[]
+	var lines:Array=[]
+	var frames_by:Dictionary={}
+	var most:=1
+	for domain:String in DOMAIN_COLORS:most=maxi(most,int(total_by.get(domain,0)))
 	for domain:String in DOMAIN_COLORS:
 		var found:Array=findings_by.get(domain,[])
 		found.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(days.get(String(a.id),-1))>int(days.get(String(b.id),-1)))
@@ -410,20 +163,45 @@ func _known_block()->Dictionary:
 		for row:Dictionary in found:
 			var day:=int(days.get(String(row.id),-1))
 			if day>=0 and today-day<3650:this_year+=1
-			if day>newest_day:newest_day=day;newest=row
 			var effects:Dictionary=row.get("effects",{})
-			listed.append({"name":String(row.name),"tip":"%s\n%s%s" % [String(row.name),("Learned "+EraWords.ago(day)) if day>=0 else "Known since before we set out",("\nDoes: "+Explainer.summary(effects)) if not effects.is_empty() else "\nOpens later knowledge"]})
+			listed.append({"wrap":true,"label":String(row.name),"value":EraWords.ago(day) if day>=0 else "of old","tip":"%s\n%s" % [String(row.name),("Does: "+Explainer.summary(effects)) if not effects.is_empty() else "Opens later knowledge"]})
 		var effect_rows:Array=by_line.get(domain,[])
-		var parts:Array=[]
-		for row:Dictionary in effect_rows:parts.append("%s %s" % [String(row.label),String(row.amount)])
-		fields.append({"id":domain,"known":found.size(),"total":int(total_by.get(domain,0)),"adds":parts,"effects":effect_rows,"findings":listed,
-			"open":expanded_domains.has(domain),"on_toggle":_toggle_domain.bind(domain)})
-	var figures:Array=[
-		{"title":"KNOWN","value":EraWords.grouped(known),"note":"of %s questions in all" % EraWords.grouped(rows.size()),"ratio":float(known)/maxf(1.0,float(rows.size())),"tip":"Questions the people have answered, of every question there is to answer in all the fields."},
-		{"title":"LEARNED IN TEN YEARS","value":str(this_year),"note":"since year %d" % maxi(1,today/365+1-10),"tip":"Questions answered in the last ten years."},
-		{"title":"NEWEST","value":String(newest.get("name","None yet")),"note":EraWords.ago(newest_day) if newest_day>=0 else "","tip":"The question answered most recently.","stretch":1.6},
+		var parts:Array[String]=[]
+		for k in mini(1,effect_rows.size()):parts.append("%s %s" % [String(effect_rows[k].label),String(effect_rows[k].amount)])
+		var adds:=" · ".join(parts)+(" · %d more" % (effect_rows.size()-1) if effect_rows.size()>1 else "")
+		var open:=expanded_domains.has(domain)
+		var total:=int(total_by.get(domain,0))
+		lines.append({"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS[domain]),"cells":{"field":Visuals.name_for(domain),"adds":adds if adds!="" else "Nothing yet; it opens later knowledge","known":"%s of %s" % [EraWords.grouped(found.size()),EraWords.grouped(total)]},
+			"bar":{"value":float(found.size())/maxf(1.0,float(total))},"button":{"label":"Close" if open else "Open","on_press":_toggle_domain.bind(domain),"tip":"Every effect %s adds, and its findings" % Visuals.name_for(domain).to_lower()},
+			"tip":"\n".join(effect_rows.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))})
+		if not open:continue
+		var effects:Array=[]
+		for row:Dictionary in effect_rows:
+			var notes:Array[String]=[String(row.get("headline",""))]
+			for note:Variant in row.get("notes",[]):notes.append(String(note))
+			effects.append({"wrap":true,"label":String(row.label),"value":String(row.amount),"tone":String(row.get("tone","")) if String(row.get("tone","")) in ["good","bad"] else "","tip":"\n".join(notes).strip_edges()})
+		var inner:Array=[]
+		if not effects.is_empty():inner.append({"type":"fact_grid","heading":"What it adds now","min_column":240,"items":effects})
+		if not listed.is_empty():inner.append({"type":"fact_grid","heading":"Findings, newest first"+(" (the newest 36 of %d)" % listed.size() if listed.size()>36 else ""),"min_column":240,"items":listed.slice(0,36)})
+		frames_by[Visuals.name_for(domain)]=({"type":"frame","heading":Visuals.name_for(domain),"actions":[{"label":"Close","on_press":_toggle_domain.bind(domain)}],"blocks":inner})
+	# The table, split around each opened field so its frame sits under its line.
+	var columns:=[{"key":"field","label":"FIELD","width":140},{"key":"adds","label":"WHAT IT ADDS NOW","wrap":true},{"key":"known","label":"KNOWN","width":90,"align":"right"}]
+	var blocks:Array=[]
+	var run:Array=[]
+	for line:Dictionary in lines:
+		run.append(line)
+		if frames_by.has(String(line.cells.field)):
+			blocks.append({"type":"table","head":blocks.is_empty(),"columns":columns,"rows":run});run=[]
+			blocks.append(frames_by[String(line.cells.field)])
+	if not run.is_empty() or blocks.is_empty():blocks.append({"type":"table","head":blocks.is_empty(),"columns":columns,"rows":run})
+	if not inert.is_empty():
+		blocks.append({"type":"fact_grid","items":[{"label":"Known effects nothing uses yet","value":str(inert.size()),"tip":"Part of what the people know, but nothing in the world reads them yet:\n"+"\n".join(inert.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))}]})
+	var kpis:Array=[
+		{"label":"KNOWN","value":EraWords.grouped(known),"delta":"of %s questions" % EraWords.grouped(rows.size()),"glance":true,"meter":float(known)/maxf(1.0,float(rows.size())),"meter_color":Tokens.GOLD,"tip":"Questions the people have answered, of every question there is to answer in all the fields."},
+		{"label":"LEARNED IN TEN YEARS","value":str(this_year),"delta":"since year %d" % maxi(1,today/365+1-10),"glance":true,"tip":"Questions answered in the last ten years."},
+		{"label":"OPEN TO A TEAM","value":EraWords.grouped(open_now),"delta":"questions ready now","glance":true,"tip":"Questions whose foundations, clues and materials are all in hand: a free team can take any of them up (Knowledge tree)."},
 	]
-	return {"type":"known_board","figures":figures,"fields":fields,"inert":inert}
+	return {"kpis":kpis,"blocks":blocks}
 
 ## The chosen question's account: its state, what it does or would do, what
 ## it builds on and waits for, what it opens, and the order that puts a team on it.
@@ -459,12 +237,37 @@ func _tree_chosen(row:Dictionary,next:Dictionary)->Dictionary:
 	if not known and float(row.get("years_ahead",0.0))>=1.0:
 		var factor:=DiscoverySystem.research_early_factor(row)
 		chosen.facts.append(["Price","%s the usual work: it belongs to a later age" % preload("res://scripts/hud/inquiry_board.gd")._times(factor),"Dated %d years after the age our learning has reached. Work on it goes slower in proportion; as our learning catches up its price falls." % roundi(float(row.years_ahead))])
+	# Who leads its line, and how their skills set its pace (office_levers.research_pace).
+	if not known:
+		var assignment:Dictionary=DiscoverySystem.research_assignment(row)
+		var leader:Dictionary=assignment.get("leader",{}) if assignment.get("leader") is Dictionary else {}
+		if not leader.is_empty():
+			chosen.facts.append(["Led by",("Nobody: the office of %s is empty" % String(leader.get("requested_office",leader.get("office",""))).to_lower()) if bool(leader.get("vacant",false)) else "%s, %s" % [String(leader.get("name","")),String(leader.get("office","")).to_lower()],leader_line(leader)])
 	var opens:Array=row.get("leads_to",[])
 	if not opens.is_empty():chosen.facts.append(["Opens",", ".join(PackedStringArray(opens.slice(0,4)))+(" and %d more" % (opens.size()-4) if opens.size()>4 else "")])
 	if bool(row.get("ready",false)) and status!="RESEARCHING":
 		chosen.on_research=_research_technology.bind(id)
 		chosen.research_label="Put a team on it"
 	return chosen
+
+## The leader's own skills in what a line needs, and how much faster (or
+## slower) it goes under them than under an ordinary holder of the office
+## (office_levers.research_pace: the engine's own execution).
+static func leader_line(leader:Dictionary)->String:
+	var needs:Array=leader.get("skills",[])
+	var office:=String(leader.get("office",""))
+	if bool(leader.get("vacant",false)):
+		var empty:=preload("res://scripts/office_levers.gd").research_pace({},office,needs)
+		return "Needs %s. With nobody to lead it, it goes %d%% slower than under an ordinary %s." % [", ".join(PackedStringArray(needs)).to_lower(),roundi(absf(1.0-empty)*100.0),String(leader.get("requested_office",office)).to_lower()]
+	var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(leader.get("person_id",0)))
+	if person.is_empty():return "Needs %s." % ", ".join(PackedStringArray(needs)).to_lower()
+	var theirs:PackedStringArray=PackedStringArray()
+	for skill in needs:theirs.append("%s %d" % [String(skill).to_lower(),roundi(GovernmentPeopleSystem.skill_value(person,String(skill)))])
+	var pace:=preload("res://scripts/office_levers.gd").research_pace(person,office,needs)
+	var pct:=roundi(absf(pace-1.0)*100.0)
+	var given:=String(person.get("name","")).get_slice(" ",0)
+	var speed:="as fast as under an ordinary leader" if pct==0 else "%d%% %s than under an ordinary leader" % [pct,"faster" if pace>=1.0 else "slower"]
+	return "%s's %s: this line goes %s." % [given,", ".join(theirs),speed]
 
 func _choose_tree_question(id:String)->void:
 	tree_selected=id
@@ -480,83 +283,22 @@ func _research_technology(id:String)->void:
 	preload("res://scripts/order_tracker.gd").research_order(id,String(DiscoverySystem.discovery_definition(id).get("name",id.replace("_"," "))),result)
 	hud.request_immediate_dock_refresh()
 
-func _latest_discovery_block()->Dictionary:
-	for event in GameState.discovery_log:
-		var discovery:=DiscoverySystem.discovery_definition(String(event.get("id","")))
-		if discovery.is_empty() or bool(discovery.get("frontier",false)): continue
-		var next:Array[String]=[]
-		for candidate in DiscoverySystem.technology_catalog:
-			if String(discovery.id) in candidate.get("requires",[]): next.append(String(candidate.name))
-		var description:=String(discovery.get("observation",""))+"\n"+_established_effect_text(discovery)
-		if not next.is_empty(): description+="\nOpens %d further avenues of inquiry." % next.size()
-		return {"type":"text","heading":"DISCOVERED · "+String(discovery.name),"text":description}
-	return {}
-
 ## The knowledge tree is drawn in the dock (knowledge_tree_board.gd); no tab
 ## opens a screen of its own.
 func open_expanded_tab(_sub:int)->bool:
 	return false
 
 ## Shows a question on the knowledge tree: its field, with it chosen.
+## Opens the knowledge tree on a field (the War page's security practices).
+func open_domain(domain:String)->void:
+	tree_domain=domain
+	tree_selected=""
+	hud.open_dock("inquiry",1,false)
+
 func show_question(id:String)->void:
 	var domain:=String(DiscoverySystem.discovery_definition(id).get("dynamic",""))
 	if domain!="":tree_domain=domain
 	tree_selected=id
-
-func _open_report(title:String,reader:Callable)->void:
-	var report:=preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,"INQUIRY",reader,signature)
-	hud.open_detail(report)
-func open_domain(domain:String)->void:
-	_open_report(Visuals.name_for(domain),_domain_report.bind(domain))
-func _attention_overview()->Array:
-	return [{"type":"text","heading":"WHAT SHOULD WE UNDERSTAND BETTER?","text":"Choose a direction. Your people pursue the work; evidence, experience and established knowledge determine what becomes possible."},{"type":"actions","items":[focused_action("FOOD & LAND","Nutrition and the living landscape",_domain_group.bind(["nutrition","ecology"])),focused_action("PEOPLE & COMMUNITY","Growth, health and culture",_domain_group.bind(["demography","health","culture"])),focused_action("WORK & MAKING","Labor, production and construction",_domain_group.bind(["labor","production","infrastructure"])),focused_action("KNOWLEDGE & SOCIETY","Learning, institutions and security",_domain_group.bind(["knowledge","institutions","security","logistics"]))]},{"type":"actions","items":[focused_action("RESEARCH WORK","Your leader's labor priority",_research_work_report),focused_action("COMPARE ATTENTION","Advanced shares across all domains",func()->Dictionary:return {"blocks":_attention_blocks()})]}]
-func _domain_group(domains:Array)->Dictionary:
-	var items:Array=[]
-	for id:String in domains:items.append({"label":id.capitalize(),"sub":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"on_press":open_domain.bind(id)})
-	return {"blocks":[{"type":"actions","heading":"CHOOSE A DIRECTION","items":items}]}
-## A field's page, drawn (field_sheet.gd): its banner, its attention as a
-## dial and a dot per learner, what its knowledge does now as bars, and its
-## questions under way with what each would bring.
-func _domain_report(id:String)->Dictionary:
-	var weight:=int(GameState.research_allocations.get(id,0));var total:=ArtifactCulture.study_weight()
-	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
-	var share:=float(weight)/maxf(1,total)
-	var observers:=int(GameState.population_allocations.get("Knowledge",0))
-	var questions:Array=[]
-	for record:Dictionary in DiscoverySystem.active_investigation_records():
-		if String(record.get("dynamic",""))!=id:continue
-		var effects:Dictionary=record.get("effects",{})
-		var would:Array=Explainer.discovery_rows(String(record.id),false) if not effects.is_empty() else []
-		for row:Dictionary in would:row["value"]=float(effects.get(row.key,0.0))
-		questions.append({"record":record,"rows":would})
-	# The sheet keeps its nodes (and the bars opened) while what it shows holds.
-	var rows:=_field_rows(id)
-	var shown:Array=[id,weight,total,observers]
-	for row:Dictionary in rows:shown.append([row.key,row.amount,row.tone])
-	for question:Dictionary in questions:
-		var record:Dictionary=question.record
-		shown.append([record.get("id",""),roundi(float(record.get("progress",0.0))*100.0),record.get("bottleneck",""),roundi(float(record.get("estimated_days",0.0))/30.0),roundi(float(record.get("trial_share",0.0))*100.0),roundf(float(record.get("research_workforce",0.0))*10.0)])
-	var goal:=String(DOMAIN_GOALS.get(id,""))
-	goal=(goal.get_slice(" — ",1) if " — " in goal else goal.trim_prefix("Aims at ")).trim_suffix(".")
-	return {"blocks":[{"type":"field_sheet","id":id,"name":Visuals.name_for(id),"goal":goal.left(1).to_upper()+goal.substr(1),
-		"share":share,"weight":weight,"learners":observers,"on_field":share*observers,
-		"caveat":"About %d in every 100 of our learners' hours go to this field. More attention speeds the work here but cannot replace missing clues; it moves people already at learning and creates no discovery, people or resources." % roundi(share*100),
-		"rows":rows,"questions":questions,"state":effect_state,"_print":str(shown).hash(),
-		"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1),
-		"on_investigations":_open_report.bind("Under way in %s" % Visuals.name_for(id).to_lower(),func()->Dictionary:return {"blocks":_investigation_blocks(id)}),
-		"on_work":_open_report.bind("Who does the work",_research_work_report)}]}
-func _research_work_report()->Dictionary:
-	var id:=SettlementModel._primary_settlement_id()
-	var state:=GovernmentPeopleSystem.settlement_management(id)
-	var occupied:=not String(SettlementModel.settlement_record(id).get("occupied_by","")).is_empty()
-	return {"blocks":[{"type":"text","heading":"LOCAL RESEARCH WORK","text":"%d people work at learning now. The local leader shares out their time with food, water and other needs, and is putting extra hands on %s."%[int(GameState.population_allocations.get("Knowledge",0)),String({"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up"}.get(String(state.get("focus","")),"everyday needs"))]},{"type":"actions","items":[{"label":"More hands on learning","sub":"Not while the place is occupied" if occupied else "Ask the leader to move some people to learning","disabled":occupied,"on_press":func():GovernmentPeopleSystem.set_settlement_focus(id,"research");hud.request_immediate_dock_refresh()},{"label":"Let the leader decide","sub":"Not while the place is occupied" if occupied else "Let the leader choose again","disabled":occupied,"on_press":func():GovernmentPeopleSystem.restore_delegation(id);hud.request_immediate_dock_refresh()}]},{"type":"text","text":"This changes the local work priority, not discovery outcomes. Essential needs can still constrain research; observations and investigations develop as time advances."}]}
-
-## Distinct questions the lines of attention hold, read without refreshing them.
-func _questions_under_way()->int:
-	var ids:Dictionary={}
-	for id:Variant in GameState.active_investigations.values():
-		if String(id)!="":ids[String(id)]=true
-	return ids.size()
 
 func _discovery_board(investigations:Array)->Dictionary:
 	var fields:Array=[]
@@ -567,7 +309,7 @@ func _discovery_board(investigations:Array)->Dictionary:
 		var count:=0
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
-		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
+		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
 	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"pace":learning_pace(investigations),"waiting":_waiting_lines(),"on_choose":_choose_team_question,
 		"hands":_hands(),"artifacts":_artifact_study()}
 
@@ -747,14 +489,6 @@ func _artifact_study_item(total_weight:int,observers:int)->Dictionary:
 		"tip":"Scholars examine held artifacts so they yield culture, research and appraisal value. Weight %d of %d.\n%s" % [weight,int(capacity.total_weight),rate_text],
 		"on_minus":_change_artifact_study.bind(-1),"on_plus":_change_artifact_study.bind(1),
 	}
-
-func _artifact_study_block()->Dictionary:
-	var observers:=maxi(0,int(GameState.population_allocations.get("Knowledge",0)))
-	var total:=ArtifactCulture.study_weight()
-	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
-	var summary:=ArtifactCulture.summary()
-	var note:="%d waiting · %d in study · %d studied" % [int(summary.unstudied_count),int(summary.in_study_count),int(summary.studied_count)]
-	return {"type":"alloc","heading":"RESEARCH TEAM ROLE","note":note,"items":[_artifact_study_item(total,observers)]}
 
 func _change_artifact_study(delta:int)->void:
 	ArtifactCulture.change_study_weight(delta)

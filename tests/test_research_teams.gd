@@ -292,9 +292,9 @@ func test_cards_keep_time_and_a_thin_team_is_named_only_below_a_third_of_normal(
 		"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
 	assert_str(Board.lead_price(board.data.investigations)).is_equal("Our learning runs ahead of its age. 25 years ahead: six times the work.")
 	# Being early for its age is its price, told on hover; the line names no holdup.
-	var holdup:Label=board.find_child("Holdup",true,false)
-	assert_str(holdup.text).is_empty()
-	assert_str((board.find_child("Question_lead_test",true,false) as Control).tooltip_text).contains("six times the usual work")
+	var row:Control=board.find_child("Fields",true,false).find_child("Row_0",true,false)
+	assert_str((row.find_child("Cell_question",true,false) as Label).text).is_equal("Far Ahead")
+	assert_str(row.tooltip_text).contains("six times the usual work")
 
 # --- A freed team's choice --------------------------------------------------------------------
 
@@ -312,13 +312,14 @@ func test_a_freed_team_offers_a_choice_for_a_season_then_keeps_its_question()->v
 		assert_int(int(option.days)).is_greater(0)
 		assert_int(int(option.opens)).is_greater_equal(0)
 		assert_bool(option.has("effects")).is_true()
-	# Waiting on its question's card as a badge; its picker floats, so the board never moves.
+	# Waiting on its question's line; its picker floats, so the board never moves.
 	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1120,2000);add_child(viewport)
 	var board=Board.new();viewport.add_child(board)
 	board.setup({"fields":[],"investigations":DiscoverySystem.active_investigation_records(),"choices":choices,"on_choose":func(_k:String,_i:String)->void:pass,"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
 	var card:Node=board.find_child("Choice_"+String(choice.key).validate_node_name(),true,false)
 	assert_object(card).is_not_null()
-	assert_object(board.find_child("ChoiceBadge",true,false)).is_not_null()
+	# The question's line carries a "Choose" verb that opens the picker.
+	assert_object(board.find_child("Fields",true,false).find_child("Verb_Choose",true,false)).is_not_null()
 	assert_object(card.get_parent()).is_instanceof(PopupPanel)
 	assert_int(card.find_children("Option_*","",true,false).size()).is_equal(options.size())
 	assert_int(card.find_children("Choose","Button",true,false).size()).is_equal(options.size())

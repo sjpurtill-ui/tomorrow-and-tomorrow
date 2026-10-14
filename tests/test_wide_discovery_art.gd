@@ -4,8 +4,6 @@ extends GdUnitTestSuite
 const Art=preload("res://scripts/hud/research_visuals.gd")
 const Painting=preload("res://scripts/hud/subject_painting.gd")
 const DiscoveryPopup=preload("res://scripts/hud/discovery_popup.gd")
-const Atlas=preload("res://scripts/hud/research_atlas.gd")
-const TreePlot=preload("res://scripts/hud/research_tree_plot.gd")
 class Host extends Node:
 	var game_speed:=3.0
 	func _set_game_speed(value:float)->void:game_speed=value
@@ -54,7 +52,7 @@ func test_whole_width_height_respects_bounds()->void:
 
 func test_cropped_slots_keep_the_focus_point_in_frame_and_most_of_a_wide_painting()->void:
 	var texture:=banner(2700,1000)
-	var slots:={"atlas card":Vector2(Atlas.CARD_WIDTH,Atlas.CARD_IMAGE_HEIGHT),"tree node":TreePlot.IMAGE,"inquiry thumbnail":Vector2(124,124),"exchange thumbnail":Vector2(148,84)}
+	var slots:={"inquiry thumbnail":Vector2(124,124),"exchange thumbnail":Vector2(148,84)}
 	for focus:Vector2 in [Vector2(.5,.5),Vector2(.12,.4),Vector2(.9,.7),Vector2(0,1)]:
 		for slot:String in slots:
 			var target:Vector2=slots[slot]
@@ -62,9 +60,6 @@ func test_cropped_slots_keep_the_focus_point_in_frame_and_most_of_a_wide_paintin
 			assert_bool(Rect2(Vector2.ZERO,texture.get_size()).grow(.01).encloses(region)).override_failure_message(slot).is_true()
 			assert_float(region.size.x/region.size.y).is_equal_approx(target.x/target.y,.001)
 			assert_bool(region.grow(.5).has_point(texture.get_size()*focus)).override_failure_message("%s loses focus %s" % [slot,focus]).is_true()
-	# List slots are sized so a banner keeps most of its picture.
-	assert_float(Art.visible_fraction(texture.get_size(),slots["atlas card"]).x).is_greater_equal(.7)
-	assert_float(Art.visible_fraction(texture.get_size(),slots["tree node"]).y).is_greater_equal(.85)
 
 func test_discovery_announcement_shows_a_real_wide_painting_whole()->void:
 	var item:=wide_discovery()
