@@ -1215,7 +1215,7 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
 	leader_box.add_child(_pip_header())
-	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
+	for c:Dictionary in commands:leader_box.add_child(_leader_row(c,commands))
 	# Raise another general: the verb at the foot of the list it adds to.
 	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
 	var name_one:=Dense.verb("+ Name a general",_name_general,"Raise one of our people to lead bands as a general. The war council gives them work against an enemy; you can name who leads against each people.")
@@ -1232,7 +1232,7 @@ func _name_general()->void:
 ## A leader as HOI4 shows one: the face, the name, the skill pips, and, while
 ## they lead bands, their men with three bars (men, will, fed). Their record
 ## and what their hand changes, in the engine's numbers, are in the tooltip.
-func _leader_row(c:Dictionary)->Control:
+func _leader_row(c:Dictionary,commands:Array=[])->Control:
 	var leader:Dictionary=c.leader
 	var war_leader:=String(c.id)==Commands.WAR_LEADER
 	var panel:=PanelContainer.new();panel.name="Leader_%s" % String(c.id)
@@ -1250,7 +1250,11 @@ func _leader_row(c:Dictionary)->Control:
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);top.mouse_filter=Control.MOUSE_FILTER_PASS;words.add_child(top)
 	var name_label:=_line(String(leader.get("name","The war leader")),14,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"))
 	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(name_label)
-	var role:=_line("War leader" if war_leader else "General",12,T.INK_MUTED);role.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(role)
+	# Who they are and where, as the Council says it (person_posts.gd).
+	var post:=preload("res://scripts/person_posts.gd").of({"person_id":int(leader.get("person_id",0)),"figure_id":String(leader.get("figure_id",""))},commands)
+	var title:=String(post.get("title",""))
+	if title=="":title="War leader" if war_leader else "General"
+	var role:=_line(title,12,T.INK_MUTED);role.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(role)
 	if war_leader:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Change";other.flat=true;other.focus_mode=Control.FOCUS_NONE
 		other.add_theme_font_size_override("font_size",12);other.add_theme_color_override("font_color",T.GOLD_TEXT);other.add_theme_color_override("font_hover_color",T.INK)
@@ -1269,7 +1273,7 @@ func _leader_row(c:Dictionary)->Control:
 		bars.tooltip_text="Men %d of %d · will %d%% · fed %d%%" % [int(c.men),int(c.full),roundi(float(c.will)*100.0),roundi(float(c.supply)*100.0)]
 		below.add_child(bars)
 	else:
-		below.add_child(_line("At home",12,T.INK_MUTED))
+		below.add_child(_line(String(post.get("place","")) if String(post.get("place",""))!="" else "At home",12,T.INK_MUTED))
 	# What their hand changes, in the engine's numbers, and what they have done.
 	var record:=Commands.record(leader)
 	var told:=PackedStringArray([leader_doing(c)])
