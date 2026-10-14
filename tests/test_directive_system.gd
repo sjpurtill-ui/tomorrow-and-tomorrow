@@ -42,8 +42,7 @@ func test_one_example_is_one_worker_read_and_never_killed_by_the_council()->void
 	assert_str(JSON.stringify(ledger_view)).contains("\"1 death\"")
 	var dated:=JSON.stringify(ledger_ui.tab(1))
 	assert_str(dated).contains("\"1 death\"")
-	var council_ui:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(null,null)
-	assert_str(council_ui._directive_state({"status":"active","implementation_followup":{"state":"reported"}})).is_equal("REPORTED")
+	assert_str(preload("res://scripts/hud/court_civic.gd").state({"status":"active","implementation_followup":{"state":"reported"}})).is_equal("REPORTED")
 
 
 func test_target_words_and_confirmation_cannot_expand_one_worker_to_men()->void:

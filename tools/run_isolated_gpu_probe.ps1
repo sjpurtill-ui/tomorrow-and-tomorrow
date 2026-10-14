@@ -5,7 +5,8 @@ param(
     [Parameter(Mandatory=$true)][string]$LogFile,
     [string]$UserArguments = '',
     [int]$TimeoutSeconds = 90,
-    [ValidateRange(1,1000000)][int]$QuitAfterFrames = 5000
+    [ValidateRange(1,1000000)][int]$QuitAfterFrames = 5000,
+    [ValidatePattern('^\d+x\d+$')][string]$Resolution = '1600x900'
 )
 # Hidden startup hints do not hide windows a process subsequently creates.
 # GPU probes render on a private, non-input desktop. Never switch desktops.
@@ -53,7 +54,7 @@ public static class IsolatedGpuDesktop {
     }
 }
 '@
-$taskArguments='--path "'+$Project+'" --audio-driver Dummy --resolution 1600x900 --quit-after '+$QuitAfterFrames+' --log-file "'+$LogFile+'" "'+$Scene+'" -- '+$UserArguments
+$taskArguments='--path "'+$Project+'" --audio-driver Dummy --resolution '+$Resolution+' --quit-after '+$QuitAfterFrames+' --log-file "'+$LogFile+'" "'+$Scene+'" -- '+$UserArguments
 $taskResult=[IsolatedGpuDesktop]::Run($Godot,$taskArguments,$Project,$TimeoutSeconds)
 $taskResult | Set-Content -LiteralPath ($LogFile+".runner.txt")
 $taskResult
