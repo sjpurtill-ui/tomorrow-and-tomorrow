@@ -365,7 +365,9 @@ static func cause(why:String)->String:
 		var at:=first.find(mark)
 		if at>0:first=first.substr(0,at)
 	var words:=first.strip_edges().split(" ",false)
-	if words.size()>6:return " ".join(words.slice(0,6))
+	if words.size()>6:
+		words=words.slice(0,6)
+		while not words.is_empty() and String(words[-1]) in ["and","of","the","a","in","to","with"]:words=words.slice(0,words.size()-1)
 	return " ".join(words)
 
 func _fill_strengths()->void:
