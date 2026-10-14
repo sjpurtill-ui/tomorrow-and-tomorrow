@@ -12,10 +12,12 @@ Default readings must expose the relevant game dynamics, including research,
 culture and regard, while preserving intelligence uncertainty and all callbacks.
 
 Current accepted revisions: shared width/fact/KPI foundation (`03fe036e`), Home
-overview (`dfec602e`) and first Food/Materials grouping (`13e405ef`). Materials
-still needs its bounded chooser and clearer source action. Research, World,
-War intelligence and the remaining page families are in review; see
-INTEGRATION_STATUS.md for delivery state. The reciprocal render/critique/revise
+overview (`dfec602e`), Food/Materials grouping (`13e405ef`), War intelligence
+(`a63c4fc3`) and the Materials chooser/source reader (`763275db`). This checkpoint
+adds bounded Court roster/foreign contact, selected Standing strengths and regard,
+and Expeditions' recent digest/selected town/searchable archive. Research, World
+Peoples and the remaining families are still in review; see INTEGRATION_STATUS.md
+for delivery state. The reciprocal render/critique/revise
 loop remains mandatory, and bounds checks alone do not establish good design.
 
 Scope: every reachable popup and its subpages. Presentation, information hierarchy,

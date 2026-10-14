@@ -21,7 +21,7 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const Standing:=preload("res://scripts/standing.gd")
 
 ## Below this width the parts under the rose stand in one column.
-const TWO_AT:=820.0
+const TWO_AT:=720.0
 const VIEW_INK:={"allure":"teal","awe":"gold","fear":"danger","respect":"info","trust":"good","resentment":"danger"}
 
 ## The rose of our nine strengths, drawn like a chart's wind rose. Its rings
@@ -186,7 +186,7 @@ class Rose extends Control:
 			var entry:Variant=(other.get("values",{}) as Dictionary).get(String(item.id),{})
 			if entry is Dictionary: text+="\n%s: %s." % [String(other.get("name","")),Standing.estimate_words(entry as Dictionary)]
 		text+="\n50% is a typical people of our age; 100% the most the age has seen."
-		return text+"\nClick to open %s." % String(item.section_name)
+		return text+"\nSelect to inspect this strength."
 
 var data:Dictionary={}
 var prints:Dictionary={}
@@ -197,6 +197,10 @@ var posture_label:Label
 var renown_label:Label
 var strength_list:VBoxContainer
 var strength_toggle:Button
+var strength_spread:BoxContainer
+var strength_choices:GridContainer
+var strength_detail:VBoxContainer
+var selected_strength:="genius"
 var compare_row:HFlowContainer
 ## The rose's one-line legend, at the head of the compare line.
 var legend_label:Control
@@ -232,7 +236,7 @@ func update_block(block:Dictionary)->bool:
 func apply(block:Dictionary)->void:
 	data=block
 	var view:Dictionary=block.get("view_state",{})
-	strength_list.visible=bool(view.get("strength_details",false))
+	strength_list.visible=bool(view.get("strength_details",size.x>=TWO_AT))
 	strength_toggle.text="Exact strengths and causes  "+("▾" if strength_list.visible else "▸")
 	name_label.text=String(block.get("people_name","Our people"))
 	posture_label.text=String((block.get("posture",{}) as Dictionary).get("words",""))
@@ -257,7 +261,12 @@ func _refill(part:String,value:Variant,fill:Callable)->void:
 	fill.call()
 
 func _layout()->void:
-	pass
+	if strength_spread==null:return
+	strength_spread.vertical=size.x<TWO_AT
+	if is_instance_valid(strength_choices):strength_choices.columns=3
+	var state:Dictionary=data.get("view_state",{})
+	strength_list.visible=bool(state.get("strength_details",size.x>=TWO_AT))
+	strength_toggle.text="Exact strengths and causes  "+("▾" if strength_list.visible else "▸")
 
 static func _flow(parent:Node,node_name:String)->HFlowContainer:
 	var flow:=HFlowContainer.new();flow.name=node_name
@@ -302,14 +311,14 @@ static func _tone_color(tone:String)->Color:
 
 func _build_hero()->void:
 	var column:=UI.sheet(self,"WhatWeAre",20.0)
-	column.add_theme_constant_override("separation",16)
+	column.add_theme_constant_override("separation",10)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);column.add_child(top)
 	seal=TextureRect.new();seal.name="Seal"
 	seal.custom_minimum_size=Vector2(34,34);seal.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	seal.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	top.add_child(seal)
 	name_label=Label.new();name_label.name="PeopleName"
-	name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.add_theme_font_size_override("font_size",32)
+	name_label.add_theme_font_override("font",T.font("ui_strong"));name_label.add_theme_font_size_override("font_size",24)
 	name_label.add_theme_color_override("font_color",T.INK);name_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	top.add_child(name_label)
@@ -318,19 +327,20 @@ func _build_hero()->void:
 	posture_label.add_theme_color_override("font_color",T.BODY);posture_label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
 	posture_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;posture_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	posture_label.mouse_filter=Control.MOUSE_FILTER_PASS
-	posture_label.tooltip_text="Each row: the strength, a bar against the peoples of our age (the tick is a typical people), its value, its change in a year and its biggest cause."
+	posture_label.tooltip_text="Select a strength to read its causes, yearly change and the decisions that can raise it. The rose compares us with the peoples of our age."
 	# The words our shape makes of us head the nine rows (see _fill_strengths).
 	renown_label=UI.label(column,"",14,T.INK_MUTED);renown_label.name="Renown"
 	renown_label.tooltip_text="What our name commands by what we are: awe from might, great works and a lead in learning; draw from our culture, plenty, learning and good order. Both make our own people proud; allure draws others to us, awe makes them wary."
 	column.add_child(posture_label)
-	var body:=VBoxContainer.new();body.name="Strengths";body.add_theme_constant_override("separation",16);column.add_child(body)
+	strength_spread=BoxContainer.new();strength_spread.name="Strengths";strength_spread.add_theme_constant_override("separation",16);column.add_child(strength_spread)
 	rose=Rose.new();rose.name="Rose"
-	rose.custom_minimum_size=Vector2(310,310)
+	rose.custom_minimum_size=Vector2(280,270)
 	rose.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
-	rose.picked.connect(_raise)
-	body.add_child(rose)
+	rose.picked.connect(_select_strength)
+	strength_spread.add_child(rose)
 	strength_list=VBoxContainer.new();strength_list.name="StrengthList"
 	strength_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;strength_list.add_theme_constant_override("separation",0)
+	strength_spread.add_child(strength_list)
 	compare_row=HFlowContainer.new();compare_row.name="Compare"
 	compare_row.add_theme_constant_override("h_separation",6);compare_row.add_theme_constant_override("v_separation",4)
 	column.add_child(compare_row)
@@ -340,7 +350,6 @@ func _build_hero()->void:
 		state["strength_details"]=strength_list.visible;data["view_state"]=state
 		strength_toggle.text="Exact strengths and causes  "+("▾" if strength_list.visible else "▸"))
 	strength_toggle.name="ShowStrengthDetails";strength_toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	column.add_child(strength_list)
 	var legend:=_swatches()
 	legend.tooltip_text="Each strength is set against the peoples of our age: 50% (the rose's middle ring, the tick on each bar) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen. Dashed lines are our watchers' estimates."
 	legend_label=legend
@@ -392,27 +401,39 @@ func _fill_strengths()->void:
 	var year_ago:Dictionary=data.get("year_ago",{})
 	rose.configure(items,year_ago)
 	UI.clear(strength_list)
+	strength_choices=GridContainer.new();strength_choices.name="StrengthChoices";strength_choices.columns=3
+	strength_choices.add_theme_constant_override("h_separation",6);strength_choices.add_theme_constant_override("v_separation",6);strength_list.add_child(strength_choices)
+	selected_strength=String((data.get("view_state",{}) as Dictionary).get("strength",selected_strength))
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var id:=String(item.id)
-		var tip:="%s %d%%: %s.\n%s.%s\nRaised through %s; it costs %s. Click to open it." % [String(item.name),roundi(float(item.value)*100.0),String(item.means),_sentence(String(item.why)),("\nAgainst the age: %s." % String(item.parts)) if String(item.get("parts",""))!="" else "",String(item.section_name),String(item.cost)]
-		var row:=UI.hot_row(strength_list,"Strength_"+id,_raise.bind(id),tip)
-		var panel:=row.get_parent() as Control
-		panel.mouse_entered.connect(func()->void:rose.set_highlight(index))
-		panel.mouse_exited.connect(func()->void:rose.set_highlight(-1))
-		UI.cell(row,String(item.name),72,13,T.INK,true)
-		var bar:=UI.bar(row,float(item.value),T.GOLD,70,0.5)
-		if year_ago.has(id):bar.ghost=clampf(float(year_ago[id])/100.0,0.0,1.0)
-		bar.tooltip_text=tip
-		UI.cell(row,"%d%%" % roundi(float(item.value)*100.0),34,13,T.INK,true,HORIZONTAL_ALIGNMENT_RIGHT)
-		var change_text:=""
-		var change_ink:=T.INK_MUTED
-		if item.has("change"):
-			var change:=float(item.change)
-			change_text="·" if absf(change)<1.0 else ("%s%d" % ["+" if change>0.0 else "−",roundi(absf(change))])
-			change_ink=T.INK_MUTED if absf(change)<1.0 else (T.GREEN_TEXT if change>0.0 else T.RED_TEXT)
-		UI.cell(row,change_text,34,12,change_ink,true,HORIZONTAL_ALIGNMENT_RIGHT)
-		UI.label(row,cause(String(item.why)),12,T.BODY,false,true)
+		var button:=UI.chip(strength_choices,"%s %d%%" % [String(item.name),roundi(float(item.value)*100)],id==selected_strength,_select_strength.bind(id),String(item.means)+". "+_sentence(String(item.why)))
+		button.name="Strength_"+id;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		button.mouse_entered.connect(func()->void:rose.set_highlight(index))
+		button.mouse_exited.connect(func()->void:rose.set_highlight(-1))
+	strength_detail=VBoxContainer.new();strength_detail.name="StrengthDetail";strength_detail.add_theme_constant_override("separation",6);strength_list.add_child(strength_detail)
+	_fill_strength_detail()
+
+func _select_strength(id:String)->void:
+	selected_strength=id
+	var state:Dictionary=data.get("view_state",{})
+	state["strength"]=id;state["strength_details"]=true;data["view_state"]=state
+	strength_list.show();strength_toggle.text="Exact strengths and causes  ▾"
+	_fill_strength_detail()
+
+func _fill_strength_detail()->void:
+	if not is_instance_valid(strength_detail):return
+	UI.clear(strength_detail)
+	for button:Button in strength_choices.get_children():button.set_pressed_no_signal(button.name=="Strength_"+selected_strength)
+	for item:Dictionary in data.get("strengths",[]):
+		if String(item.id)!=selected_strength:continue
+		UI.label(strength_detail,String(item.means),16,T.INK,true,true)
+		UI.label(strength_detail,_sentence(String(item.why)),14,T.BODY,false,true)
+		var change:="%+d points this year" % roundi(float(item.change)) if item.has("change") else "No yearly comparison yet"
+		UI.label(strength_detail,change,14,T.INK_MUTED,false,true)
+		var details:=UI.verb(strength_detail,"Open "+String(item.section_name),_raise.bind(selected_strength),"Raised through %s; it costs %s." % [String(item.section_name),String(item.cost)])
+		details.name="OpenStrength";details.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+		strength_detail.tooltip_text=String(item.get("parts",""))
 
 func _raise(id:String)->void:
 	var raise:Variant=data.get("on_raise")
@@ -442,6 +463,20 @@ func _fill_compare()->void:
 		overlays.append({"values":values,"color":p.get("accent",T.RED),"name":String(p.name),"chosen":String(p.civ_id)==chosen})
 	rose.overlay(overlays)
 	UI.label(compare_row,"  Lay over ours:",12,T.INK_MUTED)
+	if list.size()>3:
+		var choose:=OptionButton.new();choose.name="ComparePeople";T.apply_button_style(choose);choose.add_item("Our people only")
+		var selected:=0
+		for index in list.size():
+			var p:Dictionary=list[index]
+			choose.add_item(String(p.name));choose.set_item_disabled(index+1,not _comparable(p))
+			if String(p.civ_id)==chosen and _comparable(p):
+				selected=index+1;rose.compare(_theirs(p),p.get("accent",T.RED),String(p.name))
+		choose.select(selected);compare_row.add_child(choose)
+		if selected==0:rose.compare({},Color.WHITE,"")
+		choose.item_selected.connect(func(index:int)->void:
+			state["compare"]="" if index==0 else String(list[index-1].civ_id)
+			prints.erase("compare");_fill_compare())
+		return
 	for p:Dictionary in list:
 		var comparable:=_comparable(p)
 		var civ_id:=String(p.civ_id)
@@ -514,7 +549,17 @@ func _fill_peoples()->void:
 		var scouts:Variant=data.get("on_scouts")
 		if scouts is Callable:UI.verb(row,"Send scouts",scouts as Callable,"Send scouts to find the peoples around us",true)
 		return
-	feelings(peoples,list,data.get("on_court"),true)
+	var state:Dictionary=data.get("view_state",{})
+	var selected:=0
+	for index in list.size():
+		if String(list[index].civ_id)==String(state.get("regard","")):selected=index
+	if list.size()>1:
+		var choose:=OptionButton.new();choose.name="RegardPeople";T.apply_button_style(choose)
+		for p:Dictionary in list:choose.add_item(String(p.name))
+		choose.select(selected);peoples.add_child(choose)
+		choose.item_selected.connect(func(index:int)->void:
+			state["regard"]=String(list[index].civ_id);data["view_state"]=state;_fill_peoples())
+	feelings(peoples,[list[selected]],data.get("on_court"),true)
 
 ## The feelings of every people we know toward us, drawn small (also on
 ## World › Peoples beside the ledger). Each people: emblem, name, danger
@@ -621,7 +666,7 @@ func _fill_arts()->void:
 
 func _fold_arts(at_work:Dictionary)->void:
 	for id:String in ["cunning","persuasion"]:
-		var row:=strength_list.find_child("Strength_"+id,false,false) as Control
+		var row:=strength_list.find_child("Strength_"+id,true,false) as Control
 		if row==null:continue
 		var lines:PackedStringArray=[]
 		for e:Dictionary in at_work.get(id,[]):lines.append("· %s" % String(e.words))

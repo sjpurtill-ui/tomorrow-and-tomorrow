@@ -10,7 +10,11 @@ Delivered and remotely verified: shared compact facts/KPIs and a 1120 px maximum
 reading width (`03fe036e`), Home overview (`dfec602e`, source `2a5a56a0`), and the
 first Food/Materials grouping pass (`13e405ef`, source `ce5d6145`). Home's 23
 integrated cases pass; Food's two and Materials' two presentation cases pass.
-Canonical main is synchronized through `13e405ef`. The live game was not restarted.
+The bounded Materials chooser is also delivered (`763275db`, source `be3c31b7`):
+eight searchable materials, one selected stock/flow reading, explicit "Where it
+comes from", and eight places per source page. Five integrated Food/Materials
+cases pass; both palettes and 1600/2869/1024 captures passed reciprocal review.
+The live game was not restarted.
 
 War intelligence is also accepted in this checkpoint: three recent reports,
 a selected foreign network, distinct home watch, and an explicit searchable
@@ -20,10 +24,22 @@ the private GPU probe passes both palettes at 1600/1024, including search,
 paging and returning. All 23 War and three Eyes panel cases pass. A narrow border
 facts/control overflow found by the populated fixture is fixed with wrapping.
 
-HELD in worker/integration worktrees: bounded Materials selection and source
-details, Research archive/question browser, richer World civilization profiles,
-Court/Standing/Expeditions composition, and the remaining
-family review. These are not claimed as delivered. No game rules are changed.
+This checkpoint adds reviewed Court/Standing/Expeditions composition. Court has
+six searchable people per roster page, one selected foreign contact, and one
+shared scroll for waiting/foreign business. Standing has nine compact selectors
+and one selected strength's explanation/action; foreign regard is also selected.
+Expeditions opens with three recent reports, a selected foreign town and its
+existing Send/Watch controls; the searchable archive shows six records per page.
+Wide/narrow private GPU probes pass; 69 focused Standing/relative/archive/watch cases
+pass. The court roster probe passes real Summon and foreign brief flows plus a
+19-person paging/search fixture, but its headless shutdown still reports two
+resources in use; the separate rendered Court navigation probe exits cleanly.
+The older full Court probe contains unrelated stale civic/era assertions and is
+not claimed as passing. All player callbacks and simulation rules remain intact.
+
+HELD in worker/integration worktrees: Research archive/question browser, richer
+World civilization profiles, Wealth and the remaining family review. These are
+not claimed as delivered. No game rules are changed.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)

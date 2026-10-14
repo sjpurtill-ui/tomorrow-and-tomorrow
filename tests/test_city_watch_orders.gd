@@ -98,10 +98,11 @@ func test_a_city_beyond_reach_disables_both_orders_with_the_reason()->void:
 	assert_bool(bool(items[0].disabled)).is_true()
 	assert_bool(bool(items[1].disabled)).is_true()
 
-func test_scouting_window_lists_cities_and_orders_from_the_row()->void:
+func test_scouting_window_selects_one_city_and_preserves_its_orders()->void:
 	var sheet:Control=await _sheet()
 	assert_bool(sheet.city_rows.has("near")).is_true()
-	assert_bool(sheet.city_rows.has("far")).is_true()
+	assert_int(sheet.city_rows.size()).is_equal(1)
+	assert_int((sheet.find_child("TownSelector",true,false) as OptionButton).item_count).is_equal(2)
 	assert_bool(sheet.city_rows.has("ours")).is_false()
 	var row:Dictionary=sheet.city_rows.near
 	assert_str(row.name.text).is_equal("Nearbrook")
@@ -126,6 +127,8 @@ func test_scouting_window_lists_cities_and_orders_from_the_row()->void:
 	assert_str(sheet.cities_note.text).contains("watching 1")
 	row.stop.pressed.emit()
 	assert_dict(CivilizationSystem.scouting_staff.city_watch("near")).is_empty()
+	(sheet.find_child("TownSelector",true,false) as OptionButton).item_selected.emit(1)
+	assert_int(sheet.city_rows.size()).is_equal(1)
 	sheet.city_rows.far.once.pressed.emit()
 	assert_int(CivilizationSystem.scout_missions.size()).is_equal(1)
 	assert_str(String(CivilizationSystem.scout_missions[0].target_id)).is_equal("city:far")
