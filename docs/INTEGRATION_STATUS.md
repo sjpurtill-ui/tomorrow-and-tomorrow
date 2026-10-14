@@ -49,9 +49,28 @@ the record disclosure contains only fixed aggregate counts. Eight private GPU
 captures pass both palettes; 32 Great Works/inspection cases pass, including
 search/paging without rebuilding the selected model and selecting the last work.
 
-HELD in worker/integration worktrees: richer World civilization profiles, Wealth,
-Direction and the remaining family review. These are
-not claimed as delivered. No game rules are changed.
+Wealth is delivered at `04aa46fe` (worker `76d2cd01`, 40 integrated cases), and
+the selected World civilization profile at `c588cd38` (worker `1778aa48`, 17 cases
+and 13 private GPU views including uncertain intelligence). The profile exposes
+learning, craft/output, society and culture as well as all nine foreign-regard
+values, with uncertainty preserved.
+
+Gallery `f29e5d98` (worker `956061ef`) has six searchable objects per page,
+selected-object actions above the artwork and bounded Sets/Rumors. The facade
+probe passes on integration; C/root revision closed the narrow grid's clipped
+second row. Full artwork and all existing study/display/exchange actions remain.
+
+This checkpoint delivers the opening's purpose/gain/cost cards, explicit first
+100-year commitment, common research trade-off above the choices and four-choice
+alternative pages. Century choices use the same cards with honest full-strength
+and inherited-blend framing; Character history is three recent/six archived.
+A accepted the revised 1024px opening/alternatives and century captures. All 27
+opening/century/ambition cases pass (reports 37/38), and both-theme private GPU
+probes pass actual choice/confirmation, all 14 paths and long inherited memory.
+
+HELD: Trade/Deliveries, Production/Exchange, Home detail/Buildings, World history,
+Chronicle/Figures/notices and Navy/Air density work. These are not claimed as
+delivered. No game rules are changed.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
 ## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)

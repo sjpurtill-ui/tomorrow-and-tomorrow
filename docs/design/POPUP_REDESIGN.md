@@ -18,7 +18,25 @@ adds bounded Court roster/foreign contact, selected Standing strengths and regar
 and Expeditions' recent digest/selected town/searchable archive (`4772bdc1`).
 Research's three selected/bounded readers are delivered at `43bcd72a`; Great Works
 adds a compact command header and six-work searchable chooser in this checkpoint.
-World Peoples and the remaining families are still in review; see INTEGRATION_STATUS.md
+Wealth is delivered at `04aa46fe` (40 integrated cases); World Peoples at
+`c588cd38` (17 cases and populated/uncertain profile captures). Gallery's bounded
+collection and selected object revision is integrated at `f29e5d98` with a clean
+facade/action probe and independently accepted six-object narrow grid.
+
+The opening now explains WHY each path matters, two concrete gains, all local
+costs and its research fields before selection. The first-century commitment and
+the common research penalty appear above the four choices. All 14 paths remain
+available through four-choice pages; confirmation remains pinned. Century choices
+use the same payoff cards and explicitly distinguish full-strength figures from
+the blend with inherited traditions. Character retains delegation controls and
+three recent choices with a six-record searchable archive. A rejected the first
+payoff draft's below-fold research penalty; the revised 1024px opening/alternatives
+and compact last century page passed the independent recheck. All 27 opening,
+century and ambition cases pass; both-theme private GPU probes exercise every path
+and real confirmation at 1600/1024 with no errors. Engine effects, century timing,
+availability, cultural memory and saves are unchanged.
+
+Remaining families are still in review; see INTEGRATION_STATUS.md
 for delivery state. The reciprocal render/critique/revise
 loop remains mandatory, and bounds checks alone do not establish good design.
 
