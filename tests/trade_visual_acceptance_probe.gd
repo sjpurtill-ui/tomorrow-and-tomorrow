@@ -186,6 +186,7 @@ static func prepare_fixture(kind: String) -> Array:
 		c.world_position = Vector2(150.0 * float(index + 1), 0)
 		c.alive = true
 		c.player_relation.contact_level = 1 if kind == "word" or index == 2 else 2
+		c.player_relation.home_location_known = int(c.player_relation.contact_level) >= 2
 		c.player_relation.opinion = 0.2
 		for other: String in (c.get("relations", {}) as Dictionary): c.relations[other].opinion = 0.2
 	WorldSimulation.start_world()
