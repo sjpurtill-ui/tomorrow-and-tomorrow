@@ -54,27 +54,14 @@ func _local_signature()->Array:
 	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
 
 func _trade_blocks()->Array:
-	var city:=SettlementModel.selected_settlement()
-	var trade:=SettlementModel.city_trade_snapshot(String(city.get("id","")))
-	var today:=int(GameState.elapsed_days)
-	var capacity:=String(trade.capacity.reason) if not bool(trade.capacity.ready) else "Your settlement leaders send spare stores to each other along known paths, up to %s km away, travelling about %s km a day." % [Plain.number(float(trade.capacity.range_km)),Plain.number(float(trade.capacity.speed_km_per_day))]
-	var blocks:Array=[{"type":"text","heading":"How deliveries travel","text":capacity}]
-	var on_road:Array=[]
-	for shipment in trade.shipments:
-		var left:=maxi(0,ceili(float(shipment.arrival_day))-today)
-		on_road.append({"name":"%s %s" % [Plain.number(float(shipment.quantity)),String(shipment.resource).to_lower()],"detail":"%s → %s" % [String(shipment.source_name),String(shipment.destination_name)],"value":"Arrives today" if left<=0 else "In "+Plain.span_text(left),"icon":preload("res://scripts/resource_icons.gd").material_texture(String(shipment.resource),48)})
-	if on_road.is_empty():blocks.append({"type":"text","heading":"On the road","text":"Nothing is on the road just now."})
-	else:blocks.append({"type":"rows","heading":"On the road","items":on_road})
-	var shown:=0
-	var arrived:Array=[]
-	for entry in trade.history:
-		if String(entry.status)!="delivered": continue
-		var ago:=maxi(0,today-int(entry.day))
-		arrived.append({"name":"%s %s delivered" % [Plain.number(float(entry.delivered)),String(entry.resource).to_lower()],"detail":"%s → %s" % [String(entry.source_name),String(entry.destination_name)],"value":"Today" if ago<=0 else Plain.span_text(ago)+" ago","icon":preload("res://scripts/resource_icons.gd").material_texture(String(entry.resource),48)})
-		shown+=1
-		if shown>=5: break
-	if not arrived.is_empty():blocks.append({"type":"rows","heading":"Recently arrived","items":arrived})
-	return blocks
+	return [{"type":"deliveries_board","read":_delivery_data}]
+
+func _delivery_data()->Dictionary:
+	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:
+		var city:=SettlementModel.selected_settlement()
+		var trade:=SettlementModel.city_trade_snapshot(String(city.get("id","")))
+		trade.day=int(GameState.elapsed_days)
+		return trade)
 
 var selected_account:=""
 ## The Wealth tab: what the people own and can trade, goods first, and the

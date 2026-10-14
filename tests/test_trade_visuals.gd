@@ -68,6 +68,7 @@ func test_word_only_contacts_have_no_trade_figures_or_actions() -> void:
 	ids = Probe.prepare_fixture("word")
 	var board := _board()
 	for id: String in ids:
+		board._choose_partner(id)
 		var people := board.find_child("People_" + id, true, false)
 		assert_object(people).is_not_null()
 		for key: String in ["Flows", "Stances", "BuyWithGoods", "Wesend", "Theysend"]:
@@ -76,7 +77,7 @@ func test_word_only_contacts_have_no_trade_figures_or_actions() -> void:
 func test_refresh_retains_live_controls_and_preserves_domain_state() -> void:
 	var board := _board()
 	var nodes: Dictionary = {}
-	for key: String in ["FlowTotals", "People_" + String(ids[0]), "People_" + String(ids[1]), "Stance_toll", "BuyWithGoods"]:
+	for key: String in ["FlowTotals", "People_" + String(ids[0]), "PartnerChoice_" + String(ids[1]), "Stance_toll", "BuyWithGoods"]:
 		var node := board.find_child(key, true, false)
 		assert_object(node).is_not_null()
 		if node != null: nodes[key] = node.get_instance_id()
@@ -184,6 +185,7 @@ func test_buy_menu_moves_actual_goods_and_registers_order() -> void:
 
 func test_embargo_disables_buy_without_hiding_stance_choices() -> void:
 	var board := _board()
+	board._choose_partner(String(ids[1]))
 	var people := board.find_child("People_" + String(ids[1]), true, false)
 	assert_bool((people.find_child("BuyWithGoods", true, false) as MenuButton).disabled).is_true()
 	assert_object(people.find_child("Stances", true, false)).is_not_null()
@@ -193,3 +195,26 @@ func test_embargo_disables_buy_without_hiding_stance_choices() -> void:
 func _stock(owner: String, good: String) -> float:
 	return float(WorldSimulation.scoped(owner, func() -> float:
 		return WorldSimulation.food.total_stored() if good == "Food" else float(WorldSimulation.state.resource_stockpiles.get(good, 0.0))))
+
+func test_partner_chooser_is_bounded_searchable_and_keeps_selected_profile() -> void:
+	for index in 10:
+		var contact:Dictionary=CivilizationSystem.civilizations[2].duplicate(true)
+		contact.id="word_%02d" % index;contact.name="Word people %02d" % index
+		CivilizationSystem.civilizations.append(contact)
+	var before:=Probe.economic_fingerprint()
+	var board:=_board()
+	var choices:=board.find_child("PartnerChoices",true,false)
+	assert_int(choices.get_child_count()).is_equal(6)
+	var selected:Node=board.find_child("People_"+String(ids[0]),true,false)
+	(board.find_child("NextPartners",true,false) as Button).pressed.emit()
+	assert_int(choices.get_child_count()).is_equal(6)
+	assert_object(board.find_child("People_"+String(ids[0]),true,false)).is_same(selected)
+	(board.find_child("NextPartners",true,false) as Button).pressed.emit()
+	assert_int(choices.get_child_count()).is_equal(1)
+	var search:=board.find_child("FindPartner",true,false) as LineEdit
+	search.text="Word people 09";search.text_changed.emit(search.text)
+	assert_int(choices.get_child_count()).is_equal(1)
+	(choices.get_child(0) as Button).pressed.emit()
+	assert_object(board.find_child("People_word_09",true,false)).is_not_null()
+	assert_object(board.find_child("People_"+String(ids[0]),true,false)).is_null()
+	assert_array(Array(Probe.economic_fingerprint())).is_equal(Array(before))
