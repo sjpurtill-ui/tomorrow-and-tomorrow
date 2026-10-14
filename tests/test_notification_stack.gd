@@ -186,6 +186,23 @@ func test_a_click_opens_what_the_notice_is_about()->void:
 	assert_bool(stack.log_panel.visible).is_true()
 	assert_int(stack.log_list.get_child_count()).is_equal(1)
 
+func test_notice_log_starts_with_three_and_search_preserves_late_actions()->void:
+	var parts:Array=await _stack()
+	var stack:CanvasLayer=parts[0];var hud:SheetHud=parts[1]
+	for index in 65:Model.remember(Model.normalize({"group":"fixture:%d" % index,"category":"building","title":"Completed work %d" % index,"text":"Full notice detail %d" % index,"action":{"kind":"section","section":"construction","sub":0}}))
+	stack._intake();stack.toggle_log()
+	assert_int(stack.log_list.get_child_count()).is_equal(3)
+	stack.log_browse.pressed.emit()
+	assert_int(stack.log_list.get_child_count()).is_equal(6)
+	stack.log_page=10;stack._fill_log()
+	assert_int(stack.log_list.get_child_count()).is_equal(5)
+	stack.log_search.text="Full notice detail 0";stack.log_search.text_changed.emit("Full notice detail 0")
+	assert_int(stack.log_list.get_child_count()).is_equal(1)
+	stack._refresh_pill()
+	assert_str(stack.log_search.text).is_equal("Full notice detail 0")
+	stack.log_list.get_child(0).pressed.emit()
+	assert_array(hud.sections).contains(["construction"])
+
 func test_the_moment_card_heads_the_same_column()->void:
 	Chronicle.record({"title":"Smoke on the horizon","tier":"moment","kind":"scout","day":1})
 	var parts:Array=await _stack()

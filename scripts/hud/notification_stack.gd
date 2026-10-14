@@ -40,7 +40,8 @@ const STANDING_SECONDS:=1.0
 const ROW_HEIGHT:=52.0
 const TOP:=T.CONTENT_TOP
 const PILL_HEIGHT:=28.0
-const LOG_ROWS:=40
+const LOG_ROWS:=6
+const RECENT_LOG_ROWS:=3
 
 var terrain:Node
 var hud:Node
@@ -59,6 +60,16 @@ var column:Control
 var pill:Button
 var log_panel:PanelContainer
 var log_list:VBoxContainer
+var log_browsing:=false
+var log_query:=""
+var log_page:=0
+var log_browse:Button
+var log_search:LineEdit
+var log_paging:HBoxContainer
+var log_previous:Button
+var log_next:Button
+var log_count:Label
+var log_hint:Label
 var held:=false
 var _views:Dictionary={}
 var _signature:=""
@@ -453,6 +464,11 @@ func _layout(delta:float)->void:
 		pill.visible=not blocked.any(func(r:Rect2)->bool:return r.intersects(pill_rect))
 		if pill.visible:y+=PILL_HEIGHT+GAP
 	if is_instance_valid(log_panel) and log_panel.visible:
+		var log_bottom:=view.y-12.0
+		if is_instance_valid(hud) and hud.has_method("right_stack_top"):log_bottom=minf(log_bottom,float(hud.right_stack_top())-GAP)
+		var scroll:=log_list.get_parent() as ScrollContainer
+		var chrome_height:=log_panel.get_combined_minimum_size().y-scroll.get_combined_minimum_size().y
+		scroll.custom_minimum_size.y=minf(maxf(64.0,log_list.get_combined_minimum_size().y),maxf(64.0,log_bottom-y-chrome_height))
 		log_panel.size=log_panel.get_combined_minimum_size()
 		log_panel.position=Vector2(roundf(right-log_panel.size.x),y)
 		log_panel.visible=pill.visible
@@ -551,7 +567,7 @@ func toggle_log()->void:
 
 
 func _build_log()->void:
-	log_panel=PanelContainer.new();log_panel.name="NoticeLogPanel";log_panel.mouse_filter=Control.MOUSE_FILTER_STOP
+	log_panel=PanelContainer.new();log_panel.theme=T.control_theme();log_panel.name="NoticeLogPanel";log_panel.mouse_filter=Control.MOUSE_FILTER_STOP
 	var style:=T.paper_panel_style(true,T.RADIUS_CARD,12.0);style.border_color=T.GOLD
 	style.shadow_color=Color(0.12,0.09,0.05,0.22);style.shadow_size=10;style.shadow_offset=Vector2(0,3)
 	log_panel.add_theme_stylebox_override("panel",style)
@@ -563,7 +579,17 @@ func _build_log()->void:
 	var close:=Button.new();close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_ALL;close.custom_minimum_size=Vector2(40,40)
 	close.add_theme_font_size_override("font_size",17);close.add_theme_color_override("font_color",T.INK_MUTED)
 	close.pressed.connect(toggle_log);head.add_child(close)
-	var hint:=_label(box,12,T.TEXT_SOFT,true);hint.text="This session, newest first. Quieter news is kept here without popping up. Click a line to open it."
+	log_hint=_label(box,14,T.TEXT_SOFT,true);log_hint.text="Recent news from this session. Choose a notice to open what it is about."
+	log_browse=Button.new();T.apply_button_style(log_browse);box.add_child(log_browse)
+	log_browse.pressed.connect(func()->void:log_browsing=not log_browsing;_fill_log())
+	log_search=LineEdit.new();log_search.placeholder_text="Search this session's notices";log_search.clear_button_enabled=true;log_search.custom_minimum_size.y=40;box.add_child(log_search)
+	log_search.text_changed.connect(func(text:String)->void:log_query=text;log_page=0;_fill_log())
+	log_paging=HBoxContainer.new();log_paging.add_theme_constant_override("separation",6);box.add_child(log_paging)
+	log_previous=Button.new();log_previous.text="Newer";T.apply_button_style(log_previous);log_paging.add_child(log_previous)
+	log_previous.pressed.connect(func()->void:log_page-=1;_fill_log())
+	log_count=_label(log_paging,14,T.INK_MUTED,false);log_count.size_flags_horizontal=Control.SIZE_EXPAND_FILL;log_count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	log_next=Button.new();log_next.text="Older";T.apply_button_style(log_next);log_paging.add_child(log_next)
+	log_next.pressed.connect(func()->void:log_page+=1;_fill_log())
 	var scroll:=ScrollContainer.new();scroll.follow_focus=true;scroll.custom_minimum_size=Vector2(0,320);scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;box.add_child(scroll)
 	log_list=VBoxContainer.new();log_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;log_list.add_theme_constant_override("separation",2);scroll.add_child(log_list)
 	var whole:=Button.new();whole.text="Open the whole Chronicle";whole.focus_mode=Control.FOCUS_ALL
@@ -578,15 +604,18 @@ func _build_log()->void:
 
 func _fill_log()->void:
 	if not is_instance_valid(log_list):return
-	for child in log_list.get_children():child.queue_free()
-	# Never down over the toolbar or your orders at the bottom right.
-	var bottom:=get_viewport().get_visible_rect().size.y-12.0
-	if is_instance_valid(hud) and hud.has_method("right_stack_top"):bottom=minf(bottom,float(hud.right_stack_top())-GAP)
-	var room:=clampf(bottom-TOP-PILL_HEIGHT-GAP-150.0,80.0,420.0)
-	(log_list.get_parent() as Control).custom_minimum_size.y=minf(room,maxf(64.0,float(mini(Model.history.size(),LOG_ROWS))*50.0))
-	for n in Model.history.slice(0,LOG_ROWS):
+	for child in log_list.get_children():log_list.remove_child(child);child.queue_free()
+	log_browse.text="Back to recent notices" if log_browsing else "Browse all %d notices" % Model.history.size()
+	log_search.visible=log_browsing;log_paging.visible=log_browsing;log_hint.visible=not log_browsing
+	var matches:=log_records();var pages:=maxi(1,ceili(float(matches.size())/LOG_ROWS));log_page=clampi(log_page,0,pages-1)
+	log_count.text="%d notices · %d / %d" % [matches.size(),log_page+1,pages];log_previous.disabled=log_page==0;log_next.disabled=log_page>=pages-1
+	var records:Array=matches.slice(log_page*LOG_ROWS,(log_page+1)*LOG_ROWS) if log_browsing else matches.slice(0,RECENT_LOG_ROWS)
+	# _layout measures the live header and footer before fitting the bounded list.
+	if records.is_empty():
+		var empty:=_label(log_list,14,T.INK_MUTED,true);empty.text="No notice matches this search." if log_browsing else "No news has arrived this session."
+	for n in records:
 		var line:=Button.new();line.flat=false;line.focus_mode=Control.FOCUS_ALL;line.alignment=HORIZONTAL_ALIGNMENT_LEFT
-		line.clip_text=true;line.custom_minimum_size=Vector2(0,48)
+		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;line.custom_minimum_size=Vector2(0,48)
 		line.text="%s · %s\n%s" % [Model.label(String(n.category)),Model.date_words(int(n.get("day",0))),Model.headline(n)+("  (%s)" % Model.count_words(n) if Model.count_words(n)!="" else "")]
 		line.tooltip_text="%s\n%s" % [Model.headline(n),String(n.get("text",""))]
 		line.icon=Model.icon(String(n.category),40);line.add_theme_constant_override("icon_max_width",22)
@@ -601,6 +630,14 @@ func _fill_log()->void:
 			toggle_log()
 			act(action))
 		log_list.add_child(line)
+
+
+func log_records()->Array:
+	var records:Array=[]
+	for notice:Dictionary in Model.history:
+		var words:="%s %s %s %s" % [Model.label(String(notice.category)),Model.date_words(int(notice.get("day",0))),Model.headline(notice),String(notice.get("text",""))]
+		if not log_browsing or log_query.strip_edges().is_empty() or words.to_lower().contains(log_query.strip_edges().to_lower()):records.append(notice)
+	return records
 
 
 ## For tests: the notices on screen, in order.
