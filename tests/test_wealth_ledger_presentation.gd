@@ -32,7 +32,7 @@ func test_daily_refresh_keeps_controls_and_updates_real_measurements()->void:
 func test_missing_measurements_do_not_invent_health_or_a_trend()->void:
 	var block:=_block();block.conditions={};block.economy.erase("productivity")
 	var ledger=auto_free(Ledger.new());ledger.setup(block)
-	assert_that(ledger.find_child("WorkerEffectiveness",true,false).get_meta("measure",null)).is_null()
+	assert_bool(ledger.find_child("WorkerEffectiveness",true,false).has_meta("measure")).is_false()
 	assert_str(_texts(ledger)).contains("Health  Not measured").contains("Some working conditions have not been measured.").not_contains("Steady:")
 	block.history=[{"day":0,"output_per_capita":0.3},{"day":30,"output_per_capita":0.4}]
 	assert_bool(ledger.update_block(block)).is_true()

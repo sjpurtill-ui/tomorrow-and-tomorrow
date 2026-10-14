@@ -6,12 +6,14 @@ const Folio=preload("res://scripts/hud/reference_folio.gd")
 const WealthFixture=preload("res://tests/wealth_visual_acceptance_probe.gd")
 const TradeFixture=preload("res://tests/trade_visual_acceptance_probe.gd")
 const FoodFixture=preload("res://tests/test_food_folio.gd")
+const MaterialsFixture=preload("res://tests/test_materials_ledger_presentation.gd")
 
 class CaptureHud extends Control:
 	signal section_requested(section:String,sub:int)
 	var dock:Control
+	var detail_provider:Object
 	func request_immediate_dock_refresh()->void:pass
-	func open_detail(_provider:Object)->void:pass
+	func open_detail(provider:Object)->void:detail_provider=provider
 
 class CaptureTerrain extends Node:
 	func _toggle_resource_view()->void:pass
@@ -19,6 +21,15 @@ class CaptureTerrain extends Node:
 
 class FoodProvider extends "res://scripts/hud/content/dock_content_economy.gd":
 	var short_food:=false
+	var prepared_materials:=false
+	func _materials_data()->Dictionary:
+		var result:=super._materials_data()
+		if prepared_materials:
+			var fixture:=MaterialsFixture.prepared_materials()
+			for key:String in fixture:
+				if not key.begins_with("on_"):result[key]=fixture[key]
+			result.selected=selected_material
+		return result
 	func _provisions_data()->Dictionary:
 		var result:=super._provisions_data()
 		var fixture:=FoodFixture.prepared_food()
@@ -43,7 +54,14 @@ func _run()->void:
 	for node:Node in get_tree().root.get_children():
 		if node!=self:node.set_process(false);node.set_physics_process(false)
 	var fixture:=WealthFixture.new()
-	fixture._fixture(_arg("state","opening"))
+	var trade_ids:Array=[]
+	if _arg("page","all")=="trade":trade_ids=TradeFixture.prepare_fixture(_arg("state","barter"))
+	else:fixture._fixture(_arg("state","opening"))
+	if _arg("history","")=="filled":
+		var scope:=GameState.selected_player_settlement_id
+		for index in 13:
+			var values:={"private_currency":11000.0+index*300.0,"hoards":1700.0+index*50.0,"aid":240.0+index*20.0}
+			preload("res://scripts/strategic_history.gd").record(GameState.strategic_history,int(GameState.elapsed_days)-360+index*30,{scope:values})
 	var output:=_arg("out",OS.get_user_data_dir())
 	var tag:=_arg("tag","capture")
 	var terrain:=CaptureTerrain.new();add_child(terrain)
@@ -55,7 +73,7 @@ func _run()->void:
 			var viewport:=SubViewport.new();viewport.size=canvas;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
 			var background:=ColorRect.new();background.color=T.PAPER_SUNK;background.size=Vector2(canvas);viewport.add_child(background)
 			var dock:=Dock.new();dock.theme=T.control_theme();dock.position=Vector2(24,20);dock.size=Vector2(Folio.page_width(canvas.x),canvas.y-40);viewport.add_child(dock);hud.dock=dock
-			for page:Array in [[0,"food"],[1,"materials"],[2,"wealth"]]:
+			for page:Array in [[0,"food"],[1,"materials"],[2,"wealth"],[3,"trade"]]:
 				if _arg("page","all")!="all" and _arg("page","all")!=String(page[1]):continue
 				dock.present(provider,int(page[0]));await _settle()
 				await _capture(viewport,output,"economy-%s-%s-%s-%d" % [tag,page[1],palette,canvas.x])
@@ -64,8 +82,35 @@ func _run()->void:
 				if page[1]=="food":
 					provider.short_food=true;dock.present(provider,0);dock.body_scroll.scroll_vertical=0;await _settle()
 					await _capture(viewport,output,"economy-%s-food-shortage-%s-%d" % [tag,palette,canvas.x]);provider.short_food=false
+				if page[1]=="materials":
+					provider.selected_material="Timber";dock.present(provider,1);dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-material-sources-%s-%d" % [tag,palette,canvas.x])
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-material-sources-bottom-%s-%d" % [tag,palette,canvas.x]);provider.selected_material=""
+					provider.prepared_materials=true;provider.selected_material="Timber";dock.present(provider,1);dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-material-active-sources-%s-%d" % [tag,palette,canvas.x])
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-material-active-sources-bottom-%s-%d" % [tag,palette,canvas.x]);provider.selected_material="";provider.prepared_materials=false
+				if page[1]=="wealth" and _arg("state","opening")=="coin":
+					provider.selected_account="private_currency";dock.present(provider,2);await _settle()
+					var ledger:=dock.find_child("WealthLedger",true,false) as Control
+					dock.body_scroll.scroll_vertical+=int(ledger.global_position.y-dock.body_scroll.global_position.y);await _settle()
+					await _capture(viewport,output,"economy-%s-wealth-accounts-%s-%d" % [tag,palette,canvas.x])
+					for button:Button in dock.find_children("*","Button",true,false):
+						if button.text=="Past balances":button.pressed.emit();break
+					if hud.detail_provider!=null:
+						dock.present(hud.detail_provider,0);dock.body_scroll.scroll_vertical=0;await _settle()
+						await _capture(viewport,output,"economy-%s-wealth-history-%s-%d" % [tag,palette,canvas.x]);hud.detail_provider=null
+					provider.selected_account=""
+				if page[1]=="trade" and not trade_ids.is_empty() and _arg("state","barter")!="word":
+					var board:=dock.find_child("TradeBoard",true,false)
+					board._toggle_people(String(trade_ids[0]));dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-trade-terms-%s-%d" % [tag,palette,canvas.x])
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-trade-terms-bottom-%s-%d" % [tag,palette,canvas.x])
 			viewport.queue_free();await get_tree().process_frame
 	fixture.free()
+	if _arg("page","all")=="trade":TradeFixture.cleanup_fixture()
 	print("POPUP_ECONOMY_CAPTURE PASS")
 	get_tree().quit(0)
 

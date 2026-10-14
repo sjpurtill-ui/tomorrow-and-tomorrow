@@ -409,6 +409,9 @@ func _build_body()->void:
 	for domain in service_buttons:
 		service_buttons[domain].set_pressed_no_signal(domain==service)
 	if training_view:page="training"
+	# Fleet and air preparation were only doorways. Keep old navigation targets
+	# working while placing those same actions directly with the forces.
+	if service!="army" and page in ["leaders","wars","recruitment"]:page="forces"
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
 	# The army is grand strategy on one page: how many serve, our enemies and
 	# what to do about each, and our leaders (hud/war_board.gd). No tabs. Every
@@ -418,7 +421,7 @@ func _build_body()->void:
 	if is_instance_valid(nav_row):nav_row.visible=not war
 	# Boats and wings keep their own pages; the leaders and the wars are the
 	# War screen's.
-	for key in ["leaders","wars"]:
+	for key in ["leaders","wars","recruitment"]:
 		if page_buttons.has(key):page_buttons[key].visible=service=="army"
 	if war:
 		_war();return
@@ -434,6 +437,10 @@ func _build_body()->void:
 		scroll.set_deferred("scroll_vertical",saved_scroll);return
 	var rows:=_rows();_hero(rows)
 	if training_view:_policy();scroll.set_deferred("scroll_vertical",saved_scroll);return
+	var prepare:=HFlowContainer.new();prepare.add_theme_constant_override("h_separation",8);prepare.add_theme_constant_override("v_separation",8);body.add_child(prepare)
+	prepare.tooltip_text="Crews and craft are organized through command. New craft are made in Production."
+	_button(prepare,"Service command",_map_command)
+	_button(prepare,"Military production ↗",_production)
 	var filters:=HBoxContainer.new();filters.add_theme_constant_override("separation",6);body.add_child(filters)
 	for definition:Array in [["all","All forces"],["attention","Need your attention"],["training","In training"]]:
 		var choice:=String(definition[0]);var button:=_button(filters,String(definition[1]),func():roster_filter=choice;_build_body())

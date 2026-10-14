@@ -30,7 +30,7 @@ func _local_tab(sub:int)->Dictionary:
 	match sub:
 		1:
 			var materials:=_materials_data()
-			return {"kpis":preload("res://scripts/hud/materials_ledger.gd").kpis(materials),"blocks":[materials]}
+			return {"kpis":[],"blocks":[materials]}
 		2:return _wealth_tab()
 		3:return {"kpis":preload("res://scripts/hud/trade_board.gd").kpis(),"blocks":[{"type":"trade_board"}]}
 	return _food_tab()
@@ -81,7 +81,7 @@ var selected_account:=""
 ## households' money. Trade between peoples mounts its own board between
 ## them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
-	return {"kpis":preload("res://scripts/hud/purse_board.gd").kpis(),"blocks":[{"type":"purse_board","mode":"wealth","on_open":_open_section,"ledger":_ledger_block()}]}
+	return {"kpis":[],"blocks":[{"type":"purse_board","mode":"wealth","on_open":_open_section,"ledger":_ledger_block()}]}
 
 ## This place's day's work and its households' money (hud/wealth_ledger.gd).
 ## The realm's treasury is the purse's, above: no town keeps its own.

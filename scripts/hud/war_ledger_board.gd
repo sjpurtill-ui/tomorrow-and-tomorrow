@@ -200,7 +200,7 @@ func _kicker(text:String)->Label:
 
 static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	var label:=Label.new();label.text=text
-	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
+	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(14,size));label.add_theme_color_override("font_color",color)
 	if wrap: label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
 

@@ -314,11 +314,10 @@ func _add_backdrop(parent:Control)->Control:
 
 ## Narration of what happens in the hall: dark ink on a parchment slip, set
 ## apart from speech bubbles by its fainter paper and thin sepia rules.
-const NARRATION_INK:=Color("3b2f22")
 static func _narration_plate()->StyleBoxFlat:
-	var style:=_plate(Color(0.93,0.88,0.77,0.94),6,0.0)
+	var style:=_plate(Tokens.PAPER_RAISED,8,0.0)
 	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=7;style.content_margin_bottom=8
-	style.border_color=Color("8a6d45");style.border_width_top=1;style.border_width_bottom=1
+	style.border_color=Tokens.RULE;style.border_width_top=1;style.border_width_bottom=1
 	style.shadow_color=Color(0,0,0,.22);style.shadow_size=5
 	return style
 
@@ -525,15 +524,15 @@ func _terms_chip(kind:String,terms:Dictionary)->Control:
 
 func _chip_box(icon:Texture2D,caption:String,value:String)->Control:
 	var chip:=PanelContainer.new();chip.name="TermsChip";chip.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	var chip_style:=Tokens.flat(Color("f6ecd6"),accent.lightened(.2),2,8,0)
+	var chip_style:=Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,8,0)
 	chip_style.content_margin_left=12;chip_style.content_margin_right=16;chip_style.content_margin_top=6;chip_style.content_margin_bottom=6
 	chip.add_theme_stylebox_override("panel",chip_style)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);chip.add_child(line)
 	if icon:
 		var picture:=TextureRect.new();picture.texture=icon;picture.custom_minimum_size=Vector2(40,40);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;line.add_child(picture)
 	var text:=VBoxContainer.new();text.add_theme_constant_override("separation",-2);line.add_child(text)
-	text.add_child(Tokens.make_label(caption,11,Color("5d4a2a"),.12))
-	var value_label:=Tokens.make_label(value,22,Color("2a2217"));value_label.add_theme_font_override("font",_bold);value_label.name="TermsValue";text.add_child(value_label)
+	text.add_child(Tokens.make_label(caption,14,Tokens.INK_MUTED,.08))
+	var value_label:=Tokens.make_label(value,24,Tokens.INK);value_label.add_theme_font_override("font",Tokens.font("ui_strong"));value_label.name="TermsValue";text.add_child(value_label)
 	return chip
 
 func _build_stage(audience:Dictionary)->Control:
@@ -629,7 +628,7 @@ func _new_stage(parent:Control,kind:String)->Control:
 	return made
 
 func _thinking_label()->Label:
-	var label:=Tokens.make_label("",15,NARRATION_INK);label.name="Thinking";label.add_theme_font_override("font",_italic);label.visible=false
+	var label:=Tokens.make_label("",16,Tokens.INK);label.name="Thinking";label.add_theme_font_override("font",_italic);label.visible=false
 	label.add_theme_stylebox_override("normal",_narration_plate())
 	return label
 
@@ -680,12 +679,13 @@ func _stage_tools(buttons:Array)->Control:
 
 func _popover_button(key:String,text:String,tip:String)->Button:
 	var button:=Button.new();button.name="Open"+key;button.text=text;button.toggle_mode=true
-	button.focus_mode=Control.FOCUS_NONE;button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	button.custom_minimum_size=Vector2(40 if key=="CourtSettings" else 0,32)
-	button.add_theme_font_size_override("font_size",13 if key!="CourtSettings" else 17)
+	button.focus_mode=Control.FOCUS_ALL;button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	button.custom_minimum_size=Vector2(40 if key=="CourtSettings" else 0,40)
+	button.add_theme_font_size_override("font_size",14 if key!="CourtSettings" else 17)
 	var plain:=Tokens.action_button_style(false)
 	var lit:=Tokens.button_pressed_style()
-	for state in ["normal","focus"]:button.add_theme_stylebox_override(state,plain)
+	button.add_theme_stylebox_override("normal",plain)
+	button.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 	for state in ["hover","pressed","hover_pressed"]:button.add_theme_stylebox_override(state,lit)
 	for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,Tokens.INK)
 	button.tooltip_text=tip
@@ -779,8 +779,8 @@ func _speaker_person(audience:Dictionary)->Dictionary:
 	return envoy
 
 func _seat_style(person_id:int,speaking:bool)->StyleBoxFlat:
-	var style:=_plate(Color(.95,.78,.36,.30) if speaking else Color(0,0,0,.22),4,0)
-	style.border_color=Color("e8c35a") if speaking else _person_color(person_id).lightened(.25)
+	var style:=_plate(Tokens.GOLD_WASH if speaking else Color(0,0,0,.22),4,0)
+	style.border_color=Tokens.ACTION if speaking else _person_color(person_id).lightened(.25)
 	style.border_width_bottom=3
 	if speaking:style.set_border_width_all(2);style.border_width_bottom=3
 	style.content_margin_left=3;style.content_margin_right=3;style.content_margin_top=3;style.content_margin_bottom=3
@@ -798,7 +798,7 @@ func _build_speech_row()->Control:
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(110,42)
-	speak_button.add_theme_font_size_override("font_size",15);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	speak_button.add_theme_font_size_override("font_size",15);Tokens.apply_button_style(speak_button,true)
 	speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
 	return row
@@ -875,7 +875,7 @@ func _build_stakes()->void:
 	else:
 		var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(spacer)
 	if _stakes_compact and rows.size()>1:
-		var toggle:=Button.new();toggle.name="StakesToggle";toggle.focus_mode=Control.FOCUS_NONE;toggle.flat=true
+		var toggle:=Button.new();toggle.name="StakesToggle";toggle.focus_mode=Control.FOCUS_ALL;toggle.flat=true
 		toggle.text="All of it ▾" if folded else "Fold ▴"
 		toggle.tooltip_text="Show everything you stand to gain or lose." if folded else "Fold it to one line, so the hall has room."
 		toggle.add_theme_font_size_override("font_size",13)
@@ -958,7 +958,7 @@ func _build_orders_row()->void:
 
 func _order_style(button:Button)->void:
 	_divine_style(button,Tokens.GOLD)
-	button.custom_minimum_size=Vector2(0,34);button.add_theme_font_size_override("font_size",13)
+	button.custom_minimum_size=Vector2(0,40);button.add_theme_font_size_override("font_size",14)
 
 ## "Did you mean": up to three of the closest orders (court_office_orders.gd
 ## closest), as one-click choices under the speaking row.
@@ -1165,13 +1165,9 @@ func _build_divine_row()->void:
 		divine_row.add_child(menu)
 
 func _divine_style(button:Button,ink:Color)->void:
-	button.custom_minimum_size=Vector2(104,42);button.add_theme_font_size_override("font_size",14);button.focus_mode=Control.FOCUS_ALL
-	var style:=Tokens.flat(ink.lerp(Tokens.PANEL_BG_SOLID,.84),ink,1,6,0);style.content_margin_left=10;style.content_margin_right=10
-	var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=ink.lerp(Tokens.PANEL_BG_SOLID,.68)
-	for state in ["normal","focus"]:button.add_theme_stylebox_override(state,style)
-	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover)
-	button.add_theme_stylebox_override("disabled",Tokens.flat(Tokens.TILE_BG,Tokens.BORDER_SOFT,1,6,0))
-	button.add_theme_color_override("font_color",ink.lightened(.15) if not Tokens.is_light() else ink.darkened(.2))
+	Tokens.apply_button_style(button,false);button.focus_mode=Control.FOCUS_ALL
+	button.custom_minimum_size=Vector2(104,40)
+	button.add_theme_color_override("font_color",Tokens.text_for(ink))
 
 func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	## Wrath or favour, validated and applied by the hall; the room reacts.
@@ -2027,14 +2023,14 @@ func _show_outcome(result:Dictionary,leave:=true)->void:
 	var head:=Tokens.make_label(head_text,13,colour,.08);head.name="ReceiptHead";words.add_child(head)
 	var outcome:=Tokens.make_label(String(result.get("outcome","")),15,Tokens.BODY);outcome.name="ReceiptText";outcome.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(outcome)
 	var dismiss:=Button.new();dismiss.name="Dismiss";dismiss.text="Return to the court" if from_court else "Dismiss the court";dismiss.custom_minimum_size=Vector2(190,46)
-	dismiss.add_theme_font_size_override("font_size",16);dismiss.add_theme_stylebox_override("normal",Tokens.gold_outline_style());dismiss.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	dismiss.add_theme_font_size_override("font_size",16);Tokens.apply_button_style(dismiss,false);dismiss.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	dismiss.pressed.connect(func()->void:
 		if from_court:show_court()
 		else:_close())
 	row.add_child(dismiss)
 	if conceive_next:
 		var visions:=Button.new();visions.name="HearVisions";visions.text="Hear the court's visions ›";visions.custom_minimum_size=Vector2(220,46)
-		visions.add_theme_font_size_override("font_size",16);visions.add_theme_stylebox_override("normal",Tokens.gold_outline_style());visions.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		visions.add_theme_font_size_override("font_size",16);Tokens.apply_button_style(visions,false);visions.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		visions.pressed.connect(open_conception);row.add_child(visions)
 	outcome_box.add_child(receipt)
 	_refresh_footer()
@@ -2068,7 +2064,7 @@ func return_to_court()->void:
 
 func _build_return_button()->Button:
 	return_button=Button.new();return_button.name="ReturnToCourt";return_button.text="‹ The court"
-	return_button.custom_minimum_size=Vector2(118,34);return_button.focus_mode=Control.FOCUS_NONE
+	return_button.custom_minimum_size=Vector2(118,34);return_button.focus_mode=Control.FOCUS_ALL
 	return_button.tooltip_text="Back to the whole court. Anyone you leave standing waits their turn."
 	return_button.pressed.connect(return_to_court)
 	return return_button
@@ -2382,7 +2378,7 @@ func _history_row(line:Dictionary)->Array:
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);stack.add_child(head)
 	var speaker_name:=String(line.get("speaker",""))
 	if role=="ruler":speaker_name="You"
-	var name_label:=Tokens.make_label(speaker_name,14,colour);name_label.add_theme_font_override("font",_bold);head.add_child(name_label)
+	var name_label:=Tokens.make_label(speaker_name,14,colour);name_label.add_theme_font_override("font",Tokens.font("ui_strong"));head.add_child(name_label)
 	var note:=_line_note(line)
 	if not note.is_empty():head.add_child(Tokens.make_label(note,12,Tokens.TEXT_DIM))
 	if aside:
@@ -2535,7 +2531,7 @@ func _cast_envoy(audience:Dictionary)->void:
 	var envoy:=court_stage.add_figure(Stage.MAIN,_speaker_person(audience),Stage.MAIN,"","",false,_bubble_accent(envoy_color)) as Control
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	var names:=VBoxContainer.new();names.add_theme_constant_override("separation",0);names.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(names)
-	var name_label:=Tokens.make_label(String(speaker.get("name","An envoy")),16,CREAM);name_label.name="EnvoyName";name_label.add_theme_font_override("font",_bold)
+	var name_label:=Tokens.make_label(String(speaker.get("name","An envoy")),16,CREAM);name_label.name="EnvoyName";name_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	names.add_child(name_label)
 	var caption_label:=Tokens.make_label("%s · %s" % [String(speaker.get("title","Envoy")),String(audience.get("civ_name",""))],12,CREAM_DIM);caption_label.name="EnvoyCaption"
 	names.add_child(caption_label)
@@ -2646,7 +2642,7 @@ func _envoy_offer(audience:Dictionary)->Dictionary:
 func _envoy_offer_plinth(offer:Dictionary)->Control:
 	var plinth:=PanelContainer.new();plinth.name="OfferObject";plinth.mouse_filter=Control.MOUSE_FILTER_PASS
 	plinth.tooltip_text=String(offer.get("tooltip",""))
-	var style:=_plate(Color(CREAM,.94),10,0);style.border_color=accent.lightened(.15);style.set_border_width_all(2)
+	var style:=_plate(Tokens.PAPER_RAISED,8,0);style.border_color=accent.lightened(.15);style.set_border_width_all(2)
 	style.shadow_color=Color(0,0,0,.35);style.shadow_size=12
 	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=12;style.content_margin_bottom=14
 	plinth.add_theme_stylebox_override("panel",style)
@@ -2656,19 +2652,19 @@ func _envoy_offer_plinth(offer:Dictionary)->Control:
 	else:
 		_place(plinth,Vector4(1,1,1,1),Vector4(-(OFFER_W+30.0),-260,-30,-16));plinth.grow_vertical=Control.GROW_DIRECTION_BEGIN
 	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",4);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;plinth.add_child(stack)
-	var caption:=Tokens.make_label(String(offer.caption),11,PAPER_SOFT,.14);caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(caption)
+	var caption:=Tokens.make_label(String(offer.caption),14,Tokens.INK_MUTED,.08);caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(caption)
 	var picture:=TextureRect.new();picture.name="OfferPicture";picture.texture=offer.texture
 	# Painted pieces fill the plinth; a drawn resource icon stays icon-sized.
 	var painted:=bool(offer.get("painted",false))
 	picture.custom_minimum_size=Vector2(96,96) if painted else Vector2(104,104)
 	picture.size_flags_vertical=Control.SIZE_EXPAND_FILL if painted else (Control.SIZE_EXPAND|Control.SIZE_SHRINK_CENTER);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	picture.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS;picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(picture)
-	var name_label:=Tokens.make_label(String(offer.name),21,PAPER_INK);name_label.name="OfferName";name_label.add_theme_font_override("font",_bold)
+	var name_label:=Tokens.make_label(String(offer.name),24,Tokens.INK);name_label.name="OfferName";name_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(name_label)
 	if not String(offer.get("tag","")).is_empty():
-		var tag:=Tokens.make_label(String(offer.tag),12,PAPER_SOFT);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(tag)
+		var tag:=Tokens.make_label(String(offer.tag),14,Tokens.INK_MUTED);tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;stack.add_child(tag)
 	if not String(offer.get("history","")).is_empty():
-		var history:=Tokens.make_label(String(offer.history),13,PAPER_SOFT);history.name="OfferHistory";history.add_theme_font_override("font",_italic)
+		var history:=Tokens.make_label(String(offer.history),16,Tokens.INK_MUTED);history.name="OfferHistory";history.add_theme_font_override("font",_italic)
 		history.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;history.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(history)
 	return plinth
 
@@ -2804,7 +2800,7 @@ func _build_envoy_talk(audience:Dictionary)->Control:
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(96,40)
-	speak_button.add_theme_font_size_override("font_size",14);speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	speak_button.add_theme_font_size_override("font_size",14);Tokens.apply_button_style(speak_button,true)
 	speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	divine_row=HBoxContainer.new();divine_row.name="DivineRow";divine_row.add_theme_constant_override("separation",6);row.add_child(divine_row)
 	queue_label=Tokens.make_label("",13,Tokens.TEXT_SOFT);queue_label.name="QueueLabel";queue_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(queue_label)
@@ -2993,7 +2989,7 @@ func _build_proposal()->void:
 	var current:=String(p.get("ambition","grand"))
 	for level:String in Works.AMBITIONS:
 		var button:=Button.new();button.name="Ambition_"+level;button.text=String(Works.AMBITION_WORDS[level]);button.toggle_mode=true;button.button_pressed=level==current
-		button.custom_minimum_size=Vector2(104,36);button.focus_mode=Control.FOCUS_NONE;button.tooltip_text=String(AMBITION_TIPS.get(level,""))
+		button.custom_minimum_size=Vector2(104,36);button.focus_mode=Control.FOCUS_ALL;button.tooltip_text=String(AMBITION_TIPS.get(level,""))
 		var on:=level==current
 		button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.GOLD_WASH if on else Tokens.BUTTON_BG,Tokens.GOLD if on else Tokens.BORDER_SOFT,2 if on else 1,4,0))
 		button.add_theme_stylebox_override("pressed",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,2,4,0))
@@ -3025,7 +3021,7 @@ func _build_proposal()->void:
 	var describe:=LineEdit.new();describe.name="DescribeVision";describe.placeholder_text="Describe your own vision…";describe.custom_minimum_size=Vector2(250,36);describe.max_length=400
 	describe.text_submitted.connect(func(text:String)->void:describe_vision(text))
 	controls.add_child(describe)
-	var ask:=Button.new();ask.name="AskBuilders";ask.text="Ask the builders";ask.custom_minimum_size=Vector2(130,36);ask.focus_mode=Control.FOCUS_NONE
+	var ask:=Button.new();ask.name="AskBuilders";ask.text="Ask the builders";ask.custom_minimum_size=Vector2(130,36);ask.focus_mode=Control.FOCUS_ALL
 	ask.pressed.connect(func()->void:describe_vision(describe.text))
 	controls.add_child(ask)
 
@@ -3132,7 +3128,7 @@ func _add_court_controls(row:BoxContainer,summon_words:String="Summon me at once
 	voice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	voice_label.mouse_filter=Control.MOUSE_FILTER_PASS
 	row.add_child(voice_label)
-	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_NONE
+	frequency_pick=OptionButton.new();frequency_pick.name="AudienceFrequency";frequency_pick.focus_mode=Control.FOCUS_ALL
 	frequency_pick.add_theme_font_size_override("font_size",13)
 	for level in FREQUENCY_LEVELS:frequency_pick.add_item(String(FREQUENCY_WORDS[level]))
 	frequency_pick.tooltip_text="How often envoys and petitioners ask to be received."
@@ -3277,7 +3273,7 @@ func _build_rest_scene(roster:Array[Dictionary])->Control:
 		var meter:=RegardMeter.new();meter.label_color=Tokens.INK_MUTED;meter.custom_minimum_size=Vector2(200,28);meter.love=float(people.love);meter.dread=float(people.dread);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(meter)
 		var read:=Tokens.make_label(_first_upper(String(people.get("read",""))),13,Tokens.BODY);read.mouse_filter=Control.MOUSE_FILTER_IGNORE;regard_box.add_child(read)
 		row.add_child(regard_box)
-	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_NONE
+	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_ALL
 	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER;close.custom_minimum_size=Vector2(150,34);close.tooltip_text="Close the court and return to your lands. Esc."
 	close.pressed.connect(_close);row.add_child(close)
 	# The court seated in the scene, the most pressing nearest the fire.
@@ -3360,15 +3356,15 @@ func _layout_rest_seats()->void:
 
 func _threshold_chip(audience:Dictionary)->Control:
 	var chip:=Button.new();chip.name="Threshold_"+String(audience.get("id",""))
-	chip.focus_mode=Control.FOCUS_NONE;chip.custom_minimum_size=Vector2(0,40)
-	var style:=_plate(Color(.06,.045,.03,.72),6,0);style.border_color=Color("c9a24a");style.border_width_left=3
+	chip.focus_mode=Control.FOCUS_ALL;chip.custom_minimum_size=Vector2(0,40)
+	var style:=_plate(Tokens.PAPER_RAISED,8,0);style.border_color=Tokens.ACTION;style.border_width_left=3
 	style.content_margin_left=8;style.content_margin_right=12
-	var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=Color(.18,.13,.07,.82);hover.border_color=Color("e8c35a")
+	var hover:=style.duplicate() as StyleBoxFlat;hover.bg_color=Tokens.HOVER_BG;hover.border_color=Tokens.ACTION
 	chip.add_theme_stylebox_override("normal",style);chip.add_theme_stylebox_override("hover",hover);chip.add_theme_stylebox_override("pressed",hover)
 	chip.icon=Identity.foreign(String(audience.get("civ_id",""))).texture
 	chip.add_theme_constant_override("icon_max_width",26);chip.add_theme_constant_override("h_separation",8)
-	chip.add_theme_color_override("font_color",Color("f6ecd6"));chip.add_theme_color_override("font_hover_color",Color("fff6e2"))
-	chip.add_theme_font_size_override("font_size",13)
+	chip.add_theme_color_override("font_color",Tokens.INK);chip.add_theme_color_override("font_hover_color",Tokens.INK);chip.add_theme_color_override("font_pressed_color",Tokens.INK);chip.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
+	chip.add_theme_font_size_override("font_size",14)
 	var waited:=int(GameState.elapsed_days)-int(audience.get("arrived_day",GameState.elapsed_days))
 	chip.text="Envoy of %s · %s" % [String(audience.get("civ_name","")),"arrived today" if waited<=0 else "waits %d d" % waited]
 	chip.tooltip_text="Receive the envoy of %s." % String(audience.get("civ_name",""))
@@ -3381,8 +3377,8 @@ func _rest_column(node_name:String,heading:String,sub:String,content:Control,rat
 	column.add_theme_constant_override("separation",4)
 	# Kicker, then its note on a line of its own; prose wraps, never ellipsizes.
 	var head:=VBoxContainer.new();head.add_theme_constant_override("separation",0);column.add_child(head)
-	head.add_child(Tokens.make_label(heading,12,Tokens.GOLD_BRIGHT,.12))
-	var note:=Tokens.make_label(sub,16,Tokens.TEXT_DIM);note.add_theme_font_override("font",_italic);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(note)
+	head.add_child(Tokens.make_label(Tokens.sentence_case(heading),22,Tokens.INK))
+	var note:=Tokens.make_label(sub,14,Tokens.TEXT_DIM);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(note)
 	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);column.add_child(rule)
 	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(content)
@@ -3396,7 +3392,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 		(groups[String(entry.group)] as Array).append(entry)
 	for group in Roster.GROUPS:
 		if not groups.has(group):continue
-		var label:=Tokens.make_label(Roster.group_word(group),10,Tokens.TEXT_DIM,.12)
+		var label:=Tokens.make_label(Roster.group_word(group),14,Tokens.TEXT_DIM,.12)
 		list.add_child(label)
 		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
 	if roster.is_empty():
@@ -3412,18 +3408,19 @@ func _roster_row(entry:Dictionary)->Control:
 	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(frame)
 	frame.add_child(_scene_picture(entry.get("person",{}) as Dictionary,34,40))
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);line.add_child(words)
-	var who:=Tokens.make_label(String(entry.name),14,Tokens.INK);who.add_theme_font_override("font",_bold);who.clip_text=true;who.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(who)
+	var who:=Tokens.make_label(String(entry.name),16,Tokens.INK);who.add_theme_font_override("font",_bold);who.clip_text=true;who.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(who)
 	var regard:Dictionary=entry.get("regard",{})
 	var sub_text:=String(entry.title)
 	if not regard.is_empty():sub_text+=" · "+String(regard.get("read",""))
-	var sub:=Tokens.make_label(sub_text,12,Tokens.TEXT_SOFT);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(sub)
+	var sub:=Tokens.make_label(sub_text,14,Tokens.TEXT_SOFT);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(sub)
 	if not regard.is_empty():
 		var gauge:=TextureRect.new();gauge.texture=Divine.meter_texture(float(regard.love),float(regard.dread),22);gauge.custom_minimum_size=Vector2(22,22);gauge.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		gauge.tooltip_text=Divine.meter_words(float(regard.love),float(regard.dread));line.add_child(gauge)
 	var matters:=int(entry.get("matters",0))
 	var count:=Tokens.make_label(("%d matter%s" % [matters,"" if matters==1 else "s"]) if matters>0 else "",12,Tokens.GOLD_BRIGHT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.custom_minimum_size.x=64;line.add_child(count)
-	var button:=Button.new();button.name="Summon_"+_node_key(String(entry.key));button.text="Summon";button.custom_minimum_size=Vector2(88,30);button.focus_mode=Control.FOCUS_NONE
-	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+	count.visible=matters>0
+	var button:=Button.new();button.name="Summon_"+_node_key(String(entry.key));button.text="Summon";button.custom_minimum_size=Vector2(88,30);button.focus_mode=Control.FOCUS_ALL
+	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;Tokens.apply_button_style(button,false)
 	button.tooltip_text="Call %s before you now." % String(entry.name)
 	var target:Dictionary=(entry.get("target",{}) as Dictionary).duplicate()
 	button.pressed.connect(func()->void:summon(target))
@@ -3472,10 +3469,10 @@ func _simple_row(button_name:String,title:String,sub:String,action:String,colour
 	if icon!=null:
 		var picture:=TextureRect.new();picture.texture=icon;picture.custom_minimum_size=Vector2(28,34);picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;line.add_child(picture)
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);line.add_child(words)
-	var head:=Tokens.make_label(title,14,Tokens.INK);head.add_theme_font_override("font",_bold);head.clip_text=true;head.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(head)
-	var detail:=Tokens.make_label(sub,12,Tokens.TEXT_SOFT);detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;detail.max_lines_visible=2;words.add_child(detail)
-	var button:=Button.new();button.name=button_name;button.text=action;button.custom_minimum_size=Vector2(84,30);button.focus_mode=Control.FOCUS_NONE
-	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());line.add_child(button)
+	var head:=Tokens.make_label(title,16,Tokens.INK);head.add_theme_font_override("font",_bold);head.clip_text=true;head.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(head)
+	var detail:=Tokens.make_label(sub,14,Tokens.TEXT_SOFT);detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;detail.max_lines_visible=2;words.add_child(detail)
+	var button:=Button.new();button.name=button_name;button.text=action;button.custom_minimum_size=Vector2(84,30);button.focus_mode=Control.FOCUS_ALL
+	button.size_flags_vertical=Control.SIZE_SHRINK_CENTER;Tokens.apply_button_style(button,false);line.add_child(button)
 	row.set_meta("button",button)
 	return row
 
@@ -3490,7 +3487,7 @@ func _decision_row(item:Dictionary)->Control:
 	for response in item.get("responses",[]):
 		var label:=String((response as Dictionary).get("label",""))
 		if label.is_empty():continue
-		var answer:=Button.new();answer.text=label;answer.focus_mode=Control.FOCUS_NONE;answer.custom_minimum_size.y=28
+		var answer:=Button.new();answer.text=label;answer.focus_mode=Control.FOCUS_ALL;answer.custom_minimum_size.y=28
 		answer.tooltip_text=String((response as Dictionary).get("ripple",(response as Dictionary).get("hint","")))
 		answer.pressed.connect(func()->void:
 			AdvisorSystem.respond_to_council_item(item_id,label)
@@ -3525,7 +3522,7 @@ func _build_rest_footer()->Control:
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(96,38)
-	speak_button.add_theme_stylebox_override("normal",Tokens.gold_outline_style());speak_button.pressed.connect(_speak);row.add_child(speak_button)
+	Tokens.apply_button_style(speak_button,true);speak_button.pressed.connect(_speak);row.add_child(speak_button)
 	if not _persons_live():
 		# Offline: ask the court about people from choices, not parsing. The
 		# choices sit beside SPEAK in the one speaking row, not orphaned below.
@@ -3535,7 +3532,8 @@ func _build_rest_footer()->Control:
 		for c in persons_choices():
 			if String(c.get("group",""))in ["ask","summon"]:rest_choices.append(c)
 		_fill_persons_menus(ask_row,rest_choices)
-	_add_court_controls(row,"Receive envoys at once")
+	var preferences:=HBoxContainer.new();preferences.add_theme_constant_override("separation",12);stack.add_child(preferences)
+	_add_court_controls(preferences,"Receive envoys at once")
 	var note:=Tokens.make_label("",13,Tokens.TEXT_DIM);note.name="CourtNote";note.add_theme_font_override("font",_italic);stack.add_child(note)
 	return bar
 
@@ -3624,7 +3622,7 @@ func _build_civic_strip()->Control:
 	civic_state_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;civic_state_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	civic_state_label.clip_text=true;civic_state_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(civic_state_label)
 	civic_replies=HBoxContainer.new();civic_replies.name="CivicReplies";civic_replies.add_theme_constant_override("separation",6);row.add_child(civic_replies)
-	var dismiss:=Button.new();dismiss.name="DismissFromOffice";dismiss.text="Dismiss from office";dismiss.focus_mode=Control.FOCUS_NONE;dismiss.custom_minimum_size=Vector2(0,28)
+	var dismiss:=Button.new();dismiss.name="DismissFromOffice";dismiss.text="Dismiss from office";dismiss.focus_mode=Control.FOCUS_ALL;dismiss.custom_minimum_size=Vector2(0,28)
 	dismiss.tooltip_text="Take their office from them. A successor takes it up at once; the dismissed keep their lives."
 	dismiss.add_theme_color_override("font_color",Tokens.RED);dismiss.pressed.connect(dismiss_leader);row.add_child(dismiss)
 	civic_status_label=Tokens.make_label("",12,Tokens.TEXT_SOFT);civic_status_label.name="CivicStatus";civic_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;civic_status_label.max_lines_visible=2
@@ -3658,12 +3656,12 @@ func _refresh_civic_strip(force:bool=false)->void:
 	for child in civic_replies.get_children():child.queue_free()
 	for reply in Civic.quick_replies(state):
 		var button:=Button.new();button.name="Civic_"+String(reply.id);button.text=String(reply.label);button.tooltip_text=String(reply.tip)
-		button.focus_mode=Control.FOCUS_NONE;button.custom_minimum_size=Vector2(0,28);button.add_theme_stylebox_override("normal",Tokens.gold_outline_style())
+		button.focus_mode=Control.FOCUS_ALL;button.custom_minimum_size=Vector2(0,28);Tokens.apply_button_style(button,false)
 		var words:=String(reply.text)
 		button.pressed.connect(func()->void:civic_reply(words))
 		civic_replies.add_child(button)
 	if state=="INTERPRETING" and terrain.has_method("_cancel_pending_pronouncement"):
-		var cancel:=Button.new();cancel.name="Civic_cancel";cancel.text="Call it back";cancel.focus_mode=Control.FOCUS_NONE;cancel.custom_minimum_size=Vector2(0,28)
+		var cancel:=Button.new();cancel.name="Civic_cancel";cancel.text="Call it back";cancel.focus_mode=Control.FOCUS_ALL;cancel.custom_minimum_size=Vector2(0,28)
 		cancel.tooltip_text="Withdraw the instruction before they finish weighing it."
 		var order_id:=String(order.get("id",""));var request_id:=String(order.get("request_id",""))
 		cancel.pressed.connect(func()->void:
@@ -3791,12 +3789,12 @@ func show_foreign(civ_id:String)->bool:
 	# pacts and leagues that bind you (the old Council of Nations).
 	var tabs:=HBoxContainer.new();tabs.name="ForeignTabs";tabs.add_theme_constant_override("separation",6);center.add_child(tabs)
 	for pair:Array in [["conversation","Conversation"],["pacts","Pacts and leagues"]]:
-		var tab:=Button.new();tab.name="Tab_"+String(pair[0]);tab.text=String(pair[1]);tab.focus_mode=Control.FOCUS_NONE;tab.custom_minimum_size.y=30
+		var tab:=Button.new();tab.name="Tab_"+String(pair[0]);tab.text=String(pair[1]);tab.focus_mode=Control.FOCUS_ALL;tab.custom_minimum_size.y=30
 		tab.add_theme_font_size_override("font_size",14);tab.pressed.connect(show_foreign_view.bind(String(pair[0])));tabs.add_child(tab)
 		foreign_refs["tab_"+String(pair[0])]=tab
 	var hall_panel:=PanelContainer.new();hall_panel.name="ConversationPane";hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	foreign_refs["conversation"]=hall_panel
-	var hall_style:=Tokens.flat(Tokens.FIELD_BG if Tokens.is_light() else Color("0a1316"),Tokens.BORDER_SOFT,1,8,0)
+	var hall_style:=Tokens.flat(Tokens.FIELD_BG,Tokens.BORDER_SOFT,1,8,0)
 	hall_style.content_margin_left=14;hall_style.content_margin_right=10;hall_style.content_margin_top=12;hall_style.content_margin_bottom=10
 	hall_panel.add_theme_stylebox_override("panel",hall_style);center.add_child(hall_panel)
 	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",6);hall_panel.add_child(stack)
@@ -3842,7 +3840,7 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 	var others:=HFlowContainer.new();others.name="OtherPeoples";others.add_theme_constant_override("h_separation",6);words.add_child(others)
 	for entry in Roster.foreign_peoples():
 		var other:=String(entry.civ_id)
-		var pick:=Button.new();pick.name="Address_"+other;pick.focus_mode=Control.FOCUS_NONE;pick.icon=Identity.foreign(other).texture;pick.expand_icon=true
+		var pick:=Button.new();pick.name="Address_"+other;pick.focus_mode=Control.FOCUS_ALL;pick.icon=Identity.foreign(other).texture;pick.expand_icon=true
 		pick.custom_minimum_size=Vector2(34,34);pick.tooltip_text="%s of %s" % [String(entry.leader),String(entry.name)];pick.disabled=other==civ_id
 		pick.add_theme_stylebox_override("normal",Tokens.flat(Tokens.PAPER_RAISED,Tokens.GOLD if other==civ_id else Tokens.RULE,1,2,2))
 		pick.add_theme_stylebox_override("disabled",Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,2,2,2))
@@ -3900,7 +3898,7 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 	plate_style.border_color=envoy_color;plate_style.border_width_left=4;plate_style.content_margin_left=12;plate_style.content_margin_right=8;plate_style.content_margin_top=7;plate_style.content_margin_bottom=8
 	plate.add_theme_stylebox_override("panel",plate_style);column.add_child(plate)
 	var names:=VBoxContainer.new();names.add_theme_constant_override("separation",0);plate.add_child(names)
-	var name_label:=Tokens.make_label(String(leader.get("name","")),19,envoy_color);name_label.add_theme_font_override("font",_bold);name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(name_label)
+	var name_label:=Tokens.make_label(String(leader.get("name","")),19,envoy_color);name_label.add_theme_font_override("font",Tokens.font("ui_strong"));name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(name_label)
 	var title_label:=Tokens.make_label("ruler of %s" % String(civ.get("name",civ_id)),13,Tokens.TEXT_SOFT);title_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;names.add_child(title_label)
 	var rows:Array=[]
 	rows.append(["Temper",String(leader.get("temperament","")),Tokens.BODY])
@@ -3988,7 +3986,7 @@ func _build_exchange_panel(civ_id:String)->Control:
 	var terms:=Tokens.make_label("",15,Tokens.BODY);terms.name="ExchangeWords";terms.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(terms)
 	var note:=Tokens.make_label("",12,Tokens.TEXT_SOFT);note.name="ExchangeNote";note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(note)
 	var seal:=Button.new();seal.name="SealExchange";seal.text="Seal this agreement";seal.custom_minimum_size=Vector2(190,38)
-	seal.add_theme_stylebox_override("normal",Tokens.gold_outline_style());seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	Tokens.apply_button_style(seal,false);seal.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	seal.pressed.connect(func()->void:
 		var result:=ForeignDialogue.seal(civ_id)
 		foreign_refs["message"]=String(result.get("error",String(ForeignDialogue.thread(civ_id).get("status",""))))
@@ -4036,12 +4034,12 @@ func _build_foreign_footer()->Control:
 	var bar:=_footer_bar()
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bar.add_child(row)
 	row.add_child(_build_return_button())
-	var connection:=Button.new();connection.name="AIConnection";connection.text="Connection settings…";connection.focus_mode=Control.FOCUS_NONE;connection.custom_minimum_size=Vector2(0,34)
+	var connection:=Button.new();connection.name="AIConnection";connection.text="Connection settings…";connection.focus_mode=Control.FOCUS_ALL;connection.custom_minimum_size=Vector2(0,34)
 	connection.pressed.connect(func()->void:PronouncementInterpreter.open_connection_settings())
 	row.add_child(connection);foreign_refs["connection"]=connection
 	var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(spacer)
 	var note:=Tokens.make_label("",12,Tokens.TEXT_DIM);note.name="CourtNote";note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(note)
-	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(150,34)
+	var close:=Button.new();close.name="CloseCourt";close.text="Leave the court ×";close.focus_mode=Control.FOCUS_ALL;close.custom_minimum_size=Vector2(150,34)
 	close.pressed.connect(_close);row.add_child(close)
 	return bar
 
@@ -4120,7 +4118,7 @@ func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)-
 	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);bubble.add_child(stack)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);stack.add_child(head)
 	var who:="You · your brief" if ruler else ("Your envoy" if role=="envoy" else leader_name)
-	var name_label:=Tokens.make_label(who,14,colour);name_label.add_theme_font_override("font",_bold);head.add_child(name_label)
+	var name_label:=Tokens.make_label(who,14,colour);name_label.add_theme_font_override("font",Tokens.font("ui_strong"));head.add_child(name_label)
 	var day:=int(turn.get("day",-1))
 	head.add_child(Tokens.make_label("earlier" if day<0 else Chronicle.date_label(day),12,Tokens.TEXT_DIM))
 	var text:=Tokens.make_label(String(turn.get("content","")),16,Tokens.BODY);text.name="LineText";text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

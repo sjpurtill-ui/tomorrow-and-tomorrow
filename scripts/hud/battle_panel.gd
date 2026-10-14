@@ -665,7 +665,7 @@ func _button(parent:Node,text:String,id:String,primary:bool)->Button:
 	var button:=Button.new(); button.name=id.capitalize().replace(" ",""); button.text=text
 	T.text(button,"body",T.INK)
 	button.custom_minimum_size=Vector2(0,40)
-	button.focus_mode=Control.FOCUS_NONE
+	button.focus_mode=Control.FOCUS_ALL
 	T.apply_button_style(button,primary)
 	button.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	button.add_theme_stylebox_override("disabled",T.button_disabled_style())

@@ -436,11 +436,11 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	var kickers:=[]
 	for child in wealth.find_children("*","Label",true,false):
 		if child.get_meta("wealth_section",false):kickers.append((child as Label).text)
-	# The strip carries what we own; the rows lead with the common store.
-	assert_str(String(kickers[0])).is_equal("THE COMMON STORE")
-	assert_int(kickers.find("THE COMMON STORE")).is_less(kickers.find("WHAT OUR GOODS BUY"))
-	assert_int(kickers.find("WHAT OUR GOODS BUY")).is_less(kickers.find("TRADE AND BUSINESS"))
-	assert_int(kickers.find("TRADE AND BUSINESS")).is_less(kickers.find("WHO HOLDS THE WEALTH"))
+	# The realm's account and decisions lead, followed by household evidence.
+	assert_str(String(kickers[0])).is_equal("The common store")
+	assert_int(kickers.find("The common store")).is_less(kickers.find("Household wealth"))
+	assert_int(kickers.find("Household wealth")).is_less(kickers.find("Trade and business"))
+	assert_int(kickers.find("Trade and business")).is_less(kickers.find("Who holds the wealth"))
 	# Arms live on the Arms tab.
 	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
 	# What we own is the engine's count: every town's goods, at our own prices.
