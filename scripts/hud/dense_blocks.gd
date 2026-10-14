@@ -36,15 +36,15 @@ extends RefCounted
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
-const ROW_HEIGHT:=28.0
-const FACT_HEIGHT:=30.0
+const ROW_HEIGHT:=40.0
+const FACT_HEIGHT:=36.0
 
 
 ## A small verb button: the one action on a row or beside a figure.
 static func verb(label:String,on_press:Variant,tip:String="",disabled:=false)->Button:
-	var go:=Button.new();go.name="Verb_"+label.validate_node_name();go.text=label;go.focus_mode=Control.FOCUS_NONE
+	var go:=Button.new();go.name="Verb_"+label.validate_node_name();go.text=label;go.focus_mode=Control.FOCUS_ALL
 	go.tooltip_text=tip;go.disabled=disabled;go.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	go.add_theme_font_override("font",T.font("ui_strong"));go.add_theme_font_size_override("font_size",12);go.custom_minimum_size=Vector2(0,22)
+	go.add_theme_font_override("font",T.font("ui_strong"));go.add_theme_font_size_override("font_size",14);go.custom_minimum_size=Vector2(0,30)
 	for state:String in ["normal","hover","pressed"]:
 		var skin:=T.gold_outline_style().duplicate() as StyleBoxFlat
 		skin.content_margin_left=9;skin.content_margin_right=9;skin.content_margin_top=1;skin.content_margin_bottom=1
@@ -52,7 +52,7 @@ static func verb(label:String,on_press:Variant,tip:String="",disabled:=false)->B
 		go.add_theme_stylebox_override(state,skin)
 	var off:=T.flat(Color(0,0,0,0),T.RULE,1,4);off.content_margin_left=9;off.content_margin_right=9;off.content_margin_top=1;off.content_margin_bottom=1
 	go.add_theme_stylebox_override("disabled",off);go.add_theme_color_override("font_disabled_color",T.INK_MUTED)
-	go.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	go.add_theme_stylebox_override("focus",T.gold_outline_style())
 	go.add_theme_color_override("font_color",T.GOLD_TEXT);go.add_theme_color_override("font_hover_color",T.INK)
 	if on_press is Callable and (on_press as Callable).is_valid():go.pressed.connect(on_press)
 	return go
@@ -62,9 +62,9 @@ static func verb(label:String,on_press:Variant,tip:String="",disabled:=false)->B
 static func tag(text:String,tone:String)->PanelContainer:
 	var pill:=PanelContainer.new();pill.name="Tag";pill.mouse_filter=Control.MOUSE_FILTER_IGNORE;pill.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var ink:=tone_color(tone,T.INK_MUTED)
-	var skin:=T.flat(Color(ink,0.14),Color(ink,0.6),1,8);skin.content_margin_left=6;skin.content_margin_right=6;skin.content_margin_top=0;skin.content_margin_bottom=0
+	var skin:=T.flat(Color(ink,0.08),Color.TRANSPARENT,0,2);skin.content_margin_left=6;skin.content_margin_right=6;skin.content_margin_top=2;skin.content_margin_bottom=2
 	pill.add_theme_stylebox_override("panel",skin)
-	var words:=T.make_label(text,11,ink);words.add_theme_font_override("font",T.font("ui_strong"));words.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var words:=T.make_label(text,12,ink);words.add_theme_font_override("font",T.font("ui_strong"));words.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	pill.add_child(words)
 	return pill
 
@@ -89,7 +89,7 @@ static func _bar(value:float,tone:String,width:float=56.0)->ProgressBar:
 
 static func render_fact_grid(parent:VBoxContainer,block:Dictionary)->GridContainer:
 	var grid:=GridContainer.new();grid.name="FactGrid"
-	grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",2)
+	grid.add_theme_constant_override("h_separation",28);grid.add_theme_constant_override("v_separation",6)
 	grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	parent.add_child(grid)
 	var widest:=float(block.get("min_column",300.0))
@@ -105,7 +105,7 @@ static func _fact(item:Dictionary)->Control:
 	var cell:=PanelContainer.new();cell.name="Fact_"+String(item.get("label","")).validate_node_name()
 	cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.custom_minimum_size.y=FACT_HEIGHT
 	var rest:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,3);rest.content_margin_left=4;rest.content_margin_right=4
-	rest.border_width_bottom=1;rest.border_color=Color(T.RULE,0.45)
+	rest.content_margin_top=4;rest.content_margin_bottom=4
 	var lit:=rest.duplicate() as StyleBoxFlat;lit.bg_color=T.HOVER_BG
 	cell.add_theme_stylebox_override("panel",rest)
 	cell.tooltip_text=String(item.get("tip",""))
@@ -114,7 +114,7 @@ static func _fact(item:Dictionary)->Control:
 	if icon is Texture2D:
 		var mark:=TextureRect.new();mark.texture=icon;mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(mark)
-	var label:=T.make_label(String(item.get("label","")),13,T.BODY);label.name="Label"
+	var label:=T.make_label(String(item.get("label","")),14,T.BODY);label.name="Label"
 	# Never cut short: a long name wraps onto a second line.
 	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(label)
@@ -124,7 +124,7 @@ static func _fact(item:Dictionary)->Control:
 		bar.add_theme_stylebox_override("background",T.flat(Color(T.INK,0.12),Color(0,0,0,0),0,2))
 		bar.add_theme_stylebox_override("fill",T.flat(tone_color(String(item.get("tone","")),T.GOLD),Color(0,0,0,0),0,2))
 		row.add_child(bar)
-	var value:=T.make_label(String(item.get("value","")),13,tone_color(String(item.get("tone","")),T.INK));value.name="Value"
+	var value:=T.make_label(String(item.get("value","")),18,tone_color(String(item.get("tone","")),T.INK));value.name="Value"
 	value.add_theme_font_override("font",T.font("ui_strong"));value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(value)
 	var button:Dictionary=item.get("button",{}) if item.get("button") is Dictionary else {}
@@ -157,7 +157,7 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 	if bool(block.get("head",true)):
 		head=HBoxContainer.new();head.name="Head";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=20;list.add_child(head)
 		var icon_gap:=Control.new();icon_gap.custom_minimum_size.x=icon_size;head.add_child(icon_gap)
-		for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,11,T.INK_MUTED,true))
+		for column:Dictionary in columns:head.add_child(_cell(String(column.get("label","")),column,12,T.INK_MUTED,true))
 		var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;list.add_child(rule)
 	var group:=""
 	var index:=0
@@ -166,7 +166,7 @@ static func render_table(parent:VBoxContainer,block:Dictionary)->VBoxContainer:
 		var this_group:=String(row.get("group",""))
 		if this_group!="" and this_group!=group:
 			group=this_group
-			var title:=T.make_label(group.to_upper(),11,T.GOLD_TEXT,0.06);title.name="Group_%d" % index;title.custom_minimum_size.y=22;title.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
+			var title:=T.make_label(group.to_upper(),12,T.GOLD_TEXT,0.06);title.name="Group_%d" % index;title.custom_minimum_size.y=32;title.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
 			list.add_child(title)
 		var line:=_row(row,columns,icon_size);line.name="Row_%d" % index
 		list.add_child(line);index+=1
@@ -191,7 +191,9 @@ static func _cell(text:String,column:Dictionary,font_size:int,ink:Color,head:=fa
 	# No cell is ever cut short ("…"): a fixed column grows to its words, a
 	# free column wraps them onto a second line.
 	var width:=float(column.get("width",0.0))
-	if width>0.0:label.custom_minimum_size.x=width
+	if width>0.0:
+		label.custom_minimum_size.x=width
+		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	else:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	if String(column.get("align",""))=="right":label.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 	return label
@@ -199,7 +201,7 @@ static func _cell(text:String,column:Dictionary,font_size:int,ink:Color,head:=fa
 
 static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	var panel:=PanelContainer.new();panel.name="Row";panel.custom_minimum_size.y=ROW_HEIGHT;panel.tooltip_text=String(row.get("tip",""))
-	var rest:=T.flat(Color(0,0,0,0),Color(0,0,0,0),0,2);rest.content_margin_left=2;rest.content_margin_right=2;rest.border_width_bottom=1;rest.border_color=Color(T.RULE,0.4)
+	var rest:=T.flat(Color.TRANSPARENT);rest.content_margin_left=4;rest.content_margin_right=4;rest.content_margin_top=4;rest.content_margin_bottom=4
 	var lit:=rest.duplicate() as StyleBoxFlat;lit.bg_color=T.HOVER_BG
 	panel.add_theme_stylebox_override("panel",rest)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(line)
@@ -211,8 +213,8 @@ static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	var first:=true
 	for column:Dictionary in columns:
 		var ink:=tone_color(String(row.get("tone","")),T.INK) if first else T.BODY
-		var label:=_cell(String(cells.get(String(column.get("key","")),"")),column,13,ink)
-		if first:label.add_theme_font_override("font",T.font("ui_strong"))
+		var label:=_cell(String(cells.get(String(column.get("key","")),"")),column,18 if first else 14,ink)
+		if first:label.add_theme_font_override("font",T.font("voice_bold"))
 		line.add_child(label);first=false
 	# Bar, tag and verb sit right-aligned in the row's end column (render_table
 	# gives every row's end column the same width).
@@ -323,12 +325,12 @@ static func render_columns(parent:VBoxContainer,block:Dictionary)->BoxContainer:
 
 static func render_frame(parent:VBoxContainer,block:Dictionary)->PanelContainer:
 	var frame:=PanelContainer.new();frame.name="Frame";frame.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var skin:=T.flat(Color(T.PAPER_RAISED,0.5),T.RULE,1,4);skin.set_content_margin_all(10)
+	var skin:=T.flat(Color.TRANSPARENT);skin.border_color=T.RULE;skin.border_width_top=1;skin.content_margin_top=14;skin.content_margin_bottom=8
 	frame.add_theme_stylebox_override("panel",skin)
 	parent.add_child(frame)
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",6);frame.add_child(box)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",12);frame.add_child(box)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);box.add_child(top)
-	var title:=T.make_label(String(block.get("heading","")).to_upper(),11,T.GOLD_TEXT,0.06);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
+	var title:=T.make_label(T.sentence_case(String(block.get("heading",""))),22,T.INK);title.add_theme_font_override("font",T.font("voice_bold"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
 	for action:Dictionary in block.get("actions",[]):top.add_child(verb(String(action.get("label","")),action.get("on_press"),String(action.get("tip",""))))
 	var inner:=VBoxContainer.new();inner.add_theme_constant_override("separation",6);box.add_child(inner)
 	var children:Array=[]
