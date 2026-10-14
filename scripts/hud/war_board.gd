@@ -785,8 +785,10 @@ static func compact(value:int)->String:
 	return "%s billion" % _one_place(float(value)/1_000_000_000.0)
 
 
+## Travel time in the one unit the war map uses too (war_ledger_model
+## span_words): days under two months, then months, then winters.
 static func _days(count:int)->String:
-	return "1 day" if count==1 else "%d days" % count
+	return Ledger.span_words(count)
 
 
 static func _one_place(value:float)->String:
@@ -861,8 +863,9 @@ func _enemy_row(e:Dictionary)->Control:
 	words.add_child(_line("%s · %s" % ["War" if String(e.kind)=="war" else "Feud","begun today" if since<=0 else Ledger.span_words(since)],12,T.INK_MUTED))
 	var trade_line:=String(preload("res://scripts/trade_words.gd").war_line(civ_id))
 	words.tooltip_text="%s.%s" % [Ledger.subtitle(e),("\n"+trade_line) if trade_line!="" else ""]
+	var dead_word:=_line("Dead",11,T.INK_MUTED);dead_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dead_word.tooltip_text="The dead of it all told: ours on the left, theirs on the right.";head.add_child(dead_word)
 	var dead:=DeadStrip.new();dead.name="Dead";dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(104,26);dead.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	dead.tooltip_text="The dead of it all told: %s of ours (left), %s of theirs (right)." % [EraWords.grouped(int(e.our_dead)),EraWords.grouped(int(e.their_dead))];head.add_child(dead)
+	dead.tooltip_text="The dead of it all told: %s of ours (left, in our ink), %s of theirs (right, in red)." % [EraWords.grouped(int(e.our_dead)),EraWords.grouped(int(e.their_dead))];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);chip.tooltip_text=Ledger.clock_words(e) if String(e.kind)=="feud" else "At war since %s." % Ledger.span_words(since);head.add_child(chip)
 	# HOI4's read of who is winning: our share of the strength against theirs.
 	var odds:=Strips.OddsBar.new();odds.name="Odds";column.add_child(odds)
@@ -1204,6 +1207,7 @@ func _take(civ_id:String,place:Dictionary,insist:=false)->void:
 
 func _build_leaders(commands:Array)->void:
 	_clear(leader_box)
+	leader_box.add_child(_pip_header())
 	for c:Dictionary in commands:leader_box.add_child(_leader_row(c))
 	# Raise another general: the verb at the foot of the list it adds to.
 	var foot:=HBoxContainer.new();foot.name="LeadersFoot";foot.add_theme_constant_override("separation",8);leader_box.add_child(foot)
@@ -1269,6 +1273,20 @@ func _leader_row(c:Dictionary)->Control:
 		if said!="":told.append(said)
 	panel.tooltip_text="\n".join(told)
 	return panel
+
+
+## What the four groups of pips on each leader are: one word over each, the
+## meaning on the pointer (force_strips GeneralPips SKILLS, its own layout:
+## an 18 px mark, then five pips, 71 px a group).
+func _pip_header()->Control:
+	var row:=HBoxContainer.new();row.name="PipHeader";row.add_theme_constant_override("separation",0)
+	var pad:=Control.new();pad.custom_minimum_size=Vector2(50,0);pad.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(pad)
+	for skill:Array in Strips.GeneralPips.SKILLS:
+		var word:=_line({"command":"Plan","tactics":"Fight","resolve":"Hold","logistics":"Supply"}.get(String(skill[0]),String(skill[2])),11,T.INK_MUTED)
+		word.add_theme_font_override("font",T.font("ui_strong"));word.custom_minimum_size=Vector2(71,0)
+		word.tooltip_text="%s, five pips at most: %s." % [String(skill[2]),String(skill[3])]
+		row.add_child(word)
+	return row
 
 
 ## The court, on the Marshal (the war leader at home): who else could hold

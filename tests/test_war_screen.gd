@@ -396,7 +396,8 @@ func test_a_people_arming_against_us_leads_its_card_with_the_march()->void:
 	var said:=Board.now_short(entry)
 	assert_bool(bool(said.danger)).is_true()
 	assert_str(String(said.text)).contains("Gathering every spear")
-	assert_str(String(said.text)).contains("%d days" % left)
+	# Travel and marching time in the war map's one unit (span_words).
+	assert_str(String(said.text)).contains(ledger.span_words(left))
 
 func test_where_every_soldier_stands_adds_up_to_everyone_under_arms()->void:
 	var Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
@@ -490,3 +491,24 @@ func test_the_armys_size_is_one_count_with_crews_serving_too()->void:
 	assert_int(preload("res://scripts/watch_military.gd").serving(MilitaryCampaign)).is_equal(now)
 	MilitaryCampaign.joint_operations.state["captured_holding"]=0
 
+
+## One estimate of another people's fighters (enemy_strength.gd): a point
+## value and its range from the intelligence ledger, "?" when nothing is known.
+func test_enemy_strength_is_a_point_and_its_range()->void:
+	var Strength:=preload("res://scripts/enemy_strength.gd")
+	var known:Dictionary=Strength.shaped({"known":true,"low":1800.0,"high":3500.0,"of":2,"bands":0,"partial":false,"tip":""},2)
+	assert_bool(bool(known.known)).is_true()
+	assert_int(int(known.low)).is_less_equal(int(known.value))
+	assert_int(int(known.value)).is_less_equal(int(known.high))
+	assert_str(String(known.text)).starts_with("~")
+	assert_str(String(known.range)).contains("–")
+	var unknown:Dictionary=Strength.shaped({"known":false},0)
+	assert_str(String(unknown.text)).is_equal("?")
+
+## One reading of who stands at home (watch_military home_standing): on
+## watch is the home guard in our towns and those free to send.
+func test_home_standing_counts_on_watch_once()->void:
+	var Watch:=preload("res://scripts/watch_military.gd")
+	var standing:Dictionary=Watch.home_standing(MilitaryCampaign)
+	for key in ["on_watch","home_guard","free_to_send","on_border","can_rise","guard_need"]:assert_bool(standing.has(key)).is_true()
+	assert_int(int(standing.on_watch)).is_greater_equal(int(standing.free_to_send))
