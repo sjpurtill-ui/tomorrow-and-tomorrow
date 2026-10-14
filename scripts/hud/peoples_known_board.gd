@@ -104,6 +104,7 @@ func _build()->void:
 	_search.size_flags_stretch_ratio=0.7;_search.add_theme_font_size_override("font_size",14);choose.add_child(_search)
 	_search.text_changed.connect(func(text:String):view.query=text;_refresh_picker())
 	_picker=OptionButton.new();_picker.name="SelectPeople";_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_picker.size_flags_stretch_ratio=1.3;_picker.custom_minimum_size.y=40;T.apply_button_style(_picker,false);choose.add_child(_picker)
+	_picker.fit_to_longest_item=false;_picker.clip_text=true;_picker.custom_minimum_size.x=120
 	_picker.get_popup().max_size.y=340
 	_picker.item_selected.connect(func(index:int):select_people(String(_picker.get_item_metadata(index))))
 	var order:=MenuButton.new();order.name="SortPeople";order.text="Sort";T.apply_button_style(order,false);choose.add_child(order)

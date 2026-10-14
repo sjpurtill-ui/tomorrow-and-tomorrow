@@ -446,6 +446,47 @@ func test_empty_hearsay_is_compact_and_keeps_the_map_action()->void:
 	(board.find_child("RumorMap",true,false) as Button).pressed.emit()
 	assert_array(opened).is_equal([true])
 
+func test_hearsay_reader_keeps_all_leads_and_only_one_detail()->void:
+	var leads:Array=[]
+	for index in 21:leads.append({"id":"lead_"+str(index),"name":"River people "+str(index),"where":"Northeast · ~24 days","text":"Telling "+str(index),"confidence":0.3,"word":"An uncertain telling","searched":2,"stale":false})
+	var called:=[]
+	var data:={"leads":leads,"actions":{"plan":func():called.append("plan"),"rumor_map":func():called.append("map")}}
+	var view:={"lead":"","query":""}
+	var board:Control=auto_free(preload("res://scripts/hud/known_world_board.gd").new());add_child(board);board.setup({"model":data,"view":view})
+	assert_int(board.lead_picker.item_count).is_equal(21)
+	assert_int(board.find_children("LeadEvidence","Label",true,false).size()).is_equal(1)
+	var search:LineEdit=board.find_child("FindLead",true,false);search.text="people 20";search.text_changed.emit(search.text)
+	assert_int(board.lead_picker.item_count).is_equal(1)
+	board.lead_picker.item_selected.emit(0)
+	assert_str(String(view.lead)).is_equal("lead_20")
+	assert_str((board.find_child("LeadEvidence",true,false) as Label).text).is_equal("Telling 20")
+	(board.find_child("FollowLead",true,false) as Button).pressed.emit();(board.find_child("RumorMap",true,false) as Button).pressed.emit()
+	assert_array(called).is_equal(["plan","map"])
+	search.grab_focus()
+	var next:Dictionary=data.duplicate(true);next.leads[20].text="A newer telling"
+	board.update_block({"model":next})
+	assert_str(String(view.lead)).is_equal("lead_20")
+	assert_str((board.find_child("FindLead",true,false) as LineEdit).text).is_equal("people 20")
+	assert_bool((board.find_child("FindLead",true,false) as LineEdit).has_focus()).is_true()
+	assert_str((board.find_child("LeadEvidence",true,false) as Label).text).is_equal("A newer telling")
+	var refreshed_search:LineEdit=board.find_child("FindLead",true,false)
+	refreshed_search.text="no such telling";refreshed_search.text_changed.emit(refreshed_search.text)
+	assert_str((board.find_child("LeadCount",true,false) as Label).text).is_equal("0 matching of 21 tellings")
+	assert_bool(board.lead_reader.visible).is_false()
+	refreshed_search.text="";refreshed_search.text_changed.emit("")
+	assert_bool(board.lead_reader.visible).is_true()
+	assert_str(String(view.lead)).is_equal("lead_20")
+
+func test_hearsay_provider_no_longer_discards_leads_after_six()->void:
+	var terrain:=StubTerrain.new();add_child(terrain);var hud:=StubHud.new();add_child(hud)
+	var provider:=World.new(terrain,hud)
+	var leads:Array=[]
+	for index in 21:leads.append({"id":"lead_"+str(index),"name":"River people "+str(index),"center":{"x":80.0,"z":40.0},"confidence":0.3,"via":"traders"})
+	var presented:=provider._leads_model(leads,Vector2.ZERO,10)
+	assert_int(presented.size()).is_greater_equal(21)
+	assert_str(String(presented[20].id)).is_equal("lead_20")
+	hud.free();terrain.free()
+
 ## A people that bows to us, or gathers every spear against us
 ## (world_answer.gd), says so in the "between us" cell.
 func test_between_us_says_who_bows_and_who_arms()->void:

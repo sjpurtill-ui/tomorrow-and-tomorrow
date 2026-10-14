@@ -24,6 +24,19 @@ var region_label:Label
 var recipe:Label
 var feedback:Label
 var reports:Label
+var report_entries:Array[Dictionary]=[]
+var report_archive:=false
+var report_page:=0
+var report_query:=""
+var report_selected:=""
+var report_signature:=""
+var report_rows:VBoxContainer
+var report_search:LineEdit
+var report_browse:Button
+var report_pager:HBoxContainer
+var report_count:Label
+var report_previous:Button
+var report_next:Button
 var replacement:CheckBox
 var tick:=0.0
 var selected_id:=0
@@ -86,6 +99,42 @@ func _page(title:String)->VBoxContainer:
 
 func _build_service()->void:
 	pass
+
+func _build_reports(column:VBoxContainer)->void:
+	column.add_theme_constant_override("separation",8)
+	P.label(column,"Latest from the service","value",T.INK).add_theme_font_size_override("font_size",20)
+	report_browse=_button(column,"Browse all reports",func()->void:report_archive=not report_archive;report_page=0;_fill_reports())
+	report_browse.name="BrowseServiceReports"
+	report_search=LineEdit.new();report_search.name="FindServiceReport";report_search.placeholder_text="Find a report";column.add_child(report_search)
+	report_search.text_changed.connect(func(value:String)->void:report_query=value;report_page=0;_fill_reports())
+	report_pager=_row(column)
+	report_previous=_button(report_pager,"Previous",func()->void:report_page-=1;_fill_reports());report_previous.name="PreviousServiceReports"
+	report_count=_label(report_pager,"",13);report_count.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	report_next=_button(report_pager,"Next",func()->void:report_page+=1;_fill_reports());report_next.name="NextServiceReports"
+	report_rows=VBoxContainer.new();report_rows.name="ServiceReportChoices";report_rows.add_theme_constant_override("separation",6);column.add_child(report_rows)
+	reports=_label(column,"Nothing to report yet.",14);reports.name="SelectedServiceReport"
+
+func _fill_reports()->void:
+	if not is_instance_valid(report_rows):return
+	report_browse.text="Back to latest" if report_archive else "Browse all reports (%d)" % report_entries.size()
+	report_search.visible=report_archive;report_pager.visible=report_archive
+	var matching:Array[Dictionary]=[]
+	for entry in report_entries:
+		if not report_archive or report_query.strip_edges().is_empty() or String(entry.text).to_lower().contains(report_query.strip_edges().to_lower()):matching.append(entry)
+	var limit:=6 if report_archive else 3
+	report_page=clampi(report_page,0,maxi(0,ceili(matching.size()/float(limit))-1))
+	report_previous.disabled=report_page==0;report_next.disabled=(report_page+1)*limit>=matching.size()
+	report_count.text="%d / %d" % [report_page+1,maxi(1,ceili(matching.size()/float(limit)))]
+	for child in report_rows.get_children():report_rows.remove_child(child);child.queue_free()
+	var page_entries:=matching.slice(report_page*limit,(report_page+1)*limit)
+	if not page_entries.any(func(entry:Dictionary)->bool:return String(entry.key)==report_selected):report_selected=String(page_entries[0].key) if not page_entries.is_empty() else ""
+	reports.text="No matching reports." if report_archive else "Nothing to report yet."
+	for entry:Dictionary in page_entries:
+		var key:=String(entry.key);var words:=String(entry.text).replace("\n"," ")
+		var summary:=words.substr(0,42)+"…" if words.length()>42 else words
+		var choice:=_button(report_rows,String(entry.when)+" · "+summary,func()->void:report_selected=key;_fill_reports();(reports.get_parent().get_parent() as ScrollContainer).ensure_control_visible.call_deferred(reports))
+		choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.clip_text=true;choice.toggle_mode=true;choice.set_pressed_no_signal(key==report_selected);choice.tooltip_text=String(entry.text)
+		if key==report_selected:reports.text=String(entry.when)+"\n"+String(entry.text)
 
 func _force_summary(force:Dictionary)->String:
 	return String(force.get("status",""))
@@ -295,9 +344,10 @@ func _refresh_status()->void:
 	for job:Dictionary in MilitaryCampaign.production_lines_snapshot().get("lines",[]):
 		if String(job.get("item",""))==String(C.UNITS.get(type_id,{}).get("equipment","")):lines.append(String(job.get("state","")))
 	if not lines.is_empty():recipe.text+="\nBeing built: "+", ".join(lines)
-	var latest:Array[String]=[]
+	var latest:Array[Dictionary]=[]
 	for event:Dictionary in op.state.events:
-		if String(event.get("domain","")) in ["",domain]:latest.append("%s: %s" % [EraWords.when(int(event.day)),event.text])
+		if String(event.get("domain","")) in ["",domain]:latest.append({"key":"%s:%s" % [event.day,event.text],"when":EraWords.when(int(event.day)),"text":String(event.text)})
 	for convoy:Dictionary in op.state.convoys:
-		if String(op.force(int(convoy.force_id)).get("domain",""))==domain and convoy.status in ["preparing","outbound","returning"]:latest.append("A transport is %s with %.0f food left." % [String(convoy.status).replace("_"," "),convoy.food])
-	reports.text="\n\n".join(latest.slice(0,12)) if not latest.is_empty() else "Nothing to report yet."
+		if String(op.force(int(convoy.force_id)).get("domain",""))==domain and convoy.status in ["preparing","outbound","returning"]:latest.push_front({"key":"transport:%s" % convoy.get("id",convoy.force_id),"when":"Under way","text":"A transport is %s with %.0f food left." % [String(convoy.status).replace("_"," "),convoy.food]})
+	var signature:=str(latest)
+	if signature!=report_signature:report_signature=signature;report_entries=latest;_fill_reports()

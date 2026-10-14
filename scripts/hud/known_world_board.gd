@@ -10,12 +10,19 @@ const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 
 var model:Dictionary={}
 var tier:=0
+var view:Dictionary={}
+var lead_picker:OptionButton
+var lead_reader:VBoxContainer
+var lead_count:Label
 ## The aims sheet sits in its own slot (hidden while there is no aim).
 var aims_slot:VBoxContainer
 
 func setup(block:Dictionary)->void:
 	name="KnownWorldBoard"
 	model=block.get("model",{})
+	view=block.get("view",{})
+	if not view.has("lead"):view.lead=""
+	if not view.has("query"):view.query=""
 	tier=int(model.get("tier",0))
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",12)
@@ -27,8 +34,13 @@ func update_block(block:Dictionary)->bool:
 	var old_model:=model
 	model=next
 	if old_model.get("aims",{})!=next.get("aims",{}) or old_model.get("leads",[])!=next.get("leads",[]):
+		var focus:=get_viewport().gui_get_focus_owner()
+		var focus_name:=String(focus.name) if focus!=null and is_ancestor_of(focus) else ""
 		for child in get_children():remove_child(child);child.queue_free()
 		_build_compact()
+		if focus_name!="":
+			var replacement:=find_child(focus_name,true,false) as Control
+			if replacement!=null:replacement.grab_focus()
 	return true
 
 ## "What we strive for": the live generational aim (legacy_aims.gd), its
@@ -87,27 +99,60 @@ func _fill_compact_side(side:VBoxContainer)->void:
 		UI.verb(empty,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
 		return
 	var stack:=UI.sheet(side,"Leads")
-	var names:={}
-	for lead:Dictionary in leads:names[String(lead.get("name",""))]=true
-	var shared:=String(names.keys()[0]) if names.size()==1 else ""
-	var head:=UI.heading(stack,"Told of, not yet met"+((": "+the_name(shared)) if shared!="" else ""))
+	var head:=UI.heading(stack,"Told of, not yet met")
 	UI.verb(head,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
-	for index in leads.size():
-		var lead:Dictionary=leads[index]
-		var row:=UI.line(stack,6);row.name="Lead_%d" % index
-		var tip:="%s%s%s" % [String(lead.get("text","")),"
-"+String(lead.get("word","")),("
-Searched for %d times, not found." % int(lead.get("searched",0))) if int(lead.get("searched",0))>0 else ("
-An old telling." if bool(lead.get("stale",false)) else "")]
-		row.tooltip_text=tip
-		var dots:=Dots.new();dots.amount=clampf(float(lead.get("confidence",0.0))/.5,0,1);row.add_child(dots)
-		dots.tooltip_text=tip;dots.mouse_filter=Control.MOUSE_FILTER_PASS
-		# Where they are said to be leads the row; many tellings share a name.
-		UI.cell(row,String(lead.get("where","")),132,13,T.INK if not bool(lead.get("stale",false)) else T.INK_MUTED,true).tooltip_text=tip
-		var who:=the_name(String(lead.get("name","")))
-		if shared=="":UI.label(row,who.substr(0,1).to_upper()+who.substr(1),12,T.INK_MUTED,false,true).tooltip_text=tip
-		else:UI.spacer(row)
-		var follow:=UI.verb(row,"Follow",actions.get("plan",Callable()),"Push an expedition toward them, planned on the map");follow.name="FollowLead"
+	lead_count=UI.label(stack,"",14,T.INK_MUTED);lead_count.name="LeadCount"
+	var choose:=HBoxContainer.new();choose.add_theme_constant_override("separation",8);stack.add_child(choose)
+	var search:=LineEdit.new();search.name="FindLead";search.placeholder_text="Find a telling";search.text=String(view.query);search.custom_minimum_size=Vector2(140,40);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_child(search)
+	search.add_theme_font_size_override("font_size",14)
+	lead_picker=OptionButton.new();lead_picker.name="SelectLead";lead_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;T.apply_button_style(lead_picker,false);choose.add_child(lead_picker);lead_picker.get_popup().max_size.y=320
+	lead_picker.fit_to_longest_item=false;lead_picker.clip_text=true;lead_picker.custom_minimum_size.x=120
+	lead_reader=VBoxContainer.new();lead_reader.name="SelectedLead";lead_reader.add_theme_constant_override("separation",6);stack.add_child(lead_reader)
+	search.text_changed.connect(func(text:String):view.query=text;_refresh_lead_picker())
+	lead_picker.item_selected.connect(func(index:int):view.lead=String(lead_picker.get_item_metadata(index));_show_lead())
+	_refresh_lead_picker();_show_lead()
+
+static func lead_key(lead:Dictionary)->String:
+	return String(lead.get("id","")) if String(lead.get("id",""))!="" else String(lead.get("name",""))+"|"+String(lead.get("where",""))+"|"+String(lead.get("text",""))
+
+func _refresh_lead_picker()->void:
+	lead_picker.clear()
+	var query:=String(view.query).strip_edges().to_lower()
+	var selected_found:=false
+	var leads:Array=model.get("leads",[])
+	if String(view.lead)=="" and not leads.is_empty():view.lead=lead_key(leads[0])
+	for lead:Dictionary in leads:
+		if query!="" and not query in (String(lead.get("name",""))+" "+String(lead.get("where",""))+" "+String(lead.get("text",""))).to_lower():continue
+		lead_picker.add_item(String(lead.get("name","A people"))+" · "+String(lead.get("where","")))
+		var index:=lead_picker.item_count-1
+		lead_picker.set_item_metadata(index,lead_key(lead))
+		if lead_key(lead)==String(view.lead):lead_picker.select(index);selected_found=true
+	var matching:=lead_picker.item_count
+	if matching==0:lead_picker.add_item("No matching tellings");lead_picker.set_item_disabled(0,true)
+	elif not selected_found:lead_picker.select(-1);lead_picker.text="Choose a matching telling"
+	lead_picker.tooltip_text="%d matching of %d tellings" % [matching,leads.size()]
+	lead_count.text="%d tellings" % leads.size() if query=="" else "%d matching of %d tellings" % [matching,leads.size()]
+	lead_reader.visible=matching>0
+
+func _show_lead()->void:
+	for child in lead_reader.get_children():lead_reader.remove_child(child);child.queue_free()
+	var selected:Dictionary={}
+	var leads:Array=model.get("leads",[])
+	for lead:Dictionary in leads:
+		if lead_key(lead)==String(view.lead):selected=lead;break
+	if selected.is_empty() and not leads.is_empty():selected=leads[0];view.lead=lead_key(selected);_refresh_lead_picker()
+	if selected.is_empty():return
+	var UI:=preload("res://scripts/hud/world_ui.gd")
+	var title:=UI.label(lead_reader,String(selected.get("where","")),18,T.INK,true);title.name="LeadWhere"
+	var text:=UI.label(lead_reader,String(selected.get("text","")),16,T.INK);text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;text.name="LeadEvidence"
+	var status:=HFlowContainer.new();status.add_theme_constant_override("h_separation",12);status.add_theme_constant_override("v_separation",4);lead_reader.add_child(status)
+	var dots:=Dots.new();dots.amount=clampf(float(selected.get("confidence",0))/.5,0,1);status.add_child(dots);dots.tooltip_text=String(selected.get("word",""))
+	UI.label(status,String(selected.get("word",""))+(" · an old telling" if bool(selected.get("stale",false)) else ""),14,T.INK_MUTED)
+	var searches:=int(selected.get("searched",0))
+	if searches>0:UI.label(lead_reader,"%d search%s; not found." % [searches,"" if searches==1 else "es"],14,T.INK_MUTED)
+	var actions:Dictionary=model.get("actions",{})
+	var follow:=UI.verb(status,"Follow lead",actions.get("plan",Callable()),"Plan an expedition on the map; choose the route there.");follow.name="FollowLead"
+
 
 class AimBar extends Control:
 	var progress:=0.0

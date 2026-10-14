@@ -29,6 +29,13 @@ func _ready()->void:
 		board.toggle(chosen);await _frames(5);hud.dock.body_scroll.scroll_vertical=900;await _frames(5);await _capture_profile("towns",canvas.x,mode)
 		board.select_people("player");hud.dock.body_scroll.scroll_vertical=0;await _frames(5);await _capture_profile("ours",canvas.x,mode)
 		_check_bounds(board,canvas.x)
+		if "--rumors" in OS.get_cmdline_user_args():
+			var known=hud.dock.find_child("KnownWorldBoard",true,false)
+			var data:Dictionary=known.model.duplicate(true);data.leads=[]
+			for index in 21:data.leads.append({"id":"review_"+str(index),"name":"People of the distant river "+str(index),"where":"Northeast · ~24 days","text":"Caravan traders spoke of People of the distant river %d, beyond the northern hills." % index,"confidence":0.3,"word":"An uncertain telling","searched":2,"stale":index%2==0})
+			known.view.query="";known.view.lead="review_0";known.update_block({"model":data});await _frames(5);hud.dock.body_scroll.scroll_vertical=100000;await _frames(5);await _capture_profile("rumors",canvas.x,mode);_check_bounds(known,canvas.x)
+			var search:LineEdit=known.find_child("FindLead",true,false);search.text="river 20";search.text_changed.emit(search.text);known.lead_picker.select(0);known.lead_picker.item_selected.emit(0);await _frames(5);await _capture_profile("rumors-selected",canvas.x,mode)
+			search.text="no such telling";search.text_changed.emit(search.text);await _frames(3);await _capture_profile("rumors-no-match",canvas.x,mode)
 		if canvas.x==1024:
 			for row:Dictionary in board.model.rows:
 				if not bool(row.us) and String(row.civ_id)!=chosen:

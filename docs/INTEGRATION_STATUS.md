@@ -52,7 +52,7 @@ search/paging without rebuilding the selected model and selecting the last work.
 Wealth is delivered at `04aa46fe` (worker `76d2cd01`, 40 integrated cases), and
 the selected World civilization profile at `c588cd38` (worker `1778aa48`, 17 cases
 and 13 private GPU views including uncertain intelligence). The profile exposes
-learning, craft/output, society and culture as well as all nine foreign-regard
+learning, craft/output, society and culture as well as all foreign-regard
 values, with uncertainty preserved.
 
 Gallery `f29e5d98` (worker `956061ef`) has six searchable objects per page,
@@ -68,8 +68,32 @@ A accepted the revised 1024px opening/alternatives and century captures. All 27
 opening/century/ambition cases pass (reports 37/38), and both-theme private GPU
 probes pass actual choice/confirmation, all 14 paths and long inherited memory.
 
-HELD: Trade/Deliveries, Production/Exchange, Home detail/Buildings, World history,
-Chronicle/Figures/notices and Navy/Air density work. These are not claimed as
+Trade/Deliveries is delivered at `1fd2d15c` (worker `1d7213b0`): one selected
+partner with exact prices and existing controls, a six-choice searchable partner
+browser, six active deliveries per page and three recent arrivals with an explicit
+archive. B/root accepted the narrow views; all 14 affected integration cases pass.
+Hearsay is delivered at `ecbca45a` (worker `feec9b2b`): searchable selected telling
+with provenance, uncertainty and the existing Follow lead action; 19 cases pass.
+
+World History is delivered at `6b87ab58` (worker `b34e3e27`): three recent
+choices, one full telling and a searchable six-event archive. A accepted the narrow
+reader/Back revision; all eight integrated reader cases pass.
+
+Navy/Air now use four searchable force choices beside a selected profile, merging
+crew/condition readiness into Forces. Reports show three recent/six archived
+choices with full tellings. Training labels its measures and places current
+food/material use and first-drill timing above the policy choices. C accepted
+the final wide/narrow composition; 40 populated private GPU captures and eight
+existing roster cases pass. Opening condition gains now correctly say points
+rather than percentages; the underlying effect values and rules are unchanged.
+
+Chronicle is delivered at `ca350fda` (worker `66c9dcc1`): three recent choices
+and a complete selected event; searchable six-record archives for events and
+buildings. Year overview counts are scoped to that year. Root accepted the
+chooser/reader revision; three integrated bounded-reader cases pass (eight
+worker Chronicle cases and 24 private GPU views in both palettes).
+
+HELD: Production/Exchange, Home detail/Buildings, and Figures/notices. These are not claimed as
 delivered. No game rules are changed.
 The Court pacing/cast proposal remains a design discussion, separate from UI work.
 
