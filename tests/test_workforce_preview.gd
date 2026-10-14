@@ -13,6 +13,18 @@ func before() -> void:
 
 func after() -> void:
 	WorldSimulation.clear()
+	# Do not resume the synthetic mature realm while the test reporter drains.
+	GameState.reset_for_new_world(78154)
+	MilitaryCampaign.reset_for_new_world()
+	GovernmentPeopleSystem.reset_for_new_world()
+	ForeignDiplomacy.reset_for_new_world()
+	CivilizationSystem.reset_for_new_world()
+	FoodSystem.reset_for_new_world()
+	DiscoverySystem.reset_for_new_world()
+	ResourceSystem.reset_for_new_world()
+	SettlementModel.reset_for_new_world()
+	PeopleDirection.reset_for_new_world()
+	ProgressionSystem.reset_for_new_world()
 	for node: Node in _processing: node.set_process(bool(_processing[node]))
 
 func before_test() -> void:
@@ -126,6 +138,9 @@ func test_food_matches_existing_calculator_and_risk_is_not_a_death_prediction() 
 func test_validated_state_becomes_stale_when_food_or_workers_or_day_changes() -> void:
 	var draft := Preview.capture()
 	assert_bool(Preview.is_current(draft)).is_true()
+	DiscoverySystem._scan.scores["ui-only-question"] = 12.0
+	DiscoverySystem.society_model._today.sources_key += 1
+	assert_bool(Preview.is_current(draft)).is_true()
 	GameState.food_stocks["Stored food"] += 1.0
 	assert_bool(Preview.is_current(draft)).is_false()
 	draft = Preview.capture()
@@ -149,6 +164,22 @@ func test_food_safeguard_is_applied_on_the_copy_and_disclosed() -> void:
 	assert_bool(result.warnings.any(func(w: Dictionary) -> bool: return w.kind == "safeguard")).is_true()
 	assert_int(int(Preview._sum(result.after.counts))).is_equal(int(draft.able))
 	assert_dict(Preview._capture_systems()).is_equal(live)
+
+func test_legacy_food_measurement_replays_each_safeguard_intervention() -> void:
+	SettlementModel.ensure_founded()
+	GameState.simulation_metrics.merge({"food_production": 95.0, "food_consumption": 100.0,
+		"food_total_stock": 2500.0, "food_net": -5.0, "food_projected_days": 20.0, "food_intake_ratio": 1.0}, true)
+	GameState.simulation_metrics.erase("food_labor_share")
+	var draft := Preview.capture()
+	for index in 4: draft = Preview.step(draft, "Construction", 1)
+	var result := Preview.evaluate(draft)
+	var original := Preview._isolated(draft._snapshot, func() -> Dictionary:
+		if not Manual.manual(): Manual.set_manual(true)
+		for command: Dictionary in draft.commands: Manual.move_share(command.role, command.points)
+		return {"counts": Manual.counts(), "towns": WorldSimulation.state.player_settlements.duplicate(true)})
+	assert_dict(result.after.counts).is_equal(original.counts)
+	assert_dict(result.after.towns[0].safeguard.allocations).is_equal(original.towns[0].local_allocations)
+	assert_bool(Preview.is_current(draft)).is_true()
 
 func test_research_construction_and_water_are_real_capacity_readings() -> void:
 	var draft := Preview.capture()
@@ -235,13 +266,14 @@ func test_mature_realm_latency_and_ledgers() -> void:
 	SettlementModel.ensure_founded()
 	for day in 370:
 		GameState.food_history.append({"day": int(GameState.elapsed_days) - 370 + day, "stored": 900000.0, "produced": 30000.0, "required": 29500.0, "eaten": 29500.0, "spoiled": 100.0, "net": 400.0})
+	var past := GameState.food_history.duplicate(true)
 	for index in 18:
 		var id := "town-%d" % index
 		GameState.player_settlements.append({"id": id, "name": "Town %d" % index, "primary": false,
 			"position": Vector2(index * 8.0, 9.0), "population_share": 0.025, "founded_day": 200 * 365})
 		SettlementModel.with_city_resources(id, func() -> void:
 			GameState.food_stocks = {"Fresh food": 800.0, "Stored food": 70000.0}
-			GameState.food_history.assign(GameState.food_history.duplicate(true)))
+			GameState.food_history.assign(past.duplicate(true)))
 	var tick := Time.get_ticks_usec()
 	var captured := Preview.capture()
 	var after_capture := Time.get_ticks_usec()
