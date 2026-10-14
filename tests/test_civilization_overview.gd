@@ -79,7 +79,8 @@ func test_the_people_screen_shows_named_faces_a_voice_and_work()->void:
 	var voice:Dictionary=block.scene.voice
 	assert_str(String(voice.line)).is_not_empty()
 	assert_str(String(voice.face.name)).is_not_empty()
-	assert_str(String(block.scene.headline)).contains("souls at the Capital fires")
+	# The line says what the numbers do not: the head count and the stores are the top bar's.
+	assert_str(String(block.scene.headline)).not_contains("souls")
 	assert_str(String(block.scene.register)).is_equal("TOLD AT THE FIRE")
 	assert_int((block.labor.tasks as Array).size()).is_greater(3)
 	for task:Dictionary in block.labor.tasks:assert_int(int(task.count)).is_greater(0)

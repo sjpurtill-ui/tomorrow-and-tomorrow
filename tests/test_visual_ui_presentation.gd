@@ -77,7 +77,8 @@ func test_culture_council_has_no_ai_settings_or_second_summon_list()->void:
 	assert_bool(provider.has_method("_summon_block")).is_false()
 	var council:=JSON.stringify(provider.tab(1))
 	assert_str(council).not_contains("DIRECTIVE INTERPRETER").not_contains("CONVERSATION SETTINGS").not_contains("SUMMON TO THE COURT")
-	assert_str(council).contains("Open the court")
+	# No boxes that only open other screens; the court's people are listed with their own Summon.
+	assert_str(council).not_contains("Decisions waiting").not_contains("Orders and reports").not_contains("War news")
 
 
 func test_recruitment_report_leads_with_people_choices_instead_of_generic_scout_copy()->void:

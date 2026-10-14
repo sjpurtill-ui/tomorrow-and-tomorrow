@@ -111,8 +111,8 @@ func test_chronicle_keeps_its_place_and_opened_pages_as_tales_arrive()->void:
 	Chronicle.record({"key":"tally:1","title":"Season tally","text":"Notches cut.","tier":"whisper","kind":"story","day":69})
 	await _open(ChronicleDock.new(null,hud))
 	feed=panel.body.find_child("ChronicleFeed",true,false)
-	# One feed, no tabs: the story hides the season tallies until asked.
-	assert_bool(panel.tabs_row.visible).is_false()
+	# The one place for history: the years, the town's own record, births and deaths, what was built.
+	assert_bool(panel.tabs_row.visible).is_true()
 	var total:int=(feed.data.entries as Array).size()
 	assert_int(feed.visible_entries().size()).is_equal(total-1)
 	feed.tallies_check.button_pressed=true

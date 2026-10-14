@@ -26,7 +26,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"Your %s" % String(settlement.get("classification","settlement")).to_lower(),
 		"title":String(settlement.get("name",terrain._settlement_display_name())).capitalize(),
-		"subtabs":["Overview","History"],
+		"subtabs":["Overview"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -52,7 +52,26 @@ var _towns:Array=[]
 func founding_block()->Dictionary:
 	var OneSeat:=preload("res://scripts/one_seat.gd")
 	var Places:=preload("res://scripts/settlement_places.gd")
-	return {"title":"How our people spread","words":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS+"\n"+Places.words(),"options":[],"on":false}
+	# One table: the seat's stage toward the next (people and districts, with
+	# a bar), then the seat and every place its families settled, one line each.
+	var s:=OneSeat.stage()
+	var next:Dictionary=s.next
+	var stage_cells:={"place":String(s.name),"where":"%d %s" % [int(s.districts),"district" if int(s.districts)==1 else "districts"],"people":EraWords.grouped(int(s.people))}
+	var stage_row:={"icon":preload("res://scripts/resource_icons.gd").domain_texture("demography",Tokens.GOLD),"cells":stage_cells,
+		"tip":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS}
+	if not next.is_empty():
+		stage_row["bar"]={"value":minf(float(s.people)/maxf(1.0,float(next.people)),float(s.districts)/maxf(1.0,float(next.districts)))}
+		stage_row["tag"]={"text":"%s at %s" % [String(next.name).to_lower(),EraWords.grouped(int(next.people))],"tone":""}
+	var rows:Array=[stage_row,{"icon":preload("res://scripts/resource_icons.gd").domain_texture("infrastructure",Tokens.INK),"cells":{"place":"The seat","where":"","people":EraWords.grouped(Places.seat_people())}}]
+	var today:=int(GameState.elapsed_days)
+	for place:Dictionary in Places.list():
+		var trend:=float(place.get("target",0.0))-float(place.get("share",0.0))
+		var way:="growing" if trend>0.0005 else ("shrinking" if trend<-0.0005 else "steady")
+		var tone:="good" if way=="growing" else ("warn" if way=="shrinking" else "")
+		if today<int(place.get("setback_until",-1)):way="rebuilding";tone="bad"
+		rows.append({"icon":preload("res://scripts/resource_icons.gd").domain_texture("ecology",Tokens.TEAL),"cells":{"place":String(place.get("name","")),"where":Places.site_words(String(place.get("kind",""))),"people":EraWords.grouped(Places.people(place))},
+			"tag":{"text":way,"tone":tone}})
+	return {"type":"table","heading":"Where our people live","columns":[{"key":"place","label":"Place"},{"key":"where","label":"Where","width":150},{"key":"people","label":"People","width":80,"align":"right"}],"rows":rows}
 
 func _city_tab(sub:int)->Dictionary:
 	var settlement:=_selected_settlement()
@@ -69,7 +88,6 @@ func _city_tab(sub:int)->Dictionary:
 			if traveling:items.push_front({"label":"Stop here","sub":"Hold the party where it stands","primary":false,"on_press":terrain._halt_founding_convoy_to_forage,"tip":"The caravan leader usually decides when to camp. This makes the party stop and wait (going to water first if there is none here) until you tell it to go on."})
 			elif led_mode in ["held","watering","foraging","resting","provisioning"]:items.push_front({"label":"Go on","sub":"Break camp and keep travelling","primary":led_mode=="held","on_press":func()->void:terrain._on_caravan_override("founding","resume"),"tip":"The caravan leader moves on by themself once water, food and health allow. This tells them to go on now."})
 		return {"brief":{"tone":String(travel_advice.get("tone","info")),"title":"A home is taking shape" if committed else String(travel_advice.get("status","Choose a home")).capitalize(),"why":"Let time run with the controls above. The people build the Hearth Circle as they go about their work; once it stands, the local leader takes charge of daily work." if committed else String(travel_advice.get("reason","The party can walk into unknown land and camp to forage on the way."))+" Settling makes the place where the party stands our home."},"blocks":[{"type":"actions","items":items}]}
-	if sub==1:return {"blocks":_history_blocks(GameState.simulation_metrics,settlement)}
 	return {"kpis":_glance_tiles(settlement),"blocks":_overview_blocks(settlement)}
 
 
@@ -156,22 +174,6 @@ func _people_blocks(_productive:int,local_population:int,local_share:float,settl
 	return blocks
 
 
-func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
-	var id:=String(settlement.get("id",""))
-	# The events are the town's founding, every discovery and its own building
-	# records: made again only when one of those logs moves.
-	var events:Array=memo.take("events",[id,String(settlement.get("name","Settlement")),settlement.has("founded_day"),int(settlement.get("founded_day",0)),Memo.log_identity(GameState.discovery_log),Memo.log_identity(GameState.building_ledger)],
-		func()->Array:return preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger))
-	return [
-		{"type":"village_history","city_id":id},
-		{"type":"chronicle","heading":"The years remembered","events":events,"_print":memo.print_of("events")},
-		Charts.population(id,true),
-		Charts.reserves(id),
-		{"type":"actions","heading":"More of the record","items":[
-			{"label":"Births and deaths","sub":"Across all our people","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,hud))},
-			{"label":"What was built here","sub":"Building, damage and rebuilding","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,id))}]}]
-
-
 func signature()->Array:
 	# The town's own figures are read in its own scope, as the page reads them.
 	var local:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
@@ -199,8 +201,9 @@ static func _known_signature()->int:
 const FOCUS_WORDS:={"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
 ## The choices offered on the Settlement dock, in the order shown.
 const ASKABLE:=["water","provisions","shelter","research","defense"]
-## The town's figures that stand as tiles under the tabs (_glance_tiles).
-const IN_TILES:=["population","life_expectancy","supply","water","roofs"]
+## The town's figures that stand as tiles under the tabs (_glance_tiles),
+## and the scholars, which the top bar counts: no row restates them.
+const IN_TILES:=["population","life_expectancy","supply","water","roofs","learning"]
 
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
@@ -264,10 +267,10 @@ func _overview_blocks(settlement:Dictionary)->Array:
 		"town_name":String(facts.name),"sketch":{},"on_visit":_visit_village,"lead":Model.lead(facts),
 		"groups":groups,"tile_rows":tile_rows,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
-		"founding":_founding,
+		"founding":{},
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":on_population,
-		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
+		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]+([_founding] if not _founding.is_empty() else [])
 
 func _visit_village()->void:
 	if is_instance_valid(hud) and hud.has_method("close_dock"):hud.close_dock()
