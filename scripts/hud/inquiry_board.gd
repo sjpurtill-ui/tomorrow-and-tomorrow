@@ -700,7 +700,7 @@ func _table_head(parent:Node)->void:
 	var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;parent.add_child(rule)
 
 static func _attention_width()->float:
-	return SHARE_W+4.0+34.0+4.0+22.0+4.0+22.0
+	return SHARE_W+4.0+34.0+4.0+28.0+4.0+28.0
 
 ## A field's row: its mark, name, attention with − and +, then its first
 ## question; its further questions on lines of their own beneath.
@@ -798,7 +798,8 @@ func _fill_card(refs:Dictionary,record:Dictionary)->void:
 	_put(refs.phase,String(words.phase) if held else "")
 	(refs.phase as Label).visible=held
 	var effects:Dictionary=record.get("effects",{})
-	_put(refs.would,("Would bring: %s" % Explainer.summary(effects,1)) if not effects.is_empty() else "")
+	# Its largest effect in a word or two; every effect is in its account on hover.
+	_put(refs.would,("Would bring: %s" % Explainer.summary(effects,1).get_slice(" and ",0)) if not effects.is_empty() else "")
 	(refs.bar as ProgressBar).value=float(words.progress)*100.0
 	var days:=float(record.get("estimated_days",0.0))
 	var clock:=Words.Plain.span_text(days) if days>0.0 and is_finite(days) and days<=365.0*150.0 else ("—" if days<=0.0 else "no end in sight")
