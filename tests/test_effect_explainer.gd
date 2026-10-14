@@ -266,59 +266,43 @@ func test_inquiry_dock_builds_with_explanations_for_a_small_state()->void:
 	var hud:=FakeHud.new();auto_free(hud)
 	var terrain:=FakeTerrain.new();auto_free(terrain)
 	var inquiry=Inquiry.new(terrain,hud)
-	# What we know: the totals first, grouped by field.
+	# What we know: one row per field with what its knowledge adds now.
 	var known:Dictionary=inquiry.tab(2)
-	var acts:Dictionary=known.blocks[0]
-	assert_str(String(acts.type)).is_equal("impact")
-	assert_str(String(acts.heading)).is_equal("WHERE YOUR KNOWLEDGE ACTS")
+	var board:Dictionary=known.blocks[0]
+	assert_str(String(board.type)).is_equal("known_board")
 	var health:Dictionary={}
-	for group:Dictionary in acts.groups:
-		if String(group.id)=="health":health=group
+	for field:Dictionary in board.fields:
+		if String(field.id)=="health":health=field
 	assert_dict(health).is_not_empty()
-	var labels:Array=(health.rows as Array).map(func(row:Dictionary)->String:return String(row.label))
+	var labels:Array=(health.effects as Array).map(func(row:Dictionary)->String:return String(row.label))
 	assert_array(labels).contains(["Protection from sickness"])
-	# Rendered: a field opens to its rows, a row opens to everywhere it acts.
+	# Opened in place: every effect, its account on hover.
+	inquiry.expanded_domains["health"]=true
 	var box:=VBoxContainer.new();add_child(box);auto_free(box)
-	box.size=Vector2(540,900)
-	DockBlocks.render(box,known.blocks)
-	var ledger:Node=box.find_children("ImpactLedger*","",true,false)[0]
-	var group_header:PanelContainer=ledger.find_child("Group_health",true,false)
-	_click(group_header)
-	var row:PanelContainer=ledger.find_child("Effect_health_protection",true,false)
-	assert_object(row).is_not_null()
-	_click(row)
-	var detail:Control=row.find_child("Detail",true,false)
-	assert_bool(detail.visible).is_true()
-	var words:="\n".join(_labels(detail))
-	assert_str(words).contains("Where it acts").contains("The health the people settle toward").contains("The Health capacity")
-	assert_bool(inquiry.effect_state.has("r:health_protection")).is_true()
-	for text:String in _labels(ledger):_assert_plain(text,"dock label")
-	# An opened finding is followed by its effects, one row each.
-	inquiry.expanded_domains["health"]=true;inquiry.expanded_discoveries["clean_water"]=true
-	var opened:Array=inquiry.tab(2).blocks
-	var found:=false
-	for block:Dictionary in opened:
-		if String(block.get("type",""))=="impact" and not block.has("groups"):
-			for effect_row:Dictionary in block.rows:found=found or String(effect_row.id).begins_with("clean_water:")
-	assert_bool(found).is_true()
-	# Knowledge tree: a known question opens to what it does now, an open one
-	# to what it would do at full use.
+	box.size=Vector2(700,900)
+	DockBlocks.render(box,inquiry.tab(2).blocks)
+	var grid:Node=box.find_child("Field_health",true,false).find_child("Effects",true,false)
+	assert_object(grid).is_not_null()
+	var said:Array=[]
+	for cell:Control in grid.get_children():said.append(cell.tooltip_text)
+	assert_str("
+".join(said)).contains("The health the people settle toward")
+	for text:String in _labels(box):_assert_plain(text,"dock label")
+	# Knowledge tree: a known question says what it does now, an open one
+	# what it would do at full use.
 	inquiry.tree_domain="health"
-	inquiry.expanded_tech["clean_water"]=true
-	var does:Array=[]
-	for block:Dictionary in inquiry.tab(1).blocks:
-		if String(block.get("type",""))=="impact":does=block.rows
-	assert_array(does).is_not_empty()
-	assert_str(String((does[0] as Dictionary).usage)).contains("taken up by 60 in 100")
+	inquiry.tree_selected="clean_water"
+	var chosen:Dictionary=(inquiry.tab(1).blocks[0] as Dictionary).chosen
+	assert_str(String(chosen.state)).starts_with("Known")
+	assert_str(String((chosen.facts as Array)[0][0])).is_equal("Does")
 	var open_question:=""
 	for technology:Dictionary in DiscoverySystem.technology_tree("health"):
 		if String(technology.status) in ["AVAILABLE","RESEARCHING"] and not (technology.get("effects",{}) as Dictionary).is_empty():open_question=String(technology.id);break
 	if open_question!="":
-		inquiry.expanded_tech.clear();inquiry.expanded_tech[open_question]=true
-		var would:Array=[]
-		for block:Dictionary in inquiry.tab(1).blocks:
-			if String(block.get("type",""))=="impact":would=block.rows
-		assert_str(String((would[0] as Dictionary).usage)).starts_with("at full use")
+		inquiry.tree_selected=open_question
+		var would:Dictionary=(inquiry.tab(1).blocks[0] as Dictionary).chosen
+		assert_str(String((would.facts as Array)[0][0])).is_equal("Would bring")
+		assert_str(String((would.facts as Array)[0][2])).contains("at full use")
 	assert_str(String(Explainer.discovery_rows("well_siting",false)[0].usage)).starts_with("at full use")
 	# The field report: what the field's knowledge does now.
 	var report:Dictionary=inquiry._domain_report("health")

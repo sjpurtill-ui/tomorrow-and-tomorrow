@@ -375,11 +375,13 @@ func test_the_leader_counts_in_words_and_seasons()->void:
 	assert_str(Model.since(400)).is_equal("13 months ago")
 
 func test_the_towns_history_is_one_of_the_chronicles_tabs()->void:
-	# One place for history: Home has no History tab; the Chronicle's "Our town" tab holds the record.
+	# One place for history: Home has no History tab; the Chronicle's years hold every telling.
 	assert_array(Provider.new(terrain,hud).meta().subtabs).is_equal(["Overview"])
-	var history:Array=preload("res://scripts/hud/content/dock_content_chronicle.gd").new(terrain,hud).tab(1).blocks
-	assert_str(String(history[0].type)).is_equal("chronicle")
-	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("village_history")
+	var chronicle=preload("res://scripts/hud/content/dock_content_chronicle.gd").new(terrain,hud)
+	assert_array(chronicle.meta().subtabs).is_equal(["The years","Births and deaths","What was built"])
+	assert_str(String(chronicle.tab(0).blocks[0].type)).is_equal("chronicle_feed")
+	for sub in 3:
+		for block:Dictionary in chronicle.tab(sub).blocks:assert_str(String(block.get("type",""))).is_not_equal("village_history")
 
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door

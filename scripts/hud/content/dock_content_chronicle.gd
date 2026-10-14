@@ -1,39 +1,137 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## The Chronicle rail entry: the story of the people as a count of years
-## (hud/chronicle_feed.gd): a mark for every year on a spiral from the
-## founding, the chosen year's facts and moments as pictures, and the years
-## one line each. The tellings are one choice away; one labelled checkbox adds
-## every season's tally. The one place for history: its other tabs are the
-## town's own record (its founding, discoveries and building, its people and
-## stores over the years), births and deaths, and what was built.
+## The Chronicle rail entry: the one place for the people's history.
+## - The years (hud/chronicle_feed.gd): a small count of years beside every
+##   telling, newest first, grouped by year and filtered by kind.
+## - Births and deaths: the people's lifetime record and what kills them now,
+##   one line per fact (dense_blocks.gd fact_grid, table).
+## - What was built: every work's record, one line each, and the materials
+##   all building has used.
+## Home has no History tab and the town's painted record is gone: the years
+## hold every telling once, here.
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Years:=preload("res://scripts/hud/chronicle_year_model.gd")
+const Icons:=preload("res://scripts/resource_icons.gd")
+const Card:=preload("res://scripts/hud/chronicle_card.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Population:=preload("res://scripts/hud/content/dock_detail_population_ledger.gd")
+const Health:=preload("res://scripts/hud/content/dock_detail_health.gd")
+## Lines of the record of works shown before "and N earlier".
+const WORKS_SHOWN:=60
 
 func meta()->Dictionary:
 	var voice:=Chronicle.voice()
 	# Our nation's name once given: "THE STORY OF THE REEDFOLK" (nation_name.gd).
 	var nation:=preload("res://scripts/nation_name.gd").in_sentence(String(GameState.nation_name))
-	return {"eyebrow":"THE STORY OF %s" % (nation.to_upper() if nation!="" else "THE PEOPLE"),"title":String(voice.feed),"subtabs":["The years","Our town","Births and deaths","What was built"]}
+	return {"eyebrow":"THE STORY OF %s" % (nation.to_upper() if nation!="" else "THE PEOPLE"),"title":String(voice.feed),"subtabs":["The years","Births and deaths","What was built"]}
 
 func tab(sub:int)->Dictionary:
-	if sub==1:return {"blocks":_town_blocks()}
-	# The two ledgers that used to open as screens of their own, as tabs here.
-	if sub==2:return preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,hud).tab(0)
-	if sub==3:return preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,GameState.selected_player_settlement_id).tab(0)
+	if sub==1:return {"blocks":_lives_blocks()}
+	if sub==2:return {"blocks":_works_blocks()}
 	var today:=int(GameState.elapsed_days)
 	return {"blocks":[{"type":"chronicle_feed","entries":Chronicle.entries("whisper"),"voice":Chronicle.voice(),
 		"years":Years.build(Chronicle.data(),today,int(GameState.population_total)),"today":today}]}
 
-## The town's own record: its founding, every discovery and its building
-## records, then its people and stores over the years.
-func _town_blocks()->Array:
-	var Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
-	var settlement:Dictionary=SettlementModel.selected_settlement_snapshot()
-	var id:=String(settlement.get("id",""))
-	var events:Array=preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger)
-	return [{"type":"chronicle","heading":"Our town through the years","events":events},Charts.population(id,true),Charts.reserves(id)]
+static func _mark(glyph:String)->Texture2D:
+	return Icons.moment_texture(glyph,Card.ACCENTS.get(glyph,Color("e1c27a")),36)
+
+static func _n(value:int)->String:
+	return EraWords.grouped(value)
+
+# --- Births and deaths ------------------------------------------------------------
+
+## The people's lifetime record, where everyone is now, what kills them now
+## and every cause of death so far. The people's count and how long they
+## live are on the top bar.
+func _lives_blocks()->Array:
+	var pregnancy:Dictionary=GameState.pregnancy_summary()
+	var born:=int(GameState.lifetime_births)
+	var lifetime:=[
+		{"label":"Born","value":_n(born),"icon":_mark("birth"),"tip":"Every birth since the people set out."},
+		{"label":"Died","value":_n(int(GameState.lifetime_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Every death since the people set out."},
+		{"label":"With child now","value":_n(int(pregnancy.get("active",0))),"icon":_mark("birth"),"tip":"Women carrying a child now: about %s births in the next year." % _n(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0))))},
+		{"label":"Births expected next year","value":_n(roundi(float(GameState.simulation_metrics.get("births_expected_next_year",0.0)))),"icon":_mark("birth"),"tip":"From the women with child now and those likely to conceive."},
+		{"label":"Lost before birth","value":_n(int(GameState.lifetime_pregnancy_losses)),"icon":_mark("omen"),"tone":"warn","tip":"Children lost before birth, since the people set out."},
+		{"label":"Born dead","value":_n(int(GameState.lifetime_stillbirths)),"icon":_mark("omen"),"tone":"warn","tip":"Children born dead, since the people set out."},
+		{"label":"Mothers died in childbirth","value":_n(int(GameState.lifetime_maternal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Mothers who died giving birth, since the people set out."},
+		{"label":"Newborns died in the first month","value":_n(int(GameState.lifetime_neonatal_deaths)),"icon":_mark("death"),"tone":"bad","tip":"Babies who died in their first month, since the people set out."},
+	]
+	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
+	var groups:=[["Working","productive","gathering, making, building","work"],["Tending others","support","care and keeping order","ceremony"],["Children and elders","dependent","looked after by the rest","birth"],["Away","away","on the road or under arms","scout"]]
+	var everyone:=0
+	for key:String in ["productive","support","dependent","absent","mobilized"]:everyone+=int(profile.get(key,0))
+	var where:Array=[]
+	for spec:Array in groups:
+		var count:=int(profile.get("absent",0))+int(profile.get("mobilized",0)) if spec[1]=="away" else int(profile.get(String(spec[1]),0))
+		where.append({"label":String(spec[0]),"value":_n(count),"bar":float(count)/maxf(1.0,float(everyone)),"icon":_mark(String(spec[3])),"tip":"%s: %s." % [String(spec[0]),String(spec[2])]})
+	var workforce:=GameState.workforce_capacity_snapshot()
+	where.append({"label":"Work done, as people at full strength","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
+		"tip":"Those at work get done what this many people at full strength would.%s" % ((" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else "")})
+	var blocks:Array=[{"type":"fact_grid","heading":"Since we set out","items":lifetime},{"type":"fact_grid","heading":"Where everyone is","items":where}]
+	var killing:Dictionary=Health.mortality_block("How many people this cause kills each year at the present rate")
+	if not killing.is_empty():blocks.append(killing)
+	# Every cause of death so far, largest first.
+	var causes:Array=Population.death_summary(GameState.demographic_ledger)
+	var most:=1
+	var named:=0
+	for row:Dictionary in causes:most=maxi(most,int(row.count));named+=int(row.count)
+	var rows:Array=[]
+	for row:Dictionary in causes:
+		rows.append({"cells":{"cause":String(row.name).capitalize(),"deaths":_n(int(row.count)),"where":String(row.sub)},"icon":_mark("death"),"bar":{"value":float(row.count)/float(most),"tone":"bad"}})
+	blocks.append({"type":"table","heading":"Recorded deaths by cause","note":"the cause is kept for %s of %s deaths" % [_n(named),_n(int(GameState.lifetime_deaths))],"empty":"No one has died yet.","columns":[{"key":"cause","label":"CAUSE"},{"key":"deaths","label":"DEATHS","width":80,"align":"right"},{"key":"where","label":"WHERE","width":110}],"rows":rows})
+	return blocks
+
+# --- What was built ---------------------------------------------------------------
+
+## Every work's record, newest first, one line each, and the materials all
+## building has used.
+func _works_blocks()->Array:
+	var id:=String(GameState.selected_player_settlement_id)
+	var summary:=GameState.building_ledger_summary(id)
+	var records:Array=summary.get("records",[])
+	var materials:Dictionary={}
+	var phases:=0
+	var damaged:=0
+	var destroyed:=0
+	for row:Dictionary in records:
+		if bool(row.get("counts_materials",false)):
+			for material:Variant in row.get("materials",{}):materials[material]=float(materials.get(material,0.0))+float(row.materials[material])
+		var event:=String(row.get("event",""))
+		if event in ["founded","started","infilled","rebuilt","legacy_completed","legacy_surviving_fabric"] or (event=="completed" and int(row.get("plot_id",-1))<0):phases+=1
+		if event=="damaged":damaged+=1
+		elif event=="destroyed":destroyed+=1
+	var used:=0.0
+	for material:Variant in materials:used+=float(materials[material])
+	var facts:=[
+		{"label":"Works recorded","value":_n(records.size()),"icon":_mark("work"),"tip":"Building, infill, renewal, damage and loss; routine days are not kept."},
+		{"label":"Building phases","value":_n(phases),"icon":_mark("settlement"),"tip":"Founded, built, infilled and renewed."},
+		{"label":"Material used","value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(used),"icon":_mark("work"),"tip":"Every unit of material taken from the stores for building, infill and rebuilding."},
+		{"label":"Damaged or destroyed","value":("%d · %d destroyed" % [damaged+destroyed,destroyed]) if damaged+destroyed>0 else "None","icon":_mark("fire"),"tone":"bad" if destroyed>0 else "","tip":"Recorded damage and destruction."},
+	]
+	var rows:Array=[]
+	var ordered:=records.duplicate()
+	ordered.reverse()
+	for row:Dictionary in ordered.slice(0,WORKS_SHOWN):
+		var event:=String(row.get("event","recorded"))
+		var parts:Array[String]=[]
+		for material:Variant in row.get("materials",{}):parts.append("%s %s" % [preload("res://scripts/hud/production_plain.gd").number(float(row.materials[material])),String(material).to_lower()])
+		var detail:=String(row.get("note",""))
+		rows.append({"cells":{"work":String(row.get("kind","Building")).replace("_"," ").capitalize(),"when":preload("res://scripts/calendar_date.gd").words(int(row.get("day",0)),true),"used":", ".join(parts) if not parts.is_empty() else "—"},
+			"icon":_mark("fire" if event in ["damaged","destroyed"] else "work"),"tag":{"text":event.replace("_"," ").capitalize(),"tone":"bad" if event=="destroyed" else ("warn" if event=="damaged" else "good")},
+			"tip":(detail.left(1).to_upper()+detail.substr(1)) if detail!="" else String(row.get("settlement_name",""))})
+	var blocks:Array=[{"type":"fact_grid","items":facts},
+		{"type":"table","heading":"Every work, newest first","note":("the newest %d of %d" % [WORKS_SHOWN,records.size()]) if records.size()>WORKS_SHOWN else "","empty":"Nothing has been built yet.",
+			"columns":[{"key":"work","label":"WORK"},{"key":"when","label":"WHEN","width":120},{"key":"used","label":"MATERIAL USED","width":280}],"rows":rows}]
+	if not materials.is_empty():
+		var names:Array=materials.keys()
+		names.sort_custom(func(a:Variant,b:Variant)->bool:return float(materials[a])>float(materials[b]))
+		var biggest:=maxf(0.001,float(materials[names[0]]))
+		var items:Array=[]
+		for material:Variant in names:items.append({"label":String(material),"value":"%s units" % preload("res://scripts/hud/production_plain.gd").number(float(materials[material])),"bar":float(materials[material])/biggest,"icon":Icons.texture_for(String(material)),"tip":"All %s taken from the stores for building." % String(material).to_lower()})
+		blocks.append({"type":"fact_grid","heading":"Material used by all building","items":items})
+	return blocks
 
 func signature()->Array:
 	var entries:Array=GameState.chronicle.get("entries",[])
 	var annals:Array=GameState.chronicle.get("annals",[]) if GameState.chronicle.get("annals") is Array else []
-	return [entries.size(),String((entries[0] as Dictionary).get("key","")) if not entries.is_empty() else "",GameState.known_discoveries.size(),annals.size(),int(GameState.elapsed_days)/365]
+	return [entries.size(),String((entries[0] as Dictionary).get("key","")) if not entries.is_empty() else "",GameState.known_discoveries.size(),annals.size(),int(GameState.elapsed_days)/365,
+		GameState.lifetime_deaths,GameState.lifetime_births,GameState.demographic_ledger.size(),GameState.building_ledger.size() if GameState.get("building_ledger") is Array else 0]

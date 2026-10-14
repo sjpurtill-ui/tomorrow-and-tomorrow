@@ -112,6 +112,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				section.add_child(board);board.setup(block)
 			"inquiry_board":
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
+			"knowledge_tree":
+				var tree:=preload("res://scripts/hud/knowledge_tree_board.gd").new();section.add_child(tree);tree.setup(block)
+			"known_board":
+				var known:=preload("res://scripts/hud/known_board.gd").new();section.add_child(known);known.setup(block)
 			"field_sheet":
 				var sheet:=preload("res://scripts/hud/field_sheet.gd").new();section.add_child(sheet);sheet.setup(block)
 			"impact":
