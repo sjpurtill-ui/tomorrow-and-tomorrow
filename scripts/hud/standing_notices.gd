@@ -15,8 +15,9 @@ extends RefCounted
 ## Each row: {key, standing:true, kind ("waiting" or "now"), tone ("red",
 ## "amber" or "gold"), category, title, text, count, lines, action, verb (the
 ## one word on its button), days (days left, where it has a clock)}.
-## A row NEEDS THE GOD when someone waits or its tone is red (needs()); those
-## are what the header and the rail's badges count.
+## Every row has its button, and every row is counted: the header's number
+## is the rows that stand, and each rail button's badge is its share of
+## them (rail_of). Red rows and those waiting stand first (urgent()).
 ## Nothing here is counted afresh: every line is the source's own.
 
 const Alerts:=preload("res://scripts/hud/army_alerts.gd")
@@ -36,8 +37,54 @@ const NO_CLOCK:=1000000
 ## Everything standing now: who waits first, then the conditions, worst first.
 static func rows(mc:Node=null)->Array[Dictionary]:
 	var out:Array[Dictionary]=waiting()
+	out.append_array(home())
 	for alert:Dictionary in Alerts.alerts(mc):out.append(from_alert(alert))
 	return out
+
+
+## What stands wrong at home and abroad, each once and each with its screen:
+## food or water truly short (food_danger, water_danger), peoples who have
+## moved against us (standing.gd's monthly reading), strangers in sight of
+## our land (civilization_system.gd local_observation_snapshot).
+static func home()->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	if WorldSimulation.state==null:return out
+	var metrics:Dictionary=GameState.simulation_metrics
+	var water:Dictionary=GameState.water_metrics
+	var EraWords:=preload("res://scripts/hud/era_words.gd")
+	if food_danger(metrics):
+		var fact:="%s left · %d in 10 eat enough" % [EraWords.days(maxf(0.0,float(metrics.get("food_days",0.0)))),roundi(clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)*10.0)]
+		out.append({"key":"standing:food","standing":true,"kind":"now","tone":"red","category":"food","title":"Food is running short","text":fact,"count":1,"lines":PackedStringArray([fact]),"verb":"Feed","days":NO_CLOCK,
+			"action":{"kind":"section","section":"economy","sub":0,"label":"the Economy screen"}})
+	if water_danger(water):
+		var fact:="%d in 10 drink enough" % roundi(clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)*10.0)
+		out.append({"key":"standing:water","standing":true,"kind":"now","tone":"red","category":"food","title":"Water is running short","text":fact,"count":1,"lines":PackedStringArray([fact]),"verb":"Water","days":NO_CLOCK,
+			"action":{"kind":"section","section":"economy","sub":0,"label":"the Economy screen"}})
+	var against:=int(metrics.get("standing_dangers",0))
+	if against>0:
+		var fact:="%d %s think us easy to push" % [against,"people" if against==1 else "peoples"]
+		out.append({"key":"standing:regard","standing":true,"kind":"now","tone":"red","category":"neighbours","title":"Others think us weak","text":fact,"count":against,"lines":PackedStringArray([fact]),"verb":"See","days":NO_CLOCK,
+			"action":{"kind":"section","section":"standing","sub":0,"label":"the World screen"}})
+	var seen:=int(CivilizationSystem.local_observation_snapshot().get("visible_count",0))
+	if seen>0:
+		var fact:="%d of theirs seen near our land" % seen
+		out.append({"key":"standing:strangers","standing":true,"kind":"now","tone":"amber","category":"neighbours","title":"Strangers in sight","text":fact,"count":seen,"lines":PackedStringArray([fact]),"verb":"See","days":NO_CLOCK,
+			"action":{"kind":"section","section":"world","sub":0,"label":"the World screen"}})
+	return out
+
+
+## Food truly short: an interruption, not a live gauge. Reserve size crosses
+## round numbers every day; only a sustained shortfall, or a bare store
+## still falling (food_care.gd), counts.
+static func food_danger(metrics:Dictionary)->bool:
+	var intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)
+	var days:=maxf(0.0,float(metrics.get("food_days",30.0)))
+	return GameState.consecutive_food_shortage_days>=2.0 or intake<0.90 or (preload("res://scripts/food_care.gd").store_level(days)=="bare" and float(metrics.get("food_net",0.0))<0.0)
+
+
+## Water truly short: two days running with people going thirsty.
+static func water_danger(water:Dictionary)->bool:
+	return maxf(0.0,float(water.get("required_today",0.0)))>0.0 and GameState.consecutive_water_shortage_days>=2.0 and clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)<0.95
 
 
 ## Envoys waiting on an answer: the only visitors who come unbidden.
@@ -65,6 +112,8 @@ static func from_alert(alert:Dictionary)->Dictionary:
 	# One fact line: the source's short form where it gives one, else its first line.
 	var text:=String(alert.get("fact",""))
 	if text=="":text=String(lines[0]) if not lines.is_empty() else ""
+	# More than one: said in the line itself, never a bare number beside it.
+	if lines.size()>1:text+=" · +%d more" % (lines.size()-1)
 	var dock:Array=alert.get("dock",[]) if alert.get("dock") is Array else []
 	var action:Dictionary
 	if dock.size()==2:action={"kind":"section","section":String(dock[0]),"sub":int(dock[1]),"label":String(PAGE_WORDS.get(String(dock[0]),"the page it is about"))}
@@ -95,8 +144,8 @@ static func tip(row:Dictionary)->String:
 	return "%s\n%s\nClick to open %s." % [String(row.get("title","")),"\n".join(row.get("lines",PackedStringArray()) as PackedStringArray),String(action.get("label","it"))]
 
 
-## Whether a row needs the god: someone waits on an answer, or it is red.
-static func needs(row:Dictionary)->bool:
+## Whether a row will not wait: someone waits on an answer, or it is red.
+static func urgent(row:Dictionary)->bool:
 	return String(row.get("kind",""))=="waiting" or String(row.get("tone",""))=="red"
 
 
@@ -113,16 +162,17 @@ static func _rank(row:Dictionary)->int:
 	var id:=String((row.get("alert",{}) as Dictionary).get("id","")) if row.get("alert") is Dictionary else ""
 	var days:=mini(int(row.get("days",NO_CLOCK)),9999)
 	if id in ["attack","battle"]:return days
-	if needs(row):return 10000+days
+	if urgent(row):return 10000+days
 	return 30000
 
 
-## The rail button a row belongs to: "military", "economy", ... or "court".
+## The rail button a row belongs to: "military", "economy", "world", ...
+## An envoy belongs to World: that is where other peoples are.
 static func rail_of(row:Dictionary)->String:
 	var action:Dictionary=row.get("action",{}) if row.get("action") is Dictionary else {}
 	match String(action.get("kind","")):
 		"war","battle":return "military"
-		"court","prisoner":return "court"
+		"court","prisoner":return "world"
 		"section":
 			var category:Dictionary=preload("res://scripts/hud/command_rail_hud.gd").category_of(String(action.get("section","")))
 			return String(category.get("id",""))

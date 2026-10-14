@@ -561,7 +561,12 @@ func _build_all_head()->void:
 	var words:=Label.new();words.name="NeedsYouText";T.text(words,"body",T.RED_TEXT);words.add_theme_font_override("font",T.font("ui_strong"))
 	words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;needs.add_child(words)
 	var go:=W.text_button("Open","");go.name="NeedsYouGo";needs.add_child(go)
-	go.pressed.connect(func()->void:_open(int(go.get_meta("page",1))))
+	go.pressed.connect(func()->void:
+		var page:=int(go.get_meta("page",1))
+		if page<0:
+			var to_materials:Variant=data.get("on_materials")
+			if to_materials is Callable and (to_materials as Callable).is_valid():(to_materials as Callable).call()
+		else:_open(page))
 	_header.needs=needs;_header.needs_text=words;_header.needs_go=go
 
 func _apply_all_head()->void:
@@ -574,13 +579,21 @@ func _apply_all_head()->void:
 	if arms>=0.01:made.append("%s %s of arms" % [Plain.number(arms),"set" if is_equal_approx(arms,1.0) else "sets"])
 	var headline:Label=_header.headline
 	if makers<=0:headline.text="No one is making anything yet"
-	elif made.is_empty():headline.text="Our %d makers made nothing today" % makers
-	else:headline.text="Our %d %s turn out %s a day" % [makers,"maker" if makers==1 else "makers"," and ".join(made)]
+	elif made.is_empty():headline.text="Our %s makers made nothing today" % Plain.number(makers)
+	else:headline.text="Our %s %s turn out %s a day" % [Plain.number(makers),"maker" if makers==1 else "makers"," and ".join(made)]
 	headline.tooltip_text="Makers are the people on Crafting. Goods are tools, baskets, pots and fittings; a set of arms arms one fighter."
 	var items:Array=o.get("attention",[])
 	var words:Label=_header.needs_text
 	var go:Button=_header.needs_go
-	if items.is_empty():
+	# A line stopped for want of a material (the chart's red mark) leads: the
+	# headline never says all is well above it.
+	var stalled:String=Flow.stalled_words(data)
+	if stalled!="":
+		words.text=_cap(stalled)
+		words.tooltip_text="A workshop line has stopped for want of a material. The Materials page shows where it comes from."
+		words.add_theme_color_override("font_color",T.RED_TEXT)
+		go.visible=true;go.set_meta("page",-1);go.text="Materials";go.tooltip_text="Open the Materials page."
+	elif items.is_empty():
 		words.text="Nothing needs you now: the homes are stocked."
 		words.tooltip_text="The homes are stocked and the bands have their gear."
 		words.add_theme_color_override("font_color",T.GREEN_TEXT);go.visible=false

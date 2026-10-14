@@ -106,7 +106,6 @@ var _detail_signature:Array=[]
 var detail_history:Array=[]
 
 var _kpi_signature:String=""
-var _badge_signature:String=""
 var _time_signature:String=""
 var _toolbar_signature:String=""
 var _information_refresh_elapsed:float=0.0
@@ -524,9 +523,10 @@ func set_active_section(id:String)->void:
 		if label:label.add_theme_color_override("font_color",Color.WHITE if active else Folio.RAIL_TEXT)
 	_position_toolbar()
 
-## How many notices of each rail category need the god
-## (hud/notification_stack.gd needing): {category id: count}. They stand on
-## the category's badge, so the notice header's total is their sum.
+## THE RAIL'S BADGES ARE THE NOTICES: how many rows of the notice column
+## belong to each rail button (hud/notification_stack.gd needing):
+## {category id: count}. Nothing else sets a badge, so the notice header's
+## total is always the sum of the rail's badges.
 var _notice_counts:Dictionary={}
 
 func set_notice_counts(counts:Dictionary)->void:
@@ -1231,7 +1231,6 @@ func refresh()->void:
 	_refresh_city_selector()
 	_refresh_time()
 	_refresh_kpis()
-	_refresh_badges()
 	_refresh_toolbar()
 
 func _refresh_time()->void:
@@ -1327,41 +1326,6 @@ func _refresh_kpis()->void:
 			_update_kpi("gdp",EraWords.grouped(Forces.at_work(MilitaryCampaign)),"of %s people" % EraWords.grouped(int(t.population)),Tokens.BLUE,"")
 	kpi_strip.reset_size()
 	_layout()
-
-func _refresh_badges()->void:
-	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
-	var visible_foreign:=int(observation.get("visible_count",0))
-	var metrics:Dictionary=GameState.simulation_metrics
-	var danger:=_economy_danger_active(metrics,GameState.water_metrics)
-	# Envoys waiting in the antechamber: the only visitors who come unbidden.
-	var envoys:=0
-	for audience:Dictionary in load("res://scripts/audience_hall.gd").waiting():
-		if String(audience.get("origin",""))=="foreign": envoys+=1
-	# Peoples moved against us (standing.gd's monthly reading).
-	var standing_dangers:=int(metrics.get("standing_dangers",0))
-	var signature:="%d|%s|%d|%d" % [visible_foreign,danger,envoys,standing_dangers]
-	if signature==_badge_signature: return
-	_badge_signature=signature
-	_set_badge("court",str(envoys) if envoys>0 else "",Tokens.GOLD)
-	_set_badge("world",str(visible_foreign) if visible_foreign>0 else "",Tokens.AMBER)
-	_set_badge("standing",str(standing_dangers) if standing_dangers>0 else "",Tokens.RED)
-	_set_badge("economy","!" if danger else "",Tokens.RED)
-
-
-func _economy_danger_active(metrics:Dictionary,water:Dictionary)->bool:
-	## A rail badge is an interruption, not a live gauge. Reserve size naturally
-	## crosses round-number thresholds during collection and consumption, which
-	## made the icon flash at high speed even while everybody ate and drank.
-	## Only an actual sustained shortfall, or a critically low reserve still
-	## falling, earns the red interruption badge; forecasts remain in the dock.
-	var food_intake:=clampf(float(metrics.get("food_intake_ratio",1.0)),0.0,1.0)
-	var food_days:=maxf(0.0,float(metrics.get("food_days",30.0)))
-	var food_net:=float(metrics.get("food_net",0.0))
-	var food_danger:=GameState.consecutive_food_shortage_days>=2.0 or food_intake<0.90 or (preload("res://scripts/food_care.gd").store_level(food_days)=="bare" and food_net<0.0)
-	var water_required:=maxf(0.0,float(water.get("required_today",0.0)))
-	var water_intake:=clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)
-	var water_danger:=water_required>0.0 and GameState.consecutive_water_shortage_days>=2.0 and water_intake<0.95
-	return food_danger or water_danger
 
 func _refresh_toolbar()->void:
 	if distance_selector: distance_selector.select(terrain.camera_distance_level())

@@ -32,7 +32,7 @@ const PAGE:=16
 ## A year's moments shown before "more".
 const TILES:=12
 ## Narrower than this, the chosen year sits under the count.
-const WIDE_AT:=700.0
+const WIDE_AT:=560.0
 const TILE_SIZE:=Vector2(104,118)
 
 
@@ -49,7 +49,7 @@ class YearCount extends Control:
 	var step:=24.0
 	var first:=0
 	func _init()->void:
-		custom_minimum_size=Vector2(320,320)
+		custom_minimum_size=Vector2(210,210)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		mouse_exited.connect(func()->void: _set_hover(-1))
 		resized.connect(func()->void: _place();queue_redraw())
@@ -231,14 +231,15 @@ var _list_shape:Array=[]
 func setup(block:Dictionary)->void:
 	data=block;name="ChronicleFeed";add_theme_constant_override("separation",14)
 	years=block.get("years",[]) if block.get("years") is Array else []
-	intro=T.make_label(_intro_text(),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(intro)
+	# The caption's words are kept for the page's voice (tests, the tallies' wording) but not shown: the title says what this is.
+	intro=T.make_label(_intro_text(),12,T.MUTED);intro.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;intro.visible=false;add_child(intro)
 	hero=BoxContainer.new();hero.name="Hero";hero.add_theme_constant_override("separation",18);add_child(hero)
 	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",6);left.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;hero.add_child(left)
 	count=YearCount.new();count.name="YearCount";left.add_child(count)
 	count.picked.connect(func(index:int)->void:_choose(int((years[index] as Dictionary).get("n",-1))))
 	count.hovered.connect(_on_count_hover)
 	count_caption=T.make_label("",12,T.TEXT_SOFT);count_caption.name="CountCaption";count_caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	count_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;count_caption.custom_minimum_size.x=300;left.add_child(count_caption)
+	count_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;count_caption.custom_minimum_size.x=200;left.add_child(count_caption)
 	folio=VBoxContainer.new();folio.name="Folio";folio.size_flags_horizontal=Control.SIZE_EXPAND_FILL;folio.add_theme_constant_override("separation",10);hero.add_child(folio)
 	tallies_check=CheckBox.new();tallies_check.name="ShowTallies"
 	tallies_check.text=_tallies_text()
@@ -356,8 +357,9 @@ func _choose(n:int)->void:
 
 func _on_count_hover(index:int)->void:
 	if count_caption==null:return
-	var shown_index:=index if index>=0 else _chosen_index()
-	count_caption.text=Page.mark_caption(years[shown_index]) if shown_index>=0 and shown_index<years.size() else ""
+	# The chosen year is named once, on its folio; the caption names only a year pointed at.
+	var shown_index:=index
+	count_caption.text=Page.mark_caption(years[shown_index]) if shown_index>=0 and shown_index<years.size() else "Each mark is a year. Click one to read it."
 	count_caption.add_theme_color_override("font_color",T.INK if index>=0 else T.TEXT_SOFT)
 
 
@@ -427,11 +429,12 @@ func _folio_people(year:Dictionary,index:int)->void:
 	var pop:=int(year.get("pop",-1))
 	if pop<=0:return
 	var voice:=_voice()
-	var said:="%d %s" % [pop,String(voice.get("people","people"))]
+	var said:="%s %s" % [EraWords.grouped(pop),String(voice.get("people","people"))]
 	var change:Variant=year.get("dpop")
 	if change!=null:
 		var d:=int(change)
-		said+=" · the same as a year before" if d==0 else (" · %d more than a year before" % d if d>0 else " · %d fewer than a year before" % -d)
+		var span:="this year" if not bool(year.get("closed",true)) else "that year"
+		said+=" · no change %s" % span if d==0 else " · %s%s %s" % ["+" if d>0 else "−",EraWords.grouped(absi(d)),span]
 	var label:=T.make_label(said,12,T.TEXT_SOFT);label.name="PeopleWords";folio.add_child(label)
 
 
@@ -439,8 +442,11 @@ func _folio_people(year:Dictionary,index:int)->void:
 func _folio_facts(year:Dictionary)->void:
 	var row:=HFlowContainer.new();row.name="Facts";row.add_theme_constant_override("h_separation",6);row.add_theme_constant_override("v_separation",6)
 	var born:=int(year.get("born",-1));var buried:=int(year.get("buried",-1))
-	if born>0:_chip(row,"birth","%d born" % born)
-	if buried>0:_chip(row,"death","%d buried" % buried)
+	if born>0:_chip(row,"birth","%s born" % EraWords.grouped(born))
+	if buried>0:_chip(row,"death","%s buried" % EraWords.grouped(buried))
+	# The rest of the year's change: neither born nor buried.
+	var other:=int(year.get("other",0))
+	if other!=0 and born>=0 and buried>=0:_chip(row,"contact","%s left or lost" % EraWords.grouped(-other) if other<0 else "%s arrived" % EraWords.grouped(other))
 	var learned:=int(year.get("learned",0))
 	if learned>0:_chip(row,"discovery","one new way" if learned==1 else "%d new ways" % learned)
 	var troubles:Array=year.get("troubles",[])
@@ -673,8 +679,8 @@ func _year_row(year:Dictionary,chosen:bool)->Button:
 	if pop>0:
 		var change:Variant=year.get("dpop")
 		var tail:=""
-		if change!=null and int(change)!=0:tail=" (%s%d)" % ["+" if int(change)>0 else "−",absi(int(change))]
-		var people:=T.make_label("%d%s" % [pop,tail],11,T.MUTED);people.mouse_filter=Control.MOUSE_FILTER_IGNORE;people.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		if change!=null and int(change)!=0:tail=" (%s%s)" % ["+" if int(change)>0 else "−",EraWords.grouped(absi(int(change)))]
+		var people:=T.make_label("%s%s" % [EraWords.grouped(pop),tail],11,T.MUTED);people.mouse_filter=Control.MOUSE_FILTER_IGNORE;people.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		line.add_child(people)
 	row.add_child(line)
 	row.tooltip_text=Page.mark_caption(year)

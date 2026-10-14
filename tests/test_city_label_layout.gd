@@ -283,7 +283,7 @@ func test_guard_badge_sets_the_watch_apart_from_the_townsfolk_and_fits_its_tag()
 	var ui:=preload("res://scripts/hud/hud_tokens.gd").font("ui")
 	var voice:=preload("res://scripts/hud/hud_tokens.gd").voice_font()
 	# "2 +5": the townsfolk take room of their own beside the watch.
-	assert_str(Labels.rise_text(5)).is_equal("+5")
+	assert_str(Labels.rise_text(5)).is_equal("5 can rise")
 	assert_float(Labels.badge_width(2,5)).is_greater(Labels.badge_width(2)+8.0)
 	assert_float(Labels.badge_width(0,3)).is_greater(Labels.badge_width(0)+8.0)
 	for parts:Array in [[2,5,false],[0,3,false],[1240,3800,false],[2,5,true],[7,0,false]]:

@@ -9,7 +9,8 @@ func _draw()->void:
 	for p:Dictionary in points:
 		if p.value!=null:known.append(p)
 	if known.size()<2:
-		draw_string(ThemeDB.fallback_font,Vector2(3,22),"No record yet",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED);return
+		# No record yet: nothing is drawn (a blank says it without the words six times over).
+		return
 	var low:=INF;var high:=-INF
 	for p:Dictionary in known:low=minf(low,float(p.value));high=maxf(high,float(p.value))
 	var first:=float(points[0].day);var span:=maxf(1,float(points[-1].day)-first)

@@ -30,7 +30,9 @@ func tab(sub:int)->Dictionary:
 	# live.
 	var mode:=String(["all","civilian","military"][clampi(sub,0,2)])
 	var block:={"type":"production_queue","mode":mode,"on_open":func(section:String,page:int)->void:
-		if is_instance_valid(hud):hud.section_requested.emit(section,page)}
+		if is_instance_valid(hud):hud.section_requested.emit(section,page),
+		"on_materials":func()->void:
+		if is_instance_valid(hud):hud.section_requested.emit("economy",1)}
 	# Every page leads with the flow chart: materials into the benches, out to
 	# what the makers make (flow_model). Military needs the towns' arms too.
 	var cards:=household_cards()

@@ -271,7 +271,8 @@ func test_no_visible_label_over_twelve_words_and_both_palettes_read()->void:
 			var body:=_render(_page())
 			await get_tree().process_frame
 			var boards:=_town_boards(body)
-			assert_int(boards.size()).is_equal(3)
+			# The town now and around the town; a work in hand adds its own board.
+			assert_int(boards.size()).is_between(2,3)
 			for board:Node in boards:
 				assert_array(_long_texts(board)).override_failure_message("%s %s" % [mode,state]).is_empty()
 				assert_array(_contrast_failures(board)).override_failure_message("%s %s" % [mode,state]).is_empty()

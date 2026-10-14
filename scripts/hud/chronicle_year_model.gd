@@ -60,6 +60,14 @@ static func build(c:Dictionary,today:int,pop_now:int=-1)->Array:
 			continue
 		var pop:=int(record.get("pop",-1))
 		record["dpop"]=pop-last_pop if pop>0 and last_pop>0 else null
+		# The year in progress: its change since the year began, the figure
+		# Home shows too (chronicle_annals.gd people_this_year).
+		if not bool(record.get("closed",true)):
+			var so_far:=Annals.people_this_year(c,pop_now,today)
+			if not so_far.is_empty():record["dpop"]=int(so_far.change)
+		# What births and burials do not account for (left, arrived, lost).
+		if record.dpop!=null and int(record.get("born",-1))>=0 and int(record.get("buried",-1))>=0:
+			record["other"]=int(record.dpop)-(int(record.born)-int(record.buried))
 		if pop>0:last_pop=pop
 		years.append(record)
 	return years

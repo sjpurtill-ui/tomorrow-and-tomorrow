@@ -116,7 +116,7 @@ func _fill()->void:
 	elif shortage>0:ahead="Looking ahead: food runs short in "+Plain.duration_text(float(shortage))+" if the seasons go as expected."
 	else:
 		var ending:=float(forecast.get("ending_days",-1.0))
-		ahead="Looking ahead: no shortage expected in the next three months"+(", with food for "+Plain.span_text(ending)+" left at the end." if ending>0.0 else ".")
+		ahead="Looking ahead: no shortage expected in the next 90 days"+(", with food for "+preload("res://scripts/hud/era_words.gd").days_in_words(ending)+" left at the end." if ending>0.0 else ".")
 	_put(_refs.forecast,ahead,tone_color("bad") if shortage>0 else T.BODY)
 	var eaten:=maxf(0.5,float(flow.get("eaten",0.0)))
 	for index in mini((data.rows as Array).size(),(_refs.rows as Array).size()):

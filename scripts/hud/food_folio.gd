@@ -4,10 +4,11 @@ var summary: GridContainer
 var daily_values: Dictionary = {}
 var flow_bar: FlowBar
 ## The day's figures in order: [flow key, caption, the bar's ink (null: not a
-## part of the bar)]. "Other" is whatever else moved the stores that day
-## (the engine's change less the four counted terms), shown so the row sums.
+## part of the bar)]. "Kept" is the engine's own change in the stores,
+## counted from the stores themselves (food_system.gd food_net); the engine
+## keeps no named tally of what else moved them, so none is invented here.
 const FLOW_CELLS := [["Produced", "Brought in", null], ["Eaten", "Eaten", Color("8a6118")], ["Spoiled", "Spoiled", Color("a34435")],
-	["Missions", "Sent out", Color("4d6389")], ["Other", "Other", Color("6b5a3e")], ["Net", "Kept", Color("5d6f34")]]
+	["Missions", "Sent out", Color("4d6389")], ["Net", "Kept", Color("5d6f34")]]
 
 func setup(block: Dictionary) -> void:
 	theme = T.control_theme()
@@ -33,8 +34,13 @@ func setup(block: Dictionary) -> void:
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.add_theme_constant_override("separation", 10)
 		summary.add_child(card)
-		var picture := FoodArt.picture(0 if kind == "food" else 4, 60, 40)
+		var picture := TextureRect.new()
+		picture.texture = preload("res://scripts/resource_icons.gd").texture_for("Food" if kind == "food" else "Freshwater")
+		picture.custom_minimum_size = Vector2(34, 34)
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		picture.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card.add_child(picture)
 		_refs[kind] = _reading(card, "", "", "", "")
 		_refs[kind].name = "FoodReading" if kind == "food" else "WaterReading"
@@ -129,17 +135,20 @@ func _fill() -> void:
 	super._fill()
 	_refs.flow.visible = false
 	var amounts := flow_amounts(data.flow)
+	# Spoiled is the stores' own lines added up, so the page's figures agree.
+	var spoiled_rows := 0
+	for item: Dictionary in data.rows: spoiled_rows += roundi(float(item.lost))
+	if not (data.rows as Array).is_empty(): amounts["Spoiled"] = float(spoiled_rows)
 	for key: String in daily_values:
 		var amount := float(amounts.get(key, 0))
 		var words: String = preload("res://scripts/realm_purse.gd").number(amount)
-		if key in ["Net", "Other"] and amount > 0: words = "+" + words
+		if key == "Net" and amount > 0: words = "+" + words
 		_put(daily_values[key], words, tone_color("bad" if amount < 0 else "good") if key == "Net" else T.INK)
 		daily_values[key].tooltip_text = String(_refs.flow.text) + "\n" + String(_refs.flow.tooltip_text)
-	# Nothing sent, nothing else moved: those two cells stand aside.
-	for key: String in ["Missions", "Other"]:
-		(daily_values[key].get_parent() as Control).visible = absf(float(amounts[key])) >= 0.5
+	# Nothing sent: that cell stands aside.
+	(daily_values.Missions.get_parent() as Control).visible = absf(float(amounts.Missions)) >= 0.5
 	(daily_values.Missions.get_parent() as Control).tooltip_text = "Rations sent with parties that left today."
-	(daily_values.Other.get_parent() as Control).tooltip_text = "Everything else that moved the stores today (rations handed out or brought in outside the day's gathering and meals). With it, the row adds up to what was kept."
+	(daily_values.Net.get_parent() as Control).tooltip_text = "The change in the stores today, counted from the stores themselves. Rations handed out between the day's counts (to parties, envoys, the watch abroad) are tallied apart, so this can differ a little from brought in less eaten, spoiled and sent."
 	flow_bar.amounts = amounts
 	flow_bar.queue_redraw()
 	# The headline carries the top bar's own figure for water in store.
@@ -160,12 +169,10 @@ func _fill() -> void:
 		_put(refs.line, "%s spoiled today" % Plain.number(float(item.lost)), T.MUTED)
 
 
-## The day's terms with the remainder named: the engine's change in the
-## stores (Net) less what was brought in, eaten, spoiled and sent out.
+## The day's terms as the engine gives them.
 static func flow_amounts(flow: Dictionary) -> Dictionary:
 	var out := {}
 	for key: String in ["Produced", "Eaten", "Spoiled", "Missions", "Net"]: out[key] = float(flow.get(key, 0))
-	out["Other"] = float(out.Net) - (float(out.Produced) - float(out.Eaten) - float(out.Spoiled) - float(out.Missions))
 	return out
 
 
@@ -180,9 +187,8 @@ class FlowBar extends Control:
 		for pair: Array in FLOW_CELLS:
 			if pair[2] == null: continue
 			var amount := float(amounts.get(pair[0], 0.0))
-			# Food that came in from elsewhere, or a day the stores shrank, is
-			# not a share of where the food went.
-			if String(pair[0]) in ["Other", "Net"]: amount = maxf(0.0, -amount if String(pair[0]) == "Other" else amount)
+			# A day the stores shrank has no "kept" share.
+			if String(pair[0]) == "Net": amount = maxf(0.0, amount)
 			if amount > 0.0: parts.append([amount, pair[2]])
 		draw_rect(Rect2(Vector2.ZERO, size), Color(T.INK, 0.10))
 		var total := 0.0

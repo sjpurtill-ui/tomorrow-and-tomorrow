@@ -125,6 +125,8 @@ func _rows(block:Dictionary)->Dictionary:
 	var out:={}
 	for group:Dictionary in block.groups:
 		for row:Dictionary in group.rows:out[String(row.key)]=row
+	# The figures shown as tiles under the tabs: the same readings, not repeated as rows.
+	for key:String in block.get("tile_rows",{}):out[key]=block.tile_rows[key]
 	return out
 
 func _page(block:Dictionary)->VBoxContainer:
@@ -189,9 +191,12 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_str(String(rows.water.value)).is_equal("8 in 10 drink enough")
 	# Roofs, repair and works: the Buildings page.
 	var shown:={}
-	for city_block:Dictionary in (Construction.new(terrain,hud).tab(0).blocks as Array):
+	var buildings:Dictionary=Construction.new(terrain,hud).tab(0)
+	for city_block:Dictionary in (buildings.blocks as Array):
 		for item:Dictionary in city_block.get("items",city_block.get("cards",[])):
 			if item.has("name"):shown[String(item.name)]=String(item.get("value",""))
+	# Homes, builders and repair lead the Buildings page as tiles; their readings travel with it.
+	for item:Dictionary in buildings.get("tile_rows",[]):shown[String(item.name)]=String(item.get("value",""))
 	assert_str(String(shown.Housing)).is_equal("%d places" % int(rows.roofs.number))
 	assert_str(String(rows.roofs.note)).is_equal("13 sleep out")
 	assert_str(String(shown.Condition)).is_equal("%d%%" % int(rows.damage.number))
@@ -229,7 +234,7 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_int(int(rows.garrison.number)).is_equal(int(truth.garrison))
 	assert_float(float(rows.fortification.own)).is_equal_approx(float(truth.fortification),0.0001)
 	# The leader says the same figures.
-	assert_str(String(block.lead)).is_equal("We are ninety-three, thirteen without a roof; food for two moons, falling; eight in ten drink enough.")
+	assert_str(String(block.lead)).is_equal("We are ninety-three, thirteen without a roof; food for 45 days, falling; eight in ten drink enough.")
 
 # --------------------------------------------------------------------------
 # The towns of strangers
@@ -272,11 +277,11 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	var compare:=page.find_child("CompareTowns",true,false) as Button
 	assert_object(compare).is_not_null()
 	assert_object(page.find_child("Scale",true,false)).is_null()
-	var people:=page.find_child("Row_population",true,false).find_child("Comparison",true,false) as Label
+	var people:=page.find_child("Row_garrison",true,false).find_child("Comparison",true,false) as Label
 	assert_bool(people.visible).is_false()
 	compare.button_pressed=true
 	assert_bool(people.visible).is_true()
-	assert_str(people.text).contains("Flintwick").contains(String(rows.population.marks[0].words))
+	assert_str(people.text).contains("Flintwick").contains(String(rows.garrison.marks[0].words))
 	assert_bool(page.update_block(block)).is_true()
 	assert_bool(compare.button_pressed).is_true()
 
@@ -387,8 +392,10 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 	var page:=_page(_block())
 	assert_object(page.find_child("TownSketch",true,false)).is_null()
 	assert_object(page.find_child("VisitVillage",true,false)).is_not_null()
-	var expected:={"life_expectancy":["health",0],"infant_mortality":["health",0],"learning":["inquiry",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
-		"supply":["economy",0],"water":["economy",0],"production":["production",0],"logistics":["economy",1],"roofs":["construction",0],"works":["construction",1],"building":["construction",1]}
+	var expected:={"infant_mortality":["health",0],"learning":["inquiry",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
+		"production":["production",0],"logistics":["economy",1],"works":["construction",1],"building":["construction",1]}
+	# A row never restates a tile.
+	for key:String in Provider.IN_TILES:assert_object(page.find_child("Row_"+key,true,false)).override_failure_message(key).is_null()
 	for key:String in expected:
 		var row:=page.find_child("Row_"+key,true,false) as Control
 		assert_object(row).override_failure_message(key).is_not_null()
@@ -398,14 +405,12 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 		hud.opened.clear()
 		row.gui_input.emit(click)
 		assert_array(hud.opened).override_failure_message(key).contains_exactly([expected[key]])
-	# The head count opens the town's own ages and families.
-	var people:=page.find_child("Row_population",true,false) as Control
-	var press:=InputEventMouseButton.new();press.button_index=MOUSE_BUTTON_LEFT;press.pressed=true
-	people.gui_input.emit(press)
+	# The town's own ages and families open from the page's foot.
+	for button in page.find_children("*","Button",true,false):
+		if (button as Button).text=="Ages and families":(button as Button).pressed.emit()
 	assert_int(hud.details.size()).is_equal(1)
 	# Each row says where it leads, in its tooltip.
-	assert_str(people.tooltip_text).contains("ages and families")
-	assert_str((page.find_child("Row_supply",true,false) as Control).tooltip_text).contains("Opens the Food page.")
+	assert_str((page.find_child("Row_logistics",true,false) as Control).tooltip_text).contains("Opens the Materials page.")
 
 func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
 	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
@@ -413,8 +418,10 @@ func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
 	assert_array(labels).is_equal(["PEOPLE","FOOD","WATER","HOMES","LIFE SPAN","ARMY"])
 	for tile:Dictionary in tiles:
 		assert_bool(bool(tile.glance)).is_true()
-		# Who ate their fill is not counted before the first day: no bar is drawn for a guess.
-		if String(tile.label)=="PEOPLE" and not tile.has("meter"):continue
+		# A head count and a life span have no full mark to fill toward: no bar.
+		if String(tile.label) in ["PEOPLE","LIFE SPAN"]:
+			assert_bool(tile.has("meter")).is_false()
+			continue
 		assert_bool(tile.has("meter")).override_failure_message(String(tile.label)).is_true()
 		assert_float(float(tile.meter)).is_between(0.0,1.5)
 		assert_bool((tile.on_press as Callable).is_valid()).is_true()
@@ -436,7 +443,9 @@ func _assert_short(page:Node)->void:
 func test_era_words_before_writing_and_short_labels()->void:
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
-	assert_str(text).contains("93 souls").contains("winters").contains("in 100").contains("Babes lost").contains("Food put by").contains("lore ").contains(" passed on")
+	assert_str(text).contains("in 100").contains("Babes lost").contains("lore ").contains(" passed on")
+	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
+	assert_str(String(tiles[4].value)).contains("winters")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	assert_array(Voice.lexicon_hits(text,Voice.era_tags("player"))).is_empty()
 	_assert_short(page)
@@ -444,14 +453,14 @@ func test_era_words_before_writing_and_short_labels()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	page=_page(_block())
 	text="\n".join(_texts(page))
-	assert_str(text).contains("93 people").contains("years").contains("in 1,000").contains("Infants buried").contains("records ")
+	assert_str(text).contains("in 1,000").contains("Infants buried").contains("records ")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	_assert_short(page)
 	# Print: the statistical age has its measures.
 	GameState.known_discoveries.append("printing_process")
 	page=_page(_block())
 	text="\n".join(_texts(page))
-	assert_str(text).contains("Life expectancy").contains("/ 1,000").contains("schooled")
+	assert_str(text).contains("/ 1,000").contains("schooled")
 	_assert_short(page)
 
 func _ground(style:StyleBox)->Color:

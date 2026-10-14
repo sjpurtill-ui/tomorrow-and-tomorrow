@@ -82,15 +82,16 @@ func _glance_tiles(settlement:Dictionary)->Array:
 	var people:=int(facts.population)
 	var metrics:Dictionary=GameState.simulation_metrics
 	var tiles:Array=[]
-	# People: how many, and how many of them ate their fill today.
-	var fed:=EraWords.fed(people,float(metrics.get("food_home_eaten",metrics.get("food_eaten",0.0))),float(metrics.get("food_home_need",metrics.get("food_consumption",0.0))))
-	var vitals:=GameState.rolling_vital_balance(365)
-	var net:=int(vitals.get("net",int(vitals.get("births",0))-int(vitals.get("deaths",0))))
-	var person:={"label":"PEOPLE","value":EraWords.grouped(people),"glance":true,"delta":"%s more %s" % [EraWords.grouped(absi(net)),"births" if net>=0 else "deaths"],"delta_color":Tokens.GREEN if net>=0 else Tokens.RED,
-		"tip":"Everyone living here. Over the last year %s more were %s (those who left or came are not counted in that)." % [EraWords.grouped(absi(net)),"born than buried" if net>=0 else "buried than born"],"on_press":jump("overview",0)}
-	if fed>=0:
-		person["meter"]=float(fed)/float(maxi(1,people));person["meter_color"]=Tokens.GREEN if fed>=people else Tokens.RED
-		person["tip"]+="\nThe bar: %s of %s ate their fill today." % [EraWords.grouped(fed),EraWords.grouped(people)]
+	# People: how many, and the year's change so far (the Chronicle's own
+	# figure: chronicle_annals.gd people_this_year), amber when falling.
+	var year:Dictionary=preload("res://scripts/chronicle_annals.gd").people_this_year(GameState.chronicle,int(GameState.population_total))
+	var person:={"label":"PEOPLE","value":EraWords.grouped(people),"glance":true,"tip":"Everyone living here.","on_press":jump("chronicle",0)}
+	if not year.is_empty():
+		var change:=int(year.change)
+		person["delta"]="no change this year" if change==0 else "%s%s this year" % ["+" if change>0 else "−",EraWords.grouped(absi(change))]
+		person["delta_color"]=Tokens.AMBER if change<0 else (Tokens.GREEN if change>0 else Tokens.MUTED)
+		var other:=int(year.other)
+		person["tip"]="Everyone living here. This year so far: %s born, %s buried%s." % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried)),"" if other==0 else (", %s left or lost" % EraWords.grouped(-other) if other<0 else ", %s arrived" % EraWords.grouped(other))]
 	tiles.append(person)
 	# Food: days in store, against the lean line (food_care.gd).
 	var days:=float(facts.food_days)
@@ -98,7 +99,7 @@ func _glance_tiles(settlement:Dictionary)->Array:
 		var level:=FoodCare.store_level(days)
 		var reading:=Words.food(days,facts.flow,true)
 		tiles.append({"label":"FOOD","value":EraWords.days(days),"glance":true,"meter":FoodCare.lean_buffer(days),"meter_color":Tokens.RED if level=="bare" else (Tokens.AMBER if level=="low" else Tokens.GREEN),
-			"delta":String(reading.trend),"delta_color":Tokens.RED if String(reading.tone)=="bad" else Tokens.MUTED,
+			"delta":"safe above %d days" % int(FoodCare.LEAN_DAYS),"delta_color":Tokens.RED if String(reading.tone)=="bad" else Tokens.MUTED,
 			"tip":"%s.\nThe bar is full at %d days in store, the lean line." % [String(reading.sentence).trim_suffix("."),int(FoodCare.LEAN_DAYS)],"on_press":jump("economy",0)})
 	# Water: days in store, and who drinks enough today.
 	var water:Dictionary=facts.water
@@ -113,12 +114,13 @@ func _glance_tiles(settlement:Dictionary)->Array:
 	var places:=int(facts.places)
 	var outside:=maxi(0,people-places)
 	tiles.append({"label":"HOMES","value":EraWords.grouped(places),"glance":true,"meter":float(people)/float(maxi(1,places)),"meter_color":Tokens.RED if outside>0 else (Tokens.AMBER if people>=places*0.95 else Tokens.GREEN),
-		"delta":"%s sleep out" % EraWords.grouped(outside) if outside>0 else "%s free" % EraWords.grouped(places-people),"delta_color":Tokens.RED if outside>0 else Tokens.MUTED,
+		"delta":"%s sleep out" % EraWords.grouped(outside) if outside>0 else "%d%% full" % roundi(float(people)/float(maxi(1,places))*100.0),"delta_color":Tokens.RED if outside>0 else Tokens.MUTED,
 		"tip":"Room under a roof for %s; %s live here. The bar is how full the houses are." % [EraWords.grouped(places),EraWords.grouped(people)],"on_press":jump("construction",0)})
 	# How long we live.
 	var life:=GameState.projected_life_expectancy()
-	tiles.append({"label":"LIFE SPAN","value":EraWords.life(life),"glance":true,"meter":life/80.0,"meter_color":Tokens.TEAL,
-		"delta":"of 80","tip":"How long a child born now can hope to live. The bar is full at 80.\n%s." % EraWords.babes_lost_short(Indicators.infant_mortality_per_1000()).capitalize(),"on_press":jump("overview",0)})
+	# No bar: a life has no full mark to fill toward.
+	tiles.append({"label":"LIFE SPAN","value":EraWords.life(life),"glance":true,
+		"delta":"%d in 100 infants lost" % roundi(Indicators.infant_mortality_per_1000()/10.0),"tip":"How long a child born now can hope to live.\n%s." % EraWords.babes_lost_short(Indicators.infant_mortality_per_1000()).capitalize(),"on_press":jump("overview",0)})
 	# The army: the War screen's own count and its gear in hand.
 	var WarBoard:GDScript=load("res://scripts/hud/war_board.gd")
 	var serving:=int(preload("res://scripts/army_levy_law.gd").reading(MilitaryCampaign).now)
@@ -197,6 +199,8 @@ static func _known_signature()->int:
 const FOCUS_WORDS:={"water":"water","provisions":"food","shelter":"shelter","research":"learning","defense":"the watch","logistics":"carrying and paths","development":"building up the place","establishment":"setting the place up","balanced":"everyday needs"}
 ## The choices offered on the Settlement dock, in the order shown.
 const ASKABLE:=["water","provisions","shelter","research","defense"]
+## The town's figures that stand as tiles under the tabs (_glance_tiles).
+const IN_TILES:=["population","life_expectancy","supply","water","roofs"]
 
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
@@ -237,6 +241,15 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	var on_population:Callable=focused_action("Ages and families","",_people_report.bind("population")).on_press
 	# Each figure opens the page that owns it; the head count, the town's own ages.
 	var groups:=Model.groups(facts,_towns)
+	# The tiles under the tabs already carry these; a row never restates a
+	# tile. The rows themselves stay with the page as `tile_rows` (the same
+	# readings the tiles show, each with the dock that owns it).
+	var tile_rows:={}
+	for group:Dictionary in groups:
+		for row:Dictionary in group.rows:
+			if String(row.key) in IN_TILES:tile_rows[String(row.key)]=row
+		group["rows"]=(group.rows as Array).filter(func(row:Dictionary)->bool:return String(row.key) not in IN_TILES)
+	groups=groups.filter(func(group:Dictionary)->bool:return not (group.rows as Array).is_empty())
 	for group:Dictionary in groups:
 		for row:Dictionary in group.rows:
 			row["on_open"]=on_population if String(row.section)=="" else jump(String(row.section),int(row.sub))
@@ -249,7 +262,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 		"work_warning":warning,"on_food_fix":_put_on_food.bind(int(warning.get("fix",0))) if int(warning.get("fix",0))>0 else Callable(),
 		# The town is on the map beside this page: no second picture of it here.
 		"town_name":String(facts.name),"sketch":{},"on_visit":_visit_village,"lead":Model.lead(facts),
-		"groups":groups,"legend":Model.legend(_towns),
+		"groups":groups,"tile_rows":tile_rows,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":_founding,
 		"on_leader":court({"settlement_id":String(id)}),

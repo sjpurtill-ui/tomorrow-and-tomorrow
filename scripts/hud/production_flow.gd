@@ -203,6 +203,15 @@ func _draw()->void:
 	for ribbon:Dictionary in _ribbons:
 		if bool(ribbon.dry):_draw_break(ribbon,font)
 
+## The first stopped line's words in a block's flow model ("no timber:
+## transport carts stalled"), "" when every line runs: the page's headline
+## says it too (production_queue.gd).
+static func stalled_words(block:Dictionary)->String:
+	var flow:Dictionary=block.get("flow",{}) if block.get("flow") is Dictionary else {}
+	for link:Dictionary in flow.get("links",[]):
+		if bool(link.get("dry",false)) and String(link.get("words",""))!="":return String(link.words)
+	return ""
+
 ## What an empty chart says: why nothing is made on this page today.
 func _idle_words()->String:
 	if mode=="military":
@@ -237,19 +246,15 @@ func _draw_ribbon(ribbon:Dictionary)->void:
 	draw_polyline(upper,Color(tint.darkened(.35),.85),1.2,true)
 	draw_polyline(lower,Color(tint.darkened(.35),.85),1.2,true)
 
-func _draw_break(ribbon:Dictionary,font:Font)->void:
+func _draw_break(ribbon:Dictionary,_font:Font)->void:
 	var points:PackedVector2Array=ribbon.points
 	var mid:=points[points.size()/2]
 	var r:=6.0
 	draw_circle(mid,r+3.0,T.PAPER_RAISED)
 	draw_line(mid+Vector2(-r,-r),mid+Vector2(r,r),T.RED,2.4,true)
 	draw_line(mid+Vector2(-r,r),mid+Vector2(r,-r),T.RED,2.4,true)
-	var words:=String(ribbon.link.get("words",""))
-	if words.is_empty():return
-	var at:=mid+Vector2(0,-12)
-	var width:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
-	draw_rect(Rect2(at+Vector2(-width*.5-5,-14),Vector2(width+10,18)),Color(T.PAPER_RAISED,.92))
-	_text(font,words,at,13,T.RED_TEXT,HORIZONTAL_ALIGNMENT_CENTER)
+	# The red mark stands on the picture; its words are the page's headline
+	# (production_queue.gd) and the ribbon's pointer, never laid over a bench's name.
 
 func _draw_node(node:Dictionary,font:Font,strong:Font)->void:
 	var pos:Vector2=node.pos

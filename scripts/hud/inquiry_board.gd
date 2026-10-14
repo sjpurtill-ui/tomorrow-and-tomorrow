@@ -48,7 +48,6 @@ func setup(block:Dictionary)->void:
 	var learning:=VBoxContainer.new();learning.name="BeingLearned";learning.add_theme_constant_override("separation",6);add_child(learning)
 	var heading:=HBoxContainer.new();learning.add_child(heading)
 	var title:=T.make_label("BEING LEARNED, FIELD BY FIELD",12,T.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
-	var hint:=T.make_label("Hover a card for the whole account; click it for its field.",12,T.TEXT_SOFT);heading.add_child(hint)
 	for lane:Dictionary in plan.lanes:_lane(learning,lane)
 	if (data.get("investigations",[]) as Array).is_empty():_empty(learning)
 	# A team freed by a proof took up the best question open to it; for a season
@@ -186,19 +185,17 @@ static func pace_words(pace:Dictionary)->Dictionary:
 		words.value="No one"
 		words.words="is set to learning, so nothing is being learned"
 	else:
-		words.value=_times(ratio,true)
-		words.words="the work of a typical people our age (%s learners; such a people keeps about %s)" % [_count(learners),_count(typical)]
-	if proofs>0.0:
-		words.proofs="At today's pace about %s question%s proven a year." % [_amount(proofs),"" if proofs<1.5 and proofs>=0.95 else "s"]
-	elif learners>0.0:
-		words.proofs="No question is near enough to proof to count a year."
+		words.value="%s×" % _amount(ratio,2 if absf(ratio-1.0)<0.1 else 1) if ratio<10.0 else "%d×" % roundi(ratio)
+		# One headline: the pace against a typical people of our age, and what it proves a year.
+		words.words="a typical people our age"+(" · about %s discover%s a year" % [_amount(proofs),"y" if proofs<1.5 and proofs>=0.95 else "ies"] if proofs>0.0 else " · no discovery near this year")
+		words["tip"]="%s scholars; a typical people our age keeps about %s." % [_scholars(),_count(typical)]
 	var limit:=limiter(pace)
 	words.limiter=String(limit.text);words.limiter_tone=String(limit.tone)
 	var chips:Array=[]
 	# Learners: the people at it, their teams, and what the age can spare.
 	var heads:=float(pace.get("heads",learners))
 	var share:=learners/maxf(1.0,float(pace.get("able",1.0)))
-	chips.append({"kind":"learners","icon":["people","learn"],"value":_count(learners),"label":"learners",
+	chips.append({"kind":"learners","icon":["people","learn"],"value":_scholars(),"label":"scholars",
 		"tone":"bad" if learners<=0.0 else "plain",
 		"tip":"%s at learning (%s by head; the hurt count less, those away teaching and those tending the sick and the lenses not at all, a gifted scholar more). They work %d question%s at once, a team on each.\nA people our age can spare %d in 100 of its able as learners, about %s; we keep %d in 100. Every learner counts; ten times the learners do about 7.6 times the work." % [_count(learners),_count(heads),int(pace.get("teams",0)),"" if int(pace.get("teams",0))==1 else "s",roundi(float(pace.get("sustainable",0.0))*100.0),_count(typical),roundi(share*100.0)]})
 	# Goods: what the learners use a day, and any shortfall.
@@ -296,13 +293,18 @@ static func _amount(value:float,places:int=1)->String:
 	var text:=("%."+str(places)+"f") % value
 	if "." in text:text=text.rstrip("0").trim_suffix(".")
 	return text
+## The scholars by head, the top bar's own count and word
+## (civilization_kpi_model.gd snapshot minds, the same call). Their weighted work (the hurt
+## counting less, the gifted more) is in the chip's pointer.
+static func _scholars()->String:
+	return preload("res://scripts/hud/era_words.gd").grouped(roundi(float(preload("res://scripts/hud/civilization_kpi_model.gd").snapshot().minds)))
+
 static func _count(value:float)->String:
 	return preload("res://scripts/hud/production_plain.gd").number(roundf(value))
 
 func _plain_heading(parent:Node)->void:
 	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",8);parent.add_child(heading)
 	var title:=T.make_label("WHAT IS BEING LEARNED",12,T.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
-	_small_button(heading,"Discovery tree",data.get("on_tree"),"Explore known methods and their prerequisites")
 	_small_button(heading,"Who does the work",data.get("on_work"),"How many people the local leaders set to learning")
 
 func _pace_header(parent:Node,words:Dictionary)->void:
@@ -317,7 +319,6 @@ func _pace_header(parent:Node,words:Dictionary)->void:
 	var said:=T.make_label(String(words.words),13,T.BODY);said.name="PaceWords";said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(said)
 	var proofs:=T.make_label(String(words.proofs),13,T.TEXT_SOFT);proofs.name="PaceProofs";left.add_child(proofs)
 	var actions:=VBoxContainer.new();actions.add_theme_constant_override("separation",4);actions.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;top.add_child(actions)
-	_small_button(actions,"Discovery tree",data.get("on_tree"),"Explore known methods and their prerequisites")
 	_small_button(actions,"Who does the work",data.get("on_work"),"How many people the local leaders set to learning")
 	# The single biggest limiter, named.
 	var limit:=HBoxContainer.new();limit.name="Limiter";limit.add_theme_constant_override("separation",8);box.add_child(limit)
@@ -332,11 +333,16 @@ func _pace_header(parent:Node,words:Dictionary)->void:
 func _fill_header(words:Dictionary)->void:
 	_put(_header.value,String(words.value))
 	_put(_header.words,String(words.words))
+	(_header.words as Label).tooltip_text=String(words.get("tip",""));(_header.words as Label).mouse_filter=Control.MOUSE_FILTER_PASS
 	_put(_header.proofs,String(words.proofs))
 	(_header.proofs as Label).visible=String(words.proofs)!=""
 	var tone:=String(words.limiter_tone)
 	var ink:Color=tone_color(tone) if tone!="plain" else T.INK
-	_put(_header.limiter,("Held back most by: " if tone!="good" else "")+String(words.limiter),ink)
+	# The limiter in a few words; its whole account in the pointer.
+	var whole:=String(words.limiter)
+	var short:=whole.get_slice(":",0).get_slice(".",0)
+	_put(_header.limiter,("Held back most by: " if tone!="good" else "")+(short.left(1).to_lower()+short.substr(1) if tone!="good" else short),ink)
+	(_header.limiter as Label).tooltip_text=whole;(_header.limiter as Label).mouse_filter=Control.MOUSE_FILTER_PASS
 	(_header.bar as ColorRect).color=T.RED if tone=="bad" else (T.GREEN if tone=="good" else T.AMBER)
 	for chip:Dictionary in words.chips:
 		var refs:Dictionary=_chips.get(String(chip.kind),{})
@@ -410,7 +416,7 @@ func _fill_lane(refs:Dictionary,lane:Dictionary)->void:
 		_put(refs.attention,"")
 	else:
 		var share:=float(field.get("share",0.0))
-		_put(refs.attention,"No attention" if share<=0.0 else "%d in 100 of our attention" % maxi(1,roundi(share*100.0)),T.TEXT_SOFT if share<=0.0 else T.BODY)
+		_put(refs.attention,"No attention" if share<=0.0 else "%d%% of attention" % maxi(1,roundi(share*100.0)),T.TEXT_SOFT if share<=0.0 else T.BODY)
 		(refs.title as Label).tooltip_text=String(field.get("goal","")).left(1).to_upper()+String(field.get("goal","")).substr(1)
 		(refs.attention as Label).tooltip_text=_field_words(field)
 		(refs.attention as Label).mouse_filter=Control.MOUSE_FILTER_STOP

@@ -139,18 +139,20 @@ func test_pending_civic_request_never_retains_transient_ui_nodes()->void:
 
 
 func test_economy_badge_ignores_healthy_reserve_threshold_crossings()->void:
-	var hud:Variant=auto_free(COMMAND_RAIL.new())
+	# The rail's badges are the notice rows; the rule for a food or water row
+	# is the notices' own (hud/standing_notices.gd).
+	var Standing:=preload("res://scripts/hud/standing_notices.gd")
 	GameState.consecutive_food_shortage_days=0.0
 	GameState.consecutive_water_shortage_days=0.0
 	var healthy_food:Dictionary={"food_days":6.8,"food_net":2.0,"food_intake_ratio":1.0}
 	var healthy_water:Dictionary={"days":0.8,"required_today":120.0,"intake_ratio":1.0}
-	assert_bool(hud._economy_danger_active(healthy_food,healthy_water)).is_false()
+	assert_bool(Standing.food_danger(healthy_food) or Standing.water_danger(healthy_water)).is_false()
 	GameState.consecutive_water_shortage_days=2.0
 	var short_water:Dictionary={"days":0.0,"required_today":120.0,"intake_ratio":0.72}
-	assert_bool(hud._economy_danger_active(healthy_food,short_water)).is_true()
+	assert_bool(Standing.water_danger(short_water)).is_true()
 	GameState.consecutive_water_shortage_days=0.0
 	var falling_food:Dictionary={"food_days":5.0,"food_net":-8.0,"food_intake_ratio":1.0}
-	assert_bool(hud._economy_danger_active(falling_food,healthy_water)).is_true()
+	assert_bool(Standing.food_danger(falling_food)).is_true()
 
 
 func test_food_weather_varies_across_years_without_escaping_bounded_yields()->void:

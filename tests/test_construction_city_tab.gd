@@ -92,6 +92,8 @@ static func _rows(page:Dictionary)->Dictionary:
 	for block:Dictionary in page.get("blocks",[]):
 		if not String(block.get("type","")) in ["rows","town_works"]:continue
 		for item:Dictionary in block.get("items",block.get("cards",[])):rows[String(item.name)]=item
+	# Homes, builders and repair lead the page as tiles; their readings travel with it.
+	for item:Dictionary in page.get("tile_rows",[]):rows[String(item.name)]=item
 	return rows
 
 ## The page as the player reads it, for the handoff and for review.
@@ -317,8 +319,14 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 			assert_bool(String(item.value).contains("·")).override_failure_message(String(item.value)).is_false()
 			for text:String in [String(item.name),String(item.value),String(item.sub),String(item.get("detail",""))]:
 				assert_object(caps.search(text)).override_failure_message(text).is_null()
-	# The works, the defences, new homes and the town's five figures.
-	assert_int(count).is_equal(8)
+	# The defences, new homes, the era and the workshops as cards (a work in hand
+	# adds its own); homes, builders and repair lead the page as tiles.
+	assert_int(count).is_between(4,5)
+	var tiles:Array=_page().kpis
+	assert_int(tiles.size()).is_greater_equal(4)
+	for tile:Dictionary in tiles:
+		assert_bool(tile.has("meter")).override_failure_message(String(tile.label)).is_true()
+		assert_str(String(tile.value)).is_not_empty()
 	# It draws: one ink row per item on the dock's paper.
 	var body:=VBoxContainer.new();add_child(body)
 	Blocks.render(body,page.blocks)

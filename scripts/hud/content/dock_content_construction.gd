@@ -62,15 +62,58 @@ func _city_tab()->Dictionary:
 	if not just.is_empty():going_up.append(just)
 	if not _defence.is_empty():going_up.append(_defence)
 	going_up.append(_new_homes_row(housing,crews))
-	return {"brief":_now_brief(city,project,housing,crews),"blocks":[
-		{"type":"town_works","heading":town,"note":_count(int(crews.heads),"builder"),"cards":going_up.slice(0,1)},
-		{"type":"town_works","heading":"The town now","readings":true,"note":_count(int(housing.people),"person","people"),"cards":[_home_row(housing),_builders_row(crews),_condition_row(),_era_row(crews),_workshops_row()]},
+	# Tiles first: homes, builders, repair, new homes, the landmark. "All
+	# built" is said once, in the lead, with the one thing to do about it;
+	# a work in hand keeps its card.
+	var brief:=_now_brief(city,project,housing,crews)
+	if not brief.has("action_label"):
+		if project.is_empty():brief.merge({"action_label":"Learn new works","on_action":jump("inquiry",0)})
+		else:brief.merge({"action_label":"Choose what to build","on_action":jump("construction",1)})
+	var blocks:Array=[]
+	if not project.is_empty():blocks.append({"type":"town_works","heading":town,"cards":going_up.slice(0,1)})
+	blocks.append({"type":"town_works","heading":"The town now","readings":true,"cards":[_era_row(crews),_workshops_row()]})
+	return {"kpis":_glance(housing,crews,project.is_empty()),"tile_rows":[_home_row(housing),_builders_row(crews),_condition_row()],"brief":brief,"blocks":blocks+[
 		{"type":"town_works","heading":"Around the town","cards":going_up.slice(1)}]+_fabric_blocks()+[
 		{"type":"impact_lines","heading":"What the buildings do","compact":true,"columns":3,"lines":Impact.summary()},
 		{"type":"impact_lines","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"compact":true,"columns":3,"lines":homes.lines},
 		{"type":"actions","items":[
 			{"label":"Choose what to build","sub":"Civic works: each work, what it needs, your priority","on_press":jump("construction",1)},
 			{"label":"Change who builds","sub":"The People: how many build, make and carry","on_press":jump("overview",0)}]}]}
+
+## The page's lead: four or five numbers with bars, each the engine's own
+## (housing(), _crews(), upkeep_warnings.gd facts, great_works.gd works).
+func _glance(h:Dictionary,crews:Dictionary,all_built:bool)->Array:
+	var tiles:Array=[]
+	var home:=_home_row(h)
+	var places:=int(h.places);var people:=int(h.people);var short:=int(h.short)
+	tiles.append({"label":"HOMES FILLED","value":"%s of %s" % [_n(mini(people,places)),_n(places)],"glance":true,"meter":clampf(float(people)/float(maxi(1,places)),0.0,1.0),"meter_color":Tokens.RED if short>0 else Tokens.GREEN,
+		"delta":"%s sleep out" % _n(short) if short>0 else "%d%% full" % roundi(float(people)/float(maxi(1,places))*100.0),"delta_color":Tokens.RED if short>0 else Tokens.MUTED,"tip":"%s %s" % [String(home.sub),String(home.detail)]})
+	var heads:=int(crews.heads);var town:=roundi(float(crews.town));var landmark:=roundi(float(crews.landmark));var military:=roundi(float(crews.military))
+	var idle:=maxi(0,heads-town-landmark-military)
+	var jobs:PackedStringArray=["%s %s" % [_n(town),"upkeep" if all_built else "town works"]]
+	if landmark>0:jobs.append("%s landmark" % _n(landmark))
+	if military>0:jobs.append("%s military" % _n(military))
+	if idle>0:jobs.append("%s away or hurt" % _n(idle))
+	tiles.append({"label":"BUILDERS","value":_n(heads),"glance":true,"meter":clampf(float(town)/float(maxi(1,heads)),0.0,1.0),"meter_color":Tokens.GREEN if heads>0 else Tokens.RED,
+		"delta":" · ".join(jobs) if heads>0 else "no one is building","delta_color":Tokens.MUTED if heads>0 else Tokens.RED,
+		"tip":"%s\nThe bar: those on the town's own work (mending, new homes%s) of all set to building. %s" % [" · ".join(jobs),"" if all_built else ", the civic work in hand",String(_builders_row(crews).detail)],"on_press":jump("overview",0)})
+	var repair:=_condition_row()
+	tiles.append({"label":"REPAIR","value":String(repair.value),"glance":true,"meter":float((repair.meter as Dictionary).ratio),"meter_color":repair.accent,
+		"delta":String(repair.sub).get_slice(":",0),"tip":"%s. %s" % [String(repair.sub),String(repair.detail)]})
+	var trigger:=int(h.trigger)
+	if bool(h.get("building",false)):
+		tiles.append({"label":"NEW HOMES","value":"%d%%" % roundi(float(h.progress)*100.0),"glance":true,"meter":float(h.progress),"meter_color":Tokens.GREEN,"delta":_left_words(float(h.days_left)),"tip":"%s more places going up." % _n(int(h.batch))})
+	elif trigger>0:
+		tiles.append({"label":"NEW HOMES","value":"at %s" % _n(trigger),"glance":true,"meter":clampf(float(people)/float(trigger),0.0,1.0),"meter_color":Tokens.GOLD,"delta":"%s people to go" % _n(maxi(0,trigger-people)),
+			"tip":"Builders put up more homes once more than %s people live here, %d%% of the places. The bar is how near that is." % [_n(trigger),roundi(Construction.HOUSING_TRIGGER*100.0)]})
+	for work:Dictionary in preload("res://scripts/great_works.gd").works():
+		if String(work.get("status","")) not in ["building","stalled"]:continue
+		var left:=float(work.get("days_left",-1.0))
+		tiles.append({"label":"LANDMARK","value":"%d%%" % roundi(float(work.get("progress",0.0))*100.0),"glance":true,"meter":float(work.get("progress",0.0)),"meter_color":Tokens.GOLD if String(work.status)=="building" else Tokens.RED,
+			"delta":_time_left(left) if String(work.status)=="building" and left>=0.0 else "stalled","delta_color":Tokens.MUTED if String(work.status)=="building" else Tokens.RED,
+			"tip":"%s: %s." % [String(work.get("name","A landmark")),String(work.get("stage",""))],"on_press":jump("construction",3)})
+		break
+	return tiles
 
 ## Who builds: the builders set to it, those on the town's own works, and the
 ## share a landmark or military works take, in heads (GameState.workers_at:
