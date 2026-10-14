@@ -46,7 +46,7 @@ func _draw()->void:
 	if compact:
 		_draw_compact()
 		return
-	var number_font:=T.font("voice")
+	var number_font:=T.font("ui_strong")
 	var width:=maxf(0.0,(size.x-24.0)/2.0)
 	for index in 2:
 		var x:=(width+24.0)*index
@@ -69,11 +69,11 @@ func _draw_compact()->void:
 	var face:=T.font("ui_strong")
 	var left:="in "+EraWords.grouped(roundi(_value(0)))
 	var right:="out "+EraWords.grouped(roundi(_value(1)))
-	var lw:=face.get_string_size(left,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
-	var rw:=face.get_string_size(right,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
+	var lw:=face.get_string_size(left,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
+	var rw:=face.get_string_size(right,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
 	var mid:=size.y*0.5
-	draw_string(face,Vector2(0,mid+5),left,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.TEAL_TEXT)
-	draw_string(face,Vector2(size.x-rw,mid+5),right,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.GOLD_TEXT)
+	draw_string(face,Vector2(0,mid+5),left,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.TEAL_TEXT)
+	draw_string(face,Vector2(size.x-rw,mid+5),right,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.GOLD_TEXT)
 	var x0:=lw+8.0;var x1:=size.x-rw-8.0
 	if x1-x0<10.0:return
 	var center:=(x0+x1)*0.5

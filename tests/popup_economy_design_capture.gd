@@ -67,15 +67,25 @@ func _run()->void:
 	var terrain:=CaptureTerrain.new();add_child(terrain)
 	var hud:=CaptureHud.new();add_child(hud)
 	var provider:=FoodProvider.new(terrain,hud)
+	if _arg("page","all")=="deliveries" and _arg("state","")=="filled":
+		var day:=int(GameState.elapsed_days)
+		var home:=GameState.selected_player_settlement_id
+		GameState.society_capacities.logistics=0.45;GameState.society_capacities.institutions=0.3
+		GameState.city_trade_shipments.assign([{"source_id":home,"source_name":"Reedwater","destination_id":"river","destination_name":"Long Willow River","resource":"Timber","quantity":24.0,"arrival_day":day+5},{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Food","quantity":110.0,"arrival_day":day+1}])
+		GameState.city_trade_history.assign([{"source_id":"river","source_name":"Long Willow River","destination_id":home,"destination_name":"Reedwater","resource":"Stone","delivered":5.0,"day":day-3,"status":"delivered"}])
 	for canvas:Vector2i in [Vector2i(1440,900),Vector2i(1000,760)]:
 		for palette:String in ["dark","light"]:
 			T.set_color_mode(palette)
-			var viewport:=SubViewport.new();viewport.size=canvas;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
+			var viewport:=SubViewport.new();viewport.size=canvas;viewport.gui_embed_subwindows=true;viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
 			var background:=ColorRect.new();background.color=T.PAPER_SUNK;background.size=Vector2(canvas);viewport.add_child(background)
 			var dock:=Dock.new();dock.theme=T.control_theme();dock.position=Vector2(24,20);dock.size=Vector2(Folio.page_width(canvas.x),canvas.y-40);viewport.add_child(dock);hud.dock=dock
-			for page:Array in [[0,"food"],[1,"materials"],[2,"wealth"],[3,"trade"]]:
+			for page:Array in [[0,"food"],[1,"materials"],[2,"wealth"],[3,"trade"],[0,"deliveries"]]:
 				if _arg("page","all")!="all" and _arg("page","all")!=String(page[1]):continue
-				dock.present(provider,int(page[0]));await _settle()
+				if page[1]=="deliveries":
+					provider.focused_action("Deliveries between places","",provider._economy_report.bind("trade")).on_press.call()
+					dock.present(hud.detail_provider,0);hud.detail_provider=null
+				else:dock.present(provider,int(page[0]))
+				await _settle()
 				await _capture(viewport,output,"economy-%s-%s-%s-%d" % [tag,page[1],palette,canvas.x])
 				dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
 				await _capture(viewport,output,"economy-%s-%s-bottom-%s-%d" % [tag,page[1],palette,canvas.x])
@@ -104,10 +114,18 @@ func _run()->void:
 					provider.selected_account=""
 				if page[1]=="trade" and not trade_ids.is_empty() and _arg("state","barter")!="word":
 					var board:=dock.find_child("TradeBoard",true,false)
-					board._toggle_people(String(trade_ids[0]));dock.body_scroll.scroll_vertical=0;await _settle()
+					if not bool(board.expanded_people.get(String(trade_ids[0]),false)):board._toggle_people(String(trade_ids[0]))
+					dock.body_scroll.scroll_vertical=0;await _settle()
 					await _capture(viewport,output,"economy-%s-trade-terms-%s-%d" % [tag,palette,canvas.x])
 					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
 					await _capture(viewport,output,"economy-%s-trade-terms-bottom-%s-%d" % [tag,palette,canvas.x])
+					for menu_name:String in ["Stance_squeeze","BuyWithGoods"]:
+						var partner:=board.find_child("People_"+String(trade_ids[0]),true,false)
+						var menu:=partner.find_child(menu_name,true,false) as MenuButton
+						if menu==null or menu.disabled:continue
+						dock.body_scroll.ensure_control_visible(menu);await _settle()
+						menu.show_popup();await _settle()
+						await _capture(viewport,output,"economy-%s-trade-%s-%s-%d" % [tag,menu_name,palette,canvas.x]);menu.get_popup().hide();await _settle()
 			viewport.queue_free();await get_tree().process_frame
 	fixture.free()
 	if _arg("page","all")=="trade":TradeFixture.cleanup_fixture()
