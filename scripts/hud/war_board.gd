@@ -103,6 +103,8 @@ var enemy_count:Label
 var feedback:Label
 var covert:Control
 var covert_toggle:Button
+var covert_back:Button
+var _overview_scroll:=0
 var clock:=0.0
 ## Capture only ("--capture-war-scroll=<px>"): the column shown further down.
 var _capture_scroll:=-1
@@ -170,15 +172,18 @@ func setup(_block:Dictionary={})->void:
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:covert_toggle.add_theme_color_override(state,T.INK_MUTED)
 	covert_toggle.tooltip_text="Our eyes among other peoples, the wary at home, what word came back and who was caught. Their own page on the rail (F3) sets how hard we watch each people and our own."
 	leaders_section.add_child(covert_toggle)
-	covert=CovertBoard.new();covert.name="CovertBoard";leaders_section.add_child(covert);covert.setup();covert.visible=false
+	covert_back=Button.new();covert_back.name="BackFromIntelligence";covert_back.text="Back to War";T.apply_button_style(covert_back)
+	covert_back.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;covert_back.visible=false;add_child(covert_back)
+	covert=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup();covert.visible=false
 	for argument in OS.get_cmdline_user_args():
 		if String(argument).begins_with("--capture-war-tab="):tab=String(argument).trim_prefix("--capture-war-tab=")
 	_apply_width()
-	covert_toggle.pressed.connect(func()->void:covert.visible=not covert.visible;_spies_words())
+	covert_toggle.pressed.connect(_toggle_covert)
+	covert_back.pressed.connect(_toggle_covert)
 	_spies_words()
 	for argument in OS.get_cmdline_user_args():
 		if String(argument).begins_with("--capture-war-scroll="):_capture_scroll=int(String(argument).trim_prefix("--capture-war-scroll="))
-		if String(argument)=="--capture-covert":covert.visible=true;_spies_words();_capture_covert=true
+		if String(argument)=="--capture-covert":covert.visible=true;_spies_words();_capture_covert=true;_apply_width(true)
 	refresh(true)
 
 
@@ -336,14 +341,14 @@ func _border_card()->Control:
 		head.add_child(place)
 		return panel
 	# Who stands on it and what it costs, one line of figures.
-	var facts:=HBoxContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("separation",14);column.add_child(facts)
+	var facts:=HFlowContainer.new();facts.name="BorderFacts";facts.add_theme_constant_override("h_separation",14);facts.add_theme_constant_override("v_separation",6);column.add_child(facts)
 	facts.add_child(_fact("Posted",compact(on_border_all),"on it","%s of ours on the border: %s of the home guard in the forts and along linked stretches, and %s of the army in %d %s at border stations (the Defend stance)." % [EraWords.grouped(on_border_all),EraWords.grouped(int(kept.posted)),EraWords.grouped(int(bands.men)),int(bands.bands),"band" if int(bands.bands)==1 else "bands"]))
 	facts.add_child(_fact("Garrison",compact(garrison),"in forts","%s in the forts. Garrisons are manned first; those left watch the linked stretches." % EraWords.grouped(garrison)))
 	var lost:=roundi(float(bill.food_lost))
 	facts.add_child(_fact("FoodLoss",compact(lost),"food lost a day","%s food spoils or is eaten on the road each day, in addition to the rations the border watch eats. Roads and carts reduce this loss." % EraWords.grouped(lost),T.RED_TEXT if lost>0 else T.INK))
 	# The share of the home guard sent out, and the verb.
 	var share:=Forts.border_share()
-	var split:=HBoxContainer.new();split.name="BorderCost";split.add_theme_constant_override("separation",6);column.add_child(split)
+	var split:=HFlowContainer.new();split.name="BorderCost";split.add_theme_constant_override("h_separation",6);split.add_theme_constant_override("v_separation",6);column.add_child(split)
 	var share_words:=_line("Send %d%% of the home guard" % roundi(share*100.0),12,T.INK);share_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;share_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	share_words.tooltip_text="The share of the home guard sent out to the forts and the line between them; garrisons are filled first."
 	split.add_child(share_words)
@@ -1367,6 +1372,14 @@ func _spies_words()->void:
 	# The society's name by age (covert_board.gd): never "spies" early.
 	covert_toggle.text="%s%s  %s" % [preload("res://scripts/eyes_corps.gd").word("Eyes").to_upper(),(" · %d abroad" % abroad) if abroad>0 else "","▾" if covert!=null and covert.visible else "›"]
 
+func _toggle_covert()->void:
+	var ancestor:=get_parent()
+	while ancestor!=null and not ancestor is ScrollContainer:ancestor=ancestor.get_parent()
+	if not covert.visible and ancestor is ScrollContainer:_overview_scroll=(ancestor as ScrollContainer).scroll_vertical
+	covert.visible=not covert.visible
+	_spies_words();_apply_width(true)
+	if ancestor is ScrollContainer:(ancestor as ScrollContainer).set_deferred("scroll_vertical",0 if covert.visible else _overview_scroll)
+
 
 # --- Panes and tabs ---------------------------------------------------------
 
@@ -1389,7 +1402,10 @@ func _apply_width(force:=false)->void:
 	var now:=wide(view_width)
 	if _laid and now==_wide and not force:return
 	_wide=now;_laid=true
-	tabs_row.visible=not now
+	var reading_intelligence:=covert!=null and covert.visible
+	tabs_row.visible=not now and not reading_intelligence
+	panes.visible=not reading_intelligence
+	if covert_back!=null:covert_back.visible=reading_intelligence
 	army_pane.custom_minimum_size.x=0.0
 	if now:
 		army_pane.visible=true;side_pane.visible=true

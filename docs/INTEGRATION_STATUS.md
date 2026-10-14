@@ -1,4 +1,79 @@
-## October 14 — Modern Strategy popup audit complete (INTEGRATED)
+## October 14 — Popup information architecture revision (IN PROGRESS)
+
+The user's later screenshots reject the first audit's interior page layouts.
+The styling checkpoint below is historical; its completion claim does not apply
+to the current redesign. Pages must prioritize decisions and selected details,
+keep facts beside their labels, avoid tall empty rows, and never open with an
+unbounded history or catalogue. Archives need explicit search and bounded pages.
+
+Delivered and remotely verified: shared compact facts/KPIs and a 1120 px maximum
+reading width (`03fe036e`), Home overview (`dfec602e`, source `2a5a56a0`), and the
+first Food/Materials grouping pass (`13e405ef`, source `ce5d6145`). Home's 23
+integrated cases pass; Food's two and Materials' two presentation cases pass.
+The bounded Materials chooser is also delivered (`763275db`, source `be3c31b7`):
+eight searchable materials, one selected stock/flow reading, explicit "Where it
+comes from", and eight places per source page. Five integrated Food/Materials
+cases pass; both palettes and 1600/2869/1024 captures passed reciprocal review.
+The live game was not restarted.
+
+War intelligence is also accepted in this checkpoint: three recent reports,
+a selected foreign network, distinct home watch, and an explicit searchable
+archive of six records per page. Reading it uses the full War popup body and
+Back restores the previous War scroll. B accepted wide/narrow rendered hierarchy;
+the private GPU probe passes both palettes at 1600/1024, including search,
+paging and returning. All 23 War and three Eyes panel cases pass. A narrow border
+facts/control overflow found by the populated fixture is fixed with wrapping.
+
+This checkpoint adds reviewed Court/Standing/Expeditions composition. Court has
+six searchable people per roster page, one selected foreign contact, and one
+shared scroll for waiting/foreign business. Standing has nine compact selectors
+and one selected strength's explanation/action; foreign regard is also selected.
+Expeditions opens with three recent reports, a selected foreign town and its
+existing Send/Watch controls; the searchable archive shows six records per page.
+Wide/narrow private GPU probes pass; 69 focused Standing/relative/archive/watch cases
+pass. The court roster probe passes real Summon and foreign brief flows plus a
+19-person paging/search fixture, but its headless shutdown still reports two
+resources in use; the separate rendered Court navigation probe exits cleanly.
+The older full Court probe contains unrelated stale civic/era assertions and is
+not claimed as passing. All player callbacks and simulation rules remain intact.
+
+Research is delivered at `43bcd72a` (source `e896ee78`): selected-field overview
+with three recent findings, explicit searchable archive with six records, six
+questions per Explore page with exact effects, three active fields and a selected
+idle field. Root accepted all three rendered subpages after revisions; 21 affected
+cases pass on integration (32 across the worker's wider Research checks).
+
+This checkpoint also adds Great Works' compact heading/actions and six-work
+searchable chooser beside the selected model. C accepted 1600/1024 composition;
+the record disclosure contains only fixed aggregate counts. Eight private GPU
+captures pass both palettes; 32 Great Works/inspection cases pass, including
+search/paging without rebuilding the selected model and selecting the last work.
+
+Wealth is delivered at `04aa46fe` (worker `76d2cd01`, 40 integrated cases), and
+the selected World civilization profile at `c588cd38` (worker `1778aa48`, 17 cases
+and 13 private GPU views including uncertain intelligence). The profile exposes
+learning, craft/output, society and culture as well as all nine foreign-regard
+values, with uncertainty preserved.
+
+Gallery `f29e5d98` (worker `956061ef`) has six searchable objects per page,
+selected-object actions above the artwork and bounded Sets/Rumors. The facade
+probe passes on integration; C/root revision closed the narrow grid's clipped
+second row. Full artwork and all existing study/display/exchange actions remain.
+
+This checkpoint delivers the opening's purpose/gain/cost cards, explicit first
+100-year commitment, common research trade-off above the choices and four-choice
+alternative pages. Century choices use the same cards with honest full-strength
+and inherited-blend framing; Character history is three recent/six archived.
+A accepted the revised 1024px opening/alternatives and century captures. All 27
+opening/century/ambition cases pass (reports 37/38), and both-theme private GPU
+probes pass actual choice/confirmation, all 14 paths and long inherited memory.
+
+HELD: Trade/Deliveries, Production/Exchange, Home detail/Buildings, World history,
+Chronicle/Figures/notices and Navy/Air density work. These are not claimed as
+delivered. No game rules are changed.
+The Court pacing/cast proposal remains a design discussion, separate from UI work.
+
+## October 14 — First Modern Strategy styling checkpoint (INTEGRATED, layout acceptance superseded)
 
 Player code checkpoint `79438388143e4ef23bb627141f0b923f9ac4fb3b` completes the
 user-selected Modern Strategy redesign across every reachable popup and subpage.

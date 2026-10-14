@@ -62,3 +62,39 @@ the view now validates that reference before checking its type.
 Evidence remains private in the worker's `artifacts/popup-modern-c`,
 `artifacts/knowledge-exchange`, and `reports/great-works` directories. Captures,
 test userdata, generated imports and caches are excluded from commits.
+
+## Research structure revision after user review
+
+The earlier visual acceptance above does not mean the later density audit is
+complete. The user rejected long lists and empty layout furniture after the
+palette rollout. Research now uses bounded overviews:
+
+- What we know keeps a field index and one selected account. The default is
+  current effects and three recent findings. Browse all replaces the effect
+  stack with an optional disclosure, search, six results per page, and Back
+  to overview. Every finding and its full explanation remains available.
+- Explore knowledge has status/search controls and six choices per page,
+  with the selected question alongside on wide layouts. Up to three exact
+  effect readings appear in its account; the full detail disclosure and
+  research callback remain unchanged.
+- Work under way shows three compact active fields per page and one selected
+  idle field's attention controls. All fields, team choices, allocations,
+  reasons, and pace explanations remain available.
+- Selected field, query, page, and reading position survive live refreshes.
+  Narrow archive layouts use a field selector above the same reader.
+
+Validation: 32 focused research/effect cases passed; 21 affected cases were
+rechecked after the final exact-effect copy revision. Private GPU fixtures
+cover a representative 239-known state at 2869, 1600, and 1024 pixels, a
+420-pixel archive component, and work/exploration at 1600 and 1024 pixels.
+The records/search tests verify late entries remain reachable through pages.
+No discovery, allocation, or simulation mechanism changed.
+
+
+## Collection bounded browser — second structural pass
+
+The collection now opens directly on at most two rows of objects (six on desktop, two in a narrow component). A compact Allure reading keeps its complete breakdown and actual effects in an inline disclosure. The inspector puts Study, Exhibit and Exchange actions above the complete, uncropped artwork; the narrow object reader removes collection controls until Back. Short-window cards retain two-line names, material and study state above the pager.
+
+Sets show at most two sampled sets with exact held/missing counts and an explicit action to browse all held pieces. Rumors have local text search and at most four results. All collection, set and rumor records remain accessible. The real facade, allocation controls, exhibition, exchange routes, and pause restoration retain their existing contracts. No simulation or save fields changed.
+
+Validation: `tests/artifact_gallery_probe.tscn` exercises filters, all pages, search, study/exhibition actions, real facade allocation, and collections with over 2,000 items plus many sets/rumors. `tests/gallery_density_capture.tscn` captures 1600, 1024 and actual420 logical widths, asserts viewport fit and the two-row720px inventory bound. Private GPU probes in both palettes passed. Other historical screens remain subject to the second structural pass; prior visual acceptance is not current bounded-default acceptance.

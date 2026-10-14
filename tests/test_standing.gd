@@ -166,12 +166,16 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	board.size=Vector2(900,1600)
 	board.setup(page.tab(0).blocks[0])
 	assert_object(board.find_child("Rose",true,false)).is_not_null()
-	# The chart leads; its nine exact factors remain available in one disclosure.
+	# Wide pages put exact factors beside the chart; an explicit hide survives
+	# both live refresh and resizing instead of resetting the player's choice.
 	var strengths:Control=board.find_child("StrengthList",true,false)
-	assert_int(strengths.get_child_count()).is_equal(9)
-	assert_bool(strengths.visible).is_false()
-	(board.find_child("ShowStrengthDetails",true,false) as Button).pressed.emit()
+	assert_int(board.find_child("StrengthChoices",true,false).get_child_count()).is_equal(9)
 	assert_bool(strengths.visible).is_true()
+	(board.find_child("Strength_genius",true,false) as Button).pressed.emit()
+	assert_str(board.selected_strength).is_equal("genius")
+	assert_object(board.find_child("OpenStrength",true,false)).is_not_null()
+	(board.find_child("ShowStrengthDetails",true,false) as Button).pressed.emit()
+	assert_bool(strengths.visible).is_false()
 	assert_object(board.find_child("Arts",true,false)).is_not_null()
 	assert_object(board.find_child("People_"+id,true,false)).is_not_null()
 	assert_object(board.find_child("Home",true,false)).is_not_null()
@@ -181,6 +185,11 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	assert_bool(chip.disabled).is_true()
 	# The daily refresh updates in place.
 	assert_bool(board.update_block(page.tab(0).blocks[0])).is_true()
+	assert_bool(strengths.visible).is_false()
+	board.size.x=440;board._layout()
+	assert_bool(strengths.visible).is_false()
+	(board.find_child("ShowStrengthDetails",true,false) as Button).pressed.emit()
+	board.size.x=900;board._layout()
 	assert_bool(strengths.visible).is_true()
 	# Drawn for real: the rose, the meters and the medallions paint without error.
 	var rose:Control=board.find_child("Rose",true,false)
@@ -190,6 +199,24 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	await get_tree().process_frame
 	assert_str(rose.tooltip_text).is_equal("")
 	assert_str(rose._get_tooltip(rose.size*0.5+Vector2(0,-120))).contains("Might")
+	# A large known world stays one selected regard profile and one comparison
+	# selector. Every people remains reachable without another wall of rows.
+	var many:Dictionary=page.tab(0).blocks[0]
+	var template:Dictionary=many.peoples[0]
+	many.peoples=[]
+	for index in 15:
+		var person:Dictionary=template.duplicate(true)
+		person.civ_id="density_%d" % index;person.name="People %d" % index
+		many.peoples.append(person)
+	board.update_block(many)
+	assert_int(board.find_child("Feelings",true,false).get_child_count()).is_equal(1)
+	var regard:OptionButton=board.find_child("RegardPeople",true,false)
+	assert_int(regard.item_count).is_equal(15)
+	regard.item_selected.emit(14)
+	assert_object(board.find_child("People_density_14",true,false)).is_not_null()
+	var comparisons:OptionButton=board.find_child("ComparePeople",true,false)
+	assert_int(comparisons.item_count).is_equal(16)
+	assert_bool(comparisons.is_item_disabled(15)).is_true()
 
 func test_every_strength_is_recorded_each_month_for_the_years_chart()->void:
 	Standing.record_monthly()

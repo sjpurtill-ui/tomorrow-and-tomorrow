@@ -53,6 +53,10 @@ func _ready()->void:
 	await _test_rail_entry()
 	await _test_rest_lists()
 	await _test_summon_each()
+	if "--roster-only" in OS.get_cmdline_user_args():
+		await _test_bounded_roster()
+		await _test_foreign_brief()
+		_finish();return
 	await _test_speak_to_court()
 	await _test_civic_flow()
 	await _test_foreign_brief()
@@ -63,6 +67,26 @@ func _ready()->void:
 	_finish()
 
 # ---------------------------------------------------------------- world
+
+func _test_bounded_roster()->void:
+	var court:Control=director.open_court();court.show_court()
+	var entries:=Roster.people()
+	if entries.is_empty():_fail("roster fixture has no officials");return
+	var many:Array[Dictionary]=[]
+	for index in 19:
+		var entry:Dictionary=entries[0].duplicate(true)
+		entry.key="bounded_fixture_%d" % index;entry.name="Visitor %02d" % index
+		many.append(entry)
+	court.roster_query="";court.roster_page=0
+	var list:Control=court._build_roster_list(many);court.add_child(list)
+	_check(list.find_child("RosterPeople",true,false).get_child_count()==6,"large roster did not default to six people")
+	(list.find_child("NextPeople",true,false) as Button).pressed.emit()
+	_check(court.roster_page==1,"roster did not advance")
+	var search:=list.find_child("CourtPeopleSearch",true,false) as LineEdit
+	search.text="Visitor 18";search.text_changed.emit(search.text)
+	_check(court.roster_page==0 and list.find_child("RosterPeople",true,false).get_child_count()==1,"roster search did not reach the last person")
+	list.queue_free();court.roster_query="";court.roster_page=0
+	print("COURT bounded roster search and paging ok")
 
 func _civ(id:String,civ_name:String,population:int,opinion:float,tension:float,position:Vector2)->Dictionary:
 	return {"id":id,"name":civ_name,"alive":true,"population":population,"food_days":40.0,"strategy":"commerce","aggression":0.3,"world_position":position,"position":position,"strategic_regions":[],"relations":{},
@@ -145,8 +169,12 @@ func _test_rest_lists()->void:
 	_check(groups.has("generals"),"no war leader at court: %s" % groups)
 	var leaders:=roster.filter(func(e:Dictionary)->bool:return String(e.settlement_id)!="")
 	_check(not leaders.is_empty(),"no settlement leader at court")
+	_check(court.find_child("RosterPeople",true,false).get_child_count()<=6,"court defaults to more than six people")
 	for entry in roster:
+		var search:=court.find_child("CourtPeopleSearch",true,false) as LineEdit
+		if search!=null:search.text=String(entry.name);search.text_changed.emit(search.text)
 		_check(court.find_child("Summon_"+court._node_key(String(entry.key)),true,false)!=null,"no summon row for %s" % entry.name)
+	court.roster_query="";court.roster_page=0;court.show_court();await _frames(2)
 	var seats:=court.find_children("Seat_*","Control",true,false)
 	_check(seats.size()>=mini(roster.size(),court.MAX_SEATED),"only %d of the court are seated in the scene" % seats.size())
 	for seat in seats:
@@ -157,7 +185,10 @@ func _test_rest_lists()->void:
 		_check(court.find_child("Receive_"+String(audience.id),true,false)!=null,"the antechamber does not list %s" % audience.id)
 	var peoples:=Roster.foreign_peoples()
 	_check(peoples.size()>=2,"foreign peoples missing: %d" % peoples.size())
-	for entry in peoples:
+	for index in peoples.size():
+		var entry:Dictionary=peoples[index]
+		var choose:=court.find_child("ForeignPeopleSelector",true,false) as OptionButton
+		if choose!=null:choose.item_selected.emit(index)
 		_check(court.find_child("Foreign_"+String(entry.civ_id),true,false)!=null,"no way to send word to %s" % entry.name)
 	var speak:=court.find_child("SpeechInput",true,false) as LineEdit
 	_check(speak!=null and "court" in speak.placeholder_text.to_lower(),"no 'speak to your court' input")
@@ -168,6 +199,8 @@ func _test_summon_each()->void:
 	for entry in Roster.people():
 		court.show_court()
 		await _frames(1)
+		var search:=court.find_child("CourtPeopleSearch",true,false) as LineEdit
+		if search!=null:search.text=String(entry.name);search.text_changed.emit(search.text)
 		var button:=court.find_child("Summon_"+court._node_key(String(entry.key)),true,false) as Button
 		if button==null:_fail("no summon for %s" % entry.name);continue
 		button.pressed.emit()
@@ -353,6 +386,7 @@ func _test_foreign_brief()->void:
 	var civ_id:=rival_a
 	ForeignDiplomacy.leader(civ_id)["audience_day"]=0
 	var court:Control=director.open_court()
+	court.foreign_selected=civ_id
 	court.show_court()
 	await _frames(1)
 	var send_word:=court.find_child("Foreign_"+civ_id,true,false) as Button

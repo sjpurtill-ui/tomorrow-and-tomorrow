@@ -22,8 +22,9 @@ func check(ok:bool,message:String)->void:
 class Stub:
 	static var items:Array=[]
 	static var focus:=""
+	static var extra_rumors:Array=[]
 	static func populate()->void:
-		items.clear();focus=""
+		items.clear();focus="";extra_rumors.clear()
 		var sets:=[["Hoard of the Ochre Hands","Ochre Hands rock shelter",7],["Grave goods of the River Folk","Burial mound above the ford",6]]
 		var stories:=["Its maker pressed a hand in red earth against the stone and left it for whoever came after.","Soot from a long-cold hearth still darkens the rim; it fed a family through a hard winter.","The marks were cut with care, in rows, as if someone were counting days or debts.","It was carried far from where the stone was quarried, then set down and never taken up again."]
 		var styles:=["etched","painted","banded","spiraling","weathered"];var motifs:=["river","sun","herd","hand","ancestor"]
@@ -62,7 +63,7 @@ class Stub:
 		return {"allure":allure,"allure_label":"admired","allure_breakdown":[{"source":"Studied pieces","value":.004*counts.studied,"text":"Understood objects others want to see"},{"source":"Exhibits","value":.02*shown,"text":"Public galleries"},{"source":"Cultural capacity","value":.1,"text":"Shared memory and cohesion"},{"source":"Openness","value":.08,"text":"Pluralist, open values"}],
 			"allure_effects":[{"target":"Diplomacy","text":"Foreign envoys receive us more warmly (+4 reception).","value":4.0},{"target":"Migration","text":"Newcomers settle 6% more readily.","value":.06},{"target":"Museum","text":"Exhibits draw about 12 more visitors a month.","value":12.0}],
 			"collection_count":items.size(),"studied_count":counts.studied,"in_study_count":counts.in_study,"unstudied_count":counts.unstudied,"exhibited_count":shown,"prestige_total":prestige,"value_totals":totals,
-			"study_role":{"allocation_key":"artifacts","weight":2.0,"workers":4,"rate_text":"about 1.6 study-days per day","focus_id":focus}}
+			"study_role":{"allocation_key":"artifacts","weight":2.0,"workers":4,"researchers":4.0,"researcher_text":"4 researchers","share":.2,"rate_text":"about 1.6 study-days per day","focus_id":focus}}
 	static func artifacts(query:Dictionary={})->Dictionary:
 		var status:=String(query.get("status","all"));var text:=String(query.get("search","")).to_lower()
 		var result:Array=[]
@@ -93,7 +94,7 @@ class Stub:
 		return [{"id":"r1","name":"The Sunken Shrine of Nine Bowls","hint":"Past the second bend of the great river, where the reeds hide a ring of standing stones, fishers say bowls rise from the mud in dry summers.","confidence":.72,"known_since_day":820,"found":false},
 			{"id":"r2","name":"Barrow of the Antler King","hint":"Three days toward the morning sun, a lone hill shaped like a sleeping elk.","confidence":.4,"known_since_day":1030,"found":false},
 			{"id":"r3","name":"Ochre Hands rock shelter","hint":"A cliff that bleeds red after rain, above the northern ford.","confidence":.9,"known_since_day":300,"found":true},
-			{"id":"r4","name":"The Salt-Road Cache","hint":"Traders whisper of a cache buried where the salt road once crossed a dry wash.","confidence":.18,"known_since_day":1200,"found":false}]
+			{"id":"r4","name":"The Salt-Road Cache","hint":"Traders whisper of a cache buried where the salt road once crossed a dry wash.","confidence":.18,"known_since_day":1200,"found":false}]+extra_rumors
 
 func _ready()->void:
 	for argument:String in OS.get_cmdline_user_args():
@@ -178,8 +179,9 @@ func _check_gallery()->void:
 		for node:Control in [gallery.header,gallery.main,gallery.browse,gallery.browse_scroll,gallery.pager,gallery.detail_scroll,gallery.detail_scroll.get_parent()]:parts.append("%s:%s" % [node.name,node.get_combined_minimum_size()])
 		check(false,"Gallery panel %s fits the screen %s; minimums %s" % [gallery.panel.get_global_rect(),screen,parts])
 	var total:=Stub.items.size()
-	check(_cards(gallery).size()==Gallery.PAGE_SIZE,"First page shows %d cards (got %d)" % [Gallery.PAGE_SIZE,_cards(gallery).size()])
-	check(String(gallery.pager_label.text).contains("of %d" % ceili(float(total)/Gallery.PAGE_SIZE)),"Pager counts pages: "+gallery.pager_label.text)
+	var page_size:int=gallery._page_size()
+	check(_cards(gallery).size()==page_size and page_size<=6,"Default inventory is bounded to one or two rows")
+	check(int(gallery.page_result.pages)==ceili(float(total)/page_size),"Pager counts every piece")
 	check(gallery.seal.value>0,"Allure seal shows a value")
 	check(gallery.effects_box.get_child_count()==3,"Allure effects explained in words")
 	var first_card=_cards(gallery)[0]
@@ -188,9 +190,9 @@ func _check_gallery()->void:
 	await _shot("gallery-grid")
 	# paging
 	gallery.next_button.pressed.emit();await _frames(3)
-	check(gallery.page==1 and _cards(gallery).size()==mini(Gallery.PAGE_SIZE,total-Gallery.PAGE_SIZE),"Second page")
-	gallery.next_button.pressed.emit();await _frames(3)
-	check(_cards(gallery).size()==total-2*Gallery.PAGE_SIZE,"Last page holds the remainder")
+	check(gallery.page==1 and _cards(gallery).size()==mini(page_size,total-page_size),"Second page")
+	gallery.page=ceili(float(total)/page_size)-1;gallery.refresh(true);await _frames(3)
+	check(_cards(gallery).size()==total-gallery.page*page_size,"Last page holds the remainder")
 	check(gallery.next_button.disabled,"Next disabled on the last page")
 	# filters
 	gallery.tab_buttons["studied"].pressed.emit();await _frames(3)
@@ -201,7 +203,7 @@ func _check_gallery()->void:
 	gallery.tab_buttons["exhibited"].pressed.emit();await _frames(3)
 	var shown_ok:=true
 	for card in _cards(gallery):shown_ok=shown_ok and card.item.exhibited
-	check(shown_ok and _cards(gallery).size()==int(Stub.summary().exhibited_count),"On exhibit view")
+	check(shown_ok and _cards(gallery).size()==mini(page_size,int(Stub.summary().exhibited_count)),"On exhibit view")
 	gallery.tab_buttons["all"].pressed.emit();await _frames(2)
 	gallery.search.text="clay";gallery.search.text_changed.emit("clay");await _frames(3)
 	var matched:=_cards(gallery)
@@ -251,10 +253,10 @@ func _check_gallery()->void:
 	gallery.tab_buttons["sets"].pressed.emit();await _frames(4)
 	var set_panels:=0;var ghosts:=0
 	for node in gallery.browse_body.get_children():
-		if String(node.name).begins_with("Set_"):set_panels+=1;ghosts+=_count_class(node,"Silhouette")
-	check(set_panels==2,"Two lost-people sets grouped (%d)" % set_panels)
-	check(ghosts==4,"Missing set pieces drawn as silhouettes (%d)" % ghosts)
-	check(not gallery.pager.visible,"Sets view has no pager")
+		if String(node.name).begins_with("Set_"):set_panels+=1;ghosts+=node.find_children("SetMissing","",true,false).size()
+	check(set_panels==mini(2,2 if gallery._browse_width()>620 else 1),"Sets are bounded to the reading space")
+	check(ghosts==set_panels,"Each incomplete set has one missing-piece marker and exact remaining count")
+	check(gallery.pager.visible,"Sets have a bounded browser")
 	await _shot("gallery-sets")
 	# rumors
 	gallery.tab_buttons["rumors"].pressed.emit();await _frames(4)
@@ -262,12 +264,35 @@ func _check_gallery()->void:
 	check(notes!=null and notes.get_child_count()==4,"Rumored treasures listed as notes")
 	check(not gallery.detail_column.visible,"Rumors do not show an unrelated owned piece")
 	await _shot("gallery-rumors")
+	# The same bounded reader keeps large sets and long rumor histories reachable.
+	for i in 25:Stub.extra_rumors.append({"id":"extra%d" % i,"name":"Hidden place %d" % i,"hint":"A distinctive landmark %d" % i,"confidence":.5,"known_since_day":i})
+	gallery.refresh(true);await _frames(2)
+	notes=gallery.find_child("RumorNotes",true,false)
+	check(notes.get_child_count()<=4,"Rumor default never becomes a long list")
+	gallery.search.text="landmark 24";gallery.search.text_changed.emit("landmark 24");await _frames(2)
+	notes=gallery.find_child("RumorNotes",true,false)
+	check(notes.get_child_count()==1 and notes.get_child(0).rumor.id=="extra24","Rumor search reaches accounts beyond the first page")
+	gallery.search.text="";gallery.search.text_changed.emit("");await _frames(2)
+	for group_index in 15:
+		for piece in 7:
+			var set_piece:Dictionary=Stub.items[0].duplicate();set_piece.id="set%d_piece%d" % [group_index,piece];set_piece.set_name="Archive set %d" % group_index;set_piece.site_name="Archive site %d" % group_index;set_piece.set_progress="7 of 9";Stub.items.append(set_piece)
+	gallery.set_view("sets");await _frames(3)
+	var rendered_sets:=0
+	for child in gallery.browse_body.get_children():
+		if String(child.name).begins_with("Set_"):rendered_sets+=1
+	check(rendered_sets<=2,"Many sets retain a two-set overview")
+	gallery.search.text="Archive site 14";gallery.search.text_changed.emit("Archive site 14");await _frames(2)
+	var set_link:=gallery.browse_body.find_child("BrowseSet",true,false) as Button
+	check(set_link!=null,"Set search reaches the final set")
+	if set_link:set_link.pressed.emit();await _frames(3)
+	check(gallery.view=="all" and int(gallery.page_result.total)==7,"Browse a set retains every held piece through inventory pages")
+	gallery.search.text="";gallery.search.text_changed.emit("");await _frames(2)
 	# large collections page without building thousands of cards
 	var extra:=Stub.items.duplicate()
 	for i in 2000:
 		var copy:Dictionary=extra[i%extra.size()].duplicate();copy.id="bulk%04d" % i;Stub.items.append(copy)
 	gallery.tab_buttons["all"].pressed.emit();await _frames(3)
-	check(_cards(gallery).size()==Gallery.PAGE_SIZE and gallery.pager_label.text.contains("of %d" % ceili(float(Stub.items.size())/Gallery.PAGE_SIZE)),"Thousands of pieces paginate: "+gallery.pager_label.text)
+	check(_cards(gallery).size()==page_size and int(gallery.page_result.pages)==ceili(float(Stub.items.size())/page_size),"Thousands of pieces paginate: "+gallery.pager_label.text)
 	# escape closes and releases the pause
 	var escape:=InputEventKey.new();escape.keycode=KEY_ESCAPE;escape.pressed=true
 	get_viewport().push_input(escape)
@@ -295,7 +320,7 @@ func _check_real_facade()->void:
 	var gallery:=Gallery.open(self,null,"",null)
 	await _frames(6)
 	check(gallery.source==facade,"Gallery reads the real facade by default")
-	check(_cards(gallery).size()==mini(made,Gallery.PAGE_SIZE),"Real facade pieces appear as cards (%d)" % _cards(gallery).size())
+	check(_cards(gallery).size()==mini(made,gallery._page_size()),"Real facade pieces appear as cards (%d)" % _cards(gallery).size())
 	check(gallery.find_child("CataloguePlate",true,false)!=null,"Real facade detail plate renders")
 	await _shot("gallery-real-facade")
 	var more:=gallery.find_child("StudyWeightMore",true,false) as Button

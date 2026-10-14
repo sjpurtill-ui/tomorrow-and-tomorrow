@@ -1,6 +1,6 @@
 extends VBoxContainer
-## THE TRADE PAGE: available goods and recent exchange lead, then each
-## people we know: its mark, name, route status, recorded pace and our stance.
+## THE TRADE PAGE: available goods and recent exchange lead, followed by one
+## selected people: its mark, route status, recorded pace and our decisions.
 ## Terms opens its decisions and evidence inline, keeping the partner in
 ## view. Each reads the trade ledger's own
 ## numbers (trade_ledger.gd, trade_words.gd):
@@ -60,6 +60,23 @@ var people_signatures:Dictionary={}
 var responsive_grids:Array[GridContainer]=[]
 var visual_sections:Array[Dictionary]=[]
 var expanded_people:Dictionary={}
+const PARTNER_PAGE_SIZE:=6
+var selected_partner:=""
+var partner_query:=""
+var partner_page:=0
+var browse_open:=false
+var partner_workspace:BoxContainer
+var browser:VBoxContainer
+var partner_choices:VBoxContainer
+var partner_search:LineEdit
+var browser_close:Button
+var partner_pager:HFlowContainer
+var partner_previous:Button
+var partner_next:Button
+var partner_count:Label
+var other_page:=0
+var others_open:=false
+var evidence_open:Dictionary={}
 
 func _ready()->void:
 	_bind_layout.call_deferred()
@@ -78,12 +95,13 @@ func setup(_block:Dictionary={})->void:
 	name="TradeBoard"
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	theme=T.control_theme()
-	add_theme_constant_override("separation",24)
+	add_theme_constant_override("separation",16)
 	summary_box=VBoxContainer.new();summary_box.name="TradeHero";summary_box.add_theme_constant_override("separation",12);add_child(summary_box)
 	feedback=S.label("",16,T.GOLD_TEXT);feedback.name="Said";feedback.visible=false;feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(feedback)
-	peoples_box=_section("Peoples we know")
+	partner_workspace=BoxContainer.new();partner_workspace.name="TradeWorkspace";partner_workspace.add_theme_constant_override("separation",24);add_child(partner_workspace)
+	peoples_box=VBoxContainer.new();peoples_box.name="SelectedPartner";peoples_box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;partner_workspace.add_child(peoples_box)
+	_build_partner_browser()
 	var others:=VBoxContainer.new();others.name="OtherTrade";others.add_theme_constant_override("separation",0);add_child(others)
-	S.head(others,"Between other peoples")
 	others_box=VBoxContainer.new();others_box.add_theme_constant_override("separation",0);others.add_child(others_box)
 	resized.connect(_responsive)
 	refresh(true)
@@ -204,7 +222,7 @@ static func kpi_items()->Array:
 func _build_summary()->void:
 	_clear(summary_box)
 	var items:=kpi_items()
-	var lead:=S.voice("%s goods available to trade" % String(items[0].value),32);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lead.tooltip_text=String(items[0].tip);summary_box.add_child(lead)
+	var lead:=S.voice("%s goods available to trade" % String(items[0].value),24);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lead.tooltip_text=String(items[0].tip);summary_box.add_child(lead)
 	var partners:Dictionary=items[3]
 	var context:=S.label("Recent trade with %s peoples%s" % [String(partners.value)," · "+String(items[0].sub) if Ledger.purse_unit("player")!="" else ""],16,T.INK_MUTED);context.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;context.tooltip_text=String(partners.tip);summary_box.add_child(context)
 	var pace:=S.label("A season's pace: worth %s received · %s sent" % [String(items[1].value),String(items[2].value)],14,T.INK_MUTED);pace.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;pace.tooltip_text=String(items[1].tip)+"\n"+String(items[2].tip);summary_box.add_child(pace)
@@ -241,6 +259,44 @@ static func known_rows()->Array:
 		return int(x.contact)>int(y.contact) or (int(x.contact)==int(y.contact) and (float(x.value)>float(y.value) or (float(x.value)==float(y.value) and String(x.name)<String(y.name)))))
 	return rows
 
+func _build_partner_browser()->void:
+	browser=VBoxContainer.new();browser.name="PartnerBrowser";browser.add_theme_constant_override("separation",8);partner_workspace.add_child(browser)
+	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",8);browser.add_child(heading)
+	var title:=S.label("Choose a people",16,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(title)
+	browser_close=S.verb("Back to terms",_toggle_partner_browser,"Close the chooser and return to the selected people's terms");browser_close.name="ClosePartnerChooser";heading.add_child(browser_close)
+	partner_search=LineEdit.new();partner_search.name="FindPartner";partner_search.placeholder_text="Find a people";partner_search.custom_minimum_size.y=40;browser.add_child(partner_search)
+	partner_search.text_changed.connect(func(words:String)->void:partner_query=words;partner_page=0;_build_partner_choices())
+	partner_pager=HFlowContainer.new();partner_pager.add_theme_constant_override("h_separation",8);partner_pager.add_theme_constant_override("v_separation",4);browser.add_child(partner_pager)
+	partner_previous=S.verb("‹",func()->void:partner_page-=1;_build_partner_choices(),"Previous peoples");partner_previous.name="PreviousPartners";partner_pager.add_child(partner_previous)
+	partner_count=S.label("",14,T.INK_MUTED);partner_count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;partner_pager.add_child(partner_count)
+	partner_next=S.verb("›",func()->void:partner_page+=1;_build_partner_choices(),"Next peoples");partner_next.name="NextPartners";partner_pager.add_child(partner_next)
+	partner_choices=VBoxContainer.new();partner_choices.name="PartnerChoices";partner_choices.add_theme_constant_override("separation",6);browser.add_child(partner_choices)
+
+func _build_partner_choices()->void:
+	_clear(partner_choices)
+	var all_rows:=_known_rows()
+	var rows:Array=[]
+	for row:Dictionary in all_rows:
+		if partner_query.strip_edges().is_empty() or String(row.name).to_lower().contains(partner_query.strip_edges().to_lower()):rows.append(row)
+	browser.visible=not all_rows.is_empty()
+	partner_search.visible=all_rows.size()>PARTNER_PAGE_SIZE or not partner_query.is_empty()
+	var last:=maxi(0,ceili(float(rows.size())/PARTNER_PAGE_SIZE)-1)
+	partner_page=clampi(partner_page,0,last)
+	partner_pager.visible=all_rows.size()>PARTNER_PAGE_SIZE
+	partner_count.text="%d–%d of %d" % [partner_page*PARTNER_PAGE_SIZE+1,mini((partner_page+1)*PARTNER_PAGE_SIZE,rows.size()),rows.size()] if not rows.is_empty() else "No matches"
+	partner_previous.disabled=partner_page==0;partner_next.disabled=partner_page>=last
+	for row:Dictionary in rows.slice(partner_page*PARTNER_PAGE_SIZE,(partner_page+1)*PARTNER_PAGE_SIZE):
+		var id:=String(row.id)
+		var button:=S.verb(String(row.name),_choose_partner.bind(id),String(row.name)+(" · Known only by word" if int(row.contact)<2 else (" · Trade available" if bool(row.available) else " · Route blocked")),id==selected_partner)
+		button.name="PartnerChoice_"+id;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		partner_choices.add_child(button)
+	if rows.is_empty():partner_choices.add_child(S.label("No matching peoples.",14,T.INK_MUTED))
+
+func _choose_partner(civ_id:String)->void:
+	selected_partner=civ_id; browse_open=false
+	if not expanded_people.has(civ_id):expanded_people[civ_id]=true
+	_build_peoples();_responsive()
+
 func _build_peoples(force:=false)->void:
 	var rows:=_known_rows()
 	if rows.is_empty():
@@ -248,21 +304,18 @@ func _build_peoples(force:=false)->void:
 			_clear(peoples_box);people_signatures.clear()
 			people_signatures["empty_theme"]=T.color_mode
 			var calm:=S.label("We have met no other people yet.",16,T.INK_MUTED);calm.name="None";peoples_box.add_child(calm)
+		_build_partner_choices()
 		return
-	# The first people goods pass with opens on its own, so the page leads
-	# with something to do; the player's own opening and closing then stand.
-	if expanded_people.is_empty():
-		var first_met:=""
-		for row:Dictionary in rows:
-			if int(row.contact)<2:continue
-			if first_met.is_empty():first_met=String(row.id)
-			if Ledger.blocked("player",String(row.id)).is_empty():first_met=String(row.id);break
-		if not first_met.is_empty():expanded_people[first_met]=true
+	if not rows.any(func(row:Dictionary)->bool:return String(row.id)==selected_partner):
+		selected_partner=String(rows[0].id)
+		if not expanded_people.has(selected_partner):expanded_people[selected_partner]=true
+	_build_partner_choices()
 	var keep:Array[String]=[]
 	var state:=Ledger.peek()
 	for row:Dictionary in rows:
+		if String(row.id)!=selected_partner:continue
 		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
-		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false)]
+		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false),evidence_open.get(id,false)]
 		if int(row.contact)>=2:
 			details.append_array([Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
 				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
@@ -290,7 +343,7 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var theirs:=Stances.stance(civ_id,"player")
 	var panel:=PanelContainer.new();panel.name="People_%s" % civ_id
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var line_style:=StyleBoxFlat.new();line_style.bg_color=Color.TRANSPARENT;line_style.border_width_bottom=1;line_style.border_color=Color(T.RULE,0.45);line_style.content_margin_top=12;line_style.content_margin_bottom=16
+	var line_style:=StyleBoxFlat.new();line_style.bg_color=Color.TRANSPARENT;line_style.border_width_bottom=1;line_style.border_color=Color(T.RULE,0.45);line_style.content_margin_top=0;line_style.content_margin_bottom=8
 	panel.add_theme_stylebox_override("panel",line_style)
 	var column:=VBoxContainer.new();column.name="Content";column.add_theme_constant_override("separation",12);panel.add_child(column)
 	var head:=HBoxContainer.new();head.name="PartnerIdentity";head.add_theme_constant_override("separation",8);head.custom_minimum_size.y=S.ROW_HEIGHT;head.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_child(head)
@@ -302,6 +355,7 @@ func _people_row(civ_id:String,contact:int)->Control:
 	var blocked:=Ledger.blocked("player",civ_id) if contact>=2 and not p.is_empty() else ""
 	if blocked!="":subtitle=Ledger.sea_words("player",civ_id) if blocked=="sea" else _blocked_words(blocked)
 	var form_label:=S.label(_cap(subtitle),14,T.RED_TEXT if blocked!="" else T.INK_MUTED);form_label.name="Form";form_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;form_label.tooltip_text=subtitle;identity.add_child(form_label)
+	var toggle:=S.verb("Change people",_toggle_partner_browser,"Choose another people to review their trade and set our terms");toggle.name="ChangePartner";head.add_child(toggle)
 	if contact<2:
 		head.add_child(S.tag("Not met",T.MUTED))
 		return panel
@@ -313,15 +367,16 @@ func _people_row(civ_id:String,contact:int)->Control:
 	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more received; right means more sent. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
 	var stance_id:=String(ours.get("id","free"))
 	summary.add_child(S.tag("Our stance: "+String(Words.LABELS.get(stance_id,stance_id)),T.RED if stance_id in Stances.COERCIVE else (T.GREEN if stance_id in ["free","favour","gifts"] else T.GOLD)))
-	var open:=bool(expanded_people.get(civ_id,false))
-	var toggle:=S.verb("Hide terms" if open else "Terms",_toggle_people.bind(civ_id),"Goods each way, how much each leans on the other, and our terms",open);toggle.name="TermsToggle";head.add_child(toggle)
 	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",16);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
 	var decisions:=VBoxContainer.new();decisions.name="TradeDecisions";decisions.add_theme_constant_override("separation",12);column.add_child(decisions)
-	var goods:=_grid(column,"GoodsExchanged",2,640)
+	var evidence:=VBoxContainer.new();evidence.name="TradeEvidence";evidence.add_theme_constant_override("separation",12);evidence.visible=bool(evidence_open.get(civ_id,false));column.add_child(evidence)
+	var evidence_toggle:=S.verb("Hide exchange detail" if evidence.visible else "Goods & dependence",func()->void:evidence_open[civ_id]=not bool(evidence_open.get(civ_id,false));_build_peoples();_responsive(),"Exact goods exchanged and how much each people depends on the other")
+	evidence_toggle.name="ExchangeEvidence";evidence_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;column.add_child(evidence_toggle);column.move_child(evidence_toggle,1)
+	var goods:=_grid(evidence,"GoodsExchanged",2,640)
 	goods.add_child(_flows("We send",Words.flow_items("player",civ_id),form))
 	goods.add_child(_flows("They send",Words.flow_items(civ_id,"player"),form))
 	goods.add_theme_constant_override("v_separation",0)
-	var needs:=_grid(column,"Dependence",2,640)
+	var needs:=_grid(evidence,"Dependence",2,640)
 	needs.add_theme_constant_override("v_separation",0)
 	for pair_:Array in [["player",civ_id],[civ_id,"player"]]:
 		var owner:=String(pair_[0]);var from:=String(pair_[1])
@@ -357,7 +412,12 @@ func _people_row(civ_id:String,contact:int)->Control:
 	return panel
 
 
+func _toggle_partner_browser()->void:
+	browse_open=not browse_open;_responsive()
+	if browse_open and partner_search.visible:partner_search.grab_focus.call_deferred()
+
 func _toggle_people(civ_id:String)->void:
+	selected_partner=civ_id
 	expanded_people[civ_id]=not bool(expanded_people.get(civ_id,false))
 	_build_peoples();_responsive()
 
@@ -559,7 +619,16 @@ func _build_others()->void:
 	if rows.is_empty():
 		var empty:=S.label("We know of no trade between other peoples.",16,T.INK_MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;others_box.add_child(empty)
 		return
-	for row:Dictionary in rows.slice(0,6):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":4.0})
+	var toggle:=S.verb("Between other peoples · %d %s%s" % [rows.size(),"exchange" if rows.size()==1 else "exchanges"," · hide" if others_open else ""],func()->void:others_open=not others_open;_build_others(),"Recorded exchange between other peoples we have met")
+	toggle.name="OtherTradeToggle";toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;others_box.add_child(toggle)
+	if not others_open:return
+	var last:=maxi(0,ceili(float(rows.size())/PARTNER_PAGE_SIZE)-1);other_page=clampi(other_page,0,last)
+	if last>0:
+		var pager:=HFlowContainer.new();pager.add_theme_constant_override("h_separation",8);others_box.add_child(pager)
+		var previous:=S.verb("Previous",func()->void:other_page-=1;_build_others());previous.disabled=other_page==0;pager.add_child(previous)
+		pager.add_child(S.label("Page %d / %d" % [other_page+1,last+1],14,T.INK_MUTED))
+		var next:=S.verb("Next",func()->void:other_page+=1;_build_others());next.disabled=other_page>=last;pager.add_child(next)
+	for row:Dictionary in rows.slice(other_page*PARTNER_PAGE_SIZE,(other_page+1)*PARTNER_PAGE_SIZE):S.row(others_box,{"id":"other","icon":"carry","icon_kind":"people","label":String(row.line),"value":"%s a month" % S.n(float(row.value)) if float(row.value)>=0.5 else "","value_width":4.0})
 
 
 func _met(id:String)->bool:
@@ -620,6 +689,15 @@ func _responsive()->void:
 		var across:=clampi(floori((available+10.0)/120.0),2,strip.get_child_count())
 		if strip.columns!=across:strip.columns=across
 	S.compact(self,available)
+	if partner_workspace!=null:
+		partner_workspace.vertical=available<850.0
+		browser.custom_minimum_size.x=0.0 if partner_workspace.vertical else 260.0
+		browser.size_flags_horizontal=Control.SIZE_EXPAND_FILL if partner_workspace.vertical else Control.SIZE_FILL
+		browser.visible=not _known_rows().is_empty() and (not partner_workspace.vertical or browse_open)
+		browser_close.visible=partner_workspace.vertical and browse_open
+		partner_workspace.move_child(browser,0 if partner_workspace.vertical else 1)
+		var change:=find_child("ChangePartner",true,false) as Button
+		if change!=null:change.visible=partner_workspace.vertical;change.text="Hide chooser" if browse_open else "Change people"
 	# A narrow page keeps each people's name, balance and Terms on its line.
 	for head:Node in find_children("PartnerIdentity","HBoxContainer",true,false):
 		for child in head.get_children():

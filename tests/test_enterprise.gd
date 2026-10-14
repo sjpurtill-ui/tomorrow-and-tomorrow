@@ -666,8 +666,8 @@ func test_the_wealth_tab_shows_business_with_short_plain_labels()->void:
 	var order:=[]
 	for child in board.find_children("*","Label",true,false):
 		if child.get_meta("wealth_section",false):order.append((child as Label).text)
-	assert_int(order.find("TRADE AND BUSINESS")).is_greater(order.find("WHAT OUR GOODS BUY"))
-	assert_int(order.find("TRADE AND BUSINESS")).is_less(order.find("WHO HOLDS THE WEALTH"))
+	assert_int(order.find("Trade and business")).is_greater(order.find("Household wealth"))
+	assert_int(order.find("Trade and business")).is_less(order.find("Who holds the wealth"))
 	# A stance chosen on the screen is the engine's stance.
 	(board.find_child("Stance_open",true,false) as Button).emit_signal("pressed")
 	assert_str(Business.stance()).is_equal("open")

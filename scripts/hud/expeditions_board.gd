@@ -25,8 +25,8 @@ const When:=preload("res://scripts/hud/report_when.gd")
 
 const PRESETS:=[["Off",0.0],["Little",2.0],["Regular",5.0],["A lot",10.0]]
 const FOCUSES:=[["exploration","Explore"],["recruitment","Find bands"],["prospecting","Prospect"]]
-const PAGE:=12
-const GROUPS_SHOWN:=8
+const PAGE:=6
+const GROUPS_SHOWN:=3
 const TWO_AT:=1000.0
 
 var model:Dictionary={}
@@ -91,6 +91,7 @@ func update_block(block:Dictionary)->bool:
 	_redraw_if("last",revision,_fill_last)
 	_redraw_if("cities",[int(GameState.elapsed_days)/7,Orders.watch_count(),CivilizationSystem.scout_missions.size(),city_feedback.size()],_fill_cities)
 	_redraw_if("tellings",[revision,view.duplicate()],_fill_tellings)
+	_layout()
 	return true
 
 var _prints:Dictionary={}
@@ -104,20 +105,23 @@ func _take(block:Dictionary)->void:
 	model=block
 	var given:Variant=block.get("view")
 	view=given if given is Dictionary else {}
-	for pair:Array in [["query",""],["filter",0],["order",1],["page",0]]:
+	for pair:Array in [["query",""],["filter",0],["order",1],["page",0],["archive",false],["town",""]]:
 		if not view.has(String(pair[0])):view[String(pair[0])]=pair[1]
 
-const WIDE_AT:=1400.0
+const WIDE_AT:=720.0
 var wide_row:HBoxContainer
 var wide_left:VBoxContainer
 var wide_right:VBoxContainer
 var _wide:=false
+var _archive_layout:=false
 
 func _layout()->void:
 	if top==null:return
-	var wide:=size.x>=WIDE_AT
-	if wide!=_wide:
+	var archive:=bool(view.get("archive",false))
+	var wide:=size.x>=WIDE_AT and not archive
+	if wide!=_wide or archive!=_archive_layout:
 		_wide=wide
+		_archive_layout=archive
 		var send:=send_box.get_parent();var last:=last_box.get_parent();var unread:=unread_box.get_parent();var tellings:=tellings_box.get_parent()
 		for frame:Node in [send,last,unread,tellings]:frame.get_parent().remove_child(frame)
 		if wide:
@@ -128,10 +132,14 @@ func _layout()->void:
 		move_child(cities_box.get_parent(),get_child_count()-1)
 		if not wide:move_child(tellings,get_child_count()-1)
 	if not _wide:top.columns=2 if size.x>=TWO_AT else 1
+	top.visible=not wide and not archive;wide_row.visible=wide
+	cities_box.get_parent().visible=not archive and not city_rows.is_empty()
+	unread_box.get_parent().visible=not archive and not unread_groups(_reports()).is_empty()
 
 ## Draws every part from the engine as it stands now.
 func redraw()->void:
 	_fill_send()
+	_fill_last()
 	_fill_unread()
 	_fill_cities()
 	_fill_tellings()
@@ -149,14 +157,15 @@ func _fill_send()->void:
 	var Words:=preload("res://scripts/hud/era_words.gd")
 	var send_head:=UI.heading(send_box,"Send scouts","%s scouts out · room for %s" % [Words.grouped(int(staff.get("away",0))),Words.grouped(int(staff.get("target",0)))])
 	send_head.tooltip_text="Scouts are the people kept for scouting; they go out in parties. The share below sets how many may be kept."
-	var kept:=_control_row(send_box,"Share")
+	var settings:=HFlowContainer.new();settings.add_theme_constant_override("h_separation",16);settings.add_theme_constant_override("v_separation",8);send_box.add_child(settings)
+	var kept:=_control_row(settings,"Share")
 	for preset:Array in PRESETS:
 		var amount:=float(preset[1])
 		var b:=UI.chip(kept,String(preset[0]),is_equal_approx(share,amount),func()->void:set_share(amount),"%.0f%% of the people of %s kept for scouting. Parties already away finish their journeys if you lower it." % [amount,String(staff.get("origin_label","home"))])
 		b.name="Share_%s" % String(preset[0]).replace(" ","")
 	var shown:=("%d%%" % roundi(share)) if is_equal_approx(share,roundf(share)) else "%.1f%%" % share
 	UI.label(kept,shown,13,T.INK,true).name="ShareValue"
-	var seek:=_control_row(send_box,"Seek")
+	var seek:=_control_row(settings,"Seek")
 	for focus:Array in FOCUSES:
 		var key:=String(focus[0])
 		var tip:String=String({"exploration":"New ground, finds and knowledge.","recruitment":"Search for scarce wandering bands who may join us. Taking people from a foreign town is a separate, hostile order.","prospecting":String((staff.get("prospecting",{}) as Dictionary).get("message","Survey real ground for rare ore and fuel. Nothing reaches the stores until a deposit is worked."))}.get(key,""))
@@ -213,7 +222,8 @@ func _parties(parent:Node)->void:
 	var parties:Array=exploration.get("parties",[])
 	if parties.is_empty():return
 	UI.rule(parent)
-	for party:Dictionary in parties:
+	var page:=clampi(int(view.get("party_page",0)),0,maxi(0,ceili(parties.size()/3.0)-1));view.party_page=page
+	for party:Dictionary in parties.slice(page*3,(page+1)*3):
 		var row:=UI.line(parent)
 		row.name="Party_%d" % int(party.get("mission_id",0))
 		var overdue:=int(party.get("overdue_days",0))
@@ -224,26 +234,20 @@ func _parties(parent:Node)->void:
 		UI.cell(row,"%d" % int(party.get("personnel",0)),34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT).tooltip_text="Scouts in the party"
 		var due:=int(party.get("days_remaining",0))
 		UI.cell(row,("late %s" % When.span(overdue)) if overdue>0 else ("home in %s" % When.span(due) if due>1 else "home any day"),104,12,T.AMBER_TEXT if overdue>0 else T.TEAL_TEXT)
+	if parties.size()>3:
+		var browse:=HBoxContainer.new();browse.add_theme_constant_override("separation",6);parent.add_child(browse)
+		UI.label(browse,"%d–%d of %d parties" % [page*3+1,mini((page+1)*3,parties.size()),parties.size()],14,T.INK_MUTED,false,true)
+		UI.verb(browse,"Previous",func()->void:view.party_page=page-1;_fill_send()).disabled=page==0
+		UI.verb(browse,"Next",func()->void:view.party_page=page+1;_fill_send()).disabled=(page+1)*3>=parties.size()
 
 ## The latest parties home, one line each, under the planner: who went, where,
 ## when, and any lost.
 func _fill_last()->void:
 	if last_box==null:return
 	UI.clear(last_box)
-	var parent:=last_box
-	var reports:=_reports()
-	last_box.get_parent().visible=not reports.is_empty()
-	if reports.is_empty():return
-	UI.heading(parent,"Last back")
-	var shown:=0
-	for item:Dictionary in select(reports,"",0,false):
-		if shown>=5:break
-		shown+=1
-		var report:Dictionary=item.report
-		var row:=UI.hot_row(parent,"Back_%d" % shown,func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.party),String(item.detail)])
-		UI.cell(row,Archive.calendar_date(int(item.day)).replace("Year ",""),74,12,T.INK_MUTED)
-		UI.label(row,"%d scouts · %s" % [int(report.get("personnel",0)),String(item.place).replace("Out to the ","").replace(" and back","").to_lower()],12,T.BODY,false,true)
-		if int(item.losses)>0:UI.tag(row,"lost %d" % int(item.losses),"danger")
+	# Recent reports already carry the party, return date and losses. Avoid
+	# repeating those same returns in a second historical list above them.
+	last_box.get_parent().hide()
 
 static func _party_title(party:Dictionary)->String:
 	return preload("res://scripts/hud/content/dock_content_world.gd").party_title(String(party.get("target_label","")),String(party.get("planned_heading","")))
@@ -342,7 +346,7 @@ func _fill_unread()->void:
 	if groups.size()>GROUPS_SHOWN:
 		var more:=UI.line(unread_box,6)
 		UI.label(more,"+%d more kinds" % (groups.size()-GROUPS_SHOWN),12,T.INK_MUTED)
-		UI.verb(more,"List all unread",func()->void:view.filter=4;view.page=0;_fill_tellings(),"Show only the unread in the table below").name="AllUnread"
+		UI.verb(more,"Browse unread",func()->void:view.filter=4;view.page=0;view.archive=true;_fill_tellings();_layout(),"Search all unread reports").name="AllUnread"
 
 func open_report(report:Dictionary)->void:
 	Archive.mark_reviewed(report)
@@ -363,7 +367,17 @@ func _fill_cities()->void:
 	cities_empty=UI.label(cities_box,"No foreign town reported yet",12,T.INK_MUTED)
 	cities_empty.visible=cities.is_empty()
 	if cities.is_empty():return
-	for city:Dictionary in cities:
+	var selected:=0
+	for index in cities.size():
+		if String(cities[index].city_id)==String(view.get("town","")):selected=index
+	if cities.size()>1:
+		var choose:=OptionButton.new();choose.name="TownSelector";T.apply_button_style(choose)
+		choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		for city:Dictionary in cities:choose.add_item(String(city.get("name",city.city_id)))
+		choose.select(selected);cities_box.add_child(choose)
+		choose.item_selected.connect(func(index:int)->void:view.town=String(cities[index].city_id);_fill_cities())
+	view.town=String(cities[selected].city_id)
+	for city:Dictionary in [cities[selected]]:
 		var id:=String(city.city_id)
 		if not city_choice.has(id):
 			var chosen:Dictionary=Orders.defaults(id,city)
@@ -383,7 +397,7 @@ func _city_row(id:String,row_model:Dictionary)->void:
 	var tip:="%s · %s · %.0f km away · %s
 Click for what we know of it." % [String(row_model.name),people,float(row_model.distance_km),String(row_model.seen)]
 	var row:=UI.hot_row(cities_box,"City_"+id.validate_node_name(),open,tip)
-	var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",12);row.add_child(stack)
+	var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",8);row.add_child(stack)
 	var name_cell:=HBoxContainer.new();name_cell.add_theme_constant_override("separation",6);name_cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	name_cell.custom_minimum_size.x=96;name_cell.mouse_filter=Control.MOUSE_FILTER_PASS;stack.add_child(name_cell)
 	var name_label:=UI.label(name_cell,String(row_model.name),20,T.INK,true,true)
@@ -463,7 +477,11 @@ func _order(id:String,kind:String)->void:
 # ------------------------------------------------------------- every telling
 
 func _build_tellings_frame()->void:
-	var head:=UI.heading(tellings_box,"Every telling","")
+	var head:=UI.heading(tellings_box,"Recent reports","")
+	head.name="ReportHeading"
+	var browse:=UI.verb(head,"Browse all",func()->void:
+		view.archive=not bool(view.get("archive",false));view.page=0;_fill_tellings();_layout())
+	browse.name="BrowseReports"
 	counter=head.get_node("Note") if head.has_node("Note") else null
 	if counter==null:
 		counter=T.make_label("",12,T.INK_MUTED);counter.name="Note";head.add_child(counter)
@@ -475,7 +493,7 @@ func _build_tellings_frame()->void:
 	search.text=String(view.get("query",""))
 	tellings_box.add_child(search)
 	search.text_changed.connect(func(value:String)->void:view.query=value;view.page=0;_fill_rows())
-	var bar:=HFlowContainer.new();bar.add_theme_constant_override("h_separation",12);bar.add_theme_constant_override("v_separation",8);tellings_box.add_child(bar)
+	var bar:=HFlowContainer.new();bar.name="ArchiveControls";bar.add_theme_constant_override("h_separation",12);bar.add_theme_constant_override("v_separation",8);tellings_box.add_child(bar)
 	var filters:=HBoxContainer.new();filters.name="Filters";filters.add_theme_constant_override("separation",4);bar.add_child(filters)
 	var order:=UI.chip(bar,"Newest",int(view.get("order",1))==1,func()->void:view.order=0 if int(view.get("order",1))==1 else 1;view.page=0;_fill_tellings(),"Newest first, or the weightiest first")
 	order.name="Order"
@@ -485,6 +503,11 @@ func _build_tellings_frame()->void:
 
 func _fill_tellings()->void:
 	if tellings_box==null:return
+	var archive:=bool(view.get("archive",false))
+	search.visible=archive
+	(tellings_box.find_child("ArchiveControls",true,false) as Control).visible=archive
+	(tellings_box.find_child("BrowseReports",true,false) as Button).text="Back to expeditions" if archive else "Browse all"
+	(tellings_box.get_node("ReportHeading/Heading") as Label).text="Scout reports" if archive else "Recent reports"
 	var filters:=tellings_box.find_child("Filters",true,false) as HBoxContainer
 	if filters!=null:
 		UI.clear(filters)
@@ -518,12 +541,14 @@ func _fill_rows()->void:
 	if results==null:return
 	UI.clear(results)
 	var reports:=_reports()
-	var selected:=select(reports,String(view.get("query","")),int(view.get("filter",0)),int(view.get("order",1))==0)
-	var pages:=maxi(1,ceili(float(selected.size())/PAGE))
+	var archive:=bool(view.get("archive",false))
+	var selected:=select(reports,String(view.get("query","")) if archive else "",int(view.get("filter",0)) if archive else 0,int(view.get("order",1))==0 if archive else false)
+	var limit:=PAGE if archive else 3
+	var pages:=maxi(1,ceili(float(selected.size())/limit))
 	var page:=clampi(int(view.get("page",0)),0,pages-1);view.page=page
 	previous.disabled=page==0;next.disabled=page>=pages-1
-	counter.text=("%d–%d of %d" % [page*PAGE+1,mini(selected.size(),(page+1)*PAGE),selected.size()]) if not selected.is_empty() else "none match"
-	visible_items=selected.slice(page*PAGE,(page+1)*PAGE)
+	counter.text=("%d–%d of %d" % [page*limit+1,mini(selected.size(),(page+1)*limit),selected.size()]) if not selected.is_empty() else "none yet"
+	visible_items=selected.slice(page*limit,(page+1)*limit)
 	for item:Dictionary in visible_items:
 		var report:Dictionary=item.report
 		var row:=UI.hot_row(results,"Report_%s" % str(report.get("mission_id",0)),func()->void:open_report(report),"%s\n%s\n%s" % [String(item.title),String(item.place),String(item.detail)])
@@ -531,7 +556,7 @@ func _fill_rows()->void:
 		var entry:=VBoxContainer.new();entry.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entry.add_theme_constant_override("separation",6);row.add_child(entry)
 		UI.label(entry,short_title(String(item.title)),18,T.INK if bool(item.meaningful) or int(item.losses)>0 else T.BODY,String(item.review)=="UNREAD",true)
 		# Who went is in the row's pointer: the title gets the width.
-		UI.label(entry,"%s · %s" % [Archive.calendar_date(int(item.day)),String(item.place).replace("Out to the ","").replace(" and back","")],14,T.INK_MUTED,false,true).tooltip_text=String(item.party)
+		UI.label(entry,"%s · %s · %d scouts" % [Archive.calendar_date(int(item.day)),String(item.place).replace("Out to the ","").replace(" and back",""),int(report.get("personnel",0))],14,T.INK_MUTED,false,true).tooltip_text=String(item.party)
 		var state:=HBoxContainer.new();state.custom_minimum_size.x=64;state.alignment=BoxContainer.ALIGNMENT_END;row.add_child(state)
 		if int(item.losses)>0:UI.tag(state,"lost %d" % int(item.losses),"danger")
 		elif String(item.review)=="UNREAD":UI.tag(state,"unread","gold")

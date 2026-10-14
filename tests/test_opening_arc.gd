@@ -124,11 +124,25 @@ func test_the_fire_circle_is_a_few_cards_not_a_wall_of_text()->void:
 	await get_tree().process_frame
 	assert_bool(screen.more_grid.visible).is_false()
 	for button in screen.ambition_buttons:
-		assert_object(button.icon).is_not_null()
+		assert_object(button.find_child("CourseIcon",true,false)).is_not_null()
+		assert_str((button.find_child("CoursePurpose",true,false) as Label).text).is_not_empty()
+		assert_str((button.find_child("CourseGains",true,false) as Label).text).is_not_empty()
+		assert_str((button.find_child("CourseCosts",true,false) as Label).text).is_not_empty()
 		assert_bool(String(button.tooltip_text).length()>String(button.text).length()).is_true()
 	screen.more_button.pressed.emit()
 	assert_bool(screen.more_grid.visible).is_true()
-	assert_int(screen.ambition_buttons.filter(func(b:Button)->bool:return b.visible).size()).is_equal(PeopleDirection.AMBITIONS.size())
+	assert_int(screen.ambition_buttons.filter(func(b:Button)->bool:return b.visible).size()).is_equal(4)
+	var seen:Array=[]
+	while true:
+		for button in screen.ambition_buttons:
+			if button.visible:seen.append(String(button.get_meta("ambition")))
+		if screen.more_next.disabled:break
+		screen.more_next.pressed.emit()
+	assert_int(seen.size()).is_equal(PeopleDirection.AMBITIONS.size()-4)
+	var last:Button=screen.ambition_buttons[-1]
+	last.pressed.emit()
+	assert_str(screen.selected_focus).is_equal(String(last.get_meta("ambition")))
+	assert_bool(last.is_visible_in_tree()).is_true()
 	screen.more_button.pressed.emit()
 	assert_int(screen.ambition_buttons.filter(func(b:Button)->bool:return b.visible).size()).is_equal(4)
 

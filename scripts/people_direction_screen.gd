@@ -4,6 +4,7 @@ extends Control
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const P:=preload("res://scripts/hud/paper_sheet.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Brief:=preload("res://scripts/hud/course_choice_brief.gd")
 var opening:=false
 var ambition_buttons:Array[Button]=[]
 var pages:Array[Control]=[]
@@ -29,6 +30,15 @@ const CARD_TAGS:=["Travel and the land","Craft and building","Customs and belong
 const CARD_COLORS:=["71bcb3","d8996a","d9b978","9ba7d6","cc7c68","b8c480","81c5ac","dbb57a","c7ac69","b27256","ac9a7b","bd985e","a46658","95859f"]
 var title:Label
 var layout:VBoxContainer
+var page_margin:MarginContainer
+var cards_scroll:ScrollContainer
+var choices_count:Label
+var choices_previous:Button
+var choices_next:Button
+var memory_page:=0
+var memory_archive:=false
+var memory_query:=""
+const CHOICES_PER_PAGE:=4
 
 func _ready()->void:
 	theme=T.control_theme()
@@ -36,7 +46,7 @@ func _ready()->void:
 	if not WorldSimulation.direction.needs_century_choice():selected_focus=WorldSimulation.direction.ambition;reviewing=true
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var background:=ColorRect.new();background.color=T.PAPER;background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(background)
-	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var margin:=MarginContainer.new();page_margin=margin;margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+edge,20)
 	add_child(margin)
 	layout=VBoxContainer.new();layout.add_theme_constant_override("separation",10);margin.add_child(layout)
@@ -55,15 +65,20 @@ func _ready()->void:
 	P.rule(layout)
 	var body:=VBoxContainer.new();body.size_flags_vertical=SIZE_EXPAND_FILL;layout.add_child(body)
 	var focus_page:=VBoxContainer.new();focus_page.size_flags_vertical=SIZE_EXPAND_FILL;focus_page.add_theme_constant_override("separation",8);body.add_child(focus_page);pages.append(focus_page)
-	var cards_scroll:=ScrollContainer.new();cards_scroll.size_flags_vertical=SIZE_EXPAND_FILL;cards_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;focus_page.add_child(cards_scroll)
-	grid=GridContainer.new();grid.columns=4;grid.size_flags_vertical=SIZE_EXPAND_FILL;grid.size_flags_horizontal=SIZE_EXPAND_FILL
+	_label(focus_page,"Choose the strengths your people will develop. Figures show each course at full strength; earlier traditions blend with your next choice. Other research runs 5% slower at full strength.","small")
+	var choices_pager:=HBoxContainer.new();choices_pager.add_theme_constant_override("separation",8);focus_page.add_child(choices_pager)
+	choices_count=_label(choices_pager,"","small");choices_count.size_flags_horizontal=SIZE_EXPAND_FILL
+	choices_previous=_button(choices_pager,"Previous",func()->void:choice_page-=1;_refresh());choices_previous.name="PreviousCourses"
+	choices_next=_button(choices_pager,"Next",func()->void:choice_page+=1;_refresh());choices_next.name="NextCourses"
+	cards_scroll=ScrollContainer.new();cards_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;cards_scroll.size_flags_vertical=SIZE_SHRINK_BEGIN;cards_scroll.follow_focus=true;focus_page.add_child(cards_scroll)
+	grid=GridContainer.new();grid.columns=3;grid.size_flags_vertical=SIZE_SHRINK_BEGIN;grid.size_flags_horizontal=SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",10);cards_scroll.add_child(grid)
+	grid.minimum_size_changed.connect(_fit_courses)
 	var index:=0
 	for id:String in PeopleDirection.AMBITIONS:
-		var card:=preload("res://scripts/ambition_art_card.gd").new()
-		card.custom_minimum_size.y=175;card.art_index=index;card.caption=CARD_TITLES[index];card.subtitle=CARD_TAGS[index];card.accent=Color(CARD_COLORS[index]);card.size_flags_horizontal=SIZE_EXPAND_FILL;card.size_flags_vertical=SIZE_EXPAND_FILL
-		if preload("res://scripts/hud/early_civ_art.gd").active():card.custom_minimum_size.y=260
-		card.set_meta("ambition",id);card.tooltip_text=String(PeopleDirection.AMBITIONS[id].vision)
+		var card:=preload("res://scripts/hud/course_choice_card.gd").new()
+		card.course_id=id;card.art_index=index;card.caption=CARD_TITLES[index];card.subtitle=CARD_TAGS[index];card.accent=Color(CARD_COLORS[index]);card.size_flags_horizontal=SIZE_EXPAND_FILL
+		card.set_meta("ambition",id);card.tooltip_text=Brief.full(id)+"\nAt full strength. Earlier traditions blend with this course."
 		card.pressed.connect(func():selected_focus=id;reviewing=true;_refresh())
 		grid.add_child(card);ambition_buttons.append(card);focus_cards.append(card);index+=1
 	choice_help=_label(focus_page,"","small")
@@ -78,6 +93,7 @@ func _ready()->void:
 	var traditions_scroll:=ScrollContainer.new();traditions_scroll.size_flags_vertical=SIZE_EXPAND_FILL;traditions_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;body.add_child(traditions_scroll);pages.append(traditions_scroll)
 	traditions=VBoxContainer.new();traditions.size_flags_horizontal=SIZE_EXPAND_FILL;traditions_scroll.add_child(traditions)
 	status=_label(layout,"","small");status.visible=false
+	if not selected_focus.is_empty():choice_page=maxi(0,PeopleDirection.AMBITIONS.keys().find(selected_focus))/CHOICES_PER_PAGE
 	resized.connect(_refresh);_show_page(0 if WorldSimulation.direction.needs_century_choice() else 1)
 	print("DIRECTION_SCREEN_READY: day=",WorldSimulation.state.elapsed_days,"; opening=",opening,"; settlement=",WorldSimulation.state.settlement_name,"; seed=",WorldSimulation.state.world_seed)
 	_capture_opening.call_deferred()
@@ -110,16 +126,24 @@ func _refresh()->void:
 	var century:=WorldSimulation.direction.century_at(int(WorldSimulation.state.elapsed_days))
 	var pending:=WorldSimulation.direction.needs_century_choice()
 	title.text="A people takes shape" if opening else "The character of a people"
-	summary.text="Choose what your people will strive for first." if opening else ("Years %d to %d of our story. Choose the course for this century." if pending else "Years %d to %d of our story.") % [century*100+1,(century+1)*100]
-	grid.columns=2 if size.x<1000 else 4
-	for card in ambition_buttons:
+	summary.text="Set your people's direction for the first 100 years." if opening else ("Years %d–%d. Commit to a direction for this century; choose again at the next." if pending else "Years %d–%d. This century's course is set.") % [century*100+1,(century+1)*100]
+	var inset:=maxi(20,roundi((size.x-1120)*.5))
+	page_margin.add_theme_constant_override("margin_left",inset);page_margin.add_theme_constant_override("margin_right",inset)
+	grid.columns=2
+	choice_page=clampi(choice_page,0,maxi(0,ceili(ambition_buttons.size()/float(CHOICES_PER_PAGE))-1))
+	choices_count.text="%d–%d of %d courses" % [choice_page*CHOICES_PER_PAGE+1,mini((choice_page+1)*CHOICES_PER_PAGE,ambition_buttons.size()),ambition_buttons.size()]
+	choices_previous.disabled=choice_page==0;choices_next.disabled=(choice_page+1)*CHOICES_PER_PAGE>=ambition_buttons.size()
+	for index in ambition_buttons.size():
+		var card:=ambition_buttons[index]
+		card.visible=index/CHOICES_PER_PAGE==choice_page
 		card.disabled=not pending;card.select(String(card.get_meta("ambition"))==selected_focus)
+	_fit_courses.call_deferred()
 	choice_help.visible=false
 	var detail:=pages[0].get_node("SelectionDetail") as Label
-	if selected_focus=="":detail.text="Pick a card to see what it would change. Every choice leaves a mark on later generations."
+	if selected_focus=="":detail.text="Select a course to review all its effects, then commit. Its traditions will live on in later generations."
 	else:
-		var ambition:Dictionary=PeopleDirection.AMBITIONS[selected_focus]
-		detail.text="%s %s" % [String(ambition.vision),effect_words(selected_focus)]
+		var reading:=Brief.brief(selected_focus)
+		detail.text="All gains at full strength: %s.\nTrade-offs: %s. %s; other research −5%%." % [String(reading.full_gains),String(reading.costs),String(reading.research)]
 		detail.tooltip_text=""
 	var confirm:=pages[0].get_node("ConfirmFocus") as Button
 	confirm.disabled=not pending or selected_focus==""
@@ -127,6 +151,9 @@ func _refresh()->void:
 	if selected_focus=="":confirm.text="Choose a course above"
 	elif not pending:confirm.text="This century's course is set: %s" % chosen_title
 	else:confirm.text=("Begin: %s" if opening else "Commit to this course: %s") % chosen_title
+
+func _fit_courses()->void:
+	if is_instance_valid(cards_scroll):cards_scroll.custom_minimum_size.y=maxf(156,minf(grid.get_combined_minimum_size().y,size.y-350))
 
 func _clear(parent:Node)->void:
 	for child in parent.get_children(): parent.remove_child(child); child.queue_free()
@@ -158,7 +185,7 @@ func _traditions_page()->void:
 	var portrait:=_box(spread);portrait.get_parent().size_flags_stretch_ratio=.85
 	var focus:=String(state.ambition)
 	var focus_index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(focus))
-	_art(portrait,focus_index,265)
+	_art(portrait,focus_index,160)
 	P.kicker(portrait,"Our present course")
 	_label(portrait,CARD_TITLES[focus_index] if focus!="" else "Not yet chosen","title")
 	if focus!="":_label(portrait,effect_words(focus),"small")
@@ -172,11 +199,11 @@ func _traditions_page()->void:
 		var toggle:=_button(control,"I will decide" if delegated else "Let leaders decide",func():state.set_delegated(area,not delegated);_traditions_page())
 		toggle.custom_minimum_size.x=150
 	var values:=_box(spread);values.add_theme_constant_override("separation",6)
-	_label(values,"What we inherit","title")
+	_label(values,"What we inherit","title").add_theme_font_size_override("font_size",24)
 	_label(values,"Each bar shows how the people lean today. The dark mark shows what earlier generations handed down. Hover a part of a bar for its share.","small")
 	for domain:Dictionary in state.cultural_tendencies():
-		var head:=HBoxContainer.new();values.add_child(head)
-		var label:=_label(head,_plain(String(domain.domain)),"body",T.INK);label.size_flags_horizontal=SIZE_EXPAND_FILL
+		var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);values.add_child(head)
+		_label(head,_plain(String(domain.domain))+" ·","body",T.INK)
 		var strongest:="";var best:=0.0
 		for pole in domain.current:
 			if float(domain.current[pole])>best:strongest=String(pole);best=float(domain.current[pole])
@@ -194,21 +221,37 @@ func _traditions_page()->void:
 				if inherited>0:segment.draw_line(Vector2(segment.size.x*inherited,2),Vector2(segment.size.x*inherited,13),T.INK,2))
 			segment.resized.connect(segment.queue_redraw);track.add_child(segment)
 	var history:=_box(traditions)
-	_label(history,"The choices we carry","title")
-	var timeline_scroll:=ScrollContainer.new();timeline_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;history.add_child(timeline_scroll)
-	var timeline:=HBoxContainer.new();timeline.add_theme_constant_override("separation",12);timeline_scroll.add_child(timeline)
+	_label(history,"The choices we carry","title").add_theme_font_size_override("font_size",24)
+	var archive_button:=_button(history,"Recent choices" if memory_archive else "Browse past choices",func()->void:memory_archive=not memory_archive;memory_page=0;_traditions_page())
+	archive_button.name="BrowseChoices"
+	var timeline_scroll:=ScrollContainer.new();timeline_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;timeline_scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;history.add_child(timeline_scroll)
+	var timeline:=GridContainer.new();timeline.name="ChoiceHistory";timeline.columns=3;timeline.size_flags_horizontal=SIZE_EXPAND_FILL;timeline.add_theme_constant_override("h_separation",12);timeline.add_theme_constant_override("v_separation",8);timeline_scroll.add_child(timeline)
 	var commitments:Array=[]
 	for event:Dictionary in state.cultural_memory.events:
 		if String(event.id).begins_with("century:") or String(event.id).begins_with("legacy:"):commitments.append(event)
-	for event:Dictionary in commitments:
-		var tile:=VBoxContainer.new();tile.custom_minimum_size.x=160;timeline.add_child(tile)
+	commitments.reverse()
+	var limit:=6 if memory_archive else 3
+	if memory_archive:
+		var query:=LineEdit.new();query.placeholder_text="Find a past course";query.text=memory_query;history.add_child(query);history.move_child(query,timeline_scroll.get_index())
+		query.text_submitted.connect(func(value:String)->void:memory_query=value;memory_page=0;_traditions_page())
+		query.tooltip_text="Enter a course name and press Enter."
+		commitments=commitments.filter(func(event:Dictionary)->bool:return memory_query.strip_edges().is_empty() or (String(PeopleDirection.AMBITIONS[event.choice].name)+" "+CARD_TITLES[maxi(0,PeopleDirection.AMBITIONS.keys().find(String(event.choice)))]).to_lower().contains(memory_query.strip_edges().to_lower()))
+	memory_page=clampi(memory_page,0,maxi(0,ceili(commitments.size()/float(limit))-1))
+	if memory_archive:
+		var pager:=HBoxContainer.new();pager.add_theme_constant_override("separation",8);history.add_child(pager);history.move_child(pager,timeline_scroll.get_index())
+		var previous:=_button(pager,"Previous",func()->void:memory_page-=1;_traditions_page());previous.disabled=memory_page==0
+		_label(pager,"%d / %d" % [memory_page+1,maxi(1,ceili(commitments.size()/float(limit)))],"small")
+		var next:=_button(pager,"Next",func()->void:memory_page+=1;_traditions_page());next.disabled=(memory_page+1)*limit>=commitments.size()
+	for event:Dictionary in commitments.slice(memory_page*limit,(memory_page+1)*limit):
+		var tile:=VBoxContainer.new();tile.size_flags_horizontal=SIZE_EXPAND_FILL;timeline.add_child(tile)
 		var index:=maxi(0,PeopleDirection.AMBITIONS.keys().find(String(event.choice)))
 		var art:=_art(tile,index,70);art.tooltip_text=CARD_TITLES[index]
 		_label(tile,String(PeopleDirection.AMBITIONS[event.choice].name),"small",T.INK)
 		_label(tile,EraWords.when(int(event.day)),"small")
 	if commitments.is_empty():
 		timeline_scroll.hide()
-		_label(history,"Your first choice begins the story.","body")
+		archive_button.visible=memory_archive
+		_label(history,"No matching choices." if memory_archive else "Your first choice begins the story.","body")
 	# The one-shot visions have become generational aims (legacy_aims.gd):
 	# the court proposes them and the god takes one up in the Court.
 	var aims:=preload("res://scripts/legacy_aims.gd").board_model()
@@ -221,8 +264,20 @@ func _traditions_page()->void:
 		_label(aim_row,"The people want an aim. Summon %s in the court to hear it." % String(aims.waiting),"body",T.INK)
 	else:
 		_label(aim_row,"No aim is sworn. The court will speak of one when the time comes.","body")
-	for legacy:Dictionary in aims.get("legacies",[]):
-		_label(aim_row,"Remembered: %s (%s)" % [String(legacy.name),EraWords.when(int(legacy.day))],"small")
+	var legacies:Array=aims.get("legacies",[])
+	if not legacies.is_empty():
+		var past:=VBoxContainer.new();past.name="PastAims";past.visible=false
+		_button(aim_row,"Remembered aims (%d)" % legacies.size(),func()->void:past.visible=not past.visible)
+		aim_row.add_child(past)
+		var pages_count:=maxi(1,ceili(legacies.size()/6.0))
+		var selector:=OptionButton.new();selector.name="AimPages";T.apply_button_style(selector)
+		for index in pages_count:selector.add_item("%d–%d of %d" % [index*6+1,mini(index*6+6,legacies.size()),legacies.size()])
+		past.add_child(selector);selector.visible=pages_count>1
+		var rows:=VBoxContainer.new();past.add_child(rows)
+		var fill:=func(index:int)->void:
+			_clear(rows)
+			for legacy:Dictionary in legacies.slice(index*6,index*6+6):_label(rows,"%s (%s)" % [String(legacy.name),EraWords.when(int(legacy.day))],"small")
+		selector.item_selected.connect(fill);fill.call(0)
 
 func _capture_opening()->void:
 	if "--capture-opening" not in OS.get_cmdline_user_args() or get_tree().root.has_meta("opening_captured"):return

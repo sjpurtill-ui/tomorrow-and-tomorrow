@@ -10,7 +10,7 @@ const DISPLAY_FONT:=preload("res://assets/fonts/cinzel/Cinzel.ttf")
 const CULTURE_PATH:="res://scripts/artifact_culture.gd"
 ## Inner classes reach the shared static helpers through this self-reference.
 const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
-const PAGE_SIZE:=24
+const PAGE_SIZE:=6
 const CARD_MIN_WIDTH:=224.0
 const CARD_GAP:=14
 const TIER_NAMES:=["Common","Unusual","Rare","Exceptional","Legendary"]
@@ -86,6 +86,8 @@ var collection_controls:VBoxContainer
 var overview_nodes:Array[Control]=[]
 var effects_toggle:Button
 var effects_open:=false
+var last_page_size:=0
+var last_compact_cards:=false
 
 # ---------------------------------------------------------------- shared API
 
@@ -271,7 +273,7 @@ func _ready()->void:
 	var style:=T.flat(T.DOCK_BG,T.BORDER_2,1,6);style.content_margin_left=24;style.content_margin_right=24;style.content_margin_top=18;style.content_margin_bottom=16
 	style.shadow_color=Color(0,0,0,.35);style.shadow_size=18
 	panel.add_theme_stylebox_override("panel",style);add_child(panel)
-	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",16);panel.add_child(root)
+	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",10);panel.add_child(root)
 	_build_header(root)
 	_build_controls(root)
 	main=HBoxContainer.new();main.size_flags_vertical=Control.SIZE_EXPAND_FILL;main.add_theme_constant_override("separation",22);root.add_child(main)
@@ -279,9 +281,9 @@ func _ready()->void:
 	browse_scroll=ScrollContainer.new();browse_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;browse_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;browse.add_child(browse_scroll)
 	browse_body=VBoxContainer.new();browse_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;browse_body.add_theme_constant_override("separation",12);browse_scroll.add_child(browse_body)
 	pager=HBoxContainer.new();pager.add_theme_constant_override("separation",10);browse.add_child(pager)
-	prev_button=action_button(pager,"Previous page",func()->void:page=maxi(0,page-1);refresh(true))
-	pager_label=label(pager,"",12,T.TEXT_SOFT);pager_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	next_button=action_button(pager,"Next page",func()->void:page+=1;refresh(true))
+	prev_button=action_button(pager,"Previous",func()->void:page=maxi(0,page-1);browse_scroll.scroll_vertical=0;refresh(true))
+	pager_label=label(pager,"",14,T.TEXT_SOFT);pager_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	next_button=action_button(pager,"Next",func()->void:page+=1;browse_scroll.scroll_vertical=0;refresh(true))
 	detail_column=VBoxContainer.new();detail_column.name="DetailColumn";detail_column.custom_minimum_size.x=430;main.add_child(detail_column)
 	detail_back=action_button(detail_column,"Back to the %s" % collection_word(),func()->void:narrow_detail=false;_layout())
 	detail_scroll=ScrollContainer.new();detail_scroll.name="DetailScroll";detail_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;detail_scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;detail_column.add_child(detail_scroll)
@@ -331,26 +333,24 @@ func api(method:String,arguments:Array=[],fallback:Variant=null)->Variant:
 # ---------------------------------------------------------------- building
 
 func _build_header(root:VBoxContainer)->void:
-	header=HBoxContainer.new();header.add_theme_constant_override("separation",24);root.add_child(header)
-	seal=Seal.new();seal.name="AllureSeal";seal.custom_minimum_size=Vector2(96,96);seal.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;header.add_child(seal)
-	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_stretch_ratio=1.25;words.add_theme_constant_override("separation",4);header.add_child(words)
-	overview_nodes.append(label(words,"Collection & allure",14,T.INK_MUTED,false))
-	display(words,"Our %s" % collection_word(),34)
-	allure_title=serif(words,"",18,T.BODY,true)
-	stats_label=label(words,"",13,T.TEXT_SOFT)
-	breakdown=Breakdown.new();breakdown.custom_minimum_size=Vector2(0,10);words.add_child(breakdown)
-	breakdown_legend=HFlowContainer.new();breakdown_legend.add_theme_constant_override("h_separation",14);breakdown_legend.add_theme_constant_override("v_separation",2);words.add_child(breakdown_legend)
-	effects_column=VBoxContainer.new();effects_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;effects_column.add_theme_constant_override("separation",6);header.add_child(effects_column)
-	label(effects_column,"What our allure does",18,T.INK,false)
-	effects_box=VBoxContainer.new();effects_box.add_theme_constant_override("separation",6);effects_column.add_child(effects_box)
+	header=HBoxContainer.new();header.add_theme_constant_override("separation",12);root.add_child(header)
+	display(header,"Our %s" % collection_word(),32)
+	# Allure is a reading, not a second hero above the objects.
+	seal=Seal.new();seal.name="AllureSeal";seal.visible=false;header.add_child(seal)
 	var close_button:=Button.new();close_button.name="CloseGallery";close_button.text="Close";close_button.custom_minimum_size=Vector2(96,38);close_button.tooltip_text="Close (Esc)";T.text(close_button,"small",T.INK);close_button.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;T.apply_button_style(close_button);close_button.pressed.connect(close);header.add_child(close_button)
-	effects_toggle=action_button(root,"Allure effects  ▸",func()->void:effects_open=not effects_open;_layout())
-	effects_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-	effects_column.reparent(root);effects_column.visible=false
-	overview_nodes.append_array([seal,allure_title,stats_label,breakdown,breakdown_legend,effects_toggle])
+	var summary:=HFlowContainer.new();summary.add_theme_constant_override("h_separation",16);summary.add_theme_constant_override("v_separation",4);root.add_child(summary)
+	allure_title=label(summary,"",16,T.GOLD_TEXT,false);allure_title.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	stats_label=label(summary,"",14,T.TEXT_SOFT,false);stats_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	effects_toggle=action_button(summary,"Allure effects  ▸",func()->void:effects_open=not effects_open;_layout())
+	effects_column=VBoxContainer.new();effects_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;effects_column.add_theme_constant_override("separation",6);root.add_child(effects_column)
+	breakdown=Breakdown.new();breakdown.custom_minimum_size=Vector2(0,8);effects_column.add_child(breakdown)
+	breakdown_legend=HFlowContainer.new();breakdown_legend.add_theme_constant_override("h_separation",14);breakdown_legend.add_theme_constant_override("v_separation",2);effects_column.add_child(breakdown_legend)
+	effects_box=VBoxContainer.new();effects_box.add_theme_constant_override("separation",6);effects_column.add_child(effects_box)
+	effects_column.visible=false
+	overview_nodes.append(summary)
 
 func _build_controls(root:VBoxContainer)->void:
-	var controls:=VBoxContainer.new();controls.add_theme_constant_override("separation",12);root.add_child(controls)
+	var controls:=VBoxContainer.new();controls.add_theme_constant_override("separation",6);root.add_child(controls)
 	collection_controls=controls
 	var tabs:=HFlowContainer.new();tabs.name="GalleryTabs";tabs.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tabs.add_theme_constant_override("h_separation",6);tabs.add_theme_constant_override("v_separation",6);controls.add_child(tabs)
 	for spec:Array in VIEWS:
@@ -377,7 +377,8 @@ func _style_tabs()->void:
 		if active:style.border_width_bottom=2
 		button.add_theme_stylebox_override("normal",style);button.add_theme_stylebox_override("hover",hover if not active else style);button.add_theme_stylebox_override("pressed",style)
 		button.add_theme_color_override("font_color",T.GOLD_TEXT if active else T.TEXT_SOFT);button.add_theme_color_override("font_hover_color",T.INK)
-	search.editable=view!="rumors"
+	search.editable=true
+	search.placeholder_text="Search rumored places" if view=="rumors" else ("Search sets or sites" if view=="sets" else "Search the collection")
 	sort_select.disabled=view in ["sets","rumors"]
 
 # ---------------------------------------------------------------- refresh
@@ -404,8 +405,10 @@ func _render_header()->void:
 		allure_title.text="The collection ledger is not yet kept."
 		stats_label.text="Old objects will be listed here once we keep a record of them."
 		return
-	allure_title.text="%s — %s" % [String(summary_data.get("allure_label","Unremarked")).capitalize(),_allure_phrase(float(summary_data.get("allure",0)))]
-	stats_label.text=_holdings_sentence(summary_data)+" Understood pieces enrich our customs and learning; pieces on show make us admired."
+	allure_title.text="Allure %d · %s" % [roundi(float(summary_data.get("allure",0))*100),String(summary_data.get("allure_label","Unremarked")).capitalize()]
+	allure_title.tooltip_text=_allure_phrase(float(summary_data.get("allure",0))).capitalize()+".\n"+_breakdown_tip(summary_data)
+	stats_label.text="%d pieces · %d understood · %d on show" % [int(summary_data.get("collection_count",0)),int(summary_data.get("studied_count",0)),int(summary_data.get("exhibited_count",0))]
+	stats_label.tooltip_text=_holdings_sentence(summary_data)+" Understood pieces enrich our customs and learning; pieces on show make us admired."
 	var parts:Array=summary_data.get("allure_breakdown",[])
 	breakdown.parts=parts;breakdown.queue_redraw()
 	for child in breakdown_legend.get_children():child.queue_free()
@@ -419,8 +422,7 @@ func _render_header()->void:
 	for effect:Dictionary in effects:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);effects_box.add_child(row)
 		var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",0);row.add_child(column)
-		label(column,String(effect.get("target","")).to_upper(),12,T.INK_MUTED,false,.08)
-		label(column,String(effect.get("text","")),13,T.BODY)
+		label(column,String(effect.get("target",""))+" · "+String(effect.get("text","")),14,T.BODY)
 	if effects.is_empty():label(effects_box,"Allure does nothing yet. Study pieces and put them on show to be admired abroad.",13,T.TEXT_SOFT)
 
 static func _allure_phrase(value:float)->String:
@@ -431,7 +433,19 @@ static func _allure_phrase(value:float)->String:
 	return "our halls are a wonder of the known world"
 
 func _query()->Dictionary:
-	return {"status":view,"sort":sort,"search":search_text.strip_edges(),"page":page,"page_size":PAGE_SIZE}
+	return {"status":view,"sort":sort,"search":search_text.strip_edges(),"page":page,"page_size":_page_size()}
+
+func _page_size()->int:
+	var columns:=maxi(1,int((_browse_width()+CARD_GAP)/(CARD_MIN_WIDTH+CARD_GAP)))
+	var rows:=2 if get_viewport_rect().size.y>=680 else 1
+	return mini(PAGE_SIZE,columns*rows)
+
+func _set_pager(total:int,amount:int,noun:String)->void:
+	var pages:=maxi(1,ceili(float(total)/amount))
+	page=clampi(page,0,pages-1)
+	pager.visible=true
+	pager_label.text="%d %s · %d / %d" % [total,noun,page+1,pages]
+	prev_button.disabled=page<=0;next_button.disabled=page>=pages-1
 
 func _render_grid()->void:
 	pager.visible=true
@@ -440,7 +454,7 @@ func _render_grid()->void:
 	if page>=pages:page=pages-1;page_result=api("artifacts",[_query()],page_result)
 	var items:Array=page_result.get("items",[])
 	var total:=int(page_result.get("total",items.size()))
-	pager_label.text="Page %d of %d  ·  %d piece%s" % [page+1,pages,total,"" if total==1 else "s"]
+	pager_label.text="%d pieces · %d / %d" % [total,page+1,pages]
 	prev_button.disabled=page<=0;next_button.disabled=page>=pages-1
 	if selected_id.is_empty() and not items.is_empty():selected_id=String(items[0].get("id",""))
 	if items.is_empty():
@@ -464,8 +478,7 @@ func _fit_columns()->void:
 
 func _browse_width()->float:
 	## Derived from the panel, not the grid, so columns never force the panel wider.
-	var area:=get_viewport_rect().size
-	var width:=area.x-(48.0 if area.x>=900.0 else 16.0)-48.0-16.0
+	var width:=panel.size.x-48.0-16.0
 	if detail_column.visible:width-=detail_column.custom_minimum_size.x+22.0
 	return maxf(CARD_MIN_WIDTH,width)
 
@@ -506,32 +519,40 @@ func collection_sets()->Array:
 	return sets
 
 func _render_sets()->void:
-	pager.visible=false
-	var intro:=label(browse_body,"Pieces left by the same lost people belong together. A completed set is worth more than its parts; the missing pieces still lie somewhere in the land.",13,T.TEXT_SOFT)
+	var intro:=label(browse_body,"Pieces from the same lost people belong together. Complete sets are worth more than their parts.",14,T.TEXT_SOFT)
 	intro.name="SetsIntro"
 	var query:=search_text.strip_edges().to_lower()
-	var shown:=0
+	var matches:Array=[]
 	for group:Dictionary in collection_sets():
-		if not query.is_empty() and not (String(group.name)+" "+String(group.site)).to_lower().contains(query):continue
-		shown+=1
-		var card:=PanelContainer.new();card.name="Set_%d" % shown
-		var style:=T.flat(plate_color(),T.BORDER_SOFT,1,5);style.set_content_margin_all(14);card.add_theme_stylebox_override("panel",style);browse_body.add_child(card)
-		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);card.add_child(column)
-		var title_row:=HBoxContainer.new();title_row.add_theme_constant_override("separation",12);column.add_child(title_row)
-		var titles:=VBoxContainer.new();titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL;titles.add_theme_constant_override("separation",2);title_row.add_child(titles)
-		serif(titles,String(group.name),20)
-		if not String(group.site).is_empty():label(titles,"From "+String(group.site),12,T.TEXT_SOFT)
+		if query.is_empty() or (String(group.name)+" "+String(group.site)).to_lower().contains(query):matches.append(group)
+	var amount:=2 if _browse_width()>620 else 1
+	_set_pager(matches.size(),amount,"sets")
+	for index in range(page*amount,mini((page+1)*amount,matches.size())):
+		var group:Dictionary=matches[index]
+		var card:=PanelContainer.new();card.name="Set_%d" % index
+		var style:=T.flat(plate_color(),T.BORDER_SOFT,1,5);style.set_content_margin_all(10);card.add_theme_stylebox_override("panel",style);browse_body.add_child(card)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);card.add_child(column)
+		serif(column,String(group.name),19)
 		var held:int=group.items.size();var total:=int(group.total)
-		var tally:=display(title_row,"%d of %d" % [held,total],20,T.GOLD_TEXT if held>=total else T.INK);tally.size_flags_horizontal=Control.SIZE_SHRINK_END;tally.autowrap_mode=TextServer.AUTOWRAP_OFF
-		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=5;bar.value=100.0*held/maxf(1,total);bar.add_theme_stylebox_override("background",T.flat(T.TRACK,Color(0,0,0,0),0,2));bar.add_theme_stylebox_override("fill",T.flat(T.GOLD,Color(0,0,0,0),0,2));column.add_child(bar)
-		var shelf:=HFlowContainer.new();shelf.add_theme_constant_override("h_separation",10);shelf.add_theme_constant_override("v_separation",10);column.add_child(shelf)
-		for item:Dictionary in group.items:shelf.add_child(mini_plate(item,92,select))
-		for missing in range(held,total):
-			var ghost:=Silhouette.new();ghost.custom_minimum_size=Vector2(92,92);ghost.tooltip_text="A missing piece of this set. Its companions suggest it still lies near where they were found.";shelf.add_child(ghost)
-		label(column,"Complete. The whole set is ours." if held>=total else "%d piece%s still missing." % [total-held,"" if total-held==1 else "s"],12,T.GOLD_TEXT if held>=total else T.TEXT_SOFT)
-	if shown==0:
+		label(column,"%d of %d held · %s" % [held,total,"Complete" if held>=total else "%d missing" % (total-held)],14,T.GOLD_TEXT if held>=total else T.BODY)
+		var shelf:=HFlowContainer.new();shelf.add_theme_constant_override("h_separation",8);shelf.add_theme_constant_override("v_separation",8);column.add_child(shelf)
+		# A small visual sample describes the set; its full holdings use the same bounded browser.
+		for item:Dictionary in group.items.slice(0,4):shelf.add_child(mini_plate(item,64,select))
+		if held<total:
+			var ghost:=Silhouette.new();ghost.name="SetMissing";ghost.custom_minimum_size=Vector2(64,64);ghost.tooltip_text="%d missing pieces. Their companions suggest they still lie near this site." % (total-held);shelf.add_child(ghost)
+		var location:=String(group.site)
+		if not location.is_empty():label(column,"From "+location,14,T.TEXT_SOFT)
+		var open_set:=action_button(column,"Browse all %d pieces" % held,func()->void:_browse_set(group),false)
+		open_set.name="BrowseSet";open_set.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+	if matches.is_empty():
 		var none:=serif(browse_body,"No sets recognized yet" if query.is_empty() else "No set matches the search",20,T.INK,true);none.name="EmptySets"
-		label(browse_body,"When pieces share a maker, a site and a style, scholars recognize them as one set.",13,T.TEXT_SOFT)
+		label(browse_body,"When pieces share a maker, a site and a style, scholars recognize them as one set.",14,T.TEXT_SOFT)
+
+func _browse_set(group:Dictionary)->void:
+	search_text=String(group.site) if not String(group.site).is_empty() else String(group.name)
+	search.text=search_text
+	if not group.items.is_empty():selected_id=String(group.items[0].get("id",""))
+	set_view("all")
 
 static func confidence_word(value:float)->String:
 	if value<.34:return "A faint rumor"
@@ -539,15 +560,20 @@ static func confidence_word(value:float)->String:
 	return "A credible account"
 
 func _render_rumors()->void:
-	pager.visible=false
-	label(browse_body,"What travelers, envoys and scouts have told us of treasures still in the ground. Rumors give landmarks and directions, never exact places.",13,T.TEXT_SOFT)
-	var rumors:Array=api("rumored_sites",["player"],[])
-	var notes:=GridContainer.new();notes.name="RumorNotes";notes.columns=2 if _browse_width()>620 else 1;notes.add_theme_constant_override("h_separation",14);notes.add_theme_constant_override("v_separation",14);browse_body.add_child(notes)
-	for rumor:Dictionary in rumors:
+	label(browse_body,"Accounts from travelers, envoys and scouts. Landmarks and directions, never exact places.",14,T.TEXT_SOFT)
+	var query:=search_text.strip_edges().to_lower()
+	var matches:Array=[]
+	for rumor:Dictionary in api("rumored_sites",["player"],[]):
+		if query.is_empty() or (String(rumor.get("name",""))+" "+String(rumor.get("hint",""))).to_lower().contains(query):matches.append(rumor)
+	var columns:=2 if _browse_width()>620 else 1
+	var amount:=columns*2
+	_set_pager(matches.size(),amount,"accounts")
+	var notes:=GridContainer.new();notes.name="RumorNotes";notes.columns=columns;notes.add_theme_constant_override("h_separation",14);notes.add_theme_constant_override("v_separation",14);browse_body.add_child(notes)
+	for rumor:Dictionary in matches.slice(page*amount,(page+1)*amount):
 		var note:=RumorNote.new();note.rumor=rumor;note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;notes.add_child(note)
-	if rumors.is_empty():
-		var none:=serif(browse_body,"No rumors have reached us",20,T.INK,true);none.name="EmptyRumors"
-		label(browse_body,"Envoys, traders and scouts may hear of ancient hoards, shrines and burial grounds.",13,T.TEXT_SOFT)
+	if matches.is_empty():
+		var none:=serif(browse_body,"No rumors have reached us" if query.is_empty() else "No account matches the search",20,T.INK,true);none.name="EmptyRumors"
+		label(browse_body,"Envoys, traders and scouts may hear of ancient hoards, shrines and burial grounds.",14,T.TEXT_SOFT)
 
 # ---------------------------------------------------------------- detail plate
 
@@ -566,16 +592,18 @@ func _render_detail()->void:
 	pips(eyebrow,tier_index,tier)
 	var origin:=String(item.get("origin",""))
 	label(eyebrow,(tier_name(item)+(" · "+origin if not origin.is_empty() else "")).to_upper(),12,T.legible(tier),true,.08)
-	serif(column,String(item.get("name","An unnamed piece")),25)
-	var frame:=ArtFrame.new();frame.name="PlateArt";frame.item=item;frame.tier=tier;frame.custom_minimum_size.y=330;column.add_child(frame)
-	var caption:=serif(column,"%s. Kept by us: %s." % [_found_text(item),custody_text(int(item.get("held_days",0)))],13,T.TEXT_SOFT,true);caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+	serif(column,String(item.get("name","An unnamed piece")),23)
 	_study_state(column,item)
-	_value_pills(column,item)
-	_story(column,item)
-	column.add_child(Flourish.new())
-	_facts(column,item)
-	_study_team(column,item)
 	_actions(column,item)
+	var presentation:=BoxContainer.new();presentation.vertical=not (narrow and get_viewport_rect().size.x>=800);presentation.add_theme_constant_override("separation",18);column.add_child(presentation)
+	var art_column:=VBoxContainer.new();art_column.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;art_column.add_theme_constant_override("separation",8);presentation.add_child(art_column)
+	var frame:=ArtFrame.new();frame.name="PlateArt";frame.item=item;frame.tier=tier;frame.custom_minimum_size=Vector2(260,260);art_column.add_child(frame)
+	var caption:=serif(art_column,"%s. Kept by us: %s." % [_found_text(item),custody_text(int(item.get("held_days",0)))],13,T.TEXT_SOFT,true);caption.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;caption.custom_minimum_size.x=260
+	var account:=VBoxContainer.new();account.size_flags_horizontal=Control.SIZE_EXPAND_FILL;account.add_theme_constant_override("separation",10);presentation.add_child(account)
+	_value_pills(account,item)
+	_story(account,item)
+	_facts(account,item)
+	_study_team(column,item)
 
 func _found_text(item:Dictionary)->String:
 	return "Found "+EraWords.when(int(item.get("found_day",0)))
@@ -594,7 +622,7 @@ func _study_state(parent:Node,item:Dictionary)->void:
 func _value_pills(parent:Node,item:Dictionary)->void:
 	var studied:=String(item.get("state",""))=="studied"
 	var values:Dictionary=item.get("value",{})
-	var row:=HBoxContainer.new();row.name="ValuePills";row.add_theme_constant_override("separation",8);parent.add_child(row)
+	var row:=HFlowContainer.new();row.name="ValuePills";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);parent.add_child(row)
 	var subject:=String(item.get("research_subject","")).replace("_"," ")
 	var specs:=[["culture","CULTURE","culture",T.VIOLET,"Cultural capacity and cohesion from understanding this piece."],["research","RESEARCH","knowledge",T.BLUE,"Support for linked research"+(": "+subject.capitalize() if not subject.is_empty() else "")+"."],["economic","ECONOMIC","wealth",T.AMBER,"What visitors and traders would give for it."]]
 	for spec:Array in specs:
@@ -651,14 +679,14 @@ func _actions(parent:Node,item:Dictionary)->void:
 	var id:=String(item.get("id",""));var studied:=String(item.get("state",""))=="studied"
 	var focus:=String(summary_data.get("study_role",{}).get("focus_id",""))==id
 	var row:=HFlowContainer.new();row.name="PlateActions";row.add_theme_constant_override("h_separation",10);row.add_theme_constant_override("v_separation",8);parent.add_child(row)
-	var study:=action_button(row,"Current study focus" if focus else "Make this the study focus",func()->void:_act(api("set_study_focus",[id],{"error":"Study focus is unavailable."}),"This piece is now the study focus."),true,"Those who study old objects will work on this piece first.")
+	var study:=action_button(row,"Current study focus" if focus else "Study this first",func()->void:_act(api("set_study_focus",[id],{"error":"Study focus is unavailable."}),"This piece is now the study focus."),true,"Those who study old objects will work on this piece first.")
 	study.name="StudyFocusButton";study.disabled=studied or focus
 	if studied:study.tooltip_text="Already studied."
 	var exhibited:=bool(item.get("exhibited",false))
 	var show:=action_button(row,"Return to the storeroom" if exhibited else "Put on exhibit",func()->void:_act(api("set_exhibited",[id,not exhibited],{"error":"Exhibition is unavailable."}),"Returned to the storeroom." if exhibited else "Now on exhibit."),not exhibited,"Understood pieces on show make us admired and draw visitors.")
 	show.name="ExhibitButton";show.disabled=not exhibited and not bool(item.get("can_exhibit",false))
 	if show.disabled:show.tooltip_text="Pieces can go on show once we have public libraries and compared chronicles, and once the piece is understood and in our hands."
-	var exchange:=action_button(row,"Give, sell or swap it",_open_exchange.bind(String(item.get("name","")),id),false,"Offer this piece to a people we have met.")
+	var exchange:=action_button(row,"Give, sell or swap",_open_exchange.bind(String(item.get("name","")),id),false,"Offer this piece to a people we have met.")
 	exchange.name="ExchangeButton"
 	if not message.is_empty():
 		var note:=label(parent,message,13,T.RED_TEXT if message.begins_with("!") else T.TEAL_TEXT);note.name="ActionMessage";note.text=message.trim_prefix("!")
@@ -689,7 +717,8 @@ func _layout()->void:
 	if panel==null:return
 	var area:=get_viewport_rect().size
 	var margin:=24.0 if area.x>=900 else 8.0
-	panel.position=Vector2(margin,margin);panel.size=Vector2(maxf(320,area.x-margin*2),maxf(320,area.y-margin*2))
+	var width:=minf(1420,maxf(320,area.x-margin*2))
+	panel.position=Vector2((area.x-width)*.5,margin);panel.size=Vector2(width,maxf(320,area.y-margin*2))
 	narrow=area.x<1180
 	var reading:=narrow and narrow_detail and view!="rumors"
 	for node:Control in overview_nodes:node.visible=not reading
@@ -701,8 +730,13 @@ func _layout()->void:
 	if view=="rumors":browse.visible=true
 	detail_back.visible=narrow
 	detail_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL if narrow else Control.SIZE_FILL
-	detail_column.custom_minimum_size.x=0.0 if narrow else clampf(area.x*.3,430,560)
+	detail_column.custom_minimum_size.x=0.0 if narrow else clampf(panel.size.x*.32,400,470)
 	_fit_columns()
+	var amount:=_page_size()
+	var compact_cards:=area.y<820
+	if amount!=last_page_size or compact_cards!=last_compact_cards:
+		last_page_size=amount;last_compact_cards=compact_cards
+		if browse_body!=null:refresh.call_deferred(true)
 
 # ================================================================ drawing
 
@@ -837,28 +871,28 @@ class ArtifactCard extends PanelContainer:
 	var selected:=false
 	var focused:=false
 	var hovered:=false
+	var compact:=false
 	var on_press:Callable
 	func _ready()->void:
+		compact=get_viewport_rect().size.y<820
 		name="Card_"+String(item.get("id","")).validate_node_name()
 		custom_minimum_size.x=CARD_MIN_WIDTH;size_flags_horizontal=Control.SIZE_EXPAND_FILL;mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 		tooltip_text="%s\n%s · %s" % [String(item.get("name","")),TIER_NAMES[clampi(int(item.get("rarity_index",0)),0,4)],Kit.state_text(item)]
 		var tier:=Kit.tier_color(int(item.get("rarity_index",0)))
-		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",5);column.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(column)
-		var art_box:=Control.new();art_box.custom_minimum_size.y=176;art_box.clip_contents=true;art_box.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(art_box)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4 if compact else 5);column.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(column)
+		var art_box:=Control.new();art_box.custom_minimum_size.y=76 if compact else 112;art_box.clip_contents=true;art_box.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(art_box)
 		var mount:=ColorRect.new();mount.color=Color("ece4d4");mount.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);mount.mouse_filter=Control.MOUSE_FILTER_IGNORE;art_box.add_child(mount)
-		var art:=TextureRect.new();art.name="Art";art.texture=item.get("texture");art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);art.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var art:=TextureRect.new();art.name="Art";art.texture=item.get("texture");art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);art.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		art.material=Kit.veil_material(Kit.veil_for(item),.35);art_box.add_child(art)
 		var marks:=CardMarks.new();marks.item=item;marks.tier=tier;marks.focused=focused;art_box.add_child(marks)
-		var title:=Kit.label(column,String(item.get("name","")),18,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.max_lines_visible=2;title.custom_minimum_size.y=40;title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var object:=String(item.get("object",""));var material:=String(item.get("material",""))
-		var sub:=Kit.label(column," · ".join(PackedStringArray([Kit.cap(material),object]).slice(0 if not material.is_empty() else 1)),12,T.TEXT_SOFT,false);sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.clip_text=true;sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var title:=Kit.label(column,String(item.get("name","")),16 if compact else 18,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.max_lines_visible=2;title.custom_minimum_size.y=40;title.clip_text=false;title.text_overrun_behavior=TextServer.OVERRUN_NO_TRIMMING;title.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var tier_words:String=TIER_NAMES[clampi(int(item.get("rarity_index",0)),0,4)]
+		var material:=Kit.cap(String(item.get("material","")))
+		var sub:=Kit.label(column,tier_words+(" · "+material if not material.is_empty() else ""),14,T.TEXT_SOFT,false);sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;sub.clip_text=true;sub.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		var state:=Kit.label(column,Kit.state_text(item),14,T.TEAL_TEXT if String(item.get("state",""))!="unstudied" else T.MUTED,false);state.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		var site:=String(item.get("site_name",""))
-		if not site.is_empty():
-			var where:=Kit.label(column,"From "+site,12,T.MUTED,false);where.clip_text=true;where.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;where.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var footer:=HFlowContainer.new();footer.add_theme_constant_override("h_separation",8);footer.add_theme_constant_override("v_separation",4);footer.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(footer)
-		Kit.pips(footer,int(item.get("rarity_index",0)),tier)
-		var tier_label:=Kit.label(footer,TIER_NAMES[clampi(int(item.get("rarity_index",0)),0,4)].to_upper(),12,T.legible(tier),false,.08);tier_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;tier_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var state:=Kit.label(footer,Kit.state_text(item),12,T.TEAL_TEXT if String(item.get("state",""))!="unstudied" else T.MUTED,false);state.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		if not site.is_empty():tooltip_text+="\nFrom "+site
+
 		mouse_entered.connect(func()->void:hovered=true;restyle())
 		mouse_exited.connect(func()->void:hovered=false;restyle())
 		gui_input.connect(func(event:InputEvent)->void:
@@ -867,7 +901,7 @@ class ArtifactCard extends PanelContainer:
 	func restyle()->void:
 		var tier:=Kit.tier_color(int(item.get("rarity_index",0)))
 		var border:=T.GOLD if selected else (tier if hovered else Color(tier,.7))
-		var style:=T.flat(Kit.plate_color(),border,2 if selected or hovered else 1,5);style.set_content_margin_all(8)
+		var style:=T.flat(Kit.plate_color(),border,2 if selected or hovered else 1,5);style.set_content_margin_all(6 if compact else 8)
 		if selected:style.shadow_color=Color(T.GOLD,.35);style.shadow_size=6
 		add_theme_stylebox_override("panel",style)
 
@@ -876,9 +910,9 @@ class ArtFrame extends Control:
 	var item:Dictionary={}
 	var tier:=Color.WHITE
 	func _ready()->void:
-		size_flags_horizontal=Control.SIZE_EXPAND_FILL;clip_contents=false
+		size_flags_horizontal=Control.SIZE_SHRINK_CENTER;clip_contents=false
 		var mount:=ColorRect.new();mount.color=Color("ece4d4");mount.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);mount.offset_left=9;mount.offset_top=9;mount.offset_right=-9;mount.offset_bottom=-9;add_child(mount)
-		var art:=TextureRect.new();art.name="PlateTexture";art.texture=item.get("texture");art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		var art:=TextureRect.new();art.name="PlateTexture";art.texture=item.get("texture");art.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;art.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);art.offset_left=9;art.offset_top=9;art.offset_right=-9;art.offset_bottom=-9;art.material=Kit.veil_material(Kit.veil_for(item),.3);add_child(art)
 		var marks:=CardMarks.new();marks.item=item;marks.tier=tier;marks.offset_left=9;marks.offset_top=9;marks.offset_right=-9;marks.offset_bottom=-9;add_child(marks)
 	func _draw()->void:
