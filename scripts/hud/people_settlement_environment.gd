@@ -31,7 +31,9 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 	var rng:=RandomNumberGenerator.new();var trees:Array[Transform3D]=[];var colors:Array[Color]=[]
 	# These are the map's exact close-cover candidates and woodland decision,
 	# evaluated read-only when its camera has not built close vegetation here.
-	for candidate:Dictionary in Cover.candidates(center,radius,.008,GameState.world_seed):
+	var candidates:=Cover.candidates(center,radius,.008,GameState.world_seed)
+	candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return (Vector2(a.point)-center).length_squared()<(Vector2(b.point)-center).length_squared())
+	for candidate:Dictionary in candidates:
 		if trees.size()>=MAX_PLANTS:break
 		var world:Vector2=candidate.point;var local:=world-origin
 		if not bounds.has_point(local) or not _clear(local,data.plots,data.routes):continue
@@ -54,15 +56,42 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 		var scale:=rng.randf_range(.74,1.34) if canopy else rng.randf_range(.22,.42)
 		var basis:=Basis(Vector3.UP,rng.randf()*TAU).scaled(Vector3.ONE*scale)
 		trees.append(Transform3D(basis,point.call(local,.0002)))
-		colors.append(Cover.canopy_tint(biome,rng.randf()).lightened(.16) if canopy else Cover.scrub_tint(biome,rng.randf()))
+		colors.append(Cover.canopy_tint(biome,rng.randf()).lightened(.04) if canopy else Cover.scrub_tint(biome,rng.randf()))
 	if trees.is_empty():return
-	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true
-	batch.mesh=terrain.call("_create_irregular_canopy_mesh",.0037,.00235);batch.instance_count=trees.size()
-	for i in trees.size():batch.set_instance_transform(i,trees[i]);batch.set_instance_color(i,colors[i])
-	var node:=MultiMeshInstance3D.new();node.name="ActualSeededWoodland";node.multimesh=batch
-	var paint:=StandardMaterial3D.new();paint.vertex_color_use_as_albedo=true;paint.vertex_color_is_srgb=true;paint.roughness=1
-	node.material_override=paint;parent.add_child(node)
-	node.set_meta("bounded_instances",trees.size())
+	# The aerial map's shallow crowns need depth at this human camera angle.
+	# Keep the exact seeded tree sites, adding a trunk and overlapping volumes;
+	# these are presentation variants, never additional timber deposits.
+	var crown:=SphereMesh.new();crown.radius=.0025;crown.height=.0044;crown.radial_segments=9;crown.rings=5
+	var trunk:=CylinderMesh.new();trunk.top_radius=.00018;trunk.bottom_radius=.00042;trunk.height=.0042;trunk.radial_segments=7
+	var leaf_transforms:Array[Transform3D]=[];var leaf_colors:Array[Color]=[];var trunks:Array[Transform3D]=[]
+	for i in trees.size():
+		var tree:Transform3D=trees[i]
+		for lobe:Vector3 in [Vector3(-.0012,.0042,0),Vector3(.0013,.0048,.0005),Vector3(0,.0063,-.0005)]:
+			leaf_transforms.append(tree*Transform3D(Basis.IDENTITY,lobe));leaf_colors.append(colors[i])
+		trunks.append(tree*Transform3D(Basis.IDENTITY,Vector3(0,.0021,0)))
+	_batch(parent,"ActualSeededWoodland",crown,leaf_transforms,leaf_colors,Color.WHITE)
+	_batch(parent,"WoodlandTrunks",trunk,trunks,[],Color("66513c"))
+	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for tree:Transform3D in trees:
+		var shadow_radius:=tree.basis.x.length()*.0045
+		var shadow_center:=Vector2(tree.origin.x,tree.origin.z)+Vector2(shadow_radius*.55,shadow_radius*.45)
+		for i in 14:
+			for at:Vector2 in [shadow_center,shadow_center+Vector2.from_angle(TAU*i/14)*shadow_radius,shadow_center+Vector2.from_angle(TAU*(i+1)/14)*shadow_radius]:
+				shade.set_color(Color(1,1,1,.5 if at==shadow_center else 0));shade.add_vertex(point.call(at,.00023))
+	var shadow:=MeshInstance3D.new();shadow.name="DrapedWoodlandShadows";shadow.mesh=shade.commit()
+	var shader:=Shader.new();shader.code="shader_type spatial; render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled; void fragment(){ALBEDO=mix(vec3(1),vec3(.45,.48,.40),COLOR.a);}"
+	var material:=ShaderMaterial.new();material.shader=shader;shadow.material_override=material;parent.add_child(shadow)
+
+static func _batch(parent:Node3D,label:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],tint:Color)->void:
+	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=not colors.is_empty()
+	batch.mesh=mesh;batch.instance_count=transforms.size()
+	for i in transforms.size():
+		batch.set_instance_transform(i,transforms[i])
+		if batch.use_colors:batch.set_instance_color(i,colors[i])
+	var node:=MultiMeshInstance3D.new();node.name=label;node.multimesh=batch
+	var paint:=ShaderMaterial.new();var shader:=Shader.new();shader.code=TREE_SHADER;paint.shader=shader
+	paint.set_shader_parameter("tint",tint);node.material_override=paint;parent.add_child(node)
+	node.set_meta("bounded_instances",transforms.size())
 
 static func _water(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,parent:Node3D)->void:
 	if not terrain.has_method("_world_river_x"):return
@@ -96,3 +125,16 @@ static func _water(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pare
 	var node:=MeshInstance3D.new();node.name="RecordedWaterCourses";node.mesh=surface.commit()
 	var paint:=StandardMaterial3D.new();paint.albedo_color=Color("638d91");paint.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;paint.cull_mode=BaseMaterial3D.CULL_DISABLED
 	node.material_override=paint;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;parent.add_child(node)
+
+const TREE_SHADER:="""shader_type spatial;
+render_mode unshaded;
+uniform vec4 tint : source_color = vec4(1.0);
+varying vec3 world_normal;varying vec3 at;
+void vertex(){world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);at=VERTEX;}
+void fragment(){
+float key=smoothstep(-.4,.85,dot(normalize(world_normal),normalize(vec3(-.55,.8,.6))));
+float leaf=fract(sin(dot(floor(at*2300.0),vec3(127.1,311.7,45.1)))*43758.5);
+vec3 base=COLOR.rgb*tint.rgb;
+ALBEDO=base*mix(vec3(.52,.65,.63),vec3(1.35,1.34,.95),key)*(.90+leaf*.16);
+}
+"""
