@@ -149,9 +149,6 @@ func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->voi
 	assert_int(int(card.rise)).is_equal(int(parts.rise))
 	assert_int(int(card.badge)+int(card.rise)).is_equal(fights)
 	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(fights))
-	# The drawing puts them at the gate.
-	var sketch:=Model.sketch_data({"id":TOWN,"population":100,"places":120,"broken":0.0,"food_reported":false,"food_days":-1.0,"material":0.0,"logistics":0.0,"water":{},"completed":[],"strength":strong},"")
-	assert_float(float(sketch.fields.garrison.low)).is_equal(float(fights))
 
 
 func test_the_townsfolk_rise_untrained_one_in_ten_of_those_not_already_serving()->void:
@@ -317,10 +314,6 @@ func test_a_town_someone_else_holds_keeps_no_guard_of_ours()->void:
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("none of ours")
 
 
-## The town's drawing, from the page's own figures.
-func _sketch(strong:Dictionary)->Dictionary:
-	return Model.sketch_data({"id":"","population":100,"places":120,"broken":0.0,"food_reported":false,"food_days":-1.0,"material":0.0,"logistics":0.0,"water":{},"completed":[],"strength":strong},"")
-
 
 func test_home_taken_by_another_people_shows_none_of_ours_everywhere()->void:
 	# Home taken (siege_recovery.capture marks the home record occupied).
@@ -334,7 +327,6 @@ func test_home_taken_by_another_people_shows_none_of_ours_everywhere()->void:
 		var row:=Model.row_for("garrison",{"strength":strong})
 		assert_int(int(row.number)).is_equal(0)
 		assert_str(String(row.value)).is_equal("none of ours")
-		assert_bool((_sketch(strong).fields as Dictionary).has("garrison")).is_false()
 	assert_dict(Labels.guard_parts(home)).is_equal(Labels.NO_GUARD)
 	var card:=_card(home,"SEANSTONE")
 	assert_int(int(card.badge)+int(card.rise)).is_equal(0)

@@ -56,11 +56,9 @@ var _revealed:=""
 
 func before()->void:
 	for node:Node in [GameState,CivilizationSystem,MilitaryCampaign,ProgressionSystem]:_processing[node]=node.is_processing()
-	_revealed=Overview.last_revealed
 
 func after()->void:
 	T.set_color_mode("light")
-	Overview.last_revealed=_revealed
 	GameState.elapsed_days=0
 	MilitaryCampaign.reset_for_new_world()
 	GovernmentPeopleSystem.reset_for_new_world()
@@ -274,16 +272,12 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	assert_str(String(rows.damage.tip)).contains("Flintwick: ")
 	page.name="PreviousOverview"
 	page=_page(block)
-	var compare:=page.find_child("CompareTowns",true,false) as Button
-	assert_object(compare).is_not_null()
-	assert_object(page.find_child("Scale",true,false)).is_null()
-	var people:=page.find_child("Row_garrison",true,false).find_child("Comparison",true,false) as Label
-	assert_bool(people.visible).is_false()
-	compare.button_pressed=true
-	assert_bool(people.visible).is_true()
-	assert_str(people.text).contains("Flintwick").contains(String(rows.garrison.marks[0].words))
+	# No panel to open: the towns' bands sit on each fact's own bar, on the line itself.
+	assert_object(page.find_child("CompareTowns",true,false)).is_null()
+	var scale:Node=page.find_child("Row_garrison",true,false).find_child("Scale",true,false)
+	assert_object(scale).is_not_null()
+	assert_array(scale.get("marks")).is_not_empty()
 	assert_bool(page.update_block(block)).is_true()
-	assert_bool(compare.button_pressed).is_true()
 
 # --------------------------------------------------------------------------
 # Other towns of ours
@@ -378,11 +372,12 @@ func test_the_leader_counts_in_words_and_seasons()->void:
 	GameState.known_discoveries.append("pictographic_records")
 	assert_str(Model.since(400)).is_equal("13 months ago")
 
-func test_history_adds_observed_views_and_keeps_the_event_chronicle()->void:
-	var history:Array=Provider.new(terrain,hud).tab(1).blocks
-	assert_str(String(history[0].type)).is_equal("village_history")
-	assert_str(String(history[1].type)).is_equal("chronicle")
-	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("settlement_overview")
+func test_the_towns_history_is_one_of_the_chronicles_tabs()->void:
+	# One place for history: Home has no History tab; the Chronicle's "Our town" tab holds the record.
+	assert_array(Provider.new(terrain,hud).meta().subtabs).is_equal(["Overview"])
+	var history:Array=preload("res://scripts/hud/content/dock_content_chronicle.gd").new(terrain,hud).tab(1).blocks
+	assert_str(String(history[0].type)).is_equal("chronicle")
+	for block:Dictionary in history:assert_str(String(block.get("type",""))).is_not_equal("village_history")
 
 # --------------------------------------------------------------------------
 # Rows: the drawing lights, and each is the owning page's front door

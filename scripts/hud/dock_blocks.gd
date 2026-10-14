@@ -51,8 +51,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/overview_folio.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
-			"village_history":
-				var panel:=preload("res://scripts/hud/village_view_history.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
 			"purse_board":
@@ -120,6 +118,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			"bars": _render_bars(section,block)
 			"tiles": _render_tiles(section,block)
 			"rows": _render_rows(section,block)
+			"fact_grid": FactGrid.render(section,block)
 			"caps": _render_caps(section,block)
 			"actions": _render_actions(section,block)
 			# No talk or order boxes in a dock: every conversation happens in the
@@ -375,6 +374,8 @@ static func _render_tiles(parent:VBoxContainer,block:Dictionary)->void:
 			note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			column.add_child(note)
 
+
+const FactGrid:=preload("res://scripts/hud/fact_grid.gd")
 
 static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 	var list:=VBoxContainer.new()

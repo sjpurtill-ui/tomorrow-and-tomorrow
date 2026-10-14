@@ -14,10 +14,6 @@ const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
 const Food:=preload("res://scripts/hud/provisions_art.gd")
 const V:=preload("res://scripts/hud/city_report_visuals.gd")
-const Held:=preload("res://scripts/hud/held_town_dossier.gd")
-## The drawing inks itself in once per town, not on every daily refresh.
-static var last_revealed:=""
-var sketch:OwnSketch
 var grid:GridContainer
 ## The drawing and the leader, side by side on a wide page, stacked on a narrow one.
 var spread:BoxContainer
@@ -32,9 +28,9 @@ func setup(block:Dictionary)->void:
 	_page_shape=shape_of(block)
 	_page_refs={"rows":[],"progress":[],"offers":[]}
 	spread=BoxContainer.new();spread.name="Spread";spread.add_theme_constant_override("separation",22);add_child(spread)
-	var drawing:Dictionary=block.get("sketch",{})
-	if not drawing.is_empty():_sketch(drawing,spread)
 	_leader(block,spread)
+	# The controls that change the town's work stand on the leader's row.
+	var controls:Node=spread.find_child("LeaderControls",true,false)
 	var leader:Dictionary=block.get("leader",{})
 	var first:=String(leader.get("name","")).get_slice(" ",0)
 	if bool(block.get("ruler_sets_work",false)):
@@ -45,22 +41,22 @@ func setup(block:Dictionary)->void:
 		var warning:Dictionary=block.get("work_warning",{})
 		if not warning.is_empty():
 			var warned:=T.make_label(String(warning.get("text","")),13,tone_color(String(warning.get("tone","warn"))))
-			warned.name="SplitWarning";warned.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(warned)
+			warned.name="SplitWarning";warned.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(warned);move_child(warned,spread.get_index()+1)
 			_page_refs["warning"]=warned
-		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);add_child(yours)
+		var yours:=HFlowContainer.new();yours.name="RulerSetsWork";yours.add_theme_constant_override("h_separation",6);yours.add_theme_constant_override("v_separation",6);controls.add_child(yours)
 		# The leader's line above already says who sets the work: only the two ways out stand here.
 		var fix:Variant=block.get("on_food_fix")
 		if fix is Callable and (fix as Callable).is_valid() and String(warning.get("fix_text",""))!="":
 			var mend:=_button(yours,String(warning.fix_text),fix,"Every town gets as many more on getting food, each taken from the task with the most people.");mend.name="FoodFix"
 			_page_refs["fix"]=mend
 		_button(yours,"Back to our leaders",block.get("on_leaders"),"Each town's leader shares out the work again, food and water first.").name="BackToLeaders"
-		_button(yours,"Set the work",block.get("on_people"),"Move people between tasks in The People.").name="SetTheWork"
+		_button(yours,"Set who works",block.get("on_people"),"Move people between tasks in The People.").name="SetTheWork"
 		for chip in yours.get_children():
 			if chip is Button:
 				(chip as Button).custom_minimum_size.y=26
 				(chip as Button).add_theme_font_size_override("font_size",12)
 	elif bool(block.get("can_direct",false)):
-		var ask:=_choices(self,"Ask %s for more hands on" % (first if not first.is_empty() else "the leader"),block.get("choices",[]),String(block.get("current","")))
+		var ask:=_choices(controls,"More hands on",block.get("choices",[]),String(block.get("current","")))
 		ask.name="AskForHands"
 		# One compact row under the leader's word.
 		for chip in ask.get_children():
@@ -87,11 +83,8 @@ func setup(block:Dictionary)->void:
 func update_block(block:Dictionary)->bool:
 	if name!="SettlementOverview" or _page_refs.is_empty() or shape_of(block)!=_page_shape:return false
 	data=block
-	if sketch!=null:
-		sketch.data=block.get("sketch",{});sketch.queue_redraw()
 	var leader:Dictionary=block.get("leader",{})
 	if _page_refs.has("office"):_put(_page_refs.office,_office_words(leader))
-	if _page_refs.has("lead"):_put(_page_refs.lead,String(block.get("lead","")))
 	if _page_refs.has("direction"):
 		_put(_page_refs.direction,String(block.get("direction","")))
 		(_page_refs.direction as Control).tooltip_text=String(block.get("direction_tip",""))
@@ -146,53 +139,32 @@ static func shape_of(block:Dictionary)->Array:
 # The drawing
 # --------------------------------------------------------------------------
 
-func _sketch(drawing:Dictionary,parent:Node)->void:
-	sketch=OwnSketch.new();sketch.name="TownSketch";sketch.data=drawing;sketch.custom_minimum_size=Vector2(300,212)
-	sketch.size_flags_horizontal=Control.SIZE_EXPAND_FILL;sketch.size_flags_stretch_ratio=1.55;parent.add_child(sketch)
-	var id:=String(drawing.get("city_id",""))
-	if id!=last_revealed:
-		last_revealed=id
-		sketch.reveal=0.0
-		if sketch.is_inside_tree():sketch.ink_in()
-		else:sketch.ready.connect(sketch.ink_in,CONNECT_ONE_SHOT)
-
-## Lights the row's part of the drawing (key "" puts it out).
-func light(key:String)->void:
-	if sketch==null:return
-	sketch.highlight=String(OwnSketch.LIGHTS.get(key,key))
-	sketch.queue_redraw()
-
 # --------------------------------------------------------------------------
 # The local leader: their face and their word on the town
 # --------------------------------------------------------------------------
 
+## The local leader as one row: a small portrait, name and office, who sets
+## the work, the way to the court, and the controls for the town's work
+## (setup adds them to LeaderControls). The leader's spoken line is not
+## shown: it only restated the tiles' numbers.
 func _leader(block:Dictionary,parent:Node)->void:
 	var leader:Dictionary=block.get("leader",{})
 	var first:=String(leader.get("name","")).get_slice(" ",0)
-	var column:=VBoxContainer.new();column.name="Leader";column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.size_flags_stretch_ratio=1.0;column.add_theme_constant_override("separation",10);parent.add_child(column)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",14);column.add_child(head)
+	var row:=HBoxContainer.new();row.name="Leader";row.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_theme_constant_override("separation",12);parent.add_child(row)
 	if not leader.is_empty():
-		var face:=Portrait.picture(leader,84,96);face.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;head.add_child(face)
-	var named:=VBoxContainer.new();named.size_flags_horizontal=Control.SIZE_EXPAND_FILL;named.add_theme_constant_override("separation",2);head.add_child(named)
-	named.add_child(T.make_label("LOCAL LEADER",12,T.GOLD_TEXT))
-	named.add_child(_voice(String(leader.get("name","No leader yet")),22))
+		var face:=Portrait.picture(leader,46,54);face.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(face)
+	var named:=VBoxContainer.new();named.size_flags_vertical=Control.SIZE_SHRINK_CENTER;named.add_theme_constant_override("separation",0);row.add_child(named)
+	var who:=_voice(String(leader.get("name","No leader yet")),18);who.autowrap_mode=TextServer.AUTOWRAP_OFF;named.add_child(who)
 	var office:=T.text(Label.new(),"small",T.INK_MUTED) as Label
-	office.text=_office_words(leader)
-	office.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;named.add_child(office)
+	office.text=_office_words(leader);named.add_child(office)
 	if not _page_refs.is_empty():_page_refs["office"]=office
-	var talk:=_button(named,"Talk with %s in court" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
-	talk.name="TalkWithLeader";talk.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-	var lead:=String(block.get("lead",""))
-	if lead!="":
-		var quote:=PanelContainer.new();quote.name="Lead"
-		var rule:=StyleBoxFlat.new();rule.bg_color=Color.TRANSPARENT;rule.border_color=T.GOLD;rule.border_width_left=2;rule.content_margin_left=14;rule.content_margin_top=1;rule.content_margin_bottom=1
-		quote.add_theme_stylebox_override("panel",rule);column.add_child(quote)
-		var words:=Label.new();words.name="LeadWords";words.text=lead;words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-		T.text(words,"voice_small",T.BODY);words.add_theme_font_override("font",T.voice_font(true));quote.add_child(words)
-		if not _page_refs.is_empty():_page_refs["lead"]=words
-	var direction:=_line(column,String(block.get("direction","")),13,T.BODY)
+	var direction:=_line(named,String(block.get("direction","")),12,T.BODY)
 	direction.name="Direction";direction.tooltip_text=String(block.get("direction_tip",""));direction.mouse_filter=Control.MOUSE_FILTER_PASS
 	if not _page_refs.is_empty():_page_refs["direction"]=direction
+	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	controls.add_theme_constant_override("h_separation",6);controls.add_theme_constant_override("v_separation",6);row.add_child(controls)
+	var talk:=_button(controls,"Talk with %s" % first if not first.is_empty() else "Open the court",block.get("on_leader"),"Call the leader to the court to talk, give orders or replace them")
+	talk.name="TalkWithLeader"
 
 static func _office_words(leader:Dictionary)->String:
 	return ("%s, age %d" % [String(leader.get("title","Local leader")),int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
@@ -236,12 +208,8 @@ func _row(row:Dictionary)->Control:
 				panel.accept_event();(action as Callable).call()
 			elif event.is_action_pressed("ui_accept"):
 				panel.accept_event();(action as Callable).call())
-	var on:=func()->void:
-		panel.add_theme_stylebox_override("panel",lit)
-		light(key)
-	var off:=func()->void:
-		panel.add_theme_stylebox_override("panel",idle)
-		if sketch!=null and sketch.highlight==String(OwnSketch.LIGHTS.get(key,key)):light("")
+	var on:=func()->void:panel.add_theme_stylebox_override("panel",lit)
+	var off:=func()->void:panel.add_theme_stylebox_override("panel",idle)
 	panel.mouse_entered.connect(on);panel.focus_entered.connect(on)
 	panel.mouse_exited.connect(off);panel.focus_exited.connect(off)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(line)
@@ -356,78 +324,3 @@ class OwnScale extends Control:
 			else:
 				draw_rect(Rect2(a,y-1.5,b-a,3),ink)
 				draw_circle(Vector2(a,y),1.8,ink);draw_circle(Vector2(b,y),1.8,ink)
-
-## Our own town as the held-town sketch draws it, with our banner at the
-## gate, plus what only we can see: the roofs still needed in pencil, the
-## walls by what stands, the well, the shared works and the stores.
-class OwnSketch extends Held.HeldSketch:
-	## The part of the drawing each row lights.
-	const LIGHTS:={"roofs":"roofs","works":"works","building":"works","water":"water","damage":"damage","fortification":"fortification","garrison":"garrison","supply":"supply","production":"production","logistics":"logistics","population":"population"}
-	## Roofs lit: the ones still needed when some sleep out, else every roof.
-	func _house(house:Dictionary)->void:
-		if highlight!="roofs":
-			super(house)
-			return
-		var people:=V.bounds(_field("population"))
-		var needed:=people.y>people.x+0.5
-		if not bool(house.sure):
-			var x:=float(house.x);var y:=float(house.y);var s:=float(house.s)
-			draw_rect(Rect2(x-s,y-s*.9,s*2,s*.9),Color(T.GOLD,.9),false,1.3)
-			draw_polyline(PackedVector2Array([Vector2(x-s*1.25,y-s*.9),Vector2(x,y-s*2.0),Vector2(x+s*1.25,y-s*.9),Vector2(x-s*1.25,y-s*.9)]),Color(T.GOLD,.9),1.3,true)
-			return
-		if needed:
-			highlight="";super(house);highlight="roofs"
-		else:
-			highlight="population";super(house);highlight="roofs"
-	func _before_houses(w:float,h:float,ground:float,cx:float,spread:float)->void:
-		var works:Array=data.get("works",[])
-		var ink:=_stroke("works",Color(T.INK,.85*reveal))
-		var strip:=ground+1.0
-		# The hearth, ringed with stones, where the people gather.
-		if works.has("Hearth Circle"):
-			var at:=Vector2(cx-spread*0.15,strip)
-			for i in 9:
-				var angle:=TAU*i/9.0
-				draw_circle(at+Vector2(cos(angle)*7.0,sin(angle)*2.6),1.3,ink)
-			draw_polyline(PackedVector2Array([at+Vector2(-2,0),at+Vector2(-1,-5),at+Vector2(0,-2),at+Vector2(1.5,-7),at+Vector2(2.5,0)]),_stroke("works",Color(T.AMBER,.9*reveal)),1.2,true)
-		# Pits dug for keeping food.
-		if works.has("Storage Pits"):
-			for i in 3:draw_arc(Vector2(cx+spread*0.85+i*9.0,strip+1.0),3.4,0.0,TAU,12,ink,1.1,true)
-		# A yard for working stone and wood.
-		if works.has("Open Work Area") or works.has("Gathering Yard"):
-			var yard:=Rect2(cx-spread*1.35,strip-4.0,20,6)
-			draw_rect(yard,ink,false,1.0)
-			for i in 4:draw_line(Vector2(yard.position.x+i*6.5,yard.position.y),Vector2(yard.position.x+i*6.5,yard.position.y-3),ink,1.0,true)
-		# The long hall and the counted stores stand behind the houses.
-		if works.has("Framed Hall") or works.has("Public Stores"):
-			var base:=Vector2(cx+spread*1.35,ground-h*.16)
-			var body:=Rect2(base.x-22,base.y-10,44,10)
-			draw_rect(body,Color(T.PAPER_RAISED,reveal));draw_rect(body,ink,false,1.2)
-			draw_colored_polygon(PackedVector2Array([Vector2(body.position.x-5,body.position.y),Vector2(base.x,base.y-24),Vector2(body.end.x+5,body.position.y)]),Color(T.AMBER,.32*reveal))
-			draw_polyline(PackedVector2Array([Vector2(body.position.x-5,body.position.y),Vector2(base.x,base.y-24),Vector2(body.end.x+5,body.position.y)]),ink,1.2,true)
-		# The well: full when every one drinks enough.
-		var water:=float(data.get("water",-1.0))
-		if water>=0.0:
-			var well:=Vector2(cx-spread*0.75,strip+1.0)
-			var line:=_stroke("water",Color(T.INK,.85*reveal))
-			draw_arc(well,6.0,0.0,TAU,18,line,1.2,true)
-			draw_line(well+Vector2(-6,0),well+Vector2(-5,-12),line,1.1,true);draw_line(well+Vector2(6,0),well+Vector2(5,-12),line,1.1,true)
-			draw_line(well+Vector2(-6,-12),well+Vector2(6,-12),line,1.1,true)
-			var ripples:=clampi(roundi(water*3.0),0,3)
-			for i in ripples:draw_arc(well,1.4+i*1.5,PI*1.1,PI*1.9,6,_stroke("water",Color(T.TEAL,.8*reveal)),1.0,true)
-	func _draw()->void:
-		super()
-		var w:=size.x;var h:=size.y;var ground:=h*.70;var cx:=w*.56;var spread:=w*.13
-		# Granaries for the months put by: a second and a third for long stores.
-		var days:=float(data.get("food_days",-1.0))
-		if days>=90.0:
-			var more:=1 if days<240.0 else 2
-			for i in more:
-				var gx:=cx+spread*2.1+(i+1)*22.0;var r:=7.0
-				draw_circle(Vector2(gx,ground-r),r,T.PAPER_RAISED);draw_arc(Vector2(gx,ground-r),r,0,TAU,24,_stroke("supply",T.INK),1.2,true)
-				draw_colored_polygon(PackedVector2Array([Vector2(gx-r-2,ground-r),Vector2(gx,ground-r*2.8),Vector2(gx+r+2,ground-r)]),Color(T.AMBER,.45))
-				draw_polyline(PackedVector2Array([Vector2(gx-r-2,ground-r),Vector2(gx,ground-r*2.8),Vector2(gx+r+2,ground-r)]),_stroke("supply",T.INK),1.2,true)
-		# The levy, lit: a wash behind the spears at the gate.
-		if highlight=="garrison" and not _field("garrison").is_empty():
-			draw_circle(Vector2(cx-spread*2.9-18.0,ground+2.0),30.0,T.GOLD_WASH)
-		_caption(w,h)

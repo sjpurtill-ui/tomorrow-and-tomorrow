@@ -26,7 +26,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"Your %s" % String(settlement.get("classification","settlement")).to_lower(),
 		"title":String(settlement.get("name",terrain._settlement_display_name())).capitalize(),
-		"subtabs":["Overview","History"],
+		"subtabs":["Overview"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -69,7 +69,6 @@ func _city_tab(sub:int)->Dictionary:
 			if traveling:items.push_front({"label":"Stop here","sub":"Hold the party where it stands","primary":false,"on_press":terrain._halt_founding_convoy_to_forage,"tip":"The caravan leader usually decides when to camp. This makes the party stop and wait (going to water first if there is none here) until you tell it to go on."})
 			elif led_mode in ["held","watering","foraging","resting","provisioning"]:items.push_front({"label":"Go on","sub":"Break camp and keep travelling","primary":led_mode=="held","on_press":func()->void:terrain._on_caravan_override("founding","resume"),"tip":"The caravan leader moves on by themself once water, food and health allow. This tells them to go on now."})
 		return {"brief":{"tone":String(travel_advice.get("tone","info")),"title":"A home is taking shape" if committed else String(travel_advice.get("status","Choose a home")).capitalize(),"why":"Let time run with the controls above. The people build the Hearth Circle as they go about their work; once it stands, the local leader takes charge of daily work." if committed else String(travel_advice.get("reason","The party can walk into unknown land and camp to forage on the way."))+" Settling makes the place where the party stands our home."},"blocks":[{"type":"actions","items":items}]}
-	if sub==1:return {"blocks":_history_blocks(GameState.simulation_metrics,settlement)}
 	return {"kpis":_glance_tiles(settlement),"blocks":_overview_blocks(settlement)}
 
 
@@ -154,22 +153,6 @@ func _people_blocks(_productive:int,local_population:int,local_share:float,settl
 		]},
 	]
 	return blocks
-
-
-func _history_blocks(_metrics:Dictionary,settlement:Dictionary)->Array:
-	var id:=String(settlement.get("id",""))
-	# The events are the town's founding, every discovery and its own building
-	# records: made again only when one of those logs moves.
-	var events:Array=memo.take("events",[id,String(settlement.get("name","Settlement")),settlement.has("founded_day"),int(settlement.get("founded_day",0)),Memo.log_identity(GameState.discovery_log),Memo.log_identity(GameState.building_ledger)],
-		func()->Array:return preload("res://scripts/hud/settlement_history_data.gd").events(settlement,GameState.discovery_log,GameState.building_ledger))
-	return [
-		{"type":"village_history","city_id":id},
-		{"type":"chronicle","heading":"The years remembered","events":events,"_print":memo.print_of("events")},
-		Charts.population(id,true),
-		Charts.reserves(id),
-		{"type":"actions","heading":"More of the record","items":[
-			{"label":"Births and deaths","sub":"Across all our people","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(terrain,hud))},
-			{"label":"What was built here","sub":"Building, damage and rebuilding","on_press":func():hud.open_detail(preload("res://scripts/hud/content/dock_detail_building_ledger.gd").new(terrain,hud,id))}]}]
 
 
 func signature()->Array:

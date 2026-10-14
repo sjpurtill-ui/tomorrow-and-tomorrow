@@ -39,13 +39,13 @@ const SECTIONS:Array[Dictionary]=[
 ## page the button opens; `tabs` renames a page's tabs where its own names
 ## would not say enough beside their neighbours.
 const CATEGORIES:Array[Dictionary]=[
-	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview","History"],"overview":["People"],"civ":["Culture","Council"]},"tooltip":"This settlement, its people and their ways"},
+	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview"],"overview":["People"],"civ":["Culture","Council"]},"tooltip":"This settlement, its people and their ways"},
 	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Workshops","Goods","Arms"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
 	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
 	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
 	{"id":"world","label":"World","pages":["world","standing","eyes"],"tabs":{"world":["Peoples","Expeditions","History"],"standing":["Standing"],"eyes":["Spies"]},"tooltip":"The world your scouts have walked, who lives in it, how they see us and what our eyes report · F6"},
-	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
+	{"id":"chronicle","label":"Chronicle","pages":["chronicle"],"tabs":{"chronicle":["The years","Our town","Births and deaths","What was built"]},"tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 ]
 ## The category a page belongs to ({} for none).
 static func category_of(section:String)->Dictionary:
