@@ -244,7 +244,7 @@ func rebuild_body()->void:
 	var paper:=Folio.page_style()
 	var surface:=get_node_or_null("FolioPaper") as ColorRect
 	if surface and surface.material is ShaderMaterial:
-		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER if Tokens.color_mode=="dark" else Color("f2ebdc"))
+		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER)
 	var laid:=get_theme_stylebox("panel") as StyleBoxFlat
 	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
 		add_theme_stylebox_override("panel",paper)

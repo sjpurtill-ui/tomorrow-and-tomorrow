@@ -19,7 +19,7 @@ func build(owner_screen:Node,recipes:Array,note:String)->void:
 	screen=owner_screen;name="Picker"
 	add_theme_constant_override("separation",6)
 	var head:=HBoxContainer.new();add_child(head)
-	var kicker:=Label.new();kicker.text="Start a line";T.text(kicker,"voice",T.INK);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
+	var kicker:=Label.new();kicker.text="Start a line";T.text(kicker,"body",T.INK);kicker.add_theme_font_override("font",T.font("ui_strong"));kicker.add_theme_font_size_override("font_size",24);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 	room=Label.new();room.name="Room";T.text(room,"small",T.INK_MUTED);room.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(room)
 	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size.y=1;add_child(rule)
 	if recipes.is_empty():
@@ -64,13 +64,8 @@ func apply(recipes:Array,note:String)->void:
 
 func _card(recipe:Dictionary)->Button:
 	var card:=Button.new();card.name="Recipe_"+String(recipe.item);card.focus_mode=Control.FOCUS_ALL
-	card.custom_minimum_size=Vector2(0,88);card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var normal:=Folio.rule_style(8)
-	var hover:=T.flat(T.HOVER_BG,T.GOLD,1,T.RADIUS_CARD)
-	var off:=Folio.rule_style(8)
-	card.add_theme_stylebox_override("normal",normal);card.add_theme_stylebox_override("hover",hover)
-	card.add_theme_stylebox_override("pressed",T.button_pressed_style());card.add_theme_stylebox_override("disabled",off)
-	card.add_theme_stylebox_override("focus",Folio.focus_style())
+	card.custom_minimum_size=Vector2(0,108);card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	T.apply_button_style(card)
 	var item:=String(recipe.item)
 	card.pressed.connect(func():screen.act(0,"start",0.0,item))
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);margin.mouse_filter=Control.MOUSE_FILTER_IGNORE

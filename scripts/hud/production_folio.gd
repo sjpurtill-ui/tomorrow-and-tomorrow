@@ -14,6 +14,7 @@ static func product_texture(item:String,size:int=96)->Texture2D:
 
 static func label(text:String,role:String="small",tone:Color=T.INK)->Label:
 	var result:=Label.new();result.text=text;T.text(result,role,tone)
+	if role.begins_with("voice"):result.add_theme_font_override("font",T.font("ui_strong"))
 	# Short readings carry their natural width. Narrative callers opt in to
 	# wrapping only after assigning an expanding column.
 	result.autowrap_mode=TextServer.AUTOWRAP_OFF
@@ -21,7 +22,7 @@ static func label(text:String,role:String="small",tone:Color=T.INK)->Label:
 	return result
 
 static func heading(parent:Node,text:String,note:String="")->Label:
-	var title:=label(text,"voice",T.INK);title.add_theme_font_override("font",T.font("voice_bold"));parent.add_child(title)
+	var title:=label(text,"voice",T.INK);title.add_theme_font_size_override("font_size",24);parent.add_child(title)
 	if not note.is_empty():parent.add_child(label(note,"small",T.INK_MUTED))
 	return title
 

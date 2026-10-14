@@ -13,7 +13,7 @@ const W:=preload("res://scripts/hud/production_widgets.gd")
 
 func setup(data:Dictionary)->void:
 	name="ProductionLineDetail";theme=T.control_theme()
-	add_theme_constant_override("separation",14)
+	add_theme_constant_override("separation",24)
 	var line:Dictionary=data.line
 	var story:=Plain.line_story(line,{})
 	var view:=Plain.line_view(line,{},{"name":String(data.get("title",""))})
@@ -21,10 +21,12 @@ func setup(data:Dictionary)->void:
 	var mark:=TextureRect.new();mark.texture=Folio.product_texture(String(line.get("item","")),128);mark.custom_minimum_size=Vector2(120,100)
 	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;hero.add_child(mark)
 	var identity:=VBoxContainer.new();identity.size_flags_horizontal=Control.SIZE_EXPAND_FILL;identity.size_flags_vertical=Control.SIZE_SHRINK_CENTER;hero.add_child(identity)
-	var title:=Label.new();title.text=String(data.title);T.text(title,"voice",T.INK);title.add_theme_font_size_override("font_size",30);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;identity.add_child(title)
+	var title:=Label.new();title.text=String(data.title);T.text(title,"title",T.INK);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;identity.add_child(title)
 	identity.tooltip_text=String(data.get("description",""));identity.mouse_filter=Control.MOUSE_FILTER_PASS
 	var tone:={"good":T.GREEN,"warn":T.AMBER,"bad":T.RED}.get(String(view.look),T.RULE_STRONG) as Color
-	var state:=W.Chip.new(String(story.short),tone,String(story.held));identity.add_child(state)
+	var condition:=String(story.short)
+	if condition.begins_with("Short of ") and float(view.get("rate",0))>0:condition=condition.trim_prefix("Short of ").capitalize()+" won't cover the target"
+	var state:=W.Chip.new(condition,tone,String(story.held));identity.add_child(state)
 	var managed:=bool(line.get("planner_managed",false)) and bool(data.get("staff_enabled",true))
 	var owner:=Plain.officer(String(data.get("owner","")))
 	var who:=HBoxContainer.new();who.add_theme_constant_override("separation",8);add_child(who)
@@ -64,9 +66,11 @@ func setup(data:Dictionary)->void:
 	_button(footer,"Crafting share",data.get("on_labor"),"How much of all crafting goes to the workshop lines.")
 	var close:=_button(footer,"Close line",data.get("on_close"),"Finished goods stay in store; work in progress is lost.")
 	close.add_theme_color_override("font_color",T.RED_TEXT)
+	# Keep the target and commands before the material evidence.
+	move_child(inputs,get_child_count()-1)
 
 func _button(parent:Node,text:String,callback:Variant,tip:String,selected:bool=false)->Button:
-	var button:=W.text_button(text,tip,selected,36);button.custom_minimum_size.y=30;parent.add_child(button)
+	var button:=W.text_button(text,tip,selected,44);parent.add_child(button)
 	if callback is Callable and callback.is_valid():button.pressed.connect(callback)
 	else:button.disabled=true
 	return button
