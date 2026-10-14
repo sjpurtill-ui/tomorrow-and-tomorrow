@@ -134,10 +134,10 @@ func test_the_standing_page_says_what_we_are_and_how_each_people_sees_us()->void
 	for view:Dictionary in theirs.views: names.append(String(view.name))
 	assert_array(names).contains_exactly(["Allure","Awe","Fear","Respect","Trust","Resentment"])
 	# Rich and unguarded: the page leads with the raid danger and its odds.
-	assert_str(String(tab.brief.title)).contains("envy our goods")
-	assert_str(String(tab.brief.why)).contains("each month")
-	# The years of our name are charted from the monthly record.
-	assert_str(String(tab.blocks[1].type)).is_equal("trend_chart")
+	assert_str(String((tab.blocks[0].warnings as Array)[0].title)).contains("envy our goods")
+	assert_str(String((tab.blocks[0].warnings as Array)[0].words)).contains("each month")
+	# One board: the year's change is on each strength's row, no chart below.
+	assert_int((tab.blocks as Array).size()).is_equal(1)
 
 func test_the_odds_on_the_page_are_the_engines()->void:
 	var id:=_met(160.0,10.0,0.7)

@@ -20,6 +20,8 @@ var view:Dictionary={}
 var chips:HBoxContainer
 var list:VBoxContainer
 var more:Button
+## Where the next rows go (the list, or one of its two columns).
+var target:Control
 
 func setup(block:Dictionary)->void:
 	name="WorldHistoryBoard"
@@ -38,6 +40,12 @@ func update_block(block:Dictionary)->bool:
 	_take(block)
 	redraw()
 	return true
+
+var _wide:=false
+func _notification(what:int)->void:
+	if what==NOTIFICATION_RESIZED and (size.x>=800.0)!=_wide and list!=null:
+		_wide=size.x>=800.0
+		redraw.call_deferred()
 
 func _take(block:Dictionary)->void:
 	model=block
@@ -67,11 +75,21 @@ func redraw()->void:
 	var entries:=chosen()
 	var shown:=entries.slice(0,int(view.get("shown",PAGE)))
 	var year:=-1
-	for entry:Dictionary in shown:
+	# On a wide page the years run on in a second column.
+	var two:=size.x>=800.0
+	var holder:Control=list
+	var columns:HBoxContainer=null
+	if two:
+		columns=HBoxContainer.new();columns.add_theme_constant_override("separation",18);list.add_child(columns)
+		holder=_column(columns)
+	target=holder
+	for index in shown.size():
+		var entry:Dictionary=shown[index]
 		var y:=int(entry.get("day",0))/365+1
 		if y!=year:
+			if two and columns.get_child_count()==1 and index>=shown.size()/2:target=_column(columns)
 			year=y
-			var head:=UI.line(list,8);head.name="Year_%d" % y
+			var head:=UI.line(target,8);head.name="Year_%d" % y
 			UI.label(head,"Year %d" % y,13,T.GOLD_TEXT,true).name="Year"
 			var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size=Vector2(0,1);rule.size_flags_horizontal=Control.SIZE_EXPAND_FILL;rule.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(rule)
 		_row(entry)
@@ -81,14 +99,25 @@ func redraw()->void:
 func _row(entry:Dictionary)->void:
 	var open:Variant=entry.get("on_open")
 	var text:=String(entry.get("text",""))
-	var row:=UI.hot_row(list,"Entry_%d" % list.get_child_count(),open if open is Callable else Callable(),"%s\n%s" % [String(entry.get("title","")),text])
+	var row:=UI.hot_row(target,"Entry_%d" % target.get_child_count(),open if open is Callable else Callable(),"%s\n%s" % [String(entry.get("title","")),text])
 	UI.icon(row,String(entry.get("icon","world")),_tint(String(entry.get("group",""))),18)
 	UI.cell(row,String(entry.get("season","")),58,12,T.INK_MUTED)
-	var title:=UI.label(row,String(entry.get("title","")),13,T.INK,bool(entry.get("weighty",false)))
-	title.custom_minimum_size.x=0;title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_stretch_ratio=1.0
-	var words:=UI.label(row,text,12,T.INK_MUTED,false,true);words.size_flags_stretch_ratio=1.4
+	# The title and its first sentence, wrapped: nothing is cut off.
+	var said:=RichTextLabel.new();said.bbcode_enabled=true;said.fit_content=true;said.scroll_active=false
+	said.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;said.custom_minimum_size.x=80
+	said.mouse_filter=Control.MOUSE_FILTER_PASS
+	said.add_theme_font_override("normal_font",T.font("ui"));said.add_theme_font_override("bold_font",T.font("ui_strong"))
+	said.add_theme_font_size_override("normal_font_size",12);said.add_theme_font_size_override("bold_font_size",13)
+	said.add_theme_color_override("default_color",T.INK_MUTED)
+	var first:=_first_sentence(text)
+	said.text="[color=#%s][b]%s[/b][/color]%s" % [T.INK.to_html(false),_escape(String(entry.get("title",""))),("  "+_escape(first)) if first!="" else ""]
+	row.add_child(said)
 	if int(entry.get("count",1))>1:UI.tag(row,"×%d" % int(entry.count),"muted")
+
+static func _column(parent:Node)->VBoxContainer:
+	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",0)
+	parent.add_child(column)
+	return column
 
 static func _tint(group:String)->Color:
 	match group:
@@ -96,3 +125,12 @@ static func _tint(group:String)->Color:
 		"contact":return T.TEAL
 		"scout":return T.GOLD
 	return T.INK_MUTED
+
+static func _first_sentence(text:String)->String:
+	var clean:=text.strip_edges()
+	for i in clean.length():
+		if clean[i] in [".","!","?"] and (i==clean.length()-1 or clean[i+1]==" "):return clean.substr(0,i+1)
+	return clean
+
+static func _escape(text:String)->String:
+	return text.replace("[","[lb]")

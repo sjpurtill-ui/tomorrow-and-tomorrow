@@ -476,6 +476,34 @@ static func _in_100(share:float)->String:
 const GUARD_SHARE:=0.035
 const GUARD_MIN:=8
 
+## WHO STANDS AT HOME, in one reading every screen uses (Home, Buildings,
+## War), with the same words: "on watch" (everyone under arms standing in our
+## towns today: the home guard there and those free to send, not yet in a
+## band), of whom the "home guard" (the share kept back, never sent), those
+## "on the border" (home guard posted to the forts and the line), and "can
+## rise" (townsfolk who take up arms untrained when raiders come). Also the
+## guard our towns need together. {on_watch, home_guard, home_share,
+## free_to_send, on_border, can_rise, guard_need}. Read from the guard ledger
+## the battles muster from (civilization_combat.gd guard_ledger).
+static func home_standing(mc:Variant)->Dictionary:
+	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed()}
+	if mc==null:return out
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	var in_towns:=0;var rise:=0
+	var ledger:Dictionary=Combat.guard_ledger(mc)
+	if ledger.is_empty() or WorldSimulation.state.player_settlements.is_empty():
+		var militia:Dictionary=Combat.home_militia(mc)
+		in_towns=int(militia.watch);rise=int(militia.rise)
+	else:
+		for id in ledger:in_towns+=int((ledger[id] as Dictionary).get("watch",0));rise+=int((ledger[id] as Dictionary).get("rise",0))
+	var free:=0 if mc.recovery.home_unavailable() else offensive_at_home(mc)
+	out.home_guard=home_guard(mc)
+	out.free_to_send=free
+	out.on_border=Combat.on_the_border(mc)
+	out.on_watch=in_towns+free
+	out.can_rise=rise
+	return out
+
 ## The guard every town of the people needs together (a people with no town
 ## yet: its own band's).
 static func guard_needed()->int:

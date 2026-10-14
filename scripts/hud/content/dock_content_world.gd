@@ -32,6 +32,9 @@ const FIND_ITEMS:=3
 ## The Peoples-we-know ledger's own view (the column it is sorted by, the
 ## other way round, whose towns are open), kept across the daily rebuilds.
 var peoples_view:Dictionary={"sort":"people","flip":false,"open":""}
+## World › Peoples' one counter line and its pointer, made by peoples_tab().
+var counter:=""
+var counter_tip:=""
 ## The tellings table's search, filter, order and page (hud/expeditions_board.gd).
 var expeditions_view:Dictionary={"query":"","filter":0,"order":1,"page":0}
 
@@ -62,13 +65,13 @@ func peoples_tab()->Dictionary:
 	var leads:=_leads_model(CivilizationSystem.rumor_network.list_leads("player",int(GameState.elapsed_days)),home,walk_km_per_day()).size()
 	var observation:Dictionary=CivilizationSystem.local_observation_snapshot()
 	var met:=encounters.size()
-	var kpis:Array=[
-		{"label":"Peoples met","value":str(met),"glance":true,"meter":float(located)/float(maxi(1,met)),"meter_color":Tokens.AMBER,
-			"delta":("all homes found" if located>=met else "%d of %d homes found" % [located,met]) if met>0 else "none yet","delta_color":Tokens.INK_MUTED,"tip":"Seen with our own eyes, or met by scouts who came home; the bar is how many of their homes we have found"},
-		{"label":"Told of","value":str(leads),"glance":true,"delta":"not yet met","delta_color":Tokens.INK_MUTED,"tip":"Peoples travellers and strangers have spoken of, never seen"},
-		{"label":"In sight","value":str(int(observation.get("visible_count",0))),"glance":true,"delta":"%.0f km lookout" % float(observation.get("radius_km",0.0)),"delta_color":Tokens.INK_MUTED,"tip":"Strangers our lookouts can see right now"},
-	]
-	return {"kpis":kpis,"brief":{},"blocks":known_world_blocks(exploration)}
+	# One counter line over the ledger, not a strip of big figures.
+	var seen_now:=int(observation.get("visible_count",0))
+	var radius:=float(observation.get("radius_km",0.0))
+	var walls:=float(WorldSimulation.military.settlement_defense_snapshot().get("observation_radius_km",radius)) if WorldSimulation.military.has_method("settlement_defense_snapshot") else radius
+	counter="%d peoples met · %s · %d told of, not met · %s within %d km" % [met,("all homes found" if located>=met else "%d homes found" % located) if met>0 else "no home found",leads,("%d strangers in sight" % seen_now) if seen_now>0 else "no strangers in sight",roundi(radius)]
+	counter_tip="Our lookouts see %d km: %d km from the defences we have built (Buildings) and %d more from the watch's alertness." % [roundi(radius),roundi(walls),maxi(0,roundi(radius-walls))]
+	return {"kpis":[],"brief":{},"blocks":known_world_blocks(exploration)}
 
 ## The first tab: the ledger of the peoples we know (once we know any), then
 ## the world as our people know it.
@@ -83,7 +86,7 @@ func known_world_blocks(exploration:Dictionary)->Array:
 func peoples_block()->Dictionary:
 	var model:=PeoplesModel.build()
 	if int(model.get("met",0))<=0:return {}
-	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"_print":model.hash()}
+	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"counter":counter,"counter_tip":counter_tip,"_print":[model.hash(),counter]}
 
 ## A town in the ledger opens its report (the city dossier).
 func open_town(city_id:String)->void:
@@ -109,15 +112,10 @@ func expeditions_tab()->Dictionary:
 	var latest:Dictionary=exploration.get("latest_report",{})
 	var last_day:=int(latest.get("day",-1)) if not latest.is_empty() else -1
 	var since:=int(GameState.elapsed_days)-last_day
-	var kpis:Array=[
-		{"label":"Parties away","value":"%d / %d" % [away,capacity],"glance":true,"meter":float(away)/float(capacity),"meter_color":Tokens.TEAL,
-			"delta":("next home in %s" % When.span(maxi(1,soonest))) if soonest>=0 else ("%d could go" % (capacity-away)),"delta_color":Tokens.INK_MUTED,"tip":"Parties out now, of the most the roads, mounts and stores allow at once"},
-		{"label":"Tellings","value":str(reports.size()),"glance":true,"meter":float(unread)/float(maxi(1,reports.size())),"meter_color":Tokens.GOLD,
-			"delta":("%d unread" % unread) if unread>0 else "all read","delta_color":Tokens.GOLD_TEXT if unread>0 else Tokens.INK_MUTED,"tip":"Accounts our scouts carried home; the bar is the share not yet read"},
-		{"label":"Last return","value":Archive.calendar_date(last_day) if last_day>=0 else "None yet","glance":true,
-			"delta":("%s ago" % When.span(since)) if last_day>=0 and since>0 else ("today" if last_day>=0 else ""),"delta_color":Tokens.INK_MUTED,"tip":"The day the latest party walked back in"},
-	]
-	return {"kpis":kpis,"brief":{},"blocks":[{"type":"expeditions","reports":reports,"view":expeditions_view,
+	var line:="%d of %d parties out · %d unread of %d tellings · %s" % [away,capacity,unread,reports.size(),("last party back %s" % Archive.calendar_date(last_day)) if last_day>=0 else "no party back yet"]
+	if soonest>=0:line+=" · next home in %s" % When.span(maxi(1,soonest))
+	var line_tip:="A party is a group sent out together; the scouts are the people in all of them. Up to %d parties can be out at once, as the roads, mounts and stores allow." % capacity
+	return {"kpis":[],"brief":{},"blocks":[{"type":"expeditions","line":line,"line_tip":line_tip,"reports":reports,"view":expeditions_view,
 		"on_read":open_report,"on_plan":plan_expedition,"on_city_report":open_town,"_print":Archive.revision(reports)}]}
 
 ## The newest tellings exactly as scout_archive.select(reports,"",0,false)
