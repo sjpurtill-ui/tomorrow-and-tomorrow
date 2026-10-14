@@ -62,7 +62,7 @@ func _ready()->void:
 	members.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;member_scroll.add_child(members)
 	strip=Control.new();strip.name="Cards";strip.mouse_filter=Control.MOUSE_FILTER_IGNORE;strip.clip_contents=true;add_child(strip)
 	left_button=_arrow("‹",-1);right_button=_arrow("›",1)
-	disclosure=Button.new();disclosure.name="ArmyDisclosure";disclosure.focus_mode=Control.FOCUS_NONE
+	disclosure=Button.new();disclosure.name="ArmyDisclosure";disclosure.focus_mode=Control.FOCUS_ALL
 	disclosure.custom_minimum_size=Vector2(142,DISCLOSURE_HEIGHT)
 	disclosure.add_theme_font_override("font",T.font("ui"))
 	disclosure.add_theme_font_size_override("font_size",13)
@@ -92,7 +92,7 @@ func _mount_plans()->void:
 
 
 func _arrow(text:String,step:int)->Button:
-	var button:=Button.new();button.text=text;button.focus_mode=Control.FOCUS_NONE
+	var button:=Button.new();button.text=text;button.focus_mode=Control.FOCUS_ALL
 	button.custom_minimum_size=Vector2(22,CARD_SIZE.y);button.size=button.custom_minimum_size
 	button.tooltip_text="More armies" if step>0 else "Earlier armies"
 	button.add_theme_font_size_override("font_size",18)

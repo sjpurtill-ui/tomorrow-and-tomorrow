@@ -11,18 +11,12 @@ class IconButton extends Button:
 	var bare:=false
 	func _init(kind:String="plus",tip:String="",side:float=26.0,borderless:bool=false)->void:
 		glyph=kind;tooltip_text=tip;bare=borderless
-		custom_minimum_size=Vector2(side,side);focus_mode=Control.FOCUS_ALL
+		custom_minimum_size=Vector2(maxf(side,40),maxf(side,40));focus_mode=Control.FOCUS_ALL
 		size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		restyle()
 	func restyle()->void:
-		var normal:=T.flat(Color(0,0,0,0) if bare else T.PAPER_RAISED,T.RULE,0 if bare else 1,T.RADIUS_CONTROL)
-		var hover:=T.flat(T.HOVER_BG,T.GOLD,1,T.RADIUS_CONTROL)
-		var off:=T.flat(Color(0,0,0,0),T.BORDER_SOFT,0 if bare else 1,T.RADIUS_CONTROL)
-		for state:String in ["normal","focus"]:add_theme_stylebox_override(state,normal if state=="normal" else T.flat(Color.TRANSPARENT,T.GOLD_TEXT,2,T.RADIUS_CONTROL))
-		add_theme_stylebox_override("hover",hover)
-		add_theme_stylebox_override("pressed",T.button_pressed_style())
-		add_theme_stylebox_override("hover_pressed",T.button_pressed_style())
-		add_theme_stylebox_override("disabled",off)
+		T.apply_button_style(self)
+		if bare:add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT,T.BORDER,0,T.RADIUS_CONTROL))
 		queue_redraw()
 	func set_glyph(kind:String,tip:String="")->void:
 		glyph=kind
@@ -53,20 +47,13 @@ class IconButton extends Button:
 ## A button with a word on it, in the screen's small type.
 static func text_button(label:String,tip:String,active:bool=false,min_width:float=0.0)->Button:
 	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.focus_mode=Control.FOCUS_ALL
-	b.custom_minimum_size=Vector2(min_width,26);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	b.custom_minimum_size=Vector2(min_width,40);b.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	style_text_button(b,active)
 	return b
 
 static func style_text_button(b:Button,active:bool)->void:
-	T.text(b,"small",T.INK if active else T.BODY)
-	b.add_theme_color_override("font_disabled_color",T.DISABLED)
-	var normal:=T.flat(T.ACTIVE_BG if active else T.PAPER_RAISED,T.GOLD if active else T.RULE,1,T.RADIUS_CONTROL)
-	normal.content_margin_left=8;normal.content_margin_right=8
-	var hover:=T.flat(T.HOVER_BG,T.GOLD,1,T.RADIUS_CONTROL);hover.content_margin_left=8;hover.content_margin_right=8
-	var off:=T.flat(Color(0,0,0,0),T.BORDER_SOFT,1,T.RADIUS_CONTROL);off.content_margin_left=8;off.content_margin_right=8
-	b.add_theme_stylebox_override("normal",normal);b.add_theme_stylebox_override("hover",hover)
-	b.add_theme_stylebox_override("pressed",T.button_pressed_style());b.add_theme_stylebox_override("disabled",off)
-	b.add_theme_stylebox_override("focus",T.flat(Color.TRANSPARENT,T.GOLD_TEXT,2,T.RADIUS_CONTROL))
+	T.apply_button_style(b)
+	if active:b.add_theme_stylebox_override("normal",T.button_pressed_style())
 
 ## A small label in a tinted pill, for badges ("for Rovik's levy") and tags.
 class Chip extends PanelContainer:
@@ -79,7 +66,7 @@ class Chip extends PanelContainer:
 	func set_reading(text:String,accent:Color,tip:String="")->void:
 		label.text=text;tooltip_text=tip
 		var tone:=accent if accent.a>0.0 else T.RULE_STRONG
-		T.text(label,"kicker",T.text_for(tone) if accent.a>0.0 else T.INK_MUTED)
+		T.text(label,"small",T.text_for(tone) if accent.a>0.0 else T.INK_MUTED)
 		var style:=T.flat(Color(tone,0.12),Color(tone,0.55),1,T.RADIUS_CONTROL)
 		style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=1;style.content_margin_bottom=1
 		add_theme_stylebox_override("panel",style)

@@ -30,8 +30,8 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	assert_str(value.text).is_equal("+135")
 	# Which way the stores went is said once, beside the day's head.
 	assert_str(panel._refs.today_side.text).is_equal("Stores are growing")
-	# The top bar says how long the food lasts; this page never repeats it.
-	assert_str(_texts(panel)).not_contains("Food lasts").contains("96,411").contains("Wild gathering").contains("Overused")
+	# The situation leads, while exact evidence and source warnings remain.
+	assert_str(_texts(panel)).contains("Food for 226 days").contains("96,411").contains("Wild gathering").contains("Overused")
 	var strip: Array = FoodPanel.kpis(block)
 	assert_str(String(strip[1].value)).is_equal("240 days")
 	block.flow.Net = -37.0
@@ -43,6 +43,7 @@ func test_live_change_and_shortage_keep_nodes_and_callbacks() -> void:
 	var later: Array = FoodPanel.kpis(block)
 	assert_str(String(later[1].value)).is_equal("Short in 12 days")
 	assert_str(String(later[2].value)).is_equal("50%")
+	assert_str(_texts(panel)).contains("A shortage is expected in 12 days").contains("50%").contains("120 hands")
 	# Every cell is an engine term, and they add up: in + taken - eaten - spoiled - lost in drying = kept.
 	assert_bool(panel.daily_values.has("Other")).is_false()
 	var real := prepared_food()

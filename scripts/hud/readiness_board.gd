@@ -119,7 +119,7 @@ func _build_strip()->void:
 	chips.depots.icon.texture=Icons.logistics_texture("depot",T.INK,48)
 	chips.rations.icon.texture=Icons.people_texture("fed",T.INK,48,false)
 	chips.repair.icon.texture=Icons.workshop_texture("mend",T.INK,24)
-	map_button=Button.new();map_button.name="ShowSupplyMap";map_button.text="Show supply on map";map_button.focus_mode=Control.FOCUS_NONE
+	map_button=Button.new();map_button.name="ShowSupplyMap";map_button.text="Show supply on map";map_button.focus_mode=Control.FOCUS_ALL
 	map_button.icon=Icons.logistics_texture("find",T.INK,40);map_button.add_theme_constant_override("icon_max_width",16);map_button.add_theme_constant_override("h_separation",5)
 	map_button.custom_minimum_size=Vector2(0,30);map_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	map_button.tooltip_text="Show where our fighters can be fed, and our supply lines, on the map."
@@ -259,7 +259,7 @@ func _row(row:Dictionary)->void:
 	_glyph(hungry_row,Icons.logistics_texture("hungry",T.RED_TEXT,32),14.0)
 	var hungry_days:=_text(hungry_row,"",12,T.RED_TEXT,true);_whole(hungry_days)
 	if wide:top.move_child(hungry_slot,line.get_index()+1)
-	var queue:=Button.new();queue.name="Priority";queue.focus_mode=Control.FOCUS_NONE;queue.custom_minimum_size=Vector2(0,26);queue.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var queue:=Button.new();queue.name="Priority";queue.focus_mode=Control.FOCUS_ALL;queue.custom_minimum_size=Vector2(0,26);queue.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	queue.visible=String(row.get("force_kind",""))=="field"
 	var army_id:=int(row.get("army_id",0))
 	queue.pressed.connect(func()->void:cycle_priority(army_id))
@@ -367,7 +367,7 @@ func _update_gear(control:Dictionary,short:Array)->void:
 		var ok:=_text(gear,"—",13,T.INK_MUTED);ok.tooltip_text="Every set issued.";ok.mouse_filter=Control.MOUSE_FILTER_PASS
 		return
 	for entry:Dictionary in short:
-		var button:=Button.new();button.name="Short_"+String(entry.item);button.focus_mode=Control.FOCUS_NONE
+		var button:=Button.new();button.name="Short_"+String(entry.item);button.focus_mode=Control.FOCUS_ALL
 		button.text="−%s" % EraWords.grouped(int(entry.missing))
 		button.icon=Icons.equipment_texture(String(entry.item),T.INK,T.AMBER,40);button.add_theme_constant_override("icon_max_width",18);button.add_theme_constant_override("h_separation",4)
 		for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,T.AMBER_TEXT)

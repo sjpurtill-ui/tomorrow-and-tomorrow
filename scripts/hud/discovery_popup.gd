@@ -53,18 +53,20 @@ func _ready()->void:
 	shade.gui_input.connect(func(event:InputEvent)->void:
 		if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:close())
 	panel=PanelContainer.new();panel.theme=T.control_theme();panel.mouse_filter=Control.MOUSE_FILTER_STOP;panel.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.RULE,1,4,24));surface.add_child(panel)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",12);panel.add_child(column)
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",24);panel.add_child(column)
 	var top:=HBoxContainer.new();column.add_child(top)
 	counter=Art.label(top,"SOMETHING NEW IS KNOWN",12,T.GOLD_TEXT);counter.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	Art.button(top,"×",close).tooltip_text="Dismiss all · Escape or click outside"
+	var close_button:=Art.button(top,"×",close);T.apply_button_style(close_button);close_button.tooltip_text="Dismiss all · Escape or click outside"
 	# Reserve the scrollbar gutter: a bar that appears and vanishes as wrapped
 	# text reflows can flip the layout back and forth and crash the engine.
 	scroll=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_RESERVE;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",12);scroll.add_child(body)
 	footer=BoxContainer.new();footer.add_theme_constant_override("separation",8);column.add_child(footer)
-	Art.button(footer,"View in research",open_research).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var research_button:=Art.button(footer,"View in research",open_research);T.apply_button_style(research_button);research_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	dismiss_button=Art.button(footer,"Dismiss all",close)
+	T.apply_button_style(dismiss_button)
 	next_button=Art.button(footer,"Continue",advance)
+	T.apply_button_style(next_button,true)
 	surface.resized.connect(layout);layout()
 	Motion.fade_in(surface,Motion.SLOW)
 func layout()->void:
@@ -117,7 +119,7 @@ func render()->void:
 	var known_since:=("Known since the %s winter" % _ordinal(day/365+1)) if EraWords.hearth() else ("Known since Year %d" % (day/365+1))
 	kicker=Art.label(discovery_summary,(Art.name_for(domain)+"  ·  "+known_since).to_upper(),12,Art.text_color(domain),true)
 	heading=Art.label(discovery_summary,String(current.get("name","New discovery")),34,T.INK,true)
-	heading.add_theme_font_override("font",Art.display_font())
+	heading.add_theme_font_override("font",T.font("ui_strong"))
 	title_rule=ColorRect.new();title_rule.color=T.GOLD;title_rule.custom_minimum_size=Vector2(0,1);title_rule.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;title_rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;discovery_summary.add_child(title_rule)
 	# One line of story: as the people saw it when the Opening Arc tells it,
 	# otherwise the first sentence of what was found.

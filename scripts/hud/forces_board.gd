@@ -99,7 +99,7 @@ func _theme()->Theme:
 # --- Small builders -----------------------------------------------------------------
 
 func _button(parent:Node,text:String,action:Callable,icon:Texture2D=null,tip:String="")->Button:
-	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.focus_mode=Control.FOCUS_NONE
+	var button:=Button.new();button.text=text;button.tooltip_text=tip;button.focus_mode=Control.FOCUS_ALL
 	button.custom_minimum_size=Vector2(0,30)
 	if icon!=null:
 		button.icon=icon;button.expand_icon=false

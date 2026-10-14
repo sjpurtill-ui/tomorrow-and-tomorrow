@@ -48,7 +48,7 @@ var _barter:Dictionary={}
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();name="IllustratedProductionQueue"
-	add_theme_constant_override("separation",14)
+	add_theme_constant_override("separation",24)
 	data=_prepared(block)
 	_shape=shape_key(data)
 	var mode:=String(data.get("mode","military"))
@@ -64,13 +64,13 @@ func setup(block:Dictionary)->void:
 		_:
 			_build_workshop_brief()
 			_build_header()
-			_build_stock()
 			var columns:=HFlowContainer.new();columns.name="Columns";columns.add_theme_constant_override("h_separation",16);columns.add_theme_constant_override("v_separation",16);add_child(columns)
 			var left:=VBoxContainer.new();left.name="LinesColumn";left.add_theme_constant_override("separation",14)
 			left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.custom_minimum_size.x=LINES_MIN_WIDTH;columns.add_child(left)
 			_build_lines(left)
 			_picker=Picker.new();_picker.custom_minimum_size.x=PICKER_WIDTH;_picker.size_flags_horizontal=Control.SIZE_FILL;columns.add_child(_picker)
 			_picker.build(self,data.get("recipes",[]),_room_note())
+			_build_stock()
 			_build_flow_disclosure("Materials & daily flow")
 			_build_footer()
 	_apply()
@@ -162,7 +162,8 @@ func _build_header()->void:
 	var strip:=PanelContainer.new();strip.name="Header"
 	var style:=Folio.rule_style(6)
 	strip.add_theme_stylebox_override("panel",style);add_child(strip)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);strip.add_child(row)
+	var group:=VBoxContainer.new();group.add_theme_constant_override("separation",8);strip.add_child(group)
+	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);group.add_child(row)
 	var materials:=HFlowContainer.new();materials.name="Materials";materials.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	materials.add_theme_constant_override("h_separation",16);materials.add_theme_constant_override("v_separation",4);row.add_child(materials)
 	# The stores are drawn on the chart above with what they hold; the strip
@@ -182,7 +183,7 @@ func _build_header()->void:
 	_header.staff.pressed.connect(func():_header_act("hand_back"))
 	_header.you=W.text_button("You","");_header.you.name="RunYou";run.add_child(_header.you)
 	_header.you.pressed.connect(func():_header_act("take_over"))
-	var note:=Label.new();note.name="StaffNote";T.text(note,"small",T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_PASS;add_child(note)
+	var note:=Label.new();note.name="StaffNote";T.text(note,"small",T.INK_MUTED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_PASS;group.add_child(note)
 	_header.note=note
 
 func _fact(parent:Node,texture:Texture2D,node_name:String,word:String="")->HBoxContainer:
@@ -375,7 +376,7 @@ class StockBar extends Control:
 
 func _build_lines(parent:Node)->void:
 	var head:=HBoxContainer.new();head.name="LinesHead";parent.add_child(head)
-	var kicker:=Label.new();kicker.text="At the workshops";T.text(kicker,"voice",T.INK);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
+	var kicker:=Folio.label("At the workshops","voice");kicker.add_theme_font_size_override("font_size",24);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 	var room:=Label.new();room.name="LineRoom";T.text(room,"kicker",T.INK_MUTED);head.add_child(room);_header.line_room=room
 	var lines:Array=data.get("lines",[])
 	var list:=VBoxContainer.new();list.name="WorkshopLines";list.add_theme_constant_override("separation",8);parent.add_child(list)
@@ -556,10 +557,11 @@ func _build_all_head()->void:
 	var box:=VBoxContainer.new();box.name="AllHead";box.add_theme_constant_override("separation",4);add_child(box)
 	_header.headline=_headline(box,"HandsAnswer")
 	_header.daily_facts=_small(box,"DailyFacts")
+	_header.daily_facts.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	var needs:=HBoxContainer.new();needs.name="NeedsYouNow";needs.add_theme_constant_override("separation",10);box.add_child(needs)
 	var words:=Label.new();words.name="NeedsYouText";T.text(words,"body",T.RED_TEXT);words.add_theme_font_override("font",T.font("ui_strong"))
 	words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;needs.add_child(words)
-	var go:=W.text_button("Open","");go.name="NeedsYouGo";needs.add_child(go)
+	var go:=W.text_button("Open","");T.apply_button_style(go,true);go.name="NeedsYouGo";needs.add_child(go)
 	go.pressed.connect(func()->void:
 		var page:=int(go.get_meta("page",1))
 		if page<0:
@@ -628,7 +630,7 @@ func _build_flow_disclosure(caption:String)->void:
 
 func _headline(parent:Node,node_name:String)->Label:
 	var label:=Label.new();label.name=node_name
-	label.add_theme_font_override("font",T.voice_font());label.add_theme_font_size_override("font_size",28);label.add_theme_color_override("font_color",T.INK)
+	label.add_theme_font_override("font",T.font("ui_strong"));label.add_theme_font_size_override("font_size",32);label.add_theme_color_override("font_color",T.INK)
 	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(label)
 	return label
 
@@ -664,6 +666,7 @@ Each figure is %d makers." % crowd.each if crowd.each>1 else "")
 	var items:Array=(o.get("attention",[]) as Array).slice(1,3)
 	if items.is_empty():return
 	_kicker(_overview_box,"Also needs attention")
+	var destinations:Array[int]=[]
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var row:=HBoxContainer.new();row.name="Attention%d" % index;row.add_theme_constant_override("separation",10);_overview_box.add_child(row)
@@ -672,8 +675,14 @@ Each figure is %d makers." % crowd.each if crowd.each>1 else "")
 		if String(item.get("sub",""))!="":
 			var sub:=Label.new();sub.text=_cap(String(item.sub));T.text(sub,"small",T.INK_MUTED);sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(sub)
 		var page:=int(item.get("page",2))
-		var go:=W.text_button("Daily work" if page==1 else "Workshop orders","Open the %s page." % ("Daily work" if page==1 else "Workshop orders"));go.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(go)
-		go.pressed.connect(func()->void:_open(page))
+		if page!=1 and not page in destinations:destinations.append(page)
+	for page:int in destinations:
+		var go:=W.text_button("Materials" if page<0 else "Workshop orders","Open the detail for these shortages.");go.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;_overview_box.add_child(go)
+		go.pressed.connect(func()->void:
+			if page<0:
+				var callback:Variant=data.get("on_materials")
+				if callback is Callable:callback.call()
+			else:_open(page))
 	if (o.get("attention",[]) as Array).size()>3:
 		var more:=_small(_overview_box,"More");more.text="And %d more on the other pages." % ((o.get("attention",[]) as Array).size()-3)
 
@@ -704,8 +713,7 @@ static func plain_status(status:String)->String:
 
 # --- Helpers shared with panels that extend this script (keep as they are) --------------
 func _button(parent:Node,label:String,callback:Variant,tip:String,active:bool=false)->void:
-	var b:=Button.new();b.text=label;b.tooltip_text=tip;b.custom_minimum_size=Vector2(28,28);b.add_theme_font_size_override("font_size",12);b.add_theme_color_override("font_color",T.BODY);b.add_theme_color_override("font_hover_color",T.INK)
-	b.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG if active else Color.TRANSPARENT,T.GOLD if active else T.BORDER_SOFT,1,0,5));b.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD,1,0,5));parent.add_child(b)
+	var b:=W.text_button(label,tip,active);parent.add_child(b)
 	if callback is Callable and callback.is_valid():b.pressed.connect(callback)
 	else:b.disabled=true
 func _bar(parent:Node,ratio:float,color:Color)->void:

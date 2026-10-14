@@ -1,12 +1,6 @@
 extends VBoxContainer
-## The Food tab, one page: a strip of four figures across the top (food in
-## store against the room for it, the 90-day outlook in days, water fetched
-## against the day's need, the hands on food), each with its control beside
-## it; the day's rations as one bar with the engine's own terms under it;
-## then two columns of one-line rows: the stores, the fire and the past
-## seasons on the left, where the food and water come from on the right, and
-## any deliveries on the road. The top bar already says how many days the
-## food and water last, so this page never says it again.
+## Food security and the daily work lead; accounting and source evidence
+## follow on the same page. All readings retain their engine values.
 ##
 ## Every number is the engine's (food_system.gd metrics, water_metrics,
 ## food_care.gd). The live refresh (update_block) keeps every node while the
@@ -16,6 +10,7 @@ const S:=preload("res://scripts/hud/econ_sheet.gd")
 const Words:=preload("res://scripts/hud/home_plain.gd")
 const Spark:=preload("res://scripts/hud/material_stock_spark.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 ## The day's count in order: [flow key, caption, the bar's ink (null: not a
 ## part of the bar)]. Every term is the engine's own (food_system.gd): what
@@ -23,8 +18,8 @@ const Plain:=preload("res://scripts/hud/production_plain.gd")
 ## spoiled, the weight drying, smoking and canning took out of the food
 ## (food_preserved.lost), and the change in the stores (food_net). They add
 ## up: in + taken - eaten - spoiled - keeping = kept.
-const FLOW_CELLS := [["Produced", "Brought in", null], ["Taken", "Taken in", null], ["Eaten", "Eaten", Color("8a6118")], ["Spoiled", "Spoiled", Color("a34435")],
-	["Keeping", "Lost in drying", Color("4d6389")], ["Net", "Into store", Color("5d6f34")]]
+const FLOW_CELLS := [["Produced", "Brought in", null], ["Taken", "Taken in", null], ["Eaten", "Eaten", "eaten"], ["Spoiled", "Spoiled", "spoiled"],
+	["Keeping", "Lost in drying", "keeping"], ["Net", "Into store", "net"]]
 ## What each food source is drawn with (resource_icons.gd people glyphs).
 const SOURCE_ICONS := {"Wild gathering":"gather", "Hunting":"hunt", "Fishing":"fish", "Cultivation":"tend"}
 
@@ -37,51 +32,66 @@ var _grids:Array[GridContainer]=[]
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="ProvisionsLedger"
-	add_theme_constant_override("separation",10)
+	add_theme_constant_override("separation",24)
 	_shape=shape_of(block)
 	_refs={"stores":[],"sources":[],"deliveries":[]}
 	var who:=_who()
 	var current:=_current_focus(block)
 	var can_direct:=bool(block.get("can_direct",false))
-	# The day's rations: one bar and the engine's terms under it.
-	var today:=S.head(self,"Today · rations")
-	_refs.today_side=today.side
+	var outlook:=VBoxContainer.new();outlook.add_theme_constant_override("separation",8);add_child(outlook)
+	_refs.horizon=S.voice("",32);_refs.horizon.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.horizon)
+	_refs.forecast=S.label("",16,T.INK_MUTED);_refs.forecast.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.forecast)
 	if can_direct:
-		# Asking for hands, beside the strip's water and food-hands figures.
-		var ask:=S.label("More hands:",12,T.INK_MUTED);ask.size_flags_vertical=Control.SIZE_SHRINK_CENTER;(today.row as HBoxContainer).add_child(ask)
+		var work:=VBoxContainer.new();work.add_theme_constant_override("separation",8);outlook.add_child(work)
+		var ask:=S.label("",14,T.INK_MUTED);ask.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;work.add_child(ask);_refs.work_caption=ask
+		var choices:=HFlowContainer.new();choices.add_theme_constant_override("h_separation",8);choices.add_theme_constant_override("v_separation",8);work.add_child(choices)
 		for spec:Array in [["provisions","Food","Provisions","gathering, hunting, fishing and carrying food"],["water","Water","Water","finding, reaching and carrying water"]]:
 			var focus_id:=String(spec[0])
-			var choice:=S.verb(String(spec[1])+(" (now)" if current==focus_id else ""),func():data.on_focus.call(focus_id),"Ask %s to put more people on %s. Other work slows." % [who,String(spec[3])],current==focus_id)
-			choice.name="Choice_"+String(spec[2]);(today.row as HBoxContainer).add_child(choice)
+			var choice:=S.verb("More hands on "+String(spec[1]).to_lower()+(" (now)" if current==focus_id else ""),func():data.on_focus.call(focus_id),"Ask %s to put more people on %s. Other work slows." % [who,String(spec[3])],current==focus_id)
+			choice.name="Choice_"+String(spec[2]);choices.add_child(choice)
 		var decide:=S.verb("Let %s decide" % who+(" (now)" if current=="" else ""),func():data.on_focus.call(""),"%s spreads the work across what the place needs." % who.capitalize(),current=="")
-		decide.name="Choice_";(today.row as HBoxContainer).add_child(decide)
-	flow_bar=FlowBar.new();flow_bar.name="FlowBar";flow_bar.custom_minimum_size=Vector2(0,12);add_child(flow_bar)
-	var daily:=GridContainer.new();daily.name="Daily";daily.columns=FLOW_CELLS.size();daily.add_theme_constant_override("h_separation",10);add_child(daily)
+		decide.name="Choice_";choices.add_child(decide)
+	var readings:=HFlowContainer.new();readings.add_theme_constant_override("h_separation",32);readings.add_theme_constant_override("v_separation",16);add_child(readings)
+	_refs.readings={}
+	for item:Dictionary in kpi_items(block):
+		if item.id=="ahead" or (item.id=="hands" and can_direct):continue
+		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=160;cell.add_theme_constant_override("separation",4);readings.add_child(cell)
+		cell.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED))
+		var value:=S.voice("",24);cell.add_child(value)
+		var note:=S.label("",14,T.INK_MUTED);cell.add_child(note)
+		_refs.readings[item.id]={"cell":cell,"value":value,"note":note}
+	# The day's rations: one bar and the engine's terms under it.
+	var today_box:=VBoxContainer.new();today_box.add_theme_constant_override("separation",12);add_child(today_box)
+	var today:=S.head(today_box,"Today's food")
+	_refs.today_side=today.side
+	flow_bar=FlowBar.new();flow_bar.name="FlowBar";flow_bar.custom_minimum_size=Vector2(0,8);today_box.add_child(flow_bar)
+	var daily:=HFlowContainer.new();daily.name="Daily";daily.add_theme_constant_override("h_separation",24);daily.add_theme_constant_override("v_separation",12);today_box.add_child(daily)
 	for pair:Array in FLOW_CELLS:
-		var cell:=HBoxContainer.new();cell.name="Cell_"+String(pair[0]);cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.add_theme_constant_override("separation",5);cell.mouse_filter=Control.MOUSE_FILTER_PASS;daily.add_child(cell)
+		var cell:=VBoxContainer.new();cell.name="Cell_"+String(pair[0]);cell.custom_minimum_size.x=88;cell.add_theme_constant_override("separation",4);cell.mouse_filter=Control.MOUSE_FILTER_PASS;daily.add_child(cell)
+		var caption_line:=HBoxContainer.new();caption_line.add_theme_constant_override("separation",6);cell.add_child(caption_line)
 		if pair[2]!=null:
-			var swatch:=ColorRect.new();swatch.color=pair[2];swatch.custom_minimum_size=Vector2(8,8);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(swatch)
-		var caption:=S.label(String(pair[1]),12,T.INK_MUTED);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;caption.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(caption)
-		var value:=S.voice("",20);value.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(value)
+			var swatch:=ColorRect.new();swatch.color=FlowBar.colors()[pair[2]];swatch.custom_minimum_size=Vector2(8,8);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;caption_line.add_child(swatch)
+		var caption:=S.label(String(pair[1]),14,T.INK_MUTED);caption.mouse_filter=Control.MOUSE_FILTER_IGNORE;caption_line.add_child(caption)
+		var value:=S.voice("",24);value.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(value)
 		daily_values[pair[0]]=value
-	_refs.missions=S.label("",12,T.INK_MUTED);add_child(_refs.missions)
+	_refs.missions=S.label("",14,T.INK_MUTED);_refs.missions.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;today_box.add_child(_refs.missions)
 	# Two columns of rows.
 	var grid:=S.columns(self,"FoodColumns",400.0,2);_grids.append(grid)
-	grid.add_theme_constant_override("v_separation",12)
+	grid.add_theme_constant_override("v_separation",24)
 	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",0);left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(left)
 	var right:=VBoxContainer.new();right.add_theme_constant_override("separation",0);right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(right)
+	_refs.stores_column=left;_refs.sources_column=right
 	var stores_head:=S.head(left,"Stores");_refs.stores_side=stores_head.side
 	for item:Dictionary in block.get("rows",[]):
 		(_refs.stores as Array).append(S.row(left,{"id":String(item.name),"icon":"Food" if String(item.name)!="Stored food" else "Clay","label":String(item.name),"value_width":96.0}))
 	if (block.get("fire",{}) as Dictionary).size()>0:_refs.fire=S.row(left,{"id":"fire","icon":"fetch","icon_kind":"people","label":"Hearth fire","bar_width":60.0})
 	# The past seasons: the food days at each monthly count, as one spark.
-	var past:=HBoxContainer.new();past.name="PastSeasons";past.add_theme_constant_override("separation",8);past.custom_minimum_size.y=34;left.add_child(past)
-	past.add_child(S.icon("Food"))
-	var past_label:=S.label("Days of food, past counts",14,T.INK);past_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;past.add_child(past_label)
+	var past:=VBoxContainer.new();past.name="PastSeasons";past.add_theme_constant_override("separation",8);left.add_child(past)
+	var past_label:=S.label("Days of food over time",14,T.INK_MUTED);past.add_child(past_label)
 	var spark:=Spark.new();spark.size_flags_horizontal=Control.SIZE_EXPAND_FILL;spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;past.add_child(spark)
 	spark.ready.connect(func()->void:spark.custom_minimum_size=Vector2(80,28))
 	_refs.spark=spark
-	_refs.past_range=S.label("",12,T.INK_MUTED);_refs.past_range.size_flags_vertical=Control.SIZE_SHRINK_CENTER;past.add_child(_refs.past_range)
+	_refs.past_range=S.label("",14,T.INK_MUTED);past.add_child(_refs.past_range)
 	var sources_head:=S.head(right,"Where it comes from");_refs.sources_side=sources_head.side
 	for source:Dictionary in block.get("sources",[]):
 		var name_word:=String(source.get("name","Source"))
@@ -103,6 +113,9 @@ func setup(block:Dictionary)->void:
 
 func _layout()->void:
 	for grid:GridContainer in _grids:S.flow(grid,size.x)
+	if _refs.has("sources_column"):
+		var columns:=_grids[0]
+		columns.move_child(_refs.sources_column,0 if columns.columns==1 else 1)
 	S.compact(self,size.x)
 
 func update_block(block:Dictionary)->bool:
@@ -136,6 +149,21 @@ func _fill()->void:
 	var eaten:=maxf(0.5,float(amounts.Eaten))
 	var water:Dictionary=data.get("water",{})
 	var need:=float(water.get("required_today",0.0))
+	var food_days:=float(data.get("food_days",0.0))
+	S.put(_refs.horizon,"Food for %s" % EraWords.days_in_words(food_days) if food_days>0.0 else "Food stores are empty",T.INK if food_days>0.0 else T.RED_TEXT)
+	for item:Dictionary in kpi_items(data):
+		if item.id=="hands" and _refs.has("work_caption"):
+			S.put(_refs.work_caption,"Today's food work · %s hands · %s" % [String(item.value),String(item.sub)])
+			_refs.work_caption.tooltip_text=String(item.get("tip",""))
+			continue
+		if item.id=="ahead":
+			var shortage:=int((data.get("forecast90",{}) as Dictionary).get("first_shortage_day",-1))
+			S.put(_refs.forecast,"A shortage is expected in %d days at the season's yields." % shortage if shortage>0 else ("In 90 days: %s %s." % [String(item.value).to_lower(),String(item.sub).replace(" · ","; ")]),T.RED_TEXT if shortage>0 else T.INK_MUTED)
+			_refs.forecast.tooltip_text=String(item.get("tip",""))
+			continue
+		var refs:Dictionary=_refs.readings[item.id]
+		S.put(refs.value,String(item.value),item.get("value_color",T.INK))
+		S.put(refs.note,String(item.sub));refs.cell.tooltip_text=String(item.get("tip",""))
 	# The day's rations.
 	for key:String in daily_values:
 		var amount:=float(amounts.get(key,0))
@@ -274,6 +302,8 @@ static func flow_amounts(flow:Dictionary)->Dictionary:
 class FlowBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	var amounts:Dictionary={}
+	static func colors()->Dictionary:
+		return {"eaten":T.AMBER,"spoiled":T.RED,"keeping":T.TEAL,"net":T.GREEN}
 	func _draw()->void:
 		var parts:Array=[]
 		for pair:Array in FLOW_CELLS:
@@ -281,7 +311,7 @@ class FlowBar extends Control:
 			var amount:=float(amounts.get(pair[0],0.0))
 			# A day the stores shrank has no "kept" share.
 			if String(pair[0])=="Net":amount=maxf(0.0,amount)
-			if amount>0.0:parts.append([amount,pair[2]])
+			if amount>0.0:parts.append([amount,colors()[pair[2]]])
 		draw_rect(Rect2(Vector2.ZERO,size),Color(T.INK,0.10))
 		var total:=0.0
 		for part:Array in parts:total+=float(part[0])

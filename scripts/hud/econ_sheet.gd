@@ -1,8 +1,8 @@
 extends RefCounted
 ## The Economy pages' shared parts, so every tab reads the same way:
-##   strip figures in the dock's own form (dock_kpis), one-line rows (icon, label, value, small bar, coloured
-##   tag, small verb buttons on the row), small gold section heads, and grids
-##   that flow rows into two or three columns on a wide page.
+##   compatible dock readings, open rows with a name and value above their
+##   explanation, quiet state tags and full-sized commands, and grids that
+##   flow into two or three columns on a wide page.
 ## Every builder returns the nodes a live refresh writes into, so a page can
 ## keep its nodes (and an open tooltip) while the day's numbers change.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
@@ -11,8 +11,8 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## The shared strategy-screen blocks: their verb, tag and bar are ours too.
 const Dense:=preload("res://scripts/hud/dense_blocks.gd")
 
-const ROW_HEIGHT:=26.0
-const ICON_SIZE:=20.0
+const ROW_HEIGHT:=48.0
+const ICON_SIZE:=24.0
 
 ## A whole number with its thousands separators (era_words.gd grouped, the
 ## one formatter every page uses).
@@ -35,7 +35,7 @@ static func label(text:String,size:int,color:Color,strong:=false)->Label:
 	return l
 
 static func voice(text:String,size:int,color:Color=T.INK)->Label:
-	var l:=label(text,size,color);l.add_theme_font_override("font",T.voice_font())
+	var l:=label(text,size,color,true)
 	return l
 
 ## Words written only when they differ (keeps an unchanged line's layout).
@@ -65,7 +65,7 @@ static func bar(ratio:float,color:Color,width:float=0.0,height:float=6.0)->Bar:
 
 ## A small coloured state tag ("Empty", "Stalled", "Full").
 static func tag(text:String,color:Color)->Label:
-	var l:=label(text,11,T.legible(color,T.DOCK_BG),true)
+	var l:=label(text,14,T.legible(color,T.DOCK_BG),true)
 	var style:=T.flat(Color(color,0.14),Color(color,0.6),1,8,0)
 	style.content_margin_left=6;style.content_margin_right=6;style.content_margin_top=1;style.content_margin_bottom=1
 	l.add_theme_stylebox_override("normal",style)
@@ -84,28 +84,25 @@ static func set_tag(l:Label,text:String,color:Color)->void:
 ## figure it changes. `chosen` marks the current one of a set of choices.
 static func verb(text:String,callback:Variant,tip:String="",chosen:=false,primary:=false)->Button:
 	var b:=Dense.verb(text,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
-	if chosen or primary:
-		# The current choice is filled, as a pressed tab is.
-		var skin:=(b.get_theme_stylebox("normal") as StyleBoxFlat).duplicate() as StyleBoxFlat
-		skin.bg_color=Color(T.GOLD,0.22);skin.border_width_bottom=2
-		b.add_theme_stylebox_override("normal",skin);b.add_theme_color_override("font_color",T.INK)
+	T.apply_button_style(b,primary)
+	if chosen and not primary:
+		b.add_theme_stylebox_override("normal",b.get_theme_stylebox("pressed").duplicate())
 	return b
 
-## A small gold section head with a hairline under it; `right` is a short
+## A sans section head; `right` is a short
 ## figure or note at the head's far end.
 static func head(parent:Node,text:String,right:String="",tip:String="")->Dictionary:
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",3);parent.add_child(box)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);parent.add_child(box)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);box.add_child(row)
-	var title:=label(text.to_upper(),12,T.GOLD_TEXT,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.tooltip_text=tip;row.add_child(title)
-	var side:=label(right,12,T.INK_MUTED);row.add_child(side)
-	var rule:=ColorRect.new();rule.color=T.RULE;rule.custom_minimum_size=Vector2(0,1);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
+	var title:=label(text,24,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.tooltip_text=tip;row.add_child(title)
+	var side:=label(right,14,T.INK_MUTED);side.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(side)
 	return {"box":box,"row":row,"title":title,"side":side}
 
 ## A grid that holds rows in 1 to `most` columns by the width it is given
 ## (`min_column` px a column). Call flow() from the page's resized signal.
 static func columns(parent:Node,node_name:String,min_column:float=380.0,most:int=2)->GridContainer:
 	var grid:=GridContainer.new();grid.name=node_name;grid.columns=1;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation",22);grid.add_theme_constant_override("v_separation",2)
+	grid.add_theme_constant_override("h_separation",24);grid.add_theme_constant_override("v_separation",8)
 	grid.set_meta("min_column",min_column);grid.set_meta("most",most)
 	parent.add_child(grid)
 	return grid
@@ -144,10 +141,10 @@ static func dock_kpis(items:Array,labels:Dictionary)->Array:
 	return out
 
 # --------------------------------------------------------------------------
-# One-line rows
+# Open rows
 # --------------------------------------------------------------------------
 
-## One fact on one line: [icon] label ... [bar] value [tag] [buttons].
+## A fact's name and value lead; notes, signals and actions follow below.
 ## item: {icon, icon_kind, label, value, value_color, ratio (-1 none),
 ## bar_color, bar_width, note (small grey text after the label), tag,
 ## tag_color, tip, buttons:[{text,on_press,tip,chosen,primary,disabled}]}.
@@ -155,33 +152,37 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 	var panel:=PanelContainer.new();panel.name="Row_"+String(item.get("id",item.get("label",""))).validate_node_name()
 	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.mouse_filter=Control.MOUSE_FILTER_PASS
 	var style:=StyleBoxFlat.new();style.bg_color=Color.TRANSPARENT;style.border_width_bottom=1;style.border_color=Color(T.RULE,0.45)
-	style.content_margin_top=1;style.content_margin_bottom=1;style.content_margin_left=2;style.content_margin_right=2
+	style.content_margin_top=10;style.content_margin_bottom=10;style.content_margin_left=0;style.content_margin_right=0
 	panel.add_theme_stylebox_override("panel",style);parent.add_child(panel)
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.custom_minimum_size.y=ROW_HEIGHT;line.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(line)
 	var key:=String(item.get("icon",""))
 	var glyph:TextureRect=null
 	if item.has("icon"):glyph=icon(key,ICON_SIZE,String(item.get("icon_kind","resource")));line.add_child(glyph)
-	var name_label:=label(String(item.get("label","")),13,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",6);line.add_child(body)
+	var headline:=HBoxContainer.new();headline.add_theme_constant_override("separation",8);body.add_child(headline)
+	var name_label:=label(String(item.get("label","")),16,T.INK,true);name_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	# The name is always whole (it wraps on a narrow page, never cut short);
 	# it takes its share of a wide row.
 	name_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;name_label.custom_minimum_size.x=80
 	name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.size_flags_stretch_ratio=float(item.get("label_width",150.0))/150.0
-	line.add_child(name_label)
-	var note:=label("",12,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.size_flags_stretch_ratio=1.6;note.custom_minimum_size.x=float(item.get("note_width",90.0));note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(note)
+	headline.add_child(name_label)
+	var value:=label("",20,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=minf(96.0,float(item.get("value_width",72.0)));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;headline.add_child(value)
+	var note:=label("",14,T.INK_MUTED);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;note.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_child(note)
+	var signals:=HFlowContainer.new();signals.add_theme_constant_override("h_separation",12);signals.add_theme_constant_override("v_separation",6);body.add_child(signals)
 	var spark:Control=null
 	if item.has("points"):
-		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(spark)
+		spark=preload("res://scripts/hud/material_stock_spark.gd").new();spark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(spark)
 		var spark_width:=float(item.get("bar_width",70.0))
 		spark.ready.connect(func()->void:spark.custom_minimum_size=Vector2(spark_width,22);spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;spark.tooltip_text="")
-	var meter:=bar(0.0,T.GOLD,float(item.get("bar_width",70.0)),5.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(meter)
-	var value:=label("",13,T.INK,true);value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(item.get("value_width",72.0));value.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(value)
-	var state:=tag("",T.MUTED);state.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(state)
+	var meter:=bar(0.0,T.GOLD,float(item.get("bar_width",70.0)),5.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(meter)
+	var state:=tag("",T.MUTED);state.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(state)
+	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);actions.visible=not (item.get("buttons",[]) as Array).is_empty();(headline if bool(item.get("compact_actions",false)) else body).add_child(actions)
 	var buttons:Array=[]
 	for spec:Dictionary in item.get("buttons",[]):
 		var b:=verb(String(spec.get("text","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("chosen",false)),bool(spec.get("primary",false)))
 		if bool(spec.get("disabled",false)):b.disabled=true
-		line.add_child(b);buttons.append(b)
-	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"compact":false}
+		actions.add_child(b);buttons.append(b)
+	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"signals":signals,"compact":false}
 	panel.set_meta("econ_row",refs)
 	set_row(refs,item)
 	return refs
@@ -193,11 +194,13 @@ static func set_row(refs:Dictionary,item:Dictionary)->void:
 	var ratio:=float(item.get("ratio",-1.0))
 	var meter:Bar=refs.bar
 	meter.visible=ratio>=0.0 and not bool(refs.get("compact",false))
-	(refs.note as Control).visible=not bool(refs.get("compact",false))
+	(refs.note as Control).visible=not String(item.get("note","")).is_empty()
+	refs.ratio=ratio
 	var color:Color=item.get("bar_color",T.GOLD)
 	if ratio>=0.0 and (meter.ratio!=ratio or meter.color!=color):meter.ratio=ratio;meter.color=color;meter.queue_redraw()
 	set_tag(refs.tag,String(item.get("tag","")),item.get("tag_color",T.MUTED))
 	var spark:Control=refs.get("spark")
+	(refs.signals as Control).visible=meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
 	if spark!=null and item.has("points") and spark.get("points")!=item.points:spark.set("points",item.points);spark.queue_redraw()
 	var tip:=String(item.get("tip",""))
 	if (refs.panel as Control).tooltip_text!=tip:(refs.panel as Control).tooltip_text=tip
@@ -224,8 +227,8 @@ class Bar extends Control:
 			var ow:=size.x*clampf(over,0.0,1.0-clampf(ratio,0.0,1.0))
 			draw_rect(Rect2(w,0,ow,size.y),Color(T.RED,0.55))
 
-## On a narrow page each row keeps its name, figure, tag and buttons; its
-## note, bar and spark go to the row's pointer. Call from the page's resize.
+## Narrow rows retain their explanation and controls. Optional graphical
+## signals stay in the row's pointer. Call from the page's resize.
 const COMPACT_BELOW:=460.0
 static func compact(root:Node,width:float)->void:
 	if width<=0.0:return
@@ -235,7 +238,7 @@ static func compact(root:Node,width:float)->void:
 		var refs:Dictionary=node.get_meta("econ_row")
 		if bool(refs.get("compact",false))==narrow:continue
 		refs.compact=narrow
-		(refs.note as Control).visible=not narrow
 		if narrow:(refs.bar as Control).visible=false
-		else:(refs.bar as Control).visible=float((refs.bar as Bar).ratio)>0.0 or (refs.bar as Control).visible
+		else:(refs.bar as Control).visible=float(refs.get("ratio",-1.0))>=0.0
 		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow
+		(refs.signals as Control).visible=(refs.bar as Control).visible or (refs.tag as Control).visible or (refs.get("spark")!=null and (refs.spark as Control).visible)
