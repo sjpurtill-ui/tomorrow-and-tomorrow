@@ -297,6 +297,7 @@ func war_open()->bool:
 ## while it is open.
 func _war_layout(key:String)->float:
 	var board:GDScript=load("res://scripts/hud/war_board.gd") as GDScript
+	if board!=null and key=="COLUMN_WIDTH":return float(board.call("column_width",get_viewport().get_visible_rect().size.x))
 	return float(board.get_script_constant_map().get(key,0.0)) if board!=null else 0.0
 
 ## The top of what stands at the bottom right: your orders, or the map

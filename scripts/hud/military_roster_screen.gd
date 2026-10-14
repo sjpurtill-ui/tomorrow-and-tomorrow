@@ -129,7 +129,7 @@ func _tell_hud()->void:
 ## what stands at the bottom right (the council's queue, your orders).
 func _layout_war(view:Vector2)->void:
 	layout_size=Vector2.ZERO
-	var width:=float(WarBoard.COLUMN_WIDTH)
+	var width:=WarBoard.column_width(view.x)
 	var top:=T.CONTENT_TOP
 	var bottom:=view.y-T.EDGE_MARGIN
 	var hud:=_hud()
@@ -159,7 +159,21 @@ func _skin_panel()->void:
 		heading.add_theme_font_override("font",T.font("voice_bold"))
 		heading.add_theme_font_size_override("font_size",preload("res://scripts/hud/dock_panel.gd").TITLE_SIZE)
 	close_button.custom_minimum_size=Vector2(32,30) if war else Vector2(40,38)
+	# The War screen's × is every page's × (dock_panel.gd): a plain glyph.
+	if war:_shared_close(close_button)
 	(panel.get_child(0) as VBoxContainer).add_theme_constant_override("separation",8 if war else 12)
+
+## The close control every page carries (dock_panel.gd): a large plain ×
+## with a soft box only under the pointer.
+static func _shared_close(button:Button)->void:
+	button.custom_minimum_size=Vector2(32,34);button.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+	button.add_theme_font_size_override("font_size",28);button.add_theme_font_override("font",T.font("voice"))
+	for state:String in ["font_color","font_focus_color"]:button.add_theme_color_override(state,T.TEXT_DIM)
+	for state:String in ["font_hover_color","font_pressed_color"]:button.add_theme_color_override(state,T.INK)
+	button.add_theme_stylebox_override("normal",T.flat(Color.TRANSPARENT))
+	button.add_theme_stylebox_override("hover",T.flat(T.CLOSE_HOVER_BG,T.BORDER_2,1,4))
+	button.add_theme_stylebox_override("pressed",T.flat(T.CLOSE_HOVER_BG,T.BORDER_2,1,4))
+	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 
 ## Whether any boat or air crews of ours are raised (joint_operations forces).
 func _has_crews(services:Array[String])->bool:

@@ -521,7 +521,7 @@ func _frame_war()->void:
 func _free_rect(view:Vector2)->Rect2:
 	var board:GDScript=load("res://scripts/hud/war_board.gd") as GDScript
 	var consts:Dictionary=board.get_script_constant_map() if board!=null else {}
-	var column:=float(consts.get("COLUMN_WIDTH",400.0))
+	var column:=float(board.call("column_width",view.x)) if board!=null else 400.0
 	var strip:=float(consts.get("STRIP_HEIGHT",64.0))
 	var left:=HudTokens.DOCK_X+8.0
 	var top:=HudTokens.CONTENT_TOP+strip+12.0
