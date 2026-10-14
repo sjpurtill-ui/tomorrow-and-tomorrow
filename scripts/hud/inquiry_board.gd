@@ -28,7 +28,15 @@ var _header:Dictionary={}
 var factor_bar:FactorBar
 ## The free team's picker, opened from its question's line.
 var _pickers:Dictionary={}
-var field_grid:GridContainer
+var field_grid:BoxContainer
+var active_fields:VBoxContainer
+var waiting_fields:VBoxContainer
+var active_page:=0
+var waiting_id:=""
+var active_page_label:Label
+var active_previous:Button
+var active_next:Button
+var waiting_picker:OptionButton
 
 
 ## What speeds and slows the work on every question: one bar, centred on the
@@ -84,7 +92,7 @@ class FactorBar extends Control:
 		return "What speeds (green) and slows (red) the work on every question; the dark mark is the usual pace."
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",24)
+	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",14)
 	var plan:=_plan(block)
 	if block.has("pace"):_readings(self,block.pace,[2,0])
 	if block.has("hands"):_hands(self,block.hands)
@@ -109,13 +117,28 @@ func update_block(_block:Dictionary)->bool:
 ## its question; attention controls remain beside the field they change.
 ## The table model below remains available to reports and existing consumers.
 func _field_spread(lanes:Array)->void:
-	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",12);add_child(heading)
-	var title:=_voice("Questions taking shape",24);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
-	var hint:=T.make_label("− / + shares attention",12,T.TEXT_SOFT);hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(hint)
-	field_grid=GridContainer.new();field_grid.name="Fields";field_grid.columns=2
-	field_grid.add_theme_constant_override("h_separation",28);field_grid.add_theme_constant_override("v_separation",24);add_child(field_grid)
+	var heading:=HFlowContainer.new();heading.add_theme_constant_override("h_separation",12);heading.add_theme_constant_override("v_separation",4);add_child(heading)
+	var title:=_voice("Questions taking shape",24);title.name="QuestionsHeading";title.autowrap_mode=TextServer.AUTOWRAP_OFF;heading.add_child(title)
+	var hint:=T.make_label("− / + shares attention",14,T.TEXT_SOFT);hint.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(hint)
+	field_grid=BoxContainer.new();field_grid.name="Fields";field_grid.add_theme_constant_override("separation",28);add_child(field_grid)
+	active_fields=VBoxContainer.new();active_fields.name="ActiveFields";active_fields.size_flags_horizontal=Control.SIZE_EXPAND_FILL;active_fields.size_flags_stretch_ratio=1.6;active_fields.add_theme_constant_override("separation",6);field_grid.add_child(active_fields)
+	waiting_fields=VBoxContainer.new();waiting_fields.name="WaitingFields";waiting_fields.size_flags_horizontal=Control.SIZE_EXPAND_FILL;waiting_fields.add_theme_constant_override("separation",10);field_grid.add_child(waiting_fields)
 	for lane:Dictionary in lanes:
 		_field_entry(lane)
+	active_fields.visible=active_fields.get_child_count()>0;waiting_fields.visible=waiting_fields.get_child_count()>0
+	if active_fields.get_child_count()>3:
+		var pager:=HBoxContainer.new();pager.add_theme_constant_override("separation",8);active_fields.add_child(pager)
+		active_previous=_small_button(pager,"Previous",func()->void:active_page-=1;_apply_field_visibility(),"Previous fields at work")
+		active_page_label=T.make_label("",14,T.TEXT_SOFT);active_page_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;pager.add_child(active_page_label)
+		active_next=_small_button(pager,"Next",func()->void:active_page+=1;_apply_field_visibility(),"Next fields at work")
+	if waiting_fields.visible:
+		var title_wait:=_voice("Other fields",20);waiting_fields.add_child(title_wait);waiting_fields.move_child(title_wait,0)
+		waiting_picker=OptionButton.new();waiting_picker.custom_minimum_size.y=40;waiting_picker.add_theme_font_size_override("font_size",16);waiting_fields.add_child(waiting_picker);waiting_fields.move_child(waiting_picker,1)
+		for lane:Dictionary in lanes:
+			if (lane.slots as Array).is_empty():waiting_picker.add_item(String(lane.name));waiting_picker.set_item_metadata(waiting_picker.item_count-1,String(lane.id))
+		waiting_id=String(waiting_picker.get_item_metadata(0))
+		waiting_picker.item_selected.connect(func(index:int)->void:waiting_id=String(waiting_picker.get_item_metadata(index));_apply_field_visibility())
+	_apply_field_visibility()
 	if data.has("artifacts"):
 		var study:Dictionary=data.artifacts
 		var row:=HBoxContainer.new();row.name="ArtifactStudy";row.add_theme_constant_override("separation",12);add_child(row)
@@ -124,10 +147,29 @@ func _field_spread(lanes:Array)->void:
 		_line(text,String(study.get("words","")),13,T.BODY).tooltip_text=String(study.get("tip",""))
 		_attention(row,study)
 
+func _apply_field_visibility()->void:
+	var active:Array=active_fields.find_children("Row_*","",false,false)
+	var pages:=maxi(1,ceili(active.size()/3.0));active_page=clampi(active_page,0,pages-1)
+	for index in active.size():(active[index] as Control).visible=index>=active_page*3 and index<(active_page+1)*3
+	if active_page_label:
+		active_page_label.text="%d–%d of %d fields" % [active_page*3+1,mini((active_page+1)*3,active.size()),active.size()];active_previous.disabled=active_page==0;active_next.disabled=active_page>=pages-1
+	for row:Control in waiting_fields.find_children("Row_*","",false,false):row.visible=String(row.name)=="Row_"+waiting_id
+
+func view_state()->Dictionary:
+	return {"active_page":active_page,"waiting_id":waiting_id}
+
+func restore_view_state(state:Dictionary)->void:
+	active_page=int(state.get("active_page",0));waiting_id=String(state.get("waiting_id",waiting_id))
+	if waiting_picker:
+		for index in waiting_picker.item_count:
+			if String(waiting_picker.get_item_metadata(index))==waiting_id:waiting_picker.select(index)
+	_apply_field_visibility()
+
 func _field_entry(lane:Dictionary)->void:
 	var field:Dictionary=lane.field
 	var box:=VBoxContainer.new();box.name="Row_"+String(lane.id);box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	box.add_theme_constant_override("separation",6);field_grid.add_child(box)
+	box.add_theme_constant_override("separation",4)
+	(active_fields if not (lane.slots as Array).is_empty() else waiting_fields).add_child(box)
 	var rule:=ColorRect.new();rule.color=Color(T.BORDER_SOFT,0.7);rule.custom_minimum_size.y=1;box.add_child(rule)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
 	var label:=Button.new();label.name="FieldLabel";label.text=String(lane.name);label.alignment=HORIZONTAL_ALIGNMENT_LEFT;label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -150,9 +192,9 @@ func _field_entry(lane:Dictionary)->void:
 	var record:Dictionary=lead.record
 	var body:=HBoxContainer.new();body.add_theme_constant_override("separation",12);box.add_child(body)
 	if has_painting(record):
-		var painting:=Visuals.paint_discovery(body,record,78);painting.custom_minimum_size.x=100;painting.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;painting.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
+		var painting:=Visuals.paint_discovery(body,record,64);painting.custom_minimum_size.x=76;painting.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;painting.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",3);body.add_child(words)
-	var title:=_voice(String(record.get("name","An open question")),24);title.name="Question_"+String(record.get("id",""));words.add_child(title)
+	var title:=_voice(String(record.get("name","An open question")),18);title.name="Question_"+String(record.get("id",""));words.add_child(title)
 	var cells:={"cells":{}}
 	_question_cells(cells,record)
 	var progress:=float(record.get("progress",0))
@@ -161,16 +203,17 @@ func _field_entry(lane:Dictionary)->void:
 	if String(cells.cells.time) in ["—","stalled"]:caption="%d%% proven · %s" % [roundi(progress*100),"gathering evidence" if String(cells.cells.time)=="—" else "work is stalled"]
 	var status:=_card_words(record)
 	if String(status.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE"):caption+=" · "+String(status.phase).to_lower()
-	var detail:=_line(words,caption,12,T.BODY);detail.tooltip_text=String(cells.tip);detail.mouse_filter=Control.MOUSE_FILTER_PASS
+	var detail:=_line(words,caption,14,T.BODY);detail.tooltip_text=String(cells.tip);detail.mouse_filter=Control.MOUSE_FILTER_PASS
 	var extra:="%d team%s" % [teams,"" if teams==1 else "s"]
-	if slots.size()>1:extra+=" · %d other question%s" % [slots.size()-1,"" if slots.size()==2 else "s"]
+	if slots.size()>1:_line(words,"%d other question%s" % [slots.size()-1,"" if slots.size()==2 else "s"],14,T.TEXT_SOFT)
 	var foot:=HFlowContainer.new();foot.add_theme_constant_override("h_separation",8);words.add_child(foot)
-	var count:=T.make_label(extra,12,T.TEXT_SOFT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_PASS
+	var count:=T.make_label(extra,14,T.TEXT_SOFT);count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;count.mouse_filter=Control.MOUSE_FILTER_PASS
 	var all:Array[String]=[]
 	for slot:Dictionary in slots:all.append("%s · %d%% proven" % [String(slot.record.get("name","")),roundi(float(slot.record.get("progress",0))*100)])
-	count.tooltip_text="\n".join(all);foot.add_child(count)
+	count.tooltip_text="\n".join(all);head.add_child(count);head.move_child(count,1)
 	for slot:Dictionary in slots:
 		if _pickers.has(String(slot.key)):_small_button(foot,"Choose question",_open_picker.bind(String(slot.key)),"A team is free: keep this question or take up another.");break
+	if foot.get_child_count()==0:words.remove_child(foot);foot.queue_free()
 
 func _attention(parent:Node,field:Dictionary)->void:
 	var less:=_small_button(parent,"−",field.get("on_less"),"Give one step of attention to the other fields")
@@ -690,14 +733,12 @@ func _pace_header(parent:Node,words:Dictionary,pace:Dictionary)->void:
 
 ## Two readings at a time: the current work first, forecast evidence below.
 func _readings(parent:Node,pace:Dictionary,indices:Array)->void:
-	var row:=HBoxContainer.new();row.name="ResearchReadings";row.add_theme_constant_override("separation",24);parent.add_child(row)
+	var row:=HFlowContainer.new();row.name="ResearchReadings";row.add_theme_constant_override("h_separation",24);row.add_theme_constant_override("v_separation",4);parent.add_child(row)
 	var readings:=figures(pace)
 	for index:int in indices:
 		var reading:Dictionary=readings[index]
-		var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;box.add_theme_constant_override("separation",4);box.tooltip_text=String(reading.tip);box.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(box)
-		_line(box,T.sentence_case(String(reading.label)),14,T.TEXT_SOFT)
-		box.add_child(_voice(String(reading.value),28))
-		_line(box,String(reading.delta),14,T.TEXT_SOFT)
+		var words:="%s: %s · %s" % [T.sentence_case(String(reading.label)),String(reading.value),String(reading.delta)]
+		var label:=T.make_label(words,16,T.BODY);label.tooltip_text=String(reading.tip);label.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(label)
 
 func _fill_header(_words:Dictionary,pace:Dictionary)->void:
 	var parts:=pace_factors(pace)
@@ -805,6 +846,6 @@ func _open_picker(channel:String)->void:
 
 func _arrange()->void:
 	var wide:=size.x>=WIDE
-	if field_grid:field_grid.columns=2 if size.x>=700.0 else 1
+	if field_grid:field_grid.vertical=not wide
 	for grid:GridContainer in choice_grids:
 		if is_instance_valid(grid):grid.columns=3 if wide else 1

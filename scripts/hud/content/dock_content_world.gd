@@ -86,14 +86,16 @@ func known_world_blocks(exploration:Dictionary)->Array:
 func peoples_block()->Dictionary:
 	var model:=PeoplesModel.build()
 	if int(model.get("met",0))<=0:return {}
-	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"counter":counter,"counter_tip":counter_tip,"side":feelings(),"_print":[model.hash(),counter,int(GameState.elapsed_days)/30]}
+	var our:=preload("res://scripts/standing.gd").strengths()
+	var regard:=feelings(our)
+	return {"type":"peoples_known","model":model,"view":peoples_view,"on_town":open_town,"on_speak":speak_with,"counter":counter,"counter_tip":counter_tip,"side":regard,"own":our,"_print":[model.hash(),regard.hash(),our.hash(),counter,int(GameState.elapsed_days)/30]}
 
 ## How each people we know sees us, as the Standing page reckons it
 ## (dock_content_standing.gd: the same rows, the same six feelings).
-func feelings()->Array:
+func feelings(our:Dictionary={})->Array:
 	var StandingPage:=preload("res://scripts/hud/content/dock_content_standing.gd")
 	var Standing:=preload("res://scripts/standing.gd")
-	var our:=Standing.strengths()
+	if our.is_empty():our=Standing.strengths()
 	var page=StandingPage.new(terrain,hud)
 	return (page.board_data(our,StandingPage.views_of(our)) as Dictionary).get("peoples",[])
 

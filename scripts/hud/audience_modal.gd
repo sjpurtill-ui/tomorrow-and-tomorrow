@@ -3204,6 +3204,9 @@ const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"general
 const MAX_SEATED:=7
 var pending_words:=""
 var pending_matter:=""
+var roster_query:=""
+var roster_page:=0
+var foreign_selected:=""
 
 func show_court()->void:
 	## The whole court gathered in its setting, nobody yet before you.
@@ -3221,9 +3224,18 @@ func show_court()->void:
 	lower.add_theme_constant_override("margin_top",12);lower.add_theme_constant_override("margin_bottom",10)
 	body.add_child(lower)
 	var columns:=HBoxContainer.new();columns.add_theme_constant_override("separation",16);lower.add_child(columns)
-	columns.add_child(_rest_column("CourtRoster","THE COURT","Send for anyone; they come at once.",_build_roster_list(roster),1.45))
-	columns.add_child(_rest_column("Antechamber","THE ANTECHAMBER","Only foreign envoys come unbidden.",_build_antechamber(),1.0))
-	columns.add_child(_rest_column("ForeignPeoples","SEND WORD ABROAD","Your envoys carry your brief to their rulers.",_build_foreign_list(),1.0))
+	columns.add_child(_rest_column("CourtRoster","THE COURT","Send for anyone; they come at once.",_build_roster_list(roster),1.1))
+	var business_scroll:=ScrollContainer.new();business_scroll.name="CourtBusinessScroll";business_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	business_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;columns.add_child(business_scroll)
+	var business:=VBoxContainer.new();business.name="CourtBusiness";business.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	business.add_theme_constant_override("separation",10);business_scroll.add_child(business)
+	var waiting:=_build_antechamber()
+	if bool(waiting.get_meta("has_business",false)):
+		var chamber:=_rest_column("Antechamber","WAITING FOR YOU","",waiting,1.0,false)
+		business.add_child(chamber)
+	else:waiting.queue_free()
+	var abroad:=_rest_column("ForeignPeoples","SEND WORD ABROAD","",_build_foreign_list(),1.0,false)
+	abroad.tooltip_text="Your envoys carry your brief to their rulers.";business.add_child(abroad)
 	body.add_child(_build_rest_footer())
 	rest_signature=_rest_state()
 	_fit()
@@ -3372,32 +3384,60 @@ func _threshold_chip(audience:Dictionary)->Control:
 	chip.pressed.connect(func()->void:receive(id))
 	return chip
 
-func _rest_column(node_name:String,heading:String,sub:String,content:Control,ratio:float)->Control:
+func _rest_column(node_name:String,heading:String,sub:String,content:Control,ratio:float,scroll_content:bool=true)->Control:
 	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.size_flags_stretch_ratio=ratio
 	column.add_theme_constant_override("separation",4)
 	# Kicker, then its note on a line of its own; prose wraps, never ellipsizes.
 	var head:=VBoxContainer.new();head.add_theme_constant_override("separation",0);column.add_child(head)
 	head.add_child(Tokens.make_label(Tokens.sentence_case(heading),22,Tokens.INK))
-	var note:=Tokens.make_label(sub,14,Tokens.TEXT_DIM);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(note)
+	if not sub.is_empty():
+		var note:=Tokens.make_label(sub,14,Tokens.TEXT_DIM);note.size_flags_horizontal=Control.SIZE_EXPAND_FILL;note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(note)
 	var rule:=ColorRect.new();rule.color=Tokens.BORDER_SOFT;rule.custom_minimum_size=Vector2(0,1);column.add_child(rule)
-	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(content)
+	content.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	if scroll_content:
+		var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
+		scroll.add_child(content)
+	else:column.add_child(content)
 	return column
 
 func _build_roster_list(roster:Array[Dictionary])->Control:
 	var list:=VBoxContainer.new();list.name="RosterList";list.add_theme_constant_override("separation",5)
-	var groups:Dictionary={}
-	for entry in roster:
-		if not groups.has(String(entry.group)):groups[String(entry.group)]=[]
-		(groups[String(entry.group)] as Array).append(entry)
-	for group in Roster.GROUPS:
-		if not groups.has(group):continue
-		var label:=Tokens.make_label(Roster.group_word(group),14,Tokens.TEXT_DIM,.12)
-		list.add_child(label)
-		for entry:Dictionary in groups[group]:list.add_child(_roster_row(entry))
+	# Keep the familiar council visible without turning every specialist and
+	# visitor into another permanent row. The full roster stays searchable.
+	var rows:=VBoxContainer.new();rows.name="RosterPeople";rows.add_theme_constant_override("separation",5)
+	var footer:=HBoxContainer.new();footer.add_theme_constant_override("separation",6)
+	var count:=Tokens.make_label("",14,Tokens.INK_MUTED);count.size_flags_horizontal=Control.SIZE_EXPAND_FILL;footer.add_child(count)
+	var previous:=Button.new();previous.name="PreviousPeople";previous.text="Previous";Tokens.apply_button_style(previous);footer.add_child(previous)
+	var next:=Button.new();next.name="NextPeople";next.text="Next";Tokens.apply_button_style(next);footer.add_child(next)
+	var fill:=func()->void:
+		for child in rows.get_children():rows.remove_child(child);child.queue_free()
+		var matches:=roster.filter(func(entry:Dictionary)->bool:
+			return roster_query.strip_edges().is_empty() or (String(entry.name)+" "+String(entry.title)+" "+Roster.group_word(String(entry.group))).to_lower().contains(roster_query.strip_edges().to_lower()))
+		roster_page=clampi(roster_page,0,maxi(0,ceili(matches.size()/6.0)-1))
+		var first:=roster_page*6
+		for index in range(first,mini(first+6,matches.size())):rows.add_child(_roster_row(matches[index]))
+		count.text="%d–%d of %d" % [first+1,mini(first+6,matches.size()),matches.size()] if not matches.is_empty() else "No matching people"
+		previous.disabled=roster_page==0;next.disabled=first+6>=matches.size()
+		footer.visible=roster.size()>6 or not roster_query.is_empty()
+	if roster.size()>6 or not roster_query.is_empty():
+		var search:=LineEdit.new();search.name="CourtPeopleSearch";search.placeholder_text="Find a person or office";search.text=roster_query;search.custom_minimum_size.y=40;list.add_child(search)
+		search.text_changed.connect(func(value:String)->void:roster_query=value;roster_page=0;fill.call())
+	list.add_child(rows);list.add_child(footer)
+	previous.pressed.connect(func()->void:roster_page-=1;fill.call())
+	next.pressed.connect(func()->void:roster_page+=1;fill.call())
+	fill.call()
 	if roster.is_empty():
 		var empty:=Tokens.make_label("No one holds office yet. Officials appear as your government grows.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
-	preload("res://scripts/hud/court_remembered.gd").append_to(list,_italic)
+	var aim:=String(preload("res://scripts/legacy_aims.gd").court_line())
+	if not aim.is_empty():
+		var current_aim:=Tokens.make_label(aim,14,Tokens.GOLD_TEXT);current_aim.name="CurrentAim";current_aim.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(current_aim)
+	var remembered:=VBoxContainer.new();remembered.name="CourtMemories"
+	preload("res://scripts/hud/court_remembered.gd").append_to(remembered,_italic)
+	if remembered.get_child_count()>0:
+		var memories:=Button.new();memories.text="Aims and remembered people";Tokens.apply_button_style(memories)
+		memories.pressed.connect(func()->void:remembered.visible=not remembered.visible);list.add_child(memories)
+		list.add_child(remembered);remembered.visible=false
+	else:remembered.queue_free()
 	return list
 
 func _roster_row(entry:Dictionary)->Control:
@@ -3430,12 +3470,10 @@ func _roster_row(entry:Dictionary)->Control:
 func _build_antechamber()->Control:
 	var list:=VBoxContainer.new();list.name="AntechamberList";list.add_theme_constant_override("separation",5)
 	var envoys:=Roster.envoys()
-	if envoys.is_empty():
-		var empty:=Tokens.make_label("No envoy waits.",13,Tokens.MUTED);empty.add_theme_font_override("font",_italic);list.add_child(empty)
 	for audience in envoys:list.add_child(_envoy_row(audience))
 	var set_aside:=Roster.court_waiting()
 	if not set_aside.is_empty():
-		list.add_child(Tokens.make_label("STILL BEFORE YOU",10,Tokens.TEXT_DIM,.12))
+		if not envoys.is_empty():list.add_child(Tokens.make_label("STILL BEFORE YOU",10,Tokens.TEXT_DIM,.12))
 		for audience in set_aside:
 			var speaker:Dictionary=audience.get("speaker",{})
 			var row:=_simple_row("Resume_"+String(audience.id),String(speaker.get("name","")),"%s · you left them waiting" % String(speaker.get("title","")),"Resume",Tokens.VIOLET)
@@ -3449,6 +3487,7 @@ func _build_antechamber()->Control:
 	if not decisions.is_empty():
 		list.add_child(Tokens.make_label("AWAITING YOUR WORD",10,Tokens.TEXT_DIM,.12))
 		for item in decisions:list.add_child(_decision_row(item))
+	list.set_meta("has_business",list.get_child_count()>0)
 	return list
 
 func _envoy_row(audience:Dictionary)->Control:
@@ -3500,7 +3539,14 @@ func _build_foreign_list()->Control:
 	var peoples:=Roster.foreign_peoples()
 	if peoples.is_empty():
 		var empty:=Tokens.make_label("You know no foreign ruler yet. Scouts and delegates must find them first.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;empty.add_theme_font_override("font",_italic);list.add_child(empty)
-	for entry in peoples:
+		return list
+	var selected:=0
+	for index in peoples.size():
+		if String(peoples[index].civ_id)==foreign_selected:selected=index
+	foreign_selected=String(peoples[selected].civ_id)
+	var selected_detail:=VBoxContainer.new();selected_detail.name="ForeignSelected"
+	var fill:=func(entry:Dictionary)->void:
+		for child in selected_detail.get_children():selected_detail.remove_child(child);child.queue_free()
 		var civ_id:=String(entry.civ_id)
 		var regard:Dictionary=entry.get("regard",{})
 		var state:="in a feud with you" if bool(entry.get("feud",false)) else ("at war with you" if bool(entry.at_war) else ("your envoys know the way" if bool(entry.access) else "no audience yet: send delegates first"))
@@ -3508,7 +3554,14 @@ func _build_foreign_list()->Control:
 		var sub:="%s · they %s · %s" % [String(entry.leader),String(regard.get("read","are undecided about you")),state]
 		var row:=_simple_row("Foreign_"+civ_id,String(entry.name),sub,"Send word",_ink(Identity.banner_color(Identity.foreign(civ_id).texture)),Identity.foreign(civ_id).texture)
 		(row.get_meta("button") as Button).pressed.connect(func()->void:show_foreign(civ_id))
-		list.add_child(row)
+		selected_detail.add_child(row)
+	if peoples.size()>1:
+		var choose:=OptionButton.new();choose.name="ForeignPeopleSelector";Tokens.apply_button_style(choose)
+		choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		for entry in peoples:choose.add_item(String(entry.name))
+		choose.select(selected);list.add_child(choose)
+		choose.item_selected.connect(func(index:int)->void:foreign_selected=String(peoples[index].civ_id);fill.call(peoples[index]))
+	list.add_child(selected_detail);fill.call(peoples[selected])
 	return list
 
 func _build_rest_footer()->Control:

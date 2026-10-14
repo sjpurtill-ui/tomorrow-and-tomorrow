@@ -426,7 +426,7 @@ func _works_screen()->void:
 	await _frames(3)
 	var ours:=GW.works()
 	var list:=atlas.find_child("WorkList",true,false)
-	if list==null or list.get_child_count()!=ours.size():_fail("works screen lists %d of %d works" % [list.get_child_count() if list else 0,ours.size()])
+	if list==null or list.get_child_count()!=mini(ours.size(),Atlas.LIST_PAGE):_fail("works screen page lists %d of %d works" % [list.get_child_count() if list else 0,ours.size()])
 	for item:Dictionary in ours:
 		atlas.select("player/%s/%s" % [String(item.city_id),String(item.work_id)])
 		await _frames(1)
