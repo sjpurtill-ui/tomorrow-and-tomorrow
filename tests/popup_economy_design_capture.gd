@@ -6,6 +6,7 @@ const Folio=preload("res://scripts/hud/reference_folio.gd")
 const WealthFixture=preload("res://tests/wealth_visual_acceptance_probe.gd")
 const TradeFixture=preload("res://tests/trade_visual_acceptance_probe.gd")
 const FoodFixture=preload("res://tests/test_food_folio.gd")
+const MaterialsFixture=preload("res://tests/test_materials_ledger_presentation.gd")
 
 class CaptureHud extends Control:
 	signal section_requested(section:String,sub:int)
@@ -19,6 +20,15 @@ class CaptureTerrain extends Node:
 
 class FoodProvider extends "res://scripts/hud/content/dock_content_economy.gd":
 	var short_food:=false
+	var prepared_materials:=false
+	func _materials_data()->Dictionary:
+		var result:=super._materials_data()
+		if prepared_materials:
+			var fixture:=MaterialsFixture.prepared_materials()
+			for key:String in fixture:
+				if not key.begins_with("on_"):result[key]=fixture[key]
+			result.selected=selected_material
+		return result
 	func _provisions_data()->Dictionary:
 		var result:=super._provisions_data()
 		var fixture:=FoodFixture.prepared_food()
@@ -64,6 +74,15 @@ func _run()->void:
 				if page[1]=="food":
 					provider.short_food=true;dock.present(provider,0);dock.body_scroll.scroll_vertical=0;await _settle()
 					await _capture(viewport,output,"economy-%s-food-shortage-%s-%d" % [tag,palette,canvas.x]);provider.short_food=false
+				if page[1]=="materials":
+					provider.selected_material="Timber";dock.present(provider,1);dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-material-sources-%s-%d" % [tag,palette,canvas.x])
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-material-sources-bottom-%s-%d" % [tag,palette,canvas.x]);provider.selected_material=""
+					provider.prepared_materials=true;provider.selected_material="Timber";dock.present(provider,1);dock.body_scroll.scroll_vertical=0;await _settle()
+					await _capture(viewport,output,"economy-%s-material-active-sources-%s-%d" % [tag,palette,canvas.x])
+					dock.body_scroll.scroll_vertical=int(dock.body.get_combined_minimum_size().y);await _settle()
+					await _capture(viewport,output,"economy-%s-material-active-sources-bottom-%s-%d" % [tag,palette,canvas.x]);provider.selected_material="";provider.prepared_materials=false
 			viewport.queue_free();await get_tree().process_frame
 	fixture.free()
 	print("POPUP_ECONOMY_CAPTURE PASS")

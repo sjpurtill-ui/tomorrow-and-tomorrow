@@ -30,7 +30,7 @@ func _local_tab(sub:int)->Dictionary:
 	match sub:
 		1:
 			var materials:=_materials_data()
-			return {"kpis":preload("res://scripts/hud/materials_ledger.gd").kpis(materials),"blocks":[materials]}
+			return {"kpis":[],"blocks":[materials]}
 		2:return _wealth_tab()
 		3:return {"kpis":preload("res://scripts/hud/trade_board.gd").kpis(),"blocks":[{"type":"trade_board"}]}
 	return _food_tab()

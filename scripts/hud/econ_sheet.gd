@@ -176,13 +176,13 @@ static func row(parent:Node,item:Dictionary)->Dictionary:
 		spark.ready.connect(func()->void:spark.custom_minimum_size=Vector2(spark_width,22);spark.mouse_filter=Control.MOUSE_FILTER_IGNORE;spark.tooltip_text="")
 	var meter:=bar(0.0,T.GOLD,float(item.get("bar_width",70.0)),5.0);meter.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(meter)
 	var state:=tag("",T.MUTED);state.mouse_filter=Control.MOUSE_FILTER_IGNORE;signals.add_child(state)
-	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);actions.visible=not (item.get("buttons",[]) as Array).is_empty();body.add_child(actions)
+	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);actions.visible=not (item.get("buttons",[]) as Array).is_empty();(headline if bool(item.get("compact_actions",false)) else body).add_child(actions)
 	var buttons:Array=[]
 	for spec:Dictionary in item.get("buttons",[]):
 		var b:=verb(String(spec.get("text","")),spec.get("on_press"),String(spec.get("tip","")),bool(spec.get("chosen",false)),bool(spec.get("primary",false)))
 		if bool(spec.get("disabled",false)):b.disabled=true
 		actions.add_child(b);buttons.append(b)
-	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"compact":false}
+	var refs:={"panel":panel,"label":name_label,"note":note,"bar":meter,"value":value,"tag":state,"buttons":buttons,"icon":glyph,"spark":spark,"signals":signals,"compact":false}
 	panel.set_meta("econ_row",refs)
 	set_row(refs,item)
 	return refs
@@ -200,6 +200,7 @@ static func set_row(refs:Dictionary,item:Dictionary)->void:
 	if ratio>=0.0 and (meter.ratio!=ratio or meter.color!=color):meter.ratio=ratio;meter.color=color;meter.queue_redraw()
 	set_tag(refs.tag,String(item.get("tag","")),item.get("tag_color",T.MUTED))
 	var spark:Control=refs.get("spark")
+	(refs.signals as Control).visible=meter.visible or (refs.tag as Control).visible or (spark!=null and spark.visible)
 	if spark!=null and item.has("points") and spark.get("points")!=item.points:spark.set("points",item.points);spark.queue_redraw()
 	var tip:=String(item.get("tip",""))
 	if (refs.panel as Control).tooltip_text!=tip:(refs.panel as Control).tooltip_text=tip
@@ -240,3 +241,4 @@ static func compact(root:Node,width:float)->void:
 		if narrow:(refs.bar as Control).visible=false
 		else:(refs.bar as Control).visible=float(refs.get("ratio",-1.0))>=0.0
 		if refs.get("spark")!=null:(refs.spark as Control).visible=not narrow
+		(refs.signals as Control).visible=(refs.bar as Control).visible or (refs.tag as Control).visible or (refs.get("spark")!=null and (refs.spark as Control).visible)
