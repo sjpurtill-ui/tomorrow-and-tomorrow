@@ -136,3 +136,20 @@ func test_reference_sidebar_and_speed_controls_keep_their_actions() -> void:
 	hud.close_dock()
 	hud.rail_buttons.economy.pressed.emit()
 	assert_array(chosen).is_equal(["economy",0])
+
+## The owner plays 1600x900 at 125%: a 1280-wide canvas. Every reading fits
+## beside the clock there, GOODS included; none is shed.
+func test_every_reading_shows_at_the_owners_size() -> void:
+	GameState.known_discoveries.append("printing_process")
+	hud._refresh_words()
+	canvas.size=Vector2i(1280,720)
+	hud._layout()
+	hud._refresh_kpis()
+	for i in 6: await get_tree().process_frame
+	hud._layout()
+	for i in 3: await get_tree().process_frame
+	for def: Dictionary in hud.KPI_DEFS:
+		var id:=String(def.id)
+		assert_bool(hud.top_readings.entries.has(id) and hud.top_readings.entries[id].button.visible).override_failure_message(id+" is shed at 1280").is_true()
+	for entry: Dictionary in hud.top_readings.entries.values():
+		assert_float(entry.button.get_global_rect().end.x).is_less_equal(hud.top_frame.get_global_rect().end.x)

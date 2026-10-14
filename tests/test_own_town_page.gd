@@ -265,7 +265,9 @@ func test_foreign_marks_are_only_returned_estimates_and_absent_without_them()->v
 	assert_float(float(again.low)).is_equal(float(mark.low))
 	assert_float(float(again.high)).is_equal(float(mark.high))
 	# Rows with no estimate of theirs carry no mark: water, roofs, works.
-	for key:String in ["water","roofs","works","building"]:assert_array(rows[key].marks).override_failure_message(key).is_empty()
+	# (Works and Building now are rows only while there is news: works not yet raised, work under way.)
+	for key:String in ["water","roofs","works","building","production","logistics"]:
+		if rows.has(key):assert_array(rows[key].marks).override_failure_message(key).is_empty()
 	# Their damage is war damage and our repair counts wear too: their sighting
 	# is told in the tooltip, never drawn against our scale.
 	assert_bool(bool(rows.damage.get("bands",true))).is_false()
@@ -329,11 +331,26 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var court:=FakeCourt.new();court.add_to_group(Director.GROUP);add_child(court)
 	var id:=_primary_id()
 	var page:=_page(_block())
-	# Where the people live is a table after the overview: the seat's stage and every place, one line each.
-	var spread:Dictionary=Provider.new(terrain,hud).tab(0).blocks.back()
+	# Where the people live is a table right under the facts, above the works:
+	# the seat's stage and every place, one line each.
+	var block:=Provider.new(terrain,hud).tab(0).blocks[0] as Dictionary
+	var spread:Dictionary=block.places
 	assert_str(String(spread.type)).is_equal("table")
 	assert_str(String(spread.heading)).is_equal("Where our people live")
 	assert_str(String(spread.rows[0].tip)).contains("district by district")
+	var places:=page.find_child("Places",true,false) as Control
+	assert_object(places).is_not_null()
+	var works:=page.find_child("WaterWorks",true,false)
+	if works:assert_int(places.get_index()).is_less(works.get_index())
+	var at:=places.get_index()
+	# A day on, the table takes its new lines where it stands.
+	var moved:=block.duplicate(true)
+	(moved.places.rows[0].cells as Dictionary)["people"]="1"
+	assert_bool(page.update_block(moved)).is_true()
+	var redrawn:=page.find_child("Places",false,false) as Control
+	assert_object(redrawn).is_not_null()
+	assert_bool(redrawn==places).is_false()
+	assert_int(redrawn.get_index()).is_equal(at)
 	assert_object(page.find_child("Choice_Ruler",true,false)).is_null()
 	# The one way to ask for more hands.
 	var ask:=page.find_child("AskForHands",true,false)
@@ -346,16 +363,12 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	(page.find_child("TalkWithLeader",true,false) as Button).pressed.emit()
 	assert_int(court.opened.size()).is_equal(1)
 	assert_str(String(court.opened[0].get("settlement_id",""))).is_equal(id)
-	# The town's own reports and its name.
-	var reports:=page.find_child("Reports",true,false)
-	var labels:=_texts(reports)
-	assert_array(Array(labels)).contains(["Ages and families","Rename this place"])
-	# Who does what is The People's to show and set (manual_work.gd), not a second screen here.
-	assert_array(Array(labels)).not_contains(["Who does what"])
-	for button in reports.find_children("*","Button",true,false):
-		if (button as Button).text=="Rename this place":(button as Button).pressed.emit()
-		if (button as Button).text=="Ages and families":(button as Button).pressed.emit()
+	# The town's name: Rename on the place's own line of the table; its ages
+	# and families on the GROWTH tile.
+	assert_array(Array(_texts(page))).not_contains(["Who does what"])
+	(page.find_child("Places",true,false).find_child("Verb_Rename",true,false) as Button).pressed.emit()
 	assert_array(terrain.naming).contains_exactly([id])
+	((Provider.new(terrain,hud).tab(0).kpis as Array)[0].on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
 	# The asked-for hands show as the current choice on the next build.
 	var text:="\n".join(_texts(_page(_block())))
@@ -390,9 +403,17 @@ func test_the_towns_history_is_one_of_the_chronicles_tabs()->void:
 func test_each_row_opens_the_page_that_owns_it()->void:
 	var page:=_page(_block())
 	assert_object(page.find_child("TownSketch",true,false)).is_null()
-	assert_object(page.find_child("VisitVillage",true,false)).is_not_null()
+	# Visit and rename stand on the places table's own lines.
+	assert_object(page.find_child("Places",true,false).find_child("Verb_Visit",true,false)).is_not_null()
+	assert_object(page.find_child("Places",true,false).find_child("Verb_Rename",true,false)).is_not_null()
+	assert_object(page.find_child("Reports",true,false)).is_null()
 	var expected:={"infant_mortality":["health",0],"garrison":["military",0],"fortification":["military",0],"damage":["construction",0],
-		"production":["production",0],"logistics":["economy",1],"works":["construction",1],"building":["construction",1]}
+		"production":["production",0],"logistics":["economy",1]}
+	# Works and Building now: rows only while there is news, else none.
+	var rows:=_rows(_block())
+	for key:String in ["works","building"]:
+		if rows.has(key):expected[key]=["construction",1]
+		else:assert_object(page.find_child("Row_"+key,true,false)).override_failure_message(key).is_null()
 	# A row never restates a tile.
 	for key:String in Provider.IN_TILES:assert_object(page.find_child("Row_"+key,true,false)).override_failure_message(key).is_null()
 	for key:String in expected:
@@ -404,21 +425,28 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 		hud.opened.clear()
 		row.gui_input.emit(click)
 		assert_array(hud.opened).override_failure_message(key).contains_exactly([expected[key]])
-	# The town's own ages and families open from the page's foot.
-	for button in page.find_children("*","Button",true,false):
-		if (button as Button).text=="Ages and families":(button as Button).pressed.emit()
+	# The town's own ages and families open from the GROWTH tile.
+	var growth:Dictionary=(Provider.new(terrain,hud).tab(0).kpis as Array)[0]
+	(growth.on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
+	# Work buildings and roads read the Buildings page's own figures, not words of ours.
+	var fabric:=preload("res://scripts/built_fabric.gd").report()
+	assert_str(String(rows.production.name)).is_equal("Work buildings")
+	assert_str(String(rows.production.value)).is_equal("%d/100" % roundi(float(fabric.cover)*100.0))
+	assert_str(String(rows.logistics.name)).is_equal("Roads")
+	assert_str(String(rows.logistics.value)).is_equal("%d/100" % roundi(float(fabric.roads)*100.0))
 	# Each row says where it leads, in its tooltip.
 	assert_str((page.find_child("Row_logistics",true,false) as Control).tooltip_text).contains("Opens the Materials page.")
 
 func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
 	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
 	var labels:=tiles.map(func(t:Dictionary)->String:return String(t.label))
-	assert_array(labels).is_equal(["PEOPLE","FOOD","WATER","HOMES","LIFE SPAN","ARMY"])
+	# Only what the top bar lacks: it has the head count, food, water and life span.
+	assert_array(labels).is_equal(["GROWTH","HOMES","MOOD","ARMY"])
 	for tile:Dictionary in tiles:
 		assert_bool(bool(tile.glance)).is_true()
-		# A head count and a life span have no full mark to fill toward: no bar.
-		if String(tile.label) in ["PEOPLE","LIFE SPAN"]:
+		# A year's change has no full mark to fill toward: no bar.
+		if String(tile.label)=="GROWTH":
 			assert_bool(tile.has("meter")).is_false()
 			continue
 		assert_bool(tile.has("meter")).override_failure_message(String(tile.label)).is_true()
@@ -426,8 +454,9 @@ func test_home_shows_six_numbers_with_bars_under_the_tabs()->void:
 		assert_bool((tile.on_press as Callable).is_valid()).is_true()
 	# Each number is the page's own: the head count, and the top bar's words for days of food.
 	var rows:=_rows(_block())
-	assert_str(String(tiles[0].value)).is_equal(EraWords.grouped(int(rows.population.number)))
-	assert_str(String(tiles[1].value)).is_equal(EraWords.days(float(rows.supply.number)))
+	assert_str(String(tiles[1].value)).is_equal(EraWords.grouped(int(rows.roofs.number)))
+	var year:=preload("res://scripts/chronicle_annals.gd").people_this_year(GameState.chronicle,int(GameState.population_total))
+	if not year.is_empty() and int(year.change)!=0:assert_str(String(tiles[0].value)).ends_with(EraWords.grouped(absi(int(year.change))))
 
 func _words(text:String)->int:
 	return text.strip_edges().split(" ",false).size()
@@ -443,8 +472,6 @@ func test_era_words_before_writing_and_short_labels()->void:
 	var page:=_page(_block())
 	var text:="\n".join(_texts(page))
 	assert_str(text).contains("in 100").contains("Babes lost")
-	var tiles:Array=Provider.new(terrain,hud).tab(0).kpis
-	assert_str(String(tiles[4].value)).contains("winters")
 	for word:String in MODERN:assert_str(text).override_failure_message(word).not_contains(word)
 	assert_array(Voice.lexicon_hits(text,Voice.era_tags("player"))).is_empty()
 	_assert_short(page)
@@ -495,11 +522,14 @@ func test_each_home_tile_pressed_opens_its_page()->void:
 	var dock:PanelContainer=auto_free(preload("res://scripts/hud/dock_panel.gd").new())
 	add_child(dock)
 	dock._rebuild_kpis(tiles)
-	var expected:={"PEOPLE":["chronicle",0],"FOOD":["economy",0],"WATER":["economy",0],"HOMES":["construction",0],"LIFE SPAN":["overview",0],"ARMY":["military",0]}
+	var expected:={"HOMES":["construction",0],"MOOD":["overview",0],"ARMY":["military",0]}
 	assert_int(dock.kpi_row.get_child_count()).is_equal(tiles.size())
 	for index in tiles.size():
 		var label:=String(tiles[index].label)
 		var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
 		hud.opened.clear()
+		var before:=hud.details.size()
 		(dock.kpi_row.get_child(index) as Control).gui_input.emit(click)
+		# GROWTH opens the town's ages and families.
+		if label=="GROWTH":assert_int(hud.details.size()).is_equal(before+1);continue
 		assert_array(hud.opened).override_failure_message(label).contains_exactly([expected[label]])

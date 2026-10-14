@@ -147,6 +147,8 @@ static func _droplet(fill:Color,shine:Color)->Array:
 
 
 static func _glyph(resource_name:String)->Array:
+	var kept:=_economy_glyph(resource_name)
+	if not kept.is_empty():return kept
 	match resource_name:
 		"Timber": return [
 			_s(28,40,28,47,3,Color("#7a5230")),
@@ -1608,3 +1610,28 @@ static func town_glyph(kind:String,c:Color)->Array:
 		"danger": return [_t(28,5,19,28,37,28,c),_s(28,27,28,52,3.2,c),_s(22,44,34,44,2.4,soft)]
 		"watchers": return _figure(20,c)+_figure(36,soft)
 	return [_c(28,28,6,c)]
+
+
+## Goods and stores the Economy pages count that have no deposit of their
+## own: food (a sheaf), stored food (a sealed jar), household goods (a pot
+## and a basket), carts, bone, fat, hides, coin and weighed metal.
+static func _economy_glyph(resource_name:String)->Array:
+	match resource_name:
+		"Food","Fresh food": return [
+			_s(28,46,28,22,2.6,Color("#8a6a2a")),_s(28,44,19,24,2.2,Color("#8a6a2a")),_s(28,44,37,24,2.2,Color("#8a6a2a")),
+			_c(28,16,5,Color("#d0a443")),_c(18,20,4.2,Color("#c79a3a")),_c(38,20,4.2,Color("#c79a3a")),_s(20,40,36,40,3,Color("#6d5120"))]
+		"Stored food": return [
+			_rr(28,32,11,13,5,Color("#a8683a")),_rr(28,17,7,3,1.5,Color("#7c4a26")),_s(19,30,37,30,2,Color("#e1c08a")),_s(19,36,37,36,2,Color("#e1c08a"))]
+		"Civilian Goods","Goods": return [
+			_rr(22,34,8,10,4,Color("#b06a3c")),_rr(22,23,5,2.5,1,Color("#7c4a26")),_rr(37,36,9,7,2,Color("#c9a35a")),_s(29,32,45,32,2,Color("#8a6a2a")),_s(29,38,45,38,2,Color("#8a6a2a"))]
+		"Transport Carts": return [
+			_rr(28,26,15,6,1.5,Color("#8a5a2e")),_ring(19,38,6,2.6,Color("#4a3a28")),_ring(37,38,6,2.6,Color("#4a3a28")),_s(13,24,6,20,2.4,Color("#6d4a26"))]
+		"Recovered Bone": return [
+			_s(18,38,38,18,5,Color("#e6dcc4")),_c(15,37,4.5,Color("#e6dcc4")),_c(19,41,4.5,Color("#e6dcc4")),_c(37,15,4.5,Color("#e6dcc4")),_c(41,19,4.5,Color("#e6dcc4"))]
+		"Recovered Animal Fat": return [
+			_rr(28,33,12,9,4,Color("#e9d9a6")),_c(28,23,6,Color("#f3e7bf")),_s(18,33,38,33,1.6,Color("#c9b47a"))]
+		"Raw Hides": return [
+			_poly([16,16,40,16,44,28,40,42,16,42,12,28],Color("#a07048")),_c(28,29,5,Color("#86593a"))]
+		"Coin","Weighed Metal": return [
+			_c(28,28,13,Color("#c9a13a")),_ring(28,28,10,1.6,Color("#8a6a1a")),_rr(28,28,3,3,0.5,Color("#8a6a1a"))]
+	return []

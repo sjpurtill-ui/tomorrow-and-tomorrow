@@ -117,9 +117,9 @@ func _local(id:String)->Dictionary:
 		if String(news.get("status",""))=="building":row["bar"]={"ratio":(low+high)*0.5,"color":Tokens.RULE_STRONG,"width":70,"tip":"Somewhere between %d%% and %d%% raised, as last heard." % [roundi(low*100.0),roundi(high*100.0)]}
 		cards.append(row)
 	var sections:=[
-		{"id":"works","heading":"Great works of %s" % String(city.get("name","the town")),"span":true,"note":"none yet" if count==0 else "",
+		{"id":"works","heading":"Great works of %s" % String(city.get("name","the town")),"span":true,"tiles":true,"note":"none yet" if count==0 else "",
 			"actions":[{"label":"Conceive","primary":count==0,"tip":"Call the court and hear what they dream of: a wonder conceived from who we are.","on_press":_conceive}]},
-		{"id":"next","heading":"What the people could raise next","span":true},
+		{"id":"next","heading":"What the people could raise next","span":true,"tiles":true},
 		{"id":"sky","heading":"The watching sky foresees"},
 		{"id":"abroad","heading":"Other peoples' works","note":"as last heard" if cards.any(func(c:Dictionary)->bool:return String(c.section)=="abroad") else ""}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards}]}

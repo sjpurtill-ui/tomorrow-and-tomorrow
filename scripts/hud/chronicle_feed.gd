@@ -29,6 +29,9 @@ const Annals:=preload("res://scripts/chronicle_annals.gd")
 const PAGE:=40
 ## The count's side.
 const COUNT_SIDE:=176.0
+const Dense:=preload("res://scripts/hud/dense_blocks.gd")
+## A telling's line: its title (wrapping, never cut) and its season.
+const LINE_COLUMNS:=[{"key":"title","wrap":true},{"key":"season","width":60,"align":"right"}]
 ## The kinds the list can be filtered to, each with its mark: [id, words, glyph].
 const FILTERS:=[["all","Everything","hearth_count"],["loss","Deaths & troubles","death"],["war","War","war"],["learning","Learning","discovery"],
 	["contact","Meetings & travel","contact"],["works","Works & customs","work"],["court","Court","court"]]
@@ -273,6 +276,10 @@ func setup(block:Dictionary)->void:
 	tallies_check.toggled.connect(func(on:bool)->void:show_tallies=on;_render_list())
 	chips.add_child(tallies_check)
 	list=VBoxContainer.new();list.name="Years";list.add_theme_constant_override("separation",0);right.add_child(list)
+	# Capture only: "--capture-telling" opens the chosen year's newest telling.
+	if "--capture-telling" in OS.get_cmdline_user_args() and _chosen_index()>=0:
+		var told:=_year_lines(years[_chosen_index()])
+		if not told.is_empty():open_key=String((told[0] as Dictionary).get("key",""))
 	_fill()
 
 
@@ -624,29 +631,23 @@ func _render_list()->void:
 ## A year's line in the list: its number, its name (or its plain words) and
 ## its change in people; choosing it opens the year above.
 func _year_row(year:Dictionary,chosen:bool,told:int)->Button:
-	var row:=Button.new();row.name="Year%d" % int(year.get("n",0));row.custom_minimum_size=Vector2(0,28);row.flat=not chosen;row.focus_mode=Control.FOCUS_NONE
-	if chosen:row.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH,T.GOLD,1,3,0))
-	row.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.RULE,1,3,0))
-	var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);line.offset_left=4;line.offset_right=-8
+	var row:=Button.new();row.name="Year%d" % int(year.get("n",0));row.custom_minimum_size=Vector2(0,26);row.flat=true;row.focus_mode=Control.FOCUS_NONE
+	row.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color(0,0,0,0),0,2,0))
+	var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);line.offset_left=2;line.offset_right=-4
 	line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",10)
-	var number:=T.make_label(str(int(year.get("n",0))),14,T.GOLD);number.add_theme_font_override("font",T.font("display"));number.custom_minimum_size.x=44
-	number.mouse_filter=Control.MOUSE_FILTER_IGNORE;number.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(number)
+	# The shared table's group line: the year and its name in small gold capitals.
 	var name:=String(year.get("name",""))
-	var words:Label
-	if not bool(year.get("closed",true)):words=T.make_label("This year",13,T.INK)
-	elif name!="":words=_serif(Page._cap(name),15,T.INK)
-	else:words=T.make_label(Page._cap(Model.unnamed_words(year)),12,T.TEXT_SOFT)
-	words.autowrap_mode=TextServer.AUTOWRAP_OFF
-	words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(words)
+	var words:=("YEAR %d · " % int(year.get("n",0)))+(Page._cap(name) if name!="" else Page._cap(Model.unnamed_words(year))).to_upper()
+	var label:=T.make_label(words,11,T.GOLD_TEXT,0.06);label.vertical_alignment=VERTICAL_ALIGNMENT_BOTTOM
+	label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.size_flags_vertical=Control.SIZE_FILL;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(label)
 	var change:Variant=year.get("dpop")
 	if change!=null and int(change)!=0:
 		var d:=int(change)
-		var delta:=T.make_label("%s%s" % ["+" if d>0 else "−",EraWords.grouped(absi(d))],12,T.GREEN_TEXT if d>0 else T.RED_TEXT);delta.mouse_filter=Control.MOUSE_FILTER_IGNORE;delta.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		var delta:=T.make_label("%s%s" % ["+" if d>0 else "−",EraWords.grouped(absi(d))],12,T.GREEN_TEXT if d>0 else T.RED_TEXT);delta.mouse_filter=Control.MOUSE_FILTER_IGNORE;delta.size_flags_vertical=Control.SIZE_SHRINK_END
 		line.add_child(delta)
 	row.add_child(line)
-	row.tooltip_text=Page.mark_caption(year)+(" · %d told" % told if told>0 else "")
+	row.tooltip_text=Page.mark_caption(year)+(" · %d told" % told if told>0 else "")+". Choose it to open the year."
 	row.pressed.connect(func()->void:_choose(int(year.get("n",-1)));_reveal_hero())
-	var rule:=ColorRect.new();rule.color=T.BORDER_SOFT;rule.custom_minimum_size.y=1;rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;rule.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE);row.add_child(rule)
 	return row
 
 
@@ -656,22 +657,18 @@ func _line(entry:Dictionary)->Control:
 	var key:=String(entry.get("key",""))
 	var open:=key==open_key
 	var box:=VBoxContainer.new();box.name="Moment";box.add_theme_constant_override("separation",0)
-	var row:=Button.new();row.name="Line";row.flat=true;row.focus_mode=Control.FOCUS_NONE;row.custom_minimum_size=Vector2(0,24)
-	row.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,Color.TRANSPARENT,0,3,0))
-	if open:row.add_theme_stylebox_override("normal",T.flat(T.GOLD_WASH,Color.TRANSPARENT,0,3,0))
-	row.tooltip_text=String(entry.get("title",""))
-	var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);line.offset_left=54;line.offset_right=-8
-	line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",8)
-	var glyph:=glyph_for(entry)
-	var mark:=TextureRect.new();mark.custom_minimum_size=Vector2(18,18);mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	mark.texture=Page.mark_texture(glyph,36);mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(mark)
+	# The game's one table line (dense_blocks.gd): mark, title (a long one
+	# wraps), season; choosing it opens its telling beneath.
 	var whisper:=String(entry.get("tier",""))=="whisper"
-	var title:=T.make_label(tile_caption(entry),13,T.TEXT_SOFT if whisper else T.INK);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	title.clip_text=true;title.custom_minimum_size.x=1;title.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(title)
-	var season:=T.make_label(Chronicle.date_label(int(entry.get("day",0))).get_slice(" · ",1),11,T.TEXT_SOFT);season.mouse_filter=Control.MOUSE_FILTER_IGNORE;season.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	season.custom_minimum_size.x=52;season.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;line.add_child(season)
-	row.add_child(line)
-	row.pressed.connect(func()->void:open_key="" if open_key==key else key;_render_list())
+	var toggle:=func()->void:
+		open_key="" if open_key==key else key
+		_render_list()
+	var row:=Dense._row({"icon":Page.mark_texture(glyph_for(entry),36),"cells":{"title":tile_caption(entry),"season":Chronicle.date_label(int(entry.get("day",0))).get_slice(" · ",1)},
+		"tip":String(entry.get("title","")),"on_click":toggle},LINE_COLUMNS)
+	row.name="Line"
+	if whisper:(row.find_child("Cell_title",true,false) as Label).add_theme_color_override("font_color",T.TEXT_SOFT)
+	if open:
+		var lit:=T.flat(T.GOLD_WASH,Color(0,0,0,0),0,2);lit.content_margin_left=2;lit.content_margin_right=2;row.add_theme_stylebox_override("panel",lit)
 	box.add_child(row)
 	if open:_reading(box,entry)
 	return box

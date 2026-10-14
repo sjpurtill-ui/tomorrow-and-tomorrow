@@ -594,6 +594,16 @@ func _draw()->void:
 	var font:=T.font("voice")
 	var lettered:={}
 	name_rects=[]
+	# Where each town's mark stands on screen (its dot, the stars of an
+	# objective and its count badge): the names keep off them.
+	var marks:Array=[]
+	var dots:Array=[]
+	for t:Dictionary in scene.get("towns",[]):
+		var c:=_screen(t.at)
+		if not c.is_finite():continue
+		# The mark itself, and above it the counter a town carries.
+		marks.append(Rect2(c-Vector2(64,78),Vector2(128,100)))
+		dots.append(Rect2(c-Vector2(24,24),Vector2(48,48)))
 	for n:Dictionary in named:
 		var owner:=String(n.owner)
 		if lettered.has(owner): continue
@@ -609,11 +619,28 @@ func _draw()->void:
 		# Low in its ground, under the towns and the hosts that stand by them;
 		# higher when the War screen's bar or strip would cover it.
 		var free:=_free_rect(size)
-		var at:=Vector2(box.get_center().x-w*0.5,box.end.y-box.size.y*0.12)
-		for share:float in [0.12,0.3,0.5,0.75]:
-			var y:=box.end.y-box.size.y*share
-			if free.encloses(Rect2(Vector2(box.get_center().x-w*0.5,y-fs),Vector2(w,fs+4.0))):
-				at=Vector2(box.get_center().x-w*0.5,y); break
+		var x:=box.get_center().x-w*0.5
+		var at:=Vector2(x,box.end.y-box.size.y*0.12)
+		# Never across a town's mark (its dot, stars and count) nor where its
+		# counter stands over it: inside the ground where clear, else under
+		# it, over it, or beside it.
+		var tries:Array=[]
+		for share:float in [0.12,0.3,0.5,0.75]:tries.append(Vector2(x,box.end.y-box.size.y*share))
+		tries.append_array([Vector2(x,box.end.y+fs+6.0),Vector2(x,box.position.y-6.0),Vector2(maxf(box.end.x,box.get_center().x+64.0)+10.0,box.get_center().y+fs*0.4),Vector2(minf(box.position.x,box.get_center().x-64.0)-w-10.0,box.get_center().y+fs*0.4),Vector2(x,box.end.y+fs*2.0+10.0),Vector2(x,box.position.y-fs-12.0)])
+		var placed:=false
+		for spot:Vector2 in tries:
+			var rect:=Rect2(spot-Vector2(0,fs),Vector2(w,fs+4.0))
+			if not free.encloses(rect): continue
+			if marks.any(func(m:Rect2)->bool:return m.intersects(rect)): continue
+			at=spot;placed=true;break
+		# Else clear of the dots at least (a counter steps aside for a name).
+		if not placed:
+			for spot:Vector2 in tries:
+				var rect:=Rect2(spot-Vector2(0,fs),Vector2(w,fs+4.0))
+				if free.encloses(rect) and not dots.any(func(m:Rect2)->bool:return m.intersects(rect)):at=spot;placed=true;break
+		if not placed:
+			for spot:Vector2 in tries:
+				if free.encloses(Rect2(spot-Vector2(0,fs),Vector2(w,fs+4.0))):at=spot;break
 		name_rects.append(Rect2(at-Vector2(0,fs),Vector2(w,fs+4.0)))
 		draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,5,Color(PAPER,0.7))
 		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color((n.color as Color).darkened(0.5),0.85))
@@ -710,7 +737,6 @@ func draw_top(canvas:Control)->void:
 	for r in name_rects:taken.append((r as Rect2).grow(2.0))
 	# Every band of ours out, as HOI4 draws a division: its counter stands
 	# by where it is, clear of names, and nothing else is laid over it.
-	var bands:=_band_counters(view,0.9,taken,_free_rect(canvas.size))
 	var found:Array=[]
 	var font:=T.font("voice")
 	var fs:=14
@@ -749,11 +775,25 @@ func draw_top(canvas:Control)->void:
 		taken.append(rect)
 		canvas.draw_string_outline(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,4,Color(PAPER,0.9))
 		canvas.draw_string(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,0.95))
+	# Nor is a town's own mark (its dot and stars) covered by a chip.
+	for t:Dictionary in scene.get("towns",[]):
+		var c:=_screen(t.at)
+		if c.is_finite():taken.append(Rect2(c-Vector2(16,16),Vector2(32,32)))
+	# The towns' names are placed: now the army at home (it never moves,
+	# with its side tab), then the bands clear of it.
+	var home_spot:=Vector2.INF
+	var home_at:=_screen(scene.get("home",Vector2.INF))
+	if home_at.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty():
+		var home_plate:=Counter.plate_size(0.9,scene.levy)
+		home_spot=_clear_spot(home_at,home_plate,taken,_free_rect(canvas.size))
+		var tab_room:=80.0 if String((scene.levy as Dictionary).get("tab",""))!="" else 0.0
+		taken.append(Rect2(home_spot-home_plate*0.5,home_plate+Vector2(tab_room,0.0)).grow(10.0))
+	var bands:=_band_counters(view,0.9,taken,_free_rect(canvas.size))
 	# The hosts.
 	var k:=0.9
 	var items:Array=[]
 	var home:=_screen(scene.get("home",Vector2.INF))
-	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"data":scene.levy,"tip":scene.get("levy_tip",PackedStringArray())})
+	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"spot":home_spot,"data":scene.levy,"tip":scene.get("levy_tip",PackedStringArray())})
 	for e:Dictionary in scene.get("enemies",[]):
 		var at:=_screen(e.there)
 		if not at.is_finite(): continue
@@ -769,7 +809,8 @@ func draw_top(canvas:Control)->void:
 		var at:Vector2=item.at
 		if not view.grow(80).has_point(at): continue
 		var plate:=Counter.plate_size(k,item.data)
-		var spot:=_clear_spot(at,plate,taken,free)
+		var spot:Vector2=item.get("spot",Vector2.INF)
+		if not spot.is_finite():spot=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))
 		found.push_front({"rect":drawn,"civ_id":String(item.get("civ_id","")),"lines":item.get("tip",PackedStringArray())})
@@ -915,7 +956,7 @@ func _band_counters(view:Rect2,k:float,taken:Array,free:Rect2)->Array:
 			"accent":preload("res://scripts/leader_commands.gd").color(preload("res://scripts/leader_commands.gd").leader_of(army)),"stale":int(card.get("report_age",0))>=preload("res://scripts/hud/army_marks.gd").STALE_DAYS}
 		var plate:=Counter.plate_size(k,data)
 		var spot:=_clear_spot(at,plate,taken,free)
-		taken.append(Rect2(spot-plate*0.5,plate).grow(4.0))
+		taken.append(Rect2(spot-plate*0.5,plate).grow(8.0))
 		var tip:=PackedStringArray([String(card.get("title","Our band")),"%s of %s men · will %d%%" % [EraWords.grouped(men),EraWords.grouped(int(card.get("full",men))),roundi(float(card.get("will",0.6))*100.0)],String(card.get("doing","")),String(card.get("supply_words",""))])
 		out.append({"at":at,"spot":spot,"rect":Rect2(spot-plate*0.5,plate),"data":data,"tip":_lines(tip)})
 	return out
