@@ -113,7 +113,7 @@ func _label(parent:Node,value:String,font_size:int,color:Color,wrap:=false)->Lab
 func _button(parent:Node,value:String,callback:Callable,primary:=false)->Button:
 	var button:=Button.new();button.text=value;button.clip_text=true;button.custom_minimum_size.y=28;button.focus_mode=Control.FOCUS_NONE
 	button.add_theme_font_override("font",UI_FONT);button.add_theme_font_size_override("font_size",12)
-	button.add_theme_stylebox_override("normal",T.action_button_style(primary));button.add_theme_stylebox_override("hover",T.action_button_style(true,true))
+	T.apply_button_style(button,primary);button.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	button.pressed.connect(callback);parent.add_child(button);return button
 
 

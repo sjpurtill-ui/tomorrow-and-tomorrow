@@ -222,8 +222,8 @@ func _choice(parent:Node,text:String,on:bool,press:Callable)->Button:
 	var b:=Kit.button(parent,text,on,press)
 	b.custom_minimum_size=Vector2(0,30)
 	if on:
-		b.add_theme_color_override("font_color",T.GOLD_TEXT)
-		b.add_theme_stylebox_override("normal",T.action_button_style(true))
+		b.add_theme_color_override("font_color",T.ACTION_INK)
+		T.apply_button_style(b,true)
 	return b
 
 static func _odds_ink(chance:float)->Color:

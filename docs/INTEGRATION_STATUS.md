@@ -3330,3 +3330,24 @@ and remotely verified before the canonical checkout is fast-forwarded. Existing
 local imports and the running player session are preserved; save and restart
 normally to load the labels.
 
+## October 14 — Modern Strategy foundation and first popup layouts
+
+Integration sources: shared/settings `7170557a` and `da6606be`; Production
+`faf747c8` (integrated as `427d7bb7`); Research `073f7c54` (integrated as
+`bcedb17f`). The user selected Modern Strategy after reviewing three visual
+specifications. Shared surfaces now use midnight, warm white and coral, sans
+headings, readable button states, and persistent readable modal scrolling.
+Production combines redundant overview/civilian destinations while preserving old
+links. Research retains three distinct tasks with inline detail. Settings groups
+options into disclosures with persistent Resume/Close controls.
+
+This is the foundation checkpoint, not completion of the all-screen audit. The
+per-screen critique loop continues in docs/design/POPUP_REDESIGN.md. Game rules,
+action callbacks and world-save structures remain unchanged. Machine-local
+appearance settings migrate once to Modern Strategy; later Daylight choices persist.
+
+Validation: shared navigation/layout/persistence suites, Production/Research suites,
+all-state button/text contrast, and preference persistence. Private GPU settings
+captures at 1024x640 and the real-map menu at 1440x900 exit normally with no script
+errors. The running player session is preserved and is not restarted by this work.
+

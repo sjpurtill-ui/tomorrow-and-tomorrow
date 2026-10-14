@@ -214,7 +214,7 @@ static func _row(row:Dictionary,columns:Array,icon_size:=18.0)->PanelContainer:
 	for column:Dictionary in columns:
 		var ink:=tone_color(String(row.get("tone","")),T.INK) if first else T.BODY
 		var label:=_cell(String(cells.get(String(column.get("key","")),"")),column,18 if first else 14,ink)
-		if first:label.add_theme_font_override("font",T.font("voice_bold"))
+		if first:label.add_theme_font_override("font",T.font("ui_strong"))
 		line.add_child(label);first=false
 	# Bar, tag and verb sit right-aligned in the row's end column (render_table
 	# gives every row's end column the same width).
@@ -330,7 +330,7 @@ static func render_frame(parent:VBoxContainer,block:Dictionary)->PanelContainer:
 	parent.add_child(frame)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",12);frame.add_child(box)
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",6);box.add_child(top)
-	var title:=T.make_label(T.sentence_case(String(block.get("heading",""))),22,T.INK);title.add_theme_font_override("font",T.font("voice_bold"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
+	var title:=T.make_label(T.sentence_case(String(block.get("heading",""))),22,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
 	for action:Dictionary in block.get("actions",[]):top.add_child(verb(String(action.get("label","")),action.get("on_press"),String(action.get("tip",""))))
 	var inner:=VBoxContainer.new();inner.add_theme_constant_override("separation",6);box.add_child(inner)
 	var children:Array=[]

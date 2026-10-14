@@ -91,10 +91,10 @@ static func toggle_button(t:Node)->Button:
 	button.add_theme_color_override("font_color",T.BODY)
 	button.add_theme_color_override("font_pressed_color",T.GOLD_TEXT)
 	button.add_theme_color_override("font_hover_pressed_color",T.GOLD_TEXT)
-	button.add_theme_stylebox_override("normal",T.action_button_style(false))
+	T.apply_button_style(button,false)
 	button.add_theme_stylebox_override("hover",T.action_button_style(false,true))
-	button.add_theme_stylebox_override("pressed",T.action_button_style(true))
-	button.add_theme_stylebox_override("hover_pressed",T.action_button_style(true,true))
+	button.add_theme_stylebox_override("pressed",T.button_pressed_style())
+	button.add_theme_stylebox_override("hover_pressed",T.button_pressed_style())
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	button.tooltip_text="Our border and its forts. Click open land to raise a fort there; click a fort to move it or break it down."
 	button.toggled.connect(func(on:bool)->void:

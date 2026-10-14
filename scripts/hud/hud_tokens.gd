@@ -1,65 +1,68 @@
 class_name HudTokens
 ## Design tokens for the Command Rail HUD (design resolution 1920x1080).
-## Source: design_handoff_command_rail_hud/README.md — values are final.
+## Modern Strategy: docs/design/MODERN_STRATEGY.md. Compatibility token names
+## remain stable so presentation changes do not touch simulation or saved state.
 
 # Runtime palette. DisplayPreferences sets it before the HUD is constructed.
-static var color_mode:="light"
-static var PANEL_BG:=Color("e9dfcf")
-static var PANEL_BG_SOLID:=Color("eee5d6")
-static var DOCK_BG:=Color("f2eadc")
-static var TILE_BG:=Color("dfd2be")
-static var ROW_BG:=Color("e8dece")
-static var ACTIVE_BG:=Color("d3c1a5")
-static var HOVER_BG:=Color("ddd0bd")
-static var CLOSE_HOVER_BG:=Color("dfc8bd")
-static var BUTTON_BG:=Color("e0d4c2")
-static var FIELD_BG:=Color("f7f1e7")
-static var SPEED_IDLE_BG:=Color("ded2c0")
-static var TRACK:=Color("c9baa4")
-static var TOOLBAR_BG:=Color("ebe1d2f2")
-static var MAP_LABEL_BG:=Color("eee5d7e8")
-static var BORDER:=Color("9b896e")
-static var BORDER_2:=Color("87745b")
-static var BORDER_SOFT:=Color("b9a991")
-static var LAYER_ON_BORDER:=Color("537d76")
-static var INK:=Color("20231f")
-static var BODY:=Color("30352f")
-static var BODY_2:=Color("3e443d")
-static var TEXT_SOFT:=Color("49524b")
-static var TEXT_DIM:=Color("49524b")
-static var MUTED:=Color("49524b")
-static var DISABLED:=Color("6b6e68")
-static var LAYER_ON_FG:=Color("343b37")
-static var GOLD:=Color("8a6118")
-static var GOLD_BRIGHT:=Color("6c480c")
-static var GOLD_WASH:=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.12)
-static var GREEN:=Color("536d32")
-static var RED:=Color("a34435")
-static var AMBER:=Color("805d1d")
-static var TEAL:=Color("356f66")
-static var BLUE:=Color("4d6389")
-static var VIOLET:=Color("695587")
+static var color_mode:="dark"
+static var PANEL_BG:=Color("111e28")
+static var PANEL_BG_SOLID:=Color("111e28")
+static var DOCK_BG:=Color("111e28")
+static var TILE_BG:=Color("1b303a")
+static var ROW_BG:=Color("182b35")
+static var ACTIVE_BG:=Color("263f49")
+static var HOVER_BG:=Color("223943")
+static var CLOSE_HOVER_BG:=Color("343741")
+static var BUTTON_BG:=Color("162932")
+static var FIELD_BG:=Color("0e1a23")
+static var SPEED_IDLE_BG:=Color("182b35")
+static var TRACK:=Color("3c5058")
+static var TOOLBAR_BG:=Color("111e28f5")
+static var MAP_LABEL_BG:=Color("111e28ed")
+static var BORDER:=Color("3c5058")
+static var BORDER_2:=Color("60727a")
+static var BORDER_SOFT:=Color("314650")
+static var LAYER_ON_BORDER:=Color("f38665")
+static var INK:=Color("f4eee0")
+static var BODY:=Color("e4e9e5")
+static var BODY_2:=Color("ccd7d6")
+static var TEXT_SOFT:=Color("b7c5c7")
+static var TEXT_DIM:=Color("b7c5c7")
+static var MUTED:=Color("b7c5c7")
+static var DISABLED:=Color("94a4aa")
+static var LAYER_ON_FG:=Color("f4eee0")
+static var GOLD:=Color("f38665")
+static var GOLD_BRIGHT:=Color("ffad8f")
+static var GOLD_WASH:=Color("f3866520")
+static var GREEN:=Color("9bc59c")
+static var RED:=Color("f29b9f")
+static var AMBER:=Color("eac17a")
+static var TEAL:=Color("8ed2c1")
+static var BLUE:=Color("a5c9f4")
+static var VIOLET:=Color("c7b5ea")
 ## Text-safe accents. The plain accents above are for bars, rules, stripes and
 ## icons; they fall near 3.3:1 on paper. Any accent that colours TEXT uses its
 ## *_TEXT twin, which reads at 4.5:1 or better on every paper ground (PANEL_BG,
 ## DOCK_BG, TILE_BG, ROW_BG, PAPER, PAPER_RAISED, PAPER_SUNK, ACTIVE_BG) in
 ## light mode and on every night ground in dark mode. tests/test_button_contrast.gd
 ## checks each pair. text_for(accent) maps an accent to its twin.
-static var GREEN_TEXT:=Color("425627")
-static var RED_TEXT:=Color("84372b")
-static var AMBER_TEXT:=Color("664a17")
-static var TEAL_TEXT:=Color("295750")
-static var BLUE_TEXT:=Color("3e506f")
-static var VIOLET_TEXT:=Color("584771")
-static var GOLD_TEXT:=Color("694a12")
-static var DARK_INK:=Color("111111")
-static var GLYPH_DARK:=Color("f4efe5")
-static var WARN_BG:=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10)
-static var WARN_BORDER:=Color("8d6c20")
-static var DANGER_BG:=Color(166.0/255.0,79.0/255.0,64.0/255.0,0.10)
-static var DANGER_BORDER:=Color("a64f40")
-static var INFO_BG:=Color(66.0/255.0,124.0/255.0,115.0/255.0,0.10)
-static var INFO_BORDER:=Color("427c73")
+static var GREEN_TEXT:=Color("b5d7b5")
+static var RED_TEXT:=Color("ffb4b7")
+static var AMBER_TEXT:=Color("f1d397")
+static var TEAL_TEXT:=Color("a6dfd1")
+static var BLUE_TEXT:=Color("b8d8ff")
+static var VIOLET_TEXT:=Color("d7c8f4")
+static var GOLD_TEXT:=Color("ffb69e")
+static var DARK_INK:=Color("14232b")
+static var GLYPH_DARK:=Color("111e28")
+static var WARN_BG:=Color("eac17a14")
+static var WARN_BORDER:=Color("eac17a")
+static var DANGER_BG:=Color("f29b9f16")
+static var DANGER_BORDER:=Color("f29b9f")
+static var INFO_BG:=Color("8ed2c114")
+static var INFO_BORDER:=Color("8ed2c1")
+static var ACTION:=Color("f38665")
+static var ACTION_INK:=Color("14232b")
 static var _control_theme:Theme
 
 # --- Chronicle type and chrome (docs/ART_DIRECTION.md section 2) -----------
@@ -77,34 +80,28 @@ static func _voice_file(italic:bool=false)->Font:
 	return load(path) as Font if ResourceLoader.exists(path) else FONT_UI
 const MIN_FONT_SIZE:=12
 const SPACE:=[0,4,8,12,16,24,32,48]
-const RADIUS_CONTROL:=2
-const RADIUS_CARD:=4
+const RADIUS_CONTROL:=4
+const RADIUS_CARD:=8
 const MOTION:={"fast":0.12,"base":0.20,"slow":0.36,"scene":0.90}
 ## Role -> [face, size]. Faces: "display", "voice", "voice_italic", "ui", "ui_strong".
-const TYPE:={"display":["display",40],"title":["display",28],"voice":["voice",22],
-	"voice_small":["voice",18],"value":["ui_strong",20],"body":["ui",16],"small":["ui",14],"kicker":["ui_strong",12]}
+const TYPE:={"display":["ui_strong",38],"title":["ui_strong",32],"voice":["voice",22],
+	"voice_small":["voice",18],"value":["ui_strong",28],"body":["ui",16],"small":["ui",14],"kicker":["ui_strong",12]}
 ## Chrome palette: one paper language for the rail, panels and scene headers.
-static var PAPER:=Color("efe6d4")
-static var PAPER_RAISED:=Color("f6efe1")
-static var PAPER_SUNK:=Color("e3d7c0")
-static var RULE:=Color("b7a383")
-static var RULE_STRONG:=Color("8c7757")
-static var INK_MUTED:=Color("594e41")
-static var SCRIM:=Color(31.0/255.0,26.0/255.0,20.0/255.0,0.55)
+static var PAPER:=Color("111e28")
+static var PAPER_RAISED:=Color("1b303a")
+static var PAPER_SUNK:=Color("0e1a23")
+static var RULE:=Color("3c5058")
+static var RULE_STRONG:=Color("60727a")
+static var INK_MUTED:=Color("b7c5c7")
+static var SCRIM:=Color("060e16b8")
 static var _fonts:Dictionary={}
-
-static func _set_chrome_palette()->void:
-	if color_mode=="dark":
-		PAPER=Color("0c1518");PAPER_RAISED=Color("111c1f");PAPER_SUNK=Color("0a1214");RULE=Color("2a3538");RULE_STRONG=Color("3e5256");INK_MUTED=Color("a0937e");SCRIM=Color(0,0,0,0.65)
-	else:
-		PAPER=Color("efe6d4");PAPER_RAISED=Color("f6efe1");PAPER_SUNK=Color("e3d7c0");RULE=Color("b7a383");RULE_STRONG=Color("8c7757");INK_MUTED=Color("594e41");SCRIM=Color(31.0/255.0,26.0/255.0,20.0/255.0,0.55)
 
 static func font(face:String)->Font:
 	## Shared font resources, one per face; never a SystemFont.
 	if _fonts.has(face):return _fonts[face]
 	var result:Font
 	match face:
-		"display":result=FONT_DISPLAY
+		"display":result=font("ui_strong")
 		"voice":result=_voice_file()
 		"voice_italic":result=_voice_file(true)
 		"voice_bold":
@@ -142,23 +139,128 @@ static func install_global_fonts()->void:
 	ThemeDB.fallback_font_size=16
 
 static func set_color_mode(mode:String)->void:
-	color_mode="dark" if mode=="dark" else "light"
+	color_mode="light" if mode=="light" else "dark"
 	_control_theme=null
-	_set_chrome_palette()
-	if color_mode=="dark":
-		PANEL_BG=Color(8.0/255.0,13.0/255.0,15.0/255.0);PANEL_BG_SOLID=Color(8.0/255.0,13.0/255.0,15.0/255.0);DOCK_BG=Color(9.0/255.0,15.0/255.0,17.0/255.0)
-		TILE_BG=Color("0e181b");ROW_BG=Color("0c1518");ACTIVE_BG=Color("16222a");HOVER_BG=Color("111c1f");CLOSE_HOVER_BG=Color("1a2427");BUTTON_BG=Color("131d20");FIELD_BG=Color("0a1214");SPEED_IDLE_BG=Color("0d1719");TRACK=Color("1b2528");TOOLBAR_BG=Color("080d0feb");MAP_LABEL_BG=Color("060a0bbf")
-		BORDER=Color("2a3538");BORDER_2=Color("2f3b3e");BORDER_SOFT=Color("223034");LAYER_ON_BORDER=Color("7ca39d")
-		INK=Color("f0e6d1");BODY=Color("e4dfd2");BODY_2=Color("d8d3c6");TEXT_SOFT=Color("b6bdb7");TEXT_DIM=Color("a9b0ab");MUTED=Color("8a948f");DISABLED=Color("6f7a77");LAYER_ON_FG=Color("d7d0bf")
-		GOLD=Color("c9a95a");GOLD_BRIGHT=Color("ead078");GOLD_WASH=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.12);GREEN=Color("8fa26a");RED=Color("c67462");AMBER=Color("d0b46f");TEAL=Color("79a8a0");BLUE=Color("8798b5");VIOLET=Color("a897c9");GLYPH_DARK=Color("0d1416")
-		GREEN_TEXT=Color("9bae76");RED_TEXT=Color("d58672");AMBER_TEXT=Color("d0b46f");TEAL_TEXT=Color("86b4ac");BLUE_TEXT=Color("97a7c2");VIOLET_TEXT=Color("b4a5d3");GOLD_TEXT=Color("d4b466")
-		WARN_BG=Color(201.0/255.0,169.0/255.0,90.0/255.0,0.08);WARN_BORDER=Color("7d6a3a");DANGER_BG=Color(198.0/255.0,116.0/255.0,98.0/255.0,0.12);DANGER_BORDER=Color("8a4f44");INFO_BG=Color(121.0/255.0,168.0/255.0,160.0/255.0,0.10);INFO_BORDER=Color("3e5f5a")
+	if is_light():
+		PANEL_BG=Color("f2f5f5")
+		PANEL_BG_SOLID=Color("f2f5f5")
+		DOCK_BG=Color("f2f5f5")
+		TILE_BG=Color("e7eeee")
+		ROW_BG=Color("eaf0f0")
+		ACTIVE_BG=Color("dce5e7")
+		HOVER_BG=Color("e0e9eb")
+		CLOSE_HOVER_BG=Color("f0dddd")
+		BUTTON_BG=Color("edf2f2")
+		FIELD_BG=Color("ffffff")
+		SPEED_IDLE_BG=Color("e7eeee")
+		TRACK=Color("c0cfd3")
+		TOOLBAR_BG=Color("f2f5f5f5")
+		MAP_LABEL_BG=Color("f2f5f5ed")
+		BORDER=Color("c0cfd3")
+		BORDER_2=Color("8b9da4")
+		BORDER_SOFT=Color("ccd7da")
+		LAYER_ON_BORDER=Color("a43a24")
+		INK=Color("142b34")
+		BODY=Color("213b45")
+		BODY_2=Color("354c54")
+		TEXT_SOFT=Color("4e626a")
+		TEXT_DIM=Color("4e626a")
+		MUTED=Color("4e626a")
+		DISABLED=Color("677d85")
+		LAYER_ON_FG=Color("142b34")
+		GOLD=Color("b7442c")
+		GOLD_BRIGHT=Color("8d2e1d")
+		GREEN=Color("3b704b")
+		RED=Color("b5444c")
+		AMBER=Color("916316")
+		TEAL=Color("277568")
+		BLUE=Color("396c9e")
+		VIOLET=Color("72559b")
+		GREEN_TEXT=Color("31563c")
+		RED_TEXT=Color("883039")
+		AMBER_TEXT=Color("684810")
+		TEAL_TEXT=Color("22584f")
+		BLUE_TEXT=Color("31567a")
+		VIOLET_TEXT=Color("594077")
+		GOLD_TEXT=Color("87301f")
+		DARK_INK=Color("14232b")
+		GLYPH_DARK=Color("f2f5f5")
+		WARN_BORDER=Color("916316")
+		DANGER_BORDER=Color("b5444c")
+		INFO_BORDER=Color("277568")
+		PAPER=Color("f2f5f5")
+		PAPER_RAISED=Color("ffffff")
+		PAPER_SUNK=Color("e7eeee")
+		RULE=Color("c0cfd3")
+		RULE_STRONG=Color("8b9da4")
+		INK_MUTED=Color("4e626a")
+		GOLD_WASH=Color("b7442c16")
+		WARN_BG=Color("91631612")
+		DANGER_BG=Color("b5444c12")
+		INFO_BG=Color("27756812")
+		SCRIM=Color("10252b70")
+		ACTION=Color("b7442c")
+		ACTION_INK=Color("fff9ef")
 	else:
-		PANEL_BG=Color("e9dfcf");PANEL_BG_SOLID=Color("eee5d6");DOCK_BG=Color("f2eadc");TILE_BG=Color("dfd2be");ROW_BG=Color("e8dece");ACTIVE_BG=Color("d3c1a5");HOVER_BG=Color("ddd0bd");CLOSE_HOVER_BG=Color("dfc8bd");BUTTON_BG=Color("e0d4c2");FIELD_BG=Color("f7f1e7");SPEED_IDLE_BG=Color("ded2c0");TRACK=Color("c9baa4");TOOLBAR_BG=Color("ebe1d2f2");MAP_LABEL_BG=Color("eee5d7e8")
-		BORDER=Color("9b896e");BORDER_2=Color("87745b");BORDER_SOFT=Color("b9a991");LAYER_ON_BORDER=Color("4b746c");INK=Color("20231f");BODY=Color("30352f");BODY_2=Color("3e443d");TEXT_SOFT=Color("49524b");TEXT_DIM=Color("49524b");MUTED=Color("49524b");DISABLED=Color("6b6e68");LAYER_ON_FG=Color("30362f")
-		GOLD=Color("8a6118");GOLD_BRIGHT=Color("6c480c");GOLD_WASH=Color(138.0/255.0,97.0/255.0,24.0/255.0,0.13);GREEN=Color("536d32");RED=Color("a34435");AMBER=Color("805d1d");TEAL=Color("356f66");BLUE=Color("4d6389");VIOLET=Color("695587");GLYPH_DARK=Color("f4efe5")
-		GREEN_TEXT=Color("425627");RED_TEXT=Color("84372b");AMBER_TEXT=Color("664a17");TEAL_TEXT=Color("295750");BLUE_TEXT=Color("3e506f");VIOLET_TEXT=Color("584771");GOLD_TEXT=Color("694a12")
-		WARN_BG=Color(141.0/255.0,108.0/255.0,32.0/255.0,0.10);WARN_BORDER=Color("8d6c20");DANGER_BG=Color(166.0/255.0,79.0/255.0,64.0/255.0,0.10);DANGER_BORDER=Color("a64f40");INFO_BG=Color(66.0/255.0,124.0/255.0,115.0/255.0,0.10);INFO_BORDER=Color("427c73")
+		PANEL_BG=Color("111e28")
+		PANEL_BG_SOLID=Color("111e28")
+		DOCK_BG=Color("111e28")
+		TILE_BG=Color("1b303a")
+		ROW_BG=Color("182b35")
+		ACTIVE_BG=Color("263f49")
+		HOVER_BG=Color("223943")
+		CLOSE_HOVER_BG=Color("343741")
+		BUTTON_BG=Color("162932")
+		FIELD_BG=Color("0e1a23")
+		SPEED_IDLE_BG=Color("182b35")
+		TRACK=Color("3c5058")
+		TOOLBAR_BG=Color("111e28f5")
+		MAP_LABEL_BG=Color("111e28ed")
+		BORDER=Color("3c5058")
+		BORDER_2=Color("60727a")
+		BORDER_SOFT=Color("314650")
+		LAYER_ON_BORDER=Color("f38665")
+		INK=Color("f4eee0")
+		BODY=Color("e4e9e5")
+		BODY_2=Color("ccd7d6")
+		TEXT_SOFT=Color("b7c5c7")
+		TEXT_DIM=Color("b7c5c7")
+		MUTED=Color("b7c5c7")
+		DISABLED=Color("94a4aa")
+		LAYER_ON_FG=Color("f4eee0")
+		GOLD=Color("f38665")
+		GOLD_BRIGHT=Color("ffad8f")
+		GREEN=Color("9bc59c")
+		RED=Color("f29b9f")
+		AMBER=Color("eac17a")
+		TEAL=Color("8ed2c1")
+		BLUE=Color("a5c9f4")
+		VIOLET=Color("c7b5ea")
+		GREEN_TEXT=Color("b5d7b5")
+		RED_TEXT=Color("ffb4b7")
+		AMBER_TEXT=Color("f1d397")
+		TEAL_TEXT=Color("a6dfd1")
+		BLUE_TEXT=Color("b8d8ff")
+		VIOLET_TEXT=Color("d7c8f4")
+		GOLD_TEXT=Color("ffb69e")
+		DARK_INK=Color("14232b")
+		GLYPH_DARK=Color("111e28")
+		WARN_BORDER=Color("eac17a")
+		DANGER_BORDER=Color("f29b9f")
+		INFO_BORDER=Color("8ed2c1")
+		PAPER=Color("111e28")
+		PAPER_RAISED=Color("1b303a")
+		PAPER_SUNK=Color("0e1a23")
+		RULE=Color("3c5058")
+		RULE_STRONG=Color("60727a")
+		INK_MUTED=Color("b7c5c7")
+		GOLD_WASH=Color("f3866520")
+		WARN_BG=Color("eac17a14")
+		DANGER_BG=Color("f29b9f16")
+		INFO_BG=Color("8ed2c114")
+		SCRIM=Color("060e16b8")
+		ACTION=Color("f38665")
+		ACTION_INK=Color("14232b")
 
 static func is_light()->bool:return color_mode=="light"
 
@@ -267,7 +369,7 @@ const TOOLTIP_FONT_SIZE:=15
 
 static func tooltip_panel_style()->StyleBoxFlat:
 	var style:=StyleBoxFlat.new()
-	style.bg_color=Color("f8f3ea") if is_light() else Color(12.0/255.0,20.0/255.0,22.0/255.0,0.98)
+	style.bg_color=PAPER_RAISED
 	style.border_color=BORDER_2 if is_light() else Color("56686b")
 	style.set_border_width_all(1)
 	style.set_corner_radius_all(4)
@@ -406,32 +508,44 @@ static func row_style(accent:Color=Color(0,0,0,0))->StyleBoxFlat:
 	return style
 
 static func action_button_style(primary:bool,hover:bool=false)->StyleBoxFlat:
-	var border:=GOLD if (primary or hover) else BORDER_2
-	var style:=flat(BUTTON_BG,border,1,3)
-	style.content_margin_left=12.0
-	style.content_margin_right=12.0
+	var hover_action:=ACTION.darkened(0.08) if is_light() else ACTION.lightened(0.08)
+	var fill:=hover_action if primary and hover else ACTION if primary else HOVER_BG if hover else BUTTON_BG
+	var style:=flat(fill,ACTION if primary else BORDER_2 if hover else BORDER,0 if primary else 1,RADIUS_CONTROL)
+	style.content_margin_left=16.0;style.content_margin_right=16.0
+	style.content_margin_top=8.0;style.content_margin_bottom=8.0
 	return style
 
 static func button_pressed_style()->StyleBoxFlat:
-	## Held down or toggled on: the darker active ground under a gold rule.
-	var style:=flat(ACTIVE_BG,GOLD,1,3)
-	style.content_margin_left=12.0
-	style.content_margin_right=12.0
+	var style:=flat(ACTIVE_BG,ACTION,1,RADIUS_CONTROL)
+	style.content_margin_left=16.0;style.content_margin_right=16.0
+	style.content_margin_top=8.0;style.content_margin_bottom=8.0
 	return style
 
 static func button_disabled_style()->StyleBoxFlat:
-	## A resting control: flatter ground and a soft rule, never Godot's grey
-	## wash. Its DISABLED label still reads at 3:1 or better.
-	var style:=flat(PANEL_BG,BORDER_SOFT,1,3)
-	style.content_margin_left=12.0
-	style.content_margin_right=12.0
-	return style
+	return flat(PAPER_SUNK,BORDER_SOFT,1,RADIUS_CONTROL,8)
 
 static func gold_outline_style()->StyleBoxFlat:
-	var style:=flat(GOLD_WASH,GOLD,1,3)
-	style.content_margin_left=10.0
-	style.content_margin_right=10.0
-	return style
+	# Compatibility name: keyboard focus is now the shared coral accent.
+	return flat(Color.TRANSPARENT,ACTION,2,RADIUS_CONTROL,8)
+
+static func apply_button_style(button:Button,primary:bool=false)->Button:
+	button.set_meta("modern_primary",primary)
+	button.custom_minimum_size.y=maxf(button.custom_minimum_size.y,44 if primary else 40)
+	button.add_theme_font_override("font",font("ui_strong") if primary else FONT_UI)
+	button.add_theme_font_size_override("font_size",16 if primary else 14)
+	button.add_theme_stylebox_override("normal",action_button_style(primary))
+	button.add_theme_stylebox_override("hover",action_button_style(primary,true))
+	button.add_theme_stylebox_override("pressed",button_pressed_style())
+	button.add_theme_stylebox_override("hover_pressed",button_pressed_style())
+	button.add_theme_stylebox_override("disabled",button_disabled_style())
+	button.add_theme_stylebox_override("focus",gold_outline_style())
+	button.add_theme_color_override("font_color",ACTION_INK if primary else INK)
+	button.add_theme_color_override("font_hover_color",ACTION_INK if primary else INK)
+	button.add_theme_color_override("font_focus_color",ACTION_INK if primary else INK)
+	button.add_theme_color_override("font_pressed_color",INK)
+	button.add_theme_color_override("font_hover_pressed_color",INK)
+	button.add_theme_color_override("font_disabled_color",DISABLED)
+	return button
 
 static func brief_style(tone:String)->StyleBoxFlat:
 	var bg:=INFO_BG

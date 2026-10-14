@@ -384,7 +384,7 @@ func _button(parent:Node,text:String,callback:Callable,primary:bool=false)->Butt
 	var node:=Button.new();node.text=text;node.custom_minimum_size.y=34;node.add_theme_font_override("font",T.font("ui"));node.add_theme_font_size_override("font_size",14)
 	for state:String in ["font_color","font_hover_color","font_focus_color"]:node.add_theme_color_override(state,TEXT)
 	node.add_theme_color_override("font_pressed_color",T.INK);node.add_theme_color_override("font_disabled_color",T.DISABLED)
-	node.add_theme_stylebox_override("normal",T.action_button_style(primary))
+	T.apply_button_style(node,primary)
 	node.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	node.add_theme_stylebox_override("pressed",T.button_pressed_style())
 	node.add_theme_stylebox_override("disabled",T.button_disabled_style())

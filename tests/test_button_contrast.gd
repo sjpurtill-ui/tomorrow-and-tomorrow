@@ -74,6 +74,18 @@ func test_discovery_and_chronicle_buttons_read_in_both_palettes()->void:
 func test_close_glyph_exists_in_the_interface_face()->void:
 	assert_bool(T.FONT_UI.has_char("×".unicode_at(0))).is_true()
 
+func test_modern_primary_actions_pair_the_fill_and_text_in_all_states()->void:
+	for mode:String in ["light","dark"]:
+		T.set_color_mode(mode)
+		var root:=themed_root()
+		var kit:=preload("res://scripts/hud/paper_kit.gd").button(root,"Continue",true)
+		var sheet:=preload("res://scripts/hud/paper_sheet.gd").button(root,"Continue",Callable(),true)
+		for button:Button in [kit,sheet]:
+			check_button(button,"modern shared primary")
+			assert_float(button.custom_minimum_size.y).is_greater_equal(44.0)
+			assert_bool(button.get_theme_stylebox("normal").bg_color==T.ACTION).is_true()
+			assert_bool(button.get_theme_color("font_color")==T.ACTION_INK).is_true()
+
 func test_game_display_preferences_theme_popups_on_canvas_layers()->void:
 	# The game themes controls that sit under CanvasLayers and SubViewports;
 	# without it Button text falls back to Godot's pale default on paper.

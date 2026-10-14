@@ -58,11 +58,11 @@ static func label(parent:Node,text:String,role:String="body",color:Color=Color(0
 		"title":size=28;ink=T.INK
 		"heading":size=20;ink=T.INK
 		"value":size=20;ink=T.INK
-		"note":size=13;ink=T.INK_MUTED
-		_:size=14;ink=T.BODY
+		"note":size=14;ink=T.INK_MUTED
+		_:size=16;ink=T.BODY
 	node.text=text
 	node.add_theme_font_override("font",T.font("ui_strong") if role in ["kicker","title","heading","value"] else T.FONT_UI)
-	if role in ["title","heading"]:node.add_theme_font_override("font",T.font("voice_bold"))
+	if role in ["title","heading"]:node.add_theme_font_override("font",T.font("ui_strong"))
 	node.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size))
 	node.add_theme_color_override("font_color",text_color(color) if color.a>0.0 else ink)
 	if wrap:
@@ -82,11 +82,11 @@ static func button(parent:Node,text:String,primary:bool=false,on_press:Callable=
 	node.add_theme_color_override("font_color",T.INK)
 	node.add_theme_color_override("font_hover_color",T.INK)
 	node.add_theme_color_override("font_disabled_color",T.DISABLED)
-	node.add_theme_stylebox_override("normal",T.action_button_style(primary))
 	node.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	node.add_theme_stylebox_override("pressed",T.button_pressed_style())
 	node.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	node.add_theme_stylebox_override("focus",T.gold_outline_style())
+	T.apply_button_style(node,primary)
 	if on_press.is_valid():node.pressed.connect(on_press)
 	if parent!=null:parent.add_child(node)
 	return node

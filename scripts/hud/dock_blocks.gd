@@ -43,7 +43,7 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 			var heading_row:=HBoxContainer.new()
 			section.add_child(heading_row)
 			var heading:=Tokens.make_label(Tokens.sentence_case(String(block.heading)),22,Tokens.INK)
-			heading.add_theme_font_override("font",Tokens.font("voice_bold"))
+			heading.add_theme_font_override("font",Tokens.font("ui_strong"))
 			heading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			if bool(block.get("folio",false)):
 				heading.add_theme_font_override("font",Tokens.font("voice"))
@@ -322,7 +322,7 @@ static func _step_button(glyph:String,action:Variant,tip:String)->Button:
 	button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	button.add_theme_stylebox_override("normal",Tokens.flat(Tokens.BUTTON_BG,Tokens.BORDER_2,1,3))
 	button.add_theme_stylebox_override("hover",Tokens.flat(Tokens.BUTTON_BG,Tokens.GOLD,1,3))
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 	if action is Callable:
 		# An explicit press must show its result immediately. The passive
 		# live-refresh guard skips rebuilds while the pointer hovers the dock,
@@ -437,7 +437,7 @@ static func _render_rows(parent:VBoxContainer,block:Dictionary)->void:
 		text_column.add_child(name_label)
 		Live.attach(name_label,"text",item.get("live_name"))
 		if String(item.get("sub",""))!="":
-			var sub_label:=Tokens.make_label(String(item.sub),12,Tokens.MUTED)
+			var sub_label:=Tokens.make_label(String(item.sub),14,Tokens.MUTED)
 			sub_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 			text_column.add_child(sub_label)
 			Live.attach(sub_label,"text",item.get("live_sub"))
@@ -602,10 +602,11 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.disabled=disabled
 		button.tooltip_text=String(item.get("tip",""))
-		button.add_theme_stylebox_override("normal",Tokens.action_button_style(primary))
-		button.add_theme_stylebox_override("hover",Tokens.action_button_style(primary,true))
+		Tokens.apply_button_style(button,false)
+		if primary:button.add_theme_stylebox_override("normal",Tokens.button_pressed_style())
+		button.add_theme_stylebox_override("hover",Tokens.action_button_style(false,true))
 		button.add_theme_stylebox_override("disabled",Tokens.action_button_style(false))
-		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("focus",Tokens.gold_outline_style())
 		grid.add_child(button)
 		Live.attach(button,"disabled",item.get("live_disabled"))
 		Live.attach(button,"tooltip_text",item.get("live_tip"))
@@ -622,7 +623,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 			plate.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;plate.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			plate.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(plate)
 		var fg:=Tokens.DISABLED if disabled else (Tokens.GOLD_TEXT if primary else Tokens.BODY)
-		var label:=Tokens.make_label(Tokens.sentence_case(String(item.get("label",""))),13,fg)
+		var label:=Tokens.make_label(Tokens.sentence_case(String(item.get("label",""))),16,fg)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		column.add_child(label)
@@ -630,7 +631,7 @@ static func _render_actions(parent:VBoxContainer,block:Dictionary)->void:
 		if item.has("live_disabled"):
 			Live.attach(label,"theme_override_colors/font_color",func()->Color: return Tokens.DISABLED if button.disabled else (Tokens.GOLD_TEXT if primary else Tokens.BODY))
 		if String(item.get("sub",""))!="":
-			var sub_label:=Tokens.make_label(String(item.sub),12,Tokens.MUTED)
+			var sub_label:=Tokens.make_label(String(item.sub),14,Tokens.MUTED)
 			sub_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 			sub_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			column.add_child(sub_label)

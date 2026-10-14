@@ -19,7 +19,7 @@ var court_volume:=1.0
 ## "off" (they kneel and sink, as before). scripts/hud/court_executions.gd.
 var court_gore:="full"
 var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
-var color_theme:="light"
+var color_theme:="dark"
 ## Shorter transitions, no camera coasting, no weather or bird motion.
 var reduce_motion:=false
 var config_path:=SETTINGS_PATH
@@ -27,6 +27,7 @@ var applying:=false
 
 func _ready()->void:
 	var config:=ConfigFile.new()
+	var migrate_appearance:=true
 	if config.load(config_path)==OK:
 		ui_scale=clampf(float(config.get_value("display","ui_scale",1.25)),1.0,1.75)
 		render_scale=clampf(float(config.get_value("display","render_scale",1.0)),0.5,1.0)
@@ -36,8 +37,9 @@ func _ready()->void:
 		court_volume=clampf(float(config.get_value("display","court_volume",1.0)),0.0,1.0)
 		court_gore=String(config.get_value("display","court_gore","full"))
 		if court_gore not in ["full","mild","off"]:court_gore="full"
-		color_theme=String(config.get_value("display","color_theme","light"))
-		if color_theme not in ["light","dark"]:color_theme="light"
+		migrate_appearance=int(config.get_value("display","visual_system",0))<1
+		color_theme="dark" if migrate_appearance else String(config.get_value("display","color_theme","dark"))
+		if color_theme not in ["light","dark"]:color_theme="dark"
 		reduce_motion=bool(config.get_value("display","reduce_motion",false))
 		var saved_speed:Variant=config.get_value("camera","map_scroll_speed",DEFAULT_MAP_SCROLL_SPEED)
 		if (saved_speed is float or saved_speed is int) and is_finite(float(saved_speed)):
@@ -50,6 +52,7 @@ func _ready()->void:
 	Tokens.install_global_fonts()
 	Tokens.set_color_mode(color_theme)
 	apply()
+	if migrate_appearance:persist()
 
 static func logical_size(pixels:Vector2i,density:float,scale:float)->Vector2i:
 	# Keep a usable canvas on small screens; never squeeze the navigation rail
@@ -107,6 +110,7 @@ func apply_court()->void:
 func persist()->void:
 	var config:=ConfigFile.new()
 	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","court_volume","court_gore","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
+	config.set_value("display","visual_system",1)
 	config.set_value("camera","map_scroll_speed",map_scroll_speed)
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
@@ -143,7 +147,7 @@ func set_color_theme(mode:String,reload_scene:bool=true)->void:
 
 func add_controls(parent:Node)->void:
 	var heading:=Label.new();heading.text="DISPLAY";heading.add_theme_font_size_override("font_size",12);heading.add_theme_color_override("font_color",Tokens.INK_MUTED);parent.add_child(heading)
-	var appearance:=_choice(parent,"Paper colour (the map redraws when you change it)",["Light","Dark"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
+	var appearance:=_choice(parent,"Interface appearance",["Daylight","Modern Strategy"],1 if color_theme=="dark" else 0,func(index:int):set_color_theme("dark" if index==1 else "light"))
 	appearance.name="ColorTheme"
 	appearance.tooltip_text="Changing it redraws the map and closes this menu. Your game carries on where it was."
 	_choice(parent,"Text & interface size",["100%","125%","150%","175%"],clampi(roundi((ui_scale-1)*4),0,3),func(index:int):ui_scale=1.0+index*.25;apply();persist())

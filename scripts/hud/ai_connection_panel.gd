@@ -30,7 +30,7 @@ func _ready()->void:
 	var root:=VBoxContainer.new();root.add_theme_constant_override("separation",12);card.add_child(root)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);root.add_child(head)
 	var title:=P.label(head,"AI connection","title",T.INK,false);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	title.add_theme_font_override("font",T.font("voice_bold"));title.add_theme_font_size_override("font_size",32)
+	title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_font_size_override("font_size",32)
 	var close:=P.button(head,"Close",func():queue_free());close.name="Close";close.size_flags_horizontal=Control.SIZE_SHRINK_END;close.custom_minimum_size=Vector2(96,38)
 	P.rule(root)
 	# The connection form may grow when Advanced opens; its heading and Close

@@ -40,7 +40,7 @@ const SECTIONS:Array[Dictionary]=[
 ## would not say enough beside their neighbours.
 const CATEGORIES:Array[Dictionary]=[
 	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview"],"overview":["People"],"civ":["Culture","Council"]},"tooltip":"This settlement, its people and their ways"},
-	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Workshops","Goods","Arms"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
+	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Daily work","Daily work","Workshop orders"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
 	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
 	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
@@ -897,7 +897,7 @@ func _build_toolbar()->void:
 		button.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 		button.add_theme_color_override("font_color",Tokens.GOLD_TEXT if bool(action[2]) else Tokens.BODY)
 		button.add_theme_color_override("font_disabled_color",Tokens.DISABLED)
-		button.add_theme_stylebox_override("normal",Tokens.action_button_style(bool(action[2])))
+		Tokens.apply_button_style(button,bool(action[2]))
 		button.add_theme_stylebox_override("hover",Tokens.action_button_style(bool(action[2]),true))
 		button.add_theme_stylebox_override("disabled",Tokens.action_button_style(false))
 		button.add_theme_stylebox_override("focus",_rail_focus_style())
@@ -948,7 +948,7 @@ func _build_toolbar()->void:
 	world_button.custom_minimum_size=Vector2(0,32)
 	world_button.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	world_button.add_theme_color_override("font_color",Tokens.BODY)
-	world_button.add_theme_stylebox_override("normal",Tokens.action_button_style(false))
+	Tokens.apply_button_style(world_button,false)
 	world_button.add_theme_stylebox_override("hover",Tokens.action_button_style(false,true))
 	world_button.add_theme_stylebox_override("focus",_rail_focus_style())
 	world_button.tooltip_text="See the whole world, and how much of it our people know."

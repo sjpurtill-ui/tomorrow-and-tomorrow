@@ -10,11 +10,9 @@ Baseline: `d179b5ee6f86e0a8ed3c4cbbb641e230905ef713`. Canonical game:
 
 ## Review loop
 
-On 2026-10-14 the user requested a substantially bolder palette, typography and
-button system, followed by visual concepts and specifications. The first shared,
-Production, Research and Settings usability checkpoints are retained on worker
-branches. Further visual rollout awaits that direction; these checkpoints do not
-constitute acceptance of the existing beige visual identity.
+On 2026-10-14 the user selected Modern Strategy and authorized its application to
+every popup and subpage. See MODERN_STRATEGY.md for the palette, type and control
+specification. Earlier layout improvements remain; beige styling is superseded.
 
 Designer A implements a screen, designer B critiques its rendered result while
 implementing another screen, A revises and critiques B, and B revisits the revision.

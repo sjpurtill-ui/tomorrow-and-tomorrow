@@ -684,7 +684,7 @@ func _popover_button(key:String,text:String,tip:String)->Button:
 	button.custom_minimum_size=Vector2(40 if key=="CourtSettings" else 0,32)
 	button.add_theme_font_size_override("font_size",13 if key!="CourtSettings" else 17)
 	var plain:=Tokens.action_button_style(false)
-	var lit:=Tokens.action_button_style(true,true)
+	var lit:=Tokens.button_pressed_style()
 	for state in ["normal","focus"]:button.add_theme_stylebox_override(state,plain)
 	for state in ["hover","pressed","hover_pressed"]:button.add_theme_stylebox_override(state,lit)
 	for state in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:button.add_theme_color_override(state,Tokens.INK)

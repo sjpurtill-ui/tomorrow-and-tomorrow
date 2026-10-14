@@ -945,7 +945,7 @@ func _label(parent:Node,text:String,size:int=15)->Label:
 	var result:=Label.new();result.text=text;result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));result.add_theme_color_override("font_color",T.INK);parent.add_child(result);return result
 func _button(parent:Node,text:String,callback:Callable)->Button:
 	var result:=Button.new();result.text=text;result.custom_minimum_size.y=34;result.pressed.connect(callback);result.size_flags_horizontal=Control.SIZE_EXPAND_FILL;result.focus_mode=Control.FOCUS_NONE
-	result.add_theme_stylebox_override("normal",T.action_button_style(false));result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.button_pressed_style());result.add_theme_stylebox_override("hover_pressed",T.button_pressed_style());result.add_theme_stylebox_override("disabled",T.button_disabled_style())
+	T.apply_button_style(result,false);result.add_theme_stylebox_override("hover",T.action_button_style(false,true));result.add_theme_stylebox_override("pressed",T.button_pressed_style());result.add_theme_stylebox_override("hover_pressed",T.button_pressed_style());result.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_hover_pressed_color","font_focus_color"]:result.add_theme_color_override(state,T.INK)
 	result.add_theme_color_override("font_disabled_color",T.DISABLED)
 	parent.add_child(result);return result

@@ -182,7 +182,7 @@ func rebuild()->void:
 	eyebrow_label.visible=eyebrow_label.text!=""
 	title_label.text=category_title if category_title!="" else Tokens.sentence_case(String(meta.get("title","")))
 	title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
-	title_label.add_theme_font_override("font",Tokens.font("voice_bold"))
+	title_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	note_label.text=title_note if category_title!="" else ""
 	note_label.visible=note_label.text!=""
 	var own:Array=meta.get("subtabs",[])
@@ -391,9 +391,9 @@ func _rebuild_kpis(kpis:Array)->void:
 		value_row.add_theme_constant_override("separation",6)
 		column.add_child(value_row)
 		var value_label:=Tokens.make_label(String(kpi.get("value","")),28,Tokens.INK)
-		value_label.add_theme_font_override("font",Tokens.font("voice_bold"))
+		value_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 		if glance:
-			value_label.add_theme_font_override("font",Tokens.font("voice_bold"));value_label.add_theme_font_size_override("font_size",28)
+			value_label.add_theme_font_override("font",Tokens.font("ui_strong"));value_label.add_theme_font_size_override("font_size",28)
 		value_row.add_child(value_label)
 		preload("res://scripts/hud/live_value_binding.gd").attach(value_label,"text",kpi.get("live_value"))
 		if String(kpi.get("delta",""))!="" and not glance:
@@ -452,7 +452,7 @@ func _rebuild_brief(brief:Dictionary)->void:
 	text_column.add_theme_constant_override("separation",2)
 	row.add_child(text_column)
 	var brief_title:=Tokens.make_label(Tokens.sentence_case(String(brief.get("title",""))),20,Tokens.INK)
-	brief_title.add_theme_font_override("font",Tokens.font("voice_bold"))
+	brief_title.add_theme_font_override("font",Tokens.font("ui_strong"))
 	brief_title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	text_column.add_child(brief_title)
 	var why:=Tokens.make_label(String(brief.get("why","")),14,Tokens.TEXT_SOFT)

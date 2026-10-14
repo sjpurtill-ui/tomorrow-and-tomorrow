@@ -68,7 +68,7 @@ func _ready()->void:
 	disclosure.add_theme_font_size_override("font_size",13)
 	disclosure.add_theme_color_override("font_color",T.INK)
 	disclosure.add_theme_color_override("font_disabled_color",T.MUTED)
-	disclosure.add_theme_stylebox_override("normal",T.action_button_style(false))
+	T.apply_button_style(disclosure,false)
 	disclosure.add_theme_stylebox_override("hover",T.action_button_style(false,true))
 	disclosure.add_theme_stylebox_override("pressed",T.button_pressed_style())
 	disclosure.add_theme_stylebox_override("disabled",T.button_disabled_style())
@@ -97,7 +97,7 @@ func _arrow(text:String,step:int)->Button:
 	button.tooltip_text="More armies" if step>0 else "Earlier armies"
 	button.add_theme_font_size_override("font_size",18)
 	button.add_theme_color_override("font_color",T.INK);button.add_theme_color_override("font_hover_color",T.INK)
-	button.add_theme_stylebox_override("normal",T.action_button_style(false));button.add_theme_stylebox_override("hover",T.action_button_style(false,true))
+	T.apply_button_style(button,false);button.add_theme_stylebox_override("hover",T.action_button_style(false,true))
 	button.add_theme_stylebox_override("pressed",T.button_pressed_style());button.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	button.pressed.connect(func():scroll=clampi(scroll+step,0,maxi(0,cards.size()-_fits()));_arrange())
 	add_child(button);button.hide()

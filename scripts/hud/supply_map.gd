@@ -99,10 +99,10 @@ static func toggle_button(t:Node)->Button:
 	button.add_theme_color_override("font_color",Tokens.BODY)
 	button.add_theme_color_override("font_pressed_color",Tokens.GOLD_TEXT)
 	button.add_theme_color_override("font_hover_pressed_color",Tokens.GOLD_TEXT)
-	button.add_theme_stylebox_override("normal",Tokens.action_button_style(false))
+	Tokens.apply_button_style(button,false)
 	button.add_theme_stylebox_override("hover",Tokens.action_button_style(false,true))
-	button.add_theme_stylebox_override("pressed",Tokens.action_button_style(true))
-	button.add_theme_stylebox_override("hover_pressed",Tokens.action_button_style(true,true))
+	button.add_theme_stylebox_override("pressed",Tokens.button_pressed_style())
+	button.add_theme_stylebox_override("hover_pressed",Tokens.button_pressed_style())
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	button.tooltip_text="Where our fighters can be fed: green fed, ochre short of food, red starving. Our supply lines, and how far the carts reach."
 	button.toggled.connect(func(on:bool)->void:

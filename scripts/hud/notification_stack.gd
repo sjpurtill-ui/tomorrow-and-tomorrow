@@ -570,7 +570,7 @@ func _build_log()->void:
 	log_list=VBoxContainer.new();log_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;log_list.add_theme_constant_override("separation",2);scroll.add_child(log_list)
 	var whole:=Button.new();whole.text="Open the whole Chronicle";whole.focus_mode=Control.FOCUS_NONE
 	whole.add_theme_font_override("font",T.FONT_UI);whole.add_theme_font_size_override("font_size",13)
-	whole.add_theme_stylebox_override("normal",T.action_button_style(true));whole.add_theme_stylebox_override("hover",T.action_button_style(true,true))
+	T.apply_button_style(whole,true);whole.add_theme_stylebox_override("hover",T.action_button_style(true,true))
 	whole.pressed.connect(func()->void:
 		toggle_log()
 		act({}))

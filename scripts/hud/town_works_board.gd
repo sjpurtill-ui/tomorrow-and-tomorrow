@@ -198,7 +198,7 @@ func _actions(actions:Array)->Control:
 		var button:=Button.new();button.name="Act";button.text=String(item.get("label",""));button.tooltip_text=String(item.get("tip",""));button.focus_mode=Control.FOCUS_NONE
 		button.custom_minimum_size=Vector2(0,28)
 		if bool(item.get("primary",false)):
-			button.add_theme_stylebox_override("normal",T.action_button_style(true));button.add_theme_color_override("font_color",T.GOLD_TEXT)
+			T.apply_button_style(button,true)
 		var action:Variant=item.get("on_press")
 		if action is Callable:button.pressed.connect(func()->void:(action as Callable).call())
 		else:button.disabled=true

@@ -205,7 +205,7 @@ func _build_card()->void:
 	if not live:
 		var again:=Button.new(); again.name="WatchAgain"; again.text="Watch again"
 		T.text(again,"body",T.INK); again.custom_minimum_size=Vector2(0,40)
-		again.add_theme_stylebox_override("normal",T.action_button_style(false))
+		T.apply_button_style(again,false)
 		again.pressed.connect(func()->void: if is_instance_valid(skirmish_scene): skirmish_scene.replay())
 		row.add_child(again)
 	_time_button(row)
@@ -666,7 +666,7 @@ func _button(parent:Node,text:String,id:String,primary:bool)->Button:
 	T.text(button,"body",T.INK)
 	button.custom_minimum_size=Vector2(0,40)
 	button.focus_mode=Control.FOCUS_NONE
-	button.add_theme_stylebox_override("normal",T.action_button_style(primary))
+	T.apply_button_style(button,primary)
 	button.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
 	button.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	button.add_theme_color_override("font_disabled_color",T.DISABLED)

@@ -83,7 +83,7 @@ static func open(terrain:Node,layer:Node)->Control:
 	# Preferences stay on this surface; opening a group never opens another page.
 	if terrain.get("display_preferences"):
 		var preferences:Node=terrain.display_preferences
-		var settings:=_disclosure(content,"Display and sound",func()->String:return "%d%% text · %s paper · %d fps" % [roundi(float(preferences.ui_scale)*100),String(preferences.color_theme).capitalize(),int(preferences.frame_limit)])
+		var settings:=_disclosure(content,"Display and sound",func()->String:return "%d%% text · %s · %d fps" % [roundi(float(preferences.ui_scale)*100),"Modern Strategy" if String(preferences.color_theme)=="dark" else "Daylight",int(preferences.frame_limit)])
 		settings.name="DisplaySettings"
 		preferences.add_controls(settings)
 		preferences.add_navigation_controls(settings)
@@ -177,7 +177,7 @@ static func _disclosure(parent:Node,title:String,summary:Variant)->VBoxContainer
 	var toggle:=Kit.quiet_button(group,title+"  ›")
 	toggle.name=title.replace(" ","")+"Toggle"
 	toggle.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	toggle.add_theme_font_override("font",T.font("voice_bold"))
+	toggle.add_theme_font_override("font",T.font("ui_strong"))
 	toggle.add_theme_font_size_override("font_size",22)
 	toggle.custom_minimum_size.y=38
 	var note:=Kit.label(group,String(summary.call()) if summary is Callable else String(summary),"note")

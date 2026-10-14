@@ -114,7 +114,7 @@ func _build()->void:
 		T.text(button,"body",T.INK)
 		button.custom_minimum_size=Vector2(0,44)
 		var primary:=id in ["continue","aftermath"]
-		button.add_theme_stylebox_override("normal",T.action_button_style(primary))
+		T.apply_button_style(button,primary)
 		button.pressed.connect(_act.bind(id))
 		row.add_child(button); buttons[id]=button
 	if buttons.has("continue"): (buttons.continue as Button).grab_focus.call_deferred()
