@@ -71,17 +71,17 @@ func _build()->void:
 	var center:=CenterContainer.new(); center.set_anchors_and_offsets_preset(PRESET_FULL_RECT); add_child(center)
 	card=PanelContainer.new(); card.name="Card"
 	card.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,32.0))
-	card.custom_minimum_size=Vector2(820,0)
+	card.custom_minimum_size=Vector2(minf(900,get_viewport_rect().size.x-40),0)
 	center.add_child(card)
 	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",16); card.add_child(column)
 	var kicker:=_label(column,"WORD FROM THE FIELD · %s" % Chronicle.date_label(int(account.day)).to_upper(),"kicker",T.INK_MUTED)
 	kicker.name="Kicker"
 	var headline:=_label(column,String(account.headline),"title",T.INK); headline.name="Headline"
-	headline.add_theme_font_override("font",T.voice_font()); headline.add_theme_font_size_override("font_size",30)
+	headline.add_theme_font_override("font",T.font("ui_strong")); headline.add_theme_font_size_override("font_size",32)
 	var sub:=_label(column,_subline(),"small",T.INK_MUTED); sub.name="Where"
 	column.add_child(_rule())
-	var scroll:=ScrollContainer.new(); scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.custom_minimum_size=Vector2(0,minf(560.0,get_viewport_rect().size.y-360.0))
+	var scroll:=ScrollContainer.new(); scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED; scroll.follow_focus=true
+	scroll.custom_minimum_size=Vector2(0,maxf(120,minf(500.0,get_viewport_rect().size.y-360.0)))
 	column.add_child(scroll)
 	# A scroll box gives its child no width of its own: set it, or prose
 	# wraps one letter to a line. The margin keeps figures clear of the bar.
@@ -89,7 +89,7 @@ func _build()->void:
 	var body:=VBoxContainer.new(); body.size_flags_horizontal=SIZE_EXPAND_FILL; body.add_theme_constant_override("separation",18); inset.add_child(body)
 	body.custom_minimum_size.x=card.custom_minimum_size.x-64.0-28.0
 	# Both sides, before and after.
-	var sides:=HBoxContainer.new(); sides.add_theme_constant_override("separation",32); body.add_child(sides)
+	var sides:=HBoxContainer.new(); sides.add_theme_constant_override("separation",16); body.add_child(sides)
 	_side_block(sides,"OUR SIDE",_our_rows(),String(account.ours.morale_words),BattleAccount.sent_line(account.ours))
 	_side_block(sides,"THEIR SIDE",_their_rows(),"",_their_note())
 	# How each side fought.
@@ -105,7 +105,7 @@ func _build()->void:
 		var quote:=_label(advice,"“%s”" % String(account.advice),"voice_small",T.INK); quote.name="Advice"
 		quote.add_theme_font_override("font",T.voice_font(true))
 	column.add_child(_rule())
-	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",12); row.alignment=BoxContainer.ALIGNMENT_END; column.add_child(row)
+	var row:=HFlowContainer.new(); row.add_theme_constant_override("h_separation",12); row.add_theme_constant_override("v_separation",8); row.alignment=FlowContainer.ALIGNMENT_END; column.add_child(row)
 	for action_variant in account.actions:
 		var action:Dictionary=action_variant
 		var id:=String(action.id)
@@ -164,8 +164,9 @@ func _fate_words(fate:String)->String:
 
 
 func _side_block(parent:Node,title:String,rows:Array,morale:String,note:String)->void:
-	var box:=VBoxContainer.new(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.size_flags_stretch_ratio=1.0; box.add_theme_constant_override("separation",6); parent.add_child(box)
-	box.custom_minimum_size.x=330.0
+	var surface:=PanelContainer.new(); surface.size_flags_horizontal=SIZE_EXPAND_FILL; surface.size_flags_stretch_ratio=1.0
+	surface.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CARD,16)); parent.add_child(surface)
+	var box:=VBoxContainer.new(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.add_theme_constant_override("separation",10); surface.add_child(box)
 	box.name=title.replace(" ","").capitalize()
 	var heading:=_label(box,title,"kicker",T.INK_MUTED); heading.name="Title"
 	var grid:=GridContainer.new(); grid.columns=2; grid.add_theme_constant_override("h_separation",16); grid.add_theme_constant_override("v_separation",4); box.add_child(grid)
@@ -175,7 +176,7 @@ func _side_block(parent:Node,title:String,rows:Array,morale:String,note:String)-
 		# Optional rows appear only when something happened.
 		if not bool(row[2]) and value is int and int(value)<=0: continue
 		var name:=_label(grid,String(row[0]),"body",T.BODY); name.size_flags_horizontal=SIZE_EXPAND_FILL
-		name.autowrap_mode=TextServer.AUTOWRAP_OFF
+		name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		var number:=_label(grid,("none" if int(value)<=0 else str(value)) if value is int else String(value),"value",T.INK)
 		number.autowrap_mode=TextServer.AUTOWRAP_OFF
 		number.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
@@ -188,7 +189,8 @@ func _section(parent:Node,title:String,lines:Array)->void:
 	if lines.all(func(line:Variant)->bool:return String(line).strip_edges()==""): return
 	var box:=VBoxContainer.new(); box.add_theme_constant_override("separation",4); parent.add_child(box)
 	box.name=title.capitalize().replace(" ","")
-	_label(box,title,"kicker",T.INK_MUTED)
+	var heading:=_label(box,title.capitalize(),"section",T.INK)
+	heading.add_theme_font_size_override("font_size",22)
 	for line in lines:
 		if String(line)!="": _label(box,String(line),"body",T.BODY)
 
@@ -196,7 +198,9 @@ func _section(parent:Node,title:String,lines:Array)->void:
 func _label(parent:Node,text:String,role:String,color:Color)->Label:
 	var label:=Label.new(); label.text=text; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size.x=0
-	T.text(label,role,color); parent.add_child(label)
+	T.text(label,role,color)
+	if label.get_theme_font_size("font_size")<14:label.add_theme_font_size_override("font_size",14)
+	parent.add_child(label)
 	return label
 
 

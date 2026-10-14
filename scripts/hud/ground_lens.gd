@@ -32,7 +32,7 @@ func _init()->void:
 	title_label=Kit.label(header,"Ground survey","heading",Color(0,0,0,0),false)
 	title_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	close_button=Kit.quiet_button(header,"Close",func()->void:closed.emit(),"Close the ground survey (or click the map)")
-	close_button.custom_minimum_size=Vector2(64,28)
+	close_button.custom_minimum_size=Vector2(72,40)
 	close_button.add_theme_font_size_override("font_size",14)
 	location_label=Kit.label(column,"","note",Color(0,0,0,0),false)
 	location_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -46,8 +46,8 @@ func _init()->void:
 	body.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	body.add_theme_font_override("normal_font",T.FONT_UI)
 	body.add_theme_font_override("bold_font",T.font("ui_strong"))
-	body.add_theme_font_size_override("normal_font_size",14)
-	body.add_theme_font_size_override("bold_font_size",14)
+	body.add_theme_font_size_override("normal_font_size",16)
+	body.add_theme_font_size_override("bold_font_size",16)
 	body.add_theme_color_override("default_color",T.BODY)
 	column.add_child(body)
 	survey=SurveyCard.new()

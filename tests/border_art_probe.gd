@@ -36,8 +36,8 @@ func _run() -> void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="): out = arg.trim_prefix("--out=")
 		if arg == "--verify": verify = true
-	if not OS.get_user_data_dir().contains("QA"):
-		push_error("Border art probe requires an isolated QA custom user directory.")
+	if not OS.get_user_data_dir().contains("QA") and not OS.get_user_data_dir().contains("Test"):
+		push_error("Border art probe requires an isolated QA or Test custom user directory.")
 		get_tree().quit(2); return
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out))
 	if "--terrain" in OS.get_cmdline_user_args():

@@ -86,8 +86,8 @@ func _ready()->void:
 	column=Control.new();column.name="NoticeColumn";column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(column)
-	pill=Button.new();pill.name="NoticeLog";pill.focus_mode=Control.FOCUS_NONE
-	pill.add_theme_font_override("font",T.FONT_UI);pill.add_theme_font_size_override("font_size",13)
+	pill=Button.new();pill.name="NoticeLog";pill.focus_mode=Control.FOCUS_ALL
+	pill.add_theme_font_override("font",T.FONT_UI);pill.add_theme_font_size_override("font_size",14)
 	pill.add_theme_color_override("font_color",T.INK);pill.add_theme_color_override("font_hover_color",T.INK)
 	var pill_style:=T.paper_panel_style(true,T.RADIUS_CARD);pill_style.content_margin_left=10;pill_style.content_margin_right=10;pill_style.content_margin_top=3;pill_style.content_margin_bottom=3
 	var pill_hover:=pill_style.duplicate() as StyleBoxFlat;pill_hover.border_color=T.GOLD
@@ -314,9 +314,7 @@ func _fill_row(row:PanelContainer,headline:String,fact:String,tone:Color,verb:St
 	var act_button:=row.get_meta("verb") as Button
 	act_button.visible=verb!=""
 	act_button.text=verb
-	for state:String in ["normal","hover","pressed"]:
-		var skin:=T.flat(tone if state=="normal" else tone.darkened(0.12),Color(0,0,0,0),0,10);skin.content_margin_left=10;skin.content_margin_right=10;skin.content_margin_top=2;skin.content_margin_bottom=2
-		act_button.add_theme_stylebox_override(state,skin)
+	T.apply_button_style(act_button,false)
 	(row.get_meta("close") as Button).visible=verb==""
 
 
@@ -363,16 +361,16 @@ func _build_row(n:Dictionary,row_name:String)->PanelContainer:
 	var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(28,28);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
 	var copy:=VBoxContainer.new();copy.size_flags_horizontal=Control.SIZE_EXPAND_FILL;copy.add_theme_constant_override("separation",-1);copy.alignment=BoxContainer.ALIGNMENT_CENTER;copy.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(copy)
-	var title:=_label(copy,16,T.INK,false);title.add_theme_font_override("font",T.voice_font());title.add_theme_font_size_override("font_size",17)
+	var title:=_label(copy,16,T.INK,false);title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_font_size_override("font_size",18)
 	title.clip_text=true;title.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var detail:=_label(copy,13,T.BODY,false);detail.clip_text=true;detail.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	var verb:=Button.new();verb.name="Verb";verb.focus_mode=Control.FOCUS_NONE;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",13)
+	var verb:=Button.new();verb.name="Verb";verb.focus_mode=Control.FOCUS_ALL;verb.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	verb.add_theme_font_override("font",T.font("ui_strong"));verb.add_theme_font_size_override("font_size",14)
 	for state:String in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:verb.add_theme_color_override(state,Color("fbf6ea"))
-	verb.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	T.apply_button_style(verb,false)
 	verb.pressed.connect(func()->void:_press(row))
 	line.add_child(verb)
-	var close:=Button.new();close.name="Close";close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(24,24)
+	var close:=Button.new();close.name="Close";close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_ALL;close.custom_minimum_size=Vector2(24,24)
 	close.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	close.add_theme_font_override("font",T.FONT_UI);close.add_theme_font_size_override("font_size",17)
 	close.add_theme_color_override("font_color",T.INK_MUTED);close.add_theme_color_override("font_hover_color",T.INK)
@@ -397,7 +395,7 @@ func _press(row:PanelContainer)->void:
 
 func _label(parent:Node,font_size:int,color:Color,wrap:bool)->Label:
 	var label:=Label.new();label.add_theme_font_override("font",T.FONT_UI)
-	label.add_theme_font_size_override("font_size",font_size);label.add_theme_color_override("font_color",color)
+	label.add_theme_font_size_override("font_size",maxi(14,font_size));label.add_theme_color_override("font_color",color)
 	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART if wrap else TextServer.AUTOWRAP_OFF
 	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	parent.add_child(label);return label
@@ -561,15 +559,15 @@ func _build_log()->void:
 	column.add_child(log_panel)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",6);log_panel.add_child(box)
 	var head:=HBoxContainer.new();box.add_child(head)
-	var title:=_label(head,18,T.INK,false);title.text="What you were told";title.add_theme_font_override("font",T.voice_font());title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var close:=Button.new();close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_NONE;close.custom_minimum_size=Vector2(26,26)
+	var title:=_label(head,24,T.INK,false);title.text="What you were told";title.add_theme_font_override("font",T.font("ui_strong"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var close:=Button.new();close.text="×";close.flat=true;close.focus_mode=Control.FOCUS_ALL;close.custom_minimum_size=Vector2(40,40)
 	close.add_theme_font_size_override("font_size",17);close.add_theme_color_override("font_color",T.INK_MUTED)
 	close.pressed.connect(toggle_log);head.add_child(close)
 	var hint:=_label(box,12,T.TEXT_SOFT,true);hint.text="This session, newest first. Quieter news is kept here without popping up. Click a line to open it."
-	var scroll:=ScrollContainer.new();scroll.custom_minimum_size=Vector2(0,320);scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;box.add_child(scroll)
+	var scroll:=ScrollContainer.new();scroll.follow_focus=true;scroll.custom_minimum_size=Vector2(0,320);scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;box.add_child(scroll)
 	log_list=VBoxContainer.new();log_list.size_flags_horizontal=Control.SIZE_EXPAND_FILL;log_list.add_theme_constant_override("separation",2);scroll.add_child(log_list)
-	var whole:=Button.new();whole.text="Open the whole Chronicle";whole.focus_mode=Control.FOCUS_NONE
-	whole.add_theme_font_override("font",T.FONT_UI);whole.add_theme_font_size_override("font_size",13)
+	var whole:=Button.new();whole.text="Open the whole Chronicle";whole.focus_mode=Control.FOCUS_ALL
+	whole.add_theme_font_override("font",T.FONT_UI);whole.add_theme_font_size_override("font_size",14)
 	T.apply_button_style(whole,true);whole.add_theme_stylebox_override("hover",T.action_button_style(true,true))
 	whole.pressed.connect(func()->void:
 		toggle_log()
@@ -584,19 +582,20 @@ func _fill_log()->void:
 	# Never down over the toolbar or your orders at the bottom right.
 	var bottom:=get_viewport().get_visible_rect().size.y-12.0
 	if is_instance_valid(hud) and hud.has_method("right_stack_top"):bottom=minf(bottom,float(hud.right_stack_top())-GAP)
-	(log_list.get_parent() as Control).custom_minimum_size.y=clampf(bottom-TOP-PILL_HEIGHT-GAP-150.0,140.0,420.0)
+	var room:=clampf(bottom-TOP-PILL_HEIGHT-GAP-150.0,80.0,420.0)
+	(log_list.get_parent() as Control).custom_minimum_size.y=minf(room,maxf(64.0,float(mini(Model.history.size(),LOG_ROWS))*50.0))
 	for n in Model.history.slice(0,LOG_ROWS):
-		var line:=Button.new();line.flat=false;line.focus_mode=Control.FOCUS_NONE;line.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		var line:=Button.new();line.flat=false;line.focus_mode=Control.FOCUS_ALL;line.alignment=HORIZONTAL_ALIGNMENT_LEFT
 		line.clip_text=true;line.custom_minimum_size=Vector2(0,48)
 		line.text="%s · %s\n%s" % [Model.label(String(n.category)),Model.date_words(int(n.get("day",0))),Model.headline(n)+("  (%s)" % Model.count_words(n) if Model.count_words(n)!="" else "")]
 		line.tooltip_text="%s\n%s" % [Model.headline(n),String(n.get("text",""))]
 		line.icon=Model.icon(String(n.category),40);line.add_theme_constant_override("icon_max_width",22)
-		line.add_theme_font_override("font",T.FONT_UI);line.add_theme_font_size_override("font_size",13)
+		line.add_theme_font_override("font",T.FONT_UI);line.add_theme_font_size_override("font_size",14)
 		line.add_theme_color_override("font_color",T.INK);line.add_theme_color_override("font_hover_color",T.INK)
 		var normal:=T.flat(Color(0,0,0,0));normal.content_margin_left=6;normal.content_margin_right=6
 		normal.border_width_left=3;normal.border_color=Model.color(String(n.category))
 		var hover:=normal.duplicate() as StyleBoxFlat;hover.bg_color=T.HOVER_BG
-		line.add_theme_stylebox_override("normal",normal);line.add_theme_stylebox_override("hover",hover);line.add_theme_stylebox_override("pressed",hover);line.add_theme_stylebox_override("focus",normal)
+		line.add_theme_stylebox_override("normal",normal);line.add_theme_stylebox_override("hover",hover);line.add_theme_stylebox_override("pressed",hover);line.add_theme_stylebox_override("focus",T.gold_outline_style())
 		var action:Dictionary=n.get("action",{}) if n.get("action") is Dictionary else {}
 		line.pressed.connect(func()->void:
 			toggle_log()

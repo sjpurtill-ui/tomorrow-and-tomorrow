@@ -11,6 +11,7 @@ const CommandPanel=preload("res://scripts/hud/command_hierarchy_panel.gd")
 func _ready()->void:
 	get_window().title="TEST — Army command capture"
 	get_window().size=Vector2i(1600,900)
+	get_window().content_scale_size=Vector2i.ZERO
 	call_deferred("_capture")
 
 func _arg(name:String,fallback:String="")->String:
@@ -63,6 +64,17 @@ func _capture()->void:
 	for _frame in 8:
 		await get_tree().process_frame
 		RenderingServer.force_draw(false)
+	if _arg("pages")!="":
+		for size in [Vector2i(1600,900),Vector2i(1024,720)]:
+			get_window().size=size
+			for page in panel.tabs.get_tab_count():
+				panel.tabs.current_tab=page
+				for frame in 12:await get_tree().process_frame
+				RenderingServer.force_draw(false)
+				var path:="res://artifacts/popup-audit/command-%d-%d.png" % [page,size.x]
+				get_viewport().get_texture().get_image().save_png(path)
+				if not Rect2(Vector2.ZERO,Vector2(size)).grow(1).encloses(panel.panel.get_global_rect()):
+					push_error("Command panel escaped viewport: %s %s" % [size,panel.panel.get_global_rect()]);get_tree().quit(1);return
 	var output:=_arg("out","res://artifacts/army-command/capture.png")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(output.get_base_dir()))
 	var error:=get_viewport().get_texture().get_image().save_png(output)

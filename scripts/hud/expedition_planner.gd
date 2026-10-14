@@ -70,9 +70,9 @@ func _unhandled_input(event:InputEvent)->void:
 
 func _process(_delta:float)->void:
 	if is_instance_valid(card):
-		card.size=card.get_combined_minimum_size()
 		var view:=get_viewport().get_visible_rect().size
-		card.position=Vector2(view.x-card.size.x-24.0,clampf((view.y-card.size.y)*0.5,T.CONTENT_TOP+8.0,maxf(T.CONTENT_TOP+8.0,view.y-card.size.y-130.0)))
+		card.size=Vector2(minf(480,view.x-24),minf(780,view.y-32))
+		card.position=Vector2(view.x-card.size.x-12.0,(view.y-card.size.y)*.5)
 	# The view glides out to the push; it is held on it until the glide ends.
 	if _frame_frames>0 and is_instance_valid(terrain):
 		_frame_frames-=1
@@ -132,13 +132,15 @@ func _frame_the_push()->void:
 
 func _rebuild(reckoning:=false)->void:
 	if not is_instance_valid(card):return
-	for child in card.get_children():child.queue_free()
-	var column:=VBoxContainer.new(); column.add_theme_constant_override("separation",8); column.custom_minimum_size=Vector2(430,0); card.add_child(column)
-	var head:=HBoxContainer.new(); column.add_child(head)
+	for child in card.get_children():card.remove_child(child);child.queue_free()
+	var chrome:=VBoxContainer.new();chrome.add_theme_constant_override("separation",16);card.add_child(chrome)
+	var head:=HBoxContainer.new();chrome.add_child(head)
 	var titles:=VBoxContainer.new(); titles.size_flags_horizontal=Control.SIZE_EXPAND_FILL; titles.add_theme_constant_override("separation",0); head.add_child(titles)
 	Kit.label(titles,"An expedition","kicker")
 	Kit.label(titles,"Push into the unknown","title")
-	var shut:=Kit.quiet_button(head,"×",close,"Close · Escape"); shut.custom_minimum_size=Vector2(36,36)
+	var shut:=Kit.quiet_button(head,"Close",close,"Close · Escape");shut.custom_minimum_size=Vector2(72,40)
+	var scroll:=ScrollContainer.new();scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;chrome.add_child(scroll)
+	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",16);scroll.add_child(column)
 	# On foot or by sea.
 	var sea:=Expedition.sea_ready()
 	var ways:=_row(column,"How")
@@ -150,23 +152,23 @@ func _rebuild(reckoning:=false)->void:
 	var grid:=GridContainer.new(); grid.columns=3; grid.add_theme_constant_override("h_separation",4); grid.add_theme_constant_override("v_separation",4); way.add_child(grid)
 	for c:Array in COMPASS:
 		if String(c[0])=="":
-			var mid:=TextureRect.new(); mid.texture=Icons.chart_texture("walker" if not by_sea else "find",INK,40); mid.custom_minimum_size=Vector2(44,32); mid.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; mid.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; grid.add_child(mid); continue
+			var mid:=TextureRect.new(); mid.texture=Icons.chart_texture("walker" if not by_sea else "find",T.INK,40); mid.custom_minimum_size=Vector2(44,32); mid.expand_mode=TextureRect.EXPAND_IGNORE_SIZE; mid.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED; grid.add_child(mid); continue
 		var id:=String(c[0])
 		var b:=_choice(grid,String(c[1]),heading==id,func()->void:choose("heading",id))
-		b.custom_minimum_size=Vector2(48,30); b.tooltip_text=id.capitalize()
+		b.custom_minimum_size=Vector2(48,40); b.tooltip_text=id.capitalize()
 	# How far.
 	var far:=_row(column,"How far, km")
-	var reaches:=HBoxContainer.new(); reaches.add_theme_constant_override("h_separation",4); reaches.add_theme_constant_override("v_separation",4); reaches.size_flags_horizontal=Control.SIZE_EXPAND_FILL; far.add_child(reaches)
+	var reaches:=HFlowContainer.new(); reaches.add_theme_constant_override("h_separation",6); reaches.add_theme_constant_override("v_separation",6); reaches.size_flags_horizontal=Control.SIZE_EXPAND_FILL; far.add_child(reaches)
 	for km:int in Expedition.REACHES:
 		var b:=_choice(reaches,_thousands(km),is_equal_approx(reach_km,float(km)),func()->void:choose("reach",km))
 		b.tooltip_text=("%s km under sail from the shore that way." % _thousands(km)) if by_sea else ("About %d in 100 of such parties come home from %s km out." % [roundi(Expedition.return_chance(float(km),false)*100.0),_thousands(km)])
 	# How many.
 	var many:=_row(column,"How many")
 	var minus:=Kit.button(many,"−",false,func()->void:choose("party",party-(10 if party>30 else 4)))
-	minus.custom_minimum_size=Vector2(36,32)
+	minus.custom_minimum_size=Vector2(40,40)
 	var count:=Kit.label(many,"%d people" % party,"value",Color(0,0,0,0),false); count.custom_minimum_size=Vector2(96,0); count.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	var plus:=Kit.button(many,"+",false,func()->void:choose("party",party+(10 if party>=30 else 4)))
-	plus.custom_minimum_size=Vector2(36,32)
+	plus.custom_minimum_size=Vector2(40,40)
 	# What it comes to.
 	var facts:=Kit.section(column,12)
 	if reckoning or current.is_empty():
@@ -190,7 +192,7 @@ func _rebuild(reckoning:=false)->void:
 		Kit.label(facts,"Home again: country %d km each side of their track is charted; any people within %d km of it is met. Signs of one within %d km are followed, overland or round the coast in the boats, and come home as a rumour where neither can be done. About %d of them may die on the way." % [roundi(Expedition.REVEAL_KM),roundi(Expedition.MEET_KM),roundi(Expedition.SIGNS_KM),roundi(float(party)*(1.0-chance)*Expedition.ROAD_TOLL)],"note",T.GREEN)
 		Kit.label(facts,"Lost: all %d die, and nothing they saw comes back." % party,"note",T.RED)
 	if String(current.get("blocker",""))!="":Kit.label(column,String(current.blocker),"body",T.RED)
-	var buttons:=HBoxContainer.new(); buttons.add_theme_constant_override("separation",8); column.add_child(buttons)
+	var buttons:=HBoxContainer.new(); buttons.add_theme_constant_override("separation",8);chrome.add_child(buttons)
 	var go:=Kit.button(buttons,"Send them",true,send,"Commit the expedition: the food is issued now and they are away until they come home or are given up.")
 	go.disabled=reckoning or not bool(current.get("ok",false))
 	go.size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -220,7 +222,7 @@ func _row(parent:Node,caption:String)->HBoxContainer:
 
 func _choice(parent:Node,text:String,on:bool,press:Callable)->Button:
 	var b:=Kit.button(parent,text,on,press)
-	b.custom_minimum_size=Vector2(0,30)
+	b.custom_minimum_size=Vector2(0,40)
 	if on:
 		b.add_theme_color_override("font_color",T.ACTION_INK)
 		T.apply_button_style(b,true)
@@ -315,7 +317,7 @@ class PushChart extends Control:
 				if not taken.any(func(r:Rect2)->bool:return r.grow(2.0).intersects(box)):break
 				box.position.y-=24.0
 			taken.append(box)
-			draw_style_box(T.flat(Color(PAPER,0.95),Color(ink,0.9),1,3,0),box)
+			draw_style_box(T.flat(T.PAPER_RAISED,Color(ink,0.9),1,3,0),box)
 			draw_string(ui,box.position+Vector2(8,14),tag,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK)
 		# The route, ink on land and blue at sea, home to the far point.
 		var plan:Dictionary=q.get("route_plan",{})

@@ -20,6 +20,7 @@ func _ready()->void:
 		if arg.begins_with("--out="): out=arg.trim_prefix("--out=")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out))
 	get_window().size=Vector2i(1600,900)
+	get_window().content_scale_size=Vector2i.ZERO
 	var backdrop:=ColorRect.new(); backdrop.color=Color("56604a"); backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var layer:=CanvasLayer.new(); layer.layer=-5; add_child(layer); layer.add_child(backdrop)
 	_setup()
@@ -56,6 +57,7 @@ func _setup()->void:
 
 ## The fight, from the real resolver: head-on against a ditch and stakes.
 func _fight()->int:
+	MilitaryCampaign.military_inventory["improvised"]=20
 	MilitaryCampaign.raise_recruits(20)
 	MilitaryCampaign.start_training("levy","improvised",20)
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
@@ -79,6 +81,9 @@ func _fight()->int:
 		if String(result.outcome)=="attacker_victory" and int(result.round_count)>=3:
 			chosen=result; break
 	if chosen.is_empty(): chosen=fallback
+	if chosen.is_empty():
+		push_error("Battle report capture fixture did not produce a resolved victory")
+		get_tree().quit(1);return 0
 	print("FIXTURE seed=%d rounds=%d outcome=%s" % [int(chosen.get("seed",0)),int(chosen.get("round_count",0)),String(chosen.get("outcome",""))])
 	var record:={"seed":int(chosen.seed),"outcome":String(chosen.outcome),"winner":String(chosen.winner),"round_count":int(chosen.round_count),"rounds":chosen.rounds,
 		"attacker":chosen.attacker,"defender":chosen.defender,"home_side":"attacker","home_force_kind":"field_army","home_force_id":army_id,"campaign_mode":"offensive",
@@ -97,6 +102,21 @@ func _fight()->int:
 
 
 func _report(seed:int)->void:
+	if "--audit-report" in OS.get_cmdline_user_args():
+		for mode in ["dark","light"]:
+			HudTokens.set_color_mode(mode)
+			for size in [Vector2i(1600,900),Vector2i(1024,720),Vector2i(800,600)]:
+				get_window().size=size
+				var audit_host:=Node.new();add_child(audit_host)
+				var report:Control=load("res://scripts/hud/battle_report_panel.gd").open(audit_host,seed)
+				for frame in 24:await get_tree().process_frame
+				var bounds:Rect2=report.card.get_global_rect()
+				if not Rect2(Vector2.ZERO,Vector2(size)).grow(1).encloses(bounds):
+					push_error("Report escapes viewport: %s %s" % [size,bounds]);get_tree().quit(1);return
+				await _save("report-%s-%d" % [mode,size.x])
+				audit_host.queue_free()
+				await get_tree().process_frame
+		return
 	var panel_path:="res://scripts/hud/battle_report_panel.gd"
 	if ResourceLoader.exists(panel_path):
 		var host:=Node.new(); add_child(host)

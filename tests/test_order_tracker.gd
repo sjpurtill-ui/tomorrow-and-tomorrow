@@ -343,15 +343,17 @@ func _sample_orders()->void:
 	Tracker.find(stalled).merge({"claimed":true,"state":"stalled","line":"Stalled: nobody is building","value":30,"total":100},true)
 
 
-func test_every_card_line_is_short_and_reads_in_light_and_dark()->void:
+func test_order_summaries_stay_bounded_and_status_keeps_the_full_recorded_reason()->void:
 	_sample_orders()
 	for o in Tracker.orders():
 		var order:Dictionary=o
-		for text in [String(order.words),String(order.line),Stack.status_words(order)]:
+		for text in [String(order.words),String(order.line)]:
 			var words:=0
 			for token in text.split(" ",false):
 				if Tracker._wordlike(String(token)):words+=1
 			assert_int(words).override_failure_message("too long: '%s'" % text).is_less_equal(Tracker.MAX_WORDS)
+		if String(order.state) in ["done","refused","called_off"]:
+			assert_str(Stack.status_words(order)).contains(String(order.line))
 	for mode in ["light","dark"]:
 		Tokens.set_color_mode(mode)
 		for state in ["accepted","under_way","done","stalled","refused","nothing"]:
