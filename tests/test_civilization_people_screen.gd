@@ -129,3 +129,17 @@ func test_restored_reader_keeps_preview_and_escape_backs_out_before_discarding()
 	assert_dict(replacement.draft).is_empty()
 	assert_bool(replacement.handle_escape()).is_false()
 	replacement.free()
+
+func test_scrolling_records_does_not_grow_the_living_scene()->void:
+	var scroll:=ScrollContainer.new();scroll.size=Vector2(934,620);add_child(scroll)
+	screen.reparent(scroll)
+	var spacer:=Control.new();spacer.custom_minimum_size.y=500;screen.add_child(spacer)
+	await get_tree().process_frame
+	screen._fit_scene()
+	await get_tree().process_frame
+	var height:float=screen.stage.custom_minimum_size.y
+	scroll.scroll_vertical=180
+	await get_tree().process_frame
+	screen._fit_scene()
+	assert_float(screen.stage.custom_minimum_size.y).is_equal(height)
+	screen.reparent(self);scroll.free()
