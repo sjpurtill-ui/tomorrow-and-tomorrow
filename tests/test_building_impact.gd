@@ -135,7 +135,8 @@ func test_the_buildings_page_shows_what_buildings_and_homes_do()->void:
 	assert_array(sections).contains(["does","homes"])
 	var does:Array=(queue.cards as Array).filter(func(c:Dictionary)->bool:return String(c.get("section",""))=="does")
 	var homes:Array=(queue.cards as Array).filter(func(c:Dictionary)->bool:return String(c.get("section",""))=="homes")
-	assert_int(does.size()).is_equal(Impact.summary().size())
+	var titles:Array=Build._settlement_definitions().map(func(d:Dictionary)->String:return String(d.name))
+	assert_int(does.size()).is_equal(Impact.summary().filter(func(l:Dictionary)->bool:return not String(l.label) in titles).size())
 	assert_int(homes.size()).is_equal((Impact.homes().lines as Array).size())
 	for project:Dictionary in queue.projects:
 		assert_array((project.impact as Dictionary).lines).is_not_empty()

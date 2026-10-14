@@ -311,7 +311,8 @@ func test_workshops_and_stores_name_the_hands_they_need()->void:
 	_found(97,["Hearth Circle","Lean-to Shelters"],240)
 	var row:Dictionary=_rows(_page())["Workshops and stores"]
 	assert_str(String(row.value)).is_equal("Short-handed")
-	assert_str(String(row.sub)).is_equal("3 of 10 makers, 6 of 10 carriers")
+	# The counts ride in its pips, once.
+	assert_float(float(row.needs[1].have)).is_equal(6.0);assert_float(float(row.needs[1].need)).is_equal(10.0)
 	assert_float(float(row.needs[0].have)).is_equal(3.0);assert_float(float(row.needs[0].need)).is_equal(10.0)
 	assert_str(String(row.detail)).contains("units of store room")
 

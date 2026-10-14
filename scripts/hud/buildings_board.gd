@@ -15,14 +15,18 @@ extends "res://scripts/hud/town_works_board.gd"
 ##     tag {text, tone}                    a coloured state word
 ##     pips true                           needs shown as pips (have / need)
 
-const COLUMN_MIN:=400.0
+## Widths are the UI's own units (the game draws at a UI scale, so 1600 px
+## wide gives this page about 665 units and 2000 px about 850).
+const COLUMN_MIN:=300.0
 const BAR_WIDTH:=80.0
 ## A row's name keeps at most this much width when the row is narrow.
 const NAME_MAX:=150.0
+const NAME_MAX_COMPACT:=120.0
 
-var _sections:Dictionary={}
-var _bands:Array=[]
+var _specs:Array=[]
 var _columns:=0
+## Rows in side-by-side columns: shorter bars, the tag on the second line.
+var _compact:=false
 
 
 func setup(block:Dictionary)->void:
@@ -34,55 +38,54 @@ func setup(block:Dictionary)->void:
 		var id:=String(card.get("section","main"))
 		if not by_section.has(id):by_section[id]=[]
 		(by_section[id] as Array).append(card)
-	# Consecutive narrow sections share one band of columns; a span section
-	# takes the whole width.
-	var band:Array=[]
 	for section:Dictionary in block.get("sections",[]):
-		var id:=String(section.get("id",""))
-		var cards:Array=by_section.get(id,[])
+		var cards:Array=by_section.get(String(section.get("id","")),[])
 		if cards.is_empty() and String(section.get("note",""))=="" and (section.get("actions",[]) as Array).is_empty():continue
-		var node:=_section(section,cards)
-		_sections[id]=node
-		node.set_meta("weight",_weight(cards))
-		if bool(section.get("span",false)):
-			if not band.is_empty():_bands.append(band);band=[]
-			_bands.append([node])
-			node.set_meta("span",true)
-		else:band.append(node)
-	if not band.is_empty():_bands.append(band)
-	for each:Array in _bands:
-		var row:=HBoxContainer.new();row.name="Band";row.add_theme_constant_override("separation",28);add_child(row)
-		row.set_meta("sections",each)
+		_specs.append({"section":section,"cards":cards})
 	resized.connect(_fit)
-	_layout(2)
+	_layout(1)
 	_fit.call_deferred()
 
 
 func _fit()->void:
+	if size.x<=0.0:return
 	var count:=clampi(floori((size.x+28.0)/(COLUMN_MIN+28.0)),1,3)
 	if count!=_columns:_layout(count)
 
 
-## Deal each band's sections into `count` columns, the next to the shortest.
+## Lay the sections out in `count` columns: a span section takes the whole
+## width; consecutive narrow ones share a band, each dealt to the shortest
+## column. Rows are drawn afresh for the width they get.
 func _layout(count:int)->void:
 	_columns=count
-	for row:HBoxContainer in get_children().filter(func(n:Node)->bool:return n is HBoxContainer and n.has_meta("sections")):
-		for column in row.get_children():
-			for child in column.get_children():column.remove_child(child)
-			row.remove_child(column);column.free()
-		var nodes:Array=row.get_meta("sections")
-		var spanned:=nodes.size()==1 and bool((nodes[0] as Node).get_meta("span",false))
-		var n:=1 if spanned else mini(count,nodes.size())
+	_compact=count>1
+	for child in get_children():
+		remove_child(child);child.free()
+	var bands:Array=[]
+	var band:Array=[]
+	for spec:Dictionary in _specs:
+		if bool((spec.section as Dictionary).get("span",false)):
+			if not band.is_empty():bands.append(band);band=[]
+			bands.append([spec])
+		else:band.append(spec)
+	if not band.is_empty():bands.append(band)
+	for each:Array in bands:
+		var row:=HBoxContainer.new();row.name="Band";row.add_theme_constant_override("separation",28);add_child(row)
+		var spanned:=each.size()==1 and bool((each[0].section as Dictionary).get("span",false))
+		var n:=1 if spanned else mini(count,each.size())
+		var was:=_compact
+		if spanned:_compact=false
 		var columns:Array=[];var heights:Array=[]
 		for i in n:
 			var column:=VBoxContainer.new();column.name="Column%d" % i;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 			column.add_theme_constant_override("separation",14);row.add_child(column);columns.append(column);heights.append(0.0)
-		for node:Control in nodes:
+		if n==1:_compact=false
+		for spec:Dictionary in each:
 			var best:=0
 			for i in n:if float(heights[i])<float(heights[best]):best=i
-			if node.get_parent()!=null:node.get_parent().remove_child(node)
-			(columns[best] as VBoxContainer).add_child(node)
-			heights[best]=float(heights[best])+float(node.get_meta("weight",1.0))
+			(columns[best] as VBoxContainer).add_child(_section(spec.section,spec.cards))
+			heights[best]=float(heights[best])+_weight(spec.cards)
+		_compact=was
 
 
 static func _weight(cards:Array)->float:
@@ -137,7 +140,7 @@ func _row(card:Dictionary)->Control:
 	line.add_child(_icon(card))
 	var name_label:=_label(String(card.get("name","")),14,T.INK,true);name_label.name="Name"
 	name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.tooltip_text=name_label.text
-	name_label.custom_minimum_size.x=minf(NAME_MAX,T.font("ui_strong").get_string_size(name_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+2.0)
+	name_label.custom_minimum_size.x=minf(NAME_MAX_COMPACT if _compact else NAME_MAX,T.font("ui_strong").get_string_size(name_label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+2.0)
 	line.add_child(name_label)
 	var sub:=_label(String(card.get("sub","")),12,T.TEXT_SOFT);sub.name="Sub"
 	sub.size_flags_horizontal=Control.SIZE_EXPAND_FILL;sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -152,12 +155,14 @@ func _row(card:Dictionary)->Control:
 		var value:=_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true);value.name="Value"
 		value.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;value.custom_minimum_size.x=float(card.get("value_width",44))
 		line.add_child(value)
-	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():line.add_child(_tag(card.tag))
+	var tagged:=card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty()
+	if tagged and not _compact:line.add_child(_tag(card.tag))
 	for item:Dictionary in card.get("actions",[]):line.add_child(_button(item))
-	if _has_second_line(card):
+	if _has_second_line(card) or (tagged and _compact):
 		var second:=HFlowContainer.new();second.name="Second";second.add_theme_constant_override("h_separation",16);second.add_theme_constant_override("v_separation",3)
 		second.mouse_filter=Control.MOUSE_FILTER_PASS
 		var indent:=Control.new();indent.custom_minimum_size=Vector2(22,0);indent.mouse_filter=Control.MOUSE_FILTER_IGNORE;second.add_child(indent)
+		if tagged and _compact:second.add_child(_tag(card.tag))
 		for gain:Dictionary in card.get("gains",[]):second.add_child(_gain_chip(gain))
 		for effect:Dictionary in card.get("effects",[]):second.add_child(_effect_chip(effect))
 		for need:Dictionary in card.get("needs",[]):second.add_child(_pips(need))
@@ -191,7 +196,7 @@ func _inline_bar(spec:Dictionary)->Control:
 	var box:=HBoxContainer.new();box.name="Bar";box.add_theme_constant_override("separation",6);box.mouse_filter=Control.MOUSE_FILTER_PASS
 	box.tooltip_text=String(spec.get("tip",""))
 	var bar:=Meter.new();bar.ratio=clampf(float(spec.get("ratio",0.0)),0.0,1.0);bar.tick=float(spec.get("tick",-1.0))
-	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2(float(spec.get("width",BAR_WIDTH)),8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	bar.fill=spec.get("color",T.GREEN);bar.custom_minimum_size=Vector2(minf(56.0,float(spec.get("width",BAR_WIDTH))) if _compact else float(spec.get("width",BAR_WIDTH)),8);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	box.add_child(bar)
 	if String(spec.get("text",""))!="" and bool(spec.get("show_text",false)):box.add_child(_label(String(spec.text),12,T.TEXT_SOFT))
 	return box
@@ -199,7 +204,7 @@ func _inline_bar(spec:Dictionary)->Control:
 
 ## One bar split by share: the builders by job, the homes by kind.
 func _segments(items:Array)->Control:
-	var bar:=Segments.new();bar.name="Segments";bar.items=items;bar.custom_minimum_size=Vector2(BAR_WIDTH+40.0,10)
+	var bar:=Segments.new();bar.name="Segments";bar.items=items;bar.custom_minimum_size=Vector2(80.0 if _compact else BAR_WIDTH+40.0,10)
 	bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.mouse_filter=Control.MOUSE_FILTER_STOP
 	var tips:PackedStringArray=[]
 	for item:Dictionary in items:tips.append("%s %s" % [String(item.get("label","")),String(item.get("value",""))])
