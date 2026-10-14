@@ -133,7 +133,7 @@ func _council_blocks()->Array:
 	var commands:=Posts.commands_now()
 	# Grouped by office, each with their face, their full title and where
 	# they are now (person_posts.gd: the same words Home and War use).
-	var order:=["council","settlement","war","scouts","builders","gifted"]
+	var office_order:=["council","settlement","war","scouts","builders","gifted"]
 	var heads:={"council":"Officials","settlement":"Town leaders","war":"War leaders","scouts":"Scouts","builders":"Master builders","gifted":"The gifted"}
 	var rows:Array=[]
 	for person:Dictionary in Roster.people():
@@ -148,7 +148,7 @@ func _council_blocks()->Array:
 			var key:=String(target.get("figure_id","")) if String(target.get("figure_id",""))!="" else String(person.name)
 			face["person_id"]=absi(key.hash())%997+1
 		var group:=String(post.group) if heads.has(String(post.group)) else "council"
-		rows.append({"group":heads[group],"rank":order.find(group),"icon":Portrait.texture(face),
+		rows.append({"group":heads[group],"rank":office_order.find(group),"icon":Portrait.texture(face),
 			"cells":{"name":String(person.name),"title":String(post.title),"place":String(post.place),"fact":fact},"tone":"",
 			"tag":{"text":fact,"tone":"warn"} if matters>0 else {},
 			"tip":"%s, %s. %s. Summon them to talk, give orders or replace them." % [String(person.name),String(post.title),String(post.place)],

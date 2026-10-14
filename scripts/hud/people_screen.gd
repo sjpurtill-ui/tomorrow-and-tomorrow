@@ -70,7 +70,7 @@ var selected_id:=""
 var voice_line:Label
 var voice_name:Label
 var voice_face:Control
-var faces_row:HFlowContainer
+var faces_row:GridContainer
 var card:PanelContainer
 var columns:GridContainer
 var left:VBoxContainer
@@ -89,7 +89,7 @@ func setup(block:Dictionary)->void:
 	name="PeopleScreen"
 	add_theme_constant_override("separation",14)
 	_build_scene()
-	faces_row=HFlowContainer.new();faces_row.name="Faces"
+	faces_row=GridContainer.new();faces_row.name="Faces";faces_row.columns=8
 	faces_row.add_theme_constant_override("h_separation",6);faces_row.add_theme_constant_override("v_separation",6)
 	add_child(_section("FACES AT THE FIRE" if _hearth(block) else "FACES AMONG THE PEOPLE",faces_row))
 	card=PanelContainer.new();card.name="PersonCard";card.visible=false
@@ -99,8 +99,8 @@ func setup(block:Dictionary)->void:
 	add_child(columns)
 	left=VBoxContainer.new();left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;left.add_theme_constant_override("separation",14);columns.add_child(left)
 	right=VBoxContainer.new();right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;right.add_theme_constant_override("separation",14);columns.add_child(right)
+	parts.labor=_part(self,"Labor");move_child(parts.labor,columns.get_index());parts.labor.add_theme_constant_override("separation",1)
 	parts.vitals=_part(left,"Vitals")
-	parts.labor=_part(right,"Labor")
 	parts.story=_part(right,"Story")
 	parts.hearths=_part(self,"Hearths")
 	parts.tallies=_part(self,"Tallies")
@@ -236,8 +236,8 @@ func _build_scene()->void:
 	var voice:=HBoxContainer.new();voice.name="Scene";voice.add_theme_constant_override("separation",10);add_child(voice)
 	voice_face=Control.new();voice_face.custom_minimum_size=Vector2(28,34);voice_face.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_face)
 	voice_line=T.make_label("",13,T.BODY);voice_line.name="VoiceLine";voice_line.add_theme_font_override("font",_serif(true))
-	voice_line.size_flags_horizontal=Control.SIZE_EXPAND_FILL;voice_line.clip_text=true;voice_line.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;voice_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_line)
-	voice_name=T.make_label("",11,T.GOLD_TEXT,0.06);voice_name.name="VoiceName";voice_name.clip_text=true;voice_name.custom_minimum_size.x=0;voice_name.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_name)
+	voice_line.size_flags_horizontal=Control.SIZE_EXPAND_FILL;voice_line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;voice_line.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_line)
+	voice_name=T.make_label("",11,T.GOLD_TEXT,0.06);voice_name.name="VoiceName";voice_name.custom_minimum_size.x=0;voice_name.size_flags_vertical=Control.SIZE_SHRINK_CENTER;voice.add_child(voice_name)
 
 
 func _fill_scene(scene:Dictionary)->void:
@@ -272,10 +272,11 @@ func _fill_faces_part(parent:Control,_drawn:Array)->void:
 	_fill_faces(parent,data.get("faces",[]))
 
 func _fill_faces(parent:Control,faces:Array)->void:
+	if parent is GridContainer:(parent as GridContainer).columns=clampi(faces.size(),1,8)
 	for face_variant in faces:
 		var face:Dictionary=face_variant
 		var id:=String(face.get("id",""))
-		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(146,42)
+		var button:=Button.new();button.name="Face_"+id.validate_node_name();button.custom_minimum_size=Vector2(0,82);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.tooltip_text="%s · %s" % [String(face.get("name","")),String(face.get("tag","")).to_lower()]
 		var chosen:=id==selected_id
 		var accent:=T.GOLD if chosen else (T.BORDER_SOFT if bool(face.get("alive",true)) else T.DISABLED)
@@ -284,17 +285,17 @@ func _fill_faces(parent:Control,faces:Array)->void:
 		button.add_theme_stylebox_override("pressed",T.flat(T.ACTIVE_BG,T.GOLD,2,4))
 		button.pressed.connect(_select.bind(id))
 		parent.add_child(button)
-		var line:=HBoxContainer.new();line.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,3)
-		line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",6);button.add_child(line)
-		var picture:=_face_picture(face,30,36);picture.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		# A small face over the name and what they are, in full (a long tag
+		# wraps; nothing is cut short), eight to a row.
+		var column:=VBoxContainer.new();column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT,Control.PRESET_MODE_MINSIZE,3)
+		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",-2);button.add_child(column)
+		var picture:=_face_picture(face,32,38);picture.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 		if not bool(face.get("alive",true)):picture.modulate=Color(0.62,0.62,0.62,0.85)
-		line.add_child(picture)
-		var column:=VBoxContainer.new();column.alignment=BoxContainer.ALIGNMENT_CENTER;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",-2);line.add_child(column)
-		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),13,T.INK);given.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		given.add_theme_font_override("font",T.font("ui_strong"));given.clip_text=true;column.add_child(given)
-		var tag:=T.make_label(String(face.get("tag","")).to_lower(),11,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		tag.clip_text=true;tag.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(tag)
+		column.add_child(picture)
+		var given:=T.make_label(String(face.get("given",face.get("name",""))).get_slice(" ",0),12,T.INK);given.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		given.add_theme_font_override("font",T.font("ui_strong"));given.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;column.add_child(given)
+		var tag:=T.make_label(String(face.get("tag","")).to_lower(),10,T.GOLD_TEXT if bool(face.get("alive",true)) else T.MUTED);tag.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		tag.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;tag.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(tag)
 
 
 func _assign_face_slots(faces:Array,scene:Dictionary)->void:
@@ -380,7 +381,7 @@ func _fill_card(parent:Control,value:Array)->void:
 ## heading: each day's figures, trends and causes are written into them.
 var _vital_rows:Array=[]
 ## Figures the top bar and Home's tiles already carry: not repeated here.
-const SHOWN_ELSEWHERE:=["stores","water","shelter","life"]
+const SHOWN_ELSEWHERE:=["fed","stores","water","shelter","life","spirit"]
 
 func _refresh_vitals(all_vitals:Array)->void:
 	var vitals:=all_vitals.filter(func(v:Dictionary)->bool:return String(v.get("id","")) not in SHOWN_ELSEWHERE)
@@ -399,6 +400,8 @@ func _refresh_vitals(all_vitals:Array)->void:
 	rebuilds+=1
 
 func _fill_vitals(parent:Control,vitals:Array)->void:
+	parent.visible=not vitals.is_empty()
+	if vitals.is_empty():return
 	parent.add_child(_heading(String(data.get("vitals_heading","HOW THEY FARE"))))
 	_vital_rows.clear()
 	for vital_variant in vitals:
@@ -407,7 +410,7 @@ func _fill_vitals(parent:Control,vitals:Array)->void:
 		var icon:=TextureRect.new()
 		icon.custom_minimum_size=Vector2(20,20);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(icon)
-		var label:=T.make_label("",13,T.BODY);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.clip_text=true;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
+		var label:=T.make_label("",13,T.BODY);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
 		var meter:=Meter.new();meter.track=T.TRACK;meter.custom_minimum_size=Vector2(80,6);meter.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(meter)
 		var value:=T.make_label("",13,T.INK);value.add_theme_font_override("font",T.font("ui_strong"));value.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(value)
 		var arrow:=T.make_label("",13,T.MUTED);arrow.custom_minimum_size.x=14;arrow.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -482,7 +485,7 @@ func _labor_header(labor:Dictionary)->VBoxContainer:
 			var tone:=String(warning.get("tone",""))
 			if tone not in ["bad","warn"]:more.append(String(warning.get("text","")));continue
 			var warn:=T.make_label(String(warning.get("text","")),12,T.RED_TEXT if tone=="bad" else T.AMBER_TEXT);warn.name="WorkWarning"
-			warn.clip_text=true;warn.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;warn.tooltip_text=warn.text;warn.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(warn)
+			warn.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;warn.tooltip_text=warn.text;warn.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(warn)
 	parent.tooltip_text="
 ".join(more)
 	return parent
@@ -553,7 +556,7 @@ static func _task_tip(task:Dictionary)->String:
 
 
 func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
-	var parent:=VBoxContainer.new();parent.add_theme_constant_override("separation",7)
+	var parent:=VBoxContainer.new();parent.add_theme_constant_override("separation",2)
 	var per:=maxi(1,int(labor.get("per_figure",1)))
 	var manual:=bool(labor.get("manual",false))
 	var on_move:Variant=labor.get("on_move")
@@ -654,7 +657,7 @@ func _fill_hearths(parent:Control,hearths:Array)->void:
 		row.add_theme_constant_override("separation",10);button.add_child(row)
 		var art:=Buildings.picture(int(hearth.get("art",0)),96,76);row.add_child(art)
 		var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.mouse_filter=Control.MOUSE_FILTER_IGNORE;body.add_theme_constant_override("separation",2);row.add_child(body)
-		var title:=T.make_label(String(hearth.get("name","")),15,T.INK);title.add_theme_font_override("font",_serif());title.clip_text=true;body.add_child(title)
+		var title:=T.make_label(String(hearth.get("name","")),15,T.INK);title.add_theme_font_override("font",_serif());title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;body.add_child(title)
 		body.add_child(T.make_label(String(hearth.get("sub","")),10,T.MUTED,0.06))
 		var needs:=T.make_label(String(hearth.get("needs","")),11,T.RED if bool(hearth.get("attention",false)) else T.BODY);needs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;needs.custom_minimum_size.x=170;body.add_child(needs)
 	for action_variant in data.get("hearth_actions",[]):

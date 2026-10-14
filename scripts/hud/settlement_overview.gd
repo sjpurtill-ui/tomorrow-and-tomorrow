@@ -9,7 +9,7 @@ extends "res://scripts/hud/home_ledger.gd"
 ## water and waste works and the town's own reports follow.
 ## The rows come from own_town_model.gd; nothing here reads the ledger.
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
-const Dense:=preload("res://scripts/hud/dense_blocks.gd")
+const OwnBlocks:=preload("res://scripts/hud/dense_blocks.gd")
 ## The painted plates the culture, inquiry and chronicle boards draw from
 ## (they extend this page for its shared pieces).
 const Buildings:=preload("res://scripts/hud/construction_art.gd")
@@ -72,12 +72,14 @@ func setup(block:Dictionary)->void:
 	if not founding.is_empty():_new_towns(founding)
 	var works:Dictionary=block.get("works",{})
 	if not works.is_empty():_works(works)
-	_rule(self)
-	var footer:=HFlowContainer.new();footer.name="Reports";footer.add_theme_constant_override("h_separation",8);add_child(footer)
-	var visit:Variant=block.get("on_visit")
-	if visit is Callable and (visit as Callable).is_valid():_button(footer,"Visit the village",visit,"Close this page and look at the town on the map").name="VisitVillage"
-	_button(footer,"Ages and families",block.get("on_population"),"How many children, workers and elders live here")
-	_button(footer,"Rename this place",block.get("on_rename"),"Change the name on the map")
+	# Visit and rename stand on the places table's lines, and ages and
+	# families on the GROWTH tile: a footer only for a town without the table.
+	if (block.get("places",{}) as Dictionary).is_empty():
+		_rule(self)
+		var footer:=HFlowContainer.new();footer.name="Reports";footer.add_theme_constant_override("h_separation",8);add_child(footer)
+		var visit:Variant=block.get("on_visit")
+		if visit is Callable and (visit as Callable).is_valid():_button(footer,"Visit the village",visit,"Close this page and look at the town on the map").name="VisitVillage"
+		_button(footer,"Rename this place",block.get("on_rename"),"Change the name on the map")
 	resized.connect(_layout);_layout()
 
 ## The live refresh: while the page keeps its shape, the drawing, the
@@ -103,7 +105,7 @@ func update_block(block:Dictionary)->bool:
 	if _page_refs.has("places") and is_instance_valid(_page_refs.places) and _places_print(places)!=String(_page_refs.get("places_print","")):
 		var old:Control=_page_refs.places;var at:=old.get_index()
 		remove_child(old);old.queue_free()
-		var fresh:=Dense.render_table(self,places);fresh.name="Places";move_child(fresh,at)
+		var fresh:=OwnBlocks.render_table(self,places);fresh.name="Places";move_child(fresh,at)
 		_page_refs["places"]=fresh;_page_refs["places_print"]=_places_print(places)
 	var works:Dictionary=block.get("works",{})
 	var progress:Array=works.get("progress",[])
@@ -171,7 +173,7 @@ func _leader(block:Dictionary,parent:Node)->void:
 	if not _page_refs.is_empty():_page_refs["office"]=office
 	named.custom_minimum_size.x=250
 	var direction:=_line(named,String(block.get("direction","")),12,T.BODY)
-	direction.autowrap_mode=TextServer.AUTOWRAP_OFF;direction.clip_text=true;direction.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;direction.custom_minimum_size.x=250
+	direction.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;direction.custom_minimum_size.x=250
 	direction.name="Direction";direction.tooltip_text=String(block.get("direction_tip",""));direction.mouse_filter=Control.MOUSE_FILTER_PASS
 	if not _page_refs.is_empty():_page_refs["direction"]=direction
 	var controls:=HFlowContainer.new();controls.name="LeaderControls";controls.size_flags_horizontal=Control.SIZE_EXPAND_FILL;controls.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -180,7 +182,9 @@ func _leader(block:Dictionary,parent:Node)->void:
 	talk.name="TalkWithLeader";talk.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 
 static func _office_words(leader:Dictionary)->String:
-	return ("%s, age %d" % [String(leader.get("title","Local leader")),int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
+	# The title every screen gives this person (person_posts.gd).
+	var title:=String(preload("res://scripts/person_posts.gd").of({"person_id":int(leader.get("person_id",0))}).title) if int(leader.get("person_id",0))>0 else String(leader.get("title","Local leader"))
+	return ("%s, age %d" % [title,int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
 
 # --------------------------------------------------------------------------
 # The figures, in four groups
@@ -284,7 +288,7 @@ func _new_towns(founding:Dictionary)->void:
 func _places(places:Dictionary)->void:
 	_rule(self)
 	var head:=T.make_label(String(places.get("heading","Where our people live")).to_upper(),12,T.GOLD_TEXT);head.name="PlacesHeading";add_child(head)
-	var table:=Dense.render_table(self,places);table.name="Places"
+	var table:=OwnBlocks.render_table(self,places);table.name="Places"
 	if not _page_refs.is_empty():
 		_page_refs["places"]=table;_page_refs["places_print"]=_places_print(places)
 
@@ -310,7 +314,7 @@ func _works(works:Dictionary)->void:
 		var sentence:=Label.new();sentence.visible=false;sentence.text=String(offer.sentence);row.add_child(sentence)
 		var ready:=String(offer.get("blocked","")).is_empty()
 		var cost:=T.make_label(String(offer.cost) if ready else String(offer.blocked),12,T.MUTED if ready else tone_color("warn"))
-		cost.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cost.clip_text=true;cost.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;cost.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(cost)
+		cost.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cost.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;cost.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(cost)
 		row.tooltip_text="%s\n%s" % [String(offer.sentence),String(offer.cost) if ready else String(offer.blocked)];row.mouse_filter=Control.MOUSE_FILTER_PASS
 		var start:=preload("res://scripts/hud/dense_blocks.gd").verb(String(offer.action),offer.get("on_press"),String(offer.cost) if ready else String(offer.blocked),not ready)
 		row.add_child(start)

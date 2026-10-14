@@ -91,54 +91,43 @@ func _city_tab(sub:int)->Dictionary:
 	return {"kpis":_glance_tiles(settlement),"blocks":_overview_blocks(settlement)}
 
 
-## Home at a glance, right under the tabs: six numbers with bars, each from
+## Home at a glance, right under the tabs: four numbers with bars, each from
 ## the figure's own source (the town's rows in own_town_model.gd, the top
 ## bar's words in era_words.gd, the War screen's army), each a click to its page.
+## Home's strip: only figures the top bar does not carry (it has the head
+## count, food, water and life span): the year's growth, homes, the people's
+## mood and the army.
 func _glance_tiles(settlement:Dictionary)->Array:
 	var facts:=Model.facts(settlement,_strength)
-	var FoodCare:=preload("res://scripts/food_care.gd")
 	var people:=int(facts.population)
-	var metrics:Dictionary=GameState.simulation_metrics
 	var tiles:Array=[]
-	# People: how many, and the year's change so far (the Chronicle's own
-	# figure: chronicle_annals.gd people_this_year), amber when falling.
+	# Growth: the year's change so far (the Chronicle's own figure:
+	# chronicle_annals.gd people_this_year), amber when falling; pressed, the
+	# town's ages and families.
 	var year:Dictionary=preload("res://scripts/chronicle_annals.gd").people_this_year(GameState.chronicle,int(GameState.population_total))
-	var person:={"label":"PEOPLE","value":EraWords.grouped(people),"glance":true,"tip":"Everyone living here.","on_press":jump("chronicle",0)}
+	var growth:={"label":"GROWTH","value":"no change","glance":true,"delta":"this year","tip":"The change in our numbers this year so far. Pressed: ages and families.","on_press":focused_action("Ages and families","",_people_report.bind("population")).on_press}
 	if not year.is_empty():
 		var change:=int(year.change)
-		person["delta"]="no change this year" if change==0 else "%s%s this year" % ["+" if change>0 else "−",EraWords.grouped(absi(change))]
-		person["delta_color"]=Tokens.AMBER if change<0 else (Tokens.GREEN if change>0 else Tokens.MUTED)
+		growth["value"]="no change" if change==0 else "%s%s" % ["+" if change>0 else "−",EraWords.grouped(absi(change))]
+		growth["delta"]="%s born · %s buried" % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried))]
+		growth["delta_color"]=Tokens.AMBER if change<0 else Tokens.MUTED
 		var other:=int(year.other)
-		person["tip"]="Everyone living here. This year so far: %s born, %s buried%s." % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried)),"" if other==0 else (", %s left or lost" % EraWords.grouped(-other) if other<0 else ", %s arrived" % EraWords.grouped(other))]
-	tiles.append(person)
-	# Food: days in store, against the lean line (food_care.gd).
-	var days:=float(facts.food_days)
-	if bool(facts.food_reported) and days>=0.0:
-		var level:=FoodCare.store_level(days)
-		var reading:=Words.food(days,facts.flow,true)
-		tiles.append({"label":"FOOD","value":EraWords.days(days),"glance":true,"meter":FoodCare.lean_buffer(days),"meter_color":Tokens.RED if level=="bare" else (Tokens.AMBER if level=="low" else Tokens.GREEN),
-			"delta":"safe above %d days" % int(FoodCare.LEAN_DAYS),"delta_color":Tokens.RED if String(reading.tone)=="bad" else Tokens.MUTED,
-			"tip":"%s.\nThe bar is full at %d days in store, the lean line." % [String(reading.sentence).trim_suffix("."),int(FoodCare.LEAN_DAYS)],"on_press":jump("economy",0)})
-	# Water: days in store, and who drinks enough today.
-	var water:Dictionary=facts.water
-	var wet:=Words.water(water)
-	var water_days:=Words.water_days(water)
-	if water_days>=0.0:
-		var ratio:=float(wet.get("ratio",1.0))
-		tiles.append({"label":"WATER","value":EraWords.days(water_days),"glance":true,"meter":ratio,"meter_color":Tokens.TEAL if String(wet.tone)=="good" else (Tokens.AMBER if String(wet.tone)=="warn" else Tokens.RED),
-			"delta":"all drink enough" if ratio>=0.98 else "%d in 10 drink enough" % roundi(ratio*10.0),"delta_color":Tokens.MUTED if ratio>=0.98 else Tokens.RED,
-			"tip":"%s.\nThe number is the water in store against a day's need; the bar is who drinks enough today." % String(wet.get("sentence",wet.headline)).trim_suffix("."),"on_press":jump("economy",0)})
+		growth["tip"]="This year so far: %s born, %s buried%s. Pressed: ages and families." % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried)),"" if other==0 else (", %s left or lost" % EraWords.grouped(-other) if other<0 else ", %s arrived" % EraWords.grouped(other))]
+	tiles.append(growth)
 	# Homes: how full the houses are.
 	var places:=int(facts.places)
 	var outside:=maxi(0,people-places)
 	tiles.append({"label":"HOMES","value":EraWords.grouped(places),"glance":true,"meter":float(people)/float(maxi(1,places)),"meter_color":Tokens.RED if outside>0 else (Tokens.AMBER if people>=places*0.95 else Tokens.GREEN),
 		"delta":"%s sleep out" % EraWords.grouped(outside) if outside>0 else "%d%% full" % roundi(float(people)/float(maxi(1,places))*100.0),"delta_color":Tokens.RED if outside>0 else Tokens.MUTED,
 		"tip":"Room under a roof for %s; %s live here. The bar is how full the houses are." % [EraWords.grouped(places),EraWords.grouped(people)],"on_press":jump("construction",0)})
-	# How long we live.
-	var life:=GameState.projected_life_expectancy()
-	# No bar: a life has no full mark to fill toward.
-	tiles.append({"label":"LIFE SPAN","value":EraWords.life(life),"glance":true,
-		"delta":"%d in 100 infants lost" % roundi(Indicators.infant_mortality_per_1000()/10.0),"tip":"How long a child born now can hope to live.\n%s." % EraWords.babes_lost_short(Indicators.infant_mortality_per_1000()).capitalize(),"on_press":jump("overview",0)})
+	# Mood: the people's spirit, the People page's own reading (people_model.gd).
+	var Overview:=preload("res://scripts/hud/civilization_overview_model.gd")
+	for vital:Dictionary in preload("res://scripts/hud/people_model.gd").vitals(Overview.snapshot(),preload("res://scripts/hud/civilization_kpi_model.gd").snapshot()):
+		if String(vital.get("id",""))!="spirit":continue
+		var fill:=float(vital.get("fill",0.0))
+		var cause:=String(vital.get("cause",""))
+		tiles.append({"label":"MOOD","value":String(vital.value),"glance":true,"meter":fill,"meter_color":Tokens.GREEN if fill>=0.6 else (Tokens.AMBER if fill>=0.35 else Tokens.RED),
+			"delta":("trust: "+cause.get_slice(": ",1).trim_suffix(".")) if cause.contains(": ") else "","tip":cause,"on_press":jump("overview",0)})
 	# The army: the War screen's own count and its gear in hand.
 	var WarBoard:GDScript=load("res://scripts/hud/war_board.gd")
 	var serving:=int(preload("res://scripts/army_levy_law.gd").reading(MilitaryCampaign).now)
@@ -259,6 +248,13 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	# The ruler's split, read for this town: what it does to the stores here,
 	# early and plainly, with the one click that mends it (manual_work.gd).
 	var warning:Dictionary=Manual.town_warning(id) if ruler and not management.is_empty() and not occupied else {}
+	var on_rename:Callable=terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()
+	# The verbs stand on the lines they change: rename on the place's own
+	# line, visit on the seat's.
+	var places:Dictionary=_founding.duplicate(true) if not _founding.is_empty() else {}
+	if (places.get("rows",[]) as Array).size()>=2:
+		places.rows[0]["button"]={"label":"Rename","on_press":on_rename,"tip":"Change the name on the map","disabled":not on_rename.is_valid()}
+		places.rows[1]["button"]={"label":"Visit","on_press":_visit_village,"tip":"Close this page and look at the town on the map"}
 	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,"direction_tip":direction_tip,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
 		"ruler_sets_work":ruler and not management.is_empty() and not occupied,"on_leaders":_work_to_leaders,"on_people":jump("overview",0),
@@ -268,10 +264,10 @@ func _overview_blocks(settlement:Dictionary)->Array:
 		"groups":groups,"tile_rows":tile_rows,"legend":Model.legend(_towns),
 		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
 		"founding":{},
-		"places":_founding,
+		"places":places,
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":on_population,
-		"on_rename":terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()}]
+		"on_rename":on_rename}]
 
 func _visit_village()->void:
 	if is_instance_valid(hud) and hud.has_method("close_dock"):hud.close_dock()

@@ -46,7 +46,7 @@ func _row(row: Dictionary) -> Control:
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE; icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER; icon.mouse_filter = Control.MOUSE_FILTER_IGNORE; line.add_child(icon)
 	var label := T.make_label("", 13, T.BODY); label.name = "Name"; label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	label.clip_text = true; label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS; label.mouse_filter = Control.MOUSE_FILTER_IGNORE; line.add_child(label)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; label.mouse_filter = Control.MOUSE_FILTER_IGNORE; line.add_child(label)
 	var value := T.make_label("", 13, T.INK); value.name = "Value"; value.add_theme_font_override("font", T.font("ui_strong"))
 	value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT; value.mouse_filter = Control.MOUSE_FILTER_IGNORE; line.add_child(value)
 	var refs := {"panel": panel, "name": label, "value": value, "bar": null, "note": null}
@@ -67,4 +67,5 @@ func _fill_row(refs: Dictionary, row: Dictionary) -> void:
 
 func _layout() -> void:
 	if spread: spread.vertical = false
-	if grid: grid.columns = 3 if size.x >= 1050 else (2 if size.x >= 520 else 1)
+	# Three columns from a 1800-wide window at 125% (the page is ~880 wide).
+	if grid: grid.columns = 3 if size.x >= 860 else (2 if size.x >= 520 else 1)
