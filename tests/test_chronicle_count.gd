@@ -175,14 +175,14 @@ func test_the_page_draws_every_year_and_opens_the_one_chosen()->void:
 	assert_int((count.get("years") as Array).size()).is_equal(4)
 	# The newest year opens first: the one in progress, which holds a tale.
 	var kicker:Label=feed.find_child("Kicker",true,false)
-	assert_str(kicker.text).contains("YEAR 4")
+	assert_str(kicker.text).contains("Year 4")
 	assert_object(feed.find_child("Moment",true,false)).is_not_null()
 	# The years are listed, newest first.
 	assert_object(feed.find_child("Year2",true,false)).is_not_null()
 	# Choosing a year opens it: its name, its facts as tokens, its moment.
 	feed._choose(2)
 	kicker=feed.find_child("Kicker",true,false)
-	assert_str(kicker.text).is_equal("YEAR 2")
+	assert_str(kicker.text).is_equal("Year 2")
 	assert_str((feed.find_child("YearName",true,false) as Label).text).is_equal("The year Tilla died")
 	assert_object(feed.find_child("Fact",true,false)).is_not_null()
 	# A live refresh keeps the chosen year.
@@ -192,7 +192,7 @@ func test_the_page_draws_every_year_and_opens_the_one_chosen()->void:
 	add_child(again)
 	again.setup(block)
 	again.restore_view_state(state)
-	assert_str((again.find_child("Kicker",true,false) as Label).text).is_equal("YEAR 2")
+	assert_str((again.find_child("Kicker",true,false) as Label).text).is_equal("Year 2")
 	remove_child(feed); remove_child(again)
 	feed.free(); again.free()
 	await await_idle_frame()

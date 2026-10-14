@@ -140,16 +140,15 @@ func _check_showcase()->void:
 	var body:=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;scroll.add_child(body)
 	DockBlocks.render(body,blocks)
 	await _frames(6)
-	var showcase:=body.find_child("ArtifactShowcase",true,false) as Control
-	check(showcase!=null,"Showcase rendered inside the Culture panel")
-	if showcase==null:host.queue_free();return
-	check(showcase.find_child("ShowcaseShelf",true,false)!=null and showcase.find_child("ShowcaseShelf",true,false).get_child_count()==4,"Four finest pieces on the shelf")
-	check(dock.get_global_rect().encloses(showcase.get_global_rect().grow(-1)) or showcase.size.x<=T.DOCK_WIDTH,"Showcase fits the dock width")
-	scroll.scroll_vertical=int(maxf(0,showcase.position.y-260))
+	var open_button:Button
+	for candidate in body.find_children("*","Button",true,false):
+		if candidate.text=="Open the collection":open_button=candidate;break
+	check(open_button!=null,"Culture exposes the collection opener")
+	if open_button==null:host.queue_free();return
+	check(open_button.size.x<=T.DOCK_WIDTH,"Collection opener fits the dock width")
+	scroll.ensure_control_visible(open_button)
 	await _frames(3)
 	await _shot("culture-entry")
-	var open_button:=showcase.find_child("OpenArtifactGallery",true,false) as Button
-	check(open_button!=null,"Open the collection button exists")
 	if open_button:
 		open_button.pressed.emit()
 		await _frames(4)
@@ -261,6 +260,7 @@ func _check_gallery()->void:
 	gallery.tab_buttons["rumors"].pressed.emit();await _frames(4)
 	var notes:=gallery.find_child("RumorNotes",true,false)
 	check(notes!=null and notes.get_child_count()==4,"Rumored treasures listed as notes")
+	check(not gallery.detail_column.visible,"Rumors do not show an unrelated owned piece")
 	await _shot("gallery-rumors")
 	# large collections page without building thousands of cards
 	var extra:=Stub.items.duplicate()
