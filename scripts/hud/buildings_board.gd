@@ -117,11 +117,56 @@ func _section(section:Dictionary,cards:Array)->Control:
 		head.add_child(note)
 	for item:Dictionary in section.get("actions",[]):head.add_child(_button(item))
 	var rule:=ColorRect.new();rule.color=T.RULE_STRONG;rule.custom_minimum_size=Vector2(0,1);rule.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(rule)
+	# A tiles section lays its items side by side, one per column of the
+	# page when three fit (2000 px), each item a small stacked card; narrower
+	# pages keep the one-line rows.
+	if bool(section.get("tiles",false)) and _columns>=3:
+		var grid:=GridContainer.new();grid.name="Tiles";grid.columns=_columns
+		grid.add_theme_constant_override("h_separation",20);grid.add_theme_constant_override("v_separation",10)
+		for card:Dictionary in cards:grid.add_child(_tile(card))
+		box.add_child(grid)
+		return box
 	for i in cards.size():
 		box.add_child(_row(cards[i]))
 		if i<cards.size()-1:
 			var hair:=ColorRect.new();hair.color=Color(T.RULE,0.55);hair.custom_minimum_size=Vector2(0,1);hair.mouse_filter=Control.MOUSE_FILTER_IGNORE;box.add_child(hair)
 	return box
+
+
+# --- A tile ----------------------------------------------------------------------
+
+## One item as a small stacked card: its mark and full name, its few words,
+## its bar, figure and state, then what it does, its bill and its verbs.
+func _tile(card:Dictionary)->Control:
+	var panel:=PanelContainer.new();panel.name="Card_"+String(card.get("key",card.get("name","tile"))).replace(" ","_")
+	panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var style:=T.flat(Color(0,0,0,0),Color(T.RULE,0.7),0,0);style.border_width_bottom=1;style.content_margin_top=6;style.content_margin_bottom=8
+	if bool(card.get("highlight",false)):style.bg_color=T.GOLD_WASH
+	panel.add_theme_stylebox_override("panel",style)
+	panel.tooltip_text=String(card.get("detail",""));panel.mouse_filter=Control.MOUSE_FILTER_STOP
+	var lines:=VBoxContainer.new();lines.add_theme_constant_override("separation",4);lines.mouse_filter=Control.MOUSE_FILTER_PASS;panel.add_child(lines)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);head.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(head)
+	head.add_child(_icon(card))
+	var name_label:=_label(String(card.get("name","")),14,T.INK,true);name_label.name="Name";head.add_child(name_label)
+	if String(card.get("sub",""))!="":
+		var sub:=_label(String(card.sub),12,T.TEXT_SOFT);sub.name="Sub";sub.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;sub.custom_minimum_size.x=120;lines.add_child(sub)
+	var figures:=HBoxContainer.new();figures.add_theme_constant_override("separation",8);figures.mouse_filter=Control.MOUSE_FILTER_PASS;lines.add_child(figures)
+	var bar:Variant=card.get("bar",card.get("progress",card.get("meter")))
+	if bar is Dictionary and not (bar as Dictionary).is_empty():
+		var spec:=(bar as Dictionary).duplicate();spec.width=60.0
+		var meter:=_inline_bar(spec);meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;figures.add_child(meter)
+		(meter.get_child(0) as Control).size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	if String(card.get("value",""))!="":figures.add_child(_label(String(card.value),15,T.legible(card.get("value_color",T.INK),T.PAPER),true))
+	if card.get("tag") is Dictionary and not (card.tag as Dictionary).is_empty():figures.add_child(_tag(card.tag))
+	var flow:=HFlowContainer.new();flow.add_theme_constant_override("h_separation",12);flow.add_theme_constant_override("v_separation",4);flow.mouse_filter=Control.MOUSE_FILTER_PASS
+	for effect:Dictionary in card.get("effects",[]):flow.add_child(_effect_chip(effect))
+	for need:Dictionary in card.get("needs",[]):flow.add_child(_pips(need))
+	if flow.get_child_count()>0:lines.add_child(flow)
+	var verbs:=HFlowContainer.new();verbs.add_theme_constant_override("h_separation",6);verbs.mouse_filter=Control.MOUSE_FILTER_PASS
+	for item:Dictionary in card.get("actions",[]):verbs.add_child(_button(item))
+	if card.get("choice") is Dictionary:verbs.add_child(_small_choice(card.choice))
+	if verbs.get_child_count()>0:lines.add_child(verbs)
+	return panel
 
 
 # --- A row -----------------------------------------------------------------------
