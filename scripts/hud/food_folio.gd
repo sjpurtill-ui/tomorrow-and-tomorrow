@@ -32,15 +32,20 @@ var _grids:Array[GridContainer]=[]
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="ProvisionsLedger"
-	add_theme_constant_override("separation",24)
+	add_theme_constant_override("separation",16)
 	_shape=shape_of(block)
 	_refs={"stores":[],"sources":[],"deliveries":[]}
 	var who:=_who()
 	var current:=_current_focus(block)
 	var can_direct:=bool(block.get("can_direct",false))
-	var outlook:=VBoxContainer.new();outlook.add_theme_constant_override("separation",8);add_child(outlook)
-	_refs.horizon=S.voice("",32);_refs.horizon.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.horizon)
-	_refs.forecast=S.label("",16,T.INK_MUTED);_refs.forecast.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.forecast)
+	# Wide space reveals related evidence alongside the decisions. Each column
+	# keeps its own vertical rhythm instead of a full-page band per number.
+	var grid:=S.columns(self,"FoodColumns",320.0,3);_grids.append(grid)
+	grid.add_theme_constant_override("v_separation",20)
+	var operations:=VBoxContainer.new();operations.name="DailyWork";operations.add_theme_constant_override("separation",16);operations.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(operations)
+	var outlook:=VBoxContainer.new();outlook.add_theme_constant_override("separation",6);operations.add_child(outlook)
+	_refs.horizon=S.voice("",24);_refs.horizon.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.horizon)
+	_refs.forecast=S.label("",14,T.INK_MUTED);_refs.forecast.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;outlook.add_child(_refs.forecast)
 	if can_direct:
 		var work:=VBoxContainer.new();work.add_theme_constant_override("separation",8);outlook.add_child(work)
 		var ask:=S.label("",14,T.INK_MUTED);ask.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;work.add_child(ask);_refs.work_caption=ask
@@ -51,35 +56,32 @@ func setup(block:Dictionary)->void:
 			choice.name="Choice_"+String(spec[2]);choices.add_child(choice)
 		var decide:=S.verb("Let %s decide" % who+(" (now)" if current=="" else ""),func():data.on_focus.call(""),"%s spreads the work across what the place needs." % who.capitalize(),current=="")
 		decide.name="Choice_";choices.add_child(decide)
-	var readings:=HFlowContainer.new();readings.add_theme_constant_override("h_separation",32);readings.add_theme_constant_override("v_separation",16);add_child(readings)
+	var readings:=VBoxContainer.new();readings.add_theme_constant_override("separation",6);operations.add_child(readings)
 	_refs.readings={}
 	for item:Dictionary in kpi_items(block):
 		if item.id=="ahead" or (item.id=="hands" and can_direct):continue
-		var cell:=VBoxContainer.new();cell.custom_minimum_size.x=160;cell.add_theme_constant_override("separation",4);readings.add_child(cell)
+		var cell:=HFlowContainer.new();cell.add_theme_constant_override("h_separation",6);cell.add_theme_constant_override("v_separation",2);readings.add_child(cell)
 		cell.add_child(S.label(String(KPI_LABELS[item.id]),14,T.INK_MUTED))
-		var value:=S.voice("",24);cell.add_child(value)
+		var value:=S.voice("",16);cell.add_child(value)
 		var note:=S.label("",14,T.INK_MUTED);cell.add_child(note)
 		_refs.readings[item.id]={"cell":cell,"value":value,"note":note}
 	# The day's rations: one bar and the engine's terms under it.
-	var today_box:=VBoxContainer.new();today_box.add_theme_constant_override("separation",12);add_child(today_box)
+	var today_box:=VBoxContainer.new();today_box.add_theme_constant_override("separation",8);operations.add_child(today_box)
 	var today:=S.head(today_box,"Today's food")
 	_refs.today_side=today.side
 	flow_bar=FlowBar.new();flow_bar.name="FlowBar";flow_bar.custom_minimum_size=Vector2(0,8);today_box.add_child(flow_bar)
-	var daily:=HFlowContainer.new();daily.name="Daily";daily.add_theme_constant_override("h_separation",24);daily.add_theme_constant_override("v_separation",12);today_box.add_child(daily)
+	var daily:=HFlowContainer.new();daily.name="Daily";daily.add_theme_constant_override("h_separation",16);daily.add_theme_constant_override("v_separation",6);today_box.add_child(daily)
 	for pair:Array in FLOW_CELLS:
-		var cell:=VBoxContainer.new();cell.name="Cell_"+String(pair[0]);cell.custom_minimum_size.x=88;cell.add_theme_constant_override("separation",4);cell.mouse_filter=Control.MOUSE_FILTER_PASS;daily.add_child(cell)
+		var cell:=HBoxContainer.new();cell.name="Cell_"+String(pair[0]);cell.add_theme_constant_override("separation",5);cell.mouse_filter=Control.MOUSE_FILTER_PASS;daily.add_child(cell)
 		var caption_line:=HBoxContainer.new();caption_line.add_theme_constant_override("separation",6);cell.add_child(caption_line)
 		if pair[2]!=null:
 			var swatch:=ColorRect.new();swatch.color=FlowBar.colors()[pair[2]];swatch.custom_minimum_size=Vector2(8,8);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;caption_line.add_child(swatch)
 		var caption:=S.label(String(pair[1]),14,T.INK_MUTED);caption.mouse_filter=Control.MOUSE_FILTER_IGNORE;caption_line.add_child(caption)
-		var value:=S.voice("",24);value.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(value)
+		var value:=S.voice("",16);value.mouse_filter=Control.MOUSE_FILTER_IGNORE;cell.add_child(value)
 		daily_values[pair[0]]=value
 	_refs.missions=S.label("",14,T.INK_MUTED);_refs.missions.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;today_box.add_child(_refs.missions)
-	# Two columns of rows.
-	var grid:=S.columns(self,"FoodColumns",400.0,2);_grids.append(grid)
-	grid.add_theme_constant_override("v_separation",24)
-	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",0);left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(left)
-	var right:=VBoxContainer.new();right.add_theme_constant_override("separation",0);right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(right)
+	var right:=VBoxContainer.new();right.add_theme_constant_override("separation",4);right.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(right)
+	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",4);left.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(left)
 	_refs.stores_column=left;_refs.sources_column=right
 	var stores_head:=S.head(left,"Stores");_refs.stores_side=stores_head.side
 	for item:Dictionary in block.get("rows",[]):
@@ -112,10 +114,8 @@ func setup(block:Dictionary)->void:
 	_layout.call_deferred()
 
 func _layout()->void:
-	for grid:GridContainer in _grids:S.flow(grid,size.x)
-	if _refs.has("sources_column"):
-		var columns:=_grids[0]
-		columns.move_child(_refs.sources_column,0 if columns.columns==1 else 1)
+	for grid:GridContainer in _grids:
+		S.flow(grid,size.x)
 	S.compact(self,size.x)
 
 func update_block(block:Dictionary)->bool:
