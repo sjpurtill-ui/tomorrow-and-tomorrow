@@ -78,7 +78,9 @@ func _ensure_view()->void:
 	environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC;view.add_child(world)
 	var sun:=DirectionalLight3D.new();sun.name="WarmAfternoon"
 	sun.rotation_degrees=Vector3(-42,-34,0);sun.light_color=Color("fff0d5");sun.light_energy=.40
-	sun.shadow_enabled=true;sun.directional_shadow_max_distance=4.0
+	# Painted terrain and ink meshes share draped contact shading below. A
+	# hardware shadow received only by the roads would end sharply at their edge.
+	sun.shadow_enabled=false;sun.directional_shadow_max_distance=4.0
 	sun.shadow_bias=.001;sun.shadow_normal_bias=.003;view.add_child(sun)
 	gui_input.connect(_input_view)
 
@@ -329,7 +331,21 @@ func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
 	if polygons.is_empty():return
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
-	for polygon:PackedVector2Array in polygons:count+=_polygon(surface,polygon,Color(.95,.70,.37,.18),.00017)
+	var width:=clampf(_desired_span/maxf(1.0,size.y)*1.5,.00005,.00018)
+	# Only the parcel edge is marked. Subdivide it over the sampled terrain,
+	# feathering outwards so the working ground keeps its original appearance.
+	for polygon:PackedVector2Array in polygons:
+		for index in polygon.size():
+			var first:=polygon[index];var last:=polygon[(index+1)%polygon.size()]
+			var pieces:=maxi(1,ceili(first.distance_to(last)/.002))
+			var side:Vector2=(last-first).normalized().orthogonal()*width
+			for piece in pieces:
+				var a:=first.lerp(last,float(piece)/pieces);var b:=first.lerp(last,float(piece+1)/pieces)
+				for direction in [-1,1]:
+					var strip:=[a,b,b+side*direction,a+side*direction]
+					for vertex in [0,1,2,0,2,3]:
+						surface.set_normal(_normal(strip[vertex]));surface.set_color(Color(.94,.75,.48,.50 if vertex<2 else 0))
+						surface.add_vertex(_point(strip[vertex],.0002));count+=1
 	if count>0:_highlight=_commit(surface,"FocusedWorkGround",true)
 
 func _update_people()->void:
