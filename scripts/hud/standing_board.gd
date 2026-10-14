@@ -331,7 +331,7 @@ func _fill_strengths()->void:
 	UI.clear(strength_list)
 	var head:=UI.line(strength_list,8);head.name="Header"
 	UI.cell(head,"",72,12,T.INK_MUTED,true)
-	UI.cell(head,"against the age",70,12,T.INK_MUTED)
+	UI.cell(head,"vs the age",70,12,T.INK_MUTED)
 	UI.cell(head,"",34,12,T.INK_MUTED)
 	UI.cell(head,"a year" if not year_ago.is_empty() else "",34,12,T.INK_MUTED,false,HORIZONTAL_ALIGNMENT_RIGHT)
 	UI.label(head,"biggest cause",12,T.INK_MUTED,false,true)
