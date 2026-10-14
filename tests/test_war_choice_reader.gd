@@ -1,0 +1,62 @@
+extends GdUnitTestSuite
+const Reader=preload("res://scripts/hud/war_choice_reader.gd")
+func test_late_record_search_selection_and_refresh_keep_full_card()->void:
+	var reader:VBoxContainer=auto_free(Reader.new());add_child(reader)
+	reader.setup("front",func(payload:Dictionary)->Control:
+		var label:=Label.new();label.text=String(payload.account);return label)
+	var records:Array=[]
+	for i in 19:records.append({"id":str(i),"title":"People %02d" % i,"subtitle":"Feud","payload":{"account":"Complete account %d" % i}})
+	reader.set_records(records)
+	assert_int(reader.choices.get_child_count()).is_equal(4)
+	reader.next.pressed.emit()
+	assert_int(reader.page).is_equal(1)
+	reader.search.text="People 18";reader.search.text_changed.emit(reader.search.text)
+	assert_int(reader.matches().size()).is_equal(1)
+	reader.choices.get_child(0).pressed.emit()
+	assert_str(reader.selected_id).is_equal("18")
+	assert_str(reader.reader.get_child(0).text).is_equal("Complete account 18")
+	records[18].payload.account="Updated complete account"
+	reader.set_records(records)
+	assert_str(reader.query).is_equal("People 18")
+	assert_str(reader.selected_id).is_equal("18")
+	assert_str(reader.reader.get_child(0).text).is_equal("Updated complete account")
+	assert_bool(reader.reveal("12")).is_true()
+	assert_str(reader.query).is_empty()
+	assert_int(reader.page).is_equal(3)
+	assert_str(reader.selected_id).is_equal("12")
+	reader.select("18");reader.search.text="People 18";reader.search.text_changed.emit(reader.search.text)
+	records.pop_back();reader.set_records(records)
+	assert_str(reader.selected_id).is_equal("0")
+	assert_int(reader.matches().size()).is_equal(0)
+	assert_int(reader.reader.get_child_count()).is_equal(1)
+
+func test_narrow_chooser_keeps_selected_card_and_returns_without_new_page()->void:
+	var reader:VBoxContainer=auto_free(Reader.new());add_child(reader)
+	reader.setup("commander",func(payload:Dictionary)->Control:
+		var label:=Label.new();label.text=String(payload.name);return label)
+	reader.size=Vector2(420,300)
+	reader.set_records([{"id":"a","title":"A","payload":{"name":"A"}},{"id":"b","title":"B","payload":{"name":"B"}}])
+	assert_bool(reader.pick.visible).is_true()
+	assert_bool(reader.reader.visible).is_true()
+	reader.pick.pressed.emit()
+	assert_bool(reader.index.visible).is_true()
+	assert_bool(reader.reader.visible).is_false()
+	reader.choices.get_child(1).pressed.emit()
+	assert_str(reader.selected_id).is_equal("b")
+	assert_bool(reader.reader.visible).is_true()
+	reader.pick.pressed.emit();reader.back.pressed.emit()
+	assert_str(reader.selected_id).is_equal("b")
+	assert_bool(reader.reader.visible).is_true()
+
+func test_army_legend_groups_fronts_without_changing_allocation_or_exact_readings()->void:
+	var board=preload("res://scripts/hud/war_board.gd")
+	var parts:Array=[{"id":"ready","label":"Free to send","men":12,"ink":"ready","tip":""}]
+	for i in 13:parts.append({"id":"front:%d" % i,"label":"Against people %d" % i,"men":i+1,"ink":"front","tip":""})
+	var before:=parts.duplicate(true)
+	var legend:Array=board.allocation_legend(parts)
+	assert_int(legend.size()).is_equal(2)
+	assert_int(legend[1].men).is_equal(91)
+	assert_str(legend[1].label).is_equal("On 13 fronts")
+	assert_str(legend[1].tip).contains("Against people 12: 13")
+	assert_array(parts).is_equal(before)
+	assert_str(board.allocation_words({"total":103,"watch":103,"parts":parts})).contains("Against people 12: 13")
