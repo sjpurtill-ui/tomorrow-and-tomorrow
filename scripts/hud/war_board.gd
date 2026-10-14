@@ -803,10 +803,12 @@ func _neighbours()->Control:
 		reach[String(people.civ_id)]=home.distance_to(Vector2(float(at.get("x",0.0)),float(at.get("z",0.0)))) if not at.is_empty() else INF
 	peoples.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(reach[String(a.civ_id)])<float(reach[String(b.civ_id)]))
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",6);box.add_child(head)
-	for spec:Array in [["Peoples we know",true],["warriors",false],["march",false]]:
+	for spec:Array in [["Peoples we know",0],["between us",64],["warriors",78],["march",78]]:
 		var cell:=_line(String(spec[0]),11,T.INK_MUTED);cell.add_theme_font_override("font",T.font("ui_strong"))
-		if bool(spec[1]):cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		else:cell.custom_minimum_size=Vector2(78,0);cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
+		if int(spec[1])==0:cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		else:
+			cell.custom_minimum_size=Vector2(float(spec[1]),0)
+			if int(spec[1])!=64:cell.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT
 		head.add_child(cell)
 	for people:Dictionary in peoples.slice(0,5):
 		var civ_id:=String(people.civ_id)
@@ -814,9 +816,9 @@ func _neighbours()->Control:
 		var between:=Known.relation_cell(people)
 		var row:=HBoxContainer.new();row.name="Known_%s" % civ_id.validate_node_name();row.add_theme_constant_override("separation",6);row.mouse_filter=Control.MOUSE_FILTER_PASS
 		var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(18,18);emblem.size_flags_vertical=Control.SIZE_SHRINK_CENTER;emblem.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(emblem)
-		var name_label:=_line(String(people.name),13,T.INK);name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
+		var name_label:=_line(String(people.name),13,T.INK);name_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;name_label.clip_text=true;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(name_label)
 		var tone:=String(between.get("tone","ink"))
-		var word:=_line(String(between.get("text","")),11,T.RED_TEXT if tone=="danger" else (T.AMBER_TEXT if tone=="warn" else (T.GREEN_TEXT if tone=="good" else T.INK_MUTED)));word.size_flags_horizontal=Control.SIZE_EXPAND_FILL;word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(word)
+		var word:=_line(String(between.get("text","")),11,T.RED_TEXT if tone=="danger" else (T.AMBER_TEXT if tone=="warn" else (T.GREEN_TEXT if tone=="good" else T.INK_MUTED)));word.custom_minimum_size=Vector2(64,0);word.clip_text=true;word.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(word)
 		var theirs:=_line(Allocation.theirs_words(e),12,T.INK);theirs.add_theme_font_override("font",T.font("ui_strong"));theirs.custom_minimum_size=Vector2(78,0);theirs.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;theirs.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(theirs)
 		var nearest:Dictionary=e.nearest
 		var road:=_line(_days(int(nearest.days)) if not nearest.is_empty() else "—",12,T.INK_MUTED);road.custom_minimum_size=Vector2(78,0);road.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;road.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(road)
@@ -836,7 +838,10 @@ func _enemy_row(e:Dictionary)->Control:
 	var civ_id:=String(e.civ_id)
 	var tone:=LedgerMarks.chip_tone(Ledger.state_word(e))
 	var panel:=PanelContainer.new();panel.name="Enemy_%s" % civ_id
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,Color(tone,0.8),10,3))
+	# The people's war in a band of its tone down the left, not a box.
+	var band:=StyleBoxFlat.new();band.bg_color=Color(tone,0.06);band.border_color=Color(tone,0.85);band.border_width_left=3
+	band.content_margin_left=10.0;band.content_margin_right=4.0;band.content_margin_top=6.0;band.content_margin_bottom=6.0
+	panel.add_theme_stylebox_override("panel",band)
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);column.add_child(head)
 	var emblem:=TextureRect.new();emblem.texture=Identity.emblem(civ_id);emblem.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;emblem.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;emblem.custom_minimum_size=Vector2(30,30)
@@ -1207,7 +1212,10 @@ func _leader_row(c:Dictionary)->Control:
 	var leader:Dictionary=c.leader
 	var war_leader:=String(c.id)==Commands.WAR_LEADER
 	var panel:=PanelContainer.new();panel.name="Leader_%s" % String(c.id)
-	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,8,0))
+	# A row of the list, a hairline under it; the portrait carries the eye.
+	var line:=StyleBoxFlat.new();line.bg_color=Color(0,0,0,0);line.border_color=T.RULE;line.border_width_bottom=1
+	line.content_margin_top=4.0;line.content_margin_bottom=6.0
+	panel.add_theme_stylebox_override("panel",line)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);panel.add_child(row)
 	var frame:=PanelContainer.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(40,48);frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	var ground:=T.flat(T.PAPER_SUNK);ground.border_color=Commands.color(String(c.id));ground.border_width_left=3;frame.add_theme_stylebox_override("panel",ground);row.add_child(frame)
