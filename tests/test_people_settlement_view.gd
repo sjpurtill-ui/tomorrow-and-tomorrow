@@ -122,12 +122,54 @@ func test_mature_paint_requires_recorded_floors_roof_and_installed_chimney()->vo
 
 func test_painted_atlas_regions_stay_inside_fractional_cells()->void:
 	var art=preload("res://scripts/hud/people_settlement_art.gd")
-	for path:String in [art.BUILDINGS,art.DETAILS,art.MATURE,art.ROOFS]:
-		var texture:Texture2D=art.atlas(path);var rows:=2 if path in [art.MATURE,art.ROOFS] else 3
-		var columns:=3 if path==art.ROOFS else 4
+	for path:String in [art.BUILDINGS,art.DETAILS,art.MATURE,art.ROOFS,art.STATES,art.VARIANTS,art.WORKSHOP]:
+		var texture:Texture2D=art.atlas(path);var rows:=3 if path in [art.BUILDINGS,art.DETAILS] else 2
+		var columns:=4 if path in [art.BUILDINGS,art.DETAILS,art.MATURE] else 3
+		if path==art.WORKSHOP:rows=1;columns=1
 		for cell in rows*columns:
 			var region:Rect2i=art.region(path,cell,rows,columns)
 			assert_bool(region.has_area()).is_true()
 			assert_bool(Rect2i(0,0,texture.get_width(),texture.get_height()).encloses(region)).is_true()
 			assert_int(region.position.x).is_greater_equal(roundi(float(cell%columns)*texture.get_width()/columns))
 			assert_int(region.end.x).is_less_equal(roundi(float(cell%columns+1)*texture.get_width()/columns))
+
+func test_painted_frames_and_damage_keep_recorded_wall_and_roof_family()->void:
+	var art=preload("res://scripts/hud/people_settlement_art.gd")
+	var plot:Dictionary={"seed":7,"form":"subdivided_frontage_compound","material_family":"organic","roof_plan":"timber_ridge","land_use":"residential_compound","storeys":1,"fabric_generation":4,"status":"under_construction","construction_progress":.58}
+	var before:=var_to_bytes(plot)
+	var frame:Dictionary=art.building_style({"plot":plot})
+	assert_str(frame.atlas).is_equal(art.STATES);assert_int(frame.cell).is_equal(0)
+	assert_float(frame.progress).is_equal(.72)
+	assert_that(var_to_bytes(plot)).is_equal(before)
+	plot.status="active";plot.damage={"fire":.4};plot.condition=.35
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(3)
+	plot.material_family="earth";plot.roof_plan="irregular_flat"
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(4)
+	plot.material_family="stone";plot.roof_plan="rubble_slab"
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(5)
+	plot.storeys=2
+	assert_str(art.building_style({"plot":plot}).atlas).is_equal(art.ROOFS)
+	plot.storeys=1;plot.status="ruin";plot.material_family="organic";plot.roof_plan="timber_ridge"
+	assert_dict(art.building_style({"plot":plot})).is_empty()
+
+func test_timber_variation_is_stable_and_workshop_requires_actual_plank_fabric()->void:
+	var art=preload("res://scripts/hud/people_settlement_art.gd")
+	var image:Image=art.atlas(art.VARIANTS).get_image()
+	if image.is_compressed():image.decompress()
+	var boundary_alpha:=0.0
+	for x in image.get_width():boundary_alpha=maxf(boundary_alpha,image.get_pixel(x,image.get_height()/2).a)
+	for column in [1,2]:
+		for y in image.get_height():boundary_alpha=maxf(boundary_alpha,image.get_pixel(image.get_width()*column/3,y).a)
+	assert_float(boundary_alpha).is_less_equal(.035)
+	var plot:Dictionary={"seed":7,"form":"subdivided_frontage_compound","material_family":"organic","roof_plan":"timber_ridge","land_use":"residential_compound","storeys":1,"fabric_generation":4,"status":"active"}
+	var first:Dictionary=art.building_style({"plot":plot})
+	assert_str(first.atlas).is_equal(art.VARIANTS)
+	assert_dict(art.building_style({"plot":plot})).is_equal(first)
+	plot.storeys=2
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(int(first.cell)+3)
+	plot.storeys=1;plot.form="route_side_workshop";plot.land_use="workshop"
+	assert_str(art.building_style({"plot":plot}).atlas).is_equal(art.WORKSHOP)
+	plot.material_family="stone"
+	assert_dict(art.building_style({"plot":plot})).is_empty()
+	plot.material_family="organic";plot.roof_plan="thatched_ridge"
+	assert_str(art.building_style({"plot":plot}).atlas).is_equal(art.MATURE)
