@@ -1,3 +1,52 @@
+## October 15 — One hundred percentage representatives (INTEGRATED)
+
+Runtime `71e3f9dc` replaces the old 48-person People vignette with nine illustrated
+work areas and exactly 100 persistent representatives, one per percentage point.
+The mixed cast has grounded job poses and tools for fields, surveying, extraction,
+building, crafting, carrying, learning, care and the watch. Scenery adds no people.
+
+Largest-remainder rounding of assigned headcounts makes percentages total 100;
+actual headcounts remain explicit. Valid drafts use the existing forecast's
+effective allocation, including food protection and whole-worker rounding. Only
+excess figures change roles. They walk through connected aisles; cancelling in
+transit turns the same figures back along the travelled path. An all-zero
+allocation uses an unassigned reserve. IDs, total count and render batch persist.
+
+The work landscape is representative, as requested, rather than a town replica.
+Recorded workshop/construction fabric can vary those illustrations; other sites
+retain representative early-material art. Simulation, population, production,
+starvation, delegation and save schemas are unchanged. Wider popup consolidation
+and detailed industrial work animation remain separate unfinished work.
+
+Fixed-angle pan/zoom and keyboard navigation remain. Painted worksites are also
+clickable. Labels avoid the projected crew; obstructing neighboring scenery is
+cut away on focus. Reciprocal agent review corrected excessive tree sway, male
+squatting walk frames, GPU interpolation changing role/sex, scenery occlusion,
+and dock restoration silently recalculating stale drafts. Existing stale drafts
+now retain the required explicit Refresh preview step.
+
+Validation: root report_77 passes 72 focused cases with zero errors, failures,
+skips or orphans (`artifacts/popup-audit/people-hundred-final-tests.log`). The
+final early Night actual-HUD journey passes 236 checks and 18 captures at
+1600×1000, 1024×720 and 2869×1337; private process 28044 exits 0. Evidence:
+`artifacts/popup-audit/hundred-final-early-dark.log` and
+`artifacts/popup-audit/living-people/hundred-final-early-dark/`. A independently
+accepts the final overview, Food, Crafting and Learning draft images. C's exact
+final developed Daylight journey passes 256 checks and 18 captures, private
+process 11356 exit 0, with matching renderer hash and final A/B/C sources. Its
+evidence is in C's `artifacts/popup-modern-c/people-hundred-mature-final.log` and
+`artifacts/popup-audit/living-people/hundred-final-c-mature-light/`. A's native
+arrival proof passes 90 samples, all 100 GPU role/sex codes, stable-batch and
+no-model-write checks, plus 36 rendered identity-boundary comparisons. B's native
+probe passes real navigation and 8,000 finite motion samples. All test windows
+use a private desktop and Dummy audio; no player/editor is interrupted.
+
+Source deliveries: A `f63177bb`, `dad79932`, `3623f910`; B `cdc66877`,
+`05be5811`, `f40737d2`; C `a31c43d3`, `9d2d1c32`, `43198911`.
+Root checkpoints are on `codex/popup-design-integration`. Artwork provenance:
+`assets/ui/people/README.md` and `work-world-art.md`. Remote main is verified
+before canonical fast-forward. An existing session needs its normal save/restart.
+
 ## October 15 — People navigation and motion correction (INTEGRATED)
 
 Runtime and proof checkpoint `15a179dd` corrects the defects reported after the
