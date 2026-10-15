@@ -65,7 +65,7 @@ func test_later_navigation_cancels_pending_work_focus()->void:
 	assert_str(hud.active_section).is_equal("inquiry")
 
 func test_living_view_gets_room_without_widening_other_reports()->void:
-	assert_float(hud._dock_width(hud.dock,2869.0)).is_equal(1600.0)
+	assert_float(hud._dock_width(hud.dock,2869.0)).is_equal(2869.0-hud.Folio.RAIL_WIDTH-hud.Tokens.EDGE_MARGIN)
 	hud.dock.provider.spatial=false
 	assert_float(hud._dock_width(hud.dock,2869.0)).is_equal(hud.Folio.page_width(2869.0))
 	hud.dock.provider.spatial=true

@@ -32,6 +32,13 @@ scaffold. These require compatible recorded form/material/storeys. Cells with
 chimneys or tile roofs additionally require corresponding installed fabric;
 unsupported buildings retain truthful geometry instead of being reskinned.
 
+Roof-specific atlas: three columns and two rows, 512px square cells. Row one:
+single-storey earth/flat-earth roof, rough stone/slab roof, timber/plank roof.
+Row two: the same materials at two storeys. No chimneys or tiles. The stored RGB
+in fully transparent pixels is brown; alpha is zero there and must be respected.
+`meadow-ground-v1.png` is a repeating painterly meadow/earth material, not a
+landscape backdrop or a new terrain resource.
+
 ## Generation prompts
 
 Buildings: production transparent 4×3 sprite atlas; style-only reference to the
@@ -54,11 +61,23 @@ consistent three-quarter view and independent silhouettes. No castles, mills,
 electricity, factories, invented emblems, people or opaque ground squares. These
 are visual assets, not game unlocks.
 
+Roofs: transparent six-cell sprite sheet, three columns and two rows; exact
+single/two-storey earth flat-roof, stone slab-roof and timber plank-roof subjects;
+same detailed warm painterly three-quarter architecture. No chimneys, thatch,
+tiles, glass, people, balconies or modern technology. A background-extraction
+edit preserved all houses and removed the surrounding brown gradient to alpha.
+
+Ground: seamless square top-down painted meadow/earth texture, subtle muted
+olive, sage and ochre mosaic with tiny stones and dry blades; low contrast,
+natural daylight. No buildings, roads, rivers, people, trees or other objects.
+
 ## Source output identities
 
 - Early: `exec-4ae5268d-c5fd-41c1-ae0d-5e588248d00f.png`
 - Details, corrected: `exec-0a4ac206-a6be-47f9-9298-5370cb721d0b.png`
 - Mature: `exec-b4eca32c-88c8-4192-9b24-984e512e5941.png`
+- Roofs: `exec-455b57e1-5c46-4114-90e8-4d22edb343ca.png`
+- Ground: `exec-c92c7cb2-ed28-420b-a783-a79a6376b7b5.png`
 
 Original outputs remain in the conversation's generated-image directory. These
 workspace copies are the runtime assets; no dependency on that directory exists.

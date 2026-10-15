@@ -1,4 +1,15 @@
-## October 14 — Living People screen (INTEGRATED)
+## October 14 — Illustrated People revision (IN PROGRESS)
+
+The user rejected the functional living-scene checkpoint below as visually unlike
+the approved illustration and obscured by large panels. Its tests certify
+behavior, not satisfaction of the art direction. The new pass uses modular
+painterly building and environmental assets selected from real records, richer
+activity and compact readings attached to physical work areas. It must pass
+independent actual-HUD critique before delivery. Acceptance criteria are in
+`docs/design/LIVING_PEOPLE_ART_REVIEW.md`; no full-scene painting is substituted
+for dynamic development, and game rules remain unchanged.
+
+## October 14 — Living People screen (integrated functional checkpoint)
 
 The user rejected the four list-based Town concepts and approved the illustrated
 village direction specifically as the People screen. This supersedes acceptance
