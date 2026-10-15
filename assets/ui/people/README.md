@@ -1,0 +1,64 @@
+# Living settlement illustration assets
+
+Original raster assets generated with the built-in `image_gen` tool on 2026-10-14.
+The approved town illustration supplied style, lighting and material direction.
+These are independently placed transparent sprites, not a fixed village backdrop.
+The renderer must select them from recorded building fabric, footprint, condition
+and construction, and must not create a building, crop, inventory or technology.
+
+## Atlas contract
+
+Both early buildings and details have four columns and three rows. Mature
+buildings have four columns and two rows. Use the actual PNG dimensions rather
+than the requested generation size. Compute opaque bounds inside each cell for
+ground contact; the generated objects do not share an exact pixel baseline.
+Keep alpha gutters out of neighboring cells and use a small alpha cutoff to
+discard negligible transparent-edge color. Files are never fetched at runtime.
+
+Early row-major cells: hide ridge shelter; hide dome; reed lean-to; timber/wattle
+roundhouse; earth household; rough-stone household; open craft canopy; raised
+timber store; open communal shelter; construction frame; damaged roof shell;
+ruin footprint.
+
+Details: spreading oak; small broadleaf; tall slender broadleaf; flowering shrub;
+wildflowers/grass; reeds; logs; baskets/jars; fence; hearth; raw stone/wood; crop
+rows. Baskets/jars, fences and crops require matching established practices or
+recorded objects. The crops do not assert yields. Decorative supplies are not
+inventory quantities. Tree positions remain the seeded terrain's positions.
+
+Mature: two-storey timber; two-storey earth; two-storey rough stone; three-storey
+masonry; broad workshop; broad storage barn; modest meeting hall; two-storey
+scaffold. These require compatible recorded form/material/storeys. Cells with
+chimneys or tile roofs additionally require corresponding installed fabric;
+unsupported buildings retain truthful geometry instead of being reskinned.
+
+## Generation prompts
+
+Buildings: production transparent 4×3 sprite atlas; style-only reference to the
+approved rich, warm, painterly strategy village; exact twelve early subjects above;
+consistent elevated three-quarter camera about 35 degrees down, upper-left sun,
+bottom-center contact, transparent gutters; intricate straw, weathered timber,
+earthy ochres and soft organic silhouettes. No UI, labels, people, ground slabs,
+modern elements, glass, electricity, mills, factories or fantasy. Distinguish
+primitive shelters from developed homes.
+
+Details: production transparent 4×3 sprite atlas of the twelve environmental
+subjects above, the same camera and warm light, textured irregular foliage,
+natural greens and ochres. No buildings, people, horizon, geometric low-poly
+trees, modernware or ground slabs. A corrective edit retained subjects/style
+and shrank each object inside a single equal square cell with transparent gutters.
+
+Mature: production transparent 4×2 sprite atlas of the eight developed subjects
+above; same warm painterly reference, detailed historic thatch/timber/masonry,
+consistent three-quarter view and independent silhouettes. No castles, mills,
+electricity, factories, invented emblems, people or opaque ground squares. These
+are visual assets, not game unlocks.
+
+## Source output identities
+
+- Early: `exec-4ae5268d-c5fd-41c1-ae0d-5e588248d00f.png`
+- Details, corrected: `exec-0a4ac206-a6be-47f9-9298-5370cb721d0b.png`
+- Mature: `exec-b4eca32c-88c8-4192-9b24-984e512e5941.png`
+
+Original outputs remain in the conversation's generated-image directory. These
+workspace copies are the runtime assets; no dependency on that directory exists.
