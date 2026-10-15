@@ -51,8 +51,14 @@ func setup(block:Dictionary)->void:
 	_hero=S.voice("",24);_hero.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_hero)
 	_supply=S.label("",14,T.INK_MUTED);_supply.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview.add_child(_supply)
 	var row_buttons:=HFlowContainer.new();row_buttons.add_theme_constant_override("h_separation",8);row_buttons.add_theme_constant_override("v_separation",8);overview.add_child(row_buttons)
+	if block.get("on_assign") is Callable:
+		var extract:=S.verb("Assign workers",func():data.on_assign.call(),"Focus Extraction in The People. Preview changes to the workforce before applying.",true)
+		extract.name="AssignExtractionWorkers";row_buttons.add_child(extract)
+	if block.get("on_assign_carriers") is Callable:
+		var carry:=S.verb("Assign carriers",func():data.on_assign_carriers.call(),"Focus Logistics in The People. Carriers move water, food and materials.")
+		carry.name="AssignLogisticsWorkers";row_buttons.add_child(carry)
 	if can_direct:
-		var more:=S.verb("More carriers"+(" (now)" if focus=="logistics" else ""),func():data.on_focus.call("logistics"),"Ask %s to put more people on carrying loads and keeping the paths open. Other work slows." % (who if not who.is_empty() else "the leader"),focus=="logistics")
+		var more:=S.verb("Ask leader: more carrying"+(" (now)" if focus=="logistics" else ""),func():data.on_focus.call("logistics"),"Ask %s to put more people on carrying loads and keeping the paths open. Other work slows." % (who if not who.is_empty() else "the leader"),focus=="logistics")
 		more.name="Choice_Logistics";row_buttons.add_child(more)
 		if focus!="":row_buttons.add_child(S.verb("Let %s decide" % (who if not who.is_empty() else "the leader"),func():data.on_focus.call(""),"The leader spreads the work across what the place needs."))
 	row_buttons.add_child(S.verb("Show on map",data.get("on_map"),"Mark known wood, stone and clay on the map"))
@@ -222,7 +228,7 @@ static func shape_of(block:Dictionary)->Array:
 	for item:Dictionary in block.get("rows",[]):
 		var open:bool=selected_key(block)==item.key
 		rows.append([String(item.key),out_of_reach(item),is_idle(item,String(block.get("selected",""))),open,(item.get("details",[]) as Array).size() if open else -1])
-	return [_who(block),_current(block),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
+	return [_who(block),_current(block),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false)),block.get("on_assign") is Callable,block.get("on_assign_carriers") is Callable]
 
 static func _current(block:Dictionary)->String:
 	var focus:=String(block.get("focus",""))

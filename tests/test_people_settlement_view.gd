@@ -68,3 +68,25 @@ func test_water_service_is_not_painted_as_a_pond_and_people_material_is_private(
 	assert_bool(town._people_paint.get_shader_parameter("map_people_visible")).is_true()
 	assert_bool(shared.get_shader_parameter("map_people_visible")).is_equal(visible_before)
 	assert_int(town.camera.projection).is_equal(Camera3D.PROJECTION_PERSPECTIVE)
+
+func test_clothing_follows_recorded_knowledge_and_supply_without_rebuilding_town()->void:
+	var context:=_context()
+	context["population"]=93
+	context["clothing_knowledge"]=[]
+	context["clothing_context"]={"adoption":{},"coverage":1.0}
+	var town:Control=auto_free(View.new());add_child(town);town.size=Vector2(900,600);town.configure(context)
+	var first_key:int=town._people_key
+	var first_builds:int=town.geometry_builds
+	var shared:ShaderMaterial=preload("res://scripts/map_life_ink.gd").material("person")
+	var shared_shader:=shared.shader.code
+	context.clothing_knowledge=["plain_weaving"]
+	context.clothing_context={"adoption":{"plain_weaving":1.0},"coverage":1.0}
+	town.update_state(context)
+	assert_int(town._people_key).is_not_equal(first_key)
+	assert_int(town.geometry_builds).is_equal(first_builds)
+	var woven_key:int=town._people_key
+	context.clothing_context.coverage=0.0
+	town.update_state(context)
+	assert_int(town._people_key).is_not_equal(woven_key)
+	assert_int(town.geometry_builds).is_equal(first_builds)
+	assert_str(shared.shader.code).is_equal(shared_shader)
