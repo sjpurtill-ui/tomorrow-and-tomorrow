@@ -39,6 +39,12 @@ in fully transparent pixels is brown; alpha is zero there and must be respected.
 `meadow-ground-v1.png` is a repeating painterly meadow/earth material, not a
 landscape backdrop or a new terrain resource.
 
+People: six columns and four rows, 256px square cells. Rows are basic hide/fiber
+wrap, joined sewn hide, coarse woven drape, and simple woven tunic. Columns are
+idle, left/right walking phases, carrying, working and crouching. The existing
+knowledge/adoption/supply gates select clothing. They remain bounded visual
+representatives moving on existing routes, not a new individual-population model.
+
 ## Generation prompts
 
 Buildings: production transparent 4×3 sprite atlas; style-only reference to the
@@ -71,6 +77,12 @@ Ground: seamless square top-down painted meadow/earth texture, subtle muted
 olive, sage and ochre mosaic with tiny stones and dry blades; low contrast,
 natural daylight. No buildings, roads, rivers, people, trees or other objects.
 
+People: transparent 6×4 sheet, the four clothing stages and six poses above,
+consistent proportions, facing right in three-quarter view, natural warm skin
+and undyed materials, soft detailed painterly light, clear at 24–60px. No modern
+shirts, trousers, buttons, collars, armor, metal tools, pottery, weapons, ground,
+UI or text. Frame bounds are measured for consistent ground contact.
+
 ## Source output identities
 
 - Early: `exec-4ae5268d-c5fd-41c1-ae0d-5e588248d00f.png`
@@ -78,6 +90,7 @@ natural daylight. No buildings, roads, rivers, people, trees or other objects.
 - Mature: `exec-b4eca32c-88c8-4192-9b24-984e512e5941.png`
 - Roofs: `exec-455b57e1-5c46-4114-90e8-4d22edb343ca.png`
 - Ground: `exec-c92c7cb2-ed28-420b-a783-a79a6376b7b5.png`
+- People: `exec-14eff4ef-116b-4e05-bb7a-6aa7d81e23c0.png`
 
 Original outputs remain in the conversation's generated-image directory. These
 workspace copies are the runtime assets; no dependency on that directory exists.
