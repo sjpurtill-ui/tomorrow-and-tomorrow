@@ -32,7 +32,7 @@ static func zones()->Dictionary:
 		for offset:Vector2 in [Vector2(-.012,-.011),Vector2(.010,-.011),Vector2(.013,-.005),Vector2(.012,.010),Vector2(.006,.017),Vector2(-.008,.017),Vector2(-.013,.008)]:polygon.append(world(at+offset))
 		var area:=Rect2(polygon[0],Vector2.ZERO)
 		for vertex:Vector2 in polygon:area=area.expand(vertex)
-		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.009,Vector2.ONE*.018),"focus_span":.031,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.015))}
+		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.009,Vector2.ONE*.018),"focus_center":world(at+Vector2(0,.006)),"focus_span":.040,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.015))}
 	return result
 
 static func work_positions(role:String,count:int=100)->PackedVector2Array:
@@ -42,8 +42,9 @@ static func work_positions(role:String,count:int=100)->PackedVector2Array:
 	# A stable sunflower packing fills outward, avoiding marching rows. The
 	# first100slots always fit, even when every representative joins one role.
 	for index in clampi(count,0,100):
-		var angle:=float(index)*2.39996323+float(ROLES.find(role))*.31
-		var radius:=.00088*sqrt(float(index)+.5)
+		var slot:=(index*37)%100
+		var angle:=float(slot)*2.39996323+float(ROLES.find(role))*.31
+		var radius:=.00088*sqrt(float(slot)+.5)
 		result.append(world(center+Vector2(cos(angle),sin(angle))*radius))
 	return result
 
@@ -107,7 +108,7 @@ static func _site(parent:Node3D,point:Callable,role:String,at:Vector2)->MeshInst
 
 static func _ground(parent:Node3D,point:Callable)->void:
 	var mesh:=SurfaceTool.new();mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var corners:Array[Vector2]=[Vector2(-.12,-.10),Vector2(.12,-.10),Vector2(.12,.12),Vector2(-.12,.12)]
+	var corners:Array[Vector2]=[Vector2(-.65,-.65),Vector2(.65,-.65),Vector2(.65,.65),Vector2(-.65,.65)]
 	for index in [0,1,2,0,2,3]:
 		var at:=world(corners[index]);mesh.set_normal(Vector3.UP);mesh.set_uv(corners[index]*16.0);mesh.add_vertex(point.call(at,-.00002))
 	var node:=MeshInstance3D.new();node.name="ContinuousWorkingLandscape";node.mesh=mesh.commit()
@@ -144,7 +145,7 @@ static func _foliage(parent:Node3D,point:Callable,objects:Array[MeshInstance3D])
 	for index in 18:
 		var angle:=float(index)*TAU/18+.14
 		var at:=world(Vector2(cos(angle)*.073,sin(angle)*.060+ .008))
-		var node:=Art.sprite(parent,Art.DETAILS,index%2,point.call(at,.00002),.011+float(index%3)*.002,{"foliage":true,"sway":.3,"phase":float(index),"name":"BorderTree_"+str(index)})
+		var node:=Art.sprite(parent,Art.DETAILS,index%2,point.call(at,.00002),.011+float(index%3)*.002,{"foliage":true,"sway":.00012,"phase":float(index),"name":"BorderTree_"+str(index)})
 		if node!=null:objects.append(node)
 
 const GROUND_SHADER="""
