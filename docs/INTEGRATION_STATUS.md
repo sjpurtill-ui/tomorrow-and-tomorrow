@@ -1,4 +1,53 @@
-## October 14 — Illustrated People revision (INTEGRATED)
+## October 15 — People navigation and motion correction (INTEGRATED)
+
+Runtime and proof checkpoint `15a179dd` corrects the defects reported after the
+previous static-image review. The village camera now pans with left/right drag,
+zooms with the wheel or visible minus/plus controls, and restores the selected
+area with Center view or Home. Its illustration angle stays fixed. Close zoom
+changes the actual camera distance, resizing retains manual navigation, and a
+visible dedicated work parcel is clickable away from its label. A drag never
+selects the parcel; small click jitter is tolerated.
+
+Walking direction now follows the actual outbound or return tangent and the
+private shader's matching +Z convention. New complete four-phase walk/carry
+paintings replace the torso-twisting two-pose cycle. Distance drives gait;
+carrier pauses keep matching clothing/load and settle to a planted-foot frame.
+Detached tools and generic empty-ground work gestures are removed. Bounded
+visual routes avoid recorded buildings and hearths. Stationary representatives
+require visible small task props; raised benches use standing poses. Suitable
+woodpile/bench pairs support pickup, loaded travel, unloading and empty return.
+Painted building edges alone do not create a reachable work surface.
+
+The implement/critique/revise loop caught and corrected an unload outfit pop and
+workers crouching several body lengths away from painted workshops. B inspected
+native-size temporal sequences; A and C cross-reviewed the changes and C/root
+reviewed the final actual HUD. This is acceptance of the motion/navigation fix,
+not completion of detailed industrial animation or the broader graphical screen
+consolidation. Those remain unfinished. Simulation, production, allocation,
+delegation and save schemas are unchanged; visual people remain capped at 48.
+
+Validation: 54 distinct focused tests pass (45 in report_68 and 26 final renderer,
+costume, worker and navigation cases in report_69, with 17 repeated cases).
+Zero errors, failures, skips or orphans. Independent native early/woven runs
+pass 264 temporal samples, covering outbound/return and diagonal travel,
+registration, loading and worksite placement. Native GUI input verifies pan,
+fixed angle, real zoom, resize/reset, parcel clicks, 3px jitter and drag exclusion.
+Final actual-HUD journeys pass 154 early Night and 174 developed Daylight checks,
+with 32 captures at 1600×1000, 1024×720 and 2869×1337. Both final root processes
+exit 0; existing command-rail anchor warnings remain. Evidence:
+`artifacts/popup-audit/people-motion-navigation-combined.log`,
+`people-motion-final-renderer.log`, `motion-final-{early-dark,mature-light}.log`,
+and `living-people/motion-final-{early-dark,mature-light}/`; independent sequences
+are in B's `artifacts/people-motion-b/final-*` and its native motion/navigation logs.
+
+Source handoffs: A `e0902da8` + `004fecba`; C `0e5a8da5` + `8376c84a`;
+B proof `3b1b6d9f`; root navigation `b94ce974`, `ac03b3c0`, `e07657d5` and
+motion artwork `1ded30a9`. Asset provenance is in `assets/ui/people/README.md`.
+Only the verified remote-main commit is fast-forwarded into the canonical
+checkout. No live player/editor is stopped or restarted; an already-running
+session needs its normal save/restart to load the updated scripts.
+
+## October 14 — Illustrated People revision (historical static acceptance)
 
 Runtime `72698e91`, combined journey `00da5360`: the rejected low-detail scene
 and large overlay panels are replaced with modular painted buildings, trees,
