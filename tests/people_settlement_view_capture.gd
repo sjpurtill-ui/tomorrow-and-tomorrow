@@ -45,6 +45,11 @@ func _ready()->void:
 		if sightline:
 			var woodland:MultiMeshInstance3D=town.model.get_node("ActualSeededWoodland")
 			var tree_data:=var_to_bytes(woodland.multimesh.buffer)
+			var crown_centers:Array[Vector3]=[]
+			for lobe in 3:
+				var custom:=woodland.multimesh.get_instance_custom_data(lobe)
+				crown_centers.append(woodland.multimesh.get_instance_transform(lobe)*((Vector3(custom.r,custom.g,custom.b)-Vector3.ONE*.5)*.02))
+			assert(crown_centers[0].distance_to(crown_centers[1])<.0002 and crown_centers[0].distance_to(crown_centers[2])<.0002,"One tree had inconsistent fade centers")
 			var builds:int=town.geometry_builds
 			town.focus_role("Food");await get_tree().create_timer(1.0).timeout
 			assert(not town._foliage_materials.is_empty())

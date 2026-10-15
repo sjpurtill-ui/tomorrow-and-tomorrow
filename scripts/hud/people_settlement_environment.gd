@@ -63,13 +63,19 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 	# these are presentation variants, never additional timber deposits.
 	var crown:=SphereMesh.new();crown.radius=.0025;crown.height=.0044;crown.radial_segments=9;crown.rings=5
 	var trunk:=CylinderMesh.new();trunk.top_radius=.00018;trunk.bottom_radius=.00042;trunk.height=.0042;trunk.radial_segments=7
-	var leaf_transforms:Array[Transform3D]=[];var leaf_colors:Array[Color]=[];var trunks:Array[Transform3D]=[]
+	var leaf_transforms:Array[Transform3D]=[];var leaf_colors:Array[Color]=[];var crown_centers:Array[Color]=[];var trunks:Array[Transform3D]=[]
 	for i in trees.size():
 		var tree:Transform3D=trees[i]
 		for lobe:Vector3 in [Vector3(-.0012,.0042,0),Vector3(.0013,.0048,.0005),Vector3(0,.0063,-.0005)]:
 			leaf_transforms.append(tree*Transform3D(Basis.IDENTITY,lobe));leaf_colors.append(colors[i])
+			# All lobes carry the same whole-crown center in their own local
+			# coordinates, so a focused cutaway fades the tree coherently.
+			var center_offset:=Vector3(0,.0048,0)-lobe
+			# Compatibility rendering can pack custom colors; normalize the
+			# small signed offset instead of relying on signed HDR color data.
+			crown_centers.append(Color(center_offset.x/.02+.5,center_offset.y/.02+.5,center_offset.z/.02+.5,.45))
 		trunks.append(tree*Transform3D(Basis.IDENTITY,Vector3(0,.0021,0)))
-	_batch(parent,"ActualSeededWoodland",crown,leaf_transforms,leaf_colors,Color.WHITE)
+	_batch(parent,"ActualSeededWoodland",crown,leaf_transforms,leaf_colors,Color.WHITE,crown_centers)
 	_batch(parent,"WoodlandTrunks",trunk,trunks,[],Color("66513c"))
 	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for tree:Transform3D in trees:
@@ -82,12 +88,13 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 	var shader:=Shader.new();shader.code="shader_type spatial; render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled; void fragment(){ALBEDO=mix(vec3(1),vec3(.45,.48,.40),COLOR.a);}"
 	var material:=ShaderMaterial.new();material.shader=shader;shadow.material_override=material;parent.add_child(shadow)
 
-static func _batch(parent:Node3D,label:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],tint:Color)->void:
-	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=not colors.is_empty()
+static func _batch(parent:Node3D,label:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],tint:Color,centers:Array[Color]=[])->void:
+	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=not colors.is_empty();batch.use_custom_data=not centers.is_empty()
 	batch.mesh=mesh;batch.instance_count=transforms.size()
 	for i in transforms.size():
 		batch.set_instance_transform(i,transforms[i])
 		if batch.use_colors:batch.set_instance_color(i,colors[i])
+		if batch.use_custom_data:batch.set_instance_custom_data(i,centers[i])
 	var node:=MultiMeshInstance3D.new();node.name=label;node.multimesh=batch
 	var paint:=ShaderMaterial.new();var shader:=Shader.new();shader.code=TREE_SHADER;paint.shader=shader
 	paint.set_shader_parameter("tint",tint);node.material_override=paint;parent.add_child(node)
@@ -132,22 +139,25 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform vec3 focus_world = vec3(0.0);
 uniform float focus_radius = 0.003;
 uniform float focus_cutaway = 0.0;
-varying vec3 world_normal;varying vec3 at;varying vec3 world_at;
-void vertex(){world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);at=VERTEX;world_at=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
+varying vec3 world_normal;varying vec3 at;varying vec4 crown;
+void vertex(){
+world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);at=VERTEX;
+crown=vec4((MODEL_MATRIX*vec4((INSTANCE_CUSTOM.xyz-vec3(.5))*.02,1.0)).xyz,INSTANCE_CUSTOM.w*.01*length(MODEL_MATRIX[0].xyz));
+}
 void fragment(){
 float key=smoothstep(-.4,.85,dot(normalize(world_normal),normalize(vec3(-.55,.8,.6))));
 float leaf=fract(sin(dot(floor(at*2300.0),vec3(127.1,311.7,45.1)))*43758.5);
 vec3 base=COLOR.rgb*tint.rgb;
 ALBEDO=base*mix(vec3(.52,.65,.63),vec3(1.35,1.34,.95),key)*(.90+leaf*.16);
-// Cut away only crowns between the camera and focused work area. The cone
-// maintains a quiet screen-sized opening; rear and peripheral trees stay whole.
+// Fade the entire obstructing crown, never carve a hole in its silhouette.
+// Its shared center keeps all three lobes coherent; rear trees stay whole.
 vec3 eye=INV_VIEW_MATRIX[3].xyz;
 vec3 ray=focus_world-eye;
 float reach=max(length(ray),0.0001);
 vec3 axis=ray/reach;
-float depth=dot(world_at-eye,axis);
-float radial=length(world_at-eye-axis*depth);
-float aperture=focus_radius*clamp(depth/reach,0.05,1.0);
+float depth=dot(crown.xyz-eye,axis);
+float radial=length(crown.xyz-eye-axis*depth);
+float aperture=focus_radius*clamp(depth/reach,0.05,1.0)+crown.w*.8;
 float in_front=step(0.0,depth)*(1.0-step(reach-0.0003,depth));
 float cut=(1.0-smoothstep(aperture*0.65,aperture,radial))*in_front*focus_cutaway;
 ALPHA=1.0-cut*0.985;
