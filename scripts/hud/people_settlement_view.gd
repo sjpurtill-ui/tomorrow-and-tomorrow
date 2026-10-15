@@ -663,6 +663,13 @@ func _clamp_navigation()->void:
 
 func _select_area_at(at:Vector2)->void:
 	var best:="";var distance:=42.0
+	# The visible work area is clickable, not just its invisible center point.
+	# Only dedicated parcels qualify; shared ground keeps the explicit labels.
+	var metadata:=role_anchor_metadata()
+	for role:String in metadata:
+		if not bool(metadata[role].physical):continue
+		for polygon:PackedVector2Array in metadata[role].polygons:
+			if Geometry2D.is_point_in_polygon(at,polygon):role_selected.emit(role);return
 	for role:String in _anchors:
 		var separation:float=at.distance_to(_anchors[role])
 		if separation<distance:best=role;distance=separation
