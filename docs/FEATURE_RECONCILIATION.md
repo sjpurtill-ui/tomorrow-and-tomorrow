@@ -1,4 +1,26 @@
-## October 14 — Living People and work assignment (INTEGRATED)
+## October 14 — Painted living People screen (INTEGRATED)
+
+Runtime `72698e91`, journey `00da5360`, replaces the rejected sparse geometry and
+large overlays with a modular painted village and compact area-linked readings.
+Actual fabric determines building materials, roofs, size, condition and active
+construction. Trees, paths, yards, smoke and bounded moving people enrich the
+settlement; era-appropriate clothing uses existing knowledge and supply evidence.
+Selecting a work area zooms to it. Current/draft consequences and food shortage
+or protection information stay in the scene beside assignment controls.
+
+The three-agent implement/critique/revise loop corrected visual defects found in
+actual captures, including a foreground crown hiding the mature workshop.
+Final independent reviews accept both Night and Daylight, wide and narrow.
+58 distinct tests pass; final native journeys pass 328 checks with 32 captures,
+and the real-shortage fixture passes with 15 more captures. Full evidence and
+source commits are in `docs/INTEGRATION_STATUS.md`. No simulation, command,
+population-authority or save-schema changes. Main is verified remotely before
+the canonical fast-forward; no running player/editor is restarted.
+
+This supersedes the visual acceptance of the functional checkpoint below.
+Other popup families are not declared complete under the later graphical request.
+
+## October 14 — Living People and work assignment (historical functional checkpoint)
 
 Runtime code `4c907b5dade7d783cb137717f38063ef2aeab02d` adds a spatial People
 screen: nine work destinations on the actual settlement, camera focus into the

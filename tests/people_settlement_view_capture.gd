@@ -39,17 +39,32 @@ func _ready()->void:
 		var kinds:Dictionary={}
 		for plot:Dictionary in data.plots:
 			var kind:=String(plot.get("form",""));kinds[kind]=int(kinds.get(kind,0))+1
+		var painted:=0
+		for child in town.model.get_children():
+			if child.has_meta("plot_id"):painted+=1
+		print("PAINTED_BUILDINGS ",painted," / ",town._building_plan.buildings.size())
+		for record:Dictionary in town._building_plan.buildings:
+			if preload("res://scripts/hud/people_settlement_art.gd").building_style(record).is_empty():
+				var plot:Dictionary=record.plot
+				print("ART_FALLBACK ",plot.get("id")," ",plot.get("form")," ",plot.get("land_use")," ",plot.get("material_family")," roof=",plot.get("roof_plan")," floors=",plot.get("storeys")," state=",plot.get("status")," damage=",plot.get("damage",{}))
+		assert(painted==town._building_plan.buildings.size(),"Representative recorded fabric has an unsupported painted form")
 		print("PEOPLE_SCENE ",year," origin=",GameState.settlement_founded_at," kinds=",kinds," meshes=",town.model.get_child_count()," ground=",town._bounds)
 		assert(before==var_to_bytes([GameState.settlement_plots,GameState.settlement_routes]),"Renderer wrote simulation records")
 		for index in 30:await get_tree().process_frame
+		# Dummy rendering cannot read back MultiMesh instance transforms.
+		if DisplayServer.get_name()!="headless":
+			var frames:=town.model.get_node_or_null("EarlyCommunalObjects/Prop_frame") as Node3D
+			if frames!=null:assert(not frames.visible,"Painted construction retains a duplicate frame")
+			if is_instance_valid(town._painted_yards):
+				for prop:Node3D in town._painted_yards.get_children():
+					var local:Vector3=town.model.to_local(prop.global_position)
+					assert(absf(local.y-town._height(Vector2(local.x,local.z))-.00006)<.000001,"Painted yard prop lost its terrain contact")
 		if sightline:
-			var woodland:MultiMeshInstance3D=town.model.get_node("ActualSeededWoodland")
-			var tree_data:=var_to_bytes(woodland.multimesh.buffer)
-			var crown_centers:Array[Vector3]=[]
-			for lobe in 3:
-				var custom:=woodland.multimesh.get_instance_custom_data(lobe)
-				crown_centers.append(woodland.multimesh.get_instance_transform(lobe)*((Vector3(custom.r,custom.g,custom.b)-Vector3.ONE*.5)*.02))
-			assert(crown_centers[0].distance_to(crown_centers[1])<.0002 and crown_centers[0].distance_to(crown_centers[2])<.0002,"One tree had inconsistent fade centers")
+			var foliage:Array[Node3D]=[];var tree_data:Array[Transform3D]=[]
+			for child:Node in town.model.get_children():
+				if child is Node3D and bool(child.get_meta("foliage",false)):
+					foliage.append(child);tree_data.append(child.transform)
+			assert(not foliage.is_empty(),"Actual seeded foliage absent")
 			var builds:int=town.geometry_builds
 			town.focus_role("Food");await get_tree().create_timer(1.0).timeout
 			assert(not town._foliage_materials.is_empty())
@@ -57,7 +72,7 @@ func _ready()->void:
 			await _capture("early-food-sightline")
 			town.reset_view();await get_tree().create_timer(1.0).timeout
 			assert(float(town._foliage_materials[0].get_shader_parameter("focus_cutaway"))<.02)
-			assert(tree_data==var_to_bytes(woodland.multimesh.buffer),"Focus moved recorded tree positions")
+			for index in foliage.size():assert(tree_data[index]==foliage[index].transform,"Focus moved recorded tree positions")
 			assert(town.geometry_builds==builds,"Focus rebuilt settlement geometry")
 			await _capture("early-food-reset");break
 		if focus_only:

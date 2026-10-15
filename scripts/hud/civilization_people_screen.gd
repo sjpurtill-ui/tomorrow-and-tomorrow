@@ -8,6 +8,7 @@ var settlement_view:Control
 var stage:Control
 var overlay:Control
 var scene_title:Label
+var scene_toolbar:HFlowContainer
 var scope_note:Label
 var mode_note:Label
 var overview_button:Button
@@ -26,6 +27,7 @@ var focus_actions:VBoxContainer
 var focus_evidence:VBoxContainer
 var focus_title:Label
 var focus_purpose:Label
+var source_reading:Label
 var people_reading:Label
 var transfer_reading:Label
 var forecast_reading:Label
@@ -39,9 +41,12 @@ var pending_note:Label
 var _configured:=false
 var _draft_revision:Array=[]
 var preview_rebased:=false
+var _placement_key:=0
 var effect_graph:WorkEffectGraphic
 var connections:AreaConnections
 var face_shelf:Control
+var food_strip:VBoxContainer
+var food_graph:FoodCrossGraphic
 
 func setup(block:Dictionary)->void:
 	super.setup(block)
@@ -63,15 +68,15 @@ func _layout()->void:
 		face_shelf.custom_minimum_size.y=faces_row.get_combined_minimum_size().y
 
 func _build_scene()->void:
-	var heading:=HFlowContainer.new();heading.name="PeopleSituation";heading.add_theme_constant_override("h_separation",16);heading.add_theme_constant_override("v_separation",6);add_child(heading)
-	scene_title=T.make_label("",22,T.INK);scene_title.add_theme_font_override("font",T.font("ui_strong"));heading.add_child(scene_title)
-	scope_note=T.make_label("",14,T.MUTED);scope_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(scope_note)
+	var heading:=HFlowContainer.new();heading.name="PeopleSituation";heading.add_theme_constant_override("h_separation",24);heading.add_theme_constant_override("v_separation",4);add_child(heading);scene_toolbar=heading
+	scene_title=_annotation_label("",18);scene_title.add_theme_font_override("font",T.font("ui_strong"));heading.add_child(scene_title)
+	scope_note=_annotation_label("",12);scope_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(scope_note)
 	var command:=heading
-	mode_note=T.make_label("",14,T.BODY);mode_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(mode_note)
-	overview_button=_scene_button(command,"Overview",_return_overview);overview_button.visible=false
-	leaders_button=_scene_button(command,"Let our leaders assign",_delegate);leaders_button.visible=false
-	pause_button=_scene_button(command,"Pause to plan",_pause_to_plan);pause_button.name="PauseToPlan";pause_button.tooltip_text="The world keeps moving while you plan. Pause it here, then resume with the clock when ready.";pause_button.visible=false
-	pending_note=T.make_label("",14,T.AMBER_TEXT);pending_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(pending_note)
+	mode_note=_annotation_label("",12);mode_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(mode_note)
+	overview_button=_annotation_button(command,"← Overview",_return_overview);overview_button.visible=false
+	leaders_button=_annotation_button(command,"Let our leaders assign",_delegate);leaders_button.visible=false
+	pause_button=_annotation_button(command,"Pause to plan",_pause_to_plan);pause_button.name="PauseToPlan";pause_button.tooltip_text="The world keeps moving while you plan. Pause it here, then resume with the clock when ready.";pause_button.visible=false
+	pending_note=_annotation_label("",12);pending_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(pending_note)
 	stage=Control.new();stage.name="LivingPeopleScene";stage.custom_minimum_size.y=560;stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stage.clip_contents=true;add_child(stage)
 	settlement_view=_make_settlement_view();settlement_view.name="PeopleSettlementView";stage.add_child(settlement_view);settlement_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	settlement_view.connect("role_anchors_changed",_anchors_changed)
@@ -79,50 +84,73 @@ func _build_scene()->void:
 	overlay=Control.new();overlay.name="WorkAreaReadings";overlay.mouse_filter=Control.MOUSE_FILTER_IGNORE;stage.add_child(overlay);overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	connections=AreaConnections.new();overlay.add_child(connections);connections.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for role:String in ROLE_NAMES:
-		var marker:=PanelContainer.new();marker.name="WorkArea_"+role;marker.custom_minimum_size=Vector2(184,0);marker.add_theme_stylebox_override("panel",T.flat(Color.TRANSPARENT,Color.TRANSPARENT,0,0,6));overlay.add_child(marker)
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",6);marker.add_child(line)
+		var marker:=PanelContainer.new();marker.name="WorkArea_"+role;marker.add_theme_stylebox_override("panel",StyleBoxEmpty.new());overlay.add_child(marker)
+		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);marker.add_child(line)
 		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",0);line.add_child(body)
-		var title:=T.make_label(ROLE_NAMES[role],14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));title.add_theme_color_override("font_outline_color",T.PANEL_BG);title.add_theme_constant_override("outline_size",2);body.add_child(title)
-		var number:=T.make_label("",16,T.INK);number.name="Workers";number.add_theme_color_override("font_outline_color",T.PANEL_BG);number.add_theme_constant_override("outline_size",2);body.add_child(number)
-		var assign:=_scene_button(line,"Assign",focus_work.bind(role));assign.name="Assign_"+role;assign.tooltip_text="Assign workers to "+String(ROLE_NAMES[role]);assign.add_theme_font_size_override("font_size",14);assign.custom_minimum_size=Vector2(66,40)
-		var normal:=T.flat(Color(T.PANEL_BG,0.16),Color.TRANSPARENT,0,3,6)
-		assign.add_theme_stylebox_override("normal",normal);assign.add_theme_color_override("font_color",T.ACTION);assign.add_theme_color_override("font_outline_color",T.PANEL_BG);assign.add_theme_constant_override("outline_size",2)
+		var title:=_annotation_label(ROLE_NAMES[role],14);title.add_theme_font_override("font",T.font("ui_strong"));body.add_child(title)
+		var number:=_annotation_label("",16);number.name="Workers";body.add_child(number)
+		var assign:=_annotation_button(line,"Assign",focus_work.bind(role));assign.name="Assign_"+role;assign.tooltip_text="Assign workers to "+String(ROLE_NAMES[role])
 		markers[role]={"node":marker,"number":number,"button":assign}
 	_build_focus()
+	heading.reparent(overlay);heading.position=Vector2(12,8)
 	stage.resized.connect(_fit_scene)
 
 func _make_settlement_view()->Control:
 	return load("res://scripts/hud/people_settlement_view.gd").new()
 
-func _scene_surface()->StyleBoxFlat:
-	var surface:=T.flat(T.PANEL_BG,T.BORDER_SOFT,1,T.RADIUS_CONTROL,10)
-	surface.bg_color.a=0.88
-	return surface
+static func annotation_ink()->Color:
+	return T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG
+static func annotation_shade()->Color:
+	return T.PANEL_BG if T.PANEL_BG.get_luminance()<T.INK.get_luminance() else T.INK
+
+func _annotation_label(words:String,pixels:int=14)->Label:
+	var label:=T.make_label(words,pixels,annotation_ink())
+	label.add_theme_color_override("font_shadow_color",Color(annotation_shade(),0.95));label.add_theme_constant_override("shadow_offset_x",1);label.add_theme_constant_override("shadow_offset_y",1)
+	label.add_theme_color_override("font_outline_color",Color(annotation_shade(),0.65));label.add_theme_constant_override("outline_size",2)
+	return label
+
+func _annotation_button(parent:Node,words:String,callback:Callable,primary:=false)->Button:
+	var button:=_scene_button(parent,words,callback,primary)
+	button.custom_minimum_size.y=40
+	button.add_theme_font_size_override("font_size",14)
+	if not primary:
+		var normal:=T.flat(Color.TRANSPARENT,T.ACTION,0,0,3);normal.border_width_bottom=1;normal.border_color=T.ACTION
+		button.add_theme_stylebox_override("normal",normal)
+		button.add_theme_stylebox_override("hover",T.flat(Color(annotation_shade(),.35),T.ACTION,1,2,3))
+		button.add_theme_stylebox_override("pressed",T.flat(Color(annotation_shade(),.55),T.ACTION,1,2,3))
+		button.add_theme_color_override("font_color",annotation_ink());button.add_theme_color_override("font_hover_color",annotation_ink())
+		button.add_theme_color_override("font_focus_color",annotation_ink());button.add_theme_color_override("font_pressed_color",annotation_ink());button.add_theme_color_override("font_disabled_color",Color(annotation_ink(),.5))
+		button.add_theme_color_override("font_outline_color",annotation_shade());button.add_theme_constant_override("outline_size",2)
+	return button
 
 func _scene_button(parent:Node,words:String,callback:Callable,primary:=false)->Button:
 	var button:=Button.new();button.text=words;T.apply_button_style(button,primary);button.pressed.connect(callback);parent.add_child(button);return button
 
 func _build_focus()->void:
-	focus_panel=PanelContainer.new();focus_panel.name="WorkDraft";focus_panel.visible=false;focus_panel.custom_minimum_size.x=260;focus_panel.add_theme_stylebox_override("panel",_scene_surface());overlay.add_child(focus_panel)
-	focus_body=VBoxContainer.new();focus_body.add_theme_constant_override("separation",8);focus_panel.add_child(focus_body)
-	focus_title=T.make_label("",22,T.INK);focus_title.add_theme_font_override("font",T.font("ui_strong"));focus_body.add_child(focus_title)
-	focus_purpose=T.make_label("",14,T.BODY);focus_purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(focus_purpose)
+	focus_panel=PanelContainer.new();focus_panel.name="WorkDraft";focus_panel.visible=false;focus_panel.add_theme_stylebox_override("panel",StyleBoxEmpty.new());overlay.add_child(focus_panel)
+	focus_body=VBoxContainer.new();focus_body.add_theme_constant_override("separation",4);focus_panel.add_child(focus_body)
+	var identity:=HBoxContainer.new();identity.add_theme_constant_override("separation",10);focus_body.add_child(identity)
+	focus_title=_annotation_label("",20);focus_title.add_theme_font_override("font",T.font("ui_strong"));identity.add_child(focus_title)
+	source_reading=_annotation_label("",12);focus_body.add_child(source_reading)
+	focus_purpose=_annotation_label("");focus_purpose.visible=false;focus_body.add_child(focus_purpose)
+	people_reading=_annotation_label("",16);people_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(people_reading)
+	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);focus_body.add_child(controls)
+	decrease_button=_annotation_button(controls,"−",_step.bind(-1));decrease_button.name="DraftLess";decrease_button.custom_minimum_size.x=40
+	increase_button=_annotation_button(controls,"+",_step.bind(1));increase_button.name="DraftMore";increase_button.custom_minimum_size.x=40
+	five_button=_annotation_button(controls,"+5",_step.bind(5));five_button.name="DraftFive";five_button.custom_minimum_size.x=40
+	var step_note:=_annotation_label("1% per step",12);step_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(step_note)
+	transfer_reading=_annotation_label("");transfer_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(transfer_reading)
+	risk_reading=_annotation_label("");risk_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;risk_reading.add_theme_color_override("font_color",annotation_ink().lerp(T.ACTION,.45));focus_body.add_child(risk_reading)
+	var commands:=HFlowContainer.new();commands.add_theme_constant_override("h_separation",10);commands.add_theme_constant_override("v_separation",4);focus_body.add_child(commands)
+	apply_button=_annotation_button(commands,"Apply assignment",_apply_draft,true);apply_button.name="ApplyWorkDraft"
+	cancel_button=_annotation_button(commands,"Cancel",_cancel_draft);cancel_button.name="CancelWorkDraft"
 	focus_actions=focus_body
-	evidence_panel=PanelContainer.new();evidence_panel.name="WorkConsequences";evidence_panel.visible=false;evidence_panel.add_theme_stylebox_override("panel",_scene_surface());overlay.add_child(evidence_panel)
-	focus_evidence=VBoxContainer.new();focus_evidence.add_theme_constant_override("separation",6);evidence_panel.add_child(focus_evidence)
-	people_reading=T.make_label("",20,T.INK);people_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_actions.add_child(people_reading)
-	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",6);focus_actions.add_child(controls)
-	decrease_button=_scene_button(controls,"−",_step.bind(-1));decrease_button.name="DraftLess";decrease_button.custom_minimum_size.x=44
-	increase_button=_scene_button(controls,"+",_step.bind(1));increase_button.name="DraftMore";increase_button.custom_minimum_size.x=44
-	five_button=_scene_button(controls,"+5",_step.bind(5));five_button.name="DraftFive";five_button.custom_minimum_size.x=44
-	var step_note:=T.make_label("1% of workers per step",14,T.MUTED);step_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;focus_actions.add_child(step_note)
-	transfer_reading=T.make_label("",14,T.BODY);transfer_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_actions.add_child(transfer_reading)
+	evidence_panel=PanelContainer.new();evidence_panel.name="WorkConsequences";evidence_panel.visible=false;evidence_panel.add_theme_stylebox_override("panel",StyleBoxEmpty.new());overlay.add_child(evidence_panel)
+	focus_evidence=VBoxContainer.new();focus_evidence.add_theme_constant_override("separation",3);evidence_panel.add_child(focus_evidence)
 	effect_graph=WorkEffectGraphic.new();effect_graph.name="LikelyWorkEffects";focus_evidence.add_child(effect_graph)
-	forecast_reading=T.make_label("",16,T.INK);forecast_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_evidence.add_child(forecast_reading)
-	risk_reading=T.make_label("",14,T.AMBER_TEXT);risk_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_actions.add_child(risk_reading)
-	var commands:=HFlowContainer.new();commands.add_theme_constant_override("h_separation",8);commands.add_theme_constant_override("v_separation",6);focus_actions.add_child(commands)
-	apply_button=_scene_button(commands,"Apply assignment",_apply_draft,true);apply_button.name="ApplyWorkDraft"
-	cancel_button=_scene_button(commands,"Cancel",_cancel_draft);cancel_button.name="CancelWorkDraft"
+	forecast_reading=_annotation_label("");forecast_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_evidence.add_child(forecast_reading)
+	food_strip=VBoxContainer.new();food_strip.name="FoodCrossEffect";food_strip.add_theme_constant_override("separation",3);overlay.add_child(food_strip)
+	food_graph=FoodCrossGraphic.new();food_graph.name="FoodCrossEffectDiagram";food_strip.add_child(food_graph)
 
 func _fill_scene(scene:Dictionary)->void:
 	if settlement_view==null:return
@@ -174,6 +202,14 @@ func focus_work(role:String)->void:
 	for line:Dictionary in impact.get("lines",[]):details.append("%s: %s. %s" % [line.get("label",""),line.get("value",""),line.get("words","")])
 	focus_purpose.tooltip_text="\n".join(details)
 	_refresh_focus()
+	_focus_assignment.call_deferred()
+
+func _focus_assignment()->void:
+	# Opening an area hides its Assign button. Carry keyboard focus into the
+	# visible controls, without disturbing a reader already working in them.
+	if active_role=="" or get_viewport().gui_get_focus_owner()!=null:return
+	for button:Button in [decrease_button,increase_button,overview_button]:
+		if button.is_visible_in_tree() and not button.disabled:button.grab_focus();return
 
 func _step(points:int)->void:
 	if draft.is_empty() or active_role=="":return
@@ -188,12 +224,12 @@ func _evaluate()->void:
 func _refresh_focus()->void:
 	if focus_panel==null:return
 	var focused:=active_role!=""
-	focus_panel.visible=focused;evidence_panel.visible=focused;overview_button.visible=focused
+	focus_panel.visible=focused;evidence_panel.visible=focused;overview_button.visible=focused;food_strip.visible=focused
 	for role:String in markers:(markers[role].node as Control).visible=not focused
 	var commands:Array=draft.get("commands",[])
 	pending_note.text=("Updated preview · review before Apply" if preview_rebased else "Draft changes · not applied") if not commands.is_empty() else ""
 	if not focused:return
-	focus_title.text=String(ROLE_NAMES.get(active_role,active_role))
+	focus_title.text=String(ROLE_NAMES.get(active_role,active_role));focus_title.tooltip_text=focus_purpose.tooltip_text
 	var now:=0
 	for task:Dictionary in data.get("labor",{}).get("tasks",[]):
 		if String(task.id)==active_role:now=int(task.count);break
@@ -206,16 +242,20 @@ func _refresh_focus()->void:
 		if String(change.get("role",""))==active_role:continue
 		transfers.append("%s %d → %d" % [String(change.role),int(change.before),int(change.after)])
 	transfer_reading.text="Requested: "+" · ".join(transfers) if not transfers.is_empty() else ""
+	transfer_reading.visible=not transfers.is_empty()
 	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")),bool(draft.get("has_changes",not commands.is_empty())))
-	forecast_reading.text=_forecast_words()
+	forecast_reading.text=_forecast_words();forecast_reading.visible=not forecast_reading.text.is_empty()
 	var warnings:=_warning_words()
 	var food:Dictionary=forecast.get("after",{}).get("food",{})
-	if float(food.get("net",0))<0 and String(food.get("hunger_risk","none"))=="none":warnings.append("Stores fall by %.1f rations/day at today’s conditions." % -float(food.net))
+	if float(food.get("net",0))<0 and String(food.get("hunger_risk","none"))=="none":warnings.append("Food stores fall %.1f rations/day." % -float(food.net))
 	if draft_stale:warnings.insert(0,"Conditions changed while you planned. Refresh this preview before applying.")
 	elif not bool(forecast.get("ok",false)):warnings.insert(0,String(forecast.get("reason","A forecast is not available yet.")))
-	risk_reading.text="\n".join(warnings)
+	risk_reading.text=" · ".join(warnings);risk_reading.visible=not warnings.is_empty()
+	_update_food_strip(not commands.is_empty())
 	apply_button.text="Refresh preview" if draft_stale else ("Apply assignment" if bool(data.get("labor",{}).get("manual",false)) else "Take control & apply")
 	apply_button.disabled=not draft_stale and (commands.is_empty() or not bool(forecast.get("ok",false)))
+	apply_button.visible=draft_stale or not commands.is_empty()
+	cancel_button.visible=not commands.is_empty()
 	cancel_button.disabled=commands.is_empty()
 	var normalized:Dictionary=preload("res://scripts/manual_work.gd").percents(draft.get("shares",{})) if not draft.is_empty() else {}
 	decrease_button.disabled=draft.is_empty() or int(normalized.get(active_role,0))<=0
@@ -261,6 +301,11 @@ func _brief_warning(warning:Dictionary)->String:
 		"safeguard":return "Food protection overrides part of this draft."
 	return String(warning.get("text",""))
 
+func _update_food_strip(changed:bool)->void:
+	food_strip.visible=active_role!="" and (changed or active_role=="Food" or risk_reading.visible)
+	food_graph.show_food(forecast,changed)
+	food_graph.tooltip_text=effect_graph.tooltip_text+"\n90-day path: captured current conditions; known seasonal food changes are included."
+
 func _forecast_words()->String:
 	if forecast.is_empty():return ""
 	var new_food:Dictionary=forecast.get("after",{}).get("food",{})
@@ -268,7 +313,7 @@ func _forecast_words()->String:
 	if active_role=="Extraction":return "Output is not forecast. "+String(forecast.get("after",{}).get("materials",{}).get("reason","It also depends on deposits, carrying and demand."))
 	if active_role=="Crafting":return "Goods output is not forecast; it also depends on supplies and demand."
 	if active_role=="Logistics" and not bool(forecast.get("after",{}).get("water",{}).get("known",false)):return "Water collection is not measured yet. Food assumes today’s conditions."
-	return "Estimate with today’s conditions held steady."
+	return ""
 
 func _apply_draft()->void:
 	if draft.is_empty():return
@@ -305,7 +350,10 @@ func _pause_to_plan()->void:
 	if callback is Callable and callback.is_valid():callback.call()
 
 func _return_overview()->void:
+	var previous:=active_role
+	var return_focus:=get_viewport().gui_get_focus_owner()!=null
 	active_role="";settlement_view.call("reset_view");_refresh_focus()
+	if return_focus and markers.has(previous):(markers[previous].button as Button).grab_focus.call_deferred()
 
 func _anchors_changed(next:Dictionary)->void:
 	anchors=next;_fit_scene()
@@ -321,44 +369,91 @@ func _fit_scene()->void:
 			break
 		ancestor=ancestor.get_parent()
 	stage.custom_minimum_size.y=clampf(minf(width*0.66,get_viewport_rect().size.y-top-18),420,760)
-	var occupied:Array[Rect2]=[]
+	scene_toolbar.size.x=width-24
+	var toolbar_height:=scene_toolbar.get_combined_minimum_size().y+16
+	var occupied:Array[Rect2]=[Rect2(Vector2.ZERO,Vector2(width,toolbar_height))]
 	var lines:Array=[]
 	var anchor_info:Dictionary=settlement_view.call("role_anchor_metadata") if settlement_view.has_method("role_anchor_metadata") else {}
+	var obstacles:Array[Rect2]=[]
+	if settlement_view.has_method("annotation_obstacles"):obstacles.assign(settlement_view.call("annotation_obstacles"))
+	# The private camera publishes every frame. Repack only after a visible
+	# pixel/layout change, rather than testing every label against every tree
+	# while the village is idle.
+	var geometry:Array=[Vector2i(stage.size),active_role,toolbar_height,focus_panel.get_combined_minimum_size(),evidence_panel.get_combined_minimum_size(),food_strip.visible,food_strip.get_combined_minimum_size()]
+	for role:String in markers:geometry.append([Vector2i(anchors.get(role,Vector2.ZERO)),(markers[role].node as Control).get_combined_minimum_size(),anchor_info.get(role,{}).get("physical",false),anchor_info.get(role,{}).get("plot_ids",[])])
+	for obstacle:Rect2 in obstacles:geometry.append(Rect2i(obstacle))
+	var key:=hash(geometry)
+	if key==_placement_key:return
+	_placement_key=key
 	for role:String in markers:
+		if active_role!="":break # hidden overview labels need no packing during a focus tween
 		var marker:Control=markers[role].node
 		(markers[role].button as Button).text="Assign workers" if width>=1100 else "Assign"
 		marker.size=marker.get_combined_minimum_size()
 		var point:Vector2=anchors.get(role,Vector2(width*0.5,stage.size.y*0.5))
-		var wanted:=point+Vector2(10,-marker.size.y*0.5)
-		wanted.x=clampf(wanted.x,8,maxf(8,width-marker.size.x-8));wanted.y=clampf(wanted.y,8,maxf(8,stage.size.y-marker.size.y-8))
-		var rect:=Rect2(wanted,marker.size)
-		for attempt in 18:
-			var collision:=false
-			for other:Rect2 in occupied:
-				if rect.intersects(other.grow(4)):collision=true;break
-			if not collision:break
-			rect.position.y+=marker.size.y+6
-			if rect.end.y>stage.size.y-8:rect.position.y=8;rect.position.x=maxf(8,rect.position.x-marker.size.x-12)
+		var rect:=_annotation_rect(point,marker.size,occupied,Rect2(Vector2(12,toolbar_height+8),Vector2(width-24,stage.size.y-toolbar_height-20)),ROLE_NAMES.keys().find(role),obstacles)
 		marker.position=rect.position;occupied.append(rect)
-		if bool(anchor_info.get(role,{}).get("physical",false)):
-			lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))})
+		lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y)),"shared":not bool(anchor_info.get(role,{}).get("physical",false))})
 	if connections!=null:connections.lines=lines;connections.visible=true;connections.queue_redraw()
 	if focus_panel!=null:
 		var point:Vector2=anchors.get(active_role,Vector2(width*0.5,stage.size.y*0.5))
-		var control_width:=minf(280,width*0.32)
-		var evidence_width:=minf(340,width*0.36)
+		var control_width:=minf(310,width*.34)
+		var evidence_width:=minf(290,width*.32)
 		focus_panel.custom_minimum_size.x=control_width;focus_panel.size.x=control_width
 		evidence_panel.custom_minimum_size.x=evidence_width;evidence_panel.size.x=evidence_width
-		focus_panel.size.y=focus_panel.get_combined_minimum_size().y
-		evidence_panel.size.y=evidence_panel.get_combined_minimum_size().y
-		focus_panel.position=Vector2(clampf(point.x-control_width-70,12,maxf(12,width-control_width-12)),clampf(point.y-focus_panel.size.y*.5,12,maxf(12,stage.size.y-focus_panel.size.y-12)))
-		evidence_panel.position=Vector2(clampf(point.x+80,12,maxf(12,width-evidence_width-12)),clampf(point.y-evidence_panel.size.y*.5,12,maxf(12,stage.size.y-evidence_panel.size.y-12)))
+		focus_panel.size.y=focus_panel.get_combined_minimum_size().y;evidence_panel.size.y=evidence_panel.get_combined_minimum_size().y
+		# Attach readings to opposite edges of the actual worksite, preserving its center.
+		focus_panel.position=Vector2(clampf(point.x+70,16,maxf(16,width-control_width-16)),clampf(point.y-170,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-focus_panel.size.y-100)))
+		evidence_panel.position=Vector2(clampf(point.x-evidence_width-65,16,maxf(16,width-evidence_width-16)),clampf(point.y-95,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-evidence_panel.size.y-100)))
+		food_strip.size.x=minf(1000,width-40);food_strip.size.y=food_strip.get_combined_minimum_size().y;food_strip.position=Vector2(20,maxf(16,stage.size.y-food_strip.size.y-16))
+		if active_role!="" and not obstacles.is_empty():
+			var bottom:=food_strip.position.y-12 if food_strip.visible else stage.size.y-16
+			var safe:=Rect2(Vector2(16,toolbar_height+8),Vector2(width-32,maxf(1,bottom-toolbar_height-8)))
+			var protected:Array[Rect2]=[Rect2(point-Vector2(48,48),Vector2(96,96))]
+			focus_panel.position=_annotation_rect(point,focus_panel.size,protected,safe,0,obstacles).position
+			protected.append(focus_panel.get_rect())
+			evidence_panel.position=_annotation_rect(point,evidence_panel.size,protected,safe,4,obstacles).position
 		if active_role!="" and connections!=null:
 			connections.lines=[]
-			if bool(anchor_info.get(active_role,{}).get("physical",false)):
-				var rect:=focus_panel.get_rect()
-				connections.lines=[{"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))}]
+			var info:Dictionary=anchor_info.get(active_role,{})
+			source_reading.text="" if bool(info.get("physical",false)) else "Shared work ground"
+			source_reading.visible=not source_reading.text.is_empty()
+			for panel:Control in [focus_panel,evidence_panel]:
+				var rect:=panel.get_rect();var source:=point;var nearest:=INF
+				# The artist exposes actual parcel contours. End the quiet line on
+				# the nearest recorded edge, leaving the working image itself clear.
+				for polygon:PackedVector2Array in (info.get("polygons",[]) if bool(info.get("physical",false)) else []):
+					for vertex:Vector2 in polygon:
+						var distance:=vertex.distance_squared_to(rect.get_center())
+						if distance<nearest:nearest=distance;source=vertex
+				connections.lines.append({"from":source,"to":Vector2(clampf(source.x,rect.position.x,rect.end.x),clampf(source.y,rect.position.y,rect.end.y)),"shared":not bool(info.get("physical",false))})
 			connections.queue_redraw()
+
+## Find nearby open paper around each real worksite, rather than stacking every
+## annotation below the same shared-ground anchor. Preference is stable on resize.
+func _annotation_rect(point:Vector2,extent:Vector2,occupied:Array[Rect2],available:Rect2,index:int,obstacles:Array[Rect2]=[])->Rect2:
+	var best:=Rect2(available.position,extent);var score:=INF
+	var preferred:=float(index)*2.399963
+	for ring in [20.0,72.0,132.0,210.0,290.0]:
+		for step in 16:
+			var angle:=preferred+step*TAU/16.0
+			var direction:=Vector2.from_angle(angle)
+			var reach:=Vector2(extent.x*.5+ring,extent.y*.5+ring)
+			var at:=point+direction*reach-extent*.5
+			at.x=clampf(at.x,available.position.x,maxf(available.position.x,available.end.x-extent.x))
+			at.y=clampf(at.y,available.position.y,maxf(available.position.y,available.end.y-extent.y))
+			var candidate:=Rect2(at,extent)
+			# Distance to the nearest edge avoids penalising horizontal positions
+			# just because a label is wider than it is tall (which made stacks).
+			var edge:=Vector2(clampf(point.x,candidate.position.x,candidate.end.x),clampf(point.y,candidate.position.y,candidate.end.y))
+			var weight:float=edge.distance_squared_to(point)+step*120+ring*ring*.05
+			if candidate.has_point(point):weight+=100000
+			for obstacle:Rect2 in obstacles:
+				if candidate.intersects(obstacle):weight+=180000*candidate.intersection(obstacle).get_area()/maxf(1,candidate.get_area())
+			for other:Rect2 in occupied:
+				if candidate.intersects(other.grow(8)):weight+=10000000+candidate.intersection(other.grow(8)).get_area()*100
+			if weight<score:score=weight;best=candidate
+	return best
 
 func view_state()->Dictionary:
 	# A preview contains detached system/catalog snapshots. Dock memory retains
@@ -398,32 +493,41 @@ class AreaConnections extends Control:
 			var start:Vector2=line.from;var finish:Vector2=line.to
 			if start.distance_to(finish)<8:continue
 			var elbow:=Vector2(finish.x,start.y)
-			draw_polyline(PackedVector2Array([start,elbow,finish]),T.PANEL_BG,2,true)
-			draw_polyline(PackedVector2Array([start,elbow,finish]),Color(T.ACTION,0.6),1,true)
-			draw_circle(start,2,T.ACTION)
+			var shared:=bool(line.get("shared",false))
+			draw_polyline(PackedVector2Array([start,elbow,finish]),Color(T.PANEL_BG,.3 if shared else .7),2 if shared else 3,true)
+			var cream:=T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG
+			if shared:
+				draw_dashed_line(start,elbow,Color(cream,.55),1.25,5,true);draw_dashed_line(elbow,finish,Color(cream,.55),1.25,5,true)
+			else:draw_polyline(PackedVector2Array([start,elbow,finish]),Color(cream,.95),1.5,true)
+			draw_circle(start,2.5,(T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG))
 
 class WorkEffectGraphic extends Control:
+	static func annotation_ink()->Color:
+		return T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG
+	static func annotation_shade()->Color:
+		return T.PANEL_BG if T.PANEL_BG.get_luminance()<T.INK.get_luminance() else T.INK
+	static func annotation_accent()->Color:
+		# The scene stays dark green in either appearance; Daylight's brick
+		# button fill needs lighter ink when it becomes a thin plot or caption.
+		return T.ACTION.lerp(annotation_ink(),.45) if T.INK.get_luminance()<T.PANEL_BG.get_luminance() else T.ACTION
 	var readings:Array=[]
-	var food_path:Array=[]
-	var food_change:=""
 	var comparing:=false
 	func _init()->void:
-		custom_minimum_size=Vector2(260,72);mouse_filter=Control.MOUSE_FILTER_IGNORE
+		custom_minimum_size=Vector2(260,72);mouse_filter=Control.MOUSE_FILTER_PASS
 	func show_forecast(result:Dictionary,role:String,settlement_id:String="",has_changes:=false)->void:
-		readings.clear();food_path.clear();food_change="";comparing=has_changes
+		readings.clear();comparing=has_changes
 		var before:Dictionary=result.get("before",{});var after:Dictionary=result.get("after",{})
 		var old_food:Dictionary=before.get("food",{});var food:Dictionary=after.get("food",{})
 		if food.has("net"):
-			food_change="Needs %.1f → %.1f/day\nStores %+.1f → %+.1f rations/day" % [float(old_food.get("required",0)),float(food.get("required",0)),float(old_food.get("net",0)),float(food.net)] if comparing else "Needs %.1f/day\nStores %+.1f rations/day" % [float(food.get("required",0)),float(food.net)]
 			tooltip_text="Food eaten %.1f → %.1f; spoiled %.1f → %.1f rations/day. Grey shows current work; coral shows this draft." % [float(old_food.get("eaten",0)),float(food.get("eaten",0)),float(old_food.get("spoilage",0)),float(food.get("spoilage",0))]
 		if food.has("production"):readings.append({"label":"Food each day","before":float(old_food.get("production",0)),"after":float(food.production),"need":float(food.get("required",0)),"unit":"rations"})
 		if role=="Knowledge":
 			var old:Dictionary=before.get("research",{});var next:Dictionary=after.get("research",{})
 			if next.has("effective_work"):
 				var prior:=float(old.get("effective_work",0));var proposed:=float(next.effective_work)
-				var words:="%+.0f%% effort · %d teams" % [(proposed/prior-1)*100,int(next.get("teams",0))] if prior>0 else "%d teams · no earlier work capacity" % int(next.get("teams",0))
+				var words:="%d → %d teams · %+.0f%% effort" % [int(old.get("teams",0)),int(next.get("teams",0)),(proposed/prior-1)*100] if prior>0 else "%d → %d teams · work can begin" % [int(old.get("teams",0)),int(next.get("teams",0))]
 				if not comparing:words="%d teams · current supplies" % int(next.get("teams",0))
-				readings.append({"label":"Research pace · current supplies","before":prior,"after":proposed,"words":words,"unit":""})
+				readings.append({"label":"Research pace · current supplies","before":prior,"after":proposed,"words":words,"unit":"","current_caption":"100%" if prior>0 else "0%","draft_caption":"%.0f%%"%(proposed/prior*100) if prior>0 else "new"})
 		elif role=="Construction":
 			var old:=_housing(before,settlement_id);var next:=_housing(after,settlement_id)
 			if bool(next.get("building",false)) and float(next.get("work_per_day",0))>0 and float(next.get("days_left",-1))>=0:
@@ -439,57 +543,72 @@ class WorkEffectGraphic extends Control:
 		elif role!="Food":
 			var old:Dictionary=before.get("effective_workers",{});var next:Dictionary=after.get("effective_workers",{})
 			if next.has(role):readings.append({"label":"Effective work crew","before":float(old.get(role,0)),"after":float(next[role]),"unit":"worker equivalents"})
-		if food.has("stock"):
-			food_path.append({"day":0,"before":float(old_food.get("stock",0)),"after":float(food.stock)})
-			for day:int in [30,90]:
-				var old:Dictionary=old_food.get("forecast%d"%day,{});var next:Dictionary=food.get("forecast%d"%day,{})
-				if old.has("ending_rations") and next.has("ending_rations"):food_path.append({"day":day,"before":float(old.ending_rations),"after":float(next.ending_rations)})
-		custom_minimum_size.y=readings.size()*64.0+(38 if food_change!="" else 0)+(112 if food_path.size()>1 else 0);visible=not readings.is_empty();queue_redraw()
+		if role!="Food" and not readings.is_empty():readings.pop_front()
+		custom_minimum_size.y=readings.size()*68.0+(18 if role=="Food" else 0);visible=not readings.is_empty();queue_redraw()
 	func _housing(plan:Dictionary,settlement_id:String)->Dictionary:
 		var construction:Dictionary=plan.get("construction",{})
 		if not (construction.get("housing",{}) as Dictionary).is_empty():return construction.housing
 		for town:Dictionary in construction.get("towns",[]):
 			if String(town.get("id",""))==settlement_id:return town.get("construction",{}).get("housing",{})
 		return {}
+	func _say(font:Font,at:Vector2,words:String,pixels:int,ink:Color)->void:
+		draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,2,annotation_shade())
+		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,ink)
 	func _draw()->void:
 		var font:=T.font("ui");var strong:=T.font("ui_strong")
 		for index in readings.size():
-			var reading:Dictionary=readings[index];var y:=index*64.0
+			var reading:Dictionary=readings[index];var y:=index*68.0
 			var before:=float(reading.before);var after:=float(reading.after);var need:=float(reading.get("need",0))
 			var scale:=maxf(1,maxf(maxf(before,after),need))*1.05
-			var ink:=T.RED_TEXT if need>0 and after<need else (T.AMBER_TEXT if after<before else T.GREEN_TEXT)
-			if bool(reading.get("lower_better",false)):ink=T.GREEN_TEXT if after<=before else T.AMBER_TEXT
-			draw_string(strong,Vector2(0,y+15),String(reading.label),HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK)
-			draw_string(font,Vector2(0,y+34),String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit] if comparing else "%.1f %s" % [after,reading.unit])),HORIZONTAL_ALIGNMENT_LEFT,-1,14,ink)
-			draw_rect(Rect2(0,y+43,size.x,12),T.TRACK)
-			if comparing:draw_rect(Rect2(0,y+43,size.x*before/scale,4),T.MUTED)
-			draw_rect(Rect2(0,y+48,size.x*after/scale,7),ink)
+			var ink:=annotation_ink();var draft_ink:=annotation_accent()
+			_say(strong,Vector2(0,y+15),String(reading.label),14,ink)
+			var words:=String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit] if comparing else "%.1f %s" % [after,reading.unit]))
+			_say(font,Vector2(0,y+35),words,16,ink)
+			var line_width:=size.x-(105 if reading.has("current_caption") else 70)
+			if comparing:
+				draw_line(Vector2(0,y+46),Vector2(line_width*before/scale,y+46),Color(ink,.65),3,true)
+				_say(font,Vector2(line_width+6,y+50),"Current "+String(reading.get("current_caption","")),11,ink)
+			draw_line(Vector2(0,y+58),Vector2(line_width*after/scale,y+58),draft_ink if comparing else ink,3,true)
+			_say(font,Vector2(line_width+6,y+62),("Draft "+String(reading.get("draft_caption",""))) if comparing else "Current",11,draft_ink if comparing else ink)
 			if need>0:
-				var x:=size.x*need/scale;draw_line(Vector2(x,y+40),Vector2(x,y+58),T.INK,2)
-				var caption:="need %.1f" % need;var text_width:=font.get_string_size(caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-				draw_string(font,Vector2(maxf(0,size.x-text_width),y+15),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
-		var y:=readings.size()*64.0
-		if food_change!="":
-			for line:String in food_change.split("\n"):draw_string(font,Vector2(0,y+14),line,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.AMBER_TEXT if line.begins_with("Stores") and (line.contains("→ -") or line.begins_with("Stores -")) else T.BODY);y+=18
-			y+=2
-		if food_path.size()>1:_draw_food_path(y,font,strong)
-	func _draw_food_path(y:float,font:Font,strong:Font)->void:
-		var maximum:=1.0
-		for point:Dictionary in food_path:maximum=maxf(maximum,maxf(float(point.before),float(point.after)))
-		draw_string(strong,Vector2(0,y+14),"Food held · seasonal outlook",HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK)
-		var prior_before:=Vector2.ZERO;var prior_after:=Vector2.ZERO
-		for i in food_path.size():
-			var point:Dictionary=food_path[i];var x:=20+(size.x-48)*float(point.day)/90.0
-			var before:=Vector2(x,y+89-float(point.before)/maximum*30);var after:=Vector2(x,y+89-float(point.after)/maximum*30)
-			if i>0:
-				if comparing:draw_line(prior_before,before,T.MUTED,1.5,true)
-				draw_line(prior_after,after,T.ACTION,2.5,true)
-			draw_circle(after,3,T.ACTION)
-			var caption:="Now" if int(point.day)==0 else "%dd" % int(point.day)
-			draw_string(font,Vector2(x-12,y+106),caption,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.MUTED)
-			prior_before=before;prior_after=after
-		var end:Dictionary=food_path.back()
-		var words:="%s → %s rations" % [preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.before)))),preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.after))))]
-		if not comparing:words="%s rations" % preload("res://scripts/hud/era_words.gd").grouped(int(round(float(end.after))))
-		draw_string(font,Vector2(0,y+32),"At 90 days · current work → draft" if comparing else "At 90 days · current work",HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.MUTED)
-		draw_string(font,Vector2(0,y+49),words,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.BODY)
+				var x:=line_width*need/scale;draw_line(Vector2(x,y+42),Vector2(x,y+64),ink,1.5)
+				_say(font,Vector2(0,y+82),"Daily need %.1f %s"%[need,String(reading.unit)],12,ink)
+
+class FoodCrossGraphic extends WorkEffectGraphic:
+	var current:Dictionary={}
+	var proposed:Dictionary={}
+	func _init()->void:
+		custom_minimum_size=Vector2(0,96);mouse_filter=Control.MOUSE_FILTER_PASS
+	func show_food(result:Dictionary,changed:bool)->void:
+		current=result.get("before",{}).get("food",{});proposed=result.get("after",{}).get("food",{});comparing=changed;queue_redraw()
+	func _reading(key:String,signed:=false)->String:
+		var old:=float(current.get(key,0));var next:=float(proposed.get(key,0))
+		var format:="%+.1f" if signed else "%.1f"
+		return (format%old)+" → "+(format%next) if comparing and not is_equal_approx(roundf(old*10),roundf(next*10)) else format%next
+	func _draw()->void:
+		if proposed.is_empty():return
+		var font:=T.font("ui");var strong:=T.font("ui_strong");var ink:=annotation_ink()
+		var flow_width:=size.x*.59;var col:=flow_width/3.0
+		_say(strong,Vector2(0,14),"Food · rations each day",13,ink)
+		var captions:=["Produced","Needed","Store change"]
+		for i in 3:
+			var key:=String(["production","required","net"][i]);var x:=col*i
+			_say(font,Vector2(x,36),captions[i],12,ink)
+			_say(strong,Vector2(x,58),_reading(key,i==2),16,annotation_accent() if i==2 and float(proposed.get("net",0))<0 else ink)
+			if i<2:_say(font,Vector2(x+col-20,53),"→",16,ink)
+		_say(font,Vector2(0,83),"%s rations held now · net includes spoilage"%preload("res://scripts/hud/era_words.gd").grouped(roundi(float(proposed.get("stock",0)))),12,ink)
+		var x:=flow_width+16;var chart_width:=maxf(80,size.x-x-110)
+		_say(strong,Vector2(x,14),"Rations after 90 days",13,ink)
+		var values:Array=[];var maximum:=1.0
+		for day in [0,30,90]:
+			var old:=float(current.get("stock",0)) if day==0 else float(current.get("forecast%d"%day,{}).get("ending_rations",0))
+			var next:=float(proposed.get("stock",0)) if day==0 else float(proposed.get("forecast%d"%day,{}).get("ending_rations",0))
+			values.append(Vector2(old,next));maximum=maxf(maximum,maxf(old,next))
+		for draft_line:bool in ([false,true] if comparing else [true]):
+			var points:=PackedVector2Array()
+			for i in 3:points.append(Vector2(x+chart_width*[0.0,1.0/3,1.0][i],72-(values[i].y if draft_line else values[i].x)/maximum*42))
+			var color:=annotation_accent() if comparing and draft_line else ink
+			draw_polyline(points,Color(annotation_shade(),.7),4,true);draw_polyline(points,color,2,true)
+			var ending:float=values[2].y if draft_line else values[2].x
+			_say(font,Vector2(x+chart_width+8,58 if draft_line else 38),("Draft " if comparing and draft_line else "Current ")+"%.0f"%ending,12,color)
+		_say(font,Vector2(x,87),"0",11,ink);_say(font,Vector2(x+chart_width-16,87),"90d",11,ink)
