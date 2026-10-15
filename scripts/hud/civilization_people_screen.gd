@@ -113,6 +113,7 @@ func _build_scene()->void:
 		var pill:=Button.new();pill.name="WorkArea_"+role;pill.text=String(short_names[role]);pill.custom_minimum_size.y=28
 		pill.add_theme_font_size_override("font_size",12);pill.add_theme_font_override("font",T.font("ui_strong"))
 		pill.add_theme_color_override("font_color",annotation_ink());pill.add_theme_color_override("font_hover_color",annotation_ink());pill.add_theme_color_override("font_pressed_color",annotation_ink())
+		pill.add_theme_color_override("font_focus_color",annotation_ink())
 		var style:=_reading_surface();style.set_content_margin_all(6);style.set_corner_radius_all(12);pill.add_theme_stylebox_override("normal",style)
 		var hover:=style.duplicate();hover.bg_color=Color("29414af5");pill.add_theme_stylebox_override("hover",hover);pill.add_theme_stylebox_override("pressed",hover)
 		pill.pressed.connect(focus_work.bind(role));overlay.add_child(pill)
