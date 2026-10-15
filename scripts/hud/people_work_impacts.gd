@@ -60,29 +60,29 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 		"Food":
 			out.append(_metric("Food brought in", before.get("food", {}), after.get("food", {}), "production", "rations/day", "Harvest estimate at today's weather and working conditions.", float(after.get("food", {}).get("required", 0))))
 		"Survey":
-			out.append(_metric("Land knowledge · settles toward", old, next, "survey_target", "%", "Coverage changes over time. Better searched land improves cutting and digging.", 100))
-			out.append(_metric("Useful finds · expected average", old, next, "finds_month", "/month", "An average, not a scheduled discovery; the existing search rules determine finds."))
+			out.append(_metric("Land knowledge target", old, next, "survey_target", "%", "Coverage settles toward this level over time. Better searched land improves cutting and digging.", 100))
+			out.append(_metric("Useful finds · average", old, next, "finds_month", "/month", "An average, not a scheduled discovery; the existing search rules determine finds."))
 		"Extraction":
-			out.append(_metric("Cutting & digging capacity", before.get("effective_workers", {}), after.get("effective_workers", {}), role, "fit workers", "Effective crew after injuries and other duties. Deposits, access and carrying limit deliveries."))
+			out.append(_metric("Cutting & digging crew", before.get("effective_workers", {}), after.get("effective_workers", {}), role, "fit workers", "Effective crew after injuries and other duties. Deposits, access and carrying limit deliveries."))
 			out.append(_metric("Last measured extraction", old, next, "extracted_today", "loads/day", "Observed output before this assignment. More workers do not guarantee a proportional increase."))
 		"Crafting":
-			out.append(_metric("Making capacity · before supply limits", old, next, "making_capacity", "goods/day", "Potential household making at today's efficiency. Materials, arms work, demand and storage can reduce output."))
+			out.append(_metric("Making capacity", old, next, "making_capacity", "goods/day", "Potential household making before supply limits. Materials, arms work, demand and storage can reduce output."))
 			out.append(_metric("Room for more goods", old, next, "goods_room", "goods", "Remaining space in homes and markets; making slows when this is full."))
 		"Logistics":
 			var water: Dictionary = after.get("water", {})
 			if bool(water.get("known", false)):
-				out.append(_metric("Drinking water collected · estimate", before.get("water", {}), water, "collected", "water/day", "Compared with drinking needs; sources, rain and household collection held fixed.", float(water.get("required", 0))))
-			out.append(_metric("Fresh food spoilage prevented", old, next, "fresh_rot_cut", "%", "Reduction from carriers compared with having no carrying cover; full cover halves fresh spoilage.", 50))
-			out.append(_metric("Extra ground supplying fresh food", old, next, "harvest_reach", "%", "Carriers bring food home from further away; full cover adds one quarter to the gathering reach.", 25))
+				out.append(_metric("Drinking water · estimate", before.get("water", {}), water, "collected", "water/day", "Compared with drinking needs; sources, rain and household collection held fixed.", float(water.get("required", 0))))
+			out.append(_metric("Fresh spoilage prevented", old, next, "fresh_rot_cut", "%", "Reduction from carriers compared with having no carrying cover; full cover halves fresh spoilage.", 50))
+			out.append(_metric("Wider food-gathering reach", old, next, "harvest_reach", "%", "Carriers bring food home from further away; full cover adds one quarter to the gathering reach.", 25))
 		"Knowledge":
 			var research: Dictionary = after.get("research", {})
 			var previous: Dictionary = before.get("research", {})
-			out.append(_metric("Research work · supplied capacity", previous, research, "effective_work", "effort/day", "Work after today's goods supply limits. This is research effort, not discoveries per day."))
+			out.append(_metric("Research effort · supplied", previous, research, "effective_work", "effort/day", "Work after today's goods supply limits. This is research effort, not discoveries per day."))
 			out.append(_metric("Research teams", previous, research, "teams", "teams", "Teams that can work at the same time; each question still has its own requirements."))
-			out.append(_metric("Research supplies required", previous, research, "goods_a_day", "goods/day", "More learners use more goods. Shortages reduce the work shown above."))
+			out.append(_metric("Research supplies needed", previous, research, "goods_a_day", "goods/day", "More learners use more goods. Shortages reduce the work shown above."))
 		"Administration":
-			out.append(_metric("Care coverage · settles toward", old, next, "care_target", "%", "Carers tend newborns, mothers and the sick. Skill adjusts gradually over about 60 days; this is the staffing target.", 100))
-			out.append(_metric("Stored food spoilage prevented", old, next, "stored_rot_cut", "%", "Reduction from keepers compared with having no keeping cover; full cover prevents 40% of stored spoilage.", 40))
+			out.append(_metric("Care coverage target", old, next, "care_target", "%", "Carers tend newborns, mothers and the sick. Skill settles toward this coverage over about 60 days; care does not change instantly.", 100))
+			out.append(_metric("Stored spoilage prevented", old, next, "stored_rot_cut", "%", "Reduction from keepers compared with having no keeping cover; full cover prevents 40% of stored spoilage.", 40))
 		"Defense":
 			out.append(_metric("Home guard", old, next, "guard", "guards", "Home guard across our settlements, compared with the guard the towns need.", float(next.get("guard_need", 0))))
 			out.append(_metric("Watch equipped", old, next, "armed", "%", "The share equipped from the actual arms ledger. Assigning people does not conjure equipment.", 100))
@@ -99,7 +99,7 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 			else:
 				out.append(_metric("Home building crew", before.get("construction", {}), after.get("construction", {}), "homes", "fit workers", "Builders allocated to housing by the existing town priorities."))
 			out.append(_metric("Repair crew", before.get("construction", {}), after.get("construction", {}), "repair", "fit workers", "Workers maintaining what already stands, compared with the repair crew wanted.", float(after.get("construction", {}).get("repair_want", 0))))
-			out.append(_metric("Improving homes, roads & works", before.get("construction", {}), after.get("construction", {}), "fabric", "fit workers", "The crew left for town improvements after housing, repair and other commitments."))
+			out.append(_metric("Town improvement crew", before.get("construction", {}), after.get("construction", {}), "fabric", "fit workers", "The crew left for town improvements after housing, repair and other commitments."))
 	for entry: Dictionary in out:
 		if not entry.has("words"):
 			entry["words"] = ("%s → %s %s" % [_number(float(entry.before)), _number(float(entry.after)), entry.unit]) if comparing and not is_equal_approx(float(entry.before), float(entry.after)) else "%s %s" % [_number(float(entry.after)), entry.unit]

@@ -29,7 +29,7 @@ func test_care_target_is_not_presented_as_instant_health_or_death_change() -> vo
 	var result := _result()
 	result.after.work_impacts.care_target = 75.0
 	var readings := Impacts.readings(result, "Administration", "", true)
-	assert_str(readings[0].label).contains("settles toward")
+	assert_str(readings[0].label).contains("target")
 	assert_str(readings[0].words).contains("50 → 75 %")
 	assert_str(readings[0].note).contains("60 days")
 	assert_bool(str(readings).contains("deaths")).is_false()
@@ -51,7 +51,7 @@ func test_capacity_and_observed_extraction_are_explicit_not_promised_output() ->
 	assert_str(readings[0].words).is_equal("6 → 9 fit workers")
 	assert_str(readings[1].label).is_equal("Last measured extraction")
 	assert_str(readings[1].words).is_equal("8.5 loads/day")
-	assert_str(Impacts.readings(result, "Crafting")[0].label).contains("before supply limits")
+	assert_str(Impacts.readings(result, "Crafting")[0].note).contains("before supply limits")
 
 func test_housing_reads_selected_town_and_does_not_compare_stopped_work_to_zero_days() -> void:
 	var result := _result()
