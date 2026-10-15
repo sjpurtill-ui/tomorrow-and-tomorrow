@@ -303,14 +303,25 @@ func _project_anchors()->void:
 	for role:String in _activity_bounds:
 		_activity_bounds[role]=(_activity_bounds[role] as Rect2).intersection(screen)
 		if (_activity_bounds[role] as Rect2).has_area():_annotation_obstacles.append(_activity_bounds[role])
+	var objects:Array[Dictionary]=[]
+	var activity:Rect2=_activity_bounds.get(focused_role,Rect2())
 	for object:MeshInstance3D in _annotation_objects:
-		if not is_instance_valid(object) or camera.is_position_behind(object.global_position):continue
+		if not is_instance_valid(object):continue
+		object.visible=true
+		if camera.is_position_behind(object.global_position):continue
 		var illustrated:Vector2=object.get_meta("illustrated_size",Vector2.ZERO)
 		var base:=object.global_position;var side:=camera.global_basis.x*illustrated.x*.5
 		var up:=camera.global_basis.y*illustrated.y
 		var rectangle:=Rect2(camera.unproject_position(base-side),Vector2.ZERO)
 		for point:Vector3 in [base+side,base-side+up,base+side+up]:rectangle=rectangle.expand(camera.unproject_position(point))
-		if rectangle.intersects(screen) and rectangle.size.x>8:_annotation_obstacles.append(rectangle.intersection(screen))
+		if rectangle.intersects(screen) and rectangle.size.x>8:
+			objects.append({"node":object,"rect":rectangle.intersection(screen),"role":String(object.get_meta("work_role",""))})
+	# Cut away a neighbouring billboard only when it hides the selected crew.
+	# The selected worksite and every representative remain in the scene.
+	for object:Dictionary in objects:
+		var obscures:bool=not focused_role.is_empty() and activity.has_area() and not String(object.role).is_empty() and object.role!=focused_role and (object.rect as Rect2).intersects(activity.grow(14))
+		(object.node as MeshInstance3D).visible=not obscures
+		if not obscures:_annotation_obstacles.append(object.rect)
 	role_anchors_changed.emit(_anchors.duplicate())
 
 func _visibility_changed()->void:
