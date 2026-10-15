@@ -466,6 +466,8 @@ func _fit_scene()->void:
 			var bottom:=food_strip.position.y-12 if food_strip.visible else stage.size.y-16
 			var safe:=Rect2(Vector2(16,toolbar_height+8),Vector2(width-32,maxf(1,bottom-toolbar_height-8)))
 			var protected:Array[Rect2]=[Rect2(point-Vector2(48,48),Vector2(96,96))]
+			var activity:Rect2=anchor_info.get(active_role,{}).get("activity_bounds",Rect2())
+			if activity.has_area():protected.append(activity.grow(10))
 			focus_panel.position=_annotation_rect(point,focus_panel.size,protected,safe,0,obstacles).position
 			protected.append(focus_panel.get_rect())
 			evidence_panel.position=_annotation_rect(point,evidence_panel.size,protected,safe,4,obstacles).position
@@ -519,7 +521,10 @@ func view_state()->Dictionary:
 func restore_view_state(saved:Dictionary)->void:
 	super.restore_view_state(saved)
 	var plan:Dictionary=saved.get("work_plan",{})
-	if not (plan.get("commands",[]) as Array).is_empty():
+	# A live dock refresh restores memory after updating this same widget.
+	# Retain its stale flag and draft; only a new reader needs to replay memory.
+	var retained:bool=not draft.is_empty() and int(plan.get("token",0))==int(draft.get("token",0)) and plan.get("commands",[])==draft.get("commands",[])
+	if not retained and not (plan.get("commands",[]) as Array).is_empty():
 		var fresh:Variant=_api("capture")
 		if fresh is Dictionary and bool(fresh.get("ok",false)):
 			draft=fresh;_draft_revision=data.get("workforce_revision",[]).duplicate(true)

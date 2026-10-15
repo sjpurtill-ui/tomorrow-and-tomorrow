@@ -23,6 +23,7 @@ var _key:int=0
 var _zones:Dictionary={}
 var _anchors:Dictionary={}
 var _activity_bounds:Dictionary={}
+var _site_bounds:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
 var _foliage_materials:Array[ShaderMaterial]=[]
 var _foliage_cut:=0.0
@@ -288,7 +289,7 @@ func _project_anchors()->void:
 		var at:Vector2=_zones[role].center
 		_anchors[role]=camera.unproject_position(_point(at,.003))
 	_annotation_obstacles.clear()
-	_activity_bounds.clear()
+	_activity_bounds.clear();_site_bounds.clear()
 	var screen:=Rect2(Vector2.ZERO,size)
 	# Protect destination activity as a stable area while people travel; labels
 	# should not chase the walkers or cover the work they are about to do.
@@ -315,13 +316,15 @@ func _project_anchors()->void:
 		var rectangle:=Rect2(camera.unproject_position(base-side),Vector2.ZERO)
 		for point:Vector3 in [base+side,base-side+up,base+side+up]:rectangle=rectangle.expand(camera.unproject_position(point))
 		if rectangle.intersects(screen) and rectangle.size.x>8:
-			objects.append({"node":object,"rect":rectangle.intersection(screen),"role":String(object.get_meta("work_role",""))})
-	# Cut away a neighbouring billboard only when it hides the selected crew.
+			objects.append({"node":object,"rect":rectangle.intersection(screen),"role":String(object.get_meta("work_role","")),"foliage":bool(object.get_meta("foliage",false))})
+	# Cut away neighbouring scenery only when it hides the selected crew.
 	# The selected worksite and every representative remain in the scene.
 	for object:Dictionary in objects:
-		var obscures:bool=not focused_role.is_empty() and activity.has_area() and not String(object.role).is_empty() and object.role!=focused_role and (object.rect as Rect2).intersects(activity.grow(14))
+		var obscures:bool=not focused_role.is_empty() and activity.has_area() and (bool(object.foliage) or not String(object.role).is_empty()) and object.role!=focused_role and (object.rect as Rect2).intersects(activity.grow(14))
 		(object.node as MeshInstance3D).visible=not obscures
-		if not obscures:_annotation_obstacles.append(object.rect)
+		if not obscures:
+			_annotation_obstacles.append(object.rect)
+			if not String(object.role).is_empty():_site_bounds[object.role]=object.rect
 	role_anchors_changed.emit(_anchors.duplicate())
 
 func _visibility_changed()->void:
@@ -391,6 +394,8 @@ func _clamp_navigation()->void:
 	_desired_target=_point(ground,.001)
 
 func _select_area_at(at:Vector2)->void:
+	for role:String in _site_bounds:
+		if (_site_bounds[role] as Rect2).has_point(at):role_selected.emit(role);return
 	var best:="";var distance:=42.0
 	# The visible work area is clickable, not just its invisible center point.
 	# Only dedicated parcels qualify; shared ground keeps the explicit labels.
