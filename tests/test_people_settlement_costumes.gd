@@ -91,3 +91,45 @@ func test_painterly_material_preserves_private_visibility_and_supply_contract() 
 	assert_float(material.get_shader_parameter("garment_supply")).is_equal(0.25)
 	assert_bool(material.get_shader_parameter("map_people_visible")==true).is_false()
 	assert_object(Ink.material("person").shader).is_same(original)
+
+func test_motion_uses_complete_walking_and_carried_body_frames() -> void:
+	var motion := Costumes.motion_uniforms()
+	for prefix:String in ["walk", "carry"]:
+		assert_bool(motion[prefix+"_atlas_ready"]).is_true()
+		var texture:Texture2D=motion[prefix+"_atlas"]
+		assert_object(texture).is_not_null()
+		if texture==null:continue
+		var frames:PackedVector4Array=motion[prefix+"_frames"]
+		assert_int(frames.size()).is_equal(16)
+		var source:=texture.get_image()
+		for index in frames.size():
+			var region:=frames[index]
+			assert_bool(region.x>=0 and region.y>=0 and region.x+region.z<=1 and region.y+region.w<=1).is_true()
+			var start:=Vector2i(roundi(float(index%4)*source.get_width()/4),roundi(float(index/4)*source.get_height()/4))
+			var end:=Vector2i(roundi(float(index%4+1)*source.get_width()/4),roundi(float(index/4+1)*source.get_height()/4))
+			assert_bool(source.get_region(Rect2i(start,end-start)).get_used_rect().has_area()).override_failure_message("Missing %s phase %d"%[prefix,index]).is_true()
+
+func test_motion_registration_keeps_feet_on_ground_and_head_stable() -> void:
+	var motion:=Costumes.motion_uniforms()
+	for prefix:String in ["walk", "carry"]:
+		var texture:Texture2D=motion[prefix+"_atlas"]
+		if texture==null:continue
+		var source:=texture.get_image()
+		var registrations:PackedVector4Array=motion[prefix+"_registration"]
+		assert_int(registrations.size()).is_equal(16)
+		for index in registrations.size():
+			var start:=Vector2i(roundi(float(index%4)*source.get_width()/4),roundi(float(index/4)*source.get_height()/4))
+			var end:=Vector2i(roundi(float(index%4+1)*source.get_width()/4),roundi(float(index/4+1)*source.get_height()/4))
+			var size:=end-start;var top:=size.y;var feet:=0;var head:=0.0;var samples:=0
+			for y in size.y:
+				for x in size.x:
+					if source.get_pixel(start.x+x,start.y+y).a<.5:continue
+					top=mini(top,y);feet=maxi(feet,y)
+					if y<size.y*.25:head+=x;samples+=1
+			var registration:=registrations[index]
+			var shown_feet:=.985+(float(feet)/size.y-registration.y)*registration.z
+			var shown_head:=.60+(head/maxi(1,samples)/size.x-registration.x)*registration.z
+			var shown_height:=float(feet-top)/size.y*registration.z
+			assert_float(shown_feet).is_equal_approx(.985,.001)
+			assert_float(shown_head).is_equal_approx(.60,.001)
+			assert_float(shown_height).is_equal_approx(.94,.001)

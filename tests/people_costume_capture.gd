@@ -35,6 +35,7 @@ func _ready() -> void:
 		if painterly:
 			paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
 			paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
+			for parameter:String in Costumes.motion_uniforms():paint.set_shader_parameter(parameter,Costumes.motion_uniforms()[parameter])
 		paint.set_shader_parameter("map_people_visible",true)
 		paint.set_shader_parameter("min_px",9.0)
 		paint.set_shader_parameter("max_swell",1.3)
