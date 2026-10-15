@@ -52,6 +52,9 @@ var _people:MultiMeshInstance3D
 var _walks:Array[Dictionary]=[]
 var _highlight:MeshInstance3D
 var _dragged:=false
+var _drag_button:=0
+var _drag_origin:=Vector2.ZERO
+var _manual_navigation:=false
 var _yards:Node3D
 var _yard_batches:=-1
 var _people_paint:ShaderMaterial
@@ -72,6 +75,7 @@ func _ready()->void:
 func _ensure_view()->void:
 	if is_instance_valid(view):return
 	name="PeopleSettlementView";mouse_filter=Control.MOUSE_FILTER_STOP
+	focus_mode=Control.FOCUS_CLICK
 	custom_minimum_size=Vector2(240,360);size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	picture=TextureRect.new();picture.name="LivingSettlement"
 	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -109,6 +113,7 @@ func update_state(context:Dictionary)->void:
 
 func focus_role(role:String)->void:
 	if not _zones.has(role):return
+	_manual_navigation=false
 	focused_role=role
 	var zone:Dictionary=_zones[role];var at:Vector2=zone.center
 	_desired_target=_point(at)
@@ -118,6 +123,7 @@ func focus_role(role:String)->void:
 	focus_changed.emit(role)
 
 func reset_view()->void:
+	_manual_navigation=false;_drag_button=0;_dragged=false
 	focused_role="";_desired_target=_point(_overview_focus,.001);_desired_span=_overview_span()
 	if is_instance_valid(_highlight):_highlight.visible=false
 	focus_changed.emit("")
@@ -668,14 +674,14 @@ func _overview_span()->float:
 func _resize_view()->void:
 	if not is_instance_valid(view):return
 	view.size=Vector2i(maxi(1,roundi(size.x)),maxi(1,roundi(size.y)))
-	if focused_role.is_empty():_desired_span=_overview_span()
+	if focused_role.is_empty() and not _manual_navigation:_desired_span=_overview_span()
 	_position_camera();_project_anchors()
 
 func _position_camera()->void:
 	if not is_instance_valid(camera):return
 	camera.size=maxf(.015,_span)
 	var offset:=Vector3(sin(_yaw)*cos(_pitch),sin(_pitch),cos(_yaw)*cos(_pitch))
-	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
+	var distance:=maxf(.008,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
 	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
 	for material in _painted_materials:material.set_shader_parameter("anim_clock",_elapsed)
@@ -720,17 +726,80 @@ func _visibility_changed()->void:
 	if is_instance_valid(view):view.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE if is_visible_in_tree() else SubViewport.UPDATE_DISABLED
 
 func _input_view(event:InputEvent)->void:
-	if event is InputEventMouseMotion and event.button_mask&MOUSE_BUTTON_MASK_RIGHT:
-		_yaw=clampf(_yaw-event.relative.x*.003,-.78,-.42) if _painted_active else _yaw-event.relative.x*.006;_pitch=clampf(_pitch+event.relative.y*.002,.53,.70) if _painted_active else clampf(_pitch+event.relative.y*.004,.35,1.18);_dragged=true;accept_event()
-	elif event is InputEventMouseButton and event.pressed:
-		if event.button_index==MOUSE_BUTTON_WHEEL_UP:_desired_span=maxf(.025,_desired_span*.9);accept_event()
-		elif event.button_index==MOUSE_BUTTON_WHEEL_DOWN:_desired_span=minf(_overview_span()*1.8,_desired_span/ .9);accept_event()
-		elif event.button_index==MOUSE_BUTTON_LEFT:
-			var best:="";var distance:=42.0
-			for role:String in _anchors:
-				var d:float=event.position.distance_to(_anchors[role])
-				if d<distance:best=role;distance=d
-			if not best.is_empty():role_selected.emit(best)
+	if event is InputEventMouseMotion and _drag_button!=0:
+		var mask:=MOUSE_BUTTON_MASK_LEFT if _drag_button==MOUSE_BUTTON_LEFT else MOUSE_BUTTON_MASK_RIGHT
+		if not event.button_mask&mask:_drag_button=0;return
+		if event.position.distance_to(_drag_origin)>5:_dragged=true
+		if _dragged:pan_view(event.relative)
+		accept_event()
+	elif event is InputEventMouseButton:
+		if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP,MOUSE_BUTTON_WHEEL_DOWN]:
+			zoom_view(.88 if event.button_index==MOUSE_BUTTON_WHEEL_UP else 1.0/.88,event.position);accept_event()
+		elif event.button_index in [MOUSE_BUTTON_LEFT,MOUSE_BUTTON_RIGHT]:
+			if event.pressed:
+				_drag_button=event.button_index;_drag_origin=event.position;_dragged=false;grab_focus()
+			else:
+				var select:=_drag_button==MOUSE_BUTTON_LEFT and not _dragged
+				_drag_button=0
+				if select:_select_area_at(event.position)
+			accept_event()
+	elif event is InputEventPanGesture:
+		pan_view(-event.delta*20.0);accept_event()
+	elif event is InputEventMagnifyGesture:
+		zoom_view(1.0/maxf(.1,event.factor),event.position);accept_event()
+	elif event is InputEventKey and event.pressed:
+		var shifts:={KEY_LEFT:Vector2(60,0),KEY_RIGHT:Vector2(-60,0),KEY_UP:Vector2(0,60),KEY_DOWN:Vector2(0,-60)}
+		if shifts.has(event.keycode):pan_view(shifts[event.keycode]);accept_event()
+		elif event.keycode in [KEY_PLUS,KEY_EQUAL,KEY_KP_ADD]:zoom_view(.88);accept_event()
+		elif event.keycode in [KEY_MINUS,KEY_KP_SUBTRACT]:zoom_view(1.0/.88);accept_event()
+		elif event.keycode==KEY_HOME:reset_navigation();accept_event()
+
+## Artwork is painted from a fixed angle. Navigation moves over the ground;
+## it never rotates or tilts the picture into stretched cardboard silhouettes.
+func pan_view(pixels:Vector2)->void:
+	if not is_instance_valid(camera) or size.y<1:return
+	var center:=size*.5
+	var before:=_navigation_ground(center)
+	var after:=_navigation_ground(center+pixels)
+	_desired_target+=before-after
+	_clamp_navigation();_manual_navigation=true
+
+func zoom_view(factor:float,at:Vector2=Vector2(-1,-1))->void:
+	if not is_instance_valid(camera):return
+	var next:=clampf(_desired_span*factor,.012,maxf(.031,_overview_span()*1.8))
+	if at.x<0:at=size*.5
+	var ground:=_navigation_ground(at)
+	var ratio:=next/maxf(.0001,_desired_span)
+	_desired_target=ground+(_desired_target-ground)*ratio
+	_desired_span=next;_clamp_navigation();_manual_navigation=true
+
+func reset_navigation()->void:
+	if focused_role.is_empty():reset_view()
+	else:focus_role(focused_role)
+
+func _navigation_ground(at:Vector2)->Vector3:
+	var plane:=Plane(Vector3.UP,_target.y)
+	var hit:Variant=plane.intersects_ray(camera.project_ray_origin(at),camera.project_ray_normal(at))
+	return hit if hit is Vector3 else _target
+
+func _clamp_navigation()->void:
+	var reach:=_bounds.grow(_desired_span*.25)
+	var ground:=Vector2(clampf(_desired_target.x,reach.position.x,reach.end.x),clampf(_desired_target.z,reach.position.y,reach.end.y))
+	_desired_target=_point(ground,.001)
+
+func _select_area_at(at:Vector2)->void:
+	var best:="";var distance:=42.0
+	# The visible work area is clickable, not just its invisible center point.
+	# Only dedicated parcels qualify; shared ground keeps the explicit labels.
+	var metadata:=role_anchor_metadata()
+	for role:String in metadata:
+		if not bool(metadata[role].physical):continue
+		for polygon:PackedVector2Array in metadata[role].polygons:
+			if Geometry2D.is_point_in_polygon(at,polygon):role_selected.emit(role);return
+	for role:String in _anchors:
+		var separation:float=at.distance_to(_anchors[role])
+		if separation<distance:best=role;distance=separation
+	if not best.is_empty():role_selected.emit(best)
 
 const GROUND_SHADER:="""shader_type spatial;
 render_mode unshaded, cull_disabled;

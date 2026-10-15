@@ -1,6 +1,6 @@
 extends RefCounted
 ## Private People-view garments. The map's material and visibility policy stay
-## unchanged. Shared billboard placement, work poses and tool animation are reused.
+## unchanged. Billboard placement is shared; painted poses have their own motion.
 ## These are bounded illustrations of known methods, not individual issued stock.
 ## No date, population size, building tier or research-in-progress unlocks attire.
 const Ink = preload("res://scripts/map_life_ink.gd")
@@ -10,7 +10,13 @@ const RELEVANT := ["cordage", "fiber_grading", "bone_needle_sewing", "plain_weav
 const PEOPLE_ATLAS := "res://assets/ui/people/settlement-people-v1.png"
 const ATLAS_COLUMNS := 6
 const ATLAS_ROWS := 4
+const WALK_ATLAS := "res://assets/ui/people/settle-people-walk-v1.png"
+const CARRY_ATLAS := "res://assets/ui/people/settle-people-carry-v1.png"
+const WALK_COLUMNS := 4
 static var _atlas_texture: Texture2D
+static var _walk_texture: Texture2D
+static var _carry_texture: Texture2D
+static var _motion_data: Dictionary = {}
 
 ## `known` is the actual known_discoveries ledger (IDs). Optional context may
 ## contain an already-read adoption map and household goods coverage. Without
@@ -61,28 +67,98 @@ static func atlas_texture() -> Texture2D:
 	return _atlas_texture
 
 static func atlas_layout() -> PackedVector4Array:
-	var texture := atlas_texture()
+	return _grid_layout(atlas_texture(), ATLAS_COLUMNS)
+
+## An unvalidated/missing motion sheet keeps the neutral pose. The old two
+## extended-leg paintings turn the torso; they are not a walking cycle.
+static func walking_texture() -> Texture2D:
+	if _walk_texture != null: return _walk_texture
+	_walk_texture = _motion_texture(WALK_ATLAS)
+	return _walk_texture
+
+static func carrying_texture() -> Texture2D:
+	if _carry_texture == null: _carry_texture = _motion_texture(CARRY_ATLAS)
+	return _carry_texture
+
+static func _motion_texture(path: String) -> Texture2D:
+	if not FileAccess.file_exists(path): return null
+	var source := Image.load_from_file(path)
+	if source == null or source.is_empty() or source.get_width() < 16 or source.get_height() < 16: return null
+	return ImageTexture.create_from_image(source)
+
+static func motion_uniforms() -> Dictionary:
+	if not _motion_data.is_empty(): return _motion_data.duplicate(false)
+	var texture := walking_texture()
+	var carry := carrying_texture()
+	var result := {"walk_atlas": texture, "walk_frames": _grid_layout(texture, WALK_COLUMNS), "walk_registration": _motion_registration(texture), "walk_atlas_ready": texture != null,
+		"carry_atlas": carry, "carry_frames": _grid_layout(carry, WALK_COLUMNS), "carry_registration": _motion_registration(carry), "carry_atlas_ready": carry != null}
+	if texture != null and carry != null: _motion_data = result
+	return result.duplicate(false)
+
+## Registration aligns the fixed head/torso anchor and ground contact of each
+## painted phase. It never splices limbs from separate paintings or stretches
+## a crouch. Fractional source cells (for example 1254/4) are measured exactly.
+static func _motion_registration(texture: Texture2D) -> PackedVector4Array:
+	var registrations := PackedVector4Array()
+	if texture == null: return registrations
+	var source := texture.get_image()
+	for row in ATLAS_ROWS:
+		for column in WALK_COLUMNS:
+			var origin := Vector2i(roundi(float(column)*source.get_width()/WALK_COLUMNS), roundi(float(row)*source.get_height()/ATLAS_ROWS))
+			var end := Vector2i(roundi(float(column+1)*source.get_width()/WALK_COLUMNS), roundi(float(row+1)*source.get_height()/ATLAS_ROWS))
+			var extent := end-origin
+			var head_x := 0.0; var head_samples := 0; var top := extent.y; var feet := 0
+			for y in extent.y:
+				for x in extent.x:
+					if source.get_pixel(origin.x+x, origin.y+y).a < .5: continue
+					top = mini(top,y); feet = maxi(feet,y)
+					if y < extent.y*.25: head_x += float(x); head_samples += 1
+			var anchor := head_x/maxi(1,head_samples)/extent.x
+			var height := float(feet-top)/extent.y
+			registrations.append(Vector4(anchor,float(feet)/extent.y,.94/maxf(.1,height),0))
+	return registrations
+
+static func _grid_layout(texture: Texture2D, columns: int) -> PackedVector4Array:
 	var frames := PackedVector4Array()
 	if texture == null: return frames
 	var dimensions := Vector2(texture.get_width(), texture.get_height())
-	var cell := dimensions / Vector2(ATLAS_COLUMNS, ATLAS_ROWS)
 	for row in ATLAS_ROWS:
-		for column in ATLAS_COLUMNS:
+		for column in columns:
 			# Sample texel centres to prevent neighbouring cells bleeding through
 			# minified alpha edges. Transparent RGB is never drawn as a backdrop.
-			var origin := (Vector2(column, row) * cell + Vector2.ONE * .5) / dimensions
-			var extent := (cell - Vector2.ONE) / dimensions
+			var start := (Vector2(column,row)*dimensions/Vector2(columns,ATLAS_ROWS)).round()
+			var end := (Vector2(column+1,row+1)*dimensions/Vector2(columns,ATLAS_ROWS)).round()
+			var origin := (start+Vector2.ONE*.5)/dimensions
+			var extent := (end-start-Vector2.ONE)/dimensions
 			frames.append(Vector4(origin.x, origin.y, extent.x, extent.y))
 	return frames
 
 static func painterly_shader_code() -> String:
 	var fragment := Ink.PERSON.find("void fragment()")
 	assert(fragment > 0, "Shared People vertex boundary changed")
-	return Ink.HEAD.replace("depth_draw_never", "depth_prepass_alpha") + GARMENT_HELPERS + PAINTERLY_UNIFORMS + Ink.PERSON.substr(0, fragment) + PAINTERLY_PAINT
+	var vertex := Ink.PERSON.substr(0, fragment)
+	# The private route renderer points local +Z along its actual travel. The
+	# shared map uses -Z. Project +Z onto camera-right before mirroring the art;
+	# all atlas figures face right, independent of gait phase or garment stage.
+	assert(vertex.contains("vec4(0.0, 0.0, -1.0, 0.0)"), "Shared People facing boundary changed")
+	vertex = vertex.replace("vec4(0.0, 0.0, -1.0, 0.0)", "vec4(0.0, 0.0, 1.0, 0.0)")
+	vertex = vertex.replace("v_time = anim_clock*max(INSTANCE_CUSTOM.w, 0.2)+INSTANCE_CUSTOM.x*6.2831;", "v_time = motion_phase_supplied ? INSTANCE_CUSTOM.w+INSTANCE_CUSTOM.x : anim_clock*max(INSTANCE_CUSTOM.w, 0.2)+INSTANCE_CUSTOM.x*6.2831;")
+	return Ink.HEAD.replace("depth_draw_never", "depth_prepass_alpha") + GARMENT_HELPERS + PAINTERLY_UNIFORMS + vertex + PAINTERLY_PAINT
 
 const PAINTERLY_UNIFORMS := """
 uniform sampler2D people_atlas : source_color, filter_linear, repeat_disable;
 uniform vec4 people_frames[24];
+// The view may provide cumulative traveled distance / stride length in w.
+// Pausing then keeps the feet still; x stays the stable clothing-supply sample.
+uniform bool motion_phase_supplied = false;
+uniform sampler2D walk_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 walk_frames[16];
+uniform vec4 walk_registration[16];
+uniform bool walk_atlas_ready = false;
+uniform sampler2D carry_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 carry_frames[16];
+uniform vec4 carry_registration[16];
+uniform bool carry_atlas_ready = false;
 """
 
 const PAINTERLY_PAINT := """
@@ -100,48 +176,36 @@ void fragment() {
     int frame = 0;
     bool walking = (pose < 0.5 || pose == 6.0) && !still;
     if (carrying) { frame = 3; }
-    else if (walking) { frame = 1 + int(mod(floor(v_time*2.2),2.0)); }
     else if (pose == 4.0 || pose >= 8.0) { frame = 5; }
-    else if (pose == 1.0 || pose == 2.0 || pose == 3.0) { frame = 4; }
-    // Small local motion keeps a carried load or working posture alive while
-    // all route positions, pace and representative counts remain caller-owned.
-    float bob = walking ? abs(sin(v_time*6.9))*0.018 : 0.0;
-    p.y -= bob;
-    if (frame == 4 || frame == 5) {
-        p.x -= sin(v_time*2.4)*0.018*smoothstep(0.2,1.3,p.y);
-    }
+    // Without a recorded task target, standing is more truthful than air
+    // punching. Crouching is a calm posture; no floating tool is synthesized.
     vec2 local_uv = vec2(p.x/1.85+0.5,1.0-p.y/1.85);
     vec4 paint = vec4(0.0);
     if (all(greaterThanEqual(local_uv,vec2(0.0))) && all(lessThanEqual(local_uv,vec2(1.0)))) {
         vec4 region = people_frames[row*6+frame];
         paint = texture(people_atlas,region.xy+local_uv*region.zw);
-        // Carrying has one upper-body painting. Reuse the matching attire's
-        // walking legs below the knee so a moving carrier does not glide.
-        if (carrying && walking && local_uv.y > 0.70) {
-            int stride_frame = 1 + int(mod(floor(v_time*2.2),2.0));
-            vec4 stride_region = people_frames[row*6+stride_frame];
-            vec4 stride_paint = texture(people_atlas,stride_region.xy+local_uv*stride_region.zw);
-            paint = mix(paint,stride_paint,smoothstep(0.70,0.73,local_uv.y));
-        }
     }
-    // Keep the original role's simple tools visible; the atlas contains no
-    // invented equipment. Warm wood/stone strokes fit the painted figures.
-    float tool = 0.0;
-    vec3 tool_color = vec3(0.34,0.25,0.15);
-    float px = max(fwidth(v_p.y),0.003);
-    if (!carrying && pose == 7.0) {
-        tool = 1.0-smoothstep(0.018,0.018+px,sd_seg(p,vec2(0.32,0.03),vec2(0.32,1.72),0.0));
-    } else if (!carrying && pose == 3.0) {
-        tool = 1.0-smoothstep(0.013,0.013+px,sd_seg(p,vec2(0.29,0.77),vec2(1.08,1.40),0.0));
-    } else if (!carrying && (pose == 2.0 || pose >= 8.0)) {
-        vec2 hand = pose == 2.0 ? vec2(0.30,0.77) : vec2(0.48,0.07);
-        vec2 tip = hand+rot2(vec2(0.0,pose == 2.0 ? 0.43 : 0.20),sin(v_time*4.0)*0.35);
-        tool = 1.0-smoothstep(0.015,0.015+px,sd_seg(p,hand,tip,0.0));
+    if (walking && !carrying && walk_atlas_ready) {
+            int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            vec4 stride_region = walk_frames[row*4+stride_frame];
+            vec4 registration = walk_registration[row*4+stride_frame];
+            vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;
+            paint = texture(walk_atlas,stride_region.xy+clamp(motion_uv,vec2(0.0),vec2(1.0))*stride_region.zw);
+            if (any(lessThan(motion_uv,vec2(0.0))) || any(greaterThan(motion_uv,vec2(1.0)))) { paint = vec4(0.0); }
+        } else if (carrying && carry_atlas_ready) {
+            // A delivery pause freezes supplied distance phase. Settle into the
+            // nearest planted-foot contact without changing body, clothes or load.
+            int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            if (still) { stride_frame = int(mod(floor(v_time*2.0+0.5)*2.0,4.0)); }
+            vec4 stride_region = carry_frames[row*4+stride_frame];
+            vec4 registration = carry_registration[row*4+stride_frame];
+            vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;
+            paint = texture(carry_atlas,stride_region.xy+clamp(motion_uv,vec2(0.0),vec2(1.0))*stride_region.zw);
+            if (any(lessThan(motion_uv,vec2(0.0))) || any(greaterThan(motion_uv,vec2(1.0)))) { paint = vec4(0.0); }
     }
     float variation = mix(0.94,1.04,fract(v_custom.x*17.731+0.21));
     vec3 color = paint.rgb*variation;
-    if (tool > paint.a) { color = tool_color; }
-    float alpha = max(paint.a,tool);
+    float alpha = paint.a;
     if (alpha < 0.03) { discard; }
     ALBEDO = color;
     ALPHA = alpha;
