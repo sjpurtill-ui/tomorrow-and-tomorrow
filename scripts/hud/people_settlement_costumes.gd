@@ -80,6 +80,10 @@ static func atlas_texture() -> Texture2D:
 	var source := Image.load_from_file(PEOPLE_ATLAS)
 	if source == null or source.is_empty(): return null
 	if source.get_width() % ATLAS_COLUMNS != 0 or source.get_height() % ATLAS_ROWS != 0: return null
+	# Downscaled figures need transparent-edge colors and prefiltered detail;
+	# plain linear sampling flickers as painted outlines cross screen pixels.
+	source.fix_alpha_edges()
+	source.generate_mipmaps()
 	_atlas_texture = ImageTexture.create_from_image(source)
 	return _atlas_texture
 
@@ -101,6 +105,8 @@ static func _motion_texture(path: String) -> Texture2D:
 	if not FileAccess.file_exists(path): return null
 	var source := Image.load_from_file(path)
 	if source == null or source.is_empty() or source.get_width() < 16 or source.get_height() < 16: return null
+	source.fix_alpha_edges()
+	source.generate_mipmaps()
 	return ImageTexture.create_from_image(source)
 
 static func motion_uniforms() -> Dictionary:
@@ -220,28 +226,28 @@ static func painterly_shader_code() -> String:
 	return Ink.HEAD.replace("depth_draw_never", "depth_prepass_alpha") + GARMENT_HELPERS + PAINTERLY_UNIFORMS + vertex + PAINTERLY_PAINT
 
 const PAINTERLY_UNIFORMS := """
-uniform sampler2D people_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D people_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 people_frames[24];
 // The view may provide cumulative traveled distance / stride length in w.
 // Pausing then keeps the feet still; x stays the stable clothing-supply sample.
 uniform bool motion_phase_supplied = false;
-uniform sampler2D walk_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D walk_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 walk_frames[16];
 uniform vec4 walk_registration[16];
 uniform bool walk_atlas_ready = false;
-uniform sampler2D carry_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D carry_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 carry_frames[16];
 uniform vec4 carry_registration[16];
 uniform bool carry_atlas_ready = false;
-uniform sampler2D male_walk_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D male_walk_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 male_walk_frames[16];
 uniform vec4 male_walk_registration[16];
 uniform bool male_walk_atlas_ready = false;
-uniform sampler2D male_carry_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D male_carry_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 male_carry_frames[16];
 uniform vec4 male_carry_registration[16];
 uniform bool male_carry_atlas_ready = false;
-uniform sampler2D role_atlas : source_color, filter_linear, repeat_disable;
+uniform sampler2D role_atlas : source_color, filter_linear_mipmap, repeat_disable;
 uniform vec4 role_frames[18];
 uniform vec4 role_registration[18];
 uniform bool role_atlas_ready = false;
@@ -328,11 +334,11 @@ void fragment() {
     float alpha = paint.a;
     if (alpha < 0.03) { discard; }
     ALBEDO = color;
+    // Keep fractional edge coverage. Alpha scissor made tiny painted edges
+    // opaque, producing a dark fringe and frame-to-frame silhouette flicker.
     ALPHA = alpha;
-    ALPHA_SCISSOR_THRESHOLD = 0.03;
 }
 """
-
 const GARMENT_HELPERS := """
 uniform float garment_stage = 0.0;
 uniform float garment_supply = 1.0;
