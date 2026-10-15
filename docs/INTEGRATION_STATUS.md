@@ -1,3 +1,59 @@
+## October 15 — Immediate People allocation (INTEGRATED)
+
+Runtime `f4d4ba43` applies allocation steps immediately through the existing guarded command.
+There is no Apply/Cancel stage. Each click captures current state, evaluates the
+existing detached calculators, and commits only a valid current command. Rapid
+clicks retain every step; a failed command leaves the current allocation and
+button limits usable. This supersedes the earlier draft/Refresh-preview flow.
+
+Controls use fixed screen positions, with retained pan, zoom and dock scroll.
+The header shows actual assigned workers (including military service), a single
+100% allocation bar, and the meaning of the 100 persistent figures. Selected
+work shows actual heads and percentages, before/now effects, practical units,
+food stores and shortage/starvation risk. Coverage caps are distinguished from
+daily needs; gradual care and observed extraction are not promised as immediate
+health or output changes. Passive effect calculation is throttled to 2.5 seconds;
+explicit clicks always capture current conditions.
+
+The critique loop rejected poor Daylight text contrast, heavy sprite fringes and
+oversized ground decorations. Paired dark reading surfaces, alpha-safe mipmaps,
+quieter work surfaces and distributed worker positions address those findings.
+Exactly 100 mixed representatives and their persistent transfer identities
+remain. Simulation rules, balance, saved data and existing food safeguards are
+unchanged. Detailed industrial animation, better Learning close-up scale and
+the broader popup consolidation remain unfinished.
+
+Root report_83 passes 83 focused cases across 12 suites with zero errors,
+failures, skips or orphans. Evidence:
+`artifacts/popup-audit/people-immediate-combined-tests.log`. C's mature Daylight
+actual HUD passes 243 checks and 18 captures, including three rapid allocations,
+identical button bounds, retained navigation/scroll and unchanged town fabric.
+A independently accepts the combined fixed-control render as a bounded visual
+improvement. Root's final world/navigation/cast recheck passes all 14 cases in
+report_84 (`artifacts/popup-audit/people-immediate-final-world-tests.log`).
+
+The final early Night actual-HUD journey passes 243 checks and 18 captures at
+1600×1000, 1024×720 and 2869×1337; private process 74304 exits 0. Evidence:
+`artifacts/popup-audit/immediate-verified-early-dark.log` and
+`artifacts/popup-audit/living-people/immediate-verified-early-dark/`. Its first
+attempt exposed an invalid test assumption: a 1% command can leave whole-person
+counts unchanged in the 56-worker fixture. The check now verifies the real
+persistent share decreases by exactly one, retaining effective-count and cast
+checks. No game behavior was changed to satisfy that assertion.
+
+B's combined mature Daylight render passes 243 checks and 18 captures, private
+process 61304 exit 0, in `artifacts/work-ground-combined-first.log` and
+`artifacts/popup-audit/living-people/immediate-b-mature-light/`. Final text
+refinements are covered by root's early journey. A/root accepted the final
+narrow overview and Food focus and the wide immediate Learning view. Existing
+engine anchor/raw-image warnings remain; there are no final script errors.
+
+Source deliveries: A `175653af`; B camera `46ff73ac`, grounds `45460dcf`;
+C `c340b7e0`. Root packaged B's reviewed ground revision without further tuning.
+Root impact/readability checkpoints: `3b96dd38`, `f02aed2a`, `676ae406`,
+`40380cb6`. No running player/editor is restarted. The normal save and restart
+is required to load these scripts after verified canonical delivery.
+
 ## October 15 — One hundred percentage representatives (INTEGRATED)
 
 Runtime `71e3f9dc` replaces the old 48-person People vignette with nine illustrated

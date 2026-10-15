@@ -121,11 +121,14 @@ func _ready()->void:
 		_check_local_annotations(board,"immediate learning")
 	# The next click must start from current live work even if a day elapsed.
 	var current_assignment:Dictionary=GameState.population_allocations.duplicate(true)
+	var current_share:int=preload("res://scripts/manual_work.gd").percents().Knowledge
 	GameState.elapsed_days+=1;hud.live_refresh_dock();await _frames(8)
 	board=hud.dock.find_child("CivilizationPeopleScreen",true,false)
 	_expect(GameState.population_allocations==current_assignment,"A world refresh alone changes no allocation")
 	board.decrease_button.pressed.emit();await _frames(8)
-	_expect(GameState.population_allocations!=current_assignment,"A later click uses a fresh current snapshot")
+	# In a small settlement, one percentage point can round to the same whole
+	# crew. Verify the actual persistent command, then check effective counts.
+	_expect(int(preload("res://scripts/manual_work.gd").percents().Knowledge)==current_share-1,"A later click uses a fresh current snapshot")
 	_check_workforce(board,false,"current work after world change")
 	get_window().size=Vector2i(1024,720);get_window().content_scale_size=Vector2i(1024,720)
 	hud.force_dock_layout();await _frames(10)
