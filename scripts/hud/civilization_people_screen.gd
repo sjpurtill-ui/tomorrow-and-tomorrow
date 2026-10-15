@@ -47,6 +47,7 @@ var connections:AreaConnections
 var face_shelf:Control
 var food_strip:VBoxContainer
 var food_graph:FoodCrossGraphic
+var navigation:VBoxContainer
 
 func setup(block:Dictionary)->void:
 	super.setup(block)
@@ -93,6 +94,12 @@ func _build_scene()->void:
 		markers[role]={"node":marker,"number":number,"button":assign}
 	_build_focus()
 	heading.reparent(overlay);heading.position=Vector2(12,8)
+	navigation=VBoxContainer.new();navigation.name="VillageNavigation";navigation.add_theme_constant_override("separation",0);overlay.add_child(navigation)
+	var camera_buttons:=HBoxContainer.new();camera_buttons.add_theme_constant_override("separation",8);navigation.add_child(camera_buttons)
+	var zoom_out:=_annotation_button(camera_buttons,"−",func():settlement_view.call("zoom_view",1.0/.88));zoom_out.name="VillageZoomOut";zoom_out.custom_minimum_size.x=36;zoom_out.tooltip_text="Zoom out"
+	var zoom_in:=_annotation_button(camera_buttons,"+",func():settlement_view.call("zoom_view",.88));zoom_in.name="VillageZoomIn";zoom_in.custom_minimum_size.x=36;zoom_in.tooltip_text="Zoom in"
+	var recenter:=_annotation_button(camera_buttons,"Center view",func():settlement_view.call("reset_navigation"));recenter.name="VillageRecenter";recenter.tooltip_text="Return to the selected area, or the village overview. Home also centers the view."
+	var help:=_annotation_label("Drag to move · scroll to zoom",11);help.mouse_filter=Control.MOUSE_FILTER_IGNORE;navigation.add_child(help)
 	stage.resized.connect(_fit_scene)
 
 func _make_settlement_view()->Control:
@@ -369,9 +376,15 @@ func _fit_scene()->void:
 			break
 		ancestor=ancestor.get_parent()
 	stage.custom_minimum_size.y=clampf(minf(width*0.66,get_viewport_rect().size.y-top-18),420,760)
-	scene_toolbar.size.x=width-24
-	var toolbar_height:=scene_toolbar.get_combined_minimum_size().y+16
-	var occupied:Array[Rect2]=[Rect2(Vector2.ZERO,Vector2(width,toolbar_height))]
+	var nav_size:=navigation.get_combined_minimum_size()
+	navigation.size=nav_size
+	# Keep the camera controls inside the visible part of a scrolled scene.
+	var nav_top:=8.0
+	if ancestor is ScrollContainer:nav_top=maxf(8,(ancestor as ScrollContainer).global_position.y-stage.global_position.y+8)
+	navigation.position=Vector2(width-nav_size.x-12,minf(nav_top,maxf(8,stage.size.y-nav_size.y-8)))
+	scene_toolbar.size.x=maxf(180,width-nav_size.x-48)
+	var toolbar_height:=maxf(scene_toolbar.get_combined_minimum_size().y,nav_size.y)+16
+	var occupied:Array[Rect2]=[Rect2(Vector2.ZERO,Vector2(width,toolbar_height)),navigation.get_rect()]
 	var lines:Array=[]
 	var anchor_info:Dictionary=settlement_view.call("role_anchor_metadata") if settlement_view.has_method("role_anchor_metadata") else {}
 	var obstacles:Array[Rect2]=[]

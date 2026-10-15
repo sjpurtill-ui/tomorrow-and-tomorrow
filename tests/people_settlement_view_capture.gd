@@ -51,6 +51,17 @@ func _ready()->void:
 		print("PEOPLE_SCENE ",year," origin=",GameState.settlement_founded_at," kinds=",kinds," meshes=",town.model.get_child_count()," ground=",town._bounds)
 		assert(before==var_to_bytes([GameState.settlement_plots,GameState.settlement_routes]),"Renderer wrote simulation records")
 		for index in 30:await get_tree().process_frame
+		var worker_tasks:Array=[];var blockers:Array[Dictionary]=town._worker_blockers()
+		for walk:Dictionary in town._walks:
+			if walk.has("stationary"):
+				assert(not String(walk.get("source","")).is_empty(),"Site worker has no recorded work object")
+				assert(town._worker_segment_clear(walk.stationary,walk.stationary,blockers),"Site worker stands inside a building or hearth")
+				worker_tasks.append(walk.source)
+			else:
+				var route:PackedVector2Array=walk.path
+				for p in range(1,route.size()):assert(town._worker_segment_clear(route[p-1],route[p],blockers),"Walker crosses a building or hearth")
+				if bool(walk.get("delivery",false)):worker_tasks.append(walk.source)
+		print("WORKER_ACTIVITY count=",town.visual_people_count," tasks=",worker_tasks)
 		# Dummy rendering cannot read back MultiMesh instance transforms.
 		if DisplayServer.get_name()!="headless":
 			var frames:=town.model.get_node_or_null("EarlyCommunalObjects/Prop_frame") as Node3D

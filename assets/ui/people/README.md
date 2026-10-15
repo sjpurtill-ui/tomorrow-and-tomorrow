@@ -134,3 +134,33 @@ the village assets. No thatch, chimney, pottery, metal, people, UI or ground sla
 
 Original outputs remain in the conversation's generated-image directory. These
 workspace copies are the runtime assets; no dependency on that directory exists.
+
+## October 15 motion revision
+
+`settle-people-walk-v1.png` and `settle-people-carry-v1.png` are transparent
+1254×1254 RGBA atlases with four columns and four clothing rows. The columns
+show contact, passing, opposite contact and opposite passing. All figures face
+right; the renderer mirrors the complete figure to match actual travel.
+The carry version holds a small wood bundle in both arms throughout the stride.
+These are bounded visual representatives, not a new stock or transport system.
+
+The motion sheets replace the two static, extended-leg poses previously used as
+a walk cycle. Complete bodies are used without splicing limbs. Fractional cell
+boundaries are rounded and sampled at texel centers, and measured head/ground
+registration keeps successive frames aligned. Gait follows distance traveled;
+pickup and delivery pauses hold it still. Existing knowledge, adoption and
+household supply rules continue to select the clothing row.
+
+Generation used the built-in image tool with transparent backgrounds. The walk
+prompt specified a four-by-four production atlas, explicit alternating contact
+and bent-knee passing poses, a stable torso facing right, bare forearms/calves,
+rough hide through simple woven garments, and the existing warm painterly style.
+It excluded modern garments, weapons, tools, labels and scenery. The carry edit
+preserved the complete walking figures and added a small bundle of wood held
+steadily with both arms. Runtime registration accommodates the returned size.
+
+- Walk source: `exec-862b96b0-7c45-455e-93b9-b724703b2d5b.png`
+- Carry source: `exec-5691c9be-6b3b-4922-939d-6e07b8d1c81e.png`
+
+The earlier eight-column candidate was rejected because its poses still twisted
+the body instead of providing a clear passing step; it is not a runtime asset.

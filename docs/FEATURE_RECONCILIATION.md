@@ -1,4 +1,26 @@
-## October 14 — Painted living People screen (INTEGRATED)
+## October 15 — People camera and representative motion (INTEGRATED)
+
+Runtime/proof `15a179dd` fixes the user's non-navigable, distortable village:
+drag pans, wheel and visible controls zoom, Center view/Home restore focus, and
+the painted camera angle stays fixed. Dedicated parcels can be clicked directly;
+dragging does not accidentally select them. Manual navigation survives resize.
+
+Both return-path heading and the shader's facing convention are corrected.
+Complete registered walking/carrying frames replace twisting static poses;
+distance controls gait, and delivery pauses retain the same clothes and bundle.
+Detached swinging tools and invented work poses on empty building edges are
+removed. Representatives use clear routes and actual small work props, with
+bounded pickup/delivery cycles where suitable objects exist. Game logic and
+save data are unchanged. This corrects the prior static review's missed motion
+defects; detailed industry and the broader graphical consolidation remain open.
+
+54 distinct tests, 264 independent native temporal samples, real GUI navigation
+checks and 328 final actual-HUD checks pass. The latter produce 32 wide/narrow
+captures in both palettes. Exact source commits and evidence are in
+`docs/INTEGRATION_STATUS.md`. Delivery is verified on remote main before the
+canonical fast-forward; no running player/editor is restarted.
+
+## October 14 — Painted living People screen (historical static acceptance)
 
 Runtime `72698e91`, journey `00da5360`, replaces the rejected sparse geometry and
 large overlays with a modular painted village and compact area-linked readings.
