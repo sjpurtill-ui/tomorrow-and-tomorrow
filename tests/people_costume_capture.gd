@@ -23,14 +23,18 @@ func _ready() -> void:
 	camera.make_current()
 	var labels := CanvasLayer.new()
 	add_child(labels)
+	var painterly := "--painterly" in OS.get_cmdline_user_args()
 	var stages: Array = [[],["bone_needle_sewing","cordage"],["plain_weaving","cordage"],["plain_weaving","bone_needle_sewing","garment_pattern_cutting","cordage"]]
-	var poses: Array = [0,1,2,4,5,7]
+	var poses: Array = [100,0,0,1,2,4,3,7,8] if painterly else [0,1,2,4,5,7]
 	for row in stages.size():
 		var look := Costumes.appearance(stages[row], {"coverage": 1.0})
 		var shader := Shader.new()
-		shader.code = Costumes.shader_code()
+		shader.code = Costumes.painterly_shader_code() if painterly else Costumes.shader_code()
 		var paint := ShaderMaterial.new()
 		paint.shader = shader
+		if painterly:
+			paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
+			paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
 		paint.set_shader_parameter("map_people_visible",true)
 		paint.set_shader_parameter("min_px",9.0)
 		paint.set_shader_parameter("max_swell",1.3)
@@ -43,8 +47,8 @@ func _ready() -> void:
 		batch.mesh = Ink.quad()
 		batch.instance_count = poses.size()
 		for column in poses.size():
-			batch.set_instance_transform(column,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.001),Vector3(-0.009+column*0.0036,0.0041-row*0.0033,0)))
-			batch.set_instance_custom_data(column,Color(fmod(column*0.618,1.0),poses[column],1.0 if column==0 else 0.0,0.75))
+			batch.set_instance_transform(column,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.001),Vector3(-0.009+column*(.018/(poses.size()-1)),0.0041-row*0.0033,0)))
+			batch.set_instance_custom_data(column,Color(fmod(column*0.618,1.0),poses[column],1.0 if column==(2 if painterly else 0) else 0.0,0.75))
 			batch.set_instance_color(column,look.palette[column%look.palette.size()])
 		var people := MultiMeshInstance3D.new()
 		people.multimesh = batch
@@ -62,8 +66,8 @@ func _ready() -> void:
 		for i in 4: await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		var frame := get_viewport().get_texture().get_image()
-		var target := "res://artifacts/people-costumes-%s.png" % ("still" if time==0 else "motion")
+		var target := "res://artifacts/people-costumes-%s%s.png" % ["painted-" if painterly else "","still" if time==0 else "motion"]
 		var saved := frame.save_png(ProjectSettings.globalize_path(target))
 		if saved != OK: push_error("Could not save costume proof"); get_tree().quit(1); return
-	print("PEOPLE_COSTUMES_CAPTURE four actual method states; six existing poses; two animation phases")
+	print("PEOPLE_COSTUMES_CAPTURE four actual method states; ",poses.size()," existing poses; two animation phases; painterly=",painterly)
 	get_tree().quit(0)

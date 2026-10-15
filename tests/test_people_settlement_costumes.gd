@@ -61,3 +61,33 @@ func test_private_shader_preserves_all_original_pose_and_tool_code() -> void:
 	material.shader = shader
 	for name: String in Costumes.appearance([]).uniforms: material.set_shader_parameter(name, Costumes.appearance([]).uniforms[name])
 	assert_bool(material.shader != Ink.material("person").shader).is_true()
+
+func test_painterly_frames_keep_transparent_gutters_and_complete_pose_cells() -> void:
+	var texture := Costumes.atlas_texture()
+	assert_object(texture).is_not_null()
+	if texture == null: return
+	var source := texture.get_image()
+	var frames := Costumes.atlas_layout()
+	assert_int(frames.size()).is_equal(24)
+	var cell := Vector2i(source.get_width()/6, source.get_height()/4)
+	for index in frames.size():
+		var origin := Vector2i(index%6, index/6)*cell
+		var sample := source.get_region(Rect2i(origin,cell))
+		assert_bool(sample.get_used_rect().has_area()).override_failure_message("Missing painted pose %d"%index).is_true()
+		assert_float(sample.get_pixel(0,0).a).is_less(0.03)
+		assert_float(sample.get_pixel(cell.x-1,0).a).is_less(0.03)
+		var frame:Vector4=frames[index]
+		assert_bool(frame.x>=0 and frame.y>=0 and frame.x+frame.z<=1 and frame.y+frame.w<=1).is_true()
+
+func test_painterly_material_preserves_private_visibility_and_supply_contract() -> void:
+	var original := Ink.material("person").shader
+	var shader := Shader.new();shader.code=Costumes.painterly_shader_code()
+	var material := ShaderMaterial.new();material.shader=shader
+	material.set_shader_parameter("people_atlas",Costumes.atlas_texture())
+	material.set_shader_parameter("people_frames",Costumes.atlas_layout())
+	var look := Costumes.appearance(["plain_weaving"],{"adoption":{"plain_weaving":1.0},"coverage":0.25})
+	for parameter:String in look.uniforms:material.set_shader_parameter(parameter,look.uniforms[parameter])
+	assert_float(material.get_shader_parameter("garment_stage")).is_equal(2.0)
+	assert_float(material.get_shader_parameter("garment_supply")).is_equal(0.25)
+	assert_bool(material.get_shader_parameter("map_people_visible")==true).is_false()
+	assert_object(Ink.material("person").shader).is_same(original)
