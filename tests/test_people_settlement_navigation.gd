@@ -60,3 +60,25 @@ func test_painted_worksite_can_be_selected_above_its_ground_footprint()->void:
 	var click:=Vector2(site.get_center().x,site.position.y+site.size.y*.20)
 	_button(town,click,true);_button(town,click,false)
 	assert_array(hits).is_equal(["Crafting"])
+
+func test_allocation_refresh_rebuild_and_restore_leave_camera_untouched()->void:
+	var town:=_town()
+	town.pan_view(Vector2(80,20));town.zoom_view(.85);town._process(2)
+	var saved:Dictionary=town.navigation_state()
+	var expected:Transform3D=town.camera.transform
+	town.set_workforce({"Food":49,"Crafting":51},true)
+	town.focus_role("Food")
+	assert_dict(town.navigation_state()).is_equal(saved)
+	# A genuine material/plot refresh may rebuild illustration geometry but
+	# cannot silently discard the view the player was using.
+	var changed:=Fixture.plot(1);changed.land_use="field";changed.condition=.40
+	town.update_state({"plots":[changed],"routes":[],"allocations":{"Food":49,"Crafting":51}})
+	assert_dict(town.navigation_state()).is_equal(saved)
+	assert_that(town.camera.transform).is_equal(expected)
+	var other:Control=auto_free(View.new());add_child(other);other.size=town.size
+	other.configure({"plots":[],"routes":[],"allocations":{"Food":100}})
+	other.restore_navigation_state(saved)
+	assert_dict(other.navigation_state()).is_equal(saved)
+	assert_that(other.camera.transform).is_equal(expected)
+	town.reset_navigation()
+	assert_bool(town.navigation_state()!=saved).is_true()
