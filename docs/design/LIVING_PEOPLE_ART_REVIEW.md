@@ -159,3 +159,32 @@ not duplicate these tests or assert an arbitrary implementation structure.
   and returns focus to the original marker. Validated against that corrected UI
   on a private GPU desktop: process 7812 exited 0, one case with no errors,
   failures or orphans (B report 52). This test depends on that UI focus fix.
+
+## Final combined review
+
+- Root combined the painted people, compact annotations, real fabric adapter and
+  matching construction/damage/workshop assets. The timber v1 sheet had roofs
+  crossing cell boundaries, visible as detached roof strips. A corrected v2 sheet
+  removes them. B verified their disappearance rather than accepting bounds tests
+  alone. The original camera-facing art proportions were retained.
+- Actual mature Crafting exposed a foreground crown hiding the workshop. C fixed
+  the fade test to use the crown's painted position. A and B independently accepted
+  the corrected actual-HUD image, with the workshop and its readings visible.
+- A and B accepted the final early Night and mature Daylight compositions at
+  narrow and wide sizes: no giant panel, list or hidden critical action; appropriate
+  early garments and truthful recorded architecture; no stray roof fragments.
+  Learning separates workers, teams and effort, and shows the food tradeoff before
+  Apply. Root inspected the final real-shortage view at 1024 pixels: requested
+  13 food workers, 48 after protection, 27.5 rations produced against 89 needed,
+  no stores, and the starvation warning immediately above Apply.
+- Final root journeys pass 154 early and 174 mature checks with 16 captures each.
+  The final real-shortage/protection run adds 15 captures and exits cleanly.
+  Evidence: `artifacts/popup-audit/living-people/accepted-early-dark/`,
+  `accepted-mature-light/`, and `artifacts/people-living-b/accepted-shortage-*`.
+  The initial mature test failure was traced to the existing map publishing saved
+  placement fields after a fixture upgrade. Completing that writer before the
+  baseline preserves the strict immutable-record assertion. Palette and current
+  draft assertions also prevent invalid visual proof.
+- Disposition: accepted for this People revision by root, A and B. This is an
+  interactive illustrated interpretation of the reference with actual recorded
+  game development, not a claim that a generated static painting became the game.

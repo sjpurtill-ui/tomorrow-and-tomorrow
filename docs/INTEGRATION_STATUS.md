@@ -1,13 +1,52 @@
-## October 14 — Illustrated People revision (IN PROGRESS)
+## October 14 — Illustrated People revision (INTEGRATED)
 
-The user rejected the functional living-scene checkpoint below as visually unlike
-the approved illustration and obscured by large panels. Its tests certify
-behavior, not satisfaction of the art direction. The new pass uses modular
-painterly building and environmental assets selected from real records, richer
-activity and compact readings attached to physical work areas. It must pass
-independent actual-HUD critique before delivery. Acceptance criteria are in
-`docs/design/LIVING_PEOPLE_ART_REVIEW.md`; no full-scene painting is substituted
-for dynamic development, and game rules remain unchanged.
+Runtime `72698e91`, combined journey `00da5360`: the rejected low-detail scene
+and large overlay panels are replaced with modular painted buildings, trees,
+yard supplies and moving people. Recorded materials, roofs, floors, construction,
+damage and footprint drive the village. Terrain contours and routes remain real;
+paths, worn yards, contact shading and hearth smoke tie the illustration together.
+Clothing still requires actual knowledge, adoption and household supply.
+
+All nine work areas use small scene annotations and leader lines. Selecting one
+zooms to its recorded parcel or explicitly identified shared ground. Compact
+current/proposed graphics sit inside the scene; food flow, reserve trajectory,
+starvation risk and actual food protection remain visible beside Apply. Large
+panel backings are removed. The People view uses the available wide-screen space.
+ManualWork, delegation, stale-preview safeguards and save rules are unchanged.
+
+A, B and C completed reciprocal critique and revision of art, annotations and
+costumes. The review rejected and corrected overly bright ground, unsupported
+roof substitutions, label collisions, duplicate construction frames, roof pieces
+crossing atlas cells, and a mature workshop hidden by a foreground crown.
+A and B accepted the final actual HUD views in both palettes. The illustration
+remains a live composition of recorded objects, not a static concept backdrop.
+
+Combined validation: 58 distinct tests pass with zero errors, failures, skips or
+orphans (40 controls/preview/navigation/overview/persistence in report_63;
+18 renderer/costume cases in report_64). C's final crown correction separately
+passes all 11 renderer cases and a native whole-tree fade/reset check. Root's
+final actual-HUD GPU journeys pass 154 early Night and 174 developed Daylight
+checks, producing 32 captures at 1600×1000, 1024×720 and 2869×1337. They cover
+all nine routes, current drafts, stale refresh, resizing, bounds, keyboard-related
+controls and unchanged allocations, delegation and fabric. An additional real
+shortage/protection GPU fixture passes at three widths with 15 captures. All
+three final native processes exited 0; no script errors. Existing command-rail
+anchor warnings remain. Evidence is in `artifacts/popup-audit/illustrated-people-
+final-*.log`, `living-people/accepted-early-dark/`, `accepted-mature-light/`, and
+`artifacts/people-living-b/accepted-shortage-*`.
+
+The first mature journey correctly detected the main terrain's asynchronous
+placement writer changing `visual_building_sites` and `visual_sites_form` after
+the fixture upgrade. The probe now completes that existing writer before taking
+its strict immutable baseline. No production writer or game rule was changed to
+make the test pass. The final palette and non-stale draft are explicitly checked.
+
+Source handoffs: A `bb9887e4`, B `7218014a`, C `f3310592` and `8ad43d92`, plus
+root artwork and integration. Asset provenance and prompts are in
+`assets/ui/people/README.md`. Delivery follows remote-main verification before
+canonical fast-forward. No live game/editor was restarted; a running session
+keeps its loaded scripts until a normal save and restart. This accepts the
+People revision only, not every popup under the newer graphical direction.
 
 ## October 14 — Living People screen (integrated functional checkpoint)
 
