@@ -130,3 +130,32 @@ not duplicate these tests or assert an arbitrary implementation structure.
   existing overview paintings for reusable art direction. No new-render
   acceptance has been granted. Forecast, simulation and renderer sources were
   not changed by this review.
+- Atlas review: the three new `assets/ui/people/settlement-*-v1.png` sheets have
+  coherent warm material detail and distinct early silhouettes. Early cells
+  9/10/11 (zero based) depict a masonry-footed timber frame, a damaged plaster
+  house and a stone ruin; they must not replace construction/damage/ruin of
+  hide or reed shelters. Details cell 7 combines baskets and pottery, so it
+  cannot appear from basket knowledge alone. Cell 11 depicts grain, not any
+  food-gathering ground. Mature chimneys and tiles require the corresponding
+  recorded installed fabric. The renderer owner corrected these mappings.
+- First painterly scene: early material detail and softer paths improve the
+  scene, but broad empty ground and widely spaced repeated shelters still fall
+  short of the reference. Closer inhabited-core composition and subtle actual
+  door/yard contact treatment are requested. Mature buildings correctly use
+  fallback geometry where the atlas roof type does not match; that truthful
+  fallback still needs matching art before visual acceptance.
+- Controls revision: the large panel backings are gone. Requested transfers,
+  the actual food cost and starvation warning now appear beside Apply. Housing
+  and food graphics explicitly label current/draft and daily need. Unchanged
+  focus hides needless disabled Apply/Cancel controls. The real shortage
+  fixture distinguishes requested 13 food workers from 48 after protection,
+  with production 27.5 against need 89 and no stores. This is semantic/layout
+  direction acceptance; combined scene composition remains under review.
+- Native keyboard regression exposed focus loss when the focused Assign marker
+  was hidden. The controls owner added focus transfer into the assignment and
+  restoration to the originating marker on Overview. The independent
+  `test_people_work_keyboard.gd` now dispatches Enter and Tab through the actual
+  controls, confirms hidden markers are excluded, edits the draft, applies once
+  and returns focus to the original marker. Validated against that corrected UI
+  on a private GPU desktop: process 7812 exited 0, one case with no errors,
+  failures or orphans (B report 52). This test depends on that UI focus fix.
