@@ -109,6 +109,7 @@ func workforce_percentages()->Dictionary:return _cast.percentages.duplicate()
 func workforce_people()->Array[Dictionary]:return _cast.population()
 
 func _build_scene()->void:
+	var remembered:Dictionary=navigation_state() if is_instance_valid(model) else {}
 	if is_instance_valid(model):model.free()
 	_materials.clear();_foliage_materials.clear();_painted_materials.clear()
 	_annotation_objects.clear();_annotation_obstacles.clear();_people=null;_highlight=null;_people_key=-1
@@ -122,9 +123,11 @@ func _build_scene()->void:
 	_cast.configure(slots,gates,WorkWorld.hub(),WorkWorld.path_for_transfer)
 	if not _cast.initialized:_cast.set_weights(_context.get("allocations",GameState.population_allocations),false)
 	geometry_builds+=1;_update_people()
-	if _zones.has(focused_role):focus_role(focused_role)
-	else:reset_view()
-	_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
+	if not remembered.is_empty():restore_navigation_state(remembered)
+	else:
+		if _zones.has(focused_role):focus_role(focused_role,true)
+		else:reset_view()
+		_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
 
 func _private_paint(node:Node)->void:
 	for child in node.get_children():
@@ -185,8 +188,11 @@ func _process(delta:float)->void:
 	_foliage_cut=lerpf(_foliage_cut,0.0 if focused_role.is_empty() else 1.0,1.0-exp(-delta*7.0))
 	_position_camera();_project_anchors();_move_people()
 
-func focus_role(role:String)->void:
+func focus_role(role:String,force:bool=false)->void:
 	if not _zones.has(role):return
+	# A refreshed allocation is still the same place. Only a new selection or
+	# explicit Center view command is allowed to move the user's camera.
+	if role==focused_role and not force:return
 	_manual_navigation=false
 	focused_role=role
 	var zone:Dictionary=_zones[role];var at:Vector2=zone.get("focus_center",zone.center)
@@ -200,6 +206,23 @@ func reset_view()->void:
 	focused_role="";_desired_target=_point(_overview_focus,.001);_desired_span=_overview_span()
 	if is_instance_valid(_highlight):_highlight.visible=false
 	focus_changed.emit("")
+
+func navigation_state()->Dictionary:
+	return {"role":focused_role,"target":_target,"desired_target":_desired_target,"span":_span,"desired_span":_desired_span,"manual":_manual_navigation}
+
+func restore_navigation_state(saved:Dictionary)->void:
+	var role:=String(saved.get("role",""))
+	if not role.is_empty() and not _zones.has(role):return
+	var target:Vector3=saved.get("target",_target)
+	var desired:Vector3=saved.get("desired_target",target)
+	if not target.is_finite() or not desired.is_finite():return
+	focused_role=role;_target=target;_desired_target=desired
+	_span=clampf(float(saved.get("span",_span)),.012,.24)
+	_desired_span=clampf(float(saved.get("desired_span",_span)),.012,.24)
+	_manual_navigation=bool(saved.get("manual",false))
+	if _zones.has(role):_make_highlight(_zones[role].polygons)
+	elif is_instance_valid(_highlight):_highlight.visible=false
+	_position_camera();_project_anchors()
 
 func role_screen_positions()->Dictionary:return _anchors.duplicate()
 
@@ -381,7 +404,7 @@ func zoom_view(factor:float,at:Vector2=Vector2(-1,-1))->void:
 
 func reset_navigation()->void:
 	if focused_role.is_empty():reset_view()
-	else:focus_role(focused_role)
+	else:focus_role(focused_role,true)
 
 func _navigation_ground(at:Vector2)->Vector3:
 	var plane:=Plane(Vector3.UP,_target.y)
