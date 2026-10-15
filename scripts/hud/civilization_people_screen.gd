@@ -41,6 +41,7 @@ var pending_note:Label
 var _configured:=false
 var _draft_revision:Array=[]
 var preview_rebased:=false
+var _placement_key:=0
 var effect_graph:WorkEffectGraphic
 var connections:AreaConnections
 var face_shelf:Control
@@ -373,16 +374,26 @@ func _fit_scene()->void:
 	var occupied:Array[Rect2]=[Rect2(Vector2.ZERO,Vector2(width,toolbar_height))]
 	var lines:Array=[]
 	var anchor_info:Dictionary=settlement_view.call("role_anchor_metadata") if settlement_view.has_method("role_anchor_metadata") else {}
+	var obstacles:Array[Rect2]=[]
+	if settlement_view.has_method("annotation_obstacles"):obstacles.assign(settlement_view.call("annotation_obstacles"))
+	# The private camera publishes every frame. Repack only after a visible
+	# pixel/layout change, rather than testing every label against every tree
+	# while the village is idle.
+	var geometry:Array=[Vector2i(stage.size),active_role,toolbar_height,focus_panel.get_combined_minimum_size(),evidence_panel.get_combined_minimum_size(),food_strip.visible,food_strip.get_combined_minimum_size()]
+	for role:String in markers:geometry.append([Vector2i(anchors.get(role,Vector2.ZERO)),(markers[role].node as Control).get_combined_minimum_size(),anchor_info.get(role,{}).get("physical",false),anchor_info.get(role,{}).get("plot_ids",[])])
+	for obstacle:Rect2 in obstacles:geometry.append(Rect2i(obstacle))
+	var key:=hash(geometry)
+	if key==_placement_key:return
+	_placement_key=key
 	for role:String in markers:
 		if active_role!="":break # hidden overview labels need no packing during a focus tween
 		var marker:Control=markers[role].node
 		(markers[role].button as Button).text="Assign workers" if width>=1100 else "Assign"
 		marker.size=marker.get_combined_minimum_size()
 		var point:Vector2=anchors.get(role,Vector2(width*0.5,stage.size.y*0.5))
-		var rect:=_annotation_rect(point,marker.size,occupied,Rect2(Vector2(12,toolbar_height+8),Vector2(width-24,stage.size.y-toolbar_height-20)),ROLE_NAMES.keys().find(role))
+		var rect:=_annotation_rect(point,marker.size,occupied,Rect2(Vector2(12,toolbar_height+8),Vector2(width-24,stage.size.y-toolbar_height-20)),ROLE_NAMES.keys().find(role),obstacles)
 		marker.position=rect.position;occupied.append(rect)
-		if bool(anchor_info.get(role,{}).get("physical",false)):
-			lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y))})
+		lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y)),"shared":not bool(anchor_info.get(role,{}).get("physical",false))})
 	if connections!=null:connections.lines=lines;connections.visible=true;connections.queue_redraw()
 	if focus_panel!=null:
 		var point:Vector2=anchors.get(active_role,Vector2(width*0.5,stage.size.y*0.5))
@@ -395,6 +406,13 @@ func _fit_scene()->void:
 		focus_panel.position=Vector2(clampf(point.x+70,16,maxf(16,width-control_width-16)),clampf(point.y-170,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-focus_panel.size.y-100)))
 		evidence_panel.position=Vector2(clampf(point.x-evidence_width-65,16,maxf(16,width-evidence_width-16)),clampf(point.y-95,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-evidence_panel.size.y-100)))
 		food_strip.size.x=minf(1000,width-40);food_strip.size.y=food_strip.get_combined_minimum_size().y;food_strip.position=Vector2(20,maxf(16,stage.size.y-food_strip.size.y-16))
+		if active_role!="" and not obstacles.is_empty():
+			var bottom:=food_strip.position.y-12 if food_strip.visible else stage.size.y-16
+			var safe:=Rect2(Vector2(16,toolbar_height+8),Vector2(width-32,maxf(1,bottom-toolbar_height-8)))
+			var protected:Array[Rect2]=[Rect2(point-Vector2(48,48),Vector2(96,96))]
+			focus_panel.position=_annotation_rect(point,focus_panel.size,protected,safe,0,obstacles).position
+			protected.append(focus_panel.get_rect())
+			evidence_panel.position=_annotation_rect(point,evidence_panel.size,protected,safe,4,obstacles).position
 		if active_role!="" and connections!=null:
 			connections.lines=[]
 			var info:Dictionary=anchor_info.get(active_role,{})
@@ -404,7 +422,7 @@ func _fit_scene()->void:
 				var rect:=panel.get_rect();var source:=point;var nearest:=INF
 				# The artist exposes actual parcel contours. End the quiet line on
 				# the nearest recorded edge, leaving the working image itself clear.
-				for polygon:PackedVector2Array in info.get("polygons",[]):
+				for polygon:PackedVector2Array in (info.get("polygons",[]) if bool(info.get("physical",false)) else []):
 					for vertex:Vector2 in polygon:
 						var distance:=vertex.distance_squared_to(rect.get_center())
 						if distance<nearest:nearest=distance;source=vertex
@@ -413,7 +431,7 @@ func _fit_scene()->void:
 
 ## Find nearby open paper around each real worksite, rather than stacking every
 ## annotation below the same shared-ground anchor. Preference is stable on resize.
-func _annotation_rect(point:Vector2,extent:Vector2,occupied:Array[Rect2],available:Rect2,index:int)->Rect2:
+func _annotation_rect(point:Vector2,extent:Vector2,occupied:Array[Rect2],available:Rect2,index:int,obstacles:Array[Rect2]=[])->Rect2:
 	var best:=Rect2(available.position,extent);var score:=INF
 	var preferred:=float(index)*2.399963
 	for ring in [20.0,72.0,132.0,210.0,290.0]:
@@ -424,7 +442,14 @@ func _annotation_rect(point:Vector2,extent:Vector2,occupied:Array[Rect2],availab
 			var at:=point+direction*reach-extent*.5
 			at.x=clampf(at.x,available.position.x,maxf(available.position.x,available.end.x-extent.x))
 			at.y=clampf(at.y,available.position.y,maxf(available.position.y,available.end.y-extent.y))
-			var candidate:=Rect2(at,extent);var weight:=candidate.get_center().distance_squared_to(point)+step*40
+			var candidate:=Rect2(at,extent)
+			# Distance to the nearest edge avoids penalising horizontal positions
+			# just because a label is wider than it is tall (which made stacks).
+			var edge:=Vector2(clampf(point.x,candidate.position.x,candidate.end.x),clampf(point.y,candidate.position.y,candidate.end.y))
+			var weight:float=edge.distance_squared_to(point)+step*120+ring*ring*.05
+			if candidate.has_point(point):weight+=100000
+			for obstacle:Rect2 in obstacles:
+				if candidate.intersects(obstacle):weight+=180000*candidate.intersection(obstacle).get_area()/maxf(1,candidate.get_area())
 			for other:Rect2 in occupied:
 				if candidate.intersects(other.grow(8)):weight+=10000000+candidate.intersection(other.grow(8)).get_area()*100
 			if weight<score:score=weight;best=candidate
@@ -468,10 +493,11 @@ class AreaConnections extends Control:
 			var start:Vector2=line.from;var finish:Vector2=line.to
 			if start.distance_to(finish)<8:continue
 			var elbow:=Vector2(finish.x,start.y)
-			draw_polyline(PackedVector2Array([start,elbow,finish]),Color(T.PANEL_BG,.7),3,true)
+			var shared:=bool(line.get("shared",false))
+			draw_polyline(PackedVector2Array([start,elbow,finish]),Color(T.PANEL_BG,.3 if shared else .7),2 if shared else 3,true)
 			var cream:=T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG
-			if bool(line.get("shared",false)):
-				draw_dashed_line(start,elbow,Color(cream,.8),1.5,5,true);draw_dashed_line(elbow,finish,Color(cream,.8),1.5,5,true)
+			if shared:
+				draw_dashed_line(start,elbow,Color(cream,.55),1.25,5,true);draw_dashed_line(elbow,finish,Color(cream,.55),1.25,5,true)
 			else:draw_polyline(PackedVector2Array([start,elbow,finish]),Color(cream,.95),1.5,true)
 			draw_circle(start,2.5,(T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG))
 
@@ -480,6 +506,10 @@ class WorkEffectGraphic extends Control:
 		return T.INK if T.INK.get_luminance()>T.PANEL_BG.get_luminance() else T.PANEL_BG
 	static func annotation_shade()->Color:
 		return T.PANEL_BG if T.PANEL_BG.get_luminance()<T.INK.get_luminance() else T.INK
+	static func annotation_accent()->Color:
+		# The scene stays dark green in either appearance; Daylight's brick
+		# button fill needs lighter ink when it becomes a thin plot or caption.
+		return T.ACTION.lerp(annotation_ink(),.45) if T.INK.get_luminance()<T.PANEL_BG.get_luminance() else T.ACTION
 	var readings:Array=[]
 	var comparing:=false
 	func _init()->void:
@@ -495,9 +525,9 @@ class WorkEffectGraphic extends Control:
 			var old:Dictionary=before.get("research",{});var next:Dictionary=after.get("research",{})
 			if next.has("effective_work"):
 				var prior:=float(old.get("effective_work",0));var proposed:=float(next.effective_work)
-				var words:="%+.0f%% effort · %d teams" % [(proposed/prior-1)*100,int(next.get("teams",0))] if prior>0 else "%d teams · no earlier work capacity" % int(next.get("teams",0))
+				var words:="%d → %d teams · %+.0f%% effort" % [int(old.get("teams",0)),int(next.get("teams",0)),(proposed/prior-1)*100] if prior>0 else "%d → %d teams · work can begin" % [int(old.get("teams",0)),int(next.get("teams",0))]
 				if not comparing:words="%d teams · current supplies" % int(next.get("teams",0))
-				readings.append({"label":"Research pace · current supplies","before":prior,"after":proposed,"words":words,"unit":""})
+				readings.append({"label":"Research pace · current supplies","before":prior,"after":proposed,"words":words,"unit":"","current_caption":"100%" if prior>0 else "0%","draft_caption":"%.0f%%"%(proposed/prior*100) if prior>0 else "new"})
 		elif role=="Construction":
 			var old:=_housing(before,settlement_id);var next:=_housing(after,settlement_id)
 			if bool(next.get("building",false)) and float(next.get("work_per_day",0))>0 and float(next.get("days_left",-1))>=0:
@@ -530,16 +560,16 @@ class WorkEffectGraphic extends Control:
 			var reading:Dictionary=readings[index];var y:=index*68.0
 			var before:=float(reading.before);var after:=float(reading.after);var need:=float(reading.get("need",0))
 			var scale:=maxf(1,maxf(maxf(before,after),need))*1.05
-			var ink:=annotation_ink();var draft_ink:=T.ACTION
+			var ink:=annotation_ink();var draft_ink:=annotation_accent()
 			_say(strong,Vector2(0,y+15),String(reading.label),14,ink)
 			var words:=String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit] if comparing else "%.1f %s" % [after,reading.unit]))
 			_say(font,Vector2(0,y+35),words,16,ink)
-			var line_width:=size.x-70
+			var line_width:=size.x-(105 if reading.has("current_caption") else 70)
 			if comparing:
 				draw_line(Vector2(0,y+46),Vector2(line_width*before/scale,y+46),Color(ink,.65),3,true)
-				_say(font,Vector2(line_width+6,y+50),"Current",11,ink)
+				_say(font,Vector2(line_width+6,y+50),"Current "+String(reading.get("current_caption","")),11,ink)
 			draw_line(Vector2(0,y+58),Vector2(line_width*after/scale,y+58),draft_ink if comparing else ink,3,true)
-			_say(font,Vector2(line_width+6,y+62),"Draft" if comparing else "Current",11,draft_ink if comparing else ink)
+			_say(font,Vector2(line_width+6,y+62),("Draft "+String(reading.get("draft_caption",""))) if comparing else "Current",11,draft_ink if comparing else ink)
 			if need>0:
 				var x:=line_width*need/scale;draw_line(Vector2(x,y+42),Vector2(x,y+64),ink,1.5)
 				_say(font,Vector2(0,y+82),"Daily need %.1f %s"%[need,String(reading.unit)],12,ink)
@@ -564,7 +594,7 @@ class FoodCrossGraphic extends WorkEffectGraphic:
 		for i in 3:
 			var key:=String(["production","required","net"][i]);var x:=col*i
 			_say(font,Vector2(x,36),captions[i],12,ink)
-			_say(strong,Vector2(x,58),_reading(key,i==2),16,T.ACTION if i==2 and float(proposed.get("net",0))<0 else ink)
+			_say(strong,Vector2(x,58),_reading(key,i==2),16,annotation_accent() if i==2 and float(proposed.get("net",0))<0 else ink)
 			if i<2:_say(font,Vector2(x+col-20,53),"→",16,ink)
 		_say(font,Vector2(0,83),"%s rations held now · net includes spoilage"%preload("res://scripts/hud/era_words.gd").grouped(roundi(float(proposed.get("stock",0)))),12,ink)
 		var x:=flow_width+16;var chart_width:=maxf(80,size.x-x-110)
@@ -577,7 +607,7 @@ class FoodCrossGraphic extends WorkEffectGraphic:
 		for draft_line:bool in ([false,true] if comparing else [true]):
 			var points:=PackedVector2Array()
 			for i in 3:points.append(Vector2(x+chart_width*[0.0,1.0/3,1.0][i],72-(values[i].y if draft_line else values[i].x)/maximum*42))
-			var color:=T.ACTION if comparing and draft_line else ink
+			var color:=annotation_accent() if comparing and draft_line else ink
 			draw_polyline(points,Color(annotation_shade(),.7),4,true);draw_polyline(points,color,2,true)
 			var ending:float=values[2].y if draft_line else values[2].x
 			_say(font,Vector2(x+chart_width+8,58 if draft_line else 38),("Draft " if comparing and draft_line else "Current ")+"%.0f"%ending,12,color)
