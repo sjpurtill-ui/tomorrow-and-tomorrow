@@ -32,20 +32,20 @@ static func zones()->Dictionary:
 		for offset:Vector2 in [Vector2(-.012,-.011),Vector2(.010,-.011),Vector2(.013,-.005),Vector2(.012,.010),Vector2(.006,.017),Vector2(-.008,.017),Vector2(-.013,.008)]:polygon.append(world(at+offset))
 		var area:=Rect2(polygon[0],Vector2.ZERO)
 		for vertex:Vector2 in polygon:area=area.expand(vertex)
-		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.009,Vector2.ONE*.018),"focus_center":world(at+Vector2(0,.006)),"focus_span":.040,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.015))}
+		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.011,Vector2.ONE*.022),"focus_center":world(at+Vector2(0,.005)),"focus_span":.040,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.011))}
 	return result
 
 static func work_positions(role:String,count:int=100)->PackedVector2Array:
 	var result:=PackedVector2Array()
 	if not LAYOUT.has(role):return result
 	var center:Vector2=LAYOUT[role]
-	# A stable sunflower packing fills outward, avoiding marching rows. The
-	# first100slots always fit, even when every representative joins one role.
+	# Stable permutation spreads small crews across the apron without marching
+	# rows. All100slots fit, even when every representative joins one role.
 	for index in clampi(count,0,100):
 		var slot:=(index*37)%100
 		var angle:=float(slot)*2.39996323+float(ROLES.find(role))*.31
 		var radius:=.00088*sqrt(float(slot)+.5)
-		result.append(world(center+Vector2(cos(angle),sin(angle))*radius))
+		result.append(world(center+Vector2(cos(angle)*1.15,sin(angle)*.70)*radius+Vector2(0,-.001)))
 	return result
 
 static func path_for_transfer(from_role:String,to_role:String)->PackedVector2Array:
@@ -76,8 +76,8 @@ static func render(parent:Node3D,point:Callable,options:Dictionary={})->Dictiona
 	for role:String in ROLES:
 		var path:=path_for_transfer(role,"Logistics");routes.append(path);_path(root,point,path,.0019,Color("a58e63"))
 		var zone:Dictionary=data[role]
-		_patch(root,point,zone.center,.0105,Color(.48,.42,.28,.20))
-		var object:=_site(root,point,role,zone.scenery)
+		_work_apron(root,point,role,zone.center)
+		var object:=_site(root,point,role,zone.scenery,options)
 		if object!=null:
 			objects.append(object)
 			obstacles.append({"center":zone.scenery,"radius":.0048,"bounds":Rect2(Vector2(zone.scenery)-Vector2.ONE*.0048,Vector2.ONE*.0096),"role":role})
@@ -89,7 +89,7 @@ static func render(parent:Node3D,point:Callable,options:Dictionary={})->Dictiona
 		targets[role]=entries
 	return {"root":root,"zones":data,"bounds":bounds(),"routes":routes,"obstacles":obstacles,"targets":targets,"annotation_objects":objects,"hub":hub(),"overview_center":world(Vector2(0,.006)),"overview_span":.088,"representative":true,"options":options.duplicate(true)}
 
-static func _site(parent:Node3D,point:Callable,role:String,at:Vector2)->MeshInstance3D:
+static func _site(parent:Node3D,point:Callable,role:String,at:Vector2,options:Dictionary)->MeshInstance3D:
 	var cell:=-1;var width:=.013;var path:=SCENERY;var rows:=2;var columns:=3
 	match role:
 		"Food":cell=0;width=.017
@@ -101,10 +101,42 @@ static func _site(parent:Node3D,point:Callable,role:String,at:Vector2)->MeshInst
 		"Construction":path=Art.STATES;cell=0;width=.015
 		"Crafting":path=Art.BUILDINGS;cell=6;rows=3;columns=4;width=.016
 		"Logistics":path=WELL;cell=0;rows=1;columns=1;width=.013
+	var recorded:=recorded_style(role,options)
+	if not recorded.is_empty():
+		path=String(recorded.atlas);cell=int(recorded.cell);rows=int(recorded.get("rows",3));columns=int(recorded.get("columns",4))
 	if cell<0 or Art.atlas(path)==null:return null
-	var node:=Art.sprite(parent,path,cell,point.call(at,.00005),width,{"rows":rows,"columns":columns,"name":"Worksite_"+role})
+	var settings:Dictionary=recorded.duplicate();settings.merge({"rows":rows,"columns":columns,"name":"Worksite_"+role},true)
+	var node:=Art.sprite(parent,path,cell,point.call(at,.00005),width,settings)
 	if node!=null:node.set_meta("work_role",role)
 	return node
+
+static func recorded_style(role:String,options:Dictionary)->Dictionary:
+	if role not in ["Crafting","Construction"]:return {}
+	var selected:Dictionary={};var generation:=-1
+	for plot:Dictionary in options.get("snapshot",{}).get("plots",[]):
+		if role=="Crafting" and String(plot.get("land_use",""))!="workshop":continue
+		if role=="Construction" and String(plot.get("status",""))!="under_construction":continue
+		var style:=Art.building_style({"plot":plot})
+		if style.is_empty():continue
+		var next:=int(plot.get("fabric_generation",0))
+		if next>generation:selected=style;generation=next
+	return selected
+
+static func _work_apron(parent:Node3D,point:Callable,role:String,center:Vector2)->void:
+	var earth:=Color(.43,.32,.18,.62)
+	if role=="Survey":earth=Color(.46,.45,.37,.62)
+	elif role=="Extraction":earth=Color(.44,.40,.29,.65)
+	elif role in ["Knowledge","Administration"]:earth=Color(.58,.48,.30,.58)
+	_patch(parent,point,center,.0125,earth)
+	_patch(parent,point,center+UP*.007,.009,Color(earth,.40))
+	if role=="Food":
+		for x:float in [-.008,-.004,0,.004,.008]:
+			_path(parent,point,PackedVector2Array([center+RIGHT*x-UP*.008,center+RIGHT*x+UP*.008]),.0013,Color("554728"))
+		for side:int in [-1,1]:
+			for y:float in [-.007,-.001,.005]:
+				Art.sprite(parent,Art.DETAILS,5,point.call(center+RIGHT*.011*side+UP*y,.00004),.002,{"name":"GrowingRow"})
+	elif role=="Crafting":
+		for side:int in [-1,1]:Art.sprite(parent,Art.DETAILS,6,point.call(center+RIGHT*.011*side+UP*.002,.00004),.0025,{"name":"WorkshopMaterials"})
 
 static func _ground(parent:Node3D,point:Callable)->void:
 	var mesh:=SurfaceTool.new();mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -145,7 +177,12 @@ static func _foliage(parent:Node3D,point:Callable,objects:Array[MeshInstance3D])
 	for index in 18:
 		var angle:=float(index)*TAU/18+.14
 		var at:=world(Vector2(cos(angle)*.073,sin(angle)*.060+ .008))
-		var node:=Art.sprite(parent,Art.DETAILS,index%2,point.call(at,.00002),.011+float(index%3)*.002,{"foliage":true,"sway":.00012,"phase":float(index),"name":"BorderTree_"+str(index)})
+		# Tall foreground crowns would cover the fields at the fixed camera angle.
+		# Low flowering scrub frames the near edge without hiding its workers.
+		var near_edge:=sin(angle)<-.25
+		var cell:=3 if near_edge else index%2
+		var width:=.004 if near_edge else .011+float(index%3)*.002
+		var node:=Art.sprite(parent,Art.DETAILS,cell,point.call(at,.00002),width,{"foliage":true,"sway":.00012,"phase":float(index),"name":"BorderPlant_"+str(index)})
 		if node!=null:objects.append(node)
 
 const GROUND_SHADER="""
