@@ -158,6 +158,7 @@ func _build_scene()->void:
 	var residual:Dictionary=Art.buildings(plan,model,_point) if _painted_active else plan
 	Early.render(residual,Vector3.ZERO,height,model)
 	Ground.render(plan,snapshot.plots,snapshot.routes,Vector3.ZERO,height,land,model,false)
+	if _painted_active:Art.hide_replaced_frames(plan,model)
 	_workplace_props(plan)
 	_yards=Yards.new();_yards.name="OccupiedHouseholdYards";model.add_child(_yards)
 	_yards.configure(func(at:Vector2)->float:return _height(at),land)
@@ -377,6 +378,9 @@ func _paint_household_yards()->void:
 		source.visible=false
 		for index in source.multimesh.instance_count:
 			var placement:=source.multimesh.get_instance_transform(index)
+			# The mesh instance origin contains its old AABB bottom offset.
+			# Painted art has its own cropped ground contact instead.
+			placement.origin.y=_height(Vector2(placement.origin.x+_yards.position.x,placement.origin.z+_yards.position.z))+.00006
 			Art.sprite(_painted_yards,Art.DETAILS,6 if kind=="woodpile" else 7,placement.origin,.0018,{"name":"OccupiedYard_"+kind,"mirror":index%2==0})
 
 func _worked_yards(plan:Dictionary)->void:
