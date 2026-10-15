@@ -94,7 +94,7 @@ func test_painterly_material_preserves_private_visibility_and_supply_contract() 
 
 func test_motion_uses_complete_walking_and_carried_body_frames() -> void:
 	var motion := Costumes.motion_uniforms()
-	for prefix:String in ["walk", "carry"]:
+	for prefix:String in ["walk", "carry", "male_walk", "male_carry"]:
 		assert_bool(motion[prefix+"_atlas_ready"]).is_true()
 		var texture:Texture2D=motion[prefix+"_atlas"]
 		assert_object(texture).is_not_null()
@@ -105,27 +105,42 @@ func test_motion_uses_complete_walking_and_carried_body_frames() -> void:
 		for index in frames.size():
 			var region:=frames[index]
 			assert_bool(region.x>=0 and region.y>=0 and region.x+region.z<=1 and region.y+region.w<=1).is_true()
-			var start:=Vector2i(roundi(float(index%4)*source.get_width()/4),roundi(float(index/4)*source.get_height()/4))
-			var end:=Vector2i(roundi(float(index%4+1)*source.get_width()/4),roundi(float(index/4+1)*source.get_height()/4))
+			var start:=Vector2i(roundi(region.x*source.get_width()-.5),roundi(region.y*source.get_height()-.5))
+			var end:=start+Vector2i(roundi(region.z*source.get_width()+1),roundi(region.w*source.get_height()+1))
 			assert_bool(source.get_region(Rect2i(start,end-start)).get_used_rect().has_area()).override_failure_message("Missing %s phase %d"%[prefix,index]).is_true()
+			if prefix.begins_with("male"):
+				for x in range(start.x,end.x):
+					assert_float(source.get_pixel(x,start.y).a).is_less(.03)
+					assert_float(source.get_pixel(x,end.y-1).a).is_less(.03)
+				for y in range(start.y,end.y):
+					assert_float(source.get_pixel(start.x,y).a).is_less(.03)
+					assert_float(source.get_pixel(end.x-1,y).a).is_less(.03)
 
 func test_motion_registration_keeps_feet_on_ground_and_head_stable() -> void:
 	var motion:=Costumes.motion_uniforms()
-	for prefix:String in ["walk", "carry"]:
+	for prefix:String in ["walk", "carry", "male_walk", "male_carry"]:
 		var texture:Texture2D=motion[prefix+"_atlas"]
 		if texture==null:continue
 		var source:=texture.get_image()
 		var registrations:PackedVector4Array=motion[prefix+"_registration"]
+		var frames:PackedVector4Array=motion[prefix+"_frames"]
 		assert_int(registrations.size()).is_equal(16)
 		for index in registrations.size():
-			var start:=Vector2i(roundi(float(index%4)*source.get_width()/4),roundi(float(index/4)*source.get_height()/4))
-			var end:=Vector2i(roundi(float(index%4+1)*source.get_width()/4),roundi(float(index/4+1)*source.get_height()/4))
+			var region:=frames[index]
+			var start:=Vector2i(roundi(region.x*source.get_width()-.5),roundi(region.y*source.get_height()-.5))
+			var end:=start+Vector2i(roundi(region.z*source.get_width()+1),roundi(region.w*source.get_height()+1))
 			var size:=end-start;var top:=size.y;var feet:=0;var head:=0.0;var samples:=0
 			for y in size.y:
 				for x in size.x:
 					if source.get_pixel(start.x+x,start.y+y).a<.5:continue
 					top=mini(top,y);feet=maxi(feet,y)
 					if y<size.y*.25:head+=x;samples+=1
+			if prefix.begins_with("male"):
+				head=0;samples=0
+				for y in range(top,mini(feet+1,ceili(top+(feet-top)*.25))):
+					for x in size.x:
+						if source.get_pixel(start.x+x,start.y+y).a<.5:continue
+						head+=x;samples+=1
 			var registration:=registrations[index]
 			var shown_feet:=.985+(float(feet)/size.y-registration.y)*registration.z
 			var shown_head:=.60+(head/maxi(1,samples)/size.x-registration.x)*registration.z
@@ -133,3 +148,41 @@ func test_motion_registration_keeps_feet_on_ground_and_head_stable() -> void:
 			assert_float(shown_feet).is_equal_approx(.985,.001)
 			assert_float(shown_head).is_equal_approx(.60,.001)
 			assert_float(shown_height).is_equal_approx(.94,.001)
+
+func test_representative_encoding_keeps_roles_sexes_and_load_independent() -> void:
+	assert_array(Costumes.ROLES).is_equal(preload("res://scripts/manual_work.gd").ROLES)
+	var sexes:=[0,0]
+	for identity in 100:
+		var sex:=identity%2;sexes[sex]+=1
+		for carrying in [false,true]:
+			var code:=Costumes.instance_code(identity%9,sex,carrying)
+			var fields:=Costumes.instance_fields(code)
+			assert_bool(fields.encoded).is_true()
+			assert_int(fields.role).is_equal(identity%9)
+			assert_int(fields.sex).is_equal(sex)
+			assert_bool(fields.carrying).is_equal(carrying)
+	assert_array(sexes).is_equal([50,50])
+	assert_bool(Costumes.instance_fields(0).encoded).is_false()
+	assert_bool(Costumes.instance_fields(1).carrying).is_true()
+	assert_bool(Costumes.instance_fields(2).encoded).is_false()
+
+func test_role_art_has_eighteen_separate_complete_cells_and_grounded_proportions() -> void:
+	var art:=Costumes.cast_uniforms()
+	assert_bool(art.role_atlas_ready).is_true()
+	var source:Image=art.role_atlas.get_image()
+	assert_int(art.role_frames.size()).is_equal(18)
+	assert_int(art.role_registration.size()).is_equal(18)
+	for index in 18:
+		var start:=Vector2i(roundi(float(index%6)*source.get_width()/6),roundi(float(index/6)*source.get_height()/3))
+		var end:=Vector2i(roundi(float(index%6+1)*source.get_width()/6),roundi(float(index/6+1)*source.get_height()/3))
+		var region:=source.get_region(Rect2i(start,end-start))
+		assert_bool(region.get_used_rect().has_area()).is_true()
+		for x in region.get_width():
+			assert_float(region.get_pixel(x,0).a).is_less(.03)
+			assert_float(region.get_pixel(x,region.get_height()-1).a).is_less(.03)
+		for y in region.get_height():
+			assert_float(region.get_pixel(0,y).a).is_less(.03)
+			assert_float(region.get_pixel(region.get_width()-1,y).a).is_less(.03)
+		var registration:Vector4=art.role_registration[index]
+		assert_bool(is_finite(registration.z) and registration.z>0).is_true()
+		assert_float(float(Costumes.ROLE_HEIGHTS[index])).is_between(.5,1.1)
