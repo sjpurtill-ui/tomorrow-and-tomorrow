@@ -1,6 +1,7 @@
 extends "res://scripts/hud/people_screen.gd"
-## Living settlement/work view. Drafts are read-only until the provider's guarded
+## Representative workforce illustration. Drafts are read-only until the provider's guarded
 ## commit calls the original ManualWork commands. Person/city actions are inherited.
+const WorkforceCast=preload("res://scripts/hud/people_workforce_cast.gd")
 const ROLE_NAMES:={"Food":"Food grounds","Survey":"Surveying","Extraction":"Wood & stone","Construction":"Building","Crafting":"Workshops","Logistics":"Water & carrying","Knowledge":"Learning","Administration":"Keeping & caring","Defense":"The watch"}
 const ROLE_PURPOSE:={"Food":"Gather, hunt, fish and grow food.","Survey":"Find resources in the nearby land.","Extraction":"Bring timber, stone and ore out of the land.","Construction":"Raise homes and works; repair what stands.","Crafting":"Make tools, equipment and everyday goods.","Logistics":"Carry supplies and bring drinking water home.","Knowledge":"Learn, teach and pursue current studies.","Administration":"Keep, distribute and care for the people.","Defense":"Keep watch and prepare our defenders."}
 
@@ -10,6 +11,7 @@ var overlay:Control
 var scene_title:Label
 var scene_toolbar:HFlowContainer
 var scope_note:Label
+var figure_legend:Label
 var mode_note:Label
 var overview_button:Button
 var leaders_button:Button
@@ -48,6 +50,10 @@ var face_shelf:Control
 var food_strip:VBoxContainer
 var food_graph:FoodCrossGraphic
 var navigation:VBoxContainer
+var _shown_counts:Dictionary={}
+var _shown_percentages:Dictionary={}
+var _current_percentages:Dictionary={}
+var _showing_preview:=false
 
 func setup(block:Dictionary)->void:
 	super.setup(block)
@@ -72,6 +78,7 @@ func _build_scene()->void:
 	var heading:=HFlowContainer.new();heading.name="PeopleSituation";heading.add_theme_constant_override("h_separation",24);heading.add_theme_constant_override("v_separation",4);add_child(heading);scene_toolbar=heading
 	scene_title=_annotation_label("",18);scene_title.add_theme_font_override("font",T.font("ui_strong"));heading.add_child(scene_title)
 	scope_note=_annotation_label("",12);scope_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(scope_note)
+	figure_legend=_annotation_label("100 figures · each = 1% of workers",12);figure_legend.name="WorkforceFigureLegend";figure_legend.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(figure_legend)
 	var command:=heading
 	mode_note=_annotation_label("",12);mode_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(mode_note)
 	overview_button=_annotation_button(command,"← Overview",_return_overview);overview_button.visible=false
@@ -98,7 +105,7 @@ func _build_scene()->void:
 	var camera_buttons:=HBoxContainer.new();camera_buttons.add_theme_constant_override("separation",8);navigation.add_child(camera_buttons)
 	var zoom_out:=_annotation_button(camera_buttons,"−",func():settlement_view.call("zoom_view",1.0/.88));zoom_out.name="VillageZoomOut";zoom_out.custom_minimum_size.x=36;zoom_out.tooltip_text="Zoom out"
 	var zoom_in:=_annotation_button(camera_buttons,"+",func():settlement_view.call("zoom_view",.88));zoom_in.name="VillageZoomIn";zoom_in.custom_minimum_size.x=36;zoom_in.tooltip_text="Zoom in"
-	var recenter:=_annotation_button(camera_buttons,"Center view",func():settlement_view.call("reset_navigation"));recenter.name="VillageRecenter";recenter.tooltip_text="Return to the selected area, or the village overview. Home also centers the view."
+	var recenter:=_annotation_button(camera_buttons,"Center view",func():settlement_view.call("reset_navigation"));recenter.name="VillageRecenter";recenter.tooltip_text="Return to the selected work area, or the workforce overview. Home also centers the view."
 	var help:=_annotation_label("Drag to move · scroll to zoom",11);help.mouse_filter=Control.MOUSE_FILTER_IGNORE;navigation.add_child(help)
 	stage.resized.connect(_fit_scene)
 
@@ -145,7 +152,7 @@ func _build_focus()->void:
 	decrease_button=_annotation_button(controls,"−",_step.bind(-1));decrease_button.name="DraftLess";decrease_button.custom_minimum_size.x=40
 	increase_button=_annotation_button(controls,"+",_step.bind(1));increase_button.name="DraftMore";increase_button.custom_minimum_size.x=40
 	five_button=_annotation_button(controls,"+5",_step.bind(5));five_button.name="DraftFive";five_button.custom_minimum_size.x=40
-	var step_note:=_annotation_label("1% per step",12);step_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(step_note)
+	var step_note:=_annotation_label("1% requested",12);step_note.tooltip_text="Each step requests one percentage point. Figures show the likely allocation after whole-worker rounding and food protection.";step_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(step_note)
 	transfer_reading=_annotation_label("");transfer_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(transfer_reading)
 	risk_reading=_annotation_label("");risk_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;risk_reading.add_theme_color_override("font_color",annotation_ink().lerp(T.ACTION,.45));focus_body.add_child(risk_reading)
 	var commands:=HFlowContainer.new();commands.add_theme_constant_override("h_separation",10);commands.add_theme_constant_override("v_separation",4);focus_body.add_child(commands)
@@ -166,9 +173,11 @@ func _fill_scene(scene:Dictionary)->void:
 	for task:Dictionary in data.get("labor",{}).get("tasks",[]):context.allocations[String(task.id)]=int(task.count)
 	if not _configured:settlement_view.call("configure",context);_configured=true
 	else:settlement_view.call("update_state",context)
-	scene_title.text=String(context.get("name","Our people"))
+	scene_title.text="Our workforce"
 	scope_note.text="%d workers · across our settlements" % int(data.get("labor",{}).get("able",0))
-	scene_title.tooltip_text=String(scene.get("headline",""))+"\n"+String(scene.get("season",""))
+	scene_title.tooltip_text="An illustration of our work categories across all settlements, not a map of one town."
+	figure_legend.tooltip_text="Percentages are rounded to 100 representative figures. Actual worker counts remain visible beside each work area."
+	_sync_workforce()
 	_fit_scene.call_deferred()
 
 ## Parent's nine-row labor UI is intentionally replaced, not duplicated.
@@ -180,13 +189,54 @@ func _rebuild_labor()->void:
 	leaders_button.tooltip_text=String(labor.get("leaders_tip",""))
 	leaders_button.visible=bool(labor.get("manual",false))
 	pause_button.visible=bool(data.get("world_running",false))
-	for task:Dictionary in labor.get("tasks",[]):
-		var role:=String(task.id)
-		if not markers.has(role):continue
-		(markers[role].number as Label).text="%s workers" % preload("res://scripts/hud/era_words.gd").grouped(int(task.count))
-		(markers[role].node as Control).tooltip_text=_share_text(task)+" of the work · "+_task_tip(task)
 	if not draft.is_empty():draft_stale=draft_stale or bool(forecast.get("stale",false)) or _draft_revision!=data.get("workforce_revision",[])
 	_refresh_focus()
+
+func _current_counts()->Dictionary:
+	var counts:={}
+	for role:String in ROLE_NAMES:counts[role]=0
+	for task:Dictionary in data.get("labor",{}).get("tasks",[]):
+		if counts.has(String(task.id)):counts[String(task.id)]=maxi(0,int(task.count))
+	return counts
+
+func _valid_changed_preview()->bool:
+	return not (draft.get("commands",[]) as Array).is_empty() and bool(draft.get("has_changes",true)) and bool(forecast.get("ok",false)) and not draft_stale and not bool(forecast.get("stale",false)) and _draft_revision==data.get("workforce_revision",[])
+
+func _sync_workforce()->void:
+	if settlement_view==null:return
+	var current:=_current_counts()
+	_current_percentages=WorkforceCast.apportion(current)
+	_showing_preview=_valid_changed_preview()
+	# Heads after the original command replay include local food protection.
+	# Productivity-equivalent workers and the requested split are not headcounts.
+	_shown_counts=(forecast.get("after",{}).get("counts",current) as Dictionary).duplicate() if _showing_preview else current
+	_shown_percentages=WorkforceCast.apportion(_shown_counts)
+	if settlement_view.has_method("set_workforce"):settlement_view.call("set_workforce",_shown_counts,_showing_preview)
+	for role:String in markers:
+		var now:=int(current.get(role,0));var next:=int(_shown_counts.get(role,0))
+		var percent:=int(_shown_percentages.get(role,0));var prior:=int(_current_percentages.get(role,0))
+		(markers[role].number as Label).text="%d%% → %d%% · %s workers"%[prior,percent,preload("res://scripts/hud/era_words.gd").grouped(next)] if _showing_preview and (prior!=percent or now!=next) else "%d%% · %s workers"%[percent,preload("res://scripts/hud/era_words.gd").grouped(next)]
+		(markers[role].node as Control).tooltip_text="Current: %d%% · %d workers"%[prior,now]+("\nProposed after rounding and food protection: %d%% · %d workers"%[percent,next] if _showing_preview else "")+"\n"+String(ROLE_PURPOSE[role])
+	figure_legend.text="100 figures · each = 1% of workers" if int(_shown_percentages.get("Unassigned",0))==0 else "100 figures · no workers assigned"
+
+func _movement_words()->String:
+	transfer_reading.tooltip_text=""
+	if not _showing_preview:return ""
+	var moved:=0;var donors:PackedStringArray=[];var recipients:PackedStringArray=[];var details:PackedStringArray=[]
+	var current:=_current_counts()
+	for role:String in ROLE_NAMES:
+		var before:=int(_current_percentages.get(role,0));var after:=int(_shown_percentages.get(role,0))
+		if after>before:moved+=after-before;recipients.append(ROLE_NAMES[role])
+		elif after<before:donors.append(ROLE_NAMES[role])
+		if int(current.get(role,0))!=int(_shown_counts.get(role,0)):details.append("%s: %d%% → %d%% · %d → %d workers"%[ROLE_NAMES[role],before,after,int(current.get(role,0)),int(_shown_counts.get(role,0))])
+	transfer_reading.tooltip_text="\n".join(details)
+	var words:="The likely allocation leaves the figures unchanged." if moved==0 else ("%d figure%s move%s from %s."%[moved,"" if moved==1 else "s","s" if moved==1 else "",donors[0]] if donors.size()==1 else "%d figures change work across %d areas."%[moved,donors.size()+recipients.size()])
+	var requested:=int(preload("res://scripts/manual_work.gd").percents(draft.get("shares",{})).get(active_role,0))
+	var effective:=int(_shown_percentages.get(active_role,0))
+	if requested!=effective:
+		var protected:bool=(forecast.get("warnings",[]) as Array).any(func(w:Dictionary)->bool:return String(w.get("kind",""))=="safeguard")
+		words+=" %d%% requested; %s yields %d%%."%[requested,"food protection" if protected else "whole-worker rounding",effective]
+	return words
 
 func _api(method:String,arguments:Array=[])->Variant:
 	var callback:Variant=(data.get("workforce",{}) as Dictionary).get(method)
@@ -230,35 +280,27 @@ func _evaluate()->void:
 
 func _refresh_focus()->void:
 	if focus_panel==null:return
+	_sync_workforce()
 	var focused:=active_role!=""
-	focus_panel.visible=focused;evidence_panel.visible=focused;overview_button.visible=focused;food_strip.visible=focused
+	focus_panel.visible=focused;evidence_panel.visible=focused and bool(forecast.get("ok",false)) and not draft_stale;overview_button.visible=focused;food_strip.visible=focused
 	for role:String in markers:(markers[role].node as Control).visible=not focused
 	var commands:Array=draft.get("commands",[])
-	pending_note.text=("Updated preview · review before Apply" if preview_rebased else "Draft changes · not applied") if not commands.is_empty() else ""
+	pending_note.text=("Preview out of date · showing current work" if draft_stale else ("Proposed work · not applied" if _showing_preview else "Preview unavailable · showing current work")) if not commands.is_empty() else ""
 	if not focused:return
 	focus_title.text=String(ROLE_NAMES.get(active_role,active_role));focus_title.tooltip_text=focus_purpose.tooltip_text
-	var now:=0
-	for task:Dictionary in data.get("labor",{}).get("tasks",[]):
-		if String(task.id)==active_role:now=int(task.count);break
-	var proposed:=int(draft.get("counts",{}).get(active_role,now))
-	var applied:=int(forecast.get("after",{}).get("counts",{}).get(active_role,proposed))
-	people_reading.text="%d → %d workers" % [now,proposed] if proposed!=now else "%d workers" % now
-	if applied!=proposed:people_reading.text+=" · %d after food protection" % applied
-	var transfers:PackedStringArray=[]
-	for change:Dictionary in draft.get("changes",[]):
-		if String(change.get("role",""))==active_role:continue
-		transfers.append("%s %d → %d" % [String(change.role),int(change.before),int(change.after)])
-	transfer_reading.text="Requested: "+" · ".join(transfers) if not transfers.is_empty() else ""
-	transfer_reading.visible=not transfers.is_empty()
-	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")),bool(draft.get("has_changes",not commands.is_empty())))
+	var now:=int(_current_counts().get(active_role,0))
+	people_reading.text="Current %d%% · %d workers"%[int(_current_percentages.get(active_role,0)),now]
+	if _showing_preview:people_reading.text+="\nProposed %d%% · %d workers"%[int(_shown_percentages.get(active_role,0)),int(_shown_counts.get(active_role,0))]
+	transfer_reading.text=_movement_words();transfer_reading.visible=not transfer_reading.text.is_empty()
+	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")),_showing_preview)
 	forecast_reading.text=_forecast_words();forecast_reading.visible=not forecast_reading.text.is_empty()
-	var warnings:=_warning_words()
+	var warnings:=_warning_words() if not draft_stale else PackedStringArray()
 	var food:Dictionary=forecast.get("after",{}).get("food",{})
-	if float(food.get("net",0))<0 and String(food.get("hunger_risk","none"))=="none":warnings.append("Food stores fall %.1f rations/day." % -float(food.net))
+	if not draft_stale and float(food.get("net",0))<0 and String(food.get("hunger_risk","none"))=="none":warnings.append("Food stores fall %.1f rations/day." % -float(food.net))
 	if draft_stale:warnings.insert(0,"Conditions changed while you planned. Refresh this preview before applying.")
 	elif not bool(forecast.get("ok",false)):warnings.insert(0,String(forecast.get("reason","A forecast is not available yet.")))
 	risk_reading.text=" · ".join(warnings);risk_reading.visible=not warnings.is_empty()
-	_update_food_strip(not commands.is_empty())
+	_update_food_strip(_showing_preview)
 	apply_button.text="Refresh preview" if draft_stale else ("Apply assignment" if bool(data.get("labor",{}).get("manual",false)) else "Take control & apply")
 	apply_button.disabled=not draft_stale and (commands.is_empty() or not bool(forecast.get("ok",false)))
 	apply_button.visible=draft_stale or not commands.is_empty()
@@ -309,7 +351,7 @@ func _brief_warning(warning:Dictionary)->String:
 	return String(warning.get("text",""))
 
 func _update_food_strip(changed:bool)->void:
-	food_strip.visible=active_role!="" and (changed or active_role=="Food" or risk_reading.visible)
+	food_strip.visible=active_role!="" and not draft_stale and bool(forecast.get("ok",false)) and (changed or active_role=="Food" or risk_reading.visible)
 	food_graph.show_food(forecast,changed)
 	food_graph.tooltip_text=effect_graph.tooltip_text+"\n90-day path: captured current conditions; known seasonal food changes are included."
 
@@ -344,6 +386,7 @@ func _apply_draft()->void:
 
 func _cancel_draft()->void:
 	draft={};forecast={};draft_stale=false;preview_rebased=false
+	_refresh_focus()
 	if active_role!="":focus_work(active_role)
 
 func _delegate()->void:
@@ -406,7 +449,7 @@ func _fit_scene()->void:
 		var point:Vector2=anchors.get(role,Vector2(width*0.5,stage.size.y*0.5))
 		var rect:=_annotation_rect(point,marker.size,occupied,Rect2(Vector2(12,toolbar_height+8),Vector2(width-24,stage.size.y-toolbar_height-20)),ROLE_NAMES.keys().find(role),obstacles)
 		marker.position=rect.position;occupied.append(rect)
-		lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y)),"shared":not bool(anchor_info.get(role,{}).get("physical",false))})
+		lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y)),"shared":false})
 	if connections!=null:connections.lines=lines;connections.visible=true;connections.queue_redraw()
 	if focus_panel!=null:
 		var point:Vector2=anchors.get(active_role,Vector2(width*0.5,stage.size.y*0.5))
@@ -415,7 +458,7 @@ func _fit_scene()->void:
 		focus_panel.custom_minimum_size.x=control_width;focus_panel.size.x=control_width
 		evidence_panel.custom_minimum_size.x=evidence_width;evidence_panel.size.x=evidence_width
 		focus_panel.size.y=focus_panel.get_combined_minimum_size().y;evidence_panel.size.y=evidence_panel.get_combined_minimum_size().y
-		# Attach readings to opposite edges of the actual worksite, preserving its center.
+		# Attach readings to the illustrated area's edges, preserving its activity.
 		focus_panel.position=Vector2(clampf(point.x+70,16,maxf(16,width-control_width-16)),clampf(point.y-170,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-focus_panel.size.y-100)))
 		evidence_panel.position=Vector2(clampf(point.x-evidence_width-65,16,maxf(16,width-evidence_width-16)),clampf(point.y-95,toolbar_height+8,maxf(toolbar_height+8,stage.size.y-evidence_panel.size.y-100)))
 		food_strip.size.x=minf(1000,width-40);food_strip.size.y=food_strip.get_combined_minimum_size().y;food_strip.position=Vector2(20,maxf(16,stage.size.y-food_strip.size.y-16))
@@ -429,21 +472,19 @@ func _fit_scene()->void:
 		if active_role!="" and connections!=null:
 			connections.lines=[]
 			var info:Dictionary=anchor_info.get(active_role,{})
-			source_reading.text="" if bool(info.get("physical",false)) else "Shared work ground"
-			source_reading.visible=not source_reading.text.is_empty()
+			source_reading.text="";source_reading.visible=false
 			for panel:Control in [focus_panel,evidence_panel]:
 				var rect:=panel.get_rect();var source:=point;var nearest:=INF
-				# The artist exposes actual parcel contours. End the quiet line on
-				# the nearest recorded edge, leaving the working image itself clear.
-				for polygon:PackedVector2Array in (info.get("polygons",[]) if bool(info.get("physical",false)) else []):
+				# End the quiet line on the illustrated zone's nearest edge.
+				for polygon:PackedVector2Array in info.get("polygons",[]):
 					for vertex:Vector2 in polygon:
 						var distance:=vertex.distance_squared_to(rect.get_center())
 						if distance<nearest:nearest=distance;source=vertex
-				connections.lines.append({"from":source,"to":Vector2(clampf(source.x,rect.position.x,rect.end.x),clampf(source.y,rect.position.y,rect.end.y)),"shared":not bool(info.get("physical",false))})
+				connections.lines.append({"from":source,"to":Vector2(clampf(source.x,rect.position.x,rect.end.x),clampf(source.y,rect.position.y,rect.end.y)),"shared":false})
 			connections.queue_redraw()
 
-## Find nearby open paper around each real worksite, rather than stacking every
-## annotation below the same shared-ground anchor. Preference is stable on resize.
+## Find nearby open space around each illustrated work area.
+## Preference is stable on resize.
 func _annotation_rect(point:Vector2,extent:Vector2,occupied:Array[Rect2],available:Rect2,index:int,obstacles:Array[Rect2]=[])->Rect2:
 	var best:=Rect2(available.position,extent);var score:=INF
 	var preferred:=float(index)*2.399963

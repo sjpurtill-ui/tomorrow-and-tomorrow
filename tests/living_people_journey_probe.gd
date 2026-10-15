@@ -2,6 +2,7 @@ extends "res://tests/own_town_capture.gd"
 ## Private integration journey through the actual terrain, HUD and provider.
 ## No player save is read or written. Run only on the isolated test desktop.
 const ROLES:=["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
+const WorkforceCast=preload("res://scripts/hud/people_workforce_cast.gd")
 var failures:Array[String]=[]
 var checks:=0
 var audit_terrain:Node
@@ -53,6 +54,7 @@ func _ready()->void:
 	if board==null:get_tree().quit(1);return
 	await _capture("overview-wide")
 	_check_markers(board,"wide")
+	_check_workforce(board,false,"initial current work")
 	var initial_height:float=board.stage.custom_minimum_size.y
 	hud.dock.body_scroll.scroll_vertical=130;await _frames(8)
 	_expect(absf(board.stage.custom_minimum_size.y-initial_height)<1.0,"Scrolling does not enlarge the living scene")
@@ -82,21 +84,39 @@ func _ready()->void:
 	var increase:=board.find_child("DraftFive",true,false) as Button
 	_expect(increase!=null,"Assignment step exists")
 	if increase:
-		increase.pressed.emit();await _frames(8)
+		var before_targets:Dictionary=board.settlement_view.call("workforce_percentages").duplicate()
+		var before_positions:=_figure_positions(board)
+		increase.pressed.emit()
+		var initial_positions:=_figure_positions(board)
+		_expect(initial_positions==before_positions,"Reallocation changes destinations without teleporting figures")
+		await _frames(8)
 		_expect(not board.draft_stale,"Learning effects capture is a current proposal")
 		_expect(not (board.draft.get("commands",[]) as Array).is_empty(),"Worker change creates draft")
 		_expect(GameState.population_allocations==original and PeopleDirection.automatic_work==original_mode,"Preview preserves current workers and delegation")
 		await _capture("learning-draft-wide")
+		_check_workforce(board,true,"effective draft")
+		var after_targets:Dictionary=board.settlement_view.call("workforce_percentages")
+		var moved:=0
+		for role:String in after_targets:moved+=maxi(0,int(after_targets.get(role,0))-int(before_targets.get(role,0)))
+		if moved>0:
+			var during:=_figure_positions(board);var changed:=0
+			for index in mini(before_positions.size(),during.size()):
+				if before_positions[index].distance_to(during[index])>.000001:changed+=1
+			_expect(changed==moved,"Only the effective percentage difference walks to new work")
+		await _frames(24);await _capture("learning-draft-moving")
+		await _frames(90);await _capture("learning-draft-arriving")
 		_check_local_annotations(board,"learning draft")
 	# Fast-world invalidation must not apply a stale allocation.
 	GameState.elapsed_days+=1
 	hud.live_refresh_dock();await _frames(6)
 	board=hud.dock.find_child("CivilizationPeopleScreen",true,false)
+	_check_workforce(board,false,"stale draft returns to current work")
 	var apply:=board.find_child("ApplyWorkDraft",true,false) as Button
 	if apply:apply.pressed.emit();await _frames(8)
 	_expect(GameState.population_allocations==original and PeopleDirection.automatic_work==original_mode,"Stale Apply does not change work")
 	var cancel:=board.find_child("CancelWorkDraft",true,false) as Button
 	if cancel:cancel.pressed.emit();await _frames(4)
+	_check_workforce(board,false,"canceled draft returns to current work")
 	# Reading a focused area also needs a refresh path as the world advances,
 	# even when no worker edit has been proposed.
 	GameState.elapsed_days+=1
@@ -117,6 +137,7 @@ func _ready()->void:
 	await _capture("food-focus-narrow")
 	hud.handle_escape();await _frames(6);await _capture("overview-narrow")
 	_check_markers(board,"narrow")
+	_check_workforce(board,false,"narrow current work")
 	get_window().size=Vector2i(2869,1337);get_window().content_scale_size=Vector2i(2869,1337)
 	hud.force_dock_layout();await _frames(16)
 	await _capture("overview-ultrawide");_check_markers(board,"ultrawide")
@@ -170,6 +191,33 @@ func _check_markers(board:Control,label:String)->void:
 		rectangles.append(rectangle)
 	_expect(inside,"Category controls stay inside the scene: "+label)
 	_expect(separate,"Category controls do not overlap: "+label)
+
+func _figure_positions(board:Control)->PackedVector3Array:
+	var positions:=PackedVector3Array()
+	var figures:=board.settlement_view.get("_people") as MultiMeshInstance3D
+	if figures==null or figures.multimesh==null:return positions
+	for index in figures.multimesh.instance_count:positions.append(figures.multimesh.get_instance_transform(index).origin)
+	return positions
+
+func _check_workforce(board:Control,preview:bool,label:String)->void:
+	_expect(board.settlement_view.has_method("workforce_percentages"),"Representative workforce accessor exists: "+label)
+	if not board.settlement_view.has_method("workforce_percentages"):return
+	var weights:Dictionary={}
+	for task:Dictionary in board.data.get("labor",{}).get("tasks",[]):weights[String(task.id)]=int(task.count)
+	if preview:weights=board.forecast.get("after",{}).get("counts",{})
+	var expected:=WorkforceCast.apportion(weights)
+	var actual:Dictionary=board.settlement_view.call("workforce_percentages")
+	_expect(actual==expected,"Figure targets match effective headcounts: "+label)
+	_expect(_figure_positions(board).size()==100,"Exactly one hundred stable figure instances: "+label)
+	_expect(int(board.settlement_view.get("visual_people_count"))==100,"Reported figure count is one hundred: "+label)
+	var total:=0
+	for count:int in actual.values():total+=count
+	_expect(total==100,"Displayed percentages total one hundred: "+label)
+	_expect(String(board.figure_legend.text).contains("100 figures"),"Figure meaning is explicit: "+label)
+	_expect(bool(board.get("_showing_preview"))==preview,"Current/proposed mode is truthful: "+label)
+	for role:String in ROLES:
+		var reading:String=board.markers[role].number.text
+		_expect(reading.contains(str(int(expected.get(role,0)))+"%"),"Zone percent matches cast: "+label+" "+role)
 
 func _capture(label:String)->void:
 	await RenderingServer.frame_post_draw
