@@ -523,7 +523,7 @@ func restore_view_state(saved:Dictionary)->void:
 	var plan:Dictionary=saved.get("work_plan",{})
 	# A live dock refresh restores memory after updating this same widget.
 	# Retain its stale flag and draft; only a new reader needs to replay memory.
-	var retained:=not draft.is_empty() and int(plan.get("token",0))==int(draft.get("token",0)) and plan.get("commands",[])==draft.get("commands",[])
+	var retained:bool=not draft.is_empty() and int(plan.get("token",0))==int(draft.get("token",0)) and plan.get("commands",[])==draft.get("commands",[])
 	if not retained and not (plan.get("commands",[]) as Array).is_empty():
 		var fresh:Variant=_api("capture")
 		if fresh is Dictionary and bool(fresh.get("ok",false)):
