@@ -2,13 +2,14 @@ extends RefCounted
 ## A disposable allocation draft and a read-only consequence preview.
 ## No live setter, order, clock tick, save or live ledger write is called here.
 ## Existing commands and rules run synchronously on detached system instances.
-## Apply belongs to the provider: check is_current, confirm taking control,
-## then replay commands through the original Manual.move_share interface.
+## Committing belongs to the provider: check is_current, require an explicit
+## assignment action, then replay through the original Manual.move_share.
 
 const Manual = preload("res://scripts/manual_work.gd")
 const Fabric = preload("res://scripts/built_fabric.gd")
 const Construction = preload("res://scripts/settlement_construction.gd")
 const Research = preload("res://scripts/research_600_catalog.gd")
+const WorkImpacts = preload("res://scripts/hud/people_work_impacts.gd")
 const BINDINGS := ["state", "discovery", "progression", "resources", "economy", "settlements", "government", "figures", "direction", "communities", "diplomacy", "dialogue", "facts", "advisors", "food", "consequences", "civics", "world", "military"]
 const ASSUMPTIONS := [
 	"Food compares one representative day at the captured season, weather, population, stores and working conditions. It is an estimate, not yesterday's observed output.",
@@ -160,6 +161,7 @@ static func _read_plan(proposed: bool, draft: Dictionary) -> Dictionary:
 	var result := {"counts": counts, "effective_workers": effective, "research": research, "towns": towns}
 	result["food"] = _combined_food(towns)
 	result["water"] = _combined_water(towns)
+	result["work_impacts"] = WorkImpacts.combine(towns)
 	# Crew effort can be added; individual housing ETAs cannot.
 	var construction: Dictionary = {}
 	for key in ["builders", "homes", "civic", "repair", "repair_want", "infra", "walls", "fabric"]:
@@ -202,6 +204,7 @@ static func _guards() -> Dictionary:
 static func _read_town() -> Dictionary:
 	var state = WorldSimulation.state
 	var water := _water()
+	var work_impacts := WorkImpacts.local_reading()
 	var crews := Fabric.crews()
 	crews["housing"] = Construction.housing()
 	var metrics: Dictionary = state.simulation_metrics
@@ -226,7 +229,7 @@ static func _read_town() -> Dictionary:
 		"sources": food.food_sources,
 		"trajectory": [{"day": 0, "stock": stock}, {"day": 1, "stock": food.food_total_stock},
 			{"day": 30, "stock": food.food_forecast_30.ending_rations}, {"day": 90, "stock": food.food_forecast_90.ending_rations}]}
-	return {"food": reading, "water": water, "construction": crews}
+	return {"food": reading, "water": water, "construction": crews, "work_impacts": work_impacts}
 
 static func _water() -> Dictionary:
 	var state = WorldSimulation.state
