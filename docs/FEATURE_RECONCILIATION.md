@@ -1,3 +1,24 @@
+## October 15 — Percentage workforce and meaningful work areas (INTEGRATED)
+
+Runtime `71e3f9dc` gives People exactly 100 persistent representatives, one per
+percentage point, across nine illustrated workplaces. Men and women use distinct
+job poses and tools. Transfers move the same figures along paths; cancelling
+turns them back. Percentages and movement reflect effective forecast headcounts,
+including existing food safeguards, with actual heads shown separately.
+
+The landscape represents work rather than replicating the town. Worksite clicks,
+fixed-angle navigation, scenery cutaway and crew-aware label placement make the
+image usable. Recorded workshop/construction fabric can vary their art. The
+critique loop corrected motion, role decoding, distortion, occlusion and stale
+draft restoration. Simulation and save rules are unchanged. Wider consolidation
+and detailed industrial animation are not represented as finished.
+
+72 focused tests and 492 final actual-HUD checks across early Night and developed
+Daylight pass, with 36 captures at wide, narrow and ultrawide sizes. Exact
+source commits, native movement proof and capture locations are recorded in
+`docs/INTEGRATION_STATUS.md`. Remote main is verified before canonical fast-forward;
+no running player or editor is restarted.
+
 ## October 15 — People camera and representative motion (INTEGRATED)
 
 Runtime/proof `15a179dd` fixes the user's non-navigable, distortable village:
