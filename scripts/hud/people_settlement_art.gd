@@ -152,6 +152,7 @@ static func sprite(parent:Node3D,path:String,cell:int,at:Vector3,width:float,opt
 	node.material_override=paint;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	node.custom_aabb=AABB(Vector3(-width,-height,-width),Vector3(width*2,height*2,width*2))
 	node.set_meta("painted",true);node.set_meta("foliage",bool(options.get("foliage",false)))
+	node.set_meta("illustrated_size",Vector2(width,height))
 	parent.add_child(node);return node
 
 static func buildings(plan:Dictionary,parent:Node3D,point:Callable)->Dictionary:

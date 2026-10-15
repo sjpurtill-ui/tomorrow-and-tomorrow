@@ -42,6 +42,8 @@ func test_view_reuses_geometry_focus_projects_and_people_are_bounded()->void:
 	assert_str(town.focused_role).is_equal("Crafting")
 	assert_int(town.role_screen_positions().size()).is_equal(9)
 	for point:Vector2 in town.role_screen_positions().values():assert_bool(point.is_finite()).is_true()
+	assert_array(town.annotation_obstacles()).is_not_empty()
+	for obstacle:Rect2 in town.annotation_obstacles():assert_bool(Rect2(Vector2.ZERO,town.size).encloses(obstacle)).is_true()
 	context.plots[0].damage={"fire":.4};town.update_state(context)
 	assert_int(town.geometry_builds).is_equal(2)
 	assert_str(town.focused_role).is_equal("Crafting")
