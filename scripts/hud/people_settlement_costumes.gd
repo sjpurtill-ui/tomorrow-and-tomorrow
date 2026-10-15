@@ -192,8 +192,11 @@ void fragment() {
             vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;
             paint = texture(walk_atlas,stride_region.xy+clamp(motion_uv,vec2(0.0),vec2(1.0))*stride_region.zw);
             if (any(lessThan(motion_uv,vec2(0.0))) || any(greaterThan(motion_uv,vec2(1.0)))) { paint = vec4(0.0); }
-        } else if (walking && carrying && carry_atlas_ready) {
+        } else if (carrying && carry_atlas_ready) {
+            // A delivery pause freezes supplied distance phase. Settle into the
+            // nearest planted-foot contact without changing body, clothes or load.
             int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            if (still) { stride_frame = int(mod(floor(v_time*2.0+0.5)*2.0,4.0)); }
             vec4 stride_region = carry_frames[row*4+stride_frame];
             vec4 registration = carry_registration[row*4+stride_frame];
             vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;

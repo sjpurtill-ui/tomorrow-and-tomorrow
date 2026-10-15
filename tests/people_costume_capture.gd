@@ -25,7 +25,7 @@ func _ready() -> void:
 	add_child(labels)
 	var painterly := "--painterly" in OS.get_cmdline_user_args()
 	var stages: Array = [[],["bone_needle_sewing","cordage"],["plain_weaving","cordage"],["plain_weaving","bone_needle_sewing","garment_pattern_cutting","cordage"]]
-	var poses: Array = [100,0,0,1,2,4,3,7,8] if painterly else [0,1,2,4,5,7]
+	var poses: Array = [100,0,0,100,2,4,3,7,8] if painterly else [0,1,2,4,5,7]
 	for row in stages.size():
 		var look := Costumes.appearance(stages[row], {"coverage": 1.0})
 		var shader := Shader.new()
@@ -49,7 +49,9 @@ func _ready() -> void:
 		batch.instance_count = poses.size()
 		for column in poses.size():
 			batch.set_instance_transform(column,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*0.001),Vector3(-0.009+column*(.018/(poses.size()-1)),0.0041-row*0.0033,0)))
-			batch.set_instance_custom_data(column,Color(fmod(column*0.618,1.0),poses[column],1.0 if column==(2 if painterly else 0) else 0.0,0.75))
+			var phase_column := 2 if painterly and column==3 else column
+			var carried := column in [2,3] if painterly else column==0
+			batch.set_instance_custom_data(column,Color(fmod(phase_column*0.618,1.0),poses[column],1.0 if carried else 0.0,0.75))
 			batch.set_instance_color(column,look.palette[column%look.palette.size()])
 		var people := MultiMeshInstance3D.new()
 		people.multimesh = batch
