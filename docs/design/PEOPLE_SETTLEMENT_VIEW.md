@@ -32,3 +32,11 @@ The first painterly GPU capture completed successfully. A second private run emi
 The ground/depth follow-up passed a fresh private GPU run (six early/mature/focused/narrow captures) and nine focused tests. The overview frames an actual near residential cluster, with calmer ground texture, worn door/work yards, tighter contact shadows and a subtle edge finish. B accepted these composition changes and the obstacle API. The remaining visual finding is the contrast between painted buildings and unsupported construction/damage/workplace geometry; it remains open for the next bounded art pass.
 
 The matching-fabric follow-up closes that finding for the representative fixtures: all 31 early and 92 mature building instances use appropriate paintings, including the active plank-roof workshop, new timber frame and damaged timber homes. Eleven focused cases pass, including material/floor gates and transparent atlas-cell boundaries. Six private native captures verify read-only records, yard ground contact and removal of the replaced communal construction frame. Timber atlas v2 corrects roof artwork that crossed nominal cell boundaries and appeared as isolated roof fragments. The integrator owns final combined review with the new people artwork and annotation controls; these component captures do not claim whole-screen graphical acceptance.
+
+Final combined acceptance: actual HUD Night/Daylight journeys pass 154/174 checks
+and 32 narrow/wide/ultrawide captures. A and B accepted the combined art and
+annotations after correcting the mature Crafting sightline: a camera-facing
+crown must be tested at its painted position, not a world-up proxy. Root's real
+shortage/protection fixture also passes with 15 captures. See
+`LIVING_PEOPLE_ART_REVIEW.md` for specific findings and dispositions. Game state
+and recorded fabric remain unchanged during the final reader/preview journeys.
