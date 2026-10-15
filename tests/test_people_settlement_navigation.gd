@@ -50,3 +50,13 @@ func test_pan_zoom_and_resize_keep_art_angle_and_selected_area_recoverable()->vo
 	assert_that(town._desired_target).is_equal(center)
 	assert_str(town.focused_role).is_equal("Food")
 	assert_that(Vector2(town._yaw,town._pitch)).is_equal(angle)
+
+func test_painted_worksite_can_be_selected_above_its_ground_footprint()->void:
+	var town:=_town();town.focus_role("Crafting");town._process(2.0)
+	var hits:Array[String]=[]
+	town.role_selected.connect(func(role:String):hits.append(role))
+	assert_bool(town._site_bounds.has("Crafting")).is_true()
+	var site:Rect2=town._site_bounds.Crafting
+	var click:=Vector2(site.get_center().x,site.position.y+site.size.y*.20)
+	_button(town,click,true);_button(town,click,false)
+	assert_array(hits).is_equal(["Crafting"])
