@@ -108,6 +108,21 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 static func _metric(label: String, before: Dictionary, after: Dictionary, key: String, unit: String, note: String, need := 0.0) -> Dictionary:
 	return {"label": label, "before": float(before.get(key, 0.0)), "after": float(after.get(key, 0.0)), "unit": unit, "note": note, "need": need}
 
+## The essential interpretation stays visible beside the graphics. Longer
+## calculation notes remain available to the UI, without expanding its layout.
+static func summary(role: String) -> String:
+	return String({
+		"Food": "At today's conditions, after spoilage. Stores cover deficits until the reserves run out.",
+		"Survey": "Land knowledge builds gradually. Finds are an average, not a monthly guarantee.",
+		"Extraction": "Last output is observed. More crew still needs accessible deposits and enough carrying.",
+		"Construction": "Housing and upkeep come first. Remaining builders improve homes, roads and works.",
+		"Crafting": "Potential output before materials, arms work, demand and storage limits.",
+		"Logistics": "Carriers bring water and food home. Full carrying cover halves fresh food spoilage.",
+		"Knowledge": "Effort includes supply limits. More learners need more goods; each question has its own demands.",
+		"Administration": "Care adjusts over about 60 days. Keepers prevent food rot now; full cover cuts stored spoilage by 40%.",
+		"Defense": "These are actual guards and equipment. New recruits still need arms and training."
+	}.get(role, ""))
+
 static func _housing(plan: Dictionary, settlement_id: String) -> Dictionary:
 	var construction: Dictionary = plan.get("construction", {})
 	if not (construction.get("housing", {}) as Dictionary).is_empty(): return construction.housing
