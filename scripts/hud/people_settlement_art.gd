@@ -281,7 +281,9 @@ vec4 anchor=MODELVIEW_MATRIX*vec4(0,0,0,1);
 float wind=sin(anim_clock*.7+phase+UV.y*2.0)*sway*pow(1.0-UV.y,2.0);
 VERTEX=anchor.xyz+vec3((UV.x-.5)*world_size.x+wind,(1.0-UV.y)*world_size.y,0);
 NORMAL=vec3(0,0,1);
-crown=(MODEL_MATRIX*vec4(0,crown_height,0,1)).xyz;
+// Test the painted crown where it is actually drawn: along camera-up.
+// A world-up center misses large foreground billboards above the worksite.
+crown=(INV_VIEW_MATRIX*vec4(anchor.xyz+vec3(0,crown_height,0),1)).xyz;
 }
 float paint_noise(vec2 p){
 vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);
