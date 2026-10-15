@@ -127,14 +127,29 @@ static func _water(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pare
 	node.material_override=paint;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;parent.add_child(node)
 
 const TREE_SHADER:="""shader_type spatial;
-render_mode unshaded;
+render_mode unshaded, blend_mix, depth_prepass_alpha;
 uniform vec4 tint : source_color = vec4(1.0);
-varying vec3 world_normal;varying vec3 at;
-void vertex(){world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);at=VERTEX;}
+uniform vec3 focus_world = vec3(0.0);
+uniform float focus_radius = 0.003;
+uniform float focus_cutaway = 0.0;
+varying vec3 world_normal;varying vec3 at;varying vec3 world_at;
+void vertex(){world_normal=normalize(MODEL_NORMAL_MATRIX*NORMAL);at=VERTEX;world_at=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz;}
 void fragment(){
 float key=smoothstep(-.4,.85,dot(normalize(world_normal),normalize(vec3(-.55,.8,.6))));
 float leaf=fract(sin(dot(floor(at*2300.0),vec3(127.1,311.7,45.1)))*43758.5);
 vec3 base=COLOR.rgb*tint.rgb;
 ALBEDO=base*mix(vec3(.52,.65,.63),vec3(1.35,1.34,.95),key)*(.90+leaf*.16);
+// Cut away only crowns between the camera and focused work area. The cone
+// maintains a quiet screen-sized opening; rear and peripheral trees stay whole.
+vec3 eye=INV_VIEW_MATRIX[3].xyz;
+vec3 ray=focus_world-eye;
+float reach=max(length(ray),0.0001);
+vec3 axis=ray/reach;
+float depth=dot(world_at-eye,axis);
+float radial=length(world_at-eye-axis*depth);
+float aperture=focus_radius*clamp(depth/reach,0.05,1.0);
+float in_front=step(0.0,depth)*(1.0-step(reach-0.0003,depth));
+float cut=(1.0-smoothstep(aperture*0.65,aperture,radial))*in_front*focus_cutaway;
+ALPHA=1.0-cut*0.985;
 }
 """

@@ -28,6 +28,8 @@ var _terrain:Node
 var _zones:Dictionary={}
 var _anchors:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
+var _foliage_materials:Array[ShaderMaterial]=[]
+var _foliage_cut:=0.0
 var _bounds:=Rect2()
 var _ground_bounds:=Rect2()
 var _heights:=PackedFloat32Array()
@@ -120,7 +122,7 @@ func role_anchor_metadata()->Dictionary:
 
 func _build_scene()->void:
 	if is_instance_valid(model):model.free()
-	_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
+	_materials.clear();_foliage_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
 	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
 	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
 	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
@@ -177,6 +179,7 @@ func _private_paint(node:Node)->void:
 				var outline:ShaderMaterial=source.next_pass.duplicate();outline.set_shader_parameter("outline_px",.7)
 				paint.next_pass=outline;_materials.append(outline)
 			child.material_override=paint
+			if child.name=="ActualSeededWoodland":_foliage_materials.append(paint)
 		_private_paint(child)
 
 func _sample_ground()->void:
@@ -436,6 +439,10 @@ func _position_camera()->void:
 	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
 	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
+	for material in _foliage_materials:
+		material.set_shader_parameter("focus_world",_desired_target+Vector3.UP*.0015)
+		material.set_shader_parameter("focus_radius",_desired_span*.19)
+		material.set_shader_parameter("focus_cutaway",_foliage_cut)
 
 func _project_anchors()->void:
 	if not is_instance_valid(camera) or not camera.is_inside_tree():return
@@ -450,6 +457,7 @@ func _process(delta:float)->void:
 	_elapsed+=minf(delta,.1)
 	_target=_target.lerp(_desired_target,1.0-exp(-delta*7.0))
 	_span=lerpf(_span,_desired_span,1.0-exp(-delta*7.0))
+	_foliage_cut=lerpf(_foliage_cut,0.0 if focused_role.is_empty() else 1.0,1.0-exp(-delta*7.0))
 	_position_camera();_project_anchors();_move_people()
 	if is_instance_valid(_yards):
 		_yards.set_view(Vector2(_target.x,_target.z),_span)
