@@ -7,6 +7,7 @@ const RIGHT=Vector2(.8253356,.5646425)
 const UP=Vector2(.5646425,-.8253356)
 const SCENERY="res://assets/ui/people/work-world-sites-v1.png"
 const GROUND="res://assets/ui/people/meadow-ground-v1.png"
+const ACTIVITY_GROUNDS="res://assets/ui/people/work-world-grounds-v1.png"
 const WELL="res://assets/ui/people/work-world-well-v1.png"
 const LAYOUT={
 	"Food":Vector2(-.040,-.031),"Survey":Vector2(-.043,.034),
@@ -32,20 +33,21 @@ static func zones()->Dictionary:
 		for offset:Vector2 in [Vector2(-.012,-.011),Vector2(.010,-.011),Vector2(.013,-.005),Vector2(.012,.010),Vector2(.006,.017),Vector2(-.008,.017),Vector2(-.013,.008)]:polygon.append(world(at+offset))
 		var area:=Rect2(polygon[0],Vector2.ZERO)
 		for vertex:Vector2 in polygon:area=area.expand(vertex)
-		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.011,Vector2.ONE*.022),"focus_center":world(at+Vector2(0,.005)),"focus_span":.040,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.011))}
+		result[role]={"center":center,"position":center,"polygon":polygon,"polygons":[polygon],"bounds":area,"work_area":Rect2(center-Vector2.ONE*.011,Vector2.ONE*.022),"focus_center":world(at),"focus_span":.044,"title":TITLES[role],"physical":true,"source":"","plot_ids":[],"gate":world(at+Vector2(0,-.011)),"scenery":world(at+Vector2(.001,.011))}
 	return result
 
 static func work_positions(role:String,count:int=100)->PackedVector2Array:
 	var result:=PackedVector2Array()
 	if not LAYOUT.has(role):return result
 	var center:Vector2=LAYOUT[role]
-	# Stable permutation spreads small crews across the apron without marching
-	# rows. All100slots fit, even when every representative joins one role.
+	# Stable stratified slots use the whole work surface. The permutation also
+	# spreads small crews across it; moving a worker never renumbers the rest.
 	for index in clampi(count,0,100):
 		var slot:=(index*37)%100
-		var angle:=float(slot)*2.39996323+float(ROLES.find(role))*.31
-		var radius:=.00088*sqrt(float(slot)+.5)
-		result.append(world(center+Vector2(cos(angle)*1.15,sin(angle)*.70)*radius+Vector2(0,-.001)))
+		var seed:=float(slot)*1.7+float(ROLES.find(role))*.61
+		var at:=Vector2((float(slot%10)-4.5)*.00235,(floorf(float(slot)/10)-4.5)*.00160-.0018)
+		at+=Vector2(sin(seed),cos(seed*1.31))*.00011
+		result.append(world(center+at))
 	return result
 
 static func path_for_transfer(from_role:String,to_role:String)->PackedVector2Array:
@@ -92,15 +94,15 @@ static func render(parent:Node3D,point:Callable,options:Dictionary={})->Dictiona
 static func _site(parent:Node3D,point:Callable,role:String,at:Vector2,options:Dictionary)->MeshInstance3D:
 	var cell:=-1;var width:=.013;var path:=SCENERY;var rows:=2;var columns:=3
 	match role:
-		"Food":cell=0;width=.017
-		"Survey":cell=1;width=.015
-		"Extraction":cell=2;width=.016
-		"Knowledge":cell=3;width=.013
-		"Administration":cell=4;width=.013
-		"Defense":cell=5;width=.014
-		"Construction":path=Art.STATES;cell=0;width=.015
-		"Crafting":path=Art.BUILDINGS;cell=6;rows=3;columns=4;width=.016
-		"Logistics":path=WELL;cell=0;rows=1;columns=1;width=.013
+		"Food":cell=0;width=.009
+		"Survey":cell=1;width=.010
+		"Extraction":cell=2;width=.012
+		"Knowledge":cell=3;width=.009
+		"Administration":cell=4;width=.010
+		"Defense":cell=5;width=.010
+		"Construction":path=Art.STATES;cell=0;width=.013
+		"Crafting":path=Art.BUILDINGS;cell=6;rows=3;columns=4;width=.0135
+		"Logistics":path=WELL;cell=0;rows=1;columns=1;width=.010
 	var recorded:=recorded_style(role,options)
 	if not recorded.is_empty():
 		path=String(recorded.atlas);cell=int(recorded.cell);rows=int(recorded.get("rows",3));columns=int(recorded.get("columns",4))
@@ -127,16 +129,35 @@ static func _work_apron(parent:Node3D,point:Callable,role:String,center:Vector2)
 	if role=="Survey":earth=Color(.46,.45,.37,.62)
 	elif role=="Extraction":earth=Color(.44,.40,.29,.65)
 	elif role in ["Knowledge","Administration"]:earth=Color(.58,.48,.30,.58)
-	_patch(parent,point,center,.0125,earth)
-	_patch(parent,point,center+UP*.007,.009,Color(earth,.40))
-	if role=="Food":
-		for x:float in [-.008,-.004,0,.004,.008]:
-			_path(parent,point,PackedVector2Array([center+RIGHT*x-UP*.008,center+RIGHT*x+UP*.008]),.0013,Color("554728"))
-		for side:int in [-1,1]:
-			for y:float in [-.007,-.001,.005]:
-				Art.sprite(parent,Art.DETAILS,5,point.call(center+RIGHT*.011*side+UP*y,.00004),.002,{"name":"GrowingRow"})
-	elif role=="Crafting":
-		for side:int in [-1,1]:Art.sprite(parent,Art.DETAILS,6,point.call(center+RIGHT*.011*side+UP*.002,.00004),.0025,{"name":"WorkshopMaterials"})
+	_patch(parent,point,center,.017,earth)
+	_patch(parent,point,center+UP*.008,.012,Color(earth,.40))
+	# The material lies under the actual worker slots, connecting activity to
+	# its setting. Contact tools remain part of each person's role artwork.
+	var cells:Dictionary={"Food":0,"Survey":1,"Extraction":1,"Construction":2,"Crafting":3,"Logistics":2,"Knowledge":4,"Administration":5,"Defense":3}
+	var dimensions:=Vector2(.029,.027)
+	if role=="Food":dimensions=Vector2(.030,.027)
+	elif role=="Crafting":dimensions=Vector2(.030,.026)
+	elif role=="Survey":dimensions=Vector2(.029,.030)
+	_activity_ground(parent,point,role,center+UP*.001,int(cells[role]),dimensions)
+	# A broad worn join, rather than a detached island, leads into the site.
+	_path(parent,point,PackedVector2Array([center-UP*.008,center+UP*.012]),.005,Color(earth,.45))
+
+static func _activity_ground(parent:Node3D,point:Callable,role:String,center:Vector2,cell:int,dimensions:Vector2)->void:
+	var texture:=Art.atlas(ACTIVITY_GROUNDS)
+	if texture==null:return
+	var region:=Art.region(ACTIVITY_GROUNDS,cell,2,3)
+	var image_size:=Vector2(texture.get_width(),texture.get_height())
+	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var corners:Array[Vector2]=[Vector2(-.5,-.5),Vector2(.5,-.5),Vector2(.5,.5),Vector2(-.5,.5)]
+	for index in [0,1,2,0,2,3]:
+		var local:Vector2=corners[index]
+		var uv:=Vector2(local.x+.5,.5-local.y)
+		surface.set_normal(Vector3.UP);surface.set_uv((Vector2(region.position)+uv*Vector2(region.size))/image_size);surface.set_uv2(uv)
+		surface.add_vertex(point.call(center+RIGHT*local.x*dimensions.x+UP*local.y*dimensions.y,.000035))
+	var node:=MeshInstance3D.new();node.name="ActivityGround_"+role;node.mesh=surface.commit()
+	var material:=ShaderMaterial.new();var shader:=Shader.new();shader.code=ACTIVITY_GROUND_SHADER;material.shader=shader
+	material.set_shader_parameter("ground_art",texture);node.material_override=material
+	node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;parent.add_child(node)
 
 static func _ground(parent:Node3D,point:Callable)->void:
 	var mesh:=SurfaceTool.new();mesh.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -192,6 +213,20 @@ uniform sampler2D ground_art:source_color,filter_linear_mipmap,repeat_enable;
 void fragment(){
  vec3 pigment=texture(ground_art,UV).rgb;
  float light=dot(pigment,vec3(.30,.55,.15));
- ALBEDO=mix(vec3(.33,.38,.21),pigment*.70+vec3(.13,.12,.075),.45);
+ ALBEDO=mix(vec3(.35,.38,.25),pigment*.66+vec3(.14,.13,.09),.24);
+}
+"""
+
+const ACTIVITY_GROUND_SHADER="""
+shader_type spatial;
+render_mode unshaded,cull_disabled,blend_mix,depth_draw_never;
+uniform sampler2D ground_art:source_color,filter_linear_mipmap;
+void fragment(){
+ vec4 paint=texture(ground_art,UV);
+ if(paint.a<.01){discard;}
+ float edge=max(abs(UV2.x*2.0-1.0),abs(UV2.y*2.0-1.0));
+ float blend=1.0-smoothstep(.60,1.0,edge);
+ ALBEDO=mix(paint.rgb,vec3(dot(paint.rgb,vec3(.3,.55,.15))),.12)*.87;
+ ALPHA=paint.a*blend*.88;
 }
 """
