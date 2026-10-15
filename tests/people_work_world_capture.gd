@@ -15,7 +15,7 @@ func _ready()->void:
 		_look(result.overview_center,.090)
 		await _capture("overview-"+str(dimensions.x))
 	for role:String in ["Food","Crafting","Administration","Logistics"]:
-		_look(result.zones[role].center,.035)
+		_look(result.zones[role].focus_center,result.zones[role].focus_span)
 		await _capture(role.to_lower()+"-1024")
 	print("PEOPLE_WORK_WORLD_NATIVE PASS ",result.zones.size()," zones")
 	get_tree().quit(0)
