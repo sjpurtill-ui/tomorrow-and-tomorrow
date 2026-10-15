@@ -421,8 +421,10 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Costumes.shader_code().replace("depth_draw_never","depth_prepass_alpha")
+	var shader:=Shader.new();shader.code=Costumes.painterly_shader_code()
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+	_people_paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
+	_people_paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
 	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
 	# Its private shader does not change the map's global no-people policy.
