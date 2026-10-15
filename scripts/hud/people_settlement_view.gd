@@ -507,7 +507,7 @@ func _install_worker_deliveries(blockers:Array[Dictionary],allocations:Dictionar
 		var source:Dictionary=_walks[index]
 		if source.get("source","")!="woodpile" or not source.has("stationary"):continue
 		for destination:Dictionary in _walks:
-			if destination.get("source","") not in ["bench","workshop_workbench"] or not destination.has("stationary"):continue
+			if destination.get("source","")!="bench" or not destination.has("stationary"):continue
 			var start:Vector2=source.stationary
 			var direction:Vector2=(Vector2(destination.target)-Vector2(destination.stationary)).normalized()
 			var finish:Vector2=Vector2(destination.stationary)+direction.orthogonal()*.001
@@ -585,15 +585,13 @@ static func _worker_free_cell(grid:AStarGrid2D,at:Vector2i)->Vector2i:
 func _worker_sites(blockers:Array[Dictionary])->Array[Dictionary]:
 	var targets:Array[Dictionary]=[]
 	for child:Node3D in model.get_children():
+		if not child.is_visible_in_tree():continue
 		var kind:=String(child.name).trim_prefix("PaintedWorkplace_").trim_prefix("Workplace_")
 		if kind not in ["bench","woodpile","pots","hide_frame","hearth_ring"]:continue
 		var role:="Food" if kind=="hearth_ring" else ("Logistics" if kind in ["woodpile","pots"] else "Crafting")
 		targets.append({"center":Vector2(child.position.x,child.position.z),"radius":.0025 if kind=="hearth_ring" else .0009,"role":role,"source":kind})
-	for record:Dictionary in _building_plan.get("buildings",[]):
-		if String(record.plot.get("status","active"))=="under_construction":
-			targets.append({"center":Vector2(record.position),"radius":float(record.get("radius",.003))+.0008,"role":"Construction","source":"recorded_frame"})
-		elif String(record.plot.get("land_use",""))=="workshop" and Art.building_style(record).get("atlas","")==Art.WORKSHOP:
-			targets.append({"center":Vector2(record.position),"radius":float(record.get("radius",.003))+.0008,"role":"Crafting","source":"workshop_workbench"})
+	# Painted building edges do not locate a reachable hand-height task surface.
+	# Only independently rendered work objects can anchor a stationary worker.
 	var result:Array[Dictionary]=[]
 	for target:Dictionary in targets:
 		# Initial workers are built before the camera is positioned. Use its
@@ -608,7 +606,8 @@ func _worker_sites(blockers:Array[Dictionary])->Array[Dictionary]:
 				if at.distance_to(other.stationary)<.001:occupied=true;break
 			if occupied:continue
 			# Work faces the nearby object/edge, never an arbitrary compass heading.
-			result.append({"stationary":at,"target":Vector2(target.center)+outward*maxf(0,float(target.radius)-.0009),"role":target.role,"source":target.source,"pose":8})
+			var pose:=100 if target.source in ["bench","hide_frame"] else 8
+			result.append({"stationary":at,"target":Vector2(target.center)+outward*maxf(0,float(target.radius)-.0009),"role":target.role,"source":target.source,"pose":pose})
 			break
 	return result
 
