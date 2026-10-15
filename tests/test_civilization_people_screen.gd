@@ -117,6 +117,23 @@ func test_running_world_change_rebases_and_requires_a_second_apply()->void:
 	screen.apply_button.pressed.emit()
 	assert_int(commits.size()).is_equal(1)
 
+func test_same_widget_dock_restore_does_not_silently_refresh_a_stale_plan()->void:
+	screen.focus_work("Knowledge");screen.increase_button.pressed.emit()
+	var saved:Dictionary=screen.view_state()
+	var held_captures:=captures;var held_evaluations:=evaluations
+	revision+=1;current=false;screen.update_block(_block());screen.restore_view_state(saved)
+	await get_tree().process_frame
+	assert_bool(screen.draft_stale).is_true()
+	assert_bool(screen.settlement_view.preview).is_false()
+	assert_dict(screen.settlement_view.weights).is_equal(_counts())
+	assert_int(captures).is_equal(held_captures)
+	assert_int(evaluations).is_equal(held_evaluations)
+	assert_str(screen.apply_button.text).is_equal("Refresh preview")
+	screen.apply_button.pressed.emit()
+	assert_bool(screen.draft_stale).is_false()
+	assert_bool(screen.settlement_view.preview).is_true()
+	assert_array(commits).is_empty()
+
 func test_live_refresh_preserves_camera_and_draft_without_expensive_capture()->void:
 	screen.focus_work("Knowledge");screen.increase_button.pressed.emit()
 	var held_captures:=captures;var held_evaluations:=evaluations
