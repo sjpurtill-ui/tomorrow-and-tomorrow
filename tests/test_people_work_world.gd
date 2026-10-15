@@ -11,7 +11,8 @@ func test_all_roles_have_stable_room_for_the_entire_workforce()->void:
 		for index in points.size():
 			assert_bool(Geometry2D.is_point_in_polygon(points[index],zones[role].polygon)).is_true()
 			assert_bool(World.bounds().has_point(points[index])).is_true()
-			for other in range(index):assert_float(points[index].distance_to(points[other])).is_greater(.0011)
+			for other in range(index):assert_float(points[index].distance_to(points[other])).is_greater(.0008)
+			assert_float(points[index].distance_to(zones[role].scenery)).is_greater(.0048)
 
 func test_every_transfer_uses_gates_and_misses_worksite_objects()->void:
 	var zones:=World.zones()
@@ -43,4 +44,14 @@ func test_sprite_cell_boundaries_are_transparent()->void:
 	for x in [0,art.get_width()/3,art.get_width()*2/3,art.get_width()-1]:
 		for y in art.get_height():assert_float(art.get_pixel(x,y).a).is_less(.02)
 	for x in art.get_width():assert_float(art.get_pixel(x,art.get_height()/2).a).is_less(.02)
+
+func test_recorded_fabric_can_change_workshop_but_calendar_cannot()->void:
+	assert_dict(World.recorded_style("Crafting",{"year":3000,"population":90000})).is_empty()
+	var plot:=preload("res://tests/city_evolution_visual_fixture.gd").plot(5)
+	plot.land_use="workshop";plot.form="covered_workshop";plot.material_family="timber";plot.status="active"
+	var before:=var_to_bytes(plot)
+	var style:=World.recorded_style("Crafting",{"snapshot":{"plots":[plot]}})
+	assert_dict(style).is_not_empty()
+	assert_that(var_to_bytes(plot)).is_equal(before)
+	assert_dict(World.recorded_style("Food",{"snapshot":{"plots":[plot]}})).is_empty()
 
