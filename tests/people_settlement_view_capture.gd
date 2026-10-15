@@ -13,7 +13,11 @@ func _ready()->void:
 	town=View.new();town.position=Vector2(30,45);town.size=Vector2(1540,800);add_child(town)
 	DirAccess.make_dir_recursive_absolute("res://artifacts/popup-modern-c/people-living")
 	var focus_only:="--focus-only" in OS.get_cmdline_user_args()
-	for year in ([1800] if focus_only else [0,1800]):
+	var sightline:="--food-sightline" in OS.get_cmdline_user_args()
+	if sightline:
+		get_window().size=Vector2i(1024,768);get_window().content_scale_size=Vector2i(1024,768)
+		town.position=Vector2(60,130);town.size=Vector2(904,537)
+	for year in ([0] if sightline else ([1800] if focus_only else [0,1800])):
 		maker._world("early" if year==0 else "late")
 		terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise();terrain._prepare_river_course()
 		GameState.settlement_founded_at=terrain._find_world_start_position()
@@ -38,6 +42,19 @@ func _ready()->void:
 		print("PEOPLE_SCENE ",year," origin=",GameState.settlement_founded_at," kinds=",kinds," meshes=",town.model.get_child_count()," ground=",town._bounds)
 		assert(before==var_to_bytes([GameState.settlement_plots,GameState.settlement_routes]),"Renderer wrote simulation records")
 		for index in 30:await get_tree().process_frame
+		if sightline:
+			var woodland:MultiMeshInstance3D=town.model.get_node("ActualSeededWoodland")
+			var tree_data:=var_to_bytes(woodland.multimesh.buffer)
+			var builds:int=town.geometry_builds
+			town.focus_role("Food");await get_tree().create_timer(1.0).timeout
+			assert(not town._foliage_materials.is_empty())
+			assert(float(town._foliage_materials[0].get_shader_parameter("focus_cutaway"))>.98)
+			await _capture("early-food-sightline")
+			town.reset_view();await get_tree().create_timer(1.0).timeout
+			assert(float(town._foliage_materials[0].get_shader_parameter("focus_cutaway"))<.02)
+			assert(tree_data==var_to_bytes(woodland.multimesh.buffer),"Focus moved recorded tree positions")
+			assert(town.geometry_builds==builds,"Focus rebuilt settlement geometry")
+			await _capture("early-food-reset");break
 		if focus_only:
 			town.focus_role("Construction");await get_tree().create_timer(.8).timeout
 			await _capture("mature-construction-outline");break
