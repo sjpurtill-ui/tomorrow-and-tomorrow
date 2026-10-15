@@ -90,3 +90,42 @@ func test_clothing_follows_recorded_knowledge_and_supply_without_rebuilding_town
 	assert_int(town._people_key).is_not_equal(woven_key)
 	assert_int(town.geometry_builds).is_equal(first_builds)
 	assert_str(shared.shader.code).is_equal(shared_shader)
+
+func test_painted_buildings_preserve_roof_material_and_construction_truth()->void:
+	var art=preload("res://scripts/hud/people_settlement_art.gd")
+	var tent:Dictionary={"form":"portable_shelter_cluster","material_family":"organic","roof_plan":"ridge_light_shelter","land_use":"residential_compound","storeys":1,"status":"active"}
+	assert_int(art.building_style({"plot":tent}).cell).is_equal(0)
+	tent.status="under_construction";tent.construction_progress=.5
+	assert_dict(art.building_style({"plot":tent})).is_empty()
+	tent.status="ruin"
+	assert_dict(art.building_style({"plot":tent})).is_empty()
+	var house:Dictionary={"form":"earthen_household","material_family":"earth","roof_plan":"irregular_flat","land_use":"residential_compound","storeys":1,"status":"active"}
+	assert_str(art.building_style({"plot":house}).atlas).is_equal(art.ROOFS)
+	assert_int(art.building_style({"plot":house}).cell).is_equal(0)
+	house.roof_plan="thatched_ridge"
+	assert_int(art.building_style({"plot":house}).cell).is_equal(4)
+
+func test_mature_paint_requires_recorded_floors_roof_and_installed_chimney()->void:
+	var art=preload("res://scripts/hud/people_settlement_art.gd")
+	var plot:Dictionary={"form":"dense_mixed_frontage","material_family":"stone","roof_plan":"thatched_ridge","land_use":"residential_compound","storeys":2,"fabric_generation":5,"status":"active"}
+	assert_dict(art.building_style({"plot":plot})).is_empty()
+	plot.building_materials={"applied":["wall_chimneys"]}
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(2)
+	plot.storeys=3
+	assert_dict(art.building_style({"plot":plot})).is_empty()
+	plot.roof_plan="fired_tile_roof"
+	assert_int(art.building_style({"plot":plot}).cell).is_equal(3)
+	plot.storeys=8
+	assert_dict(art.building_style({"plot":plot})).is_empty()
+
+func test_painted_atlas_regions_stay_inside_fractional_cells()->void:
+	var art=preload("res://scripts/hud/people_settlement_art.gd")
+	for path:String in [art.BUILDINGS,art.DETAILS,art.MATURE,art.ROOFS]:
+		var texture:Texture2D=art.atlas(path);var rows:=2 if path in [art.MATURE,art.ROOFS] else 3
+		var columns:=3 if path==art.ROOFS else 4
+		for cell in rows*columns:
+			var region:Rect2i=art.region(path,cell,rows,columns)
+			assert_bool(region.has_area()).is_true()
+			assert_bool(Rect2i(0,0,texture.get_width(),texture.get_height()).encloses(region)).is_true()
+			assert_int(region.position.x).is_greater_equal(roundi(float(cell%columns)*texture.get_width()/columns))
+			assert_int(region.end.x).is_less_equal(roundi(float(cell%columns+1)*texture.get_width()/columns))

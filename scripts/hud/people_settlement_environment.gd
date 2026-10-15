@@ -1,6 +1,7 @@
 extends RefCounted
 ## Bounded landscape context sampled from the same seeded land cover and river
 ## courses as the map. It never builds or changes the live terrain's nodes.
+const Art=preload("res://scripts/hud/people_settlement_art.gd")
 const Cover=preload("res://scripts/landscape_cover.gd")
 const MAX_PLANTS:=360
 
@@ -75,8 +76,16 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 			# small signed offset instead of relying on signed HDR color data.
 			crown_centers.append(Color(center_offset.x/.02+.5,center_offset.y/.02+.5,center_offset.z/.02+.5,.45))
 		trunks.append(tree*Transform3D(Basis.IDENTITY,Vector3(0,.0021,0)))
-	_batch(parent,"ActualSeededWoodland",crown,leaf_transforms,leaf_colors,Color.WHITE,crown_centers)
-	_batch(parent,"WoodlandTrunks",trunk,trunks,[],Color("66513c"))
+	if Art.available():
+		for i in trees.size():
+			var tree:Transform3D=trees[i];var scale:=tree.basis.x.length()
+			var cell:=i%3 if scale>.5 else (3 if i%3==0 else 4)
+			var width:=.009*scale if scale>.5 else .007*scale
+			Art.sprite(parent,Art.DETAILS,cell,tree.origin,width,{"name":"PaintedFoliage_%d"%i,"foliage":true,"sway":width*.008,"phase":float(i)*1.37})
+	else:
+		_batch(parent,"ActualSeededWoodland",crown,leaf_transforms,leaf_colors,Color.WHITE,crown_centers)
+		_batch(parent,"WoodlandTrunks",trunk,trunks,[],Color("66513c"))
+
 	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for tree:Transform3D in trees:
 		var shadow_radius:=tree.basis.x.length()*.0045
@@ -86,7 +95,7 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 				shade.set_color(Color(1,1,1,.5 if at==shadow_center else 0));shade.add_vertex(point.call(at,.00023))
 	var shadow:=MeshInstance3D.new();shadow.name="DrapedWoodlandShadows";shadow.mesh=shade.commit()
 	var shader:=Shader.new();shader.code="shader_type spatial; render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled; void fragment(){ALBEDO=mix(vec3(1),vec3(.45,.48,.40),COLOR.a);}"
-	var material:=ShaderMaterial.new();material.shader=shader;shadow.material_override=material;parent.add_child(shadow)
+	var material:=ShaderMaterial.new();material.shader=shader;material.render_priority=-15;shadow.material_override=material;parent.add_child(shadow)
 
 static func _batch(parent:Node3D,label:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],tint:Color,centers:Array[Color]=[])->void:
 	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=not colors.is_empty();batch.use_custom_data=not centers.is_empty()

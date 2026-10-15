@@ -9,6 +9,7 @@ const Snapshot=preload("res://scripts/hud/people_settlement_scene.gd")
 const Early=preload("res://scripts/early_settlement_visual.gd")
 const Ground=preload("res://scripts/early_settlement_ground.gd")
 const Yards=preload("res://scripts/settlement_yard_details.gd")
+const Art=preload("res://scripts/hud/people_settlement_art.gd")
 const Setting=preload("res://scripts/hud/people_settlement_environment.gd")
 const Life=preload("res://scripts/map_life_ink.gd")
 const Costumes=preload("res://scripts/hud/people_settlement_costumes.gd")
@@ -31,6 +32,9 @@ var _anchors:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
 var _foliage_materials:Array[ShaderMaterial]=[]
 var _foliage_cut:=0.0
+var _painted_materials:Array[ShaderMaterial]=[]
+var _painted_active:=false
+var _painted_yards:Node3D
 var _bounds:=Rect2()
 var _ground_bounds:=Rect2()
 var _heights:=PackedFloat32Array()
@@ -39,7 +43,7 @@ var _desired_target:=Vector3.ZERO
 var _span:=.1
 var _desired_span:=.1
 var _yaw:=-.60
-var _pitch:=.51
+var _pitch:=.61
 var _elapsed:=0.0
 var _people:MultiMeshInstance3D
 var _walks:Array[Dictionary]=[]
@@ -118,15 +122,21 @@ func role_anchor_metadata()->Dictionary:
 	for role:String in _zones:
 		var zone:Dictionary=_zones[role];var at:Vector2=zone.center
 		var point:=_point(at,.003)
-		result[role]={"position":_anchors.get(role,Vector2.ZERO),"visible":not camera.is_position_behind(point) and Rect2(Vector2.ZERO,size).has_point(_anchors.get(role,Vector2.ZERO)),"physical":zone.physical,"plot_ids":zone.plot_ids.duplicate(),"source":zone.source}
+		var screen_polygons:Array[PackedVector2Array]=[]
+		for polygon:PackedVector2Array in zone.polygons:
+			var projected:=PackedVector2Array()
+			for vertex:Vector2 in polygon:projected.append(camera.unproject_position(_point(vertex,.0002)))
+			screen_polygons.append(projected)
+		result[role]={"polygons":screen_polygons,"position":_anchors.get(role,Vector2.ZERO),"visible":not camera.is_position_behind(point) and Rect2(Vector2.ZERO,size).has_point(_anchors.get(role,Vector2.ZERO)),"physical":zone.physical,"plot_ids":zone.plot_ids.duplicate(),"source":zone.source}
 	return result
 
 func _build_scene()->void:
 	if is_instance_valid(model):model.free()
-	_materials.clear();_foliage_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
+	_materials.clear();_foliage_materials.clear();_painted_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
 	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
 	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
 	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
+	_painted_active=Art.available()
 	_sample_ground();_landscape()
 	Setting.render(_terrain,snapshot,_ground_bounds,_point,model)
 	var land:=func(at:Vector2)->bool:
@@ -138,7 +148,8 @@ func _build_scene()->void:
 	_building_plan=plan
 	_frame_inhabited_core(plan)
 	_worked_yards(plan)
-	Early.render(plan,Vector3.ZERO,height,model)
+	var residual:Dictionary=Art.buildings(plan,model,_point) if _painted_active else plan
+	Early.render(residual,Vector3.ZERO,height,model)
 	Ground.render(plan,snapshot.plots,snapshot.routes,Vector3.ZERO,height,land,model,false)
 	_workplace_props(plan)
 	_yards=Yards.new();_yards.name="OccupiedHouseholdYards";model.add_child(_yards)
@@ -180,7 +191,8 @@ func _private_paint(node:Node)->void:
 				var outline:ShaderMaterial=source.next_pass.duplicate();outline.set_shader_parameter("outline_px",.7)
 				paint.next_pass=outline;_materials.append(outline)
 			child.material_override=paint
-			if child.name=="ActualSeededWoodland":_foliage_materials.append(paint)
+			if child.name=="ActualSeededWoodland" or bool(child.get_meta("foliage",false)):_foliage_materials.append(paint)
+			if bool(child.get_meta("painted",false)):_painted_materials.append(paint)
 		_private_paint(child)
 
 func _sample_ground()->void:
@@ -221,7 +233,13 @@ func _landscape()->void:
 	var landscape:=_commit(surface,"Landscape",false)
 	var shader:=Shader.new();shader.code=GROUND_SHADER
 	var paint:=ShaderMaterial.new();paint.shader=shader
-	paint.set_shader_parameter("ground_photo",load("res://assets/terrain/temperate_ground_albedo_v1.png"))
+	var ground_art:=Art.atlas("res://assets/ui/people/meadow-ground-v1.png") if _painted_active else null
+	paint.set_shader_parameter("ground_photo",ground_art if ground_art!=null else load("res://assets/terrain/temperate_ground_albedo_v1.png"))
+	paint.set_shader_parameter("painted_ground",ground_art!=null)
+	if is_instance_valid(_terrain) and _terrain.has_method("_biome_at"):
+		var biome:Dictionary=_terrain.call("_biome_at",snapshot.origin.x,snapshot.origin.z)
+		paint.set_shader_parameter("aridity",1.0-smoothstep(.18,.45,float(biome.get("precipitation",.5))))
+		paint.set_shader_parameter("cold",1.0-smoothstep(.12,.25,float(biome.get("temperature",.5))))
 	landscape.material_override=paint
 	var ground:=SurfaceTool.new();ground.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
 	for plot:Dictionary in snapshot.plots:
@@ -239,11 +257,29 @@ func _landscape()->void:
 	for route:Dictionary in snapshot.routes:
 		if not bool(route.get("active",true)):continue
 		var points:PackedVector2Array=route.get("points",PackedVector2Array())
-		var width:=maxf(.001,float(route.get("width_m",2.0))*.001)
-		for i in range(1,points.size()):
-			var side:Vector2=(points[i]-points[i-1]).normalized().orthogonal()*width*.5
-			count+=_polygon(ground,PackedVector2Array([points[i-1]+side,points[i]+side,points[i]-side,points[i-1]-side]),Color("786b52"),.0001)
-	if count>0:_commit(ground,"RecordedGroundAndRoutes",false)
+		var width:=maxf(.00055,float(route.get("width_m",2.0))*.001)
+		count+=_paint_path(ground,points,width)
+	if count>0:_commit(ground,"RecordedGroundAndRoutes",true)
+
+func _paint_path(surface:SurfaceTool,points:PackedVector2Array,width:float)->int:
+	var curve:=PackedVector2Array();var count:=0
+	for i in range(1,points.size()):
+		var p0:Vector2=points[maxi(0,i-2)];var p1:Vector2=points[i-1]
+		var p2:Vector2=points[i];var p3:Vector2=points[mini(points.size()-1,i+1)]
+		var steps:=maxi(3,ceili(p1.distance_to(p2)/.0015))
+		for step in steps:curve.append(p1.cubic_interpolate(p2,p0,p3,float(step)/steps))
+	if points.is_empty():return 0
+	curve.append(points[-1])
+	var sides:=PackedVector2Array()
+	for i in curve.size():
+		sides.append((curve[mini(curve.size()-1,i+1)]-curve[maxi(0,i-1)]).normalized().orthogonal()*(width*.5+.0007))
+	for i in range(1,curve.size()):
+		for sign in [-1,1]:
+			var strip:=[curve[i-1],curve[i],curve[i]+sides[i]*sign,curve[i-1]+sides[i-1]*sign]
+			for vertex in [0,1,2,0,2,3]:
+				surface.set_normal(_normal(strip[vertex]));surface.set_color(Color(.58,.46,.30,.88 if vertex<2 else 0))
+				surface.add_vertex(_point(strip[vertex],.00018));count+=1
+	return count
 
 func _field_rows(surface:SurfaceTool,polygon:PackedVector2Array,plot:Dictionary)->int:
 	if polygon.size()<3:return 0
@@ -266,7 +302,7 @@ func _commit(surface:SurfaceTool,label:String,transparent:bool)->MeshInstance3D:
 	var node:=MeshInstance3D.new();node.name=label;node.mesh=surface.commit()
 	var material:=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.vertex_color_is_srgb=true;material.roughness=1.0
 	material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	if transparent:material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+	if transparent:material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;material.render_priority=-20
 	node.material_override=material;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;model.add_child(node)
 	return node
 
@@ -279,6 +315,8 @@ func _workplace_props(plan:Dictionary)->void:
 		var at:Vector2=plot.get("centroid",Vector2.ZERO)
 		if form=="open_hearth_yard" and at.length()<.005:
 			_prop("hearth_ring",at,0)
+			if _painted_active:
+				Art.smoke(model,_point(at,.001),.0045);continue
 			var fire:=MeshInstance3D.new();var cone:=CylinderMesh.new();cone.bottom_radius=.00065;cone.top_radius=0;cone.height=.0015;cone.radial_segments=7
 			fire.mesh=cone;fire.position=_point(at,.00075)
 			var glow:=StandardMaterial3D.new();glow.albedo_color=Color("ef9d48");glow.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
@@ -301,23 +339,38 @@ func _workplace_props(plan:Dictionary)->void:
 				_prop(kind,place,angle);count+=1;slot+=1;break
 
 func _prop(kind:String,at:Vector2,yaw:float)->void:
+	if _painted_active and kind in ["woodpile","pots","hearth_ring"]:
+		var cell:=6 if kind=="woodpile" else (7 if kind=="pots" else 9)
+		Art.sprite(model,Art.DETAILS,cell,_point(at,.00012),.0036 if kind=="hearth_ring" else .002,{"name":"PaintedWorkplace_"+kind})
+		return
 	var mesh:Mesh=Shapes.prop(kind)
 	if mesh==null:return
 	var node:=MeshInstance3D.new();node.name="Workplace_"+kind;node.mesh=mesh
 	node.transform=Transform3D(Basis(Vector3.UP,yaw).scaled(Vector3.ONE*.001),_point(at,.0001))
 	node.material_override=preload("res://scripts/settlement_ink.gd").material();model.add_child(node)
 
+func _paint_household_yards()->void:
+	if is_instance_valid(_painted_yards):_painted_yards.free()
+	_painted_yards=Node3D.new();_painted_yards.name="PaintedOccupiedYards";_yards.add_child(_painted_yards)
+	for kind:String in ["woodpile","pots"]:
+		var source:=_yards.get_node_or_null("Yard_"+kind) as MultiMeshInstance3D
+		if source==null:continue
+		source.visible=false
+		for index in source.multimesh.instance_count:
+			var placement:=source.multimesh.get_instance_transform(index)
+			Art.sprite(_painted_yards,Art.DETAILS,6 if kind=="woodpile" else 7,placement.origin,.0018,{"name":"OccupiedYard_"+kind,"mirror":index%2==0})
+
 func _worked_yards(plan:Dictionary)->void:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
 	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for building:Dictionary in plan.get("buildings",[]):
-		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))*1.4
+		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))*(2.1 if _painted_active else 1.4)
 		for i in 14:
-			var a:=at+Vector2.from_angle(TAU*i/14.0)*radius
-			var b:=at+Vector2.from_angle(TAU*(i+1)/14.0)*radius
+			var a:=at+Vector2.from_angle(TAU*i/14.0)*radius*(.85+.22*sin(i*2.17+float(building.get("plot_id",0))))
+			var b:=at+Vector2.from_angle(TAU*(i+1)/14.0)*radius*(.85+.22*sin((i+1)%14*2.17+float(building.get("plot_id",0))))
 			for point:Vector2 in [at,a,b]:
 				surface.set_normal(_normal(point))
-				surface.set_color(Color(.59,.52,.37,.65) if point==at else Color(.59,.52,.37,0))
+				surface.set_color(Color(.55,.42,.26,.95) if point==at else Color(.55,.42,.26,0))
 				surface.add_vertex(_point(point,.00005));count+=1
 		var center:=at+Vector2(radius*.55,radius*.45)
 		for i in 16:
@@ -329,7 +382,7 @@ func _worked_yards(plan:Dictionary)->void:
 	if count>0:
 		var shadows:=_commit(shade,"DrapedBuildingContactShadows",true)
 		var shader:=Shader.new();shader.code=CONTACT_SHADER
-		var paint:=ShaderMaterial.new();paint.shader=shader;shadows.material_override=paint
+		var paint:=ShaderMaterial.new();paint.shader=shader;paint.render_priority=-15;shadows.material_override=paint
 
 func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
@@ -368,7 +421,7 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Costumes.shader_code()
+	var shader:=Shader.new();shader.code=Costumes.shader_code().replace("depth_draw_never","depth_prepass_alpha")
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
 	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
@@ -443,7 +496,7 @@ func _overview_span()->float:
 	# through their role anchors and the reversible wheel zoom.
 	var horizontal:=absf(cos(_yaw))*_bounds.size.x+absf(sin(_yaw))*_bounds.size.y
 	var depth:=absf(sin(_yaw))*_bounds.size.x+absf(cos(_yaw))*_bounds.size.y
-	return maxf(.036,maxf(horizontal/aspect,depth*sin(_pitch)) *.84)
+	return maxf(.036,maxf(horizontal/aspect,depth*sin(_pitch)) *(.63 if _painted_active else .84))
 
 func _resize_view()->void:
 	if not is_instance_valid(view):return
@@ -458,6 +511,7 @@ func _position_camera()->void:
 	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
 	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
+	for material in _painted_materials:material.set_shader_parameter("anim_clock",_elapsed)
 	for material in _foliage_materials:
 		material.set_shader_parameter("focus_world",_desired_target+Vector3.UP*.0015)
 		material.set_shader_parameter("focus_radius",_desired_span*.19)
@@ -483,13 +537,14 @@ func _process(delta:float)->void:
 		_yards.process_jobs(1200,4)
 		if int(_yards.batch_updates)!=_yard_batches:
 			_yard_batches=int(_yards.batch_updates);_private_paint(_yards)
+			if _painted_active:_paint_household_yards()
 
 func _visibility_changed()->void:
 	if is_instance_valid(view):view.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE if is_visible_in_tree() else SubViewport.UPDATE_DISABLED
 
 func _input_view(event:InputEvent)->void:
 	if event is InputEventMouseMotion and event.button_mask&MOUSE_BUTTON_MASK_RIGHT:
-		_yaw-=event.relative.x*.006;_pitch=clampf(_pitch+event.relative.y*.004,.35,1.18);_dragged=true;accept_event()
+		_yaw=clampf(_yaw-event.relative.x*.003,-.78,-.42) if _painted_active else _yaw-event.relative.x*.006;_pitch=clampf(_pitch+event.relative.y*.002,.53,.70) if _painted_active else clampf(_pitch+event.relative.y*.004,.35,1.18);_dragged=true;accept_event()
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index==MOUSE_BUTTON_WHEEL_UP:_desired_span=maxf(.025,_desired_span*.9);accept_event()
 		elif event.button_index==MOUSE_BUTTON_WHEEL_DOWN:_desired_span=minf(_overview_span()*1.8,_desired_span/ .9);accept_event()
@@ -503,6 +558,9 @@ func _input_view(event:InputEvent)->void:
 const GROUND_SHADER:="""shader_type spatial;
 render_mode unshaded, cull_disabled;
 uniform sampler2D ground_photo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
+uniform bool painted_ground=false;
+uniform float aridity=0.0;
+uniform float cold=0.0;
 varying vec3 at;
 void vertex(){at=VERTEX;}
 float grain(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -510,8 +568,12 @@ float noise(vec2 p){vec2 c=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix
 void fragment(){
 vec3 photo=texture(ground_photo,UV).rgb;
 float broad=noise(at.xz*30.0)*.7+noise(at.xz*120.0+vec2(6.1,2.8))*.3;
-vec3 ground=mix(vec3(.35,.39,.24),vec3(.46,.46,.31),broad);
-ALBEDO=ground*(.87+dot(photo,vec3(.2126,.7152,.0722))*.28);ROUGHNESS=1.0;
+vec3 ground=mix(vec3(.26,.31,.16),vec3(.45,.44,.26),broad);
+float fine=noise(at.xz*580.0);
+vec3 color=painted_ground ? photo*(.88+broad*.20) : ground*(.72+dot(photo,vec3(.2126,.7152,.0722))*.52)*(.94+fine*.12);
+float value=dot(color,vec3(.2126,.7152,.0722));
+color=mix(color,vec3(value)*vec3(1.25,1.12,.82),aridity*.85);
+ALBEDO=mix(color,vec3(value)*vec3(1.0,1.04,1.03),cold*.7);ROUGHNESS=1.0;
 }
 """
 
