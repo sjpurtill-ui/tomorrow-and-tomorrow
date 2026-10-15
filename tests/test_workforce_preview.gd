@@ -135,6 +135,23 @@ func test_food_matches_existing_calculator_and_risk_is_not_a_death_prediction() 
 	assert_float(float(result.after.food.net)).is_equal_approx(float(expected.food_net), 0.00001)
 	assert_dict(result.after.food.forecast90).is_equal(expected.food_forecast_90)
 
+func test_practical_impacts_follow_effective_assignment_without_instant_care_or_inventory() -> void:
+	var impacts := preload("res://scripts/hud/people_work_impacts.gd")
+	var care := preload("res://scripts/food_care.gd")
+	var live := Preview._capture_systems()
+	var draft := Preview.step(Preview.capture(), "Administration", 10)
+	var result := Preview.evaluate(draft)
+	var expected := Preview._isolated(draft._snapshot, func() -> Dictionary:
+		Preview._replay(draft)
+		return impacts.local_reading())
+	assert_float(float(result.after.work_impacts.care_target)).is_equal_approx(float(expected.care_target), 0.000001)
+	assert_float(float(result.after.work_impacts.stored_rot_cut)).is_equal_approx(float(expected.stored_rot_cut), 0.000001)
+	assert_float(float(result.after.work_impacts.care_current)).is_equal_approx(float(result.before.work_impacts.care_current), 0.000001)
+	assert_float(float(result.after.work_impacts.extracted_today)).is_equal_approx(float(result.before.work_impacts.extracted_today), 0.000001)
+	assert_float(float(result.after.work_impacts.care_target)).is_greater_equal(float(result.before.work_impacts.care_target))
+	assert_float(float(result.after.work_impacts.stored_rot_cut)).is_less_equal(care.KEEP_STORED_CUT * 100.0)
+	assert_dict(Preview._capture_systems()).is_equal(live)
+
 func test_validated_state_becomes_stale_when_food_or_workers_or_day_changes() -> void:
 	var draft := Preview.capture()
 	assert_bool(Preview.is_current(draft)).is_true()
