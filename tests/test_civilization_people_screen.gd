@@ -11,10 +11,14 @@ class SceneStub extends Control:
 	var weights:Dictionary={}
 	var preview:=false
 	var navigation:={"offset":Vector2(13,8),"zoom":.6}
-	func configure(_context:Dictionary)->void:pass
+	func configure(_context:Dictionary)->void:
+		var anchors:={}
+		for index in Manual.ROLES.size():anchors[Manual.ROLES[index]]=Vector2(90+(index%3)*140,80+(index/3)*130)
+		role_anchors_changed.emit(anchors)
 	func update_state(_context:Dictionary)->void:refreshes+=1
 	func set_workforce(next:Dictionary,proposed:=false)->void:weights=next.duplicate();preview=proposed
 	func workforce_percentages()->Dictionary:return Screen.WorkforceCast.apportion(weights)
+	func portrait_stage()->Dictionary:return {"title":"Camp"}
 	func focus_role(role:String)->void:focused=role;focuses+=1;navigation={"offset":Vector2.ZERO,"zoom":1.0}
 	func reset_view()->void:focused=""
 	func navigation_state()->Dictionary:return navigation.duplicate()
@@ -66,7 +70,7 @@ func _commit(draft:Dictionary,take_control:bool)->Dictionary:
 func _block()->Dictionary:
 	var tasks:Array=[]
 	for role:String in Manual.ROLES:tasks.append({"id":role,"label":role,"count":counts[role],"share":float(counts[role])/100.0})
-	return {"type":"civilization_people","scene":{},"faces":[],"vitals":[],"story":{},"hearths":[],"tallies":[],"workforce_revision":[revision],"settlement_view":{},"labor":{"tasks":tasks,"able":100,"manual":manual},"workforce":{"capture":_capture,"step":_step,"evaluate":_evaluate,"commit":_commit}}
+	return {"type":"civilization_people","scene":{},"faces":[],"vitals":[],"story":{},"hearths":[],"tallies":[],"workforce_revision":[revision],"settlement_view":{"population":93},"labor":{"tasks":tasks,"able":100,"manual":manual},"workforce":{"capture":_capture,"step":_step,"evaluate":_evaluate,"commit":_commit}}
 func test_role_navigation_reads_without_mutation_or_duplicate_focus()->void:
 	for role:String in Manual.ROLES:
 		screen.focus_work(role);screen.focus_work(role)
@@ -76,7 +80,7 @@ func test_role_navigation_reads_without_mutation_or_duplicate_focus()->void:
 	assert_bool(screen.parts.labor.visible).is_false()
 	assert_object(screen.find_child("ApplyWorkDraft",true,false)).is_null()
 	assert_object(screen.find_child("CancelWorkDraft",true,false)).is_null()
-func test_single_click_immediately_commits_and_moves_one_effective_figure()->void:
+func test_single_click_immediately_commits_and_updates_actual_headcount()->void:
 	screen.focus_work("Crafting");screen.increase_button.pressed.emit()
 	assert_int(commits.size()).is_equal(1)
 	assert_bool(commits[0].take_control).is_true()
@@ -94,12 +98,12 @@ func test_rapid_clicks_capture_latest_live_state_without_losing_steps()->void:
 	assert_int(int(commits[2].draft.token)).is_equal(3)
 	assert_int(captures).is_equal(4)
 	assert_int(evaluations).is_equal(4)
-func test_protected_counts_and_figures_follow_actual_commit_result()->void:
+func test_protected_headcounts_follow_actual_commit_result()->void:
 	screen.focus_work("Crafting");protect_food=true;screen.five_button.pressed.emit()
 	assert_int(counts.Crafting).is_equal(13)
 	assert_int(screen.settlement_view.workforce_percentages().Crafting).is_equal(13)
 	assert_str(screen.people_reading.text).is_equal("13 workers · 13%")
-	assert_str(screen.transfer_reading.text).contains("Food protection")
+	assert_str(screen.transfer_reading.text).contains("10 → 13 workers")
 func test_failed_forecast_cannot_commit_and_keeps_current_figures()->void:
 	screen.focus_work("Knowledge");available=false;screen.increase_button.pressed.emit()
 	assert_array(commits).is_empty()
@@ -151,12 +155,18 @@ func test_starvation_precedes_water_and_protection_in_visible_warning()->void:
 	screen.forecast.warnings=[{"kind":"safeguard","town":"Safe town"},{"kind":"starvation","town":"Hungry town"}]
 	screen._refresh_focus()
 	assert_str(screen.risk_reading.text).contains("Hungry town").contains("food is short now")
-func test_overview_slots_do_not_repack_when_world_anchors_change()->void:
+func test_portrait_pills_follow_actual_area_anchors_and_sidebar_never_overlays_image()->void:
 	await get_tree().process_frame;screen._fit_scene()
-	var positions:={}
-	for role:String in screen.markers:positions[role]=screen.markers[role].node.position
-	screen._anchors_changed({"Food":Vector2(1,600),"Knowledge":Vector2(900,1)})
-	for role:String in screen.markers:assert_object(screen.markers[role].node.position).is_equal(positions[role])
+	screen._anchors_changed({"Food":Vector2(100,120),"Knowledge":Vector2(320,220)})
+	var food:Rect2=screen.markers.Food.node.get_rect()
+	assert_bool(food.has_point(Vector2(100,120))).is_true()
+	assert_bool(screen.sidebar.get_rect().intersects(screen.settlement_view.get_rect())).is_false()
+	var portrait:Rect2=screen.settlement_view.get_rect();var side:Rect2=screen.sidebar.get_rect()
+	screen.focus_work("Knowledge");screen.increase_button.pressed.emit();await get_tree().process_frame
+	assert_object(screen.settlement_view.get_rect()).is_equal(portrait)
+	assert_object(screen.sidebar.get_rect()).is_equal(side)
+	assert_bool(screen.sidebar.get_global_rect().encloses(screen.focus_panel.get_global_rect())).is_true()
+
 func test_zero_and_hundred_percent_boundaries_disable_correct_step()->void:
 	counts.Knowledge=0;counts.Food=30;screen.update_block(_block());screen.focus_work("Knowledge")
 	assert_bool(screen.decrease_button.disabled).is_true()
@@ -169,8 +179,9 @@ func test_no_workers_uses_unassigned_reserve_and_explicit_total()->void:
 	for role:String in counts:counts[role]=0
 	var empty:=_block();empty.labor.able=0;screen.update_block(empty)
 	assert_int(screen.settlement_view.workforce_percentages().Unassigned).is_equal(100)
+	assert_bool(screen.figure_legend.visible).is_false()
 	assert_str(screen.scope_note.text).is_equal("0 assigned")
-	assert_str(screen.figure_legend.text).is_equal("100 figures · no workers assigned")
+	assert_str(screen.figure_legend.text).is_empty()
 
 func test_failed_boundary_command_does_not_disable_unapplied_last_five_percent()->void:
 	for role:String in counts:counts[role]=0
@@ -192,3 +203,8 @@ func test_passive_changes_are_throttled_but_each_click_is_fresh()->void:
 	screen.increase_button.pressed.emit()
 	assert_int(captures).is_equal(held+1)
 	assert_int(commits.size()).is_equal(1)
+
+func test_population_caption_is_distinct_from_assigned_workforce()->void:
+	assert_str(screen.portrait_caption.text).is_equal("Camp · 93 people")
+	assert_str(screen.scope_note.text).is_equal("100 assigned")
+	assert_bool(screen.figure_legend.visible).is_false()

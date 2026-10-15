@@ -1,9 +1,9 @@
 extends "res://scripts/hud/people_screen.gd"
-## Representative workforce illustration. Each allocation step goes through a fresh
+## Painted town portrait. Each allocation step goes through a fresh
 ## snapshot and the existing guarded ManualWork commit. Person/city actions are inherited.
 const WorkImpacts=preload("res://scripts/hud/people_work_impacts.gd")
 const WorkforceCast=preload("res://scripts/hud/people_workforce_cast.gd")
-const ROLE_NAMES:={"Food":"Food grounds","Survey":"Surveying","Extraction":"Wood & stone","Construction":"Building","Crafting":"Workshops","Logistics":"Water & carrying","Knowledge":"Learning","Administration":"Keeping & caring","Defense":"The watch"}
+const ROLE_NAMES:={"Food":"Food grounds","Survey":"Surveying","Extraction":"Wood & stone","Construction":"Building","Crafting":"Making","Logistics":"Water & carrying","Knowledge":"Learning","Administration":"Keeping & caring","Defense":"The watch"}
 const ROLE_PURPOSE:={"Food":"Gather, hunt, fish and grow food.","Survey":"Find resources in the nearby land.","Extraction":"Bring timber, stone and ore out of the land.","Construction":"Raise homes and works; repair what stands.","Crafting":"Make tools, equipment and everyday goods.","Logistics":"Carry supplies and bring drinking water home.","Knowledge":"Learn, teach and pursue current studies.","Administration":"Keep, distribute and care for the people.","Defense":"Keep watch and prepare our defenders."}
 
 var settlement_view:Control
@@ -49,6 +49,7 @@ var face_shelf:Control
 var food_strip:VBoxContainer
 var food_graph:FoodCrossGraphic
 var navigation:VBoxContainer
+var navigation_surface:PanelContainer
 var _shown_counts:Dictionary={}
 var _shown_percentages:Dictionary={}
 var _current_percentages:Dictionary={}
@@ -64,6 +65,10 @@ var allocation_bar:AllocationBar
 var _effect_slots:=0
 var _last_effect_ms:=-3000
 var _effects_outdated:=false
+var sidebar:PanelContainer
+var sidebar_content:Control
+var overview_panel:VBoxContainer
+var portrait_caption:Label
 
 func setup(block:Dictionary)->void:
 	super.setup(block)
@@ -88,28 +93,39 @@ func _build_scene()->void:
 	var heading:=HFlowContainer.new();heading.name="PeopleSituation";heading.add_theme_constant_override("h_separation",24);heading.add_theme_constant_override("v_separation",4);add_child(heading);scene_toolbar=heading
 	scene_title=_annotation_label("",18);scene_title.add_theme_font_override("font",T.font("ui_strong"));heading.add_child(scene_title)
 	scope_note=_annotation_label("",12);scope_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(scope_note)
-	figure_legend=_annotation_label("100 figures · each = 1% of workers",12);figure_legend.name="WorkforceFigureLegend";figure_legend.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(figure_legend)
+	figure_legend=_annotation_label("",12);figure_legend.visible=false;heading.add_child(figure_legend)
 	var command:=heading
 	mode_note=_annotation_label("",12);mode_note.custom_minimum_size.x=88;mode_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(mode_note)
-	overview_button=_annotation_button(command,"← Overview",_return_overview);overview_button.visible=false
+	overview_button=_annotation_button(command,"Whole town",_return_overview);overview_button.disabled=true
 	leaders_button=_annotation_button(command,"Let our leaders assign",_delegate);leaders_button.visible=false
 	pause_button=_annotation_button(command,"Pause world",_pause_to_plan);pause_button.name="PauseToPlan";pause_button.tooltip_text="Pause the world here; resume with the clock when ready.";pause_button.visible=false
 	allocation_bar=AllocationBar.new();allocation_bar.custom_minimum_size.y=12;add_child(allocation_bar)
 	pending_note=_annotation_label("",12);pending_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;command.add_child(pending_note)
-	stage=Control.new();stage.name="LivingPeopleScene";stage.custom_minimum_size.y=560;stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stage.clip_contents=true;add_child(stage)
-	settlement_view=_make_settlement_view();settlement_view.name="PeopleSettlementView";stage.add_child(settlement_view);settlement_view.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	stage=Control.new();stage.name="PeoplePortraitAndAssignments";stage.custom_minimum_size.y=560;stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stage.clip_contents=true;add_child(stage)
+	settlement_view=_make_settlement_view();settlement_view.name="PeopleTownPortraitView";stage.add_child(settlement_view);settlement_view.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
 	settlement_view.connect("role_anchors_changed",_anchors_changed)
 	if settlement_view.has_signal("role_selected"):settlement_view.connect("role_selected",focus_work)
-	overlay=Control.new();overlay.name="WorkAreaReadings";overlay.mouse_filter=Control.MOUSE_FILTER_IGNORE;stage.add_child(overlay);overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	connections=AreaConnections.new();overlay.add_child(connections);connections.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay=Control.new();overlay.name="WorkAreaReadings";overlay.mouse_filter=Control.MOUSE_FILTER_IGNORE;stage.add_child(overlay);overlay.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	portrait_caption=Label.new();portrait_caption.name="PortraitPopulation";portrait_caption.add_theme_font_size_override("font_size",12);portrait_caption.add_theme_color_override("font_color",T.MUTED);stage.add_child(portrait_caption)
+	connections=AreaConnections.new();overlay.add_child(connections);connections.visible=false
+	var short_names:={"Food":"Food","Survey":"Survey","Extraction":"Wood & stone","Construction":"Building","Crafting":"Making","Logistics":"Carrying","Knowledge":"Learning","Administration":"Care","Defense":"Watch"}
 	for role:String in ROLE_NAMES:
-		var marker:=PanelContainer.new();marker.name="WorkArea_"+role;marker.add_theme_stylebox_override("panel",_reading_surface());overlay.add_child(marker)
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);marker.add_child(line)
-		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",0);line.add_child(body)
-		var title:=_annotation_label(ROLE_NAMES[role],14);title.add_theme_font_override("font",T.font("ui_strong"));body.add_child(title)
-		var number:=_annotation_label("",14);number.name="Workers";number.custom_minimum_size.x=160;body.add_child(number)
-		var assign:=_annotation_button(line,"Assign",focus_work.bind(role));assign.name="Assign_"+role;assign.tooltip_text="Assign workers to "+String(ROLE_NAMES[role])
-		markers[role]={"node":marker,"number":number,"button":assign}
+		var pill:=Button.new();pill.name="WorkArea_"+role;pill.text=String(short_names[role]);pill.custom_minimum_size.y=28
+		pill.add_theme_font_size_override("font_size",12);pill.add_theme_font_override("font",T.font("ui_strong"))
+		pill.add_theme_color_override("font_color",annotation_ink());pill.add_theme_color_override("font_hover_color",annotation_ink());pill.add_theme_color_override("font_pressed_color",annotation_ink())
+		var style:=_reading_surface();style.set_content_margin_all(6);style.set_corner_radius_all(12);pill.add_theme_stylebox_override("normal",style)
+		var hover:=style.duplicate();hover.bg_color=Color("29414af5");pill.add_theme_stylebox_override("hover",hover);pill.add_theme_stylebox_override("pressed",hover)
+		pill.pressed.connect(focus_work.bind(role));overlay.add_child(pill)
+		# The number label is an accessible full-headcount reading; the picture
+		# pill stays short and the selected sidebar carries the full numbers.
+		var number:=Label.new();number.visible=false;pill.add_child(number)
+		markers[role]={"node":pill,"number":number,"button":pill,"short":short_names[role]}
+	sidebar=PanelContainer.new();sidebar.name="WorkAssignmentSidebar";sidebar.add_theme_stylebox_override("panel",_reading_surface());stage.add_child(sidebar)
+	sidebar_content=Control.new();sidebar.add_child(sidebar_content)
+	overview_panel=VBoxContainer.new();overview_panel.name="ChooseTownWork";overview_panel.add_theme_constant_override("separation",12);sidebar_content.add_child(overview_panel)
+	var title:=_annotation_label("Work around the town",20);title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview_panel.add_child(title)
+	var guidance:=_annotation_label("Choose a work area in the portrait to see its people and change their assignment.",14);guidance.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview_panel.add_child(guidance)
+	var scope:=_annotation_label("Assignments cover all our settlements. Each + or − changes the allocation immediately.",13);scope.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;overview_panel.add_child(scope)
 	_build_focus()
 	# The workforce total stays on the quiet HUD surface, outside the artwork.
 	for child:Node in heading.get_children():
@@ -122,7 +138,8 @@ func _build_scene()->void:
 	scope_note.add_theme_font_size_override("font_size",22)
 	scope_note.add_theme_font_override("font",T.font("ui_strong"))
 	scene_title.visible=false;pending_note.visible=false
-	navigation=VBoxContainer.new();navigation.name="VillageNavigation";navigation.add_theme_constant_override("separation",0);overlay.add_child(navigation)
+	navigation_surface=PanelContainer.new();var nav_style:=_reading_surface();nav_style.set_content_margin_all(6);navigation_surface.add_theme_stylebox_override("panel",nav_style);overlay.add_child(navigation_surface)
+	navigation=VBoxContainer.new();navigation.name="VillageNavigation";navigation.add_theme_constant_override("separation",0);navigation_surface.add_child(navigation)
 	var camera_buttons:=HBoxContainer.new();camera_buttons.add_theme_constant_override("separation",8);navigation.add_child(camera_buttons)
 	var zoom_out:=_annotation_button(camera_buttons,"−",func():settlement_view.call("zoom_view",1.0/.88));zoom_out.name="VillageZoomOut";zoom_out.custom_minimum_size.x=36;zoom_out.tooltip_text="Zoom out"
 	var zoom_in:=_annotation_button(camera_buttons,"+",func():settlement_view.call("zoom_view",.88));zoom_in.name="VillageZoomIn";zoom_in.custom_minimum_size.x=36;zoom_in.tooltip_text="Zoom in"
@@ -131,7 +148,7 @@ func _build_scene()->void:
 	stage.resized.connect(_fit_scene)
 
 func _make_settlement_view()->Control:
-	return load("res://scripts/hud/people_settlement_view.gd").new()
+	return load("res://scripts/hud/people_town_portrait_view.gd").new()
 
 static func annotation_ink()->Color:
 	return Color("f4eee0")
@@ -146,7 +163,7 @@ func _annotation_label(words:String,pixels:int=14)->Label:
 
 func _annotation_button(parent:Node,words:String,callback:Callable,primary:=false)->Button:
 	var button:=_scene_button(parent,words,callback,primary)
-	button.custom_minimum_size.y=40
+	button.custom_minimum_size.y=36
 	button.add_theme_font_size_override("font_size",14)
 	if not primary:
 		var normal:=T.flat(Color.TRANSPARENT,T.ACTION,0,0,3);normal.border_width_bottom=1;normal.border_color=T.ACTION
@@ -162,7 +179,7 @@ func _scene_button(parent:Node,words:String,callback:Callable,primary:=false)->B
 	var button:=Button.new();button.text=words;T.apply_button_style(button,primary);button.pressed.connect(callback);parent.add_child(button);return button
 
 func _build_focus()->void:
-	focus_panel=PanelContainer.new();focus_panel.name="WorkDraft";focus_panel.visible=false;focus_panel.add_theme_stylebox_override("panel",_reading_surface());overlay.add_child(focus_panel)
+	focus_panel=PanelContainer.new();focus_panel.name="WorkDraft";focus_panel.visible=false;focus_panel.add_theme_stylebox_override("panel",StyleBoxEmpty.new());sidebar_content.add_child(focus_panel)
 	focus_body=VBoxContainer.new();focus_body.add_theme_constant_override("separation",4);focus_panel.add_child(focus_body)
 	var identity:=HBoxContainer.new();identity.add_theme_constant_override("separation",10);focus_body.add_child(identity)
 	focus_title=_annotation_label("",18);focus_title.add_theme_font_override("font",T.font("ui_strong"));identity.add_child(focus_title)
@@ -170,27 +187,29 @@ func _build_focus()->void:
 	focus_purpose=_annotation_label("");focus_purpose.visible=false;focus_body.add_child(focus_purpose)
 	people_reading=_annotation_label("",22);people_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(people_reading)
 	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);focus_body.add_child(controls)
-	decrease_button=_annotation_button(controls,"−",_step.bind(-1));decrease_button.name="DraftLess";decrease_button.custom_minimum_size.x=40
-	increase_button=_annotation_button(controls,"+",_step.bind(1));increase_button.name="DraftMore";increase_button.custom_minimum_size.x=40
-	five_button=_annotation_button(controls,"+5",_step.bind(5));five_button.name="DraftFive";five_button.custom_minimum_size.x=40
-	var step_note:=_annotation_label("1% of workforce",12);step_note.tooltip_text="Each click takes control of work and applies now. Whole-worker rounding and local food protection can change the number moved.";step_note.size_flags_vertical=Control.SIZE_SHRINK_CENTER;controls.add_child(step_note)
+	decrease_button=_annotation_button(controls,"−1%",_step.bind(-1));decrease_button.name="DraftLess";decrease_button.custom_minimum_size.x=64
+	increase_button=_annotation_button(controls,"+1%",_step.bind(1));increase_button.name="DraftMore";increase_button.custom_minimum_size.x=64
+	five_button=_annotation_button(controls,"+5%",_step.bind(5));five_button.name="DraftFive";five_button.custom_minimum_size.x=64
+	var step_note:=_annotation_label("1% of workforce",12);step_note.tooltip_text="Each click takes control of work and applies now. Whole-worker rounding and local food protection can change the number moved.";step_note.visible=false;controls.add_child(step_note)
+	for step_button:Button in [decrease_button,increase_button,five_button]:step_button.tooltip_text=step_note.tooltip_text
 	transfer_reading=_annotation_label("");transfer_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_body.add_child(transfer_reading)
 	risk_reading=_annotation_label("");risk_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;risk_reading.add_theme_color_override("font_color",annotation_ink().lerp(T.ACTION,.45));focus_body.add_child(risk_reading)
 	var commands:=HFlowContainer.new();commands.add_theme_constant_override("h_separation",10);commands.add_theme_constant_override("v_separation",4);focus_body.add_child(commands)
 	# No staged Apply/Cancel flow: these controls change work immediately.
 	commands.visible=false
 	focus_actions=focus_body
-	evidence_panel=PanelContainer.new();evidence_panel.name="WorkConsequences";evidence_panel.visible=false;evidence_panel.add_theme_stylebox_override("panel",_reading_surface());overlay.add_child(evidence_panel)
+	evidence_panel=PanelContainer.new();evidence_panel.name="WorkConsequences";evidence_panel.visible=false;evidence_panel.add_theme_stylebox_override("panel",StyleBoxEmpty.new());sidebar_content.add_child(evidence_panel)
 	focus_evidence=VBoxContainer.new();focus_evidence.add_theme_constant_override("separation",3);evidence_panel.add_child(focus_evidence)
 	effect_graph=WorkEffectGraphic.new();effect_graph.name="LikelyWorkEffects";focus_evidence.add_child(effect_graph)
 	forecast_reading=_annotation_label("");forecast_reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;focus_evidence.add_child(forecast_reading)
-	food_back=PanelContainer.new();food_back.name="FoodReadingsSurface";food_back.add_theme_stylebox_override("panel",_reading_surface());overlay.add_child(food_back)
+	food_back=PanelContainer.new();food_back.name="FoodReadingsSurface";food_back.add_theme_stylebox_override("panel",StyleBoxEmpty.new());sidebar_content.add_child(food_back)
 	food_strip=VBoxContainer.new();food_strip.name="FoodCrossEffect";food_strip.add_theme_constant_override("separation",3);food_back.add_child(food_strip)
-	food_graph=FoodCrossGraphic.new();food_graph.name="FoodCrossEffectDiagram";food_strip.add_child(food_graph)
+	food_graph=PortraitFoodGraphic.new();food_graph.name="FoodCrossEffectDiagram";food_strip.add_child(food_graph)
+	risk_reading.reparent(food_strip)
 	for label:Label in [transfer_reading,risk_reading]:
 		label.add_theme_font_size_override("font_size",13);label.custom_minimum_size.y=32;label.max_lines_visible=2;label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	forecast_reading.add_theme_font_size_override("font_size",13);forecast_reading.custom_minimum_size.y=48;forecast_reading.max_lines_visible=3;forecast_reading.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
-	people_reading.custom_minimum_size.y=32
+	forecast_reading.add_theme_font_size_override("font_size",13);forecast_reading.custom_minimum_size.y=38;forecast_reading.max_lines_visible=3;forecast_reading.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+	people_reading.custom_minimum_size.y=28
 
 func _reading_surface()->StyleBoxFlat:
 	var box:=StyleBoxFlat.new();box.bg_color=Color("14232bf2");box.set_corner_radius_all(4);box.set_content_margin_all(12)
@@ -203,13 +222,16 @@ func _fill_scene(scene:Dictionary)->void:
 	for task:Dictionary in data.get("labor",{}).get("tasks",[]):context.allocations[String(task.id)]=int(task.count)
 	if not _configured:settlement_view.call("configure",context);_configured=true
 	else:settlement_view.call("update_state",context)
+	var portrait_info:Dictionary=settlement_view.call("portrait_stage") if settlement_view.has_method("portrait_stage") else {}
+	portrait_caption.text="%s · %s people" % [String(portrait_info.get("title","Our community")),preload("res://scripts/hud/era_words.gd").grouped(int(context.get("population",0)))]
+	portrait_caption.tooltip_text="An illustrative town portrait scaled to our total population. Work assignments cover the whole civilization."
 	scene_title.text="Our workforce"
 	var assigned:=0
 	for count:int in _current_counts().values():assigned+=count
 	scope_note.text="%s assigned" % preload("res://scripts/hud/era_words.gd").grouped(assigned)
 	scope_note.tooltip_text="Everyone assigned across our settlements, including the watch and serving soldiers. The top-bar At work total excludes military service."
-	scene_title.tooltip_text="An illustration of our work categories across all settlements, not a map of one town."
-	figure_legend.tooltip_text="Each figure represents 1% of assigned workers, including the watch. Actual headcounts remain visible beside each area."
+	scene_title.tooltip_text="A painted town portrait showing work categories; assignments cover all our settlements."
+	figure_legend.tooltip_text=""
 	_sync_workforce()
 	_fit_scene.call_deferred()
 
@@ -224,10 +246,10 @@ func _rebuild_labor()->void:
 	pause_button.visible=true;pause_button.disabled=not bool(data.get("world_running",false))
 	if _awaiting_commit_refresh and _current_counts()==forecast.get("after",{}).get("counts",{}):
 		_awaiting_commit_refresh=false;_draft_revision=data.get("workforce_revision",[]).duplicate(true)
-	elif active_role!="" and not _committing and _draft_revision!=data.get("workforce_revision",[]):
+	elif not _committing and _draft_revision!=data.get("workforce_revision",[]):
 		_comparison=false
 		_effects_outdated=true
-		if not _refresh_pending and Time.get_ticks_msec()-_last_effect_ms>=2500:_refresh_pending=true;_refresh_current.call_deferred()
+		if not _refresh_pending and Time.get_ticks_msec()-_last_effect_ms>=2500:_refresh_pending=true;_refresh_current.call_deferred(false)
 	_refresh_focus()
 
 func _current_counts()->Dictionary:
@@ -246,8 +268,9 @@ func _sync_workforce()->void:
 	for role:String in markers:
 		var count:=int(_shown_counts.get(role,0));var percent:=int(_shown_percentages.get(role,0))
 		(markers[role].number as Label).text="%d%% · %s workers"%[percent,preload("res://scripts/hud/era_words.gd").grouped(count)]
+		(markers[role].button as Button).text="%s %d%%"%[markers[role].short,percent]
 		(markers[role].node as Control).tooltip_text="%d%% · %d assigned workers\n%s"%[percent,count,ROLE_PURPOSE[role]]
-	figure_legend.text="100 figures · each = 1% of workers" if int(_shown_percentages.get("Unassigned",0))==0 else "100 figures · no workers assigned"
+	figure_legend.text=""
 
 func _api(method:String,arguments:Array=[])->Variant:
 	var callback:Variant=(data.get("workforce",{}) as Dictionary).get(method)
@@ -266,9 +289,10 @@ func focus_work(role:String)->void:
 	else:_refresh_focus()
 	_focus_assignment.call_deferred()
 
-func _refresh_current()->void:
+func _refresh_current(force:=true)->void:
+	if not force and not _refresh_pending:return
 	_refresh_pending=false
-	if active_role=="" or _committing:return
+	if _committing:return
 	_last_effect_ms=Time.get_ticks_msec();_effects_outdated=false
 	var captured:Variant=_api("capture")
 	if captured is Dictionary and bool(captured.get("ok",false)):
@@ -313,11 +337,9 @@ func _step(points:int)->void:
 		for task:Dictionary in data.get("labor",{}).get("tasks",[]):task.count=int(counts.get(String(task.id),0))
 		data.labor.manual=true
 		_comparison=true;_awaiting_commit_refresh=true
-		var previous:int=WorkforceCast.apportion(forecast.get("before",{}).get("counts",{})).get(active_role,0)
+		var before_count:=int(forecast.get("before",{}).get("counts",{}).get(active_role,0));var after_count:=int(counts.get(active_role,0))
 		var current:int=WorkforceCast.apportion(counts).get(active_role,0)
-		var delta:=current-previous
-		_last_change="%d%% → %d%% · %d figure%s %s"%[previous,current,absi(delta),"" if absi(delta)==1 else "s","moved here" if delta>0 else "moved away"] if delta!=0 else "Assignment applied. Rounding or food protection kept this crew unchanged."
-		if (forecast.get("warnings",[]) as Array).any(func(w:Dictionary)->bool:return String(w.get("kind",""))=="safeguard"):_last_change+=" Food protection is active."
+		_last_change="%d → %d workers · %d%% assigned here"%[before_count,after_count,current] if before_count!=after_count else "Share updated; rounding or food protection kept %d workers here."%after_count
 		mode_note.text="You assign";leaders_button.disabled=false
 	else:
 		_command_error=String(result.get("reason","Conditions changed. Click again to use the current allocation.") if result is Dictionary else "This assignment could not be applied.")
@@ -334,10 +356,14 @@ func _refresh_focus()->void:
 	if focus_panel==null:return
 	_sync_workforce()
 	var focused:=active_role!=""
-	focus_panel.visible=focused;evidence_panel.visible=focused;overview_button.visible=focused;food_back.visible=focused
+	focus_panel.visible=focused;evidence_panel.visible=focused;overview_button.visible=true;overview_button.disabled=not focused;overview_panel.visible=not focused;food_back.visible=true
 	for role:String in markers:(markers[role].node as Control).visible=not focused
 	pending_note.text=""
-	if not focused:return
+	var warnings:=_warning_words()
+	risk_reading.text=_command_error if _command_error!="" else (warnings[0] if not warnings.is_empty() else "")
+	risk_reading.tooltip_text=_command_error if _command_error!="" else "\n".join(warnings);risk_reading.visible=true
+	_update_food_strip(_comparison)
+	if not focused:_fit_scene.call_deferred();return
 	focus_title.text=String(ROLE_NAMES.get(active_role,active_role))
 	focus_title.tooltip_text=String(ROLE_PURPOSE.get(active_role,""))
 	source_reading.text="Effects: previous update" if _effects_outdated else ""
@@ -347,18 +373,12 @@ func _refresh_focus()->void:
 	transfer_reading.tooltip_text=transfer_reading.text;transfer_reading.visible=true
 	effect_graph.show_forecast(forecast,active_role,String(data.get("settlement_view",{}).get("settlement_id","")),_comparison)
 	if _effect_slots==0:_effect_slots=clampi(effect_graph.readings.size(),1,3)
-	effect_graph.custom_minimum_size.y=_effect_slots*58
+	effect_graph.custom_minimum_size.y=132
 	var notes:PackedStringArray=[]
 	for reading:Dictionary in effect_graph.readings:
 		var note:=String(reading.get("note",""))
 		if note!="" and not notes.has(note):notes.append(note)
 	forecast_reading.text=WorkImpacts.summary(active_role);forecast_reading.tooltip_text=("Estimate from the previous update.\n" if _effects_outdated else "")+"\n".join(notes);forecast_reading.visible=true
-	var warnings:=_warning_words()
-	var food:Dictionary=forecast.get("after",{}).get("food",{})
-	if warnings.is_empty() and float(food.get("net",0))<0:warnings.append("Food stores: %+.1f rations/day."%float(food.net))
-	risk_reading.text=_command_error if _command_error!="" else (warnings[0] if not warnings.is_empty() else "Food and local safeguards are included.")
-	risk_reading.tooltip_text=_command_error if _command_error!="" else "\n".join(warnings);risk_reading.visible=true
-	_update_food_strip(_comparison)
 	var normalized:Dictionary=preload("res://scripts/manual_work.gd").percents(draft.get("shares",{})) if not draft.is_empty() else _current_percentages
 	decrease_button.disabled=_committing or int(normalized.get(active_role,0))<=0
 	increase_button.disabled=_committing or int(normalized.get(active_role,0))>=100;five_button.disabled=increase_button.disabled
@@ -406,7 +426,7 @@ func _brief_warning(warning:Dictionary)->String:
 	return String(warning.get("text",""))
 
 func _update_food_strip(changed:bool)->void:
-	food_back.visible=active_role!="" and bool(forecast.get("ok",false))
+	food_back.visible=bool(forecast.get("ok",false))
 	food_graph.show_food(forecast,changed)
 	food_graph.tooltip_text="90-day outlook at current conditions, including known seasonal food changes."
 
@@ -431,56 +451,32 @@ func _anchors_changed(next:Dictionary)->void:
 
 func _fit_scene()->void:
 	if stage==null or not is_inside_tree():return
-	var width:=maxf(300,stage.size.x)
-	var top:=stage.global_position.y
-	var ancestor:Node=stage.get_parent()
+	var width:=maxf(560,stage.size.x)
+	var top:=stage.global_position.y;var ancestor:Node=stage.get_parent()
 	while ancestor!=null:
-		if ancestor is ScrollContainer:
-			top+=float((ancestor as ScrollContainer).scroll_vertical)
-			break
+		if ancestor is ScrollContainer:top+=float((ancestor as ScrollContainer).scroll_vertical);break
 		ancestor=ancestor.get_parent()
-	stage.custom_minimum_size.y=clampf(minf(width*0.66,get_viewport_rect().size.y-top-18),420,760)
-	var nav_size:=navigation.get_combined_minimum_size()
-	navigation.size=nav_size
-	# Keep the camera controls inside the visible part of a scrolled scene.
-	var nav_top:=8.0
-	if ancestor is ScrollContainer:nav_top=maxf(8,(ancestor as ScrollContainer).global_position.y-stage.global_position.y+8)
-	navigation.position=Vector2(width-nav_size.x-12,minf(nav_top,maxf(8,stage.size.y-nav_size.y-8)))
+	stage.custom_minimum_size.y=clampf(get_viewport_rect().size.y-top-18,470,1120)
+	var side_width:=300.0 if width<1100 else 340.0
+	var portrait_width:=minf(width-side_width-16,(stage.size.y-24)*1.5)
+	var composition_x:=maxf(0,(width-portrait_width-side_width-16)*.5)
+	settlement_view.position=Vector2(composition_x,0);settlement_view.size=Vector2(portrait_width,stage.size.y-24)
+	portrait_caption.position=Vector2(composition_x,stage.size.y-20);portrait_caption.size=Vector2(portrait_width,20)
+	overlay.position=settlement_view.position;overlay.size=settlement_view.size
+	sidebar.position=Vector2(composition_x+portrait_width+16,0);sidebar.size=Vector2(side_width,stage.size.y)
+	var inner_width:=side_width-24;var inner_height:=stage.size.y-24
 	scene_toolbar.size.x=width
-	var toolbar_height:=nav_size.y+16
-	var occupied:Array[Rect2]=[Rect2(Vector2.ZERO,Vector2(width,toolbar_height)),navigation.get_rect()]
-	var lines:Array=[]
-	# Overview labels have stable slots; only their connector endpoints track pan.
-	var grid:={"Survey":Vector2(0,0),"Crafting":Vector2(1,0),"Extraction":Vector2(2,0),"Knowledge":Vector2(0,1),"Logistics":Vector2(1,1),"Construction":Vector2(2,1),"Food":Vector2(0,2),"Administration":Vector2(1,2),"Defense":Vector2(2,2)}
+	overview_panel.position=Vector2.ZERO;overview_panel.size.x=inner_width
+	focus_panel.position=Vector2.ZERO;focus_panel.custom_minimum_size=Vector2(inner_width,132);focus_panel.size=Vector2(inner_width,132)
+	evidence_panel.position=Vector2(0,144);evidence_panel.custom_minimum_size=Vector2(inner_width,176);evidence_panel.size=Vector2(inner_width,176)
+	food_back.position=Vector2(0,maxf(326,inner_height-120));food_back.custom_minimum_size=Vector2(inner_width,120);food_back.size=Vector2(inner_width,120)
+	var nav_size:=navigation_surface.get_combined_minimum_size();navigation_surface.size=nav_size
+	navigation_surface.position=Vector2(maxf(4,portrait_width-nav_size.x-8),8)
 	for role:String in markers:
-		if active_role!="":break # hidden overview labels need no packing during a focus tween
-		var marker:Control=markers[role].node
-		(markers[role].button as Button).text="Assign"
-		marker.size=marker.get_combined_minimum_size()
-		var point:Vector2=anchors.get(role,Vector2(width*0.5,stage.size.y*0.5))
-		var slot:Vector2=grid[role]
-		var origin:=Vector2(12+slot.x*(width-marker.size.x-24)/2,toolbar_height+slot.y*(stage.size.y-toolbar_height-marker.size.y-12)/2)
-		var rect:=Rect2(origin,marker.size)
-		marker.position=origin;occupied.append(rect)
-		lines.append({"from":point,"to":Vector2(clampf(point.x,rect.position.x,rect.end.x),clampf(point.y,rect.position.y,rect.end.y)),"shared":false})
-	if connections!=null:connections.lines=lines;connections.visible=true;connections.queue_redraw()
-	if focus_panel!=null:
-		# Screen-space edges, not moving world anchors. These bounds depend only
-		# on the viewport, so no click, count or warning can move the stepper.
-		var control_width:=minf(282,width*.30)
-		var evidence_width:=minf(332,width*.35)
-		focus_panel.custom_minimum_size=Vector2(control_width,208)
-		focus_panel.size=Vector2(control_width,208)
-		var evidence_height:=float(maxi(1,_effect_slots)*58+75)
-		evidence_panel.custom_minimum_size=Vector2(evidence_width,evidence_height)
-		evidence_panel.size=Vector2(evidence_width,evidence_height)
-		focus_panel.position=Vector2(12,toolbar_height)
-		evidence_panel.position=Vector2(width-evidence_width-12,toolbar_height)
-		food_back.custom_minimum_size=Vector2(width-24,94)
-		food_back.size=Vector2(width-24,94)
-		food_back.position=Vector2(12,stage.size.y-106)
-		if active_role!="" and connections!=null:
-			connections.lines=[];connections.queue_redraw()
+		var marker:Control=markers[role].node;marker.size=marker.get_combined_minimum_size()
+		var anchor:Vector2=anchors.get(role,Vector2(-1000,-1000))
+		marker.visible=active_role=="" and Rect2(Vector2.ZERO,settlement_view.size).has_point(anchor)
+		marker.position=Vector2(clampf(anchor.x-marker.size.x*.5,4,maxf(4,portrait_width-marker.size.x-4)),clampf(anchor.y-marker.size.y*.5,4,maxf(4,stage.size.y-marker.size.y-4)))
 
 func view_state()->Dictionary:
 	var saved:=super.view_state();saved.focus_work=active_role
@@ -549,29 +545,30 @@ class WorkEffectGraphic extends Control:
 		custom_minimum_size=Vector2(260,72);mouse_filter=Control.MOUSE_FILTER_PASS
 	func show_forecast(result:Dictionary,role:String,settlement_id:String="",has_changes:=false)->void:
 		readings=WorkImpacts.readings(result,role,settlement_id,has_changes);comparing=has_changes
-		custom_minimum_size.y=174;visible=true;queue_redraw()
+		custom_minimum_size.y=132;visible=true;queue_redraw()
 	func _say(font:Font,at:Vector2,words:String,pixels:int,ink:Color)->void:
 		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,ink)
 	func _draw()->void:
 		var font:=T.font("ui");var strong:=T.font("ui_strong")
 		for index in readings.size():
-			var reading:Dictionary=readings[index];var y:=index*58.0
+			var reading:Dictionary=readings[index];var y:=index*44.0
 			var before:=float(reading.before);var after:=float(reading.after);var need:=float(reading.get("need",0))
+			var changed:=comparing and not is_equal_approx(before,after)
 			var scale:=maxf(1,maxf(maxf(before,after),need))*1.05
 			var ink:=annotation_ink();var draft_ink:=annotation_accent()
 			_say(strong,Vector2(0,y+15),String(reading.label),12 if String(reading.label).length()>34 else 14,ink)
 			var words:=String(reading.get("words","%.1f → %.1f %s" % [before,after,reading.unit] if comparing else "%.1f %s" % [after,reading.unit]))
-			_say(font,Vector2(0,y+32),words,16,ink)
-			if not comparing and need<=0:continue
+			_say(font,Vector2(0,y+29),words,16,ink)
+			if not changed and need<=0:continue
 			var line_width:=size.x-(105 if reading.has("current_caption") else 70)
-			if comparing:
-				draw_line(Vector2(0,y+39),Vector2(line_width*before/scale,y+39),Color(ink,.65),3,true)
-				_say(font,Vector2(line_width+6,y+42),"Before "+String(reading.get("current_caption","")),11,ink)
-			draw_line(Vector2(0,y+47),Vector2(line_width*after/scale,y+47),draft_ink if comparing else ink,3,true)
-			_say(font,Vector2(line_width+6,y+50),("Now "+String(reading.get("draft_caption",""))) if comparing else "Now",11,draft_ink if comparing else ink)
+			if changed:
+				_say(font,Vector2(line_width+6,y+34),"Before",10,Color(ink,.65))
+				_say(font,Vector2(line_width+6,y+44),"Now",10,draft_ink)
+				draw_line(Vector2(0,y+34),Vector2(line_width*before/scale,y+34),Color(ink,.65),3,true)
+			draw_line(Vector2(0,y+40),Vector2(line_width*after/scale,y+40),draft_ink if changed else ink,3,true)
 			if need>0:
-				var x:=line_width*need/scale;draw_line(Vector2(x,y+42),Vector2(x,y+51),ink,1.5)
-				_say(font,Vector2(0,y+57),"%s %.1f %s"%[String(reading.get("need_label","Need")),need,String(reading.unit)],12,ink)
+				var x:=line_width*need/scale;draw_line(Vector2(x,y+35),Vector2(x,y+42),ink,1.5)
+				_say(font,Vector2(line_width+6,y+14),"%s %.0f%s"%[String(reading.get("need_label","Need")),need,"%" if String(reading.unit)=="%" else ""],10,ink)
 
 class FoodCrossGraphic extends WorkEffectGraphic:
 	var current:Dictionary={}
@@ -611,3 +608,14 @@ class FoodCrossGraphic extends WorkEffectGraphic:
 			var ending:float=values[2].y if draft_line else values[2].x
 			_say(font,Vector2(x+chart_width+8,48 if draft_line else 30),("Now " if draft_line else "Before ")+"%.0f"%ending,12,color)
 		_say(font,Vector2(x,68),"0",11,ink);_say(font,Vector2(x+chart_width-16,68),"90d",11,ink)
+
+class PortraitFoodGraphic extends FoodCrossGraphic:
+	func _init()->void:custom_minimum_size=Vector2(0,82);mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		if proposed.is_empty():return
+		var font:=T.font("ui");var strong:=T.font("ui_strong");var ink:=annotation_ink()
+		_say(strong,Vector2(0,14),"Food each day",14,ink)
+		_say(font,Vector2(0,34),"In %.1f · need %.1f"%[float(proposed.get("production",0)),float(proposed.get("required",0))],14,ink)
+		var net:=float(proposed.get("net",0))
+		_say(strong,Vector2(0,54),"Stores %+.1f rations/day"%net,15,annotation_accent() if net<0 else ink)
+		_say(font,Vector2(0,76),"%s held · 90d estimate %s"%[preload("res://scripts/hud/era_words.gd").grouped(roundi(float(proposed.get("stock",0)))),preload("res://scripts/hud/era_words.gd").grouped(roundi(float(proposed.get("forecast90",{}).get("ending_rations",0))))],12,ink)
