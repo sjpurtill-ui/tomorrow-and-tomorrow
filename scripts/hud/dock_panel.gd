@@ -44,6 +44,9 @@ var brief_panel:PanelContainer
 var body_scroll:ScrollContainer
 var body:VBoxContainer
 var close_button:Button
+var header_margin:MarginContainer
+var tabs_margin:MarginContainer
+var spatial_view:=false
 var back_mode:bool=false
 ## Fingerprints of the rendered body sections, KPI row and brief, so a live
 ## refresh only replaces what changed.
@@ -67,6 +70,7 @@ func _ready()->void:
 	add_child(root)
 	# Header
 	var header:=MarginContainer.new()
+	header_margin=header
 	header.add_theme_constant_override("margin_left",26)
 	header.add_theme_constant_override("margin_right",26)
 	header.add_theme_constant_override("margin_top",14)
@@ -111,7 +115,7 @@ func _ready()->void:
 	header_row.add_child(note_label)
 	header_row.add_child(close)
 	# Sub-tabs
-	var tabs_margin:=MarginContainer.new()
+	tabs_margin=MarginContainer.new()
 	tabs_margin.add_theme_constant_override("margin_left",26)
 	tabs_margin.add_theme_constant_override("margin_right",26)
 	root.add_child(tabs_margin)
@@ -174,6 +178,16 @@ func present(new_provider:Object,new_sub:int=0)->void:
 func rebuild()->void:
 	if provider==null: return
 	var meta:Dictionary=provider.meta()
+	var spatial:=bool(meta.get("spatial_view",false))
+	spatial_view=spatial
+	for edge in ["left","right"]:
+		header_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
+		tabs_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
+	header_margin.add_theme_constant_override("margin_top",6 if spatial else 14)
+	header_margin.add_theme_constant_override("margin_bottom",4 if spatial else 10)
+	var body_margin:=body.get_parent() as MarginContainer
+	for edge in ["left","right","bottom"]:body_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
+	body_margin.add_theme_constant_override("margin_top",12 if spatial else 24)
 	_set_fit(bool(meta.get("fit_height",false)))
 	# Providers still pass shouted text; the dock speaks in sentence case.
 	# One header on every screen: the rail's word on one line, the tabs right
@@ -181,7 +195,7 @@ func rebuild()->void:
 	eyebrow_label.text="" if category_title!="" else Tokens.sentence_case(String(meta.get("eyebrow","")))
 	eyebrow_label.visible=eyebrow_label.text!=""
 	title_label.text=category_title if category_title!="" else Tokens.sentence_case(String(meta.get("title","")))
-	title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
+	title_label.add_theme_font_size_override("font_size",24 if spatial else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
 	title_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	note_label.text=title_note if category_title!="" else ""
 	note_label.visible=note_label.text!=""
@@ -201,6 +215,7 @@ func rebuild()->void:
 		tab_buttons.append(tab)
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
+		tab.custom_minimum_size.y=30 if spatial else 38
 		tab.visible=index<subtabs.size()
 		if index<subtabs.size(): tab.text=Tokens.sentence_case(String(subtabs[index]))
 		var active:=index<_flat.size() and bool(_flat[index].active)
@@ -546,7 +561,7 @@ func _set_fit(enabled:bool)->void:
 
 func _on_resized()->void:
 	if title_label:
-		title_label.add_theme_font_size_override("font_size",TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
+		title_label.add_theme_font_size_override("font_size",24 if spatial_view else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
 		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",15 if _flat.size()>5 else 16)
 	_kpi_columns()
 	if _fitting:return

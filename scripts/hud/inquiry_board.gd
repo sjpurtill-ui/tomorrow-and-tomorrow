@@ -802,7 +802,10 @@ func _hands(parent:Node,hands:Dictionary)->void:
 	said.tooltip_text=String(hands.get("tip",""));said.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(said)
 	var blocked:=bool(hands.get("occupied",false))
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",8);actions.add_theme_constant_override("v_separation",8);group.add_child(actions)
-	var more:=_small_button(actions,"More hands on learning",null if blocked else hands.get("on_more"),"Not while the place is occupied" if blocked else "Ask the local leader to move some people to learning. It changes who works at learning, not what is found.")
+	if hands.get("on_assign") is Callable:
+		var assign:=_small_button(actions,"Assign workers",hands.on_assign,"Focus Knowledge in The People. Preview learning and food security before applying.")
+		assign.name="AssignKnowledgeWorkers";T.apply_button_style(assign,true)
+	var more:=_small_button(actions,"Ask leader: more learning",null if blocked else hands.get("on_more"),"Not while the place is occupied" if blocked else "Ask the local leader to move some people to learning. It changes who works at learning, not what is found.")
 	T.apply_button_style(more,true)
 	more.name="MoreHands"
 	var free:=_small_button(actions,"Let the leader decide",null if blocked else hands.get("on_free"),"Not while the place is occupied" if blocked else "Let the local leader share out the work again.")
