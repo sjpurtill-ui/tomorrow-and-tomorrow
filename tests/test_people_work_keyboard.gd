@@ -39,7 +39,7 @@ func _tab_to(target:Control)->bool:
 		if focused==target:return true
 	return false
 
-func test_enter_and_tab_reach_assignment_and_apply_without_hidden_overview_stops()->void:
+func test_enter_applies_each_step_and_tab_returns_without_hidden_overview_stops()->void:
 	var screen:Control=fixture.screen
 	var assign:Button=screen.markers.Construction.button
 	assign.grab_focus()
@@ -55,15 +55,14 @@ func test_enter_and_tab_reach_assignment_and_apply_without_hidden_overview_stops
 	await _key(KEY_ENTER)
 	assert_int(screen.draft.counts.Construction).is_equal(11)
 	assert_int(screen.draft.counts.Food).is_equal(19)
-	assert_array(fixture.commits).is_empty()
-	reached=await _tab_to(screen.apply_button)
-	assert_bool(reached).override_failure_message("Keyboard could not reach Apply after editing workers: "+", ".join(tab_path)).is_true()
-	if not reached:return
-	await _key(KEY_ENTER)
 	assert_int(fixture.commits.size()).is_equal(1)
-	if fixture.commits.is_empty():return
 	assert_bool(fixture.commits[0].take_control).is_true()
 	assert_str(fixture.commits[0].draft.commands[0].role).is_equal("Construction")
+	assert_bool(viewport.gui_get_focus_owner()==screen.increase_button).is_true()
+	await _key(KEY_ENTER);await _key(KEY_ENTER)
+	assert_int(fixture.commits.size()).is_equal(3)
+	assert_int(fixture.counts.Construction).is_equal(13)
+	assert_bool(viewport.gui_get_focus_owner()==screen.increase_button).is_true()
 	reached=await _tab_to(screen.overview_button)
 	assert_bool(reached).override_failure_message("Keyboard could not return to the settlement after applying: "+", ".join(tab_path)).is_true()
 	if not reached:return

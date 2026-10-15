@@ -93,8 +93,8 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 		# the player has opened (people_screen.gd), not all nine every day.
 		"impact_of":task_impact}
 
-## Only the explicit Apply action may change work. A running-world change is
-## returned to the reader for a new preview; no stale estimate is committed.
+## An explicit allocation step changes work through this guarded command.
+## The captured token must still match; stale commands never mutate work.
 func commit_workforce(draft:Dictionary,confirm_take_control:bool=false)->Dictionary:
 	if not WorkforcePreview.is_current(draft):return {"ok":false,"stale":true}
 	var commands:Array=draft.get("commands",[])
@@ -102,8 +102,8 @@ func commit_workforce(draft:Dictionary,confirm_take_control:bool=false)->Diction
 	if not bool(draft.get("has_changes",false)):return {"ok":false,"reason":"The assignment is unchanged."}
 	for command:Variant in commands:
 		if not command is Dictionary or not Manual.ROLES.has(String(command.get("role",""))) or int(command.get("points",0))==0:
-			return {"ok":false,"reason":"This assignment is not valid. Refresh the preview."}
-	if not Manual.manual() and not confirm_take_control:return {"ok":false,"reason":"Taking control needs an explicit Apply."}
+			return {"ok":false,"reason":"This assignment is not valid. Try again from the current allocation."}
+	if not Manual.manual() and not confirm_take_control:return {"ok":false,"reason":"Taking control needs an explicit allocation action."}
 	if not Manual.manual():Manual.set_manual(true)
 	for command:Dictionary in commands:Manual.move_share(String(command.role),int(command.points))
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
