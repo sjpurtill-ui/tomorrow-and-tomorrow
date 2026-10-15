@@ -18,6 +18,8 @@ func test_every_role_has_bounded_practical_readings_with_units_and_explanations(
 	var original := result.duplicate(true)
 	for role: String in ["Food", "Survey", "Extraction", "Construction", "Crafting", "Logistics", "Knowledge", "Administration", "Defense"]:
 		var readings := Impacts.readings(result, role)
+		assert_str(Impacts.summary(role)).is_not_empty()
+		assert_int(Impacts.summary(role).length()).is_less_equal(120)
 		assert_int(readings.size()).is_between(1, 3)
 		for reading: Dictionary in readings:
 			assert_str(reading.unit).is_not_empty()
