@@ -92,6 +92,29 @@ func test_painterly_material_preserves_private_visibility_and_supply_contract() 
 	assert_bool(material.get_shader_parameter("map_people_visible")==true).is_false()
 	assert_object(Ink.material("person").shader).is_same(original)
 
+func test_prefiltered_atlases_preserve_authored_base_alpha_and_dimensions() -> void:
+	var motion := Costumes.motion_uniforms()
+	var textures := {
+		Costumes.PEOPLE_ATLAS: Costumes.atlas_texture(),
+		Costumes.ROLE_ATLAS: Costumes.cast_uniforms().role_atlas,
+		Costumes.WALK_ATLAS: motion.walk_atlas,
+		Costumes.CARRY_ATLAS: motion.carry_atlas,
+		Costumes.MALE_WALK_ATLAS: motion.male_walk_atlas,
+		Costumes.MALE_CARRY_ATLAS: motion.male_carry_atlas,
+	}
+	for path: String in textures:
+		var original := Image.load_from_file(path)
+		var rendered: Image = textures[path].get_image()
+		assert_vector(rendered.get_size()).is_equal(original.get_size())
+		assert_int(rendered.get_format()).is_equal(Image.FORMAT_RGBA8)
+		assert_bool(rendered.has_mipmaps()).override_failure_message(path).is_true()
+		var before := original.get_data()
+		var after := rendered.get_data()
+		var changed_alpha := 0
+		for offset in range(3, before.size(), 4):
+			if before[offset] != after[offset]: changed_alpha += 1
+		assert_int(changed_alpha).override_failure_message("Filtering changed authored transparency: " + path).is_equal(0)
+
 func test_motion_uses_complete_walking_and_carried_body_frames() -> void:
 	var motion := Costumes.motion_uniforms()
 	for prefix:String in ["walk", "carry", "male_walk", "male_carry"]:
