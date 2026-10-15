@@ -222,7 +222,7 @@ func _work_queue_width(view_width:float)->float:
 
 func _dock_width(panel:Control,view_width:float)->float:
 	if panel.provider and bool(panel.provider.meta().get("spatial_view",false)):
-		return minf(1600.0,maxf(280.0,view_width-Folio.RAIL_WIDTH-Tokens.EDGE_MARGIN))
+		return maxf(280.0,view_width-Folio.RAIL_WIDTH-Tokens.EDGE_MARGIN)
 	return Folio.page_width(view_width)
 
 func force_dock_layout()->void:
