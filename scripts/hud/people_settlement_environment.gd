@@ -89,12 +89,12 @@ static func _foliage(terrain:Node,data:Dictionary,bounds:Rect2,point:Callable,pa
 	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for tree:Transform3D in trees:
 		var shadow_radius:=tree.basis.x.length()*.0045
-		var shadow_center:=Vector2(tree.origin.x,tree.origin.z)+Vector2(shadow_radius*.55,shadow_radius*.45)
+		var shadow_center:=Vector2(tree.origin.x,tree.origin.z)+Vector2(shadow_radius*.50,shadow_radius*.35)
 		for i in 14:
 			for at:Vector2 in [shadow_center,shadow_center+Vector2.from_angle(TAU*i/14)*shadow_radius,shadow_center+Vector2.from_angle(TAU*(i+1)/14)*shadow_radius]:
-				shade.set_color(Color(1,1,1,.5 if at==shadow_center else 0));shade.add_vertex(point.call(at,.00023))
+				shade.set_color(Color(1,1,1,.38 if at==shadow_center else 0));shade.add_vertex(point.call(at,.00023))
 	var shadow:=MeshInstance3D.new();shadow.name="DrapedWoodlandShadows";shadow.mesh=shade.commit()
-	var shader:=Shader.new();shader.code="shader_type spatial; render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled; void fragment(){ALBEDO=mix(vec3(1),vec3(.45,.48,.40),COLOR.a);}"
+	var shader:=Shader.new();shader.code="shader_type spatial; render_mode unshaded,blend_mix,depth_draw_never,cull_disabled,shadows_disabled; void fragment(){ALBEDO=vec3(.08,.11,.08);ALPHA=COLOR.a;}"
 	var material:=ShaderMaterial.new();material.shader=shader;material.render_priority=-15;shadow.material_override=material;parent.add_child(shadow)
 
 static func _batch(parent:Node3D,label:String,mesh:Mesh,transforms:Array[Transform3D],colors:Array[Color],tint:Color,centers:Array[Color]=[])->void:

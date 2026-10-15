@@ -35,7 +35,10 @@ var _foliage_cut:=0.0
 var _painted_materials:Array[ShaderMaterial]=[]
 var _painted_active:=false
 var _painted_yards:Node3D
+var _annotation_objects:Array[MeshInstance3D]=[]
+var _annotation_obstacles:Array[Rect2]=[]
 var _bounds:=Rect2()
+var _overview_focus:=Vector2.ZERO
 var _ground_bounds:=Rect2()
 var _heights:=PackedFloat32Array()
 var _target:=Vector3.ZERO
@@ -71,12 +74,14 @@ func _ensure_view()->void:
 	picture=TextureRect.new();picture.name="LivingSettlement"
 	picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_SCALE
-	picture.mouse_filter=Control.MOUSE_FILTER_IGNORE;add_child(picture)
+	picture.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var finish:=ShaderMaterial.new();var finish_shader:=Shader.new();finish_shader.code=SCENE_FINISH;finish.shader=finish_shader
+	picture.material=finish;add_child(picture)
 	view=SubViewport.new();view.name="PeopleSettlementWorld";view.own_world_3d=true
 	view.size=Vector2i(1024,640);view.gui_disable_input=true;view.msaa_3d=Viewport.MSAA_4X
 	view.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE;add_child(view)
 	picture.texture=view.get_texture()
-	camera=Camera3D.new();camera.name="SettlementCamera";camera.projection=Camera3D.PROJECTION_PERSPECTIVE;camera.fov=38.0
+	camera=Camera3D.new();camera.name="SettlementCamera";camera.projection=Camera3D.PROJECTION_PERSPECTIVE;camera.fov=42.0
 	camera.near=.0001;camera.far=10.0;camera.current=true;view.add_child(camera)
 	var world:=WorldEnvironment.new();var environment:=Environment.new();world.environment=environment
 	environment.background_mode=Environment.BG_COLOR;environment.background_color=Color("87968c")
@@ -111,7 +116,7 @@ func focus_role(role:String)->void:
 	focus_changed.emit(role)
 
 func reset_view()->void:
-	focused_role="";_desired_target=_point(_bounds.get_center());_desired_span=_overview_span()
+	focused_role="";_desired_target=_point(_overview_focus,.001);_desired_span=_overview_span()
 	if is_instance_valid(_highlight):_highlight.visible=false
 	focus_changed.emit("")
 
@@ -130,9 +135,11 @@ func role_anchor_metadata()->Dictionary:
 		result[role]={"polygons":screen_polygons,"position":_anchors.get(role,Vector2.ZERO),"visible":not camera.is_position_behind(point) and Rect2(Vector2.ZERO,size).has_point(_anchors.get(role,Vector2.ZERO)),"physical":zone.physical,"plot_ids":zone.plot_ids.duplicate(),"source":zone.source}
 	return result
 
+func annotation_obstacles()->Array[Rect2]:return _annotation_obstacles.duplicate()
+
 func _build_scene()->void:
 	if is_instance_valid(model):model.free()
-	_materials.clear();_foliage_materials.clear();_painted_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
+	_materials.clear();_foliage_materials.clear();_painted_materials.clear();_annotation_objects.clear();_annotation_obstacles.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
 	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
 	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
 	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
@@ -167,7 +174,7 @@ func _build_scene()->void:
 	_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
 
 func _frame_inhabited_core(plan:Dictionary)->void:
-	var points:=PackedVector2Array()
+	var points:=PackedVector2Array();var inhabited:Array[Vector2]=[]
 	for record:Dictionary in plan.get("buildings",[]):
 		var plot:Dictionary=record.plot
 		if String(plot.get("status","active")) in ["ruin","reclaimed","vacant"]:continue
@@ -175,10 +182,21 @@ func _frame_inhabited_core(plan:Dictionary)->void:
 		if use not in ["residential_compound","mixed_household","temporary_encampment","workshop","storage","civic"]:continue
 		var at:Vector2=record.position;var radius:=float(record.get("radius",.003))
 		points.append(at-Vector2.ONE*radius);points.append(at+Vector2.ONE*radius)
-	if points.is_empty():return
+		if use in ["residential_compound","mixed_household","temporary_encampment"]:inhabited.append(at)
+	if points.is_empty():_overview_focus=_bounds.get_center();return
 	_bounds=Rect2(points[0],Vector2.ZERO)
 	for point in points:_bounds=_bounds.expand(point)
 	_bounds=_bounds.grow(.002)
+	_overview_focus=_bounds.get_center()
+	if _painted_active and not inhabited.is_empty():
+		var near:=Vector2(sin(_yaw),cos(_yaw))
+		var ideal:=_bounds.get_center()+near*maxf(_bounds.size.x,_bounds.size.y)*.20
+		inhabited.sort_custom(func(a:Vector2,b:Vector2)->bool:return a.distance_squared_to(ideal)<b.distance_squared_to(ideal))
+		var close:=Vector2.ZERO;var count:=mini(8,inhabited.size())
+		for i in count:close+=inhabited[i]
+		# Place real near homes in the foreground, with their existing roads and
+		# more distant neighbours behind. No structure is moved or multiplied.
+		_overview_focus=close/float(count)-near*.006
 
 func _private_paint(node:Node)->void:
 	for child in node.get_children():
@@ -193,6 +211,7 @@ func _private_paint(node:Node)->void:
 			child.material_override=paint
 			if child.name=="ActualSeededWoodland" or bool(child.get_meta("foliage",false)):_foliage_materials.append(paint)
 			if bool(child.get_meta("painted",false)):_painted_materials.append(paint)
+			if child is MeshInstance3D and child.has_meta("illustrated_size") and (child.has_meta("plot_id") or bool(child.get_meta("foliage",false))):_annotation_objects.append(child)
 		_private_paint(child)
 
 func _sample_ground()->void:
@@ -364,25 +383,41 @@ func _worked_yards(plan:Dictionary)->void:
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
 	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for building:Dictionary in plan.get("buildings",[]):
-		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))*(2.1 if _painted_active else 1.4)
-		for i in 14:
-			var a:=at+Vector2.from_angle(TAU*i/14.0)*radius*(.85+.22*sin(i*2.17+float(building.get("plot_id",0))))
-			var b:=at+Vector2.from_angle(TAU*(i+1)/14.0)*radius*(.85+.22*sin((i+1)%14*2.17+float(building.get("plot_id",0))))
-			for point:Vector2 in [at,a,b]:
-				surface.set_normal(_normal(point))
-				surface.set_color(Color(.55,.42,.26,.95) if point==at else Color(.55,.42,.26,0))
-				surface.add_vertex(_point(point,.00005));count+=1
-		var center:=at+Vector2(radius*.55,radius*.45)
-		for i in 16:
-			var a:=center+Vector2.from_angle(TAU*i/16.0)*radius*1.5
-			var b:=center+Vector2.from_angle(TAU*(i+1)/16.0)*radius*1.5
-			for point:Vector2 in [center,a,b]:
-				shade.set_color(Color(1,1,1,.60 if point==center else 0));shade.add_vertex(_point(point,.00022))
+		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))
+		var door:=at+Vector2(sin(_yaw),cos(_yaw))*radius*.35
+		count+=_wear_patch(surface,door,radius*2.15,int(building.get("plot_id",0)),Color(.44,.32,.19,.88))
+		# Dense contact at the actual ground pivot prevents the painted footing
+		# from floating. A softer, longer shade follows the same afternoon sun.
+		_shadow_patch(shade,at,Vector2(radius*.95,radius*.50),.48)
+		_shadow_patch(shade,at+Vector2(radius*.7,radius*.45),Vector2(radius*1.4,radius*.70),.20)
+	for plot:Dictionary in snapshot.plots:
+		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
+		var form:=String(plot.get("form",""))
+		if form not in ["open_hearth_yard","maintained_gathering_ground","open_work_yard","guarded_cache"]:continue
+		var at:Vector2=plot.get("centroid",Vector2.ZERO)
+		count+=_wear_patch(surface,at,.0075,int(plot.get("id",0)),Color(.46,.34,.21,.78))
+		if form=="open_hearth_yard":_shadow_patch(shade,at,Vector2(.0018,.0010),.50)
 	if count>0:_commit(surface,"WornGroundAroundRecordedBuildings",true)
 	if count>0:
 		var shadows:=_commit(shade,"DrapedBuildingContactShadows",true)
 		var shader:=Shader.new();shader.code=CONTACT_SHADER
 		var paint:=ShaderMaterial.new();paint.shader=shader;paint.render_priority=-15;shadows.material_override=paint
+
+func _wear_patch(surface:SurfaceTool,at:Vector2,radius:float,seed_value:int,color:Color)->int:
+	for i in 20:
+		var a:=at+Vector2.from_angle(TAU*i/20.0)*radius*(.87+.16*sin(i*2.17+seed_value))
+		var b:=at+Vector2.from_angle(TAU*(i+1)/20.0)*radius*(.87+.16*sin((i+1)%20*2.17+seed_value))
+		for point:Vector2 in [at,a,b]:
+			surface.set_normal(_normal(point));surface.set_color(color if point==at else Color(color,0))
+			surface.add_vertex(_point(point,.00028))
+	return 60
+
+func _shadow_patch(surface:SurfaceTool,at:Vector2,extent:Vector2,opacity:float)->void:
+	for i in 20:
+		var a:=at+Vector2.from_angle(TAU*i/20)*extent
+		var b:=at+Vector2.from_angle(TAU*(i+1)/20)*extent
+		for point:Vector2 in [at,a,b]:
+			surface.set_color(Color(1,1,1,opacity if point==at else 0));surface.add_vertex(_point(point,.00038))
 
 func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
@@ -496,7 +531,7 @@ func _overview_span()->float:
 	# through their role anchors and the reversible wheel zoom.
 	var horizontal:=absf(cos(_yaw))*_bounds.size.x+absf(sin(_yaw))*_bounds.size.y
 	var depth:=absf(sin(_yaw))*_bounds.size.x+absf(cos(_yaw))*_bounds.size.y
-	return maxf(.036,maxf(horizontal/aspect,depth*sin(_pitch)) *(.63 if _painted_active else .84))
+	return maxf(.031,maxf(horizontal/aspect,depth*sin(_pitch)) *(.53 if _painted_active else .84))
 
 func _resize_view()->void:
 	if not is_instance_valid(view):return
@@ -523,6 +558,16 @@ func _project_anchors()->void:
 	for role:String in _zones:
 		var at:Vector2=_zones[role].center
 		_anchors[role]=camera.unproject_position(_point(at,.003))
+	_annotation_obstacles.clear()
+	var screen:=Rect2(Vector2.ZERO,size)
+	for object:MeshInstance3D in _annotation_objects:
+		if not is_instance_valid(object) or camera.is_position_behind(object.global_position):continue
+		var illustrated:Vector2=object.get_meta("illustrated_size",Vector2.ZERO)
+		var base:=object.global_position;var side:=camera.global_basis.x*illustrated.x*.5
+		var up:=camera.global_basis.y*illustrated.y
+		var rectangle:=Rect2(camera.unproject_position(base-side),Vector2.ZERO)
+		for point:Vector3 in [base+side,base-side+up,base+side+up]:rectangle=rectangle.expand(camera.unproject_position(point))
+		if rectangle.intersects(screen) and rectangle.size.x>8:_annotation_obstacles.append(rectangle.intersection(screen))
 	role_anchors_changed.emit(_anchors.duplicate())
 
 func _process(delta:float)->void:
@@ -566,11 +611,12 @@ void vertex(){at=VERTEX;}
 float grain(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 c=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(grain(c),grain(c+vec2(1,0)),f.x),mix(grain(c+vec2(0,1)),grain(c+vec2(1)),f.x),f.y);}
 void fragment(){
-vec3 photo=texture(ground_photo,UV).rgb;
+vec3 photo=mix(textureLod(ground_photo,UV,2.0).rgb,texture(ground_photo,UV).rgb,.25);
 float broad=noise(at.xz*30.0)*.7+noise(at.xz*120.0+vec2(6.1,2.8))*.3;
 vec3 ground=mix(vec3(.26,.31,.16),vec3(.45,.44,.26),broad);
 float fine=noise(at.xz*580.0);
-vec3 color=painted_ground ? photo*(.88+broad*.20) : ground*(.72+dot(photo,vec3(.2126,.7152,.0722))*.52)*(.94+fine*.12);
+vec3 calm=mix(vec3(.17,.20,.115),vec3(.29,.27,.18),broad);
+vec3 color=painted_ground ? mix(calm,photo*.66,.42) : ground*(.72+dot(photo,vec3(.2126,.7152,.0722))*.52)*(.94+fine*.12);
 float value=dot(color,vec3(.2126,.7152,.0722));
 color=mix(color,vec3(value)*vec3(1.25,1.12,.82),aridity*.85);
 ALBEDO=mix(color,vec3(value)*vec3(1.0,1.04,1.03),cold*.7);ROUGHNESS=1.0;
@@ -578,6 +624,15 @@ ALBEDO=mix(color,vec3(value)*vec3(1.0,1.04,1.03),cold*.7);ROUGHNESS=1.0;
 """
 
 const CONTACT_SHADER:="""shader_type spatial;
-render_mode unshaded,blend_mul,depth_draw_never,cull_disabled,shadows_disabled;
-void fragment(){ALBEDO=mix(vec3(1.0),vec3(.47,.49,.43),COLOR.a);}
+render_mode unshaded,blend_mix,depth_draw_never,cull_disabled,shadows_disabled;
+void fragment(){ALBEDO=vec3(.08,.10,.07);ALPHA=COLOR.a;}
+"""
+
+const SCENE_FINISH:="""shader_type canvas_item;
+void fragment(){
+vec4 scene=texture(TEXTURE,UV);
+vec2 edge=(UV-.5)*vec2(.9,1.0);
+float vignette=1.0-smoothstep(.28,.72,length(edge))*.12;
+COLOR=vec4(scene.rgb*vignette,scene.a);
+}
 """
