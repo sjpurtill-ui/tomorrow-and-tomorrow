@@ -22,6 +22,7 @@ var _context:Dictionary={}
 var _key:int=0
 var _zones:Dictionary={}
 var _anchors:Dictionary={}
+var _activity_bounds:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
 var _foliage_materials:Array[ShaderMaterial]=[]
 var _foliage_cut:=0.0
@@ -187,7 +188,7 @@ func focus_role(role:String)->void:
 	if not _zones.has(role):return
 	_manual_navigation=false
 	focused_role=role
-	var zone:Dictionary=_zones[role];var at:Vector2=zone.center
+	var zone:Dictionary=_zones[role];var at:Vector2=zone.get("focus_center",zone.center)
 	_desired_target=_point(at)
 	_desired_span=float(zone.focus_span)
 	_make_highlight(zone.polygons)
@@ -211,7 +212,7 @@ func role_anchor_metadata()->Dictionary:
 			var projected:=PackedVector2Array()
 			for vertex:Vector2 in polygon:projected.append(camera.unproject_position(_point(vertex,.0002)))
 			screen_polygons.append(projected)
-		result[role]={"polygons":screen_polygons,"position":_anchors.get(role,Vector2.ZERO),"visible":not camera.is_position_behind(point) and Rect2(Vector2.ZERO,size).has_point(_anchors.get(role,Vector2.ZERO)),"physical":zone.physical,"plot_ids":zone.plot_ids.duplicate(),"source":zone.source}
+		result[role]={"polygons":screen_polygons,"position":_anchors.get(role,Vector2.ZERO),"visible":not camera.is_position_behind(point) and Rect2(Vector2.ZERO,size).has_point(_anchors.get(role,Vector2.ZERO)),"physical":zone.physical,"plot_ids":zone.plot_ids.duplicate(),"source":zone.source,"activity_bounds":_activity_bounds.get(role,Rect2())}
 	return result
 
 func annotation_obstacles()->Array[Rect2]:return _annotation_obstacles.duplicate()
@@ -287,7 +288,21 @@ func _project_anchors()->void:
 		var at:Vector2=_zones[role].center
 		_anchors[role]=camera.unproject_position(_point(at,.003))
 	_annotation_obstacles.clear()
+	_activity_bounds.clear()
 	var screen:=Rect2(Vector2.ZERO,size)
+	# Protect destination activity as a stable area while people travel; labels
+	# should not chase the walkers or cover the work they are about to do.
+	for person:Dictionary in _cast.people:
+		var role:=String(person.role);var base:=_point(person.target,.00005)
+		if camera.is_position_behind(base):continue
+		var side:=camera.global_basis.x*.0011;var up:=camera.global_basis.y*.0028
+		var rectangle:=Rect2(camera.unproject_position(base-side),Vector2.ZERO)
+		for point:Vector3 in [base+side,base-side+up,base+side+up]:rectangle=rectangle.expand(camera.unproject_position(point))
+		if _activity_bounds.has(role):rectangle=rectangle.merge(_activity_bounds[role])
+		_activity_bounds[role]=rectangle
+	for role:String in _activity_bounds:
+		_activity_bounds[role]=(_activity_bounds[role] as Rect2).intersection(screen)
+		if (_activity_bounds[role] as Rect2).has_area():_annotation_obstacles.append(_activity_bounds[role])
 	for object:MeshInstance3D in _annotation_objects:
 		if not is_instance_valid(object) or camera.is_position_behind(object.global_position):continue
 		var illustrated:Vector2=object.get_meta("illustrated_size",Vector2.ZERO)
