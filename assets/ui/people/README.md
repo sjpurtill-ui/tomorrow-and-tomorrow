@@ -53,6 +53,9 @@ or damage and matching material, floor count and roof; they are not generic
 ruin overlays. Timber variants use the same three-by-two layout: three modest
 single-storey plank-roof houses, then three two-storey versions. Stable recorded
 building identity chooses variation without changing installed fabric.
+The renderer uses `settlement-timber-variants-v2.png`. Its corrected spacing
+keeps lower-row roofs out of the top-row cells; v1 is retained as superseded
+source artwork and is not used by the renderer.
 
 Workshop: one 1254px square transparent image of an open-front timber workshop
 with a plank roof, for that recorded material and form. No chimney, glass, metal
@@ -107,6 +110,9 @@ Timber variants: transparent six-cell sheet, three columns and two rows, three
 single-storey and three two-storey timber plank-roof houses; varied modest
 weathered wood, roof pitch and handmade detailing, consistent camera and light.
 No thatch, tiles, chimneys, glass, people or new technology. Clear alpha gutters.
+The corrective v2 edit preserved the six subjects and required every complete
+house to fit inside its own 512px cell with transparent separation. A read-only
+alpha audit confirmed no visible pixels on the row or column boundaries.
 
 Workshop: a single transparent, warmly painted ancient open-front timber
 workshop, one storey, steep wooden plank roof, handmade bench with wood/stone
@@ -123,6 +129,7 @@ the village assets. No thatch, chimney, pottery, metal, people, UI or ground sla
 - People: `exec-14eff4ef-116b-4e05-bb7a-6aa7d81e23c0.png`
 - States: `exec-00bbc6ed-d6f1-401a-9723-ded77ef349e3.png`
 - Timber variants: `exec-fbfd323b-5fd5-47ae-b308-c5b23a365a4f.png`
+- Timber variants, corrected v2: `exec-4076ee61-3153-41bf-bb20-be10339d2472.png`
 - Workshop: `exec-f2ea6e25-3755-4bb0-ad69-ae415d5a1570.png`
 
 Original outputs remain in the conversation's generated-image directory. These
