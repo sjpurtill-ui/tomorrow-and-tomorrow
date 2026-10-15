@@ -60,6 +60,8 @@ var _yard_batches:=-1
 var _people_paint:ShaderMaterial
 var _building_plan:Dictionary={}
 var _people_key:=-1
+var _worker_route_key:=-1
+var _worker_route_cache:Array[PackedVector2Array]=[]
 
 func configure(context:Dictionary)->void:
 	_ensure_view();update_state(context)
@@ -458,10 +460,8 @@ func _update_people()->void:
 	_people_key=key
 	if is_instance_valid(_people):_people.free()
 	_walks.clear();visual_people_count=0
-	var routes:Array=[]
-	for route:Dictionary in snapshot.routes:
-		var points:PackedVector2Array=route.get("points",PackedVector2Array())
-		if bool(route.get("active",true)) and points.size()>1:routes.append(points)
+	var blockers:=_worker_blockers()
+	var routes:=_worker_routes(blockers)
 	if routes.is_empty():return
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
@@ -470,6 +470,9 @@ func _update_people()->void:
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
 	_people_paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
 	_people_paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
+	var motion:Dictionary=Costumes.motion_uniforms()
+	for parameter:String in motion:_people_paint.set_shader_parameter(parameter,motion[parameter])
+	_people_paint.set_shader_parameter("motion_phase_supplied",true)
 	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
 	# Its private shader does not change the map's global no-people policy.
@@ -481,28 +484,133 @@ func _update_people()->void:
 	var colors:Array[Color]=look.palette
 	for i in visual_people_count:
 		var path:PackedVector2Array=routes[i%routes.size()]
-		_walks.append({"path":path,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
+		var length:=0.0
+		for p in range(1,path.size()):length+=path[p-1].distance_to(path[p])
+		_walks.append({"path":path,"length":length,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
 		batch.set_instance_color(i,colors[i%colors.size()])
-		batch.set_instance_custom_data(i,Color(fmod(i*.618,1.0),0,1 if i%4==0 else 0,.75))
-	# A few members work at existing physical work areas. They are illustrative
-	# representatives, not an additional allocation or individual simulation.
+		batch.set_instance_custom_data(i,Color(fmod(i*.618,1.0),0,0,.75))
+	# Site actions need a visible target. A role allocation alone cannot invent
+	# a workshop, a tool, or a reason to gesture in an empty parcel.
 	var index:=0;var allocations:Dictionary=_context.get("allocations",GameState.population_allocations)
-	for role:String in ["Crafting","Construction","Food","Logistics","Knowledge","Defense"]:
-		if index>=mini(6,_walks.size()) or int(allocations.get(role,0))<=0 or not _zones.has(role):continue
-		var zone:Dictionary=_zones[role]
-		if not bool(zone.physical):continue
-		var at:Vector2=zone.center;var safe:=false
-		for attempt in 16:
-			var candidate:=at+Vector2.from_angle(attempt*TAU/16)*(.0025+attempt*.0002)
-			var blocked:=false
-			for building:Dictionary in _building_plan.get("buildings",[]):
-				if candidate.distance_to(building.position)<float(building.get("radius",.003))+.0005:blocked=true;break
-			if not blocked:at=candidate;safe=true;break
-		if not safe:continue
-		_walks[index]["stationary"]=at
-		var pose:=8 if role in ["Crafting","Construction"] else (1 if role=="Food" else (7 if role=="Defense" else 5))
-		batch.set_instance_custom_data(index,Color(float(index)*.17,pose,0,.7));index+=1
+	for site:Dictionary in _worker_sites(blockers):
+		if index>=mini(6,_walks.size()):break
+		if int(allocations.get(site.role,0))<=0:continue
+		_walks[index].merge(site,true)
+		batch.set_instance_custom_data(index,Color(float(index)*.17,int(site.pose),0,.7));index+=1
+	_install_worker_deliveries(blockers,allocations)
 	_move_people()
+
+func _install_worker_deliveries(blockers:Array[Dictionary],allocations:Dictionary)->void:
+	if int(allocations.get("Logistics",0))<=0 or int(allocations.get("Crafting",0))<=0:return
+	var count:=0
+	for index in _walks.size():
+		var source:Dictionary=_walks[index]
+		if source.get("source","")!="woodpile" or not source.has("stationary"):continue
+		for destination:Dictionary in _walks:
+			if destination.get("source","") not in ["bench","workshop_workbench"] or not destination.has("stationary"):continue
+			var start:Vector2=source.stationary
+			var direction:Vector2=(Vector2(destination.target)-Vector2(destination.stationary)).normalized()
+			var finish:Vector2=Vector2(destination.stationary)+direction.orthogonal()*.001
+			var distance:=start.distance_to(finish)
+			if distance<.0015 or distance>.015 or not _worker_segment_clear(start,finish,blockers):continue
+			_walks[index]={"path":PackedVector2Array([start,finish]),"length":distance,"phase":float(source.phase),"speed":.0007,"delivery":true,"pause":1.2,"role":"Logistics","source":"woodpile_to_workbench","pickup_target":source.target,"drop_target":destination.target}
+			count+=1;break
+		if count>=2:break
+
+func _worker_blockers()->Array[Dictionary]:
+	var result:Array[Dictionary]=[]
+	for record:Dictionary in _building_plan.get("buildings",[]):
+		result.append({"center":Vector2(record.position),"radius":maxf(.0015,float(record.get("radius",.003)))+.00055,"source":"building"})
+	for plot:Dictionary in snapshot.get("plots",[]):
+		if String(plot.get("form",""))=="open_hearth_yard" and String(plot.get("status","active")) not in ["vacant","reclaimed"]:
+			result.append({"center":Vector2(plot.get("centroid",Vector2.ZERO)),"radius":.0022,"source":"hearth"})
+	return result
+
+static func _worker_segment_clear(a:Vector2,b:Vector2,blockers:Array[Dictionary])->bool:
+	for obstacle:Dictionary in blockers:
+		if Geometry2D.get_closest_point_to_segment(Vector2(obstacle.center),a,b).distance_to(obstacle.center)<float(obstacle.radius):return false
+	return true
+
+func _worker_routes(blockers:Array[Dictionary])->Array[PackedVector2Array]:
+	if _worker_route_key==_key:return _worker_route_cache
+	_worker_route_key=_key;_worker_route_cache.clear()
+	# This navigation grid exists only in this renderer. Routes and plots remain
+	# untouched; visual walkers step around footprints instead of through them.
+	var grid:=AStarGrid2D.new();var area:=_bounds.grow(.008)
+	var step:=maxf(.0012,maxf(area.size.x,area.size.y)/160.0)
+	grid.region=Rect2i(Vector2i.ZERO,Vector2i(ceil(area.size.x/step)+1,ceil(area.size.y/step)+1))
+	grid.cell_size=Vector2.ONE*step;grid.offset=area.position
+	grid.diagonal_mode=AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES;grid.update()
+	for obstacle:Dictionary in blockers:
+		var radius:=float(obstacle.radius)+step*.75;var center:Vector2=obstacle.center
+		var first:=Vector2i(((center-Vector2.ONE*radius-area.position)/step).floor())
+		var last:=Vector2i(((center+Vector2.ONE*radius-area.position)/step).ceil())
+		for y in range(maxi(0,first.y),mini(grid.region.end.y,last.y+1)):
+			for x in range(maxi(0,first.x),mini(grid.region.end.x,last.x+1)):
+				var cell:=Vector2i(x,y)
+				if grid.get_point_position(cell).distance_to(center)<radius:grid.set_point_solid(cell)
+	for route:Dictionary in snapshot.routes:
+		var points:PackedVector2Array=route.get("points",PackedVector2Array())
+		if not bool(route.get("active",true)) or points.size()<2:continue
+		var path:=PackedVector2Array();var valid:=true
+		for p in range(1,points.size()):
+			var a:Vector2=points[p-1];var b:Vector2=points[p]
+			if _worker_segment_clear(a,b,blockers):
+				if path.is_empty():path.append(a)
+				path.append(b);continue
+			var start:=_worker_free_cell(grid,Vector2i(((a-area.position)/step).round()))
+			var finish:=_worker_free_cell(grid,Vector2i(((b-area.position)/step).round()))
+			if start.x<0 or finish.x<0:valid=false;break
+			var detour:=grid.get_point_path(start,finish)
+			if detour.size()<2:valid=false;break
+			for point:Vector2 in detour:
+				if path.is_empty() or path[-1].distance_to(point)>.00001:path.append(point)
+		if not valid or path.size()<2:continue
+		for p in range(1,path.size()):
+			if not _worker_segment_clear(path[p-1],path[p],blockers):valid=false;break
+		if valid:_worker_route_cache.append(path)
+	return _worker_route_cache
+
+static func _worker_free_cell(grid:AStarGrid2D,at:Vector2i)->Vector2i:
+	at=at.clamp(grid.region.position,grid.region.end-Vector2i.ONE)
+	if not grid.is_point_solid(at):return at
+	for reach in range(1,12):
+		for y in range(-reach,reach+1):
+			for x in range(-reach,reach+1):
+				if maxi(absi(x),absi(y))!=reach:continue
+				var cell:=at+Vector2i(x,y)
+				if grid.region.has_point(cell) and not grid.is_point_solid(cell):return cell
+	return Vector2i(-1,-1)
+
+func _worker_sites(blockers:Array[Dictionary])->Array[Dictionary]:
+	var targets:Array[Dictionary]=[]
+	for child:Node3D in model.get_children():
+		var kind:=String(child.name).trim_prefix("PaintedWorkplace_").trim_prefix("Workplace_")
+		if kind not in ["bench","woodpile","pots","hide_frame","hearth_ring"]:continue
+		var role:="Food" if kind=="hearth_ring" else ("Logistics" if kind in ["woodpile","pots"] else "Crafting")
+		targets.append({"center":Vector2(child.position.x,child.position.z),"radius":.0025 if kind=="hearth_ring" else .0009,"role":role,"source":kind})
+	for record:Dictionary in _building_plan.get("buildings",[]):
+		if String(record.plot.get("status","active"))=="under_construction":
+			targets.append({"center":Vector2(record.position),"radius":float(record.get("radius",.003))+.0008,"role":"Construction","source":"recorded_frame"})
+		elif String(record.plot.get("land_use",""))=="workshop" and Art.building_style(record).get("atlas","")==Art.WORKSHOP:
+			targets.append({"center":Vector2(record.position),"radius":float(record.get("radius",.003))+.0008,"role":"Crafting","source":"workshop_workbench"})
+	var result:Array[Dictionary]=[]
+	for target:Dictionary in targets:
+		# Initial workers are built before the camera is positioned. Use its
+		# intended viewing direction so first-frame activity is on the near side.
+		var front:=Vector2(sin(_yaw),cos(_yaw)).angle()
+		for attempt in 16:
+			var outward:=Vector2.from_angle(front+attempt*TAU/16)
+			var at:Vector2=target.center+outward*float(target.radius)
+			if not _worker_segment_clear(at,at,blockers):continue
+			var occupied:=false
+			for other:Dictionary in result:
+				if at.distance_to(other.stationary)<.001:occupied=true;break
+			if occupied:continue
+			# Work faces the nearby object/edge, never an arbitrary compass heading.
+			result.append({"stationary":at,"target":Vector2(target.center)+outward*maxf(0,float(target.radius)-.0009),"role":target.role,"source":target.source,"pose":8})
+			break
+	return result
 
 func _clothing_appearance()->Dictionary:
 	# Read the selected settlement's last issued-clothing report without entering
@@ -524,18 +632,37 @@ func _move_people()->void:
 	if not is_instance_valid(_people):return
 	_people_paint.set_shader_parameter("anim_clock",_elapsed)
 	for i in _walks.size():
-		var walk:Dictionary=_walks[i];var path:PackedVector2Array=walk.path;var length:=0.0
-		if walk.has("stationary"):
-			_people.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*.001),_point(walk.stationary,.00005)));continue
+		var state:=_worker_sample(_walks[i],_elapsed)
+		var direction:Vector2=state.direction
+		_people.multimesh.set_instance_transform(i,Transform3D(Basis(Vector3.UP,atan2(direction.x,direction.y)).scaled(Vector3.ONE*.001),_point(state.position,.00005)))
+		_people.multimesh.set_instance_custom_data(i,Color(float(_walks[i].phase),int(state.get("pose",0)),1.0 if bool(state.get("carrying",false)) else 0.0,float(state.get("traveled",0))/.0008))
+
+static func _worker_sample(walk:Dictionary,elapsed:float)->Dictionary:
+	if walk.has("stationary"):
+		return {"position":Vector2(walk.stationary),"direction":Vector2(walk.target)-Vector2(walk.stationary),"pose":int(walk.get("pose",100)),"traveled":0.0,"carrying":false}
+	var path:PackedVector2Array=walk.path;var length:=float(walk.get("length",0))
+	if length<=0:
 		for p in range(1,path.size()):length+=path[p-1].distance_to(path[p])
-		if length<=.00001:continue
-		var distance:=pingpong(float(walk.phase)*length*2+_elapsed*float(walk.speed),length)
-		var at:Vector2=path[0];var direction:=Vector2.DOWN
-		for p in range(1,path.size()):
-			var segment:=path[p-1].distance_to(path[p])
-			if distance<=segment:at=path[p-1].lerp(path[p],distance/maxf(segment,.00001));direction=path[p]-path[p-1];break
-			distance-=segment
-		_people.multimesh.set_instance_transform(i,Transform3D(Basis(Vector3.UP,atan2(direction.x,direction.y)).scaled(Vector3.ONE*.001),_point(at,.00005)))
+	if length<=.00001:return {"position":path[0] if not path.is_empty() else Vector2.ZERO,"direction":Vector2.DOWN}
+	var traveled:=float(walk.phase)*length*2+elapsed*float(walk.speed)
+	var travel:=fposmod(traveled,length*2)
+	var returning:=travel>=length
+	var distance:=length*2-travel if returning else travel
+	var carrying:=false
+	if bool(walk.get("delivery",false)):
+		var pause:=float(walk.get("pause",1.2));var duration:=length/maxf(.00001,float(walk.speed))
+		var cycle:=2*(duration+pause);var absolute_time:=float(walk.phase)*cycle+elapsed;var time:=fposmod(absolute_time,cycle)
+		traveled=floor(absolute_time/cycle)*length*2
+		if time<pause:return {"position":path[0],"direction":Vector2(walk.pickup_target)-path[0],"pose":8,"carrying":false,"traveled":traveled}
+		if time<duration+pause:distance=(time-pause)*float(walk.speed);traveled+=distance;returning=false;carrying=true
+		elif time<duration+pause*2:return {"position":path[-1],"direction":Vector2(walk.drop_target)-path[-1],"pose":100,"carrying":true,"traveled":traveled+length}
+		else:distance=length-(time-duration-pause*2)*float(walk.speed);traveled+=length*2-distance;returning=true
+	for p in range(1,path.size()):
+		var segment:=path[p-1].distance_to(path[p])
+		if distance<=segment:
+			return {"position":path[p-1].lerp(path[p],distance/maxf(segment,.00001)),"direction":(path[p]-path[p-1])*(-1.0 if returning else 1.0),"pose":0,"carrying":carrying,"traveled":traveled}
+		distance-=segment
+	return {"position":path[-1],"direction":path[-2]-path[-1]}
 
 func _overview_span()->float:
 	var aspect:=maxf(.5,size.x/maxf(1.0,size.y))
