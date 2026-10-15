@@ -207,3 +207,32 @@ Final built-in source outputs, directory `01a13b4f-8ab2-7a81-a3b3-186e772b4a77`:
 Earlier closely packed candidates were excluded because their figures crossed
 the nominal cell boundaries. The runtime assets above live in this repository;
 the generated-image directory is provenance only.
+
+## Upright male passing poses
+
+Actual arrival sequences exposed a squat in the first male motion sheets:
+both knees bent during the passing phase. The runtime now uses
+`settle-people-male-walk-v2.png` and `settle-people-male-carry-v2.png`.
+The passing figures stand over one nearly straight support leg with the other
+ankle swinging low. The complete torso, garment, legs and carried bundle are
+painted together; registration does not attempt to repair anatomy by stretching.
+Both sheets retain four material rows and four phases on transparent alpha.
+
+The built-in image tool edited the original male walk with the accepted female
+sheet as a gait reference. The prompt required the same male identity, clothing,
+right-facing torso and complete silhouettes, with a straight support leg,
+ordinary small head/pelvis movement, and no crouch, squat, raised knee or jump.
+The carry edit preserved those corrected complete bodies and added the same
+small tied wood bundle held steadily by both hands. It explicitly excluded
+the old carrier's squatting leg anatomy. No raster CLI or procedural limb
+splicing was used. Texture cuts follow the inspected transparent row gaps.
+
+Built-in outputs in directory `01a13b4f-8ab2-7a81-a3b3-186e772b4a77`:
+
+- Male walk v2: `exec-09572cbb-f30b-415e-85b2-921aca213b89.png`
+- Male carry v2: `exec-6636cb83-0b15-4b07-822f-7ea626b17688.png`
+
+The carry sheet received one packing-only edit after its first corrected
+candidate (`exec-7d8a1875-f515-4dd8-91c5-a01a49239e85.png`) still placed lower
+rows too close together. That edit requested generous transparent gutters,
+uniform complete-figure scaling and unchanged upright gait/garment identity.
