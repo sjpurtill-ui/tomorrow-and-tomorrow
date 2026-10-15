@@ -39,6 +39,28 @@ in fully transparent pixels is brown; alpha is zero there and must be respected.
 `meadow-ground-v1.png` is a repeating painterly meadow/earth material, not a
 landscape backdrop or a new terrain resource.
 
+People: six columns and four rows, 256px square cells. Rows are basic hide/fiber
+wrap, joined sewn hide, coarse woven drape, and simple woven tunic. Columns are
+idle, left/right walking phases, carrying, working and crouching. The existing
+knowledge/adoption/supply gates select clothing. They remain bounded visual
+representatives moving on existing routes, not a new individual-population model.
+
+States: three columns and two rows, 512px square cells. Row one: bare timber
+construction without masonry footing; partly built earth walls; partly built
+rough-stone walls. Row two: fire-damaged timber/plank, earth/flat-roof and
+stone/slab-roof houses. These require the corresponding recorded construction
+or damage and matching material, floor count and roof; they are not generic
+ruin overlays. Timber variants use the same three-by-two layout: three modest
+single-storey plank-roof houses, then three two-storey versions. Stable recorded
+building identity chooses variation without changing installed fabric.
+The renderer uses `settlement-timber-variants-v2.png`. Its corrected spacing
+keeps lower-row roofs out of the top-row cells; v1 is retained as superseded
+source artwork and is not used by the renderer.
+
+Workshop: one 1254px square transparent image of an open-front timber workshop
+with a plank roof, for that recorded material and form. No chimney, glass, metal
+fittings or machinery. Its decorative supplies do not assert stored quantities.
+
 ## Generation prompts
 
 Buildings: production transparent 4×3 sprite atlas; style-only reference to the
@@ -71,6 +93,32 @@ Ground: seamless square top-down painted meadow/earth texture, subtle muted
 olive, sage and ochre mosaic with tiny stones and dry blades; low contrast,
 natural daylight. No buildings, roads, rivers, people, trees or other objects.
 
+People: transparent 6×4 sheet, the four clothing stages and six poses above,
+consistent proportions, facing right in three-quarter view, natural warm skin
+and undyed materials, soft detailed painterly light, clear at 24–60px. No modern
+shirts, trousers, buttons, collars, armor, metal tools, pottery, weapons, ground,
+UI or text. Frame bounds are measured for consistent ground contact.
+
+States: transparent six-cell sheet, three columns and two rows; exact unfinished
+and damaged subjects above, consistent warm painterly three-quarter camera.
+Timber frame rests directly on ground without a masonry foundation. Damaged
+houses retain their matching roof material and single-storey form. No people,
+labels, modern equipment, complete buildings in the construction row or solid
+background. Transparent gutters separate each independent object.
+
+Timber variants: transparent six-cell sheet, three columns and two rows, three
+single-storey and three two-storey timber plank-roof houses; varied modest
+weathered wood, roof pitch and handmade detailing, consistent camera and light.
+No thatch, tiles, chimneys, glass, people or new technology. Clear alpha gutters.
+The corrective v2 edit preserved the six subjects and required every complete
+house to fit inside its own 512px cell with transparent separation. A read-only
+alpha audit confirmed no visible pixels on the row or column boundaries.
+
+Workshop: a single transparent, warmly painted ancient open-front timber
+workshop, one storey, steep wooden plank roof, handmade bench with wood/stone
+tools and logs. Detailed weathered timber, elevated three-quarter view matching
+the village assets. No thatch, chimney, pottery, metal, people, UI or ground slab.
+
 ## Source output identities
 
 - Early: `exec-4ae5268d-c5fd-41c1-ae0d-5e588248d00f.png`
@@ -78,6 +126,11 @@ natural daylight. No buildings, roads, rivers, people, trees or other objects.
 - Mature: `exec-b4eca32c-88c8-4192-9b24-984e512e5941.png`
 - Roofs: `exec-455b57e1-5c46-4114-90e8-4d22edb343ca.png`
 - Ground: `exec-c92c7cb2-ed28-420b-a783-a79a6376b7b5.png`
+- People: `exec-14eff4ef-116b-4e05-bb7a-6aa7d81e23c0.png`
+- States: `exec-00bbc6ed-d6f1-401a-9723-ded77ef349e3.png`
+- Timber variants: `exec-fbfd323b-5fd5-47ae-b308-c5b23a365a4f.png`
+- Timber variants, corrected v2: `exec-4076ee61-3153-41bf-bb20-be10339d2472.png`
+- Workshop: `exec-f2ea6e25-3755-4bb0-ad69-ae415d5a1570.png`
 
 Original outputs remain in the conversation's generated-image directory. These
 workspace copies are the runtime assets; no dependency on that directory exists.

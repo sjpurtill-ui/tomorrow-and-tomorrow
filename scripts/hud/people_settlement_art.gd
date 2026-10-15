@@ -3,6 +3,9 @@ extends RefCounted
 ## chooses an appearance; it never creates a building, upgrade or resource.
 const BUILDINGS="res://assets/ui/people/settlement-buildings-v1.png"
 const DETAILS="res://assets/ui/people/settlement-details-v1.png"
+const STATES="res://assets/ui/people/settlement-states-v1.png"
+const VARIANTS="res://assets/ui/people/settlement-timber-variants-v2.png"
+const WORKSHOP="res://assets/ui/people/settlement-workshop-v1.png"
 const ROOFS="res://assets/ui/people/settlement-roofs-v1.png"
 const MATURE="res://assets/ui/people/settlement-mature-v1.png"
 const Early=preload("res://scripts/early_settlement_visual.gd")
@@ -61,8 +64,12 @@ static func building_style(record:Dictionary)->Dictionary:
 	var use:=String(plot.get("land_use",""))
 	var form:=String(plot.get("form",""))
 	if state.mode=="retrofit":return {} # Preserve the original actual scaffold.
+	var active_frame:=_construction_style(plot,state)
+	if not active_frame.is_empty():return active_frame
 	var matching_roof:=_recorded_roof_style(plot,state)
 	if not matching_roof.is_empty():return matching_roof
+	var workshop:=_workshop_style(plot,state)
+	if not workshop.is_empty():return workshop
 	if int(plot.get("storeys",1))>1 or int(plot.get("fabric_generation",0))>=4:
 		return _mature_style(plot,state)
 	var roof:=Late.roof_for(plot)
@@ -87,14 +94,26 @@ static func building_style(record:Dictionary)->Dictionary:
 	elif status=="ruin":
 		if family!="stone":return {}
 		cell=11
-	elif float((plot.get("damage",{}) as Dictionary).get("fire",0))>.25:
-		if cell!=4:return {}
+	elif float((plot.get("damage",{}) as Dictionary).get("fire",0))>.25 and cell==4:
 		cell=10
 	return {"atlas":BUILDINGS,"cell":cell,"rows":3,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":progress,"repair":state.mode=="retrofit"}
 
+static func _construction_style(plot:Dictionary,state:Dictionary)->Dictionary:
+	if not _exists(STATES) or state.mode!="new" or int(plot.get("storeys",1))!=1:return {}
+	if int(plot.get("fabric_generation",0))>=11:return {}
+	if String(plot.get("land_use","")) not in ["residential_compound","mixed_household","workshop","storage"]:return {}
+	var form:=String(plot.get("form",""))
+	if form in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment","lean_to_household_cluster"]:return {}
+	var family:=String(plot.get("material_family",""));var cell:=-1
+	if family in ["organic","timber"]:cell=0
+	elif family=="earth":cell=1
+	elif family=="stone":cell=2
+	if cell<0:return {}
+	return {"atlas":STATES,"cell":cell,"rows":2,"columns":3,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":[.20,.43,.72,1.0][int(state.stage)]}
+
 static func _recorded_roof_style(plot:Dictionary,state:Dictionary)->Dictionary:
 	if not _exists(ROOFS) or not String(state.mode).is_empty():return {}
-	if String(plot.get("status",""))=="ruin" or float((plot.get("damage",{}) as Dictionary).get("fire",0))>.25:return {}
+	if String(plot.get("status",""))=="ruin":return {}
 	if String(plot.get("land_use","")) not in ["residential_compound","mixed_household"]:return {}
 	var form:=String(plot.get("form",""))
 	if form in ["portable_shelter_cluster","light_shelter_cluster","emergency_open_encampment","lean_to_household_cluster"]:return {}
@@ -104,7 +123,20 @@ static func _recorded_roof_style(plot:Dictionary,state:Dictionary)->Dictionary:
 	elif family=="stone" and roof=="slab":cell=1
 	elif family in ["organic","timber"] and roof=="timber":cell=2
 	if cell<0:return {}
-	return {"atlas":ROOFS,"cell":cell+(3 if floors==2 else 0),"rows":2,"columns":3,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":1.0}
+	var path:=ROOFS
+	# Damage art is restricted to the same installed wall/roof family and
+	# floor count. A fire never swaps a hide shelter for a masonry ruin.
+	if floors==1 and _exists(STATES) and float((plot.get("damage",{}) as Dictionary).get("fire",0))>.25:
+		return {"atlas":STATES,"cell":3+([1,2,0][cell]),"rows":2,"columns":3,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":1.0}
+	if cell==2 and _exists(VARIANTS):path=VARIANTS;cell=posmod(int(plot.get("seed",plot.get("id",0))),3)
+	return {"atlas":path,"cell":cell+(3 if floors==2 else 0),"rows":2,"columns":3,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":1.0}
+
+static func _workshop_style(plot:Dictionary,state:Dictionary)->Dictionary:
+	if not _exists(WORKSHOP) or not String(state.mode).is_empty():return {}
+	if String(plot.get("status",""))=="ruin" or int(plot.get("storeys",1))!=1:return {}
+	if String(plot.get("land_use",""))!="workshop" or String(plot.get("material_family","")) not in ["organic","timber"]:return {}
+	if Late.roof_for(plot)!="timber" or int(plot.get("fabric_generation",0))>=11:return {}
+	return {"atlas":WORKSHOP,"cell":0,"rows":1,"columns":1,"condition":clampf(float(plot.get("condition",1.0)),0,1),"progress":1.0}
 
 static func _mature_style(plot:Dictionary,state:Dictionary)->Dictionary:
 	if not _exists(MATURE):return {}
@@ -112,7 +144,6 @@ static func _mature_style(plot:Dictionary,state:Dictionary)->Dictionary:
 	var use:=String(plot.get("land_use",""));var family:=String(plot.get("material_family",""))
 	var roof:=Late.roof_for(plot);var cell:=-1
 	if generation>=11 or floors>3 or String(plot.get("status",""))=="ruin":return {}
-	if float((plot.get("damage",{}) as Dictionary).get("fire",0))>.25:return {}
 	var applied:Array=(plot.get("building_materials",{}) as Dictionary).get("applied",[])
 	var chimney:=false
 	for method:String in ["wall_chimneys","multi_flue_chimney_stacks","narrow_throat_fireplace"]:
@@ -142,6 +173,8 @@ static func sprite(parent:Node3D,path:String,cell:int,at:Vector3,width:float,opt
 	var height:=width*float(crop.size.y)/maxf(1,crop.size.x)
 	paint.set_shader_parameter("world_size",Vector2(width,height))
 	paint.set_shader_parameter("mirror",bool(options.get("mirror",false)))
+	paint.set_shader_parameter("art_tint",options.get("tint",Color.WHITE))
+	paint.set_shader_parameter("fire_damage",float(options.get("fire",0.0)))
 	paint.set_shader_parameter("wear",1.0-float(options.get("condition",1.0)))
 	paint.set_shader_parameter("build_progress",float(options.get("progress",1.0)))
 	paint.set_shader_parameter("sway",float(options.get("sway",0.0)))
@@ -160,6 +193,11 @@ static func buildings(plan:Dictionary,parent:Node3D,point:Callable)->Dictionary:
 	for record:Dictionary in plan.get("buildings",[]):
 		var style:=building_style(record)
 		if style.is_empty():remaining.append(record);continue
+		var plot:Dictionary=record.plot
+		style["fire"]=clampf(float((plot.get("damage",{}) as Dictionary).get("fire",0)),0,1)
+		style["phase"]=float(posmod(hash([plot.get("seed",0),record.get("id",0)]),53))*.17
+		var palettes:=[Color(.94,.98,1.0),Color(1.0,.96,.92),Color(.96,.94,.92),Color.WHITE]
+		style["tint"]=palettes[posmod(hash([plot.get("seed",0),record.get("id",0)]),palettes.size())]
 		var radius:=maxf(.0015,float(record.get("radius",.003)))
 		var node:=sprite(parent,style.atlas,style.cell,point.call(Vector2(record.position),.00008),radius*2.0,style.merged({"name":"PaintedBuilding_"+str(record.get("id","")),"mirror":sin(float(record.get("angle",0)))<0}))
 		if node==null:remaining.append(record)
@@ -167,6 +205,27 @@ static func buildings(plan:Dictionary,parent:Node3D,point:Callable)->Dictionary:
 			node.set_meta("plot_id",int(record.plot_id));node.set_meta("recorded_form",String(record.plot.get("form","")))
 	fallback["buildings"]=remaining
 	return fallback
+
+static func hide_replaced_frames(plan:Dictionary,parent:Node3D)->void:
+	var node:=parent.get_node_or_null("EarlyCommunalObjects/Prop_frame") as MultiMeshInstance3D
+	if node==null:return
+	var replaced:Array[Vector2]=[]
+	for record:Dictionary in plan.get("buildings",[]):
+		if Construction.state(record.plot).mode=="new" and not building_style(record).is_empty():replaced.append(Vector2(record.position))
+	var retained:=0
+	for index in node.multimesh.instance_count:
+		var placement:=node.multimesh.get_instance_transform(index)
+		var matching:=false
+		for at:Vector2 in replaced:
+			if at.distance_squared_to(Vector2(placement.origin.x,placement.origin.z))<.000000000001:matching=true;break
+		if matching:
+			placement.basis=Basis().scaled(Vector3.ZERO)
+			node.multimesh.set_instance_transform(index,placement)
+		else:retained+=1
+	if retained==0:
+		node.visible=false
+		var shadow:=parent.get_node_or_null("EarlyCommunalObjects/PropShadow_frame") as Node3D
+		if shadow!=null:shadow.visible=false
 
 static func smoke(parent:Node3D,at:Vector3,width:float)->void:
 	var node:=MeshInstance3D.new();node.name="RecordedHearthSmoke"
@@ -202,6 +261,8 @@ render_mode unshaded, blend_mix, depth_prepass_alpha, cull_disabled, shadows_dis
 uniform sampler2D art : source_color, filter_linear_mipmap;
 uniform vec4 region=vec4(0,0,1,1);
 uniform vec2 world_size=vec2(.006,.006);
+uniform vec4 art_tint : source_color=vec4(1.0);
+uniform float fire_damage=0.0;
 uniform float wear=0.0;
 uniform bool mirror=false;
 uniform float build_progress=1.0;
@@ -220,13 +281,26 @@ vec4 anchor=MODELVIEW_MATRIX*vec4(0,0,0,1);
 float wind=sin(anim_clock*.7+phase+UV.y*2.0)*sway*pow(1.0-UV.y,2.0);
 VERTEX=anchor.xyz+vec3((UV.x-.5)*world_size.x+wind,(1.0-UV.y)*world_size.y,0);
 NORMAL=vec3(0,0,1);
-crown=(MODEL_MATRIX*vec4(0,crown_height,0,1)).xyz;
+// Test the painted crown where it is actually drawn: along camera-up.
+// A world-up center misses large foreground billboards above the worksite.
+crown=(INV_VIEW_MATRIX*vec4(anchor.xyz+vec3(0,crown_height,0),1)).xyz;
+}
+float paint_noise(vec2 p){
+vec2 i=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);
+vec3 k=vec3(127.1,311.7,43758.5453);
+float a=fract(sin(dot(i,k.xy))*k.z);float b=fract(sin(dot(i+vec2(1,0),k.xy))*k.z);
+float c=fract(sin(dot(i+vec2(0,1),k.xy))*k.z);float d=fract(sin(dot(i+vec2(1),k.xy))*k.z);
+return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
 }
 void fragment(){
 vec2 sample_uv=vec2(mirror ? 1.0-UV.x : UV.x,UV.y);
 vec4 color=texture(art,region.xy+sample_uv*region.zw);
 float grey=dot(color.rgb,vec3(.25,.55,.2));
-ALBEDO=mix(color.rgb,mix(color.rgb,vec3(grey)*vec3(.78,.72,.64),.5),wear*.5);
+ALBEDO=mix(color.rgb,mix(color.rgb,vec3(grey)*vec3(.78,.72,.64),.5),wear*.5)*art_tint.rgb;
+float roof=1.0-smoothstep(.12,.66,UV.y);
+float soot=fire_damage*(.35+.8*paint_noise(UV*7.0+phase))*(.35+roof*.9);
+ALBEDO=mix(ALBEDO,vec3(.035,.027,.018),clamp(soot,0.0,.88));
+float hole=smoothstep(.63,.83,paint_noise(UV*12.0+phase))*roof*clamp((fire_damage-.30)*1.4,0.0,.9);
 float cut=0.0;
 if(tree_cutaway){
  vec3 eye=INV_VIEW_MATRIX[3].xyz;vec3 ray=focus_world-eye;float reach=max(length(ray),.0001);vec3 axis=ray/reach;
@@ -234,7 +308,7 @@ if(tree_cutaway){
  float aperture=focus_radius*clamp(depth/reach,.05,1.0)+crown_radius*.8;
  cut=(1.0-smoothstep(aperture*.65,aperture,radial))*step(0.0,depth)*(1.0-step(reach-.0003,depth))*focus_cutaway;
 }
-ALPHA=color.a*(1.0-cut*.985)*smoothstep(1.0-build_progress-.025,1.0-build_progress+.025,UV.y);
+ALPHA=color.a*(1.0-cut*.985)*(1.0-hole)*smoothstep(1.0-build_progress-.025,1.0-build_progress+.025,UV.y);
 ALPHA_SCISSOR_THRESHOLD=.035;
 }
 """

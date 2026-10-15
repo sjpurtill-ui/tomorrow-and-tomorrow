@@ -158,6 +158,7 @@ func _build_scene()->void:
 	var residual:Dictionary=Art.buildings(plan,model,_point) if _painted_active else plan
 	Early.render(residual,Vector3.ZERO,height,model)
 	Ground.render(plan,snapshot.plots,snapshot.routes,Vector3.ZERO,height,land,model,false)
+	if _painted_active:Art.hide_replaced_frames(plan,model)
 	_workplace_props(plan)
 	_yards=Yards.new();_yards.name="OccupiedHouseholdYards";model.add_child(_yards)
 	_yards.configure(func(at:Vector2)->float:return _height(at),land)
@@ -377,6 +378,9 @@ func _paint_household_yards()->void:
 		source.visible=false
 		for index in source.multimesh.instance_count:
 			var placement:=source.multimesh.get_instance_transform(index)
+			# The mesh instance origin contains its old AABB bottom offset.
+			# Painted art has its own cropped ground contact instead.
+			placement.origin.y=_height(Vector2(placement.origin.x+_yards.position.x,placement.origin.z+_yards.position.z))+.00006
 			Art.sprite(_painted_yards,Art.DETAILS,6 if kind=="woodpile" else 7,placement.origin,.0018,{"name":"OccupiedYard_"+kind,"mirror":index%2==0})
 
 func _worked_yards(plan:Dictionary)->void:
@@ -456,8 +460,10 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Costumes.shader_code().replace("depth_draw_never","depth_prepass_alpha")
+	var shader:=Shader.new();shader.code=Costumes.painterly_shader_code()
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+	_people_paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
+	_people_paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
 	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
 	# Its private shader does not change the map's global no-people policy.

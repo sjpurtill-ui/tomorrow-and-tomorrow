@@ -43,9 +43,22 @@ func _ready()->void:
 		for child in town.model.get_children():
 			if child.has_meta("plot_id"):painted+=1
 		print("PAINTED_BUILDINGS ",painted," / ",town._building_plan.buildings.size())
+		for record:Dictionary in town._building_plan.buildings:
+			if preload("res://scripts/hud/people_settlement_art.gd").building_style(record).is_empty():
+				var plot:Dictionary=record.plot
+				print("ART_FALLBACK ",plot.get("id")," ",plot.get("form")," ",plot.get("land_use")," ",plot.get("material_family")," roof=",plot.get("roof_plan")," floors=",plot.get("storeys")," state=",plot.get("status")," damage=",plot.get("damage",{}))
+		assert(painted==town._building_plan.buildings.size(),"Representative recorded fabric has an unsupported painted form")
 		print("PEOPLE_SCENE ",year," origin=",GameState.settlement_founded_at," kinds=",kinds," meshes=",town.model.get_child_count()," ground=",town._bounds)
 		assert(before==var_to_bytes([GameState.settlement_plots,GameState.settlement_routes]),"Renderer wrote simulation records")
 		for index in 30:await get_tree().process_frame
+		# Dummy rendering cannot read back MultiMesh instance transforms.
+		if DisplayServer.get_name()!="headless":
+			var frames:=town.model.get_node_or_null("EarlyCommunalObjects/Prop_frame") as Node3D
+			if frames!=null:assert(not frames.visible,"Painted construction retains a duplicate frame")
+			if is_instance_valid(town._painted_yards):
+				for prop:Node3D in town._painted_yards.get_children():
+					var local:Vector3=town.model.to_local(prop.global_position)
+					assert(absf(local.y-town._height(Vector2(local.x,local.z))-.00006)<.000001,"Painted yard prop lost its terrain contact")
 		if sightline:
 			var foliage:Array[Node3D]=[];var tree_data:Array[Transform3D]=[]
 			for child:Node in town.model.get_children():

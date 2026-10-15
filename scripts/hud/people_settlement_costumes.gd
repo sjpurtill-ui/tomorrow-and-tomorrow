@@ -7,6 +7,10 @@ const Ink = preload("res://scripts/map_life_ink.gd")
 const HIDE_PALETTE: Array[Color] = [Color("967651"), Color("796047"), Color("b49b73"), Color("69523e"), Color("aa8860")]
 const WOVEN_PALETTE: Array[Color] = [Color("c3b38c"), Color("a5936e"), Color("8b795e"), Color("d0c3a2"), Color("75634d")]
 const RELEVANT := ["cordage", "fiber_grading", "bone_needle_sewing", "plain_weaving", "garment_pattern_cutting", "layered_clothing_design"]
+const PEOPLE_ATLAS := "res://assets/ui/people/settlement-people-v1.png"
+const ATLAS_COLUMNS := 6
+const ATLAS_ROWS := 4
+static var _atlas_texture: Texture2D
 
 ## `known` is the actual known_discoveries ledger (IDs). Optional context may
 ## contain an already-read adoption map and household goods coverage. Without
@@ -43,6 +47,107 @@ static func shader_code() -> String:
 	var tools_start := Ink.PERSON.find("\tif (tool_len > 0.0) {")
 	assert(paint_start >= 0 and tools_start > paint_start, "Shared People pose boundary changed")
 	return Ink.HEAD + GARMENT_HELPERS + Ink.PERSON.substr(0, paint_start) + GARMENT_PAINT + Ink.PERSON.substr(tools_start)
+
+## The private illustrated view opts into this shader. The original map and
+## procedural fallback remain unchanged. A complete cell keeps all poses on the
+## same foot baseline; cropping each pose separately would stretch a crouch.
+static func atlas_texture() -> Texture2D:
+	if _atlas_texture != null: return _atlas_texture
+	if not FileAccess.file_exists(PEOPLE_ATLAS): return null
+	var source := Image.load_from_file(PEOPLE_ATLAS)
+	if source == null or source.is_empty(): return null
+	if source.get_width() % ATLAS_COLUMNS != 0 or source.get_height() % ATLAS_ROWS != 0: return null
+	_atlas_texture = ImageTexture.create_from_image(source)
+	return _atlas_texture
+
+static func atlas_layout() -> PackedVector4Array:
+	var texture := atlas_texture()
+	var frames := PackedVector4Array()
+	if texture == null: return frames
+	var dimensions := Vector2(texture.get_width(), texture.get_height())
+	var cell := dimensions / Vector2(ATLAS_COLUMNS, ATLAS_ROWS)
+	for row in ATLAS_ROWS:
+		for column in ATLAS_COLUMNS:
+			# Sample texel centres to prevent neighbouring cells bleeding through
+			# minified alpha edges. Transparent RGB is never drawn as a backdrop.
+			var origin := (Vector2(column, row) * cell + Vector2.ONE * .5) / dimensions
+			var extent := (cell - Vector2.ONE) / dimensions
+			frames.append(Vector4(origin.x, origin.y, extent.x, extent.y))
+	return frames
+
+static func painterly_shader_code() -> String:
+	var fragment := Ink.PERSON.find("void fragment()")
+	assert(fragment > 0, "Shared People vertex boundary changed")
+	return Ink.HEAD.replace("depth_draw_never", "depth_prepass_alpha") + GARMENT_HELPERS + PAINTERLY_UNIFORMS + Ink.PERSON.substr(0, fragment) + PAINTERLY_PAINT
+
+const PAINTERLY_UNIFORMS := """
+uniform sampler2D people_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 people_frames[24];
+"""
+
+const PAINTERLY_PAINT := """
+void fragment() {
+    if (!map_people_visible) { discard; }
+    vec2 p = vec2(v_p.x*v_flip, v_p.y);
+    float pose = floor(mod(v_custom.y,100.0)+0.5);
+    bool still = v_custom.y > 99.5;
+    bool child = v_custom.z > 1.5;
+    bool carrying = v_custom.z > 0.5 && !child;
+    // The same stable per-person supply sample as the wrap shader: knowing a
+    // method never outfits everybody, and missing issue records keep row zero.
+    float sample_id = fract(v_custom.x*11.971+0.07);
+    int row = sample_id < garment_supply ? int(clamp(garment_stage,0.0,3.0)+0.5) : 0;
+    int frame = 0;
+    bool walking = (pose < 0.5 || pose == 6.0) && !still;
+    if (carrying) { frame = 3; }
+    else if (walking) { frame = 1 + int(mod(floor(v_time*2.2),2.0)); }
+    else if (pose == 4.0 || pose >= 8.0) { frame = 5; }
+    else if (pose == 1.0 || pose == 2.0 || pose == 3.0) { frame = 4; }
+    // Small local motion keeps a carried load or working posture alive while
+    // all route positions, pace and representative counts remain caller-owned.
+    float bob = walking ? abs(sin(v_time*6.9))*0.018 : 0.0;
+    p.y -= bob;
+    if (frame == 4 || frame == 5) {
+        p.x -= sin(v_time*2.4)*0.018*smoothstep(0.2,1.3,p.y);
+    }
+    vec2 local_uv = vec2(p.x/1.85+0.5,1.0-p.y/1.85);
+    vec4 paint = vec4(0.0);
+    if (all(greaterThanEqual(local_uv,vec2(0.0))) && all(lessThanEqual(local_uv,vec2(1.0)))) {
+        vec4 region = people_frames[row*6+frame];
+        paint = texture(people_atlas,region.xy+local_uv*region.zw);
+        // Carrying has one upper-body painting. Reuse the matching attire's
+        // walking legs below the knee so a moving carrier does not glide.
+        if (carrying && walking && local_uv.y > 0.70) {
+            int stride_frame = 1 + int(mod(floor(v_time*2.2),2.0));
+            vec4 stride_region = people_frames[row*6+stride_frame];
+            vec4 stride_paint = texture(people_atlas,stride_region.xy+local_uv*stride_region.zw);
+            paint = mix(paint,stride_paint,smoothstep(0.70,0.73,local_uv.y));
+        }
+    }
+    // Keep the original role's simple tools visible; the atlas contains no
+    // invented equipment. Warm wood/stone strokes fit the painted figures.
+    float tool = 0.0;
+    vec3 tool_color = vec3(0.34,0.25,0.15);
+    float px = max(fwidth(v_p.y),0.003);
+    if (!carrying && pose == 7.0) {
+        tool = 1.0-smoothstep(0.018,0.018+px,sd_seg(p,vec2(0.32,0.03),vec2(0.32,1.72),0.0));
+    } else if (!carrying && pose == 3.0) {
+        tool = 1.0-smoothstep(0.013,0.013+px,sd_seg(p,vec2(0.29,0.77),vec2(1.08,1.40),0.0));
+    } else if (!carrying && (pose == 2.0 || pose >= 8.0)) {
+        vec2 hand = pose == 2.0 ? vec2(0.30,0.77) : vec2(0.48,0.07);
+        vec2 tip = hand+rot2(vec2(0.0,pose == 2.0 ? 0.43 : 0.20),sin(v_time*4.0)*0.35);
+        tool = 1.0-smoothstep(0.015,0.015+px,sd_seg(p,hand,tip,0.0));
+    }
+    float variation = mix(0.94,1.04,fract(v_custom.x*17.731+0.21));
+    vec3 color = paint.rgb*variation;
+    if (tool > paint.a) { color = tool_color; }
+    float alpha = max(paint.a,tool);
+    if (alpha < 0.03) { discard; }
+    ALBEDO = color;
+    ALPHA = alpha;
+    ALPHA_SCISSOR_THRESHOLD = 0.03;
+}
+"""
 
 const GARMENT_HELPERS := """
 uniform float garment_stage = 0.0;
