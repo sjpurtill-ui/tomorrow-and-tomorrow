@@ -11,6 +11,7 @@ const Ground=preload("res://scripts/early_settlement_ground.gd")
 const Yards=preload("res://scripts/settlement_yard_details.gd")
 const Setting=preload("res://scripts/hud/people_settlement_environment.gd")
 const Life=preload("res://scripts/map_life_ink.gd")
+const Costumes=preload("res://scripts/hud/people_settlement_costumes.gd")
 const Shapes=preload("res://scripts/settlement_kit_shapes.gd")
 const MAX_PEOPLE:=48
 const GRID:=41
@@ -28,6 +29,8 @@ var _terrain:Node
 var _zones:Dictionary={}
 var _anchors:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
+var _foliage_materials:Array[ShaderMaterial]=[]
+var _foliage_cut:=0.0
 var _bounds:=Rect2()
 var _ground_bounds:=Rect2()
 var _heights:=PackedFloat32Array()
@@ -78,7 +81,9 @@ func _ensure_view()->void:
 	environment.tonemap_mode=Environment.TONE_MAPPER_FILMIC;view.add_child(world)
 	var sun:=DirectionalLight3D.new();sun.name="WarmAfternoon"
 	sun.rotation_degrees=Vector3(-42,-34,0);sun.light_color=Color("fff0d5");sun.light_energy=.40
-	sun.shadow_enabled=true;sun.directional_shadow_max_distance=4.0
+	# Painted terrain and ink meshes share draped contact shading below. A
+	# hardware shadow received only by the roads would end sharply at their edge.
+	sun.shadow_enabled=false;sun.directional_shadow_max_distance=4.0
 	sun.shadow_bias=.001;sun.shadow_normal_bias=.003;view.add_child(sun)
 	gui_input.connect(_input_view)
 
@@ -118,7 +123,7 @@ func role_anchor_metadata()->Dictionary:
 
 func _build_scene()->void:
 	if is_instance_valid(model):model.free()
-	_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
+	_materials.clear();_foliage_materials.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
 	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
 	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
 	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
@@ -175,6 +180,7 @@ func _private_paint(node:Node)->void:
 				var outline:ShaderMaterial=source.next_pass.duplicate();outline.set_shader_parameter("outline_px",.7)
 				paint.next_pass=outline;_materials.append(outline)
 			child.material_override=paint
+			if child.name=="ActualSeededWoodland":_foliage_materials.append(paint)
 		_private_paint(child)
 
 func _sample_ground()->void:
@@ -329,12 +335,27 @@ func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
 	if polygons.is_empty():return
 	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
-	for polygon:PackedVector2Array in polygons:count+=_polygon(surface,polygon,Color(.95,.70,.37,.18),.00017)
+	var width:=clampf(_desired_span/maxf(1.0,size.y)*1.5,.00005,.00018)
+	# Only the parcel edge is marked. Subdivide it over the sampled terrain,
+	# feathering outwards so the working ground keeps its original appearance.
+	for polygon:PackedVector2Array in polygons:
+		for index in polygon.size():
+			var first:=polygon[index];var last:=polygon[(index+1)%polygon.size()]
+			var pieces:=maxi(1,ceili(first.distance_to(last)/.002))
+			var side:Vector2=(last-first).normalized().orthogonal()*width
+			for piece in pieces:
+				var a:=first.lerp(last,float(piece)/pieces);var b:=first.lerp(last,float(piece+1)/pieces)
+				for direction in [-1,1]:
+					var strip:=[a,b,b+side*direction,a+side*direction]
+					for vertex in [0,1,2,0,2,3]:
+						surface.set_normal(_normal(strip[vertex]));surface.set_color(Color(.94,.75,.48,.50 if vertex<2 else 0))
+						surface.add_vertex(_point(strip[vertex],.0002));count+=1
 	if count>0:_highlight=_commit(surface,"FocusedWorkGround",true)
 
 func _update_people()->void:
 	if not is_instance_valid(model):return
-	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations)])
+	var look:=_clothing_appearance()
+	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations),look.key])
 	if key==_people_key:return
 	_people_key=key
 	if is_instance_valid(_people):_people.free()
@@ -347,8 +368,9 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Life.shader_code("person")
+	var shader:=Shader.new();shader.code=Costumes.shader_code()
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
 	# Its private shader does not change the map's global no-people policy.
 	_people_paint.set_shader_parameter("map_people_visible",true)
@@ -356,7 +378,7 @@ func _update_people()->void:
 	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true;batch.mesh=Life.quad();batch.instance_count=visual_people_count
 	_people=MultiMeshInstance3D.new();_people.name="RepresentativePeople";_people.multimesh=batch;_people.material_override=_people_paint;model.add_child(_people)
 	_people.custom_aabb=AABB(Vector3(_ground_bounds.position.x,-.1,_ground_bounds.position.y),Vector3(_ground_bounds.size.x,.2,_ground_bounds.size.y))
-	var colors:Array[Color]=[Color("e0c39b"),Color("a96d51"),Color("556e69"),Color("d1b073"),Color("6a6253")]
+	var colors:Array[Color]=look.palette
 	for i in visual_people_count:
 		var path:PackedVector2Array=routes[i%routes.size()]
 		_walks.append({"path":path,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
@@ -381,6 +403,22 @@ func _update_people()->void:
 		var pose:=8 if role in ["Crafting","Construction"] else (1 if role=="Food" else (7 if role=="Defense" else 5))
 		batch.set_instance_custom_data(index,Color(float(index)*.17,pose,0,.7));index+=1
 	_move_people()
+
+func _clothing_appearance()->Dictionary:
+	# Read the selected settlement's last issued-clothing report without entering
+	# a resource scope or advancing clothing production. Missing evidence keeps
+	# the basic wraps; knowing a technique alone never outfits every household.
+	var clothing:Dictionary=GameState.household_clothing
+	var population:=float(GameState.population_total)
+	var id:=String(_context.get("settlement_id",""))
+	var record:Dictionary=SettlementModel.settlement_record(id) if not id.is_empty() else {}
+	if not record.is_empty():
+		if not bool(record.get("primary",false)):clothing=record.get("local_resources",{}).get("household_clothing",{})
+		if WorldSimulation.state==GameState:population=SettlementModel._settlement_population(record)
+	var report:Dictionary=clothing.get("report",{})
+	var coverage:=clampf(float(report.get("issued",0))/maxf(1,population),0,1)
+	var evidence:Dictionary=_context.get("clothing_context",{"adoption":GameState.discovery_adoption,"coverage":coverage})
+	return Costumes.appearance(_context.get("clothing_knowledge",GameState.known_discoveries),evidence)
 
 func _move_people()->void:
 	if not is_instance_valid(_people):return
@@ -420,6 +458,10 @@ func _position_camera()->void:
 	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
 	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
+	for material in _foliage_materials:
+		material.set_shader_parameter("focus_world",_desired_target+Vector3.UP*.0015)
+		material.set_shader_parameter("focus_radius",_desired_span*.19)
+		material.set_shader_parameter("focus_cutaway",_foliage_cut)
 
 func _project_anchors()->void:
 	if not is_instance_valid(camera) or not camera.is_inside_tree():return
@@ -434,6 +476,7 @@ func _process(delta:float)->void:
 	_elapsed+=minf(delta,.1)
 	_target=_target.lerp(_desired_target,1.0-exp(-delta*7.0))
 	_span=lerpf(_span,_desired_span,1.0-exp(-delta*7.0))
+	_foliage_cut=lerpf(_foliage_cut,0.0 if focused_role.is_empty() else 1.0,1.0-exp(-delta*7.0))
 	_position_camera();_project_anchors();_move_people()
 	if is_instance_valid(_yards):
 		_yards.set_view(Vector2(_target.x,_target.z),_span)

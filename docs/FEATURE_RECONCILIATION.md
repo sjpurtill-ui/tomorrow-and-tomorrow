@@ -1,4 +1,36 @@
-## October 14 — Modern Strategy across all reachable popups (INTEGRATED)
+## October 14 — Living People and work assignment (INTEGRATED)
+
+Runtime code `4c907b5dade7d783cb137717f38063ef2aeab02d` adds a spatial People
+screen: nine work destinations on the actual settlement, camera focus into the
+selected area, and assignment controls and current/proposed graphics inside it.
+Recorded parcels, building fabric, construction and damage drive its changing
+appearance. Food, Materials, Production, Research and Buildings assignment routes
+converge here; local requests to leaders retain their existing behavior.
+
+Previewing uses detached copies of existing rules for food production, reserve
+depletion/shortage, research capacity, local housing timing and measured water.
+Material outputs are explicitly not predicted from crew counts. Apply runs the
+existing ManualWork commands, with explicit control takeover and stale-preview
+protection. Simulation rules, population authority and save schema are unchanged.
+
+The private scene uses existing game meshes, bounded drawn people and whole-crown
+foliage fading at focused sites. Early garments are hide/fiber wraps; sewing,
+weaving, adoption and actual household supplies govern later clothing. The
+generated painting is an art-direction reference, not the implemented renderer.
+
+Reciprocal implementation/critique/revision is complete for this screen. Fifty
+distinct regression cases pass across eight suites; the combined private GPU
+journey passes 107 checks and 14 wide/narrow captures, including all work areas,
+drafts, stale state and no accidental allocations. Logs and detailed source
+commits are recorded in `docs/INTEGRATION_STATUS.md`. Existing command-rail anchor
+warnings remain. Remote main is verified before the canonical checkout is
+fast-forwarded. No live game/editor restart or save migration was performed.
+
+This supersedes the earlier styling checkpoint below for People. The user's
+subsequent graphical request is not considered satisfied for every other popup
+by that historical styling checkpoint.
+
+## October 14 — Modern Strategy across all reachable popups (historical styling checkpoint)
 
 Player code `79438388143e4ef23bb627141f0b923f9ac4fb3b` completes the full popup
 and subpage redesign. Cool Night/Daylight surfaces, coral action hierarchy,
