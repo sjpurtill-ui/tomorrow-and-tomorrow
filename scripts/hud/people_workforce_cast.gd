@@ -48,11 +48,17 @@ func set_weights(weights:Dictionary,animate:bool=true)->void:
 	var retained:Dictionary={};var available:Array[int]=[]
 	var keys:Array[String]=ROLES.duplicate();keys.append(RESERVE)
 	for role:String in keys:retained[role]=[]
-	# Keep already assigned identities and slots. Only the excess leaves a job.
-	for person:Dictionary in people:
-		var role:=String(person.role)
-		if retained[role].size()<int(wanted.get(role,0)):retained[role].append(int(person.id))
-		else:available.append(int(person.id))
+	# Keep settled workers first. If a draft is reversed while somebody is in
+	# transit, send that same person back rather than exchanging a second one.
+	for role:String in keys:
+		var candidates:Array[Dictionary]=[]
+		for person:Dictionary in people:
+			if person.role==role:candidates.append(person)
+		candidates.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+			return not bool(a.moving) if bool(a.moving)!=bool(b.moving) else int(a.id)<int(b.id))
+		for person:Dictionary in candidates:
+			if retained[role].size()<int(wanted.get(role,0)):retained[role].append(int(person.id))
+			else:available.append(int(person.id))
 	for role:String in keys:
 		var used:Dictionary={}
 		for id:int in retained[role]:used[int(people[id].slot)]=true
@@ -71,14 +77,25 @@ func set_weights(weights:Dictionary,animate:bool=true)->void:
 			if not initialized or not animate:
 				person.position=destination;person.path=PackedVector2Array();person.segment=0;person.moving=false
 			else:
-				person.path=_transfer_path(Vector2(person.position),previous,role,destination)
+				person.path=_reassignment_path(person,previous,role,destination)
 				person.segment=0;person.moving=person.path.size()>1
 	initialized=true
 
-func _transfer_path(start:Vector2,from:String,to:String,destination:Vector2)->PackedVector2Array:
-	var path:=PackedVector2Array([start])
-	var journey:PackedVector2Array=route_provider.call(from,to) if route_provider.is_valid() else PackedVector2Array()
-	if journey.is_empty():journey=PackedVector2Array([gates.get(from,hub),hub,gates.get(to,hub)])
+func _reassignment_path(person:Dictionary,from:String,to:String,destination:Vector2)->PackedVector2Array:
+	var path:=PackedVector2Array([Vector2(person.position)])
+	var departure:=from
+	if bool(person.moving):
+		# A changed draft retraces the already travelled aisle, not a diagonal to
+		# the abandoned destination. Cancelling therefore visibly turns them back.
+		departure=String(person.get("departure_role",from))
+		var previous_path:PackedVector2Array=person.path
+		for index in range(int(person.segment),-1,-1):
+			if path[-1].distance_to(previous_path[index])>.00001:path.append(previous_path[index])
+	person.departure_role=departure
+	var journey:PackedVector2Array=PackedVector2Array()
+	if departure!=to:
+		journey=route_provider.call(departure,to) if route_provider.is_valid() else PackedVector2Array()
+		if journey.is_empty():journey=PackedVector2Array([gates.get(departure,hub),hub,gates.get(to,hub)])
 	journey.append(destination)
 	for point:Vector2 in journey:
 		if point.distance_to(path[-1])>.00001:path.append(point)

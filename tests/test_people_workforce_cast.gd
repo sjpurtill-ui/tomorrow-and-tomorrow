@@ -51,3 +51,19 @@ func test_every_person_can_change_job_without_respawn_or_shared_destination()->v
 	for person:Dictionary in cast.people:assert_that(person.position).is_equal(person.target)
 	var settled:Array=cast.population();cast.set_weights({"Defense":100})
 	assert_that(var_to_bytes(cast.population())).is_equal(var_to_bytes(settled))
+
+func test_cancelling_midway_turns_back_along_the_travelled_path()->void:
+	var cast=Cast.new();var slots:Dictionary={}
+	for role:String in Cast.ROLES:
+		var points:=PackedVector2Array()
+		for i in 100:points.append(Vector2(float(Cast.ROLES.find(role))*.03,float(i)*.0001))
+		slots[role]=points
+	cast.configure(slots,{"Food":Vector2(.01,0),"Crafting":Vector2(.11,0)},Vector2(.06,.03))
+	cast.set_weights({"Food":60,"Crafting":40},false)
+	cast.set_weights({"Food":59,"Crafting":41});cast.advance(.1)
+	var id:=-1;var heading:=Vector2.ZERO
+	for person:Dictionary in cast.people:
+		if bool(person.moving):id=person.id;heading=cast.direction(person);break
+	assert_int(id).is_greater_equal(0)
+	cast.set_weights({"Food":60,"Crafting":40})
+	assert_float(cast.direction(cast.people[id]).dot(heading)).is_less(-.999)
