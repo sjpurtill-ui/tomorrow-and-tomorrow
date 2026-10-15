@@ -1,4 +1,4 @@
-## October 14 — Living People screen (IN PROGRESS, latest direction)
+## October 14 — Living People screen (INTEGRATED)
 
 The user rejected the four list-based Town concepts and approved the illustrated
 village direction specifically as the People screen. This supersedes acceptance
@@ -15,23 +15,55 @@ risk where calculable, as well as the selected work's other effects. Previewing
 must never advance or mutate live simulation state, and application retains the
 existing labor rules. Relevant assignment routes should converge on this screen.
 
-Implementation ownership: A read-only workforce forecast; B graphical People
-controls/provider; C living scene/camera; root integration and route consolidation.
-The generated village image is an art-direction concept only. Static artwork
-behind lists does not satisfy the user's dynamic scene requirement.
+Player code `4c907b5dade7d783cb137717f38063ef2aeab02d`: nine assignment destinations sit on a
+living settlement. Selecting one moves the camera into its actual parcel (or
+identified shared ground), with controls and consequence graphics inside the
+scene. Real recorded expansion, building fabric, construction and damage drive
+the geometry. Bounded illustrated people follow existing work grounds and routes.
+The private renderer never changes the map's materials or settlement records.
+Foreground tree crowns fade as a whole when they obscure the focused area.
+People wear early hide/fiber wraps with bare forearms and calves. Sewing and
+weaving change those garments only with recorded knowledge, adoption and local
+household clothing supply; calendar dates never create modern clothing.
 
-Assembly checkpoint (worker branch only, not player delivery): the read-only
-forecast (`c9683ab1`, corrected by `3c453d62`) is in the integration worktree.
-It replays the existing allocation commands on detached systems, includes town
-food safeguards, and compares food, water evidence, learning capacity and
-construction. The renderer foundation (`0e13b2ae`) reads recorded settlement
-plots/routes in a private world. Both remain under visual integration review.
-Root routing (`e23e4f5e`) connects assignment shortcuts to category focus, gives
-only the spatial People view more room, and preserves local leader priorities.
-The combined 13 forecast, four scene, and three navigation cases pass cleanly
-(`living-people-foundation-final.log`, report_55). An additional 30 routing and
-existing Food/Materials/Production/Buildings checks pass. These checks establish
-behavior, not acceptance of the illustration, camera framing, or final controls.
+Food, Materials, Production, Research and Buildings assignment shortcuts now
+focus this shared People view. Local requests to leaders remain separate and
+retain their existing behavior. The narrower header gives the scene more room;
+other report widths and headers retain their prior layout.
+
+Drafts compare current work with proposed work through detached copies of the
+existing rules: food production, demand, reserve trajectory and shortage risk;
+research capacity; local housing timing; and measured water collection. Town food
+protection is included and distinguished from the requested split. Material
+output is explicitly not inferred from crew size. No new economic, mortality,
+labor or save rules were introduced. Only Apply replays existing ManualWork
+commands; taking control is explicit. Changed conditions require a refreshed
+preview before a second Apply. Even unchanged readings remain refreshable.
+
+A implemented forecasts and critiqued B's controls; B implemented controls and
+critiqued C's scene; C revised framing, trees, illustrated activity, focused ground
+and sightlines. Root owns shared routing and final integration. Sources include
+`c9683ab1`, `3c453d62`, `e9e1b19c`, `191c5d44`, `5ee2f267`, `0e13b2ae`,
+`c1d9882e`, `49ea716c`, `e568b8e6`, `f9e5defe` and `a254a547`. A's costume
+revision received B's independent review and a combined actual-scale recheck.
+The generated village remains an art-direction concept;
+the implementation uses the game's evolving meshes and drawn people.
+
+Combined regression checks: 50 distinct cases across eight suites pass
+(`living-people-final-foundation.log`, report_57; `living-people-final-controls.log`,
+report_58; `living-people-clothing-integration.log`, report_59). An additional 30
+assignment-route and existing Food, Materials, Production and Buildings cases
+passed during assembly. The final private GPU journey passes 107 checks with no
+script errors and 14 captures at 1600×1000 and 1024×720, including all nine areas,
+drafts, stale previews, returning, bounds and unchanged live allocations. Evidence:
+`artifacts/popup-audit/living-people-wardrobe-final.log` and `living-people/`.
+Existing command-rail anchor warnings remain; they do not fail these checks.
+
+Delivery uses the required remote-main verification before canonical fast-forward.
+No live game/editor was restarted and no save migration is required. A running
+session retains its loaded scripts until a normal save and restart. This entry
+accepts the combined People screen; it does not mark the other popup families as
+meeting the user's newer graphical direction.
 
 ## October 14 — Popup information architecture revision (IN PROGRESS)
 
