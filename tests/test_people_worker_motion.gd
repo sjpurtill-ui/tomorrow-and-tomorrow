@@ -41,10 +41,18 @@ func test_allocations_do_not_create_empty_ground_work_actions()->void:
 		if not walk.has("stationary"):continue
 		tasks+=1
 		assert_str(walk.source).is_equal("bench")
-		assert_int(walk.pose).is_equal(8)
+		assert_int(walk.pose).is_equal(100)
 		assert_float(Vector2(walk.stationary).distance_to(Vector2(.025,.025))).is_less(0.0011)
 		assert_float(Vector2(walk.target).distance_to(Vector2(.025,.025))).is_less(0.00001)
 	assert_int(tasks).is_equal(1)
+	bench.visible=false
+	assert_int(town._worker_sites(town._worker_blockers()).size()).is_equal(0)
+	# A painted workshop or unfinished frame alone supplies no reachable work
+	# surface: its outer footprint must not create a crouch on empty ground.
+	var frame:=Fixture.plot(2);frame.status="under_construction"
+	var workshop:=Fixture.plot(3);workshop.land_use="workshop";workshop.form="route_side_workshop"
+	town._building_plan={"buildings":[{"plot":frame,"position":Vector2.ZERO,"radius":.003},{"plot":workshop,"position":Vector2(.01,0),"radius":.003}]}
+	assert_int(town._worker_sites(town._worker_blockers()).size()).is_equal(0)
 
 func test_actual_supply_delivery_pauses_loads_and_returns_empty()->void:
 	var delivery:Dictionary={"path":PackedVector2Array([Vector2.ZERO,Vector2(.004,0)]),"length":.004,"speed":.001,"phase":0.0,"pause":1.0,"delivery":true,"pickup_target":Vector2(0,.001),"drop_target":Vector2(.004,.001)}
