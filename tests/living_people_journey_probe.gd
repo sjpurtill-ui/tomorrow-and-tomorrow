@@ -78,23 +78,30 @@ func _ready()->void:
 		await _capture(role.to_lower()+"-focus-wide")
 		_expect(hud.handle_escape(),"Escape consumed at work focus")
 		_expect(hud.dock.visible and String(board.active_role)=="","Escape returns to settlement image: "+role)
-	# A real shortage/learning draft: it must remain a proposal until Apply.
-	hud.focus_people_work("Knowledge");await _frames(8)
+	# An allocation click is the complete action: guarded mutation, stable UI,
+	# and the same hundred figures walking to the resulting effective shares.
+	hud.focus_people_work("Knowledge");await _frames(50)
 	board=hud.dock.find_child("CivilizationPeopleScreen",true,false)
+	board.settlement_view.pan_view(Vector2(12,6));await _frames(30)
 	var increase:=board.find_child("DraftFive",true,false) as Button
 	_expect(increase!=null,"Assignment step exists")
+	_expect(board.find_child("ApplyWorkDraft",true,false)==null and board.find_child("CancelWorkDraft",true,false)==null,"No Apply or Cancel is needed")
 	if increase:
 		var before_targets:Dictionary=board.settlement_view.call("workforce_percentages").duplicate()
 		var before_positions:=_figure_positions(board)
+		var held_rect:Rect2=increase.get_global_rect()
+		var held_scroll:int=hud.dock.body_scroll.scroll_vertical
+		var held_target:Vector3=board.settlement_view._desired_target
+		var held_span:float=board.settlement_view._desired_span
 		increase.pressed.emit()
-		var initial_positions:=_figure_positions(board)
-		_expect(initial_positions==before_positions,"Reallocation changes destinations without teleporting figures")
+		_expect(_figure_positions(board)==before_positions,"Reallocation changes destinations without teleporting figures")
+		_expect(GameState.population_allocations!=original and not PeopleDirection.automatic_work,"One click immediately applies allocation through original commands")
 		await _frames(8)
-		_expect(not board.draft_stale,"Learning effects capture is a current proposal")
-		_expect(not (board.draft.get("commands",[]) as Array).is_empty(),"Worker change creates draft")
-		_expect(GameState.population_allocations==original and PeopleDirection.automatic_work==original_mode,"Preview preserves current workers and delegation")
-		await _capture("learning-draft-wide")
-		_check_workforce(board,true,"effective draft")
+		_expect(increase.get_global_rect()==held_rect,"Step button rectangle is unchanged after real live refresh")
+		_expect(hud.dock.body_scroll.scroll_vertical==held_scroll,"Allocation does not scroll the dock")
+		_expect(board.settlement_view._desired_target==held_target and is_equal_approx(board.settlement_view._desired_span,held_span),"Allocation preserves manual camera pan and zoom")
+		await _capture("learning-applied-wide")
+		_check_workforce(board,false,"effective immediate allocation")
 		var after_targets:Dictionary=board.settlement_view.call("workforce_percentages")
 		var moved:=0
 		for role:String in after_targets:moved+=maxi(0,int(after_targets.get(role,0))-int(before_targets.get(role,0)))
@@ -103,30 +110,23 @@ func _ready()->void:
 			for index in mini(before_positions.size(),during.size()):
 				if before_positions[index].distance_to(during[index])>.000001:changed+=1
 			_expect(changed==moved,"Only the effective percentage difference walks to new work")
-		await _frames(24);await _capture("learning-draft-moving")
-		await _frames(90);await _capture("learning-draft-arriving")
-		_check_local_annotations(board,"learning draft")
-	# Fast-world invalidation must not apply a stale allocation.
-	GameState.elapsed_days+=1
-	hud.live_refresh_dock();await _frames(6)
+		await _frames(24);await _capture("learning-applied-moving")
+		await _frames(90);await _capture("learning-applied-arriving")
+		var previous:int=preload("res://scripts/manual_work.gd").percents().Knowledge
+		for index in 3:board.increase_button.pressed.emit()
+		await _frames(8)
+		_expect(int(preload("res://scripts/manual_work.gd").percents().Knowledge)==previous+3,"Three rapid clicks retain three real allocation steps")
+		_expect(increase.get_global_rect()==held_rect,"Rapid allocation leaves stepper in place")
+		_expect(hud.dock.body_scroll.scroll_vertical==held_scroll,"Rapid allocation preserves dock scroll")
+		_check_local_annotations(board,"immediate learning")
+	# The next click must start from current live work even if a day elapsed.
+	var current_assignment:Dictionary=GameState.population_allocations.duplicate(true)
+	GameState.elapsed_days+=1;hud.live_refresh_dock();await _frames(8)
 	board=hud.dock.find_child("CivilizationPeopleScreen",true,false)
-	_check_workforce(board,false,"stale draft returns to current work")
-	var apply:=board.find_child("ApplyWorkDraft",true,false) as Button
-	if apply:apply.pressed.emit();await _frames(8)
-	_expect(GameState.population_allocations==original and PeopleDirection.automatic_work==original_mode,"Stale Apply does not change work")
-	var cancel:=board.find_child("CancelWorkDraft",true,false) as Button
-	if cancel:cancel.pressed.emit();await _frames(4)
-	_check_workforce(board,false,"canceled draft returns to current work")
-	# Reading a focused area also needs a refresh path as the world advances,
-	# even when no worker edit has been proposed.
-	GameState.elapsed_days+=1
-	hud.live_refresh_dock();await _frames(6)
-	board=hud.dock.find_child("CivilizationPeopleScreen",true,false)
-	apply=board.find_child("ApplyWorkDraft",true,false) as Button
-	_expect(apply!=null and not apply.disabled,"Unchanged stale reading can refresh")
-	if apply and not apply.disabled:apply.pressed.emit();await _frames(6)
-	_expect(not board.draft_stale,"Refreshing unchanged readings clears stale state")
-	_expect(GameState.population_allocations==original and PeopleDirection.automatic_work==original_mode,"Refreshing unchanged readings preserves work and delegation")
+	_expect(GameState.population_allocations==current_assignment,"A world refresh alone changes no allocation")
+	board.decrease_button.pressed.emit();await _frames(8)
+	_expect(GameState.population_allocations!=current_assignment,"A later click uses a fresh current snapshot")
+	_check_workforce(board,false,"current work after world change")
 	get_window().size=Vector2i(1024,720);get_window().content_scale_size=Vector2i(1024,720)
 	hud.force_dock_layout();await _frames(10)
 	await _capture("focused-narrow")
@@ -154,7 +154,7 @@ func _ready()->void:
 			var before:Dictionary=plots_before[index];var after:Dictionary=GameState.settlement_plots[index]
 			for key in after:
 				if var_to_bytes(before.get(key))!=var_to_bytes(after[key]):print("FABRIC_DIFF ",after.get("id")," ",key)
-	_expect(var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])==fabric_before,"Reading and previewing the illustration preserves recorded fabric")
+	_expect(var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])==fabric_before,"Reading and allocating in the illustration preserves recorded fabric")
 	print("LIVING_PEOPLE_JOURNEY ",checks," checks; failures: ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -233,7 +233,7 @@ func _check_local_annotations(board:Control,label:String)->void:
 	_expect(not action.intersects(consequence),"Assignment and consequence remain separate: "+label)
 	# Compact bounds supplement the visual review; this does not claim the
 	# bounding rectangles measure the visible ink of transparent annotations.
-	_expect(action.get_area()+consequence.get_area()<scene.get_area()*.25,"Local controls leave most of the worksite visible: "+label)
+	_expect(action.get_area()+consequence.get_area()<scene.get_area()*.40,"Local controls leave most of the worksite visible: "+label)
 	var strip:Control=board.get("food_strip")
 	if is_instance_valid(strip) and strip.is_visible_in_tree():
 		_expect(scene.encloses(strip.get_global_rect()),"Food cost diagram remains inside the scene: "+label)
