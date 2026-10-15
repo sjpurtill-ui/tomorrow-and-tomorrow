@@ -12,11 +12,28 @@ const ATLAS_COLUMNS := 6
 const ATLAS_ROWS := 4
 const WALK_ATLAS := "res://assets/ui/people/settle-people-walk-v1.png"
 const CARRY_ATLAS := "res://assets/ui/people/settle-people-carry-v1.png"
+const MALE_WALK_ATLAS := "res://assets/ui/people/settle-people-male-walk-v1.png"
+const MALE_CARRY_ATLAS := "res://assets/ui/people/settle-people-male-carry-v1.png"
+const ROLE_ATLAS := "res://assets/ui/people/settle-people-roles-v1.png"
+const ROLES := ["Food", "Survey", "Extraction", "Construction", "Crafting", "Logistics", "Knowledge", "Administration", "Defense"]
+const WORK_POSE := 20
+# Complete crouches remain shorter than standing people; the artwork is never
+# stretched into a standing silhouette. These are presentation proportions only.
+const ROLE_HEIGHTS := [.76,.82,.94,.65,.62,.63,.64,.65,.66,.82,.94,.94,.64,.65,.60,.61,1.02,1.02]
 const WALK_COLUMNS := 4
 static var _atlas_texture: Texture2D
 static var _walk_texture: Texture2D
 static var _carry_texture: Texture2D
 static var _motion_data: Dictionary = {}
+
+## Private representative fields: x stays stable identity, y is the pose and w
+## is distance phase. Legacy z=0/1/2 remains untouched. All encoded roles are adults.
+static func instance_code(role_index: int, sex: int, carrying: bool = false) -> float:
+	return float(4*(clampi(role_index,0,ROLES.size()-1)+1)+2*posmod(sex,2)+(1 if carrying else 0))
+
+static func instance_fields(code: float) -> Dictionary:
+	var value := maxi(0,roundi(code))
+	return {"role":clampi(value/4-1,-1,ROLES.size()-1),"sex":(value/2)%2 if value>=4 else 0,"carrying":value%2==1,"encoded":value>=4}
 
 ## `known` is the actual known_discoveries ledger (IDs). Optional context may
 ## contain an already-read adoption map and household goods coverage. Without
@@ -92,13 +109,41 @@ static func motion_uniforms() -> Dictionary:
 	var carry := carrying_texture()
 	var result := {"walk_atlas": texture, "walk_frames": _grid_layout(texture, WALK_COLUMNS), "walk_registration": _motion_registration(texture), "walk_atlas_ready": texture != null,
 		"carry_atlas": carry, "carry_frames": _grid_layout(carry, WALK_COLUMNS), "carry_registration": _motion_registration(carry), "carry_atlas_ready": carry != null}
-	if texture != null and carry != null: _motion_data = result
+	for prefix: String in ["male_walk", "male_carry"]:
+		var male_texture := _motion_texture(MALE_WALK_ATLAS if prefix=="male_walk" else MALE_CARRY_ATLAS)
+		var frames := _male_layout(male_texture)
+		result[prefix+"_atlas"] = male_texture
+		result[prefix+"_frames"] = frames
+		result[prefix+"_registration"] = _motion_registration(male_texture,frames)
+		result[prefix+"_atlas_ready"] = male_texture!=null
+	var roles := _motion_texture(ROLE_ATLAS)
+	result.merge({"role_atlas":roles,"role_frames":_grid_layout(roles,6,3),"role_registration":_activity_registration(roles),"role_atlas_ready":roles!=null})
+	if texture != null and carry != null and roles!=null: _motion_data = result
 	return result.duplicate(false)
+
+static func cast_uniforms() -> Dictionary:
+	return motion_uniforms()
+
+static func _activity_registration(texture: Texture2D) -> PackedVector4Array:
+	var registrations := PackedVector4Array()
+	if texture==null:return registrations
+	var source:=texture.get_image()
+	for index in 18:
+		var start:=Vector2i(roundi(float(index%6)*source.get_width()/6),roundi(float(index/6)*source.get_height()/3))
+		var end:=Vector2i(roundi(float(index%6+1)*source.get_width()/6),roundi(float(index/6+1)*source.get_height()/3))
+		var extent:=end-start;var left:=extent.x;var right:=0;var top:=extent.y;var bottom:=0
+		for y in extent.y:
+			for x in extent.x:
+				if source.get_pixel(start.x+x,start.y+y).a<.5:continue
+				left=mini(left,x);right=maxi(right,x);top=mini(top,y);bottom=maxi(bottom,y)
+		var height:=float(bottom-top)/extent.y
+		registrations.append(Vector4(float(left+right)*.5/extent.x,float(bottom)/extent.y,float(ROLE_HEIGHTS[index])/maxf(.1,height),0))
+	return registrations
 
 ## Registration aligns the fixed head/torso anchor and ground contact of each
 ## painted phase. It never splices limbs from separate paintings or stretches
 ## a crouch. Fractional source cells (for example 1254/4) are measured exactly.
-static func _motion_registration(texture: Texture2D) -> PackedVector4Array:
+static func _motion_registration(texture: Texture2D, measured_frames: PackedVector4Array = PackedVector4Array()) -> PackedVector4Array:
 	var registrations := PackedVector4Array()
 	if texture == null: return registrations
 	var source := texture.get_image()
@@ -106,6 +151,10 @@ static func _motion_registration(texture: Texture2D) -> PackedVector4Array:
 		for column in WALK_COLUMNS:
 			var origin := Vector2i(roundi(float(column)*source.get_width()/WALK_COLUMNS), roundi(float(row)*source.get_height()/ATLAS_ROWS))
 			var end := Vector2i(roundi(float(column+1)*source.get_width()/WALK_COLUMNS), roundi(float(row+1)*source.get_height()/ATLAS_ROWS))
+			if not measured_frames.is_empty():
+				var region:=measured_frames[row*WALK_COLUMNS+column]
+				origin=Vector2i(roundi(region.x*source.get_width()-.5),roundi(region.y*source.get_height()-.5))
+				end=origin+Vector2i(roundi(region.z*source.get_width()+1),roundi(region.w*source.get_height()+1))
 			var extent := end-origin
 			var head_x := 0.0; var head_samples := 0; var top := extent.y; var feet := 0
 			for y in extent.y:
@@ -113,21 +162,45 @@ static func _motion_registration(texture: Texture2D) -> PackedVector4Array:
 					if source.get_pixel(origin.x+x, origin.y+y).a < .5: continue
 					top = mini(top,y); feet = maxi(feet,y)
 					if y < extent.y*.25: head_x += float(x); head_samples += 1
+			if not measured_frames.is_empty():
+				head_x=0;head_samples=0
+				for y in range(top,mini(feet+1,ceili(top+(feet-top)*.25))):
+					for x in extent.x:
+						if source.get_pixel(origin.x+x,origin.y+y).a<.5:continue
+						head_x+=float(x);head_samples+=1
 			var anchor := head_x/maxi(1,head_samples)/extent.x
 			var height := float(feet-top)/extent.y
 			registrations.append(Vector4(anchor,float(feet)/extent.y,.94/maxf(.1,height),0))
 	return registrations
 
-static func _grid_layout(texture: Texture2D, columns: int) -> PackedVector4Array:
+static func _male_layout(texture: Texture2D) -> PackedVector4Array:
+	# The returned artwork has generous but slightly uneven gutters. These cuts
+	# sit in inspected transparent gaps, preserving complete feet/head silhouettes.
+	# Image files stay unchanged; only texture regions select the actual cells.
+	var result:=PackedVector4Array()
+	if texture==null:return result
+	var x_edges:=[0,344,617,963,1254]
+	var y_edges:=[0,354,637,920,1254]
+	var dimensions:=Vector2(texture.get_width(),texture.get_height())
+	for row in 4:
+		for column in 4:
+			var start:=(Vector2(x_edges[column],y_edges[row])*dimensions/1254.0).round()
+			var end:=(Vector2(x_edges[column+1],y_edges[row+1])*dimensions/1254.0).round()
+			var origin:=(start+Vector2.ONE*.5)/dimensions
+			var extent:=(end-start-Vector2.ONE)/dimensions
+			result.append(Vector4(origin.x,origin.y,extent.x,extent.y))
+	return result
+
+static func _grid_layout(texture: Texture2D, columns: int, rows: int = ATLAS_ROWS) -> PackedVector4Array:
 	var frames := PackedVector4Array()
 	if texture == null: return frames
 	var dimensions := Vector2(texture.get_width(), texture.get_height())
-	for row in ATLAS_ROWS:
+	for row in rows:
 		for column in columns:
 			# Sample texel centres to prevent neighbouring cells bleeding through
 			# minified alpha edges. Transparent RGB is never drawn as a backdrop.
-			var start := (Vector2(column,row)*dimensions/Vector2(columns,ATLAS_ROWS)).round()
-			var end := (Vector2(column+1,row+1)*dimensions/Vector2(columns,ATLAS_ROWS)).round()
+			var start := (Vector2(column,row)*dimensions/Vector2(columns,rows)).round()
+			var end := (Vector2(column+1,row+1)*dimensions/Vector2(columns,rows)).round()
 			var origin := (start+Vector2.ONE*.5)/dimensions
 			var extent := (end-start-Vector2.ONE)/dimensions
 			frames.append(Vector4(origin.x, origin.y, extent.x, extent.y))
@@ -142,6 +215,7 @@ static func painterly_shader_code() -> String:
 	# all atlas figures face right, independent of gait phase or garment stage.
 	assert(vertex.contains("vec4(0.0, 0.0, -1.0, 0.0)"), "Shared People facing boundary changed")
 	vertex = vertex.replace("vec4(0.0, 0.0, -1.0, 0.0)", "vec4(0.0, 0.0, 1.0, 0.0)")
+	vertex = vertex.replace("float child = step(1.5, INSTANCE_CUSTOM.z);", "float child = step(1.5, INSTANCE_CUSTOM.z)*(1.0-step(3.5, INSTANCE_CUSTOM.z));")
 	vertex = vertex.replace("v_time = anim_clock*max(INSTANCE_CUSTOM.w, 0.2)+INSTANCE_CUSTOM.x*6.2831;", "v_time = motion_phase_supplied ? INSTANCE_CUSTOM.w+INSTANCE_CUSTOM.x : anim_clock*max(INSTANCE_CUSTOM.w, 0.2)+INSTANCE_CUSTOM.x*6.2831;")
 	return Ink.HEAD.replace("depth_draw_never", "depth_prepass_alpha") + GARMENT_HELPERS + PAINTERLY_UNIFORMS + vertex + PAINTERLY_PAINT
 
@@ -159,6 +233,18 @@ uniform sampler2D carry_atlas : source_color, filter_linear, repeat_disable;
 uniform vec4 carry_frames[16];
 uniform vec4 carry_registration[16];
 uniform bool carry_atlas_ready = false;
+uniform sampler2D male_walk_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 male_walk_frames[16];
+uniform vec4 male_walk_registration[16];
+uniform bool male_walk_atlas_ready = false;
+uniform sampler2D male_carry_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 male_carry_frames[16];
+uniform vec4 male_carry_registration[16];
+uniform bool male_carry_atlas_ready = false;
+uniform sampler2D role_atlas : source_color, filter_linear, repeat_disable;
+uniform vec4 role_frames[18];
+uniform vec4 role_registration[18];
+uniform bool role_atlas_ready = false;
 """
 
 const PAINTERLY_PAINT := """
@@ -167,12 +253,18 @@ void fragment() {
     vec2 p = vec2(v_p.x*v_flip, v_p.y);
     float pose = floor(mod(v_custom.y,100.0)+0.5);
     bool still = v_custom.y > 99.5;
-    bool child = v_custom.z > 1.5;
-    bool carrying = v_custom.z > 0.5 && !child;
+    bool encoded = v_custom.z >= 3.5;
+    int role = encoded ? clamp(int(floor(v_custom.z/4.0))-1,0,8) : -1;
+    bool male = encoded && mod(floor(v_custom.z/2.0),2.0)>0.5;
+    bool child = !encoded && v_custom.z > 1.5;
+    bool carrying = mod(v_custom.z,2.0)>0.5 && !child;
     // The same stable per-person supply sample as the wrap shader: knowing a
     // method never outfits everybody, and missing issue records keep row zero.
     float sample_id = fract(v_custom.x*11.971+0.07);
     int row = sample_id < garment_supply ? int(clamp(garment_stage,0.0,3.0)+0.5) : 0;
+    // Percentage representatives share a conservative material identity across
+    // travel and work. They do not claim individual issued clothing inventory.
+    if (encoded) { row = 0; }
     int frame = 0;
     bool walking = (pose < 0.5 || pose == 6.0) && !still;
     if (carrying) { frame = 3; }
@@ -185,8 +277,32 @@ void fragment() {
         vec4 region = people_frames[row*6+frame];
         paint = texture(people_atlas,region.xy+local_uv*region.zw);
     }
-    if (walking && !carrying && walk_atlas_ready) {
+    if (encoded && pose==20.0 && role_atlas_ready) {
+            int activity = role*2+(male ? 1 : 0);
+            vec4 region = role_frames[activity];
+            vec4 registration = role_registration[activity];
+            vec2 activity_uv = (local_uv-vec2(0.5,0.985))/registration.z+registration.xy;
+            paint = texture(role_atlas,region.xy+clamp(activity_uv,vec2(0.0),vec2(1.0))*region.zw);
+            if (any(lessThan(activity_uv,vec2(0.0))) || any(greaterThan(activity_uv,vec2(1.0)))) { paint = vec4(0.0); }
+    } else if (male && carrying && male_carry_atlas_ready) {
             int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            if (!walking) { stride_frame = int(mod(floor(v_time*2.0+0.5)*2.0,4.0)); }
+            vec4 region = male_carry_frames[row*4+stride_frame];
+            vec4 registration = male_carry_registration[row*4+stride_frame];
+            vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;
+            paint = texture(male_carry_atlas,region.xy+clamp(motion_uv,vec2(0.0),vec2(1.0))*region.zw);
+            if (any(lessThan(motion_uv,vec2(0.0))) || any(greaterThan(motion_uv,vec2(1.0)))) { paint = vec4(0.0); }
+    } else if (male && male_walk_atlas_ready) {
+            int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            if (!walking) { stride_frame = int(mod(floor(v_time*2.0+0.5)*2.0,4.0)); }
+            vec4 region = male_walk_frames[row*4+stride_frame];
+            vec4 registration = male_walk_registration[row*4+stride_frame];
+            vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;
+            paint = texture(male_walk_atlas,region.xy+clamp(motion_uv,vec2(0.0),vec2(1.0))*region.zw);
+            if (any(lessThan(motion_uv,vec2(0.0))) || any(greaterThan(motion_uv,vec2(1.0)))) { paint = vec4(0.0); }
+    } else if ((walking || encoded) && !carrying && walk_atlas_ready) {
+            int stride_frame = int(mod(floor(v_time*4.0),4.0));
+            if (!walking) { stride_frame = int(mod(floor(v_time*2.0+0.5)*2.0,4.0)); }
             vec4 stride_region = walk_frames[row*4+stride_frame];
             vec4 registration = walk_registration[row*4+stride_frame];
             vec2 motion_uv = (local_uv-vec2(0.60,0.985))/registration.z+registration.xy;

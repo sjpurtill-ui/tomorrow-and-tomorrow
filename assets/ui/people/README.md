@@ -164,3 +164,46 @@ steadily with both arms. Runtime registration accommodates the returned size.
 
 The earlier eight-column candidate was rejected because its poses still twisted
 the body instead of providing a clear passing step; it is not a runtime asset.
+
+## Mixed workforce representatives
+
+Three additional assets were created with the built-in image-generation tool:
+
+- `settle-people-roles-v1.png`: eighteen complete figures, one woman and one man
+  for each of Food, Survey, Extraction, Construction, Crafting, Logistics,
+  Knowledge, Administration (keeping and caring), and Defense. Six columns by
+  three rows; paired roles follow that order. Only one adult appears in each
+  cell. Tools touch a small local work object; care prepares leaves and dressings
+  without adding a patient. Watchkeepers carry simple upright stone-tipped spears.
+- `settle-people-male-walk-v1.png`: the male counterpart of the approved four-phase
+  contact/passing walk, with the same four garment-material stages.
+- `settle-people-male-carry-v1.png`: complete matching bodies holding a wood bundle
+  through all four phases, including a stable planted contact during a pause.
+
+The role sheet is 1774×887 RGBA. The male motion sheets are 1254×1254 RGBA with
+slightly uneven transparent gutters; inspected texture-region boundaries preserve
+complete feet and heads. PNGs are not trimmed or repainted by runtime code.
+The shader registers ground and head positions, and preserves naturally shorter
+crouching poses. The cast's conservative hide clothing stays consistent between
+travel and work. These are percentage representatives, not individual clothing
+or equipment inventory; legacy knowledge/adoption/issued-clothing gates remain.
+
+Prompt set: use the existing warm painterly ancient clothing as style reference;
+create alternating female/male work pairs, with bare forearms/calves, natural
+hide wraps, one complete adult per cell and visible hand/tool contact. Explicitly
+exclude modern garments, armor, paper, metal tools, extra people and scenery slabs.
+The care revision replaces counters with leaf preparation and a rolled dressing;
+the male garments use a consistent shoulder wrap. A packing revision adds large
+transparent gutters. The male walk prompt specifies stable right-facing torsos
+and alternating planted-contact/bent-knee-passing poses. The carry edit changes
+only arms and the held load, preserving whole-body gait and clothing.
+
+Final built-in source outputs, directory `01a13b4f-8ab2-7a81-a3b3-186e772b4a77`:
+
+- Roles: `exec-14ca8681-7a34-4bce-b388-3f6f35a954e6.png`
+- Male walk: `exec-5beaf2bb-b9ec-4236-b647-835442d000b1.png`
+- Male carry: `exec-9592906d-14ee-4f12-9eb0-5fbff7296aed.png`
+
+Earlier closely packed candidates were excluded because their figures crossed
+the nominal cell boundaries. The runtime assets above live in this repository;
+the generated-image directory is provenance only.
