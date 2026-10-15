@@ -34,6 +34,7 @@ func test_care_target_is_not_presented_as_instant_health_or_death_change() -> vo
 	assert_str(readings[0].label).contains("target")
 	assert_str(readings[0].words).contains("50 → 75 %")
 	assert_str(readings[0].note).contains("60 days")
+	assert_str(readings[0].need_label).is_equal("Full cover")
 	assert_bool(str(readings).contains("deaths")).is_false()
 
 func test_unmeasured_water_is_omitted_instead_of_claiming_zero_collection() -> void:

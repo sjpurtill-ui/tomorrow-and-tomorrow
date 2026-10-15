@@ -60,7 +60,7 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 		"Food":
 			out.append(_metric("Food brought in", before.get("food", {}), after.get("food", {}), "production", "rations/day", "Harvest estimate at today's weather and working conditions.", float(after.get("food", {}).get("required", 0))))
 		"Survey":
-			out.append(_metric("Land knowledge target", old, next, "survey_target", "%", "Coverage settles toward this level over time. Better searched land improves cutting and digging.", 100))
+			out.append(_metric("Land knowledge target", old, next, "survey_target", "%", "Coverage settles toward this level over time. Better searched land improves cutting and digging.", 100, "Full cover"))
 			out.append(_metric("Useful finds · average", old, next, "finds_month", "/month", "An average, not a scheduled discovery; the existing search rules determine finds."))
 		"Extraction":
 			out.append(_metric("Cutting & digging crew", before.get("effective_workers", {}), after.get("effective_workers", {}), role, "fit workers", "Effective crew after injuries and other duties. Deposits, access and carrying limit deliveries."))
@@ -72,8 +72,8 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 			var water: Dictionary = after.get("water", {})
 			if bool(water.get("known", false)):
 				out.append(_metric("Drinking water · estimate", before.get("water", {}), water, "collected", "water/day", "Compared with drinking needs; sources, rain and household collection held fixed.", float(water.get("required", 0))))
-			out.append(_metric("Fresh spoilage prevented", old, next, "fresh_rot_cut", "%", "Reduction from carriers compared with having no carrying cover; full cover halves fresh spoilage.", 50))
-			out.append(_metric("Wider food-gathering reach", old, next, "harvest_reach", "%", "Carriers bring food home from further away; full cover adds one quarter to the gathering reach.", 25))
+			out.append(_metric("Fresh spoilage prevented", old, next, "fresh_rot_cut", "%", "Reduction from carriers compared with having no carrying cover; full cover halves fresh spoilage.", 50, "Full cover"))
+			out.append(_metric("Wider food-gathering reach", old, next, "harvest_reach", "%", "Carriers bring food home from further away; full cover adds one quarter to the gathering reach.", 25, "Full cover"))
 		"Knowledge":
 			var research: Dictionary = after.get("research", {})
 			var previous: Dictionary = before.get("research", {})
@@ -81,8 +81,8 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 			out.append(_metric("Research teams", previous, research, "teams", "teams", "Teams that can work at the same time; each question still has its own requirements."))
 			out.append(_metric("Research supplies needed", previous, research, "goods_a_day", "goods/day", "More learners use more goods. Shortages reduce the work shown above."))
 		"Administration":
-			out.append(_metric("Care coverage target", old, next, "care_target", "%", "Carers tend newborns, mothers and the sick. Skill settles toward this coverage over about 60 days; care does not change instantly.", 100))
-			out.append(_metric("Stored spoilage prevented", old, next, "stored_rot_cut", "%", "Reduction from keepers compared with having no keeping cover; full cover prevents 40% of stored spoilage.", 40))
+			out.append(_metric("Care coverage target", old, next, "care_target", "%", "Carers tend newborns, mothers and the sick. Skill settles toward this coverage over about 60 days; care does not change instantly.", 100, "Full cover"))
+			out.append(_metric("Stored spoilage prevented", old, next, "stored_rot_cut", "%", "Reduction from keepers compared with having no keeping cover; full cover prevents 40% of stored spoilage.", 40, "Full cover"))
 		"Defense":
 			out.append(_metric("Home guard", old, next, "guard", "guards", "Home guard across our settlements, compared with the guard the towns need.", float(next.get("guard_need", 0))))
 			out.append(_metric("Watch equipped", old, next, "armed", "%", "The share equipped from the actual arms ledger. Assigning people does not conjure equipment.", 100))
@@ -105,14 +105,14 @@ static func readings(result: Dictionary, role: String, settlement_id := "", comp
 			entry["words"] = ("%s → %s %s" % [_number(float(entry.before)), _number(float(entry.after)), entry.unit]) if comparing and not is_equal_approx(float(entry.before), float(entry.after)) else "%s %s" % [_number(float(entry.after)), entry.unit]
 	return out
 
-static func _metric(label: String, before: Dictionary, after: Dictionary, key: String, unit: String, note: String, need := 0.0) -> Dictionary:
-	return {"label": label, "before": float(before.get(key, 0.0)), "after": float(after.get(key, 0.0)), "unit": unit, "note": note, "need": need}
+static func _metric(label: String, before: Dictionary, after: Dictionary, key: String, unit: String, note: String, need := 0.0, need_label := "Need") -> Dictionary:
+	return {"label": label, "before": float(before.get(key, 0.0)), "after": float(after.get(key, 0.0)), "unit": unit, "note": note, "need": need, "need_label": need_label}
 
 ## The essential interpretation stays visible beside the graphics. Longer
 ## calculation notes remain available to the UI, without expanding its layout.
 static func summary(role: String) -> String:
 	return String({
-		"Food": "At today's conditions, after spoilage. Stores cover deficits until the reserves run out.",
+		"Food": "Harvest at today's conditions. Store change includes spoilage; reserves cover any deficit.",
 		"Survey": "Land knowledge builds gradually. Finds are an average, not a monthly guarantee.",
 		"Extraction": "Last output is observed. More crew still needs accessible deposits and enough carrying.",
 		"Construction": "Housing and upkeep come first. Remaining builders improve homes, roads and works.",
