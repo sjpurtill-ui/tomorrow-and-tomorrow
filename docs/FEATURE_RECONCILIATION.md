@@ -1,3 +1,21 @@
+## October 15 — Direct People allocation (INTEGRATED)
+
+Runtime `f4d4ba43`: People's minus/plus controls apply immediately using the existing guarded labor
+command. Apply/Cancel and stale-draft refresh steps are removed. Camera, scroll
+and controls retain their positions through allocation and live refresh.
+
+Actual assigned totals, percentages and a 100% bar are clearly separated from
+the 100 visual representatives. Fixed readable effects show practical work
+consequences and food risks from existing calculators. Worker edges and work
+surfaces are calmer. The agent critique loop included implementation, native
+render review and revisions. No simulation rules or save schemas change.
+
+The 83 focused cases and final 14-case scenery/navigation recheck pass. Final
+early Night and combined mature Daylight HUD journeys pass 243 checks each.
+Source hashes, final native captures,
+delivery state and remaining graphical limitations are maintained in
+`docs/INTEGRATION_STATUS.md`. Wider popup consolidation remains unfinished.
+
 ## October 15 — Percentage workforce and meaningful work areas (INTEGRATED)
 
 Runtime `71e3f9dc` gives People exactly 100 persistent representatives, one per
