@@ -1,21 +1,15 @@
 extends Control
-## Living, private view of recorded settlement fabric. The economy remains in
-## its existing authorities; this scene only presents copied plots and routes.
+## An illustrated workforce: 100 persistent people, one per percentage point.
+## All numbers come from the existing allocation/forecast authorities.
 signal role_anchors_changed(anchors:Dictionary)
 signal focus_changed(role:String)
 signal role_selected(role:String)
-
 const Snapshot=preload("res://scripts/hud/people_settlement_scene.gd")
-const Early=preload("res://scripts/early_settlement_visual.gd")
-const Ground=preload("res://scripts/early_settlement_ground.gd")
-const Yards=preload("res://scripts/settlement_yard_details.gd")
-const Art=preload("res://scripts/hud/people_settlement_art.gd")
-const Setting=preload("res://scripts/hud/people_settlement_environment.gd")
+const WorkWorld=preload("res://scripts/hud/people_work_world.gd")
+const Cast=preload("res://scripts/hud/people_workforce_cast.gd")
 const Life=preload("res://scripts/map_life_ink.gd")
 const Costumes=preload("res://scripts/hud/people_settlement_costumes.gd")
-const Shapes=preload("res://scripts/settlement_kit_shapes.gd")
-const MAX_PEOPLE:=48
-const GRID:=41
+const MAX_PEOPLE:=100
 var view:SubViewport
 var camera:Camera3D
 var picture:TextureRect
@@ -26,21 +20,16 @@ var geometry_builds:=0
 var visual_people_count:=0
 var _context:Dictionary={}
 var _key:int=0
-var _terrain:Node
 var _zones:Dictionary={}
 var _anchors:Dictionary={}
 var _materials:Array[ShaderMaterial]=[]
 var _foliage_materials:Array[ShaderMaterial]=[]
 var _foliage_cut:=0.0
 var _painted_materials:Array[ShaderMaterial]=[]
-var _painted_active:=false
-var _painted_yards:Node3D
 var _annotation_objects:Array[MeshInstance3D]=[]
 var _annotation_obstacles:Array[Rect2]=[]
 var _bounds:=Rect2()
 var _overview_focus:=Vector2.ZERO
-var _ground_bounds:=Rect2()
-var _heights:=PackedFloat32Array()
 var _target:=Vector3.ZERO
 var _desired_target:=Vector3.ZERO
 var _span:=.1
@@ -49,19 +38,16 @@ var _yaw:=-.60
 var _pitch:=.61
 var _elapsed:=0.0
 var _people:MultiMeshInstance3D
-var _walks:Array[Dictionary]=[]
 var _highlight:MeshInstance3D
 var _dragged:=false
 var _drag_button:=0
 var _drag_origin:=Vector2.ZERO
 var _manual_navigation:=false
-var _yards:Node3D
-var _yard_batches:=-1
 var _people_paint:ShaderMaterial
-var _building_plan:Dictionary={}
 var _people_key:=-1
-var _worker_route_key:=-1
-var _worker_route_cache:Array[PackedVector2Array]=[]
+var _cast=Cast.new()
+var _workforce_preview:=false
+var _workforce_weights:Dictionary={}
 
 func configure(context:Dictionary)->void:
 	_ensure_view();update_state(context)
@@ -103,13 +89,99 @@ func _ensure_view()->void:
 	gui_input.connect(_input_view)
 
 func update_state(context:Dictionary)->void:
-	_ensure_view();_context=context.duplicate(false);_terrain=context.get("terrain")
-	var next:=Snapshot.snapshot(context);var key:=hash([Snapshot.signature(next),Ground.known_crafts(),_terrain.get_instance_id() if is_instance_valid(_terrain) else 0])
+	_ensure_view();_context=context.duplicate(false)
+	var next:=Snapshot.snapshot(context);var key:=Snapshot.signature(next)
 	if key!=_key or not is_instance_valid(model):
 		snapshot=next;_key=key;_build_scene()
-	else:
-		_update_people()
+	_update_people()
+	if not _workforce_preview:set_workforce(context.get("allocations",GameState.population_allocations))
 	_resize_view()
+
+func set_workforce(weights:Dictionary,preview:bool=false)->void:
+	_workforce_weights=weights.duplicate(true);_workforce_preview=preview
+	if _cast.people.is_empty():return
+	_cast.set_weights(weights);_move_people()
+
+func workforce_percentages()->Dictionary:return _cast.percentages.duplicate()
+
+func workforce_people()->Array[Dictionary]:return _cast.population()
+
+func _build_scene()->void:
+	if is_instance_valid(model):model.free()
+	_materials.clear();_foliage_materials.clear();_painted_materials.clear()
+	_annotation_objects.clear();_annotation_obstacles.clear();_people=null;_highlight=null;_people_key=-1
+	model=Node3D.new();model.name="IllustratedWorkforce";view.add_child(model)
+	var landscape:Dictionary=WorkWorld.render(model,_point,{"snapshot":snapshot})
+	_zones=landscape.zones;_bounds=landscape.bounds;_overview_focus=landscape.overview_center
+	_annotation_objects.assign(landscape.annotation_objects);_private_paint(model)
+	var slots:Dictionary={};var gates:Dictionary={}
+	for role:String in Cast.ROLES:
+		slots[role]=WorkWorld.work_positions(role,100);gates[role]=_zones[role].gate
+	_cast.configure(slots,gates,WorkWorld.hub(),WorkWorld.path_for_transfer)
+	if not _cast.initialized:_cast.set_weights(_context.get("allocations",GameState.population_allocations),false)
+	geometry_builds+=1;_update_people()
+	if _zones.has(focused_role):focus_role(focused_role)
+	else:reset_view()
+	_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
+
+func _private_paint(node:Node)->void:
+	for child in node.get_children():
+		if child is GeometryInstance3D and child.material_override is ShaderMaterial:
+			var paint:ShaderMaterial=child.material_override.duplicate();child.material_override=paint
+			_materials.append(paint)
+			if bool(child.get_meta("foliage",false)):_foliage_materials.append(paint)
+			if bool(child.get_meta("painted",false)):_painted_materials.append(paint)
+		_private_paint(child)
+
+func _point(at:Vector2,lift:float=0.0)->Vector3:return Vector3(at.x,lift,at.y)
+func _normal(_at:Vector2)->Vector3:return Vector3.UP
+
+func _update_people()->void:
+	if not is_instance_valid(model):return
+	var look:=_clothing_appearance()
+	if not is_instance_valid(_people):
+		var shader:=Shader.new();shader.code=Costumes.painterly_shader_code()
+		_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+		_people_paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
+		_people_paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
+		var uniforms:Dictionary=Costumes.cast_uniforms()
+		for parameter:String in uniforms:_people_paint.set_shader_parameter(parameter,uniforms[parameter])
+		_people_paint.set_shader_parameter("motion_phase_supplied",true)
+		_people_paint.set_shader_parameter("map_people_visible",true)
+		_people_paint.set_shader_parameter("min_px",9.0);_people_paint.set_shader_parameter("max_swell",1.3)
+		var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true
+		batch.mesh=Life.quad();batch.instance_count=MAX_PEOPLE
+		_people=MultiMeshInstance3D.new();_people.name="HundredPeople";_people.multimesh=batch;_people.material_override=_people_paint;model.add_child(_people)
+		_people.custom_aabb=AABB(Vector3(_bounds.position.x,-.1,_bounds.position.y),Vector3(_bounds.size.x,.2,_bounds.size.y))
+		visual_people_count=MAX_PEOPLE
+	if _people_key!=int(look.key):
+		_people_key=int(look.key)
+		for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
+		var colors:Array[Color]=look.palette
+		for i in MAX_PEOPLE:_people.multimesh.set_instance_color(i,colors[i%colors.size()])
+	_move_people()
+
+func _move_people()->void:
+	if not is_instance_valid(_people):return
+	_people_paint.set_shader_parameter("anim_clock",_elapsed)
+	for person:Dictionary in _cast.people:
+		var direction:Vector2=_cast.direction(person)
+		var role_index:=Cast.ROLES.find(String(person.role))
+		var pose:=0 if bool(person.moving) else (20 if role_index>=0 else 100)
+		_people.multimesh.set_instance_transform(int(person.id),Transform3D(Basis(Vector3.UP,atan2(direction.x,direction.y)).scaled(Vector3.ONE*.0012),_point(person.position,.00005)))
+		_people.multimesh.set_instance_custom_data(int(person.id),Color(fmod(float(person.id)*.618,1.0),pose,Costumes.instance_code(maxi(0,role_index),int(person.sex)),float(person.traveled)/.0018))
+
+func _overview_span()->float:
+	var aspect:=maxf(.5,size.x/maxf(1.0,size.y))
+	return maxf(.088,.145/aspect)
+
+func _process(delta:float)->void:
+	if not is_visible_in_tree() or not is_instance_valid(model):return
+	_elapsed+=minf(delta,.1);_cast.advance(minf(delta,.1))
+	_target=_target.lerp(_desired_target,1.0-exp(-delta*7.0))
+	_span=lerpf(_span,_desired_span,1.0-exp(-delta*7.0))
+	_foliage_cut=lerpf(_foliage_cut,0.0 if focused_role.is_empty() else 1.0,1.0-exp(-delta*7.0))
+	_position_camera();_project_anchors();_move_people()
 
 func focus_role(role:String)->void:
 	if not _zones.has(role):return
@@ -117,8 +189,7 @@ func focus_role(role:String)->void:
 	focused_role=role
 	var zone:Dictionary=_zones[role];var at:Vector2=zone.center
 	_desired_target=_point(at)
-	var area:Rect2=zone.bounds
-	_desired_span=clampf(maxf(area.size.x,area.size.y)*.82,.018,_overview_span())
+	_desired_span=float(zone.focus_span)
 	_make_highlight(zone.polygons)
 	focus_changed.emit(role)
 
@@ -145,291 +216,21 @@ func role_anchor_metadata()->Dictionary:
 
 func annotation_obstacles()->Array[Rect2]:return _annotation_obstacles.duplicate()
 
-func _build_scene()->void:
-	if is_instance_valid(model):model.free()
-	_materials.clear();_foliage_materials.clear();_painted_materials.clear();_annotation_objects.clear();_annotation_obstacles.clear();_walks.clear();_people=null;_highlight=null;_yards=null;_yard_batches=-1;_people_key=-1
-	model=Node3D.new();model.name="RecordedSettlement";view.add_child(model)
-	_bounds=Snapshot.bounds(snapshot.plots,snapshot.routes)
-	_ground_bounds=_bounds.grow(maxf(_bounds.size.x,_bounds.size.y)*2.2+.08)
-	_painted_active=Art.available()
-	_sample_ground();_landscape()
-	Setting.render(_terrain,snapshot,_ground_bounds,_point,model)
-	var land:=func(at:Vector2)->bool:
-		if is_instance_valid(_terrain) and _terrain.has_method("_settlement_stage_land_at"):
-			return bool(_terrain.call("_settlement_stage_land_at",at+Vector2(snapshot.origin.x,snapshot.origin.z)))
-		return true
-	var height:=func(x:float,z:float)->float:return _height(Vector2(x,z))
-	var plan:Dictionary=Early.layout(snapshot.plots,snapshot.routes,land)
-	_building_plan=plan
-	_frame_inhabited_core(plan)
-	_worked_yards(plan)
-	var residual:Dictionary=Art.buildings(plan,model,_point) if _painted_active else plan
-	Early.render(residual,Vector3.ZERO,height,model)
-	Ground.render(plan,snapshot.plots,snapshot.routes,Vector3.ZERO,height,land,model,false)
-	if _painted_active:Art.hide_replaced_frames(plan,model)
-	_workplace_props(plan)
-	_yards=Yards.new();_yards.name="OccupiedHouseholdYards";model.add_child(_yards)
-	_yards.configure(func(at:Vector2)->float:return _height(at),land)
-	var knowledge:Array=GameState.known_discoveries.duplicate()
-	for entry in GameState.discovery_log:
-		if entry is Dictionary:knowledge.append(String(entry.get("id","")))
-	var sources:Array[Dictionary]=[{"id":"people-view","origin":Vector2.ZERO,"plan":plan,"plots":snapshot.plots,"routes":snapshot.routes,"knowledge":knowledge}]
-	_yards.request(sources,_key)
-	_private_paint(model)
-	_zones=Snapshot.zones(snapshot.plots,snapshot.routes)
-	geometry_builds+=1;_update_people()
-	if _zones.has(focused_role):focus_role(focused_role)
-	else:reset_view()
-	_target=_desired_target;_span=_desired_span;_position_camera();_project_anchors()
-
-func _frame_inhabited_core(plan:Dictionary)->void:
-	var points:=PackedVector2Array();var inhabited:Array[Vector2]=[]
-	for record:Dictionary in plan.get("buildings",[]):
-		var plot:Dictionary=record.plot
-		if String(plot.get("status","active")) in ["ruin","reclaimed","vacant"]:continue
-		var use:=String(plot.get("land_use",""))
-		if use not in ["residential_compound","mixed_household","temporary_encampment","workshop","storage","civic"]:continue
-		var at:Vector2=record.position;var radius:=float(record.get("radius",.003))
-		points.append(at-Vector2.ONE*radius);points.append(at+Vector2.ONE*radius)
-		if use in ["residential_compound","mixed_household","temporary_encampment"]:inhabited.append(at)
-	if points.is_empty():_overview_focus=_bounds.get_center();return
-	_bounds=Rect2(points[0],Vector2.ZERO)
-	for point in points:_bounds=_bounds.expand(point)
-	_bounds=_bounds.grow(.002)
-	_overview_focus=_bounds.get_center()
-	if _painted_active and not inhabited.is_empty():
-		var near:=Vector2(sin(_yaw),cos(_yaw))
-		var ideal:=_bounds.get_center()+near*maxf(_bounds.size.x,_bounds.size.y)*.20
-		inhabited.sort_custom(func(a:Vector2,b:Vector2)->bool:return a.distance_squared_to(ideal)<b.distance_squared_to(ideal))
-		var close:=Vector2.ZERO;var count:=mini(8,inhabited.size())
-		for i in count:close+=inhabited[i]
-		# Place real near homes in the foreground, with their existing roads and
-		# more distant neighbours behind. No structure is moved or multiplied.
-		_overview_focus=close/float(count)-near*.006
-
-func _private_paint(node:Node)->void:
-	for child in node.get_children():
-		if child is GeometryInstance3D and child.material_override is ShaderMaterial:
-			var source:ShaderMaterial=child.material_override;var paint:ShaderMaterial=source.duplicate()
-			paint.set_shader_parameter("map_cloud",Vector4.ZERO);paint.set_shader_parameter("map_wind",Vector4.ZERO)
-			paint.set_shader_parameter("hearth",Vector4.ZERO);paint.set_shader_parameter("anim_clock",0.0)
-			paint.set_shader_parameter("vertex_srgb",true)
-			if source.next_pass is ShaderMaterial:
-				var outline:ShaderMaterial=source.next_pass.duplicate();outline.set_shader_parameter("outline_px",.7)
-				paint.next_pass=outline;_materials.append(outline)
-			child.material_override=paint
-			if child.name=="ActualSeededWoodland" or bool(child.get_meta("foliage",false)):_foliage_materials.append(paint)
-			if bool(child.get_meta("painted",false)):_painted_materials.append(paint)
-			if child is MeshInstance3D and child.has_meta("illustrated_size") and (child.has_meta("plot_id") or bool(child.get_meta("foliage",false))):_annotation_objects.append(child)
-		_private_paint(child)
-
-func _sample_ground()->void:
-	_heights.resize(GRID*GRID)
-	var sampled:=is_instance_valid(_terrain) and _terrain.has_method("_height_at")
-	var origin:Vector3=snapshot.origin;var base:=float(_terrain.call("_height_at",origin.x,origin.z)) if sampled else 0.0
-	for y in GRID:
-		for x in GRID:
-			var at:=_ground_bounds.position+Vector2(x,y)/float(GRID-1)*_ground_bounds.size
-			var h:=float(_terrain.call("_height_at",origin.x+at.x,origin.z+at.y))-base if sampled else 0.0
-			_heights[y*GRID+x]=h if is_finite(h) else 0.0
-
-func _height(at:Vector2)->float:
-	if _heights.is_empty():return 0.0
-	var cell:Vector2=((at-_ground_bounds.position)/_ground_bounds.size*float(GRID-1)).clamp(Vector2.ZERO,Vector2.ONE*(GRID-1))
-	var x:=mini(floori(cell.x),GRID-2);var y:=mini(floori(cell.y),GRID-2)
-	var u:=cell.x-x;var v:=cell.y-y
-	var a:=float(_heights[y*GRID+x]);var b:=float(_heights[y*GRID+x+1])
-	var c:=float(_heights[(y+1)*GRID+x+1]);var d:=float(_heights[(y+1)*GRID+x])
-	return a+(b-a)*u+(c-b)*v if u>=v else a+(c-d)*u+(d-a)*v
-
-func _point(at:Vector2,lift:float=0.0)->Vector3:return Vector3(at.x,_height(at)+lift,at.y)
-
-func _normal(at:Vector2)->Vector3:
-	var step:=maxf(.0001,_ground_bounds.size.x/float(GRID-1))
-	return Vector3(_height(at-Vector2(step,0))-_height(at+Vector2(step,0)),step*2.0,_height(at-Vector2(0,step))-_height(at+Vector2(0,step))).normalized()
-
-func _landscape()->void:
-	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for y in GRID-1:
-		for x in GRID-1:
-			var points:Array[Vector2]=[]
-			for offset:Vector2 in [Vector2.ZERO,Vector2.RIGHT,Vector2.ONE,Vector2.DOWN]:
-				points.append(_ground_bounds.position+(Vector2(x,y)+offset)/float(GRID-1)*_ground_bounds.size)
-			for face:Array in [[0,1,2],[0,2,3]]:
-				for index:int in face:
-					surface.set_normal(_normal(points[index]));surface.set_uv(points[index]*25.0);surface.add_vertex(_point(points[index]))
-	var landscape:=_commit(surface,"Landscape",false)
-	var shader:=Shader.new();shader.code=GROUND_SHADER
-	var paint:=ShaderMaterial.new();paint.shader=shader
-	var ground_art:=Art.atlas("res://assets/ui/people/meadow-ground-v1.png") if _painted_active else null
-	paint.set_shader_parameter("ground_photo",ground_art if ground_art!=null else load("res://assets/terrain/temperate_ground_albedo_v1.png"))
-	paint.set_shader_parameter("painted_ground",ground_art!=null)
-	if is_instance_valid(_terrain) and _terrain.has_method("_biome_at"):
-		var biome:Dictionary=_terrain.call("_biome_at",snapshot.origin.x,snapshot.origin.z)
-		paint.set_shader_parameter("aridity",1.0-smoothstep(.18,.45,float(biome.get("precipitation",.5))))
-		paint.set_shader_parameter("cold",1.0-smoothstep(.12,.25,float(biome.get("temperature",.5))))
-	landscape.material_override=paint
-	var ground:=SurfaceTool.new();ground.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
-	for plot:Dictionary in snapshot.plots:
-		if String(plot.get("status","active"))=="reclaimed":continue
-		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
-		var use:=String(plot.get("land_use",""));var color:=Color("b5a789")
-		# A water-service parcel is a well/draw point, never evidence of a pond.
-		# The recorded water object is rendered by Ground; channels by Setting.
-		if use not in ["field","pasture","dirty_industry"]:continue
-		if use in ["field","pasture"]:color=Color("a5ad63") if float(plot.get("crop_cover",.5))>.2 else Color("a58f68")
-		elif use in ["waste","dirty_industry"]:color=Color("968e77")
-		elif String(plot.get("status",""))=="ruin":color=Color("817a69")
-		count+=_polygon(ground,polygon,color,.00003)
-		if use=="field":count+=_field_rows(ground,polygon,plot)
-	for route:Dictionary in snapshot.routes:
-		if not bool(route.get("active",true)):continue
-		var points:PackedVector2Array=route.get("points",PackedVector2Array())
-		var width:=maxf(.00055,float(route.get("width_m",2.0))*.001)
-		count+=_paint_path(ground,points,width)
-	if count>0:_commit(ground,"RecordedGroundAndRoutes",true)
-
-func _paint_path(surface:SurfaceTool,points:PackedVector2Array,width:float)->int:
-	var curve:=PackedVector2Array();var count:=0
-	for i in range(1,points.size()):
-		var p0:Vector2=points[maxi(0,i-2)];var p1:Vector2=points[i-1]
-		var p2:Vector2=points[i];var p3:Vector2=points[mini(points.size()-1,i+1)]
-		var steps:=maxi(3,ceili(p1.distance_to(p2)/.0015))
-		for step in steps:curve.append(p1.cubic_interpolate(p2,p0,p3,float(step)/steps))
-	if points.is_empty():return 0
-	curve.append(points[-1])
-	var sides:=PackedVector2Array()
-	for i in curve.size():
-		sides.append((curve[mini(curve.size()-1,i+1)]-curve[maxi(0,i-1)]).normalized().orthogonal()*(width*.5+.0007))
-	for i in range(1,curve.size()):
-		for sign in [-1,1]:
-			var strip:=[curve[i-1],curve[i],curve[i]+sides[i]*sign,curve[i-1]+sides[i-1]*sign]
-			for vertex in [0,1,2,0,2,3]:
-				surface.set_normal(_normal(strip[vertex]));surface.set_color(Color(.58,.46,.30,.88 if vertex<2 else 0))
-				surface.add_vertex(_point(strip[vertex],.00018));count+=1
-	return count
-
-func _field_rows(surface:SurfaceTool,polygon:PackedVector2Array,plot:Dictionary)->int:
-	if polygon.size()<3:return 0
-	var area:=Rect2(polygon[0],Vector2.ZERO)
-	for point in polygon:area=area.expand(point)
-	var count:=0;var green:=Color("798c4c") if float(plot.get("crop_cover",.5))>.2 else Color("9a805c")
-	for row in range(1,mini(18,int(area.size.y/.002))):
-		var y:=area.position.y+row*.002
-		var strip:=PackedVector2Array([Vector2(area.position.x,y),Vector2(area.end.x,y),Vector2(area.end.x,y+.00045),Vector2(area.position.x,y+.00045)])
-		for clipped in Geometry2D.intersect_polygons(polygon,strip):count+=_polygon(surface,clipped,green,.00008)
-	return count
-
-func _polygon(surface:SurfaceTool,points:PackedVector2Array,color:Color,lift:float)->int:
-	if points.size()<3:return 0
-	var indices:=Geometry2D.triangulate_polygon(points)
-	for index in indices:surface.set_normal(_normal(points[index]));surface.set_color(color);surface.add_vertex(_point(points[index],lift))
-	return indices.size()
-
-func _commit(surface:SurfaceTool,label:String,transparent:bool)->MeshInstance3D:
-	var node:=MeshInstance3D.new();node.name=label;node.mesh=surface.commit()
-	var material:=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.vertex_color_is_srgb=true;material.roughness=1.0
-	material.cull_mode=BaseMaterial3D.CULL_DISABLED
-	if transparent:material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;material.render_priority=-20
-	node.material_override=material;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;model.add_child(node)
-	return node
-
-func _workplace_props(plan:Dictionary)->void:
-	var crafts:=Ground.known_crafts();var count:=0
-	for plot:Dictionary in snapshot.plots:
-		if count>=24:break
-		if String(plot.get("status","active")) in ["vacant","ruin","reclaimed","under_construction"]:continue
-		var form:=String(plot.get("form",""));var use:=String(plot.get("land_use",""))
-		var at:Vector2=plot.get("centroid",Vector2.ZERO)
-		if form=="open_hearth_yard" and at.length()<.005:
-			_prop("hearth_ring",at,0)
-			if _painted_active:
-				Art.smoke(model,_point(at,.001),.0045);continue
-			var fire:=MeshInstance3D.new();var cone:=CylinderMesh.new();cone.bottom_radius=.00065;cone.top_radius=0;cone.height=.0015;cone.radial_segments=7
-			fire.mesh=cone;fire.position=_point(at,.00075)
-			var glow:=StandardMaterial3D.new();glow.albedo_color=Color("ef9d48");glow.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-			fire.material_override=glow;fire.name="RecordedHearthFlame";model.add_child(fire)
-		if use!="workshop":continue
-		var choices:Array[String]=["bench","woodpile"]
-		if bool(crafts.pottery):choices.append("pots")
-		if bool(crafts.hides):choices.append("hide_frame")
-		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
-		var slot:=0
-		for kind in choices:
-			for attempt in 16:
-				var angle:=TAU*(attempt+slot*3)/16.0
-				var place:=at+Vector2.from_angle(angle)*(.003+attempt*.00025)
-				if polygon.size()>2 and not Geometry2D.is_point_in_polygon(place,polygon):continue
-				var clear:=true
-				for building:Dictionary in plan.get("buildings",[]):
-					if place.distance_to(building.position)<float(building.get("radius",.003))+.0015:clear=false;break
-				if not clear:continue
-				_prop(kind,place,angle);count+=1;slot+=1;break
-
-func _prop(kind:String,at:Vector2,yaw:float)->void:
-	if _painted_active and kind in ["woodpile","pots","hearth_ring"]:
-		var cell:=6 if kind=="woodpile" else (7 if kind=="pots" else 9)
-		Art.sprite(model,Art.DETAILS,cell,_point(at,.00012),.0036 if kind=="hearth_ring" else .002,{"name":"PaintedWorkplace_"+kind})
-		return
-	var mesh:Mesh=Shapes.prop(kind)
-	if mesh==null:return
-	var node:=MeshInstance3D.new();node.name="Workplace_"+kind;node.mesh=mesh
-	node.transform=Transform3D(Basis(Vector3.UP,yaw).scaled(Vector3.ONE*.001),_point(at,.0001))
-	node.material_override=preload("res://scripts/settlement_ink.gd").material();model.add_child(node)
-
-func _paint_household_yards()->void:
-	if is_instance_valid(_painted_yards):_painted_yards.free()
-	_painted_yards=Node3D.new();_painted_yards.name="PaintedOccupiedYards";_yards.add_child(_painted_yards)
-	for kind:String in ["woodpile","pots"]:
-		var source:=_yards.get_node_or_null("Yard_"+kind) as MultiMeshInstance3D
-		if source==null:continue
-		source.visible=false
-		for index in source.multimesh.instance_count:
-			var placement:=source.multimesh.get_instance_transform(index)
-			# The mesh instance origin contains its old AABB bottom offset.
-			# Painted art has its own cropped ground contact instead.
-			placement.origin.y=_height(Vector2(placement.origin.x+_yards.position.x,placement.origin.z+_yards.position.z))+.00006
-			Art.sprite(_painted_yards,Art.DETAILS,6 if kind=="woodpile" else 7,placement.origin,.0018,{"name":"OccupiedYard_"+kind,"mirror":index%2==0})
-
-func _worked_yards(plan:Dictionary)->void:
-	var surface:=SurfaceTool.new();surface.begin(Mesh.PRIMITIVE_TRIANGLES);var count:=0
-	var shade:=SurfaceTool.new();shade.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for building:Dictionary in plan.get("buildings",[]):
-		var at:Vector2=building.position;var radius:=float(building.get("radius",.0035))
-		var door:=at+Vector2(sin(_yaw),cos(_yaw))*radius*.35
-		count+=_wear_patch(surface,door,radius*2.15,int(building.get("plot_id",0)),Color(.44,.32,.19,.88))
-		# Dense contact at the actual ground pivot prevents the painted footing
-		# from floating. A softer, longer shade follows the same afternoon sun.
-		_shadow_patch(shade,at,Vector2(radius*.95,radius*.50),.48)
-		_shadow_patch(shade,at+Vector2(radius*.7,radius*.45),Vector2(radius*1.4,radius*.70),.20)
-	for plot:Dictionary in snapshot.plots:
-		if String(plot.get("status","active")) in ["vacant","reclaimed","ruin"]:continue
-		var form:=String(plot.get("form",""))
-		if form not in ["open_hearth_yard","maintained_gathering_ground","open_work_yard","guarded_cache"]:continue
-		var at:Vector2=plot.get("centroid",Vector2.ZERO)
-		count+=_wear_patch(surface,at,.0075,int(plot.get("id",0)),Color(.46,.34,.21,.78))
-		if form=="open_hearth_yard":_shadow_patch(shade,at,Vector2(.0018,.0010),.50)
-	if count>0:_commit(surface,"WornGroundAroundRecordedBuildings",true)
-	if count>0:
-		var shadows:=_commit(shade,"DrapedBuildingContactShadows",true)
-		var shader:=Shader.new();shader.code=CONTACT_SHADER
-		var paint:=ShaderMaterial.new();paint.shader=shader;paint.render_priority=-15;shadows.material_override=paint
-
-func _wear_patch(surface:SurfaceTool,at:Vector2,radius:float,seed_value:int,color:Color)->int:
-	for i in 20:
-		var a:=at+Vector2.from_angle(TAU*i/20.0)*radius*(.87+.16*sin(i*2.17+seed_value))
-		var b:=at+Vector2.from_angle(TAU*(i+1)/20.0)*radius*(.87+.16*sin((i+1)%20*2.17+seed_value))
-		for point:Vector2 in [at,a,b]:
-			surface.set_normal(_normal(point));surface.set_color(color if point==at else Color(color,0))
-			surface.add_vertex(_point(point,.00028))
-	return 60
-
-func _shadow_patch(surface:SurfaceTool,at:Vector2,extent:Vector2,opacity:float)->void:
-	for i in 20:
-		var a:=at+Vector2.from_angle(TAU*i/20)*extent
-		var b:=at+Vector2.from_angle(TAU*(i+1)/20)*extent
-		for point:Vector2 in [at,a,b]:
-			surface.set_color(Color(1,1,1,opacity if point==at else 0));surface.add_vertex(_point(point,.00038))
+func _clothing_appearance()->Dictionary:
+	# Read the selected settlement's last issued-clothing report without entering
+	# a resource scope or advancing clothing production. Missing evidence keeps
+	# the basic wraps; knowing a technique alone never outfits every household.
+	var clothing:Dictionary=GameState.household_clothing
+	var population:=float(GameState.population_total)
+	var id:=String(_context.get("settlement_id",""))
+	var record:Dictionary=SettlementModel.settlement_record(id) if not id.is_empty() else {}
+	if not record.is_empty():
+		if not bool(record.get("primary",false)):clothing=record.get("local_resources",{}).get("household_clothing",{})
+		if WorldSimulation.state==GameState:population=SettlementModel._settlement_population(record)
+	var report:Dictionary=clothing.get("report",{})
+	var coverage:=clampf(float(report.get("issued",0))/maxf(1,population),0,1)
+	var evidence:Dictionary=_context.get("clothing_context",{"adoption":GameState.discovery_adoption,"coverage":coverage})
+	return Costumes.appearance(_context.get("clothing_knowledge",GameState.known_discoveries),evidence)
 
 func _make_highlight(polygons:Array)->void:
 	if is_instance_valid(_highlight):_highlight.free()
@@ -452,224 +253,13 @@ func _make_highlight(polygons:Array)->void:
 						surface.add_vertex(_point(strip[vertex],.0002));count+=1
 	if count>0:_highlight=_commit(surface,"FocusedWorkGround",true)
 
-func _update_people()->void:
-	if not is_instance_valid(model):return
-	var look:=_clothing_appearance()
-	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations),look.key])
-	if key==_people_key:return
-	_people_key=key
-	if is_instance_valid(_people):_people.free()
-	_walks.clear();visual_people_count=0
-	var blockers:=_worker_blockers()
-	var routes:=_worker_routes(blockers)
-	if routes.is_empty():return
-	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
-	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
-	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Costumes.painterly_shader_code()
-	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
-	_people_paint.set_shader_parameter("people_atlas",Costumes.atlas_texture())
-	_people_paint.set_shader_parameter("people_frames",Costumes.atlas_layout())
-	var motion:Dictionary=Costumes.motion_uniforms()
-	for parameter:String in motion:_people_paint.set_shader_parameter(parameter,motion[parameter])
-	_people_paint.set_shader_parameter("motion_phase_supplied",true)
-	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
-	# The People view explicitly requests bounded illustrative representatives.
-	# Its private shader does not change the map's global no-people policy.
-	_people_paint.set_shader_parameter("map_people_visible",true)
-	_people_paint.set_shader_parameter("min_px",9.0);_people_paint.set_shader_parameter("max_swell",1.3)
-	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true;batch.mesh=Life.quad();batch.instance_count=visual_people_count
-	_people=MultiMeshInstance3D.new();_people.name="RepresentativePeople";_people.multimesh=batch;_people.material_override=_people_paint;model.add_child(_people)
-	_people.custom_aabb=AABB(Vector3(_ground_bounds.position.x,-.1,_ground_bounds.position.y),Vector3(_ground_bounds.size.x,.2,_ground_bounds.size.y))
-	var colors:Array[Color]=look.palette
-	for i in visual_people_count:
-		var path:PackedVector2Array=routes[i%routes.size()]
-		var length:=0.0
-		for p in range(1,path.size()):length+=path[p-1].distance_to(path[p])
-		_walks.append({"path":path,"length":length,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
-		batch.set_instance_color(i,colors[i%colors.size()])
-		batch.set_instance_custom_data(i,Color(fmod(i*.618,1.0),0,0,.75))
-	# Site actions need a visible target. A role allocation alone cannot invent
-	# a workshop, a tool, or a reason to gesture in an empty parcel.
-	var index:=0;var allocations:Dictionary=_context.get("allocations",GameState.population_allocations)
-	for site:Dictionary in _worker_sites(blockers):
-		if index>=mini(6,_walks.size()):break
-		if int(allocations.get(site.role,0))<=0:continue
-		_walks[index].merge(site,true)
-		batch.set_instance_custom_data(index,Color(float(index)*.17,int(site.pose),0,.7));index+=1
-	_install_worker_deliveries(blockers,allocations)
-	_move_people()
-
-func _install_worker_deliveries(blockers:Array[Dictionary],allocations:Dictionary)->void:
-	if int(allocations.get("Logistics",0))<=0 or int(allocations.get("Crafting",0))<=0:return
-	var count:=0
-	for index in _walks.size():
-		var source:Dictionary=_walks[index]
-		if source.get("source","")!="woodpile" or not source.has("stationary"):continue
-		for destination:Dictionary in _walks:
-			if destination.get("source","")!="bench" or not destination.has("stationary"):continue
-			var start:Vector2=source.stationary
-			var direction:Vector2=(Vector2(destination.target)-Vector2(destination.stationary)).normalized()
-			var finish:Vector2=Vector2(destination.stationary)+direction.orthogonal()*.001
-			var distance:=start.distance_to(finish)
-			if distance<.0015 or distance>.015 or not _worker_segment_clear(start,finish,blockers):continue
-			_walks[index]={"path":PackedVector2Array([start,finish]),"length":distance,"phase":float(source.phase),"speed":.0007,"delivery":true,"pause":1.2,"role":"Logistics","source":"woodpile_to_workbench","pickup_target":source.target,"drop_target":destination.target}
-			count+=1;break
-		if count>=2:break
-
-func _worker_blockers()->Array[Dictionary]:
-	var result:Array[Dictionary]=[]
-	for record:Dictionary in _building_plan.get("buildings",[]):
-		result.append({"center":Vector2(record.position),"radius":maxf(.0015,float(record.get("radius",.003)))+.00055,"source":"building"})
-	for plot:Dictionary in snapshot.get("plots",[]):
-		if String(plot.get("form",""))=="open_hearth_yard" and String(plot.get("status","active")) not in ["vacant","reclaimed"]:
-			result.append({"center":Vector2(plot.get("centroid",Vector2.ZERO)),"radius":.0022,"source":"hearth"})
-	return result
-
-static func _worker_segment_clear(a:Vector2,b:Vector2,blockers:Array[Dictionary])->bool:
-	for obstacle:Dictionary in blockers:
-		if Geometry2D.get_closest_point_to_segment(Vector2(obstacle.center),a,b).distance_to(obstacle.center)<float(obstacle.radius):return false
-	return true
-
-func _worker_routes(blockers:Array[Dictionary])->Array[PackedVector2Array]:
-	if _worker_route_key==_key:return _worker_route_cache
-	_worker_route_key=_key;_worker_route_cache.clear()
-	# This navigation grid exists only in this renderer. Routes and plots remain
-	# untouched; visual walkers step around footprints instead of through them.
-	var grid:=AStarGrid2D.new();var area:=_bounds.grow(.008)
-	var step:=maxf(.0012,maxf(area.size.x,area.size.y)/160.0)
-	grid.region=Rect2i(Vector2i.ZERO,Vector2i(ceil(area.size.x/step)+1,ceil(area.size.y/step)+1))
-	grid.cell_size=Vector2.ONE*step;grid.offset=area.position
-	grid.diagonal_mode=AStarGrid2D.DIAGONAL_MODE_ONLY_IF_NO_OBSTACLES;grid.update()
-	for obstacle:Dictionary in blockers:
-		var radius:=float(obstacle.radius)+step*.75;var center:Vector2=obstacle.center
-		var first:=Vector2i(((center-Vector2.ONE*radius-area.position)/step).floor())
-		var last:=Vector2i(((center+Vector2.ONE*radius-area.position)/step).ceil())
-		for y in range(maxi(0,first.y),mini(grid.region.end.y,last.y+1)):
-			for x in range(maxi(0,first.x),mini(grid.region.end.x,last.x+1)):
-				var cell:=Vector2i(x,y)
-				if grid.get_point_position(cell).distance_to(center)<radius:grid.set_point_solid(cell)
-	for route:Dictionary in snapshot.routes:
-		var points:PackedVector2Array=route.get("points",PackedVector2Array())
-		if not bool(route.get("active",true)) or points.size()<2:continue
-		var path:=PackedVector2Array();var valid:=true
-		for p in range(1,points.size()):
-			var a:Vector2=points[p-1];var b:Vector2=points[p]
-			if _worker_segment_clear(a,b,blockers):
-				if path.is_empty():path.append(a)
-				path.append(b);continue
-			var start:=_worker_free_cell(grid,Vector2i(((a-area.position)/step).round()))
-			var finish:=_worker_free_cell(grid,Vector2i(((b-area.position)/step).round()))
-			if start.x<0 or finish.x<0:valid=false;break
-			var detour:=grid.get_point_path(start,finish)
-			if detour.size()<2:valid=false;break
-			for point:Vector2 in detour:
-				if path.is_empty() or path[-1].distance_to(point)>.00001:path.append(point)
-		if not valid or path.size()<2:continue
-		for p in range(1,path.size()):
-			if not _worker_segment_clear(path[p-1],path[p],blockers):valid=false;break
-		if valid:_worker_route_cache.append(path)
-	return _worker_route_cache
-
-static func _worker_free_cell(grid:AStarGrid2D,at:Vector2i)->Vector2i:
-	at=at.clamp(grid.region.position,grid.region.end-Vector2i.ONE)
-	if not grid.is_point_solid(at):return at
-	for reach in range(1,12):
-		for y in range(-reach,reach+1):
-			for x in range(-reach,reach+1):
-				if maxi(absi(x),absi(y))!=reach:continue
-				var cell:=at+Vector2i(x,y)
-				if grid.region.has_point(cell) and not grid.is_point_solid(cell):return cell
-	return Vector2i(-1,-1)
-
-func _worker_sites(blockers:Array[Dictionary])->Array[Dictionary]:
-	var targets:Array[Dictionary]=[]
-	for child:Node3D in model.get_children():
-		if not child.is_visible_in_tree():continue
-		var kind:=String(child.name).trim_prefix("PaintedWorkplace_").trim_prefix("Workplace_")
-		if kind not in ["bench","woodpile","pots","hide_frame","hearth_ring"]:continue
-		var role:="Food" if kind=="hearth_ring" else ("Logistics" if kind in ["woodpile","pots"] else "Crafting")
-		targets.append({"center":Vector2(child.position.x,child.position.z),"radius":.0025 if kind=="hearth_ring" else .0009,"role":role,"source":kind})
-	# Painted building edges do not locate a reachable hand-height task surface.
-	# Only independently rendered work objects can anchor a stationary worker.
-	var result:Array[Dictionary]=[]
-	for target:Dictionary in targets:
-		# Initial workers are built before the camera is positioned. Use its
-		# intended viewing direction so first-frame activity is on the near side.
-		var front:=Vector2(sin(_yaw),cos(_yaw)).angle()
-		for attempt in 16:
-			var outward:=Vector2.from_angle(front+attempt*TAU/16)
-			var at:Vector2=target.center+outward*float(target.radius)
-			if not _worker_segment_clear(at,at,blockers):continue
-			var occupied:=false
-			for other:Dictionary in result:
-				if at.distance_to(other.stationary)<.001:occupied=true;break
-			if occupied:continue
-			# Work faces the nearby object/edge, never an arbitrary compass heading.
-			var pose:=100 if target.source in ["bench","hide_frame"] else 8
-			result.append({"stationary":at,"target":Vector2(target.center)+outward*maxf(0,float(target.radius)-.0009),"role":target.role,"source":target.source,"pose":pose})
-			break
-	return result
-
-func _clothing_appearance()->Dictionary:
-	# Read the selected settlement's last issued-clothing report without entering
-	# a resource scope or advancing clothing production. Missing evidence keeps
-	# the basic wraps; knowing a technique alone never outfits every household.
-	var clothing:Dictionary=GameState.household_clothing
-	var population:=float(GameState.population_total)
-	var id:=String(_context.get("settlement_id",""))
-	var record:Dictionary=SettlementModel.settlement_record(id) if not id.is_empty() else {}
-	if not record.is_empty():
-		if not bool(record.get("primary",false)):clothing=record.get("local_resources",{}).get("household_clothing",{})
-		if WorldSimulation.state==GameState:population=SettlementModel._settlement_population(record)
-	var report:Dictionary=clothing.get("report",{})
-	var coverage:=clampf(float(report.get("issued",0))/maxf(1,population),0,1)
-	var evidence:Dictionary=_context.get("clothing_context",{"adoption":GameState.discovery_adoption,"coverage":coverage})
-	return Costumes.appearance(_context.get("clothing_knowledge",GameState.known_discoveries),evidence)
-
-func _move_people()->void:
-	if not is_instance_valid(_people):return
-	_people_paint.set_shader_parameter("anim_clock",_elapsed)
-	for i in _walks.size():
-		var state:=_worker_sample(_walks[i],_elapsed)
-		var direction:Vector2=state.direction
-		_people.multimesh.set_instance_transform(i,Transform3D(Basis(Vector3.UP,atan2(direction.x,direction.y)).scaled(Vector3.ONE*.001),_point(state.position,.00005)))
-		_people.multimesh.set_instance_custom_data(i,Color(float(_walks[i].phase),int(state.get("pose",0)),1.0 if bool(state.get("carrying",false)) else 0.0,float(state.get("traveled",0))/.0008))
-
-static func _worker_sample(walk:Dictionary,elapsed:float)->Dictionary:
-	if walk.has("stationary"):
-		return {"position":Vector2(walk.stationary),"direction":Vector2(walk.target)-Vector2(walk.stationary),"pose":int(walk.get("pose",100)),"traveled":0.0,"carrying":false}
-	var path:PackedVector2Array=walk.path;var length:=float(walk.get("length",0))
-	if length<=0:
-		for p in range(1,path.size()):length+=path[p-1].distance_to(path[p])
-	if length<=.00001:return {"position":path[0] if not path.is_empty() else Vector2.ZERO,"direction":Vector2.DOWN}
-	var traveled:=float(walk.phase)*length*2+elapsed*float(walk.speed)
-	var travel:=fposmod(traveled,length*2)
-	var returning:=travel>=length
-	var distance:=length*2-travel if returning else travel
-	var carrying:=false
-	if bool(walk.get("delivery",false)):
-		var pause:=float(walk.get("pause",1.2));var duration:=length/maxf(.00001,float(walk.speed))
-		var cycle:=2*(duration+pause);var absolute_time:=float(walk.phase)*cycle+elapsed;var time:=fposmod(absolute_time,cycle)
-		traveled=floor(absolute_time/cycle)*length*2
-		if time<pause:return {"position":path[0],"direction":Vector2(walk.pickup_target)-path[0],"pose":8,"carrying":false,"traveled":traveled}
-		if time<duration+pause:distance=(time-pause)*float(walk.speed);traveled+=distance;returning=false;carrying=true
-		elif time<duration+pause*2:return {"position":path[-1],"direction":Vector2(walk.drop_target)-path[-1],"pose":100,"carrying":true,"traveled":traveled+length}
-		else:distance=length-(time-duration-pause*2)*float(walk.speed);traveled+=length*2-distance;returning=true
-	for p in range(1,path.size()):
-		var segment:=path[p-1].distance_to(path[p])
-		if distance<=segment:
-			return {"position":path[p-1].lerp(path[p],distance/maxf(segment,.00001)),"direction":(path[p]-path[p-1])*(-1.0 if returning else 1.0),"pose":0,"carrying":carrying,"traveled":traveled}
-		distance-=segment
-	return {"position":path[-1],"direction":path[-2]-path[-1]}
-
-func _overview_span()->float:
-	var aspect:=maxf(.5,size.x/maxf(1.0,size.y))
-	# Frame the inhabited center closely; remote parcels remain available
-	# through their role anchors and the reversible wheel zoom.
-	var horizontal:=absf(cos(_yaw))*_bounds.size.x+absf(sin(_yaw))*_bounds.size.y
-	var depth:=absf(sin(_yaw))*_bounds.size.x+absf(cos(_yaw))*_bounds.size.y
-	return maxf(.031,maxf(horizontal/aspect,depth*sin(_pitch)) *(.53 if _painted_active else .84))
+func _commit(surface:SurfaceTool,label:String,transparent:bool)->MeshInstance3D:
+	var node:=MeshInstance3D.new();node.name=label;node.mesh=surface.commit()
+	var material:=StandardMaterial3D.new();material.vertex_color_use_as_albedo=true;material.vertex_color_is_srgb=true;material.roughness=1.0
+	material.cull_mode=BaseMaterial3D.CULL_DISABLED
+	if transparent:material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA;material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED;material.render_priority=-20
+	node.material_override=material;node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF;model.add_child(node)
+	return node
 
 func _resize_view()->void:
 	if not is_instance_valid(view):return
@@ -708,20 +298,6 @@ func _project_anchors()->void:
 		if rectangle.intersects(screen) and rectangle.size.x>8:_annotation_obstacles.append(rectangle.intersection(screen))
 	role_anchors_changed.emit(_anchors.duplicate())
 
-func _process(delta:float)->void:
-	if not is_visible_in_tree() or not is_instance_valid(model):return
-	_elapsed+=minf(delta,.1)
-	_target=_target.lerp(_desired_target,1.0-exp(-delta*7.0))
-	_span=lerpf(_span,_desired_span,1.0-exp(-delta*7.0))
-	_foliage_cut=lerpf(_foliage_cut,0.0 if focused_role.is_empty() else 1.0,1.0-exp(-delta*7.0))
-	_position_camera();_project_anchors();_move_people()
-	if is_instance_valid(_yards):
-		_yards.set_view(Vector2(_target.x,_target.z),_span)
-		_yards.process_jobs(1200,4)
-		if int(_yards.batch_updates)!=_yard_batches:
-			_yard_batches=int(_yards.batch_updates);_private_paint(_yards)
-			if _painted_active:_paint_household_yards()
-
 func _visibility_changed()->void:
 	if is_instance_valid(view):view.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE if is_visible_in_tree() else SubViewport.UPDATE_DISABLED
 
@@ -756,6 +332,7 @@ func _input_view(event:InputEvent)->void:
 
 ## Artwork is painted from a fixed angle. Navigation moves over the ground;
 ## it never rotates or tilts the picture into stretched cardboard silhouettes.
+
 func pan_view(pixels:Vector2)->void:
 	if not is_instance_valid(camera) or size.y<1:return
 	var center:=size*.5
@@ -800,34 +377,6 @@ func _select_area_at(at:Vector2)->void:
 		var separation:float=at.distance_to(_anchors[role])
 		if separation<distance:best=role;distance=separation
 	if not best.is_empty():role_selected.emit(best)
-
-const GROUND_SHADER:="""shader_type spatial;
-render_mode unshaded, cull_disabled;
-uniform sampler2D ground_photo : source_color, repeat_enable, filter_linear_mipmap_anisotropic;
-uniform bool painted_ground=false;
-uniform float aridity=0.0;
-uniform float cold=0.0;
-varying vec3 at;
-void vertex(){at=VERTEX;}
-float grain(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float noise(vec2 p){vec2 c=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(grain(c),grain(c+vec2(1,0)),f.x),mix(grain(c+vec2(0,1)),grain(c+vec2(1)),f.x),f.y);}
-void fragment(){
-vec3 photo=mix(textureLod(ground_photo,UV,2.0).rgb,texture(ground_photo,UV).rgb,.25);
-float broad=noise(at.xz*30.0)*.7+noise(at.xz*120.0+vec2(6.1,2.8))*.3;
-vec3 ground=mix(vec3(.26,.31,.16),vec3(.45,.44,.26),broad);
-float fine=noise(at.xz*580.0);
-vec3 calm=mix(vec3(.17,.20,.115),vec3(.29,.27,.18),broad);
-vec3 color=painted_ground ? mix(calm,photo*.66,.42) : ground*(.72+dot(photo,vec3(.2126,.7152,.0722))*.52)*(.94+fine*.12);
-float value=dot(color,vec3(.2126,.7152,.0722));
-color=mix(color,vec3(value)*vec3(1.25,1.12,.82),aridity*.85);
-ALBEDO=mix(color,vec3(value)*vec3(1.0,1.04,1.03),cold*.7);ROUGHNESS=1.0;
-}
-"""
-
-const CONTACT_SHADER:="""shader_type spatial;
-render_mode unshaded,blend_mix,depth_draw_never,cull_disabled,shadows_disabled;
-void fragment(){ALBEDO=vec3(.08,.10,.07);ALPHA=COLOR.a;}
-"""
 
 const SCENE_FINISH:="""shader_type canvas_item;
 void fragment(){
