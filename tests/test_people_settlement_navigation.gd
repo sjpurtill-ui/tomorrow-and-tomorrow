@@ -37,6 +37,11 @@ func test_pan_zoom_and_resize_keep_art_angle_and_selected_area_recoverable()->vo
 	assert_bool((town._desired_target as Vector3).distance_to(center)>.0001).is_true()
 	assert_float(town._desired_span).is_less(span)
 	assert_that(Vector2(town._yaw,town._pitch)).is_equal(angle)
+	# The closest permitted zoom must move the camera, not just the saved span.
+	town._span=.018;town._position_camera()
+	var farther:float=town.camera.position.distance_to(town._target)
+	town._span=.012;town._position_camera()
+	assert_float(town.camera.position.distance_to(town._target)).is_less(farther*.8)
 	assert_str(town.focused_role).is_equal("Food")
 	var manual_span:float=town._desired_span
 	town.size=Vector2(760,560);town._resize_view()

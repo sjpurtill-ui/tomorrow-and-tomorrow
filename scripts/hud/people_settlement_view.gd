@@ -555,7 +555,7 @@ func _position_camera()->void:
 	if not is_instance_valid(camera):return
 	camera.size=maxf(.015,_span)
 	var offset:=Vector3(sin(_yaw)*cos(_pitch),sin(_pitch),cos(_yaw)*cos(_pitch))
-	var distance:=maxf(.025,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
+	var distance:=maxf(.008,_span/(2.0*tan(deg_to_rad(camera.fov*.5))))
 	camera.position=_target+offset*distance;camera.look_at(_target)
 	for material in _materials:material.set_shader_parameter("pixel_km",camera.size/maxf(1.0,view.size.y))
 	for material in _painted_materials:material.set_shader_parameter("anim_clock",_elapsed)
