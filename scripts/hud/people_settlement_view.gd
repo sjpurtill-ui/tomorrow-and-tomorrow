@@ -11,6 +11,7 @@ const Ground=preload("res://scripts/early_settlement_ground.gd")
 const Yards=preload("res://scripts/settlement_yard_details.gd")
 const Setting=preload("res://scripts/hud/people_settlement_environment.gd")
 const Life=preload("res://scripts/map_life_ink.gd")
+const Costumes=preload("res://scripts/hud/people_settlement_costumes.gd")
 const Shapes=preload("res://scripts/settlement_kit_shapes.gd")
 const MAX_PEOPLE:=48
 const GRID:=41
@@ -353,7 +354,8 @@ func _make_highlight(polygons:Array)->void:
 
 func _update_people()->void:
 	if not is_instance_valid(model):return
-	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations)])
+	var look:=_clothing_appearance()
+	var key:=hash([_context.get("population",GameState.population_total),_context.get("allocations",GameState.population_allocations),look.key])
 	if key==_people_key:return
 	_people_key=key
 	if is_instance_valid(_people):_people.free()
@@ -366,8 +368,9 @@ func _update_people()->void:
 	var population:=maxi(0,int(_context.get("population",GameState.population_total)))
 	visual_people_count=mini(MAX_PEOPLE,ceili(sqrt(float(population))*2.0))
 	if visual_people_count==0:return
-	var shader:=Shader.new();shader.code=Life.shader_code("person")
+	var shader:=Shader.new();shader.code=Costumes.shader_code()
 	_people_paint=ShaderMaterial.new();_people_paint.shader=shader
+	for parameter:String in look.uniforms:_people_paint.set_shader_parameter(parameter,look.uniforms[parameter])
 	# The People view explicitly requests bounded illustrative representatives.
 	# Its private shader does not change the map's global no-people policy.
 	_people_paint.set_shader_parameter("map_people_visible",true)
@@ -375,7 +378,7 @@ func _update_people()->void:
 	var batch:=MultiMesh.new();batch.transform_format=MultiMesh.TRANSFORM_3D;batch.use_colors=true;batch.use_custom_data=true;batch.mesh=Life.quad();batch.instance_count=visual_people_count
 	_people=MultiMeshInstance3D.new();_people.name="RepresentativePeople";_people.multimesh=batch;_people.material_override=_people_paint;model.add_child(_people)
 	_people.custom_aabb=AABB(Vector3(_ground_bounds.position.x,-.1,_ground_bounds.position.y),Vector3(_ground_bounds.size.x,.2,_ground_bounds.size.y))
-	var colors:Array[Color]=[Color("e0c39b"),Color("a96d51"),Color("556e69"),Color("d1b073"),Color("6a6253")]
+	var colors:Array[Color]=look.palette
 	for i in visual_people_count:
 		var path:PackedVector2Array=routes[i%routes.size()]
 		_walks.append({"path":path,"phase":fmod(i*.618,1.0),"speed":.00055+(i%5)*.00006})
@@ -400,6 +403,22 @@ func _update_people()->void:
 		var pose:=8 if role in ["Crafting","Construction"] else (1 if role=="Food" else (7 if role=="Defense" else 5))
 		batch.set_instance_custom_data(index,Color(float(index)*.17,pose,0,.7));index+=1
 	_move_people()
+
+func _clothing_appearance()->Dictionary:
+	# Read the selected settlement's last issued-clothing report without entering
+	# a resource scope or advancing clothing production. Missing evidence keeps
+	# the basic wraps; knowing a technique alone never outfits every household.
+	var clothing:Dictionary=GameState.household_clothing
+	var population:=float(GameState.population_total)
+	var id:=String(_context.get("settlement_id",""))
+	var record:Dictionary=SettlementModel.settlement_record(id) if not id.is_empty() else {}
+	if not record.is_empty():
+		if not bool(record.get("primary",false)):clothing=record.get("local_resources",{}).get("household_clothing",{})
+		if WorldSimulation.state==GameState:population=SettlementModel._settlement_population(record)
+	var report:Dictionary=clothing.get("report",{})
+	var coverage:=clampf(float(report.get("issued",0))/maxf(1,population),0,1)
+	var evidence:Dictionary=_context.get("clothing_context",{"adoption":GameState.discovery_adoption,"coverage":coverage})
+	return Costumes.appearance(_context.get("clothing_knowledge",GameState.known_discoveries),evidence)
 
 func _move_people()->void:
 	if not is_instance_valid(_people):return
