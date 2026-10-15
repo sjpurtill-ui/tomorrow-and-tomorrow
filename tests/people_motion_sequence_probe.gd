@@ -12,6 +12,7 @@ var selected:Array[String]=[]
 var prefix:="hundred"
 var navigation_only:=false
 var woven:=false
+var composition_only:=false
 
 func _ready()->void:
 	if "test" not in OS.get_user_data_dir().to_lower():push_error("Isolated Test user data required");get_tree().quit(2);return
@@ -19,13 +20,32 @@ func _ready()->void:
 		if arg.begins_with("--prefix="):prefix=arg.trim_prefix("--prefix=")
 		if arg=="--navigation-only":navigation_only=true
 		if arg=="--woven":woven=true
+		if arg=="--composition-only":composition_only=true
 	get_window().size=Vector2i(1200,940);get_window().content_scale_size=Vector2i(1200,940)
 	DirAccess.make_dir_recursive_absolute(OUTPUT)
 	town=View.new();town.size=Vector2(1100,800);add_child(town);town.configure(_motion_context());town.set_process(false)
+	if composition_only:
+		await _composition()
+		print("PEOPLE_NATIVE_COMPOSITION ",failures)
+		get_tree().quit(0 if failures.is_empty() else 1);return
 	await _navigation()
 	if not navigation_only:await _representative_journey()
 	print("PEOPLE_NATIVE_WORKFORCE ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
+
+func _composition()->void:
+	for dimensions:Vector2i in [Vector2i(1600,1000),Vector2i(1024,768)]:
+		get_window().size=dimensions;get_window().content_scale_size=dimensions
+		town.position=Vector2(20,30);town.size=Vector2(1448,760) if dimensions.x==1600 else Vector2(904,560)
+		town.set_workforce(_motion_context().allocations,false)
+		town.reset_view();await _settle();_verify_cast()
+		await _navigation_capture("composition-overview-"+str(dimensions.x))
+		for role:String in ["Food","Crafting","Knowledge"]:
+			town.focus_role(role);await _settle()
+			var state:Dictionary=town.navigation_state()
+			town.set_workforce(_motion_context().allocations,false);town.focus_role(role)
+			if town.navigation_state()!=state:failures.append("Same-role allocation moved focused camera")
+			await _navigation_capture("composition-"+role.to_lower()+"-"+str(dimensions.x))
 
 func _representative_journey()->void:
 	var before:=var_to_bytes([GameState.settlement_plots,GameState.settlement_routes,GameState.population_allocations])

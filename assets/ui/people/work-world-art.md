@@ -22,3 +22,17 @@ fixed elevated camera. Original generated files remain outside the repository.
 The landscape reuses the existing painted workshop, building frame, meadow and
 foliage assets. Slot and transfer-path geometry is authored separately so the
 art does not determine worker counts or game behavior.
+
+## Work-ground revision, October 15, 2026
+
+`work-world-grounds-v1.png` is a six-cell painted ground atlas generated with
+the built-in imagegen tool for this revision. It contains young crop rows,
+gravel, worked earth, wood shavings, compacted learning ground and sparse herbs.
+It contains no people, labels or additional population representatives. The
+renderer places these textures beneath the actual work slots and feathers each
+cell's boundary with its private ground shader.
+
+The first candidate's oversized logs and stone rings were rejected in reciprocal
+review. The delivered second candidate uses finer material marks and quieter
+edges so the people and their task tools remain legible. Ground textures are
+representative activity scenery, not claims about actual stock or technology.
