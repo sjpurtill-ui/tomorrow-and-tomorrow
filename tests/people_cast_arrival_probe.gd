@@ -24,7 +24,7 @@ func _ready()->void:
 		var origin:="Food" if role=="Logistics" else "Logistics"
 		town._cast.set_weights({origin:100},false)
 		town.set_workforce({origin:88,role:12},true)
-		town.focus_role(role);town._target=town._desired_target;town._span=town._desired_span;town._position_camera();town._move_people()
+		town.focus_role(role);town._target=town._desired_target;town._span=town._desired_span;town._position_camera();town._move_people();town._project_anchors()
 		var selected:Dictionary={}
 		for person:Dictionary in town._cast.people:
 			if person.role==role and person.moving and not selected.has(int(person.sex)):selected[int(person.sex)]=int(person.id)
@@ -83,7 +83,7 @@ func _ready()->void:
 			var expected:=Costumes.instance_code(Costumes.ROLES.find(String(person.role)),int(person.sex))
 			if int(custom.g)!=20 or not is_equal_approx(custom.b,expected):failures.append(role+": settled GPU instance does not match role/sex/work pose")
 		await _save_scene(role.to_lower()+"-worksite")
-	town.reset_view();town._target=town._desired_target;town._span=town._desired_span;town._position_camera();town._move_people()
+	town.reset_view();town._target=town._desired_target;town._span=town._desired_span;town._position_camera();town._move_people();town._project_anchors()
 	await _save_scene("overview")
 	if before!=var_to_bytes([GameState.population_allocations,GameState.settlement_plots,GameState.settlement_routes]):failures.append("Probe changed live model records")
 	var output:=FileAccess.open(OUTPUT+"/report.json",FileAccess.WRITE);output.store_string(JSON.stringify({"records":records,"failures":failures,"view":source,"note":"Same ID before/after actual arrival; normal .0012 sprite scale. Close crops hide other instances only; full worksite views retain all100."},"\t"));output.close()

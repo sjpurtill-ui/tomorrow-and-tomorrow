@@ -12,8 +12,8 @@ const ATLAS_COLUMNS := 6
 const ATLAS_ROWS := 4
 const WALK_ATLAS := "res://assets/ui/people/settle-people-walk-v1.png"
 const CARRY_ATLAS := "res://assets/ui/people/settle-people-carry-v1.png"
-const MALE_WALK_ATLAS := "res://assets/ui/people/settle-people-male-walk-v1.png"
-const MALE_CARRY_ATLAS := "res://assets/ui/people/settle-people-male-carry-v1.png"
+const MALE_WALK_ATLAS := "res://assets/ui/people/settle-people-male-walk-v2.png"
+const MALE_CARRY_ATLAS := "res://assets/ui/people/settle-people-male-carry-v2.png"
 const ROLE_ATLAS := "res://assets/ui/people/settle-people-roles-v1.png"
 const ROLES := ["Food", "Survey", "Extraction", "Construction", "Crafting", "Logistics", "Knowledge", "Administration", "Defense"]
 const WORK_POSE := 20
@@ -180,7 +180,7 @@ static func _male_layout(texture: Texture2D) -> PackedVector4Array:
 	var result:=PackedVector4Array()
 	if texture==null:return result
 	var x_edges:=[0,344,617,963,1254]
-	var y_edges:=[0,354,637,920,1254]
+	var y_edges:=[0,360,660,956,1254]
 	var dimensions:=Vector2(texture.get_width(),texture.get_height())
 	for row in 4:
 		for column in 4:
