@@ -253,11 +253,15 @@ void fragment() {
     vec2 p = vec2(v_p.x*v_flip, v_p.y);
     float pose = floor(mod(v_custom.y,100.0)+0.5);
     bool still = v_custom.y > 99.5;
-    bool encoded = v_custom.z >= 3.5;
-    int role = encoded ? clamp(int(floor(v_custom.z/4.0))-1,0,8) : -1;
-    bool male = encoded && mod(floor(v_custom.z/2.0),2.0)>0.5;
-    bool child = !encoded && v_custom.z > 1.5;
-    bool carrying = mod(v_custom.z,2.0)>0.5 && !child;
+    // Raster interpolation can place a constant integer just below its exact
+    // boundary. Quantize before every bit-field decode so identity cannot
+    // change with camera position or between triangles of the same figure.
+    float identity_code = floor(v_custom.z+0.5);
+    bool encoded = identity_code >= 4.0;
+    int role = encoded ? clamp(int(floor(identity_code/4.0))-1,0,8) : -1;
+    bool male = encoded && mod(floor(identity_code/2.0),2.0)>0.5;
+    bool child = !encoded && identity_code > 1.5;
+    bool carrying = mod(identity_code,2.0)>0.5 && !child;
     // The same stable per-person supply sample as the wrap shader: knowing a
     // method never outfits everybody, and missing issue records keep row zero.
     float sample_id = fract(v_custom.x*11.971+0.07);
