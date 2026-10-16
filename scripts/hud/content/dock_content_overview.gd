@@ -6,12 +6,9 @@ const Buildings=preload("res://scripts/hud/construction_art.gd")
 const Manual=preload("res://scripts/manual_work.gd")
 const TaskImpact=preload("res://scripts/task_impact.gd")
 const WorkforcePreview=preload("res://scripts/hud/workforce_preview.gd")
-## THE PEOPLE: the god looking down on their people. One living scene (the
-## settlement at this hour, a headline and one voice from the fires), the
-## faces of named people, the vitals as meters with a trend and a cause, what
-## the people are doing now, the season's story and each hearth. Output, lore,
-## crafts, buildings, warriors, chiefs and stores stay in the tallies row, one
-## click away. Drawn by hud/people_screen.gd; the data is people_model.gd.
+## Home / People uses people_allocator_screen.gd. The retained labor callbacks
+## own assignment; WorkforcePreview supplies detached consequence estimates.
+## The additional people/story fields remain available to legacy readers.
 
 func meta()->Dictionary:
 	if EraWords.reckoned():return {"spatial_view":true,"eyebrow":"CIVILIZATION · ALL SETTLEMENTS","title":"The People","subtabs":["OVERVIEW"]}
@@ -107,7 +104,7 @@ func commit_workforce(draft:Dictionary,confirm_take_control:bool=false)->Diction
 	if not Manual.manual():Manual.set_manual(true)
 	for command:Dictionary in commands:Manual.move_share(String(command.role),int(command.points))
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
-	return {"ok":true,"counts":Manual.counts()}
+	return {"ok":true,"counts":Manual.counts(),"revision":signature()}
 
 func pause_to_plan()->void:
 	if is_instance_valid(hud) and hud.has_method("_on_speed_pressed"):
