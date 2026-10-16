@@ -27,6 +27,7 @@ var _work_id := ""
 var _art_path := ""
 var _scope_id := ""
 var _comparison_stamp := 0
+var _layout_width := -1.0
 
 func setup(block: Dictionary) -> void:
 	name = "SettlementOverview"
@@ -35,8 +36,17 @@ func setup(block: Dictionary) -> void:
 	add_theme_constant_override("separation", 22)
 	_build()
 	resized.connect(_layout)
+	_hero.resized.connect(_layout)
 	update_block(block)
 	_layout()
+	call_deferred("_layout")
+
+func _process(_delta: float) -> void:
+	# Containers finish their first sizing after setup; settle against the real
+	# content width rather than the zero-width node's provisional orientation.
+	if _hero == null: return
+	if not is_equal_approx(_layout_width, _hero.size.x): _layout()
+	_fit_picture()
 
 func _build() -> void:
 	var population := HFlowContainer.new()
@@ -70,11 +80,12 @@ func _build() -> void:
 	_picture_frame.ratio = 1.35
 	_picture_frame.stretch_mode = AspectRatioContainer.STRETCH_WIDTH_CONTROLS_HEIGHT
 	_picture_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_picture_frame.clip_contents = true
 	scene.add_child(_picture_frame)
 	_portrait = TextureRect.new()
 	_portrait.name = "HomePortrait"
 	_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_picture_frame.add_child(_portrait)
 	_label(scene, "housing", 20)
@@ -333,8 +344,8 @@ func _fill_comparison() -> void:
 	_set_text("comparison", text)
 	var compare: Button = _buttons.CareCompare
 	compare.disabled = not _valid(data.get("compare_care"))
-	T.apply_button_style(_buttons.CareCurrent, not comparison_active)
-	T.apply_button_style(compare, comparison_active)
+	_mark_comparison(_buttons.CareCurrent, not comparison_active)
+	_mark_comparison(compare, comparison_active)
 
 func _fill_society(lives: Dictionary) -> void:
 	var research: Dictionary = lives.get("research", {})
@@ -490,12 +501,34 @@ func _update_art(population: int) -> void:
 
 func _layout() -> void:
 	if _hero == null: return
-	var narrow := size.x < 780
+	_layout_width = _hero.size.x
+	var available := _hero.size.x if _hero.size.x > 0 else size.x
+	var narrow := available < 620
 	_hero.vertical = narrow
-	_society.vertical = size.x < 860
+	_society.vertical = available < 700
 	_foundations.vertical = narrow
 	(_refs.food_box as BoxContainer).vertical = narrow
 	for child: Control in _hero.get_children(): child.custom_minimum_size.x = 0
+	_fit_picture()
+
+func _fit_picture() -> void:
+	if _picture_frame == null or _picture_frame.size.x <= 0: return
+	var height := ceilf(_picture_frame.size.x / maxf(.1, _picture_frame.ratio))
+	if not is_equal_approx(_picture_frame.custom_minimum_size.y, height):
+		_picture_frame.custom_minimum_size.y = height
+
+func _mark_comparison(button: Button, selected: bool) -> void:
+	# Selection changes ink only: identical typography and margins keep both
+	# targets fixed while a real comparison replaces its explanatory text.
+	var style: StyleBoxFlat = T.action_button_style(false).duplicate()
+	if selected:
+		style.bg_color = T.ACTION
+		style.border_color = T.ACTION
+	button.add_theme_stylebox_override("normal", style)
+	button.add_theme_font_override("font", T.FONT_UI)
+	button.add_theme_font_size_override("font_size", 14)
+	for key in ["font_color", "font_focus_color"]:
+		button.add_theme_color_override(key, T.ACTION_INK if selected else T.INK)
 
 func _driver(key: String, ratio: float, known: bool, tip: String) -> void:
 	var refs: Dictionary = _drivers[key]
