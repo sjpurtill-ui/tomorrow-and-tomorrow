@@ -1,4 +1,28 @@
-## October 15 — Direct People allocation (INTEGRATED)
+## October 15 — Vibrant population portraits (INTEGRATED)
+
+Runtime `7a013791` replaces the active People sprite view with one large,
+selectable portrait. A spare encampment opens the game; four progressively
+denser paintings follow actual population at 150, 400, 1,500 and 6,000 people.
+Every stage is vibrant. These visual thresholds change no simulation rules,
+technology, building unlocks or saved state.
+
+Selecting one of nine work areas zooms into the same image. Pan/zoom and aspect
+ratio are bounded, and the selected area/view survive population-stage changes.
+Actual counts, immediate allocation and practical effects including food risk
+stay in a stable sidebar beside the art. The former Apply flow and 100-moving-
+figure presentation are not active. Artwork represents activities rather than
+an exact town or workforce census. Wider popup consolidation remains unfinished.
+
+Agent critique prompted the sparse starting revision, a visible Watch figure,
+corrected larger-town work-area placement, compact layout and readable focused
+labels. All 48 combined tests pass. Exact final early Night and mature Daylight
+HUD journeys pass 291 checks each, producing 18 captures across three sizes;
+both private test processes exit successfully. Source hashes and evidence are
+in `docs/INTEGRATION_STATUS.md`; imagegen prompts and final asset paths are in
+`assets/ui/people/town-portrait-art.md`. Remote main is verified before canonical
+fast-forward. No running player or editor is restarted.
+
+## October 15 — Direct People allocation (historical presentation)
 
 Runtime `f4d4ba43`: People's minus/plus controls apply immediately using the existing guarded labor
 command. Apply/Cancel and stale-draft refresh steps are removed. Camera, scroll

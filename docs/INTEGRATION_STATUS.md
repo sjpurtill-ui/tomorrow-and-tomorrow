@@ -1,4 +1,60 @@
-## October 15 — Immediate People allocation (INTEGRATED)
+## October 15 — Population-based People portraits (INTEGRATED)
+
+Runtime `7a013791` replaces the active sprite landscape with one continuous,
+selectable town portrait. The starting image is a spare, vibrant encampment:
+two hide windbreaks, one fire, a handful of people and mostly untouched nature.
+Actual total population selects Camp below 150, Hearth at 150–399, Village at
+400–1,499, Town at 1,500–5,999 and Large town from 6,000. These presentation
+thresholds do not grant buildings, technology or civic rank.
+
+Nine meaningful work areas can be selected directly in the image or through
+their compact percentage labels. Clicking focuses the same image; bounded
+pan, wheel zoom, visible controls and keyboard navigation preserve its aspect
+ratio. Population changes retain the selected area and normalized view. The
+stable sidebar beside the image shows actual worker counts, immediate -1%/+1%
+and +5% controls, existing practical impact calculations and food consequences.
+There is no Apply step. Buttons, camera and scroll stay put through allocation.
+
+This supersedes the active 100-figure presentation described below. The old
+renderer remains in source, but the photo screen makes no claim that its painted
+figures are a workforce census or move when a worker is reassigned. Game rules,
+population authority, save schemas, labor commands and food safeguards are
+unchanged. Artwork is representative and changes with population, not with
+individual building construction. Broader popup consolidation remains open.
+
+The implementation/critique/revision loop corrected an overbuilt starting image,
+a cropped camp lookout, misplaced Care/Learning targets in larger towns,
+excessive space between image and controls, repeated food information and
+Daylight keyboard-focus text contrast. A independently reviewed the art and
+actual HUD; B owns the viewer and C owns the integrated People layout. Source
+deliveries: B `dde715d1` and `f1f1b551`; C `dcbf0978`. Root integrates these as
+`6b9c4c70`, `4253f407`, `33e7b833`, followed by final art/data/contrast `7a013791`.
+
+Combined validation passes 48 cases in seven suites with zero errors, failures,
+skips or orphans (report_87,
+`artifacts/popup-audit/people-portrait-combined-tests.log`). This covers current
+allocation commands and safeguards, detached impacts, keyboard controls,
+population boundaries, all five real images, nine bounded work areas and
+read-only navigation. B's private native viewer probe also passes actual click,
+drag and wheel input, stage/view retention and model immutability.
+
+Exact final runtime actual-HUD journeys pass 291 checks each for Camp 93/Night
+and Town 2,400/Daylight at 1600×1000, 1024×720 and 2869×1337, with 18 captures.
+They verify real allocation clicks, stable control bounds and navigation,
+whole-worker rounding, all five population stages and unchanged simulation
+state during presentation-only changes. Private processes 38676 and 68248 both
+exit 0; no script/engine errors occur. Existing command-rail anchor warnings
+remain. Evidence: `artifacts/popup-audit/portrait-final-early-dark.log`,
+`portrait-final-mature-light.log`, and corresponding
+`artifacts/popup-audit/people-portrait/portrait-final-*/` capture folders.
+
+The five shipped paintings, exact prompts and built-in imagegen provenance are
+recorded in `assets/ui/people/town-portrait-art.md`. Generated captures and
+rejected candidates remain outside source commits. Remote main is verified
+before canonical fast-forward; the running player/editor is not restarted.
+An existing session needs its normal save and restart to load the new screen.
+
+## October 15 — Immediate People allocation (historical presentation)
 
 Runtime `f4d4ba43` applies allocation steps immediately through the existing guarded command.
 There is no Apply/Cancel stage. Each click captures current state, evaluates the
