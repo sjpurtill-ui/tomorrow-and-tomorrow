@@ -26,6 +26,7 @@ var _works_open := false
 var _work_id := ""
 var _art_path := ""
 var _scope_id := ""
+var _comparison_stamp := 0
 
 func setup(block: Dictionary) -> void:
 	name = "SettlementOverview"
@@ -235,7 +236,7 @@ func update_block(block: Dictionary) -> bool:
 	var lives: Dictionary = block.get("lives", {})
 	var id := String(lives.get("scope", {}).get("id", ""))
 	# A displayed comparison belongs to its captured state, not a later day or town.
-	if id != _scope_id or lives.get("day", -1) != data.get("lives", {}).get("day", -1):
+	if id != _scope_id or (comparison_active and hash(lives) != _comparison_stamp):
 		comparison_active = false
 		comparison = {}
 	_scope_id = id
@@ -247,9 +248,9 @@ func _fill() -> void:
 	var lives: Dictionary = data.get("lives", {})
 	if not bool(lives.get("ok", false)):
 		for key: String in _refs:
-			if _refs[key] is Label: _set(key, "")
-		_set("population", String(lives.get("reason", "Condition readings are not available yet.")))
-		_set("risk", "Not measured")
+			if _refs[key] is Label: _set_text(key, "")
+		_set_text("population", String(lives.get("reason", "Condition readings are not available yet.")))
+		_set_text("risk", "Not measured")
 		for key: String in _drivers: _driver(key, -1, false, "Not measured")
 		_food_graph.reading = {}
 		_food_graph.queue_redraw()
@@ -262,20 +263,20 @@ func _fill() -> void:
 	var conditions: Dictionary = lives.get("conditions", {})
 	var scope: Dictionary = lives.get("scope", {})
 	var count := int(population.get("current", scope.get("population", 0)))
-	_set("population", "%s people" % _num(count))
-	_set("town", String(scope.get("name", data.get("town_name", "This settlement"))))
-	_set("year", "%s people" % _signed(float(population.get("year_delta", 0))) if bool(population.get("year_start_known", false)) else "No dated baseline")
+	_set_text("population", "%s people" % _num(count))
+	_set_text("town", String(scope.get("name", data.get("town_name", "This settlement"))))
+	_set_text("year", "%s people" % _signed(float(population.get("year_delta", 0))) if bool(population.get("year_start_known", false)) else "No dated baseline")
 	var vital: Dictionary = population.get("vitals", {})
-	_set("vitals", "%s born · %s died" % [_num(vital.get("births", 0)), _num(vital.get("deaths", 0))] if bool(vital.get("known", false)) else "No dated reports yet")
-	_set("vital_period", "Days %d–%d · natural change %s" % [int(vital.get("from_day", 0)), int(vital.get("to_day", 0)), _signed(vital.get("natural_change", 0))] if bool(vital.get("known", false)) else "Recorded totals will appear as days pass.")
+	_set_text("vitals", "%s born · %s died" % [_num(vital.get("births", 0)), _num(vital.get("deaths", 0))] if bool(vital.get("known", false)) else "No dated reports yet")
+	_set_text("vital_period", "Days %d–%d · natural change %s" % [int(vital.get("from_day", 0)), int(vital.get("to_day", 0)), _signed(vital.get("natural_change", 0))] if bool(vital.get("known", false)) else "Recorded totals will appear as days pass.")
 	_refs.vital_period.tooltip_text = String(vital.get("note", "Births minus deaths is natural change; it does not explain migration or the whole population change."))
 	_update_art(count)
 	var housing: Dictionary = conditions.get("housing", {})
 	var cap := int(housing.get("capacity", 0))
-	_set("housing", "Shelter places for everyone" if cap >= count else "%s people without a shelter place" % _num(maxi(0, count - cap)))
-	_set("housing_detail", "%s people · %s places · %s spare\nHome quality %s/100 · upkeep %s%%" % [_num(count), _num(cap), _num(housing.get("spare", 0)), _num(float(housing.get("quality", 0)) * 100), _num(float(housing.get("upkeep", 0)) * 100)])
+	_set_text("housing", "Shelter places for everyone" if cap >= count else "%s people without a shelter place" % _num(maxi(0, count - cap)))
+	_set_text("housing_detail", "%s people · %s places · %s spare\nHome quality %s/100 · upkeep %s%%" % [_num(count), _num(cap), _num(housing.get("spare", 0)), _num(float(housing.get("quality", 0)) * 100), _num(float(housing.get("upkeep", 0)) * 100)])
 	var illness := (1.0 - float(housing.get("illness_factor", 1))) * 100.0
-	_set("housing_effect", "Home quality reduces illness deaths by %s%% in the current calculation." % _num(illness) if illness > .01 else "Shelter capacity and home quality are separate needs.")
+	_set_text("housing_effect", "Home quality reduces illness deaths by %s%% in the current calculation." % _num(illness) if illness > .01 else "Shelter capacity and home quality are separate needs.")
 	var water: Dictionary = conditions.get("water", {})
 	var food: Dictionary = conditions.get("food", {})
 	var care: Dictionary = conditions.get("care", {})
@@ -285,11 +286,11 @@ func _fill() -> void:
 	_driver("shelter", float(housing.get("coverage", -1)), not housing.is_empty(), "Shelter places / population; this is not a building count")
 	var risk: Dictionary = conditions.get("infant_risk", {})
 	var known := bool(risk.get("known", false))
-	_set("risk", "%s in 100" % _num(risk.get("per_100", 0)) if known else "Not measured")
-	_set("risk_note", String(risk.get("note", "Projected risk, not recorded deaths.")))
+	_set_text("risk", "%s in 100" % _num(risk.get("per_100", 0)) if known else "Not measured")
+	_set_text("risk_note", String(risk.get("note", "Projected risk, not recorded deaths.")))
 	_risk_dots.risk = float(risk.get("per_100", -1)) if known else -1
 	_risk_dots.queue_redraw()
-	_set("care", "Care %s%% → target %s%% over about %d days.\n%s assigned to keeping & caring; %s effective worker-equivalents." % [_num(float(care.get("current", 0)) * 100), _num(float(care.get("target", 0)) * 100), int(care.get("settle_days", 60)), _num(care.get("assigned", 0)), _num(care.get("workers", 0))] if bool(care.get("known", false)) else "Care coverage is not measured yet.")
+	_set_text("care", "Care %s%% → target %s%% over about %d days.\n%s assigned to keeping & caring; %s effective worker-equivalents." % [_num(float(care.get("current", 0)) * 100), _num(float(care.get("target", 0)) * 100), int(care.get("settle_days", 60)), _num(care.get("assigned", 0)), _num(care.get("workers", 0))] if bool(care.get("known", false)) else "Care coverage is not measured yet.")
 	_refs.care.tooltip_text = str(care.get("practices", []))
 	_fill_comparison()
 	_fill_food(food)
@@ -300,15 +301,16 @@ func _fill() -> void:
 
 func _fill_food(food: Dictionary) -> void:
 	var shown := food
-	if comparison_active and bool(comparison.get("ok", false)):
+	var compared := comparison_active and bool(comparison.get("ok", false))
+	if compared:
 		shown = comparison.get("after", {}).get("food", food)
-	_set("food_period", "Compared assignment · same captured conditions" if comparison_active else String(food.get("period", "Latest recorded daily flow")))
-	_food_graph.reading = shown if bool(food.get("known", false)) or comparison_active else {}
+	_set_text("food_period", "Compared assignment · same captured conditions" if compared else String(food.get("period", "Latest recorded daily flow")))
+	_food_graph.reading = shown if bool(food.get("known", false)) or compared else {}
 	_food_graph.queue_redraw()
 	var days := float(food.get("stored_days", -1))
-	_set("reserves", "%s days of meals" % _num(days) if days >= 0 else "Not measured")
-	_set("balance", "Stores %s rations / day" % _signed(float(shown.get("net", 0))) if bool(food.get("known", false)) or comparison_active else "No daily balance recorded")
-	_set("food_note", "%s rations held. Reserves ÷ daily need, not a starvation countdown." % _num(food.get("stock", 0)))
+	_set_text("reserves", "%s days of meals" % _num(days) if days >= 0 else "Not measured")
+	_set_text("balance", "Stores %s rations / day" % _signed(float(shown.get("net", 0))) if bool(food.get("known", false)) or compared else "No daily balance recorded")
+	_set_text("food_note", "%s rations held. Reserves ÷ daily need, not a starvation countdown." % _num(food.get("stock", 0)))
 	_refs.balance.add_theme_color_override("font_color", T.AMBER_TEXT if float(shown.get("net", 0)) < 0 else T.GREEN_TEXT)
 
 func _fill_comparison() -> void:
@@ -321,13 +323,14 @@ func _fill_comparison() -> void:
 			for row: Dictionary in comparison.get("actual_transfers", []):
 				changes.append("%s %s" % [String(row.get("role", "")), _signed(row.get("delta", 0))])
 			text = "Care target %s%% → %s%%; food balance %s → %s rations/day.\n%s\n%s" % [_num(float(before.get("care", {}).get("target", 0)) * 100), _num(float(after.get("care", {}).get("target", 0)) * 100), _signed(before.get("food", {}).get("net", 0)), _signed(after.get("food", {}).get("net", 0)), "; ".join(changes), String(comparison.get("risk_note", "Current infant risk is unchanged here; no future risk forecast is available."))]
-			var warnings: Array = comparison.get("warnings", [])
+			var warnings: Array = comparison.get("warnings", []).duplicate()
+			warnings.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _warning_rank(a) < _warning_rank(b))
 			if not warnings.is_empty():
 				text += "\n" + String(warnings[0].get("text", ""))
 				if warnings.size() > 1: text += " (+%d more conditions; see tooltip)" % (warnings.size() - 1)
 			_refs.comparison.tooltip_text = "%s\n%s\n%s" % [String(comparison.get("scope", "")), str(comparison.get("warnings", [])), str(comparison.get("assumptions", []))]
 		else: text = String(comparison.get("reason", "A comparison is not available yet."))
-	_set("comparison", text)
+	_set_text("comparison", text)
 	var compare: Button = _buttons.CareCompare
 	compare.disabled = not _valid(data.get("compare_care"))
 	T.apply_button_style(_buttons.CareCurrent, not comparison_active)
@@ -336,41 +339,41 @@ func _fill_comparison() -> void:
 func _fill_society(lives: Dictionary) -> void:
 	var research: Dictionary = lives.get("research", {})
 	var question: Dictionary = research.get("current", {})
-	_set("question", String(question.get("name", research.get("empty", "No active question is recorded."))))
+	_set_text("question", String(question.get("name", research.get("empty", "No active question is recorded."))))
 	var progress := float(question.get("progress", 0))
-	_set("research_progress", "%s%% explored · %s%% recorded adoption / trial use" % [_num(progress * 100), _num(float(question.get("adoption", 0)) * 100)] if not question.is_empty() else "")
+	_set_text("research_progress", "%s%% explored · %s%% recorded adoption / trial use" % [_num(progress * 100), _num(float(question.get("adoption", 0)) * 100)] if not question.is_empty() else "")
 	_research_bar.visible = not question.is_empty()
 	_research_bar.value = progress * 100
 	var effects: Array[String] = []
 	for row: Dictionary in question.get("effects", []):
 		if bool(row.get("inert", false)): continue
 		effects.append("%s %s" % [String(row.get("label", "")), String(row.get("amount", ""))])
-	_set("research_effect", "At full use: " + " · ".join(effects.slice(0, 2)) if not effects.is_empty() else "")
+	_set_text("research_effect", "At full use: " + " · ".join(effects.slice(0, 2)) if not effects.is_empty() else "")
 	_refs.research_effect.tooltip_text = "\n".join(effects)
-	_set("research_usage", String(question.get("usage", "")))
-	_set("research_counts", "%d active inquiries · %d discoveries\n%d methods with recorded adoption" % [int(research.get("active_count", 0)), int(research.get("known_count", 0)), int(research.get("adopted_count", 0))])
+	_set_text("research_usage", String(question.get("usage", "")))
+	_set_text("research_counts", "%d active inquiries · %d discoveries\n%d methods with recorded adoption" % [int(research.get("active_count", 0)), int(research.get("known_count", 0)), int(research.get("adopted_count", 0))])
 	var culture: Dictionary = lives.get("culture", {})
 	var course: Dictionary = culture.get("course", {})
-	_set("course", String(course.get("name", "No course recorded")))
+	_set_text("course", String(course.get("name", "No course recorded")))
 	var values: Array[String] = []
 	for row: Dictionary in culture.get("effects", []):
 		if absf(float(row.get("amount", 0))) < .01: continue
 		var label := String(row.get("label", row.get("id", "")))
 		if String(row.get("id", "")) in ["births", "fertility"] or label == "Births": label = "Conception support"
 		values.append("%s %s%s" % [label, _signed(row.get("amount", 0)), " pts" if String(row.get("unit", "")) == "points" else "%"])
-	_set("culture_effect", " · ".join(values.slice(0, 3)) if not values.is_empty() else "No active course or value modifiers recorded.")
+	_set_text("culture_effect", " · ".join(values.slice(0, 3)) if not values.is_empty() else "No active course or value modifiers recorded.")
 	_refs.culture_effect.tooltip_text = "\n".join(values)
-	_set("culture_meaning", String(course.get("vision", "")))
+	_set_text("culture_meaning", String(course.get("vision", "")))
 	var regard: Dictionary = lives.get("regard", {})
-	_set("awe", "Awe · %s/100" % _num(float(regard.get("awe", 0)) * 100) if bool(regard.get("known", false)) else "Awe · not measured")
-	_set("draw", "Draw · %s/100" % _num(float(regard.get("draw", 0)) * 100) if bool(regard.get("known", false)) else "Draw · not measured")
-	_set("regard_meaning", String(regard.get("note", "Civilization-wide standing has not been recorded yet.")))
+	_set_text("awe", "Awe · %s/100" % _num(float(regard.get("awe", 0)) * 100) if bool(regard.get("known", false)) else "Awe · not measured")
+	_set_text("draw", "Draw · %s/100" % _num(float(regard.get("draw", 0)) * 100) if bool(regard.get("known", false)) else "Draw · not measured")
+	_set_text("regard_meaning", String(regard.get("note", "Civilization-wide standing has not been recorded yet.")))
 
 func _fill_foundations(foundation: Dictionary) -> void:
-	_set("foundations", "Service coverage %s/100 · roads %s/100\nBuilders' craft %s/%s" % [_num(float(foundation.get("service_coverage", 0)) * 100), _num(float(foundation.get("road_quality", 0)) * 100), _num(foundation.get("craft", 0)), _num(foundation.get("craft_max", 10))])
-	_set("work_effects", "Making ×%s · stored food decay ×%s · hauling ×%s\nService and quality measures, not building counts." % [_num(foundation.get("making_multiplier", 1), 2), _num(foundation.get("stored_rot_multiplier", 1), 2), _num(foundation.get("haul_multiplier", 1), 2)])
+	_set_text("foundations", "Service coverage %s/100 · roads %s/100\nBuilders' craft %s/%s" % [_num(float(foundation.get("service_coverage", 0)) * 100), _num(float(foundation.get("road_quality", 0)) * 100), _num(foundation.get("craft", 0)), _num(foundation.get("craft_max", 10))])
+	_set_text("work_effects", "Making ×%s · stored food decay ×%s · hauling ×%s\nService and quality measures, not building counts." % [_num(foundation.get("making_multiplier", 1), 2), _num(foundation.get("stored_rot_multiplier", 1), 2), _num(foundation.get("haul_multiplier", 1), 2)])
 	var watch: Dictionary = foundation.get("watch", {})
-	_set("watch", "%s serving · %s could muster" % [_num(watch.get("standing", 0)), _num(watch.get("mobilisable", 0))])
+	_set_text("watch", "%s serving · %s could muster" % [_num(watch.get("standing", 0)), _num(watch.get("mobilisable", 0))])
 	var blockers: Array[String] = []
 	for row: Dictionary in watch.get("blockers", []): blockers.append(String(row.get("text", "")))
 	var words := String(watch.get("short", ""))
@@ -378,7 +381,7 @@ func _fill_foundations(foundation: Dictionary) -> void:
 	if not building.is_empty(): words += " · %s %s%% built" % [String(building.get("short", "Works")), _num(float(building.get("progress", 0)) * 100)]
 	if not blockers.is_empty(): words += "\n" + "; ".join(blockers.slice(0, 2))
 	elif not String(watch.get("reason", "")).is_empty(): words += "\n" + String(watch.reason)
-	_set("watch_reason", words)
+	_set_text("watch_reason", words)
 	_refs.watch_reason.tooltip_text = "\n".join(blockers)
 
 func _fill_actions() -> void:
@@ -390,28 +393,28 @@ func _fill_actions() -> void:
 			button.visible = _valid(data.get(key))
 	_buttons.BackToLeaders.visible = bool(data.get("ruler_sets_work", false)) and _valid(data.get("on_leaders"))
 	var leader: Dictionary = data.get("leader", {})
-	_set("leader", "%s%s" % [String(leader.get("name", "Our leaders")), " · age %s" % str(leader.age) if leader.has("age") else ""])
-	_set("direction", String(data.get("direction", "")))
+	_set_text("leader", "%s%s" % [String(leader.get("name", "Our leaders")), " · age %s" % str(leader.age) if leader.has("age") else ""])
+	_set_text("direction", String(data.get("direction", "")))
 	_refs.direction.tooltip_text = String(data.get("direction_tip", ""))
 	var choices: Array = data.get("choices", [])
 	_priority.visible = bool(data.get("can_direct", false)) and not bool(data.get("ruler_sets_work", false)) and not choices.is_empty()
 	_sync_options(_priority, choices, String(data.get("current", "")), "label")
 	var warning: Dictionary = data.get("work_warning", {})
-	_set("work_warning", String(warning.get("text", "")))
+	_set_text("work_warning", String(warning.get("text", "")))
 	_buttons.FoodFix.text = String(warning.get("fix_text", ""))
 	_buttons.FoodFix.visible = _valid(data.get("on_food_fix")) and not _buttons.FoodFix.text.is_empty()
 	var founding: Dictionary = data.get("founding", {})
 	var options: Array = founding.get("options", [])
 	_founding.visible = not options.is_empty()
 	_sync_options(_founding, options, "leaders" if bool(founding.get("on", true)) else "ruler", "label")
-	_set("founding", String(founding.get("words", "")))
+	_set_text("founding", String(founding.get("words", "")))
 
 func _fill_works() -> void:
 	var works: Dictionary = data.get("works", {})
 	var offers: Array = works.get("offers", [])
 	_buttons.WaterWorksToggle.visible = not works.is_empty()
 	_works.visible = _works_open and not works.is_empty()
-	_set("works_progress", "\n".join(works.get("progress", [])))
+	_set_text("works_progress", "\n".join(works.get("progress", [])))
 	var found := false
 	for offer: Dictionary in offers:
 		if String(offer.get("id", "")) == _work_id: found = true
@@ -419,9 +422,9 @@ func _fill_works() -> void:
 	_sync_options(_work_select, offers, _work_id, "title")
 	_work_select.visible = not offers.is_empty()
 	var selected := _selected_work()
-	_set("work_sentence", String(selected.get("sentence", "")))
+	_set_text("work_sentence", String(selected.get("sentence", "")))
 	var blocked := String(selected.get("blocked", ""))
-	_set("work_cost", String(selected.get("cost", "")) + ("\n" + blocked if not blocked.is_empty() else ""))
+	_set_text("work_cost", String(selected.get("cost", "")) + ("\n" + blocked if not blocked.is_empty() else ""))
 	_buttons.StartSelectedWork.text = String(selected.get("action", "Start"))
 	_buttons.StartSelectedWork.visible = not selected.is_empty()
 	_buttons.StartSelectedWork.disabled = not blocked.is_empty() or not _valid(selected.get("on_press"))
@@ -458,6 +461,7 @@ func _compare_care() -> void:
 	if not _valid(data.get("compare_care")): return
 	comparison = data.compare_care.call()
 	comparison_active = true
+	_comparison_stamp = hash(data.get("lives", {}))
 	_fill()
 
 func capture_view_state() -> Dictionary:
@@ -500,7 +504,7 @@ func _driver(key: String, ratio: float, known: bool, tip: String) -> void:
 	refs.bar.value = ratio * 100 if known else 0
 	refs.box.tooltip_text = tip
 
-func _set(key: String, text: String) -> void:
+func _set_text(key: String, text: String) -> void:
 	var label: Label = _refs[key]
 	if label.text != text: label.text = text
 	label.visible = not text.is_empty()
@@ -577,6 +581,9 @@ func _rule() -> void:
 
 static func _valid(callback: Variant) -> bool:
 	return callback is Callable and (callback as Callable).is_valid()
+
+static func _warning_rank(warning: Dictionary) -> int:
+	return {"starvation": 0, "food_shortage": 1, "water": 2, "safeguard": 3}.get(String(warning.get("kind", "")), 4)
 
 static func _num(value: Variant, precision: int = 1) -> String:
 	var number := float(value)
