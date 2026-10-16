@@ -1,3 +1,51 @@
+## October 16 — Home: lives and consequences (INTEGRATED)
+
+Runtime `19722d91` activates the illustrated Lives view in the actual Home /
+Overview provider. `3f21ccb8` wires its real data and existing commands; the
+final follow-up labels fractional local care shares as worker-equivalents.
+Source deliveries: model `34bb4e7f`; renderer through `e53029cf`. A built the
+view, B reviewed its data and controls, C independently critiqued captures,
+and A revised portrait geometry, reading width, contrast and stable controls.
+
+Home now shows the selected town's population, dated vital records, water,
+food, care, shelter, current estimated infant risk and food flow, with national
+research, culture and standing clearly distinguished. It uses the approved
+human-centered hearth painting at 150–399 people, the sparse camp below 150,
+and existing population-stage town portraits thereafter. Art is representative,
+not a census or an unlock. Long tables are no longer the active Home layout.
+
+The optional +5 percentage-point care comparison runs existing detached
+workforce and food rules, reports actual donors and cross-town food warnings,
+and changes no assignments. Current infant risk is not presented as a future
+deaths-saved forecast. Assign care opens the existing immediate People controls;
+leader priorities, waterworks, health, research and culture routes remain live.
+Unknown dates and measurements remain unknown. No "other net change" residual
+is invented, and births/deaths have their own recorded period. No simulation
+rules or save schema changed. The preview excludes Government's transient
+`_read_key`, which otherwise retained a live state reference after a court read.
+
+Validation: 69/69 cases across six combined suites pass with zero errors,
+failures, skips or orphans (`report_90`,
+`artifacts/popup-audit/home-lives-final-combined-tests.log`). After the final
+microcopy change, all nine view cases pass (`report_91`,
+`home-lives-final-copy-tests.log`). Actual-HUD private GPU journeys pass 1008
+checks for Hearth/Night, 1024 for Town/Daylight, and 1018 for a secondary town
+(220 local people, 1100 national); each covers 1600×1000, 1024×720 and 2869×1337.
+The final copy revision repeats the secondary journey with 1018/1018 passed.
+Evidence is in `artifacts/home-lives-final-*.log`, `home-lives-final-copy-*.log`
+and `artifacts/home-lives/final-*`. All private processes exited 0. Existing
+command-rail anchor warnings remain; no script/engine errors in final probes.
+
+A broader earlier run also exposed old Economy/Deliveries wording assertions
+in `test_home_docks_plain.gd` (More hands vs Ask leader, old Materials labels,
+removed Deliveries voice data). Those unchanged non-Home contracts were not
+rewritten for this task; its Home, waterworks and health/research cases passed.
+This is not a claim that every historical test in the repository passes.
+
+Main is pushed and remotely verified before canonical fast-forward. The live
+player was not stopped or restarted. Load this runtime through the normal
+canonical launcher. Wider popup redesign remains separate work.
+
 ## October 15 — Population-based People portraits (INTEGRATED)
 
 Runtime `7a013791` replaces the active sprite landscape with one continuous,

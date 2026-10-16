@@ -1,3 +1,27 @@
+## October 16 — Actual Home lives and consequences (INTEGRATED)
+
+Runtime `19722d91` replaces Home's active table layout with the approved
+illustrated Lives view. Local population, dated births/deaths, water, food,
+care, shelter and infant risk come from the current settlement's ledgers;
+research, cultural effects and dated awe/draw remain national readings.
+No illustrative quantities or unexplained population residuals are shown.
+
+Existing detached rules calculate a read-only care-allocation comparison,
+including real donor counts and food risks across towns. It predicts care
+coverage and food consequences, not a guaranteed number of lives saved.
+Current/Compare and Assign care stay fixed; actual assignment uses the existing
+People screen with no added Apply step. Existing leader and waterworks actions
+remain accessible. Portraits use the selected town's real population stage.
+
+The agent critique loop corrected image overlap, ultrawide growth, shifting
+buttons, stale/failed forecasts, local/realm scope and fractional-worker labels.
+69 combined cases plus the final nine-case view rerun pass. Three actual-HUD
+journeys pass across three resolutions and both color modes; the final local
+copy correction also passes the full secondary-town journey. See
+`docs/INTEGRATION_STATUS.md` for exact evidence and unrelated legacy-test limits.
+Save schema and simulation rules are unchanged. Remote verification precedes
+canonical fast-forward; no running player session was interrupted.
+
 ## October 15 — Vibrant population portraits (INTEGRATED)
 
 Runtime `7a013791` replaces the active People sprite view with one large,
