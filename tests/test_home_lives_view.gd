@@ -61,6 +61,7 @@ func test_comparison_is_lazy_keeps_current_risk_and_current_restores_reading() -
 	assert_bool(view.comparison_active).is_true()
 	assert_str(view.find_child("RiskValue", true, false).text).is_equal(original)
 	assert_str(view._refs.comparison.text).contains("food shortage")
+	assert_str(view._refs.comparison.text).contains("All towns:")
 	assert_str(view._refs.balance.text).contains("−6")
 	assert_array(actions).is_empty()
 	view.find_child("CareCurrent", true, false).pressed.emit()
@@ -94,6 +95,8 @@ func test_missing_measurements_are_not_presented_as_zero_coverage_or_recorded_de
 	assert_str(view._refs.year.text).is_equal("No dated baseline")
 	assert_str(view._refs.vital_period.text).contains("natural change +2")
 	assert_str(view._refs.risk_note.text).contains("not recorded deaths")
+	assert_str(view._refs.foundations.text).contains("not measured")
+	assert_str(view._refs.watch.text).contains("not measured")
 
 func test_unavailable_comparison_does_not_create_a_food_measurement() -> void:
 	var block := _block()
@@ -125,7 +128,9 @@ func test_portrait_reserves_its_aspect_and_comparison_targets_keep_their_geometr
 	assert_float(frame_rect.size.y).is_greater(100.0)
 	var current: Rect2 = view.find_child("CareCurrent", true, false).get_global_rect()
 	var compare: Rect2 = view.find_child("CareCompare", true, false).get_global_rect()
+	var assign: Rect2 = view.find_child("AssignCare", true, false).get_global_rect()
 	view.find_child("CareCompare", true, false).pressed.emit()
 	for frame in 4: await get_tree().process_frame
 	assert_object(view.find_child("CareCurrent", true, false).get_global_rect()).is_equal(current)
 	assert_object(view.find_child("CareCompare", true, false).get_global_rect()).is_equal(compare)
+	assert_object(view.find_child("AssignCare", true, false).get_global_rect()).is_equal(assign)

@@ -28,6 +28,8 @@ var _art_path := ""
 var _scope_id := ""
 var _comparison_stamp := 0
 var _layout_width := -1.0
+var _content: VBoxContainer
+var _content_margin: MarginContainer
 
 func setup(block: Dictionary) -> void:
 	name = "SettlementOverview"
@@ -49,11 +51,17 @@ func _process(_delta: float) -> void:
 	_fit_picture()
 
 func _build() -> void:
+	_content_margin = MarginContainer.new()
+	_content_margin.name = "ReadingWidth"
+	add_child(_content_margin)
+	_content = VBoxContainer.new()
+	_content.add_theme_constant_override("separation", 22)
+	_content_margin.add_child(_content)
 	var population := HFlowContainer.new()
 	population.name = "PopulationSummary"
 	population.add_theme_constant_override("h_separation", 28)
 	population.add_theme_constant_override("v_separation", 8)
-	add_child(population)
+	_content.add_child(population)
 	var local := _column(population)
 	local.custom_minimum_size.x = 155
 	_text(local, "Living here", 14, T.MUTED)
@@ -70,7 +78,7 @@ func _build() -> void:
 	_hero = BoxContainer.new()
 	_hero.name = "LivesHero"
 	_hero.add_theme_constant_override("separation", 22)
-	add_child(_hero)
+	_content.add_child(_hero)
 	var scene := _column(_hero, 12)
 	scene.name = "HomeScene"
 	scene.size_flags_stretch_ratio = 1.18
@@ -139,11 +147,12 @@ func _build() -> void:
 	right.add_child(actions)
 	_action(actions, "Assign care", "on_assign_care", "AssignCare", true)
 	_action(actions, "Health & families", "on_health", "HealthDetail")
+	right.move_child(actions, _refs.comparison.get_index())
 	_rule()
 	var food := BoxContainer.new()
 	food.name = "HomeFoodFlow"
 	food.add_theme_constant_override("separation", 24)
-	add_child(food)
+	_content.add_child(food)
 	_refs.food_box = food
 	var flow := _column(food, 7)
 	_text(flow, "Keeping people fed", 22)
@@ -159,11 +168,11 @@ func _build() -> void:
 	_label(reserves, "food_note", 14, T.MUTED)
 	_action(reserves, "Food & reserves", "on_food", "FoodDetail")
 	_rule()
-	_text(self, "Across our civilization", 14, T.GOLD_TEXT)
+	_text(_content, "Across our civilization", 14, T.GOLD_TEXT)
 	_society = BoxContainer.new()
 	_society.name = "HomeSociety"
 	_society.add_theme_constant_override("separation", 24)
-	add_child(_society)
+	_content.add_child(_society)
 	var learning := _column(_society, 8)
 	_text(learning, "Knowledge into practice", 22)
 	_label(learning, "question", 20)
@@ -188,7 +197,7 @@ func _build() -> void:
 	_foundations = BoxContainer.new()
 	_foundations.name = "EverydayFoundations"
 	_foundations.add_theme_constant_override("separation", 24)
-	add_child(_foundations)
+	_content.add_child(_foundations)
 	var work := _column(_foundations, 7)
 	_text(work, "The support behind daily work", 22)
 	_label(work, "foundations", 18)
@@ -203,7 +212,7 @@ func _build() -> void:
 	_text(watch, "Who protects these lives?", 22)
 	_label(watch, "watch", 20)
 	_label(watch, "watch_reason", 14, T.MUTED)
-	_works = _column(self, 8)
+	_works = _column(_content, 8)
 	_works.name = "WaterWorks"
 	_works.visible = false
 	_text(_works, "Water & sanitation", 22)
@@ -215,7 +224,7 @@ func _build() -> void:
 	var start := _action(_works, "Start", "", "StartSelectedWork", true)
 	start.pressed.connect(_start_work)
 	_rule()
-	var footer := _column(self, 10)
+	var footer := _column(_content, 10)
 	footer.name = "HomeLeadership"
 	_label(footer, "leader", 20)
 	_label(footer, "direction", 14, T.MUTED)
@@ -332,8 +341,9 @@ func _fill_comparison() -> void:
 			var after: Dictionary = comparison.get("after", {})
 			var changes: Array[String] = []
 			for row: Dictionary in comparison.get("actual_transfers", []):
-				changes.append("%s %s" % [String(row.get("role", "")), _signed(row.get("delta", 0))])
-			text = "Care target %s%% → %s%%; food balance %s → %s rations/day.\n%s\n%s" % [_num(float(before.get("care", {}).get("target", 0)) * 100), _num(float(after.get("care", {}).get("target", 0)) * 100), _signed(before.get("food", {}).get("net", 0)), _signed(after.get("food", {}).get("net", 0)), "; ".join(changes), String(comparison.get("risk_note", "Current infant risk is unchanged here; no future risk forecast is available."))]
+				var role := String(row.get("role", ""))
+				changes.append("%s %s" % ["Keeping & caring" if role == "Administration" else role, _signed(row.get("delta", 0))])
+			text = "This settlement: care target %s%% → %s%%; food balance %s → %s rations/day.\nAll towns: %s\n%s" % [_num(float(before.get("care", {}).get("target", 0)) * 100), _num(float(after.get("care", {}).get("target", 0)) * 100), _signed(before.get("food", {}).get("net", 0)), _signed(after.get("food", {}).get("net", 0)), "; ".join(changes), String(comparison.get("risk_note", "Current infant risk is unchanged here; no future risk forecast is available."))]
 			var warnings: Array = comparison.get("warnings", []).duplicate()
 			warnings.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return _warning_rank(a) < _warning_rank(b))
 			if not warnings.is_empty():
@@ -376,14 +386,31 @@ func _fill_society(lives: Dictionary) -> void:
 	_refs.culture_effect.tooltip_text = "\n".join(values)
 	_set_text("culture_meaning", String(course.get("vision", "")))
 	var regard: Dictionary = lives.get("regard", {})
-	_set_text("awe", "Awe · %s/100" % _num(float(regard.get("awe", 0)) * 100) if bool(regard.get("known", false)) else "Awe · not measured")
-	_set_text("draw", "Draw · %s/100" % _num(float(regard.get("draw", 0)) * 100) if bool(regard.get("known", false)) else "Draw · not measured")
-	_set_text("regard_meaning", String(regard.get("note", "Civilization-wide standing has not been recorded yet.")))
+	var measured := bool(regard.get("known", false))
+	_set_text("awe", "Awe · %s/100" % _num(float(regard.get("awe", 0)) * 100) if measured else "Awe & draw not recorded")
+	_set_text("draw", "Draw · %s/100" % _num(float(regard.get("draw", 0)) * 100) if measured else "")
+	var date := int(regard.get("day", -1))
+	_set_text("regard_meaning", "Awe reflects might, works and learning. Draw also reflects culture, plenty, order and diplomacy.\nAge-relative readings%s." % (" · recorded day %d" % date if date >= 0 else "") if measured else "Civilization-wide standing will appear after it is measured.")
+	_refs.regard_meaning.tooltip_text = String(regard.get("note", ""))
 
 func _fill_foundations(foundation: Dictionary) -> void:
+	if not bool(foundation.get("known", false)):
+		_set_text("foundations", "Local services are not measured yet.")
+		_set_text("work_effects", "")
+		_set_text("watch", "Local protection is not measured yet.")
+		_set_text("watch_reason", "")
+		return
 	_set_text("foundations", "Service coverage %s/100 · roads %s/100\nBuilders' craft %s/%s" % [_num(float(foundation.get("service_coverage", 0)) * 100), _num(float(foundation.get("road_quality", 0)) * 100), _num(foundation.get("craft", 0)), _num(foundation.get("craft_max", 10))])
-	_set_text("work_effects", "Making ×%s · stored food decay ×%s · hauling ×%s\nService and quality measures, not building counts." % [_num(foundation.get("making_multiplier", 1), 2), _num(foundation.get("stored_rot_multiplier", 1), 2), _num(foundation.get("haul_multiplier", 1), 2)])
+	var effects: Array[String] = []
+	for pair in [["making_multiplier", "Making"], ["stored_rot_multiplier", "Stored-food decay"], ["haul_multiplier", "Hauling"]]:
+		var change := (float(foundation.get(pair[0], 1)) - 1.0) * 100.0
+		if absf(change) >= .01: effects.append("%s %s%%" % [pair[1], _signed(change)])
+	_set_text("work_effects", (" · ".join(effects) + "\n" if not effects.is_empty() else "") + "Service and quality measures, not building counts.")
 	var watch: Dictionary = foundation.get("watch", {})
+	if watch.is_empty():
+		_set_text("watch", "Local protection is not measured yet.")
+		_set_text("watch_reason", "")
+		return
 	_set_text("watch", "%s serving · %s could muster" % [_num(watch.get("standing", 0)), _num(watch.get("mobilisable", 0))])
 	var blockers: Array[String] = []
 	for row: Dictionary in watch.get("blockers", []): blockers.append(String(row.get("text", "")))
@@ -501,6 +528,10 @@ func _update_art(population: int) -> void:
 
 func _layout() -> void:
 	if _hero == null: return
+	var margin := maxi(0, floori((size.x - 1320.0) * .5))
+	if _content_margin.get_theme_constant("margin_left") != margin:
+		_content_margin.add_theme_constant_override("margin_left", margin)
+		_content_margin.add_theme_constant_override("margin_right", margin)
 	_layout_width = _hero.size.x
 	var available := _hero.size.x if _hero.size.x > 0 else size.x
 	var narrow := available < 620
@@ -525,9 +556,16 @@ func _mark_comparison(button: Button, selected: bool) -> void:
 		style.bg_color = T.ACTION
 		style.border_color = T.ACTION
 	button.add_theme_stylebox_override("normal", style)
+	var hover: StyleBoxFlat = T.action_button_style(false, true).duplicate()
+	if selected:
+		hover.bg_color = T.ACTION.lightened(.06)
+		hover.border_color = T.ACTION
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", style)
+	button.add_theme_stylebox_override("hover_pressed", hover)
 	button.add_theme_font_override("font", T.FONT_UI)
 	button.add_theme_font_size_override("font_size", 14)
-	for key in ["font_color", "font_focus_color"]:
+	for key in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
 		button.add_theme_color_override(key, T.ACTION_INK if selected else T.INK)
 
 func _driver(key: String, ratio: float, known: bool, tip: String) -> void:
@@ -610,7 +648,7 @@ func _bar(parent: Node) -> ProgressBar:
 func _rule() -> void:
 	var rule := HSeparator.new()
 	rule.add_theme_stylebox_override("separator", T.flat(T.BORDER_SOFT))
-	add_child(rule)
+	_content.add_child(rule)
 
 static func _valid(callback: Variant) -> bool:
 	return callback is Callable and (callback as Callable).is_valid()
