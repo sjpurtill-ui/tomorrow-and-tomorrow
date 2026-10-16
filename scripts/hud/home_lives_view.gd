@@ -331,8 +331,11 @@ func _fill() -> void:
 		for key: String in _drivers: _driver(key, -1, false, "Not measured")
 		_food_graph.reading = {}
 		_food_graph.queue_redraw()
-		for gauge: StandingGauge in _standing_gauges.values():
+		for key: String in _standing_gauges:
+			var gauge: StandingGauge = _standing_gauges[key]
 			gauge.value = -1
+			gauge.tooltip_text = "Not recorded"
+			gauge.accessibility_name = "%s: not recorded" % key.capitalize()
 			gauge.queue_redraw()
 		_refs.service_readings.visible = false
 		_research_bar.visible = false
@@ -467,6 +470,7 @@ func _fill_society(lives: Dictionary) -> void:
 		var gauge: StandingGauge = _standing_gauges[key]
 		gauge.value = float(regard.get(key, 0)) * 100 if measured else -1
 		gauge.tooltip_text = "%s: %s / 100. Age-relative standing." % [key.capitalize(), _num(gauge.value)] if measured else "Not recorded"
+		gauge.accessibility_name = "%s: %s out of 100. Age-relative standing." % [key.capitalize(), _num(gauge.value)] if measured else "%s: not recorded" % key.capitalize()
 		gauge.queue_redraw()
 	var date := int(regard.get("day", -1))
 	_set_text("regard_meaning", "Age-relative standing%s" % (" · day %d" % date if date >= 0 else "") if measured else "Standing has not been measured yet.")
@@ -733,8 +737,9 @@ func _link(parent: Node, title: String, key: String, node_name: String, font_siz
 	button.add_theme_stylebox_override("normal", normal)
 	button.add_theme_stylebox_override("hover", hover)
 	button.add_theme_stylebox_override("pressed", hover)
+	button.add_theme_stylebox_override("hover_pressed", hover)
 	button.add_theme_stylebox_override("disabled", normal)
-	for key_name: String in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color"]:
+	for key_name: String in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
 		button.add_theme_color_override(key_name, T.TEAL_TEXT)
 	return button
 
