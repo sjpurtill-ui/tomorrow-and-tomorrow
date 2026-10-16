@@ -1,0 +1,70 @@
+{
+  "method": "Built-in image_gen",
+  "layout": {
+    "columns": 2,
+    "rows": 3
+  },
+  "style": "Painterly realistic resource specimens, warm ivory background",
+  "atlases": [
+    {
+      "id": "common",
+      "prompt": "Use case: stylized-concept. Create one production-ready raster texture atlas for the Working Stockyard screen of a historical strategy game. EXACT layout: 2 columns and 3 rows, six equally-sized cells in a 1536 by1024 landscape image. Uniform warm pale ivory/parchment background across the whole atlas (#f1e8d6 feel), no lines or frames. Match refined painterly realistic material specimen illustrations: rich tactile detail, restrained natural vivid color, three-quarter slightly elevated view, soft daylight from upper left, delicate contact shadows. Each isolated specimen/pile centered within its own cell, fills about75% of cell width and70% of cell height, ample clean margin so nothing crosses a cell boundary. Every object entirely visible. No text, names, numbers, letters, icons, labels, UI, watermark or decorative elements. These are actual raw resources, not finished tools, ingots or machinery. All six cells must be present in precisely this reading order: TOP LEFT: knapped and unknapped dark smoky grey flint nodules with sharp waxy chipped faces. TOP RIGHT: a small mound of naturally crystalline off-white rock salt with a few clear cubic crystals. MIDDLE LEFT: a gathered bunch of green medicinal leaves, small flowers and tangled roots tied simply with fiber. MIDDLE RIGHT: cut blocks and crumbled pieces of dark brown fibrous peat, visible plant fibers. BOTTOM LEFT: a small pile of creamy beige rough limestone chunks with chalky porous fracture surfaces. BOTTOM RIGHT: a low mound of fine pale golden quartz sand with fine individual grains and no vessel.",
+      "keys": [
+        "Flint",
+        "Salt",
+        "Medicinal Plants",
+        "Peat",
+        "Limestone",
+        "Fine Sand"
+      ]
+    },
+    {
+      "id": "earth",
+      "prompt": "Use case: stylized-concept. Create one production-ready raster texture atlas for the Working Stockyard screen of a historical strategy game. EXACT layout: 2 columns and 3 rows, six equally-sized cells in a 1536 by1024 landscape image. Uniform warm pale ivory/parchment background across the whole atlas (#f1e8d6 feel), no lines or frames. Match refined painterly realistic material specimen illustrations: rich tactile detail, restrained natural vivid color, three-quarter slightly elevated view, soft daylight from upper left, delicate contact shadows. Each isolated specimen/pile centered within its own cell, fills about75% of cell width and70% of cell height, ample clean margin so nothing crosses a cell boundary. Every object entirely visible. No text, names, numbers, letters, icons, labels, UI, watermark or decorative elements. These are actual raw resources, not finished tools, ingots or machinery. All six cells must be present in precisely this reading order: TOP LEFT: a low mound and earthy clods of vivid ochre red-yellow pigment earth. TOP RIGHT: a few sticky-looking deep black natural bitumen lumps, dull pitch with some glossy tar faces, no container. MIDDLE LEFT: grey-beige raw refractory fireclay clods, rough earthy clay texture, not fired bricks. MIDDLE RIGHT: pure creamy white raw kaolin clay clods and powder, soft matte surface. BOTTOM LEFT: rough muted tan-grey phosphate rock chunks with naturally nodular earthy texture. BOTTOM RIGHT: dense dark graphite mineral chunks and flakes, subtle metallic grey sheen, not black coal.",
+      "keys": [
+        "Ochre Earth",
+        "Bitumen",
+        "Refractory Clay",
+        "Kaolin",
+        "Phosphate Rock",
+        "Graphite"
+      ]
+    },
+    {
+      "id": "fuel",
+      "prompt": "Use case: stylized-concept. Create one production-ready raster texture atlas for the Working Stockyard screen of a historical strategy game. EXACT layout: 2 columns and 3 rows, six equally-sized cells in a 1536 by1024 landscape image. Uniform warm pale ivory/parchment background across the whole atlas (#f1e8d6 feel), no lines or frames. Match refined painterly realistic material specimen illustrations: rich tactile detail, restrained natural vivid color, three-quarter slightly elevated view, soft daylight from upper left, delicate contact shadows. Each isolated specimen/pile centered within its own cell, fills about75% of cell width and70% of cell height, ample clean margin so nothing crosses a cell boundary. Every object entirely visible. No text, names, numbers, letters, icons, labels, UI, watermark or decorative elements. These are actual raw resources, not finished tools, ingots or machinery. All six cells must be present in precisely this reading order: TOP LEFT: vivid naturally yellow sulfur mineral chunks with irregular crystalline faces. TOP RIGHT: off-white pale nitrate mineral crusts and crystals on a little earthy rocky base, natural saltpeter, no finished fertilizer bag. MIDDLE LEFT: a small pile of hard black coal with irregular glossy angular fracture faces. MIDDLE RIGHT: thick brown-black crude oil pooling in a shallow depression of pale rough natural rock, oily reflective surface, NO modern drums or containers. BOTTOM LEFT: dark heavy black cassiterite tin ore embedded in brown rocky chunks, raw mineral not metallic ingots. BOTTOM RIGHT: heavy grey galena lead ore chunks, dull silvery grey cubic cleavage faces, raw rock.",
+      "keys": [
+        "Sulfur",
+        "Nitrates",
+        "Coal",
+        "Crude Oil",
+        "Tin Ore",
+        "Lead Ore"
+      ]
+    },
+    {
+      "id": "ores",
+      "prompt": "Use case: stylized-concept. Create one production-ready raster texture atlas for the Working Stockyard screen of a historical strategy game. EXACT layout: 2 columns and 3 rows, six equally-sized cells in a 1536 by1024 landscape image. Uniform warm pale ivory/parchment background across the whole atlas (#f1e8d6 feel), no lines or frames. Match refined painterly realistic material specimen illustrations: rich tactile detail, restrained natural vivid color, three-quarter slightly elevated view, soft daylight from upper left, delicate contact shadows. Each isolated specimen/pile centered within its own cell, fills about75% of cell width and70% of cell height, ample clean margin so nothing crosses a cell boundary. Every object entirely visible. No text, names, numbers, letters, icons, labels, UI, watermark or decorative elements. These are actual raw resources, not finished tools, ingots or machinery. All six cells must be present in precisely this reading order: TOP LEFT: iron ore chunks, rusty red-brown hematite rock with darker heavy faces. TOP RIGHT: zinc ore sphalerite, dark honey-brown and muted grey-brown angular mineral chunks with subtle resinous luster. MIDDLE LEFT: silver-bearing raw rock, charcoal-grey stone with narrow dull silver metallic veins, NOT polished silver bars. MIDDLE RIGHT: gold-bearing quartz raw ore, milky quartz and brown stone with small native gold flecks and thin veins, NOT a pile of gold nuggets. BOTTOM LEFT: nickel-bearing ore, rough dark grey-green and rusty brown mineral rock, not refined metal. BOTTOM RIGHT: bauxite ore, reddish orange-brown porous earthy chunks with visible small rounded pea-like inclusions.",
+      "keys": [
+        "Iron Ore",
+        "Zinc Ore",
+        "Silver Ore",
+        "Gold Ore",
+        "Nickel Ore",
+        "Bauxite"
+      ]
+    },
+    {
+      "id": "land",
+      "prompt": "Use case: stylized-concept. Create one production-ready raster texture atlas for the Working Stockyard screen of a historical strategy game. EXACT layout: 2 columns and 3 rows, six equally-sized cells in a 1536 by1024 landscape image. Uniform warm pale ivory/parchment background across the whole atlas (#f1e8d6 feel), no lines or frames. Match refined painterly realistic material specimen illustrations: rich tactile detail, restrained natural vivid color, three-quarter slightly elevated view, soft daylight from upper left, delicate contact shadows. Each isolated specimen/pile centered within its own cell, fills about75% of cell width and70% of cell height, ample clean margin so nothing crosses a cell boundary. Every object entirely visible. No text, names, numbers, letters, icons, labels, UI, watermark or decorative elements. These are actual raw resources, not finished tools, ingots or machinery. All six cells must be present in precisely this reading order: TOP LEFT: rutile-bearing ore, dark reddish-brown raw mineral stones with slender dark red-brown crystalline inclusions, no titanium metal. TOP RIGHT: uranium-bearing raw ore, heavy very dark brown-black pitchblende mineral with subtle earthy yellow weathering flecks, NO glow, NO radiation sign, NO fantasy neon. MIDDLE LEFT: an isolated small cutaway patch of rich dark fertile soil with roots and a few green shoots, represent productive land rather than a heap of mining material. MIDDLE RIGHT: a small naturalistic red-brown deer standing quietly in an isolated little patch of grass, represent wild game, NO people or hunting weapons. BOTTOM LEFT: an isolated geological cutaway specimen with layered rock above a deep blue underground water-bearing layer, a little translucent visible water at the base, no pipes or machinery; represents deep aquifer. BOTTOM RIGHT: an unidentified assortment of plain wrapped bundles and a closed natural fiber basket, a discreet generic stored-goods specimen; no question mark and no text.",
+      "keys": [
+        "Rutile Ore",
+        "Uranium Ore",
+        "Fertile Soil",
+        "Game",
+        "Deep Aquifer",
+        "__fallback__"
+      ]
+    }
+  ]
+}

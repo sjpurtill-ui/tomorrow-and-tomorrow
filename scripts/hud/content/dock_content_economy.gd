@@ -54,7 +54,17 @@ func _local_signature()->Array:
 	var food_report:Array=[]
 	for key:String in ["food_days","food_net","food_production","food_eaten","food_spoilage","food_spoilage_by_type","food_preserved","food_harvest","food_workers","food_labor_share","food_sources","food_forecast_30","food_forecast_90","food_forecast_day","food_intake_ratio","food_consumption","food_home_need","food_home_eaten","fire_practice","food_preservation_inputs"]:
 		food_report.append(metrics.get(key))
-	return [hash(food_report),hash(GameState.food_stocks),hash(GameState.water_metrics),FoodSystem.issued_on_day(int(GameState.elapsed_days)),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
+	return [hash(food_report),hash(GameState.food_stocks),hash(GameState.water_metrics),FoodSystem.issued_on_day(int(GameState.elapsed_days)),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05),_material_reading_signature()]
+
+## Equal-bulk exchanges and source changes can happen without advancing a day.
+## Read only the displayed facts; no simulation pass or fresh random roll.
+func _material_reading_signature()->int:
+	var sources:Array=[]
+	for deposit:Dictionary in ResourceSystem.visible_deposits():
+		sources.append([deposit.get("id"),deposit.get("resource"),ResourceSystem.display_name(String(deposit.get("resource",""))),deposit.get("name"),deposit.get("stage"),deposit.get("blockers"),deposit.get("bottleneck"),deposit.get("remaining"),deposit.get("initial_amount"),deposit.get("delivered_today"),deposit.get("stock_at_source"),deposit.get("in_transit")])
+	var names:Array=[]
+	for key:String in GameState.resource_stockpiles:names.append([key,ResourceSystem.display_name(key)])
+	return hash([GameState.resource_stockpiles,GameState.material_metrics,GameState.land_survey,sources,names])
 
 func _trade_blocks()->Array:
 	return [{"type":"deliveries_board","read":_delivery_data}]
@@ -211,4 +221,9 @@ func _materials_data()->Dictionary:
 	var counted:PackedStringArray=[]
 	for key:String in GameState.resource_stockpiles:
 		if key!="Food" and float(GameState.resource_stockpiles[key])>=0.5 and ResourceSystem._is_material_resource(key):counted.append(ResourceSystem.display_name(key).to_lower())
-	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"hauling":metrics.get("flow_ratio",null),"land":ResourceSystem.land_words(),"cover":float(ResourceSystem.land_reading().get("cover",0.0)),"counted":", ".join(counted),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"browse_state":material_browse_state,"priorities":materials_priorities,"on_select":func(key:String):selected_material=key;material_browse_state.sources_page=0;material_browse_state.sources_open=false;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_assign":assign_workers("Extraction"),"on_assign_carriers":assign_workers("Logistics"),"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	var land_reading:=ResourceSystem.land_reading()
+	var land_condition:=ResourceSystem.land_heading(land_reading)
+	var target_words:="toward %d" % roundi(float(land_reading.get("target",0.0))*100.0)
+	land_condition=land_condition.replace(target_words,target_words+"%")
+	land_condition=land_condition.left(1).to_upper()+land_condition.substr(1)+"."
+	return {"type":"materials_ledger","title":"Materials","focus":String(GovernmentPeopleSystem.settlement_management(id).get("focus","")),"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(id),"managed":city.get("auto_manage",true),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),"storage":ResourceSystem.stored_bulk(),"capacity":float(metrics.get("storage_capacity",0)),"capacity_known":metrics.has("storage_capacity"),"hauling":metrics.get("flow_ratio",null),"waiting":metrics.get("at_source",null),"in_transit":metrics.get("in_transit",null),"land":ResourceSystem.land_words(),"cover":float(land_reading.get("cover",0.0)),"land_condition":land_condition,"counted":", ".join(counted),"rows":rows,"incoming":incoming,"day":GameState.elapsed_days,"selected":selected_material,"browse_state":material_browse_state,"priorities":materials_priorities,"on_select":func(key:String):selected_material=key;material_browse_state.sources_page=0;material_browse_state.sources_open=false;hud.request_immediate_dock_refresh(),"on_toggle":func():materials_priorities=not materials_priorities;hud.request_immediate_dock_refresh(),"on_map":terrain._toggle_resource_view,"on_assign":assign_workers("Extraction"),"on_assign_carriers":assign_workers("Logistics"),"on_focus":_provisions_focus,"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}

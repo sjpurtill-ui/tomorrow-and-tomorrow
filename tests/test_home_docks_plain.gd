@@ -61,7 +61,8 @@ func test_food_page_asks_for_hands_beside_the_figures_it_moves()->void:
 	var strip:Array=preload("res://scripts/hud/food_folio.gd").kpis(page.data)
 	assert_str(String(strip[1].value)).is_equal("Short in 40 days")
 	assert_str(String(strip[2].value)).is_equal("80%")
-	assert_str(text).contains("More hands on water (now)").contains("Let Tovan decide")
+	assert_str(text).contains("Ask for more water").contains("Let Tovan decide")
+	assert_bool((page.find_child("Choice_Water",true,false) as Button).button_pressed).is_true()
 	assert_str(text).not_contains("Food lasts").not_contains("▴").not_contains("▾").not_contains("LEADER MANAGED")
 	(page.find_child("Choice_Provisions",true,false) as Button).pressed.emit()
 	assert_array(asked).contains_exactly(["provisions"])
@@ -76,10 +77,11 @@ func test_materials_and_wealth_ledgers_use_words()->void:
 	var yards:Dictionary=preload("res://scripts/hud/materials_ledger.gd").kpis(materials.data)[0]
 	assert_str(String(yards.value)).is_equal("98")
 	assert_str(String(yards.delta)).contains("of 100 room")
-	# The whole account sits on the row's pointer; the yards' words on the strip's.
-	assert_str((materials.find_child("Material_Timber",true,false) as Control).tooltip_text).contains("Timber: 40 in store").contains("Rising since last month")
+	# The pile tooltip states its units; the stable reader carries the trend.
+	assert_str((materials.find_child("Material_Timber",true,false) as Control).tooltip_text).contains("Timber: 40 in store")
+	assert_str(String(materials._selection.since.text)).contains("latest recorded stock count")
 	assert_str(String(yards.tip)).contains("Stores are full")
-	assert_str(text).not_contains("›").not_contains("DELIVERED / DAY")
+	assert_str(text).not_contains("DELIVERED / DAY")
 	var wealth:VBoxContainer=auto_free(preload("res://scripts/hud/wealth_ledger.gd").new())
 	wealth.setup({"stage":"subsistence","city":"Ashford","leader":{},"managed":true,"economy":{"gdp":42.0,"gdp_per_capita":0.4,"productivity":0.8,"effective_workers":52.0},
 		"history":[],"conditions":{"health":0.5,"cohesion":0.9,"housing":1.0},"accounts":[],"selected":"","show_work":false,
@@ -177,9 +179,8 @@ func test_a_shipment_on_the_way_reads_across_the_row()->void:
 		"day":10,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	materials.size=Vector2(1100,600);add_child(materials)
 	await get_tree().process_frame;await get_tree().process_frame
-	var voice:Control=materials._incoming[0].voice
-	var when:Control=materials._incoming[0].when
-	assert_str(_texts(materials)).contains("3 medicinal plants on the way").contains("From Seanstone")
-	assert_float(voice.size.x).is_greater(100.0)
-	assert_float(when.size.x).is_greater(100.0)
-	assert_float(voice.size.y).is_less(40.0)
+	var reading:Label=materials._incoming[0].label
+	assert_str(reading.text).contains("3 medicinal plants").contains("Seanstone").contains("4 days")
+	assert_float(reading.size.x).is_greater(100.0)
+	assert_float(reading.size.y).is_less(60.0)
+	assert_float(reading.get_global_rect().end.x).is_less_equal(materials.get_global_rect().end.x+1.0)
