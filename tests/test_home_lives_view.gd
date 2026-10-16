@@ -94,3 +94,24 @@ func test_missing_measurements_are_not_presented_as_zero_coverage_or_recorded_de
 	assert_str(view._refs.year.text).is_equal("No dated baseline")
 	assert_str(view._refs.vital_period.text).contains("natural change +2")
 	assert_str(view._refs.risk_note.text).contains("not recorded deaths")
+
+func test_unavailable_comparison_does_not_create_a_food_measurement() -> void:
+	var block := _block()
+	block.lives.conditions.food = {"known": false}
+	block.compare_care = func() -> Dictionary: return {"ok": false, "reason": "No estimate available."}
+	view.update_block(block)
+	view.find_child("CareCompare", true, false).pressed.emit()
+	assert_dict(view._food_graph.reading).is_empty()
+	assert_str(view._refs.food_period.text).not_contains("Compared assignment")
+	assert_str(view._refs.balance.text).is_equal("No daily balance recorded")
+
+func test_cross_town_starvation_warning_precedes_water_and_safeguard_notes() -> void:
+	var block := _block()
+	block.compare_care = func() -> Dictionary:
+		var result := _compare()
+		result.warnings = [{"kind": "water", "text": "Our town: low water."}, {"kind": "safeguard", "text": "Our town: food protection."}, {"kind": "starvation", "text": "South town: starvation risk."}]
+		return result
+	view.update_block(block)
+	view.find_child("CareCompare", true, false).pressed.emit()
+	assert_str(view._refs.comparison.text).contains("South town: starvation risk.")
+	assert_str(view._refs.comparison.text).not_contains("Our town: low water.")
