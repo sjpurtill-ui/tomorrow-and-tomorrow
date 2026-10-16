@@ -1,3 +1,13 @@
+## October 16 — Home Council consolidation (INTEGRATED)
+
+`02627394` removes the redundant Council page. Home has Overview, People and
+Culture; legacy Council requests resolve to Culture. Officials and summons use
+the existing court button/F12. Open tracked orders remain in Your orders, which
+is available after closing a full-window court. No unique Council action was
+lost, and no game logic or save format changed. Six navigation/rail tests and the
+existing private Culture journey across three sizes pass. See INTEGRATION_STATUS
+for evidence. No live player session was restarted.
+
 ## October 16 — Standard People allocator restored (INTEGRATED)
 
 `7c939c96` makes Home / People a direct nine-area allocator again. Requested

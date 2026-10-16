@@ -1,3 +1,24 @@
+## October 16 — Redundant Home Council removed (INTEGRATED)
+
+Runtime `02627394` removes Council from Home's tab row and the Civilization
+provider's available pages. Home now shows Overview, People and Culture. Old
+`civ,1` requests safely resolve to Culture; the dock already clamps the tab.
+The court button/F12 retains the full roster and conversations. The existing
+Your orders tracker retains every tracked order and its destination. Its existing
+suppression while the court fills the window is unchanged: close court to read
+that tracker. An independent audit confirmed Council supplied no unique action.
+The dormant Council renderer/helper remain in source for historical fixtures.
+No simulation, save, conversation, order or authority logic changed.
+
+Six existing category-navigation and rail-stability cases pass with no errors,
+failures, skips or orphans (`report_100`,
+`artifacts/popup-audit/home-council-removal-tests.log`). The existing actual-HUD
+Culture journey passed at 1024×720, 1600×1000 and 2869×1337 on a private desktop;
+the captured Home header confirms only three tabs. Evidence:
+`artifacts/home-council-removal.log`, `artifacts/home-modern-dark-*-culture.png`.
+The process exited 0 with no script/engine errors; existing anchor warnings
+remain. Remote-first integration preserves the running player session.
+
 ## October 16 — Direct People allocator and consequences (INTEGRATED)
 
 Runtime `7c939c96` switches the actual Home / People renderer to
