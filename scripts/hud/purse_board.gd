@@ -30,6 +30,7 @@ const Scale:=preload("res://scripts/standing_scale.gd")
 const Production:=preload("res://scripts/hud/content/dock_content_production.gd")
 const ArtifactArt:=preload("res://scripts/hud/artifact_visuals.gd")
 const Ledger:=preload("res://scripts/hud/wealth_ledger.gd")
+const Prosperity:=preload("res://scripts/hud/wealth_prosperity_view.gd")
 const REFRESH_SECONDS:=1.0
 const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Wear"}
 ## Business does "hardly anything yet" below this much added to all work;
@@ -66,6 +67,12 @@ var buying_open:=false
 var responsive_grids:Array[GridContainer]=[]
 ## The day's work (wealth_ledger.gd), mounted in the left column.
 var ledger:Control
+var prosperity:Control
+var prosperity_margin:MarginContainer
+var prosperity_body:VBoxContainer
+var detail_sections:Dictionary={}
+var detail_buttons:Dictionary={}
+var open_detail:=""
 
 func _ready()->void:
 	_bind_layout.call_deferred()
@@ -88,6 +95,9 @@ func setup(block:Dictionary={})->void:
 	theme=T.control_theme()
 	add_theme_constant_override("separation",16)
 	feedback=S.label("",16,T.GOLD_TEXT);feedback.name="Said";feedback.visible=false;feedback.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	if mode=="wealth":
+		_setup_prosperity(block)
+		resized.connect(_responsive);refresh(true);_responsive();return
 	var left:VBoxContainer=self
 	var right:VBoxContainer=self
 	if mode=="wealth":
@@ -113,6 +123,30 @@ func setup(block:Dictionary={})->void:
 	resized.connect(_responsive)
 	refresh(true)
 	_responsive()
+
+func _setup_prosperity(block:Dictionary)->void:
+	prosperity_margin=MarginContainer.new();prosperity_margin.name="WealthReadingWidth";add_child(prosperity_margin)
+	prosperity_body=VBoxContainer.new();prosperity_body.add_theme_constant_override("separation",14);prosperity_margin.add_child(prosperity_body)
+	prosperity=Prosperity.new();prosperity_body.add_child(prosperity);prosperity.setup({})
+	prosperity_body.add_child(feedback)
+	var choices:=HFlowContainer.new();choices.name="WealthDetails";choices.add_theme_constant_override("h_separation",8);choices.add_theme_constant_override("v_separation",6);prosperity_body.add_child(choices)
+	for spec:Array in [["households","Household goods & treasures"],["account","Account & hungry towns"],["business","Trade & business"],["work","Local work & balances"]]:
+		var key:=String(spec[0]);var button:=S.verb(String(spec[1]),_toggle_detail.bind(key));button.name="WealthDetail_"+key;button.toggle_mode=true;choices.add_child(button);detail_buttons[key]=button
+		var section:=VBoxContainer.new();section.name="WealthSection_"+key;section.visible=false;section.add_theme_constant_override("separation",12);prosperity_body.add_child(section);detail_sections[key]=section
+	# Each secondary task remains reachable, with one section open at a time.
+	own_box=_section("Household goods and appraised treasures",detail_sections.households,"OwnCard")
+	head_box=_part(detail_sections.account);lines_box=_part(detail_sections.account);sources_box=_part(detail_sections.account)
+	business_box=_section("Trade and business across our civilization",detail_sections.business,"BusinessCard")
+	var block_ledger:Variant=block.get("ledger")
+	if block_ledger is Dictionary:
+		ledger=Ledger.new();detail_sections.work.add_child(ledger);ledger.setup(block_ledger)
+	else:detail_buttons.work.visible=false
+
+func _toggle_detail(key:String)->void:
+	open_detail="" if open_detail==key else key
+	for id:String in detail_sections:
+		detail_sections[id].visible=open_detail==id
+		detail_buttons[id].set_pressed_no_signal(open_detail==id)
 
 func _column(parent:Node,node_name:String)->VBoxContainer:
 	var column:=VBoxContainer.new();column.name=node_name;column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",16);parent.add_child(column)
@@ -153,11 +187,16 @@ func refresh(force:=false)->void:
 	var forecast:=Purse.forecast()
 	var purse:=Purse.state()
 	var season:=Purse.season()
-	_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out,mode]),force,func()->void:_build_head(forecast,season))
+	if mode=="wealth":
+		prosperity.update_view(_prosperity_data(forecast,purse,season))
+		_rebuild("head",head_box,str([forecast,season]),force,func()->void:_build_account_receipts(forecast,season))
+	else:_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out,mode]),force,func()->void:_build_head(forecast,season))
 	var sources:=Purse.sources()
 	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
-	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
-	_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open(),_town_count()]),force,func()->void:_build_lines(forecast,purse))
+	if mode=="store":
+		_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
+		_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open(),_town_count()]),force,func()->void:_build_lines(forecast,purse))
+	else:_rebuild("lines",lines_box,str([purse.lines,forecast.lines.relief,_town_count(),Purse.food_places().map(func(place:Dictionary)->float:return float(place.days))]),force,func()->void:_build_relief(forecast,purse))
 	if mode!="wealth":return
 	var held:=Standing.wealth_held()
 	var cards:=Production.household_cards()
@@ -172,6 +211,70 @@ func refresh(force:=false)->void:
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
 	_rebuild("wealth",wealth_box,str([WorldSimulation.state.wealth_shares,parts,String(WorldSimulation.state.economy_stage)]),force,func()->void:_build_wealth())
 	_responsive()
+
+func _prosperity_data(forecast:Dictionary,purse:Dictionary,season:Dictionary)->Dictionary:
+	var held:=Standing.wealth_held();var current:=String(purse.levy);var quote:=Purse.quote(current)
+	var tips:Dictionary={}
+	for level:String in Purse.LEVELS:
+		var q:=Purse.quote(level)
+		tips[level]="%s: %s of %s. Estimated %s / season at current work. Trust −%d; holding together −%d. About 1 in %d hide dues." % [String(Purse.LEVEL_NAMES[level]),String(q.words),Purse.harvest_word(),Purse.amount_text(float(q.per_season)),roundi(float(q.trust)),roundi(float(q.cohesion)),int(q.hidden_one_in)]
+	var lines:Dictionary={}
+	var soldier_counts:=Purse.soldiers()
+	for key:String in ["crews","scholars","army"]:
+		var entry:Dictionary=(forecast.lines as Dictionary).get(key,{})
+		var on:=bool(entry.get("on",false));var effect:=""
+		match key:
+			"crews":effect="Building +%s%% now" % S.n(Purse.crews_bonus()*100.0) if on else "Up to %d%% faster when fully funded" % roundi(Purse.CREWS_MAX*100.0)
+			"scholars":effect="Research +%s%% now" % S.n((Purse.scholars_factor()-1.0)*100.0) if on else "Up to %d%% faster when fully funded" % roundi(Purse.SCHOLARS_MAX*100.0)
+			"army":effect="No soldiers to pay" if on and int(purse.get("unpaid_months",0))==0 and int(soldier_counts.at_arms)==0 and int(soldier_counts.reserve)==0 else "Pay enabled; no arrears recorded" if on and int(purse.get("unpaid_months",0))==0 else "Pay in arrears" if on else "Pay disabled"
+		lines[key]={"on":on,"cost":Purse.amount_text(float(entry.get("per_season",0.0)))+" / season"+(" if enabled" if not on else ""),"effect":effect,"who":String(entry.get("who","")),"tip":_effect_tip(key)}
+	var parts:Dictionary=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{}) if WorldSimulation.state.economy_metrics.get("social_pressure_parts") is Dictionary else {}
+	var pressure_known:=parts.has("total") and parts.get("total")!=null
+	var total:=float(parts.get("total",0.0))*100.0 if pressure_known else 0.0
+	var causes:PackedStringArray=[]
+	for pair:Array in [["unequal","wealth shares"],["want","unmet needs"],["prices","prices"],["levy","levy"]]:
+		var value:=float(parts.get(pair[0],0))*100.0
+		if value>0.0:causes.append("%s −%s" % [pair[1],S.n(value)])
+	if float(parts.get("benefit",0.0))>0.0:causes.append("economic benefit +%s" % S.n(float(parts.benefit)*100.0))
+	var shares:Array=WorldSimulation.state.wealth_shares
+	var shares_valid:=shares.size()==5;var shares_total:=0.0
+	for value:Variant in shares:
+		if not (value is float or value is int) or float(value)<0.0 or float(value)>1.0:shares_valid=false
+		else:shares_total+=float(value)
+	shares_valid=shares_valid and shares_total>0.0
+	if not shares_valid:shares=[]
+	var army:Dictionary=purse.get("last_army",{}) if purse.get("last_army") is Dictionary else {}
+	var unpaid:="Soldiers unpaid %d months · will −%d · %d went home" % [int(purse.get("unpaid_months",0)),roundi(float(army.get("will_lost",0.0))*100.0),int(army.get("deserted",0))] if int(purse.get("unpaid_months",0))>0 else ""
+	var cards:=Production.household_cards();var spare:=0.0
+	for card:Dictionary in cards:spare+=float(card.get("spare",0))
+	if cards.is_empty():spare=Goods.spare()
+	var net:=float(forecast.net)
+	return {"households":"%s household goods · all towns" % S.n(float(held.goods)),"balance":Purse.amount_text(float(forecast.balance)),"account_name":Purse.account_name(),"unit":Purse.unit_word(),
+		"balance_tip":"The civilization's public account, separate from household goods and treasure appraisal. "+_cap(_given_words())+".","shares":shares.duplicate(),
+		"pressure_known":pressure_known,"pressure":total,"causes":("Home economy: "+", ".join(causes)+". Rounded readings.") if not causes.is_empty() else "Home economy: no pressure from the recorded contributors." if pressure_known else "Home economy: trust-pressure contributors have not been measured.",
+		"pressure_tip":"The home economy's signed contribution to the trust target, not an all-town average or a daily loss of trust. Trust changes gradually toward its target. The reported components include any economic benefit and the levy; do not add the separately quoted levy effect again.",
+		"levy":current,"levy_reading":"%s levy · ~%s / season" % [String(Purse.LEVEL_NAMES.get(current,current)),Purse.amount_text(float(quote.per_season))],"levy_cost":"Estimated at current work · trust −%d · holding together −%d" % [roundi(float(quote.trust)),roundi(float(quote.cohesion))],"level_tips":tips,"lines":lines,"unpaid":unpaid,
+		"forecast":"%s forecast: %s%s %s / season at current settings." % [_cap(Purse.account_name()),"+" if net>0 else "−" if net<0 else "",Purse.number(absf(net)),Purse.unit_word()],"forecast_tip":_season_words(forecast,season,true),
+		"summary":"Households: %s goods available for trade · %s kept for use. Treasure appraisal is separate." % [S.n(spare),S.n(maxf(0,float(held.goods)-spare))],"on_levy":_choose_levy,"on_line":_toggle}
+
+func _build_account_receipts(forecast:Dictionary,season:Dictionary)->void:
+	_clear(head_box);head_box.add_theme_constant_override("separation",8)
+	head_box.add_child(S.label("The public account · all towns",18,T.INK,true))
+	var given:=_line(_cap(_given_words())+".",14,T.INK_MUTED,true);given.name="Balance";head_box.add_child(given)
+	head_box.add_child(_line("Forecast at current settings: %s in · %s out per season." % [Purse.amount_text(float(forecast["in"])),Purse.amount_text(float(forecast.out))],14,T.INK,true))
+	head_box.add_child(_line("Recorded over %s days: %s received · %s spent." % [Purse.number(float(season.days)),Purse.amount_text(float(season.total_in)),Purse.amount_text(float(season.total_out))],14,T.INK_MUTED,true))
+	var out:Dictionary=season.get("out",{});var recorded:PackedStringArray=[]
+	for key:String in out:
+		if float(out[key])>0.0:recorded.append("%s %s" % [String(LINE_LABELS.get(key,key)).to_lower(),Purse.amount_text(float(out[key]))])
+	head_box.add_child(_line("Recorded outlays: "+(" · ".join(recorded) if not recorded.is_empty() else "none")+".",14,T.INK_MUTED,true))
+	if float(forecast.get("rot",0))>0:head_box.add_child(_line("Forecast storage wear: %s / season." % Purse.amount_text(float(forecast.rot)),14,T.INK_MUTED,true))
+	if float(forecast.get("debt",0))>0:head_box.add_child(_line("Old debts: %s · repaid monthly." % Purse.amount_text(float(forecast.debt)),14,T.AMBER_TEXT,true))
+	var rations:=Purse.buys_rations()
+	if rations>=0:head_box.add_child(_line("At current prices this account could buy %s rations. This is buying power, not stored food." % Purse.number(rations),14,T.INK_MUTED,true))
+
+func _build_relief(forecast:Dictionary,purse:Dictionary)->void:
+	_clear(lines_box)
+	if _town_count()>1 or Purse.line_on("relief"):_line_row("relief",forecast,purse)
 
 func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->void:
 	if box==null:return
@@ -262,7 +365,7 @@ static func _trend_words(net:float,trend:String)->String:
 	return _cap(trend)+"."
 
 ## The season's reckoning, for the tooltip: what comes in and what goes out.
-func _season_words(forecast:Dictionary,season:Dictionary)->String:
+func _season_words(forecast:Dictionary,season:Dictionary,recorded_span:=false)->String:
 	var ins:PackedStringArray=["the levy %s" % Purse.number(float(forecast.levy))]
 	if float(forecast.rich)>0.0:ins.append("the rich %s" % Purse.number(float(forecast.rich)))
 	if float(forecast.get("charter",0.0))>0.0:ins.append("%s %s" % [Business.purse_name().to_lower(),Purse.number(float(forecast.charter))])
@@ -271,7 +374,8 @@ func _season_words(forecast:Dictionary,season:Dictionary)->String:
 		var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
 		if bool(entry.get("on",false)) and float(entry.get("per_season",0.0))>=0.5:outs.append("%s %s" % [String(LINE_LABELS[line]).to_lower(),Purse.number(float(entry.per_season))])
 	if float(forecast.get("rot",0.0))>=0.5:outs.append("wear %s" % Purse.number(float(forecast.rot)))
-	return "A season at today's settings, in %s.\nIn: %s.\nOut: %s.\nLast season %s came in and %s went out." % [Purse.unit_word(),", ".join(ins),", ".join(outs) if not outs.is_empty() else "nothing",Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
+	var period:="Recorded over %s days:" % Purse.number(float(season.days)) if recorded_span else "Last season"
+	return "A season at today's settings, in %s.\nIn: %s.\nOut: %s.\n%s %s came in and %s went out." % [Purse.unit_word(),", ".join(ins),", ".join(outs) if not outs.is_empty() else "nothing",period,Purse.number(float(season.total_in)),Purse.number(float(season.total_out))]
 
 ## Only with several towns: who gives most, one row each.
 func _build_sources(sources:Dictionary,refocus:=false)->void:
@@ -567,6 +671,10 @@ func _responsive()->void:
 			if ancestor.size.x>0:available=minf(available,maxf(0.0,ancestor.size.x-24.0))
 			break
 		ancestor=ancestor.get_parent()
+	if prosperity_margin!=null:
+		var inset:=maxi(0,roundi((available-1320.0)*0.5));prosperity_margin.add_theme_constant_override("margin_left",inset);prosperity_margin.add_theme_constant_override("margin_right",inset)
+		prosperity.policy.columns=2 if available>=620 else 1
+		prosperity.spending.columns=3 if available>=620 else 1
 	var retained:Array[GridContainer]=[]
 	for grid:GridContainer in responsive_grids:
 		if not is_instance_valid(grid):continue

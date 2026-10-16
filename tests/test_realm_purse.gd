@@ -433,14 +433,12 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	for part in ["GoodsBuy","GoodsAHead","Barter","Fifths","Shares","Pressure","Balance","Levels","Line_army","StoreAnswer"]:
 		assert_object(wealth.find_child(part,true,false)).override_failure_message("the wealth board has no %s" % part).is_not_null()
 	for gone in ["StorePointer","SeeStore","SeeMaterials","SeeArms","WealthCards"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
-	var kickers:=[]
-	for child in wealth.find_children("*","Label",true,false):
-		if child.get_meta("wealth_section",false):kickers.append((child as Label).text)
-	# The realm's account and decisions lead, followed by household evidence.
-	assert_str(String(kickers[0])).is_equal("The common store")
-	assert_int(kickers.find("The common store")).is_less(kickers.find("Household wealth"))
-	assert_int(kickers.find("Household wealth")).is_less(kickers.find("Trade and business"))
-	assert_int(kickers.find("Trade and business")).is_less(kickers.find("Who holds the wealth"))
+	# The retained primary view groups real shares, pressure and commands.
+	# Existing secondary readings remain available in compact disclosures.
+	assert_object(wealth.find_child("ProsperityAndPressure",true,false)).is_not_null()
+	for key in ["households","account","business"]:
+		assert_object(wealth.find_child("WealthDetail_"+key,true,false)).is_not_null()
+		assert_bool((wealth.find_child("WealthSection_"+key,true,false) as Control).visible).is_false()
 	# Arms live on the Arms tab.
 	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
 	# What we own is the engine's count: every town's goods, at our own prices.
@@ -464,11 +462,9 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 			if token in ["·","−","+",":"]: continue
 			words+=1
 		if words>12: long.append(text)
-	for node in wealth.find_children("*","",true,false):
-		var text:=""
-		if node is Label: text=(node as Label).text
-		elif node is Button: text=(node as Button).text
-		else: continue
+	# Explanatory readings may wrap; direct action labels remain short.
+	for node in wealth.find_children("*","Button",true,false):
+		var text:=String((node as Button).text)
 		var words:=0
 		for token in text.replace("\n"," ").split(" ",false):
 			if token in ["·","−","+",":"]: continue
