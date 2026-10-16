@@ -98,6 +98,18 @@ func test_missing_measurements_are_not_presented_as_zero_coverage_or_recorded_de
 	assert_str(view._refs.foundations.text).contains("not measured")
 	assert_str(view._refs.watch.text).contains("not measured")
 
+func test_fractional_local_care_allocation_is_unitized_without_inventing_heads() -> void:
+	var block := _block()
+	block.lives.conditions.care.assigned = 5.2
+	block.lives.conditions.care.workers = 4.7
+	view.update_block(block)
+	assert_str(view._refs.care.text).contains("Care allocation: 5.2 worker-equivalents")
+	assert_str(view._refs.care.text).contains("effective effort 4.7 worker-equivalents")
+	assert_str(view._refs.care.text).not_contains("5.2 assigned")
+	block.lives.conditions.care.assigned = 9
+	view.update_block(block)
+	assert_str(view._refs.care.text).contains("9 assigned to keeping & caring")
+
 func test_unavailable_comparison_does_not_create_a_food_measurement() -> void:
 	var block := _block()
 	block.lives.conditions.food = {"known": false}

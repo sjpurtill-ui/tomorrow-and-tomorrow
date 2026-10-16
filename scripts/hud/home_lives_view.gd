@@ -310,7 +310,11 @@ func _fill() -> void:
 	_set_text("risk_note", String(risk.get("note", "Projected risk, not recorded deaths.")))
 	_risk_dots.risk = float(risk.get("per_100", -1)) if known else -1
 	_risk_dots.queue_redraw()
-	_set_text("care", "Care %s%% now; target %s%%. Coverage changes gradually.\n%s assigned to keeping & caring; %s effective worker-equivalents." % [_num(float(care.get("current", 0)) * 100), _num(float(care.get("target", 0)) * 100), _num(care.get("assigned", 0)), _num(care.get("workers", 0))] if bool(care.get("known", false)) else "Care coverage is not measured yet.")
+	var assigned := float(care.get("assigned", 0))
+	var allocation := "%s assigned to keeping & caring" % _num(assigned)
+	if not is_equal_approx(assigned, roundf(assigned)):
+		allocation = "Care allocation: %s worker-equivalents" % _num(assigned)
+	_set_text("care", "Care %s%% now; target %s%%. Coverage changes gradually.\n%s; effective effort %s worker-equivalents." % [_num(float(care.get("current", 0)) * 100), _num(float(care.get("target", 0)) * 100), allocation, _num(care.get("workers", 0))] if bool(care.get("known", false)) else "Care coverage is not measured yet.")
 	_refs.care.tooltip_text = "Coverage moves 1/%d of the remaining gap toward its target each day.\n%s" % [int(care.get("settle_days", 60)), str(care.get("practices", []))]
 	_fill_comparison()
 	_fill_food(food)
