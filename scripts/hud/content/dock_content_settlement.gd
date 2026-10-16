@@ -6,12 +6,11 @@ const Words:=preload("res://scripts/hud/home_plain.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 const Works:=preload("res://scripts/hud/water_conveyance_controls.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
+const Lives:=preload("res://scripts/hud/home_lives_model.gd")
 ## SETTLEMENT section: our town's own page (Overview) and its History.
-## The Overview is as rich as a stranger's town's page and exact because the
-## town is ours: the town drawn from its figures, the local leader's word,
-## then every figure grouped, each read from the ledger its owning dock
-## shows (own_town_model.gd) and laid against the foreign towns we know.
-## Any town of ours, first or not, gets the same page from its own figures.
+## The active overview reads guarded local living conditions and civilization
+## context through HomeLives. Existing leadership and work commands remain
+## explicit actions. Archived folio/model helpers below have no production call.
 
 const COHORT_LABELS:Array[Array]=[["children","0–13","Children, not yet working"],["youth","14–24","Young people of working age"],["early_adults","25–34","Adults of working age"],["established_adults","35–44","Adults of working age"],["mature_adults","45–59","Older adults, still working"],["elders","60+","Elders, mostly past heavy work. How long people live is an average from birth, not a limit."]]
 ## Who sets the daily work (manual_work.gd). Who does what is The People's
@@ -25,21 +24,30 @@ func meta()->Dictionary:
 	var settlement:=_selected_settlement()
 	return {
 		"eyebrow":"Your %s" % String(settlement.get("classification","settlement")).to_lower(),
-		"title":String(settlement.get("name",terrain._settlement_display_name())).capitalize(),
+		"title":String(settlement.get("name",GameState.settlement_name)).capitalize(),
 		"subtabs":["Overview"],
+		"spatial_view":not String(settlement.get("id","")).is_empty(),
 	}
 
 func tab(sub:int)->Dictionary:
-	# New towns are the whole realm's business: read outside this place's stores.
-	_founding=founding_block() if sub==0 else {}
-	# Who would defend it (home's levy, watch and walls, or the town's own
-	# watch), read as the Military ledger reads them, and the foreign towns
-	# our scouts have brought home; neither is read in the town's own scope.
-	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
-	var primary:=picked.is_empty() or bool(picked.get("primary",false))
-	_strength=Model.strength(primary,String(picked.get("id",""))) if sub==0 else {}
-	_towns=Model.foreign_towns() if sub==0 else []
-	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab(sub)))
+	# The illustrated overview consumes Lives' guarded local/realm readings.
+	# Do not also compute the superseded comparison tables and KPI dashboard.
+	var page:Dictionary=_city_tab(sub)
+	# The new overview owns its scopes: local living conditions alongside
+	# civilization-wide learning, values and standing. Read after restoring the
+	# outer town scope so national measures cannot accidentally use local people.
+	for block:Dictionary in page.get("blocks",[]):
+		if String(block.get("type",""))!="settlement_overview":continue
+		var city_id:=String(GameState.selected_player_settlement_id)
+		block["lives"]=Lives.snapshot(city_id)
+		block["compare_care"]=Lives.compare_care.bind(city_id,5)
+		block["on_health"]=func()->void:hud.open_detail(preload("res://scripts/hud/content/dock_detail_health.gd").new(terrain,hud),0)
+		block["on_assign_care"]=assign_workers("Administration")
+		block["on_research"]=jump("inquiry",0)
+		block["on_culture"]=jump("civ",0)
+		block["on_food"]=jump("economy",0)
+		block["on_works"]=jump("construction",0)
+	return page
 
 var _founding:Dictionary={}
 var _strength:Dictionary={}
@@ -106,7 +114,6 @@ func _city_tab(sub:int)->Dictionary:
 			elif led_mode in ["held","watering","foraging","resting","provisioning"]:items.push_front({"label":"Go on","sub":"Break camp and keep travelling","primary":led_mode=="held","on_press":func()->void:terrain._on_caravan_override("founding","resume"),"tip":"The caravan leader moves on by themself once water, food and health allow. This tells them to go on now."})
 		return {"brief":{"tone":String(travel_advice.get("tone","info")),"title":"A home is taking shape" if committed else String(travel_advice.get("status","Choose a home")).capitalize(),"why":"Let time run with the controls above. The people build the Hearth Circle as they go about their work; once it stands, the local leader takes charge of daily work." if committed else String(travel_advice.get("reason","The party can walk into unknown land and camp to forage on the way."))+" Settling makes the place where the party stands our home."},"blocks":[{"type":"actions","items":items}]}
 	var blocks:=_overview_blocks(settlement)
-	blocks[0]["readings"]=_glance_tiles(settlement)
 	return {"blocks":blocks}
 
 
@@ -130,8 +137,7 @@ func _glance_tiles(settlement:Dictionary)->Array:
 		growth["value"]="no change" if change==0 else "%s%s" % ["+" if change>0 else "−",EraWords.grouped(absi(change))]
 		growth["delta"]="%s born · %s buried" % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried))]
 		growth["delta_color"]=Tokens.AMBER if change<0 else Tokens.MUTED
-		var other:=int(year.other)
-		growth["tip"]="This year so far: %s born, %s buried%s. Pressed: ages and families." % [EraWords.grouped(int(year.born)),EraWords.grouped(int(year.buried)),"" if other==0 else (", %s left or lost" % EraWords.grouped(-other) if other<0 else ", %s arrived" % EraWords.grouped(other))]
+		growth["tip"]="Population change compares today's count with the year-start count. Births and burials use completed seasonal reports and do not reconcile that change. Pressed: ages and families."
 	tiles.append(growth)
 	# Homes: how full the houses are.
 	var places:=int(facts.places)
@@ -157,10 +163,17 @@ func _glance_tiles(settlement:Dictionary)->Array:
 
 
 func _selected_settlement()->Dictionary:
-	var settlement:Dictionary=SettlementModel.selected_settlement_snapshot()
-	if settlement.is_empty():
-		return {"id":"","name":terrain._settlement_display_name(),"classification":"settlement","population":GameState.population_total,"primary":true}
-	return settlement
+	# selected_settlement_snapshot() seeds records and changes the selection.
+	# A screen only reads the existing selection, with a local primary fallback.
+	var record:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
+	if record.is_empty():
+		for city:Dictionary in GameState.player_settlements:
+			if bool(city.get("primary",false)):record=city;break
+	if record.is_empty():return {"id":"","name":GameState.settlement_name,"classification":"settlement","population":GameState.population_total,"primary":true}
+	var out:=record.duplicate(true)
+	out["population"]=roundi(SettlementModel._settlement_population(record))
+	out["classification"]=String(record.get("classification",GameState.settlement_morphology.get("classification","settlement") if bool(record.get("primary",false)) else "settlement"))
+	return out
 
 func _people_blocks(_productive:int,local_population:int,local_share:float,settlement:Dictionary,_management:Dictionary)->Array:
 	var cohorts:Dictionary=GameState._integer_age_cohorts()
@@ -183,10 +196,15 @@ func _people_blocks(_productive:int,local_population:int,local_share:float,settl
 
 
 func signature()->Array:
-	# The town's own figures are read in its own scope, as the page reads them.
-	var local:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
-	return [PeopleDirection.auto_settlement,GameState.settlement_convoy.get("active",false),Memo.log_identity(GameState.discovery_log),GameState.strategic_history.get("last_day",-1),GameState.selected_player_settlement_id,GameState.settlement_network_revision,GovernmentPeopleSystem.revision,
-		int(MilitaryCampaign.home_army.get("troops",0)),MilitaryCampaign.settlement_defense.hash(),int(GameState.population_allocations.get("Defense",0)),_known_signature(),int(GameState.elapsed_days)/30]+local
+	# Raw receipts only: no city-form seeding, health recalculation, government
+	# initialization or scope swaps merely to decide whether a view must refresh.
+	# Exact hashes retain same-day paused edits to research, culture and standing.
+	return [int(GameState.elapsed_days),GameState.world_seed,GameState.selected_player_settlement_id,GameState.player_settlements.hash(),GameState.population_total,
+		GameState.population_health,GameState.housing_capacity,GameState.population_allocations.hash(),GameState.simulation_metrics.hash(),GameState.water_metrics.hash(),GameState.food_stocks.hash(),
+		GameState.resource_stockpiles.hash(),GameState.early_care.hash(),GameState.built_fabric.hash(),GameState.city_form.hash(),GameState.strategic_history.hash(),GameState.vital_statistics_history.hash(),
+		GameState.active_investigations.hash(),GameState.discovery_progress.hash(),GameState.discovery_adoption.hash(),GameState.known_discoveries.hash(),GameState.societal_values.hash(),
+		PeopleDirection.ambition,PeopleDirection.cultural_memory.hash(),PeopleDirection.automatic_work,PeopleDirection.work_baseline.hash(),GovernmentPeopleSystem.revision,
+		MilitaryCampaign.home_army.hash(),MilitaryCampaign.settlement_defense.hash(),GameState.water_waste_works.hash(),GameState.water_conveyance.hash(),GameState.settlement_projects.hash(),GameState.settlement_completed.hash()]
 
 func _city_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
@@ -215,8 +233,7 @@ const IN_TILES:=["population","life_expectancy","supply","water","roofs","learni
 
 func _overview_blocks(settlement:Dictionary)->Array:
 	var id:=String(settlement.get("id",""))
-	var management:=GovernmentPeopleSystem.settlement_management(id)
-	var facts:=Model.facts(settlement,_strength)
+	var management:=_management_reading(settlement)
 	var leader:Dictionary=management.get("leader",{})
 	var leader_name:=String(leader.get("name","")).get_slice(" ",0)
 	var focus:=String(management.get("focus","balanced"))
@@ -226,7 +243,7 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	# What the leader is doing, short; the reason is in the tooltip.
 	var direction:=""
 	var direction_tip:=""
-	var ruler:=Manual.manual()
+	var ruler:=not PeopleDirection.automatic_work
 	if management.is_empty():direction="No one runs this place's daily work yet."
 	elif ruler:
 		direction="You set the daily work for all our towns."
@@ -240,53 +257,67 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	# The leader's own hand on the town's work, in the engine's numbers
 	# (office_levers.gd town_labour: the labour lever, x0.95 to x1.06).
 	if not leader.is_empty() and not occupied:
-		var hand:=preload("res://scripts/office_levers.gd").town_labour(GovernmentPeopleSystem.person_snapshot(int(leader.get("person_id",0))))
+		var hand:=preload("res://scripts/office_levers.gd").town_labour(leader)
 		var size:=roundi(absf(hand-1.0)*100.0)
 		direction_tip=(direction_tip+"\n" if direction_tip!="" else "")+("Under %s this town gets %d%% %s work done than under an ordinary leader." % [leader_name,size,"more" if hand>=1.0 else "less"] if size>0 else "%s runs the town's work as an ordinary leader would." % leader_name)
 	var choices:Array=[]
 	for key:String in ASKABLE:
 		choices.append({"id":key,"label":String(FOCUS_WORDS[key]).capitalize(),"tip":String(GovernmentPeopleSystem.FOCUS_EFFECTS.get(key,""))+" Other work slows.","on_press":_ask_for_hands.bind(id,key)})
 	choices.append({"id":"","label":"Let %s decide" % (leader_name if not leader_name.is_empty() else "the leader"),"tip":"The leader spreads the work across what the place needs.","on_press":_ask_for_hands.bind(id,"")})
-	var works_context:=_works_context(settlement)
-	var works_city:="" if bool(settlement.get("primary",false)) else id
+	var local:=_local_metadata(settlement,ruler and not management.is_empty() and not occupied)
 	var on_population:Callable=focused_action("Ages and families","",_people_report.bind("population")).on_press
-	# Each figure opens the page that owns it; the head count, the town's own ages.
-	var groups:=Model.groups(facts,_towns)
-	# The tiles under the tabs already carry these; a row never restates a
-	# tile. The rows themselves stay with the page as `tile_rows` (the same
-	# readings the tiles show, each with the dock that owns it).
-	var tile_rows:={}
-	for group:Dictionary in groups:
-		for row:Dictionary in group.rows:
-			if String(row.key) in IN_TILES:tile_rows[String(row.key)]=row
-		group["rows"]=(group.rows as Array).filter(func(row:Dictionary)->bool:return String(row.key) not in IN_TILES)
-	groups=groups.filter(func(group:Dictionary)->bool:return not (group.rows as Array).is_empty())
-	for group:Dictionary in groups:
-		for row:Dictionary in group.rows:
-			row["on_open"]=on_population if String(row.section)=="" else jump(String(row.section),int(row.sub))
 	# The ruler's split, read for this town: what it does to the stores here,
 	# early and plainly, with the one click that mends it (manual_work.gd).
-	var warning:Dictionary=Manual.town_warning(id) if ruler and not management.is_empty() and not occupied else {}
+	var warning:Dictionary=local.warning
 	var on_rename:Callable=terrain._open_settlement_naming_panel.bind(id) if is_instance_valid(terrain) and terrain.has_method("_open_settlement_naming_panel") else Callable()
 	# The verbs stand on the lines they change: rename on the place's own
 	# line, visit on the seat's.
-	var places:Dictionary=_founding.duplicate(true) if not _founding.is_empty() else {}
-	if (places.get("rows",[]) as Array).size()>=2:
-		places.rows[0]["button"]={"label":"Rename","on_press":on_rename,"tip":"Change the name on the map","disabled":not on_rename.is_valid()}
-		places.rows[1]["button"]={"label":"Visit","on_press":_visit_village,"tip":"Close this page and look at the town on the map"}
 	return [{"type":"settlement_overview","leader":leader,"managed":managed,"direction":direction,"direction_tip":direction_tip,
 		"can_direct":not management.is_empty() and not occupied,"choices":choices,"current":"" if managed else focus,
 		"ruler_sets_work":ruler and not management.is_empty() and not occupied,"on_leaders":_work_to_leaders,"on_people":jump("overview",0),
 		"work_warning":warning,"on_food_fix":_put_on_food.bind(int(warning.get("fix",0))) if int(warning.get("fix",0))>0 else Callable(),
-		# The town is on the map beside this page: no second picture of it here.
-		"town_name":String(facts.name),"sketch":{},"on_visit":_visit_village,"lead":Model.lead(facts),
-		"groups":groups,"tile_rows":tile_rows,"legend":Model.legend(_towns),
-		"works":_works_data(works_context,works_city) if not works_context.is_empty() else {},
+		# Compatibility metadata; the active Lives renderer owns its illustration.
+		"town_name":String(settlement.get("name","")),"sketch":{},"on_visit":_visit_village,"lead":"",
+		"groups":[],"tile_rows":{},"legend":[],
+		"works":local.works,
 		"founding":{},
-		"places":places,
+		"places":{},
 		"on_leader":court({"settlement_id":String(id)}),
 		"on_population":on_population,
 		"on_rename":on_rename}]
+
+func _management_reading(settlement:Dictionary)->Dictionary:
+	# The old accessor initializes/reconciles the government, including new
+	# people and offices. Read only the official who is already in the ledger.
+	if String(settlement.get("id",""))=="":return {}
+	var person:=GovernmentPeopleSystem._person_record(int(settlement.get("leader_person_id",0))).duplicate(true)
+	if not person.is_empty():
+		person["age"]=GovernmentPeopleSystem.age_years(person)
+		person["title"]=GovernmentPeopleSystem.settlement_leader_title()
+		person["appearance_civ_id"]=WorldSimulation.actor_id
+		person["appearance_world_seed"]=GameState.world_seed
+	return {"leader":person,"focus":String(settlement.get("management_focus","balanced")),"auto_manage":bool(settlement.get("auto_manage",true)),
+		"focus_reason":String(settlement.get("management_focus_reason","Local priorities have not yet been reassessed.")),"focus_effect":String(settlement.get("management_focus_effect",""))}
+
+func _local_metadata(settlement:Dictionary,read_warning:bool)->Dictionary:
+	var empty:={"works":{},"warning":{}}
+	if not PeopleDirection.initialized or PeopleDirection.seed_value!=GameState.world_seed or not DiscoverySystem.initialized:return empty
+	# Scope helpers seed older city defaults; geographic context expires old
+	# observations. Both are useful simulation behavior, but not a view write.
+	var saved:={}
+	for field:String in ["player_settlements","population_cohorts","pregnancy_cohorts","population_total","population_exact","built_fabric","fabric_realm","city_form","early_care","early_care_blend","society_exchange","border_forts","simulation_events","field_observation_signals"]:
+		var value:Variant=GameState.get(field);saved[field]=value
+		if value is Dictionary or value is Array:GameState.set(field,value.duplicate(true))
+	var national:=SettlementModel._national_population_in_scope
+	var fraction:=SettlementModel._national_civilian_workforce_fraction
+	var id:=String(settlement.get("id",""))
+	var result:Dictionary=SettlementModel.with_city_resources(id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:
+		var context:=_works_context(settlement)
+		return {"works":_works_data(context,"" if bool(settlement.get("primary",false)) else id) if not context.is_empty() else {},"warning":Manual.town_warning(id) if read_warning else {}}))
+	for field:String in saved:GameState.set(field,saved[field])
+	SettlementModel._national_population_in_scope=national
+	SettlementModel._national_civilian_workforce_fraction=fraction
+	return result
 
 func _visit_village()->void:
 	if is_instance_valid(hud) and hud.has_method("close_dock"):hud.close_dock()

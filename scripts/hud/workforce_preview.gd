@@ -25,7 +25,9 @@ static var _busy := false
 # still independently copied for each evaluation and checked by the token.
 const DEFINITIONS := ["catalog", "technology_catalog", "technology_limits", "catalog_by_id", "catalog_by_channel", "definitions_by_id"]
 const DEFINITION_INDICES := ["technology_catalog", "catalog_by_id", "catalog_by_channel", "definitions_by_id"]
-const TRANSIENT_READERS := ["_candidate_index", "_scan", "_today"]
+# Government's reconciliation key includes the live state object's identity.
+# Detached systems must rebuild it against their own state, never share it.
+const TRANSIENT_READERS := ["_candidate_index", "_scan", "_today", "_read_key"]
 static var _before_token := 0
 static var _before_result: Dictionary = {}
 

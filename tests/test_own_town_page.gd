@@ -1,5 +1,8 @@
 extends GdUnitTestSuite
 ## "How come other civs' city info pages are so much better than my own!"
+## Retained folio/model regression: the active Home now uses home_lives_view.
+## Its provider/read-only/navigation contract is in test_home_lives_provider.
+## This suite still verifies the reusable own_town_model and old folio directly.
 ## Our own town's page (settlement_overview.gd, own_town_model.gd) is drawn
 ## from its own figures and is at least as rich as a stranger's: the town in
 ## ink, the local leader's word, every figure grouped with a bar, the foreign
@@ -114,10 +117,36 @@ func after_test()->void:
 # --------------------------------------------------------------------------
 
 func _block()->Dictionary:
-	var page:Dictionary=Provider.new(terrain,hud).tab(0)
+	var provider:=Provider.new(terrain,hud)
+	var page:Dictionary=provider.tab(0)
 	var blocks:Array=page.blocks
 	assert_str(String(blocks[0].type)).is_equal("settlement_overview")
-	return blocks[0]
+	# Explicitly assemble this retained renderer's model fixture. Production
+	# Home no longer calculates these duplicate tables merely to discard them.
+	var block:Dictionary=blocks[0]
+	var settlement:=provider._selected_settlement()
+	var id:=String(settlement.get("id",""))
+	provider._strength=Model.strength(bool(settlement.get("primary",false)),id)
+	provider._towns=Model.foreign_towns()
+	var founding:=provider.founding_block()
+	_scoped(id,func()->void:
+		var facts:=Model.facts(settlement,provider._strength)
+		block.lead=Model.lead(facts)
+		block.groups=Model.groups(facts,provider._towns)
+		block.legend=Model.legend(provider._towns)
+		block.tile_rows={}
+		for group:Dictionary in block.groups:
+			for row:Dictionary in group.rows:
+				row["on_open"]=block.on_population if String(row.section)=="" else provider.jump(String(row.section),int(row.sub))
+				if String(row.key) in provider.IN_TILES:block.tile_rows[String(row.key)]=row
+			group.rows=(group.rows as Array).filter(func(row:Dictionary)->bool:return String(row.key) not in provider.IN_TILES)
+		block.groups=(block.groups as Array).filter(func(group:Dictionary)->bool:return not (group.rows as Array).is_empty())
+		block["readings"]=provider._glance_tiles(settlement))
+	block.places=founding
+	if (founding.get("rows",[]) as Array).size()>=2:
+		block.places.rows[0]["button"]={"label":"Rename","on_press":block.on_rename,"tip":"Change the name on the map","disabled":not block.on_rename.is_valid()}
+		block.places.rows[1]["button"]={"label":"Visit","on_press":block.on_visit,"tip":"Close this page and look at the town on the map"}
+	return block
 
 func _rows(block:Dictionary)->Dictionary:
 	var out:={}
@@ -333,7 +362,7 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	var page:=_page(_block())
 	# Where the people live is a table right under the facts, above the works:
 	# the seat's stage and every place, one line each.
-	var block:=Provider.new(terrain,hud).tab(0).blocks[0] as Dictionary
+	var block:=_block()
 	var spread:Dictionary=block.places
 	assert_str(String(spread.type)).is_equal("table")
 	assert_str(String(spread.heading)).is_equal("Where our people live")
@@ -368,7 +397,7 @@ func test_seat_growth_leader_card_hands_and_reports_still_act()->void:
 	assert_array(Array(_texts(page))).not_contains(["Who does what"])
 	(page.find_child("Places",true,false).find_child("Verb_Rename",true,false) as Button).pressed.emit()
 	assert_array(terrain.naming).contains_exactly([id])
-	((Provider.new(terrain,hud).tab(0).blocks[0].readings as Array)[0].on_press as Callable).call()
+	((_block().readings as Array)[0].on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
 	# The asked-for hands show as the current choice on the next build.
 	var text:="\n".join(_texts(_page(_block())))
@@ -426,7 +455,7 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 		row.gui_input.emit(click)
 		assert_array(hud.opened).override_failure_message(key).contains_exactly([expected[key]])
 	# The town's own ages and families open from the GROWTH tile.
-	var growth:Dictionary=(Provider.new(terrain,hud).tab(0).blocks[0].readings as Array)[0]
+	var growth:Dictionary=(_block().readings as Array)[0]
 	(growth.on_press as Callable).call()
 	assert_int(hud.details.size()).is_equal(1)
 	# Work buildings and roads read the Buildings page's own figures, not words of ours.
@@ -439,7 +468,7 @@ func test_each_row_opens_the_page_that_owns_it()->void:
 	assert_str((page.find_child("Row_logistics",true,false) as Control).tooltip_text).contains("Opens the Materials page.")
 
 func test_home_keeps_four_readings_with_their_actions_and_bars()->void:
-	var tiles:Array=Provider.new(terrain,hud).tab(0).blocks[0].readings
+	var tiles:Array=_block().readings
 	var labels:=tiles.map(func(t:Dictionary)->String:return String(t.label))
 	# Only what the top bar lacks: it has the head count, food, water and life span.
 	assert_array(labels).is_equal(["GROWTH","HOMES","MOOD","ARMY"])
@@ -518,7 +547,7 @@ func test_the_page_reads_in_light_and_dark()->void:
 # --------------------------------------------------------------------------
 
 func test_each_home_tile_pressed_opens_its_page()->void:
-	var tiles:Array=Provider.new(terrain,hud).tab(0).blocks[0].readings
+	var tiles:Array=_block().readings
 	var page:=_page(_block())
 	var expected:={"HOMES":["construction",0],"MOOD":["overview",0],"ARMY":["military",0]}
 	assert_int(page._reading_refs.size()).is_equal(tiles.size())
@@ -533,7 +562,7 @@ func test_each_home_tile_pressed_opens_its_page()->void:
 		assert_array(hud.opened).override_failure_message(label).contains_exactly([expected[label]])
 
 func test_live_home_refresh_keeps_focused_action_and_every_reading_with_its_source()->void:
-	var block:Dictionary=Provider.new(terrain,hud).tab(0).blocks[0]
+	var block:Dictionary=_block()
 	var page:=_page(block)
 	var talk:=page.find_child("TalkWithLeader",true,false) as Button
 	talk.grab_focus()

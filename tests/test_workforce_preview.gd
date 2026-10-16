@@ -224,6 +224,9 @@ func test_missing_water_measurement_is_unknown_and_invalid_drafts_restore_scope(
 	assert_bool(Preview._busy).is_false()
 
 func test_snapshot_contains_only_detached_data_and_preview_cost_is_measured() -> void:
+	# An ordinary court/leader read warms a cache containing the live state.
+	# It must not escape into a detached workforce or Home care preview.
+	GovernmentPeopleSystem.officeholder("head_of_government")
 	var started := Time.get_ticks_usec()
 	var draft := Preview.capture()
 	var captured := Time.get_ticks_usec()
