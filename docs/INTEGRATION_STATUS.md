@@ -1,3 +1,42 @@
+## October 16 — Materials: compact Working Stockyard (INTEGRATED)
+
+Runtime `74a6f2ea` applies the selected Working Stockyard to Economy Materials.
+The stockyard painting carries the current storage situation; a weighted-space
+graphic distinguishes room used from overflow. The user's density correction is
+implemented as 44-pixel rows with 30-pixel specimen icons, 14–16-pixel text and
+eight materials per page. Search, selection and paging retain their controls.
+The compact selected reader keeps stock, source conditions and assignment/map
+actions together. Arrivals, storage losses and carrying are separate readings;
+waiting and in-transit loads remain visible. No simulation rules, command
+authority or save format changed.
+
+Five generated atlases add 29 dedicated specimens and a generic stored-goods
+fallback; the existing five specimens complete all 34 provider-visible catalogue
+resources. Runtime discovery names remain authoritative, and unknown imported
+or legacy stock keys remain visible with generic art. Land and water context is
+distinguished from empty material piles. Art provenance and exact prompts are
+in `assets/ui/materials/WORKING_STOCKYARD_ART.md` and its linked JSON.
+
+Same-day stock composition, source receipts and land readings refresh without
+advancing the simulation, including equal-bulk exchanges. Weighted storage is
+not presented as a sum of unlike stock units; gross arrivals are not called net
+change. Tiny positive stocks are not labeled empty. Unknown readings remain
+unknown. Existing local leader requests and civilization-wide assignment routes
+retain their scope and authority.
+
+Nineteen behavior cases pass with zero errors, failures, skips or orphans
+(`report_105`, `artifacts/stockyard-unit-compact.log`). Actual terrain/HUD/provider
+private GPU journeys pass 781 checks for early Night and 1323 for mature
+Daylight, each across 1024×720, 1600×1000 and 2869×1337. The mature fixture uses ten
+real resource stocks and the engine's daily step to produce overflow and losses.
+Checks cover all artwork, exact ledger readings, same-day refresh, stable nodes,
+search/paging, keyboard actions, assignment navigation and unchanged ledgers/RNG
+while reading. Evidence: `artifacts/stockyard-native-final-{dark,light}.log` and
+`artifacts/materials-stockyard/final-*`. Both processes exited 0 with no script
+or engine errors; existing command-rail anchor warnings remain. Independent
+visual/data critique accepted both themes. Integration uses remote-first main
+delivery; no player process was launched or restarted.
+
 ## October 16 — Food: Living Pantry (INTEGRATED)
 
 Runtime `2201b711` replaces the active Economy Food renderer with the selected

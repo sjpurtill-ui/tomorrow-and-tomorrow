@@ -1,3 +1,26 @@
+## October 16 — Compact Working Stockyard (INTEGRATED)
+
+`74a6f2ea` implements the selected Materials design with a stockyard banner,
+weighted storage/overflow graphic and compact iconized inventory. The user's
+size correction reduces the inventory to 30-pixel images and 44-pixel rows,
+with restrained counts and bounded eight-item pages. Selected-material context,
+source conditions and existing actions stay together; gross arrivals, losses,
+carrying and current queued loads are distinct. Same-day provider refresh covers
+equal-bulk stock exchanges and updated source receipts. No game rules, authority
+or save-schema changes.
+
+All 34 provider-visible catalogue resources have dedicated art; 29 specimens
+are new. Unknown manufactured/imported or legacy keys use an honest generic
+fallback and retain their exact names and quantities. Art never unlocks a
+resource. Prompts and provenance are recorded with the assets.
+
+The final 19 behavior tests and two actual-HUD private GPU journeys pass
+(781/1323 checks, three sizes, both themes, including real overflow accounting).
+Independent review accepted the small icon rows and corrected carrying footer,
+fractional-stock wording and survey percentage. See INTEGRATION_STATUS for
+evidence. Main is delivered through verified remote-first integration; no
+player process was launched or restarted.
+
 ## October 16 — Food Living Pantry (INTEGRATED)
 
 `2201b711` applies the selected Living Pantry concept to the real Economy Food
