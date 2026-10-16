@@ -51,7 +51,10 @@ func signature()->Array:
 
 func _local_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
-	return [snappedf(float(metrics.get("food_days",0.0)),0.1),snappedf(float(metrics.get("food_net",0.0)),0.1),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.water_metrics.get("days",0.0)),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
+	var food_report:Array=[]
+	for key:String in ["food_days","food_net","food_production","food_eaten","food_spoilage","food_spoilage_by_type","food_preserved","food_harvest","food_workers","food_labor_share","food_sources","food_forecast_30","food_forecast_90","food_forecast_day","food_intake_ratio","food_consumption","food_home_need","food_home_eaten","fire_practice","food_preservation_inputs"]:
+		food_report.append(metrics.get(key))
+	return [hash(food_report),hash(GameState.food_stocks),hash(GameState.water_metrics),FoodSystem.issued_on_day(int(GameState.elapsed_days)),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05)]
 
 func _trade_blocks()->Array:
 	return [{"type":"deliveries_board","read":_delivery_data}]
@@ -105,7 +108,11 @@ func _provisions_data()->Dictionary:
 	var id:=GameState.selected_player_settlement_id
 	var city:=SettlementModel.settlement_record(id)
 	var rows:Array=[]
-	var stocks:Dictionary=metrics.get("food_stocks",GameState.food_stocks)
+	# Departing parties can draw from the live stock after the daily receipt.
+	# Read current reserves, while keeping the receipt's flows and forecast dated.
+	var stocks:Dictionary=GameState.food_stocks
+	var stock_total:=float(stocks.get("Fresh food",0.0))+float(stocks.get("Stored food",0.0))
+	var food_days:float=stock_total/float(metrics.food_consumption) if float(metrics.get("food_consumption",0.0))>0.0 else float(metrics.get("food_days",-1.0))
 	# Who keeps each store from spoiling (food_care.gd): carriers the fresh,
 	# keepers the stored, with the engine's own covers.
 	var FoodCare:=preload("res://scripts/food_care.gd")
@@ -123,15 +130,21 @@ func _provisions_data()->Dictionary:
 		if String(shipment.get("destination_id",""))!=id or String(shipment.get("status",""))!="in_transit":continue
 		var left:=maxi(0,ceili(float(shipment.get("arrival_day",today)))-today)
 		deliveries.append({"resource":String(shipment.get("resource","")),"source_name":String(shipment.get("source_name","")),"quantity":float(shipment.get("quantity",0.0)),"when":"arrives today" if left<=0 else "arrives in "+Plain.span_text(left)})
-	return {"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),
-		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(float(metrics.get("food_days",-1.0))) if metrics.has("food_days") else "","food_days":metrics.get("food_days",-1.0),
+	var block:={"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),
+		"day":today,"flow_known":metrics.has_all(["food_production","food_eaten","food_spoilage","food_net"]),"forecast_day":metrics.get("food_forecast_day",-1),
+		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(food_days) if food_days>=0.0 else "","food_days":food_days,
 		"capacity":FoodSystem._food_storage_capacity(),"food_workers":float(metrics.get("food_workers",0.0)),"food_share":float(metrics.get("food_labor_share",0.0)),
 		"water":GameState.water_metrics.duplicate(true),"water_access":ResourceSystem.water_access_snapshot(),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),
 		"sources":(metrics.get("food_sources",[]) as Array).duplicate(true),"fire":fire.duplicate(),"fuel":float(fuel.get("Timber",0.0)) if not fuel.is_empty() else -1.0,
 		"history":_material_points(id,["food_days"]).get("food_days",[]),"deliveries":deliveries,
 		"flow":{"Produced":metrics.get("food_production",0),"Taken":(metrics.get("food_harvest",{}) as Dictionary).get("Transferred",0.0),"Eaten":metrics.get("food_eaten",0),"Spoiled":metrics.get("food_spoilage",0),"Keeping":(metrics.get("food_preserved",{}) as Dictionary).get("lost",0.0),"Missions":FoodSystem.issued_on_day(today),"Net":metrics.get("food_net",0)},
-		"on_assign":assign_workers("Food"),"on_assign_water":assign_workers("Logistics"),
+		"on_assign":assign_workers("Food"),"on_assign_water":assign_workers("Logistics"),"on_talk":court({"settlement_id":id}),
 		"on_focus":_provisions_focus,"has_deliveries":_has_food_deliveries(),"on_trade":focused_action("Deliveries between places","",_economy_report.bind("trade")).on_press}
+	# Presence is meaningful: no daily report is not a day of zero production
+	# or proof that everyone ate. Keep the presentation on the same receipt.
+	for field:String in ["food_intake_ratio","food_consumption","food_home_need","food_home_eaten"]:
+		if metrics.has(field):block["food_need" if field=="food_consumption" else field]=metrics[field]
+	return block
 func _has_food_deliveries()->bool:
 	var trade:=SettlementModel.city_trade_snapshot(GameState.selected_player_settlement_id)
 	return not (trade.get("shipments",[]) as Array).is_empty() or not (trade.get("history",[]) as Array).is_empty()
