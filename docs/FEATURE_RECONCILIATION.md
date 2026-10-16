@@ -1,3 +1,26 @@
+## October 16 — Wealth Prosperity & Pressure (INTEGRATED)
+
+`c909a742` implements the user's selected third Wealth direction on the actual
+Economy route: household imagery, five equal household groups with real wealth
+shares, signed trust-target pressure and compact levy/funding decisions. Funding
+effects reflect actual paid fractions, forecasts are distinct from dated
+receipts, and unknown readings remain unknown. Current public-account units
+follow the existing goods/coin progression. Household holdings, treasury and
+treasure appraisal are not combined into a fictional total.
+
+The same game commands drive every control. Household buying power/collection,
+account receipts/relief, business and local work/balances remain reachable through
+four compact disclosures. No game logic, command authority or save schema changed.
+The approved image is representative scenery with provenance beside the asset.
+
+The final 42 tests and two actual-HUD private GPU journeys pass (1579/1666 checks,
+three sizes, both themes). Visual critique corrected the opening header's width;
+new guards check compact readable totals and visible artwork. Command geometry,
+keyboard focus, live refresh and read-only ledger/RNG behavior pass. Independent
+final review accepted the implementation. See INTEGRATION_STATUS for evidence.
+Main is delivered through verified remote-first integration; no player process
+was launched or restarted.
+
 ## October 16 — Compact Working Stockyard (INTEGRATED)
 
 `74a6f2ea` implements the selected Materials design with a stockyard banner,

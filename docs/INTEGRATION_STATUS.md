@@ -1,3 +1,39 @@
+## October 16 — Wealth: Prosperity & Pressure (INTEGRATED)
+
+Runtime `c909a742` applies the selected third design to the actual Economy Wealth
+route. An approved household painting leads into five equally sized household
+groups with the engine's wealth shares. Compact public-account and household
+holdings, signed home-economy trust-target pressure, direct levy choices and
+three funding decisions follow. Crew and scholar effects use the current funded
+fraction; disabled lines show their possible fully funded benefit. Soldier
+arrears and desertions remain visible, and an empty army reads “No soldiers to
+pay.” Forecasts are labeled estimates at current settings; recorded receipts
+state their actual day span. Unknown measurements are not fabricated zeros.
+
+The original levy and spending commands remain authoritative. Four compact,
+single-open disclosures retain household buying power and treasures, public
+receipts and hungry-town relief, trade and business, and selected-town work and
+balances. Currency stages, account scope, bounded town contributions, collection
+access and local account actions remain intact. No simulation rule, payment,
+command authority or save format changed. The painting is representative art,
+not a census or an unlocked-building record; provenance is in
+`assets/ui/wealth/PROSPERITY_ART.md`.
+
+Forty-two cases pass across the purse, Wealth visuals, local ledger and new
+Prosperity suites with zero errors, failures, skips or orphans (`report_107`,
+`artifacts/wealth-unit-final.log`). Actual terrain/provider private GPU journeys
+pass 1579 checks in early Night and 1666 in mature Daylight, with 27 captures
+across 1024×720, 1600×1000 and 2869×1337. Coverage includes real click/keyboard
+commands, steady control geometry, retained nodes/focus/scroll, live economic
+readings and unchanged ledgers/RNG while reading. A first visual critique found
+and corrected a collapsed header column; regression checks now require readable
+totals and visible artwork before scrolling. Independent final review accepted
+both themes and the data distinctions. Both probes exited 0 without engine or
+script errors; pre-existing command-rail anchor warnings remain. Evidence:
+`artifacts/wealth-native-final-{dark,light}.log` and
+`artifacts/wealth-prosperity/final-*`. Integration uses verified remote-first
+main delivery. No player process was launched or restarted.
+
 ## October 16 — Materials: compact Working Stockyard (INTEGRATED)
 
 Runtime `74a6f2ea` applies the selected Working Stockyard to Economy Materials.
