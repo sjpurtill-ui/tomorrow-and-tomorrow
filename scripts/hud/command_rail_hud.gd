@@ -39,7 +39,7 @@ const SECTIONS:Array[Dictionary]=[
 ## page the button opens; `tabs` renames a page's tabs where its own names
 ## would not say enough beside their neighbours.
 const CATEGORIES:Array[Dictionary]=[
-	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview"],"overview":["People"],"civ":["Culture","Council"]},"tooltip":"This settlement, its people and their ways"},
+	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview"],"overview":["People"],"civ":["Culture"]},"tooltip":"This settlement, its people and their ways"},
 	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Daily work","Daily work","Workshop orders"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
 	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},

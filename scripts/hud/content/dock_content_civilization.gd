@@ -20,11 +20,11 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"What our ways do",
 		"title":"Culture",
-		"subtabs":["Culture","Council"],
+		"subtabs":["Culture"],
 	}
 
-func tab(sub:int)->Dictionary:
-	if sub==1:return {"blocks":_council_blocks()}
+func tab(_sub:int)->Dictionary:
+	# Old Council links land on Culture; the court owns people and conversations.
 	return {"blocks":_society_overview()}
 
 func _society_blocks(capacities:Dictionary)->Array:
