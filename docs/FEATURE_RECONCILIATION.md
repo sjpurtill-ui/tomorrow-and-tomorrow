@@ -1,3 +1,18 @@
+## October 16 — Compact Home lower section (INTEGRATED)
+
+`2dd0dcab` with `c1010eb8` replaces the sprawling lower Home columns and large
+navigation buttons with a compact food band, labeled research meters, paired
+Awe/Draw gauges, local service readings and a tidy leader/action footer. All
+values and actions still come from the existing provider. Defense blockers
+name the upcoming work and distinguish an automatic danger trigger from a
+material shortage. No simulation, save-schema or upper portrait changes.
+
+Independent visual and code critiques are resolved. Nine retained-view tests
+pass after the final accessibility correction; native Night and Daylight
+journeys each pass 1200 checks across three widths. See INTEGRATION_STATUS for
+evidence. Delivery uses verified remote-first main integration and does not
+restart any running player session.
+
 ## October 16 — Actual Home lives and consequences (INTEGRATED)
 
 Runtime `19722d91` replaces Home's active table layout with the approved

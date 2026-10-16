@@ -1,3 +1,33 @@
+## October 16 — Home lower-page cleanup (INTEGRATED)
+
+Runtime `2dd0dcab` and accessibility follow-up `c1010eb8` tighten only the
+lower Home view. Food now pairs a shared-scale intake/use chart and daily-need
+markers with current reserves. Research has directly labeled exploration and
+adoption/trial meters; culture keeps its actual effects; Awe and Draw use
+small age-relative gauges. Local services, roads and craft retain their own
+denominators. The watch names its current defenses and next project, and
+explains the people's automatic danger trigger. Compact links replace wide
+navigation buttons, with a shorter leader/action footer and less blank space.
+
+The data model, simulations, saves and command callbacks are unchanged. Full
+use versus adoption remains explicit, shortages and blockers remain visible,
+and unavailable readings are not turned into zeros. Gauge values have accessible
+names and clear stale tooltips when readings become unavailable. A separate
+design reviewer checked wide/narrow captures, and a second reviewer checked
+data, callbacks and accessibility; both follow-up corrections are included.
+
+Validation: all nine Home view tests pass after the accessibility follow-up
+(`report_94`, `artifacts/popup-audit/home-bottom-accessibility-tests.log`).
+Actual-HUD private GPU journeys pass 1200 checks each in Night and Daylight
+at 1600×1000, 1024×720 and 2869×1337, including retained controls, mouse/keyboard
+care comparison, stable scroll, bounds and an unchanged state/RNG ledger.
+Evidence: `artifacts/home-bottom-final-{dark,light}.log` and
+`artifacts/home-lives/bottom-final-*`. The journey also captures the ultrawide
+bottom. Both private processes exited 0; the existing command-rail anchor
+warnings remain, with no script or engine errors. The final metadata/pressed
+style correction was verified by the nine-case rerun; rendered geometry is
+unchanged from the reviewed captures. No player session was restarted.
+
 ## October 16 — Home: lives and consequences (INTEGRATED)
 
 Runtime `19722d91` activates the illustrated Lives view in the actual Home /
