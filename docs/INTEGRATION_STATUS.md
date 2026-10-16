@@ -1,3 +1,36 @@
+## October 16 — Food: Living Pantry (INTEGRATED)
+
+Runtime `2201b711` replaces the active Economy Food renderer with the selected
+Living Pantry design. The approved landscape carries the four source yields,
+source warnings, current reserves, local meal adequacy, water intake and the
+90-day outlook. A compact daily account and existing assignment/conversation
+controls follow. Exact fresh/stored stocks, preservation, source condition and
+recorded history remain in a compact disclosure; deliveries are bounded to six
+per page. The painting is representative scenery, not a population census or
+evidence of unlocked cultivation. Other Economy tabs are unchanged.
+
+The provider reads current scoped stocks after same-day departures and refreshes
+changed food/water receipts. Reserve cover uses current stocks and measured daily
+need; the daily account and dated forecast remain their original engine receipts.
+Unknown readings stay unknown, current shortages remain warnings, effective food
+workers are labeled worker-equivalents, and local readings are distinct from the
+civilization-wide assignment destination. No simulation rules, command authority
+or save format changed. The existing court route supplies Talk with the leader.
+
+Eight behavior tests pass with zero errors, failures, skips or orphans
+(`report_102`, `artifacts/pantry-final-tests.log`). Actual terrain/HUD/provider
+private GPU journeys pass 831 checks each for early Night and mature Daylight
+at 1024x720, 1600x1000 and 2869x1337. They verify exact engine readings, same-day
+stock refresh, stable retained controls, keyboard disclosure, assignment
+navigation and unchanged audited ledgers/RNG while reading. Both processes exited
+0 with no script/engine errors; existing command-rail anchor warnings remain.
+Evidence: `artifacts/pantry-final-{dark,light}.log` and
+`artifacts/food-pantry/final-*`. The final Daylight capture includes the last
+source-label/travel-status refinements; Night uses the same corrected geometry.
+An independent visual/data critique accepted the final result. Runtime was
+remotely verified on main before canonical fast-forward. The existing player
+session remains running with its previously loaded scripts; no restart occurred.
+
 ## October 16 — Redundant Home Council removed (INTEGRATED)
 
 Runtime `02627394` removes Council from Home's tab row and the Civilization

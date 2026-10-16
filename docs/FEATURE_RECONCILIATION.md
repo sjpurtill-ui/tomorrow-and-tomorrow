@@ -1,3 +1,19 @@
+## October 16 — Food Living Pantry (INTEGRATED)
+
+`2201b711` applies the selected Living Pantry concept to the real Economy Food
+screen. The approved painting holds live source yields and warnings, reserves,
+meal adequacy, drinking needs and the outlook. Daily accounting and existing
+assignment/conversation controls remain direct; secondary evidence is compact
+and deliveries are paged. Current stock withdrawals update immediately while
+daily flow and forecast receipts retain their distinct meaning. Unknown values
+are not invented zeros. No simulation, authority or save-schema changes.
+
+Eight behavior cases and two actual-HUD private GPU journeys (831 checks each,
+three sizes, both themes) pass. The implementation/critique loop corrected
+gradient artifacts, detail sizing, ambiguous land-condition labels and negative
+store-change wording. See INTEGRATION_STATUS for evidence. Remote-first main
+integration is verified; the running player session was not restarted.
+
 ## October 16 — Home Council consolidation (INTEGRATED)
 
 `02627394` removes the redundant Council page. Home has Overview, People and
