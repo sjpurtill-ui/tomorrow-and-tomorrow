@@ -1,3 +1,26 @@
+## October 16 — Standard People allocator restored (INTEGRATED)
+
+`7c939c96` makes Home / People a direct nine-area allocator again. Requested
+percentages and actual assigned people are shown separately beside fixed,
+immediate controls. Population-based artwork stays in the header; allocation
+no longer depends on selecting or moving around the picture. The old portrait
+renderer remains inactive in source, with no migration or save-schema change.
+
+Consequences use the existing detached game calculations and guarded commands:
+actual donor counts, research effort and teams, material demand, construction,
+care, water, watch, and prominent food reserve/shortage consequences. Research
+effort is not promised discoveries, care changes gradually, and current reserves
+are not a starvation countdown. A zero food-stock change can still accompany
+starvation. Exact revision acknowledgment prevents an old forecast from being
+certified by a newer same-count update. No simulation rules changed.
+
+Independent visual and data critiques are resolved. The final nine view tests
+pass, following the 12-case view/commit and 31-case broader checks. Final early
+Daylight and mature Night journeys each pass 648 checks across three resolutions,
+including all nine controls and food warnings visible at 1024×720. See
+INTEGRATION_STATUS for evidence. The player session was not restarted; the
+canonical checkout receives the verified remote main commit before delivery.
+
 ## October 16 — Compact Home lower section (INTEGRATED)
 
 `2dd0dcab` with `c1010eb8` replaces the sprawling lower Home columns and large

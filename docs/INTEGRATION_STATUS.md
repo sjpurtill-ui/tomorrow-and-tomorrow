@@ -1,3 +1,39 @@
+## October 16 — Direct People allocator and consequences (INTEGRATED)
+
+Runtime `7c939c96` switches the actual Home / People renderer to
+`people_allocator_screen.gd`. All nine work areas have fixed minus, plus and
+plus-five controls, actual worker counts and separate requested percentages.
+The population-stage portrait remains a quiet header backdrop. All nine controls
+and the food-risk panel fit the tested 1024×720 viewport; wide screens use a
+bounded reading width. The former portrait navigation renderer remains in source
+but is no longer active. Other popups are outside this delivery.
+
+Assignments still apply immediately through the existing guarded workforce API.
+One detached evaluation supplies the whole view; an exact revision receipt keeps
+post-command comparisons from being mistaken for later world state. The panel
+shows actual donor changes, before/after consequences, supplied research effort
+and teams, goods demand, food-store drawdown and named town shortage/starvation
+warnings. Local housing estimates name the town. Unknown forecasts stay unknown;
+zero stock change is not described as adequate food. Simulation rules, automatic
+food protection, population, command authority and save format are unchanged.
+
+The implementation/critique loop included an independent visual reviewer and a
+data/command reviewer. Follow-ups fixed toolbar wrapping, short-window density,
+food-warning priority, requested-versus-actual counts and forecast freshness.
+31 combined view/commit/preview/impact cases passed (`report_96`); the expanded
+view and commit suites then passed 12/12 (`report_98`), followed by all nine view
+cases after final copy/style changes (`report_99`). All runs had zero errors,
+failures, skips or orphans. Logs: `artifacts/popup-audit/people-allocator-*.log`.
+
+Final actual-HUD private GPU journeys each pass 648 checks for early Daylight
+and mature Night across 1600×1000, 1024×720 and 2869×1337. They check real commands,
+rapid clicks, keyboard assignment, stale-day refresh, read-only selection,
+stable controls/scroll, counts and targets against the ledger, and delegation.
+Both processes exited 0; existing command-rail anchor warnings remain, with no
+script/engine errors. Evidence: `artifacts/people-allocator-approved-{light,dark}.log`
+and `artifacts/popup-audit/people-allocator/approved-*`. No live player or editor
+was restarted. Delivery follows verified remote-first main integration.
+
 ## October 16 — Home lower-page cleanup (INTEGRATED)
 
 Runtime `2dd0dcab` and accessibility follow-up `c1010eb8` tighten only the
