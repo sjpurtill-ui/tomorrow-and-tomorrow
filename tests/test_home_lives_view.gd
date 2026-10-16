@@ -115,3 +115,17 @@ func test_cross_town_starvation_warning_precedes_water_and_safeguard_notes() -> 
 	view.find_child("CareCompare", true, false).pressed.emit()
 	assert_str(view._refs.comparison.text).contains("South town: starvation risk.")
 	assert_str(view._refs.comparison.text).not_contains("Our town: low water.")
+
+func test_portrait_reserves_its_aspect_and_comparison_targets_keep_their_geometry() -> void:
+	for frame in 4: await get_tree().process_frame
+	assert_bool(view._hero.vertical).is_false()
+	var frame_rect: Rect2 = view._picture_frame.get_global_rect()
+	var picture_rect: Rect2 = view._portrait.get_global_rect()
+	assert_bool(frame_rect.grow(1).encloses(picture_rect)).is_true()
+	assert_float(frame_rect.size.y).is_greater(100.0)
+	var current: Rect2 = view.find_child("CareCurrent", true, false).get_global_rect()
+	var compare: Rect2 = view.find_child("CareCompare", true, false).get_global_rect()
+	view.find_child("CareCompare", true, false).pressed.emit()
+	for frame in 4: await get_tree().process_frame
+	assert_object(view.find_child("CareCurrent", true, false).get_global_rect()).is_equal(current)
+	assert_object(view.find_child("CareCompare", true, false).get_global_rect()).is_equal(compare)
