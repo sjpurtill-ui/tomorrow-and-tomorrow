@@ -18,6 +18,9 @@ var _drivers: Dictionary = {}
 var _risk_dots: RiskDots
 var _food_graph: FoodFlow
 var _research_bar: ProgressBar
+var _adoption_bar: ProgressBar
+var _standing_gauges: Dictionary = {}
+var _service_gauges: Dictionary = {}
 var _works: VBoxContainer
 var _work_select: OptionButton
 var _priority: OptionButton
@@ -149,68 +152,112 @@ func _build() -> void:
 	_action(actions, "Health & families", "on_health", "HealthDetail")
 	right.move_child(actions, _refs.comparison.get_index())
 	_rule()
+	var food_band := PanelContainer.new()
+	food_band.name = "FoodBand"
+	var band_style := T.flat(T.ROW_BG)
+	band_style.content_margin_left = 18
+	band_style.content_margin_right = 18
+	band_style.content_margin_top = 14
+	band_style.content_margin_bottom = 14
+	food_band.add_theme_stylebox_override("panel", band_style)
+	_content.add_child(food_band)
+	var food_content := _column(food_band, 10)
+	var food_heading := HBoxContainer.new()
+	food_content.add_child(food_heading)
+	_text(food_heading, "Keeping people fed", 20)
+	_link(food_heading, "Food & reserves ↗", "on_food", "FoodDetail")
 	var food := BoxContainer.new()
 	food.name = "HomeFoodFlow"
-	food.add_theme_constant_override("separation", 24)
-	_content.add_child(food)
+	food.add_theme_constant_override("separation", 28)
+	food_content.add_child(food)
 	_refs.food_box = food
-	var flow := _column(food, 7)
-	_text(flow, "Keeping people fed", 22)
-	_label(flow, "food_period", 14, T.MUTED)
+	var flow := _column(food, 4)
+	_label(flow, "food_period", 13, T.MUTED)
 	_food_graph = FoodFlow.new()
-	_food_graph.custom_minimum_size.y = 112
+	_food_graph.custom_minimum_size.y = 94
 	flow.add_child(_food_graph)
-	var reserves := _column(food, 6)
-	reserves.size_flags_stretch_ratio = .65
-	_text(reserves, "Current reserves", 14, T.MUTED)
-	_label(reserves, "reserves", 28)
-	_label(reserves, "balance", 18)
-	_label(reserves, "food_note", 14, T.MUTED)
-	_action(reserves, "Food & reserves", "on_food", "FoodDetail")
-	_rule()
-	_text(_content, "Across our civilization", 14, T.GOLD_TEXT)
+	var reserves := _column(food, 4)
+	reserves.size_flags_stretch_ratio = .6
+	_text(reserves, "IN RESERVE", 12, T.MUTED)
+	_label(reserves, "reserves", 27)
+	_label(reserves, "balance", 16)
+	_label(reserves, "food_note", 13, T.MUTED)
+	var civilization := _column(_content, 9)
+	_text(civilization, "ACROSS OUR CIVILIZATION", 12, T.GOLD_TEXT)
 	_society = BoxContainer.new()
 	_society.name = "HomeSociety"
 	_society.add_theme_constant_override("separation", 24)
-	_content.add_child(_society)
-	var learning := _column(_society, 8)
-	_text(learning, "Knowledge into practice", 22)
-	_label(learning, "question", 20)
-	_label(learning, "research_progress", 14, T.MUTED)
-	_research_bar = _bar(learning)
+	civilization.add_child(_society)
+	var learning := _column(_society, 6)
+	learning.size_flags_stretch_ratio = 1.15
+	_link(learning, "Research ↗", "on_research", "ResearchDetail", 19)
+	_label(learning, "question", 18)
+	var research_meters := HBoxContainer.new()
+	research_meters.add_theme_constant_override("separation", 14)
+	learning.add_child(research_meters)
+	var exploration := _column(research_meters, 4)
+	_label(exploration, "research_progress", 13, T.TEAL_TEXT)
+	_research_bar = _bar(exploration)
+	var adoption := _column(research_meters, 4)
+	_label(adoption, "research_adoption", 13, T.GOLD_TEXT)
+	_adoption_bar = _bar(adoption)
+	_adoption_bar.add_theme_stylebox_override("fill", T.flat(T.GOLD))
 	_label(learning, "research_effect", 16)
-	_label(learning, "research_usage", 14, T.MUTED)
-	_label(learning, "research_counts", 14, T.MUTED)
-	_action(learning, "Research", "on_research", "ResearchDetail")
-	var culture := _column(_society, 8)
-	_text(culture, "Values people live by", 22)
-	_label(culture, "course", 20)
+	_label(learning, "research_usage", 13, T.MUTED)
+	_label(learning, "research_counts", 13, T.MUTED)
+	var culture := _column(_society, 6)
+	_link(culture, "Culture & values ↗", "on_culture", "CultureDetail", 19)
+	_label(culture, "course", 18)
 	_label(culture, "culture_effect", 16)
-	_label(culture, "culture_meaning", 14, T.MUTED)
-	_action(culture, "Culture & values", "on_culture", "CultureDetail")
-	var regard := _column(_society, 8)
-	_text(regard, "How others see us", 22)
-	_label(regard, "awe", 24)
-	_label(regard, "draw", 24)
-	_label(regard, "regard_meaning", 14, T.MUTED)
-	_rule()
+	_label(culture, "culture_meaning", 13, T.MUTED)
+	var regard := _column(_society, 6)
+	regard.size_flags_stretch_ratio = .85
+	var regard_title := _text(regard, "How others see us", 19)
+	regard_title.custom_minimum_size.y = 32
+	regard_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	var gauges := HBoxContainer.new()
+	gauges.add_theme_constant_override("separation", 18)
+	regard.add_child(gauges)
+	for key: String in ["awe", "draw"]:
+		var item := _column(gauges, 0)
+		var gauge := StandingGauge.new()
+		gauge.custom_minimum_size = Vector2(100, 73)
+		gauge.ink = T.GOLD if key == "awe" else T.TEAL
+		item.add_child(gauge)
+		_standing_gauges[key] = gauge
+		var caption := _label(item, key, 14)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label(regard, "regard_meaning", 13, T.MUTED)
 	_foundations = BoxContainer.new()
 	_foundations.name = "EverydayFoundations"
 	_foundations.add_theme_constant_override("separation", 24)
 	_content.add_child(_foundations)
-	var work := _column(_foundations, 7)
-	_text(work, "The support behind daily work", 22)
-	_label(work, "foundations", 18)
-	_label(work, "work_effects", 14, T.MUTED)
+	var work := _column(_foundations, 6)
+	work.size_flags_stretch_ratio = 1.3
+	_link(work, "Buildings & works ↗", "on_works", "WorkDetail", 19)
+	_label(work, "foundations", 14, T.MUTED)
+	var services := HBoxContainer.new()
+	services.name = "LocalServiceReadings"
+	services.add_theme_constant_override("separation", 20)
+	work.add_child(services)
+	_refs.service_readings = services
+	for entry in [["services", "Services"], ["roads", "Roads"], ["craft", "Builders' craft"]]:
+		var item := _column(services, 3)
+		_text(item, entry[1], 13, T.MUTED)
+		var amount := _text(item, "—", 22)
+		var bar := _bar(item)
+		_service_gauges[entry[0]] = {"value": amount, "bar": bar}
+	_label(work, "work_effects", 14, T.BODY)
 	var work_actions := HFlowContainer.new()
 	work_actions.add_theme_constant_override("h_separation", 8)
 	work.add_child(work_actions)
-	_action(work_actions, "Buildings & works", "on_works", "WorkDetail")
-	var toggle := _action(work_actions, "Water & sanitation", "", "WaterWorksToggle")
+	var toggle := _link(work_actions, "Water & sanitation ›", "", "WaterWorksToggle")
 	toggle.pressed.connect(func() -> void: _works_open = not _works_open; _works.visible = _works_open)
-	var watch := _column(_foundations, 7)
-	_text(watch, "Who protects these lives?", 22)
-	_label(watch, "watch", 20)
+	var watch := _column(_foundations, 6)
+	var watch_title := _text(watch, "On watch", 19)
+	watch_title.custom_minimum_size.y = 32
+	watch_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_label(watch, "watch", 22)
 	_label(watch, "watch_reason", 14, T.MUTED)
 	_works = _column(_content, 8)
 	_works.name = "WaterWorks"
@@ -222,32 +269,42 @@ func _build() -> void:
 	_label(_works, "work_sentence", 16)
 	_label(_works, "work_cost", 14, T.MUTED)
 	var start := _action(_works, "Start", "", "StartSelectedWork", true)
+	start.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	start.pressed.connect(_start_work)
-	_rule()
-	var footer := _column(_content, 10)
+	var footer := _column(_content, 6)
 	footer.name = "HomeLeadership"
-	_label(footer, "leader", 20)
-	_label(footer, "direction", 14, T.MUTED)
+	var leadership_row := BoxContainer.new()
+	leadership_row.add_theme_constant_override("separation", 18)
+	footer.add_child(leadership_row)
+	_refs.leadership_row = leadership_row
+	var identity := _column(leadership_row, 3)
+	_label(identity, "leader", 18)
+	_label(identity, "direction", 13, T.MUTED)
 	var leadership := HFlowContainer.new()
 	leadership.add_theme_constant_override("h_separation", 8)
 	leadership.add_theme_constant_override("v_separation", 6)
-	footer.add_child(leadership)
-	_action(leadership, "Talk through our priorities", "on_leader", "TalkToLeader")
-	_action(leadership, "Assign workers", "on_people", "PeopleDetail")
-	_action(leadership, "Back to our leaders", "on_leaders", "BackToLeaders")
+	leadership.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	leadership.size_flags_stretch_ratio = 1.3
+	leadership_row.add_child(leadership)
+	_link(leadership, "Talk priorities", "on_leader", "TalkToLeader")
+	_action(leadership, "Assign workers", "on_people", "PeopleDetail", true)
+	_link(leadership, "Back to our leaders", "on_leaders", "BackToLeaders")
 	_priority = _selector(leadership, "LeaderPriorities")
+	_priority.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_priority.item_selected.connect(_select_priority)
 	_label(footer, "work_warning", 14, T.AMBER_TEXT)
 	var fix := _action(footer, "", "on_food_fix", "FoodFix")
+	fix.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	fix.visible = false
 	var ending := HFlowContainer.new()
-	ending.add_theme_constant_override("h_separation", 8)
+	ending.add_theme_constant_override("h_separation", 20)
 	ending.add_theme_constant_override("v_separation", 6)
 	footer.add_child(ending)
-	_action(ending, "Population & families", "on_population", "PopulationDetail")
-	_action(ending, "Visit this place", "on_visit", "VisitVillage")
-	_action(ending, "Rename", "on_rename", "RenamePlace")
+	_link(ending, "Population & families ↗", "on_population", "PopulationDetail")
+	_link(ending, "Visit this place ↗", "on_visit", "VisitVillage")
+	_link(ending, "Rename", "on_rename", "RenamePlace")
 	_founding = _selector(ending, "NewTownsChoice")
+	_founding.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_founding.item_selected.connect(_select_founding)
 	_label(footer, "founding", 14, T.MUTED)
 
@@ -274,6 +331,12 @@ func _fill() -> void:
 		for key: String in _drivers: _driver(key, -1, false, "Not measured")
 		_food_graph.reading = {}
 		_food_graph.queue_redraw()
+		for gauge: StandingGauge in _standing_gauges.values():
+			gauge.value = -1
+			gauge.queue_redraw()
+		_refs.service_readings.visible = false
+		_research_bar.visible = false
+		_adoption_bar.visible = false
 		_risk_dots.risk = -1
 		_risk_dots.queue_redraw()
 		_fill_actions()
@@ -334,7 +397,8 @@ func _fill_food(food: Dictionary) -> void:
 	var days := float(food.get("stored_days", -1))
 	_set_text("reserves", "%s days of meals" % _num(days) if days >= 0 else "Not measured")
 	_set_text("balance", "Stores %s rations / day" % _signed(float(shown.get("net", 0))) if bool(food.get("known", false)) or compared else "No daily balance recorded")
-	_set_text("food_note", "%s rations held. Reserves ÷ daily need, not a starvation countdown." % _num(food.get("stock", 0)))
+	_set_text("food_note", "%s rations held · at current daily need" % _num(food.get("stock", 0)) if bool(food.get("known", false)) else "Reserves have not been measured.")
+	_refs.reserves.tooltip_text = "Current stored food divided by daily need. This is not a starvation countdown: production, intake and losses continue to change."
 	_refs.balance.add_theme_color_override("font_color", T.AMBER_TEXT if float(shown.get("net", 0)) < 0 else T.GREEN_TEXT)
 
 func _fill_comparison() -> void:
@@ -366,17 +430,23 @@ func _fill_society(lives: Dictionary) -> void:
 	var question: Dictionary = research.get("current", {})
 	_set_text("question", String(question.get("name", research.get("empty", "No active question is recorded."))))
 	var progress := float(question.get("progress", 0))
-	_set_text("research_progress", "%s%% explored · %s%% recorded adoption / trial use" % [_num(progress * 100), _num(float(question.get("adoption", 0)) * 100)] if not question.is_empty() else "")
+	_set_text("research_progress", "Explored · %s%%" % _num(progress * 100) if not question.is_empty() else "")
+	_set_text("research_adoption", "Adoption / trial · %s%%" % _num(float(question.get("adoption", 0)) * 100) if not question.is_empty() else "")
 	_research_bar.visible = not question.is_empty()
 	_research_bar.value = progress * 100
+	_research_bar.tooltip_text = "Question explored: %s%%" % _num(progress * 100)
+	_adoption_bar.visible = not question.is_empty()
+	_adoption_bar.value = float(question.get("adoption", 0)) * 100
+	_adoption_bar.tooltip_text = "Recorded adoption / trial use: %s%%" % _num(float(question.get("adoption", 0)) * 100)
 	var effects: Array[String] = []
 	for row: Dictionary in question.get("effects", []):
 		if bool(row.get("inert", false)): continue
 		effects.append("%s %s" % [String(row.get("label", "")), String(row.get("amount", ""))])
 	_set_text("research_effect", "At full use: " + " · ".join(effects.slice(0, 2)) if not effects.is_empty() else "")
 	_refs.research_effect.tooltip_text = "\n".join(effects)
-	_set_text("research_usage", String(question.get("usage", "")))
-	_set_text("research_counts", "%d active inquiries · %d discoveries\n%d methods with recorded adoption" % [int(research.get("active_count", 0)), int(research.get("known_count", 0)), int(research.get("adopted_count", 0))])
+	_set_text("research_usage", "Needs practice & supplies." if not String(question.get("usage", "")).is_empty() else "")
+	_refs.research_usage.tooltip_text = String(question.get("usage", ""))
+	_set_text("research_counts", "%d inquiries · %d discoveries · %d with adoption" % [int(research.get("active_count", 0)), int(research.get("known_count", 0)), int(research.get("adopted_count", 0))])
 	var culture: Dictionary = lives.get("culture", {})
 	var course: Dictionary = culture.get("course", {})
 	_set_text("course", String(course.get("name", "No course recorded")))
@@ -391,25 +461,39 @@ func _fill_society(lives: Dictionary) -> void:
 	_set_text("culture_meaning", String(course.get("vision", "")))
 	var regard: Dictionary = lives.get("regard", {})
 	var measured := bool(regard.get("known", false))
-	_set_text("awe", "Awe · %s/100" % _num(float(regard.get("awe", 0)) * 100) if measured else "Awe & draw not recorded")
-	_set_text("draw", "Draw · %s/100" % _num(float(regard.get("draw", 0)) * 100) if measured else "")
+	_set_text("awe", "Awe")
+	_set_text("draw", "Draw")
+	for key: String in _standing_gauges:
+		var gauge: StandingGauge = _standing_gauges[key]
+		gauge.value = float(regard.get(key, 0)) * 100 if measured else -1
+		gauge.tooltip_text = "%s: %s / 100. Age-relative standing." % [key.capitalize(), _num(gauge.value)] if measured else "Not recorded"
+		gauge.queue_redraw()
 	var date := int(regard.get("day", -1))
-	_set_text("regard_meaning", "Awe reflects might, works and learning. Draw also reflects culture, plenty, order and diplomacy.\nAge-relative readings%s." % (" · recorded day %d" % date if date >= 0 else "") if measured else "Civilization-wide standing will appear after it is measured.")
-	_refs.regard_meaning.tooltip_text = String(regard.get("note", ""))
+	_set_text("regard_meaning", "Age-relative standing%s" % (" · day %d" % date if date >= 0 else "") if measured else "Standing has not been measured yet.")
+	_refs.awe.tooltip_text = "Awe reflects might, works and learning."
+	_refs.draw.tooltip_text = "Draw also reflects culture, plenty, order and diplomacy."
+	_refs.regard_meaning.tooltip_text = "Awe reflects might, works and learning. Draw also reflects culture, plenty, order and diplomacy.\n" + String(regard.get("note", ""))
 
 func _fill_foundations(foundation: Dictionary) -> void:
+	_refs.service_readings.visible = bool(foundation.get("known", false))
 	if not bool(foundation.get("known", false)):
 		_set_text("foundations", "Local services are not measured yet.")
 		_set_text("work_effects", "")
 		_set_text("watch", "Local protection is not measured yet.")
 		_set_text("watch_reason", "")
 		return
-	_set_text("foundations", "Service coverage %s/100 · roads %s/100\nBuilders' craft %s/%s" % [_num(float(foundation.get("service_coverage", 0)) * 100), _num(float(foundation.get("road_quality", 0)) * 100), _num(foundation.get("craft", 0)), _num(foundation.get("craft_max", 10))])
+	_set_text("foundations", "")
+	for entry in [["services", float(foundation.get("service_coverage", 0)) * 100, 100.0], ["roads", float(foundation.get("road_quality", 0)) * 100, 100.0], ["craft", float(foundation.get("craft", 0)), float(foundation.get("craft_max", 10))]]:
+		var gauge: Dictionary = _service_gauges[entry[0]]
+		gauge.value.text = "%s / %s" % [_num(entry[1]), _num(entry[2])]
+		gauge.bar.value = float(entry[1]) / maxf(.001, float(entry[2])) * 100
+		gauge.value.tooltip_text = "Service and quality measures, not building counts."
 	var effects: Array[String] = []
 	for pair in [["making_multiplier", "Making"], ["stored_rot_multiplier", "Stored-food decay"], ["haul_multiplier", "Hauling"]]:
 		var change := (float(foundation.get(pair[0], 1)) - 1.0) * 100.0
 		if absf(change) >= .01: effects.append("%s %s%%" % [pair[1], _signed(change)])
-	_set_text("work_effects", (" · ".join(effects) + "\n" if not effects.is_empty() else "") + "Service and quality measures, not building counts.")
+	_set_text("work_effects", " · ".join(effects) if not effects.is_empty() else "No output modifiers from local services yet.")
+	_refs.work_effects.tooltip_text = "Service and quality measures, not building counts."
 	var watch: Dictionary = foundation.get("watch", {})
 	if watch.is_empty():
 		_set_text("watch", "Local protection is not measured yet.")
@@ -417,10 +501,16 @@ func _fill_foundations(foundation: Dictionary) -> void:
 		return
 	_set_text("watch", "%s serving · %s could muster" % [_num(watch.get("standing", 0)), _num(watch.get("mobilisable", 0))])
 	var blockers: Array[String] = []
-	for row: Dictionary in watch.get("blockers", []): blockers.append(String(row.get("text", "")))
+	for row: Dictionary in watch.get("blockers", []):
+		# The danger threshold describes the people's automatic decision; it is
+		# not a material shortage or a suggestion to put more lives in danger.
+		if String(row.get("kind", "")) == "danger":
+			blockers.append("People see no need yet (danger %d; trigger %d)" % [floori(float(row.get("have", 0)) * 100 + .0001), roundi(float(row.get("need", 0)) * 100)])
+		else: blockers.append(String(row.get("text", "")))
 	var words := String(watch.get("short", ""))
 	var building: Dictionary = watch.get("building", {})
 	if not building.is_empty(): words += " · %s %s%% built" % [String(building.get("short", "Works")), _num(float(building.get("progress", 0)) * 100)]
+	elif not watch.get("next", {}).is_empty(): words += " · next: %s" % String(watch.next.get("short", "defense works"))
 	if not blockers.is_empty(): words += "\n" + "; ".join(blockers.slice(0, 2))
 	elif not String(watch.get("reason", "")).is_empty(): words += "\n" + String(watch.reason)
 	_set_text("watch_reason", words)
@@ -540,9 +630,10 @@ func _layout() -> void:
 	var available := _hero.size.x if _hero.size.x > 0 else size.x
 	var narrow := available < 620
 	_hero.vertical = narrow
-	_society.vertical = available < 700
+	_society.vertical = available < 880
 	_foundations.vertical = narrow
 	(_refs.food_box as BoxContainer).vertical = narrow
+	(_refs.leadership_row as BoxContainer).vertical = available < 800
 	for child: Control in _hero.get_children(): child.custom_minimum_size.x = 0
 	_fit_picture()
 
@@ -627,6 +718,26 @@ func _selector(parent: Node, node_name: String) -> OptionButton:
 	parent.add_child(select)
 	return select
 
+func _link(parent: Node, title: String, key: String, node_name: String, font_size: int = 14) -> Button:
+	var button := _action(parent, title, key, node_name)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	button.custom_minimum_size.y = 32
+	button.add_theme_font_size_override("font_size", font_size)
+	var normal := T.flat(Color.TRANSPARENT)
+	normal.content_margin_top = 5
+	normal.content_margin_bottom = 5
+	var hover := normal.duplicate() as StyleBoxFlat
+	hover.bg_color = T.HOVER_BG
+	hover.border_color = T.TEAL
+	hover.border_width_bottom = 1
+	button.add_theme_stylebox_override("normal", normal)
+	button.add_theme_stylebox_override("hover", hover)
+	button.add_theme_stylebox_override("pressed", hover)
+	button.add_theme_stylebox_override("disabled", normal)
+	for key_name: String in ["font_color", "font_focus_color", "font_hover_color", "font_pressed_color"]:
+		button.add_theme_color_override(key_name, T.TEAL_TEXT)
+	return button
+
 func _sync_options(select: OptionButton, items: Array, active: String, label_key: String) -> void:
 	var stamp := ""
 	for item: Dictionary in items: stamp += String(item.get("id", "")) + ":" + String(item.get(label_key, "")) + "|"
@@ -684,17 +795,35 @@ class FoodFlow extends Control:
 		if reading.is_empty():
 			draw_string(font, Vector2(0, 35), "Daily food flow is not recorded yet.", HORIZONTAL_ALIGNMENT_LEFT, size.x, 16, T.MUTED)
 			return
-		var entries := [["production", "Brought in"], ["eaten", "Eaten"], ["spoilage", "Lost"]]
-		var maximum := maxf(1, maxf(float(reading.get("production", 0)), float(reading.get("required", 0))))
-		var width := size.x / 3.0
-		for index in 3:
-			var x: float = index * width
-			var amount := float(reading.get(entries[index][0], 0))
-			draw_string(font, Vector2(x, 22), HomeLivesNumber(amount), HORIZONTAL_ALIGNMENT_LEFT, width - 12, 25, T.INK)
-			draw_string(font, Vector2(x, 48), entries[index][1], HORIZONTAL_ALIGNMENT_LEFT, width - 12, 14, T.BODY)
-			draw_rect(Rect2(x, 61, width - 20, 5), T.TRACK)
-			draw_rect(Rect2(x, 61, (width - 20) * clampf(amount / maximum, 0, 1), 5), T.TEAL if index == 0 else T.AMBER)
-		var note := "Rations / day · daily need %s" % HomeLivesNumber(float(reading.get("required", 0)))
-		draw_string(font, Vector2(0, 94), note, HORIZONTAL_ALIGNMENT_LEFT, size.x, 14, T.MUTED)
+		var production := maxf(0, float(reading.get("production", 0)))
+		var eaten := maxf(0, float(reading.get("eaten", 0)))
+		var loss := maxf(0, float(reading.get("spoilage", 0)))
+		var required := maxf(0, float(reading.get("required", 0)))
+		var maximum := maxf(1, maxf(maxf(production, required), eaten + loss))
+		var width := size.x - 2
+		draw_string(font, Vector2(0, 16), "Brought in  %s" % HomeLivesNumber(production), HORIZONTAL_ALIGNMENT_LEFT, width, 16, T.BODY)
+		draw_rect(Rect2(0, 23, width, 6), T.TRACK)
+		draw_rect(Rect2(0, 23, width * production / maximum, 6), T.TEAL)
+		draw_string(font, Vector2(0, 49), "Eaten  %s   ·   Lost  %s" % [HomeLivesNumber(eaten), HomeLivesNumber(loss)], HORIZONTAL_ALIGNMENT_LEFT, width, 16, T.BODY)
+		draw_rect(Rect2(0, 56, width, 6), T.TRACK)
+		draw_rect(Rect2(0, 56, width * eaten / maximum, 6), T.AMBER)
+		draw_rect(Rect2(width * eaten / maximum, 56, width * loss / maximum, 6), T.RED)
+		var need_x := width * required / maximum
+		for y: float in [23.0, 56.0]: draw_line(Vector2(need_x, y - 3), Vector2(need_x, y + 9), T.INK, 1)
+		var note := "Rations / day · marker: daily need %s" % HomeLivesNumber(required)
+		draw_string(font, Vector2(0, 86), note, HORIZONTAL_ALIGNMENT_LEFT, size.x, 13, T.MUTED)
 	static func HomeLivesNumber(value: float) -> String:
 		return str(roundi(value)) if absf(value - roundf(value)) < .01 else "%.1f" % value
+
+class StandingGauge extends Control:
+	var value := -1.0
+	var ink := Color.WHITE
+	func _draw() -> void:
+		var at := Vector2(size.x * .5, 52)
+		var radius := 43.0
+		draw_arc(at, radius, PI, TAU, 48, T.TRACK, 4, true)
+		if value >= 0: draw_arc(at, radius, PI, PI + PI * clampf(value / 100, 0, 1), 48, ink, 4, true)
+		var font := T.font("ui")
+		var amount := "—" if value < 0 else FoodFlow.HomeLivesNumber(value)
+		draw_string(font, Vector2(0, 47), amount, HORIZONTAL_ALIGNMENT_CENTER, size.x, 27, T.INK)
+		draw_string(font, Vector2(0, 67), "/ 100" if value >= 0 else "unrecorded", HORIZONTAL_ALIGNMENT_CENTER, size.x, 12, T.MUTED)

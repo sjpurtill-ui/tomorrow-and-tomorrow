@@ -136,6 +136,8 @@ func _ready()->void:
 				_expect(comparison.get_global_rect()==narrow_button and current.get_global_rect()==narrow_current,"Narrow Current keeps both controls fixed")
 				_expect(hud.dock.body_scroll.scroll_vertical==narrow_scroll,"Narrow Current preserves scroll")
 			hud.dock.body_scroll.scroll_vertical=100000;await _frames(4);await _capture("consequences-narrow")
+		else:
+			hud.dock.body_scroll.scroll_vertical=100000;await _frames(4);await _capture("consequences-"+str(canvas.x))
 	var text:=" ".join(_visible_text(board)).to_lower()
 	for forbidden:String in ["illustrative additions","other net change","example only","51 in use","safer water preparation*"]:
 		_expect(not text.contains(forbidden),"No illustrative placeholder: "+forbidden)
