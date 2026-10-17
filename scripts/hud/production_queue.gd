@@ -1,13 +1,11 @@
 extends VBoxContainer
-## Production keeps daily household work and workshop orders as two tasks.
-## Each task uses a bounded index and one selected reading. Recipes explain their
-## use, complete material bill and current blockers before the existing Start action.
-## Order priority, callbacks and values come directly from the provider. Live row
-## controls are retained across numeric updates; presentation state survives shape
-## changes through the provider's view_state dictionary.
+## Dense production board: resource strip, category filters and simultaneous
+## military line rows; civilian output is one adjacent route. Numeric updates
+## retain live controls, category selection and scroll geometry.
 ##
 ## Other dock panels extend this script for _button, _bar and _rule; keep those
 ## three helpers, T, Art and data unchanged.
+const Industrial=preload("res://scripts/hud/production_skin.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Art:=preload("res://scripts/hud/production_art.gd")
 const P:=preload("res://scripts/persistent_production.gd")
@@ -42,10 +40,12 @@ var _view_state:Dictionary={}
 var _selectors:Dictionary={}
 var _workspaces:Dictionary={}
 var _workspace_buttons:Dictionary={}
+var _filter_buttons:Dictionary={}
+var _line_filter:="all"
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();name="IllustratedProductionQueue"
-	add_theme_constant_override("separation",12)
+	add_theme_constant_override("separation",6)
 	data=_prepared(block)
 	_view_state=block.get("view_state",{})
 	_shape=shape_key(data)
@@ -58,25 +58,28 @@ func setup(block:Dictionary)->void:
 			_overview_box=VBoxContainer.new();_overview_box.name="Overview";_overview_box.add_theme_constant_override("separation",10);add_child(_overview_box)
 			_build_flow_disclosure("How today's work moves")
 		"civilian":
-			_build_flow()
-			_build_assign_workers()
-			_build_households(self,true)
+			_build_civilian_lines()
 		_:
-			_build_workshop_brief()
+			_build_header()
 			_build_assign_workers()
 			var navigation:=HFlowContainer.new();navigation.add_theme_constant_override("h_separation",8);add_child(navigation)
-			for entry:Array in [["orders","Current orders"],["recipes","Choose a product"],["stock","Equipment stores"]]:
+			for entry:Array in [["orders","Production lines"],["recipes","+ Add production line"],["stock","Stockpile"]]:
 				var key:=String(entry[0]);var button:=W.text_button(String(entry[1]),"Show "+String(entry[1]).to_lower());button.toggle_mode=true;navigation.add_child(button);_workspace_buttons[key]=button
 				button.pressed.connect(func():_show_workspace(key))
 			var orders:=VBoxContainer.new();orders.name="LinesColumn";orders.add_theme_constant_override("separation",8);add_child(orders);_workspaces.orders=orders
+			_build_filters(orders)
 			_build_lines(orders)
+			if not data.get("civilian_lines",[]).is_empty():_build_civilian_lines(orders)
 			_picker=Picker.new();add_child(_picker);_workspaces.recipes=_picker
 			_picker.build(self,data.get("recipes",[]),_room_note())
 			_build_stock()
-			_show_workspace(String(_view_state.get("workspace","orders" if not data.get("lines",[]).is_empty() else "recipes")))
+			_show_workspace(String(_view_state.get("workspace","orders")))
 			_build_flow_disclosure("Materials & daily flow")
 			_build_footer()
-			_build_header()
+	var contents:=get_children()
+	var frame:=PanelContainer.new();frame.name="ProductionSurface";frame.add_theme_stylebox_override("panel",Industrial.flat(Color("252a25"),Color("626650"),1,1,8));add_child(frame)
+	var layout:=VBoxContainer.new();layout.add_theme_constant_override("separation",6);frame.add_child(layout)
+	for child:Node in contents:child.reparent(layout)
 	_apply()
 
 ## True when the new block has the same lines, chips and cards: the screen
@@ -97,6 +100,7 @@ static func shape_key(block:Dictionary)->String:
 	for material:Dictionary in block.get("materials",[]):parts.append("M"+String(material.get("resource","")))
 	for city:Dictionary in block.get("households",[]):parts.append("H"+String(city.get("id","")))
 	for technique:Dictionary in block.get("techniques",[]):parts.append("T"+String(technique.get("id","")))
+	for row:Dictionary in block.get("civilian_lines",[]):parts.append("C"+String(row.id))
 	parts.append("B%d" % int(block.get("boatyards",0)))
 	if block.has("arms"):parts.append("A")
 	if block.has("overview"):parts.append("V")
@@ -182,13 +186,15 @@ func _build_header()->void:
 	materials.add_theme_constant_override("h_separation",16);materials.add_theme_constant_override("v_separation",4);row.add_child(materials)
 	# The stores are drawn on the chart above with what they hold; the strip
 	# keeps the workshop's own figures.
-	materials.visible=false
+	materials.visible=true
+	for material:Dictionary in data.get("materials",[]):
+		_material_chips[String(material.resource)]=_fact(materials,Icons.material_texture(String(material.resource)),"Material_"+String(material.resource),"")
 	var workshop:=HBoxContainer.new();workshop.name="Workshop";workshop.add_theme_constant_override("separation",14);row.add_child(workshop)
 	_header.hands=_fact(workshop,null,"Hands","HANDS")
 	# The chart above says the makers on the lines; the strip does not repeat it.
-	_header.hands.visible=false
+	_header.hands.visible=true
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
-	_header.lines.visible=false
+	_header.lines.visible=true
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
 	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)
 	var run_word:=Label.new();run_word.text="Managed by";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
@@ -403,16 +409,15 @@ class StockBar extends Control:
 
 func _build_lines(parent:Node)->void:
 	var head:=HBoxContainer.new();head.name="LinesHead";parent.add_child(head)
-	var kicker:=Folio.label("At the workshops","voice");kicker.add_theme_font_size_override("font_size",24);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
+	var kicker:=Folio.label("PRODUCTION LINES","small");kicker.add_theme_font_size_override("font_size",14);kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(kicker)
 	var room:=Label.new();room.name="LineRoom";T.text(room,"kicker",T.INK_MUTED);head.add_child(room);_header.line_room=room
 	var lines:Array=data.get("lines",[])
-	var list:=_selection(parent,"lines",4);list.name="WorkshopLines"
+	var list:=VBoxContainer.new();list.name="WorkshopLines";list.add_theme_constant_override("separation",4);parent.add_child(list)
 	for view:Dictionary in lines:
 		var row:=LineRow.new();row.build(self,view);_rows[int(view.id)]=row
-		list.add_record(str(view.id),"%d · %s" % [int(view.rank),String(view.name)],String(view.get("short","Working")),row)
+		list.add_child(row)
 	if lines.is_empty():
 		var empty:=Folio.label("No orders yet. Choose a product to put your workshops to work.","body",T.INK_MUTED);empty.name="NoLines";empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(empty)
-	list.refresh()
 
 func _selection(parent:Node,key:String,limit:int=6)->Control:
 	if not _view_state.has(key):_view_state[key]={}
@@ -423,6 +428,7 @@ func _show_workspace(key:String)->void:
 	for choice in _workspaces:
 		_workspaces[choice].visible=choice==key
 		_workspace_buttons[choice].set_pressed_no_signal(choice==key)
+	preload("res://scripts/hud/production_skin.gd").apply(self)
 
 ## The heads over the rows' columns, aligned with LineRow's fixed widths.
 func _column_heads()->MarginContainer:
@@ -444,7 +450,9 @@ func _apply_lines()->void:
 	var lines:Array=data.get("lines",[])
 	for view:Dictionary in lines:
 		var row:Node=_rows.get(int(view.id))
-		if row!=null:row.apply(view)
+		if row!=null:
+			row.apply(view)
+			row.visible=_line_filter=="all" or _category(String(view.item))==_line_filter
 		if _selectors.has("lines"):_selectors.lines.update_record(str(view.id),"%d · %s" % [int(view.rank),String(view.name)],String(view.get("short","Working")))
 	if _header.has("line_room"):
 		var room:Label=_header.line_room
@@ -585,10 +593,11 @@ func _apply()->void:
 	if _flow!=null:_flow.set_model(data.get("flow",{}),String(data.get("mode","military")))
 	match String(data.get("mode","military")):
 		"all":_apply_all_head();_apply_households();_apply_overview()
-		"civilian":_apply_households()
+		"civilian":_apply_civilian_lines()
 		_:
-			_apply_workshop_brief();_apply_header();_apply_stock();_apply_lines()
+			_apply_workshop_brief();_apply_header();_apply_stock();_apply_lines();_apply_civilian_lines()
 			if _picker!=null:_picker.apply(data.get("recipes",[]),_room_note())
+	preload("res://scripts/hud/production_skin.gd").apply(self)
 
 func _open(page:int)->void:
 	var open:Variant=data.get("on_open")
@@ -782,3 +791,51 @@ func _bar(parent:Node,ratio:float,color:Color)->void:
 	var bar:=ProgressBar.new();bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.custom_minimum_size.y=7;bar.show_percentage=false;bar.value=ratio*100;bar.add_theme_stylebox_override("background",T.flat(T.TRACK));bar.add_theme_stylebox_override("fill",T.flat(color));parent.add_child(bar)
 func _rule(parent:Node)->void:
 	var rule:=HSeparator.new();rule.add_theme_color_override("color",T.BORDER_SOFT);parent.add_child(rule)
+
+# Civilian production uses the same dense line language, with assignments
+# delegated to the People ledger instead of inventing a second labor owner.
+var _civil_rows:Dictionary={}
+func _build_civilian_lines(parent:Node=null)->void:
+	if parent==null:parent=self
+	for row:Dictionary in data.get("civilian_lines",[]):
+		var panel:=PanelContainer.new();panel.name="Civilian_"+String(row.id)
+		panel.add_theme_stylebox_override("panel",Industrial.flat(Color("344033"),Color("59604b"),1,1,8));parent.add_child(panel)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);panel.add_child(column)
+		var top:=HBoxContainer.new();column.add_child(top)
+		var title:=Folio.label(String(row.name),"body",Color("dddcc8"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
+		var button:=W.text_button("Assign", "Change the workers assigned to "+String(row.name));top.add_child(button)
+		button.pressed.connect(func():
+			var callback:Variant=data.get("on_civilian_assign")
+			if callback is Callable:callback.call(String(row.role)))
+		var output:=Folio.label("","small",Color("dddcc8"));column.add_child(output)
+		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=8;bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));bar.add_theme_stylebox_override("fill",T.flat(Color("8da760")));column.add_child(bar)
+		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(inputs)
+		_civil_rows[String(row.id)]={"output":output,"bar":bar,"inputs":inputs}
+
+func _apply_civilian_lines()->void:
+	for row:Dictionary in data.get("civilian_lines",[]):
+		var refs:Dictionary=_civil_rows.get(String(row.id),{})
+		if refs.is_empty():continue
+		refs.output.text="%s / day    •    %s stored    •    %s workers" % [Plain.number(float(row.output)),Plain.number(float(row.stock)),Plain.number(float(row.workers))]
+		refs.bar.value=clampf(float(row.get("coverage",1.0)),0,1)*100
+		refs.bar.tooltip_text=String(row.get("bar_tip","Store coverage"))
+		refs.inputs.text=String(row.get("status",""))
+
+func _build_filters(parent:Node)->void:
+	var toolbar:=HFlowContainer.new();toolbar.name="CategoryFilters";toolbar.add_theme_constant_override("h_separation",3);parent.add_child(toolbar)
+	_line_filter=String(_view_state.get("line_filter","all"))
+	for entry:Array in [["all","All"],["weapons","Land"],["ammunition","Ammo"],["boats","Naval"],["aircraft","Air"],["carts","Transport"]]:
+		var key:=String(entry[0]);var button:=W.text_button(String(entry[1]),"Show "+String(entry[1])+" production lines");button.toggle_mode=true;toolbar.add_child(button);_filter_buttons[key]=button
+		button.set_pressed_no_signal(_line_filter==key)
+		button.pressed.connect(func():
+			_line_filter=key;_view_state.line_filter=key
+			for choice:String in _filter_buttons:_filter_buttons[choice].set_pressed_no_signal(choice==key)
+			_apply_lines();preload("res://scripts/hud/production_skin.gd").apply(self))
+
+func _category(item:String)->String:
+	for recipe:Dictionary in data.get("recipes",[]):
+		if String(recipe.item)==item:return String(recipe.get("category","weapons"))
+	var joint:=preload("res://scripts/joint_force_catalog.gd").by_equipment(item)
+	if not joint.is_empty():return "boats" if String(joint.domain)=="navy" else "aircraft"
+	if item in ["transport_cart","supply_lorry"]:return "carts"
+	return "ammunition" if MilitaryCampaign.CONSUMABLE_KNOWLEDGE.has(item) else "weapons"

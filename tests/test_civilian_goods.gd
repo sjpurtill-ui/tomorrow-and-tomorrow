@@ -69,11 +69,12 @@ func test_output_is_limited_by_labor_and_by_raw_materials()->void:
 	GameState.elapsed_days+=1
 	var stock_before:=Goods.stock()*(1.0-Goods.DAILY_WEAR)
 	report=Goods.advance()
-	assert_float(float(report.made)).is_equal_approx(.05/Goods.RAW_PER_UNIT,.00001)
+	assert_float(float(report.made)).is_less(expected*.5)
+	assert_float(float(report.made)).is_greater(.05/Goods.RAW_PER_UNIT)
 	assert_float(float(GameState.resource_stockpiles.Stone)).is_equal_approx(0.0,.000001)
-	assert_float(Goods.stock()).is_equal_approx(stock_before+.05/Goods.RAW_PER_UNIT,.00001)
+	assert_float(Goods.stock()).is_equal_approx(stock_before+float(report.made),.00001)
 
-func test_nothing_is_made_without_workers_materials_or_a_settled_site()->void:
+func test_no_workers_or_unsettled_site_stop_but_materials_slow()->void:
 	GameState.population_allocations.Crafting=0
 	var report:=Goods.advance()
 	assert_float(float(report.made)).is_equal(0.0)
@@ -81,8 +82,8 @@ func test_nothing_is_made_without_workers_materials_or_a_settled_site()->void:
 	GameState.population_allocations.Crafting=20;GameState.resource_stockpiles={}
 	GameState.elapsed_days+=1
 	report=Goods.advance()
-	assert_float(float(report.made)).is_equal(0.0)
-	assert_str(String(report.reason)).contains("Needs timber")
+	assert_float(float(report.made)).is_greater(0.0)
+	assert_float(float(report.resource_factor)).is_less(1.0)
 	GameState.settlement_site_committed=false;GameState.resource_stockpiles={"Timber":10.0}
 	GameState.elapsed_days+=1
 	report=Goods.advance()

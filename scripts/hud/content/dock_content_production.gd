@@ -19,19 +19,21 @@ const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
 var view_state:Dictionary={}
 func meta()->Dictionary:
-	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":true, "title_size":38, "spread_tabs":true, "subtabs":["Daily work","Daily work","Workshop orders"], "hidden_subtabs":[1], "subtab_aliases":{1:0}, "fit_height":true}
+	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":false, "title_size":26, "spread_tabs":true, "subtabs":["Military","Civilian","Military"], "hidden_subtabs":[2], "subtab_aliases":{2:0}, "fit_height":true}
 func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
 	_ensure_workshop()
 	# Two tasks: follow the day's work, or direct workshop orders. The old
 	# Civilian index is retained as a deep-link alias to the combined daily page.
-	var mode:="military" if sub>=2 else "all"
+	var mode:="civilian" if sub==1 else "military"
 	var block:={"type":"production_queue","mode":mode,"view_state":view_state,"on_open":func(section:String,page:int)->void:
 		if is_instance_valid(hud):hud.section_requested.emit(section,page),
 		"on_materials":func()->void:
 		if is_instance_valid(hud):hud.section_requested.emit("economy",1)}
 	block.on_assign=assign_workers("Crafting")
+	block.on_civilian_assign=func(role:String)->void:assign_workers(role).call()
+	if mode=="civilian":block.civilian_lines=civilian_lines()
 	# Every page leads with the flow chart: materials into the benches, out to
 	# what the makers make (flow_model). Military needs the towns' arms too.
 	var cards:=household_cards()
@@ -56,6 +58,10 @@ func tab(sub:int)->Dictionary:
 		var lines:Array=with_staff_plans(snapshot.lines)
 		var context:=line_context(snapshot)
 		block.arms=arms_reading()
+		block.civilian_lines=[]
+		for card:Dictionary in cards:
+			if float(card.arms_hands)<=0 and float(card.arms_made)<=0:continue
+			block.civilian_lines.append({"id":"arms_"+String(card.id),"name":"Watch arms · "+String(card.city),"role":"Crafting","stock":float(card.get("arms_stock",0)),"output":card.arms_made,"workers":card.arms_hands,"coverage":float(card.arms_resource_factor),"status":"Automatic replenishment · resource penalty −%d%%" % roundi((1.0-float(card.arms_resource_factor))*100),"bar_tip":"Production retained after resource shortages"})
 		block.merge({"lines":line_views(lines,context,stock,pool),"capacity":snapshot.capacity,"context":context,
 			"materials":_stores(lines),"hands":{"total":int(pool.total),"lines":int(pool.lines)},"boatyards":_boatyards(),"stock":stock,
 			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":workshop_owner(),"status":MilitaryCampaign.workshop.data.status,
@@ -408,8 +414,8 @@ static func _household_card()->Dictionary:
 		"learners":float(report.get("learners",0.0)) if current else 0.0,
 		# Today's materials in and goods out (civilian_goods.gd advance), for the flow chart.
 		"for_barter":float(report.get("for_barter",0.0)) if current else 0.0,"inputs":(report.get("inputs",{}) as Dictionary).duplicate() if current else {},
-		"arms_made":float(report.get("arms_made",0.0)) if current else 0.0,"arms_hands":float(report.get("arms_hands",0.0)) if current else 0.0,
-		"arms_inputs":(report.get("arms_inputs",{}) as Dictionary).duplicate() if current else {},"workers":float(report.get("workers",0.0)) if current else 0.0}
+		"arms_stock":float(GameState.resource_stockpiles.get("Arms",0)),"arms_made":float(report.get("arms_made",0.0)) if current else 0.0,"arms_hands":float(report.get("arms_hands",0.0)) if current else 0.0,
+		"arms_inputs":(report.get("arms_inputs",{}) as Dictionary).duplicate() if current else {},"workers":float(report.get("workers",0.0)) if current else 0.0,"resource_factor":float(report.get("resource_factor",1.0)),"arms_resource_factor":float(report.get("arms_resource_factor",1.0))}
 
 ## THE FLOW CHART (hud/production_flow.gd): what the makers' hands make today,
 ## from what, and what it does for us. Every number is the engine's:
@@ -571,4 +577,22 @@ static func _technique_rows()->Array:
 	for technique:Dictionary in _technique_list():
 		var adoption:=float(technique.adoption)
 		rows.append({"name":String(technique.name),"value":"%d%% adopted" % roundi(adoption*100.0),"sub":"Acting at %d%% of its benefit" % roundi(float(technique.working)*100.0),"accent":Tokens.GREEN if adoption>=.5 else Tokens.AMBER})
+	return rows
+
+static func civilian_lines()->Array:
+	var rows:Array=[]
+	rows.append({"id":"food","name":"Food & water","role":"Food","stock":float(GameState.resource_stockpiles.get("Food",0)),"output":float(GameState.simulation_metrics.get("food_production",0)),"workers":GameState.effective_workers("Food"),"coverage":minf(1.0,float(GameState.simulation_metrics.get("food_production",0))/maxf(1,float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))),"status":"Daily food production · consumed %.1f / day" % float(GameState.simulation_metrics.get("food_consumption",0)),"bar_tip":"Daily food production compared with consumption"})
+	for city:Dictionary in household_cards():
+		rows.append({"id":"goods_"+String(city.id),"name":"Civilian goods · "+String(city.city),"role":"Crafting","stock":city.stock,"output":city.made,"workers":city.workers,"coverage":city.coverage,"status":String(city.reason)+" · inputs −%d%% · timber, fiber, clay, stone or flint" % roundi((1.0-float(city.resource_factor))*100),"bar_tip":"Household stock target: %d%% covered" % roundi(float(city.coverage)*100)})
+	var grouped:Dictionary={}
+	for deposit:Dictionary in ResourceSystem.visible_deposits():
+		var resource:=String(deposit.get("resource",""))
+		if resource.is_empty():continue
+		if not grouped.has(resource):grouped[resource]={"workers":0.0,"output":0.0}
+		grouped[resource].workers+=float(deposit.get("workers",0))
+		grouped[resource].output+=float(deposit.get("extracted_today",0))
+	var names:Array=grouped.keys();names.sort()
+	for resource:String in names:
+		var reading:Dictionary=grouped[resource]
+		rows.append({"id":"raw_"+resource,"name":ResourceSystem.display_name(resource),"role":"Extraction","stock":float(GameState.resource_stockpiles.get(resource,0)),"output":reading.output,"workers":reading.workers,"coverage":1.0 if float(reading.output)>0 else 0.0,"status":"Extraction · today's actual output","bar_tip":"Working" if float(reading.output)>0 else "No extraction recorded today"})
 	return rows

@@ -146,7 +146,7 @@ func test_numbers_on_screen_match_the_model()->void:
 		assert_str((row.find_child("KeepValue",true,false) as Label).text).is_equal(str(int(line.target_stock)))
 		assert_str((row.find_child("Stock",true,false) as Label).text).is_equal(str(int(line.stock)))
 		var story:=Plain.line_story(line,context)
-		if float(story.rate)>0.0:assert_str(String(row.find_child("Output",true,false).reading)).is_equal(Plain.rate_short(float(story.rate)))
+		if float(story.rate)>0.0:assert_str(String(row.find_child("Output",true,false).reading)).is_equal(preload("res://scripts/hud/production_line_row.gd").daily_rate(float(story.rate)))
 	var levy:=Logistics.row("improvised")
 	var chip:Node=panel.find_child("Stock_improvised",true,false)
 	assert_str((chip.find_child("Have",true,false) as Label).text).is_equal(str(int(levy.stock)))

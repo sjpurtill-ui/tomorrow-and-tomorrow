@@ -141,7 +141,7 @@ static func _line_unit_for(mc:Variant,item:String)->String:
 	return best
 
 ## THE MAKERS' ARMS NOW: {age (an AGES row), unit, item}: the best age whose
-## knowledge is held, whose materials are in store or being dug, and one of
+## knowledge is held, one of
 ## whose weapons (AGE_ITEMS, in order) a line unit of ours can carry with its
 ## practice learned; else the next age down. {} when none (the watch fights
 ## with what comes to hand, and the makers make no arms). Read once a day
@@ -157,7 +157,7 @@ static func arms_age(mc:Variant=null)->Dictionary:
 	var found:={}
 	for i in range(AGES.size()-1,-1,-1):
 		var age:Dictionary=AGES[i]
-		if not _held(String(age.needs)) or not _within_reach(age):continue
+		if not _held(String(age.needs)):continue
 		for item:String in AGE_ITEMS[String(age.id)]:
 			var unit:=_line_unit_for(mc,item)
 			if unit!="":found={"age":age,"unit":unit,"item":item};break
@@ -604,34 +604,33 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 	if arms.is_empty():
 		out.reason="No weapon our makers make arms our line foot yet"
 		return out
-	# The age is within reach (arms_age: in store or being dug). What is still
-	# being dug is waited for: an older age's sets would stand in the age's
-	# weapon's place at its quality. An age out of reach altogether falls back
-	# in arms_age, never here.
+	# Keep the researched product. Missing operating inputs slow its capacity
+	# instead of silently substituting an older age of equipment.
 	var age:Dictionary=arms.age
 	out.kind=String(age.kind)
-	if not _can_make(age):
-		out.reason="Waiting on %s" % _short_words(age)
-		return out
 	var span:=float(WorldSimulation.span)
-	var work:=makers*share*efficiency*span
-	var sets:=minf(work/float(age.maker_days),left)
-	# Materials: what one set takes, from the stores in scope.
-	if String(age.id)=="stone":
-		var raw:=0.0
-		for item:String in STONE_BASKET:raw+=_usable(item)
-		sets=minf(sets,raw/_raw_per_set(age))
-	else:
-		for item:String in age.materials:sets=minf(sets,_usable(item)/float(age.materials[item]))
-	# Only what the materials really drawn make.
-	if sets>0.000001:sets=_draw(age,sets,out.inputs)
+	var assigned:=makers*share
+	var slots:=maxi(1,ceili(assigned))
+	var daily:=assigned*efficiency/float(age.maker_days)
+	var requirements:Dictionary={};var available:Dictionary={}
+	for item:String in age.materials:
+		var cost:=float(age.materials[item])
+		requirements[item]=maxf(1.0,ceilf(cost))
+		available[item]=_usable(item)/maxf(.000001,cost*daily/slots/float(requirements[item]))
+	var supply:=preload("res://scripts/production_shortage.gd").evaluate(requirements,slots,available)
+	out.resource_factor=float(supply.factor)
+	var sets:=minf(daily*span*float(supply.factor),left)
+	for item:String in age.materials:
+		var used:=minf(_usable(item),float(age.materials[item])*sets)
+		WorldSimulation.state.resource_stockpiles[item]=_stock_of(item)-used
+		out.inputs[item]=used
 	if sets<=0.000001:
 		out.reason="Needs %s" % _needs_words(age)
 		return out
 	WorldSimulation.state.resource_stockpiles[GOOD]=stock()+sets
 	p["made"]=float(p.get("made",0.0))+sets
 	out.sets=sets/span
-	out.hands=sets*float(age.maker_days)/efficiency/span
+	out.hands=minf(assigned,sets*float(age.maker_days)/maxf(.000001,efficiency*float(supply.factor))/span)
 	out.reason="Arming the watch"
 	var r:=record()
 	r.made=float(r.made)+sets

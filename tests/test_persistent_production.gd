@@ -23,19 +23,20 @@ func start(target:int=0)->Dictionary:
 	assert_bool(result.has("ok")).is_true()
 	return MilitaryCampaign.equipment_queue.back()
 
-func test_shortage_waits_then_consumes_only_actual_fractional_work()->void:
+func test_shortage_slows_work_without_negative_material_stock()->void:
 	var job:=start()
 	GameState.resource_stockpiles.Timber=0.0
-	Production.advance(MilitaryCampaign,job,100)
-	assert_float(float(job.progress_days)).is_equal(0.0)
-	assert_int(int(job.completed)).is_equal(0)
+	var factor:=float(Production.shortage_plan(MilitaryCampaign)[int(job.id)].factor)
+	assert_float(factor).is_greater(0.0)
+	assert_float(factor).is_less(1.0)
+	Production.advance(MilitaryCampaign,job,float(job.work_per_item))
+	assert_float(float(job.progress_days)/float(job.work_per_item)).is_equal_approx(factor,.000001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(0.0)
 	GameState.resource_stockpiles.Timber=.175
-	Production.advance(MilitaryCampaign,job,100)
-	assert_float(float(job.progress_days)/float(job.work_per_item)).is_equal_approx(.5,.000001)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(0,.000001)
-	GameState.resource_stockpiles.Timber=.175
-	Production.advance(MilitaryCampaign,job,100)
-	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(1)
+	Production.advance(MilitaryCampaign,job,float(job.work_per_item))
+	Production.advance(MilitaryCampaign,job,float(job.work_per_item)*10.0)
+	assert_int(int(job.completed)).is_greater_equal(1)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_greater_equal(0.0)
 	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(1)
 
 func test_target_persists_and_resumes_after_goods_are_issued()->void:
@@ -83,12 +84,12 @@ func test_priority_shares_one_workforce_and_scarce_inputs()->void:
 	GameState.resource_stockpiles.Timber=.0001
 	MilitaryCampaign._process_equipment_production_day()
 	assert_float(float(low.last_work)).is_greater(0)
-	assert_float(float(high.last_work)).is_equal(0.0)
+	assert_float(float(high.last_consumed.get("Timber",0))).is_equal(0.0)
 	Production.move(MilitaryCampaign,int(high.id),0)
 	GameState.resource_stockpiles.Timber=.0001
 	MilitaryCampaign._process_equipment_production_day()
 	assert_float(float(high.last_work)).is_greater(0)
-	assert_float(float(low.last_work)).is_equal(0.0)
+	assert_float(float(low.last_consumed.get("Timber",0))).is_equal(0.0)
 
 func test_health_and_destroyed_workplaces_reduce_real_output()->void:
 	start()
@@ -168,7 +169,7 @@ func test_main_supply_dock_defaults_to_persistent_controls()->void:
 	var terrain:=DockTerrain.new();var hud:=DockHud.new()
 	var provider:=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 	var report:Dictionary=provider._supply_order_report("equipment","improvised")
-	assert_str(str(report)).contains("START PRODUCTION LINE")
+	assert_str(str(report).to_lower()).contains("start this line")
 	report.blocks.back().items[0].on_press.call()
 	assert_bool(terrain.result.has("ok")).is_true()
 	var job:Dictionary=MilitaryCampaign.equipment_queue.back()
@@ -233,9 +234,10 @@ func test_unknown_products_are_hidden_and_cannot_start()->void:
 	assert_bool(MilitaryCampaign.start_production_line("service_rifle",5).has("error")).is_true()
 	assert_int(MilitaryCampaign.equipment_queue.size()).is_equal(0)
 
-func test_new_line_requires_materials_and_workforce_with_actionable_reason()->void:
+func test_new_line_allows_missing_inputs_but_requires_workforce()->void:
 	GameState.resource_stockpiles.Timber=0.0
-	assert_str(String(MilitaryCampaign.start_production_line("improvised",5).error)).contains("Timber")
+	assert_bool(MilitaryCampaign.start_production_line("improvised",5).has("ok")).is_true()
+	MilitaryCampaign.equipment_queue.clear()
 	GameState.resource_stockpiles.Timber=100.0
 	MilitaryCampaign.production_labor_share=0
 	assert_str(String(MilitaryCampaign.start_production_line("improvised",5).error)).contains("crafting share")
@@ -247,11 +249,13 @@ func test_material_limited_forecast_and_default_finite_target()->void:
 	assert_int(job.target_stock).is_equal(5)
 	GameState.resource_stockpiles.Timber=.175
 	var view:=Production.snapshot(MilitaryCampaign,job,100,1)
-	assert_float(float(view.forecast_output_per_day)).is_equal_approx(.5,.000001)
+	assert_float(float(view.forecast_output_per_day)).is_greater(.5)
+	assert_float(float(view.resource_factor)).is_less(1.0)
 	GameState.resource_stockpiles.Timber=0
 	view=Production.snapshot(MilitaryCampaign,job,100,1)
-	assert_float(float(view.forecast_output_per_day)).is_equal(0.0)
-	assert_str(String(view.state)).contains("Missing")
+	assert_float(float(view.forecast_output_per_day)).is_greater(0.0)
+	assert_float(float(view.resource_factor)).is_less(1.0)
+	assert_str(String(view.state)).is_equal("Working")
 
 func test_existing_line_rechecks_research_before_consuming_materials()->void:
 	if "hafted_weapons" not in GameState.known_discoveries:GameState.known_discoveries.append("hafted_weapons")

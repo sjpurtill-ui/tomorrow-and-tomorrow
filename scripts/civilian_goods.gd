@@ -56,7 +56,8 @@ const HOLD_MORE:=.5
 ## Output gained per fully adopted technique.
 const TECHNIQUE_OUTPUT:=.05
 ## Raw materials per goods-unit and the basket they are drawn from. A missing
-## material is replaced by the others; output stops only when all run out.
+## material is replaced by the others. A shortage of the entire basket uses
+## the shared per-capacity resource penalty.
 const RAW_PER_UNIT:=.16
 const BASKET:={"Fiber Plants":.32,"Timber":.30,"Clay":.18,"Stone":.12,"Flint":.08}
 ## Food rations of sealed storage each unit of goods provides once sealed
@@ -332,7 +333,7 @@ static func advance()->Dictionary:
 		var reserve:=workshop_input_reserve()
 		# Arms first, while the watch lacks them: those hands make no goods today.
 		var arms:=Arms.make(all_makers,pace,reserve)
-		report.arms_made=float(arms.sets);report.arms_hands=float(arms.hands);report.arms_kind=String(arms.kind);report.arms_inputs=arms.inputs
+		report.arms_made=float(arms.sets);report.arms_hands=float(arms.hands);report.arms_kind=String(arms.kind);report.arms_inputs=arms.inputs;report.arms_resource_factor=float(arms.get("resource_factor",1.0))
 		var labor:=maxf(0.0,all_makers-float(arms.hands))*CRAFT_SHARE*WorldSimulation.span
 		# Techniques, and how well people work (the business sector's factor included).
 		var rate:=BASE_RATE*technique_output()*pace*specialization()
@@ -348,11 +349,16 @@ static func advance()->Dictionary:
 		if labor<=0.0:report.reason="No craftspeople assigned"
 		elif room<=0.0:report.reason="Homes and the market are full"
 		elif raw_available<=.000001:report.reason="Needs timber, fiber, clay, stone or flint"
+		var slots:=maxi(1,ceili(labor/maxf(1.0,WorldSimulation.span)))
+		var inputs_available:={"Materials":raw_available/maxf(.000001,labor*rate/maxf(1.0,WorldSimulation.span)/slots*RAW_PER_UNIT)}
+		var supply:=preload("res://scripts/production_shortage.gd").evaluate({"Materials":1.0},slots,inputs_available)
+		report.resource_factor=float(supply.factor)
+		var productive_labor:=labor*float(supply.factor)
 		# For the homes first, from any material on hand.
-		var for_homes:=_make_from(spendable,minf(minf(labor*rate,need),room),report.inputs)
+		var for_homes:=_make_from(spendable,minf(minf(productive_labor*rate,need),room),report.inputs)
 		# Then for barter, only from what the builders' stores can spare.
 		var for_barter:=0.0
-		var left:=labor*rate-for_homes
+		var left:=productive_labor*rate-for_homes
 		if left>.000001 and room-for_homes>.000001:
 			var population:=maxf(1.0,WorldSimulation.state.population_exact)
 			var beyond:Dictionary={}
@@ -366,7 +372,7 @@ static func advance()->Dictionary:
 			stocks[GOODS]=stock()+amount
 			report.made=amount/WorldSimulation.span
 			report.for_barter=for_barter/WorldSimulation.span
-			report.workers=amount/rate/WorldSimulation.span
+			report.workers=amount/maxf(.000001,rate*float(supply.factor))/WorldSimulation.span
 			report.reason="Making goods for barter" if for_barter>.000001 else "Replenishing as needed"
 		elif report.reason=="" and need<=0.0:report.reason="Stock target met"
 	report.worth=worth_in_rations(float(report.made))
@@ -376,13 +382,11 @@ static func advance()->Dictionary:
 	WorldSimulation.discovery.refresh_operating_effects()
 	return report.duplicate(true)
 
-## Makes up to `amount` goods from `spendable` (by basket weight among the
-## materials on hand; a short one is covered by the rest), drawing from the
-## stores. Returns what was made.
+## Draw the available basket for an already shortage-adjusted output budget.
+## Missing physical inputs are represented by the capacity penalty upstream.
+## A draw never spends reserved materials or makes a stock negative.
 static func _make_from(spendable:Dictionary,amount:float,inputs:Dictionary)->float:
-	var raw:=0.0
-	for item:String in BASKET:raw+=float(spendable.get(item,0.0))
-	amount=minf(amount,raw/RAW_PER_UNIT)
+	amount=maxf(0.0,amount)
 	if amount<=.000001:return 0.0
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var needed:=amount*RAW_PER_UNIT
@@ -400,7 +404,7 @@ static func _make_from(spendable:Dictionary,amount:float,inputs:Dictionary)->flo
 			inputs[item]=float(inputs.get(item,0.0))+drawn
 			drawn_total+=drawn
 		needed-=drawn_total
-	return amount-maxf(0.0,needed)/RAW_PER_UNIT
+	return amount
 
 ## WHAT MAKING DOES, in the engine's numbers (for the People view,
 ## role_effects.gd): what the makers make now, and what ten more would make.

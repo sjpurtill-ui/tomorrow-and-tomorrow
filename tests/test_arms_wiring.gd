@@ -266,28 +266,28 @@ func test_a_bronze_age_levy_takes_up_spears_it_can_carry()->void:
 	assert_int(spears).is_equal(10)
 
 
-func test_the_makers_fall_back_to_an_age_they_can_make()->void:
+func test_makers_keep_researched_recipe_and_slow_when_inputs_missing()->void:
 	_work_crafting(20)
 	MilitaryCampaign._rebuild_home_army_with([{"id":45,"unit":"spearman","weapon":"spear","count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
 	GameState.resource_stockpiles.merge({"Timber":500.0,"Flint":100.0,"Stone":100.0,"Fiber Plants":100.0},true)
 	GameState.resource_stockpiles.erase("Copper Ore");GameState.resource_stockpiles.erase("Tin Ore");GameState.resource_stockpiles.erase("Coal")
-	# Bronze known, no tin or copper in store or being dug: spears and bows.
+	# Shortage slows the researched recipe; it does not silently downgrade it.
 	_know("bronze_weaponry",1.0)
 	GameState.elapsed_days=10
-	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("stone")
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
 	assert_int(int(Arms.plan_day().wanted)).is_equal(20)
 	var made:=Arms.make(20.0,0.8)
 	assert_float(float(made.sets)).is_greater(0.0)
-	# Iron known too, no coal: still spears and bows, never nothing.
+	# Iron remains the researched recipe even without coal.
 	_know("bloomery_smelting",1.0)
 	GameState.elapsed_days=11
-	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("stone")
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("iron")
 	Arms.plan_day()
 	assert_float(float(Arms.make(20.0,0.8).sets)).is_greater(0.0)
-	# Copper and tin come into store: bronze arms.
+	# Adding bronze materials does not downgrade known iron work.
 	GameState.resource_stockpiles["Copper Ore"]=50.0;GameState.resource_stockpiles["Tin Ore"]=10.0
 	GameState.elapsed_days=12
-	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("iron")
 
 
 func test_a_weapons_own_kits_never_fill_another_weapons_place()->void:
@@ -385,7 +385,7 @@ func test_an_old_levy_takes_up_the_armourys_own_spears()->void:
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(20)
 
 
-func test_while_bronze_is_being_dug_the_makers_wait_never_passing_spears_off_as_swords()->void:
+func test_bronze_shortages_slow_production_and_recover_when_supplied()->void:
 	GameState.population_allocations["Crafting"]=20
 	GameState.population_allocations["Defense"]=20
 	GameState.resource_stockpiles.erase("Copper Ore");GameState.resource_stockpiles.erase("Tin Ore")
@@ -393,17 +393,18 @@ func test_while_bronze_is_being_dug_the_makers_wait_never_passing_spears_off_as_
 	GameState.resource_deposits.append({"resource":"Copper Ore","workers":3,"extracted_today":0.5,"stage":"developed"})
 	GameState.resource_deposits.append({"resource":"Tin Ore","workers":2,"extracted_today":0.1,"stage":"developed"})
 	GameState.elapsed_days=12
-	# Bronze is within reach (being dug): its kit, and nothing made until it is in store.
+	# Bronze remains the product while missing inputs reduce its speed.
 	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
 	var kit:Dictionary=Arms.made_kit()
 	MilitaryCampaign._rebuild_home_army_with([{"id":46,"unit":String(kit.unit),"weapon":String(kit.item),"count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
 	assert_int(int(Arms.plan_day().wanted)).is_greater(0)
 	var made:=Arms.make(20.0,0.8)
-	assert_float(float(made.sets)).is_equal(0.0)
-	assert_str(String(made.reason)).contains("copper ore").contains("tin ore")
-	assert_float(Arms.stock()).is_equal(0.0)
+	assert_float(float(made.sets)).is_greater(0.0)
+	assert_float(float(made.resource_factor)).is_less(1.0)
+	assert_float(Arms.stock()).is_greater(0.0)
 	assert_int(MilitaryCampaign._deliver_inventory_replacements(1000.0)).is_equal(0)
 	# Once in store, bronze arms are made.
 	GameState.resource_stockpiles["Copper Ore"]=50.0;GameState.resource_stockpiles["Tin Ore"]=10.0
-	assert_float(float(Arms.make(20.0,0.8).sets)).is_greater(0.0)
+	var supplied:=Arms.make(20.0,0.8)
+	assert_float(float(supplied.sets)).is_greater(float(made.sets))
 	GameState.resource_deposits.pop_back();GameState.resource_deposits.pop_back()

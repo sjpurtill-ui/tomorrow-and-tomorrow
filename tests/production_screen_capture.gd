@@ -79,7 +79,7 @@ func _run()->void:
 	print("CAPTURE_OWNER ",MilitaryCampaign.workshop.owner())
 	for line:Dictionary in MilitaryCampaign.production_lines_snapshot().lines:
 		print("CAPTURE_LINE ",line.item," state=",line.state," rate=",line.get("output_per_day",0)," forecast=",line.get("forecast_output_per_day",0))
-	for pair:Array in [[2,"military"],[1,"civilian"]]:
+	for pair:Array in [[0,"military"],[1,"civilian"]]:
 		var viewport:=SubViewport.new();viewport.size=Vector2i(WIDTH+48,2400);viewport.transparent_bg=false
 		viewport.render_target_update_mode=SubViewport.UPDATE_ALWAYS;add_child(viewport)
 		var panel:=PanelContainer.new();panel.theme=T.control_theme()
@@ -90,6 +90,7 @@ func _run()->void:
 		var title:=T.make_label(String(meta.title),28,T.INK);title.add_theme_font_override("font",T.font("display"));column.add_child(title)
 		var tabs:=HBoxContainer.new();tabs.add_theme_constant_override("separation",18);column.add_child(tabs)
 		for index:int in (meta.subtabs as Array).size():
+			if index in meta.get("hidden_subtabs",[]):continue
 			tabs.add_child(T.make_label(String(meta.subtabs[index]),14,T.GOLD if index==int(pair[0]) else T.MUTED))
 		var body:=VBoxContainer.new();body.add_theme_constant_override("separation",16);body.custom_minimum_size.x=WIDTH;column.add_child(body)
 		DockBlocks.render(body,provider.tab(int(pair[0])).blocks)

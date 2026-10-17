@@ -771,12 +771,13 @@ func production_lines_snapshot()->Dictionary:
 	for job in equipment_queue:
 		if PersistentProduction.eligible(self,job): weight_total+=maxf(0.05,float(job.get("allocation",1.0)))
 	var total_rate:=_production_rate()
+	var shortage_plan:=PersistentProduction.shortage_plan(self)
 	for job_variant in equipment_queue:
 		var job:Dictionary=job_variant
 		var weight:=maxf(0.05,float(job.get("allocation",1.0)))
 		var share:=weight/maxf(0.05,weight_total) if PersistentProduction.eligible(self,job) else 0.0
 		if bool(job.get("persistent",false)):
-			lines.append(PersistentProduction.snapshot(self,job,total_rate,share))
+			lines.append(PersistentProduction.snapshot(self,job,total_rate,share,shortage_plan.get(int(job.id),{})))
 			continue
 		var efficiency:=clampf(float(job.get("efficiency",0.20)),0.10,1.0)
 		var remaining:=maxf(0.0,float(job.get("required_days",0.0))-float(job.get("progress_days",0.0)))
@@ -6005,13 +6006,14 @@ func _process_equipment_production_day()->void:
 	# Scarce shared inputs go down the list in order: line 1 first. The order
 	# is the priority the player sets on the Production screen.
 	var ordered:Array=equipment_queue.filter(func(job:Dictionary)->bool:return bool(job.get("persistent",false)))
+	var shortage_plan:=PersistentProduction.shortage_plan(self)
 	for job:Dictionary in ordered:
 		var work:=crafting*float(job.allocation)/maxf(.05,weight_total)*float(job.efficiency)
 		if PersistentProduction.eligible(self,job):work=preload("res://scripts/managed_weapon_repair.gd").advance(self,job,work)
 		# Soldiers waiting for simple gear help make their own (workshop steward).
 		if PersistentProduction.eligible(self,job):work+=workshop.muster_hands_work(job)*WorldSimulation.span
 		var before:Dictionary=workshop.output_stocks(job)
-		PersistentProduction.advance(self,job,work)
+		PersistentProduction.advance(self,job,work,shortage_plan.get(int(job.id),{}))
 		workshop.record(job,before)
 	for index in range(equipment_queue.size()-1,-1,-1):
 		var job:Dictionary=equipment_queue[index]

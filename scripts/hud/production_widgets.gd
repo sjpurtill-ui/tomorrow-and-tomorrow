@@ -9,6 +9,7 @@ class IconButton extends Button:
 	var glyph:="plus"
 	var danger:=false
 	var bare:=false
+	var ink_override:=Color.TRANSPARENT
 	func _init(kind:String="plus",tip:String="",side:float=26.0,borderless:bool=false)->void:
 		glyph=kind;tooltip_text=tip;bare=borderless
 		custom_minimum_size=Vector2(maxf(side,40),maxf(side,40));focus_mode=Control.FOCUS_ALL
@@ -23,7 +24,7 @@ class IconButton extends Button:
 		if not tip.is_empty():tooltip_text=tip
 		queue_redraw()
 	func _draw()->void:
-		var ink:=T.DISABLED if disabled else (T.RED_TEXT if danger else T.INK)
+		var ink:=(Color(ink_override,.35) if disabled else ink_override) if ink_override.a>0 else (T.DISABLED if disabled else (T.RED_TEXT if danger else T.INK))
 		var c:=size*0.5
 		var r:=minf(size.x,size.y)*0.24
 		match glyph:
@@ -79,6 +80,7 @@ class OutputBar extends Control:
 	var tone:=Color.GREEN
 	var look:="good"
 	var reading:=""
+	var ink_override:=Color.TRANSPARENT
 	func _init(width:float=176.0)->void:
 		custom_minimum_size=Vector2(width,26);mouse_filter=Control.MOUSE_FILTER_PASS
 		size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -93,7 +95,7 @@ class OutputBar extends Control:
 	func text_color()->Color:
 		# Ink on every wash: the bar's colour already says the condition, and
 		# tinted text on a tinted fill falls under 4.5:1.
-		return T.INK
+		return ink_override if ink_override.a>0 else T.INK
 	func _draw()->void:
 		# The number is output; only the fine underline is progress to the
 		# target. A full-tinted rectangle made a blocked order look productive.

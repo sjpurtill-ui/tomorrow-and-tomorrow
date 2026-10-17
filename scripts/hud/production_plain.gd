@@ -216,6 +216,10 @@ static func line_story(line:Dictionary,context:Dictionary={})->Dictionary:
 		held="Your people no longer know how to make this.";story.tone="bad";story.short="Know-how lost"
 	elif state=="Waiting for workshop labor":
 		held="Waiting for workshop hands.";story.tone="warn";story.short="Waiting for workers"
+	elif line.has("resource_factor") and float(line.resource_factor)<.999:
+		var lost:=roundi((1.0-float(line.resource_factor))*100)
+		held="Missing inputs reduce production by %d%%. Priority runs from the top line down; a capacity slot stops at 20 missing input units." % lost
+		story.tone="bad" if lost>=100 else "warn";story.short="Inputs −%d%%" % lost
 	elif not shortest.is_empty():
 		var name:=String(shortest.name).to_lower()
 		if float(shortest.stored)<float(shortest.per_item):
@@ -378,6 +382,9 @@ static func line_view(line:Dictionary,context:Dictionary={},extra:Dictionary={})
 		"hands":int(extra.get("hands",0)),"hands_exact":float(extra.get("hands_exact",extra.get("hands",0))),"hands_step":float(extra.get("hands_step",1.0)),"badge":extra.get("badge",{}),
 		"ordered":int(line.get("ordered",line.get("count",0))),"completed":int(line.get("completed",0)),"progress_text":String(story.progress_text)}
 	# The next item's share done (the target row's arc on the line card).
+	view.resource_factor=float(line.get("resource_factor",1.0))
+	view.resource_missing=line.get("resource_missing",{})
+	view.materials=line.get("materials_status",[])
 	view.next=clampf(float(line.get("progress_days",0.0))/maxf(.001,float(line.get("work_per_item",1.0))),0.0,1.0)
 	var stock_row:Dictionary=extra.get("stock",{})
 	view.needed=int(stock_row.get("needed",0));view.deficit=int(stock_row.get("deficit",0))

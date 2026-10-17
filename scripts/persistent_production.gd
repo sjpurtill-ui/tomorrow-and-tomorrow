@@ -79,11 +79,8 @@ static func startup_blockers(host:Node,item:String,installed:Dictionary={})->Arr
 	if host.production_labor_share<=0:result.append("No crafting labor assigned to workshop production. Increase the workshop crafting share.")
 	if float(staff.workers)<=0:result.append("No available craftspeople. Assign crafting work in your cities.")
 	elif float(staff.condition_factor)<=0:result.append("Workforce or workplaces cannot operate. Restore health and usable workshops.")
-	for resource:String in definition.materials:
-		var needed:=float(definition.materials[resource])+float(tooling.get(resource,0));var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
-		if stored<needed:result.append("%s: %.2f in stores; %.2f needed for one item." % [WorldSimulation.resources.display_name(resource),stored,needed])
+	# Operating inputs affect speed; only installed setup tools are mandatory.
 	for resource:String in tooling:
-		if definition.materials.has(resource):continue
 		if float(WorldSimulation.state.resource_stockpiles.get(resource,0))<float(tooling[resource]):result.append("Line setup needs %.1f %s." % [float(tooling[resource]),resource])
 	return result
 
@@ -100,7 +97,7 @@ static func start(host: Node, item: String, target: int) -> Dictionary:
 	var job:=definition.duplicate(true)
 	job.merge({"id":id,"persistent":true,"target_stock":target,"paused":false,"allocation":1.0,"efficiency":.20,"progress_days":0.0,"completed":0,"count":1,"required_days":float(definition.work_per_item),"reserved_materials":{},"last_output":0,"last_consumed":{},"last_work":0.0,"tooling_paid":true,"installed_tooling":definition.tooling.duplicate(true)})
 	host.equipment_queue.append(job)
-	return {"ok":true,"job_id":id,"message":product_name(item)+(" — continuous production: no limit; runs until paused or supplies run out." if target==0 else " — maintain %d in stores; pauses at target and replenishes after issue." % target)}
+	return {"ok":true,"job_id":id,"message":product_name(item)+(" — continuous production: no limit; runs until paused or shortages exhaust its capacity." if target==0 else " — maintain %d in stores; pauses at target and replenishes after issue." % target)}
 
 static func configure(host: Node, id: int, target: int, paused: bool) -> Dictionary:
 	if target<0 or target>MAX_TARGET: return {"error":"Invalid stockpile target."}
@@ -275,8 +272,6 @@ static func state(host: Node, job: Dictionary) -> String:
 	if not joint.is_empty() and not host.joint_operations.available_base(String(joint.domain)):return "No operational "+("naval base" if joint.domain=="navy" else "airfield")
 	if int(job.target_stock)>0 and stock(host,job)>=int(job.target_stock): return "Target met"
 	if preload("res://scripts/managed_weapon_repair.gd").available(host,job):return "Repairing equipment"
-	for resource in job.materials:
-		if float(job.materials[resource])>0 and float(WorldSimulation.state.resource_stockpiles.get(resource,0))<=.000000001: return "Missing "+WorldSimulation.resources.display_name(String(resource))
 	return "Working"
 
 static func eligible(host: Node, job: Dictionary) -> bool:
@@ -294,22 +289,20 @@ static func workforce() -> Dictionary:
 	var powered_factor:=1.0+minf(.5,preload("res://scripts/technology_operations.gd").service("mechanical_work")/maxf(1.0,workers))
 	return {"powered_factor":powered_factor,"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities*powered_factor}
 
-static func advance(host: Node, job: Dictionary, work: float) -> void:
+static func advance(host: Node, job: Dictionary, work: float, supply:Dictionary={}) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}
 	if not eligible(host,job) or work<=0:return
 	if preload("res://scripts/research_licenses.gd").uses_license(String(job.item)):work*=.65
 	var per_item:=float(job.work_per_item)
 	var units:=work/per_item
-	if job.has("ai_turnover"):units=minf(units,maxf(0,1.0-float(job.progress_days)/per_item))
+	if supply.is_empty():supply=shortage_plan(host).get(int(job.id),{"factor":1.0})
+	job.resource_factor=float(supply.factor)
+	var possible:=maxf(0,units*float(supply.factor))
+	if job.has("ai_turnover"):possible=minf(possible,maxf(0,1.0-float(job.progress_days)/per_item))
 	if int(job.target_stock)>0:
-		units=minf(units,maxf(0.0,int(job.target_stock)-stock(host,job)-float(job.progress_days)/per_item))
-	var possible:=units
+		possible=minf(possible,maxf(0.0,int(job.target_stock)-stock(host,job)-float(job.progress_days)/per_item))
 	for resource in job.materials:
-		var cost:=float(job.materials[resource])
-		if cost>0: possible=minf(possible,maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/cost)
-	possible=maxf(0,possible)
-	for resource in job.materials:
-		var consumed:=float(job.materials[resource])*possible
+		var consumed:=minf(maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))),float(job.materials[resource])*possible)
 		WorldSimulation.state.resource_stockpiles[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))-consumed)
 		job.last_consumed[resource]=consumed
 	var progress:=float(job.progress_days)+possible*per_item
@@ -325,7 +318,7 @@ static func advance(host: Node, job: Dictionary, work: float) -> void:
 	# Skill grows with the days worked: a step of several days learns as much as those days.
 	if possible>0: job.efficiency=move_toward(float(job.efficiency),1.0,.0025*(.65+host._adoption("workshop_standards"))*minf(1,possible/maxf(.000001,units))*float(WorldSimulation.span))
 
-static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> Dictionary:
+static func snapshot(host: Node, job: Dictionary, rate: float, share: float, supply:Dictionary={}) -> Dictionary:
 	var result:=job.duplicate(true)
 	result["state"]=state(host,job);result["stock"]=stock(host,job);result["share"]=share
 	result["licensed"]=preload("res://scripts/research_licenses.gd").uses_license(String(job.item))
@@ -343,6 +336,12 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 		elif float(staff.workers)<=0:result.state="No available craftspeople"
 		elif float(staff.workplace_condition)<=0:result.state="No usable workplaces"
 		else:result.state="Workforce unable to work"
+	if supply.is_empty():supply=shortage_plan(host).get(int(job.id),{"factor":1.0,"missing":{},"stopped":0})
+	result["resource_factor"]=float(supply.factor)
+	result["resource_missing"]=supply.get("missing",{})
+	result["stopped_capacity"]=int(supply.get("stopped",0))
+	result["unpenalized_daily_work"]=float(result.daily_work)
+	if not repairing:result.daily_work*=float(supply.factor)
 	result["output_per_day"]=float(result.daily_work)/float(result.work_per_item)
 	result["inputs_per_day"]={}
 	for resource in job.materials: result.inputs_per_day[resource]=float(job.materials[resource])*float(result.output_per_day)*(preload("res://scripts/managed_weapon_repair.gd").MATERIAL_FACTOR if repairing else 1.0)
@@ -350,11 +349,40 @@ static func snapshot(host: Node, job: Dictionary, rate: float, share: float) -> 
 	result["materials_status"]=[]
 	for resource:String in job.materials:
 		var cost:=float(job.materials[resource]);var stored:=float(WorldSimulation.state.resource_stockpiles.get(resource,0))
-		if cost>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),stored/cost)
+		if cost>0 and repairing:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),stored/cost)
 		result.materials_status.append({"resource":resource,"name":WorldSimulation.resources.display_name(resource),"stored":stored,"per_item":cost,"per_day":float(result.inputs_per_day[resource])})
 	if int(job.target_stock)>0:result.forecast_output_per_day=minf(float(result.forecast_output_per_day),maxf(0,int(job.target_stock)-int(result.stock)-float(job.progress_days)/float(job.work_per_item)))
 	result["electricity_per_item"]=0.0
 	return result
+
+## Same priority ledger for the day and its UI forecast. Capacity is the
+## existing Crafting allocation, not a second population or factory system.
+static func shortage_plan(host:Node)->Dictionary:
+	var pool:=hands(host)
+	var total_weight:=0.0
+	for job:Dictionary in host.equipment_queue:
+		if eligible(host,job):total_weight+=maxf(.05,float(job.get("allocation",1)))
+	var rate:=float(host._production_rate())
+	var plans:Dictionary={}
+	var ledger:Dictionary={}
+	var conversion:Dictionary={}
+	# One capacity input is one maker's nominal daily raw-material demand.
+	for job:Dictionary in host.equipment_queue:
+		if not bool(job.get("persistent",false)) or not eligible(host,job):continue
+		var count:=maxi(1,int(pool.by_line.get(int(job.id),0)))
+		var daily:=rate*float(job.allocation)/maxf(.05,total_weight)*float(job.efficiency)/maxf(.001,float(job.work_per_item))
+		for resource:String in job.materials:
+			var cost:=float(job.materials[resource])
+			if cost>0:conversion[resource]=maxf(float(conversion.get(resource,0)),cost*daily/count/maxf(1.0,ceilf(cost)))
+	for resource:String in conversion:
+		ledger[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0)))/maxf(.000001,float(conversion[resource]))
+	for job:Dictionary in host.equipment_queue:
+		if not bool(job.get("persistent",false)) or not eligible(host,job):continue
+		var requirements:Dictionary={}
+		for resource:String in job.materials:
+			if float(job.materials[resource])>0:requirements[resource]=maxf(1.0,ceilf(float(job.materials[resource])))
+		plans[int(job.id)]=preload("res://scripts/production_shortage.gd").evaluate(requirements,maxi(1,int(pool.by_line.get(int(job.id),0))),ledger)
+	return plans
 
 static var _allowed_tools:Dictionary={}
 ## Tool names a saved line may hold: former recipe tools and their flattened

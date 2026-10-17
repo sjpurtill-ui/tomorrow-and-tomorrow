@@ -98,13 +98,13 @@ func test_screen_has_one_readout_and_worded_controls()->void:
 		text+=label.text+"
 "
 		assert_int(label.get_theme_font_size("font_size")).is_greater_equal(12)
-	for banned:String in ["LEADER MANAGED","/ lines","⌒","0.02 / day","Ready to order when needed","KNOWN WORKSHOP RECIPES","Low","Normal","Urgent","Held back"]:
+	for banned:String in ["LEADER MANAGED","/ lines","⌒","Ready to order when needed","KNOWN WORKSHOP RECIPES","Low","Normal","Urgent","Held back"]:
 		assert_str(text).not_contains(banned)
 	# Numbers on the surface; the old card sentences live in the tooltips.
 	var card:Node=panel.find_child("Line1",true,false)
-	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(0)
+	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(1)
 	var bar:Control=card.find_child("Output",true,false)
-	assert_str(String(bar.reading)).is_equal("7 a year")
+	assert_str(String(bar.reading)).is_equal("0.02 / day")
 	assert_str(bar.tooltip_text).contains("About 1 every 50 days").contains("Short of timber: the 5 in store covers about 16 of the 25 still wanted.")
 	assert_str((panel.find_child("RunStaff",true,false) as Button).tooltip_text).contains("runs the workshops except Simple levy weapons")
 	for button:Button in panel.find_children("*","Button",true,false):
@@ -148,44 +148,19 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	provider._header_action("hand_back")
 	assert_bool(bool(MilitaryCampaign.workshop.data.enabled)).is_true()
 	assert_bool(bool(MilitaryCampaign.equipment_queue[0].planner_managed)).is_true()
-	# The old Civilian link still reaches all its goods and craft readings,
-	# now on Daily work alongside the overview. Workshop orders retain index 2.
-	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("all")
-	assert_array(provider.meta().hidden_subtabs).contains([1])
-	assert_int(int(provider.meta().subtab_aliases[1])).is_equal(0)
-	assert_array(provider.tab(1).blocks[0].households).is_equal(provider.tab(0).blocks[0].households)
-	assert_array(provider.tab(1).blocks[0].techniques).is_equal(provider.tab(0).blocks[0].techniques)
-	assert_bool(provider.tab(1).blocks[0].has("lines")).is_false()
-	# The two workflows differ; direct workshop controls remain on page 2.
-	var all:Dictionary=provider.tab(0).blocks[0]
-	assert_str(String(all.mode)).is_equal("all")
-	for gone in ["lines","recipes","stock","arms"]:assert_bool(all.has(gone)).override_failure_message("All carries %s" % gone).is_false()
-	var military:Dictionary=provider.tab(2).blocks[0]
-	assert_bool(military.has("arms")).is_true()
-	assert_bool(provider.tab(1).blocks[0].has("arms")).is_false()
-	var overview:Control=auto_free(Queue.new());add_child(overview);overview.setup(all)
-	assert_object(overview.find_child("HandsAnswer",true,false)).is_not_null()
-	assert_object(overview.find_child("WorkshopLines",true,false)).is_null()
-	assert_object(overview.find_child("Recipe_improvised",true,false)).is_null()
-	# The headline in plain words, the day's flow chart under it.
-	var said:=String((overview.find_child("HandsAnswer",true,false) as Label).text)
-	assert_bool(said.begins_with("Our ") or said.begins_with("No one")).override_failure_message(said).is_true()
-	var chart:Control=overview.find_child("Flow",true,false)
-	assert_object(chart).is_not_null()
-	assert_bool((chart.model.get("benches",[]) as Array).is_empty()).is_false()
-	var legend:=""
-	for label in overview.find_child("HandsLegend",true,false).find_children("*","Label",true,false):legend+=(label as Label).text+" | "
-	assert_str(legend).contains("Homes and barter").contains("Workshop lines").contains("Arms")
-	# Readings belong to the task's narrative and local controls, avoiding a
-	# repeated five-column KPI strip on narrow screens.
-	assert_array(provider.tab(2).get("kpis",[])).is_empty()
-	assert_array(provider.tab(1).get("kpis",[])).is_empty()
-	assert_str((overview.find_child("DailyFacts",true,false) as Label).text).contains("goods spare for barter")
+	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("civilian")
+	assert_array(provider.meta().hidden_subtabs).contains([2])
+	assert_int(int(provider.meta().subtab_aliases[2])).is_equal(0)
+	var military:Dictionary=provider.tab(0).blocks[0]
+	assert_str(String(military.mode)).is_equal("military")
+	for field in ["lines","recipes","stock","arms"]:assert_bool(military.has(field)).is_true()
+	assert_array(provider.tab(2).blocks[0].lines).is_equal(military.lines)
+	var screen:Control=auto_free(Queue.new());add_child(screen);screen.setup(military)
+	assert_object(screen.find_child("WorkshopLines",true,false)).is_not_null()
+	assert_object(screen.find_child("Recipe_improvised",true,false)).is_not_null()
 	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
-	assert_object(civilian.find_child("HouseholdsHead",true,false)).is_not_null()
-	for gone:String in ["GoodsAnswer","Jar","Pile","ArmsAnswer"]:assert_object(civilian.find_child(gone,true,false)).is_null()
-	var arms:Control=auto_free(Queue.new());add_child(arms);arms.setup(military)
-	for gone:String in ["ArmsRack","ArmsCost"]:assert_object(arms.find_child(gone,true,false)).is_null()
+	assert_object(civilian.find_child("Civilian_food",true,false)).is_not_null()
+	assert_object(civilian.find_child("WorkshopLines",true,false)).is_null()
 
 func test_the_workshop_note_is_said_the_way_a_person_says_it()->void:
 	assert_str(Queue.plain_status("No additional feasible supply order. Existing lines continue.")).is_equal("Nothing new to order; the lines keep working.")
