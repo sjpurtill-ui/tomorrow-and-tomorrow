@@ -55,3 +55,41 @@ func test_an_any_mood_piece_joins_every_mood_in_its_years()->void:
 	for mood in Soundtrack.MOODS:
 		assert_bool(Soundtrack.pieces_for_year(mood,2900).has(any)).override_failure_message(mood).is_true()
 		assert_bool(Soundtrack.pieces_for_year(mood,2799).has(any)).is_false()
+
+
+func test_added_espacio_takes_load_only_in_the_early_calm_pool()->void:
+	for take:String in ["ii","iii"]:
+		var path:="res://assets/audio/score/calm/y1-200_espacio_silencio_"+take+".mp3"
+		var stream:=load(path) as AudioStream
+		assert_object(stream).is_not_null()
+		assert_float(stream.get_length()).is_greater(60.0)
+		assert_bool(Soundtrack.pieces_for_year("calm",1).has(path)).is_true()
+		assert_bool(Soundtrack.pieces_for_year("calm",200).has(path)).is_true()
+		assert_bool(Soundtrack.pieces_for_year("calm",201).has(path)).is_false()
+		assert_bool(Soundtrack.pieces_for_year("war",1).has(path)).is_false()
+
+class CueProbe extends Soundtrack:
+	var now:=0.0
+	var cues:=0
+	func _seconds()->float:return now
+	func play_next()->void:cues+=1
+
+func test_rotation_waits_five_minutes_and_never_cuts_a_playing_piece()->void:
+	var probe:=CueProbe.new();auto_free(probe)
+	var score:=AudioStreamPlayer.new();auto_free(score);add_child(score)
+	probe.player=score
+	probe._next_check=10000.0
+	probe._next_cue=Soundtrack.GAP_MIN
+	assert_float(Soundtrack.GAP_MIN).is_equal(300.0)
+	assert_float(Soundtrack.GAP_MAX).is_equal(300.0)
+	probe.now=299.0;probe._process(0.0)
+	assert_int(probe.cues).is_equal(0)
+	probe.now=300.0;probe._process(0.0)
+	assert_int(probe.cues).is_equal(1)
+	score.stream=load("res://assets/audio/score/calm/y1-200_espacio_silencio_ii.mp3")
+	score.play()
+	assert_bool(score.playing).is_true()
+	probe.now=400.0;probe._process(0.0)
+	assert_int(probe.cues).is_equal(1)
+	score.stop();probe._process(0.0)
+	assert_int(probe.cues).is_equal(2)
