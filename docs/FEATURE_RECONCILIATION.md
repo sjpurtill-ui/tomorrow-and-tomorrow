@@ -53,8 +53,12 @@ Validation: 73 checks passed across growing visits, early visitors, later envoy
 requests and Defense/manpower. Final focused run: all 18 tests passed, zero errors, failures or orphans; this
 includes agreement controls, shared world reserves, reload/cutoff continuation
 and replacement objectives (77 distinct checks across both runs).
-Delivery status: READY for integration; remote delivery is recorded below after
-verification. Generated import caches, UIDs and reports are excluded.
+Delivery status: INTEGRATED. Implementation `833d6727cc9d57295fef85b2bc8cb12d7529ecde`
+was pushed and verified on both `origin/main` and
+`origin/codex/growing-settlement-visits`; canonical main was then fast-forwarded
+to the verified remote commit (ahead/behind 0/0). Generated import caches, UIDs
+and reports are excluded. The standalone release is built separately; a running
+player session is not restarted by this integration.
 
 ## October 17 — Personal visitors below 1,000 people
 
