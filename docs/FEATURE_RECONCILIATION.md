@@ -1,3 +1,40 @@
+## October 17 — Allocation controls and steady Home refreshes (INTEGRATED)
+
+Runtime `a54edb000` replaces “a step takes control” with an explicit **I will
+assign** button and labeled **−1%, +1%, +5%** controls. Commands finish an already
+pending simulation day before capturing fresh state, so clicks between day-job
+slices are no longer rejected just because the world is advancing. Read-only
+captures never flush the day; existing authority, freshness, rounding, military
+and food-protection rules remain in force. Failures appear beside the affected
+row and in the feedback line; successful assignment feedback survives live ticks.
+
+Home retains its dated consequence estimate while play runs and updates live
+worker counts in place. The expensive detached forecast runs on opening (when a
+consistent state is available), explicit Update estimates, assignment changes,
+and updates while paused. Failed temporary reads retain the last usable estimate.
+Row styles are reused, and refreshes retain controls, focus and scroll. No save
+schema, population ownership or production rules changed.
+
+Validation: 34 distinct cases passed across `test_workforce_preview.gd` (14),
+`test_people_allocator_screen.gd` (14), and `test_people_work_commit.gd` (6), with
+zero errors, failures or orphans. Tests include a real provider-to-screen button
+signal during a pending day, fresh-token commits, read-only forecasts, narrow
+700px row geometry, no recurring forecasts during play, preserved receipts,
+paused/manual estimate updates, and six advancing-day dock refreshes retaining
+scroll, focus and button rectangles. The latter fixture's slowest refresh was
+7.0ms; this is not a live campaign frame-rate claim. Tests ran headless in
+`/Users/seanpurtill/Documents/Codex/tt-allocation-controls` with isolated Test
+userdata. Logs: `/tmp/tat-allocation-tests-final.log` (forecast suite),
+`/tmp/tat-allocation-refresh.log` (screen suite), and
+`/tmp/tat-home-refresh-dock.log` (final provider/dock suite).
+
+Delivery follows remote-first integration from `codex/allocation-controls`, base
+`d6feef48d`. Changes are limited to the allocation screen, its Overview provider,
+two focused test suites and integration records. No shared simulation hotspot
+conflicts. Existing canonical import metadata and generated local test artifacts
+are excluded. No player session was launched or interrupted. Native mouse/visual
+verification and a live campaign performance measurement were not performed.
+
 ## October 16 — Wealth Prosperity & Pressure (INTEGRATED)
 
 `c909a742` implements the user's selected third Wealth direction on the actual
