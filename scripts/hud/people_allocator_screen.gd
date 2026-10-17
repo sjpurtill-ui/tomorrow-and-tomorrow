@@ -33,6 +33,8 @@ var _error := ""
 var _last_change := ""
 var _last_role := ""
 var _requested: Dictionary = {}
+var _forecast_day := -1
+var _action_feedback := ""
 
 func setup(block: Dictionary) -> void:
 	name = "CivilizationPeopleScreen"
@@ -46,7 +48,7 @@ func setup(block: Dictionary) -> void:
 	_layout.call_deferred()
 
 func _process(_delta: float) -> void:
-	if _dirty and not _busy and Time.get_ticks_msec() - _last_read_ms >= 2500:
+	if _dirty and not _busy and not bool(data.get("world_running", false)) and Time.get_ticks_msec() - _last_read_ms >= 2500:
 		_refresh_current()
 
 func _build() -> void:
@@ -89,12 +91,18 @@ func _build() -> void:
 	var mode := _label(toolbar, "mode", 14, T.BODY)
 	mode.autowrap_mode = TextServer.AUTOWRAP_OFF
 	mode.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	refs.take_control = _button(toolbar, "I will assign", _take_control, "TakeControlWork")
 	refs.delegate = _button(toolbar, "Let leaders assign", _delegate, "DelegateWork")
 	refs.pause = _button(toolbar, "Pause world", _pause, "PauseToPlan")
-	var explanation := _text(toolbar, "1 point = 1% of workforce · immediate", 13, T.MUTED)
+	refs.refresh = _button(toolbar, "Update estimates", _refresh_estimates, "RefreshWorkEstimates")
+	var explanation := _text(toolbar, "Use −1%, +1% or +5% to move workers", 13, T.MUTED)
 	explanation.autowrap_mode = TextServer.AUTOWRAP_OFF
 	explanation.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	explanation.tooltip_text = "Increasing one task takes its requested share from the largest other tasks. Actual workers can differ because of whole-worker rounding, military duties and local food protection."
+	var feedback := _label(_content, "feedback", 13, T.BODY)
+	feedback.custom_minimum_size.y = 38
+	feedback.max_lines_visible = 2
+	feedback.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_body = BoxContainer.new()
 	_body.name = "AllocatorAndConsequences"
 	_body.add_theme_constant_override("separation", 22)
@@ -106,7 +114,7 @@ func _build() -> void:
 	var headings := HBoxContainer.new()
 	headings.add_theme_constant_override("separation", 10)
 	allocator.add_child(headings)
-	var role_heading := _text(headings, "WORK AREA / CURRENT EFFECT", 12, T.MUTED)
+	var role_heading := _text(headings, "WORK AREA / ESTIMATED EFFECT", 12, T.MUTED)
 	role_heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var workers_heading := _text(headings, "WORKERS", 12, T.MUTED)
 	workers_heading.custom_minimum_size.x = 72
@@ -145,6 +153,7 @@ func _build() -> void:
 		effect.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var count := _text(line, "—", 21)
 		count.custom_minimum_size.x = 72
+		count.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		var share := _column(line, 4)
@@ -165,7 +174,7 @@ func _build() -> void:
 		line.add_child(buttons)
 		var steps: Dictionary = {}
 		for amount: int in [-1, 1, 5]:
-			var button := _button(buttons, "−" if amount < 0 else "+" if amount == 1 else "+5", _step.bind(role, amount), "Step_%s_%d" % [role, amount])
+			var button := _button(buttons, "−1%" if amount < 0 else "+1%" if amount == 1 else "+5%", _step.bind(role, amount), "Step_%s_%d" % [role, amount])
 			button.custom_minimum_size = Vector2(44, 34)
 			for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
 				var style := button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
@@ -186,7 +195,7 @@ func _build() -> void:
 	var details := _column(sidebar, 7)
 	_label(details, "detail_title", 22)
 	var estimate_mode := _label(details, "estimate_mode", 12, T.GOLD_TEXT)
-	estimate_mode.custom_minimum_size.y = 20
+	estimate_mode.custom_minimum_size.y = 38
 	estimate_mode.max_lines_visible = 2
 	var transfer := _label(details, "transfer", 14)
 	transfer.custom_minimum_size.y = 40
@@ -221,7 +230,7 @@ func _build() -> void:
 	meaning.custom_minimum_size.y = 42
 	meaning.max_lines_visible = 3
 	meaning.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	var assumption := _text(details, "Estimates hold today's conditions and workforce; the seasonal food outlook can change.", 12, T.MUTED)
+	var assumption := _text(details, "Estimates hold the recorded conditions and workforce; the seasonal food outlook can change.", 12, T.MUTED)
 	assumption.tooltip_text = "Food is estimated, not an observed receipt or a promise. Reserves are not shared instantly between towns. Actual named town warnings take precedence over the aggregate food balance."
 
 func update_block(block: Dictionary) -> bool:
@@ -261,16 +270,24 @@ func _task_shares() -> Dictionary:
 	for task: Dictionary in data.get("labor", {}).get("tasks", []): shares[String(task.id)] = int(task.get("share", 0))
 	return shares
 
-func _refresh_current() -> void:
+func _refresh_estimates() -> void:
+	_refresh_current(true)
+
+func _refresh_current(for_assignment := false) -> void:
 	if _busy: return
 	_last_read_ms = Time.get_ticks_msec()
-	var captured: Variant = _api("capture")
+	var captured: Variant = _api("capture", [true]) if for_assignment else _api("capture")
+	var next: Dictionary
 	if captured is Dictionary and bool(captured.get("ok", false)):
 		var result: Variant = _api("evaluate", [captured])
-		forecast = result if result is Dictionary else {}
+		next = result if result is Dictionary else {}
 		_requested = Manual.percents(captured.get("shares", {}))
-	else: forecast = {"ok":false, "reason":String(captured.get("reason", "Current work cannot be estimated.") if captured is Dictionary else "Current work cannot be estimated.")}
-	_dirty = false
+	else: next = {"ok":false, "reason":String(captured.get("reason", "Current work cannot be estimated.") if captured is Dictionary else "Current work cannot be estimated.")}
+	_dirty = not bool(next.get("ok", false))
+	# A temporary busy day must not blank a usable estimate on the screen.
+	if not _dirty or not bool(forecast.get("ok", false)):
+		forecast = next
+		if not _dirty: _forecast_day = int(captured.get("day", data.get("day", -1)))
 	_comparison = false
 	_awaiting_counts = {}
 	_awaiting_revision = []
@@ -291,7 +308,7 @@ func _step(role: String, points: int) -> void:
 	active_role = role
 	_busy = true
 	_error = ""
-	var captured: Variant = _api("capture")
+	var captured: Variant = _api("capture", [true])
 	if not captured is Dictionary or not bool(captured.get("ok", false)):
 		_error = String(captured.get("reason", "Wait for the current day to finish.") if captured is Dictionary else "Work is not available.")
 		_finish_command(); return
@@ -308,6 +325,7 @@ func _step(role: String, points: int) -> void:
 		_error = String(result.get("reason", "Conditions changed. Try again from the current allocation.") if result is Dictionary else "The assignment was not applied.")
 		_finish_command(); return
 	forecast = estimate
+	_forecast_day = int(captured.get("day", data.get("day", -1)))
 	var counts: Dictionary = result.get("counts", forecast.after.get("counts", {}))
 	forecast.after.counts = counts.duplicate(true)
 	_requested = Manual.percents(proposed.shares)
@@ -331,10 +349,28 @@ func _step(role: String, points: int) -> void:
 			moves.append("%s %s" % [NAMES[task], _signed(delta)])
 	_last_change = " · ".join(moves) if not moves.is_empty() else "Target changed; rounding or food protection kept worker counts unchanged."
 	_last_role = role
+	_action_feedback = "Applied: " + _last_change
 	_finish_command()
 
 func _finish_command() -> void:
 	_busy = false
+	_fill_header()
+	_fill_rows()
+	_fill_consequences()
+
+func _take_control() -> void:
+	var callback: Variant = data.get("labor", {}).get("on_ruler")
+	if not _has_callback(callback): return
+	callback.call()
+	data = data.duplicate(true)
+	data.labor.manual = true
+	_action_feedback = "You now assign workers. Use −1%, +1% or +5% to change a target."
+	_error = ""
+	_comparison = false
+	_changes = {}
+	_last_change = ""
+	_dirty = true
+	_last_read_ms = -3000
 	_fill_header()
 	_fill_rows()
 	_fill_consequences()
@@ -350,9 +386,11 @@ func _delegate() -> void:
 		_error = ""
 		_last_change = ""
 		data.labor.manual = false
+		_action_feedback = "Leaders now assign workers."
 		_dirty = true
 		_last_read_ms = -3000
 		_fill_header()
+		_fill_consequences()
 
 func _pause() -> void:
 	var callback: Variant = data.get("pause_to_plan")
@@ -366,7 +404,8 @@ func _fill_header() -> void:
 	refs.scope.text = "Across all settlements · %s people in our civilization" % Words.grouped(population)
 	refs.total.tooltip_text = "Actual assigned workers, including the watch and serving soldiers. This differs from full population and the top-bar civilian At work count."
 	var manual := bool(data.get("labor", {}).get("manual", false))
-	refs.mode.text = "You assign" if manual else "Leaders assign · a step takes control"
+	refs.mode.text = "You assign workers" if manual else "Leaders assign workers"
+	refs.take_control.disabled = manual or not _has_callback(data.get("labor", {}).get("on_ruler"))
 	refs.delegate.disabled = not manual or not _has_callback(data.get("labor", {}).get("on_leaders"))
 	refs.pause.disabled = not bool(data.get("world_running", false)) or not _has_callback(data.get("pause_to_plan"))
 	var path := Portrait.texture_path(data.get("settlement_view", {}))
@@ -398,20 +437,38 @@ func _fill_rows() -> void:
 		if role == "Construction" and not readings.is_empty() and String(readings[0].get("unit", "")) == "days":
 			row.effect.text += " in " + String(data.get("settlement_view", {}).get("name", "founding settlement"))
 		row.effect.tooltip_text = row.effect.text + ("\n" + String(readings[0].get("note", "")) if not readings.is_empty() else "")
-		if _dirty: row.effect.text = "Previous estimate · " + row.effect.text
+		if not bool(forecast.get("ok", false)): row.effect.text = "Estimate pending"
+		if role == active_role and not _error.is_empty():
+			row.effect.text = "Not applied: " + _error
+			row.effect.tooltip_text = row.effect.text
 		var selected := role == active_role
-		var style := T.flat(T.ACTIVE_BG if selected else T.ROW_BG, T.ACTION if selected else T.BORDER_SOFT, 1, 3, 4)
-		style.border_width_left = 3 if selected else 1
-		row.panel.add_theme_stylebox_override("panel", style)
-		row.count.add_theme_color_override("font_color", T.GOLD_TEXT if _changes.has(role) else T.INK)
+		var background := T.ACTIVE_BG if selected else T.ROW_BG
+		var border := T.ACTION if selected else T.BORDER_SOFT
+		var current := row.panel.get_theme_stylebox("panel") as StyleBoxFlat
+		if current == null or not row.panel.has_theme_stylebox_override("panel") or current.bg_color != background or current.border_color != border:
+			var style := T.flat(background, border, 1, 3, 4)
+			style.border_width_left = 3 if selected else 1
+			row.panel.add_theme_stylebox_override("panel", style)
+		var ink := T.GOLD_TEXT if _changes.has(role) else T.INK
+		if row.count.get_theme_color("font_color") != ink: row.count.add_theme_color_override("font_color", ink)
 
 func _fill_consequences() -> void:
 	if refs.is_empty(): return
+	var manual := bool(data.get("labor", {}).get("manual", false))
+	refs.feedback.text = NAMES[active_role] + " selected. Use −1%, +1% or +5% to move workers now." if manual else "Choose I will assign, or use −1%, +1% or +5% to take control and move workers."
+	if not _error.is_empty(): refs.feedback.text = "Not applied: " + _error
+	elif not _action_feedback.is_empty(): refs.feedback.text = _action_feedback
+	elif not bool(forecast.get("ok", false)):
+		refs.feedback.text = "Estimates pending: " + String(forecast.get("reason", "Waiting for a current reading."))
+	refs.feedback.tooltip_text = refs.feedback.text
+	_ink(refs.feedback, T.AMBER_TEXT if not _error.is_empty() or not bool(forecast.get("ok", false)) else T.BODY)
 	refs.detail_title.text = NAMES[active_role]
-	refs.estimate_mode.text = "LAST CHANGE · " + String(NAMES.get(_last_role, _last_role)).to_upper() if _comparison else "PREVIOUS ESTIMATE · UPDATING" if _dirty else "CURRENT ALLOCATION · ESTIMATE"
+	refs.estimate_mode.text = "LAST CHANGE · " + String(NAMES.get(_last_role, _last_role)).to_upper() if _comparison else "ESTIMATES · DAY %d" % _forecast_day if _forecast_day >= 0 else "ALLOCATION ESTIMATES"
+	if _dirty and bool(forecast.get("ok", false)): refs.estimate_mode.text += " · Update estimates"
+	refs.estimate_mode.tooltip_text = "Worker counts stay live. Estimates hold the conditions when calculated; update them here or pause the world for automatic updates."
 	refs.transfer.text = _error if not _error.is_empty() else _last_change if _comparison else "Select any work area for its effects. Adjustments redistribute the same workforce."
 	refs.transfer.tooltip_text = refs.transfer.text
-	refs.transfer.add_theme_color_override("font_color", T.AMBER_TEXT if not _error.is_empty() else T.BODY)
+	_ink(refs.transfer, T.AMBER_TEXT if not _error.is_empty() else T.BODY)
 	var readings := Impacts.readings(forecast, active_role, String(data.get("settlement_view", {}).get("settlement_id", "")), _comparison)
 	if active_role == "Knowledge" and _comparison and not readings.is_empty():
 		var effort: Dictionary = readings[0]
@@ -457,7 +514,7 @@ func _fill_consequences() -> void:
 		if net <= 0 and old_net <= 0:
 			refs.food.text = "Stores %s rations/day\n%s %s rations drawn from stores/day" % [_transition(old_net, net, true, true), _number(absf(net - old_net)), "more" if net < old_net else "fewer"]
 	else:
-		refs.food.text += "\n" + ("Today's shortfall draws on reserves." if net < 0 else "Today's surplus builds reserves." if net > 0 else "Stored food is unchanged today.")
+		refs.food.text += "\n" + ("Estimated shortfall draws on reserves." if net < 0 else "Estimated surplus builds reserves." if net > 0 else "Stored food is unchanged in this estimate.")
 	refs.stores.text = "%s rations held · 90-day estimate %s" % [Words.grouped(roundi(float(food.get("stock", 0)))), Words.grouped(roundi(float(food.get("forecast90", {}).get("ending_rations", 0))))]
 	refs.food.tooltip_text = "Production %s → %s; daily need %s → %s. Net includes spoilage." % [_number(prior.get("production", 0)), _number(food.get("production", 0)), _number(prior.get("required", 0)), _number(food.get("required", 0))]
 	var warnings: Array = forecast.get("warnings", []).duplicate()
@@ -465,7 +522,7 @@ func _fill_consequences() -> void:
 	var warning_text: Array[String] = []
 	for warning: Dictionary in warnings: warning_text.append(String(warning.get("text", "")))
 	refs.risk.text = "\n".join(warning_text) if not warning_text.is_empty() else "No food shortage in the current 90-day outlook."
-	refs.risk.add_theme_color_override("font_color", T.RED_TEXT if not warnings.is_empty() and _warning_rank(warnings[0]) == 0 else T.AMBER_TEXT if not warning_text.is_empty() else T.MUTED)
+	_ink(refs.risk, T.RED_TEXT if not warnings.is_empty() and _warning_rank(warnings[0]) == 0 else T.AMBER_TEXT if not warning_text.is_empty() else T.MUTED)
 
 func view_state() -> Dictionary: return {"focus_work":active_role}
 
@@ -493,11 +550,14 @@ func _layout() -> void:
 	for role: String in rows:
 		rows[role].panel.custom_minimum_size.y = 44 if compact else 50
 		rows[role].select.custom_minimum_size.y = 20 if compact else 24
-	for button: Button in [refs.delegate, refs.pause]:
+	for button: Button in [refs.take_control, refs.delegate, refs.pause, refs.refresh]:
 		for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
-			var style := button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
-			style.content_margin_top = 5 if compact else 8
-			style.content_margin_bottom = 5 if compact else 8
+			var current := button.get_theme_stylebox(state) as StyleBoxFlat
+			var padding_y := 5 if compact else 8
+			if current.content_margin_top == padding_y and current.content_margin_bottom == padding_y: continue
+			var style := current.duplicate() as StyleBoxFlat
+			style.content_margin_top = padding_y
+			style.content_margin_bottom = padding_y
 			button.add_theme_stylebox_override(state, style)
 
 func _column(parent: Node, gap := 4) -> VBoxContainer:
@@ -527,6 +587,9 @@ func _button(parent: Node, words: String, callback: Callable, node_name: String)
 	button.pressed.connect(callback)
 	parent.add_child(button)
 	return button
+
+static func _ink(label: Label, color: Color) -> void:
+	if label.get_theme_color("font_color") != color: label.add_theme_color_override("font_color", color)
 
 static func _has_callback(value: Variant) -> bool: return value is Callable and value.is_valid()
 static func _number(value: Variant) -> String: return Impacts._number(float(value))

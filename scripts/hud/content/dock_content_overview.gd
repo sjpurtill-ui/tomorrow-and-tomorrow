@@ -46,8 +46,8 @@ func tab(_sub:int)->Dictionary:
 		"vitals_heading":"HOW THEY FARE" if not modern else "VITAL STATISTICS","hearths_heading":("OUR %s" % EraWords.word("places","hearths").to_upper()) if not modern else "CITIES & SETTLEMENTS",
 		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon,
 		"settlement_view":{"settlement_id":primary,"name":People.home_name(),"terrain":terrain,"population":int(GameState.population_total)},
-		"workforce_revision":signature(),"world_running":is_instance_valid(terrain) and float(terrain.get("game_speed"))>0.0,"pause_to_plan":pause_to_plan,
-		"workforce":{"capture":WorkforcePreview.capture,"step":WorkforcePreview.step,"evaluate":WorkforcePreview.evaluate,"is_current":WorkforcePreview.is_current,"commit":commit_workforce}}
+		"day":floori(GameState.elapsed_days),"workforce_revision":signature(),"world_running":is_instance_valid(terrain) and float(terrain.get("game_speed"))>0.0,"pause_to_plan":pause_to_plan,
+		"workforce":{"capture":capture_workforce,"step":WorkforcePreview.step,"evaluate":WorkforcePreview.evaluate,"is_current":WorkforcePreview.is_current,"commit":commit_workforce}}
 	return {"blocks":[block]}
 
 ## WHAT THE PEOPLE ARE DOING TODAY, and who sets it (manual_work.gd). Our
@@ -90,6 +90,14 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 		# the player has opened (people_screen.gd), not all nine every day.
 		"impact_of":task_impact}
 
+## Reads never advance the world. An explicit assignment finishes only the
+## already scheduled day so a click between simulation slices is not discarded.
+func capture_workforce(for_assignment:bool=false)->Dictionary:
+	if for_assignment:WorldSimulation.flush_day()
+	var captured:=WorkforcePreview.capture()
+	captured["day"]=floori(GameState.elapsed_days)
+	return captured
+
 ## An explicit allocation step changes work through this guarded command.
 ## The captured token must still match; stale commands never mutate work.
 func commit_workforce(draft:Dictionary,confirm_take_control:bool=false)->Dictionary:
@@ -117,6 +125,7 @@ func task_impact(role:String)->Dictionary:
 
 ## "Who sets the daily work": our leaders (false) or the ruler (true).
 func set_work(ruler:bool)->void:
+	WorldSimulation.flush_day()
 	Manual.set_manual(ruler)
 	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
 
@@ -151,7 +160,7 @@ static func days(value:float)->String:
 
 func signature()->Array:
 	return [floori(GameState.elapsed_days),GameState.population_total,GameState.settlement_network_revision,GameState.morphology_revision,GovernmentPeopleSystem.revision,MilitaryCampaign.equipment_queue.hash(),GameState.simulation_metrics.hash(),GameState.water_metrics.hash(),
-		GameState.population_allocations.hash(),PeopleDirection.automatic_work]
+		GameState.population_allocations.hash(),PeopleDirection.automatic_work,is_instance_valid(terrain) and float(terrain.get("game_speed"))>0.0]
 
 static func percent(total:float,population:int)->String:
 	return "%d%%"%roundi(total/population*100) if population>0 else "Report pending"

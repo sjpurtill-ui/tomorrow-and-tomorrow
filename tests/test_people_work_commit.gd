@@ -3,6 +3,9 @@ const Fixture=preload("res://tests/test_workforce_preview.gd")
 const Preview=preload("res://scripts/hud/workforce_preview.gd")
 const Manual=preload("res://scripts/manual_work.gd")
 const Provider=preload("res://scripts/hud/content/dock_content_overview.gd")
+class RunningTerrain extends Node:
+	var game_speed := 1.0
+
 class Hud extends Control:
 	signal section_requested(section:String,sub:int)
 	var refreshes:=0
@@ -52,3 +55,82 @@ func test_changed_world_rejects_commit_and_explicit_pause_uses_existing_hud_path
 	provider.pause_to_plan()
 	assert_array(hud.speed_requests).is_equal([0])
 	assert_int(hud.refreshes).is_equal(1)
+
+func test_click_during_pending_day_finishes_it_before_capturing_and_committing()->void:
+	var Job=preload("res://scripts/day_job.gd")
+	var job=Job.new()
+	var old_day:=GameState.elapsed_days
+	job.add_group("player",[Job.step("finish_pending",{},func()->void:
+		GameState.elapsed_days+=1
+		WorldSimulation.advancing=false
+	)])
+	WorldSimulation._day_job=job
+	WorldSimulation.advancing=true
+	assert_bool(provider.capture_workforce().ok).is_false()
+	assert_float(GameState.elapsed_days).is_equal(old_day)
+	var draft:Dictionary=provider.capture_workforce(true)
+	assert_bool(draft.ok).is_true()
+	assert_bool(WorldSimulation.day_in_progress()).is_false()
+	assert_float(GameState.elapsed_days).is_equal(old_day+1)
+	draft=Preview.step(draft,"Knowledge",5)
+	var expected:=Preview.evaluate(draft)
+	assert_bool(expected.ok).is_true()
+	assert_bool(provider.commit_workforce(draft,true).ok).is_true()
+	assert_dict(Manual.counts()).is_equal(expected.after.counts)
+	assert_bool(PeopleDirection.automatic_work).is_false()
+	assert_array(hud.speed_requests).is_empty()
+
+func test_real_allocator_click_recovers_from_pending_day_read()->void:
+	var View=preload("res://scripts/hud/people_allocator_screen.gd")
+	var Job=preload("res://scripts/day_job.gd")
+	var block:Dictionary=provider.tab(0).blocks[0]
+	var job=Job.new()
+	job.add_group("player",[Job.step("finish_pending",{},func()->void:
+		WorldSimulation.advancing=false
+	)])
+	WorldSimulation._day_job=job
+	WorldSimulation.advancing=true
+	var screen=View.new()
+	add_child(screen)
+	screen.setup(block)
+	assert_bool(screen.forecast.ok).is_false()
+	screen.rows.Knowledge.steps[5].pressed.emit()
+	assert_bool(screen.forecast.ok).is_true()
+	assert_bool(PeopleDirection.automatic_work).is_false()
+	assert_str(screen.refs.feedback.text).starts_with("Applied:")
+	assert_dict(Manual.counts()).is_equal(screen.forecast.after.counts)
+	screen.free()
+
+func test_running_home_refresh_preserves_scroll_focus_and_control_geometry()->void:
+	var terrain:=RunningTerrain.new()
+	add_child(terrain)
+	provider.terrain=terrain
+	var panel=preload("res://scripts/hud/dock_panel.gd").new()
+	add_child(panel)
+	panel.size=Vector2(700,420)
+	panel.present(provider,0)
+	for frame in 6:await get_tree().process_frame
+	var screen:Control=panel.body.find_child("CivilizationPeopleScreen",true,false)
+	var button:Button=screen.rows.Knowledge.steps[1]
+	button.grab_focus()
+	panel.body_scroll.ensure_control_visible(button)
+	for frame in 4:await get_tree().process_frame
+	var scroll:int=panel.body_scroll.scroll_vertical
+	assert_int(scroll).is_greater(0)
+	var rect:=button.get_global_rect()
+	var builds:int=panel.sections_built
+	var longest:=0
+	for day in 6:
+		GameState.elapsed_days+=1
+		var tick:=Time.get_ticks_usec()
+		panel.rebuild_body()
+		longest=maxi(longest,Time.get_ticks_usec()-tick)
+		for frame in 4:await get_tree().process_frame
+		assert_int(panel.body_scroll.scroll_vertical).is_equal(scroll)
+		assert_object(button.get_global_rect()).is_equal(rect)
+		assert_object(get_viewport().gui_get_focus_owner()).is_same(button)
+		assert_int(panel.sections_built).is_equal(builds)
+	print("Home live refresh fixture: slowest %.1fms across six days" % (float(longest)/1000.0))
+	panel.free()
+	provider.terrain=null
+	terrain.free()

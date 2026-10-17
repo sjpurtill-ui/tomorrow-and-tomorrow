@@ -25,7 +25,7 @@ func before_test() -> void:
 
 func after_test() -> void: screen.free()
 
-func _capture() -> Dictionary:
+func _capture(_for_assignment: bool = false) -> Dictionary:
 	captures += 1
 	return {"ok":true, "token":revision, "counts":counts.duplicate(), "shares":shares.duplicate(), "commands":[]}
 
@@ -58,7 +58,7 @@ func _block() -> Dictionary:
 	var tasks: Array = []
 	for role: String in Manual.ROLES: tasks.append({"id":role, "count":counts[role], "share":shares[role]})
 	return {"type":"civilization_people", "settlement_view":{"population":193}, "workforce_revision":[revision],
-		"labor":{"tasks":tasks, "manual":manual, "on_leaders":func(): manual = false},
+		"labor":{"tasks":tasks, "manual":manual, "on_leaders":func(): manual = false, "on_ruler":func(): manual = true},
 		"workforce":{"capture":_capture, "step":_step, "evaluate":_evaluate, "commit":_commit}}
 
 func test_all_nine_allocations_are_present_and_reading_is_shared_and_read_only() -> void:
@@ -123,7 +123,7 @@ func test_refresh_restore_and_long_risk_keep_row_nodes_and_controls_fixed() -> v
 	var held := captures
 	for index in 3: revision += 1; screen.update_block(_block())
 	assert_int(captures).is_equal(held)
-	assert_str(screen.refs.estimate_mode.text).contains("PREVIOUS")
+	assert_str(screen.refs.estimate_mode.text).contains("Update estimates")
 
 func test_empty_unknown_and_boundary_states_do_not_invent_workers_or_effects() -> void:
 	for role: String in counts: counts[role] = 0; shares[role] = 0
@@ -134,9 +134,9 @@ func test_empty_unknown_and_boundary_states_do_not_invent_workers_or_effects() -
 	screen.update_block(_block())
 	assert_bool(screen.rows.Knowledge.steps[1].disabled).is_true()
 	assert_bool(screen.rows.Food.steps[-1].disabled).is_true()
-	available = false; screen._refresh_current()
+	available = false; screen.forecast = {}; screen._refresh_current()
 	assert_str(screen.refs.food.text).is_equal("Food estimate unavailable")
-	assert_str(screen.rows.Knowledge.effect.text).is_equal("Estimate unavailable")
+	assert_str(screen.rows.Knowledge.effect.text).is_equal("Estimate pending")
 
 func test_delegation_uses_original_callback_and_restore_never_replays_actions() -> void:
 	screen.rows.Crafting.steps[1].pressed.emit()
@@ -155,7 +155,7 @@ func test_same_heads_after_world_change_do_not_certify_old_consequences() -> voi
 	screen.update_block(_block())
 	assert_bool(screen._comparison).is_false()
 	assert_bool(screen._dirty).is_true()
-	assert_str(screen.refs.estimate_mode.text).contains("PREVIOUS")
+	assert_str(screen.refs.estimate_mode.text).contains("Update estimates")
 
 func test_research_and_food_change_explain_tradeoff_without_claiming_discoveries() -> void:
 	screen._comparison = true
@@ -174,3 +174,89 @@ func test_research_and_food_change_explain_tradeoff_without_claiming_discoveries
 	screen._fill_consequences()
 	assert_str(screen.refs.food.text).contains("Stored food is unchanged")
 	assert_str(screen.refs.risk.text).contains("risks starvation")
+
+func test_explicit_control_button_and_inline_feedback_explain_assignments() -> void:
+	assert_str(screen.refs.mode.text).is_equal("Leaders assign workers")
+	assert_bool(screen.refs.take_control.disabled).is_false()
+	screen.refs.take_control.pressed.emit()
+	assert_bool(manual).is_true()
+	assert_bool(screen.refs.take_control.disabled).is_true()
+	assert_bool(screen.refs.delegate.disabled).is_false()
+	assert_str(screen.refs.mode.text).is_equal("You assign workers")
+	assert_int(commits).is_equal(0)
+	screen.rows.Knowledge.steps[5].pressed.emit()
+	assert_str(screen.refs.feedback.text).starts_with("Applied:").contains("Learning +5")
+	reject = true
+	screen.rows.Knowledge.steps[1].pressed.emit()
+	assert_str(screen.refs.feedback.text).starts_with("Not applied:").contains("World changed")
+	assert_int(commits).is_equal(1)
+
+func test_failed_read_retries_without_a_new_provider_revision() -> void:
+	available = false
+	screen.forecast = {}
+	screen._refresh_current()
+	assert_bool(screen._dirty).is_true()
+	assert_str(screen.refs.feedback.text).contains("Forecast unavailable")
+	available = true
+	screen._last_read_ms = -3000
+	screen._process(0.0)
+	assert_bool(screen._dirty).is_false()
+	assert_bool(screen.forecast.ok).is_true()
+	assert_int(commits).is_equal(0)
+
+func test_assignment_buttons_fit_narrow_and_wide_rows() -> void:
+	for width: float in [700.0, 1200.0]:
+		screen.size.x = width
+		screen._layout()
+		for frame in 4: await get_tree().process_frame
+		for role: String in Manual.ROLES:
+			var row: Dictionary = screen.rows[role]
+			for points: int in [-1, 1, 5]:
+				assert_bool(row.panel.get_global_rect().encloses(row.steps[points].get_global_rect())).is_true()
+				assert_float(row.steps[points].get_global_rect().end.x).is_less_equal(screen.get_global_rect().end.x)
+
+func test_running_updates_keep_estimates_styles_controls_and_action_feedback_steady() -> void:
+	screen.rows.Knowledge.steps[5].pressed.emit()
+	var receipt: String = screen.refs.feedback.text
+	var effect: String = screen.rows.Knowledge.effect.text
+	var button: Button = screen.rows.Knowledge.steps[1]
+	var style: StyleBox = screen.rows.Knowledge.panel.get_theme_stylebox("panel")
+	var held := evaluations
+	for day in 8:
+		revision += 1
+		counts.Knowledge += 1
+		var block := _block()
+		block.world_running = true
+		block.day = 100 + day
+		screen.update_block(block)
+		screen._last_read_ms = -3000
+		screen._process(0.0)
+		assert_int(evaluations).is_equal(held)
+		assert_str(screen.rows.Knowledge.count.text).is_equal(str(counts.Knowledge))
+		assert_str(screen.rows.Knowledge.effect.text).is_equal(effect)
+		assert_str(screen.refs.feedback.text).is_equal(receipt)
+		assert_object(screen.rows.Knowledge.steps[1]).is_same(button)
+		assert_object(screen.rows.Knowledge.panel.get_theme_stylebox("panel")).is_same(style)
+	assert_bool(screen._comparison).is_false()
+	screen.refs.refresh.pressed.emit()
+	assert_int(evaluations).is_equal(held + 1)
+	assert_str(screen.refs.estimate_mode.text).contains("DAY 107")
+	assert_int(commits).is_equal(1)
+	var paused := _block()
+	paused.day = 108
+	revision += 1
+	paused.workforce_revision = [revision]
+	screen.update_block(paused)
+	screen._last_read_ms = -3000
+	screen._process(0.0)
+	assert_int(evaluations).is_equal(held + 2)
+	assert_str(screen.refs.estimate_mode.text).contains("DAY 108")
+
+func test_temporarily_failed_refresh_keeps_last_valid_estimate() -> void:
+	var previous: Dictionary = screen.forecast.duplicate(true)
+	var effect: String = screen.rows.Knowledge.effect.text
+	available = false
+	screen._refresh_current()
+	assert_dict(screen.forecast).is_equal(previous)
+	assert_str(screen.rows.Knowledge.effect.text).is_equal(effect)
+	assert_bool(screen._dirty).is_true()
