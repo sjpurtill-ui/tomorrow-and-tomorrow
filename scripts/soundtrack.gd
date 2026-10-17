@@ -12,7 +12,7 @@ extends Node
 ## war band is on them. A
 ## piece of the present mood starts, then the next one GAP_MIN to GAP_MAX
 ## seconds of real time after it began (silence between when the piece is
-## shorter), never the same piece twice running when the mood has others.
+## shorter; a longer piece plays to its end and the next follows it), never the same piece twice running when the mood has others.
 ## When the mood turns, the piece playing fades out over FADE seconds and one
 ## of the new mood begins. A mood with no pieces yet is silent.
 ## Real time, not the world's days: speed and pause change nothing. Plays on
@@ -24,8 +24,8 @@ const DEFAULT_MOOD:="calm"
 ## The folder whose pieces join every mood's.
 const ANY_MOOD:="any"
 ## Seconds from the start of one piece to the start of the next.
-const GAP_MIN:=480.0
-const GAP_MAX:=720.0
+const GAP_MIN:=300.0
+const GAP_MAX:=300.0
 ## How often the mood is read, and how long a piece takes to fade when it turns.
 const MOOD_CHECK:=5.0
 const FADE:=4.0
