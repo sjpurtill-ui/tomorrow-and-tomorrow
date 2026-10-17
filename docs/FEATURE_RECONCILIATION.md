@@ -3807,3 +3807,12 @@ place tags avoid city pins and great-work marks. All 46 focused headless cases
 pass. No save changes or running-session restart were made. The integration
 record is in `docs/INTEGRATION_STATUS.md`; publication precedes canonical update.
 
+
+## October 17 — Shared forage and short raids
+
+The `codex/early-raids-foraging` delivery adds a persistent, shared geographic
+forage limit and bounded routine raids through the existing general-led war
+engine. See `docs/INTEGRATION_STATUS.md` for scope, numerical tuning, remote-first
+integration and the five baseline military test failures. New forage, supply,
+raid-policy, rival-feud, manpower and full-save tests pass. Separate caravan or
+livestock targets and new access/compensation objectives remain future work.

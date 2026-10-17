@@ -1,3 +1,57 @@
+## October 17 — Shared foraging and short raids
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/early-raids-foraging`, base `469e13a8e62b6c44300409b369805c25610ea050`.
+Scope: shared foraging ledger, actual field rations and supply-map forecasts,
+foraging march pace, routine raid size/cadence/return rules, and their tests.
+
+Ordinary country feeds twenty soldiers per day across all bands in a shared
+12 km district (rich country up to thirty; poor land and winter reduce it).
+Larger armies need food for the remainder. Actual gathering depletes shared
+land, persists through save/reload and returns gradually over sixty unused days.
+Splitting forces or toggling movement does not restore food. Maps, route
+forecasts and actual rations use the same rule; ordinary foraging marches are
+20% slower and searching exhausted ground is 50% slower.
+
+Routine raiding parties use 8–20 existing allocated fighters. Generals return
+when food runs short, a quarter of initial strength is lost/unavailable,
+observed defenders overwhelm them, or fourteen days out are reached. Active
+combat resolves before return. Repeat raids wait thirty days plus travel and
+recovery. Explicitly requested larger raids remain possible. Existing real
+interception, stores loot, feud and retaliation paths remain in use.
+
+Save compatibility: shared `WorldSimulation.forage_land` is optional in older
+saves; missing records start undepleted. Validated restore/rollback includes
+this ledger. Existing per-force camp fields remain readable but are no longer
+the authority for local food. No save reset, new manpower source, mandatory
+logistics interface, or player restart. Shared hotspot: `military_campaign.gd`;
+also touches global world persistence, not `save_system.gd` or project settings.
+
+Limitations: this first slice uses existing fields/stores raid targets. Separate
+caravan/livestock/forage-party targets and new access/compensation objectives
+remain future work. Capacity is shared within fixed districts, with boundaries;
+initial numerical tuning is not a claim of completed player balancing.
+
+Validation: 109 distinct tests run; 104 pass. All seven new shared-forage tests,
+17 supply/model/map tests, four raid-policy tests, five rival-feud tests,
+25 Defense manpower tests and five full-save guards pass. Existing upkeep and
+council suites have five failing cases, reproduced on unchanged base main in
+`/tmp/tat-early-raids-baseline`: draft-limit wording, the retired civilian town
+watch expectation, two home-defeat fixtures, and rival-on-rival conquest. They
+have the same four runtime errors/eight failed assertions on base and this
+branch. No new failing case is introduced. The older failures remain open;
+this is not a claim that the complete military suite is green.
+
+Final logs: `/tmp/tat-early-raids-final.log`,
+`/tmp/tat-early-raids-manpower-save.log`; baseline comparison:
+`/tmp/tat-early-baseline-tests.log`. `git diff --check` passes.
+
+INTEGRATED via remote-first delivery of this entry's commit: task branch and
+main share the tested source, with canonical fast-forward only after remote
+verification. A running game retains its already-loaded code until its next
+normal launch. Generated imports/UIDs, test overrides and build artifacts are
+excluded from the source commit.
+
 ## October 17 — One troop-manpower source
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

@@ -16,10 +16,10 @@ extends RefCounted
 ## FORAGE_FEEDS men in full in ordinary country, so a band of twenty can live
 ## off it and a host of thousands cannot.
 const FORAGE_STATIONED:=1.0
-const FORAGE_FORAGING:=0.6
+const FORAGE_FORAGING:=1.0
 const FORAGE_MOVING:=0.25
 ## Living off the land, a band marches at this share of its pace.
-const FORAGE_PACE:=0.5
+const FORAGE_PACE:=0.8
 ## A ration below this share counts as a hungry day for the soldiers.
 const HUNGRY_BELOW:=0.75
 
@@ -33,9 +33,15 @@ static func forage_base(force:Dictionary)->float:
 ## it better. `carried` is the share of its bread the carriers bring.
 static func should_live_off_land(carried:float,factor:float)->bool:
 	var c:=clampf(carried,0.0,1.0)
-	var full:=c+(1.0-c)*minf(1.0,FORAGE_MOVING*factor)
-	var slow:=c+(1.0-c)*minf(1.0,FORAGE_FORAGING*factor)
+	var full:=minf(1.0,c+FORAGE_MOVING*factor)
+	var slow:=minf(1.0,c+FORAGE_FORAGING*factor)
 	return full<HUNGRY_BELOW and slow>full+0.02
+
+## Searching exhausted ground takes half the day; ordinary foraging costs
+## one fifth of marching pace. Route estimates call this same function.
+static func forage_pace(force:Dictionary)->float:
+	var supply=load("res://scripts/supply_state.gd")
+	return 0.5 if float(supply.camp_left(force))<0.5 else FORAGE_PACE
 
 static func forage_share(force:Dictionary)->float:
 	var base:=forage_base(force)

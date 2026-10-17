@@ -61,9 +61,11 @@ const WATCH_SHARE:=0.2
 ## Fewer than this is no band at all.
 const MIN_BAND:=3
 ## A raiding party is at least this many when the men are there.
-const RAID_FLOOR:=10
+const RAID_FLOOR:=8
+const RAID_CEILING:=20
+const RAID_OUT_DAYS:=14
 ## Between raids while punishing (days).
-const RAID_REST_DAYS:=90
+const RAID_REST_DAYS:=30
 ## A raid their feud called waits at most this long for the band to be sent.
 const RAID_CALL_DAYS:=30
 ## Messengers for peace go again after this many days while refused.
@@ -601,13 +603,12 @@ static func _find_them(civ_id:String,_today_day:int,asked:String="")->Dictionary
 	var said:=String(wl.call("send_trackers",civ_id,asked))
 	return _record(civ_id,"act",said,{"live":true})
 
-## The band a raid needs: a raiding party (RAID_FLOOR at least, the
-## record's 5 to 30 men of a raid at small scale), larger as their fighters
-## are many, until the odds are 3 to 2; else all the war leader can spare.
+## Routine raids use 8–20 already allocated fighters. If that cannot beat
+## the observed defense, the general waits; conquest uses a larger host.
 static func _raid_size(town:Dictionary)->int:
 	var forces:=_forces()
-	var free:=int(forces.free)
-	if free<=0: return 0
+	var free:=mini(int(forces.free),RAID_CEILING)
+	if free<RAID_FLOOR: return 0
 	var least:=mini(free,RAID_FLOOR)
 	var enemy:=_estimate(String(town.city_id))
 	if not bool(enemy.get("known",false)): return free
@@ -1022,7 +1023,7 @@ static func _tag(army_id:int,civ_id:String,act:String,town:Dictionary,odds:Dicti
 	var mc:=_mc()
 	var index:int=mc._field_army_index(army_id)
 	if index<0: return
-	var tag:={"civ":civ_id,"act":act,"city":String(town.get("city_id","")),"name":String(town.get("name","")).substr(0,60),"since":_today(),"phase":"out","formed":formed}
+	var tag:={"civ":civ_id,"act":act,"city":String(town.get("city_id","")),"name":String(town.get("name","")).substr(0,60),"since":_today(),"phase":"out","formed":formed,"starting_troops":int(mc.field_armies[index].get("troops",0))}
 	if not odds.is_empty(): tag["odds"]=snappedf(float(odds.get("raw",1.0)),0.01)
 	if String(town.get("formation_id",""))!="": tag["formation"]=String(town.formation_id)
 	mc.field_armies[index]["council"]=tag
@@ -1082,6 +1083,15 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 			"take": _front(civ_id)["take_failed"]=today
 			"punish": _front(civ_id)["raided"]=today
 		return _record(civ_id,"rest","%s is out of the fighting to rest and refill (%s)." % [who,_unfit_words(band)],ids)
+	if act=="punish" and String(c.get("phase","out"))=="out":
+		var reason:=raid_return_reason(band,today)
+		if reason=="":
+			var target:=_town(civ_id,town_id,name)
+			var observed:=_band_odds(band,target,"raid") if not target.is_empty() else {}
+			if not observed.is_empty() and float(observed.raw)<0.65:reason="the reported defenders now outmatch the band"
+		if reason!="" and _send_home(band):
+			_front(civ_id)["raided"]=today
+			return _record(civ_id,"rest","%s calls off the raid and brings the band home: %s." % [who,reason],ids)
 	if mc._besieging(army_id):
 		# The general storms when the walls are worn (military_campaign:
 		# a commander's siege assaults at pressure 0.72).
@@ -1135,8 +1145,17 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 	_send_home(band)
 	return _record(civ_id,"hold","%s turns for home." % who,ids)
 
-## A band turns for home by the land road (or, already home, is ready to be
-## folded back into the levy). False when it cannot move now.
+## General's limits for a short raid; existing campaigns without this new
+## starting count remain readable and acquire the normal time/food limits.
+static func raid_return_reason(band:Dictionary,today:int)->String:
+	var c:Dictionary=band.get("council",{})
+	var start:=int(c.get("starting_troops",band.get("troops",0)))
+	if start>0 and int(band.get("troops",0))<=floori(start*0.75):return "a quarter of the raiders are lost or unable to fight"
+	if float(band.get("hungry_days",0.0))>=2.0 and Supply.fed(band)<Supply.WELL_FROM and float(band.get("train_days",0.0))<=1.0:return "food is running short"
+	if today-int(c.get("since",today))>=RAID_OUT_DAYS:return "the short raid has reached its return deadline"
+	return ""
+
+## Turns home by the existing route; false when combat prevents withdrawal.
 static func _send_home(band:Dictionary)->bool:
 	var mc:=_mc()
 	var army_id:=int(band.get("army_id",0))
@@ -1281,6 +1300,7 @@ static func _take_up(band:Dictionary,stances:Dictionary,today:int)->String:
 		var civ_id:=String(key)
 		var stance:=String(stances[key])
 		if not stance in ["punish","take"] or not _band_on(civ_id,[stance]).is_empty(): continue
+		if stance=="punish" and (int(band.get("troops",0))<RAID_FLOOR or int(band.get("troops",0))>RAID_CEILING):continue
 		var f:=_front(civ_id)
 		if stance=="punish" and today-int(f.get("raided",-99999))<RAID_REST_DAYS and not _raid_called(civ_id): continue
 		if stance=="take" and today-int(f.get("take_failed",-99999))<TAKE_REST_DAYS: continue
@@ -1493,7 +1513,7 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 	if not at.is_finite() or troops<=0: return {}
 	if _player():
 		# The march's own reckoning (military_campaign march_supply): its
-		# days, the share of the road lived off the land at half pace, and how
+		# days, the share of the road lived off the land 20–50% slower, and how
 		# the band would be fed on the road and camped at the end, with the
 		# carriers as they are today. The leaner of the two decides.
 		var mc:=_mc()
@@ -1519,6 +1539,10 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 	var SeaRoad:=preload("res://scripts/army_sea_road.gd")
 	var by_boat:=km>float(load(WAR_LOOP_PATH).NEIGHBOUR_MARGIN_KM) and km<=float(SeaRoad.war_reach_km()) and SeaRoad.links_by_sea("town:"+String(town.get("city_id",town.get("name",""))),WorldSimulation.world.player_world_origin,at)
 	var ratio:=clampf(food_days/maxf(1.0,road_days*4.0),0.0,1.0)*(1.0 if by_boat else clampf(1.15-km/400.0,0.2,1.0))
+	if not by_boat:
+		var land:Dictionary=Supply.land_at(Supply.rations_field(),at,_today())
+		var local:=Supply.Foraging.factor(Supply.Foraging.snapshot(),at,_today(),float(land.rich),float(land.cold),troops)
+		ratio=minf(1.0,ratio+local)
 	return {"ratio":ratio,"season":"","km":km,"days":road_days}
 
 static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
@@ -1527,7 +1551,7 @@ static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
 	var where:=("camped at %s" if float(fed.get("there",1.0))<float(fed.get("on_road",1.0)) else "on the road to %s") % String(town.name)
 	var how:=PackedStringArray()
 	if float(fed.get("days",0.0))>=1.0: how.append("about %s on the road" % _span(roundi(float(fed.days))))
-	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land at half pace" % ("most" if float(fed.half_pace)>=0.6 else "part"))
+	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land 20–50% slower" % ("most" if float(fed.half_pace)>=0.6 else "part"))
 	var carried:=(" They can carry food for %s." % _span(int(float(fed.train_days)))) if float(fed.get("train_days",0.0))>=1.0 else ""
 	if carried!="" and int(fed.get("forts",0))>0: carried+=" Our forts on the way hold %s more." % _span(int(float(fed.fort_days)))
 	elif carried!="": carried+=" No stocked fort of ours stands on that road."
@@ -1552,6 +1576,7 @@ static func _launch(civ_id:String,town:Dictionary,act:String,insist:bool,options
 	var besiege:bool=not raid and free>=SIEGE_MIN and (_mc().active_siege as Dictionary).is_empty() and (odds.is_empty() or float(odds.raw)<STORM_ODDS)
 	# Everything they have (world_answer.gd): every free fighter goes as one band.
 	var count:=(free if bool(options.get("all",false)) else _raid_size(town)) if raid else 0
+	if raid and count<=0:return _record(civ_id,"wait","The war leader needs at least eight free allocated fighters for a raid.")
 	if _player(): return _launch_ours(civ_id,town,act,besiege,count,insist,options)
 	return _launch_theirs(civ_id,town,act,besiege,count,insist,odds)
 

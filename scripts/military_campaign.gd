@@ -1327,7 +1327,7 @@ func field_route(start:Vector2,target:Vector2,force:Dictionary={})->Dictionary:
 ## field_route result) from today, day by day as the daily march spends it
 ## (march_terrain.days / walk_day). A road profiled for another force is
 ## re-weighed for this one first. Where the carriers cannot feed the band it
-## lives off the land at half pace (field_rations.gd FORAGE_PACE), and the
+## lives off the land 20–50% slower (field_rations.gd FORAGE_PACE), and the
 ## days count that too (_forage_slowing).
 func march_days(force:Dictionary,route:Dictionary)->int:
 	if float(route.get("length_km",0.0))<0.5 and not route.has("e"): return 0
@@ -1379,7 +1379,7 @@ func march_supply(force:Dictionary,route:Dictionary)->Dictionary:
 
 ## How much living off the land slows a march on this road (from `done`
 ## level km on): 1 where the carriers feed the band all the way, up to
-## 1/FORAGE_PACE (twice the days) where they reach it nowhere. The same
+## twice the days in exhausted country where they reach it nowhere. The same
 ## daily choice the march makes (_lives_off_land), asked at a few points of
 ## the road still ahead, as a share of the time. A chase keeps pace.
 func _forage_slowing(force:Dictionary,origin:Vector2,packed:Array,done:float=0.0)->float:
@@ -1393,7 +1393,7 @@ func _forage_slowing(force:Dictionary,origin:Vector2,packed:Array,done:float=0.0
 	var train:=train_days_for(force)
 	probe["train_days"]=0.0
 	var ahead:=float(MarchTerrain.days(origin,packed,_field_army_speed(force),int(WorldSimulation.state.elapsed_days),MarchTerrain.mix_of(force)))*(total-done)/total
-	var living:=0
+	var extra_time:=0.0
 	var cover:=_train_cover(force,origin,packed,done,total,ahead)
 	train=float(cover.start)
 	for k in MARCH_SAMPLES:
@@ -1401,13 +1401,12 @@ func _forage_slowing(force:Dictionary,origin:Vector2,packed:Array,done:float=0.0
 		if _covered(cover,along): continue
 		var at:Vector2=MarchTerrain.at_effort(origin,packed,lerpf(done,total,along)).position
 		probe["position"]={"x":at.x,"z":at.y}
-		if _lives_off_land(probe): living+=1
-	var share:=float(living)/float(MARCH_SAMPLES)
-	return (1.0-share)+share/FieldRations.FORAGE_PACE
+		if _lives_off_land(probe): extra_time+=1.0/FieldRations.forage_pace(probe)-1.0
+	return 1.0+extra_time/float(MARCH_SAMPLES)
 
 
 ## Where the carriers cannot feed a band on the march, its general lives off
-## the land (half pace, foraging and hunting as they go) when that feeds the
+## the land (20–50% slower, foraging and hunting as they go) when that feeds the
 ## men better than the full march (field_rations.gd).
 func _lives_off_land(force:Dictionary)->bool:
 	return FieldRations.should_live_off_land(_force_provision_access(force),SupplyState.forage_factor(force))
@@ -1431,7 +1430,7 @@ func _field_supply_advice(army:Dictionary)->String:
 	var fed:=SupplyState.fed(army)
 	var words:=""
 	if fed<FieldRations.HUNGRY_BELOW: words+=" They eat %d%% of a ration: the march is slowed." % roundi(fed*100.0)
-	if float(army.get("march_slowing",1.0))>1.01: words+=" Where the carriers cannot reach them they live off the land at half pace; the days count it."
+	if float(army.get("march_slowing",1.0))>1.01: words+=" Where the carriers cannot reach them they live off the land 20–50% slower; the days count it."
 	return words
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
@@ -1990,12 +1989,12 @@ func _process_field_army_movement_day()->void:
 		var legs:=ArmyLandRoute.unpack(packed)
 		var mix:=MarchTerrain.mix_of(army)
 		# Where the carriers cannot feed the band, the general lives off the
-		# land: half pace, foraging and hunting as they go, when that feeds the
+		# land: 20–50% slower, foraging and hunting as they go, when that feeds the
 		# men better than the full march (field_rations.gd). A chase keeps pace.
 		var SeaRoad:=preload("res://scripts/army_sea_road.gd")
 		var sailing:=SeaRoad.at_sea(army,float(army.get("march_effort_done",0.0)))
 		army["living_off_land"]=intercept_target_id.is_empty() and not sailing and _lives_off_land(army)
-		var speed:=_field_army_speed(army)*(FieldRations.FORAGE_PACE if bool(army.living_off_land) else 1.0)
+		var speed:=_field_army_speed(army)*(FieldRations.forage_pace(army) if bool(army.living_off_land) else 1.0)
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var done_before:=float(army.get("march_effort_done",0.0))
 		var done:=MarchTerrain.walk_day(origin,packed,done_before,speed,today,mix)
@@ -4186,10 +4185,11 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 		# A band away from home forages for part of what the carriers did not
 		# bring. What is still missing is the band's own hunger, not the home's.
 		var foraged:=0.0
-		if not _army_is_home(force):foraged=maxf(0.0,need*share-field_received)*FieldRations.forage_share(force)
+		if not _army_is_home(force):foraged=minf(maxf(0.0,need*share-field_received),need*share*FieldRations.forage_share(force))
+		var men_days:=float(maxi(0,int(force.get("troops",0))))*float(WorldSimulation.span)
+		var gathered:=SupplyState.eat_camp(force,foraged/maxf(.01,need*share)*men_days,float(WorldSimulation.span))
+		foraged=gathered/maxf(.01,men_days)*need*share
 		provision_ratio=clampf((field_received+foraged)/maxf(.01,need*share),0,1) if need*share>0 else 1.0
-		# What they foraged eats out the country round their camp (supply_state.gd).
-		SupplyState.eat_camp(force,(foraged/maxf(.01,need*share))*float(maxi(0,int(force.get("troops",0))))*float(WorldSimulation.span) if need*share>0 else 0.0,float(WorldSimulation.span))
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=field_received
 		force["provisions_foraged_today"]=foraged

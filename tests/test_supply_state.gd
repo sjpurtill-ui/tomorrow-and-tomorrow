@@ -414,7 +414,7 @@ func test_a_small_band_lives_off_the_land_and_a_host_cannot()->void:
 	# men camped feed themselves; on the march the general slows to forage
 	# and hunt, and they stay fed. A host of thousands cannot.
 	var few:=_band(21,Vector2(60,0),20)
-	assert_float(Rations.forage_share(few)).is_equal_approx(1.0,0.0001)
+	assert_float(Rations.forage_share(few)).is_greater_equal(Rations.HUNGRY_BELOW)
 	few["status"]="moving"
 	var factor:=Supply.forage_factor(few)
 	assert_bool(Rations.should_live_off_land(0.0,factor)).is_true()
@@ -429,3 +429,20 @@ func test_a_small_band_lives_off_the_land_and_a_host_cannot()->void:
 	var point:=Supply.at_point(home+Vector2(250,0),20,true,false)
 	assert_bool(bool(point.living_off_land)).is_true()
 	assert_float(float(point.ratio)).is_greater_equal(Rations.HUNGRY_BELOW)
+
+func test_carried_rations_cover_only_the_remainder_beyond_local_forage()->void:
+	var band:=_band(81,Vector2(60,0),40)
+	band["train_days"]=0.0
+	MilitaryCampaign.field_armies.assign([band])
+	var local:=Rations.forage_share(band)*40.0
+	MilitaryCampaign.record_daily_provisions(40.0,10.0,{})
+	assert_float(float(band.provisions_delivered_today)).is_equal_approx(10.0,0.001)
+	assert_float(float(band.provisions_foraged_today)).is_equal_approx(local,0.001)
+	assert_float(float(band.provision_ratio)).is_equal_approx((10.0+local)/40.0,0.001)
+
+func test_foraging_on_depleted_ground_slows_marching_to_half_pace()->void:
+	var band:=_band(82,Vector2(60,0),12)
+	assert_float(Rations.forage_pace(band)).is_equal(0.8)
+	var key:=Supply.Foraging.district(Supply.force_pos(band))
+	WorldSimulation.forage_land[key]={"day":int(GameState.elapsed_days),"debt":300.0,"stock":400.0,"used":0.0,"budget":5.0}
+	assert_float(Rations.forage_pace(band)).is_equal(0.5)

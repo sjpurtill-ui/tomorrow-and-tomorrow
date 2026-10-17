@@ -48,6 +48,7 @@ extends RefCounted
 ## Screens: of_force(), of_army_id(), at_point(), forces(), words().
 ## Static helpers; preload.
 
+const Foraging:=preload("res://scripts/field_foraging.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const Mechanics:=preload("res://scripts/research_mechanics.gd")
 const March:=preload("res://scripts/march_terrain.gd")
@@ -81,20 +82,13 @@ const FALLBACK_FACTOR:=1.25
 ## Foraging: the typical richness of the land, the band size that forages
 ## at field_rations' stated rate, and the cap on the share.
 const FORAGE_TYPICAL:=0.42
-## The men the land round a camp feeds in full in ordinary country; a bigger
-## force finds less each, by the square root (field_rations.gd).
-const FORAGE_FEEDS:=150.0
+## One shared district feeds twenty soldiers in ordinary country. Larger
+## forces divide this amount; soldiers beyond it need carried provisions.
+const FORAGE_FEEDS:=20.0
 const FORAGE_SHARE_MAX:=1.0
-## The land round a camp holds food for FORAGE_FEEDS men for CAMP_FORAGE_DAYS
-## in ordinary country (more in rich country, less in poor). A band camped
-## in one place eats it out: what it forages falls with what it has found
-## there already, down to CAMP_FORAGE_FLOOR (game farther out, what regrows).
-## A band of twenty lives off ordinary country for about three months, one of
-## a hundred and fifty for a few days. Moving on more than CAMP_KM, or
-## marching, it finds fresh country and the count starts again.
 const CAMP_FORAGE_DAYS:=20.0
 const CAMP_FORAGE_FLOOR:=0.1
-const CAMP_KM:=3.0
+const CAMP_KM:=12.0
 ## Ground weight when nothing is surveyed (tests, headless): open land.
 const NEUTRAL_RICH:=FORAGE_TYPICAL
 const NEUTRAL_SWING:=12.0
@@ -1074,10 +1068,7 @@ static func reach_effort(who:String,share:float=REACH_HAUL,endurance:float=0.0)-
 ## How well a band of this size forages this country today, as a factor on
 ## field_rations' base shares: the land's richness, the season, the size.
 static func forage_factor_from(rich:float,chill:float,troops:int)->float:
-	var area:=clampf(rich/FORAGE_TYPICAL,0.3,1.5)
-	var season:=1.0-0.7*chill
-	var size:=clampf(sqrt(FORAGE_FEEDS/float(maxi(1,troops))),0.05,4.0)
-	return clampf(area*season*size,0.02,6.0)
+	return Foraging.capacity(rich,chill)/float(maxi(1,troops))
 
 ## The land at a point: {rich, t, swing, cold}. From the field; off it, from
 ## the marching ground (main thread) or open land.
@@ -1110,7 +1101,7 @@ static func siege_factor()->float:
 ## share at all), stores (the share the stores could send), siege (the
 ## share of carts a besieged home lets out) and endurance (the people's
 ## supply endurance) are the day's inputs, read once by the caller (day_inputs()).
-static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0,preview:Dictionary={})->Dictionary:
+static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,transport:float,stores:float,siege:float,endurance:float=0.0,preview:Dictionary={},forage:Dictionary={})->Dictionary:
 	var who:=String(field.carrier) if not field.is_empty() else carrier()
 	var e:=effort_at(field,p)
 	var trip:=trip_effort(e)
@@ -1130,13 +1121,13 @@ static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,tran
 	var carried:=clampf(transport*haul*stores,0.0,1.0)
 	# On the march the general lives off the land where the carriers cannot
 	# feed the band (field_rations.should_live_off_land), as the march does.
-	var factor:=forage_factor_from(float(land.rich),chill,troops)
+	var factor:=Foraging.factor(forage,p,day,float(land.rich),chill,troops)
 	var living:=moving and FieldRations.should_live_off_land(carried,factor)
 	var base:=FieldRations.FORAGE_STATIONED if not moving else (FieldRations.FORAGE_FORAGING if living else FieldRations.FORAGE_MOVING)
 	var share:=minf(FORAGE_SHARE_MAX,base*factor)
-	var foraged:=(1.0-carried)*share
+	var foraged:=minf(1.0-carried,share)
 	return {"ratio":clampf(carried+foraged,0.0,1.0),"carried":carried,"foraged":foraged,"local":0.0,"air":0.0,"haul":haul,"transport":transport,"stores":stores,"living_off_land":living,
-		"effort":float(e.effort),"trip_effort":trip,"days":days,"cold":chill,"sources":e.sources,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
+		"effort":float(e.effort),"trip_effort":trip,"days":days,"cold":chill,"sources":e.sources,"rich":float(land.rich),"forage_share":share,"forage_capacity":Foraging.capacity(float(land.rich),chill)*Foraging.left(forage.get("land",{}).get(Foraging.district(p),{}),day,true),"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
 
 ## A node's place on the land.
 static func node_pos(field:Dictionary,i:int)->Vector2:
@@ -1172,7 +1163,7 @@ static func grid(field:Dictionary,troops:int,inputs:Dictionary,known:PackedByteA
 	for i in n:
 		if i%512==0 and bool(cancel[0]): return {}
 		if land[i]==0 or i>=known.size() or known[i]==0: continue
-		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)),inputs.get("preview",{}))
+		var t:=terms(field,node_pos(field,i),day,troops,false,float(inputs.transport),float(inputs.stores),float(inputs.siege),float(inputs.get("endurance",0.0)),inputs.get("preview",{}),inputs.get("forage",{}))
 		ratio[i]=float(t.ratio); carried[i]=float(t.carried); haul[i]=float(t.haul)
 	return {"ratio":ratio,"carried":carried,"haul":haul,"troops":troops,"day":day,"key":int(field.get("key",0))}
 
@@ -1186,7 +1177,7 @@ static func day_inputs()->Dictionary:
 	if s!=null: stores=clampf(float((s.simulation_metrics as Dictionary).get("food_intake_ratio",1.0)),0.0,1.0)
 	var preview:Dictionary={}
 	if mc!=null and mc.has_method("carrier_reading"): preview=(mc.carrier_reading() as Dictionary).get("preview",{})
-	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today(),"preview":preview}
+	return {"transport":transport,"stores":stores,"siege":siege_factor(),"endurance":endurance_today(),"day":today(),"preview":preview,"forage":Foraging.snapshot()}
 
 ## The people's supply endurance (research_mechanics.gd), 0 without a people.
 static func endurance_today()->float:
@@ -1294,39 +1285,33 @@ static func forage_factor(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite(): return 1.0
 	var land:=land_at(rations_field(),p,today())
-	return forage_factor_from(float(land.rich),float(land.cold),int(force.get("troops",0)))*camp_left_from(float(land.rich),force)
+	return Foraging.factor(Foraging.snapshot(force),p,today(),float(land.rich),float(land.cold),int(force.get("troops",0)))
 
 ## Share of the country's food still to be found round a band's camp: 1 on
 ## the march or new to a place, falling as it eats the country out.
-static func camp_left_from(rich:float,force:Dictionary)->float:
-	if String(force.get("status","stationed"))=="moving": return 1.0
-	var eaten:=maxf(0.0,float(force.get("forage_eaten",0.0)))
-	if eaten<=0.0: return 1.0
-	var stock:=FORAGE_FEEDS*CAMP_FORAGE_DAYS*clampf(rich/FORAGE_TYPICAL,0.3,1.5)
-	return clampf(1.0-eaten/stock,CAMP_FORAGE_FLOOR,1.0)
+static func camp_left_from(_rich:float,force:Dictionary)->float:
+	return camp_left(force)
 
 static func camp_left(force:Dictionary)->float:
 	var p:=force_pos(force)
 	if not p.is_finite(): return 1.0
-	return camp_left_from(float(land_at(rations_field(),p,today()).rich),force)
+	return Foraging.left(WorldSimulation.forage_land.get(Foraging.district(p),{}),today())
 
-## A day of foraging at a band's camp (military_campaign
-## .record_daily_provisions): the food it found there, in men-days (the
-## share of a ration foraged x men x days). Marching, or moved on more than
-## CAMP_KM, it is fresh country: the count starts again. Kept on the band:
-## camp_days, forage_eaten, forage_left (for the screens).
-static func eat_camp(force:Dictionary,man_days:float,span:float)->void:
+## Records actual food taken from the shared district, including on a march.
+## Moving/reforming a band never restores a district it already exhausted.
+static func eat_camp(force:Dictionary,man_days:float,span:float)->float:
 	var p:=force_pos(force)
-	if String(force.get("status","stationed"))=="moving" or not p.is_finite():
-		force["camp_days"]=0.0; force["forage_eaten"]=0.0; force["forage_left"]=1.0; force.erase("camp_at")
-		return
+	if not p.is_finite():return 0.0
+	var land:=land_at(rations_field(),p,today())
+	var eaten:=Foraging.take(p,today(),float(land.rich),float(land.cold),man_days,span)
 	var camp:Variant=force.get("camp_at")
-	var at:=Vector2(float((camp as Dictionary).get("x",0.0)),float((camp as Dictionary).get("z",0.0))) if camp is Dictionary else Vector2.INF
-	if not at.is_finite() or at.distance_to(p)>CAMP_KM:
-		force["camp_at"]={"x":p.x,"z":p.y}; force["camp_days"]=0.0; force["forage_eaten"]=0.0
+	var at:=Vector2(float(camp.get("x",0.0)),float(camp.get("z",0.0))) if camp is Dictionary else Vector2.INF
+	if not at.is_finite() or Foraging.district(at)!=Foraging.district(p):
+		force["camp_at"]={"x":p.x,"z":p.y};force["camp_days"]=0.0;force["forage_eaten"]=0.0
 	force["camp_days"]=float(force.get("camp_days",0.0))+maxf(0.0,span)
-	force["forage_eaten"]=float(force.get("forage_eaten",0.0))+maxf(0.0,man_days)
+	force["forage_eaten"]=float(force.get("forage_eaten",0.0))+eaten
 	force["forage_left"]=camp_left(force)
+	return eaten
 
 
 # --------------------------------------------------------------------------
@@ -1350,7 +1335,7 @@ static func at_point(point:Vector2,troops:int=-1,moving:=false,one_more:=true)->
 	if troops<0: troops=typical_troops()
 	var f:=field()
 	var d:=day_inputs()
-	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),d.get("preview",{}) if one_more else {})
+	var t:=terms(f,point,int(d.day),troops,moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),d.get("preview",{}) if one_more else {},Foraging.at_point(point,troops,one_more))
 	var report:=_report_from_terms(f,t,point)
 	report["force_kind"]="point"; report["troops"]=troops
 	report["words"]=words(report)
@@ -1391,7 +1376,7 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 	elif is_relay(hub_kind) and String(hub.get("via",""))!="" and (hub.get("pos",Vector2.INF) as Vector2).distance_to(p)<=AT_DEPOT_KM:
 		hub_name=String(hub.via); hub_kind="home"
 	var report:={"ratio":ratio,"state":state_of(ratio),"carried":float(t.carried),"foraged":float(t.foraged),"local":float(t.local),"air":0.0,
-		"haul":float(t.haul),"transport":float(t.transport),"stores":float(t.stores),"days":float(t.days),"effort":float(t.effort),
+		"forage_capacity":float(t.get("forage_capacity",0.0)),"haul":float(t.haul),"transport":float(t.transport),"stores":float(t.stores),"days":float(t.days),"effort":float(t.effort),
 		"km":km,"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
 		"hub":hub_name,"hub_kind":hub_kind,"hub_position":hub.get("pos",Vector2.INF),"depot_name":depot,
 		"season":"winter" if float(t.cold)>=0.3 else "","cold":float(t.cold),"rich":float(t.rich),"carrier":String(t.carrier),
@@ -1422,13 +1407,13 @@ static func of_force(force:Dictionary)->Dictionary:
 		var f:=field()
 		var d:=day_inputs()
 		var moving:=String(force.get("status","stationed"))=="moving"
-		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+		var t:=terms(f,p,int(d.day),int(force.get("troops",0)),moving,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),{},Foraging.snapshot(force))
 		report=_report_from_terms(f,t,p)
 		# The same line on the coldest day of the coming year where the band
 		# stands, with today's carriers: the warning before the snow.
 		if kind=="field" and p.is_finite():
 			var deep:=coldest_day(p,int(d.day))
-			var w:=terms(f,p,deep,int(force.get("troops",0)),false,float(d.transport),float(d.stores),float(d.siege),float(d.endurance))
+			var w:=terms(f,p,deep,int(force.get("troops",0)),false,float(d.transport),float(d.stores),float(d.siege),float(d.endurance),{},Foraging.snapshot(force))
 			if float(w.cold)>0.0: report["winter"]={"ratio":float(w.ratio),"in_days":deep-int(d.day),"cold":float(w.cold)}
 		# The day's actual rations, as the engine recorded them.
 		var need:=float(force.get("provisions_required_today",0.0))
@@ -1591,9 +1576,10 @@ static func why(report:Dictionary)->PackedStringArray:
 	if float(report.get("stores",1.0))<0.97: out.append("the stores are short")
 	if String(report.get("season",""))=="winter": out.append("winter: the carts are slow and there is little to forage")
 	var rich:=float(report.get("rich",NEUTRAL_RICH))
+	if report.has("forage_capacity"):out.append("local forage feeds about %d soldiers per day, shared by bands in the same district" % floori(float(report.forage_capacity)))
 	if rich<FORAGE_TYPICAL*0.7: out.append("poor country to forage")
 	elif rich>FORAGE_TYPICAL*1.25: out.append("rich country to forage")
-	if bool(report.get("living_off_land",false)): out.append("living off the land: half pace, foraging and hunting as they go")
+	if bool(report.get("living_off_land",false)): out.append("living off the land: 20–50% slower, foraging and hunting as they go")
 	if float(report.get("forage_left",1.0))<0.5: out.append("%d days in one camp: the country round it is eaten out" % roundi(float(report.get("camp_days",0.0))))
 	if String(report.get("siege",""))!="": out.append(String(report.siege))
 	if String(report.get("blockade",""))!="": out.append(String(report.blockade))

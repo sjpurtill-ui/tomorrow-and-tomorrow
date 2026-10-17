@@ -299,11 +299,12 @@ func test_forage_runs_out_on_a_long_camp()->void:
 	assert_float(Rations.forage_share(band)).is_equal(1.0)
 	var fed_days:=0
 	for day in 200:
+		GameState.elapsed_days+=1
 		var share:=Rations.forage_share(band)
 		if share>=Rations.HUNGRY_BELOW: fed_days+=1
 		Supply.eat_camp(band,share*20.0,1.0)
-	# About three months, then the country round the camp is eaten out.
-	assert_int(fed_days).is_between(80,130)
+	# Roughly a week at full strength; sustained use depletes the district.
+	assert_int(fed_days).is_between(3,15)
 	assert_float(Rations.forage_share(band)).is_less(Rations.HUNGRY_BELOW)
 	assert_float(float(band.camp_days)).is_equal(200.0)
 	assert_float(float(band.forage_left)).is_less(0.5)
@@ -312,11 +313,13 @@ func test_forage_runs_out_on_a_long_camp()->void:
 	var days:=0
 	while Rations.forage_share(host)>=Rations.HUNGRY_BELOW and days<60:
 		Supply.eat_camp(host,Rations.forage_share(host)*150.0,1.0); days+=1
-	assert_int(days).is_between(3,9)
-	# Moving on, it is fresh country again.
+	assert_int(days).is_equal(0)
+	# Changing status does not refresh the ground; physically moving does.
 	band["status"]="moving"
 	Supply.eat_camp(band,0.0,1.0)
 	band["status"]="stationed"
+	assert_float(Rations.forage_share(band)).is_less(Rations.HUNGRY_BELOW)
+	band.position.x+=48.0
 	assert_float(Rations.forage_share(band)).is_equal(1.0)
 	# The supply words say so while they are camped there.
 	var report:={"ratio":0.5,"forage_left":0.2,"camp_days":90.0,"force_kind":"field","days":1.0,"hub":"Seanstone"}
@@ -498,9 +501,9 @@ func test_a_lost_fight_at_home_is_not_the_loss_of_home()->void:
 
 # --- Half pace counts in the one march estimate --------------------------------
 
-func test_half_pace_counts_in_the_march_estimate()->void:
+func test_foraging_delay_counts_in_the_march_estimate()->void:
 	# No carriers for a band already out: a band of twenty lives off the
-	# land the whole way, at half pace.
+	# land the whole way, 20% slower.
 	GameState.population_allocations["Logistics"]=0
 	var band:=_band(3,[_formation(31,"levy","spear",20)],40.0)
 	# The food they brought is eaten.
@@ -523,7 +526,7 @@ func test_half_pace_counts_in_the_march_estimate()->void:
 	var live:Dictionary=MilitaryCampaign.field_armies[0]
 	live["status"]="moving"
 	MilitaryCampaign._set_march_route(live,road)
-	assert_float(float(live.march_slowing)).is_greater(1.5)
+	assert_float(float(live.march_slowing)).is_equal_approx(1.25,0.01)
 	assert_int(MilitaryCampaign._march_days_left(live,from)).is_equal(days)
 
 

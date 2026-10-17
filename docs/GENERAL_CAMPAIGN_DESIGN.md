@@ -62,3 +62,41 @@ prototype headcount or classroom ceiling may forbid drafting. Costs and outcomes
 must carry the constraint. See `RECRUIT_DEPLOY_DESIGN.md` for the integrated queue
 workflow, workforce consequences and remaining HOI4 parity gaps. This changes
 recruitment authority, not the general-led battlefield direction above.
+
+## October 17 — Small raids and shared foraging
+
+Routine raids use 8–20 fighters from the existing Defense allocation. They
+attack the existing known fields/stores targets and use the existing march,
+interception, combat, loot, feud and retaliation paths. The general considers
+returning every council sitting (normally three days while active), after a
+quarter of the starting strength is unavailable, two hungry days with at most
+one carried ration-day left, a reported overwhelming defense, or fourteen days
+out. An ongoing battle resolves before the return order. Punish allows another
+raid after thirty days of rest; a fresh explicit order can override that rest.
+Explicitly requested larger forces remain possible through the existing orders.
+No new troop pool or civilian emergency defenders are introduced.
+
+Foraging has an absolute geographic capacity: twenty full soldier rations per
+day in ordinary productive land, up to thirty in richer land, about six in a
+full winter or the poorest ordinary land (both penalties can combine). The
+remainder needs carried food. Marching fast collects one quarter of that local
+capacity; slowing to forage collects the full amount at 80% marching speed,
+or 50% in a district with less than half its forage remaining.
+
+All field armies, including rivals, share each 12 km square district's capacity
+in proportion to their numbers. A shared daily withdrawal ceiling prevents
+splitting, merging or repeated ration calls from multiplying the available
+food. Actual food taken depletes the district, including while marching.
+Moving out and back, changing army identity, and saving/reloading do not reset
+it. District reserves recover gradually, fully within sixty unused days;
+recovered entries are pruned. Actual rations and supply previews add foraged
+food to carried food, up to the full ration, rather than multiplying only the
+shortage by a forage percentage. Map workers use an immutable snapshot of the
+same ledger. The map explanation includes the shared local capacity.
+
+This is the first slice of the early-conflict proposal. Separate livestock,
+caravan and forage-party target entities, new disputes over access, and new
+compensation/tribute objectives are not added here. Existing raids and feuds
+continue to provide interception, consequences and settlement of grievances.
+The district boundary is an intentional spatial approximation, and the initial
+capacities, return deadline and cadence need play balancing.

@@ -12,6 +12,7 @@ var actors:Dictionary={}
 var human_projection:Dictionary={}
 var market_orders:Dictionary={}
 var geography_stock:Dictionary={}
+var forage_land:Dictionary={}
 var relation_baselines:Dictionary={}
 var enabled:=false
 var advancing:=false
@@ -131,6 +132,7 @@ func clear()->void:
 	human_projection.clear()
 	market_orders.clear()
 	geography_stock.clear()
+	forage_land.clear()
 	relation_baselines.clear()
 	enabled=false
 	last_day=-1
@@ -575,7 +577,7 @@ func capture_actor(id:String)->Dictionary:
 	)
 
 func export_state()->Dictionary:
-	var result:={"version":1,"enabled":enabled,"seed":_seed,"last_day":last_day,"actors":{},"geography_stock":geography_stock.duplicate(true),"relation_baselines":relation_baselines.duplicate(true),"human_projection":human_projection.duplicate(true)}
+	var result:={"version":1,"enabled":enabled,"seed":_seed,"last_day":last_day,"actors":{},"geography_stock":geography_stock.duplicate(true),"forage_land":forage_land.duplicate(true),"relation_baselines":relation_baselines.duplicate(true),"human_projection":human_projection.duplicate(true)}
 	for id:String in actors:
 		result.actors[id]={"controller":actors[id].controller,"last_day":actors[id].last_day,"origin":actors[id].origin,"sequence":actors[id].sequence,"orders":actors[id].orders.duplicate(true),"state":capture_actor(id)}
 	return result
@@ -585,6 +587,7 @@ func validate_payload(payload:Dictionary)->String:
 	if int(payload.get("version",0))!=1:return "Unsupported civilization simulation version."
 	if not payload.get("actors") is Dictionary:return "Invalid civilization ownership register."
 	if payload.actors.size()>CivilizationSystem.MAX_RIVAL_CIVILIZATIONS:return "Too many civilization owners."
+	if not preload("res://scripts/field_foraging.gd").valid(payload.get("forage_land",{})):return "Invalid shared foraging ground."
 	if not payload.get("geography_stock",{}) is Dictionary:return "Invalid shared world reserves."
 	if not payload.get("human_projection",{}) is Dictionary:return "Invalid human civilization projection."
 	for reserve in payload.get("geography_stock",{}).values():
@@ -658,6 +661,7 @@ func _restore_state(payload:Dictionary)->Dictionary:
 	clear()
 	_seed=int(payload.seed);last_day=int(payload.last_day)
 	geography_stock=payload.get("geography_stock",{}).duplicate(true)
+	forage_land=payload.get("forage_land",{}).duplicate(true)
 	relation_baselines=payload.get("relation_baselines",{}).duplicate(true)
 	human_projection=payload.get("human_projection",{}).duplicate(true)
 	var failures:Array[String]=[]
@@ -791,12 +795,12 @@ func _stage_restore(payload:Dictionary,validate_only:bool)->Dictionary:
 	if error!="":return {"error":error}
 	if payload.is_empty():return {"ok":true,"legacy":true}
 	_views_day=-1
-	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"relations":relation_baselines,"markets":market_orders,"job":_day_job,"advancing":advancing}
-	actors={};human_projection={};geography_stock={};relation_baselines={};market_orders={};enabled=false
+	var previous:={"actors":actors,"human":human_projection,"enabled":enabled,"seed":_seed,"day":last_day,"geography":geography_stock,"forage":forage_land,"relations":relation_baselines,"markets":market_orders,"job":_day_job,"advancing":advancing}
+	actors={};human_projection={};geography_stock={};forage_land={};relation_baselines={};market_orders={};enabled=false
 	var result:=_restore_state(payload)
 	if validate_only or result.has("error"):
 		clear()
-		actors=previous.actors;human_projection=previous.human;geography_stock=previous.geography;relation_baselines=previous.relations;market_orders=previous.markets
+		actors=previous.actors;human_projection=previous.human;geography_stock=previous.geography;forage_land=previous.forage;relation_baselines=previous.relations;market_orders=previous.markets
 		enabled=previous.enabled;_seed=previous.seed;last_day=previous.day
 		# Validating another save must not cancel the current world's day.
 		_day_job=previous.job;advancing=previous.advancing

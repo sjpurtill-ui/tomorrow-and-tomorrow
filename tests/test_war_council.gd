@@ -444,8 +444,8 @@ func test_a_few_years_of_punishing_give_a_sane_number_of_raids()->void:
 	var raids:=0
 	for e in (WAR.state().log as Array):
 		if String((e as Dictionary).get("kind",""))=="battle_ours": raids+=1
-	# One raid at a time, a rest between: about one a season, never daily.
-	assert_int(bands_seen.size()).override_failure_message("bands: %d" % bands_seen.size()).is_between(3,14)
+	# One raid at a time, a rest between: at most one a month plus travel, never daily.
+	assert_int(bands_seen.size()).override_failure_message("bands: %d" % bands_seen.size()).is_between(3,36)
 	assert_int(sittings).override_failure_message("sittings: %d" % sittings).is_less(3*365/2)
 	assert_int(raids).is_less_equal(bands_seen.size())
 	assert_int(Time.get_ticks_msec()-start).is_less(90000)
@@ -783,7 +783,7 @@ func test_a_band_left_at_their_town_takes_up_the_raid()->void:
 	_train(60)
 	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
 	WAR.front(civ_id)["stance"]="punish"
-	var afield:=_old_band(30,"Host marching on Tsaren",city_id,city)
+	var afield:=_old_band(20,"Raiders marching on Tsaren",city_id,city)
 	var home_before:=int(MilitaryCampaign.home_army.troops)
 	Council.sit(int(GameState.elapsed_days))
 	var band:=_army(afield)
@@ -809,7 +809,7 @@ func test_a_resting_or_broken_band_is_not_sent()->void:
 	_counted(10.0)
 	_train(160)
 	# A broken band of the old orders, left at their town.
-	var broken:=_old_band(30,"Host marching on Tsaren",city_id,city)
+	var broken:=_old_band(20,"Raiders marching on Tsaren",city_id,city)
 	_army(broken)["morale"]=0.15
 	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
 	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
@@ -866,7 +866,7 @@ func test_council_bands_are_free_of_a_whole_army_order()->void:
 	assert_str(String(band.status)).is_equal("moving")
 
 ## The feed-the-march check is the march's own reckoning (military_campaign
-## march_supply): days, the share lived off the land at half pace, fed on
+## march_supply): days, the share lived off the land 20–50% slower, fed on
 ## the road and camped at the end, the leaner of the two deciding.
 func test_the_march_is_fed_by_the_marchs_own_reckoning()->void:
 	_train(60)
@@ -884,7 +884,7 @@ func test_the_march_is_fed_by_the_marchs_own_reckoning()->void:
 	var said:=Council._hungry_road_words(town,{"ratio":0.3,"on_road":0.3,"there":0.8,"days":9.0,"half_pace":0.5,"season":""})
 	assert_str(said).contains("on the road to Tsaren")
 	assert_str(said).contains("30% of a ration")
-	assert_str(said).contains("living off the land at half pace")
+	assert_str(said).contains("living off the land 20–50% slower")
 
 ## The zone staff (land_command.gd) read the one break and strength lines
 ## (army_lines.gd) and the one supply number (supply_state.gd fed), and no
@@ -948,3 +948,25 @@ func test_a_band_out_against_a_broken_people_comes_home()->void:
 	if not live.is_empty(): assert_str(String((live.get("council",{}) as Dictionary).get("phase",""))).is_equal("home")
 	assert_str(Council.stance_of(civ_id)).is_not_equal("take")
 	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("leave")
+
+func test_routine_raid_is_small_even_when_many_fighters_are_free()->void:
+	_train(120)
+	_counted(6.0)
+	var town:={"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}
+	assert_int(Council._raid_size(town)).is_between(8,20)
+	_counted(500.0)
+	assert_int(Council._raid_size(town)).is_equal(20)
+
+func test_raid_food_failure_cancels_outbound_march_and_orders_return()->void:
+	_train(40)
+	var made:=MilitaryCampaign.create_field_army(12,"Short raiders")
+	assert_bool(made.has("error")).is_false()
+	var band:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int(made.army.army_id))]
+	band.position={"x":city.x,"z":city.y}
+	band.status="moving";band.destination_id=city_id
+	band["train_days"]=0.0;band["hungry_days"]=2.0;band["provision_ratio"]=0.4
+	band["council"]={"act":"punish","phase":"out","civ":civ_id,"city":city_id,"name":"Tsaren","since":int(GameState.elapsed_days),"starting_troops":12}
+	var result:=Council._follow(civ_id,band,int(GameState.elapsed_days))
+	assert_str(String(result.get("says",""))).contains("food is running short")
+	assert_str(String(band.council.phase)).is_equal("home")
+	assert_str(String(band.destination_id)).is_equal("player_home")
