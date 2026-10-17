@@ -1,3 +1,62 @@
+## October 17 — Open PR audit and soundtrack integration
+
+Integrator worktree: `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`,
+branch `codex/pr-audit-soundtrack`, base `cb63fc8946ffe25600f940e3d596533327447b60`.
+Scope: soundtrack assets/controller tests and this integration record. No save
+schema, population, combat, terrain or shared simulation hotspot changes.
+
+PR #176 (`codex/music-rotation`, `d912f26c0ecd`) was genuinely absent and merges
+cleanly. It adds Espacio Silencio II and III to the calm pool in years 1–200 and
+sets the start-to-start interval to five real minutes. A piece longer than that
+finishes before rotation; existing mood transitions, age ranges, Music volume
+and any-mood tracks remain intact. Nine soundtrack tests pass, including loading
+both new MP3s, age/mood eligibility and the elapsed cue waiting for playback to
+finish. Log: `/tmp/tat-soundtrack-tests.log`. Save compatible; no migration.
+
+The user clarified that **border forts are the intended approach, with no other
+town-watch effects**. Do not merge #95 as a way to resolve the review backlog.
+This audit introduces no additional town-watch behavior.
+
+Review of the other open PRs (left open and unmerged):
+
+- **#95, town-watch odds:** reject as written. Conflicts in `war_odds.gd` and
+  `civilization_combat.gd`; its builder collapses guards and rising townsfolk
+  into one unarmed militia block. Current code preserves the guard's equipment
+  and drill separately and accounts for border-fort postings. Its design also
+  contradicts the user's explicit border-fort direction. If odds need correction,
+  derive them from the current border-fort/force ledger in a new change.
+- **#213, simulator bench:** hold for fixes. An optional development tool, not a
+  player-game feature. `bench_engine.py` builds changed-constant projects using
+  Windows `cmd /c mklink /J`, so those runs cannot work on Mac as written. The
+  patched-project cache key hashes only knobs and reuses any `ready` directory;
+  after source changes, identical knobs can silently run old copied scripts.
+  Include source identity and serialize project creation before trusting results.
+- **#130, Economy Trade test:** largely superseded. Main already expects the
+  fourth Trade tab. Its remaining addition only checks that tab's title; no
+  gameplay behavior changes.
+- **#90, phantom hunger test:** fixture correction, not a hunger-system change.
+  It marks the field band's camp as already foraged so the test can exercise
+  shortages under current foraging rules. Suitable to retain as test maintenance.
+- **#187, court evaluation:** test/harness maintenance rather than gameplay.
+  The nearby-feud fixture commit is already represented in main. Remaining
+  changes replace stale names/counts with live office/labor readings, read the
+  current army ledger, and align expectations with one-seat settlement founding,
+  naming a people at its first settlement and relief from the common store.
+
+Review validation: previewed only the remaining test changes in this worktree,
+then restored the exact pre-review test files. The phantom-hunger suite passed
+8/8 and Home docks passed 11/11, including the additional Trade-title assertion.
+The five updated court expectations passed all 20 offline/stubbed-reader runs;
+the army-disbanding case and its variants were checked separately. These use
+mock readers, not paid API calls; they do not establish live-model reliability.
+Logs: `/tmp/tat-pr-review-tests.log` and `/tmp/tat-pr-review-army-tests.log`.
+No full court-corpus run or simulator runtime validation was performed.
+
+Only the soundtrack PR is selected for integration. The other five are review
+findings, not implicitly approved merges. Generated imports, test reports,
+preview fixtures and build outputs are excluded from commits. Existing player
+processes keep their bundled release until a normal restart.
+
 ## October 17 — Thin sidebar and persistent population (INTEGRATED)
 
 Follow-up to `bacf747b8d21`: the rail is 44 logical pixels wide (was 78),
