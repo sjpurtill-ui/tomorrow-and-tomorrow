@@ -421,6 +421,8 @@ func _build_herald(audience:Dictionary)->Control:
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
 	var cream:=Tokens.INK;var cream_dim:=Tokens.INK_MUTED
 	var work_info:=_work_herald(audience) if kind in WORK_KINDS else {}
+	var personal:=Hall._situation_type(audience)=="early_visit"
+	if personal:work_info["eyebrow"]="A PERSONAL VISITOR"
 	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(work_info.get("eyebrow",KINDS.get(kind,KINDS.news).eyebrow)),12,cream_dim,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
 	if kind in ["petition","summons"]:subject=("%s %s" % [String(speaker.get("title","")),String(speaker.get("name","An official"))]).strip_edges().to_upper()
@@ -432,6 +434,7 @@ func _build_herald(audience:Dictionary)->Control:
 	if not headline.is_empty() and kind!="report" and not kind in WORK_KINDS:
 		herald_text=("%s %s" % [subject,headline]).to_upper()
 	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
+	if personal:herald_text=(String(speaker.get("name","A visitor"))+" · "+headline).to_upper()
 	var title:=Tokens.make_label(herald_text,24 if _compact() else 27,cream);title.name="HeraldTitle"
 	title.add_theme_font_override("font",Tokens.font("display"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	var day:=int(GameState.elapsed_days);var arrived:=int(audience.get("arrived_day",day))
@@ -1375,7 +1378,9 @@ func _speak()->void:
 			return
 	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
 	if resolved_result.is_empty():
-		var named:=String(Lives.typed_choice(audience_id,text))
+		var personal:Dictionary=Hall._early().call("typed_choice",Hall.find(audience_id),text)
+		var named:=String(personal.get("option",""))
+		if named.is_empty(): named=String(Lives.typed_choice(audience_id,text))
 		# An aim in the god's own words (online), or one of those proposed.
 		if named.is_empty():named=String(preload("res://scripts/legacy_aims.gd").typed_choice(audience_id,text,_voice_ok() and voice.has_method("is_live") and bool(voice.is_live())))
 		# An order for the war leader in the god's own words ("hold the ford").
@@ -1836,6 +1841,8 @@ func choose(option_id:String)->Dictionary:
 			_prisoner_words(result);return result
 		_show_toast(String(result.get("outcome",result.get("error",""))))
 		_build_options();return result
+	if bool(result.get("keep_open",false)):
+		_build_options(); _pump(); return result
 	if not String(result.get("next_audience_id","")).is_empty():
 		# They set the first matter aside and raise the other one.
 		show_audience(String(result.next_audience_id))

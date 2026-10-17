@@ -1159,7 +1159,7 @@ func scene(audience_id:String)->Dictionary:
 		var known:Dictionary=Persons.by_id(String(speaker.get("known_id",""))) if String(speaker.get("known_id",""))!="" else {}
 		envoy_persona=Persons.persona(known) if not known.is_empty() else CV.for_person(person)
 	else:
-		envoy_persona=CV.for_envoy(civ_id,audience_id)
+		envoy_persona=CV.for_envoy(civ_id,"personal:"+String(speaker.get("name","")) if String(audience.get("situation",{}).get("type",""))=="early_visit" else audience_id)
 	envoy_persona["key"]="envoy"
 	if not String(speaker.get("name","")).is_empty(): envoy_persona["name"]=String(speaker.name)
 	if not String(speaker.get("title","")).is_empty(): envoy_persona["title"]=String(speaker.title)
@@ -2623,6 +2623,8 @@ func _append_if(out:Array[Dictionary],line:Dictionary)->void:
 	if not line.is_empty(): out.append(line)
 
 func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	if String(s.get("sit_type",""))=="early_visit":
+		return [_say(s,s.envoy,[String(s.audience.situation.visit.opening)],rng)]
 	## Short and punchy: the visitor says at most two lines (why they came or
 	## what they remember, then the business), and at most two officials speak,
 	## each in their own manner.
@@ -2824,6 +2826,9 @@ func _report_bank(member:Dictionary)->Array:
 	return COURT_REPORT_ANY
 
 func _offline_speak(s:Dictionary,player_text:String,rng:RandomNumberGenerator)->Array[Dictionary]:
+	if String(s.get("sit_type",""))=="early_visit":
+		var visit:Dictionary=s.audience.situation.visit
+		return [_say(s,s.envoy,[String(visit.get("heard_account",visit.detail))],rng)]
 	## One reply: an answer from the facts when the ruler asked something,
 	## otherwise the visitor's manner. At most one official reacts.
 	var out:Array[Dictionary]=[]
@@ -2992,6 +2997,8 @@ func answer_bank(s:Dictionary,player_text:String)->Array:
 	return by_kind.get(String(s.kind),by_kind.get("any",[]))
 
 func _offline_closing(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	if String(s.get("sit_type",""))=="early_visit":
+		return [_say(s,s.envoy,[String(load("res://scripts/early_visitors.gd").parting(s.audience))],rng)]
 	## One parting line that reacts to the actual outcome, and at most one aside.
 	var out:Array[Dictionary]=[]
 	if String(s.get("sit_type","")) in LIVES_SCENES: return out
@@ -3322,6 +3329,7 @@ static func _mood_words(value:float)->String:
 	return "merry; the visitor is enjoying themselves"
 
 func _kind_words(s:Dictionary)->String:
+	if String(s.get("sit_type",""))=="early_visit":return "A private visitor speaks for themselves: "+String(s.audience.situation.visit.opening)
 	var civ:String=String(s.civ)
 	match String(s.kind):
 		"gift":
@@ -3348,6 +3356,7 @@ func _kind_words(s:Dictionary)->String:
 func _audience_want(s:Dictionary,member:Dictionary)->String:
 	var persona:Dictionary=member.persona
 	if String(member.key)=="envoy":
+		if String(s.get("sit_type",""))=="early_visit":return "to be heard about this personal matter: "+String(s.audience.situation.visit.opening)
 		if String(s.kind)=="report": return "to be believed, to have the danger or the prize taken seriously, and to be sent out again"
 		if String(s.kind) in WORK_KINDS: return _work_want(s)
 		if s.origin=="court":
@@ -3391,6 +3400,8 @@ func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var facts:String=JSON.stringify(ctx)
 	if facts.length()>2400: facts=facts.substr(0,2400)+"...}"
 	parts.append("FACTS YOU MAY USE (nothing else is true): "+facts)
+	if String(s.get("sit_type",""))=="early_visit":
+		parts.append("PERSONAL VISITOR FACTS (complete; speak for yourself, never as a ruler's envoy): "+JSON.stringify(load("res://scripts/early_visitors.gd").voice_facts(s.audience)))
 	var stakes:=stakes_text(s)
 	if stakes!="": parts.append("WHAT THE RULER STANDS TO GAIN (the engine's own reckoning of the proposal; when asked what we gain, what it costs, how likely it is or what happens if refused, say these plainly with these numbers and nothing else): "+stakes)
 	var records:=court_records(s)
@@ -3494,6 +3505,8 @@ func _gate_words(s:Dictionary)->String:
 	return " Optionally '%s' adds ONE short line (%s); no other official speaks." % [key,why]
 
 func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
+	if stage=="open" and String(s.get("sit_type",""))=="early_visit":
+		return "'envoy' is only the cast key for this private visitor. In one or two short first-person lines, lead with their personal problem or invitation from PERSONAL VISITOR FACTS. No official greeting, ruler's message or invented demand. Allegations stay allegations. mood_shift 0."
 	var bench:int=int(s.officials.size())
 	match stage:
 		"open":

@@ -782,6 +782,7 @@ static func _n(value:Variant)->int:
 	return roundi(float(value))
 
 static func options(audience:Dictionary)->Array[Dictionary]:
+	if Hall._situation_type(audience)=="early_visit": return Hall._early().call("options",audience)
 	var type:=Hall._situation_type(audience)
 	if Aftermath.handles(type): return Aftermath.options(audience)
 	if Answer.handles(type): return Answer.options(audience)
@@ -2025,7 +2026,7 @@ const ANSWER_PHRASES:={
 const SHARE_FIELD:={"food_loan":"amount","work_for_food":"food","barter":"give_amt","refuge":"people","healer_plea":"herbs","war_supplies":"amount"}
 
 static func answerable(audience:Dictionary)->bool:
-	return TYPES.has(Hall._situation_type(audience)) and String(audience.get("status",""))=="waiting" and String(audience.get("origin",""))=="foreign"
+	return (TYPES.has(Hall._situation_type(audience)) or Hall._situation_type(audience)=="early_visit") and String(audience.get("status",""))=="waiting" and String(audience.get("origin",""))=="foreign"
 
 static func _norm(text:String)->String:
 	var clean:=" "+text.to_lower().replace("’","'")+" "
@@ -2066,6 +2067,7 @@ static func typed_resource(text:String,exclude:String)->String:
 	return ""
 
 static func typed_choice(audience:Dictionary,text:String)->Dictionary:
+	if Hall._situation_type(audience)=="early_visit": return Hall._early().call("typed_choice",audience,text)
 	## {option, share?, repay_res?} when the words clearly name one open answer;
 	## {} when they are a question, say nothing about it, or could mean two.
 	if not answerable(audience): return {}

@@ -1,3 +1,54 @@
+## October 17 — Personal visitors below 1,000 people
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/early-personal-visitors`, base `e6782629b48a5693a49cfbd102e31b398ac1d50a`.
+Owned scope: `early_visitors.gd`, audience scheduling/resolution and saved-record
+validation, dialogue and court presentation, focused visitor/envoy tests.
+No shared simulation hotspot was edited.
+
+Eight visits replace routine foreign business while population is below 1,000:
+a disputed hunting catch, a craftsperson seeking a home, two adult lovers seeking
+shelter, a traveller offering to guide scouts, a household seeking settlement,
+a visitor negotiating the return of recorded captive scouts, an invitation to
+a gathering, and a named visitor remembering the player's actual earlier answer.
+Eligibility comes from neighbouring communities, known crafts, need, relations,
+scouting targets, captivity and saved audience history. Recent stories are avoided
+when another is eligible. Personal visits use personal titles and first-person
+openings, with offline dialogue and bounded live answer interpretation.
+
+Normal spacing averages four game years, subject to the existing frequency setting
+and arrival jitter. First contact and ordinary hunger do not bypass this budget;
+peace and surrender remain possible. A single known neighbour can return after
+the cooldown. New personal visits stop at 1,000; pending audiences and journeys
+can finish. No post-1,000 redesign was added.
+
+Hearing the people involved leaves the audience open. Decisions revalidate live
+availability before changing state. Migrants transfer between actual population
+ledgers, adult visits remove adults only, teaching enters the study collection,
+and the guide dispatches an ordinary scouting mission. Captive returns remove
+existing captivity without adding population. Gathering delegates consume two
+workers for fourteen days through the existing absence ledger. Cohesion sets
+stated contest odds; a saved seeded roll settles the result, and prizes come
+from the host's actual stores. Outcomes cannot be collected twice. These personal
+visits do not produce the generic envoy demand/sequel chain or an insult penalty
+for expiring unanswered.
+
+Save compatibility: additive audience records and optional `personal_journeys`;
+existing saves load without a migration or reset. Facts and hidden rolls survive
+JSON round trips and are validated. Higher-population envoy mechanics remain in
+place. The user will supply that phase's replacement design separately.
+
+READY for integration: 61 distinct focused tests pass across five suites:
+14 early visitors (`/tmp/tat-early-verified.log`), 20 envoy requests and 2 court
+voice tests (`/tmp/tat-early-final-tests.log`, whose earlier fixture failure is
+superseded by the verified visitor run), 18 fair deals and 7 aftermath tests
+(`/tmp/tat-early-regression.log`; its older envoy fixtures were corrected and
+passed in the later run). No script errors. `git diff --check` passes.
+
+Limitations: live dialogue was checked through prompt/answer validation rather
+than a paid API request. No player session has been restarted. The implementation
+must be pushed and integrated before building the canonical release.
+
 ## October 17 — Flanking, envelopment and a pierced front
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
