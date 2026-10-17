@@ -675,9 +675,8 @@ static func defense()->Dictionary:
 	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	lines.append(_line("Guard at home","%d of %d" % [guard,required],
 		"The watch at home is home's guard (the watch is the army): in a raid or siege they defend it; the home guard posted in our other towns stands there. Home needs %s on guard (3.5 in 100 of its people, at least %d)." % [_count(required),Watch.GUARD_MIN],"good" if guard>=required else "bad"))
-	var townsfolk:=int(walls.get("garrison_townsfolk",0))
-	lines.append(_line("Townsfolk who would fight","%s at home" % _count(townsfolk) if townsfolk>0 else "none",
-		"When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained and are not counted as the guard.","plain"))
+	lines.append(_line("Troop manpower","%s allocated" % _count(int(WorldSimulation.state.population_allocations.get("Defense",0))),
+		"All soldiers and crews come from the Defense allocation in People. Civilians do not provide extra defenders.","plain"))
 	# The watch is the army and drills at home (watch_military.gd).
 	var drill:Dictionary=preload("res://scripts/watch_military.gd").role_effect(MilitaryCampaign)
 	lines.append(_line("Drill of the watch","%d in 100" % roundi(float(drill.drill)*100.0),

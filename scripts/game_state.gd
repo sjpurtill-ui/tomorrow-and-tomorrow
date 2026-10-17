@@ -1801,7 +1801,7 @@ func able_population() -> int:
 	initialize_population_model()
 	return maxi(1,roundi(float(population_cohorts.get("working_age",population_exact*0.60))))
 
-func synchronize_population_allocations() -> void:
+func synchronize_population_allocations(release_military:=false) -> void:
 	initialize_population_model()
 	var total_percentage:=0.0
 	for role in POPULATION_ROLES:
@@ -1815,7 +1815,9 @@ func synchronize_population_allocations() -> void:
 	# rounded afresh. A change of the split itself is laid anew.
 	if self==GameState:
 		var Manual:GDScript=load("res://scripts/manual_work.gd")
-		if not bool(Manual.relaid) and bool(Manual.manual()) and _hold_allocations(able,total_percentage):return
+		if not bool(Manual.relaid) and bool(Manual.manual()) and _hold_allocations(able,total_percentage):
+			_reconcile_defense_allocation(release_military)
+			return
 	var assigned:=0
 	var remainders:Dictionary={}
 	for role in POPULATION_ROLES:
@@ -1835,6 +1837,14 @@ func synchronize_population_allocations() -> void:
 		population_allocations[best_role]=int(population_allocations.get(best_role,0))+1
 		remainders[best_role]=-1.0
 		assigned+=1
+
+	_reconcile_defense_allocation(release_military)
+
+func _reconcile_defense_allocation(release_military:bool)->void:
+	if WorldSimulation.state!=self:return
+	var mc:Variant=WorldSimulation.military
+	if mc!=null and bool(mc.watch_folded):
+		preload("res://scripts/watch_military.gd").reconcile_allocation(mc,release_military)
 
 ## Keeps yesterday's counts when today's shares ask for the same within a
 ## person a task (rounding only), moving just the difference in the working
@@ -1889,7 +1899,7 @@ func adjust_population_role_percentage(role:String,delta:float) -> void:
 			if other==role: continue
 			population_allocation_percentages[other]=maxf(0.0,float(population_allocation_percentages.get(other,0.0))*remaining/other_total)
 	population_allocation_percentages[role]=target
-	synchronize_population_allocations()
+	synchronize_population_allocations(true)
 
 func civilian_workforce_fraction()->float:
 	var civilian:=0.0

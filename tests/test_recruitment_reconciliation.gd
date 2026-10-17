@@ -25,7 +25,11 @@ func test_first_full_class_with_no_home_soldiers_starts_once()->void:
 	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(0)
 	assert_int(MilitaryCampaign._queued_trainees()).is_equal(8)
 	assert_int(GameState.population_total).is_equal(population)
-func test_six_home_two_missing_enroll_even_without_spare_supplies()->void:
+func test_recruitment_waits_for_places_in_the_people_split()->void:
+	assert_int(int(MilitaryCampaign.queue_template_training(1).get("queued",0))).is_equal(0)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(6)
+	assert_int(int(GameState.population_allocations.Defense)).is_equal(6)
+	GameState.population_allocations.Defense=8
 	var result:=MilitaryCampaign.queue_template_training(1)
 	assert_int(int(result.get("queued",0))).is_equal(2)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(8)
@@ -106,7 +110,7 @@ func test_batch_holds_finished_members_and_cancels_all_members()->void:
 
 func test_training_crowding_slows_instruction_without_limiting_intake()->void:
 	GameState.ensure_population_total(5000);GameState.initialize_population_model()
-	GameState.population_allocations.Defense=49
+	GameState.population_allocations.Defense=50
 	MilitaryCampaign.army_templates[0].entries[0].count=50
 	MilitaryCampaign.home_army.formations[0].experience=.8
 	MilitaryCampaign.military_inventory.improvised=100

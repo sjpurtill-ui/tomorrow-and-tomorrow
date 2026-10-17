@@ -4,8 +4,8 @@ extends RefCounted
 ## Every town has its guards: the watch is the military (watch_military.gd);
 ## its home guard is spread over home and the towns by their people, home
 ## also keeps the offensive troops not out in a band, a band its men, and
-## every town its townsfolk who rise (town_watch); a town's losses are its
-## own and its guard's come off the watch (guard_ledger).
+## every town only its allocated soldiers (town_watch). Guard losses come
+## off the same manpower ledger (guard_ledger).
 static func owner(id:String)->String:return "player" if id=="human" else id
 ## The id of home's watch-and-townsfolk block when another people's battle
 ## musters it (force_for): far above any formation id a people allocates.
@@ -94,9 +94,7 @@ const RISE_TRAINING:=0.10
 ##    in. They are the watch at home (home_army), counted once: those posted
 ##    in the other towns stand there, not in home's battle (posted_away).
 ##    Offensive troops at home stand at home; bands away defend nothing.
-##  - The rise. Of the grown people (working age) not keeping watch or under
-##    arms (personnel_ledger), RISE_SHARE take up arms, each in the town they
-##    live in. No one rises twice, and no one both rises and keeps watch.
+##  - The legacy rise field is always zero: civilians add no troop manpower.
 ## Each is shared out by people among the towns that keep a guard (lived
 ## in, and not held by another people), home included, in whole people that
 ## add up exactly (largest remainder). Before any town is founded all of
@@ -125,27 +123,11 @@ static func guard_ledger(mc:Variant=null)->Dictionary:
 	for id:String in people:out[id]={"watch":int(watches.get(id,0)),"rise":int(rises.get(id,0))}
 	return out
 
-## The people's whole home guard (standing at home today) and its
-## townsfolk who would rise (unrounded), before they are shared out among
-## the towns.
+## Only allocated military personnel defend. Civilians never generate a second
+## emergency army; the zero rise fields remain readable by older battle records.
 static func _whole_people(mc:Variant)->Dictionary:
-	var state=WorldSimulation.state
 	var Watch:=preload("res://scripts/watch_military.gd")
-	# Grown people away from home (caravans, convoys, scouts, envoys, scholars
-	# abroad) cannot rise, as they cannot enlist (recruitment_capacity). Read
-	# first: reading them settles the people's counts, as enlisting does.
-	var away:=_away(state)
-	# Everyone keeping watch or under arms anywhere: the watch share, or more
-	# while bands away stand above it. None of them rises.
-	var serving:=maxi(Watch.manpower(mc),maxi(0,int(mc._mobilized_count())))
-	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(away)-float(serving))
-	# Roads bring more of the countryside's people to the fight in time
-	# (built_fabric.gd ROAD_RISE).
-	# The home guard posted out to the border forts and the line between them
-	# (fort_border.gd watch) stand there, not in the towns: the towns share
-	# what is left. (They were counted in both: the Towns card's "on guard"
-	# and a town's defenders included the men the Border card showed posted.)
-	return {"watch":maxi(0,int(Watch.home_guard(mc))-on_the_border(mc)),"rise_exact":minf(adults,RISE_SHARE*adults*preload("res://scripts/built_fabric.gd").rise_factor())}
+	return {"watch":maxi(0,int(Watch.home_guard(mc))-on_the_border(mc)),"rise_exact":0.0}
 
 ## Grown people of the people in scope who are away from their towns.
 static func _away(state:Variant)->int:

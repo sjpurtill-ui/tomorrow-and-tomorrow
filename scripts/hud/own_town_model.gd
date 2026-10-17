@@ -68,7 +68,7 @@ static func strength(primary:bool,settlement_id:String="")->Dictionary:
 
 ## What the townsfolk who rise are, in the row's tooltip (civilization_combat
 ## RISE_SHARE).
-const RISE_WORDS:="When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained."
+const RISE_WORDS:="All troops come from the Defense allocation in People. Civilians do not provide extra defenders."
 
 ## Those who would fight untrained, in words: "4 on watch, 9 would take up
 ## arms"; "no one" when nobody would.
@@ -273,7 +273,7 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			var value:=untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))
 			if s.is_empty() or bool(s.get("town",false)):
 				return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-					"meaning":"The home guard posted here (the watch, shared among our towns by their people), and the townsfolk who take up arms when raiders come. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
+					"meaning":"The allocated soldiers posted here. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
 			# Those free for the bands keep watch too: never one count with the
 			# townsfolk, who are no soldiers (the map badge sets them apart).
 			# Home's figure is War's own count (watch_military.gd home_standing):
@@ -284,7 +284,7 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			var several:=WorldSimulation.state.player_settlements.size()>1
 			value=untrained_words(int(standing.on_watch),int(standing.can_rise) if several else int(standing.can_rise_home))
 			return {"key":key,"name":"Fighters, all our towns" if several else "Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The army at home (its home guard and those free to send), and the townsfolk who take up arms when raiders come."}
+				"note":("%s free to send" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The allocated army at home, including the home guard and those free to send."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if s.is_empty() or int(s.wall_stage)<=0:

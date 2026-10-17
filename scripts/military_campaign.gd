@@ -348,7 +348,7 @@ func keep_watch()->Dictionary:
 func raise_recruits(count:int)->Dictionary:
 	WorldSimulation.state.initialize_population_model()
 	if home_army.is_empty(): home_army=_empty_home_army()
-	var capacity:=recruitment_capacity()
+	var capacity:=available_service_population()
 	var room:=mini(maxi(0,count),maxi(0,capacity-_mobilized_count()))
 	var raised:=0
 	if room>0:
@@ -788,7 +788,12 @@ func production_lines_snapshot()->Dictionary:
 
 
 func recruitment_capacity()->int:
-	# People, not a technology/law percentage. Away civilians cannot also enlist.
+	# Every service shares the People split; adult population is not a second reserve.
+	return preload("res://scripts/watch_military.gd").manpower(self)
+
+
+func available_service_population()->int:
+	# Explicit orders to increase Defense can move available adults into that split.
 	WorldSimulation.state.initialize_population_model()
 	var adults:=maxi(0,roundi(float(WorldSimulation.state.population_cohorts.get("working_age",0))))
 	var away:=int(WorldSimulation.world.player_population_commitments().get("working_absent",0))
@@ -802,8 +807,8 @@ func _mobilized_count()->int:
 
 
 # Fixed aggregate categories only. This is the authoritative bridge between
-# military readiness and population accounting: mobilization above the Defense
-# allocation must displace other work instead of becoming duplicate people.
+# military readiness and population accounting. All service commitments remain
+# in Defense until they can actually return to civilian work.
 func personnel_ledger()->Dictionary:
 	var wounded:=training_injury_pool
 	var absent:=0
@@ -7202,7 +7207,7 @@ func siege_visual_snapshot(siege_id:String="")->Dictionary:
 func template_recruitment_blocker()->String:
 	if _home_battle_running():return "Our people at home are fighting; recruiting waits until the fight is over."
 	if recovery.home_unavailable():return "Home is occupied."
-	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "All available adults committed: %d of %d people." % [_mobilized_count(),recruitment_capacity()]
+	if _mobilized_count()>=recruitment_capacity() and aggregate_recruits<=0:return "All Defense places committed: %d of %d people. Increase Defense in the People allocation split." % [_mobilized_count(),recruitment_capacity()]
 	return "Available places will enter training on the next simulation day while the order is active."
 func cancel_template_recruitment(template_id:int)->Dictionary:
 	var index:=_template_index(template_id)

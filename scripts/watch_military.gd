@@ -13,8 +13,7 @@ extends RefCounted
 ##     goes;
 ##   - above the share: the surplus at home goes back to work, the lastingly
 ##     hurt first, then the least drilled. Bands away are never sent home on
-##     its account: they count against the share until they come back (their
-##     work at home stays undone: GameState.civilian_workforce_fraction).
+##     its account: they remain counted in Defense until they come back.
 ## Drill happens within the watch over time (drill_day): each formation at
 ## home closes on what our people can teach it (MilitaryCampaign
 ## _training_quality, less for the unarmed) at the training policy's pace,
@@ -41,10 +40,7 @@ const VERSION:=1
 ## How drilled a person is on the day they join the watch: the least the
 ## combat engine knows (combat_simulator holds every block at 0.25).
 const START_DRILL:=0.25
-## The watch is filled or emptied to the share only when it is off by this
-## share of it, and by at least SLACK_MIN people, so a day's swing of one in
-## who can work does not send people to and fro (the ruler's own word is kept
-## to the person: keep's `exact`).
+## Tolerance for the council's decisions to recall idle bands, never manpower intake.
 const SLACK:=0.02
 const SLACK_MIN:=2
 ## The player's split until they choose one: a fifth of the watch stays home,
@@ -405,7 +401,9 @@ static func move(n:int)->int:
 		# Exact, whatever the rounding of the other tasks.
 		var moved:=manpower()-before
 		if moved!=target-before:_set_defense(state,target)
-	if mc!=null:mc.set("watch_work_share",float(manpower())/float(able))
+	if mc!=null:
+		mc.set("watch_work_share",float(target)/float(able))
+		if bool(mc.watch_folded):reconcile_allocation(mc)
 	return manpower()-before
 
 ## Puts exactly `target` on the watch, taking from or giving to the task
@@ -476,21 +474,8 @@ static func _in_100(share:float)->String:
 const GUARD_SHARE:=0.035
 const GUARD_MIN:=8
 
-## WHO STANDS AT HOME, in one reading every screen uses (Home, Buildings,
-## War), with the same words: "on watch" (everyone under arms standing in our
-## towns today: the home guard there and those free to send, not yet in a
-## band), of whom the "home guard" (the share kept back, never sent), those
-## "on the border" (home guard posted to the forts and the line), and "can
-## rise" (townsfolk who take up arms untrained when raiders come). Also the
-## guard our towns need together. And, named apart because it is another
-## count, "set to keep watch": the share of the people's work given to the
-## watch, of them those at home today (at_home): they, not the soldiers
-## standing over the share, do the day's watch work that raises the walls.
-## {on_watch, home_guard, home_share, free_to_send, on_border, can_rise,
-## guard_need, set_to_watch, can_rise_home}. One scope: on_watch and
-## can_rise count all our towns that keep a guard; can_rise_home is the
-## home town's own share of can_rise, for a screen about home alone. Read from the guard ledger
-## the battles muster from (civilization_combat.gd guard_ledger).
+## Allocated soldiers at home, on the border and available to send. The
+## legacy can_rise fields remain zero for older callers and battle records.
 static func home_standing(mc:Variant)->Dictionary:
 	var out:={"on_watch":0,"home_guard":0,"home_share":home_share(mc),"free_to_send":0,"on_border":0,"can_rise":0,"guard_need":guard_needed(),"set_to_watch":0,"can_rise_home":0}
 	if mc==null:return out
@@ -577,32 +562,53 @@ static func percent(share:float)->String:
 
 ## Every day, every people: an older save's recruits and trainees fold into
 ## the watch, nobody waits to be called up, the watch is filled or emptied
-## to the share at home, and those at home drill. `exact`: the ruler's own
-## word, kept to the person (else within SLACK). {joined, released, folded}.
-static func keep(mc:Variant,day:int,exact:=false)->Dictionary:
+## to the share at home, to the person. {joined, released, folded}.
+static func keep(mc:Variant,day:int,_exact:=false)->Dictionary:
 	var out:={"joined":0,"released":0,"folded":0}
-	if mc.recovery.home_unavailable():return out
-	# Nothing moves at home while any fight against our home is still being
-	# fought, ours or another people's: those mustered for it, the guard
-	# posted in our other towns among them, come back to it after.
-	if home_fight_pending(mc):return out
+	if mc.recovery.home_unavailable() or home_fight_pending(mc):
+		reconcile_allocation(mc,false)
+		return out
 	if not bool(mc.get("watch_folded")):out.folded=fold(mc)
-	# A computer people's split follows its ruler's temper until set (its
-	# ruler's orders keep it to the plan: civilization_controller
-	# military_orders), with its own wars in its own scope.
+	out.released=reconcile_allocation(mc)
+	if mc.recovery.home_unavailable() or home_fight_pending(mc):return out
 	if WorldSimulation.actor_id!="player" and float(mc.get("watch_home_share"))<0.0 and float(mc.get("watch_home_auto"))<0.0:
 		var personality:Dictionary=preload("res://scripts/leader_personality.gd").of_owner(WorldSimulation.actor_id)
 		mc.set("watch_home_auto",default_home_share(personality,_at_war()))
-	# Nobody waits to be called up: whoever is waiting joins the watch.
 	if int(mc.aggregate_recruits)>0:out.folded=int(out.folded)+join_waiting(mc)
-	var watch:=manpower(mc)
-	var have:=serving(mc)
-	var slack:=1 if exact else maxi(SLACK_MIN,ceili(float(watch)*SLACK))
-	if watch-have>=slack or (watch>have and have==0):
-		out.joined=join(mc,watch-have)
-	elif have-watch>=slack:
-		out.released=release(mc,have-watch)
+	out.joined=join(mc,maxi(0,manpower(mc)-serving(mc)))
 	return out
+
+## Actual commitments stay in the People split until released. A lower desired
+## share releases home soldiers first; armies away, crews and recovering people
+## remain in Defense, never simultaneously assigned to civilian work.
+static var _reconciling:=false
+static func reconcile_allocation(mc:Variant,release_surplus:=true)->int:
+	if _reconciling or mc==null:return 0
+	_reconciling=true
+	var released:=0
+	var excess:=maxi(0,serving(mc)-manpower(mc))
+	if release_surplus and excess>0 and not mc.recovery.home_unavailable() and not home_fight_pending(mc):
+		released=release(mc,excess)
+	_set_defense(WorldSimulation.state,maxi(manpower(mc),serving(mc)))
+	_reconciling=false
+	return released
+
+## Crews transfer from the same allocation: waiting recruits, unfilled places,
+## then available soldiers at home. Deployed people and the home reserve stay put.
+static func transferable(mc:Variant)->int:
+	if mc.recovery.home_unavailable() or home_fight_pending(mc):return 0
+	if serving(mc)>manpower(mc):return 0
+	return maxi(0,int(mc.aggregate_recruits))+maxi(0,manpower(mc)-serving(mc))+offensive_at_home(mc)
+
+static func take_service_personnel(mc:Variant,n:int)->int:
+	var accepted:=mini(maxi(0,n),transferable(mc))
+	var waiting:=mini(accepted,maxi(0,int(mc.aggregate_recruits)))
+	mc.aggregate_recruits=int(mc.aggregate_recruits)-waiting
+	# Compute unfilled places before removing existing people from their records.
+	var unfilled:=maxi(0,manpower(mc)-serving(mc)-waiting)
+	var from_home:=maxi(0,accepted-waiting-unfilled)
+	if from_home>0:_release_least_drilled(mc,from_home)
+	return accepted
 
 ## Whether the people in scope is at war with anyone, by its own world's
 ## record (each people's world holds its own relations).
@@ -673,6 +679,10 @@ static func posted_men(posted:Dictionary)->int:
 ## goes, split among the kinds of the army's makeup (army_makeup.gd split;
 ## all as arms_kit until the ruler chooses one). Returns those who joined.
 static func join(mc:Variant,n:int)->int:
+	n=mini(n,maxi(0,manpower(mc)-serving(mc)))
+	return _join_allocated(mc,n)
+
+static func _join_allocated(mc:Variant,n:int)->int:
 	if n<=0:return 0
 	if mc.home_army.is_empty():mc.home_army=mc._empty_home_army()
 	var additions:Array=[]
@@ -709,7 +719,7 @@ static func join_waiting(mc:Variant)->int:
 	var waiting:=maxi(0,int(mc.aggregate_recruits))
 	if waiting<=0:return 0
 	mc.aggregate_recruits=0
-	return join(mc,waiting)
+	return _join_allocated(mc,waiting)
 
 ## The surplus at home goes back to work: the lastingly hurt first, then the
 ## least drilled at home. Never a band away, never a garrison. Returns those

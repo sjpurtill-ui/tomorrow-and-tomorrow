@@ -67,3 +67,31 @@ func test_training_daily_clock_does_not_repeat_same_day()->void:
 	assert_float(trained).is_greater(0)
 	operations.advance(1)
 	assert_float(float(operations.force(receipt.id).training)).is_equal(trained)
+
+func test_crews_transfer_from_allocated_home_soldiers_without_duplicate_people()->void:
+	MilitaryCampaign.set_watch_share(.10)
+	var allocated:=int(GameState.population_allocations.Defense)
+	var home:=int(MilitaryCampaign.home_army.troops)
+	var result:Dictionary=operations.commission(base_id,"observation_balloon",2)
+	assert_bool(result.has("ok")).is_true()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(home-6)
+	assert_int(operations.personnel()).is_equal(6)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(allocated)
+	assert_int(int(GameState.population_allocations.Defense)).is_equal(allocated)
+
+func test_zero_allocation_blocks_crews_and_automatic_replacement()->void:
+	GameState.population_allocations.Defense=0
+	assert_bool(operations.commission(base_id,"observation_balloon",1).has("error")).is_true()
+	assert_int(MilitaryCampaign.military_inventory.observation_balloon_equipment).is_equal(2)
+	GameState.population_allocations.Defense=3
+	var result:Dictionary=operations.commission(base_id,"observation_balloon",1)
+	assert_bool(result.has("ok")).is_true()
+	var record:Dictionary=operations.force(int(result.id))
+	record.crew_shortfall=2
+	GameState.population_allocations.Defense=1
+	operations._replace(record)
+	assert_int(int(record.crew_shortfall)).is_equal(2)
+	GameState.population_allocations.Defense=3
+	operations._replace(record)
+	assert_bool(record.has("crew_shortfall")).is_false()
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(3)

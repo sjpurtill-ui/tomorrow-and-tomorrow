@@ -1,3 +1,43 @@
+## October 17 — One troop-manpower source
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/allocation-only-manpower`, base `5434bda8d34d33fee3f74f4c0fd69521d09e5c03`.
+Scope: military manpower accounting, People allocation reconciliation, naval/air
+crew intake, civilian emergency defenders and the corresponding screen text.
+
+The People split's Defense allocation is the sole military manpower source.
+Automatic recruitment and replacement use allocated places, not the whole adult
+population. Explicit orders to raise more fighters still move people into the
+same Defense split; they do not create a second pool. Naval and air crews can
+transfer from available allocated home troops or recruits. Civilians no longer
+provide emergency defenders for home or other towns, for players or rivals.
+The screens no longer promise the extra one-in-ten civilian force.
+
+Allocation reductions release eligible home soldiers. Deployed troops, crews,
+trainees and recovery commitments remain counted in Defense until released,
+so the same people cannot also appear as civilian workers. Requested shares
+remain in the existing work policy and apply as people become available.
+Population recounts and casualties preserve commitments rather than causing
+unrelated demobilization. Daily intake respects single-person changes exactly.
+
+Existing save schema is retained; old battle fields remain readable, and old
+armies retain the existing migration into the People split. No save reset or
+player restart is part of this delivery. GovernmentPeopleSystem remains the
+owner of daily labor. Shared-file integration touches `game_state.gd` and
+`military_campaign.gd`; no map, project-settings or save-system changes.
+
+Validation: 101 distinct cases pass: watch/military 25, naval/air operations 7,
+recruitment reconciliation 13, town displays 19, border forts 15 and manual
+People controls 22. The final watch rerun includes release after a deployed
+band returns. Logs: `/tmp/tat-allocation-manpower-verified.log` (other suites)
+and `/tmp/tat-allocation-watch-final.log` (final watch suite). No script errors
+remain in these passing runs; `git diff --check` passes.
+
+INTEGRATED via the remote-first delivery of this entry's commit: the task branch
+and `main` share the same source; the canonical checkout fast-forwards only after
+GitHub verification. A running player retains its loaded scripts until its next
+normal launch. Generated imports, UIDs and local artifacts are excluded.
+
 ## October 17 — Court speech aspiration balance
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

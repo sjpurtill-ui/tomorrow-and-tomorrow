@@ -193,7 +193,19 @@ func test_lowering_the_watch_sends_the_least_drilled_home_never_a_band()->void:
 	MilitaryCampaign.set_watch_share(0.0)
 	assert_int(int(MilitaryCampaign.field_armies[0].troops)).is_equal(12)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(0)
-	assert_float(GameState.civilian_workforce_fraction()).is_less(1.0)
+	assert_int(int(GameState.population_allocations.Defense)).is_equal(12)
+	assert_float(GameState.civilian_workforce_fraction()).is_equal(1.0)
+	var allocated:=0
+	for value in GameState.population_allocations.values():allocated+=int(value)
+	assert_int(allocated).is_equal(GameState.able_population())
+	# The lower desired share takes effect as the band returns, without a
+	# second request or deleting anyone from the population.
+	MilitaryCampaign.field_armies[0].location_id="player_home"
+	assert_bool(MilitaryCampaign.disband_field_army(int(band.army_id)).has("ok")).is_true()
+	GovernmentPeopleSystem.delegate_now()
+	assert_int(int(GameState.population_allocations.Defense)).is_equal(0)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(0)
+	assert_float(GameState.population_exact).is_equal(people)
 
 
 # ---------------------------------------------------------------------------
@@ -250,8 +262,8 @@ func test_the_home_guard_defends_home_and_the_towns_by_their_people()->void:
 	# Spread by their people: a quarter of the people, a quarter of the guard.
 	assert_int(int(ledger[TOWN].watch)).is_equal(roundi(float(guard)*0.25))
 	assert_int(int(ledger[TOWN].watch)+int(ledger[home_id].watch)).is_equal(guard)
-	# The townsfolk still rise beside them.
-	assert_int(int(ledger[TOWN].rise)).is_greater(0)
+	# Civilians provide no additional troops.
+	assert_int(int(ledger[TOWN].rise)).is_equal(0)
 	var town_force:=Combat.town_watch(TOWN)
 	assert_int(int(town_force.troops)).is_equal(int(ledger[TOWN].watch)+int(ledger[TOWN].rise))
 	# Home stands with everyone at home but the guard posted in the town.
@@ -412,33 +424,25 @@ func test_a_rivals_fight_at_our_home_holds_our_watch_still()->void:
 	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(10)
 
 
-func test_each_block_of_a_towns_defenders_takes_its_own_losses()->void:
+func test_zero_defense_never_generates_civilian_defenders()->void:
 	_second_town()
-	var watch:=_watch(0.10)
-	MilitaryCampaign.set_watch_split(1.0)
-	var parts:Dictionary=Combat.guard_ledger()[TOWN]
-	var guard:=int(parts.watch);var rise:=int(parts.rise)
-	assert_int(rise).is_greater_equal(5)
-	# Every one of the three who fell was of the townsfolk: the guard stood.
-	MilitaryCampaign._apply_town_watch_result(TOWN,{"formations":[{"id":-1,"count":guard},{"id":-2,"count":rise-3}]},[{"defender_casualties":{"killed":2,"wounded":1}}],"defender")
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch)
-	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch)
-	# Half of the next four were of the guard: two of theirs are off the
-	# watch at home, one dead and one hurt.
-	MilitaryCampaign._apply_town_watch_result(TOWN,{"formations":[{"id":-1,"count":guard-2},{"id":-2,"count":rise-5}]},[{"defender_casualties":{"killed":2,"wounded":2}}],"defender")
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch-2)
-	assert_int(int(MilitaryCampaign.home_army.get("wounded_pool",0))).is_equal(1)
-	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch-1)
+	_watch(0.0)
+	assert_int(MilitaryCampaign.recruitment_capacity()).is_equal(0)
+	assert_int(Watch.join(MilitaryCampaign,100)).is_equal(0)
+	assert_int(int(Combat.town_watch(TOWN).get("troops",0))).is_equal(0)
+	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(0)
+	assert_int(int(Combat.home_militia().rise)).is_equal(0)
 
 
-func test_a_swing_of_one_moves_nobody()->void:
+func test_one_person_changes_are_respected_exactly()->void:
 	var watch:=_watch(0.05)
 	GameState.population_allocations["Defense"]=watch+1
-	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(0)
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(1)
 	GameState.population_allocations["Defense"]=watch+2
-	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(2)
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(1)
 	GameState.population_allocations["Defense"]=watch+1
-	assert_int(int(MilitaryCampaign.keep_watch().released)).is_equal(0)
+	assert_int(int(MilitaryCampaign.keep_watch().released)).is_equal(1)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch+1)
 
 
 func test_those_away_do_not_build_walls_or_keep_order_at_home()->void:

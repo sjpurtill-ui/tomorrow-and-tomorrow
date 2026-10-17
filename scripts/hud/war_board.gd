@@ -522,10 +522,8 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	# Who stands at home and who would rise, in the words every screen uses
 	# (watch_military.gd home_standing).
 	var standing:=Watch.home_standing(MilitaryCampaign)
-	var rise_line:=_line("%s on watch, %s can rise, all towns" % [compact(int(standing.on_watch)),compact(int(standing.can_rise))],12,T.INK_MUTED);rise_line.name="OnWatch"
-	rise_line.tooltip_text="Counted over all our towns that keep a guard (home alone: %s can rise).
-On watch: everyone under arms standing in our towns today, the home guard there and those free to send (%s posted out on the border besides).
-Can rise: the townsfolk who take up arms beside them, untrained, when raiders come." % [EraWords.grouped(int(standing.can_rise_home)),EraWords.grouped(int(standing.on_border))]
+	var rise_line:=_line("%s stationed in our towns" % compact(int(standing.on_watch)),12,T.INK_MUTED);rise_line.name="OnWatch"
+	rise_line.tooltip_text="All soldiers and crews come from the Defense allocation in People. %s are posted on the border besides; civilians do not form an additional army." % EraWords.grouped(int(standing.on_border))
 	var standing_row:=HBoxContainer.new();standing_row.add_theme_constant_override("separation",14);standing_row.add_child(rise_line)
 	# The home guard posted out, said beside it so the counts add up.
 	if int(standing.on_border)>0:

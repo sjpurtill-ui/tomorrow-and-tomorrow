@@ -135,7 +135,8 @@ func commission_quote(base_id:int,type_id:String,count:int)->Dictionary:
 	if not bool(gate.unlocked):return {"error":String(gate.reason)}
 	if int(host.military_inventory.get(String(unit.equipment),0))<count:return {"error":"Produce %d %s first; only %d in reserve." % [count,unit.label,int(host.military_inventory.get(String(unit.equipment),0))]}
 	var needed:=count*int(unit.crew)
-	if needed>maxi(0,host.recruitment_capacity()-host._mobilized_count()):return {"error":"This force needs %d crew; %d military service places are free." % [needed,maxi(0,host.recruitment_capacity()-host._mobilized_count())]}
+	var available:=preload("res://scripts/watch_military.gd").transferable(host)
+	if needed>available:return {"error":"This force needs %d crew; %d are available within the Defense allocation." % [needed,available]}
 	var policy:Dictionary=host.training_staff.policy(String(unit.domain))
 	return {"ok":true,"crew":needed,"reserve":int(host.military_inventory.get(String(unit.equipment),0)),"training_days":ceili(host.training_staff.service_days(float(unit.training_days))/maxf(.001,float(policy.intake))) if policy.id!="suspended" else -1}
 
@@ -143,6 +144,7 @@ func commission(base_id:int,type_id:String,count:int,name:String="")->Dictionary
 	var quote:=commission_quote(base_id,type_id,count)
 	if quote.has("error"):return quote
 	var record:=base(base_id);var unit:Dictionary=C.UNITS[type_id]
+	preload("res://scripts/watch_military.gd").take_service_personnel(host,int(quote.crew))
 	host.military_inventory[String(unit.equipment)]-=count
 	var groups:Dictionary={};groups[type_id]=count
 	var entry:={"id":_id(),"owner":"player","name":name if name!="" else String(unit.label)+(" Task Force" if unit.domain=="navy" else " Wing"),"domain":unit.domain,"base_id":base_id,"units":groups,"authorized":groups.duplicate(true),"mission":"hold","region":{},"status":"Training crews","training":0.0,"condition":1.0,"experience":0.0,"efficiency":0.0,"auto_replace":true,"repair_threshold":.6,"fuel_used":0,"loss_fraction":0.0,"damage":0.0}
@@ -423,20 +425,19 @@ func ground_fire(record:Dictionary,share:float,source:String)->void:
 	_losses(record,damage*preload("res://scripts/battle_tactics.gd").zone_factor(String(record.get("tactic","")),"taken"),source,"ground")
 func _replace(record:Dictionary)->void:
 	if record.owner!="player":return
-	# Crews short after hits are made up from the depot, then new recruits.
+	# Replacements transfer within Defense, never enlist civilians implicitly.
+	var Watch:=preload("res://scripts/watch_military.gd")
 	var shortfall:=int(record.get("crew_shortfall",0))
 	if shortfall>0:
-		var from_depot:=mini(shortfall,int(host.aggregate_recruits))
-		host.aggregate_recruits=int(host.aggregate_recruits)-from_depot
-		var fresh:=mini(shortfall-from_depot,maxi(0,host.recruitment_capacity()-host._mobilized_count()))
-		record["crew_shortfall"]=shortfall-from_depot-fresh
+		record["crew_shortfall"]=shortfall-Watch.take_service_personnel(host,shortfall)
 		if int(record.crew_shortfall)<=0:record.erase("crew_shortfall")
 	if not bool(record.auto_replace):return
 	for id:String in record.authorized:
 		var unit:Dictionary=C.UNITS[id]
 		var count:=mini(maxi(0,int(record.authorized[id])-int(record.units.get(id,0))),int(host.military_inventory.get(String(unit.equipment),0)))
-		count=mini(count,maxi(0,host.recruitment_capacity()-host._mobilized_count())/maxi(1,int(unit.crew)))
+		count=mini(count,Watch.transferable(host)/maxi(1,int(unit.crew)))
 		if count<=0:continue
+		Watch.take_service_personnel(host,count*int(unit.crew))
 		host.military_inventory[String(unit.equipment)]-=count;record.units[id]=int(record.units.get(id,0))+count
 		record.training=minf(float(record.training),.7)
 func construction_share(city_id:String="")->float:

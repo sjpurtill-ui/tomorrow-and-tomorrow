@@ -543,13 +543,13 @@ static func _recruit(reading:Dictionary)->Dictionary:
 ## home (MilitaryCampaign.recruitment_capacity) and how many of them are
 ## already under arms, in drill or away with the bands.
 static func _nobody_free_says(mc:Variant,asked:int)->String:
-	var adults:=int(mc.recruitment_capacity())
+	var adults:=int(mc.available_service_population())
 	var taken:=int(mc._mobilized_count())
 	if adults<=0: return "Nobody can be called up: 0 of the %d you asked for. No able adults are at home; all are away." % asked
 	return "Nobody can be called up: 0 of the %d you asked for. Of our %d able adults at home, %d are already under arms, in drill or with the bands." % [asked,adults,mini(taken,adults)]
 
 static func _nobody_free_outcome(mc:Variant,asked:int)->String:
-	return "Nothing is set in motion: 0 of %d called up, no free adults (%d able, %d under arms)." % [asked,int(mc.recruitment_capacity()),int(mc._mobilized_count())]
+	return "Nothing is set in motion: 0 of %d called up, no free adults (%d able, %d under arms)." % [asked,int(mc.available_service_population()),int(mc._mobilized_count())]
 
 ## Fighters stood down (MilitaryCampaign.demobilize): those hurt first, then
 ## the recruits waiting, then the fighters at home; bands away in the field
