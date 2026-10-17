@@ -89,10 +89,11 @@ func test_a_battle_being_fought_reaches_the_war_map()->void:
 	var ours:Array=(built.marks as Array).filter(func(m:Dictionary)->bool: return String(m.side)=="ours" and int(m.get("army_id",0))==army_id)
 	assert_int(ours.size()).is_equal(1)
 	assert_str(String(ours[0].state)).is_equal("fighting")
-	# The click on it asks the game's own battle view for this army's fight.
+	# The fight stays on the map; clicking inspects its report.
 	var request:=Overlay.battle_view_request(battle)
-	assert_str(String(request.method)).is_equal("_open_battle_graphics")
-	assert_array(request.args).is_equal([army_id,-1])
+	assert_dict(request).is_empty()
+	assert_dict(battle.shape_a).is_not_empty()
+	assert_dict(battle.shape_b).is_not_empty()
 	# When the fight is over, nothing is left standing on the map as a live battle.
 	MilitaryCampaign.active_engagement.clear()
 	assert_array(overlay.collect().get("battles",[])).is_empty()

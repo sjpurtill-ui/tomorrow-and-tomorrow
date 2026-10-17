@@ -57,9 +57,10 @@ func test_idle_map_keeps_small_hittable_identity_without_cards_or_routes()->void
 	assert_array(chart.drawn_routes).is_empty()
 	assert_array(chart.drawn_objectives).is_empty()
 	assert_int(chart.battle_cache.size()).is_equal(1)
-	assert_float((chart.battle_cache[0].rect as Rect2).size.x).is_less_equal(32.0)
+	assert_bool((chart.battle_cache[0].rect as Rect2).has_area()).is_true()
+	assert_int(chart.liquid_cache.size()).is_equal(1)
 	assert_str(String(chart.battle_at(chart.battle_cache[0].at).battle.id)).is_equal("battle-one")
-	assert_int(chart.drawn_marks.size()).is_equal(3)
+	assert_int(chart.drawn_marks.size()).is_equal(2) # Fighting army is the liquid body.
 	for entry:Dictionary in chart.drawn_marks:
 		assert_float(float(entry.size)).is_less_equal(18.0)
 		var hit:=chart.mark_at(entry.at)
@@ -85,15 +86,15 @@ func test_inspecting_either_army_reveals_only_its_route_and_shared_objective()->
 	assert_array(chart.drawn_routes).is_empty()
 	assert_array(chart.drawn_objectives).is_empty()
 
-func test_a_force_at_contact_keeps_a_separate_click_target()->void:
+func test_a_force_at_contact_is_inspected_through_its_battle_body()->void:
 	var inputs:=_inputs()
 	inputs.friendly=[_force(1,Vector2.ZERO)]
 	inputs.enemy=[]
 	var chart:=_chart(inputs)
 	await await_idle_frame();await await_idle_frame()
 	var force_at:=chart.mark_screen_position("ours","1")
-	assert_int(int(chart.mark_at(force_at).army_id)).is_equal(1)
-	assert_dict(chart.battle_at(force_at)).is_empty()
+	assert_bool(force_at.is_finite()).is_false()
+	assert_int(int(chart.battle_at(chart.battle_cache[0].at).battle.army_id)).is_equal(1)
 	assert_str(String(chart.battle_at(chart.battle_cache[0].at).battle.id)).is_equal("battle-one")
 	# The same real contact stays inspectable on the close ground view.
 	chart.band_override="ground"
@@ -129,6 +130,7 @@ func test_front_and_dated_enemy_notes_focus_their_own_geometry()->void:
 func test_dated_army_disclosure_uses_the_drawn_report_not_live_strength()->void:
 	MilitaryCampaign.field_armies=[{"army_id":1,"troops":99000,"name":"North Host","status":"moving"}]
 	var inputs:=_inputs()
+	inputs.battles=[] # This is an old march report, not a currently observed battle.
 	inputs.friendly=[_force(1,Vector2(-3,-2),{"report_age":3,"doing_context":{"status":"stationed","location_name":"North Road"}})]
 	inputs.enemy=[]
 	var chart:=_chart(inputs)
@@ -174,7 +176,7 @@ func test_inspected_note_takes_precedence_over_an_older_terrain_selection()->voi
 	chart.note_about={}
 	assert_bool(chart._focused({"army_id":1})).is_true()
 	chart.terrain=null
-	var at:=chart.mark_screen_position("ours","1")
+	var at:=chart.mark_screen_position("ours","2")
 	chart._hover(at)
 	assert_bool(chart.tip.visible).is_true()
 	chart.open_note(chart.mark_at(at),at)

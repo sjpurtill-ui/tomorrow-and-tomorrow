@@ -1,3 +1,54 @@
+## October 17 — Marching columns and liquid battlefronts on the map
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/liquid-battle-fronts`, base `382277268458e8faaa5c0ec1a98b332fbcd0c2b8`.
+Owned scope: `hud/war_front_overlay.gd`, `hud/battle_marker_source.gd`, new
+`hud/liquid_battle_front.gd`, and map/geometry regression tests.
+
+Moving field forces are narrow liquid columns. Their tail follows the travelled
+route, and position interpolation follows its bends rather than cutting corners.
+A newly observed battle unfolds the previous marching body sideways into the
+combat front. Large visible battles use flowing opposing tubes; small bands
+(under 180 at opening) and fronts below 48 screen pixels use opposing blobs.
+Remaining troop counts determine body size on a shared scale. Battle progress
+pushes the losing side back; resolved tactic phases bend the bodies into flanks,
+envelopments, advances or withdrawals. Narrow ground prevents flank curls.
+Actual final reports drive the last shrink/retreat before a brief fade.
+
+Clicking a field battle keeps the player on the map with its report and general
+conversation action. Participant flags no longer duplicate their combat bodies.
+Marching columns keep army inspection targets. Stale observations freeze; reduced
+motion disables ripples/unfolding; pausing stops the motion clock. Bounded visual
+state is separate from, and never changes, the combat ledger. Report counts read
+the authoritative target, not visually interpolated troop counts.
+
+Validation: 90 distinct tests pass across liquid geometry, live campaign-to-map,
+battle map, plate layout, quiet-map interactions, contact fronts, war fronts,
+tactics and block combat. A final 19-test subset passes after the interpolation
+cleanup. No script errors; `git diff --check` passes. The 20-contact chart probe
+measured 9.0 ms composition / 2.4 ms static drawing on this Mac; this is not a
+whole-game FPS claim. Logs: `/tmp/tat-liquid-final-tests.log` and
+`/tmp/tat-liquid-final-recheck.log`.
+
+A guarded, automatically closed graphical probe captured 168 frames of march,
+unfolding, flanking and losses with the actual renderer and labelled synthetic
+inputs. Local evidence: `artifacts/liquid-fronts-review/march-spread-fight.gif`.
+This is an isolated map-renderer fixture, not footage of the player's campaign.
+Generated captures, their local harness, imports/UIDs and test userdata are not
+source deliveries. The user session was not stopped or restarted.
+
+Limitations: these bodies visualize the existing aggregate tactical simulation;
+they do not introduce autonomous spatial collision/pathfinding for individual
+battle wings. Unknown travelled routes use a compact direction-aligned column.
+A force already in battle when first observed appears deployed, without inventing
+an unseen march. Existing siege work screens and historical battle-view code remain.
+Save schema and combat rules are unchanged; existing saves are compatible. No
+shared simulation hotspot or terrain/project settings was edited.
+
+INTEGRATED by remote-first delivery of this entry's commit: push and verify origin
+main before fast-forwarding the canonical Mac main. A running release retains its
+bundled version until its next normal launch.
+
 ## October 17 — Shared foraging and short raids
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

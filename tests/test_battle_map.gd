@@ -312,7 +312,7 @@ func test_arrows_draw_out_ease_and_finished_ones_fade()->void:
 
 # --- Clicks and the pointer ------------------------------------------------------------------------
 
-func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_line()->void:
+func test_a_click_on_our_battle_stays_on_the_map_and_the_pointer_gets_one_line()->void:
 	# The game's own entry point exists.
 	var ui:=get_tree().root.get_node_or_null("MilitaryCommandUI")
 	assert_object(ui).is_not_null()
@@ -335,20 +335,21 @@ func test_a_click_on_our_battle_opens_the_battle_view_and_the_pointer_gets_one_l
 	var click:=InputEventMouseButton.new()
 	click.button_index=MOUSE_BUTTON_LEFT; click.pressed=true; click.position=ours.at
 	overlay._input(click)
-	assert_int(opened.size()).is_equal(1)
-	assert_str(String(opened[0].method)).is_equal("_open_battle_graphics")
-	assert_array(opened[0].args).is_equal([1,-1])
-	# Resting on it: one plain line.
+	assert_array(opened).is_empty()
+	assert_bool(overlay.note.visible).is_true()
+	assert_str(String(overlay.note_about.battle.id)).is_equal("ours:1")
+	# Resting on it after closing its report: one plain line.
+	overlay.close_note()
 	overlay._hover(ours.at)
 	assert_bool(overlay.tip.visible).is_true()
-	assert_str((overlay.tip.get_child(0) as Label).text).contains("Tsaren · day 2").contains("We are pushing them back · 340 against 280").contains("Click to watch the battle")
+	assert_str((overlay.tip.get_child(0) as Label).text).contains("Tsaren · day 2").contains("We are pushing them back · 340 against 280").contains("Click for the battle report")
 	overlay._hover(Vector2(5,5))
 	assert_bool(overlay.tip.visible).is_false()
 	# A rival's fight is not ours to open: a note about what was seen.
 	var rival:Dictionary=(overlay.battle_cache as Array).filter(func(e:Dictionary)->bool: return not bool(e.battle.ours))[0]
 	click.position=rival.at
 	overlay._input(click)
-	assert_int(opened.size()).is_equal(1)
+	assert_array(opened).is_empty()
 	assert_bool(overlay.note.visible).is_true()
 	assert_str(String(overlay.note_content(overlay.note_about).kicker)).is_equal("THEIR BATTLE")
 	# The contact owns the idle chart; names and strength wait for inspection.

@@ -94,7 +94,8 @@ func test_contact_and_readout_both_open_the_same_battle_after_layout()->void:
 	var entry:Dictionary=overlay.battle_cache[0]
 	assert_bool((entry.rect as Rect2).has_point(entry.contact_at)).is_true()
 	assert_that(entry.at).is_equal(entry.contact_at)
-	assert_that((entry.rect as Rect2).size).is_equal(Vector2(26,24))
+	assert_bool((entry.rect as Rect2).has_area()).is_true()
+	assert_int(overlay.liquid_cache.size()).is_equal(1)
 	assert_array(overlay.placed_captions).is_empty()
 	var opened:Array=[]
 	overlay.battle_opener=func(request:Dictionary)->void:opened.append(request)
@@ -102,9 +103,9 @@ func test_contact_and_readout_both_open_the_same_battle_after_layout()->void:
 		var hit:Dictionary=overlay.battle_at(point)
 		assert_str(String(hit.battle.id)).is_equal("fight")
 		overlay.open_battle(hit,point)
-	assert_int(opened.size()).is_equal(2)
-	assert_that(opened[0]).is_equal(opened[1])
-	assert_array(opened[0].args).is_equal([7,-1])
+	assert_array(opened).is_empty()
+	assert_bool(overlay.note.visible).is_true()
+	assert_str(String(overlay.note_about.battle.id)).is_equal("fight")
 
 
 func test_default_counter_captions_preserve_age_without_repeating_counts()->void:

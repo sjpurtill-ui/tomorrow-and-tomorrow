@@ -23,6 +23,7 @@ extends RefCounted
 ## to breaking. Pure static helpers over plain data: tests pass fixtures
 ## (a Dictionary shaped like MilitaryCampaign works as well as the node).
 
+const Tactics:=preload("res://scripts/battle_tactics.gd")
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 
 const OURS_COLOUR:=Color("#4f9bb8")
@@ -211,6 +212,17 @@ static func _side(force:Dictionary,initial:int,civ_id:String,name:String,colour:
 		"year":ArmyMarks.force_year(force.get("formations",[]) if force.get("formations") is Array else [])}
 
 
+
+## Shapes are the actual tactic and latest resolved phase, including when
+## our force is the defender. Frozen rival reports carry this snapshot too.
+static func tactical_shape(engagement:Dictionary,side:String)->Dictionary:
+	var plan:Dictionary=engagement.get("tactics",{})
+	var entry:Dictionary=plan.get(side,{})
+	var rounds:Array=engagement.get("rounds",[])
+	var last:Dictionary=rounds[-1] if not rounds.is_empty() else {}
+	var count:=maxi(0,int(engagement.get("round",rounds.size()))-int(entry.get("since",0)))
+	return Tactics.shape(String(entry.get("id",Tactics.BASELINE)),count,String(last.get(side+"_tactic_phase","hold")))
+
 # --- Our battles --------------------------------------------------------------------------
 
 ## Where one of our engagements is fought: between the army fighting it and
@@ -266,7 +278,8 @@ static func from_engagement(engagement:Dictionary,id:String,context:Dictionary)-
 		"status":_status(engagement),
 		"day":day_of(engagement,today),"place_name":place_name(pos,named,context),"ours":true,"army_id":int(engagement.get("home_force_id",0)),
 		"seed":int(engagement.get("seed",0)),"rounds":(rounds as Array).size() if rounds is Array else 0,"commanded":bool(engagement.get("commander_managed",false)),
-		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today}
+		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today,"shape_a":tactical_shape(engagement,home_side),"shape_b":tactical_shape(engagement,enemy_side),
+		"flank_allowed":bool((engagement.get("battle",{}) as Dictionary).get("ground",{}).get("flank",true))}
 
 
 ## What a battle is doing now, as the battle panel says it
@@ -368,7 +381,8 @@ static func from_rival(owner:String,military:Variant,engagement:Dictionary,id:St
 	return {"id":"rival:%s:%s" % [owner,id],"kind":"battle","x":pos.x,"z":pos.y,"pos":pos,"sides":{"a":a,"b":b},"progress":progress_of(engagement,home_side),
 		"status":_status(engagement),"day":day_of(engagement,today),"place_name":place_name(pos,String(threat.get("target_region_name","")),context),"ours":false,"army_id":0,
 		"seed":int(engagement.get("seed",0)),"rounds":(engagement.get("rounds",[]) as Array).size() if engagement.get("rounds") is Array else 0,"commanded":false,
-		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today}
+		"skirmish":_skirmish(int(a.troops),int(b.troops)),"age_days":0,"observed_day":today,"shape_a":tactical_shape(engagement,home_side),"shape_b":tactical_shape(engagement,enemy_side),
+		"flank_allowed":bool((engagement.get("battle",{}) as Dictionary).get("ground",{}).get("flank",true))}
 
 
 ## The rivals' battles our watchers see today, and those seen in the last
