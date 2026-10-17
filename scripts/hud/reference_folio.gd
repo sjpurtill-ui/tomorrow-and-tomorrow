@@ -3,7 +3,9 @@ extends RefCounted
 ## Prototype geometry is shared only by the rail and page shell.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Approved:=preload("res://scripts/hud/approved_ui_art.gd")
-const RAIL_WIDTH:=78.0
+const RAIL_WIDTH:=44.0
+const RAIL_BUTTON_HEIGHT:=44.0
+const RAIL_ICON_SIZE:=24.0
 const TOP_HEIGHT:=45.0
 const OLIVE:=Color("29372f")
 const GOLD:=Color("c5b582")

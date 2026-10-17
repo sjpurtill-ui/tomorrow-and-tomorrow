@@ -1,3 +1,34 @@
+## October 17 — Thin sidebar and persistent population (INTEGRATED)
+
+Follow-up to `bacf747b8d21`: the rail is 44 logical pixels wide (was 78),
+with 24-pixel icons (was 40) and 44-pixel buttons. Category names remain in
+hover descriptions and accessibility names. Alert badges fit inside the rail;
+page and top-bar offsets follow its shared width.
+
+Population was explicitly hidden below a 1280-wide logical canvas and was also
+in the overflow-removal order. It and food are now retained; secondary readings
+give way as needed. The width calculation uses available space before the clock
+rather than the container's stale minimum size, then applies the final size after
+layout settles. This prevents overlap while resizing or changing interface scale.
+The existing 1280 test assumed every metric always fit and only compared against
+an already-expanded container; it now verifies essentials and the actual clock
+boundary. No population simulation or save fields changed.
+
+Validation: all 7 folio-reading tests pass, including 960/1024/1138/1280/1536/1920
+logical widths in early and later eras, retained population controls/value parity,
+navigation, hover, live warning updates, compact sidebar geometry and badges.
+The 3 production-navigation regressions also pass with the narrower rail.
+`/tmp/tat-population-topbar-tests.log` records the final 7-case run. The production
+capture now renders the complete real HUD shell, including its top bar and rail,
+in isolated SubViewports; the compact 960-pixel capture was visually inspected.
+No test process remains open. Generated captures and reports are excluded.
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/hoi4-production`, base `bacf747b8d21`. Scope: command rail, shared folio
+geometry, and UI checks/captures. No shared simulation hotspot changes or conflicts.
+Delivery follows remote-first integration; the live player requires a normal
+restart to use the newly built release.
+
 ## October 17 — Production navigation and screen correction (INTEGRATED)
 
 Follow-up to `37431d082e93`: the real Economy category still overrode the new

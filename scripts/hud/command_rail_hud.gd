@@ -148,7 +148,8 @@ func _ready()->void:
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
 	var page_width:=Folio.page_width(view.x)
-	for id in rail_buttons:(rail_buttons[id] as Button).custom_minimum_size.y=78.0
+	var readings_width:=page_width
+	for id in rail_buttons:(rail_buttons[id] as Button).custom_minimum_size.y=Folio.RAIL_BUTTON_HEIGHT
 	if top_frame:
 		top_frame.position=Vector2(Folio.RAIL_WIDTH,0)
 		top_frame.size=Vector2(page_width,Folio.TOP_HEIGHT)
@@ -172,19 +173,20 @@ func _layout()->void:
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
 		if top_frame:
-			top_frame.size.x=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-12.0))
+			readings_width=minf(page_width,maxf(280.0,time_pill.position.x-Folio.RAIL_WIDTH-12.0))
+			top_frame.size.x=readings_width
 	if kpi_strip:
 		# Retain the original formatting and hover sources; the persistent bar
 		# presents their readings instead of a second row of boxed chips.
 		kpi_strip.visible=false
 		# The status strip is a fixed-height top-bar component. At the minimum
-		# supported canvas, retain the urgent food, survival and GDP outcomes and
+		# supported canvas, retain population and food, then fit other readings and
 		# hide duplicate context instead of wrapping downward over the map.
 		var compact_top:=view.x<1280
 		for id in kpi_chips:(kpi_chips[id].chip as Control).visible=true
 		for rule in kpi_separators:rule.visible=true
 		if compact_top:
-			_hide_kpi("population");_hide_kpi("water")
+			_hide_kpi("water")
 		# Before writing, tools and gear are told in the People view, not the strip.
 		if compact_top or EraWords.hearth():_hide_kpi("goods")
 		# Before writing, who ate today is told in the PEOPLE chip itself; a
@@ -192,10 +194,12 @@ func _layout()->void:
 		if EraWords.hearth():_hide_kpi("gdp")
 		# Never over the clock and the pace buttons: every reading shows in
 		# full, so when the bar left of the clock is too narrow for them all,
-		# the least urgent go first (KPI_SHED_ORDER); food, lives and the day's
-		# labour always stay.
+		# the secondary readings go first (KPI_SHED_ORDER); population and
+		# food always stay.
 		if top_readings and top_frame:
-			var room:=top_frame.size.x-40.0
+			# Use available geometry, not the container's old minimum width:
+			# before sorting, the latter can still include readings just hidden.
+			var room:=readings_width-40.0
 			if city_selector!=null and city_selector.visible:room-=city_selector.custom_minimum_size.x+10.0+(36.0 if view.x>=1280 else 0.0)
 			for id in KPI_SHED_ORDER:
 				if top_readings.needed_width(kpi_readings())<=room:break
@@ -205,6 +209,7 @@ func _layout()->void:
 	if top_readings:
 		top_readings.visible=true
 		top_readings.show_readings(kpi_readings())
+		if top_frame:top_frame.set_deferred("size",Vector2(readings_width,Folio.TOP_HEIGHT))
 	_layout_orders()
 	if dock:
 		dock.position=Vector2(Folio.RAIL_WIDTH,Folio.TOP_HEIGHT)
@@ -415,7 +420,7 @@ func _open_order_screen(screen:String)->void:
 
 func _build_frame()->void:
 	var tint:=ColorRect.new();tint.name="MapTopTint";tint.color=Color(Folio.OLIVE,0.86);tint.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	tint.set_anchors_preset(Control.PRESET_TOP_WIDE);tint.offset_left=Folio.RAIL_WIDTH;tint.offset_bottom=Folio.TOP_HEIGHT;add_child(tint)
+	tint.set_anchors_preset(Control.PRESET_TOP_LEFT);tint.offset_left=Folio.RAIL_WIDTH;tint.offset_bottom=Folio.TOP_HEIGHT;add_child(tint)
 	top_frame=PanelContainer.new();top_frame.name="TopFrame";top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	# The readings and clock share MapTopTint's uninterrupted background.
 	var style:=Tokens.flat(Color.TRANSPARENT)
@@ -462,7 +467,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	var id:=String((section.pages as Array)[0])
 	var button:=Button.new();button.name="Rail"+id.capitalize().replace(" ","")
 	if id=="civ":button.name="RailCivilization"
-	button.custom_minimum_size=Vector2(0,78);button.tooltip_text=String(section.tooltip)
+	button.custom_minimum_size=Vector2(0,Folio.RAIL_BUTTON_HEIGHT);button.tooltip_text=String(section.label)+": "+String(section.tooltip);button.accessibility_name=String(section.label)
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false));button.add_theme_stylebox_override("hover",_approved_rail_style(false,true));button.add_theme_stylebox_override("pressed",_approved_rail_style(true));button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(func()->void:
 		# Open on a page of this category: the button closes it. Else it
@@ -470,9 +475,9 @@ func _make_rail_button(section:Dictionary)->Button:
 		if active_section in (section.pages as Array):section_requested.emit("",0);return
 		section_requested.emit(String(_last_page.get(String(section.id),id)),0))
 	var content:=VBoxContainer.new();content.set_anchors_preset(Control.PRESET_FULL_RECT);content.alignment=BoxContainer.ALIGNMENT_CENTER;content.add_theme_constant_override("separation",2);content.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(content)
-	var symbol:=Folio.rail_icon(id);symbol.custom_minimum_size=Vector2(40,40);symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(symbol);rail_icons[id]=symbol
-	var label:=Tokens.make_label(String(section.label),14,Folio.RAIL_TEXT);label.add_theme_font_override("font",Tokens.font("voice"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label);rail_labels[id]=label
-	var badge:=Label.new();badge.visible=false;badge.custom_minimum_size=Vector2(16,16);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.position=Vector2(57,3);button.add_child(badge)
+	var symbol:=Folio.rail_icon(id);symbol.custom_minimum_size=Vector2.ONE*Folio.RAIL_ICON_SIZE;symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(symbol);rail_icons[id]=symbol
+	var label:=Tokens.make_label(String(section.label),14,Folio.RAIL_TEXT);label.add_theme_font_override("font",Tokens.font("voice"));label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label);label.visible=false;rail_labels[id]=label
+	var badge:=Label.new();badge.visible=false;badge.custom_minimum_size=Vector2(16,16);badge.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;badge.add_theme_font_size_override("font_size",10);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.position=Vector2(26,2);button.add_child(badge)
 	rail_buttons[id]=button;rail_badges[id]=badge
 	return button
 
@@ -498,12 +503,12 @@ func _refresh_words()->void:
 	_layout()
 
 func _make_court_button()->Button:
-	var button:=Button.new();button.name="RailCourt";button.custom_minimum_size=Vector2(0,58)
+	var button:=Button.new();button.name="RailCourt";button.custom_minimum_size=Vector2(0,Folio.RAIL_BUTTON_HEIGHT);button.accessibility_name="Court"
 	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false));button.add_theme_stylebox_override("hover",_approved_rail_style(false,true));button.add_theme_stylebox_override("focus",_rail_focus_style());button.pressed.connect(open_court)
 	preload("res://scripts/hud/court_prewarm.gd").attach(button)
-	var icon:=Folio.rail_icon("court");icon.set_anchors_preset(Control.PRESET_CENTER);icon.position=Vector2(-20,-22);icon.size=Vector2(40,44);icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(icon)
-	var badge:=Label.new();badge.visible=false;badge.position=Vector2(57,3);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(badge);rail_badges["court"]=badge
+	var icon:=Folio.rail_icon("court");icon.set_anchors_preset(Control.PRESET_CENTER);icon.custom_minimum_size=Vector2.ONE*Folio.RAIL_ICON_SIZE;icon.position=-Vector2.ONE*Folio.RAIL_ICON_SIZE/2;icon.size=Vector2.ONE*Folio.RAIL_ICON_SIZE;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(icon)
+	var badge:=Label.new();badge.visible=false;badge.position=Vector2(26,2);badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK);badge.mouse_filter=Control.MOUSE_FILTER_IGNORE;button.add_child(badge);rail_badges["court"]=badge
 	return button
 
 func open_court()->void:
@@ -569,6 +574,8 @@ func _set_badge(id:String,text:String,color:Color)->void:
 	badge.visible=text!=""
 	if text=="": return
 	badge.text=text
+	badge.add_theme_font_size_override("font_size",10)
+	badge.position.x=maxf(0.0,(badge.get_parent() as Control).size.x-maxf(16.0,badge.get_theme_font("font").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,10).x)-4.0)
 	var pill:=Tokens.flat(color,Color(0,0,0,0),0,8)
 	pill.content_margin_left=4.0
 	pill.content_margin_right=4.0
@@ -706,8 +713,8 @@ const KPI_DEFS:Array[Dictionary]=[
 ]
 
 ## Which status chips give way first when the top bar is too narrow for them
-## all (after the age's own rules in _layout).
-const KPI_SHED_ORDER:=["goods","science","water","population"]
+## all (after the age's own rules in _layout). Population and food are never shed.
+const KPI_SHED_ORDER:=["goods","science","water","gdp","health"]
 
 ## Caption, value and note have separate lines within the 72 px header.
 ## Insets keep them clear of the fine frame and the semantic bottom rule.

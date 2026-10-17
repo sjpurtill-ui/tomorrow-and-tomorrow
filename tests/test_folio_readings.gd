@@ -137,9 +137,9 @@ func test_reference_sidebar_and_speed_controls_keep_their_actions() -> void:
 	hud.rail_buttons.economy.pressed.emit()
 	assert_array(chosen).is_equal(["economy",0])
 
-## The owner plays 1600x900 at 125%: a 1280-wide canvas. Every reading fits
-## beside the clock there, GOODS included; none is shed.
-func test_every_reading_shows_at_the_owners_size() -> void:
+## A 1280-wide logical canvas keeps the essentials beside even a long date.
+## Secondary readings may give way; a wide container must not mask overlap.
+func test_primary_readings_fit_beside_the_clock_at_1280() -> void:
 	GameState.known_discoveries.append("printing_process")
 	hud._refresh_words()
 	canvas.size=Vector2i(1280,720)
@@ -148,8 +148,48 @@ func test_every_reading_shows_at_the_owners_size() -> void:
 	for i in 6: await get_tree().process_frame
 	hud._layout()
 	for i in 3: await get_tree().process_frame
-	for def: Dictionary in hud.KPI_DEFS:
-		var id:=String(def.id)
-		assert_bool(hud.top_readings.entries.has(id) and hud.top_readings.entries[id].button.visible).override_failure_message(id+" is shed at 1280").is_true()
+	for id: String in ["population","food"]:
+		assert_bool(hud.top_readings.entries[id].button.visible).is_true()
+	assert_float(hud.top_frame.get_global_rect().end.x).is_less_equal(hud.time_pill.position.x)
 	for entry: Dictionary in hud.top_readings.entries.values():
-		assert_float(entry.button.get_global_rect().end.x).is_less_equal(hud.top_frame.get_global_rect().end.x)
+		if entry.button.visible:assert_float(entry.button.get_global_rect().end.x).is_less_equal(hud.top_frame.get_global_rect().end.x)
+
+
+func test_population_survives_compact_canvas_and_space_pressure() -> void:
+	var population: Button=hud.top_readings.entries.population.button
+	for modern: bool in [false,true]:
+		if modern:GameState.known_discoveries.append("printing_process")
+		hud._refresh_words();hud._refresh_kpis()
+		# Match the logical widths reached by window resizing and UI scaling.
+		for width: int in [960,1024,1138,1280,1536,1920]:
+			canvas.size=Vector2i(width,1024)
+			hud._layout()
+			for i in 6:await get_tree().process_frame
+			assert_bool(population.is_visible_in_tree()).override_failure_message("Population hidden at %d, modern=%s" % [width,modern]).is_true()
+			assert_object(hud.top_readings.entries.population.button).is_same(population)
+			assert_str(hud.top_readings.entries.population.value.text).is_equal(hud.kpi_chips.population.value.text)
+			for entry: Dictionary in hud.top_readings.entries.values():
+				if entry.button.visible:
+					assert_float(entry.button.get_global_rect().end.x).is_less_equal(hud.time_pill.position.x)
+	var selected: Array=[]
+	hud.section_requested.connect(func(section:String,sub:int):selected.assign([section,sub]))
+	population.pressed.emit()
+	assert_array(selected).is_equal(["overview",0])
+
+
+func test_thin_sidebar_keeps_small_icons_names_and_navigation() -> void:
+	for i in 4:await get_tree().process_frame
+	assert_float(hud.rail_panel.size.x).is_equal(44.0)
+	for id: String in hud.rail_buttons:
+		var button: Button=hud.rail_buttons[id]
+		assert_float(button.size.y).is_equal(44.0)
+		assert_float(hud.rail_icons[id].size.x).is_equal(24.0)
+		assert_bool(hud.rail_labels[id].visible).is_false()
+		assert_str(button.accessibility_name).is_not_empty()
+		assert_str(button.tooltip_text).is_not_empty()
+	assert_float(hud.dock.position.x).is_equal(44.0)
+	hud.set_notice_counts({"economy":24})
+	var badge: Label=hud.rail_badges.economy
+	await get_tree().process_frame
+	assert_str(badge.text).is_equal("24")
+	assert_float(badge.get_global_rect().end.x).is_less_equal(44.0)
