@@ -17,27 +17,27 @@ The user clarified that **border forts are the intended approach, with no other
 town-watch effects**. Do not merge #95 as a way to resolve the review backlog.
 This audit introduces no additional town-watch behavior.
 
-Review of the other open PRs (left open and unmerged):
+Disposition after review and the user's explicit merge/close instructions:
 
-- **#95, town-watch odds:** reject as written. Conflicts in `war_odds.gd` and
+- **#95, town-watch odds: CLOSED without merging.** Reject as written. Conflicts in `war_odds.gd` and
   `civilization_combat.gd`; its builder collapses guards and rising townsfolk
   into one unarmed militia block. Current code preserves the guard's equipment
   and drill separately and accounts for border-fort postings. Its design also
   contradicts the user's explicit border-fort direction. If odds need correction,
   derive them from the current border-fort/force ledger in a new change.
-- **#213, simulator bench:** hold for fixes. An optional development tool, not a
+- **#213, simulator bench: CLOSED without merging.** Requires fixes if revived. An optional development tool, not a
   player-game feature. `bench_engine.py` builds changed-constant projects using
   Windows `cmd /c mklink /J`, so those runs cannot work on Mac as written. The
   patched-project cache key hashes only knobs and reuses any `ready` directory;
   after source changes, identical knobs can silently run old copied scripts.
   Include source identity and serialize project creation before trusting results.
-- **#130, Economy Trade test:** largely superseded. Main already expects the
+- **#130, Economy Trade test: CLOSED without merging.** Largely superseded. Main already expects the
   fourth Trade tab. Its remaining addition only checks that tab's title; no
   gameplay behavior changes.
-- **#90, phantom hunger test:** fixture correction, not a hunger-system change.
+- **#90, phantom hunger test: selected for integration.** Fixture correction, not a hunger-system change.
   It marks the field band's camp as already foraged so the test can exercise
   shortages under current foraging rules. Suitable to retain as test maintenance.
-- **#187, court evaluation:** test/harness maintenance rather than gameplay.
+- **#187, court evaluation: selected for integration.** Test/harness maintenance rather than gameplay.
   The nearby-feud fixture commit is already represented in main. Remaining
   changes replace stale names/counts with live office/labor readings, read the
   current army ledger, and align expectations with one-seat settlement founding,
@@ -47,13 +47,19 @@ Review validation: previewed only the remaining test changes in this worktree,
 then restored the exact pre-review test files. The phantom-hunger suite passed
 8/8 and Home docks passed 11/11, including the additional Trade-title assertion.
 The five updated court expectations passed all 20 offline/stubbed-reader runs;
-the army-disbanding case and its variants were checked separately. These use
+the army-disbanding case and its variants passed another 10/10 runs. These use
 mock readers, not paid API calls; they do not establish live-model reliability.
 Logs: `/tmp/tat-pr-review-tests.log` and `/tmp/tat-pr-review-army-tests.log`.
 No full court-corpus run or simulator runtime validation was performed.
 
-Only the soundtrack PR is selected for integration. The other five are review
-findings, not implicitly approved merges. Generated imports, test reports,
+The user subsequently authorized merging #187 and #90 unless already present,
+and closing the rest. Only #187's first fixture commit was already represented;
+its remaining updates and #90 were missing. Both merged cleanly, with no fixture
+conflict. Their final three changed files byte-match the previews validated above.
+These add no player mechanics, change no save data, and retain the border-fort
+implementation. #176, #187 and #90 are selected for remote-first integration;
+#95, #130 and #213 are closed without merging. GitHub preserves closed PR history;
+remote source branches are retained. Generated imports, test reports,
 preview fixtures and build outputs are excluded from commits. Existing player
 processes keep their bundled release until a normal restart.
 
