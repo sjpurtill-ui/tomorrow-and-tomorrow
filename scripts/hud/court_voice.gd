@@ -486,10 +486,16 @@ static func render_samples(voice:Dictionary,text:String,seconds:float,mood:Varia
 	paint_line(sc,voice,syllables,feel,whisper)
 	return voice_score(sc,voice,feel,Synth.seed_of("%d|%s|line" % [int(voice.get("seed",0)),text]))
 
+## The same resonators amplify broadband aspiration much more than the LF
+## voice source. In ordinary speech it must sit below the voiced syllables.
+## Whispered lines and explicitly authored breath gestures keep their own level.
+const SPEECH_ASPIRATION_GAIN:=0.2
+
 ## A voice's tracks a frame at a time: formants, voicing, breath, noise and
 ## its band, nasality, the antiformant of a nasal or an l, the glottis's
 ## shape (LF Rd) and pitch; and the release bursts of the stops.
 class Score:
+	var aspiration_gain:=1.0
 	var n:=0
 	var f1:=PackedFloat32Array()
 	var f2:=PackedFloat32Array()
@@ -696,7 +702,7 @@ static func voice_score(sc:Score,voice:Dictionary,feel:Dictionary,seed_value:int
 			# breath pulses with the glottis: loud while it is open, little while shut
 			var open:=1.0 if ph<te_n else 0.55
 			var voiced_w:=clampf(av*2.0,0.0,1.0)
-			var src:=glot*0.32*sh*av+noise*(ah*lerpf(1.0,open,voiced_w)+breath*av*open)*0.5
+			var src:=glot*0.32*sh*av+noise*(ah*lerpf(1.0,open,voiced_w)+breath*av*open)*0.5*sc.aspiration_gain
 			tilt_y+=tilt_a*(src-tilt_y)
 			var o:=k1.x*tilt_y+k1.y*y11+k1.z*y12;y12=y11;y11=o
 			o=k2.x*o+k2.y*y21+k2.z*y22;y22=y21;y21=o
@@ -748,6 +754,7 @@ static func voice_score(sc:Score,voice:Dictionary,feel:Dictionary,seed_value:int
 ## Paints a line's syllables onto the score: where each sound sits in its
 ## syllable, the formants it aims for, the voicing and noise, and the melody.
 static func paint_line(sc:Score,voice:Dictionary,syllables:Array,feel:Dictionary,whisper:bool)->void:
+	sc.aspiration_gain=1.0 if whisper else SPEECH_ASPIRATION_GAIN
 	var tongue:Dictionary=voice.get("tongue",phonology_of({}))
 	var pros:Dictionary=tongue.get("prosody",{})
 	var base:=float(voice.get("f0",120.0))

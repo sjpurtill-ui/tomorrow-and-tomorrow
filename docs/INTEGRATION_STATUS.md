@@ -1,3 +1,36 @@
+## October 17 — Court speech aspiration balance
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/court-voice-hiss`, base `ecbc0b568c7fb18f5552413410edeb22a92d23cf`.
+Scope: `court_voice.gd`, a signal regression suite and an offline audio audit.
+
+The user reported hissing/breathy court replies. Normal replies were not routed
+as whispers. Signal isolation instead found excessive aspiration through the
+voice resonators: the controlled male /a/ breath source measured 0.660 RMS versus
+0.161 for the voiced vowel. Across four registers and neutral/afraid/tired lines,
+noise intervals measured 0.77–1.15 times the voiced intervals' RMS. Ordinary
+speech now attenuates aspiration at the source to 0.2 of its former amplitude;
+voicing, fricative articulation, timing, pitch and language choices remain intact.
+The gain is authored on speech scores, leaving explicit whispers and Foley
+breath gestures untouched. Normal crowd babble uses the same corrected path.
+
+The same twelve line fixtures now measure noise/voice RMS ratios of 0.26–0.35,
+with raw noise intervals down 9.3–10.6 dB before whole-line normalization. All
+27 tests pass (25 existing court-sound cases plus two balance regressions).
+The signal regression fails its 0.6 noise/voice limit on all twelve original
+fixtures. An independent audit compared the pre-change generator and confirmed
+four whispers and four breath gestures unchanged sample-for-sample. Evidence:
+`/tmp/tat-court-voice-tests.log`, `/tmp/tat-court-voice-audit-verified.log`,
+`/tmp/tat-court-voice-before/` and `/tmp/tat-court-voice-after/`.
+
+No recording of the user's session was supplied, so this confirms a generator
+imbalance matching the symptom, not an exclusive diagnosis of every audible
+noise. The generated review WAVs are available for listening; no subjective
+listening approval is claimed. No simulation/save changes, migration, shared
+hotspot edits or conflicts. Generated reports/imports/audio are excluded.
+Remote-first integration is required; the running player retains its bundled
+old audio until a normal restart.
+
 ## October 17 — Open PR audit and soundtrack integration
 
 Integrator worktree: `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`,
