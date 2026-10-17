@@ -78,17 +78,17 @@ func build(owner_screen:Node,first:Dictionary)->void:
 			"pause":pause=button;pause.name="Pause";pause.pressed.connect(func():screen.act(int(view.id),"pause",0.0))
 			"close":close=button;close.name="Close";close.pressed.connect(_on_close)
 	var body:=HBoxContainer.new();body.name="Body";body.add_theme_constant_override("separation",8);column.add_child(body)
-	var art:=Control.new();art.name="Picture";art.custom_minimum_size=Vector2(66,50);body.add_child(art)
+	var art:=Control.new();art.name="Picture";art.custom_minimum_size=Vector2(66,40);body.add_child(art)
 	picture=TextureRect.new();picture.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;picture.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;picture.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);art.add_child(picture)
 	var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;reading.add_theme_constant_override("separation",2);body.add_child(reading)
-	bar=W.OutputBar.new(110);bar.ink_override=LIGHT;bar.name="Output";bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.custom_minimum_size.y=22;reading.add_child(bar)
+	bar=W.OutputBar.new(110);bar.ink_override=LIGHT;bar.name="Output";bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.custom_minimum_size.y=20;reading.add_child(bar)
 	efficiency_bar=ProgressBar.new();efficiency_bar.name="Efficiency";efficiency_bar.show_percentage=false;efficiency_bar.custom_minimum_size.y=7
 	efficiency_bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));efficiency_bar.add_theme_stylebox_override("fill",Industrial.flat(Color("7f9b4c")));reading.add_child(efficiency_bar)
 	var state:=Folio.label("","small",LIGHT);state.name="Condition";state.add_theme_font_size_override("font_size",12);reading.add_child(state)
 	var allocation:=VBoxContainer.new();allocation.add_theme_constant_override("separation",2);body.add_child(allocation)
 	capacity_grid=GridContainer.new();capacity_grid.name="CapacityGrid";capacity_grid.columns=5;capacity_grid.add_theme_constant_override("h_separation",2);capacity_grid.add_theme_constant_override("v_separation",2);allocation.add_child(capacity_grid)
 	for index in 15:
-		var slot:=Button.new();slot.custom_minimum_size=Vector2(19,12);slot.focus_mode=Control.FOCUS_ALL;capacity_grid.add_child(slot)
+		var slot:=CapacitySlot.new();slot.custom_minimum_size=Vector2(19,14);slot.focus_mode=Control.FOCUS_ALL;capacity_grid.add_child(slot)
 		slot.pressed.connect(func():
 			var scale:=maxi(1,ceili(float(view.get("hands_total",0))/15.0))
 			var desired:=mini(int(view.get("hands_total",0)),(index+1)*scale)
@@ -107,7 +107,7 @@ func build(owner_screen:Node,first:Dictionary)->void:
 	keep_value=Folio.label("","small",LIGHT);keep_value.name="KeepValue";controls.add_child(keep_value)
 	keep_up=W.IconButton.new("plus","",22);keep_up.name="KeepUp";controls.add_child(keep_up);keep_up.pressed.connect(func():screen.act(int(view.id),"target",float(Plain.step_target(int(view.target),1))))
 	# Retain detail-only readings without making every row a full-page card.
-	badge=W.Chip.new();badge.name="Badge";column.add_child(badge)
+	badge=W.Chip.new();badge.name="Badge";top.add_child(badge);top.move_child(badge,2)
 	auto=W.text_button("Auto","");auto.name="Auto";controls.add_child(auto);auto.pressed.connect(func():screen.act(int(view.id),"auto",0.0 if bool(view.managed) else 1.0))
 	skill=W.SkillGraph.new();skill.name="Skill";skill.visible=false;column.add_child(skill)
 	target_row=Pictures.TargetRow.new();target_row.visible=false;column.add_child(target_row)
@@ -202,9 +202,10 @@ func apply(next:Dictionary)->void:
 	for index in capacity_grid.get_child_count():
 		var slot:Button=capacity_grid.get_child(index)
 		var assigned:=index*scale<people
-		var fill:=Color("a3b976") if assigned else Color("20241e")
-		if assigned and factor<=0:fill=Color("aa5143")
-		slot.add_theme_stylebox_override("normal",Industrial.flat(fill,Color("727b5c"),1,1))
+		(slot as CapacitySlot).lit=assigned
+		(slot as CapacitySlot).blocked=assigned and factor<=0
+		slot.queue_redraw()
+		slot.add_theme_stylebox_override("normal",Industrial.flat(Color("252b22"),Color("414b36"),1,0))
 		slot.add_theme_stylebox_override("hover",Industrial.flat(Color("c4c890"),Color("e5dfb6"),1,1))
 		slot.tooltip_text="Assign %d makers to this line (%d per square)." % [mini(total,(index+1)*scale),scale]
 		slot.disabled=paused or index*scale>=total
@@ -251,3 +252,14 @@ func _drop_data(_at:Vector2,data:Variant)->void:
 
 static func daily_rate(value:float)->String:
 	return ("%.3f" % value if value<.01 else "%.2f" % value)+" / day"
+
+
+class CapacitySlot extends Button:
+	var lit:=false
+	var blocked:=false
+	func _draw()->void:
+		var ink:=Color("a2b66e") if lit else Color("555f47")
+		if blocked:ink=Color("bd6550")
+		var at:=Vector2(floorf((size.x-12)/2),floorf((size.y-10)/2))
+		draw_colored_polygon(PackedVector2Array([at+Vector2(0,10),at+Vector2(0,5),at+Vector2(4,2),at+Vector2(4,5),at+Vector2(8,2),at+Vector2(8,5),at+Vector2(10,5),at+Vector2(10,0),at+Vector2(12,0),at+Vector2(12,10)]),ink)
+		for x in [2,6,10]:draw_rect(Rect2(at+Vector2(x,7),Vector2(1,2)),Color("252b22"))

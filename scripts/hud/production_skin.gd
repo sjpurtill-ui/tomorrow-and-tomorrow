@@ -21,8 +21,8 @@ static func apply(root:Node)->void:
 			if button.get_parent().name!="CapacityGrid":
 				button.add_theme_stylebox_override("normal",selected if button.button_pressed else normal)
 				button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",selected);button.add_theme_stylebox_override("disabled",disabled)
-				button.custom_minimum_size.y=28
-				if button is W.IconButton:button.custom_minimum_size=Vector2(26,26);button.ink_override=INK
+				button.custom_minimum_size.y=22
+				if button is W.IconButton:button.custom_minimum_size=Vector2(22,22);button.ink_override=INK
 			for kind in ["font_color","font_hover_color","font_pressed_color"]:button.add_theme_color_override(kind,INK)
 			button.add_theme_color_override("font_disabled_color",Color("737966"));button.add_theme_font_size_override("font_size",13)
 		elif child is Label:

@@ -19,7 +19,7 @@ const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
 var workshop:RefCounted
 var view_state:Dictionary={}
 func meta()->Dictionary:
-	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":false, "title_size":26, "spread_tabs":true, "subtabs":["Military","Civilian","Military"], "hidden_subtabs":[2], "subtab_aliases":{2:0}, "fit_height":true}
+	return {"eyebrow":"WORKSHOPS & EQUIPMENT", "title":"Production", "serif":false, "title_size":26, "spread_tabs":true, "subtabs":["Military","Civilian","Military"], "hidden_subtabs":[2], "subtab_aliases":{2:0}, "fit_height":false, "industrial_view":true}
 func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:

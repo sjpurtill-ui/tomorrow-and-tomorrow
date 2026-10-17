@@ -40,7 +40,7 @@ const SECTIONS:Array[Dictionary]=[
 ## would not say enough beside their neighbours.
 const CATEGORIES:Array[Dictionary]=[
 	{"id":"home","label":"Home","pages":["settlement","overview","civ"],"tabs":{"settlement":["Overview"],"overview":["People"],"civ":["Culture"]},"tooltip":"This settlement, its people and their ways"},
-	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Daily work","Daily work","Workshop orders"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
+	{"id":"economy","label":"Economy","pages":["economy","production"],"tabs":{"economy":["Food","Materials","Wealth","Trade"],"production":["Military","Civilian","Military"]},"tooltip":"Food and water, materials, wealth, trade and what is being made · F2"},
 	{"id":"construction","label":"Buildings","pages":["construction"],"tooltip":"Construction and infrastructure · F7"},
 	{"id":"inquiry","label":"Research","pages":["inquiry"],"tooltip":"What the people know and are learning · F5"},
 	{"id":"military","label":"War","pages":["military"],"tooltip":"War: how many serve, our enemies and our leaders · F8"},
@@ -221,6 +221,8 @@ func _work_queue_width(view_width:float)->float:
 	return Folio.page_width(view_width)
 
 func _dock_width(panel:Control,view_width:float)->float:
+	if panel.provider and bool(panel.provider.meta().get("industrial_view",false)):
+		return minf(620.0,maxf(280.0,view_width-Folio.RAIL_WIDTH-Tokens.EDGE_MARGIN))
 	if panel.provider and bool(panel.provider.meta().get("spatial_view",false)):
 		return maxf(280.0,view_width-Folio.RAIL_WIDTH-Tokens.EDGE_MARGIN)
 	return Folio.page_width(view_width)

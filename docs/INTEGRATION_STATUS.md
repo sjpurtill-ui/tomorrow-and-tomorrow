@@ -1,3 +1,36 @@
+## October 17 — Production navigation and screen correction (INTEGRATED)
+
+Follow-up to `37431d082e93`: the real Economy category still overrode the new
+provider names with two “Daily work” tabs, and the equipment catalogue replaced
+all working lines with a large detail sheet. Corrected the category labels to
+Military/Civilian (legacy military subtab 2 remains an alias). Production now
+requests a bounded 620 logical-pixel industrial dock, compact chrome and margins,
+and retains its palette through refresh and resize. Other category widths and
+spatial layouts keep their existing rules. The equipment catalogue is a compact,
+scrolling disclosure above the always-visible line list. Stockpile is also a
+disclosure; numeric updates preserve controls. Military rows are 107 logical
+pixels in the inspected early/late fixtures, with capacity factory glyphs and
+beneficiary badges in the title strip. Civilian rows share the equipment,
+output/coverage-bar and workforce arrangement. This uses the game's own artwork;
+it is not a pixel-for-pixel reproduction of HOI4's assets.
+
+Validation: 40 headless cases passed across production navigation, shortage,
+production screen, HOI4 production and category navigation suites. New regression
+checks use the real category overrides, legacy links, compact-width routing,
+catalogue toggles, row visibility and reuse, palette retention and resize. Native
+SubViewport captures of the actual dock with early, catalogue-open, eight-line
+late and civilian fixtures were inspected; all capture processes exited. Logs:
+`/tmp/tat-production-correction-tests.log` and
+`/tmp/tat-production-correction-capture.log`. Captures are generated evidence,
+not the current player game, and are excluded from Git.
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/hoi4-production`, base `37431d082e93`. Owned production widgets/provider,
+`command_rail_hud.gd` category/width routing and `dock_panel.gd` scoped styling.
+No simulation, save schema or shared simulation hotspot changes; saves remain
+compatible. No shared-file conflicts. Delivery follows remote-first integration.
+The existing player process keeps its bundled prior build until normal restart.
+
 ## October 17 — HOI4 production board and resource shortages (INTEGRATED)
 
 Runtime checkpoint `365b38a1f` replaces the summary-first Production route with

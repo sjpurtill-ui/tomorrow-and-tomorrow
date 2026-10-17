@@ -47,6 +47,7 @@ var close_button:Button
 var header_margin:MarginContainer
 var tabs_margin:MarginContainer
 var spatial_view:=false
+var industrial_view:=false
 var back_mode:bool=false
 ## Fingerprints of the rendered body sections, KPI row and brief, so a live
 ## refresh only replaces what changed.
@@ -179,23 +180,28 @@ func rebuild()->void:
 	if provider==null: return
 	var meta:Dictionary=provider.meta()
 	var spatial:=bool(meta.get("spatial_view",false))
+	var industrial:=bool(meta.get("industrial_view",false))
+	industrial_view=industrial
+	var compact:=spatial or industrial
+	add_theme_stylebox_override("panel",preload("res://scripts/hud/production_skin.gd").flat(Color("252a25"),Color("626650"),1) if industrial else Folio.page_style())
+	get_node("FolioPaper").visible=not industrial
 	spatial_view=spatial
 	for edge in ["left","right"]:
-		header_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
-		tabs_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
-	header_margin.add_theme_constant_override("margin_top",6 if spatial else 14)
-	header_margin.add_theme_constant_override("margin_bottom",4 if spatial else 10)
+		header_margin.add_theme_constant_override("margin_"+edge,8 if industrial else 12 if spatial else 26)
+		tabs_margin.add_theme_constant_override("margin_"+edge,8 if industrial else 12 if spatial else 26)
+	header_margin.add_theme_constant_override("margin_top",6 if compact else 14)
+	header_margin.add_theme_constant_override("margin_bottom",4 if compact else 10)
 	var body_margin:=body.get_parent() as MarginContainer
-	for edge in ["left","right","bottom"]:body_margin.add_theme_constant_override("margin_"+edge,12 if spatial else 26)
-	body_margin.add_theme_constant_override("margin_top",12 if spatial else 24)
+	for edge in ["left","right","bottom"]:body_margin.add_theme_constant_override("margin_"+edge,8 if industrial else 12 if spatial else 26)
+	body_margin.add_theme_constant_override("margin_top",6 if industrial else 12 if spatial else 24)
 	_set_fit(bool(meta.get("fit_height",false)))
 	# Providers still pass shouted text; the dock speaks in sentence case.
 	# One header on every screen: the rail's word on one line, the tabs right
 	# under it. A report outside the categories keeps its own title and line.
 	eyebrow_label.text="" if category_title!="" else Tokens.sentence_case(String(meta.get("eyebrow","")))
-	eyebrow_label.visible=eyebrow_label.text!=""
-	title_label.text=category_title if category_title!="" else Tokens.sentence_case(String(meta.get("title","")))
-	title_label.add_theme_font_size_override("font_size",24 if spatial else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
+	eyebrow_label.visible=eyebrow_label.text!="" and not industrial
+	title_label.text="PRODUCTION" if industrial else category_title if category_title!="" else Tokens.sentence_case(String(meta.get("title","")))
+	title_label.add_theme_font_size_override("font_size",20 if industrial else 24 if spatial else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
 	title_label.add_theme_font_override("font",Tokens.font("ui_strong"))
 	note_label.text=title_note if category_title!="" else ""
 	note_label.visible=note_label.text!=""
@@ -215,10 +221,12 @@ func rebuild()->void:
 		tab_buttons.append(tab)
 	for index in tab_buttons.size():
 		var tab:=tab_buttons[index]
-		tab.custom_minimum_size.y=30 if spatial else 38
+		tab.custom_minimum_size.y=28 if compact else 38
 		tab.visible=index<subtabs.size()
 		if index<subtabs.size(): tab.text=Tokens.sentence_case(String(subtabs[index]))
 		var active:=index<_flat.size() and bool(_flat[index].active)
+		tab.toggle_mode=industrial
+		tab.set_pressed_no_signal(active if industrial else false)
 		tab.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
 		var style:=Tokens.flat(Tokens.GOLD_WASH if active else Color.TRANSPARENT)
 		style.border_color=Tokens.GOLD
@@ -233,6 +241,9 @@ func rebuild()->void:
 		tab.add_theme_stylebox_override("pressed",style)
 		tab.add_theme_color_override("font_color",Tokens.INK if active else Tokens.TEXT_DIM)
 		tab.add_theme_color_override("font_hover_color",Tokens.INK)
+	if industrial:
+		preload("res://scripts/hud/production_skin.gd").apply(tabs_margin)
+		title_label.add_theme_font_size_override("font_size",20)
 	rebuild_body()
 
 
@@ -256,7 +267,7 @@ func rebuild_body()->void:
 	# only when the palette moved: setting a style or ink, even the same one,
 	# lays the whole dock out again on the next frame.
 	var military_board:bool=not data.get("blocks",[]).is_empty() and data.blocks[0].get("type","")=="recruit_deploy"
-	var paper:=Folio.page_style()
+	var paper:=preload("res://scripts/hud/production_skin.gd").flat(Color("252a25"),Color("626650"),1) if industrial_view else Folio.page_style()
 	var surface:=get_node_or_null("FolioPaper") as ColorRect
 	if surface and surface.material is ShaderMaterial:
 		(surface.material as ShaderMaterial).set_shader_parameter("paper_color",Tokens.PAPER)
@@ -264,7 +275,7 @@ func rebuild_body()->void:
 	if laid==null or laid.bg_color!=paper.bg_color or laid.border_color!=paper.border_color or laid.border_width_top!=paper.border_width_top or laid.corner_radius_top_left!=paper.corner_radius_top_left or not has_theme_stylebox_override("panel"):
 		add_theme_stylebox_override("panel",paper)
 	if military_board and category_title=="":title_label.text="Recruit and deploy"
-	_ink(title_label,"font_color",Tokens.INK)
+	_ink(title_label,"font_color",Color("dedcc8") if industrial_view else Tokens.INK)
 	_ink(eyebrow_label,"font_color",Tokens.GOLD_TEXT)
 	_ink(close_button,"font_color",Tokens.TEXT_DIM)
 	ViewState.restore(body_scroll,view)
@@ -561,8 +572,8 @@ func _set_fit(enabled:bool)->void:
 
 func _on_resized()->void:
 	if title_label:
-		title_label.add_theme_font_size_override("font_size",24 if spatial_view else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
-		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",15 if _flat.size()>5 else 16)
+		title_label.add_theme_font_size_override("font_size",20 if industrial_view else 24 if spatial_view else TITLE_SIZE if size.x>=600 else TITLE_SIZE_NARROW)
+		for tab:Button in tab_buttons:tab.add_theme_font_size_override("font_size",13 if industrial_view else 15 if _flat.size()>5 else 16)
 	_kpi_columns()
 	if _fitting:return
 	_room=size.y

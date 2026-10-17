@@ -61,23 +61,22 @@ func setup(block:Dictionary)->void:
 			_build_civilian_lines()
 		_:
 			_build_header()
-			_build_assign_workers()
 			var navigation:=HFlowContainer.new();navigation.add_theme_constant_override("h_separation",8);add_child(navigation)
-			for entry:Array in [["orders","Production lines"],["recipes","+ Add production line"],["stock","Stockpile"]]:
+			for entry:Array in [["recipes","+ Add equipment"],["stock","Stockpile"]]:
 				var key:=String(entry[0]);var button:=W.text_button(String(entry[1]),"Show "+String(entry[1]).to_lower());button.toggle_mode=true;navigation.add_child(button);_workspace_buttons[key]=button
-				button.pressed.connect(func():_show_workspace(key))
+				button.pressed.connect(func():_show_workspace(key if button.button_pressed else "orders"))
+			_picker=Picker.new();add_child(_picker);_workspaces.recipes=_picker
+			_picker.build(self,data.get("recipes",[]),_room_note())
 			var orders:=VBoxContainer.new();orders.name="LinesColumn";orders.add_theme_constant_override("separation",8);add_child(orders);_workspaces.orders=orders
 			_build_filters(orders)
 			_build_lines(orders)
 			if not data.get("civilian_lines",[]).is_empty():_build_civilian_lines(orders)
-			_picker=Picker.new();add_child(_picker);_workspaces.recipes=_picker
-			_picker.build(self,data.get("recipes",[]),_room_note())
 			_build_stock()
 			_show_workspace(String(_view_state.get("workspace","orders")))
 			_build_flow_disclosure("Materials & daily flow")
 			_build_footer()
 	var contents:=get_children()
-	var frame:=PanelContainer.new();frame.name="ProductionSurface";frame.add_theme_stylebox_override("panel",Industrial.flat(Color("252a25"),Color("626650"),1,1,8));add_child(frame)
+	var frame:=PanelContainer.new();frame.name="ProductionSurface";frame.add_theme_stylebox_override("panel",Industrial.flat(Color("252a25"),Color("626650"),0,0,0));add_child(frame)
 	var layout:=VBoxContainer.new();layout.add_theme_constant_override("separation",6);frame.add_child(layout)
 	for child:Node in contents:child.reparent(layout)
 	_apply()
@@ -189,14 +188,14 @@ func _build_header()->void:
 	materials.visible=true
 	for material:Dictionary in data.get("materials",[]):
 		_material_chips[String(material.resource)]=_fact(materials,Icons.material_texture(String(material.resource)),"Material_"+String(material.resource),"")
-	var workshop:=HBoxContainer.new();workshop.name="Workshop";workshop.add_theme_constant_override("separation",14);row.add_child(workshop)
+	var workshop:=HBoxContainer.new();workshop.name="Workshop";workshop.add_theme_constant_override("separation",12);group.add_child(workshop)
 	_header.hands=_fact(workshop,null,"Hands","HANDS")
 	# The chart above says the makers on the lines; the strip does not repeat it.
 	_header.hands.visible=true
 	_header.lines=_fact(workshop,null,"LineSlots","LINES")
 	_header.lines.visible=true
 	if int(data.get("boatyards",0))>0:_header.boatyards=_fact(workshop,null,"Boatyards","BOATYARDS")
-	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(run)
+	var run:=HBoxContainer.new();run.name="RunBy";run.add_theme_constant_override("separation",0);run.size_flags_vertical=Control.SIZE_SHRINK_CENTER;workshop.add_child(run)
 	var run_word:=Label.new();run_word.text="Managed by";T.text(run_word,"kicker",T.INK_MUTED);run_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;run.add_child(run_word)
 	var run_gap:=Control.new();run_gap.custom_minimum_size.x=6;run.add_child(run_gap)
 	_header.staff=W.text_button("Staff","");_header.staff.name="RunStaff";run.add_child(_header.staff)
@@ -265,7 +264,8 @@ func _apply_header()->void:
 	you.tooltip_text="You run the workshops: you choose what is made. Existing lines keep running." if not managed or person.is_empty() else "Take over: you choose what is made. Existing lines keep running."
 	var status:=String(data.get("status","")).strip_edges()
 	var note:Label=_header.note
-	note.visible=not status.is_empty()
+	note.visible=false
+	_header.staff.tooltip_text+="\n"+status
 	# The officer by given name, as the game names people in short; the full
 	# name, office and whole note are in the tooltip.
 	status=plain_status(status)
@@ -426,7 +426,8 @@ func _selection(parent:Node,key:String,limit:int=6)->Control:
 func _show_workspace(key:String)->void:
 	_view_state.workspace=key
 	for choice in _workspaces:
-		_workspaces[choice].visible=choice==key
+		_workspaces[choice].visible=choice=="orders" or choice==key
+	for choice in _workspace_buttons:
 		_workspace_buttons[choice].set_pressed_no_signal(choice==key)
 	preload("res://scripts/hud/production_skin.gd").apply(self)
 
@@ -582,6 +583,7 @@ static func household_story(city:Dictionary)->Dictionary:
 # --- Footer --------------------------------------------------------------------------
 
 func _build_footer()->void:
+	_build_assign_workers()
 	var row:=HFlowContainer.new();row.name="Footer";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8);add_child(row)
 	for entry:Array in [["One-off orders","on_add","Make a fixed number once instead of keeping a store."],["Crafting share","on_manage","Who runs the workshops, and how much crafting labor goes to lines."],["Output history","on_history","What the workshops and households have finished."]]:
 		var button:=W.text_button(String(entry[0]),String(entry[2]));button.name=String(entry[0]).replace(" ","").replace("-","");row.add_child(button)
@@ -801,27 +803,36 @@ func _build_civilian_lines(parent:Node=null)->void:
 	if parent==null:parent=self
 	for row:Dictionary in data.get("civilian_lines",[]):
 		var panel:=PanelContainer.new();panel.name="Civilian_"+String(row.id)
-		panel.add_theme_stylebox_override("panel",Industrial.flat(Color("344033"),Color("59604b"),1,1,8));parent.add_child(panel)
-		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",4);panel.add_child(column)
+		panel.add_theme_stylebox_override("panel",Industrial.flat(Color("344033"),Color("59604b"),1,0,6));parent.add_child(panel)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",3);panel.add_child(column)
 		var top:=HBoxContainer.new();column.add_child(top)
-		var title:=Folio.label(String(row.name),"body",Color("dddcc8"));title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
-		var button:=W.text_button("Assign", "Change the workers assigned to "+String(row.name));top.add_child(button)
+		var title:=Folio.label(String(row.name),"body",Industrial.INK);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
+		var button:=W.text_button("Assign workers", "Change the workers assigned to "+String(row.name));top.add_child(button)
 		button.pressed.connect(func():
 			var callback:Variant=data.get("on_civilian_assign")
 			if callback is Callable:callback.call(String(row.role)))
-		var output:=Folio.label("","small",Color("dddcc8"));column.add_child(output)
-		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=8;bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));bar.add_theme_stylebox_override("fill",T.flat(Color("8da760")));column.add_child(bar)
-		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(inputs)
-		_civil_rows[String(row.id)]={"panel":panel,"output":output,"bar":bar,"inputs":inputs}
+		var body:=HBoxContainer.new();body.add_theme_constant_override("separation",8);column.add_child(body)
+		var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(66,40);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;body.add_child(icon)
+		var id:=String(row.id)
+		icon.texture=Icons.material_texture(id.trim_prefix("raw_"),48) if id.begins_with("raw_") else Icons.material_texture("Food",48) if id=="food" else Folio.product_texture("improvised") if id.begins_with("arms_") else Icons.workshop_texture("gear",Industrial.INK,48)
+		var reading:=VBoxContainer.new();reading.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_child(reading)
+		var output:=Folio.label("","body",Industrial.INK);reading.add_child(output)
+		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=7;bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));bar.add_theme_stylebox_override("fill",Industrial.flat(Color("8da760")));reading.add_child(bar)
+		var stored:=Folio.label("","small",Industrial.INK);reading.add_child(stored)
+		var workers:=Folio.label("","small",Industrial.INK);workers.custom_minimum_size.x=100;workers.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;body.add_child(workers)
+		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(inputs)
+		_civil_rows[String(row.id)]={"panel":panel,"output":output,"bar":bar,"inputs":inputs,"stored":stored,"workers":workers}
 
 func _apply_civilian_lines()->void:
 	for row:Dictionary in data.get("civilian_lines",[]):
 		var refs:Dictionary=_civil_rows.get(String(row.id),{})
 		if refs.is_empty():continue
-		refs.output.text="%s / day    •    %s stored    •    %s workers" % [Plain.number(float(row.output)),Plain.number(float(row.stock)),Plain.number(float(row.workers))]
+		refs.output.text="%s / day" % Plain.number(float(row.output))
+		refs.stored.text="%s stored" % Plain.number(float(row.stock))
+		refs.workers.text="%s workers" % Plain.number(float(row.workers))
 		refs.bar.value=clampf(float(row.get("coverage",1.0)),0,1)*100
 		refs.bar.tooltip_text=String(row.get("bar_tip","Store coverage"))
-		refs.inputs.text=String(row.get("status",""))
+		refs.inputs.text=String(row.get("status",""));refs.inputs.tooltip_text=refs.inputs.text
 
 func _build_filters(parent:Node)->void:
 	var toolbar:=HFlowContainer.new();toolbar.name="CategoryFilters";toolbar.add_theme_constant_override("h_separation",3);parent.add_child(toolbar)
