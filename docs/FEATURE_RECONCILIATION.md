@@ -38,7 +38,9 @@ existing saves load without a migration or reset. Facts and hidden rolls survive
 JSON round trips and are validated. Higher-population envoy mechanics remain in
 place. The user will supply that phase's replacement design separately.
 
-READY for integration: 61 distinct focused tests pass across five suites:
+INTEGRATED — source `ca0a309def355be2166623de9a29e5bb7fb2a9e1`, with both
+`origin/main` and canonical `main` included in the integration branch. No
+shared-file conflicts. 61 distinct focused tests pass across five suites:
 14 early visitors (`/tmp/tat-early-verified.log`), 20 envoy requests and 2 court
 voice tests (`/tmp/tat-early-final-tests.log`, whose earlier fixture failure is
 superseded by the verified visitor run), 18 fair deals and 7 aftermath tests
@@ -46,8 +48,9 @@ superseded by the verified visitor run), 18 fair deals and 7 aftermath tests
 passed in the later run). No script errors. `git diff --check` passes.
 
 Limitations: live dialogue was checked through prompt/answer validation rather
-than a paid API request. No player session has been restarted. The implementation
-must be pushed and integrated before building the canonical release.
+than a paid API request. No player session has been restarted. The canonical release is built only
+after the integration commit is pushed, remotely verified, and fast-forwarded
+into the canonical checkout; its `build.ok` records the exact source revision.
 
 ## October 17 — Flanking, envelopment and a pierced front
 
