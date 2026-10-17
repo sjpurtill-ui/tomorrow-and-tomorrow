@@ -39,6 +39,8 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 		var a:Dictionary=battle.get("shape_a",{})
 		var b:Dictionary=battle.get("shape_b",{})
 		var flank:=bool(battle.get("flank_allowed",true))
+		var wrap_a:=float(a.get("closure",0.0)) if flank and String(a.get("shape",""))=="double_envelopment" else 0.0
+		var wrap_b:=float(b.get("closure",0.0)) if flank and String(b.get("shape",""))=="double_envelopment" else 0.0
 		for k in SAMPLES:
 			var u:=float(k)/float(SAMPLES-1)*2.0-1.0
 			var edge:=pow(absf(u),3.0)
@@ -47,7 +49,32 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 			var bow:=progress*span*0.24*(1.0-0.48*u*u)
 			var tactic:=(float(a.get("bulge",0.0))-float(b.get("bulge",0.0)))*span*0.12*(1.0-u*u)+(hook_a-hook_b)*edge*span*0.36
 			var ripple:=sin(u*8.0-time*2.6+phase)*1.4*float(live and not still)
-			seam.append(at+axis*(bow+tactic+ripple)+across*u*span*0.5)
+			seam.append(at+axis*(bow+tactic+ripple+(wrap_a-wrap_b)*span*0.15*edge)+across*u*span*0.5*(1.0-maxf(wrap_a,wrap_b)*0.65*edge))
+	# Only a recorded successful breakthrough opens a gap. The two surviving
+	# contact segments turn inward along the penetration's shoulders.
+	var piercing_side:=""
+	var piercing:=0.0
+	for key in ["a","b"]:
+		var tactic:Dictionary=battle.get("shape_"+key,{})
+		var closure:=clampf(float(tactic.get("closure",0.0)),0.0,1.0)
+		if String(tactic.get("shape",""))=="pocket" and closure>piercing:
+			piercing=closure;piercing_side=key
+	var seams:Array=[seam]
+	if not blob and piercing>0.001:
+		seams=[]
+		var direction:=1.0 if piercing_side=="a" else -1.0
+		for half in 2:
+			var segment:=PackedVector2Array()
+			for k in SAMPLES:
+				var f:=float(k)/float(SAMPLES-1)
+				var u:=lerpf(-1.0,-0.24*piercing,f) if half==0 else lerpf(0.24*piercing,1.0,f)
+				var source:=(u+1.0)*0.5*float(SAMPLES-1)
+				var j:=mini(int(source),SAMPLES-2)
+				var point:=seam[j].lerp(seam[j+1],source-float(j))
+				var near_gap:=f if half==0 else 1.0-f
+				point+=axis*direction*span*0.44*piercing*pow(near_gap,3.0)
+				segment.append(point)
+			seams.append(segment)
 	var bodies:Array=[]
 	var bounds:=Rect2(at,Vector2.ZERO)
 	for index in 2:
@@ -74,17 +101,37 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 				polygon.append(centre+Vector2(cos(angle),sin(angle))*radius*ripple)
 			points.append(centre)
 		else:
-			for k in SAMPLES:
-				var tangent:=(seam[mini(k+1,SAMPLES-1)]-seam[maxi(0,k-1)]).normalized()
-				var normal:=tangent.orthogonal()
-				if normal.dot(axis)<0.0:normal=-normal
-				points.append(seam[k]-normal*sign_side*(radius+1.1))
+			points=_offset_front(seams[0],radius,sign_side)
 		var body:={"side":key,"points":points,"polygon":polygon,"radius":radius,"colour":colour,"remaining":remaining,"blob":blob}
+		if not blob and seams.size()==2:
+			var second:=_offset_front(seams[1],radius,sign_side)
+			if key==piercing_side:
+				# One attacking body passes through the gap and protects both
+				# shoulders. Its nose joins the two fronts beyond the split.
+				var first_tip:Vector2=points[-1];var second_tip:Vector2=second[0]
+				for k in range(1,9):
+					var f:=float(k)/9.0
+					points.append(first_tip.lerp(second_tip,f)+axis*sign_side*sin(PI*f)*span*0.07*piercing)
+				points.append_array(second);body.points=points
+			else:
+				var separated:=body.duplicate(true);separated.points=second
+				bodies.append(separated)
 		bodies.append(body)
-		for point in (polygon if blob else points):bounds=bounds.expand(point)
-		bounds=bounds.merge(Rect2(points[0]-Vector2.ONE*(radius+3.0),Vector2.ONE*(radius+3.0)*2.0))
-		bounds=bounds.merge(Rect2(points[-1]-Vector2.ONE*(radius+3.0),Vector2.ONE*(radius+3.0)*2.0))
-	return {"bodies":bodies,"blob":blob,"bounds":bounds.grow(13.0 if not blob else 3.0),"at":at,"seam":seam}
+	# All segments, including split fronts, share the battle's inspection area.
+	for body:Dictionary in bodies:
+		var padding:=float(body.radius)+3.0
+		for point in (body.polygon if bool(body.blob) else body.points):
+			bounds=bounds.merge(Rect2(point-Vector2.ONE*padding,Vector2.ONE*padding*2.0))
+	return {"bodies":bodies,"blob":blob,"bounds":bounds.grow(13.0 if not blob else 3.0),"at":at,"seam":seam,"seams":seams,"piercing_side":piercing_side if seams.size()==2 else ""}
+
+## Samples run in the same direction along both opponents. Keeping the
+## normal's orientation lets fronts curl past a right angle without flipping.
+static func _offset_front(seam:PackedVector2Array,radius:float,side:float)->PackedVector2Array:
+	var points:=PackedVector2Array()
+	for k in seam.size():
+		var tangent:=(seam[mini(k+1,seam.size()-1)]-seam[maxi(0,k-1)]).normalized()
+		points.append(seam[k]+tangent.orthogonal()*side*(radius+1.1))
+	return points
 
 static func draw(canvas:CanvasItem,shape:Dictionary,alpha:float=1.0)->void:
 	for body:Dictionary in shape.bodies:
@@ -180,7 +227,11 @@ static func deploy(shape:Dictionary,columns:Dictionary,amount:float)->Dictionary
 		var points:=PackedVector2Array()
 		for k in SAMPLES:
 			var u:=float(k)/float(SAMPLES-1)*2.0-1.0
-			var target:Vector2=end[0] if bool(body.blob) else end[mini(k,end.size()-1)]
+			var target:Vector2=end[0]
+			if not bool(body.blob):
+				var sample:=float(k)*float(end.size()-1)/float(SAMPLES-1)
+				var i:=mini(int(sample),end.size()-2)
+				target=end[i].lerp(end[i+1],sample-float(i))
 			points.append(head+(target-centre)*spread+(centre-head)*(join+(spread-join)*absf(u)))
 		var stem:Dictionary=column_body.duplicate(true)
 		stem.side=String(body.side)+"_feeding"

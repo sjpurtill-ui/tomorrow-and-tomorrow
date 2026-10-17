@@ -140,3 +140,65 @@ func test_head_fans_both_ways_while_tail_stays_behind_the_junction()->void:
 	for point:Vector2 in stem.points:
 		assert_float(absf(point.y)).is_less(0.001)
 		assert_float(point.x).is_less_equal(junction.x+0.001)
+
+func test_confirmed_breakthrough_opens_two_defending_fronts_for_either_side()->void:
+	for attacker in ["a","b"]:
+		var b:=battle()
+		b["shape_"+attacker]=Tactics.shape("armoured_breakthrough",5,"closing")
+		var before:=b.duplicate(true)
+		var shape:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+		assert_int(shape.seams.size()).is_equal(2)
+		assert_str(String(shape.piercing_side)).is_equal(attacker)
+		var attacking:=0;var defending:=0
+		for body:Dictionary in shape.bodies:
+			if String(body.side)==attacker:attacking+=1
+			else:defending+=1
+			for point:Vector2 in body.points:
+				assert_bool(point.is_finite()).is_true()
+				assert_bool((shape.bounds as Rect2).has_point(point)).is_true()
+		assert_int(attacking).is_equal(1)
+		assert_int(defending).is_equal(2)
+		assert_float(shape.seams[0][-1].distance_to(shape.seams[1][0])).is_greater(35.0)
+		assert_dict(b).is_equal(before)
+
+func test_attempted_or_failed_breakthrough_never_splits_the_front()->void:
+	for phase in ["hold","break_in","failed"]:
+		var b:=battle();b.shape_a=Tactics.shape("armoured_breakthrough",5,phase)
+		var shape:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+		assert_int(shape.bodies.size()).is_equal(2)
+		assert_int(shape.seams.size()).is_equal(1)
+		assert_str(String(shape.piercing_side)).is_empty()
+	var small:=battle(20);small.shape_a=Tactics.shape("armoured_breakthrough",5,"closing")
+	assert_bool(Liquid.geometry(small,Vector2.ZERO,Vector2.RIGHT,180,0,true).blob).is_true()
+
+func test_double_envelopment_curls_both_ends_without_cutting_the_middle()->void:
+	var b:=battle();b.shape_a=Tactics.shape("double_envelopment",5,"closing")
+	var shape:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	assert_int(shape.seams.size()).is_equal(1)
+	var seam:PackedVector2Array=shape.seam
+	assert_float(seam[0].x).is_greater(seam[Liquid.SAMPLES/2].x+60.0)
+	assert_float(seam[-1].x).is_greater(seam[Liquid.SAMPLES/2].x+60.0)
+	assert_float(absf(seam[0].y-seam[-1].y)).is_less(70.0)
+	b.flank_allowed=false
+	shape=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	assert_float(absf(shape.seam[0].y-shape.seam[-1].y)).is_equal(180.0)
+
+func test_new_tactic_identity_reaches_live_geometry_without_reusing_old_closure()->void:
+	var chart:Control=auto_free(Overlay.new());var b:=battle()
+	b.shape_a=Tactics.shape("double_envelopment",5,"closing")
+	chart.set_scene({"battles":[b]},true)
+	b.shape_a=Tactics.shape("armoured_breakthrough",2,"break_in")
+	chart.set_scene({"battles":[b]})
+	chart.ease_battles(0.1)
+	assert_str(String(chart.live_battles.fight.shown.shape_a.shape)).is_equal("pocket")
+	assert_float(float(chart.live_battles.fight.shown.shape_a.closure)).is_equal(0.0)
+
+func test_deployment_reaches_both_ends_of_a_pierced_front()->void:
+	var b:=battle();b.shape_a=Tactics.shape("armoured_breakthrough",5,"closing")
+	var shape:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	var column_shape:=Liquid.column(Vector2(-80,0),PackedVector2Array([Vector2(-80,0),Vector2(-160,0)]),Vector2.RIGHT,2000,70,0,true)
+	var near_end:=Liquid.deploy(shape,{"a":column_shape},0.99)
+	var points:PackedVector2Array=near_end.bodies[0].points
+	var target:PackedVector2Array=shape.bodies[0].points
+	assert_float(points[0].distance_to(target[0])).is_less(1.0)
+	assert_float(points[-1].distance_to(target[-1])).is_less(1.0)

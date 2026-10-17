@@ -362,6 +362,8 @@ func ease_battles(delta:float)->bool:
 				if b.has(field):a[field]=b[field]
 			var shape:Dictionary=shown.get("shape_"+key,{}).duplicate()
 			var wanted:Dictionary=target.get("shape_"+key,{})
+			if String(shape.get("shape","clash"))!=String(wanted.get("shape","clash")):shape.closure=0.0
+			shape["shape"]=wanted.get("shape","clash")
 			for field in ["wing","wings","bulge","closure"]:
 				var value:=float(shape.get(field,0.0));var aim:=float(wanted.get(field,0.0))
 				shape[field]=aim if absf(value-aim)<0.001 else lerpf(value,aim,weight)

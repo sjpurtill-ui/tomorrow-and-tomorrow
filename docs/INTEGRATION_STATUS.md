@@ -1,3 +1,38 @@
+## October 17 — Flanking, envelopment and a pierced front
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/battle-maneuver-previews`, base `f8cf0c702f75edfd1177f4b21c11b0e2df2bb7bb`.
+Scope: liquid map geometry, `war_front_overlay.gd` tactic interpolation, and
+`test_liquid_battle_front.gd`. No simulation hotspots or combat rules changed.
+
+Successful armoured breakthrough now opens the defending body into two contact
+segments. The attacker passes through their gap, with a continuous nose joining
+its shoulders. Both sides back each surviving front; losses reduce thickness.
+Only the existing pocket shape's resolved closing phase enables this split:
+attempted and failed breakthroughs retain one front. Either side can pierce.
+Double envelopment curls both ends inward on their shared contact; chokepoints
+still prevent those wings. Orientation stays continuous through tight curls.
+Updated tactic identities reach interpolated map geometry without borrowing a
+previous tactic's closure. Deployment resamples the complete longer body.
+
+Validation: 59 tests pass across liquid geometry, live battle map, quiet map,
+battle map, plate layout and tactics; no errors, failures or script errors.
+Log: `/tmp/tat-maneuver-final-tests.log`. `git diff --check` passes.
+A guarded, automatically closed renderer probe produced 240 frames comparing
+flanking, double envelopment and breakthrough, then thinning from reported losses.
+Phases come from BattleTactics.side_effect for illustrative force inputs; positions
+and losses are fixtures, not footage of the player's campaign. Successful split
+and depleted-front captures were inspected. Local evidence:
+`artifacts/maneuver-fronts-review/flank-envelope-pierce.gif`.
+
+Save schema and compatibility are unchanged. The two fronts remain visual parts
+of one engagement, not independently simulated field armies or newly awarded
+territory. The existing combat ledger decides success and casualties. Small and
+distant fights still use blobs. Captures, their harness and generated imports/UIDs
+are local exclusions. User session untouched. Delivery follows task-branch push,
+verified origin/main-first integration, canonical fast-forward and build-only
+release preparation; no player restart is performed.
+
 ## October 17 — Head-first deployment and shared frontage correction
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
