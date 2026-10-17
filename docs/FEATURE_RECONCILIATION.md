@@ -1,3 +1,49 @@
+## October 17 — HOI4 production board and resource shortages (INTEGRATED)
+
+Runtime checkpoint `365b38a1f` replaces the summary-first Production route with
+an industrial production board: Military/Civilian tabs, resource and capacity
+strip, simultaneous olive equipment rows, daily output, efficiency, resource
+penalty, clickable capacity grid, maker and target controls, priority arrows,
+pause and category filters. Existing land, ammunition, transport, naval and air
+recipes use the board; old Military page links still resolve. Civilian rows show
+actual food, goods and discovered extraction output. Civilian assignment opens
+the established People authority. Automatic watch arms are visible on the land
+view. Controls update in place for numeric changes.
+
+The researched HOI4 baseline is 5% per cumulative missing input unit per capacity
+slot, worst resource wins, stopping a slot at 20 missing units. A bounded analytic
+calculator applies that rule to the existing makers; higher lines claim inputs
+first. Forecasts and daily work share a priority plan. Operating input shortages
+no longer prohibit opening a line. Output can continue at reduced speed with
+missing ingredients; material draws are capped at available stock. This is an
+intentional change from strict per-item material conservation. Setup tooling,
+research, bases, workforce and stock targets retain their gates. Automatic watch
+arms and the civilian material basket use the same shortage calculator. Watch
+arms retain the researched recipe under shortage instead of silently downgrading.
+
+Validation: 80 distinct passing headless cases: 9 shortage/UI/catalog cases,
+19 persistent-production, 10 screen, 14 HOI4 integration, 9 civilian-goods and
+19 arms-wiring. Includes 150 seeded comparisons against a per-slot reference,
+the exact 20-input cutoff, a ten-million-slot bounded calculation, scarce-input
+forecast/actual agreement, target completion, save round trip, every naval/air
+catalog entry, priority controls and in-place refresh. Logs are
+`/tmp/tat-hoi-validation.log`, `/tmp/tat-hoi-final-focused.log` and
+`/tmp/tat-hoi-last-check.log`. Native offscreen-viewport captures of the actual
+widgets at 540px width were inspected in light HUD mode; temporary test processes
+exited after capture. No player session was interrupted.
+
+Worktree: `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/hoi4-production`, base `c4caac5e93c6`. Shared hotspot: a small
+`military_campaign.gd` adapter passing the shortage plan to snapshots and daily
+production. No conflicting worker changes. Existing save fields are compatible;
+new penalty readings are optional derived/report fields. Civilian goods remain
+aggregate goods, rather than invented separately owned recipe queues. This uses
+our artwork and existing maker capacity, not copied HOI4 assets or new factories.
+See `docs/research/HOI4_PRODUCTION.md` for the installed 1.18 source verification
+and explicit adaptation. Generated imports, test reports, userdata and captures
+are excluded from Git. Delivery uses remote-first integration; a running release
+continues using its bundled previous revision until restarted normally.
+
 ## October 17 — Allocation controls and steady Home refreshes (INTEGRATED)
 
 Runtime `a54edb000` replaces “a step takes control” with an explicit **I will

@@ -454,6 +454,8 @@ func _apply_lines()->void:
 			row.apply(view)
 			row.visible=_line_filter=="all" or _category(String(view.item))==_line_filter
 		if _selectors.has("lines"):_selectors.lines.update_record(str(view.id),"%d · %s" % [int(view.rank),String(view.name)],String(view.get("short","Working")))
+	if String(data.get("mode","military"))=="military":
+		for refs:Dictionary in _civil_rows.values():refs.panel.visible=_line_filter in ["all","weapons"]
 	if _header.has("line_room"):
 		var room:Label=_header.line_room
 		room.text="%d of %d lines" % [lines.size(),int(data.get("capacity",lines.size()))]
@@ -810,7 +812,7 @@ func _build_civilian_lines(parent:Node=null)->void:
 		var output:=Folio.label("","small",Color("dddcc8"));column.add_child(output)
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=8;bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));bar.add_theme_stylebox_override("fill",T.flat(Color("8da760")));column.add_child(bar)
 		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(inputs)
-		_civil_rows[String(row.id)]={"output":output,"bar":bar,"inputs":inputs}
+		_civil_rows[String(row.id)]={"panel":panel,"output":output,"bar":bar,"inputs":inputs}
 
 func _apply_civilian_lines()->void:
 	for row:Dictionary in data.get("civilian_lines",[]):
