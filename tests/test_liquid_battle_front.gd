@@ -20,7 +20,7 @@ func test_losses_shrink_only_the_affected_side_and_progress_pushes_it_back()->vo
 		b.sides.b.troops=count/4;b.progress=0.75
 		var after:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180.0,0,true)
 		assert_float(float(after.bodies[0].radius)).is_equal(float(before.bodies[0].radius))
-		assert_float(float(after.bodies[1].radius)).is_equal(float(before.bodies[1].radius)*0.5)
+		assert_float(float(after.bodies[1].radius)).is_equal(float(before.bodies[1].radius)*(0.5 if count<180 else 0.25))
 		var mid:=int((after.bodies[1].points as PackedVector2Array).size()/2)
 		assert_float(after.bodies[1].points[mid].x).is_greater(before.bodies[1].points[mid].x)
 		b.sides.b.troops=0
@@ -82,6 +82,7 @@ func test_column_follows_route_bends_and_spreads_into_front()->void:
 	var start:=Liquid.deploy(shape,{"a":column_shape},0)
 	var end:=Liquid.deploy(shape,{"a":column_shape},1)
 	assert_that(start.bodies[0].points).is_equal(points)
+	for point:Vector2 in points:assert_bool((start.bounds as Rect2).has_point(point)).is_true()
 	assert_that(end.bodies[0].points).is_equal(shape.bodies[0].points)
 	assert_float((end.bodies[0].points[-1]-end.bodies[0].points[0]).abs().y).is_greater(150.0)
 
@@ -105,3 +106,37 @@ func test_new_contact_unfolds_the_previous_marching_force_without_mutating_it()-
 	chart.ease_battles(1.0)
 	assert_float(float(chart.live_battles.fight.deployment)).is_equal(1.0)
 	assert_float(float(mark.pos.x)).is_equal(-1.0)
+
+func test_losses_thin_the_front_without_abandoning_either_flank()->void:
+	var b:=battle();b.sides.b.troops=500
+	var shape:=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	var a:Dictionary=shape.bodies[0];var other:Dictionary=shape.bodies[1]
+	assert_float(float(other.radius)).is_equal(float(a.radius)*0.25)
+	for endpoint in [0,Liquid.SAMPLES-1]:
+		assert_float(a.points[endpoint].y).is_equal(other.points[endpoint].y)
+	assert_float(absf(other.points[-1].y-other.points[0].y)).is_equal(180.0)
+	# Even when a tactic bends the seam, both sides back every segment.
+	b.shape_a=Tactics.shape("flank_attack",3,"closing")
+	shape=Liquid.geometry(b,Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	for body:Dictionary in shape.bodies:
+		for k in Liquid.SAMPLES:
+			assert_float(body.points[k].distance_to(shape.seam[k])).is_equal_approx(float(body.radius)+1.1,0.001)
+
+func test_head_fans_both_ways_while_tail_stays_behind_the_junction()->void:
+	var trail:=PackedVector2Array([Vector2(-80,0),Vector2(-160,0),Vector2(-240,0)])
+	var column_shape:=Liquid.column(trail[0],trail,Vector2.RIGHT,2000,70,0,true)
+	var shape:=Liquid.geometry(battle(),Vector2.ZERO,Vector2.RIGHT,180,0,true)
+	var halfway:=Liquid.deploy(shape,{"a":column_shape},0.5)
+	var front:PackedVector2Array=halfway.bodies[0].points
+	var junction:Vector2=front[Liquid.SAMPLES/2]
+	assert_float(front[0].y).is_greater(junction.y+30)
+	assert_float(front[-1].y).is_less(junction.y-30)
+	assert_float(front[0].x).is_greater(junction.x+15)
+	assert_float(front[-1].x).is_greater(junction.x+15)
+	assert_float(front[0].x).is_equal_approx(front[-1].x,2.0)
+	var stem:Dictionary=halfway.bodies[-1]
+	assert_str(String(stem.side)).is_equal("a_feeding")
+	assert_that(stem.points[0]).is_equal(junction)
+	for point:Vector2 in stem.points:
+		assert_float(absf(point.y)).is_less(0.001)
+		assert_float(point.x).is_less_equal(junction.x+0.001)

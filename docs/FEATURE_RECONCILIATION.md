@@ -1,3 +1,34 @@
+## October 17 — Head-first deployment and shared frontage correction
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/fanning-battle-fronts`, base `81e5e3b89f093e1182ea2e536eeda40611e0edb5`.
+Scope: `scripts/hud/liquid_battle_front.gd` and its geometry tests.
+
+This supersedes the sideways column morph described below. A marching head
+fans into left and right wings, forming a V while the tail feeds into their
+central junction. Both armies follow one shared contact curve, covering its
+whole length and both flanks. Lower manpower reduces line thickness linearly
+instead of shortening the front; small encounters retain shrinking blobs.
+Tactic phases and battle progress bend the shared contact. Thin-line outlines
+also diminish, so a depleted side does not retain a misleading thick border.
+Reduced motion disables ripples; deployment hit bounds include the starting tail.
+
+Validation: 47 tests pass across liquid geometry, live campaign-to-map, quiet
+map, battle map and plate layout, with no script errors. Log:
+`/tmp/tat-fanning-final-tests.log`. A guarded, automatically closed graphical
+probe captured 168 frames using the actual renderer and labelled synthetic
+inputs. Mid-deployment and depleted-front frames were visually inspected.
+Local evidence: `artifacts/fanning-fronts-review/head-fans-front-thins.gif`.
+This is a renderer fixture, not footage of the player's campaign.
+
+Save compatibility: unchanged; no schema, troop pool or combat resolution edits.
+The thinner line visualizes existing strength disadvantage; it adds no separate
+local breakthrough/density simulation. No shared simulation hotspots changed,
+and no integration conflicts are expected. Captures, capture harness and generated
+imports/UIDs remain local and excluded. The active player session is untouched.
+Delivery follows the verified task-branch push, origin/main-first integration,
+canonical fast-forward and build-only release workflow.
+
 ## October 17 — Marching columns and liquid battlefronts on the map
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

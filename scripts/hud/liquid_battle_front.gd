@@ -15,7 +15,7 @@ static func span_km(battle:Dictionary)->float:
 	return clampf(sqrt(largest)*0.07,0.15,4.0)
 
 ## A fluid centreline or round blob for each side. Area diminishes with
-## remaining strength; progress bends and displaces the contact toward the
+## remaining strength (depth at a shared frontage); progress moves the contact toward the
 ## losing side. Animation only adds small ripples, never invented casualties.
 static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clock:float,still:bool=false)->Dictionary:
 	if axis.length_squared()<0.0001:axis=Vector2.RIGHT
@@ -32,6 +32,22 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 	var live:=int(battle.get("age_days",0))==0 and String(battle.get("status","fighting"))=="fighting"
 	var time:=clock if live and not still else 0.0
 	var phase:=float(absi(hash(String(battle.get("id",""))))%1000)/173.0
+	# One contact curve for both opponents. Each side backs the whole seam;
+	# casualties reduce depth/density, never silently abandon its two ends.
+	var seam:=PackedVector2Array()
+	if not blob:
+		var a:Dictionary=battle.get("shape_a",{})
+		var b:Dictionary=battle.get("shape_b",{})
+		var flank:=bool(battle.get("flank_allowed",true))
+		for k in SAMPLES:
+			var u:=float(k)/float(SAMPLES-1)*2.0-1.0
+			var edge:=pow(absf(u),3.0)
+			var hook_a:=maxf(float(a.get("wings",0.0)),float(a.get("wing",0.0)) if u>0.0 else 0.0) if flank else 0.0
+			var hook_b:=maxf(float(b.get("wings",0.0)),float(b.get("wing",0.0)) if u<0.0 else 0.0) if flank else 0.0
+			var bow:=progress*span*0.24*(1.0-0.48*u*u)
+			var tactic:=(float(a.get("bulge",0.0))-float(b.get("bulge",0.0)))*span*0.12*(1.0-u*u)+(hook_a-hook_b)*edge*span*0.36
+			var ripple:=sin(u*8.0-time*2.6+phase)*1.4*float(live and not still)
+			seam.append(at+axis*(bow+tactic+ripple)+across*u*span*0.5)
 	var bodies:Array=[]
 	var bounds:=Rect2(at,Vector2.ZERO)
 	for index in 2:
@@ -39,7 +55,8 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 		var side:Dictionary=sides.get(key,{})
 		var men:=maxf(0.0,float(side.get("troops",0)))
 		if men<=0.01:continue
-		var relative:=sqrt(clampf(men/largest,0.0,1.0))
+		var density:=clampf(men/largest,0.0,1.0)
+		var relative:=sqrt(density) if blob else density
 		var initial:=maxf(1.0,float(side.get("initial",men)))
 		var remaining:=clampf(men/initial,0.0,1.0)
 		var sign_side:=1.0 if index==0 else -1.0
@@ -53,32 +70,21 @@ static func geometry(battle:Dictionary,at:Vector2,axis:Vector2,span_px:float,clo
 			var centre:=at+axis*(progress*base*1.5-sign_side*(radius+0.8+losing*base*0.7))
 			for k in 32:
 				var angle:=TAU*float(k)/32.0
-				var ripple:=1.0+(0.055*sin(angle*3.0-time*2.5+phase)+0.025*sin(angle*5.0+time*1.7))*float(live)
+				var ripple:=1.0+(0.055*sin(angle*3.0-time*2.5+phase)+0.025*sin(angle*5.0+time*1.7))*float(live and not still)
 				polygon.append(centre+Vector2(cos(angle),sin(angle))*radius*ripple)
 			points.append(centre)
 		else:
-			var shape:Dictionary=battle.get("shape_"+key,{})
-			var wing:=float(shape.get("wing",0.0)) if bool(battle.get("flank_allowed",true)) else 0.0
-			var wings:=float(shape.get("wings",0.0)) if bool(battle.get("flank_allowed",true)) else 0.0
-			var closure:=float(shape.get("closure",0.0)) if wings>0.0 else 0.0
-			var bulge:=float(shape.get("bulge",0.0))
-			var half:=span*0.5*relative
 			for k in SAMPLES:
-				var u:=float(k)/float(SAMPLES-1)*2.0-1.0
-				var edge:=pow(absf(u),3.0)
-				var hook:=maxf(wings,wing if u>0.0 else 0.0)*edge
-				var bow:=progress*span*0.24*(1.0-0.48*u*u)
-				var retreat:=-sign_side*losing*span*0.16
-				var tactic:=sign_side*(bulge*span*0.12*(1.0-u*u)+hook*span*0.36)
-				var ripple:=sin(u*8.0-time*2.6+phase)*minf(2.2,radius*0.24)*float(live)
-				var forward:=-sign_side*(radius+1.1)+bow+retreat+tactic+ripple
-				points.append(at+axis*forward+across*(u*half*(1.0-closure*0.45*edge)))
+				var tangent:=(seam[mini(k+1,SAMPLES-1)]-seam[maxi(0,k-1)]).normalized()
+				var normal:=tangent.orthogonal()
+				if normal.dot(axis)<0.0:normal=-normal
+				points.append(seam[k]-normal*sign_side*(radius+1.1))
 		var body:={"side":key,"points":points,"polygon":polygon,"radius":radius,"colour":colour,"remaining":remaining,"blob":blob}
 		bodies.append(body)
 		for point in (polygon if blob else points):bounds=bounds.expand(point)
 		bounds=bounds.merge(Rect2(points[0]-Vector2.ONE*(radius+3.0),Vector2.ONE*(radius+3.0)*2.0))
 		bounds=bounds.merge(Rect2(points[-1]-Vector2.ONE*(radius+3.0),Vector2.ONE*(radius+3.0)*2.0))
-	return {"bodies":bodies,"blob":blob,"bounds":bounds.grow(13.0 if not blob else 3.0),"at":at}
+	return {"bodies":bodies,"blob":blob,"bounds":bounds.grow(13.0 if not blob else 3.0),"at":at,"seam":seam}
 
 static func draw(canvas:CanvasItem,shape:Dictionary,alpha:float=1.0)->void:
 	for body:Dictionary in shape.bodies:
@@ -93,9 +99,9 @@ static func draw(canvas:CanvasItem,shape:Dictionary,alpha:float=1.0)->void:
 		else:
 			# Rounded tubes; no teeth, weapon counters or tactical arrow decals.
 			for pass_index in 3:
-				var width:=radius*2.0+(3.0 if pass_index==0 else 0.0)
+				var width:=radius*2.0+(minf(2.5,radius*0.6) if pass_index==0 else 0.0)
 				var ink:=Color("#17282b",alpha*0.8) if pass_index==0 else Color(colour,alpha)
-				if pass_index==2:width=maxf(0.6,radius*0.45);ink=Color(colour.lightened(0.5),alpha*0.42)
+				if pass_index==2:width=radius*0.45;ink=Color(colour.lightened(0.5),alpha*0.42)
 				canvas.draw_polyline(points,ink,width,true)
 				canvas.draw_circle(points[0],width*0.5,ink)
 				canvas.draw_circle(points[-1],width*0.5,ink)
@@ -148,24 +154,52 @@ static func column(at:Vector2,trail:PackedVector2Array,heading:Vector2,men:float
 		points.append(point);bounds=bounds.expand(point)
 	return {"bodies":[{"side":"a","points":points,"polygon":PackedVector2Array(),"radius":radius,"colour":colour,"remaining":1.0,"blob":false}],"bounds":bounds.grow(radius+3.0),"blob":false,"at":at}
 
-## Unfold the same column into its front. Source points are projected from
-## the last reported route, so the initial body has no icon-to-line jump.
+## The head opens into two wings, while the remaining column feeds into
+## the central junction. No mapping of a column's tail onto one flank.
 static func deploy(shape:Dictionary,columns:Dictionary,amount:float)->Dictionary:
-	var mix:=smoothstep(0.0,1.0,clampf(amount,0.0,1.0))
-	if mix>=1.0 or columns.is_empty():return shape
+	var t:=clampf(amount,0.0,1.0)
+	if t>=1.0 or columns.is_empty():return shape
 	var result:=shape.duplicate(true)
+	var feeding:Array=[]
 	for body:Dictionary in result.bodies:
 		var column_shape:Dictionary=columns.get(String(body.side),{})
 		if column_shape.is_empty():continue
-		var start:PackedVector2Array=column_shape.bodies[0].points
+		var column_body:Dictionary=column_shape.bodies[0]
+		var start:PackedVector2Array=column_body.points
 		var end:PackedVector2Array=body.points
+		if t<=0.00001:
+			body.points=start;body.blob=false;body.polygon=PackedVector2Array();body.radius=column_body.radius
+			result.bounds=(result.bounds as Rect2).merge(column_shape.bounds)
+			continue
+		var head:=start[0]
+		var centre:Vector2=end[0] if bool(body.blob) else end[end.size()/2]
+		# Wings lead; the junction catches up as the last ranks arrive.
+		var spread:=smoothstep(0.0,0.78,t)
+		var join:=smoothstep(0.30,1.0,t)
+		var junction:=head.lerp(centre,join)
 		var points:=PackedVector2Array()
 		for k in SAMPLES:
+			var u:=float(k)/float(SAMPLES-1)*2.0-1.0
 			var target:Vector2=end[0] if bool(body.blob) else end[mini(k,end.size()-1)]
-			points.append(start[mini(k,start.size()-1)].lerp(target,mix))
+			points.append(head+(target-centre)*spread+(centre-head)*(join+(spread-join)*absf(u)))
+		var stem:Dictionary=column_body.duplicate(true)
+		stem.side=String(body.side)+"_feeding"
+		stem.colour=body.colour
+		stem.radius=float(column_body.radius)*(1.0-smoothstep(0.35,1.0,t))
+		var tail:=PackedVector2Array()
+		for k in SAMPLES:
+			var f:=float(k)/float(SAMPLES-1)
+			var sample:=f*(1.0-t)*float(start.size()-1)
+			var i:=mini(int(sample),start.size()-2)
+			var on_road:=start[i].lerp(start[i+1],sample-float(i))
+			tail.append(on_road+(junction-head)*(1.0-f))
+		stem.points=tail
+		if float(stem.radius)>0.01:feeding.append(stem)
 		body.points=points;body.blob=false;body.polygon=PackedVector2Array()
-		body.radius=lerpf(float(column_shape.bodies[0].radius),float(body.radius),mix)
+		body.radius=float(body.radius)*sqrt(spread)
 		for point in points:result.bounds=(result.bounds as Rect2).expand(point)
+		for point in tail:result.bounds=(result.bounds as Rect2).expand(point)
+	result.bodies.append_array(feeding)
 	result.bounds=(result.bounds as Rect2).grow(5.0)
 	return result
 
