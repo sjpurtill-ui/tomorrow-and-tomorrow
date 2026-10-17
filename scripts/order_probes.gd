@@ -26,6 +26,7 @@ static func _today()->int:
 static func read(o:Dictionary)->Dictionary:
 	var refs:Dictionary=o.get("refs",{}) if o.get("refs") is Dictionary else {}
 	match String(o.get("kind","")):
+		"growing_visit": return load("res://scripts/growing_visitors.gd").card(refs)
 		"levy": return _levy(refs)
 		"workshop": return _workshop(refs)
 		"line": return _line(refs)

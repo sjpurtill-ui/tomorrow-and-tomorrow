@@ -712,6 +712,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var extractors:=WorldSimulation.state.effective_workers("Extraction")
 	# Builders idle for want of materials help carry them home (built_fabric.gd).
 	var carriers:=WorldSimulation.state.effective_workers("Logistics")+preload("res://scripts/built_fabric.gd").idle_builders()
+	var home_workers:Vector2=load("res://scripts/resource_access.gd").work(extractors,carriers,context)
+	extractors=home_workers.x;carriers=home_workers.y
 	var labor_eff:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var storage_priorities:=_storage_gathering_priorities()
 	stamp=trace.mark("flow_workers_and_storage",stamp)

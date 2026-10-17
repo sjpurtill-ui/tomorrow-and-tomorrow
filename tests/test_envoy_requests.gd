@@ -265,14 +265,14 @@ func test_offline_opening_says_what_the_request_is()->void:
 
 func _arrivals(days:int,wider:bool)->Array:
 	_world()
-	# Personal visitors own the sub-1,000 phase; this checks the unchanged later envoy system.
-	GameState.ensure_population_total(1000)
+	# Personal and household visits own the sub-10,000 phases; this checks the later envoy system.
+	GameState.ensure_population_total(10000)
 	ER.enabled=wider
 	Hall.set_frequency("lively")
 	var out:Array=[]
 	var rng:=RandomNumberGenerator.new(); rng.seed=SEED
 	for day in range(401,401+days):
-		GameState.ensure_population_total(1000)
+		GameState.ensure_population_total(10000)
 		GameState.elapsed_days=day
 		if day%45==0:
 			var civ:=_civ(rng.randi_range(0,2))
@@ -428,7 +428,7 @@ func test_a_loan_follow_up_says_whether_it_was_repaid()->void:
 	assert_str(ER.recall_text(met[0],entry,int(GameState.elapsed_days)+400)).contains("paid back")
 
 func _hunger_occasions(days:Array,food:Array)->Array:
-	GameState.ensure_population_total(1000)
+	GameState.ensure_population_total(10000)
 	var seen:Array=[]
 	var civ:=_civ()
 	civ.player_relation.border_tension=0.0

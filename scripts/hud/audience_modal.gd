@@ -421,7 +421,7 @@ func _build_herald(audience:Dictionary)->Control:
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",1);row.add_child(words)
 	var cream:=Tokens.INK;var cream_dim:=Tokens.INK_MUTED
 	var work_info:=_work_herald(audience) if kind in WORK_KINDS else {}
-	var personal:=Hall._situation_type(audience)=="early_visit"
+	var personal:=Hall._personal(audience)
 	if personal:work_info["eyebrow"]="A PERSONAL VISITOR"
 	var eyebrow:=Tokens.make_label("THE HERALD ANNOUNCES · "+String(work_info.get("eyebrow",KINDS.get(kind,KINDS.news).eyebrow)),12,cream_dim,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
@@ -1378,7 +1378,7 @@ func _speak()->void:
 			return
 	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
 	if resolved_result.is_empty():
-		var personal:Dictionary=Hall._early().call("typed_choice",Hall.find(audience_id),text)
+		var personal:Dictionary=Hall._visitor(Hall.find(audience_id)).call("typed_choice",Hall.find(audience_id),text)
 		var named:=String(personal.get("option",""))
 		if named.is_empty(): named=String(Lives.typed_choice(audience_id,text))
 		# An aim in the god's own words (online), or one of those proposed.

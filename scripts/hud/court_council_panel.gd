@@ -16,6 +16,7 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const Rivals:=preload("res://scripts/rival_rulers.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Pacts:=preload("res://scripts/trade_pacts.gd")
+const Access:=preload("res://scripts/resource_access.gd")
 const Messages:=preload("res://scripts/envoy_messages.gd")
 
 const LEDGER_SHOWN:=8
@@ -32,6 +33,7 @@ var stack:VBoxContainer
 var league_box:VBoxContainer
 var called_box:VBoxContainer
 var exchange_box:VBoxContainer
+var access_box:VBoxContainer
 var ledger_box:VBoxContainer
 var outcome:Label
 var _signature:=""
@@ -46,6 +48,7 @@ func _ready()->void:
 	league_box=_section("League","Your league")
 	called_box=_section("CalledUpon","Promises called upon")
 	exchange_box=_section("Exchanges","Standing exchanges")
+	access_box=_section("ResourceAccess","Resource access")
 	ledger_box=_section("Dealings","Recent dealings")
 	outcome=_voice("",16,Tokens.INK,true);outcome.name="Outcome";outcome.visible=false;stack.add_child(outcome)
 	refresh(true)
@@ -189,12 +192,13 @@ static func ties(id:String)->Array[Dictionary]:
 func refresh(force:bool=false)->void:
 	if stack==null:return
 	var state:Dictionary=model().public_snapshot(civ_id)
-	var signature:=JSON.stringify([state.get("league"),state.get("obligations"),state.get("relief"),state.get("history"),Pacts.store().get("pacts",[]),civ_id,String(WorldSimulation.world.diplomatic_mission.get("civ_id",""))])
+	var signature:=JSON.stringify([state.get("league"),state.get("obligations"),state.get("relief"),state.get("history"),Pacts.store().get("pacts",[]),Access.contracts(),civ_id,String(WorldSimulation.world.diplomatic_mission.get("civ_id",""))])
 	if not force and signature==_signature:return
 	_signature=signature
 	_fill_league(state)
 	_fill_called(state)
 	_fill_exchanges()
+	_fill_access()
 	_fill_ledger(state)
 
 func _fill_league(state:Dictionary)->void:
@@ -296,3 +300,19 @@ func _fill_ledger(state:Dictionary)->void:
 		var full:=plain(String(item.get("text","")))
 		var line:=_voice(first_sentence(full),16,Tokens.BODY);line.tooltip_text=full;line.mouse_filter=MOUSE_FILTER_PASS
 		entry.add_child(line)
+
+func _fill_access()->void:
+	_clear(access_box)
+	var shown:=0
+	for agreement:Dictionary in Access.contracts():
+		if civ_id!="" and agreement.civ!=civ_id:continue
+		shown+=1
+		var row:=VBoxContainer.new();access_box.add_child(row)
+		row.add_child(_label("%s · %s" % [name_of(String(agreement.civ)),String(agreement.resource)],"body",Tokens.INK))
+		row.add_child(_label(String(Access.card(String(agreement.id)).line),"small",Tokens.INK_MUTED))
+		row.add_child(_label("%.1f diggers · %.1f carriers · host share 25%% · expires %s" % [float(agreement.workers),float(agreement.carriers),when(int(agreement.until))],"small",Tokens.INK_MUTED))
+		if agreement.status=="active":
+			var end:=_button("End access agreement")
+			end.pressed.connect(func()->void:Access.stop(String(agreement.id));refresh(true))
+			row.add_child(end)
+	if shown==0:access_box.add_child(_quiet("No negotiated resource access. A neighbour with an accessible quarry may offer terms."))

@@ -133,10 +133,20 @@ const COURT_OCCASIONS:=["condition","grievance","war_council"]
 
 ## Every situation the hall can raise, its audience kind, and the real
 ## mechanic its answers resolve through. `headline` is a short herald phrase.
+static func _growing()->GDScript:
+	return load("res://scripts/growing_visitors.gd") as GDScript
+
+static func _visitor(a:Dictionary)->GDScript:
+	return _growing() if _situation_type(a)=="growing_visit" else _early()
+
+static func _personal(a:Dictionary)->bool:
+	return _situation_type(a) in ["early_visit","growing_visit"]
+
 static func _early()->GDScript:
 	return load("res://scripts/early_visitors.gd") as GDScript
 
 const SITUATIONS:={
+	"growing_visit":{"kind":"request","headline":"a household delegation","mechanic":"growing_visitors.gd; trade, people, general orders and resource access"},
 	"early_visit":{"kind":"request","headline":"a personal visitor","mechanic":"early_visitors.gd; existing population, stores and scouting ledgers"},
 	"gift_goods":{"kind":"gift","headline":"brings a gift","mechanic":"civilization_exchange take/receive between real ledgers"},
 	"gratitude_gift":{"kind":"gift","headline":"returns kindness with a gift","mechanic":"civilization_exchange take/receive between real ledgers"},
@@ -401,6 +411,7 @@ static func _roads()->float:
 static func _gap()->int:
 	## Average days between any two envoys.
 	if bool(_early().call("active")): return roundi(1460.0*_scale())
+	if bool(_growing().call("active")): return roundi((1095.0 if _player_population()<5000 else 365.0)*_scale())
 	return maxi(MIN_GAP*2,roundi(float(ERA_GLOBAL_GAP[era_tier()])*_scale()/(1.0+_roads()*0.3)))
 
 static func civ_gap(civ_id:String)->int:
@@ -420,7 +431,7 @@ static func _budget_allows(occasion:Dictionary,day:int)->bool:
 	var s:=state()
 	var since:=day-int(s.last_arrival_day)
 	if since<MIN_GAP: return false
-	if bool(_early().call("active")) and String(occasion.get("civ_id",""))!="" and not bool(_early().call("urgent",occasion)):
+	if (bool(_early().call("active")) or bool(_growing().call("active"))) and not bool(_early().call("urgent",occasion)):
 		return day>=90 and day>=int(s.next_any) and since>=roundi(float(_gap())*0.75)
 	# Urgent business (hunger, a threat, a chance of peace) does not wait a season.
 	# Nor does a newly met people's first envoy.
@@ -433,7 +444,7 @@ static func _speaker_allows(occasion:Dictionary,day:int)->bool:
 	if key=="": return true
 	var thread:=String(occasion.get("type","")) in THREAD_OCCASIONS
 	var crisis:=bool(occasion.get("crisis",false))
-	if key==String(s.last_speaker) and not thread and not (key.begins_with("civ:") and bool(_early().call("active"))): return false
+	if key==String(s.last_speaker) and not thread and not (key.begins_with("civ:") and (bool(_early().call("active")) or bool(_growing().call("active")))): return false
 	if key.begins_with("civ:"):
 		var last:=int((s.last_civ as Dictionary).get(key.trim_prefix("civ:"),-99999))
 		# A sequel was already scheduled a civ gap out; other business from the
@@ -492,6 +503,7 @@ static func daily(day:int)->Array[Dictionary]:
 	# (civilization_day.gd), never by the hall catching up.
 	_requests().call("daily",day)
 	_early().call("daily",day)
+	_growing().call("daily",day)
 	# Standing exchanges sealed in talk with foreign rulers (trade_pacts.gd).
 	(load(PACTS_PATH) as GDScript).call("daily",day)
 	# Ultimatums the god's envoys delivered: deadlines, kept and broken threats.
@@ -523,6 +535,10 @@ static func daily(day:int)->Array[Dictionary]:
 		_enqueue(audience,day)
 		arrivals.append(audience)
 		break
+	if arrivals.is_empty() and waiting().is_empty() and bool(_growing().call("active")) and _budget_allows({},day):
+		var delegation:Dictionary=_growing().call("generate","",{},day)
+		if not delegation.is_empty():
+			_enqueue(delegation,day);arrivals.append(delegation)
 	return arrivals
 
 static func _envoy_waiting()->bool:
@@ -552,7 +568,7 @@ static func _expire(day:int)->void:
 		elif audience.kind=="great_work":
 			# Works never deadlock: the council answers stage gates after its own delay.
 			audience.outcome="%s could wait no longer; the matter of %s passed to the council." % [String(audience.speaker.name),String((audience.get("great_work",{}) as Dictionary).get("title","the work"))]
-		elif _situation_type(audience)=="early_visit":
+		elif _personal(audience):
 			audience.outcome="%s could wait no longer and left peacefully. No goods or people changed hands." % String(audience.speaker.name)
 		elif audience.origin=="foreign":
 			var id:=String(audience.civ_id)
@@ -568,13 +584,13 @@ static func _expire(day:int)->void:
 			# The ruler called them in; if the ruler never saw them, no one is slighted.
 			var matter:String="their report on %s" % String(audience.get("report",{}).get("subject_name","what they found")) if audience.kind=="report" else _topic_words(String(audience.petition.get("topic","")))
 			audience.outcome="%s went back to their work; the matter of %s was set aside." % [String(audience.speaker.name),matter]
-		_ledger_close(audience,"expired","offended" if audience.origin=="foreign" and _situation_type(audience)!="early_visit" else "neutral",String(audience.outcome))
+		_ledger_close(audience,"expired","offended" if audience.origin=="foreign" and not _personal(audience) else "neutral",String(audience.outcome))
 		_archive(audience)
 
 static func _enqueue(audience:Dictionary,day:int,external:bool=false)->void:
 	var s:=state()
 	s.queue.append(audience)
-	if String(audience.get("origin",""))=="court":
+	if String(audience.get("origin",""))=="court" and not _personal(audience):
 		# Called in by the ruler: no envoy budget is spent.
 		var key:=_speaker_key(audience)
 		if key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
@@ -936,10 +952,10 @@ static func _note_arrival(audience:Dictionary,day:int,external:bool)->void:
 	s.last_speaker=key
 	if key.begins_with("civ:"): s.last_civ[key.trim_prefix("civ:")]=day
 	elif key.begins_with("person:"): s.last_person[key.trim_prefix("person:")]=day
-	if String(audience.get("origin",""))=="foreign" and _situation_type(audience)!="early_visit": _requests().call("note_arrival",audience)
+	if String(audience.get("origin",""))=="foreign" and not _personal(audience): _requests().call("note_arrival",audience)
 	_ledger_add(audience)
 	# Their envoy stood in our hall: the road home is known (war_loop.gd came_to_us).
-	if key.begins_with("civ:") and _situation_type(audience)!="early_visit": (load("res://scripts/war_loop.gd") as GDScript).call("came_to_us",key.trim_prefix("civ:"),day,"envoy")
+	if key.begins_with("civ:") and not _personal(audience): (load("res://scripts/war_loop.gd") as GDScript).call("came_to_us",key.trim_prefix("civ:"),day,"envoy")
 
 static func _gift_recent(civ_id:String,day:int)->bool:
 	## Whether this people sent a pure goodwill gift within the decade.
@@ -1276,7 +1292,7 @@ static func _ambient(day:int)->void:
 		if ForeignDiplomacy.civilization(id).is_empty() or bool(civ.player_relation.get("at_war",false)): continue
 		# A people in a hot feud with us has no business at our fire.
 		if bool(_war().call("hot",id,day)): continue
-		if "civ:"+id==String(s.last_speaker) and not bool(_early().call("active")): continue
+		if "civ:"+id==String(s.last_speaker) and not (bool(_early().call("active")) or bool(_growing().call("active"))): continue
 		var heard:=maxi(int((s.last_civ as Dictionary).get(id,-99999)),int(words.get(id,-99999)))
 		heard=maxi(heard,int(civ.player_relation.get("met_day",-99999)))
 		var silent:=day-heard
@@ -1300,6 +1316,8 @@ static func _ambient(day:int)->void:
 	_add_occasion({"key":"ambient:%d" % day,"type":"ambient","civ_id":String(pick.civ_id),"day":day,"expires":day+45,"data":{"text":"business between your peoples","business":pick.business}})
 
 static func _business_mix(civ_id:String,day:int)->Dictionary:
+	if bool(_growing().call("active")):
+		return {} if (_growing().call("eligible",civ_id) as Array).is_empty() else {"growing_visit":1.0}
 	if bool(_early().call("active")):
 		return {} if (_early().call("eligible",civ_id,day) as Array).is_empty() else {"early_visit":1.0}
 	## What a people actually has to come about, as situation weights.
@@ -1478,6 +1496,8 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	if gate=="none": return {}
 	if gate!="peace" and bool(_early().call("active")) and not bool(_early().call("urgent",occasion)):
 		return _early().call("generate",civ_id,occasion,day)
+	if gate!="peace" and bool(_growing().call("active")) and not bool(_early().call("urgent",occasion)):
+		return _growing().call("generate",civ_id,occasion,day)
 	var used:=_used_asks("civ:"+civ_id,day)
 	var candidates:=_foreign_candidates(civ_id,occasion,rng,used,day,gate)
 	var chosen:=_weighted(candidates,rng)
@@ -2468,7 +2488,7 @@ static func options(id:String)->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	if audience.is_empty() or String(audience.status)!="waiting": return result
 	if audience.has("prisoner_id"): return _captives().call("options",audience)
-	if _situation_type(audience)=="early_visit": return _early().call("options",audience)
+	if _personal(audience): return _visitor(audience).call("options",audience)
 	var terms:Dictionary=audience.terms
 	var text:=_terms_text(terms)
 	match String(audience.kind):
@@ -2670,8 +2690,8 @@ static func resolve(id:String,option_id:String)->Dictionary:
 		if String(option.id)==option_id: chosen=option
 	if chosen.is_empty(): return {"ok":false,"outcome":"That answer is not open to you here.","reaction":"neutral"}
 	if not bool(chosen.enabled): return {"ok":false,"outcome":String(chosen.reason),"reaction":"neutral"}
-	if _situation_type(audience)=="early_visit":
-		var personal:Dictionary=_early().call("resolve",audience,option_id)
+	if _personal(audience):
+		var personal:Dictionary=_visitor(audience).call("resolve",audience,option_id)
 		if personal.has("error"): return {"ok":false,"outcome":String(personal.error),"reaction":"neutral"}
 		return personal
 	if option_id.begins_with("hear:"): return _hear_other(audience,option_id.trim_prefix("hear:"))
@@ -3954,6 +3974,8 @@ static func validate_state(data:Variant)->bool:
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false
+	if data.has("resource_access") and not bool(load("res://scripts/resource_access.gd").valid(data.resource_access)):return false
+	if data.has("growing_jobs") and not bool(_growing().call("valid_jobs",data.growing_jobs)):return false
 	if data.has("personal_journeys") and not bool(_early().call("valid_jobs",data.personal_journeys)): return false
 	if data.has("envoy_requests") and not bool(_requests().call("valid_state",data.envoy_requests)): return false
 	if data.has("trade_pacts") and not bool((load(PACTS_PATH) as GDScript).call("valid_state",data.trade_pacts)): return false
@@ -3996,7 +4018,7 @@ static func _valid_audience(a:Variant)->bool:
 	var situation:Variant=a.get("situation",{})
 	if not situation is Dictionary or JSON.stringify(situation).length()>SITUATION_JSON_MAX: return false
 	if not (situation as Dictionary).is_empty() and not SITUATIONS.has(String(situation.get("type",""))): return false
-	if String(situation.get("type",""))=="early_visit" and not bool(_early().call("valid",a)): return false
+	if _personal(a) and not bool(_visitor(a).call("valid",a)): return false
 	if a.kind=="proposal" and (situation as Dictionary).is_empty(): return false
 	var topic:=String((a.get("petition",{}) as Dictionary).get("topic",""))
 	if a.kind=="petition" and topic not in TOPICS: return false

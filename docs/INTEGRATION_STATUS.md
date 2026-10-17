@@ -1,3 +1,61 @@
+## October 17 — Consequential visits from 1,000 to 10,000 people
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/growing-settlement-visits`, base `700f55ab89c8f5e0c427bfbd7708076a35374e12`.
+Owned scope: new `growing_visitors.gd` and `resource_access.gd`, court scheduling,
+options, voice facts and agreement controls, extraction workforce reservation,
+order probes and focused tests. No shared integration hotspot was changed.
+
+Six delegations replace routine foreign business in this population band:
+
+- Food shortage can bring a real supplier offering four seasonal food-for-timber
+  exchanges. Existing trade pacts own delivery, matching loads, default and war.
+- Households can ask for up to 200 people to return from Defense. Generals recall
+  expeditions; only available home personnel are demobilized. Other Defense
+  workers return through the same People allocation. A newer general objective
+  cancels pending release. Automatic leaders prioritize provisions; manual work
+  remains under the player's control.
+- Actual import dependence or an existing pact can produce a complaint about
+  raiding that supplier. Recall, seek peace, or keep the objective; existing war
+  and delivery rules determine whether trade can resume.
+- A settlement short of food or water can propose a bounded move to an existing
+  town with spare shelter, food and water. Preparations consume actual provisions;
+  residents keep working until the scheduled moving day. The destination is
+  checked again, then local population shares and age/pregnancy cohorts transfer.
+  National population is unchanged. Buildings and stores stay in their towns.
+- A neighbour may offer a year's access to an actual accessible Stone or Clay
+  deposit within 360 km. One quarter of home Extraction and Logistics workers is
+  diverted, the host keeps one quarter of output, and net loads arrive after
+  travel. Both parties draw on the same finite reserve. War, feud, embargo,
+  closed routes, lost access, depletion or expiry end extraction. Already-carried
+  loads still arrive. The court's Pacts and leagues panel shows workers, payments,
+  deliveries, expiry and an End access agreement button.
+- Hungry foreign households can request admission of up to 200 actual people.
+  Full or smaller admission respects reception capacity and available food,
+  transfers the same population/cohorts from their origin, and issues one Food
+  per arrival. There are no created people or happiness substitutes.
+
+Normal arrival spacing averages three game years below 5,000 and one year above,
+subject to the existing frequency setting and jitter. Real peace/surrender can
+still interrupt. Domestic delegations spend that same budget. All choices
+revalidate when clicked; pending visits and commitments survive crossing 10,000.
+Orders expose the actual agreement/job ledger. Online voice receives complete
+facts; offline openings and exact typed option labels work without AI.
+
+Save compatibility: additive optional audience-state arrays, validated on load;
+older saves need no conversion. No new autoload, population authority or resource
+copy. Major families are deliberately deferred to the later 10,000+ phase.
+Limits: quarry rights currently cover Stone and Clay, one active agreement;
+relocation is between existing player settlements, with a preparation period
+rather than a new map caravan. This build does not create a major-family system.
+
+Validation: 73 checks passed across growing visits, early visitors, later envoy
+requests and Defense/manpower. Final focused run: all 18 tests passed, zero errors, failures or orphans; this
+includes agreement controls, shared world reserves, reload/cutoff continuation
+and replacement objectives (77 distinct checks across both runs).
+Delivery status: READY for integration; remote delivery is recorded below after
+verification. Generated import caches, UIDs and reports are excluded.
+
 ## October 17 — Personal visitors below 1,000 people
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
