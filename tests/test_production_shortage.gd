@@ -111,3 +111,15 @@ func test_all_naval_and_air_products_reach_the_same_catalog()->void:
 	var products:=P.available_products(MilitaryCampaign)
 	for unit:Dictionary in catalog.UNITS.values():
 		assert_bool(String(unit.equipment) in products).override_failure_message(String(unit.label)+" missing from production").is_true()
+
+func test_flow_reports_actual_inputs_and_calls_a_running_shortage_slowed()->void:
+	var card:={"made":20.0,"inputs":{"Timber":.2},"input_span":2.0,"arms_made":0.0}
+	var line:={"id":1,"item":"improvised","stock":0,"target_stock":10,"output_per_day":2.0,"forecast_output_per_day":1.0,"resource_factor":.5,"resource_missing":{"Timber":1},"materials_status":[{"resource":"Timber","per_item":.35,"per_day":.7,"stored":.05}]}
+	GameState.resource_stockpiles.Timber=.05
+	var flow:=Provider.flow_model([card],[line],{})
+	for link:Dictionary in flow.links:
+		if String(link.get("from",""))!="Timber":continue
+		if String(link.to)=="goods":assert_float(float(link.per_day)).is_equal_approx(.1,.000001)
+		if String(link.to)=="lines":
+			assert_float(float(link.per_day)).is_equal_approx(.05,.000001)
+			assert_str(String(link.words)).contains("slowed").not_contains("stalled")

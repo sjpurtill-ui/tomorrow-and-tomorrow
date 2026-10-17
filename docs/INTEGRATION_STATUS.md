@@ -21,14 +21,16 @@ research, bases, workforce and stock targets retain their gates. Automatic watch
 arms and the civilian material basket use the same shortage calculator. Watch
 arms retain the researched recipe under shortage instead of silently downgrading.
 
-Validation: 80 distinct passing headless cases: 9 shortage/UI/catalog cases,
+Validation: 81 distinct passing headless cases: 10 shortage/UI/catalog/flow cases,
 19 persistent-production, 10 screen, 14 HOI4 integration, 9 civilian-goods and
 19 arms-wiring. Includes 150 seeded comparisons against a per-slot reference,
 the exact 20-input cutoff, a ten-million-slot bounded calculation, scarce-input
 forecast/actual agreement, target completion, save round trip, every naval/air
 catalog entry, priority controls and in-place refresh. Logs are
 `/tmp/tat-hoi-validation.log`, `/tmp/tat-hoi-final-focused.log` and
-`/tmp/tat-hoi-last-check.log`. Native offscreen-viewport captures of the actual
+`/tmp/tat-hoi-last-check.log` and `/tmp/tat-hoi-flow-check.log`. The optional
+flow diagram reports actual material draws, capped shared input forecasts, and
+labels running shortages as slowed. Native offscreen-viewport captures of the actual
 widgets at 540px width were inspected in light HUD mode; temporary test processes
 exited after capture. No player session was interrupted.
 

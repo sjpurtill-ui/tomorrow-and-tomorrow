@@ -324,7 +324,7 @@ static func advance()->Dictionary:
 	# took their goods before the makers' day; the report shows it ("learners",
 	# a day) and the makers make it good below.
 	var learners:=preload("res://scripts/research_600_catalog.gd").learners_goods()
-	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken),"for_barter":0.0,"worth":0.0,"per_maker":0.0,"arms_made":0.0,"arms_hands":0.0,"arms_kind":"","arms_inputs":{}}
+	var report:Dictionary={"input_span":float(WorldSimulation.span),"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken),"for_barter":0.0,"worth":0.0,"per_maker":0.0,"arms_made":0.0,"arms_hands":0.0,"arms_kind":"","arms_inputs":{}}
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:
 		report.reason="Needs a settled workplace"
 	else:

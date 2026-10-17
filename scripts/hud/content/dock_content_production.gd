@@ -413,7 +413,7 @@ static func _household_card()->Dictionary:
 		# Goods the learners took today (research_600_catalog.gd learning_goods).
 		"learners":float(report.get("learners",0.0)) if current else 0.0,
 		# Today's materials in and goods out (civilian_goods.gd advance), for the flow chart.
-		"for_barter":float(report.get("for_barter",0.0)) if current else 0.0,"inputs":(report.get("inputs",{}) as Dictionary).duplicate() if current else {},
+		"input_span":maxf(1.0,float(report.get("input_span",1.0))),"for_barter":float(report.get("for_barter",0.0)) if current else 0.0,"inputs":(report.get("inputs",{}) as Dictionary).duplicate() if current else {},
 		"arms_stock":float(GameState.resource_stockpiles.get("Arms",0)),"arms_made":float(report.get("arms_made",0.0)) if current else 0.0,"arms_hands":float(report.get("arms_hands",0.0)) if current else 0.0,
 		"arms_inputs":(report.get("arms_inputs",{}) as Dictionary).duplicate() if current else {},"workers":float(report.get("workers",0.0)) if current else 0.0,"resource_factor":float(report.get("resource_factor",1.0)),"arms_resource_factor":float(report.get("arms_resource_factor",1.0))}
 
@@ -442,13 +442,10 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 		var card_made:=float(card.get("made",0.0))
 		made+=card_made;barter+=float(card.get("for_barter",0.0))
 		workers+=float(card.get("workers",0.0))
-		_scaled_into(goods_in,card.get("inputs",{}),card_made*Goods.RAW_PER_UNIT)
+		_daily_into(goods_in,card.get("inputs",{}),float(card.get("input_span",1.0)))
 		var sets:=float(card.get("arms_made",0.0))
 		arms_made+=sets;arms_hands+=float(card.get("arms_hands",0.0))
-		var age:Dictionary=Arms.set_age()
-		var raw:=0.0
-		for item:String in age.materials:raw+=float(age.materials[item])
-		_scaled_into(arms_in,card.get("arms_inputs",{}),sets*raw)
+		_daily_into(arms_in,card.get("arms_inputs",{}),float(card.get("input_span",1.0)))
 		var reason:=String(card.get("reason",""))
 		if reason!="":reasons[reason]=int(reasons.get(reason,0))+1
 	var links:Array=[]
@@ -492,11 +489,12 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 	var line_hands:=float(hands.get("lines",0))
 	var line_out:=0.0
 	var line_count:=0
+	var input_budget:Dictionary=GameState.resource_stockpiles.duplicate()
 	for line:Dictionary in lines:
 		if bool(line.get("paused",false)):continue
 		line_count+=1
 		var item:=String(line.get("item",""))
-		var per_day:=float(line.get("output_per_day",0.0))
+		var per_day:=float(line.get("forecast_output_per_day",line.get("output_per_day",0.0)))
 		var wants:=int(line.get("target_stock",0))<=0 or int(line.get("stock",0))<int(line.get("target_stock",0))
 		line_out+=per_day
 		var out_id:="line:%d" % int(line.get("id",0))
@@ -506,9 +504,12 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 			var resource:=String(input.get("resource",""))
 			if resource.is_empty():continue
 			_add_unique(resources,resource)
-			var short:=wants and float(input.get("stored",0.0))<float(input.get("per_item",0.0))
-			links.append({"from":resource,"to":"lines","per_day":float(input.get("per_day",0.0)) if not short else 0.0,"dry":short,
-				"words":("no %s: %s stalled" % [ResourceSystem.display_name(resource).to_lower(),P.product_name(item).to_lower()]) if short else ""})
+			var wanted_input:=float(input.get("per_item",0))*per_day
+			var drawn:=minf(maxf(0,float(input_budget.get(resource,0))),wanted_input)
+			input_budget[resource]=maxf(0,float(input_budget.get(resource,0))-drawn)
+			var short:=wants and (drawn<wanted_input or (float(line.get("resource_factor",1))<1 and float(line.get("resource_missing",{}).get(resource,0))>0))
+			links.append({"from":resource,"to":"lines","per_day":drawn,"dry":short,
+				"words":("%s shortage: %s %s" % [ResourceSystem.display_name(resource).to_lower(),P.product_name(item).to_lower(),"stopped" if per_day<=0 else "slowed"]) if short else ""})
 	var benches:Array=[{"id":"goods","kind":_goods_bench(),"name":"Household benches","hands":maxf(0.0,float(hands.get("total",0))-line_hands-arms_hands),"per_day":made,"unit":"goods",
 		"stalled":"" if made>=0.01 or int(reasons.get("Stock target met",0))+int(reasons.get("Homes and the market are full",0))>0 else _plain_reason(reasons)}]
 	if show_arms:benches.append({"id":"arms","kind":"anvil" if String(Arms.set_age().id)!="stone" else "knapping","name":"Arms bench","hands":arms_hands,"per_day":arms_made,"unit":"sets","stalled":arms_stalled,"wanted":wanted})
@@ -524,11 +525,8 @@ static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
 	materials.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _material_used(links,String(a.resource))>_material_used(links,String(b.resource)))
 	return {"materials":materials,"benches":benches,"outputs":outputs,"links":links,"makers":int(hands.get("total",0)),"goods":made,"barter":barter,"arms":arms_made,"wanted":wanted}
 
-static func _scaled_into(total:Dictionary,inputs:Dictionary,day_amount:float)->void:
-	var drawn:=0.0
-	for item:String in inputs:drawn+=maxf(0.0,float(inputs[item]))
-	if drawn<=0.0 or day_amount<=0.0:return
-	for item:String in inputs:total[item]=float(total.get(item,0.0))+maxf(0.0,float(inputs[item]))*day_amount/drawn
+static func _daily_into(total:Dictionary,inputs:Dictionary,span:float)->void:
+	for item:String in inputs:total[item]=float(total.get(item,0.0))+maxf(0.0,float(inputs[item]))/maxf(1.0,span)
 
 static func _add_unique(list:Array[String],item:String)->void:
 	if item not in list:list.append(item)

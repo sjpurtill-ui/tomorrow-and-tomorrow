@@ -6,7 +6,7 @@ const Goods=preload("res://scripts/civilian_goods.gd")
 
 func before_test()->void:
 	WorldSimulation.clear()
-	GameState.reset_for_new_world(5151);DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
+	GameState.reset_for_new_world(5151);MilitaryCampaign.reset_for_new_world();DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.known_discoveries=[];GameState.discovery_adoption={}
 	GameState.ensure_population_total(100)
