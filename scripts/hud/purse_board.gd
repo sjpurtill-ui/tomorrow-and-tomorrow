@@ -227,7 +227,7 @@ func _prosperity_data(forecast:Dictionary,purse:Dictionary,season:Dictionary)->D
 			"crews":effect="Building +%s%% now" % S.n(Purse.crews_bonus()*100.0) if on else "Up to %d%% faster when fully funded" % roundi(Purse.CREWS_MAX*100.0)
 			"scholars":effect="Research +%s%% now" % S.n((Purse.scholars_factor()-1.0)*100.0) if on else "Up to %d%% faster when fully funded" % roundi(Purse.SCHOLARS_MAX*100.0)
 			"army":effect="No soldiers to pay" if on and int(purse.get("unpaid_months",0))==0 and int(soldier_counts.at_arms)==0 and int(soldier_counts.reserve)==0 else "Pay enabled; no arrears recorded" if on and int(purse.get("unpaid_months",0))==0 else "Pay in arrears" if on else "Pay disabled"
-		lines[key]={"on":on,"cost":Purse.amount_text(float(entry.get("per_season",0.0)))+" / season"+(" if enabled" if not on else ""),"effect":effect,"who":String(entry.get("who","")),"tip":_effect_tip(key)}
+		lines[key]={"on":on,"coverage":purse.get("funded",{}).get(key,null) if on else 0.0,"cost":Purse.amount_text(float(entry.get("per_season",0.0)))+" / season"+(" if enabled" if not on else ""),"effect":effect,"who":String(entry.get("who","")),"tip":_effect_tip(key)}
 	var parts:Dictionary=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{}) if WorldSimulation.state.economy_metrics.get("social_pressure_parts") is Dictionary else {}
 	var pressure_known:=parts.has("total") and parts.get("total")!=null
 	var total:=float(parts.get("total",0.0))*100.0 if pressure_known else 0.0

@@ -18,6 +18,7 @@ const SOURCE_NAMES := ["Cultivation", "Wild gathering", "Hunting", "Fishing"]
 var data:Dictionary={}
 var _storage_grid:Control
 var daily_values:Dictionary={}
+var flow_strip:Control
 var flow_bar:FlowBar
 var _shape:Array=[]
 var _refs:Dictionary={}
@@ -82,6 +83,7 @@ func _build_scene()->void:
 	_refs.water_place=_scene_label("",14);_refs.water_place.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;water_box.add_child(_refs.water_place)
 
 func _build_daily_flow()->void:
+	flow_strip=preload("res://scripts/hud/resource_flow_strip.gd").new();_body.add_child(flow_strip)
 	var coverage:=HFlowContainer.new();coverage.name="NeedsAndDelivery";coverage.add_theme_constant_override("h_separation",24);coverage.add_theme_constant_override("v_separation",10);_body.add_child(coverage)
 	_refs.food_coverage=preload("res://scripts/hud/comparison_tile.gd").new();_refs.food_coverage.name="FoodCoverage";coverage.add_child(_refs.food_coverage)
 	_refs.water_coverage=preload("res://scripts/hud/comparison_tile.gd").new();_refs.water_coverage.name="WaterCoverage";coverage.add_child(_refs.water_coverage)
@@ -243,6 +245,9 @@ func _fill()->void:
 	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()),data.get("on_builders",Callable()))
 	var amounts:=flow_amounts(data.get("flow",{}))
 	var measured:=bool(data.get("flow_known",true))
+	var stock:=0.0
+	for row:Dictionary in data.get("rows",[]):stock+=float(row.get("stock",0))
+	flow_strip.fill(S.n(float(amounts.Produced)+float(amounts.Taken))+" / day" if measured else "Unknown",S.n(stock),S.n(float(amounts.Eaten))+" eaten / day" if measured else "Unknown","Rations produced + taken in","Rations held now",("%s lost + %s to parties / day" % [S.n(float(amounts.Spoiled)+float(amounts.Keeping)),S.n(float(data.get("flow",{}).get("Missions",0)))]) if measured else "Daily flows not yet measured")
 	var daily_need:=float(data.get("food_need",amounts.Eaten))
 	var water:Dictionary=data.get("water",{})
 	var need:=float(water.get("required_today",0.0))

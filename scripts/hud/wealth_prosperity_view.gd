@@ -66,7 +66,9 @@ func setup(block:Dictionary)->void:
 		var cost:=_label("",16,T.INK,true);cost.name="Cost";cell.add_child(cost)
 		var effect:=_label("",14,T.INK_MUTED);effect.name="Effect";cell.add_child(effect)
 		var who:=_label("",14,T.INK_MUTED);who.name="Who";cell.add_child(who)
-		funding[key]={"cell":cell,"toggle":toggle,"cost":cost,"effect":effect,"who":who}
+		var coverage:=ProgressBar.new();coverage.name="FundingCoverage";coverage.show_percentage=false;coverage.custom_minimum_size.y=6;coverage.add_theme_stylebox_override("background",T.flat(T.TRACK));coverage.add_theme_stylebox_override("fill",T.flat(T.TEAL));cell.add_child(coverage)
+		var coverage_words:=_label("",12,T.INK_MUTED);cell.add_child(coverage_words)
+		funding[key]={"coverage":coverage,"coverage_words":coverage_words,"cell":cell,"toggle":toggle,"cost":cost,"effect":effect,"who":who}
 	refs.unpaid=_label("",14,T.RED_TEXT);refs.unpaid.name="Unpaid";add_child(refs.unpaid)
 	refs.forecast=_label("",14,T.INK_MUTED);refs.forecast.name="Verdict";add_child(refs.forecast)
 	refs.summary=_label("",14,T.INK_MUTED);refs.summary.name="HouseholdSummary";add_child(refs.summary)
@@ -94,6 +96,9 @@ func update_view(block:Dictionary)->void:
 		var item:Dictionary=(data.get("lines",{}) as Dictionary).get(key,{})
 		var row:Dictionary=funding[key];var on:=bool(item.get("on",false))
 		row.toggle.set_pressed_no_signal(on);row.toggle.tooltip_text=String(item.get("tip",""))
+		var coverage:Variant=item.get("coverage",null);row.coverage.visible=coverage!=null
+		if coverage!=null:row.coverage.value=clampf(float(coverage),0,1)*100
+		row.coverage_words.text=("%.0f%% funded in the latest account" % (clampf(float(coverage),0,1)*100) if coverage!=null else "Funding coverage not recorded") if on else "Funding disabled"
 		S.put(row.cost,String(item.get("cost","")));S.put(row.effect,String(item.get("effect","")),T.TEAL if on else T.INK_MUTED);S.put(row.who,String(item.get("who","")))
 	S.put(refs.unpaid,String(data.get("unpaid","")));refs.unpaid.visible=not refs.unpaid.text.is_empty()
 	S.put(refs.forecast,String(data.get("forecast","")));refs.forecast.tooltip_text=String(data.get("forecast_tip",""))

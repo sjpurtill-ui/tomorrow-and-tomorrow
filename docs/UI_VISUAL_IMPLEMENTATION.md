@@ -9,8 +9,8 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [x] Shared retained comparison widgets and bounded visible choices.
 - [ ] Buildings: visible categories, material need/have, capacity before/after, builder/queue state.
 - [x] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
-- [ ] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
-- [ ] Materials: protected supplies/free stock and arrivals/losses; hauling and storage bottlenecks.
+- [x] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
+- [x] Materials: protected supplies/free stock and arrivals/losses; hauling and storage bottlenecks.
 - [ ] Global town/realm scope, compact map controls, stable interaction while running.
 - [ ] Rule check: border-fort-only effects; remove rejected non-fort watch effects if active.
 
@@ -21,7 +21,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [ ] Military production: dense simultaneous lines, actual efficiency/resource penalty/stop threshold.
 - [ ] Civilian production: consistent rows, purpose, inputs/output/target.
 - [ ] Production catalog, selected line and receipts: bounded visual choices and history.
-- [ ] Wealth/purse: distinct accounts and funded service cost/coverage comparisons.
+- [x] Wealth/purse: distinct accounts and funded service cost/coverage comparisons.
 
 ## Batch 3: knowledge and health
 
@@ -88,3 +88,7 @@ Health now distinguishes unlocked/delivered signed effect totals, actual adoptio
 ## Checkpoint 6 — Families as consequential choices
 
 Family court has portraits, stage/organization readings, shared-formula program comparisons, explicit patronage/endorsement/funding distinctions and cultural direction. Daily readings retain controls; falling below 10k correctly returns to households. All 38 tests pass, including each evolutionary stage and worker invariance; actual early court, business family, party and narrow renders reviewed. Wider diplomacy and remaining audit tasks are not complete.
+
+## Checkpoint 7 — Resource flow and funded services
+
+Food and Materials have retained arriving/held/leaving readings with explicit units, alongside their existing needs/reserves/hauling/storage controls. Materials explicitly identifies the unrecorded daily work-use quantity. Wealth shows actual paid share, delivered benefit and unknown history. 28 distinct checks pass; all three actual wide/narrow native views reviewed with clean capture exit. No simulation/save change.

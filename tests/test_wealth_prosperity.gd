@@ -171,3 +171,15 @@ func test_partial_funding_and_army_arrears_report_actual_effects_not_the_full_qu
 		assert_str(view.funding.scholars.effect.text).is_equal("Research +0% now")
 		assert_array(view.find_children("*","",true,false)).contains_exactly(nodes)
 		assert_bool(_reading_state()==before).is_true())
+
+func test_funding_coverage_tracks_paid_share_and_unknown_without_mutating_money()->void:
+	WorldSimulation.scoped(ACTOR,func()->void:
+		var purse:=Purse.state();purse.lines.scholars=true;purse.funded.scholars=.25
+		var before:=var_to_bytes(purse)
+		var board:=_board();var primary:=_primary(board)
+		assert_float(primary.funding.scholars.coverage.value).is_equal(25.0)
+		assert_str(primary.funding.scholars.coverage_words.text).contains("25% funded")
+		assert_bool(var_to_bytes(purse)==before).is_true()
+		purse.funded.erase("scholars");board.refresh()
+		assert_bool(primary.funding.scholars.coverage.visible).is_false()
+		assert_str(primary.funding.scholars.coverage_words.text).contains("not recorded"))
