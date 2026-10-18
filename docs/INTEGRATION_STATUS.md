@@ -1,3 +1,13 @@
+## October 18 — Storage for every physical store
+
+Status: INTEGRATED — source `72165be9464172343896b71a963611fa6b8e7e08`, verified on remote `main` and `codex/needs-driven-trade-storage`; base `b04921ce360721c7228aaba9b68f38d9b1cb8fd3`.
+
+Food, water, open yards, dry, covered, sealed and secure stores have always-visible individual capacity readings and expansion controls. Towns automatically choose expansion at 80% occupancy. Repeat jobs use the existing civic builders, pay actual local materials, preserve work already underway, and add real capacity. Small stores get small batches; busy stores scale up. No labor allocation is changed. Missing builders/materials are visible, and player requests use the order tracker. Materials also show food/water, while the Food page exposes its two stores.
+
+Validation: 32 focused checks pass without failures, errors or orphans (10 new storage tests plus Food folio, Materials ledger, opening storage and material reserves). Another 15 construction-city checks pass assertions; that existing UI suite reports three orphan nodes. Coverage includes all seven repeat expansions, payment, real loss limits, blocking, locked job bills, save representation, secondary-town and rival isolation, retained controls and order completion. Logs `/tmp/tt-storage-final.log` and `/tmp/tt-storage-mechanics3.log` are local only. New `storage_works` defaults empty and is reflected in saves and city resources; no destructive migration. Shared files: game_state, settlement_model, resource/food/construction and order tracker; no integration conflicts.
+
+Trade redesign remains in progress on this branch. No player restart; the running session retains its previous release.
+
 ## October 18 — Quiet routine notices
 
 Status: INTEGRATED — source `7348a346711db4c7034485d591337d32fa03cf93`,
