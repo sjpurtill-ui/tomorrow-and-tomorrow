@@ -80,6 +80,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var screen:=preload("res://scripts/hud/people_allocator_screen.gd").new();section.add_child(screen);screen.setup(block)
 			"people":
 				var screen:=preload("res://scripts/hud/people_screen.gd").new();section.add_child(screen);screen.setup(block)
+			"health_dashboard":
+				var panel:=preload("res://scripts/hud/health_dashboard.gd").new();section.add_child(panel);panel.setup(block)
 			"settlement_overview":
 				var panel:=preload("res://scripts/hud/home_lives_view.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle":

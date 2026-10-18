@@ -2,7 +2,6 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
-const LIFE_REASONS:=preload("res://scripts/hud/life_change_words.gd")
 const Hardships:=preload("res://scripts/hardship_log.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Card:=preload("res://scripts/hud/chronicle_card.gd")
@@ -17,9 +16,9 @@ var hardship_page:=0
 var show_record_help:=false
 
 func meta()->Dictionary:
-	if not EraWords.reckoned():return {"eyebrow":"Life and death","title":"How long we live","subtabs":["Lives","Sickness & disasters"]}
+	if not EraWords.reckoned():return {"spatial_view":true,"eyebrow":"Life and death","title":"How long we live","subtabs":["Lives","Sickness & disasters"]}
 	return {
-		"eyebrow":"Health and survival",
+		"spatial_view":true,"eyebrow":"Health and survival",
 		"title":"Health & Life Expectancy",
 		"subtabs":["Lives","Sickness & disasters"],
 	}
@@ -114,65 +113,23 @@ func _city_health()->Dictionary:
 		{"label":"DEATHS IN THE LAST YEAR" if EraWords.reckoned() else "BURIED THIS YEAR","value":str(int(vital.get("deaths",0))),"delta":"since this time last year","accent":Tokens.RED,"tip":"Everyone who died in the past year."},
 		{"label":"MEAN AGE AT DEATH" if EraWords.reckoned() else "AGE OF THE DEAD","value":("%.1f years" % observed_age if EraWords.reckoned() else EraWords.life(observed_age)) if observed_age>=0.0 else "—","delta":"observed" if observed_age>=0.0 else "no deaths","accent":Tokens.AMBER,"tip":"The average age of those who died so far."},
 	]
-	var brief:=_health_brief(expectancy,expectancy_delta,water_intake,housing)
-	var history_block:Dictionary={
-		"type":"line_chart","heading":"Life expectancy over the years" if EraWords.reckoned() else "How long we live, over the years","note":"counted each month, up to 40 years back","items":history,
-		"tip":"Projected life expectancy recorded from the simulation. Gold diamonds mark health-related discoveries; circles mark meaningful changes without a health discovery."
-	}
-	var blocks:Array=[]
-	var care_rows:=_care_rows()
 	var Care:=preload("res://scripts/civilian_care.gd")
 	var care_city:=GameState.resource_settlement_id
-	var care_words:=preload("res://scripts/hud/home_plain.gd").care(float(Care.data().staff_share),Care.staff(),Care.data().report,preload("res://scripts/civilian_care_fabric.gd").outstanding(Care.data()),bool(Care.methods(WorldSimulation.state).get("rounds",false)))
-	var choice:=String(care_words.choice)
-	blocks.append({"type":"text","heading":"Care of the sick","text":Care.describe()})
-	if bool(Care.methods(WorldSimulation.state).get("rounds",false)):
-		var set_share:=func(share:float)->void:
-			SettlementModel.with_city_resources(care_city,func():Care.set_share(share))
-			hud.request_immediate_dock_refresh()
-		blocks.append({"type":"actions","heading":"How many lore keepers look after the sick","items":[
-			{"label":"None"+(" (now)" if choice=="none" else ""),"sub":"The sick are looked after at home","primary":choice=="none","on_press":set_share.bind(0.0)},
-			{"label":"A quarter of them"+(" (now)" if choice=="standard" else ""),"sub":"The usual share","primary":choice=="standard","on_press":set_share.bind(0.25)},
-			{"label":"Half of them"+(" (now)" if choice=="more" else ""),"sub":"More care, slower learning","primary":choice=="more","on_press":set_share.bind(0.5)}]})
-	blocks.append(history_block)
-	var readings:Array=[]
-	for reading:Dictionary in kpis:readings.append({"label":reading.label,"value":reading.value,"note":reading.get("delta",""),"tip":reading.get("tip","")})
-	blocks.append({"type":"tiles","heading":"The current readings","items":readings})
-	if not care_rows.is_empty():blocks.append({"type":"rows","heading":"What decides who survives","note":"what we know and what we eat","items":care_rows})
-	var changes:Array=[]
-	for index in range(history.size()-1,-1,-1):
-		var point:Dictionary=history[index]
-		var marker:=String(point.get("marker_type",""))
-		if marker=="": continue
-		var delta:=float(point.get("delta",0.0))
-		# The whole month's change, in days or weeks when that is its size: a
-		# new practice is taken up over years, so its first month is small.
-		var change:=EraWords.life_change(delta)
-		var detail:=("Life expectancy that month: %s" if EraWords.reckoned() else "That month: %s of life") % change
-		if change=="less than a day" and marker=="discovery":detail="That month: less than a day so far; new ways take years to spread"
-		# What moved it, with its numbers (GameState.life_change_reasons).
-		var reasons:Array=point.get("reasons",[]) if point.get("reasons") is Array else []
-		var told:=LIFE_REASONS.tell(reasons,delta,index,history)
-		var name:=String(point.get("marker_label","")) if marker=="discovery" else String(told.name)
-		if String(told.why)!="":detail+=". "+String(told.why)
-		changes.append({
-			"name":name,
-			"sub":EraWords.when(int(point.get("day",0))),
-			"detail":detail,
-			"value":"New knowledge" if marker=="discovery" else String(told.category),
-			"value_color":Tokens.GOLD_TEXT if marker=="discovery" else (Tokens.RED_TEXT if delta<0.0 else Tokens.BLUE_TEXT),
-			"accent":Tokens.GOLD if marker=="discovery" else (Tokens.RED if delta<0.0 else Tokens.BLUE),
-			"tip":("A health-related discovery came this month; the new way adds more as more of the people take it up. " if marker=="discovery" else "")+String(told.tip)
-		})
-		if changes.size()>=6: break
-	if not changes.is_empty(): blocks.append({"type":"rows","heading":"Why lives grew longer or shorter","note":"latest changes","items":changes})
-	var killing:=mortality_block("How many people this is killing each year at present")
-	if not killing.is_empty(): blocks.append(killing)
-	blocks.append({"type":"tiles","heading":"How people live now","items":[
-		{"label":"Enough to drink","value":"%d in 10" % roundi(water_intake/10.0),"note":"everyone drinks enough" if water_intake>=98 else "some go thirsty","note_color":Tokens.GREEN_TEXT if water_intake>=98 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many drink as much as they need each day"},
-		{"label":"A roof at night","value":"%d in 10" % mini(10,roundi(housing/10.0)),"note":"everyone is sheltered" if housing>=95 else "some sleep in the open","note_color":Tokens.GREEN_TEXT if housing>=95 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many have shelter"},
-	]})
-	return {"readings":kpis,"brief":brief,"blocks":blocks}
+	var rounds:=bool(Care.methods(WorldSimulation.state).get("rounds",false))
+	var set_share:=func(share:float)->void:
+		SettlementModel.with_city_resources(care_city,func():Care.set_share(share))
+		if hud: hud.request_immediate_dock_refresh()
+	var alert:=""
+	if water_intake<90:alert="Water shortage: only %d%% of drinking need met" % water_intake
+	elif housing<80:alert="Shelter shortage: roofs for %d%% of people" % housing
+	return {"readings":kpis,"blocks":[{
+		"type":"health_dashboard","readings":kpis,"history":history,
+		"discoveries":preload("res://scripts/hud/health_discoveries.gd").read(),
+		"conditions":_care_rows(),"mortality":mortality_block("Annual risk at today's rate").get("items",[]),
+		"care_title":"Care of the sick","care":Care.describe(),"care_share":float(Care.data().staff_share),
+		"care_unlocked":rounds,"on_care":set_share,"alert":alert,
+		"water":water_intake,"housing":housing,"scope":care_city
+	}]}
 
 ## The hard times' bar on "What is killing people now" (crisis_background.gd).
 const HARD_TIMES_NAME:="Sickness, floods and lean seasons (a usual year)"
@@ -245,18 +202,6 @@ func _care_rows()->Array:
 		})
 	return rows
 
-func _health_brief(expectancy:float,delta:float,water_intake:int,housing:int)->Dictionary:
-	var lives:="Life expectancy is %.1f years." % expectancy if EraWords.reckoned() else "A child born now can hope for %s." % EraWords.life(expectancy)
-	if water_intake<90:
-		return {"tone":"danger","title":"Water access is shortening lives","why":"Only %d%% of daily drinking need is met. %s" % [water_intake,lives]}
-	if housing<80:
-		return {"tone":"warn","title":"Exposure is shortening lives","why":"Shelter covers %d%% of the population. %s" % [housing,lives]}
-	if delta<=-0.5:
-		return {"tone":"warn","title":"Life expectancy has fallen" if EraWords.reckoned() else "Lives are growing shorter","why":"Last month it changed by %s. Check the marked history and current mortality pressures below." % EraWords.life_change(delta)}
-	if not EraWords.reckoned():
-		return {"tone":"info","title":"A child born now can hope for %s" % EraWords.life(expectancy),"why":"This is how long a newborn may live as things stand, not the age of everyone alive. %s The chart shows which changes came from new knowledge and which from how the people live." % EraWords.babes_lost_sentence(Indicators.infant_mortality_per_1000())}
-	return {"tone":"info","title":"Expected lifespan is %.1f years" % expectancy,"why":"This is the modeled lifespan of a newborn under current conditions, not the average age of everyone alive. The chart distinguishes research-linked changes from shifts in living conditions."}
-
 func signature()->Array:
 	var sig:Array=SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Array:return SettlementModel.with_local_population(_city_signature))
 	# The log's lines change as troubles run their course.
@@ -266,4 +211,4 @@ func signature()->Array:
 func _city_signature()->Array:
 	var history:Array[Dictionary]=GameState.health_history_snapshot()
 	var latest:Dictionary=history[-1] if not history.is_empty() else {}
-	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),roundi(float(GameState.early_care.get("under5",1.0))*100.0),roundi(float(GameState.early_care.get("diet",0.0))*100.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0)),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]
+	return [GameState.selected_player_settlement_id,GameState.elapsed_days,GameState.known_discoveries.size(),GameState.discovery_adoption.hash(),GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),roundi(float(GameState.early_care.get("under5",1.0))*100.0),roundi(float(GameState.early_care.get("diet",0.0))*100.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0)),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]

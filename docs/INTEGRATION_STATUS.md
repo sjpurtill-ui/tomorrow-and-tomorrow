@@ -1,3 +1,17 @@
+## October 17 — Compact health dashboard / floating map help removal
+
+Status: READY — branch `codex/compact-health-dashboard`, based on
+`731db0e1930d2f4334adb7f23d00d6d2ede59a45` in
+`/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
+
+Compact health readings and chart with a retained details inspector; discoveries
+explain live adoption, health effects, protection coverage and recorded changes
+without inventing isolated lifespan gains. The floating Map help button is
+removed; the top-bar help icon remains. No gameplay/save migration changes.
+54 relevant checks pass; one stale unrelated People persistence test is excluded.
+See FEATURE_RECONCILIATION.md for scope, limitations and validation. Live player
+has not been restarted; release preparation follows remote integration.
+
 ## October 17 — Allocation commands and family court completion
 
 Status: INTEGRATED — source `7f637e370017838f8d6443b69f11f8587b1106ed` verified on both remote

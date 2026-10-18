@@ -6,6 +6,8 @@ class_name HealthHistoryChart
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 
+signal point_selected(index:int)
+var selected_index:=-1
 var points:Array=[]
 var plot_rect:=Rect2()
 ## Which key of each point holds its value.
@@ -65,6 +67,9 @@ func _draw()->void:
 		var marker:=String(point.get("marker_type",""))
 		if marker=="": continue
 		draw_marker(self,marker,line[index],float(point.get("delta",0.0)))
+	if selected_index>=0 and selected_index<line.size():
+		draw_line(Vector2(line[selected_index].x,plot_rect.position.y),Vector2(line[selected_index].x,plot_rect.end.y),Tokens.MUTED,1.0)
+		draw_circle(line[selected_index],5.0,Tokens.INK,false,1.5,true)
 	var first_day:=int((points[0] as Dictionary).get("day",0))
 	var last_day:=int((points[-1] as Dictionary).get("day",first_day))
 	var Era:=preload("res://scripts/hud/era_words.gd")
@@ -95,6 +100,10 @@ static func draw_marker(canvas:CanvasItem,kind:String,at:Vector2,delta:float,rad
 			canvas.draw_circle(at,radius-1.0,Tokens.RED if delta<0.0 else Tokens.BLUE)
 
 func _gui_input(event:InputEvent)->void:
+	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.pressed and plot_rect.has_point(event.position) and not points.is_empty():
+		var clicked:=clampi(roundi((event.position.x-plot_rect.position.x)/maxf(1.0,plot_rect.size.x)*float(points.size()-1)),0,points.size()-1)
+		point_selected.emit(clicked)
+		accept_event()
 	var motion:=event as InputEventMouseMotion
 	if motion==null or points.is_empty() or not plot_rect.has_point(motion.position): return
 	var ratio:=clampf((motion.position.x-plot_rect.position.x)/maxf(1.0,plot_rect.size.x),0.0,1.0)

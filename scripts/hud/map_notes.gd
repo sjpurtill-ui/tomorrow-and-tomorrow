@@ -22,13 +22,9 @@ static func help_words(site_committed:bool,targeting:bool,convoy_active:bool)->D
 	return {"title":"Using the map",
 		"body":"Drag with the middle mouse button, press W A S D, or slide two fingers to move. Scroll or pinch to zoom.\nClick a city for details; double-click to move closer. Click the map to close cards and this note."}
 
-## Builds the help button and card on `layer`. Returns their nodes.
-static func build_help(layer:CanvasLayer,view:Vector2,on_toggle:Callable,on_close:Callable)->Dictionary:
-	var button:=Kit.button(null,"Map help",false,on_toggle,"How to move the map, and what to do next")
-	button.name="MapHelpButton"
-	button.position=Vector2(T.RAIL_WIDTH+16.0,view.y-130.0)
-	button.size=Vector2(112,34)
-	layer.add_child(button)
+## Builds the on-demand help card. Entry lives in the top-bar help control;
+## there is no floating button covering the map.
+static func build_help(layer:CanvasLayer,view:Vector2,_on_toggle:Callable,on_close:Callable)->Dictionary:
 	var panel:=Kit.panel(T.TEAL,14.0)
 	panel.name="MapFirstUseHelp"
 	panel.position=Vector2(T.RAIL_WIDTH+16.0,view.y-262.0)
@@ -42,14 +38,14 @@ static func build_help(layer:CanvasLayer,view:Vector2,on_toggle:Callable,on_clos
 	column.add_child(header)
 	var title:=Kit.label(header,"","heading",Color(0,0,0,0),false)
 	title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	var close:=Kit.quiet_button(header,"Close",on_close,"Close this note, or click the map. Map help opens it again.")
+	var close:=Kit.quiet_button(header,"Close",on_close,"Close this note, or click the map. The top-bar help icon opens it again.")
 	close.custom_minimum_size=Vector2(64,28)
 	var body:=Kit.label(column,"","body")
 	body.custom_minimum_size.x=388
 	layer.add_child(panel)
-	return {"button":button,"panel":panel,"title":title,"body":body}
+	return {"button":null,"panel":panel,"title":title,"body":body}
 
-## Keeps the card's bottom edge just above the help button as its text grows.
+## Keeps the card clear of the bottom map controls as its text grows.
 static func place_help(panel:Control,view:Vector2)->void:
 	if panel==null:return
 	panel.reset_size()

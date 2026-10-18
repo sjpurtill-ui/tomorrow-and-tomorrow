@@ -1,3 +1,41 @@
+## October 17 — Compact health dashboard and map space
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/compact-health-dashboard`, base `731db0e1930d2f4334adb7f23d00d6d2ede59a45`.
+Scope: Health Lives screen, discovery explanation, chart selection and removal
+of the floating Map help button. Shared hotspot: only the map-help construction
+in `local_terrain.gd`; no terrain, simulation, labor or save-format changes.
+
+Health now has a compact header, four readings and a side-by-side lifespan chart
+and selectable Discoveries / Conditions / Care / Deaths inspector. Narrow
+windows stack the columns. Details scroll within the inspector; the chart and
+current readings are no longer buried under repeated prose and long lists.
+Daily refresh preserves the selected discovery, month, focus and outer scroll.
+Care still invokes the existing selected-town command.
+
+Discoveries show their live adoption/practice, actual effect-source contributions
+before shared caps/upkeep, direct early-care coverage now versus full practice,
+and their recorded interval's total lifespan change. Selecting a discovery
+highlights that interval; clicking the chart or choosing a month shows recorded
+causes. Missing historical evidence is explicit. Existing history does not
+isolate each discovery's life-years, so the screen never attributes the entire
+month's gain to a discovery. No counterfactual longevity gains are invented.
+
+The floating Map help button is no longer created. On-demand help and the map
+legend remain reachable from the top-bar help icon; menu map settings remain.
+No running player was interrupted or relaunched. Saves need no migration.
+Generated imports, UID files, local reports and releases are excluded from Git.
+
+Validation: 10 new dashboard/read-only attribution checks, 17 civilian-care
+checks, 5 applicable dock-persistence checks, 11 plain-home/dock checks, 6 crisis
+background checks and 5 life-change-reason checks pass (54 distinct tests).
+An unrelated existing persistence case still calls the removed People view's
+`_select` method and is excluded from the passing focused rerun. The map
+onboarding probe was updated to use the current menu modal rather than its
+removed `provisions_panel` test hook. The headless map probe completes its help-card, absent-button and modal checks;
+its broader run fails six unrelated rail/toolbar/inspection/river-preview
+expectations. No rendered visual capture was made.
+
 ## October 17 — Evolving families and a court of interests
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

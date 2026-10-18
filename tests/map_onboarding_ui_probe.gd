@@ -16,7 +16,7 @@ func _ready()->void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var viewport_size:=get_viewport().get_visible_rect().size
-	_expect(terrain.map_help_button!=null and terrain.map_help_panel!=null,"normal play did not construct compact map help")
+	_expect(terrain.map_help_button==null and terrain.map_help_panel!=null,"map help should keep its card without a floating button")
 	var visible_surface_resources:=ResourceSystem.visible_deposits()
 	_expect(visible_surface_resources.size()>=4,"founding expedition recognized no practical surface resources")
 	# The settlement overview is the rail's first entry, "The People" (overview).
@@ -78,7 +78,8 @@ func _ready()->void:
 	report_blocker.name="ProbeOpenReport"
 	report_blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	terrain.interface_layer.add_child(report_blocker)
-	terrain.provisions_panel=report_blocker
+	var prior_menu:Control=terrain.world_menu_panel
+	terrain.world_menu_panel=report_blocker
 	terrain._on_diplomatic_event({
 		"kind":"first_contact","formation_id":"probe_formation","civ_id":"probe_civ","day":2,
 		"title":"First contact","description":"A foreign party met the settlement directly."
@@ -86,7 +87,7 @@ func _ready()->void:
 	_expect(terrain.active_foreign_alert.is_empty() and terrain.foreign_alert_queue.size()==1,"foreign alert did not defer while a report owned the interaction layer")
 	_expect(not terrain.foreign_alert_panel.visible and not terrain.foreign_alert_panel.is_visible_in_tree(),"foreign alert remained visible or interactive above an open report")
 	terrain._arbitrate_notification_overlays()
-	_expect(not terrain.map_help_panel.visible and not terrain.map_help_button.visible,"map help remained visible or clickable beneath an open report")
+	_expect(not terrain.map_help_panel.visible and terrain.map_help_button==null,"map help remained visible or clickable beneath an open report")
 	report_blocker.visible=false
 	terrain._arbitrate_notification_overlays()
 	# The deferred first contact is told as an urgent notice in the one stack at
@@ -94,13 +95,13 @@ func _ready()->void:
 	var Notices:=preload("res://scripts/hud/notification_model.gd")
 	_expect(not terrain.active_foreign_alert.is_empty() and not terrain.foreign_alert_panel.visible,"deferred foreign alert did not become active after the report closed")
 	_expect(Notices.pending.any(func(n:Dictionary)->bool:return String(n.get("tier",""))=="urgent" and String(n.get("category",""))=="neighbours") or Notices.history.any(func(n:Dictionary)->bool:return String(n.get("category",""))=="neighbours"),"first contact was not told as an urgent Neighbours notice")
-	_expect(terrain.map_help_panel.visible and terrain.map_help_button.visible,"map help did not return after the player returned to the map")
+	_expect(terrain.map_help_panel.visible and terrain.map_help_button==null,"map help did not return after the player returned to the map")
 	report_blocker.visible=true
 	terrain._arbitrate_notification_overlays()
 	_expect(not terrain.foreign_alert_panel.visible and not terrain.foreign_alert_panel.is_visible_in_tree(),"active foreign alert was not suppressed when a report opened over it")
 	report_blocker.visible=false
 	terrain._finish_active_foreign_alert()
-	terrain.provisions_panel=null
+	terrain.world_menu_panel=prior_menu
 	report_blocker.queue_free()
 	var river_z:float=terrain.world_start_position.z
 	var river_x:float=terrain._world_river_x(river_z)

@@ -13172,7 +13172,7 @@ func _on_hud_escape()->void:
 
 
 func _build_map_help(layer:CanvasLayer)->void:
-	# The help button and its note are built in scripts/hud/map_notes.gd.
+	# On-demand help only; no floating map button.
 	var help:=MapNotes.build_help(layer,get_viewport().get_visible_rect().size,_toggle_map_help,_dismiss_map_help)
 	map_help_button=help.button
 	map_help_panel=help.panel
@@ -13181,7 +13181,6 @@ func _build_map_help(layer:CanvasLayer)->void:
 	# The founding-focus screen is deferred until after the interface is built.  Do
 	# not flash map controls underneath that mandatory, mouse-stopping modal.
 	var available_on_map:=not capture_render_active and GameState.founding_focus!=""
-	map_help_button.visible=available_on_map
 	map_help_panel.visible=available_on_map and not map_help_dismissed
 	_refresh_map_help()
 
