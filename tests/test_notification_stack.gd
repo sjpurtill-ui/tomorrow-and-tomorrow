@@ -56,10 +56,10 @@ func test_each_told_line_gets_a_category_and_a_tier()->void:
 	assert_str(Model.tier_of({"tier":"moment","kind":"omen"},"faith")).is_equal("card")
 	assert_str(Model.tier_of({"tier":"whisper","kind":"work"},"people")).is_equal("minor")
 
-func test_the_discovery_setting_decides_whether_learning_pops_up()->void:
+func test_learning_stays_quiet_in_every_legacy_setting()->void:
 	var season:={"key":"learned:12","title":"What the spring taught","text":"This season the people learned: tanning.","tier":"notice","kind":"discovery"}
 	assert_str(Model.tier_of(season,"learning","milestones")).is_equal("minor")
-	assert_str(Model.tier_of(season,"learning","all")).is_equal("notable")
+	assert_str(Model.tier_of(season,"learning","all")).is_equal("minor")
 	assert_str(Model.tier_of(season,"learning","quiet")).is_equal("minor")
 
 func test_a_notice_is_one_plain_sentence()->void:
@@ -99,11 +99,11 @@ func test_the_chronicle_queues_what_it_tells_and_a_folded_repeat_counts_on_it()-
 
 func test_only_the_primary_lines_pop_up()->void:
 	# Routine news goes to the log; war, strangers, thirst, the court's answers,
-	# a great work and a first in learning are the primary notices.
+	# a great work and executions are the primary notices.
 	for routine:Dictionary in [{"key":"work_done:3","title":"A hall is raised","kind":"settlement"},{"key":"demo|1","title":"Three were born","kind":"birth"},{"key":"scout:4","title":"Scouts came home","kind":"scout"},{"key":"land_find:2","title":"Ochre found","kind":"work"},{"key":"annal:9","title":"The year's tale","kind":"annal"}]:
 		var routine_entry:=routine.duplicate();routine_entry["tier"]="notice"
 		assert_str(Model.from_chronicle(routine_entry).tier).is_equal("minor")
-	for primary:Dictionary in [{"key":"contact:2","title":"Strangers come","kind":"contact"},{"key":"great_work:1","title":"The stone ring is raised","kind":"ceremony"},{"key":"court:callback:o1","title":"What came of your order","kind":"court"},{"key":"d:1","title":"A dry year","kind":"drought"},{"key":"discovery:5","title":"Fire is tamed","kind":"discovery","first":true}]:
+	for primary:Dictionary in [{"key":"contact:2","title":"Strangers come","kind":"contact"},{"key":"great_work:1","title":"The stone ring is raised","kind":"ceremony"},{"key":"court:callback:o1","title":"What came of your order","kind":"court"},{"key":"d:1","title":"A dry year","kind":"drought"}]:
 		var primary_entry:=primary.duplicate();primary_entry["tier"]="notice"
 		assert_str(Model.from_chronicle(primary_entry).tier).is_equal("notable")
 
@@ -416,3 +416,57 @@ func test_every_verb_button_and_the_envoys_row_open_their_screen()->void:
 	_click_row(stack,"standing:hungry")
 	assert_str(_war_screen_opened()).is_not_empty()
 	assert_int(stack.standing.size()).is_equal(6)
+
+
+func test_regard_does_not_create_a_permanent_notice()->void:
+	GameState.simulation_metrics["standing_dangers"]=8
+	assert_bool(Standing.home().any(func(row:Dictionary)->bool:return row.key=="standing:regard")).is_false()
+	assert_float(float(GameState.simulation_metrics.standing_dangers)).is_equal(8.0)
+
+func test_deaths_and_discoveries_are_kept_without_cards_or_toasts()->void:
+	GameState.research_notification_mode="all"
+	var kept:Array=[]
+	for entry:Dictionary in [
+		{"key":"court:death:person:7","title":"Sana Is Dead","kind":"death","tier":"moment","action":{"kind":"court"}},
+		{"key":"discovery:clean_water","title":"Clean water","kind":"discovery","tier":"moment","first":true},
+		{"key":"first:burial","title":"The first grave","kind":"death","tier":"notice"},
+		{"key":"genius-lost:child","title":"A gifted child is lost","kind":"death","tier":"notice"}]:
+		kept.append(Chronicle.record(entry))
+	var parts:Array=await _stack()
+	var stack:CanvasLayer=parts[0];var hud:SheetHud=parts[1]
+	assert_object(Card.flush(hud.get_parent(),hud)).is_null()
+	await get_tree().process_frame
+	assert_int(stack.rows.size()).is_equal(0)
+	assert_int(Chronicle.entries().size()).is_equal(4)
+	assert_int(Model.history.size()).is_equal(4)
+	assert_bool(hud.has_meta("chronicle_card")).is_false()
+	for entry:Dictionary in kept:
+		assert_str(Model.from_chronicle(entry,"all").tier).is_equal("minor")
+
+func test_execution_provenance_survives_the_court_and_keeps_its_card()->void:
+	Lives.record("death","Sana Is Dead","Sana was executed.",{"pid":7},{"key":"court:death:person:7","source":"execution"})
+	var entry:Dictionary=Chronicle.entries()[0]
+	assert_str(entry.source).is_equal("execution")
+	assert_str(Model.from_chronicle(entry).tier).is_equal("card")
+	var parts:Array=await _stack();var hud:SheetHud=parts[1]
+	var card:=Card.flush(hud.get_parent(),hud)
+	assert_object(card).is_not_null()
+	assert_bool(card.showing).is_true()
+	assert_str(card.current.key).is_equal("court:death:person:7")
+
+func test_ledger_executions_remain_notices_after_retelling()->void:
+	for title:String in ["Put to Death","Officeholder Executed","Leader Executed"]:
+		var entry:={"key":"ev|4|%s|named" % title,"title":"The ruler's judgment","kind":"death","tier":"notice"}
+		assert_str(Model.from_chronicle(entry).tier).is_equal("notable")
+	# Mentioning an execution in an obituary is not evidence of one.
+	assert_str(Model.from_chronicle({"key":"court:death:person:8","title":"Lina Is Dead","text":"Lina opposed executions. She died of old age.","kind":"death","tier":"moment"}).tier).is_equal("minor")
+
+func test_existing_card_drains_later_quiet_events_without_showing_them()->void:
+	var parts:Array=await _stack();var hud:SheetHud=parts[1]
+	var card:=Card.ensure(hud.get_parent(),hud)
+	Chronicle.record({"key":"death:9","title":"Died in winter","kind":"death","tier":"moment"})
+	Chronicle.record({"key":"discovery:9","title":"A new method","kind":"discovery","tier":"moment"})
+	card.drain()
+	assert_bool(card.showing).is_false()
+	assert_int(card.queue.size()).is_equal(0)
+	assert_int(Chronicle.pending_cards.size()).is_equal(0)

@@ -114,23 +114,20 @@ func test_a_carried_tally_is_labelled_with_the_year_it_closes_in()->void:
 	assert_int(HearthCount.season_year(4)).is_equal(2)
 
 
-func test_moment_card_replaces_the_research_popup_and_never_pauses()->void:
+func test_discoveries_stay_recorded_without_any_automatic_card()->void:
 	var pair:=_same_field_pair()
 	GameState.known_discoveries.append(pair[0])
 	Chronicle.ingest_day({"discoveries":[{"id":pair[0],"day":3}],"progression":[]})
 	var canvas:SubViewport=auto_free(SubViewport.new());canvas.size=Vector2i(1280,800);add_child(canvas)
 	var host:=Host.new();canvas.add_child(host)
 	var hud:=Control.new();host.add_child(hud)
-	# One card queue: no research toast, no popup, only the Chronicle's card.
+	# Learning stays in the archive, even when recorded as a major moment.
 	assert_object(Notices.announce(host,hud,[{"id":pair[0],"day":3}])).is_null()
 	assert_bool(hud.has_meta("discovery_popup")).is_false()
 	assert_bool(hud.has_meta("research_digest")).is_false()
-	var card:=Card.flush(host,hud)
-	assert_object(card).is_not_null()
-	assert_bool(card.showing).is_true()
-	assert_str(card.title_label.text).is_not_empty()
-	# Wide paintings lead as the banner; other art keeps the side picture.
-	assert_object(card.banner.texture if card.banner.visible else card.picture.texture).is_not_null()
+	assert_object(Card.flush(host,hud)).is_null()
+	assert_int(Chronicle.entries("notice").size()).is_greater(0)
+	assert_bool(hud.has_meta("chronicle_card")).is_false()
 	assert_float(host.game_speed).is_equal(3.0)
 
 func test_moments_are_capped_per_month_and_extra_ones_are_kept_as_notices()->void:

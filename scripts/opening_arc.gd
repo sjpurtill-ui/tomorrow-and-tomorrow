@@ -390,11 +390,7 @@ static func _discovery(day:int,terrain:Node)->Dictionary:
 	var who:=String(finder.get("name","One of our people"))
 	var scene:="At the evening fire %s showed everyone what they had worked out: %s. People passed it from hand to hand until the fire burned low." % [who,name.to_lower()]
 	event["scene"]=scene
-	# The Chronicle's card carries the scene (Chronicle.record_beat): the one
-	# card queue, never a second popup. Only the player's "every discovery"
-	# choice also opens the full reading card.
-	if GameState.research_notification_mode=="all" and is_instance_valid(terrain) and "hud" in terrain and is_instance_valid(terrain.hud):
-		preload("res://scripts/hud/discovery_popup.gd").announce(terrain,terrain.hud,[event])
+	# Keep the scene in the Chronicle; learning no longer opens a popup.
 	return _emit("first_discovery",day,"The first discovery: %s" % name,scene,{"discovery_id":id,"person_id":int(finder.get("person_id",0))})
 
 # ---------------------------------------------------------------------------

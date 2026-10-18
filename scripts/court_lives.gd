@@ -174,7 +174,7 @@ static func _tell_chronicle(entry:Dictionary,told:Dictionary)->Dictionary:
 		"tier":String(told.get("tier",CHRONICLE_TIERS.get(kind,"notice"))),"kind":String(CHRONICLE_KINDS.get(kind,"court")),
 		"action":{"kind":"court","focus":focus},"ledger":false,"domain":"institutions" if kind in ["death","succession","callback"] else "court"}
 	# How a routine line folds into its earlier card (chronicle.gd fold_as).
-	for field in ["fold_as","fold_days","fold","category","alert"]:
+	for field in ["fold_as","fold_days","fold","category","alert","source"]:
 		if told.has(field): request[field]=told[field]
 	return Chronicle.record(request)
 
@@ -410,6 +410,7 @@ static func _on_official_death(person:Dictionary,day:int)->void:
 	var tenure:=(" after %s in office" % _years_words(months)) if months>=12 else ""
 	var said:="%s, %s, died aged %d%s. They %s. The court gathers at the fire to mourn them." % [String(person.get("name","")),String(office.title),age,tenure,deed]
 	var told:={"key":"court:death:person:%d" % pid,"focus":{"person_id":holder_pid} if holder_pid>0 else {}}
+	if executed:told["source"]="execution"
 	if holder_pid>0:
 		var holder_name:=EraNames.given_of(String(Hall._official(holder_pid).get("name",""))) if holder_pid!=pid else ""
 		told["text"]=said.trim_suffix(" The court gathers at the fire to mourn them.")+" "+preload("res://scripts/chronicle_specifics.gd").mourning_close(holder_name,hash("mourn:%d" % pid))

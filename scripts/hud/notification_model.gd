@@ -28,6 +28,7 @@ extends RefCounted
 ## Presentation only: nothing here changes the game. The log lives for the
 ## session; the Chronicle is the record that is saved.
 
+const Quiet:=preload("res://scripts/hud/quiet_notice_policy.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 
@@ -82,7 +83,7 @@ const WORD_CATEGORY:=[
 ]
 ## The primary notices: the only routine lines that pop up. War, strangers
 ## and envoys, hunger and thirst, weather and sickness, spies, what came of the
-## god's orders, a great work, a death in the court, a first in learning. Every
+## god's orders, a great work, or an execution. Every
 ## other told line (a town built, a birth, a scout's sighting, a road report)
 ## goes to the log.
 const PRIMARY_CATEGORIES:=["war","neighbours","food","health","weather","spies","court"]
@@ -156,7 +157,7 @@ static func normalize(notice:Dictionary)->Dictionary:
 	var category:=String(notice.get("category",""))
 	n["category"]=category if CATEGORIES.has(category) else "story"
 	var tier:=String(notice.get("tier","notable"))
-	n["tier"]=tier if tier in TIERS else "notable"
+	n["tier"]="minor" if Quiet.quiet(n) else (tier if tier in TIERS else "notable")
 	if not n.has("day"):n["day"]=int(GameState.elapsed_days) if Engine.get_main_loop()!=null else 0
 	if String(n.get("group","")).is_empty():n["group"]="%s|%s" % [n.category,_family(String(n.title))]
 	n["count"]=maxi(1,int(notice.get("count",1)))
@@ -177,8 +178,9 @@ static func from_chronicle(entry:Dictionary,mode:String="milestones")->Dictionar
 		if String(rule.tier)!="" and tier!="card":tier=String(rule.tier)
 		if String(rule.get("title",""))!="":title=String(rule.title)
 		if not (rule.get("action",{}) as Dictionary).is_empty():action=(rule.action as Dictionary).duplicate(true)
-	var notice:={"source":"chronicle","key":key,"title":title,"text":String(entry.get("base_text",entry.get("text",""))),
-		"category":category,"tier":tier,"day":int(entry.get("day",0)),"action":action}
+	var notice:={"key":key,"title":title,"text":String(entry.get("base_text",entry.get("text",""))),
+		"category":category,"tier":tier,"day":int(entry.get("day",0)),"action":action,
+		"kind":String(entry.get("kind","")),"source":String(entry.get("source","chronicle"))}
 	# A repeat the Chronicle folded into an earlier card: it counts on that
 	# notice, and never pops up by itself.
 	if String(entry.get("same_as",""))!="":
@@ -233,7 +235,8 @@ static func category_of(entry:Dictionary)->String:
 	return "story"
 
 
-static func tier_of(entry:Dictionary,category:String,mode:String="milestones")->String:
+static func tier_of(entry:Dictionary,category:String,_mode:String="milestones")->String:
+	if Quiet.quiet(entry) or category=="learning":return "minor"
 	var tier:=String(entry.get("tier","notice"))
 	var key:=String(entry.get("key",""))
 	var action:Dictionary=entry.get("action",{}) if entry.get("action") is Dictionary else {}
@@ -243,17 +246,12 @@ static func tier_of(entry:Dictionary,category:String,mode:String="milestones")->
 	if tier=="moment":return "card"
 	if tier=="whisper":return "urgent" if urgent and not bool(entry.get("folded",false)) else "minor"
 	if urgent:return "urgent"
-	# The player's own discovery setting: "quiet" keeps learning in the log;
-	# "milestones" pops up only the firsts and turnings (the Chronicle's card
-	# tells those), so a season's tally of what was learned stays in the log.
-	if category=="learning" and (mode=="quiet" or (mode=="milestones" and not bool(entry.get("first",false)))):return "minor"
 	return "notable" if is_primary(entry,category) else "minor"
 
 
-## True for the few told lines that pop up (see PRIMARY_CATEGORIES). A first in
-## learning is primary: tier_of has already put the season's tally in the log.
+## True for the few told lines that pop up after the quiet policy is applied.
 static func is_primary(entry:Dictionary,category:String)->bool:
-	if category=="learning":return true
+	if Quiet.quiet(entry) or category=="learning":return false
 	if category in PRIMARY_CATEGORIES or String(entry.get("kind","")) in PRIMARY_KINDS:return true
 	var key:=String(entry.get("key",""))
 	for prefix in PRIMARY_KEYS:

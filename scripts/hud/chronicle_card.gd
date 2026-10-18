@@ -56,7 +56,10 @@ var top:=TOP
 static var _stings:Dictionary={}
 
 
+const Quiet:=preload("res://scripts/hud/quiet_notice_policy.gd")
+
 static func flush(terrain_node:Node,hud_node:Node)->CanvasLayer:
+	Chronicle.pending_cards.assign(Chronicle.pending_cards.filter(func(entry:Dictionary)->bool:return not Quiet.quiet(entry)))
 	if Chronicle.pending_cards.is_empty() or not is_instance_valid(hud_node):return null
 	var card:=ensure(terrain_node,hud_node)
 	card.drain()
@@ -152,7 +155,8 @@ func sheet_rect()->Rect2:
 
 func drain()->void:
 	while not Chronicle.pending_cards.is_empty():
-		queue.append(Chronicle.pending_cards.pop_front())
+		var entry:Dictionary=Chronicle.pending_cards.pop_front()
+		if not Quiet.quiet(entry):queue.append(entry)
 	if queue.size()>4:queue=queue.slice(queue.size()-4)
 	if not showing:_next()
 

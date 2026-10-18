@@ -60,11 +60,7 @@ static func home()->Array[Dictionary]:
 		var fact:="%d in 10 drink enough" % roundi(clampf(float(water.get("intake_ratio",1.0)),0.0,1.0)*10.0)
 		out.append({"key":"standing:water","standing":true,"kind":"now","tone":"red","category":"food","title":"Water is running short","text":fact,"count":1,"lines":PackedStringArray([fact]),"verb":"Water","days":NO_CLOCK,
 			"action":{"kind":"section","section":"economy","sub":0,"label":"the Economy screen"}})
-	var against:=int(metrics.get("standing_dangers",0))
-	if against>0:
-		var fact:="%d %s think us easy to push" % [against,"people" if against==1 else "peoples"]
-		out.append({"key":"standing:regard","standing":true,"kind":"now","tone":"red","category":"neighbours","title":"Others think us weak","text":fact,"count":against,"lines":PackedStringArray([fact]),"verb":"See","days":NO_CLOCK,
-			"action":{"kind":"section","section":"standing","sub":0,"label":"the World screen"}})
+	# Regard is available in World; a persistent opinion is not an interruption.
 	var seen:=int(CivilizationSystem.local_observation_snapshot().get("visible_count",0))
 	if seen>0:
 		var fact:="%d of theirs seen near our land" % seen
