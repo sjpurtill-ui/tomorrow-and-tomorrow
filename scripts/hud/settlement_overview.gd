@@ -181,8 +181,8 @@ func _leader(block:Dictionary,parent:Node)->void:
 
 static func _office_words(leader:Dictionary)->String:
 	# The title every screen gives this person (person_posts.gd).
-	var title:=String(preload("res://scripts/person_posts.gd").of({"person_id":int(leader.get("person_id",0))}).title) if int(leader.get("person_id",0))>0 else String(leader.get("title","Local leader"))
-	return ("%s, age %d" % [title,int(leader.get("age",0))]) if not leader.is_empty() else "The government appoints one of the people."
+	var title:=preload("res://scripts/major_families.gd").court_title(int(leader.get("person_id",0))) if int(leader.get("person_id",0))>0 else String(leader.get("title","Local leader"))
+	return ("%s, age %d" % [title,int(leader.get("age",0))]) if not leader.is_empty() else "No household spokesperson is recorded here yet."
 
 # --------------------------------------------------------------------------
 # The figures, in four groups

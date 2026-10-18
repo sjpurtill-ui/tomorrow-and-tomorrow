@@ -45,8 +45,6 @@ const Stage:=preload("res://scripts/hud/court_stage.gd")
 const Directing:=preload("res://scripts/hud/court_director.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
-## What the court knows of an official (what the Chiefs dock used to show).
-const OfficeDossier:=preload("res://scripts/hud/court_office_dossier.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -350,6 +348,8 @@ func show_audience(id:String)->void:
 	var kind:=String(audience.get("kind","news"))
 	accent=_kind_color(kind)
 	speaker_person_id=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
+	if speaker_person_id>0 and String(audience.get("origin",""))!="foreign":
+		audience.speaker.title=preload("res://scripts/major_families.gd").court_title(speaker_person_id)
 	envoy_color=_ink(Identity.banner_color(Identity.foreign(String(audience.get("civ_id",""))).texture)) if String(audience.get("origin",""))=="foreign" else _ink(Tokens.VIOLET)
 	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,accent.darkened(.1),2,10,0)
 	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
@@ -752,9 +752,10 @@ func _dossier_rows(audience:Dictionary)->Array:
 		# PRISONER (captured_agents.gd, builder P): who they are and what they said; a word shown false in red.
 		if audience.has("prisoner_id"):
 			for row:Array in Prisoners.dossier_rows(String(audience.get("id",""))):rows.append([String(row[0]),String(row[1]),Tokens.RED if String(row[2])=="false" else Tokens.BODY])
-		# An official: their office, fit, skills, hand, who could replace them
-		# and their standing orders (court_office_dossier.gd).
-		if String(audience.get("origin",""))=="court":rows.append_array(OfficeDossier.rows(int((audience.get("speaker",{}) as Dictionary).get("person_id",0))))
+		# Household motives and family patronage replace the old office dossier.
+		if String(audience.get("origin",""))=="court":
+			for detail:Array in preload("res://scripts/major_families.gd").court_rows(int(audience.get("speaker",{}).get("person_id",0))):
+				rows.append([detail[0],detail[1],Tokens.BODY])
 		var petitioner:Dictionary=context.get("petitioner",{}) if context.get("petitioner") is Dictionary else {}
 		if not petitioner.is_empty():
 			rows.append(["Trust in you",String(petitioner.get("trust","moderate")),Tokens.BODY])
@@ -3226,11 +3227,12 @@ func show_court()->void:
 	body=VBoxContainer.new();body.name="CourtAtRest";body.add_theme_constant_override("separation",12);card.add_child(body)
 	var families=preload("res://scripts/major_families.gd")
 	families.ensure()
+	if domestic_page=="officials" or (domestic_page=="people" and not families.active()):domestic_page="interests"
 	var header:=HBoxContainer.new();body.add_child(header)
 	var title:=Tokens.make_label("THE COURT",24,Tokens.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(title)
 	var close_button:=Button.new();close_button.text="Close";Tokens.apply_button_style(close_button);close_button.pressed.connect(_close);header.add_child(close_button)
 	var tabs:=HBoxContainer.new();tabs.name="CourtTabs";body.add_child(tabs)
-	for pair:Array in [["interests","Families and parties" if families.active() else "Household business"],["officials","Officials and orders"],["diplomacy","Diplomacy"]]:
+	for pair:Array in ([["interests","Families and parties"],["people","People and business"],["diplomacy","Diplomacy"]] if families.active() else [["interests","Household business"],["diplomacy","Diplomacy"]]):
 		var button:=Button.new();button.name="CourtTab"+String(pair[0]);button.text=String(pair[1]);Tokens.apply_button_style(button,domestic_page==String(pair[0]))
 		var view:=String(pair[0]);button.pressed.connect(func()->void:domestic_page=view;show_court());tabs.add_child(button)
 	if domestic_page=="interests" and not families.data().is_empty():
@@ -3245,12 +3247,12 @@ func show_court()->void:
 		var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",12);scroll.add_child(stack)
 		if domestic_page=="diplomacy":
 			stack.add_child(_build_antechamber());stack.add_child(_build_foreign_list())
-		elif domestic_page=="officials":
-			stack.add_child(_build_antechamber());stack.add_child(_build_roster_list(Roster.people()))
+		elif domestic_page=="people":
+			stack.add_child(_build_antechamber());stack.add_child(_build_roster_list(Roster.domestic_people()))
 		else:
-			var note:=Tokens.make_label(families.brief(),16,Tokens.TEXT_SOFT);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(note)
+			var note:=Tokens.make_label(families.court_brief(),16,Tokens.TEXT_SOFT);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(note)
 			stack.add_child(_build_antechamber())
-			stack.add_child(_build_roster_list(Roster.people()))
+			stack.add_child(_build_roster_list(Roster.domestic_people()))
 	body.add_child(_build_rest_footer())
 	rest_signature=_rest_state()
 	_fit()
@@ -3434,7 +3436,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 		previous.disabled=roster_page==0;next.disabled=first+6>=matches.size()
 		footer.visible=roster.size()>6 or not roster_query.is_empty()
 	if roster.size()>6 or not roster_query.is_empty():
-		var search:=LineEdit.new();search.name="CourtPeopleSearch";search.placeholder_text="Find a person or office";search.text=roster_query;search.custom_minimum_size.y=40;list.add_child(search)
+		var search:=LineEdit.new();search.name="CourtPeopleSearch";search.placeholder_text="Find a person or trade";search.text=roster_query;search.custom_minimum_size.y=40;list.add_child(search)
 		search.text_changed.connect(func(value:String)->void:roster_query=value;roster_page=0;fill.call())
 	list.add_child(rows);list.add_child(footer)
 	previous.pressed.connect(func()->void:roster_page-=1;fill.call())
@@ -3585,7 +3587,7 @@ func _build_rest_footer()->Control:
 	speech_input=LineEdit.new();speech_input.name="SpeechInput";speech_input.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	speech_input.custom_minimum_size=Vector2(360,38);speech_input.max_length=400;speech_input.add_theme_font_size_override("font_size",15)
 	speech_input.placeholder_text="Speak to your court…"
-	speech_input.tooltip_text="Name whom you address (by name or office), or speak plainly and your local leader answers. Name a foreign people to brief an envoy."
+	speech_input.tooltip_text="Name the person or family you address, or speak plainly and a local voice answers. Name a foreign people to brief an envoy."
 	speech_input.text_submitted.connect(func(_t:String):_speak())
 	row.add_child(speech_input)
 	speak_button=Button.new();speak_button.name="Speak";speak_button.text="Speak";speak_button.custom_minimum_size=Vector2(96,38)
@@ -3698,9 +3700,6 @@ func _build_civic_strip()->Control:
 	civic_state_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;civic_state_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	civic_state_label.clip_text=true;civic_state_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(civic_state_label)
 	civic_replies=HBoxContainer.new();civic_replies.name="CivicReplies";civic_replies.add_theme_constant_override("separation",6);row.add_child(civic_replies)
-	var dismiss:=Button.new();dismiss.name="DismissFromOffice";dismiss.text="Dismiss from office";dismiss.focus_mode=Control.FOCUS_ALL;dismiss.custom_minimum_size=Vector2(0,28)
-	dismiss.tooltip_text="Take their office from them. A successor takes it up at once; the dismissed keep their lives."
-	dismiss.add_theme_color_override("font_color",Tokens.RED);dismiss.pressed.connect(dismiss_leader);row.add_child(dismiss)
 	civic_status_label=Tokens.make_label("",12,Tokens.TEXT_SOFT);civic_status_label.name="CivicStatus";civic_status_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;civic_status_label.max_lines_visible=2
 	stack.add_child(civic_status_label)
 	_refresh_civic_strip(true)

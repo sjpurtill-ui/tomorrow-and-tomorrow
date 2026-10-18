@@ -1,3 +1,31 @@
+## October 17 — Allocation commands and family court completion
+
+Status: READY in `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/evolving-major-families`, base `dbcdcf8ff18f29bc2ec300b315df9b10d2878f8b`.
+
+People allocation buttons now call the existing live Manual/Government authority
+without requiring a successful forecast snapshot or evaluation. The command
+finishes an already scheduled day, validates the role/step, preserves total
+workers and existing food/military protections, and reports actual changed
+counts. Forecasts remain optional reads and are invalidated after assignment.
+A regression uses real population/provider/view code with deliberately failed
+capture and evaluation: repeated +5 and -1 still apply and survive delegation.
+
+The court no longer exposes a parallel officials tab, office appointment dossier,
+or dismiss-from-office button. Household and family identities also appear in
+summons, shared person cards, the opening fire circle and the town leader row.
+Family growth and rivalry no longer receive a hidden legacy-office bonus.
+Existing government people, labor delegation, field generals, diplomacy and
+order execution remain the same ledger; these internal services are not a
+second player-facing court. Old saves require no migration; speaker titles are
+refreshed when an existing audience is opened.
+
+Validation: 16 workforce-preview/provider checks, 14 allocator UI checks,
+34 family/court checks, 7 court-fact checks and 22 manual-work checks pass.
+Mac launcher adds `--existing-build`: it verifies exact HEAD against origin/main,
+build marker and signed bundle without exporting local changes. Generated
+imports and UID files remain excluded. Player launch follows integration.
+
 ## October 17 — Evolving families / contextual court characters
 
 Status: INTEGRATED — source `2cfa4988ba62355fc178450c5c9e3f4f151e2f95`, verified on

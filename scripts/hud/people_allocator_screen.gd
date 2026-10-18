@@ -306,6 +306,9 @@ func focus_work(role: String) -> void:
 func _step(role: String, points: int) -> void:
 	if _busy or not NAMES.has(role) or points == 0: return
 	active_role = role
+	if _has_callback(data.get("workforce", {}).get("assign")):
+		_assign_now(role, points)
+		return
 	_busy = true
 	_error = ""
 	var captured: Variant = _api("capture", [true])
@@ -350,6 +353,42 @@ func _step(role: String, points: int) -> void:
 	_last_change = " · ".join(moves) if not moves.is_empty() else "Target changed; rounding or food protection kept worker counts unchanged."
 	_last_role = role
 	_action_feedback = "Applied: " + _last_change
+	_finish_command()
+
+func _assign_now(role: String, points: int) -> void:
+	_busy = true
+	_error = ""
+	var result: Variant = _api("assign", [role, points])
+	if not result is Dictionary or not bool(result.get("ok", false)):
+		_error = String(result.get("reason", "The assignment was not applied.") if result is Dictionary else "Work is not available.")
+		_finish_command()
+		return
+	var counts: Dictionary = result.counts
+	_requested = Manual.percents(result.shares)
+	data = data.duplicate(true)
+	for task: Dictionary in data.get("labor", {}).get("tasks", []):
+		task.count = int(counts.get(String(task.id), 0))
+		task.share = int(_requested.get(String(task.id), 0))
+	data.labor.manual = true
+	_changes = {}
+	var moves: Array[String] = []
+	for task: String in Manual.ROLES:
+		var delta := int(counts.get(task, 0)) - int(result.before.get(task, 0))
+		if delta != 0:
+			_changes[task] = delta
+			moves.append("%s %s" % [NAMES[task], _signed(delta)])
+	_last_change = " · ".join(moves) if not moves.is_empty() else "Target changed; rounding or food protection kept worker counts unchanged."
+	_action_feedback = "Applied: " + _last_change
+	_last_role = role
+	# Do not present the previous workforce's forecast as this allocation's result.
+	forecast = {"ok":false, "reason":"Assignment applied. Update estimates for this workforce."}
+	_comparison = false
+	_dirty = true
+	_forecast_day = -1
+	_awaiting_counts = counts.duplicate(true)
+	_awaiting_revision = result.get("revision", []).duplicate(true)
+	_revision = _awaiting_revision.duplicate(true)
+	_last_read_ms = Time.get_ticks_msec()
 	_finish_command()
 
 func _finish_command() -> void:
@@ -420,7 +459,7 @@ func _fill_rows() -> void:
 	var counts := _counts()
 	var total := 0
 	for value: int in counts.values(): total += value
-	var valid := _has_callback(data.get("workforce", {}).get("commit")) and total > 0
+	var valid := (_has_callback(data.get("workforce", {}).get("assign")) or _has_callback(data.get("workforce", {}).get("commit"))) and total > 0
 	for role: String in rows:
 		var row: Dictionary = rows[role]
 		var share := int(_requested.get(role, 0))

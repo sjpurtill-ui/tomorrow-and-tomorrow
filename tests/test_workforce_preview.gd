@@ -310,3 +310,41 @@ func test_mature_realm_latency_and_ledgers() -> void:
 	assert_int(result.after.towns.size()).is_equal(19)
 	assert_int(int(Preview._sum(result.after.counts))).is_equal(int(captured.able))
 	print("Mature workforce preview: %d discoveries,19 towns, capture %.1fms step %.1fms first %.1fms next %.1fms check %.1fms" % [GameState.known_discoveries.size(), float(after_capture-tick)/1000.0, float(after_step-after_capture)/1000.0, float(after_evaluate-after_step)/1000.0, float(after_next-after_evaluate)/1000.0, float(after_current-after_next)/1000.0])
+
+func test_live_buttons_apply_when_capture_and_forecast_are_unavailable() -> void:
+	var provider := preload("res://scripts/hud/content/dock_content_overview.gd").new(null, null)
+	var view := preload("res://scripts/hud/people_allocator_screen.gd").new()
+	add_child(view)
+	var tasks: Array = []
+	for role: String in Manual.ROLES:
+		tasks.append({"id":role, "count":Manual.counts()[role], "share":Manual.percents(Manual._shares_of(Manual.counts()))[role]})
+	view.setup({"settlement_view":{"population":120}, "workforce_revision":provider.signature(), "world_running":true,
+		"labor":{"tasks":tasks, "manual":false, "on_ruler":provider.set_work.bind(true), "on_leaders":provider.set_work.bind(false)},
+		"workforce":{"assign":provider.assign_workforce,
+			"capture":func(_assignment:bool=false)->Dictionary:return {"ok":false,"reason":"Estimate unavailable"},
+			"evaluate":func(_draft:Dictionary)->Dictionary:return {"ok":false,"reason":"Estimate unavailable"}}})
+	assert_bool(view.forecast.ok).is_false()
+	var able := Manual.able()
+	var old_share := int(Manual.percents(Manual._shares_of(Manual.counts())).Knowledge)
+	for index in 3:view.rows.Knowledge.steps[5].pressed.emit()
+	assert_bool(Manual.manual()).is_true()
+	assert_int(int(Manual.percents().Knowledge)).is_equal(old_share+15)
+	assert_int(Manual.able()).is_equal(able)
+	assert_str(view.rows.Knowledge.share.text).is_equal(str(old_share+15)+"%")
+	assert_str(view.refs.feedback.text).starts_with("Applied:")
+	assert_str(view.refs.food.text).is_equal("Food estimate unavailable")
+	assert_dict(view._counts()).is_equal(Manual.counts())
+	view.rows.Knowledge.steps[-1].pressed.emit()
+	assert_int(int(Manual.percents().Knowledge)).is_equal(old_share+14)
+	GovernmentPeopleSystem.delegate_now()
+	assert_int(int(Manual.percents().Knowledge)).is_equal(old_share+14)
+	assert_int(Manual.able()).is_equal(able)
+	view.free()
+
+func test_live_assignment_rejects_bad_input_without_changing_work() -> void:
+	var provider := preload("res://scripts/hud/content/dock_content_overview.gd").new(null, null)
+	var before := Manual.counts()
+	assert_bool(provider.assign_workforce("Invented", 5).ok).is_false()
+	assert_bool(provider.assign_workforce("Food", 500).ok).is_false()
+	assert_bool(PeopleDirection.automatic_work).is_true()
+	assert_dict(Manual.counts()).is_equal(before)

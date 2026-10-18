@@ -70,6 +70,15 @@ static func _count_word(count:int)->String:
 static func ceremony_line()->String:
 	return Stages.protocol_line(stage())
 
+static func domestic_people()->Array[Dictionary]:
+	var roster:=people()
+	for entry:Dictionary in roster:
+		var pid:=int(entry.get("target",{}).get("person_id",0))
+		if pid<=0:continue
+		entry.title=preload("res://scripts/major_families.gd").court_title(pid)
+		if String(entry.group) in ["council","settlement"]:entry.group="folk"
+	return roster
+
 static func people()->Array[Dictionary]:
 	## Everyone who may be summoned, each once:
 	## {key,target,name,title,group,matters,person,regard,settlement_id}

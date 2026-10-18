@@ -74,12 +74,11 @@ static func _form_house(d:Dictionary,role:String,used:Array)->void:
 	d.families.append({"id":role,"name":surname+" house","founder":String(head.name),"head":int(head.person_id),"stage":1,"months":0.0,"standing":1.0,"loyalty":0.5,"rival":"","party":"","successions":0,"character":Character.make(head,role,Character.context()),"performance":0.5})
 
 static func strength(f:Dictionary)->float:
-	# Real workers, actual office, and accumulated patronage. No extra workers.
+	# Real constituencies and accumulated patronage. Legacy service slots confer no family power.
 	var workers:=float(WorldSimulation.state.population_allocations.get(String(f.id),0))
-	var head:Dictionary=WorldSimulation.government.person_snapshot(int(f.head))
 	var total:=0.0
 	for count:Variant in WorldSimulation.state.population_allocations.values():total+=maxf(0.0,float(count))
-	return (1.0+100.0*sqrt(maxf(0.0,workers)/maxf(1.0,total))+float(f.standing)*2.0+(12.0 if String(head.get("office_key",""))!="" else 0.0)+(20.0 if data().get("favored","")==f.id else 0.0))*(0.5+0.5*float(f.loyalty))*(0.5+0.5*float(f.get("performance",.5)))
+	return (1.0+100.0*sqrt(maxf(0.0,workers)/maxf(1.0,total))+float(f.standing)*2.0+(20.0 if data().get("favored","")==f.id else 0.0))*(0.5+0.5*float(f.loyalty))*(0.5+0.5*float(f.get("performance",.5)))
 
 static func tick(day:int)->void:
 	if not active():return
@@ -110,12 +109,11 @@ static func tick(day:int)->void:
 		elif Character.eligible("conquest",Character.context()) and f.id=="Defense" and character.get("outlook")=="security":
 			f.character=Character.make(head,String(f.id),Character.context())
 		f.performance=performance(String(f.id))
-		var appointed:=String(head.get("office_key",""))!=""
-		f.standing=clampf(float(f.standing)+(0.3 if favored else -0.04)+(0.12 if appointed else 0.0),0.0,30.0)
+		f.standing=clampf(float(f.standing)+(0.3 if favored else -0.04),0.0,30.0)
 		f.loyalty=clampf(float(f.loyalty)+(0.01 if favored else -0.002),0.0,1.0)
 		var limit:=ceiling(int(WorldSimulation.settlements.national_population()))
 		if int(f.stage)<limit:
-			f.months=float(f.months)+1.0+(0.5 if favored or appointed else 0.0)
+			f.months=float(f.months)+1.0+(0.5 if favored else 0.0)
 			if float(f.months)>=float(MATURITY[int(f.stage)]):
 				f.stage=int(f.stage)+1;f.months=0.0
 				_note(d,"%s has become part of %s." % [String(f.name),String(STAGES[int(f.stage)]).to_lower()])
@@ -310,6 +308,29 @@ static func speaker_profile(person_id:int)->Dictionary:
 		if skill>score:score=skill;role=id
 	if String(person.get("office_key",""))=="Marshal":role="Defense"
 	return Character.make(person,role,Character.context())
+
+## Public identity belongs to the household/house, not the legacy service slot.
+## GovernmentPeopleSystem still owns the actual person and executes daily labor.
+static func court_title(person_id:int)->String:
+	for f:Dictionary in data().get("families",[]):
+		if int(f.head)==person_id:return String(f.name)+" · "+String(TRADES[f.id][0])
+	var person:=WorldSimulation.government.person_snapshot(person_id)
+	if person.is_empty():return "Community member"
+	var profile:=speaker_profile(person_id)
+	var role:=String(profile.get("trade","Administration"))
+	return String({"Food":"Food gatherer","Survey":"Pathfinder","Extraction":"Wood and stone worker","Construction":"Builder","Crafting":"Maker","Logistics":"Carrier and trader","Knowledge":"Teacher","Administration":"Household elder","Defense":"Watch organizer"}.get(role,"Community member"))
+
+static func court_rows(person_id:int)->Array:
+	var person:=WorldSimulation.government.person_snapshot(person_id)
+	if person.is_empty():return []
+	var profile:=speaker_profile(person_id)
+	var rows:Array=[["Speaks for",court_title(person_id)],["Wants",String(profile.want)],["Fears",String(profile.fear)],["Manner",String(profile.manner)]]
+	for f:Dictionary in data().get("families",[]):
+		if int(f.head)!=person_id:continue
+		rows.append(["Our relationship","Favored" if String(data().favored)==String(f.id) else "Not favored"])
+		rows.append(["Program","Endorsed" if String(data().mandate)==String(f.id) else "Not endorsed"])
+		rows.append(["Patronage","Favor this head or endorse their program from Families and parties."])
+	return rows
 
 static func head_profile(person_id:int)->Dictionary:
 	for f:Dictionary in data().get("families",[]):

@@ -15,7 +15,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--build-only', action='store_true', help='Build without opening a game; also allowed in a development worktree.')
     parser.add_argument('--resume-saved', action='store_true', help='Resume quicksave instead of starting a fresh world.')
+    parser.add_argument('--existing-build', action='store_true', help='Open only the signed, already-built release for integrated HEAD; never export working files.')
     args = parser.parse_args()
+    if args.existing_build and args.build_only:
+        parser.error('--existing-build cannot be combined with --build-only')
     game_root = Path(__file__).resolve().parents[1]
 
     def git(*parts):
@@ -28,7 +31,7 @@ def main():
     config = (game_root / 'project.godot').read_text()
     if 'run/main_scene="res://local_terrain.tscn"' not in config or 'config/use_custom_user_dir=true' in config:
         raise RuntimeError('The project has a test entry point or test userdata setting.')
-    if not args.build_only and git('status', '--porcelain', '--untracked-files=no'):
+    if not args.build_only and not args.existing_build and git('status', '--porcelain', '--untracked-files=no'):
         raise RuntimeError('Commit and verify the integrated changes before a player launch.')
     if not args.build_only:
         for line in subprocess.check_output(['ps', '-ax', '-o', 'pid=,command='], text=True).splitlines():
@@ -43,6 +46,14 @@ def main():
     executable = app / 'Contents' / 'MacOS' / 'Tomorrow and Tomorrow'
     build_log = destination / 'export.log'
     complete = destination / 'build.ok'
+    if args.existing_build:
+        head = git('rev-parse', 'HEAD')
+        remote = git('ls-remote', 'origin', 'refs/heads/main').split()
+        if not remote or remote[0] != head:
+            raise RuntimeError('Existing player release must match verified origin/main.')
+        if not executable.is_file() or not complete.is_file() or complete.read_text().strip() != head:
+            raise RuntimeError('No completed release for this revision. Build it before launching.')
+        subprocess.run(['/usr/bin/codesign', '--verify', '--deep', '--strict', str(app)], check=True)
     if not executable.exists() or not complete.exists() or args.build_only:
         complete.unlink(missing_ok=True)
         helper = game_root / 'artifacts' / 'native' / 'KeychainBridge'

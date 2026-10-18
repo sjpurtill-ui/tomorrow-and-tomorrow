@@ -81,7 +81,7 @@ func _ready()->void:
 	var left:=VBoxContainer.new();left.add_theme_constant_override("separation",6);row.add_child(left)
 	if not person.is_empty(): left.add_child(Portrait.picture(person,112,140))
 	var who:=_label(String(person.get("name","The eldest at the fire")),15,T.INK);who.custom_minimum_size.x=112;who.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;left.add_child(who)
-	left.add_child(_label(String(person.get("office_title","Hearth Chief")),12,T.INK_MUTED))
+	left.add_child(_label("Elder at the fire",12,T.INK_MUTED))
 	var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",10);row.add_child(column)
 	pages.append(column)
 	speech=_label("",20,T.INK);speech.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART

@@ -54,7 +54,7 @@ func build(id:String)->void:
 	_label(details,"Constituency: %d people currently assigned to %s. These are existing workers, not extra population or soldiers." % [int(GameState.population_allocations.get(id,0)),String(Families.TRADES[id][0]).to_lower()])
 	_label(details,"Standing %.1f · loyalty %.0f%% · rival: %s" % [float(f.standing),float(f.loyalty)*100.0,String(Families.family(String(f.rival)).get("name","none"))])
 	if int(f.stage)<5:
-		_label(details,"Next: %s at %s people, then %.0f / %d months of organization. Favor and public office accelerate it." % [String(Families.STAGES[int(f.stage)+1]),String.num_int64(Families.THRESHOLDS[int(f.stage)]),float(f.months),int(Families.MATURITY[int(f.stage)])],13)
+		_label(details,"Next: %s at %s people, then %.0f / %d months of organization. Favor accelerates it." % [String(Families.STAGES[int(f.stage)+1]),String.num_int64(Families.THRESHOLDS[int(f.stage)]),float(f.months),int(Families.MATURITY[int(f.stage)])],13)
 	if not String(f.party).is_empty():
 		var party:Dictionary=d.parties.get(String(f.party),{})
 		var leader:=GovernmentPeopleSystem.person_snapshot(int(party.get("head",0)))

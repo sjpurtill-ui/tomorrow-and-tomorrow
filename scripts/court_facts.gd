@@ -216,7 +216,7 @@ static func _common(out:Dictionary)->void:
 	var regard:=Divine.people_regard(officials)
 	out["people_regard"]={"read":String(regard.get("read","")),"love":Divine._band(float(regard.get("love",0.5))),"dread":Divine._band(float(regard.get("dread",0.0)))}
 	var council:Array=[]
-	for p:Dictionary in officials: council.append({"title":String(p.get("office_title","")),"name":String(p.get("name","")),"office":String(p.get("office_key",""))})
+	for p:Dictionary in officials: council.append({"title":preload("res://scripts/major_families.gd").court_title(int(p.get("person_id",0))),"name":String(p.get("name","")),"office":String(p.get("office_key",""))})
 	out["council"]=council
 	# What each office's holder changes, in the engine's numbers (office
 	# levers): everyone at court knows what the council's hands are worth.
@@ -714,15 +714,11 @@ static func generals()->Array:
 ## engine's numbers: ["Iska, Keeper of Stores: saves 12% of what would rot
 ## (an ordinary one 0%)", ...] (office_levers.gd).
 static func hands()->Array:
-	var Levers:=preload("res://scripts/office_levers.gd")
+	var families=preload("res://scripts/major_families.gd")
 	var out:Array=[]
-	for office:Dictionary in GovernmentPeopleSystem.active_offices():
-		var key:=String(office.key)
-		var holder:Dictionary=WorldSimulation.state.leadership_positions.get(key,{}) if WorldSimulation.state!=null else {}
-		if holder.is_empty() or int(holder.get("person_id",0))<=0: continue
-		var card:Dictionary=Levers.marshal_card() if key=="Marshal" else Levers.card(key)
-		if card.is_empty(): continue
-		out.append("%s, %s: %s" % [String(holder.get("name","")),String(office.title),String(card.text).get_slice(" · ",0).to_lower()])
+	var effects:=families.bonuses()
+	for role:String in effects:
+		out.append("%s %+.1f%%" % [String(families.EFFECT_NAMES[role]),float(effects[role])*100.0])
 	return out
 
 static func text(s:Dictionary)->String:
@@ -733,7 +729,7 @@ static func text(s:Dictionary)->String:
 	if s.get("purse") is Dictionary and not (s.purse as Dictionary).is_empty(): lines.append(PurseOrders.text(s.purse))
 	if s.get("business") is Dictionary and not (s.business as Dictionary).is_empty(): lines.append(BusinessOrders.text(s.business))
 	var hands_said:Array=s.get("hands",[])
-	if not hands_said.is_empty(): lines.append("What the council's hands are worth, against an ordinary holder: %s." % "; ".join(PackedStringArray(hands_said)))
+	if not hands_said.is_empty(): lines.append("Current family program bonuses and drawbacks: %s." % "; ".join(PackedStringArray(hands_said)))
 	var wars:Array=s.get("at_war_with",[])
 	var peace:Array=s.get("at_peace_with",[])
 	var feud_rows:PackedStringArray=PackedStringArray()

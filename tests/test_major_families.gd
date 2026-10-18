@@ -329,3 +329,32 @@ func test_small_court_does_not_know_future_unlocks_or_hijack_household_questions
 	assert_str(String(facts.families)).contains("households")
 	var answer:=preload("res://scripts/court_answers.gd").answer(facts,"How many families are held captive?")
 	assert_str(answer).is_not_equal(String(facts.families))
+
+func test_court_has_no_parallel_office_screen_or_appointment_dossier()->void:
+	var modal:=Modal.new();add_child(modal)
+	await get_tree().process_frame
+	assert_object(modal.find_child("CourtTabofficials",true,false)).is_null()
+	modal.domestic_page="officials";modal.show_court()
+	assert_object(modal.find_child("FamilyCourt",true,false)).is_not_null()
+	var head:=int(F.family("Knowledge").head)
+	assert_str(F.court_title(head)).contains(String(F.family("Knowledge").name))
+	assert_str(preload("res://scripts/person_posts.gd").of({"person_id":head}).title).contains(String(F.family("Knowledge").name))
+	var rows:=F.court_rows(head)
+	assert_bool(rows.any(func(row:Array)->bool:return row[0]=="Wants")).is_true()
+	assert_bool(rows.any(func(row:Array)->bool:return row[0] in ["Office","Could hold it","Empty offices"])).is_false()
+	var audience:=preload("res://scripts/audience_hall.gd").summon({"person_id":head})
+	assert_str(String(audience.get("speaker",{}).get("title",""))).contains(String(F.family("Knowledge").name))
+	modal.queue_free();await get_tree().process_frame
+
+func test_small_households_do_not_show_old_office_management()->void:
+	GameState.society_exchange.erase("major_families")
+	GameState.ensure_population_total(120)
+	var modal:=Modal.new();add_child(modal)
+	await get_tree().process_frame
+	assert_object(modal.find_child("CourtTabofficials",true,false)).is_null()
+	assert_object(modal.find_child("CourtTabpeople",true,false)).is_null()
+	assert_object(modal.find_child("RosterList",true,false)).is_not_null()
+	for entry:Dictionary in preload("res://scripts/hud/court_roster.gd").domestic_people():
+		if int(entry.get("target",{}).get("person_id",0))>0:
+			assert_str(String(entry.title).to_lower()).not_contains("steward").not_contains("minister")
+	modal.queue_free();await get_tree().process_frame

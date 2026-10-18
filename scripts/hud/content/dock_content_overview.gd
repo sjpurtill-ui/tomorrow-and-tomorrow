@@ -47,7 +47,7 @@ func tab(_sub:int)->Dictionary:
 		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon,
 		"settlement_view":{"settlement_id":primary,"name":People.home_name(),"terrain":terrain,"population":int(GameState.population_total)},
 		"day":floori(GameState.elapsed_days),"workforce_revision":signature(),"world_running":is_instance_valid(terrain) and float(terrain.get("game_speed"))>0.0,"pause_to_plan":pause_to_plan,
-		"workforce":{"capture":capture_workforce,"step":WorkforcePreview.step,"evaluate":WorkforcePreview.evaluate,"is_current":WorkforcePreview.is_current,"commit":commit_workforce}}
+		"workforce":{"assign":assign_workforce,"capture":capture_workforce,"step":WorkforcePreview.step,"evaluate":WorkforcePreview.evaluate,"is_current":WorkforcePreview.is_current,"commit":commit_workforce}}
 	return {"blocks":[block]}
 
 ## WHAT THE PEOPLE ARE DOING TODAY, and who sets it (manual_work.gd). Our
@@ -97,6 +97,24 @@ func capture_workforce(for_assignment:bool=false)->Dictionary:
 	var captured:=WorkforcePreview.capture()
 	captured["day"]=floori(GameState.elapsed_days)
 	return captured
+
+## A direct click is a live command, not a conditional forecast approval.
+## Finish the scheduled day, then use the sole workforce authority synchronously.
+func assign_workforce(role:String,points:int)->Dictionary:
+	if role not in Manual.ROLES or points not in [-1,1,5]:
+		return {"ok":false,"reason":"Choose a valid allocation step."}
+	WorldSimulation.flush_day()
+	if WorldSimulation.advancing or WorldSimulation.actor_id!="player":
+		return {"ok":false,"reason":"The current day is still finishing. Try again in a moment."}
+	if Manual.able()<=0:return {"ok":false,"reason":"There are no available workers."}
+	var before:=Manual.counts()
+	if not Manual.manual():Manual.set_manual(true)
+	var prior:=Manual.percents()
+	Manual.move_share(role,points)
+	var shares:=Manual.percents()
+	if shares==prior:return {"ok":false,"reason":"No further share can move in that direction."}
+	if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"):hud.request_immediate_dock_refresh()
+	return {"ok":true,"before":before,"counts":Manual.counts(),"shares":shares,"revision":signature()}
 
 ## An explicit allocation step changes work through this guarded command.
 ## The captured token must still match; stale commands never mutate work.

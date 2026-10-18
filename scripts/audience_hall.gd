@@ -588,6 +588,8 @@ static func _expire(day:int)->void:
 		_archive(audience)
 
 static func _enqueue(audience:Dictionary,day:int,external:bool=false)->void:
+	if String(audience.get("origin",""))!="foreign" and int(audience.get("speaker",{}).get("person_id",0))>0:
+		audience.speaker.title=preload("res://scripts/major_families.gd").court_title(int(audience.speaker.person_id))
 	var s:=state()
 	s.queue.append(audience)
 	if String(audience.get("origin",""))=="court" and not _personal(audience):

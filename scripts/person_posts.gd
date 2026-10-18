@@ -51,7 +51,7 @@ static func _official(pid:int,commands:Array)->Dictionary:
 		var c:Dictionary=command
 		if String(c.get("id",""))==Commands.WAR_LEADER and group=="war" and int(c.get("men",0))>0:place=_field_words(c)
 	if titles.is_empty():titles.append("Official")
-	return {"title":" and ".join(titles),"place":place,"group":group}
+	return {"title":preload("res://scripts/major_families.gd").court_title(pid),"place":place,"group":group}
 
 ## A figure of note: a general (in the field or at home, as War shows them),
 ## a master builder, or one of the gifted.
