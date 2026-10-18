@@ -51,14 +51,17 @@ saves initialize it only when eligible. State is bounded to nine trade houses,
 nine party organizations and forty history entries per civilization. No generated
 caches, saves, report artifacts or UIDs belong in this delivery.
 
-Validation: 92 distinct checks pass across families (31), court facts (7),
+Validation: 93 distinct checks pass across families (32), court facts (7),
 early visitors (14), growing visitors (18), and manual work (22). Final focused
-family run: 31/31, zero errors, failures or orphans. The court-facts fixture now
+family run: 32/32, zero errors, failures or orphans. The court-facts fixture now
 explicitly tests unseen enemy preparations before marking the report heard;
 it previously assumed a seeded detection roll always succeeded. Save roundtrip,
 AI civilization isolation, succession, dynamic coalitions, voice prompts/offline
 arguments, contextual ambition gates, and unchanged worker counts are covered.
 UI validation is headless control/flow testing, not a captured visual audit.
+The final follow-up keeps future population unlocks out of character fact sheets,
+separates political-house questions from ordinary household/captivity questions,
+and keeps humorous lines from asserting unrecorded accusations by rivals.
 Integration: INTEGRATED. Source `2cfa4988ba62355fc178450c5c9e3f4f151e2f95`
 was pushed and remotely verified on both the task branch and main before the
 canonical Mac main was fast-forwarded (0/0 ahead/behind). Release export is

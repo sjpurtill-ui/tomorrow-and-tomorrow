@@ -142,7 +142,7 @@ static func _home()->String:
 ## bare "how many?" just after an order about a town's men.
 static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:String="")->String:
 	var family_question:=question.to_lower()
-	if is_question(question) and (family_question.contains("families") or family_question.contains("political parties") or family_question.contains("patronage") or family_question.contains("work mandate")):
+	if is_question(question) and (family_question.contains("major families") or family_question.contains("trade houses") or family_question.contains("favored house") or family_question.contains("family program") or family_question.contains("political parties") or family_question.contains("patronage") or family_question.contains("endorsed program")):
 		return String(sheet.get("families",""))
 	var text:=normalize(question.strip_edges())
 	if text.is_empty() or not is_question(text): return ""

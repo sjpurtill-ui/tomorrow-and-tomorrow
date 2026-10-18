@@ -127,7 +127,7 @@ static func answer_for(audience_id:String,text:String)->String:
 static func sheet(which:Array)->Dictionary:
 	var day:=_day()
 	var out:={"offices":which.duplicate(),"day":day,"when":EraWords.when(day)}
-	out["families"]=preload("res://scripts/major_families.gd").brief()
+	out["families"]=preload("res://scripts/major_families.gd").court_brief()
 	_common(out)
 	if which.has("war"): _war(out)
 	if which.has("stores"): _stores(out)

@@ -320,3 +320,12 @@ func test_repeated_concessions_do_not_farm_loyalty()->void:
 	loyalty=float(F.family("Logistics").loyalty)
 	assert_bool(F.decide("trade","Logistics").ok).is_false()
 	assert_float(F.family("Logistics").loyalty).is_equal(loyalty)
+
+func test_small_court_does_not_know_future_unlocks_or_hijack_household_questions()->void:
+	GameState.society_exchange.erase("major_families")
+	GameState.ensure_population_total(120)
+	var facts:=preload("res://scripts/court_facts.gd").sheet(["stores"])
+	assert_str(String(facts.families)).not_contains("10,000")
+	assert_str(String(facts.families)).contains("households")
+	var answer:=preload("res://scripts/court_answers.gd").answer(facts,"How many families are held captive?")
+	assert_str(answer).is_not_equal(String(facts.families))

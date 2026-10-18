@@ -349,6 +349,10 @@ static func decide(action:String,id:String)->Dictionary:
 	else:return {"ok":false,"text":"Unknown family decision."}
 	return {"ok":true,"text":String(d.history[0].text)}
 
+static func court_brief()->String:
+	if data().is_empty():return "There are no established trade houses here. People speak for their households and their own practical concerns."
+	return brief()
+
 static func brief()->String:
 	if data().is_empty():return "Major families emerge at 10,000 people. Household visitors and officials bring the smaller settlement's business."
 	var d:=data()

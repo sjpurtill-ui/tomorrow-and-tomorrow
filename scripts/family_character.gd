@@ -25,10 +25,10 @@ const HUMOR={
 	"discovery":["I can bear being wrong. Being told I am wrong before anyone tries it is much more irritating.","If age settled every argument, we would put a stone in charge."],
 	"service":["Everyone praises generosity. The disagreement starts when we discuss whose stores to open."],
 	"exchange":["I have nothing against strangers. Most of them have not yet asked me for credit."],
-	"dynasty":["My rivals call our standing inherited. Their own advantages, naturally, are deserved."],
+	"dynasty":["Inherited standing sounds much more respectable when it is one's own."],
 	"security":["A quiet night is excellent work. Unfortunately it makes a very poor speech."],
-	"conquest":["My rivals are admirably cautious about risks someone else would receive the credit for."],
-	"stewardship":["I am told I worry too much about next winter. Winter has never thanked me for worrying less."],
+	"conquest":["Caution is easier to admire when someone else would receive the credit."],
+	"stewardship":["I worry about next winter. Winter has never thanked me for worrying less."],
 }
 
 static func context()->Dictionary:
