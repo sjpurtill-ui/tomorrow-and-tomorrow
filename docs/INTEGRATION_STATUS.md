@@ -1,8 +1,11 @@
 ## October 17 — Evolving families / contextual court characters
 
-Status: READY — validated in `codex/evolving-major-families`
+Status: INTEGRATED — source `2cfa4988ba62355fc178450c5c9e3f4f151e2f95`, verified on
+`origin/main` and `origin/codex/evolving-major-families`
 at `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, based on
-`96010115c1c897fcf00035ee7dd5a00cd803ffc8`. Not yet integrated.
+`96010115c1c897fcf00035ee7dd5a00cd803ffc8`. Canonical main was fast-forwarded
+only after the remote main SHA matched; ahead/behind 0/0. Release build follows
+this record. No live game or editor was restarted.
 
 Domestic court is organized around active trade families and their evolving
 political coalitions. User correction is authoritative: efficiency bonuses and

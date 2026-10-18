@@ -59,7 +59,10 @@ it previously assumed a seeded detection roll always succeeded. Save roundtrip,
 AI civilization isolation, succession, dynamic coalitions, voice prompts/offline
 arguments, contextual ambition gates, and unchanged worker counts are covered.
 UI validation is headless control/flow testing, not a captured visual audit.
-Integration: READY; awaiting verified branch push and main integration.
+Integration: INTEGRATED. Source `2cfa4988ba62355fc178450c5c9e3f4f151e2f95`
+was pushed and remotely verified on both the task branch and main before the
+canonical Mac main was fast-forwarded (0/0 ahead/behind). Release export is
+separate from this source verification. No running player session was restarted.
 
 ## October 17 — Consequential visits from 1,000 to 10,000 people
 
