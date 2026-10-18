@@ -14,6 +14,7 @@ const ART_PATH:="res://assets/ui/materials/working-stockyard.jpg"
 const SCENE_INK:=Color("fff4df")
 
 var data:Dictionary={}
+var _storage_grid:Control
 var _shape:Array=[]
 var _land:Label
 var _land_bar:Control
@@ -59,6 +60,7 @@ func setup(block:Dictionary)->void:
 	_margin=MarginContainer.new();_margin.name="StockyardReadingWidth";add_child(_margin)
 	_body=VBoxContainer.new();_body.add_theme_constant_override("separation",12);_margin.add_child(_body)
 	_build_banner();_build_capacity()
+	_storage_grid=preload("res://scripts/hud/storage_capacity_grid.gd").new();_body.add_child(_storage_grid)
 	_composition=BoxContainer.new();_composition.name="StockyardInventoryAndContext";_composition.add_theme_constant_override("separation",22);_body.add_child(_composition)
 	_inventory=VBoxContainer.new();_inventory.name="StockyardInventory";_inventory.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_inventory.size_flags_stretch_ratio=1.8;_inventory.add_theme_constant_override("separation",8);_composition.add_child(_inventory)
 	_catalog=_inventory
@@ -266,10 +268,15 @@ func _arrange()->void:
 		(slot.label as Control).custom_minimum_size.x=clampf(row_width-60.0-stock_width,60.0,190.0)
 
 func _fill()->void:
+	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()))
 	var held:=float(data.get("storage",0.0));var room:=float(data.get("capacity",0.0))
 	var capacity_known:=bool(data.get("capacity_known",room>0.0))
 	var full:=held/room if capacity_known and room>0 else -1.0
 	S.put(_hero,"Storage capacity not measured." if not capacity_known else "The yard is overflowing." if room>0 and held>room else "The yard is nearly full." if full>=0.85 else "Room for the next load." if room>0 else "No storage capacity.",SCENE_INK)
+	for store:Dictionary in data.get("storage_rows",[]):
+		if String(store.kind) in ["food","water"]:continue
+		if float(store.used)>float(store.capacity):
+			S.put(_hero,String(store.label)+" overflowing.",SCENE_INK);break
 	var hauling:Variant=data.get("hauling")
 	var carried:=clampf(float(hauling),0,1) if hauling!=null else -1.0
 	var supply_words:="Carrying has not been measured yet." if carried<0 else "Recorded carrying: %d%% of extracted output." % roundi(carried*100)

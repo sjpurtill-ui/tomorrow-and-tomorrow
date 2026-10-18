@@ -35,6 +35,7 @@ static func read(o:Dictionary)->Dictionary:
 		"recruit_line": return _recruit_line(refs)
 		"research": return _research(refs)
 		"build": return _build(refs)
+		"storage": return SettlementModel.with_city_resources(String(refs.get("settlement_id","")),_storage.bind(refs))
 		"defences": return _defences(refs)
 		"directive": return _directive(refs)
 		"civic": return _civic(refs)
@@ -291,3 +292,13 @@ static func _civic(refs:Dictionary)->Dictionary:
 		"DISCUSSION","PROPOSAL RECORDED":return {"state":"accepted","line":"The council: talk only, nothing done","reason":"the council only talked; nothing has changed","progress":0.0}
 		"NEEDS YOUR DECISION":return {"state":"accepted","line":"The council waits for your answer","reason":"the town leader objects and waits for you","progress":0.0}
 	return {"state":"accepted","line":"The council weighs it","reason":"the town leader is still weighing it","progress":0.0}
+
+static func _storage(refs:Dictionary)->Dictionary:
+	var storage=preload("res://scripts/storage_works.gd")
+	var kind:=String(refs.get("kind",""))
+	if storage.added(kind)>float(refs.get("before",0)):
+		return {"state":"done","line":String(storage.LABELS.get(kind,kind))+" expanded","progress":1.0,"moved":true}
+	for row:Dictionary in storage.rows([kind]):
+		var work:=float(GameState.settlement_projects.get(storage.title(kind),0))
+		return {"state":"under_way" if work>0 else "accepted","line":String(row.status),"reason":String(row.status),"progress":work,"moved":work>0}
+	return {"state":"stalled","line":"Storage job unavailable","progress":0.0}

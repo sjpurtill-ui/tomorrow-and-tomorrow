@@ -22,7 +22,7 @@ const STARTING_SHELTER_PLACES:=150
 const Fabric:=preload("res://scripts/built_fabric.gd")
 
 static func _settlement_definitions() -> Array[Dictionary]:
-	return [
+	var definitions:Array[Dictionary]=[
 		{"name":"Hearth Circle", "days":6.0, "requires":[], "minimum":{"Construction":3},"materials":{"Timber":6.0,"Fiber Plants":6.0},"requires_water":true,"effect":"anchors the camp and makes communal work possible"},
 		{"name":"Lean-to Shelters", "days":9.0, "requires":["Hearth Circle"], "minimum":{"Construction":5},"materials":{"Timber":18.0,"Fiber Plants":12.0},"effect":"protects health and expands shelter"},
 		{"name":"Storage Pits", "days":7.0, "requires":["Hearth Circle"], "minimum":{"Construction":4, "Logistics":4},"materials":{"Timber":4.0,"Fiber Plants":3.0},"effect":"slows spoilage and expands food storage"},
@@ -34,7 +34,13 @@ static func _settlement_definitions() -> Array[Dictionary]:
 		{"name":"Shrine House", "days":18.0, "requires":["Hearth Shrine","Lean-to Shelters"], "discovery":"first_shrine_house", "minimum":{"Construction":6},"materials":{"Timber":16.0,"Clay":12.0,"Stone":8.0},"effect":"a house for the god, tended by keepers: the people hold together, heed their leaders, love the god more and fear the god less; the offerings cost food and the keepers must be at work"}
 	]
 
+	definitions.append_array(preload("res://scripts/storage_works.gd").projects())
+	return definitions
+
 static func _settlement_project_available(project: Dictionary) -> bool:
+	if project.has("storage_kind"):
+		var storage=preload("res://scripts/storage_works.gd")
+		if not storage.needed(String(project.storage_kind),storage.used(),storage.capacities()):return false
 	if String(project.name) in WorldSimulation.state.settlement_completed:
 		return false
 	for required in project.requires:
@@ -96,10 +102,18 @@ static func _current_settlement_project() -> Dictionary:
 	var priority:=String(city.get("construction_priority",""))
 	for project in available:
 		if String(project.name)==priority:return project
+	# Finish work already begun before switching to a newly full store.
+	for project in available:
+		if float(WorldSimulation.state.settlement_projects.get(project.name,0))>0:return project
 	var best: Dictionary = available[0]
 	var best_score := -INF
 	for project in available:
 		var score := float(WorldSimulation.state.settlement_projects.get(project.name,0.0))*0.08
+		if project.has("storage_kind"):
+			var storage=preload("res://scripts/storage_works.gd")
+			var kind:=String(project.storage_kind)
+			var fill:=float(storage.used()[kind])/maxf(1.0,float(storage.capacities()[kind]))
+			score+=5.0+minf(10.0,fill*4.0)+(20.0 if storage.requested(kind) else 0.0)
 		match String(project.name):
 			"Lean-to Shelters": score+=(1.0-clampf(float(WorldSimulation.state.housing_capacity)/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0))*4.0+1.1
 			"Storage Pits": score+=(1.0-clampf(float(WorldSimulation.state.simulation_metrics.get("food_days",30.0))/45.0,0.0,1.0))*3.4+float(WorldSimulation.state.population_allocations.get("Logistics",0))/10.0
@@ -220,12 +234,14 @@ static func process_day()->Array[Dictionary]:
 	var project:=_current_settlement_project()
 	if project.is_empty():return events
 	var title:=String(project.name)
+	if project.has("storage_kind"):preload("res://scripts/storage_works.gd").begin(project)
 	WorldSimulation.state.settlement_projects[title]=float(WorldSimulation.state.settlement_projects.get(title,0))+daily_work()*WorldSimulation.span
 	if float(WorldSimulation.state.settlement_projects[title])<float(project.days):return events
 	var materials:=_settlement_project_material_plan(project)
 	if materials.is_empty():return events
 	for resource in materials:WorldSimulation.state.resource_stockpiles[resource]=maxf(0,float(WorldSimulation.state.resource_stockpiles.get(resource,0))-float(materials[resource]))
-	WorldSimulation.state.settlement_completed.append(title)
+	if project.has("storage_kind"):preload("res://scripts/storage_works.gd").complete(project)
+	else:WorldSimulation.state.settlement_completed.append(title)
 	if title=="Hearth Circle":
 		WorldSimulation.state.settlement_founded_day=int(WorldSimulation.state.elapsed_days)
 		WorldSimulation.settlements.ensure_founded()
@@ -233,12 +249,13 @@ static func process_day()->Array[Dictionary]:
 	elif title=="Lean-to Shelters":WorldSimulation.state.housing_capacity+=lean_to_places()
 	var completed_form:String="communal_work"
 	var completed_use:String="communal"
-	if title=="Public Stores":completed_form="public_storehouse";completed_use="storage"
+	if project.has("storage_kind"):completed_form="public_storehouse";completed_use="storage"
+	elif title=="Public Stores":completed_form="public_storehouse";completed_use="storage"
 	elif title=="Framed Hall":completed_form="timber_frame_hall"
 	var event:={"day":int(WorldSimulation.state.elapsed_days),"settlement_id":WorldSimulation.state.resource_settlement_id,"settlement_name":WorldSimulation.state.settlement_name,"event":"completed","kind":title,"form":completed_form,"land_use":completed_use,"roof_plan":"thatched_ridge" if title=="Framed Hall" else "","material_family":preload("res://scripts/construction_materials.gd").family_for(materials),"materials":materials,"counts_materials":true,"condition":1.0,"status":"active","note":String(project.get("effect",""))}
 	WorldSimulation.state.record_building_event(event)
 	events.append(event)
-	tell_finished(title)
+	if not project.has("storage_kind"):tell_finished(title)
 	return events
 
 ## A civic work stands: the god's own people remember it in their Chronicle
@@ -325,6 +342,11 @@ static func set_priority(city_id:String,title:String)->Dictionary:
 			var discovery:=String(project.get("discovery",""))
 			valid=discovery.is_empty() or discovery in WorldSimulation.state.known_discoveries
 		if not valid:return {"error":"That project is not known."}
+	var storage=preload("res://scripts/storage_works.gd")
+	for kind:String in storage.KINDS:
+		if title==storage.title(kind):
+			var result:Dictionary=WorldSimulation.settlements.with_city_resources(city_id,storage.queue.bind(kind))
+			if result.has("error"):return result
 	city["construction_priority"]=title
 	WorldSimulation.state.settlement_network_revision+=1
 	return {"ok":true,"message":"Leader manages construction." if title.is_empty() else title+" prioritized when requirements are met."}

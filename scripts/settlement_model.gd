@@ -42,7 +42,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"fire_practice":{"initialized":false,"embers":0.0,"last_day":-1,"source":"none","last_event":"No maintained fire","fuel_today":0.0,"ignitions":0,"extinctions":0},
 	"food_source_health":{"Wild gathering":0.92,"Hunting":0.88,"Fishing":0.90,"Cultivation":0.94},
 	"food_history":[],"food_issue_history":[],"nutrition_reserve":0.90,"malnutrition_burden":0.0,
-	"founding_manifest":{},"settlement_completed":["Hearth Circle"],"settlement_projects":{},
+	"founding_manifest":{},"settlement_completed":["Hearth Circle"],"settlement_projects":{},"storage_works":{},
 	"settlement_plots":[],"settlement_morphology":{"classification":"hamlet"},
 	"housing_capacity":0,"housing_progress":0.0,
 	"settlement_routes":[],"settlement_nuclei":[],"settlement_plot_history":[],

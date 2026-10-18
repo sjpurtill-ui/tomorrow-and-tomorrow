@@ -16,6 +16,7 @@ const SOURCE_ICONS := {"Wild gathering":"gather", "Hunting":"hunt", "Fishing":"f
 const SOURCE_NAMES := ["Cultivation", "Wild gathering", "Hunting", "Fishing"]
 
 var data:Dictionary={}
+var _storage_grid:Control
 var daily_values:Dictionary={}
 var flow_bar:FlowBar
 var _shape:Array=[]
@@ -38,6 +39,7 @@ func setup(block:Dictionary)->void:
 	_margin=MarginContainer.new();_margin.name="PantryReadingWidth";add_child(_margin)
 	_body=VBoxContainer.new();_body.add_theme_constant_override("separation",14);_margin.add_child(_body)
 	_build_scene()
+	_storage_grid=preload("res://scripts/hud/storage_capacity_grid.gd").new();_body.add_child(_storage_grid)
 	_build_daily_flow()
 	_build_commands()
 	_build_details()
@@ -210,6 +212,7 @@ func _who()->String:
 	return _who_of(data)
 
 func _fill()->void:
+	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()))
 	var amounts:=flow_amounts(data.get("flow",{}))
 	var measured:=bool(data.get("flow_known",true))
 	var daily_need:=float(data.get("food_need",amounts.Eaten))

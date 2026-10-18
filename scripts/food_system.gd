@@ -662,6 +662,7 @@ func _food_storage_capacity()->float:
 	if "Public Stores" in WorldSimulation.state.settlement_completed:capacity+=WorldSimulation.state.population_exact*120.0*Goods.factor("public_stores")
 	capacity+=Goods.sealed_storage_rations()
 	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"food_capacity")
+	capacity+=preload("res://scripts/storage_works.gd").added("food")
 	return capacity
 
 func _consume(required: float) -> Dictionary:

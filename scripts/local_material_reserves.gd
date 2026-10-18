@@ -5,6 +5,9 @@ static func calculate()->Dictionary:
 	var result:Dictionary={}
 	var build=preload("res://scripts/settlement_construction.gd")
 	for project:Dictionary in build._settlement_definitions():
+		if project.has("storage_kind"):
+			var storage=preload("res://scripts/storage_works.gd")
+			if not storage.needed(String(project.storage_kind),storage.used(),storage.capacities()):continue
 		if String(project.name) in state.settlement_completed:continue
 		if project.has("discovery") and String(project.discovery) not in state.known_discoveries:continue
 		var ready:=true

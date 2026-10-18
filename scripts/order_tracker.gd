@@ -442,6 +442,12 @@ static func building_order(title:String,result:Dictionary,settlement_id:String="
 	# One work comes first in a town: a later choice replaces the earlier.
 	supersede(card,"priority:%s" % settlement_id)
 	if title=="":done(card,"The town's leader chooses what is built");return card
+	var storage=preload("res://scripts/storage_works.gd")
+	for kind:String in storage.KINDS:
+		if title==storage.title(kind):
+			var before:float=SettlementModel.with_city_resources(settlement_id,storage.added.bind(kind))
+			claim(card,"storage",{"kind":kind,"settlement_id":settlement_id,"before":before},"the builders","construction")
+			return card
 	var built:=0
 	for t in GameState.settlement_completed:
 		if String(t)==title:built+=1

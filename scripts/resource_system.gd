@@ -394,12 +394,7 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var collected:=float(drawn.collected)
 	var conveyed:=float(drawn.conveyed)
 	var rain_collected:=float(drawn.rain)
-	var portable_days:=float(WorldSimulation.state.founding_manifest.get("water_vessel_days",3.0))
-	portable_days+=maxf(0.0,WorldSimulation.consequences.policy_effect("water_storage"))
-	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
-	if "Open Work Area" in WorldSimulation.state.settlement_completed: portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0
-	var capacity:=population*portable_days+maxf(0.0,float(works.get("cistern_capacity",0.0)))
-	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"water_capacity")
+	var capacity:=water_storage_capacity(maxf(0.0,float(works.get("cistern_capacity",0.0))))
 	var stored_before:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0.0)))
 	# A multi-day step (day_span.gd) runs each of its days' store in turn at
 	# the day's draw, so a falling store falls by every day it covers; its
@@ -1237,6 +1232,7 @@ func _storage_capacities()->Dictionary:
 	# already limit how much of the nominal space can be used.
 	var built:Dictionary=WorldSimulation.settlements.city_capacities().get("storage_bulk",{})
 	for kind:String in built:result[kind]=float(result[kind])+float(built[kind])
+	for kind:String in result:result[kind]+=preload("res://scripts/storage_works.gd").added(kind)
 	result.dry*=1.0+WorldSimulation.discovery.effect("dry_storage")
 	result.covered*=1.0+WorldSimulation.discovery.effect("container_capacity")
 	result.sealed*=1.0+WorldSimulation.discovery.effect("container_capacity")
@@ -2020,3 +2016,14 @@ func _role_effect_here(role:String)->Dictionary:
 	var ten_words:="Ten more would bring in nothing until a deposit is opened for work."
 	if per>0.0:ten_words="Ten more would bring in about %.1f more loads a day (%.2f each at today's yield)." % [per*10.0,per]
 	return {"role":role,"now":now_words,"plus_ten":ten_words,"numbers":numbers}
+
+## Shared live capacity for the simulation and the storage controls.
+func water_storage_capacity(cistern_capacity:float=-1.0)->float:
+	if cistern_capacity<0.0:cistern_capacity=maxf(0.0,float(WorldSimulation.state.water_metrics.get("cistern_capacity",0.0)))
+	var portable_days:=float(WorldSimulation.state.founding_manifest.get("water_vessel_days",3.0))
+	portable_days+=maxf(0.0,WorldSimulation.consequences.policy_effect("water_storage"))
+	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
+	if "Open Work Area" in WorldSimulation.state.settlement_completed: portable_days+=1.0+WorldSimulation.discovery.effect("container_capacity")*2.0
+	var capacity:=WorldSimulation.state.population_exact*portable_days+maxf(0.0,cistern_capacity)
+	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"water_capacity")
+	return capacity+preload("res://scripts/storage_works.gd").added("water")

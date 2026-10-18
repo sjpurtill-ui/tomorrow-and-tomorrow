@@ -170,6 +170,7 @@ var food_security := 0.82
 var housing_capacity := 150
 var housing_progress := 0.0
 var settlement_projects: Dictionary = {}
+var storage_works: Dictionary = {}
 var settlement_completed: Array[String] = []
 var settlement_site_committed := false
 var settlement_founded_at := Vector3.ZERO
@@ -565,6 +566,7 @@ func reset_for_new_world(new_seed:int)->void:
 	housing_capacity=150
 	housing_progress=0.0
 	settlement_projects={}
+	storage_works={}
 	settlement_completed=[]
 	settlement_site_committed=false
 	settlement_founded_at=Vector3.ZERO
