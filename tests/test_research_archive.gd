@@ -51,3 +51,12 @@ func test_explore_search_and_pages_reach_every_question_without_a_long_list()->v
 	assert_array(selected).contains_exactly(["q59"])
 	board.question_query="Question 37";board.question_page=0;board._render_questions()
 	assert_int(board.question_grid.get_child_count()).is_equal(1)
+
+func test_archive_can_shrink_after_opening_wide()->void:
+	var board:Control=auto_free(Board.new());add_child(board);board.size=Vector2(1060,700);board.setup(_block([]))
+	for i in 4:await get_tree().process_frame
+	board.size.x=420
+	for i in 6:await get_tree().process_frame
+	assert_bool(board.archive_picker.visible).is_true()
+	assert_bool(board.archive_list.visible).is_false()
+	assert_float(board.get_combined_minimum_size().x).is_less_equal(421.0)

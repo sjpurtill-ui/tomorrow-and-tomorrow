@@ -69,7 +69,7 @@ func _arrange()->void:
 		var wide:=size.x>=760.0
 		archive_list.visible=wide;archive_picker.visible=not wide
 		for grid:GridContainer in archive_detail.find_children("EffectCategories","GridContainer",true,false):grid.columns=2 if size.x>=1000 else 1
-		archive_body.custom_minimum_size.x=minf(maxf(0,size.x),1060.0)
+		archive_body.custom_minimum_size.x=0
 		_fit_archive_reader.call_deferred()
 		return
 	if body==null:return
@@ -285,7 +285,7 @@ func _archive(parent:Node)->void:
 	summary.tooltip_text=String(data.get("summary_tip",""));summary.mouse_filter=Control.MOUSE_FILTER_PASS
 	var fields:Array=data.get("archive_fields",[])
 	archive_picker=VisibleChoice.new();archive_picker.name="ArchiveFieldPicker";archive_picker.custom_minimum_size.y=40;archive_picker.add_theme_font_size_override("font_size",16);parent.add_child(archive_picker)
-	archive_body=HBoxContainer.new();archive_body.name="ArchiveBody";archive_body.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;archive_body.add_theme_constant_override("separation",24);parent.add_child(archive_body)
+	archive_body=HBoxContainer.new();archive_body.name="ArchiveBody";archive_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;archive_body.add_theme_constant_override("separation",24);parent.add_child(archive_body)
 	archive_list=VBoxContainer.new();archive_list.name="ArchiveFields";archive_list.custom_minimum_size.x=232;archive_list.add_theme_constant_override("separation",2);archive_list.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;archive_body.add_child(archive_list)
 	archive_reader=ScrollContainer.new();archive_reader.name="FieldReader";archive_reader.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;archive_reader.size_flags_horizontal=Control.SIZE_EXPAND_FILL;archive_body.add_child(archive_reader)
 	archive_detail=VBoxContainer.new();archive_detail.name="FieldAccount";archive_detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;archive_detail.add_theme_constant_override("separation",6);archive_reader.add_child(archive_detail)
