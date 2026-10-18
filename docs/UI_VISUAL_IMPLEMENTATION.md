@@ -34,10 +34,10 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 ## Batch 4: households and politics
 
-- [ ] Early household court and reachable titles/actions checked in play.
-- [ ] Family court: portraits, program gains/drawbacks/cost, rivalry and wants.
-- [ ] Evolution through all five population thresholds and organization stages.
-- [ ] Separate favor/endorsement/funding consequences, without moving workers.
+- [x] Early household court and reachable titles/actions checked in play.
+- [x] Family court: portraits, program gains/drawbacks/cost, rivalry and wants.
+- [x] Evolution through all five population thresholds and organization stages.
+- [x] Separate favor/endorsement/funding consequences, without moving workers.
 - [x] Culture: all official/lived value pairs and actual bonuses.
 - [ ] Audience/diplomacy: visible targets/actions and adjudicated consequence receipt.
 
@@ -84,3 +84,7 @@ People has a reconciled selectable workforce strip and stable donor/recipient fe
 ## Checkpoint 5 — Delivered research and hardship losses
 
 Health now distinguishes unlocked/delivered signed effect totals, actual adoption and missing means. No isolated longevity attribution is claimed. The bounded hardship browser adds selected loss pictograms; knowledge archive effects become compact columns. 22 checks pass and native 1280/500 renders were reviewed with clean capture exit. The global research overview and other remaining checklist items stay required.
+
+## Checkpoint 6 — Families as consequential choices
+
+Family court has portraits, stage/organization readings, shared-formula program comparisons, explicit patronage/endorsement/funding distinctions and cultural direction. Daily readings retain controls; falling below 10k correctly returns to households. All 38 tests pass, including each evolutionary stage and worker invariance; actual early court, business family, party and narrow renders reviewed. Wider diplomacy and remaining audit tasks are not complete.

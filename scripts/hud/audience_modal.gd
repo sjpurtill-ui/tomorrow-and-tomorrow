@@ -2185,7 +2185,10 @@ func _process(delta:float)->void:
 		_rest_clock-=delta
 		if _rest_clock<=0.0:
 			_rest_clock=.5
-			if _rest_state()!=rest_signature:
+			var family_panel:=card.find_child("FamilyCourt",true,false)
+			if family_panel!=null and family_panel.refresh():
+				rest_signature=_rest_state();_refresh_voice_indicator();return
+			if family_panel!=null or _rest_state()!=rest_signature:
 				# A new day redraws the court at rest; keep the roster lists
 				# where the player had scrolled them, and their focus.
 				var view:=ViewState.capture(card)
@@ -3235,7 +3238,7 @@ func show_court()->void:
 	for pair:Array in ([["interests","Families and parties"],["people","People and business"],["diplomacy","Diplomacy"]] if families.active() else [["interests","Households and concerns"],["diplomacy","Diplomacy"]]):
 		var button:=Button.new();button.name="CourtTab"+String(pair[0]);button.text=String(pair[1]);Tokens.apply_button_style(button,domestic_page==String(pair[0]))
 		var view:=String(pair[0]);button.pressed.connect(func()->void:domestic_page=view;show_court());tabs.add_child(button)
-	if domestic_page=="interests" and not families.data().is_empty():
+	if domestic_page=="interests" and families.active() and not families.data().is_empty():
 		var panel:=preload("res://scripts/hud/court_families_panel.gd").new()
 		if families.family(family_selected).is_empty() and not families.data().families.is_empty():family_selected=String(families.data().families[0].id)
 		body.add_child(panel);panel.build(family_selected)

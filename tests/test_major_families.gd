@@ -383,3 +383,44 @@ func test_household_identity_and_wants_replace_job_titles_without_reassigning_an
 	assert_dict(GameState.population_allocations).is_equal(allocation)
 	assert_bool(F.data().is_empty()).is_true()
 	modal.queue_free();await get_tree().process_frame
+
+func test_program_previews_match_decisions_without_reassigning_workers()->void:
+	var before:=GameState.society_exchange.duplicate(true)
+	var counts:=GameState.population_allocations.duplicate(true)
+	var endorsement:=F.program_bonuses("Knowledge")
+	var favored:=F.program_bonuses("Knowledge",.15)
+	assert_dict(GameState.society_exchange).is_equal(before)
+	F.decide("entrust","Knowledge")
+	assert_dict(F.bonuses()).is_equal(endorsement)
+	F.decide("favor","Knowledge")
+	assert_dict(F.bonuses()).is_equal(favored)
+	assert_dict(GameState.population_allocations).is_equal(counts)
+
+func test_family_panel_retains_controls_during_reading_refresh()->void:
+	var panel=auto_free(preload("res://scripts/hud/court_families_panel.gd").new());add_child(panel);panel.size=Vector2(1100,750);panel.build("Knowledge")
+	await get_tree().process_frame
+	var button:=panel.find_child("FavorKnowledge",true,false) as Button;button.grab_focus()
+	var identity:=button.get_instance_id()
+	F.family("Knowledge").loyalty=.72
+	assert_bool(panel.refresh()).is_true()
+	assert_int(panel.find_child("FavorKnowledge",true,false).get_instance_id()).is_equal(identity)
+	assert_bool(button.has_focus()).is_true()
+	panel.size.x=500
+	for i in 5:await get_tree().process_frame
+	assert_bool(panel.vertical).is_true()
+	assert_float(panel.get_combined_minimum_size().x).is_less_equal(500)
+	assert_int(panel.find_child("FamilyEvolution",true,false).get_child_count()).is_equal(5)
+
+func test_court_retains_family_controls_and_returns_to_households_after_collapse()->void:
+	var modal:=Modal.new();add_child(modal)
+	await get_tree().process_frame
+	var button:=modal.find_child("FavorFood",true,false)
+	var identity:=button.get_instance_id()
+	F.family("Food").loyalty=.77
+	modal._process(.6)
+	assert_int(modal.find_child("FavorFood",true,false).get_instance_id()).is_equal(identity)
+	GameState.ensure_population_total(120)
+	modal._process(.6)
+	assert_object(modal.find_child("FamilyCourt",true,false)).is_null()
+	assert_object(modal.find_child("CourtTabinterests",true,false)).is_not_null()
+	modal.queue_free();await get_tree().process_frame

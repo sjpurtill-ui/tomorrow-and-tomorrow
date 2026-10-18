@@ -238,10 +238,16 @@ static func program(id:String)->Dictionary:
 static func bonuses()->Dictionary:
 	var d:=data()
 	if not active() or d.is_empty() or String(d.mandate).is_empty():return {}
-	var f:=family(String(d.mandate))
-	if f.is_empty():return {}
+	return program_bonuses(String(d.mandate))
+
+## Read-only action preview and live calculation share exactly the same formula.
+## Favor raises the selected head's loyalty by .15; endorsement does not.
+static func program_bonuses(id:String,loyalty_delta:float=0.0)->Dictionary:
+	var d:=data()
+	var f:=family(id)
+	if not active() or f.is_empty():return {}
 	var result:Dictionary={}
-	var support:=clampf(float(f.loyalty),0,1)
+	var support:=clampf(float(f.loyalty)+loyalty_delta,0,1)
 	var magnitude:=.06+.06*support
 	for role:String in program(String(f.id)).weights:result[role]=magnitude*float(program(String(f.id)).weights[role])
 	# A rival's victory causes resistance, not reassigned workers.
