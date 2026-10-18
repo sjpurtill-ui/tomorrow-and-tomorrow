@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## WORLD › PEOPLES, under the ledger of peoples: what we strive for (the live
 ## generational aim, legacy_aims.gd) and the peoples told of but not yet met,
 ## one line each with Follow. No chart of its own: the map beside the page
@@ -11,7 +12,7 @@ const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 var model:Dictionary={}
 var tier:=0
 var view:Dictionary={}
-var lead_picker:OptionButton
+var lead_picker:VisibleChoice
 var lead_reader:VBoxContainer
 var lead_count:Label
 ## The aims sheet sits in its own slot (hidden while there is no aim).
@@ -102,10 +103,10 @@ func _fill_compact_side(side:VBoxContainer)->void:
 	var head:=UI.heading(stack,"Told of, not yet met")
 	UI.verb(head,"Map of hearsay",actions.get("rumor_map",Callable()),"Where travellers' accounts place peoples we have not seen").name="RumorMap"
 	lead_count=UI.label(stack,"",14,T.INK_MUTED);lead_count.name="LeadCount"
-	var choose:=HBoxContainer.new();choose.add_theme_constant_override("separation",8);stack.add_child(choose)
+	var choose:=VBoxContainer.new();choose.add_theme_constant_override("separation",8);stack.add_child(choose)
 	var search:=LineEdit.new();search.name="FindLead";search.placeholder_text="Find a telling";search.text=String(view.query);search.custom_minimum_size=Vector2(140,40);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_child(search)
 	search.add_theme_font_size_override("font_size",14)
-	lead_picker=OptionButton.new();lead_picker.name="SelectLead";lead_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;T.apply_button_style(lead_picker,false);choose.add_child(lead_picker);lead_picker.get_popup().max_size.y=320
+	lead_picker=VisibleChoice.new();lead_picker.searchable=false;lead_picker.name="SelectLead";lead_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choose.add_child(lead_picker);
 	lead_picker.fit_to_longest_item=false;lead_picker.clip_text=true;lead_picker.custom_minimum_size.x=120
 	lead_reader=VBoxContainer.new();lead_reader.name="SelectedLead";lead_reader.add_theme_constant_override("separation",6);stack.add_child(lead_reader)
 	search.text_changed.connect(func(text:String):view.query=text;_refresh_lead_picker())

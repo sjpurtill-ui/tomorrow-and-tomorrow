@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## THE STANDING BOARD: the heart of the game on one page, dense.
 ##
 ##   ┌ what we are: our seal and name, the words our shape makes of us, the
@@ -464,7 +465,7 @@ func _fill_compare()->void:
 	rose.overlay(overlays)
 	UI.label(compare_row,"  Lay over ours:",12,T.INK_MUTED)
 	if list.size()>3:
-		var choose:=OptionButton.new();choose.name="ComparePeople";T.apply_button_style(choose);choose.add_item("Our people only")
+		var choose:=VisibleChoice.new();choose.name="ComparePeople";choose.add_item("Our people only")
 		var selected:=0
 		for index in list.size():
 			var p:Dictionary=list[index]
@@ -554,7 +555,7 @@ func _fill_peoples()->void:
 	for index in list.size():
 		if String(list[index].civ_id)==String(state.get("regard","")):selected=index
 	if list.size()>1:
-		var choose:=OptionButton.new();choose.name="RegardPeople";T.apply_button_style(choose)
+		var choose:=VisibleChoice.new();choose.name="RegardPeople";
 		for p:Dictionary in list:choose.add_item(String(p.name))
 		choose.select(selected);peoples.add_child(choose)
 		choose.item_selected.connect(func(index:int)->void:
@@ -565,13 +566,9 @@ func _fill_peoples()->void:
 ## World › Peoples beside the ledger). Each people: emblem, name, danger
 ## tags, six pips and, where given, a Talk.
 static func feelings(parent:VBoxContainer,list:Array,on_court:Variant,with_talk:bool)->void:
-	var head:=UI.heading(parent,"How they see us")
-	# The pips' colours, after the heading on a wide sheet, under it on a narrow one.
-	var legend:Container
-	if with_talk:
-		legend=HBoxContainer.new();legend.add_theme_constant_override("separation",4);head.add_child(legend)
-	else:
-		legend=HFlowContainer.new();legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",0);parent.add_child(legend)
+	UI.heading(parent,"How they see us")
+	# Keep named colors below the heading so it cannot be squeezed to letters.
+	var legend:=HFlowContainer.new();legend.add_theme_constant_override("h_separation",4);legend.add_theme_constant_override("v_separation",4);parent.add_child(legend)
 	legend.name="PipLegend"
 	for view:Dictionary in (list[0] as Dictionary).get("views",[]):
 		var dot:=Pip.new();dot.value=1.0;dot.ink=UI.tone_color(String(VIEW_INK.get(String(view.id),"gold")));dot.custom_minimum_size=Vector2(9,9);legend.add_child(dot)

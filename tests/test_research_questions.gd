@@ -176,3 +176,30 @@ func test_a_holdup_is_named_on_its_line_and_explained_on_hover()->void:
 		if String(row.cells.question).ends_with(" · thin team"):named+=1
 		if not String(row.cells.question).begins_with("Turbidity"):assert_str(String(row.tip)).contains(sentence.left(1).to_lower()+sentence.substr(1))
 	assert_int(named).is_equal(4)
+
+func test_daily_evidence_and_attention_refresh_keep_focused_controls()->void:
+	var calls:Array=[]
+	var block:={"fields":[{"id":"health","name":"Health","weight":1,"share":0.25,"on_more":func():calls.append("old"),"on_less":func():pass}],"investigations":[{"id":"turbidity_judging","name":"Turbidity Judging","dynamic":"health","progress":0.2,"research_workforce":1.2}],"choices":[]}
+	var board=auto_free(Board.new());add_child(board);board.setup(block)
+	await get_tree().process_frame
+	var button:Button=board.find_child("MoreAttention",true,false);button.grab_focus()
+	var original_id:=button.get_instance_id()
+	var changed:=block.duplicate(true)
+	changed.fields[0].share=0.5
+	changed.fields[0].on_more=func():calls.append("current")
+	changed.investigations[0].progress=0.7
+	assert_bool(board.update_block(changed)).is_true()
+	await get_tree().process_frame
+	assert_int(board.find_child("MoreAttention",true,false).get_instance_id()).is_equal(original_id)
+	assert_bool(button.has_focus()).is_true()
+	assert_float(board._lane_refs.health.bar.value).is_equal_approx(70.0,0.01)
+	assert_str(board.find_child("AttentionShare",true,false).text).is_equal("50%")
+	assert_array(calls).is_empty()
+	button.pressed.emit()
+	assert_array(calls).contains_exactly(["current"])
+
+func test_changed_question_requires_structural_refresh()->void:
+	var block:={"fields":[],"investigations":[{"id":"turbidity_judging","name":"Turbidity Judging","dynamic":"health","progress":0.2}]}
+	var board=auto_free(Board.new());add_child(board);board.setup(block)
+	var changed:=block.duplicate(true);changed.investigations[0].id="other_question"
+	assert_bool(board.update_block(changed)).is_false()

@@ -71,7 +71,7 @@ func run()->void:
 			sheet.offer_id=selected_id;sheet.offer_to="neighbor";sheet.offer_mode="gift";sheet._build_offer();sheet.outer.scroll_vertical=0;await settle()
 			await capture(viewport,sheet,"give",palette)
 			sheet.offer_mode="trade";sheet.offer_query="Cedar piece 49";sheet.offer_want="";sheet._build_offer();await settle()
-			var wanted:OptionButton=sheet.offer_box.find_child("Wanted",true,false)
+			var wanted:Sheet.VisibleChoice=sheet.offer_box.find_child("Wanted",true,false)
 			check(wanted.item_count==2,"Swap search reaches record50")
 			wanted.select(1);wanted.item_selected.emit(1);await settle()
 			await capture(viewport,sheet,"swap",palette)

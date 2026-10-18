@@ -6,7 +6,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 ## Batch 0–1: controls and material needs
 
-- [ ] Shared retained comparison widgets and bounded visible choices.
+- [x] Shared retained comparison widgets and bounded visible choices.
 - [ ] Buildings: visible categories, material need/have, capacity before/after, builder/queue state.
 - [ ] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
 - [ ] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
@@ -68,3 +68,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 Implemented: reusable retained same-unit comparison tile; visible Building section buttons; material have/need and capacity now/after; expansion bills, gain and builder progress on all seven store tiles; protected-work supplies/free-stock reading in Materials; actual meal/water requirement comparisons; compact responsive Food painting and source grid. The broader map/queue/flow work, incoming-storage projections and other unchecked tasks remain outstanding.
 
 Validation: 49 distinct cases across storage (13), construction (15), Food (10), Materials (9) and comparison widgets (2) pass assertions with no errors/failures. The existing construction suite still reports three orphan nodes and exit 101; the other 34 cases report no orphans. Final logs: `/tmp/tt-visual-batch1-final.log`, `/tmp/tt-visual-buildings-final.log`, `/tmp/tt-visual-batch1-layout.log`. Guarded native renders reviewed at 1280 and 360 widths for Buildings, storage, Food and Materials; the capture exited. Test fixtures and captured files remain local. No simulation rule, allocation or save-schema change. Existing field/action handlers retained.
+
+## Checkpoint 2 — Visible choices and retained Research
+
+Implemented bounded visible choices across eleven UI components (Home, Research, knowledge, Peoples, Known World, expeditions, scouting, Standing, spies, gallery and exchange). Shared trays preserve identity, metadata and disabled state; searches and pages keep large sets bounded. Research daily numeric refresh retains allocation controls and uses current callbacks; actual structural question changes still use the dock's preserved view state. Native review includes wide/narrow layouts and corrected Standing legend wrapping. All broader redesign tasks above remain required; replacing selectors does not complete their screen redesigns. Integration status records tests and the combined-suite collection-state limitation.

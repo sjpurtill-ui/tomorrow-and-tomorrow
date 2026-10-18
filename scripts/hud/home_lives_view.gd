@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## Home's retained, illustrated reading. This view consumes snapshots and invokes
 ## the provider's existing commands; it never calculates or changes game state.
 const T = preload("res://scripts/hud/hud_tokens.gd")
@@ -22,9 +23,9 @@ var _adoption_bar: ProgressBar
 var _standing_gauges: Dictionary = {}
 var _service_gauges: Dictionary = {}
 var _works: VBoxContainer
-var _work_select: OptionButton
-var _priority: OptionButton
-var _founding: OptionButton
+var _work_select: VisibleChoice
+var _priority: VisibleChoice
+var _founding: VisibleChoice
 var _works_open := false
 var _work_id := ""
 var _art_path := ""
@@ -710,15 +711,13 @@ func _action(parent: Node, title: String, key: String, node_name: String, primar
 	if not key.is_empty(): button.pressed.connect(func() -> void: if _valid(data.get(key)): data[key].call())
 	return button
 
-func _selector(parent: Node, node_name: String) -> OptionButton:
-	var select := OptionButton.new()
+func _selector(parent: Node, node_name: String) -> VisibleChoice:
+	var select := VisibleChoice.new()
 	select.name = node_name
 	select.fit_to_longest_item = false
 	select.custom_minimum_size = Vector2(200, 40)
 	select.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	select.add_theme_font_size_override("font_size", 14)
-	select.get_popup().max_size.y = 320
-	T.apply_button_style(select)
 	parent.add_child(select)
 	return select
 
@@ -743,7 +742,7 @@ func _link(parent: Node, title: String, key: String, node_name: String, font_siz
 		button.add_theme_color_override(key_name, T.TEAL_TEXT)
 	return button
 
-func _sync_options(select: OptionButton, items: Array, active: String, label_key: String) -> void:
+func _sync_options(select: VisibleChoice, items: Array, active: String, label_key: String) -> void:
 	var stamp := ""
 	for item: Dictionary in items: stamp += String(item.get("id", "")) + ":" + String(item.get(label_key, "")) + "|"
 	if String(select.get_meta("stamp", "")) != stamp:

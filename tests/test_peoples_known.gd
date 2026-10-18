@@ -280,7 +280,7 @@ func test_selector_sort_search_and_town_callbacks_are_preserved()->void:
 	var view:={"selected":"a"}
 	var board:=_board(_full_model("reckoned"),view,func(id:String):opened.append(id))
 	await get_tree().process_frame
-	var picker:OptionButton=board.find_child("SelectPeople",true,false)
+	var picker:Board.VisibleChoice=board.find_child("SelectPeople",true,false)
 	assert_str(String(_board(_full_model("reckoned")).view.selected)).is_equal("a")
 	assert_str(String(picker.get_item_metadata(0))).is_equal("player")
 	board.sort_by("fighters")
@@ -345,12 +345,12 @@ func test_live_profile_updates_preserve_selection_and_focus()->void:
 	var view:={"selected":"player","sort":"people","flip":false}
 	var board:=_board(_full_model("hearth"),view)
 	await get_tree().process_frame
-	var picker:OptionButton=board.find_child("SelectPeople",true,false)
-	picker.grab_focus()
+	var picker:Board.VisibleChoice=board.find_child("SelectPeople",true,false)
+	picker.buttons[0].grab_focus()
 	var next:=_full_model("hearth",431.0,0.08)
 	board.update_block({"model":next,"view":view})
 	assert_bool(board.find_child("SelectPeople",true,false)==picker).is_true()
-	assert_bool(picker.has_focus()).is_true()
+	assert_bool(picker.buttons[0].has_focus()).is_true()
 	assert_str((board.find_child("Cell_people",true,false).find_child("Value",true,false) as Label).text).is_equal("431")
 	assert_str(String(view.selected)).is_equal("player")
 	var talked:=[]
@@ -370,7 +370,9 @@ func test_a_narrow_profile_wraps_without_hiding_facts_or_actions()->void:
 	await get_tree().process_frame
 	assert_bool(board._columns.vertical).is_true()
 	assert_bool((board.find_child("Freshness",true,false) as Control).visible).is_true()
-	assert_int((board.find_child("SelectPeople",true,false) as OptionButton).get_popup().max_size.y).is_equal(340)
+	assert_int(board._picker.buttons.size()).is_less_equal(6)
+	assert_int(board.find_children("*","OptionButton",true,false).size()).is_equal(0)
+	assert_int(board.find_children("*","MenuButton",true,false).size()).is_equal(0)
 	for id:String in Model.RANKED:assert_bool((board.find_child("Cell_"+id,true,false) as Control).visible).is_true()
 
 func _ground_of(node:Node)->Color:

@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## One selected civilization, its reported capabilities, and its regard for us.
 ## Foreign readings come only from the existing intelligence/Standing estimates.
 const T:=preload("res://scripts/hud/hud_tokens.gd")
@@ -23,7 +24,7 @@ var _labels:Dictionary={}
 var _bars:Dictionary={}
 var _profile:VBoxContainer
 var _columns:BoxContainer
-var _picker:OptionButton
+var _picker:VisibleChoice
 var _search:LineEdit
 var _counter:Label
 var _page_shape:=""
@@ -99,19 +100,21 @@ func toggle(id:String)->void:
 func _build()->void:
 	for child in get_children():remove_child(child);child.queue_free()
 	_counter=_label(counter,14,T.INK_MUTED);_counter.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(_counter)
-	var choose:=HBoxContainer.new();choose.name="CivilizationChooser";choose.add_theme_constant_override("separation",8);add_child(choose)
+	var choose:=VBoxContainer.new();choose.name="CivilizationChooser";choose.add_theme_constant_override("separation",8);add_child(choose)
 	_search=LineEdit.new();_search.name="FindPeople";_search.placeholder_text="Find a people";_search.text=String(view.query);_search.custom_minimum_size=Vector2(140,40);_search.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	_search.size_flags_stretch_ratio=0.7;_search.add_theme_font_size_override("font_size",14);choose.add_child(_search)
 	_search.text_changed.connect(func(text:String):view.query=text;_refresh_picker())
-	_picker=OptionButton.new();_picker.name="SelectPeople";_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_picker.size_flags_stretch_ratio=1.3;_picker.custom_minimum_size.y=40;T.apply_button_style(_picker,false);choose.add_child(_picker)
+	_picker=VisibleChoice.new();_picker.searchable=false;_picker.name="SelectPeople";_picker.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_picker.size_flags_stretch_ratio=1.3;_picker.custom_minimum_size.y=40;choose.add_child(_picker)
 	_picker.fit_to_longest_item=false;_picker.clip_text=true;_picker.custom_minimum_size.x=120
-	_picker.get_popup().max_size.y=340
+
 	_picker.item_selected.connect(func(index:int):select_people(String(_picker.get_item_metadata(index))))
-	var order:=MenuButton.new();order.name="SortPeople";order.text="Sort";T.apply_button_style(order,false);choose.add_child(order)
+	choose.add_child(_label("ORDER BY · choose again to reverse",12,T.INK_MUTED))
+	var order:=VisibleChoice.new();order.name="SortPeople";choose.add_child(order)
 	for id:String in ["name","people","fighters","between","lore","wealth"]:
-		order.get_popup().add_item(String(_titles().get(id,id)))
-		order.get_popup().set_item_metadata(order.get_popup().item_count-1,id)
-	order.get_popup().id_pressed.connect(func(index:int):sort_by(String(order.get_popup().get_item_metadata(index))))
+		order.add_item(String(_titles().get(id,id)))
+		order.set_item_metadata(order.item_count-1,id)
+		if id==String(view.sort):order.select(order.item_count-1)
+	order.item_selected.connect(func(index:int):sort_by(String(order.get_item_metadata(index))))
 	order.tooltip_text="Order the civilization selector by a known reading. Choose the same reading again to reverse it; unknown readings remain last."
 	_profile=VBoxContainer.new();_profile.name="SelectedProfile";_profile.add_theme_constant_override("separation",10);add_child(_profile)
 	_refresh_picker();_build_profile()

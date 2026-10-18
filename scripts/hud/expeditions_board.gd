@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## WORLD › EXPEDITIONS, on one page (the old scouting window and the "every
 ## telling" screen folded in):
 ##
@@ -53,7 +54,7 @@ var city_choice:Dictionary={}
 var city_feedback:Dictionary={}
 var cities_note:Label
 var cities_empty:Label
-var origin_selector:OptionButton
+var origin_selector:VisibleChoice
 var _printed:=""
 
 func setup(block:Dictionary)->void:
@@ -172,8 +173,8 @@ func _fill_send()->void:
 		var b:=UI.chip(seek,String(focus[1]),String(staff.get("focus",""))==key,func()->void:set_focus(key),String(tip))
 		b.name="Focus_"+key
 	var from:=_control_row(send_box,"From")
-	origin_selector=OptionButton.new();origin_selector.name="ScoutOrigin";origin_selector.focus_mode=Control.FOCUS_ALL
-	T.apply_button_style(origin_selector)
+	origin_selector=VisibleChoice.new();origin_selector.name="ScoutOrigin";origin_selector.focus_mode=Control.FOCUS_ALL
+
 	origin_selector.custom_minimum_size=Vector2(170,44);origin_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL;origin_selector.clip_text=true;origin_selector.add_theme_font_size_override("font_size",16)
 	origin_selector.add_theme_color_override("font_color",T.INK)
 	from.add_child(origin_selector)
@@ -371,7 +372,7 @@ func _fill_cities()->void:
 	for index in cities.size():
 		if String(cities[index].city_id)==String(view.get("town","")):selected=index
 	if cities.size()>1:
-		var choose:=OptionButton.new();choose.name="TownSelector";T.apply_button_style(choose)
+		var choose:=VisibleChoice.new();choose.name="TownSelector";
 		choose.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		for city:Dictionary in cities:choose.add_item(String(city.get("name",city.city_id)))
 		choose.select(selected);cities_box.add_child(choose)

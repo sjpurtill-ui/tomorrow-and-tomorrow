@@ -1,4 +1,5 @@
 extends Control
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## Artifacts & Allure — the culture section's museum catalogue.
 ## Reads only the ArtifactCulture facade (scripts/artifact_culture.gd) and acts
 ## through its set_study_focus / set_exhibited calls. Pauses the simulation
@@ -66,7 +67,7 @@ var breakdown_legend:HFlowContainer
 var effects_box:VBoxContainer
 var tab_buttons:Dictionary={}
 var search:LineEdit
-var sort_select:OptionButton
+var sort_select:VisibleChoice
 var main:HBoxContainer
 var browse:VBoxContainer
 var browse_scroll:ScrollContainer
@@ -358,9 +359,9 @@ func _build_controls(root:VBoxContainer)->void:
 		var button:=Button.new();button.name="Tab_"+id;button.focus_mode=Control.FOCUS_ALL;T.apply_button_style(button)
 		button.pressed.connect(func()->void:set_view(id));tabs.add_child(button);tab_buttons[id]=button
 	var tools:=HBoxContainer.new();tools.add_theme_constant_override("separation",12);controls.add_child(tools)
-	search=LineEdit.new();search.name="GallerySearch";search.placeholder_text="Search the collection";search.custom_minimum_size=Vector2(120,44);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;search.add_theme_font_size_override("font_size",16);search.clear_button_enabled=true;tools.add_child(search)
+	search=LineEdit.new();search.size_flags_vertical=Control.SIZE_SHRINK_CENTER;search.name="GallerySearch";search.placeholder_text="Search the collection";search.custom_minimum_size=Vector2(120,44);search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;search.add_theme_font_size_override("font_size",16);search.clear_button_enabled=true;tools.add_child(search)
 	search.text_changed.connect(func(value:String)->void:search_text=value;page=0;refresh(true))
-	sort_select=OptionButton.new();sort_select.name="GallerySort";sort_select.custom_minimum_size=Vector2(170,44);sort_select.focus_mode=Control.FOCUS_ALL;T.apply_button_style(sort_select);tools.add_child(sort_select)
+	sort_select=VisibleChoice.new();sort_select.name="GallerySort";sort_select.custom_minimum_size=Vector2(170,44);sort_select.focus_mode=Control.FOCUS_ALL;tools.add_child(sort_select)
 	for spec:Array in SORTS:sort_select.add_item(String(spec[1]));sort_select.set_item_metadata(sort_select.item_count-1,spec[0])
 	sort_select.item_selected.connect(func(index:int)->void:sort=String(sort_select.get_item_metadata(index));page=0;refresh(true))
 

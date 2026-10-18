@@ -1,4 +1,5 @@
 extends Control
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## Brought home: every find our travellers carried back, and one simple way to
 ## hand a piece to another people (pick a piece, pick who, pick how, confirm).
 const ArtifactArt=preload("res://scripts/hud/artifact_visuals.gd")
@@ -36,7 +37,7 @@ var page:=0
 var previous_page:Button
 var next_page:Button
 var page_label:Label
-var filter:OptionButton
+var filter:VisibleChoice
 var outer:ScrollContainer
 ## The one exchange card: the piece, who receives it, how, then a confirmation.
 var offer_box:VBoxContainer
@@ -84,7 +85,7 @@ func _ready()->void:
 	reader_back=P.button(body,"Back to selected piece",func():home_open=false;study_open=false;_sync_view();outer.scroll_vertical=0);reader_back.name="BackToPiece";reader_back.size_flags_horizontal=SIZE_SHRINK_BEGIN;reader_back.autowrap_mode=TextServer.AUTOWRAP_OFF
 	select_piece=P.button(body,"Choose a piece",func():browse_open=not browse_open;_sync_view());select_piece.name="ChoosePiece";select_piece.size_flags_horizontal=SIZE_SHRINK_BEGIN;select_piece.autowrap_mode=TextServer.AUTOWRAP_OFF
 	browser_box=VBoxContainer.new();browser_box.name="CollectionBrowser";browser_box.add_theme_constant_override("separation",8);body.add_child(browser_box)
-	filter=OptionButton.new();filter.add_item("Everything brought home");filter.add_item("Objects and samples");filter.add_item("Knowledge");filter.add_item("Customs");T.apply_button_style(filter);filter.custom_minimum_size.y=44;filter.item_selected.connect(func(_value:int):page=0;refresh(true));browser_box.add_child(filter)
+	filter=VisibleChoice.new();filter.add_item("Everything brought home");filter.add_item("Objects and samples");filter.add_item("Knowledge");filter.add_item("Customs");filter.custom_minimum_size.y=44;filter.item_selected.connect(func(_value:int):page=0;refresh(true));browser_box.add_child(filter)
 	search=LineEdit.new();search.placeholder_text="Find a piece or a place";search.add_theme_font_size_override("font_size",16);search.custom_minimum_size.y=44;search.text_changed.connect(func(_text:String):page=0;refresh(true));browser_box.add_child(search)
 	var navigation:=HBoxContainer.new();navigation.add_theme_constant_override("separation",8);browser_box.add_child(navigation)
 	previous_page=P.button(navigation,"Previous",func():page=maxi(0,page-1);refresh(true));previous_page.size_flags_horizontal=SIZE_SHRINK_BEGIN;previous_page.custom_minimum_size.x=90
@@ -300,7 +301,7 @@ func _build_offer()->void:
 		_cancel_button(box)
 		return
 	label(box,"Who receives it?","small",T.INK_MUTED)
-	var recipient:=OptionButton.new();recipient.name="Recipient";T.apply_button_style(recipient);recipient.custom_minimum_size.y=44;recipient.fit_to_longest_item=false;recipient.clip_text=true;recipient.get_popup().max_size.y=320
+	var recipient:=VisibleChoice.new();recipient.name="Recipient";recipient.custom_minimum_size.y=44;recipient.fit_to_longest_item=false;recipient.clip_text=true;
 	recipient.add_item("Choose a people");recipient.set_item_metadata(0,"")
 	for id:String in contacts:
 		recipient.add_item(_recipient_name(id));recipient.set_item_metadata(recipient.item_count-1,id)
@@ -322,7 +323,7 @@ func _build_offer()->void:
 		label(box,"Which of their pieces do you want in return?","small",T.INK_MUTED)
 		var find:=LineEdit.new();find.name="FindTheirPiece";find.placeholder_text="Find one of their pieces";find.text=offer_query;find.custom_minimum_size.y=40;box.add_child(find)
 		find.text_changed.connect(func(words:String):offer_query=words;offer_want="";_build_offer.call_deferred())
-		var want:=OptionButton.new();want.name="Wanted";T.apply_button_style(want);want.custom_minimum_size.y=40;want.fit_to_longest_item=false;want.clip_text=true;want.get_popup().max_size.y=320
+		var want:=VisibleChoice.new();want.name="Wanted";want.custom_minimum_size.y=40;want.fit_to_longest_item=false;want.clip_text=true;
 		want.add_item("Choose one of their pieces");want.set_item_metadata(0,"")
 		var target:=E.owner_state(offer_to)
 		if target!=null:

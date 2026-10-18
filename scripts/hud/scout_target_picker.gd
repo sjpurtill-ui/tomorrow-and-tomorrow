@@ -1,9 +1,10 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## Group display choices without merging evidence or changing mission target IDs.
 var detail:Label
-var selector:OptionButton
-var category:OptionButton
-var subject:OptionButton
+var selector:VisibleChoice
+var category:VisibleChoice
+var subject:VisibleChoice
 var options:Array=[]
 var groups:Dictionary={}
 var categories:Array=[]
@@ -22,10 +23,10 @@ static func grouped(options_in:Array)->Dictionary:
 
 func setup(values:Array,selected:String)->void:
 	options=values;groups=grouped(values)
-	category=OptionButton.new();subject=OptionButton.new();selector=OptionButton.new()
-	for control:OptionButton in [category,subject,selector]:
+	category=VisibleChoice.new();subject=VisibleChoice.new();selector=VisibleChoice.new()
+	for control:VisibleChoice in [category,subject,selector]:
 		control.fit_to_longest_item=false;control.custom_minimum_size.y=36
-		control.get_popup().max_size=Vector2i(700,360);add_child(control)
+		add_child(control)
 	detail=Label.new();detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;add_child(detail)
 	selector.item_selected.connect(func(index:int):detail.text=selector.get_item_tooltip(index))
 	categories=groups.keys()

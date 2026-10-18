@@ -1,4 +1,5 @@
 extends "res://scripts/hud/settlement_overview.gd"
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## The Research board ("Work under way"). Its four figures (pace, discoveries a
 ## year, teams at work, how far our learning runs ahead of the calendar) are
 ## the dock's own strip (figures(), read by dock_content_inquiry.gd). Below it:
@@ -36,7 +37,10 @@ var waiting_id:=""
 var active_page_label:Label
 var active_previous:Button
 var active_next:Button
-var waiting_picker:OptionButton
+var waiting_picker:VisibleChoice
+var _retained_shape:Array=[]
+var _lane_refs:Dictionary={}
+var _reading_refs:Dictionary={}
 
 
 ## What speeds and slows the work on every question: one bar, centred on the
@@ -94,6 +98,7 @@ class FactorBar extends Control:
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();data=block;name="InquiryBoard";add_theme_constant_override("separation",14)
 	var plan:=_plan(block)
+	_retained_shape=_refresh_shape(block,plan)
 	if block.has("pace"):_readings(self,block.pace,[2,0])
 	if block.has("hands"):_hands(self,block.hands)
 	# A team freed by a proof took up the best question open to it; for a season
@@ -109,9 +114,72 @@ func setup(block:Dictionary)->void:
 	# Capture only: "--capture-picker" opens the first free team's picker.
 	if "--capture-picker" in OS.get_cmdline_user_args() and not _pickers.is_empty():_open_picker.call_deferred(String(_pickers.keys()[0]))
 
-## The board is drawn afresh on each refresh; its rows are cheap.
-func update_block(_block:Dictionary)->bool:
-	return false
+## Daily readings retain their controls, page, focus and scroll anchor.
+func update_block(block:Dictionary)->bool:
+	var plan:=_plan(block)
+	if _retained_shape!=_refresh_shape(block,plan):return false
+	data=block
+	for lane:Dictionary in plan.lanes:
+		var refs:Dictionary=_lane_refs[String(lane.id)]
+		_fill_attention(refs.head,lane.field)
+		if (lane.slots as Array).is_empty():
+			var wait:=_waiting_words(lane);refs.wait.text=String(wait.text);refs.wait.tooltip_text=String(wait.tip)
+		else:_fill_lane_readings(refs,lane)
+	if block.has("pace"):
+		var readings:=figures(block.pace)
+		for index:int in _reading_refs:
+			var reading:Dictionary=readings[index]
+			_reading_refs[index].text="%s: %s · %s" % [T.sentence_case(String(reading.label)),String(reading.value),String(reading.delta)]
+			_reading_refs[index].tooltip_text=String(reading.tip)
+		_fill_header(plan.pace,block.pace)
+	if block.has("hands"):
+		var hands:Dictionary=block.hands
+		var said:Label=find_child("HandsWords",true,false);said.text=String(hands.get("words",""));said.tooltip_text=String(hands.get("tip",""))
+		for pair in [["AssignKnowledgeWorkers","on_assign"],["MoreHands","on_more"],["LeaderDecides","on_free"]]:
+			var button:Button=find_child(pair[0],true,false)
+			if button:button.set_meta("live_callback",hands.get(pair[1]))
+	if block.has("artifacts"):
+		var row:Node=find_child("ArtifactStudy",true,false)
+		_fill_attention(row,block.artifacts)
+		var words:Label=row.find_child("StudyWords",true,false);words.text=String(block.artifacts.get("words",""));words.tooltip_text=String(block.artifacts.get("tip",""))
+	return true
+
+static func _refresh_shape(block:Dictionary,plan:Dictionary)->Array:
+	var records:Array=[]
+	for lane:Dictionary in plan.lanes:
+		var lead:Dictionary=_lead_record(lane.slots)
+		records.append([String(lane.id),lead.get("id",""),(lane.slots as Array).size()])
+	var hands:Dictionary=block.get("hands",{})
+	return [plan.shape,records,block.has("hands"),bool(hands.get("occupied",false)),hands.get("on_assign") is Callable,block.has("artifacts")]
+
+static func _lead_record(slots:Array)->Dictionary:
+	var result:Dictionary={}
+	for slot:Dictionary in slots:
+		if result.is_empty() or float(slot.record.get("progress",0))>float(result.get("progress",0)):result=slot.record
+	return result
+
+func _fill_lane_readings(refs:Dictionary,lane:Dictionary)->void:
+	var record:=_lead_record(lane.slots)
+	var cells:={"cells":{}};_question_cells(cells,record)
+	var progress:=float(record.get("progress",0))
+	refs.bar.value=clampf(progress,0,1)*100
+	var caption:="%d%% proven · %s to proof" % [roundi(progress*100),String(cells.cells.time)]
+	if String(cells.cells.time) in ["—","stalled"]:caption="%d%% proven · %s" % [roundi(progress*100),"gathering evidence" if String(cells.cells.time)=="—" else "work is stalled"]
+	var status:=_card_words(record)
+	if String(status.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE"):caption+=" · "+String(status.phase).to_lower()
+	refs.detail.text=caption;refs.detail.tooltip_text=String(cells.tip)
+	var teams:=0;var all:Array[String]=[]
+	for slot:Dictionary in lane.slots:
+		teams+=maxi(1,int(slot.record.get("teams_on",1)))
+		all.append("%s · %d%% proven" % [String(slot.record.get("name","")),roundi(float(slot.record.get("progress",0))*100)])
+	refs.count.text="%d team%s" % [teams,"" if teams==1 else "s"];refs.count.tooltip_text="\n".join(all)
+
+func _fill_attention(parent:Node,field:Dictionary)->void:
+	var less:Button=parent.get_node_or_null("LessAttention")
+	if less==null:return
+	less.disabled=int(field.get("weight",0))<=0;less.set_meta("live_callback",field.get("on_less"))
+	parent.get_node("MoreAttention").set_meta("live_callback",field.get("on_more"))
+	parent.get_node("AttentionShare").text="%d%%" % roundi(float(field.get("share",0))*100)
 
 ## Each field reads as a small entry in a field journal. Evidence belongs to
 ## its question; attention controls remain beside the field they change.
@@ -133,9 +201,9 @@ func _field_spread(lanes:Array)->void:
 		active_next=_small_button(pager,"Next",func()->void:active_page+=1;_apply_field_visibility(),"Next fields at work")
 	if waiting_fields.visible:
 		var title_wait:=_voice("Other fields",20);waiting_fields.add_child(title_wait);waiting_fields.move_child(title_wait,0)
-		waiting_picker=OptionButton.new();waiting_picker.custom_minimum_size.y=40;waiting_picker.add_theme_font_size_override("font_size",16);waiting_fields.add_child(waiting_picker);waiting_fields.move_child(waiting_picker,1)
+		waiting_picker=VisibleChoice.new();waiting_picker.custom_minimum_size.y=40;waiting_picker.add_theme_font_size_override("font_size",16);waiting_fields.add_child(waiting_picker);waiting_fields.move_child(waiting_picker,1)
 		for lane:Dictionary in lanes:
-			if (lane.slots as Array).is_empty():waiting_picker.add_item(String(lane.name));waiting_picker.set_item_metadata(waiting_picker.item_count-1,String(lane.id))
+			if (lane.slots as Array).is_empty():waiting_picker.add_icon_item(preload("res://scripts/resource_icons.gd").domain_texture(String(lane.id),Visuals.color(String(lane.id))),String(lane.name));waiting_picker.set_item_metadata(waiting_picker.item_count-1,String(lane.id))
 		waiting_id=String(waiting_picker.get_item_metadata(0))
 		waiting_picker.item_selected.connect(func(index:int)->void:waiting_id=String(waiting_picker.get_item_metadata(index));_apply_field_visibility())
 	_apply_field_visibility()
@@ -144,7 +212,7 @@ func _field_spread(lanes:Array)->void:
 		var row:=HBoxContainer.new();row.name="ArtifactStudy";row.add_theme_constant_override("separation",12);add_child(row)
 		var text:=VBoxContainer.new();text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(text)
 		text.add_child(_voice("Learning from objects",20))
-		_line(text,String(study.get("words","")),13,T.BODY).tooltip_text=String(study.get("tip",""))
+		var study_words:=_line(text,String(study.get("words","")),13,T.BODY);study_words.name="StudyWords";study_words.tooltip_text=String(study.get("tip",""))
 		_attention(row,study)
 
 func _apply_field_visibility()->void:
@@ -178,11 +246,13 @@ func _field_entry(lane:Dictionary)->void:
 	label.tooltip_text=String(field.get("goal",""))+"\nExplore this field's knowledge."
 	if field.get("on_open") is Callable:label.pressed.connect(field.on_open)
 	head.add_child(label)
+	_lane_refs[String(lane.id)]={"head":head}
 	if not field.is_empty():_attention(head,field)
 	var slots:Array=lane.slots
 	if slots.is_empty():
 		var wait:=_waiting_words(lane)
 		var waiting:=_line(box,String(wait.text),14,T.TEXT_SOFT);waiting.tooltip_text=String(wait.tip);waiting.mouse_filter=Control.MOUSE_FILTER_PASS
+		_lane_refs[String(lane.id)]["wait"]=waiting
 		return
 	var lead:Dictionary=slots[0]
 	var teams:=0
@@ -199,11 +269,13 @@ func _field_entry(lane:Dictionary)->void:
 	_question_cells(cells,record)
 	var progress:=float(record.get("progress",0))
 	_bar(words,progress,Visuals.color(String(lane.id)))
+	_lane_refs[String(lane.id)]["bar"]=words.get_child(words.get_child_count()-1)
 	var caption:="%d%% proven · %s to proof" % [roundi(progress*100),String(cells.cells.time)]
 	if String(cells.cells.time) in ["—","stalled"]:caption="%d%% proven · %s" % [roundi(progress*100),"gathering evidence" if String(cells.cells.time)=="—" else "work is stalled"]
 	var status:=_card_words(record)
 	if String(status.phase)!="" and not String(record.get("bottleneck","")).begins_with("AHEAD OF ITS AGE"):caption+=" · "+String(status.phase).to_lower()
 	var detail:=_line(words,caption,14,T.BODY);detail.tooltip_text=String(cells.tip);detail.mouse_filter=Control.MOUSE_FILTER_PASS
+	_lane_refs[String(lane.id)]["detail"]=detail
 	var extra:="%d team%s" % [teams,"" if teams==1 else "s"]
 	if slots.size()>1:_line(words,"%d other question%s" % [slots.size()-1,"" if slots.size()==2 else "s"],14,T.TEXT_SOFT)
 	var foot:=HFlowContainer.new();foot.add_theme_constant_override("h_separation",8);words.add_child(foot)
@@ -211,15 +283,16 @@ func _field_entry(lane:Dictionary)->void:
 	var all:Array[String]=[]
 	for slot:Dictionary in slots:all.append("%s · %d%% proven" % [String(slot.record.get("name","")),roundi(float(slot.record.get("progress",0))*100)])
 	count.tooltip_text="\n".join(all);head.add_child(count);head.move_child(count,1)
+	_lane_refs[String(lane.id)]["count"]=count
 	for slot:Dictionary in slots:
 		if _pickers.has(String(slot.key)):_small_button(foot,"Choose question",_open_picker.bind(String(slot.key)),"A team is free: keep this question or take up another.");break
 	if foot.get_child_count()==0:words.remove_child(foot);foot.queue_free()
 
 func _attention(parent:Node,field:Dictionary)->void:
 	var less:=_small_button(parent,"−",field.get("on_less"),"Give one step of attention to the other fields")
-	less.disabled=int(field.get("weight",0))<=0;less.custom_minimum_size=Vector2(40,40)
-	var share:=T.make_label("%d%%" % roundi(float(field.get("share",0))*100),13,T.INK);share.custom_minimum_size.x=36;share.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;parent.add_child(share)
-	var more:=_small_button(parent,"+",field.get("on_more"),"Move one step of attention to this field");more.custom_minimum_size=Vector2(40,40)
+	less.name="LessAttention";less.disabled=int(field.get("weight",0))<=0;less.custom_minimum_size=Vector2(40,40)
+	var share:=T.make_label("%d%%" % roundi(float(field.get("share",0))*100),13,T.INK);share.name="AttentionShare";share.custom_minimum_size.x=36;share.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;share.size_flags_vertical=Control.SIZE_SHRINK_CENTER;parent.add_child(share)
+	var more:=_small_button(parent,"+",field.get("on_more"),"Move one step of attention to this field");more.name="MoreAttention";more.custom_minimum_size=Vector2(40,40)
 
 ## The table of fields (dense_blocks.gd): one line per field and per further
 ## question, columns aligned, the field's share of attention with − and + last.
@@ -739,6 +812,7 @@ func _readings(parent:Node,pace:Dictionary,indices:Array)->void:
 		var reading:Dictionary=readings[index]
 		var words:="%s: %s · %s" % [T.sentence_case(String(reading.label)),String(reading.value),String(reading.delta)]
 		var label:=T.make_label(words,16,T.BODY);label.tooltip_text=String(reading.tip);label.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(label)
+		_reading_refs[index]=label
 
 func _fill_header(_words:Dictionary,pace:Dictionary)->void:
 	var parts:=pace_factors(pace)
@@ -820,7 +894,11 @@ func _hands(parent:Node,hands:Dictionary)->void:
 # --------------------------------------------------------------------------
 
 func _small_button(parent:Node,label:String,callback:Variant,tip:String)->Button:
-	var button:=Dense.verb(label,callback,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	var button:=Dense.verb(label,null,tip,not (callback is Callable and (callback as Callable).is_valid()))
+	button.set_meta("live_callback",callback)
+	button.pressed.connect(func()->void:
+		var current:Variant=button.get_meta("live_callback")
+		if not button.disabled and current is Callable and current.is_valid():current.call())
 	T.apply_button_style(button)
 	parent.add_child(button)
 	return button

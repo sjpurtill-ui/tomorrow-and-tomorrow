@@ -210,11 +210,11 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 		many.peoples.append(person)
 	board.update_block(many)
 	assert_int(board.find_child("Feelings",true,false).get_child_count()).is_equal(1)
-	var regard:OptionButton=board.find_child("RegardPeople",true,false)
+	var regard:Control=board.find_child("RegardPeople",true,false)
 	assert_int(regard.item_count).is_equal(15)
 	regard.item_selected.emit(14)
 	assert_object(board.find_child("People_density_14",true,false)).is_not_null()
-	var comparisons:OptionButton=board.find_child("ComparePeople",true,false)
+	var comparisons:Control=board.find_child("ComparePeople",true,false)
 	assert_int(comparisons.item_count).is_equal(16)
 	assert_bool(comparisons.is_item_disabled(15)).is_true()
 

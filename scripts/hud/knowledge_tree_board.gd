@@ -1,4 +1,5 @@
 extends "res://scripts/hud/home_ledger.gd"
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## THE KNOWLEDGE TREE (Research › Explore knowledge), drawn in the dock:
 ## one field selector and chosen question, then one path per line of study in that
 ## field, read left to right the way the knowledge grows: how much of the
@@ -23,7 +24,7 @@ var body:BoxContainer
 var detail:VBoxContainer
 var archive_body:HBoxContainer
 var archive_list:VBoxContainer
-var archive_picker:OptionButton
+var archive_picker:VisibleChoice
 var archive_reader:ScrollContainer
 var archive_detail:VBoxContainer
 var archive_selected:String=""
@@ -46,7 +47,7 @@ var question_count:Label
 var question_previous:Button
 var question_next:Button
 var question_search:LineEdit
-var question_status:OptionButton
+var question_status:VisibleChoice
 var question_choices:Array=[]
 
 func setup(block:Dictionary)->void:
@@ -96,11 +97,11 @@ func _fit_archive_reader()->void:
 func _fields(parent:Node)->void:
 	var row:=HFlowContainer.new();row.name="Fields";row.add_theme_constant_override("h_separation",16);row.add_theme_constant_override("v_separation",6);parent.add_child(row)
 	var label:=T.make_label("Explore a field",24,T.INK);label.add_theme_font_override("font",T.font("ui_strong"));label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
-	var picker:=OptionButton.new();picker.name="FieldPicker";picker.custom_minimum_size=Vector2(260,40);picker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;picker.add_theme_font_size_override("font_size",16);row.add_child(picker)
+	var picker:=VisibleChoice.new();picker.name="FieldPicker";picker.custom_minimum_size=Vector2(260,40);picker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;picker.add_theme_font_size_override("font_size",16);row.add_child(picker)
 	var ids:Array[String]=[]
 	for field:Dictionary in data.get("fields",[]):
 		var id:=String(field.id)
-		ids.append(id);picker.add_item(Visuals.name_for(id))
+		ids.append(id);picker.add_icon_item(Icons.domain_texture(id,Visuals.color(id)),Visuals.name_for(id))
 		if id==String(data.get("domain","")):
 			picker.select(ids.size()-1)
 			var summary:=T.make_label("%d known · %d under way" % [int(field.get("known",0)),int(field.get("active",0))],13,T.TEXT_SOFT);summary.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(summary)
@@ -137,9 +138,9 @@ static func lanes_of(rows:Array,domain:String,next:Dictionary)->Array:
 func _lanes(parent:Node)->void:
 	parent.add_child(_voice("Choose a question",22))
 	var controls:=HBoxContainer.new();controls.add_theme_constant_override("separation",8);parent.add_child(controls)
-	question_search=LineEdit.new();question_search.placeholder_text="Search this field";question_search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;question_search.custom_minimum_size.y=40;controls.add_child(question_search)
+	question_search=LineEdit.new();question_search.size_flags_vertical=Control.SIZE_SHRINK_CENTER;question_search.placeholder_text="Search this field";question_search.size_flags_horizontal=Control.SIZE_EXPAND_FILL;question_search.custom_minimum_size.y=40;controls.add_child(question_search)
 	question_search.text_changed.connect(func(value:String)->void:question_query=value;question_page=0;_render_questions())
-	question_status=OptionButton.new();question_status.custom_minimum_size.y=40;controls.add_child(question_status)
+	question_status=VisibleChoice.new();question_status.custom_minimum_size.y=40;controls.add_child(question_status)
 	for words:String in ["Open & under way","Known","Waiting","All questions"]:question_status.add_item(words)
 	question_status.item_selected.connect(func(index:int)->void:question_filter=["open","known","waiting","all"][index];question_page=0;_render_questions())
 	question_grid=GridContainer.new();question_grid.name="QuestionChoices";question_grid.columns=2;question_grid.add_theme_constant_override("h_separation",8);question_grid.add_theme_constant_override("v_separation",8);parent.add_child(question_grid)
@@ -282,7 +283,7 @@ func _archive(parent:Node)->void:
 	var summary:=_line(parent,String(data.get("summary","")),16,T.TEXT_SOFT)
 	summary.tooltip_text=String(data.get("summary_tip",""));summary.mouse_filter=Control.MOUSE_FILTER_PASS
 	var fields:Array=data.get("archive_fields",[])
-	archive_picker=OptionButton.new();archive_picker.name="ArchiveFieldPicker";archive_picker.custom_minimum_size.y=40;archive_picker.add_theme_font_size_override("font_size",16);parent.add_child(archive_picker)
+	archive_picker=VisibleChoice.new();archive_picker.name="ArchiveFieldPicker";archive_picker.custom_minimum_size.y=40;archive_picker.add_theme_font_size_override("font_size",16);parent.add_child(archive_picker)
 	archive_body=HBoxContainer.new();archive_body.name="ArchiveBody";archive_body.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;archive_body.add_theme_constant_override("separation",24);parent.add_child(archive_body)
 	archive_list=VBoxContainer.new();archive_list.name="ArchiveFields";archive_list.custom_minimum_size.x=232;archive_list.add_theme_constant_override("separation",2);archive_list.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;archive_body.add_child(archive_list)
 	archive_reader=ScrollContainer.new();archive_reader.name="FieldReader";archive_reader.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;archive_reader.size_flags_horizontal=Control.SIZE_EXPAND_FILL;archive_body.add_child(archive_reader)

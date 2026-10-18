@@ -1,4 +1,5 @@
 extends VBoxContainer
+const VisibleChoice=preload("res://scripts/hud/visible_choices.gd")
 ## THE SPIES PAGE (rail F3): our networks among other peoples and the watch
 ## for theirs among us, on paper like every other page.
 ##
@@ -286,7 +287,7 @@ func _networks(rows:Array,view:Dictionary,parent:Container)->void:
 	if rows.is_empty():
 		UI.label(column,"We know no other people yet",12,T.INK_MUTED)
 		return
-	var selector:=OptionButton.new();selector.name="NetworkPeople";T.apply_button_style(selector)
+	var selector:=VisibleChoice.new();selector.name="NetworkPeople";
 	selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var selected_index:=0
 	for index in rows.size():
