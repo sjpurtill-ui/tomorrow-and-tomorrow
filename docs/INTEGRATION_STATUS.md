@@ -1,3 +1,9 @@
+## October 18 — Visual audit implementation, first checkpoint
+
+READY on `codex/visual-comparison-screens`, base `b8499d6f6aa6e3315763e3f351373bbcba038a1e`. See [UI_VISUAL_IMPLEMENTATION.md](UI_VISUAL_IMPLEMENTATION.md) for the authorized full-scope checklist and unfinished work. This checkpoint adds retained same-unit comparison widgets, direct Building categories and visible construction costs/gains, all-storage expansion bills/progress, Materials' protected/free supply comparison, and Food/water needs. Food's cramped narrow painting is replaced with a compact reserve scene plus readable source grid; its wide painting uses less height.
+
+49 distinct assertions suites' cases pass, no errors/failures; 3 pre-existing construction-suite orphans remain (exit 101 in that suite). Other cases report zero orphans. Actual native renders reviewed at normal/narrow widths; no player window or restart. Data comes from current resource/reserve/building ledgers; no save-schema or gameplay rules change. Captures/reports/import metadata excluded. No shared simulation hotspot edits or integration conflicts. Remaining audit work is not declared complete.
+
 ## October 18 — All-screen visual audit
 
 Documentation delivery: [UI_VISUAL_AUDIT.md](UI_VISUAL_AUDIT.md), audited against integrated source `2a2fc5c9c5d0324c524f070716ae2f7447281282`. Covers every main navigation category and tab, health/court, military and world details, collections, orders, founding and utility overlays. Proposes concrete comparisons, priorities, existing visuals to preserve, mechanics constraints and acceptance checks. Explicitly distinguishes source inspection from runtime visual validation. Flags the remaining watch-visibility language for a border-fort-only rules check; does not claim that check or the proposed redesigns are implemented. No gameplay changes or new save fields in this documentation checkpoint. Local links checked; no player restart.

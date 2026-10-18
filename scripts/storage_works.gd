@@ -90,7 +90,9 @@ static func rows(kinds:Array=KINDS)->Array[Dictionary]:
 			elif WorldSimulation.state.effective_workers("Construction")<=0:status="Needs builders"
 			elif not missing.is_empty():status="Needs "+", ".join(missing)
 			elif work>0:status="Building · %d%%" % roundi(work/float(project.days)*100)
+		var costs:Array=[]
+		for item:String in project.materials:costs.append({"resource":item,"need":float(project.materials[item]),"have":float(WorldSimulation.state.resource_stockpiles.get(item,0))})
 		var bill:PackedStringArray=[]
 		for item:String in project.materials:bill.append("%s %s" % [str(project.materials[item]),item.to_lower()])
-		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"pending":pending,"requested":requested(kind),"building":work>0,"status":status,"added":project.capacity_added,"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
+		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"pending":pending,"requested":requested(kind),"building":work>0,"status":status,"added":project.capacity_added,"costs":costs,"work_done":work,"work_required":float(project.days),"capacity_after":float(room[kind])+float(project.capacity_added),"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
 	return result

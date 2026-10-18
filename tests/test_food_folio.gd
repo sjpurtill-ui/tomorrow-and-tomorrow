@@ -229,3 +229,32 @@ func test_pantry_disclosure_and_live_values_keep_controls_and_input_unchanged() 
 	assert_bool(panel._refs.details.visible).is_true()
 	assert_str(String(panel.daily_values.Net.text)).is_equal("−135")
 	assert_str(_texts(panel)).contains("125").contains("96,000")
+
+func test_coverage_compares_actual_need_without_inventing_unknown_need()->void:
+	var panel=auto_free(FoodPanel.new());var block:=prepared_food()
+	panel.setup(block)
+	assert_bool(panel._refs.food_coverage.visible).is_false()
+	assert_bool(panel._refs.water_coverage.visible).is_true()
+	assert_float(float(panel._refs.water_coverage.get_meta("left"))).is_equal(426.0)
+	assert_float(float(panel._refs.water_coverage.get_meta("right"))).is_equal(440.0)
+	block.food_need=600.0;block.flow.Eaten=400.0
+	var original=panel._refs.food_coverage
+	panel.update_block(block)
+	assert_object(panel._refs.food_coverage).is_same(original)
+	assert_bool(original.visible).is_true()
+	assert_float(float(original.get_meta("left"))).is_equal(600.0)
+	assert_float(float(original.get_meta("right"))).is_equal(400.0)
+
+func test_narrow_food_scene_keeps_sources_readable_and_restores_wide_layout()->void:
+	var host:Control=auto_free(Control.new());host.size=Vector2(360,1000);add_child(host)
+	var panel:=FoodPanel.new();host.add_child(panel);panel.size=Vector2(360,1000);panel.setup(prepared_food())
+	for frame in 4:await get_tree().process_frame
+	assert_bool(panel._refs.source_grid.visible).is_true()
+	for source:String in panel.SOURCE_NAMES:
+		assert_object(panel._refs.source_labels[source].box.get_parent()).is_same(panel._refs.source_grid)
+	assert_float(panel.get_combined_minimum_size().x).is_less_equal(360.0)
+	panel.size.x=1200
+	for frame in 4:await get_tree().process_frame
+	assert_bool(panel._refs.source_grid.visible).is_false()
+	for source:String in panel.SOURCE_NAMES:
+		assert_object(panel._refs.source_labels[source].box.get_parent()).is_same(panel._scene)

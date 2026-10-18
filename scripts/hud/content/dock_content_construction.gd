@@ -78,8 +78,6 @@ func _city_tab()->Dictionary:
 	if not just.is_empty():cards.append(_as_row(just,"next"))
 	if not _defence.is_empty():cards.append(_defence_row(_defence))
 	var homes_row:=_as_row(_new_homes_row(housing,crews),"next")
-	for gain:Dictionary in homes_row.get("gains",[]):homes_row.detail="%s %s: %s → %s." % [String(homes_row.get("detail","")),String(gain.label),String(gain.before),String(gain.after)]
-	homes_row.erase("gains")
 	cards.append(homes_row)
 	cards.append_array(_landmark_rows())
 	cards.append_array(_crew_rows(crews))
@@ -516,6 +514,10 @@ static func _effects(impact:Variant)->Array:
 
 ## The places a work adds, as the housing ledger will read once it stands.
 static func _work_gains(title:String)->Array:
+	var stores=preload("res://scripts/storage_works.gd")
+	for row:Dictionary in stores.rows():
+		if title==stores.title(String(row.kind)):
+			return [{"label":String(row.label),"before":float(row.capacity),"after":float(row.capacity_after),"unit":String(row.unit),"tone":"good"}]
 	if title!="Lean-to Shelters":return []
 	var places:=int(GameState.housing_capacity)
 	return [{"label":"Places","icon":"homes","before":_n(places),"after":_n(places+Construction.lean_to_places()),"tone":"good","tip":"The Lean-to Shelters add room for %s people." % _n(Construction.lean_to_places())}]

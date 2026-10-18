@@ -198,6 +198,7 @@ func _materials_data()->Dictionary:
 	for key:String in GameState.resource_stockpiles:
 		if key!="Food" and float(GameState.resource_stockpiles[key])>.001 and not grouped.has(key):grouped[key]={"sites":[],"delivered":0.0}
 	var trends:=_material_points(id,grouped.keys())
+	var protected:=preload("res://scripts/local_material_reserves.gd").calculate()
 	var rows:Array=[]
 	for key:String in grouped:
 		var item:Dictionary=grouped[key];var points:Array=trends[key]
@@ -209,7 +210,7 @@ func _materials_data()->Dictionary:
 			var condition:=", ".join(blockers) if not blockers.is_empty() else String(site.get("bottleneck",site.get("stage","Surveyed")))
 			if ResourceSystem.deposit_exhausted(site):condition="worked out; nothing left to take"
 			details.append(String(site.get("name",ResourceSystem.display_name(key)))+": "+condition.left(1).to_lower()+condition.substr(1))
-		rows.append({"key":key,"name":ResourceSystem.display_name(key),"stock":float(GameState.resource_stockpiles.get(key,0)),"delivered":item.delivered,"points":points,"details":details,"blocked":blocked,"loss":float(metrics.get("losses_by_resource",{}).get(key,0))})
+		rows.append({"key":key,"name":ResourceSystem.display_name(key),"stock":float(GameState.resource_stockpiles.get(key,0)),"protected":float(protected.get(key,0)),"delivered":item.delivered,"points":points,"details":details,"blocked":blocked,"loss":float(metrics.get("losses_by_resource",{}).get(key,0))})
 	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var order:=["Timber","Stone","Clay","Fiber Plants","Copper Ore"]
 		var ai:=order.find(a.key);var bi:=order.find(b.key)

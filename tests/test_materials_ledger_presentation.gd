@@ -215,3 +215,14 @@ func test_live_callback_replacement_and_reading_do_not_issue_actions()->void:
 	(panel.find_child("MaterialDeliveries",true,false) as Button).pressed.emit()
 	(panel.find_child("Choice_",true,false) as Button).pressed.emit()
 	assert_array(calls).contains_exactly(["extraction","carriers","focus:logistics","map","select:Timber","deliveries","focus:"])
+
+func test_protected_materials_can_exceed_stock_without_negative_free_amount()->void:
+	var panel=auto_free(Materials.new());var data:=prepared_materials()
+	data.rows[0].protected=20.0;data.selected="Timber"
+	panel.setup(data)
+	assert_bool(panel._selection.coverage.visible).is_true()
+	assert_str(panel._selection.free.text).contains("Free to use: 0").contains("Missing for work: 8")
+	var original=panel._selection.coverage
+	data.rows[0].stock=30.0;panel.update_block(data)
+	assert_object(panel._selection.coverage).is_same(original)
+	assert_str(panel._selection.free.text).contains("Free to use: 10").contains("Missing for work: 0")

@@ -22,7 +22,7 @@ const BAR_WIDTH:=80.0
 
 var view_state:Dictionary={}
 var browser:Control
-var category:OptionButton
+var category:HFlowContainer
 var _specs:Array=[]
 var _columns:=0
 ## Supporting sections use shorter bars when arranged side by side.
@@ -57,13 +57,11 @@ func _layout(_count:int)->void:
 	var selected:=String(view_state.get("section",String(_specs[0].section.id)))
 	if not _specs.any(func(spec:Dictionary)->bool:return String(spec.section.id)==selected):selected=String(_specs[0].section.id)
 	view_state.section=selected
-	var nav:=HBoxContainer.new();nav.add_theme_constant_override("separation",10);nav.visible=_specs.size()>1;add_child(nav)
-	nav.add_child(_label("View",14,T.INK_MUTED))
-	category=OptionButton.new();category.name="SectionChoice";category.custom_minimum_size.y=40;category.size_flags_horizontal=Control.SIZE_EXPAND_FILL;category.fit_to_longest_item=false;nav.add_child(category)
-	for i in _specs.size():
-		var spec:Dictionary=_specs[i];category.add_item("%s · %d" % [String(spec.section.heading),spec.cards.size()])
-		if String(spec.section.id)==selected:category.select(i)
-	category.item_selected.connect(func(index:int):view_state.section=String(_specs[index].section.id);_layout(1))
+	category=HFlowContainer.new();category.name="SectionChoices";category.add_theme_constant_override("h_separation",6);category.add_theme_constant_override("v_separation",6);category.visible=_specs.size()>1;add_child(category)
+	for spec:Dictionary in _specs:
+		var key:=String(spec.section.id)
+		var button:=_button({"label":"%s · %d" % [String(spec.section.heading),spec.cards.size()],"primary":key==selected,"on_press":func():view_state.section=key;_layout(1)})
+		button.name="Section_"+key;button.toggle_mode=true;button.set_pressed_no_signal(key==selected);category.add_child(button)
 	for spec:Dictionary in _specs:
 		if String(spec.section.id)==selected:add_child(_section(spec.section,spec.cards));break
 
@@ -161,7 +159,7 @@ func _row(card:Dictionary)->Control:
 		for gain:Dictionary in card.get("gains",[]):second.add_child(_gain_chip(gain))
 		for effect:Dictionary in card.get("effects",[]):second.add_child(_effect_chip(effect))
 		if not (card.get("needs",[]) as Array).is_empty():
-			var needs:=VBoxContainer.new();needs.add_theme_constant_override("separation",5)
+			var needs:=VBoxContainer.new();needs.size_flags_horizontal=Control.SIZE_EXPAND_FILL;needs.add_theme_constant_override("separation",5)
 			needs.add_child(_label(String(card.get("needs_label","In store / build cost")),14,T.TEXT_SOFT))
 			var bill:=HFlowContainer.new();bill.add_theme_constant_override("h_separation",16);needs.add_child(bill)
 			for need:Dictionary in card.needs:bill.add_child(_pips(need))
@@ -238,12 +236,9 @@ func _small_choice(choice:Dictionary)->Control:
 
 
 func _gain_chip(gain:Dictionary)->Control:
-	var chip:=HBoxContainer.new();chip.name="Gain";chip.add_theme_constant_override("separation",4);chip.tooltip_text=String(gain.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP
-	if String(gain.get("icon",""))!="":chip.add_child(_mark(String(gain.icon),14))
-	chip.add_child(_label(String(gain.get("label","")),14,T.TEXT_SOFT))
-	chip.add_child(_label("%s → " % String(gain.get("before","")),14,T.TEXT_SOFT))
-	chip.add_child(_label(String(gain.get("after","")),14,tone_ink(String(gain.get("tone","good"))),true))
-	return chip
+	var tile:=preload("res://scripts/hud/comparison_tile.gd").new();tile.name="Gain"
+	tile.fill(String(gain.get("label","")),"NOW",gain.get("before",""),"AFTER",gain.get("after",""),String(gain.get("unit","")),"",String(gain.get("tip","")))
+	return tile
 
 
 func _effect_chip(effect:Dictionary)->Control:
@@ -256,21 +251,10 @@ func _effect_chip(effect:Dictionary)->Control:
 ## Have against need: a good's icon, have / need in green or red and five
 ## pips (dense_blocks.gd cost_chip); hands (makers, carriers) by name.
 func _pips(need:Dictionary)->Control:
-	var have:=float(need.get("have",0.0));var wanted:=maxf(0.0001,float(need.get("need",0.0)))
+	var tile:=preload("res://scripts/hud/comparison_tile.gd").new();tile.name="Need"
 	var resource:=String(need.get("resource",""))
-	var chip:HBoxContainer
-	if resource!="":
-		chip=Dense.cost_chip(resource,have,wanted)
-	else:
-		var short:=have+0.0001<wanted
-		chip=HBoxContainer.new();chip.add_theme_constant_override("separation",4)
-		chip.add_child(_label(String(need.get("label","")),14,T.TEXT_SOFT))
-		chip.add_child(_label("%s / %s" % [_n(have),_n(wanted)],14,T.RED_TEXT if short else T.GREEN_TEXT,true))
-		var pips:=Dense.Pips.new();pips.share=clampf(have/wanted,0.0,1.0);pips.ink=T.RED_TEXT if short else T.GREEN_TEXT
-		pips.custom_minimum_size=Vector2(35,8);pips.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.add_child(pips)
-	chip.name="Need";chip.mouse_filter=Control.MOUSE_FILTER_STOP
-	if String(need.get("tip",""))!="":chip.tooltip_text=String(need.tip)
-	return chip
+	tile.fill(String(need.get("label",resource)),"HAVE",float(need.get("have",0)),"NEED",float(need.get("need",0)),"",resource,String(need.get("tip","")))
+	return tile
 
 
 class Segments extends Control:

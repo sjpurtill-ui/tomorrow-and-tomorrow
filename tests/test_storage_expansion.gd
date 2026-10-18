@@ -163,3 +163,14 @@ func test_daily_builders_expand_all_full_store_types_without_changing_allocation
 	for kind:String in Stores.KINDS:
 		assert_float(Stores.added(kind)).override_failure_message(kind).is_greater(0)
 	assert_dict(GameState.population_allocations).is_equal(allocation)
+
+func test_expansion_reading_exposes_exact_bill_and_capacity_without_mutation()->void:
+	var before:=GameState.storage_works.duplicate(true)
+	var panel=auto_free(Grid.new());var rows:=Stores.rows();panel.fill(rows,func(_kind:String):pass)
+	for row:Dictionary in rows:
+		assert_float(float(row.capacity_after)).is_equal(float(row.capacity)+float(row.added))
+		assert_int(row.costs.size()).is_greater(0)
+		for cost:Dictionary in row.costs:
+			assert_float(float(cost.have)).is_equal(float(GameState.resource_stockpiles.get(cost.resource,0)))
+		assert_int(panel.tiles[row.kind].bill.get_child_count()).is_equal(row.costs.size())
+	assert_dict(GameState.storage_works).is_equal(before)

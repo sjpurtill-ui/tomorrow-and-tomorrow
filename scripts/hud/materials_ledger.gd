@@ -138,6 +138,8 @@ func _build_selected()->void:
 	_selection.name=S.voice("",18);_selection.name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(_selection.name)
 	_selection.stock=S.voice("",16);_selection.stock.name="SelectedMaterialStock";words.add_child(_selection.stock)
 	_selection.reading=S.label("",14,T.INK_MUTED);_selection.reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(_selection.reading)
+	_selection.coverage=preload("res://scripts/hud/comparison_tile.gd").new();_selection.coverage.name="MaterialCommitments";_detail_host.add_child(_selection.coverage)
+	_selection.free=S.label("",14,T.INK);_selection.free.name="FreeStock";_selection.free.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_detail_host.add_child(_selection.free)
 	var actions:=HFlowContainer.new();actions.name="SelectedMaterialActions";actions.add_theme_constant_override("h_separation",6);actions.add_theme_constant_override("v_separation",5);_detail_host.add_child(actions)
 	_actions.assign=S.verb("Assign workers",func():_invoke("on_assign"),"Open the civilization-wide Extraction allocation and its consequences.",false,true);_actions.assign.name="AssignExtractionWorkers";actions.add_child(_actions.assign)
 	_actions.map=S.verb("Show on map",func():_invoke("on_map"),"Mark known material sources on the map.");_actions.map.name="ShowMaterialsOnMap";actions.add_child(_actions.map)
@@ -374,6 +376,12 @@ func _fill_selected()->void:
 	S.put(_selection.name,String(item.get("name",_selected_key)))
 	var context:=_context_stock(_selected_key,float(item.get("stock",0)))
 	S.put(_selection.stock,context if not context.is_empty() else _stock_amount(float(item.get("stock",0)))+" in store")
+	_selection.coverage.visible=context.is_empty() and item.has("protected")
+	_selection.free.visible=_selection.coverage.visible
+	if _selection.coverage.visible:
+		var held:=float(item.get("stock",0));var protected:=float(item.get("protected",0))
+		_selection.coverage.fill("Supplies for work","IN STORE",held,"PROTECTED",protected,"material units",_selected_key,"The existing reserve rules protect building supplies and active production inputs. The target may exceed current stock.")
+		S.put(_selection.free,"Free to use: %s · Missing for work: %s" % [S.n(maxf(0,held-protected)),S.n(maxf(0,protected-held))],T.AMBER_TEXT if held<protected else T.TEAL)
 	var contextual_only:=not context.is_empty() and float(item.get("delivered",0))<=0.05 and float(item.get("loss",0))<=0.05
 	S.put(_selection.reading,"Recorded natural resource; see its source conditions below." if contextual_only else flow_words(item));_selection.reading.tooltip_text="Daily arrivals and recorded storage losses. Use by workshops and construction is not included in these two flows."
 	var points:Array=item.get("points",[])

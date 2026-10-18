@@ -39,6 +39,7 @@ func setup(block:Dictionary)->void:
 	_margin=MarginContainer.new();_margin.name="PantryReadingWidth";add_child(_margin)
 	_body=VBoxContainer.new();_body.add_theme_constant_override("separation",14);_margin.add_child(_body)
 	_build_scene()
+	_refs.source_grid=GridContainer.new();_refs.source_grid.name="FoodSourcesCompact";_refs.source_grid.columns=2;_refs.source_grid.add_theme_constant_override("h_separation",12);_refs.source_grid.add_theme_constant_override("v_separation",8);_body.add_child(_refs.source_grid)
 	_storage_grid=preload("res://scripts/hud/storage_capacity_grid.gd").new();_body.add_child(_storage_grid)
 	_build_daily_flow()
 	_build_commands()
@@ -58,6 +59,7 @@ func _build_scene()->void:
 		var box:=VBoxContainer.new();box.name="Source_"+("Gathering" if source_name=="Wild gathering" else source_name)
 		box.add_theme_constant_override("separation",0);_scene.add_child(box)
 		var title:=_scene_label(source_name,14,true);box.add_child(title)
+		title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		var value:=_scene_label("",25,true);value.name="Value";box.add_child(value)
 		var status:=_scene_label("",14);status.name="Status";status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(status)
 		_refs.source_labels[source_name]={"box":box,"title":title,"value":value,"status":status}
@@ -80,6 +82,9 @@ func _build_scene()->void:
 	_refs.water_place=_scene_label("",14);_refs.water_place.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;water_box.add_child(_refs.water_place)
 
 func _build_daily_flow()->void:
+	var coverage:=HFlowContainer.new();coverage.name="NeedsAndDelivery";coverage.add_theme_constant_override("h_separation",24);coverage.add_theme_constant_override("v_separation",10);_body.add_child(coverage)
+	_refs.food_coverage=preload("res://scripts/hud/comparison_tile.gd").new();_refs.food_coverage.name="FoodCoverage";coverage.add_child(_refs.food_coverage)
+	_refs.water_coverage=preload("res://scripts/hud/comparison_tile.gd").new();_refs.water_coverage.name="WaterCoverage";coverage.add_child(_refs.water_coverage)
 	var daily_box:=VBoxContainer.new();daily_box.name="PantryDailyFlow";daily_box.add_theme_constant_override("separation",6);_body.add_child(daily_box)
 	var daily:=HFlowContainer.new();daily.name="Daily";daily.add_theme_constant_override("h_separation",28);daily.add_theme_constant_override("v_separation",8);daily_box.add_child(daily)
 	# The main causal chain is first; losses stay adjacent as quieter evidence.
@@ -98,7 +103,7 @@ func _build_daily_flow()->void:
 
 func _build_commands()->void:
 	var row:=HFlowContainer.new();row.name="PantryActions";row.add_theme_constant_override("h_separation",12);row.add_theme_constant_override("v_separation",8);_body.add_child(row)
-	_refs.work_caption=S.label("",16,T.INK,true);_refs.work_caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(_refs.work_caption)
+	_refs.work_caption=S.label("",16,T.INK,true);_refs.work_caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;_refs.work_caption.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;_refs.work_caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(_refs.work_caption)
 	_refs.assign=S.verb("Assign workers",func():_invoke("on_assign"),"Open the food allocation and its consequences.",false,true);_refs.assign.name="AssignFoodWorkers";row.add_child(_refs.assign)
 	_refs.assign_water=S.verb("Water carriers",func():_invoke("on_assign_water"),"Open Logistics. These workers carry water, supplies and materials.");_refs.assign_water.name="AssignWaterCarriers";row.add_child(_refs.assign_water)
 	_refs.talk=S.verb("Talk with the leader",func():_invoke("on_talk"),"Speak with this settlement’s leader.");_refs.talk.name="TalkFoodLeader";row.add_child(_refs.talk)
@@ -175,7 +180,30 @@ func _layout()->void:
 	var width:=maxf(1.0,_body.size.x)
 	if width<200:return
 	_layout_width=width
-	var height:=clampf(width*0.41,380.0,520.0)
+	var compact:=width<680
+	_refs.source_grid.visible=compact
+	for source_name:String in SOURCE_NAMES:
+		var refs:Dictionary=_refs.source_labels[source_name]
+		var parent:Node=_refs.source_grid if compact else _scene
+		if refs.box.get_parent()!=parent:refs.box.reparent(parent)
+		refs.title.add_theme_color_override("font_color",T.INK if compact else SCENE_INK)
+		refs.value.add_theme_color_override("font_color",T.INK if compact else SCENE_INK)
+		refs.status.add_theme_color_override("font_color",T.INK_MUTED if compact else SCENE_MUTED)
+		refs.value.add_theme_font_size_override("font_size",21 if compact else 25)
+		for label:Label in [refs.title,refs.value,refs.status]:label.add_theme_constant_override("shadow_outline_size",0 if compact else 3);label.add_theme_color_override("font_shadow_color",Color.TRANSPARENT if compact else Color(0.025,0.05,0.04,.92))
+	_refs.water_box.visible=not compact
+	if compact:
+		_scene.custom_minimum_size.y=240
+		_refs.headline.add_theme_font_size_override("font_size",25)
+		_refs.headline.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		_refs.reserve_value.add_theme_font_size_override("font_size",40)
+		_refs.story.position=Vector2(14,14);_refs.story.size=Vector2(width-28,70)
+		_refs.reserve.position=Vector2(14,96);_refs.reserve.size=Vector2(width-28,132)
+		for grid:GridContainer in _grids:S.flow(grid,width)
+		S.compact(self,width)
+		return
+	_refs.headline.autowrap_mode=TextServer.AUTOWRAP_OFF
+	var height:=clampf(width*0.30,330.0,390.0)
 	_scene.custom_minimum_size.y=height
 	_place(_refs.source_labels["Cultivation"].box,Vector2(0.045,0.06),Vector2(0.23,0.23),width,height)
 	_place(_refs.source_labels["Wild gathering"].box,Vector2(0.76,0.06),Vector2(0.23,0.23),width,height)
@@ -219,6 +247,10 @@ func _fill()->void:
 	var water:Dictionary=data.get("water",{})
 	var need:=float(water.get("required_today",0.0))
 	_fill_scene(amounts,water)
+	_refs.food_coverage.fill("Daily meals","NEEDED",daily_need,"EATEN",float(amounts.Eaten),"rations / day","Food","Food actually consumed in the latest daily ledger. This includes provisioned field armies.")
+	_refs.food_coverage.visible=measured and data.has("food_need")
+	_refs.water_coverage.visible=water.has("required_today") and water.has("collected_today")
+	if _refs.water_coverage.visible:_refs.water_coverage.fill("Daily water","NEEDED",need,"FETCHED",float(water.collected_today),"water units / day","Freshwater")
 	var hands:=float(data.get("food_workers",0.0))
 	S.put(_refs.work_caption,"Food effort: %s worker-equivalents · %d%%" % [S.n(hands),roundi(float(data.get("food_share",0.0))*100.0)])
 	_refs.work_caption.tooltip_text="Effective worker-equivalents on food in this settlement; these are not a headcount. Assign workers opens the civilization-wide allocation.\n"+String(data.get("food_plan",""))
@@ -379,7 +411,7 @@ func _fill_scene(amounts:Dictionary,water:Dictionary)->void:
 		var refs:Dictionary=_refs.source_labels[source_name]
 		var source:Dictionary=sources.get(source_name,{})
 		var known:=not source.is_empty() and measured
-		S.put(refs.value,(S.n(float(source.get("produced",0)))+" / day") if known else "—",SCENE_INK)
+		S.put(refs.value,(S.n(float(source.get("produced",0)))+" / day") if known else "—",T.INK if _layout_width>0 and _layout_width<680 else SCENE_INK)
 		var access:=String(source.get("access",""))
 		var status:="Not measured yet" if not known else ""
 		if access=="practice not discovered":status="Not discovered"
