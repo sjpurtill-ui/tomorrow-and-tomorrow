@@ -4122,8 +4122,10 @@ livestock targets and new access/compensation objectives remain future work.
 
 ## October 17 — Allocation commands and family court completion
 
-Status: READY in `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
-`codex/evolving-major-families`, base `dbcdcf8ff18f29bc2ec300b315df9b10d2878f8b`.
+Status: INTEGRATED — source `7f637e370017838f8d6443b69f11f8587b1106ed` verified on both remote
+`main` and `codex/evolving-major-families`, then canonical main fast-forwarded.
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, based on
+`dbcdcf8ff18f29bc2ec300b315df9b10d2878f8b`.
 
 People allocation buttons now call the existing live Manual/Government authority
 without requiring a successful forecast snapshot or evaluation. The command
@@ -4147,4 +4149,3 @@ Validation: 16 workforce-preview/provider checks, 14 allocator UI checks,
 Mac launcher adds `--existing-build`: it verifies exact HEAD against origin/main,
 build marker and signed bundle without exporting local changes. Generated
 imports and UID files remain excluded. Player launch follows integration.
-
