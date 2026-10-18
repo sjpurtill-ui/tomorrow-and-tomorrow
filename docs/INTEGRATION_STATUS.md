@@ -1,7 +1,8 @@
 ## October 17 — Compact health dashboard / floating map help removal
 
-Status: READY — branch `codex/compact-health-dashboard`, based on
-`731db0e1930d2f4334adb7f23d00d6d2ede59a45` in
+Status: INTEGRATED — source `38a45f13f376599dec40cc6b3967bf8a4a4f94fb`
+verified by fresh remote queries on `main` and `codex/compact-health-dashboard`.
+Based on `731db0e1930d2f4334adb7f23d00d6d2ede59a45` in
 `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
 
 Compact health readings and chart with a retained details inspector; discoveries
@@ -9,6 +10,8 @@ explain live adoption, health effects, protection coverage and recorded changes
 without inventing isolated lifespan gains. The floating Map help button is
 removed; the top-bar help icon remains. No gameplay/save migration changes.
 54 relevant checks pass; one stale unrelated People persistence test is excluded.
+Map help checks pass within the headless scene probe; six unrelated broader
+rail/toolbar/inspection/river-preview expectations fail.
 See FEATURE_RECONCILIATION.md for scope, limitations and validation. Live player
 has not been restarted; release preparation follows remote integration.
 

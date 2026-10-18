@@ -1,5 +1,8 @@
 ## October 17 — Compact health dashboard and map space
 
+Integrated source: `38a45f13f376599dec40cc6b3967bf8a4a4f94fb`, verified on remote
+`main` and `codex/compact-health-dashboard` before canonical fast-forward.
+
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
 `codex/compact-health-dashboard`, base `731db0e1930d2f4334adb7f23d00d6d2ede59a45`.
 Scope: Health Lives screen, discovery explanation, chart selection and removal
