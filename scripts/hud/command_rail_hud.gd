@@ -62,7 +62,7 @@ const WaterWatch:=preload("res://scripts/hud/water_watch.gd")
 ## Time controls speak in words: Pause, then five paces from slowest to fastest.
 const SPEED_LABELS:Array[String]=["Pause","Slowest","Slow","Normal","Fast","Fastest"]
 
-var city_selector:OptionButton
+var city_selector:Button
 var city_selector_signature:String=""
 var terrain:Node
 
@@ -163,12 +163,18 @@ func _layout()->void:
 	if brand_label:brand_label.visible=false
 	if brand_row:
 		brand_row.add_theme_constant_override("separation",10)
-		# The town's name stands on the bar only when there is a choice of towns.
+		# The town scope stays visible even when there is only one town.
 		var city_mark:=brand_row.get_node_or_null("TopCityIcon") as Control
 		if city_mark:city_mark.visible=view.x>=1280 and city_selector!=null and city_selector.visible
-	if city_selector:city_selector.custom_minimum_size.x=80 if view.x<1280 else 150
+	if city_selector:city_selector.custom_minimum_size.x=130 if view.x<1280 else 180
 	if top_actions:top_actions.position=Vector2(view.x-top_actions.get_combined_minimum_size().x-12,6)
 	if time_pill:
+		var compact_clock:=view.x<1100
+		time_text.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART if compact_clock else TextServer.AUTOWRAP_OFF
+		time_text.custom_minimum_size=Vector2(100 if compact_clock else 175,32 if compact_clock else 28)
+		time_text.add_theme_font_size_override("normal_font_size",14 if compact_clock else 17)
+		time_text.add_theme_font_size_override("bold_font_size",14 if compact_clock else 17)
+		time_pill.reset_size()
 		var actions_width:=top_actions.get_combined_minimum_size().x+24 if top_actions else 0.0
 		var clock_width:=time_pill.get_combined_minimum_size().x
 		time_pill.position=Vector2(maxf(Folio.RAIL_WIDTH+8,view.x-actions_width-clock_width),7)
@@ -185,8 +191,6 @@ func _layout()->void:
 		var compact_top:=view.x<1280
 		for id in kpi_chips:(kpi_chips[id].chip as Control).visible=true
 		for rule in kpi_separators:rule.visible=true
-		if compact_top:
-			_hide_kpi("water")
 		# Before writing, tools and gear are told in the People view, not the strip.
 		if compact_top or EraWords.hearth():_hide_kpi("goods")
 		# Before writing, who ate today is told in the PEOPLE chip itself; a
@@ -258,6 +262,12 @@ func _position_toolbar()->void:
 	# it restores the map toolbar; keyboard map controls remain available.
 	toolbar.visible=active_section==""
 	var free_left:=Tokens.DOCK_DETAIL_X if active_section!="" else Folio.RAIL_WIDTH
+	var controls:=toolbar.get_node_or_null("ToolbarChoices") as Control
+	if controls:
+		var wanted:=16.0
+		for child:Control in controls.get_children():
+			if child.visible:wanted+=child.get_combined_minimum_size().x+6
+		toolbar.size.x=minf(wanted,maxf(300,view.x-free_left-24))
 	# Your orders hold the bottom right: the toolbar centres in the room left
 	# of them when it fits there (else the cards stand above it).
 	var right:=view.x
@@ -714,7 +724,7 @@ const KPI_DEFS:Array[Dictionary]=[
 
 ## Which status chips give way first when the top bar is too narrow for them
 ## all (after the age's own rules in _layout). Population and food are never shed.
-const KPI_SHED_ORDER:=["goods","science","water","gdp","health"]
+const KPI_SHED_ORDER:=["goods","science","gdp","health","water"]
 
 ## Caption, value and note have separate lines within the 72 px header.
 ## Insets keep them clear of the fine frame and the semantic bottom rule.
@@ -807,7 +817,7 @@ func kpi_readings()->Array[Dictionary]:
 	for def:Dictionary in KPI_DEFS:
 		var parts:Dictionary=kpi_chips.get(String(def.id),{})
 		if parts.is_empty() or not (parts.chip as Control).visible:continue
-		readings.append({"id":String(def.id),"caption":(parts.caption as Label).text,
+		readings.append({"id":String(def.id),"caption":"ALL PEOPLE" if String(def.id)=="population" else (parts.caption as Label).text,
 			"value":(parts.value as Label).text,"note":(parts.delta as Label).text,
 			"note_color":(parts.delta as Label).get_theme_color("font_color"),
 			"section":String(def.section),"sub":int(def.sub)})
@@ -872,16 +882,16 @@ func _build_toolbar()->void:
 	style.content_margin_left=8.0;style.content_margin_right=8.0
 	toolbar.add_theme_stylebox_override("panel",style)
 	add_child(toolbar)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",6)
+	var row:=HFlowContainer.new();row.name="ToolbarChoices"
+	row.add_theme_constant_override("h_separation",6);row.add_theme_constant_override("v_separation",4)
 	toolbar.add_child(row)
-	city_selector=OptionButton.new()
+	toolbar.minimum_size_changed.connect(func():_position_toolbar.call_deferred())
+	city_selector=preload("res://scripts/hud/town_scope_button.gd").new()
 	city_selector.name="CitySelector"
 	city_selector.custom_minimum_size=Vector2(150,30)
-	city_selector.fit_to_longest_item=false
 	city_selector.add_theme_font_override("font",Tokens.font("voice"))
 	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
-	city_selector.add_theme_font_size_override("font_size",19)
+	city_selector.add_theme_font_size_override("font_size",14)
 	TopbarInk.apply(city_selector)
 	for color_key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
 		city_selector.add_theme_color_override(color_key,Folio.RAIL_TEXT)
@@ -889,7 +899,6 @@ func _build_toolbar()->void:
 	city_selector.add_theme_color_override("icon_hover_color",Folio.RAIL_TEXT)
 	city_selector.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
 	city_selector.add_theme_stylebox_override("pressed",Folio.rail_style(false,true))
-	city_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	# The name takes the room left before the clock and is cut short with an
 	# ellipsis there; it never runs under the date.
 	city_selector.clip_text=true;city_selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;city_selector.alignment=HORIZONTAL_ALIGNMENT_LEFT
@@ -936,12 +945,10 @@ func _build_toolbar()->void:
 	compass_label.pressed.connect(func()->void: terrain._reset_camera_north())
 	compass_label.tooltip_text="Click to reset north-up (N). Rotate with Q/E or Shift + middle-drag; drag vertically to tilt."
 	scale_box.add_child(compass_label)
-	distance_selector=OptionButton.new();distance_selector.name="MapDistanceLevel"
-	distance_selector.fit_to_longest_item=false
+	distance_selector=preload("res://scripts/hud/compact_choices.gd").new();distance_selector.name="MapDistanceLevel"
 	distance_selector.custom_minimum_size=Vector2(104,32)
 	distance_selector.add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	distance_selector.add_theme_color_override("font_color",Tokens.INK)
-	distance_selector.get_popup().add_theme_font_size_override("font_size",TOOLBAR_FONT_SIZE)
 	# Like the rest of the shell, tolerate a HUD built before its terrain is set.
 	for index:int in (terrain.CAMERA_DISTANCE_LEVELS.size() if terrain else 0):distance_selector.add_item(String(EraWords.DISTANCE_WORDS[mini(index,EraWords.DISTANCE_WORDS.size()-1)]))
 	distance_selector.tooltip_text="How far the map looks: close by, the valley, the region, the far lands. Scroll or pinch changes one step; Shift-scroll makes gentle fine adjustments."
@@ -1288,7 +1295,7 @@ func _refresh_time()->void:
 	time_pill.reset_size()
 	_layout()
 
-var distance_selector:OptionButton
+var distance_selector:Control
 
 func _refresh_kpis()->void:
 	var t:Dictionary=preload("res://scripts/hud/civilization_kpi_model.gd").snapshot()
@@ -1317,7 +1324,7 @@ func _refresh_kpis()->void:
 	var counted:=hungry<=0 and bool(t.get("full_year",false)) and born+buried>0
 	if counted:people_note="born %d · buried %d" % [born,buried]
 	# Under PEOPLE the count needs no unit; before writing it is told in souls.
-	_update_kpi("population",EraWords.people(population) if EraWords.hearth() else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if counted and buried>born else Tokens.MUTED),"")
+	_update_kpi("population",EraWords.people(population) if EraWords.hearth() else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if counted and buried>born else Tokens.MUTED),"All our people across every town, including people away.")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
@@ -1448,11 +1455,11 @@ func _refresh_city_selector()->void:
 	if signature==city_selector_signature: return
 	city_selector_signature=signature
 	city_selector.clear()
-	# One town: nothing to choose, so no name on the bar (Home carries it).
-	city_selector.visible=settlements.size()>1
+	# Keep the affected town explicit, including a single-town campaign.
+	city_selector.visible=not settlements.is_empty()
 	for city in settlements:
 		city_selector.add_item(toolbar_case(String(city.get("name","Settlement"))))
-		var index:=city_selector.item_count-1
+		var index:=int(city_selector.item_count)-1
 		city_selector.set_item_metadata(index,String(city.id))
 		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)
 

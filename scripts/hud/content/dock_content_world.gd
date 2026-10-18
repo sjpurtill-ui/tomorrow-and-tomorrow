@@ -71,7 +71,7 @@ func peoples_tab()->Dictionary:
 	var radius:=float(observation.get("radius_km",0.0))
 	var walls:=float(WorldSimulation.military.settlement_defense_snapshot().get("observation_radius_km",radius)) if WorldSimulation.military.has_method("settlement_defense_snapshot") else radius
 	counter="%d peoples met · %s · %d told of, not met · %s within %d km" % [met,("all homes found" if located>=met else "%d homes found" % located) if met>0 else "no home found",leads,("%d strangers in sight" % seen_now) if seen_now>0 else "no strangers in sight",roundi(radius)]
-	counter_tip="Our lookouts see %d km: %d km from the defences we have built (Buildings) and %d more from the watch's alertness." % [roundi(radius),roundi(walls),maxi(0,roundi(radius-walls))]
+	counter_tip="Our lookouts see %d km: %d km from the defences we have built (Buildings) and %d more from settlement security." % [roundi(radius),roundi(walls),maxi(0,roundi(radius-walls))]
 	return {"kpis":[],"brief":{},"blocks":known_world_blocks(exploration)}
 
 ## The first tab: the ledger of the peoples we know (once we know any), then

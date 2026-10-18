@@ -11,8 +11,8 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [x] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
 - [x] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
 - [x] Materials: protected supplies/free stock and arrivals/losses; hauling and storage bottlenecks.
-- [ ] Global town/realm scope, compact map controls, stable interaction while running.
-- [ ] Rule check: border-fort-only effects; remove rejected non-fort watch effects if active.
+- [x] Global town/realm scope, compact map controls, stable interaction while running.
+- [x] Rule check: border-fort-only effects; remove rejected non-fort watch effects if active.
 
 ## Batch 2: people and production
 
@@ -101,3 +101,7 @@ Military rows show named stock/need comparisons and retain current controls. Civ
 ## Checkpoint 9 — Home and population reconciliation
 
 Home adds paired shelter/care/food readings and bounds its artwork, with narrow action-first layout. Population reconciles one dated interval, exposes unknown/unexplained changes honestly, shows existing complete cohorts and separates birth risks from its searchable six-record archive. Chronicle reuses the same balance. 34 distinct checks pass; actual native Home/population wide/narrow views reviewed with clean exit. No simulation/save change. Broader Chronicle/capacity visual regression and other final acceptance remain tracked above.
+
+## Checkpoint 10 — Map scope and direct controls
+
+Four zoom choices, bounded town tray, explicit realm population and responsive map controls are implemented. 32 checks pass and normal/narrow/enlarged native renders reviewed. Fort/home Defense remains one allocated pool; World labels its actual security reading. No simulation/save change. All broader final interaction acceptance and unchecked screen work remains required.
