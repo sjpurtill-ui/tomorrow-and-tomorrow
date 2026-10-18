@@ -167,7 +167,7 @@ func _chips(blockers:Array,notes:Array)->Control:
 
 
 func _chip(item:Dictionary,tone:String)->Control:
-	var chip:=PanelContainer.new();chip.name="Blocker" if tone!="note" else "Note";chip.tooltip_text=String(item.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP
+	var chip:=PanelContainer.new();chip.size_flags_vertical=Control.SIZE_SHRINK_CENTER;chip.name="Blocker" if tone!="note" else "Note";chip.tooltip_text=String(item.get("tip",""));chip.mouse_filter=Control.MOUSE_FILTER_STOP
 	var ground:Color=T.DANGER_BG if tone=="bad" else (T.WARN_BG if tone=="warn" else Color(0,0,0,0))
 	var rule:Color=T.DANGER_BORDER if tone=="bad" else (T.WARN_BORDER if tone=="warn" else T.RULE)
 	var style:=T.flat(ground,rule,1,10);style.content_margin_left=8;style.content_margin_right=8;style.content_margin_top=1;style.content_margin_bottom=2

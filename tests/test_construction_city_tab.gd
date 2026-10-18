@@ -86,6 +86,11 @@ func _found(people:int,completed:Array,places:int,day:int=40)->void:
 func _page()->Dictionary:
 	return Provider.new(terrain,hud).tab(0)
 
+static func _board(page:Dictionary)->Dictionary:
+	for block:Dictionary in page.blocks:
+		if String(block.get("type",""))=="town_works":return block
+	return {}
+
 ## Every card (or row) of the page by name.
 static func _rows(page:Dictionary)->Dictionary:
 	var rows:={}
@@ -190,7 +195,7 @@ func test_a_second_town_shows_its_own_homes_and_work()->void:
 	assert_bool(bool(SettlementModel.select_settlement("second").ok)).is_true()
 	var page:=_page()
 	_print("a second town, just founded",page)
-	assert_str(String(((page.blocks[0] as Dictionary).sections as Array)[0].heading)).starts_with("Rivermeet")
+	assert_str(String(((_board(page) as Dictionary).sections as Array)[0].heading)).starts_with("Rivermeet")
 	var places:int=SettlementModel.with_city_resources("second",func()->int:return int(GameState.housing_capacity))
 	var housing:Dictionary=_rows(page).Housing
 	assert_str(String(housing.value)).is_equal("%d places" % places)
@@ -262,9 +267,9 @@ func test_builders_row_counts_who_builds_and_the_actions_open_the_owning_pages()
 	assert_str(String(builders.value)).is_equal("8")
 	assert_str(String(builders.sub)).is_equal("All on the town's works")
 	# The builders' figure and the "Set builders" verb open The People.
-	for tile:Dictionary in page.blocks[0].readings:
+	for tile:Dictionary in _board(page).readings:
 		if String(tile.label)=="BUILDERS":(tile.on_press as Callable).call()
-	for section:Dictionary in (page.blocks[0] as Dictionary).sections:
+	for section:Dictionary in (_board(page) as Dictionary).sections:
 		for action:Dictionary in section.get("actions",[]):(action.on_press as Callable).call()
 	assert_array(hud.opened).contains_exactly([["overview",0],["overview",0]])
 	GameState.population_allocations.Construction=0
@@ -296,7 +301,7 @@ func test_era_says_what_the_next_era_still_needs()->void:
 	var page:=_page()
 	var era:Dictionary=_keyed(page).era
 	var shown:=""
-	for tile:Dictionary in page.blocks[0].readings:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
+	for tile:Dictionary in _board(page).readings:if String(tile.label)=="BUILDING ERA":shown=String(tile.value)
 	assert_str(shown).is_equal("Foothold")
 	assert_str(String(era.name)).is_equal("Next: Hamlet")
 	# Hamlet needs a year's age, three finished works and four makers.
@@ -323,7 +328,7 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 	for text:String in [String(page.brief.get("title","")),String(page.brief.get("why",""))]:
 		assert_object(caps.search(text)).override_failure_message(text).is_null()
 	var count:=0
-	var board:Dictionary=page.blocks[0]
+	var board:Dictionary=_board(page)
 	for section:Dictionary in board.sections:assert_object(caps.search(String(section.heading))).is_null()
 	for item:Dictionary in board.cards:
 		if String(item.get("section",""))=="kpi":continue
@@ -338,7 +343,7 @@ func test_every_row_is_plain_readable_and_has_a_meaning()->void:
 			assert_int(text.split(" ",false).size()).override_failure_message(text).is_less_equal(12)
 	# What goes up, who builds, the fabric and what comes next, as rows.
 	assert_int(count).is_greater_equal(10)
-	var tiles:Array=page.blocks[0].readings
+	var tiles:Array=_board(page).readings
 	assert_int(tiles.size()).is_greater_equal(4)
 	for tile:Dictionary in tiles:
 		assert_bool(tile.has("meter") or tile.has("segments")).override_failure_message(String(tile.label)).is_true()
@@ -425,7 +430,7 @@ func test_landmarks_keep_their_presenter_and_route_conception()->void:
 	var provider:=Provider.new(terrain,hud)
 	var page:Dictionary=provider.tab(3)
 	await get_tree().process_frame
-	var action:Callable=page.blocks[0].sections[0].actions[0].on_press
+	var action:Callable=_board(page).sections[0].actions[0].on_press
 	assert_bool(action.is_valid()).is_true()
 	action.call()
 	assert_int(director.opened).is_equal(1)

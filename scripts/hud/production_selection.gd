@@ -8,7 +8,8 @@ var configured_limit:=6
 var search:LineEdit
 var spread:BoxContainer
 var index:VBoxContainer
-var choices:VBoxContainer
+var tiles:=false
+var choices:Container
 var reader:VBoxContainer
 var back:Button
 var counter:Label
@@ -24,7 +25,7 @@ func setup(saved:Dictionary,limit:int=6)->void:
 	index=VBoxContainer.new();index.custom_minimum_size.x=236;index.add_theme_constant_override("separation",6);spread.add_child(index)
 	search=LineEdit.new();search.name="Search";search.placeholder_text="Find by name or condition";search.custom_minimum_size.y=40;search.text=String(state.get("query",""));index.add_child(search)
 	search.text_changed.connect(func(value:String):state.query=value;state.page=0;state.reading=false;refresh())
-	choices=VBoxContainer.new();choices.name="Choices";choices.add_theme_constant_override("separation",5);index.add_child(choices)
+	choices=GridContainer.new() if tiles else VBoxContainer.new();choices.name="Choices";choices.add_theme_constant_override("separation",5);index.add_child(choices)
 	var pages:=HBoxContainer.new();pages.add_theme_constant_override("separation",5);index.add_child(pages)
 	previous=_button("‹","Previous choices");pages.add_child(previous);previous.pressed.connect(func():state.page=int(state.get("page",0))-1;refresh())
 	counter=T.make_label("",13,T.INK_MUTED);counter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;counter.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;pages.add_child(counter)
@@ -54,6 +55,9 @@ func refresh()->void:
 		var key:=String(record.key)
 		var choice:=_button(String(record.title)+( "\n"+String(record.summary) if not String(record.summary).is_empty() else ""),String(record.title)+"\n"+String(record.summary))
 		choice.name="Choice_"+key;choice.alignment=HORIZONTAL_ALIGNMENT_LEFT;choice.clip_text=true;choice.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choice.custom_minimum_size.y=52
+		if record.get("icon") is Texture2D:
+			choice.icon=record.icon;choice.expand_icon=true;choice.add_theme_constant_override("icon_max_width",28)
+		if tiles:choice.custom_minimum_size.y=84
 		choice.toggle_mode=true;choice.set_pressed_no_signal(key==selected);choice.pressed.connect(func():select(key));choices.add_child(choice)
 	if matched.is_empty():choices.add_child(T.make_label("No matching choices",15,T.INK_MUTED))
 	for record:Dictionary in records:(record.content as Control).visible=String(record.key)==selected
@@ -83,9 +87,10 @@ func _layout()->void:
 		for i in matched.size():
 			if String(matched[i].key)==selected:state.page=floori(float(i)/limit);break
 		page_size=limit;call_deferred("refresh")
-	spread.vertical=_narrow
-	index.custom_minimum_size.x=0 if _narrow else 236
-	index.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow else Control.SIZE_FILL
+	spread.vertical=_narrow or tiles
+	if tiles:(choices as GridContainer).columns=3 if size.x>=1000 else 2 if size.x>=600 else 1
+	index.custom_minimum_size.x=0 if _narrow or tiles else 236
+	index.size_flags_horizontal=Control.SIZE_EXPAND_FILL if _narrow or tiles else Control.SIZE_FILL
 	var reading:=bool(state.get("reading",false)) and not String(state.get("selected","")).is_empty()
 	index.visible=records.size()>1 and (not _narrow or not reading)
 	reader.visible=not _narrow or reading or records.size()<=1

@@ -104,11 +104,26 @@ func _city_tab()->Dictionary:
 		{"id":"crews","heading":"Builders by job","actions":[{"label":"Assign workers","tip":"Focus construction in The People. Preview the effects on building, other work and food before applying.","on_press":assign_workers("Construction")}]},
 		{"id":"fabric","heading":"The town's fabric"},
 		{"id":"soon","heading":"Coming next"}]
-	var page:={"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards,"readings":_glance(housing,crews)}]}
+	var civic_heads:=0.0
+	for part:Dictionary in _crew_split(crews):
+		if String(part.key)=="civic":civic_heads=float(part.heads)
+	var context:={"type":"town_context","city_id":String(city.get("id","")),"capacity":_capacity_readings(housing),"on_storage":jump("economy",1),"builders":int(crews.heads),"civic_builders":civic_heads,"work":_work_rows(city,project,crews),"on_assign":assign_workers("Construction")}
+	var page:={"blocks":[context,{"type":"town_works","board":true,"sections":sections,"cards":cards,"readings":_glance(housing,crews),"hide_readings":["HOMES","BUILDERS"]}]}
 	# A lead line only when something is wrong; a quiet town needs none.
 	var brief:=_now_brief(city,project,housing,crews)
 	page["brief"]=brief if String(brief.get("tone",""))!="info" else {}
 	return page
+
+## Fixed functional categories; their count does not grow with years, plots or population.
+func _capacity_readings(housing:Dictionary)->Array:
+	var rows:Array=[{"id":"housing","name":"Housing","used":housing.people,"capacity":housing.places,"unit":"people / places","over":"without shelter","under":"spare places"}]
+	var water:Dictionary=WorldSimulation.state.water_metrics
+	rows.append({"id":"drinking","name":"Drinking water today","used":water.get("required_today",null),"capacity":water.get("drinking_consumed_today",null),"unit":"needed / supplied","over":"unmet water","under":"surplus water"})
+	var stores=preload("res://scripts/storage_works.gd")
+	var held:Dictionary=stores.used();var room:Dictionary=stores.capacities();var incoming:Dictionary=stores.incoming()
+	for kind:String in stores.KINDS:
+		rows.append({"id":kind,"name":stores.LABELS[kind],"used":held[kind],"capacity":room[kind],"unit":("rations" if kind=="food" else "water units" if kind=="water" else "bulk")+" held / room","over":"over capacity","under":"free room","incoming":incoming[kind]})
+	return rows
 
 ## A town_works card as a board row in `section`, its progress as the row's
 ## bar and its state as a tag.
@@ -913,7 +928,7 @@ func _civic_tab()->Dictionary:
 		if not unknown:projects.append(project)
 		if done:built+=1
 		# The selected work keeps its purpose beside its figures and controls.
-		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":"","detail":"It %s." % _gain(definition),"effects":_effects(project.impact)}
+		var row:={"section":"works","key":"work_"+title,"icon":work_icon(title),"name":title,"sub":"","detail":"It %s." % _gain(definition),"effects":_effects(project.impact),"gains":_work_gains(title) if not done else []}
 		if done:
 			# Completed works remain individual searchable entries, with their effects.
 			var ago:=int(project.finished_ago)

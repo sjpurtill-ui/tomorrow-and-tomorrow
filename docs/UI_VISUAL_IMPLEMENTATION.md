@@ -7,7 +7,8 @@ Unchecked entries remain required work. An integrated source change is not a cla
 ## Batch 0–1: controls and material needs
 
 - [x] Shared retained comparison widgets and bounded visible choices.
-- [ ] Buildings: visible categories, material need/have, capacity before/after, builder/queue state.
+- [x] Buildings Town/Civic Works: fixed capacity categories, visible icon choices, material need/have, capacity before/after, current work and waiting priority. Physical plot plan explicitly rejected and removed.
+- [ ] Buildings Infrastructure: actual routes, carrying limits and links to border forts.
 - [x] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
 - [x] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
 - [x] Materials: protected supplies/free stock and arrivals/losses; hauling and storage bottlenecks.
@@ -105,3 +106,7 @@ Home adds paired shelter/care/food readings and bounds its artwork, with narrow 
 ## Checkpoint 10 — Map scope and direct controls
 
 Four zoom choices, bounded town tray, explicit realm population and responsive map controls are implemented. 32 checks pass and normal/narrow/enlarged native renders reviewed. Fort/home Defense remains one allocated pool; World labels its actual security reading. No simulation/save change. All broader final interaction acceptance and unchecked screen work remains required.
+
+## Checkpoint 11 — Bounded building capacity and civic choices
+
+The Town shows nine fixed need/capacity comparisons and the current-work/builder lane; Civic Works uses a bounded icon grid with benefits, blockers and pinned costs/actions. The user rejected the physical plan: no added geometry read/copy/draw code remains. Actual early views and prepared 20-million-population values reviewed wide/narrow. 23 assertion cases pass; three previously documented construction-suite orphans remain. Infrastructure and history redesign, full live interaction validation and all other unchecked work remain required.

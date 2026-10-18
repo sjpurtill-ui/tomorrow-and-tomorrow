@@ -3,28 +3,24 @@ const Queue=preload("res://scripts/hud/production_queue.gd")
 const Fixture=preload("res://tests/test_production_screen.gd")
 const Selection=preload("res://scripts/hud/production_selection.gd")
 
-func test_last_filtered_order_keeps_global_rank_and_existing_actions()->void:
+func test_last_simultaneous_line_keeps_global_rank_and_existing_actions()->void:
 	var actions:Array=[];var lines:Array=[]
 	for i in 19:
 		var line:=Fixture.healthy_line();line.id=i+1;lines.append(line)
 	var block:={"mode":"military","lines":lines,"capacity":20,"context":Fixture.CONTEXT,"on_action":func(id,action,value):actions.append([id,action,value])}
 	var queue:Control=auto_free(Queue.new());add_child(queue);queue.size=Vector2(1000,700);queue.setup(block)
 	for frame in 4:await get_tree().process_frame
-	var index:Control=queue._selectors.lines
-	assert_int(index.choices.get_child_count()).is_equal(4)
-	index.search.text="19 ·";index.search.text_changed.emit(index.search.text)
-	assert_int(index.choices.get_child_count()).is_equal(1)
-	index.select("19")
+	assert_int(queue._rows.size()).is_equal(19)
 	var selected:Control=queue._rows[19]
 	assert_bool(selected.is_visible_in_tree()).is_true()
-	assert_int(queue._rows.values().filter(func(row:Control)->bool:return row.is_visible_in_tree()).size()).is_equal(1)
+	assert_int(queue._rows.values().filter(func(row:Control)->bool:return row.is_visible_in_tree()).size()).is_equal(19)
 	(selected.find_child("Up",true,false) as Button).pressed.emit()
 	(selected.find_child("KeepUp",true,false) as Button).pressed.emit()
 	assert_array(actions).contains_exactly([[19,"move",-1.0],[19,"target",25.0]])
 	lines[18].target_stock=40
 	assert_bool(queue.update_block(block)).is_true()
 	assert_str((selected.find_child("KeepValue",true,false) as Label).text).is_equal("40")
-	assert_str(index.search.text).is_equal("19 ·")
+	assert_object(queue._rows[19]).is_same(selected)
 
 func test_narrow_reading_and_back_keep_search_and_page()->void:
 	var index:Control=auto_free(Selection.new());add_child(index);index.size=Vector2(500,700);index.setup({},6)

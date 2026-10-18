@@ -97,14 +97,20 @@ func _section(section:Dictionary,cards:Array)->Control:
 		for item:Dictionary in section.actions:actions.add_child(_button(item))
 	var id:=String(section.get("id",""))
 	if not view_state.has(id):view_state[id]={}
-	browser=Selection.new();box.add_child(browser);browser.setup(view_state[id],6)
+	browser=Selection.new();browser.tiles=id=="works";box.add_child(browser);browser.setup(view_state[id],6)
 	for i in cards.size():
 		var card:Dictionary=cards[i]
 		var content:=VBoxContainer.new();content.add_theme_constant_override("separation",10)
 		var key:=str(card.get("key",i))
 		var status:=String(card.get("sub",""))
 		if status.is_empty():status=String(card.get("tag",{}).get("text",card.get("value","")))
+		if id=="works":
+			var benefits:PackedStringArray=[]
+			for effect:Dictionary in (card.get("effects",[]) as Array).slice(0,2):benefits.append(String(effect.get("label",""))+" "+String(effect.get("value","")))
+			for gain:Dictionary in (card.get("gains",[]) as Array).slice(0,1):benefits.append(String(gain.get("label",""))+" "+str(gain.get("before",""))+" → "+str(gain.get("after","")))
+			if not benefits.is_empty():status=" · ".join(benefits)+"\n"+status
 		browser.add_record(key,String(card.get("name","Work")),status,content)
+		browser.records.back()["icon"]=Icons.town_texture(String(card.get("icon","hall")),T.INK,28)
 		content.add_child(_row(card))
 		var detail:=String(card.get("reading",card.get("detail",""))).replace("\r","").replace("\n\n","\n")
 		if not detail.is_empty():
@@ -276,6 +282,7 @@ class Segments extends Control:
 func _context_readings(readings:Array)->Control:
 	var flow:=HFlowContainer.new();flow.name="ContextReadings";flow.add_theme_constant_override("h_separation",18);flow.add_theme_constant_override("v_separation",8)
 	for reading:Dictionary in readings:
+		if String(reading.get("label","")) in data.get("hide_readings",[]):continue
 		var cell:=HBoxContainer.new();cell.add_theme_constant_override("separation",6);cell.tooltip_text=String(reading.get("delta",""))+"\n"+String(reading.get("tip",""));flow.add_child(cell)
 		cell.add_child(_label(String(reading.get("label","")).capitalize(),14,T.INK_MUTED))
 		cell.add_child(_label(String(reading.get("value","")),16,T.INK,true))
