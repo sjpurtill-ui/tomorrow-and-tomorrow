@@ -260,3 +260,17 @@ func test_temporarily_failed_refresh_keeps_last_valid_estimate() -> void:
 	assert_dict(screen.forecast).is_equal(previous)
 	assert_str(screen.rows.Knowledge.effect.text).is_equal(effect)
 	assert_bool(screen._dirty).is_true()
+
+func test_workforce_strip_reconciles_assigned_counts_and_only_selects()->void:
+	screen.workforce_strip.size.x=1000
+	var total:=0
+	for part:Dictionary in screen.workforce_strip._parts():total+=int(part.count)
+	assert_int(total).is_equal(100)
+	var before:=commits
+	screen.workforce_strip.picked.emit("Defense")
+	assert_str(screen.active_role).is_equal("Defense")
+	assert_int(commits).is_equal(before)
+	screen.rows.Knowledge.steps[1].pressed.emit()
+	assert_int(int(screen.workforce_strip.counts.Knowledge)).is_equal(11)
+	assert_str(screen.transfer_labels.Knowledge.text).contains("← 1")
+	assert_str(screen.transfer_labels.Food.text).contains("→ 1")

@@ -384,6 +384,7 @@ static func line_view(line:Dictionary,context:Dictionary={},extra:Dictionary={})
 	# The next item's share done (the target row's arc on the line card).
 	view.resource_factor=float(line.get("resource_factor",1.0))
 	view.resource_missing=line.get("resource_missing",{})
+	view.stopped_capacity=int(line.get("stopped_capacity",0))
 	view.materials=line.get("materials_status",[])
 	view.next=clampf(float(line.get("progress_days",0.0))/maxf(.001,float(line.get("work_per_item",1.0))),0.0,1.0)
 	var stock_row:Dictionary=extra.get("stock",{})

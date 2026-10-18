@@ -16,7 +16,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 ## Batch 2: people and production
 
-- [ ] People: reconciled allocation strip, selected mode, donor/recipient change, effects and explicit estimate failures.
+- [x] People: reconciled allocation strip, selected mode, donor/recipient change, effects and explicit estimate failures.
 - [ ] Home: compact coverage comparisons and visible current-work choices.
 - [ ] Military production: dense simultaneous lines, actual efficiency/resource penalty/stop threshold.
 - [ ] Civilian production: consistent rows, purpose, inputs/output/target.
@@ -76,3 +76,7 @@ Implemented bounded visible choices across eleven UI components (Home, Research,
 ## Checkpoint 3 — All values together; storage arrivals
 
 All ten value axes are visible with lived/official markers and poles, retained value-only updates, exact family shift/target context and existing bonus/history displays. All seven store tiles include scoped physical arrivals, converted bulk loads and a labelled capacity projection; current/incoming/overflow segments share one scale. Existing building actions/costs/progress remain visible. Culture/storage have 23 passing checks and reviewed actual wide/narrow native renders. No rules/save-schema changes.
+
+## Checkpoint 4 — People and stopped production slots
+
+People has a reconciled selectable workforce strip and stable donor/recipient feedback. Native review also corrected blank worker counts. Production exposes its actual penalty and stopped-slot threshold, including partial grouped-pip stoppages. 40 checks pass; 1280/720 native layouts reviewed. The isolated capture completed its work but crashed during native shutdown; this limitation is recorded in the integration log. The broader production redesign and remaining screen work are unfinished.

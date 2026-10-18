@@ -192,7 +192,9 @@ func apply(next:Dictionary)->void:
 	target_row.set_row(have,keep_count,float(view.get("next",0.0)) if not paused else 0.0,tone)
 	target_row.tooltip_text=("%d in store of %d to keep; the open marks are still to make, the arc is the next one." % [have,keep_count]) if persistent else ("%d of %d made." % [have,keep_count])
 	var factor:=clampf(float(view.get("resource_factor",1.0)),0,1)
+	var stopped:=clampi(int(view.get("stopped_capacity",0)),0,people)
 	shortage.text="Inputs −%d%%" % roundi((1.0-factor)*100) if factor<.999 else "Inputs ✓"
+	if stopped>0:shortage.text+=" · %d/%d stopped" % [stopped,people]
 	shortage.add_theme_color_override("font_color",Color("ef9c86") if factor<.999 else Color("b9d38c"))
 	shortage.tooltip_text="Resource shortage reduces output by %d%%. Each missing input unit costs 5%% per capacity slot; 20 stops that slot. Priority runs top to bottom." % roundi((1-factor)*100)
 	for resource:String in view.get("resource_missing",{}):
@@ -203,14 +205,20 @@ func apply(next:Dictionary)->void:
 		var slot:Button=capacity_grid.get_child(index)
 		var assigned:=index*scale<people
 		(slot as CapacitySlot).lit=assigned
-		(slot as CapacitySlot).blocked=assigned and factor<=0
+		var slot_count:=maxi(0,mini(scale,people-index*scale))
+		var stopped_here:=maxi(0,mini(people,(index+1)*scale)-maxi(index*scale,people-stopped))
+		(slot as CapacitySlot).blocked=assigned and (factor<=0 or stopped_here==slot_count)
+		(slot as CapacitySlot).stopped_share=float(stopped_here)/maxi(1,slot_count)
 		slot.queue_redraw()
 		slot.add_theme_stylebox_override("normal",Industrial.flat(Color("252b22"),Color("414b36"),1,0))
 		slot.add_theme_stylebox_override("hover",Industrial.flat(Color("c4c890"),Color("e5dfb6"),1,1))
-		slot.tooltip_text="Assign %d makers to this line (%d per square)." % [mini(total,(index+1)*scale),scale]
+		slot.tooltip_text="Assign %d makers to this line (%d per square)." % [mini(total,(index+1)*scale),scale]+(" %d of these stopped by missing inputs." % stopped_here if stopped_here>0 else "")
 		slot.disabled=paused or index*scale>=total
 		slot.add_theme_stylebox_override("disabled",Industrial.flat(Color("20241e"),Color("424837"),1,1))
 	condition.text="%d%% efficiency · %s" % [roundi(float(view.efficiency)*100),"Input shortage" if factor<.999 else "Producing" if float(view.rate)>0 else String(view.get("short","Waiting"))]
+	if factor<.999:
+		var shortage_rule=preload("res://scripts/production_shortage.gd")
+		condition.text+=" · −%d%% / missing input; slot stops at %d" % [roundi(shortage_rule.PENALTY*100),roundi(1.0/shortage_rule.PENALTY)]
 	condition.add_theme_color_override("font_color",LIGHT)
 	title.add_theme_color_override("font_color",LIGHT)
 	stock.add_theme_color_override("font_color",LIGHT)
@@ -257,9 +265,11 @@ static func daily_rate(value:float)->String:
 class CapacitySlot extends Button:
 	var lit:=false
 	var blocked:=false
+	var stopped_share:=0.0
 	func _draw()->void:
 		var ink:=Color("a2b66e") if lit else Color("555f47")
 		if blocked:ink=Color("bd6550")
 		var at:=Vector2(floorf((size.x-12)/2),floorf((size.y-10)/2))
 		draw_colored_polygon(PackedVector2Array([at+Vector2(0,10),at+Vector2(0,5),at+Vector2(4,2),at+Vector2(4,5),at+Vector2(8,2),at+Vector2(8,5),at+Vector2(10,5),at+Vector2(10,0),at+Vector2(12,0),at+Vector2(12,10)]),ink)
+		if stopped_share>0 and not blocked:draw_rect(Rect2(at+Vector2(0,8),Vector2(12*stopped_share,2)),Color("bd6550"))
 		for x in [2,6,10]:draw_rect(Rect2(at+Vector2(x,7),Vector2(1,2)),Color("252b22"))

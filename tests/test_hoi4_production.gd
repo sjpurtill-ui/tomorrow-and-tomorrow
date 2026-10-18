@@ -328,3 +328,17 @@ func test_a_stockpile_card_says_when_the_shortfall_is_covered()->void:
 	var chip:Node=_screen().find_child("Stock_improvised",true,false)
 	assert_int(int(chip.find_child("Bar",true,false).get("stock"))).is_equal(3)
 	assert_str((chip.find_child("Cover",true,false) as Label).text).contains("short")
+
+func test_partial_resource_stoppage_is_visible_in_line_and_capacity_pips()->void:
+	_room_for_lines(2)
+	var id:=int(MilitaryCampaign.start_production_line("improvised",25).job_id)
+	var panel:=_screen(2)
+	var row:Node=panel.find_child("Line%d" % id,true,false)
+	var view:Dictionary=row.view.duplicate(true)
+	view.hands=10;view.hands_total=10;view.resource_factor=0.4;view.stopped_capacity=3
+	row.apply(view)
+	assert_str(row.shortage.text).contains("−60%").contains("3/10 stopped")
+	assert_str(row.find_child("Condition",true,false).text).contains("slot stops at 20")
+	assert_bool(row.capacity_grid.get_child(6).blocked).is_false()
+	assert_bool(row.capacity_grid.get_child(7).blocked).is_true()
+	assert_bool(row.capacity_grid.get_child(9).blocked).is_true()

@@ -7,7 +7,7 @@ const Impacts = preload("res://scripts/hud/people_work_impacts.gd")
 const Portrait = preload("res://scripts/hud/people_town_portrait.gd")
 const Words = preload("res://scripts/hud/era_words.gd")
 const Icons = preload("res://scripts/resource_icons.gd")
-const NAMES = {"Food":"Food grounds", "Survey":"Surveying", "Extraction":"Wood & stone", "Construction":"Building", "Crafting":"Making", "Logistics":"Water & carrying", "Knowledge":"Learning", "Administration":"Keeping & caring", "Defense":"The watch"}
+const NAMES = {"Food":"Food grounds", "Survey":"Surveying", "Extraction":"Wood & stone", "Construction":"Building", "Crafting":"Making", "Logistics":"Water & carrying", "Knowledge":"Learning", "Administration":"Keeping & caring", "Defense":"Defense & armies"}
 const DOMAINS = ["nutrition", "ecology", "labor", "infrastructure", "production", "logistics", "knowledge", "health", "security"]
 
 var data: Dictionary = {}
@@ -20,6 +20,8 @@ var _margin: MarginContainer
 var _content: VBoxContainer
 var _art: TextureRect
 var _art_path := ""
+var workforce_strip:Control
+var transfer_labels:Dictionary={}
 var _metrics: Array[Dictionary] = []
 var _revision: Array = []
 var _dirty := false
@@ -103,6 +105,11 @@ func _build() -> void:
 	feedback.custom_minimum_size.y = 38
 	feedback.max_lines_visible = 2
 	feedback.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	workforce_strip=preload("res://scripts/hud/workforce_strip.gd").new();_content.add_child(workforce_strip);workforce_strip.picked.connect(focus_work)
+	var transfer_view:=ScrollContainer.new();transfer_view.name="WorkerTransfers";transfer_view.custom_minimum_size.y=40;transfer_view.vertical_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;_content.add_child(transfer_view)
+	var transfers:=HBoxContainer.new();transfers.add_theme_constant_override("separation",16);transfer_view.add_child(transfers)
+	for role:String in Manual.ROLES:
+		var changed:=_text(transfers,"",14,T.INK);changed.autowrap_mode=TextServer.AUTOWRAP_OFF;transfer_labels[role]=changed
 	_body = BoxContainer.new()
 	_body.name = "AllocatorAndConsequences"
 	_body.add_theme_constant_override("separation", 22)
@@ -153,6 +160,7 @@ func _build() -> void:
 		effect.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		var count := _text(line, "—", 21)
 		count.custom_minimum_size.x = 72
+		count.autowrap_mode = TextServer.AUTOWRAP_OFF
 		count.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -459,6 +467,12 @@ func _fill_rows() -> void:
 	var counts := _counts()
 	var total := 0
 	for value: int in counts.values(): total += value
+	workforce_strip.fill(counts,NAMES,active_role,_changes)
+	for role:String in transfer_labels:
+		var changed:Label=transfer_labels[role];var delta:=int(_changes.get(role,0));changed.visible=delta!=0
+		changed.text="%s %s %d" % [NAMES[role],"←" if delta>0 else "→",absi(delta)]
+		changed.tooltip_text="%d people %s this work in the last applied change." % [absi(delta),"moved into" if delta>0 else "moved out of"]
+		_ink(changed,T.GREEN_TEXT if delta>0 else T.AMBER_TEXT)
 	var valid := (_has_callback(data.get("workforce", {}).get("assign")) or _has_callback(data.get("workforce", {}).get("commit"))) and total > 0
 	for role: String in rows:
 		var row: Dictionary = rows[role]
@@ -572,7 +586,7 @@ func restore_view_state(saved: Dictionary) -> void:
 func handle_escape() -> bool: return false
 
 func _layout() -> void:
-	if _body == null: return
+	if _body == null or not is_inside_tree(): return
 	var margin := maxi(0, floori((size.x - 1420) * .5))
 	_margin.add_theme_constant_override("margin_left", margin)
 	_margin.add_theme_constant_override("margin_right", margin)
