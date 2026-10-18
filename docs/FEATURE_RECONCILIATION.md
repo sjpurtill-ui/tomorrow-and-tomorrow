@@ -1,3 +1,36 @@
+## October 17 — Research totals and visual hardship history
+
+Status: INTEGRATED — source `6d3bcee7f1286f9622a8a1f13e96bdf2ac7e0ad9`,
+verified on remote `main` and `codex/health-research-totals`. Based on
+`0d82e3a01498f31377a8b5077860323e2b53860b` in
+`/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
+
+Lives shows every unlocked additive health-research category in a fixed table:
+full-use contribution and current in-use contribution, before shared caps and
+upkeep. Only the latest three relevant discoveries appear beneath it. Month
+navigation uses previous/next controls; Conditions uses compact visible rows.
+No discovery dropdowns remain. These figures are effect points, not invented
+individual life-year gains.
+
+Sickness & disasters now has five ten-year loss totals, a selectable yearly
+death chart, six compact event selectors per page, and one account beside them.
+Selecting a year filters events; All history and pagination reach older records.
+The selected event remains selected through daily refresh and incoming events.
+Summoning is a separate action and uses the existing callback. Counts and prose
+come from the existing bounded hardship ledger; no simulation or save changes.
+
+Validation: 12 health dashboard checks, 5 hardship dashboard checks, and all 11
+quiet-hardship checks pass. Coverage includes all eleven research categories,
+latest-three ordering, actual source contributions, 200-event pagination,
+selection/focus retention, yearly totals, separate summon action, and narrow/
+wide layout. The legacy quiet-hardship suite reports 627 orphan-node warnings;
+the new UI suites report none. No interactive preview or player restart was
+performed. The running release retains its previously loaded scripts; canonical
+release preparation follows this integration. Generated import metadata, UID
+files, test reports, private saves and release artifacts are excluded from Git.
+Shared UI edits: DockBlocks registers the new widget; the Health provider supplies
+its data. No conflicts or changes to shared simulation hotspots.
+
 ## October 17 — Quicksave report-schema compatibility
 
 Status: INTEGRATED — source `acb6c0bf0efa0681fe72d9bfc4a397628da37c73`
