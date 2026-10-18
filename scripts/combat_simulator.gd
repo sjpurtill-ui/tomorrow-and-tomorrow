@@ -457,7 +457,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			Blocks.note_tactics(state,{},plan)
 		Blocks.deploy(state,plan)
 
-		var attacker_cohorts := evaluate_force(attacking_force, defending_force, 1.0, true)
+		var attacker_cohorts := evaluate_force(attacking_force, defending_force, 1.0, true, true)
 		var defender_cohorts := evaluate_force(defending_force, attacking_force, effective_terrain_defense, true)
 		var attacker_commander:Dictionary=attacking_force.get("commander",{})
 		var defender_commander:Dictionary=defending_force.get("commander",{})
@@ -567,8 +567,8 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		Blocks.book_kinds(state,"attacker",attacker_block_losses,attacker_casualties)
 		Blocks.book_kinds(state,"defender",defender_block_losses,defender_casualties)
 
-		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)),lethality)
-		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)),lethality)
+		attacker_morale = _next_morale(attacker_morale,attacker_losses,maxi(1,attacker_initial),defender_share,float(attacker_commander.get("resolve",0.5)),lethality*preload("res://scripts/division_statistics.gd").morale_wear(attacking_force.get("formations",[]),self))
+		defender_morale = _next_morale(defender_morale,defender_losses,maxi(1,defender_initial),attacker_share,float(defender_commander.get("resolve",0.5)),lethality*preload("res://scripts/division_statistics.gd").morale_wear(defending_force.get("formations",[]),self))
 		if crush>1.0:
 			var dread:=maxf(0.0,odds-LOPSIDED_FROM)*LOPSIDED_MORALE_STEP*lethality
 			if attacker_weaker: attacker_morale=maxf(0.0,attacker_morale-dread)
@@ -843,7 +843,7 @@ static func effective_odds(attacker_power:float,defender_power:float,attacker_tr
 ## for all to fight, only the men in the line count, as in the battle itself.
 func overrun_expected(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0,ground:Dictionary={})->String:
 	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
-	var ac:=evaluate_force(a,d,1.0); var dc:=evaluate_force(d,a,clampf(terrain_defense,0.5,2.0))
+	var ac:=evaluate_force(a,d,1.0,false,true); var dc:=evaluate_force(d,a,clampf(terrain_defense,0.5,2.0))
 	var state:=Blocks.begin(a,d,{"ground":ground,"terrain_defense":terrain_defense})
 	var ap:=_cohort_power(ac,float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)),Blocks.weights(state,"attacker",ac.size(),float(a.morale)))
 	var dp:=_cohort_power(dc,float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)),Blocks.weights(state,"defender",dc.size(),float(d.morale)))
@@ -860,7 +860,7 @@ func odds_of(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->floa
 ## is the stronger): the stated odds (war_odds.gd) read this.
 func raw_odds(attacker:Dictionary,defender:Dictionary,terrain_defense:=1.0)->float:
 	var a:=_normalize_force(attacker,"Attacker"); var d:=_normalize_force(defender,"Defender")
-	var ap:=_cohort_power(evaluate_force(a,d,1.0),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
+	var ap:=_cohort_power(evaluate_force(a,d,1.0,false,true),float(a.morale),float(a.readiness),float((a.get("commander",{}) as Dictionary).get("command",0.5)))
 	var dp:=_cohort_power(evaluate_force(d,a,clampf(terrain_defense,0.5,2.0)),float(d.morale),float(d.readiness),float((d.get("commander",{}) as Dictionary).get("command",0.5)))
 	return effective_odds(ap,dp,int(a.troops),int(d.troops))
 
@@ -897,7 +897,7 @@ func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Di
 		"attacker_tactic_phase":"closing" if weak=="defender" else "hold","defender_tactic_phase":"closing" if weak=="attacker" else "hold"}
 	for side in ["attacker","defender"]:
 		var force:Dictionary=forces[side]
-		var cohorts:=evaluate_force(force,forces["defender" if side=="attacker" else "attacker"],1.0)
+		var cohorts:=evaluate_force(force,forces["defender" if side=="attacker" else "attacker"],1.0,false,side=="attacker")
 		var applied:=_apply_cohort_losses(force.get("formations",[]),cohorts,int(losses[side]),rng)
 		var ammunition:=_consume_ammunition(applied.formations,0.5 if side==strong else 0.2,rng)
 		force["formations"]=applied.formations
@@ -930,7 +930,7 @@ func _overrun_exchange(weak:String,attacking_force:Dictionary,defending_force:Di
 
 ## Each formation's fighting stats against this opponent. lean: only count,
 ## attack and defense (the same numbers), for the exchange loop.
-func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier := 1.0, lean:=false) -> Array[Dictionary]:
+func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier := 1.0, lean:=false, attacking:=false) -> Array[Dictionary]:
 	var formations: Array = force.get("formations", force.get("composition", []))
 	if formations.is_empty():
 		return [{
@@ -940,10 +940,11 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		}]
 	var enemy_formations: Array = opponent.get("formations", opponent.get("composition", []))
 	var commander:Dictionary=force.get("commander",{})
-	var tactics:=clampf(float(commander.get("tactics",0.5)),0.0,1.0)
+	var traits:=preload("res://scripts/division_statistics.gd").support_traits(formations)
+	var tactics:=clampf(float(commander.get("tactics",0.5))+minf(.15,float(traits.recon)*.05),0.0,1.0)
 	var result: Array[Dictionary] = []
-	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))*(1+clampf(float(force.get("joint_air_support",0)),0,.3))*(1-clampf(float(force.get("joint_air_pressure",0)),0,.25))
-	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))
+	var formation_attack_modifier:=maxf(0.0,float(force.get("attack_modifier",1.0)))*(1+clampf(float(force.get("joint_air_support",0)),0,.3))*(1-clampf(float(force.get("joint_air_pressure",0))*(1.0-float(traits.air_protection)),0,.25))
+	var formation_defense_modifier:=maxf(0.05,float(force.get("defense_modifier",1.0)))*(1.0 if attacking else 1.0+float(traits.entrenchment))
 	# The enemy's mix is the same for every formation: weigh it once per arm.
 	var matchups:Dictionary={}
 	var stores_share:=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
@@ -983,6 +984,7 @@ func evaluate_force(force: Dictionary, opponent: Dictionary, terrain_modifier :=
 		var matchup:=float(matchups[unit_id])
 		matchup=1.0+(matchup-1.0)*(0.65+tactics*0.70)
 		var doctrine_defense:=preload("res://scripts/combined_arms_doctrine.gd").defense(formation,formations,enemy_formations)
+		if attacking:doctrine_defense*=preload("res://scripts/division_statistics.gd").breakthrough_factor(unit_id)
 		# Our blows against the enemy's hard share lose what our kit cannot pierce;
 		# how much of the enemy's fire gets through our own armour sets where
 		# our losses fall (_apply_cohort_losses).
@@ -1050,6 +1052,8 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 	organization_recovery*=0.70+command*0.60
 	# Days of home preparation covered by one call (multi-day rival steps).
 	var days:=float(context.get("days",1.0))
+	var support:=preload("res://scripts/division_statistics.gd").support_traits(prepared.get("formations",[]))
+	organization_recovery*=1.0+float(support.initiative)
 	var delivered:=0
 	var formations:Array=prepared.get("formations",[])
 	for index in formations.size():
@@ -1091,6 +1095,7 @@ func advance_preparation_day(force: Dictionary, context: Dictionary = {}) -> Dic
 		var arrivals:=mini(manpower_queue,capacity)
 		formation["count"]=count+arrivals
 		if arrivals>0:
+			formation["experience"]=float(formation.get("experience",0.0))*float(count)/maxf(1,float(count+arrivals))
 			formation["doctrines"]=preload("res://scripts/combined_arms_doctrine.gd").clean(formation.get("doctrines",{}))
 			for doctrine:String in formation.doctrines:formation.doctrines[doctrine]*=float(count)/float(count+arrivals)
 		formations[index]=formation
@@ -1395,6 +1400,7 @@ func _normalize_force(force: Dictionary, fallback_name: String) -> Dictionary:
 		formation_force["captured_in_battle"]=int(force.get("captured_in_battle",0))
 		formation_force["dead"]=int(force.get("dead",0))
 		formation_force["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
+		for key:String in ["joint_air_support","joint_air_pressure"]:formation_force[key]=float(force.get(key,0))
 		return formation_force
 	var normalized := create_force(
 		String(force.get("name", fallback_name)),

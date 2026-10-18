@@ -179,8 +179,16 @@ var runner_messages:Array[Dictionary]=[]
 ## formations out of the home force as one field army.
 var army_templates:Array[Dictionary]=[]
 var next_army_template_id:=1
+var active_division_template_id:=0
 var settlement_defense:Dictionary={}
 
+
+var division_designer_screen:CanvasLayer
+func open_division_designer(id:int=0)->void:
+	if is_instance_valid(division_designer_screen):division_designer_screen.queue_free()
+	division_designer_screen=load("res://scripts/hud/division_designer.gd").new()
+	division_designer_screen.template_id=id if id>0 else maxi(1,active_division_template_id)
+	get_tree().root.add_child(division_designer_screen)
 
 var roster_screen:CanvasLayer
 func open_roster(service:String="army",training:bool=false,page:String="")->void:
@@ -284,6 +292,7 @@ func reset_for_new_world()->void:
 	runner_messages.clear()
 	next_field_army_id=1
 	army_templates=_default_army_templates()
+	active_division_template_id=0
 	next_army_template_id=army_templates.size()+1
 	settlement_defense=_default_settlement_defense()
 	settlement_defense_changed.emit(settlement_defense_snapshot())
@@ -1709,7 +1718,7 @@ func disband_field_army(army_id:int)->Dictionary:
 
 func _default_army_templates()->Array[Dictionary]:
 	# Start with a modest design; later designs may exceed current population.
-	return [{"template_id":1,"name":"LEVY BAND","entries":[{"unit":"levy","weapon":"improvised","count":clampi(recruitment_capacity(),1,20)}]}]
+	return [{"template_id":1,"name":"Levy band","automatic_name":true,"entries":[{"unit":"levy","weapon":"improvised","count":clampi(recruitment_capacity(),1,20)}]}]
 
 
 func _ensure_army_templates()->void:
@@ -1771,6 +1780,7 @@ func army_template_snapshot()->Dictionary:
 
 
 func create_army_template(name:String="")->Dictionary:
+	if army_templates.size()>=64:return {"error":"Keep at most 64 division designs."}
 	var label:=name.strip_edges()
 	if label=="": label="BUILD %d" % next_army_template_id
 	var template:Dictionary={"template_id":next_army_template_id,"name":label.to_upper(),"entries":[]}
@@ -1783,6 +1793,7 @@ func delete_army_template(template_id:int)->Dictionary:
 	var index:=_template_index(template_id)
 	if index<0: return {"error":"That army build no longer exists."}
 	if army_templates.size()<=1: return {"error":"Keep at least one army build."}
+	if active_division_template_id==template_id:active_division_template_id=0
 	army_templates.remove_at(index)
 	return {"ok":true}
 
@@ -1807,6 +1818,7 @@ func adjust_template_entry(template_id:int,unit:String,weapon:String,delta:int)-
 	if not found and applied>0:
 		entries.append({"unit":unit,"weapon":weapon,"count":applied})
 	template["entries"]=entries
+	template.erase("designer_slots")
 	army_templates[index]=template
 	var result:Dictionary={"ok":true,"template":template.duplicate(true)}
 	if applied<delta: result["message"]="Added %d of %d — the build is now at the mobilization capacity of %d." % [applied,delta,recruitment_capacity()]
@@ -4380,6 +4392,7 @@ func export_state()->Dictionary:
 		"field_depots":field_depots.duplicate(true),
 		"runner_messages":runner_messages.duplicate(true),
 		"army_templates":army_templates.duplicate(true),
+		"active_division_template_id":active_division_template_id,
 		"next_army_template_id":next_army_template_id,
 		"next_field_army_id":next_field_army_id,
 		"settlement_defense":settlement_defense.duplicate(true)
@@ -4387,6 +4400,8 @@ func export_state()->Dictionary:
 
 
 func import_state(payload:Dictionary)->Dictionary:
+	var design_error:=preload("res://scripts/division_design.gd").validate_saved(payload)
+	if not design_error.is_empty():return {"error":design_error}
 	var recruitment_error:=String(recruit_deploy.validate_saved(payload))
 	if not recruitment_error.is_empty():return {"error":recruitment_error}
 	if not preload("res://scripts/combined_arms_doctrine.gd").valid_tree(payload):return {"error":"Invalid practiced military doctrine."}
@@ -4797,6 +4812,7 @@ func _apply_imported_state(payload:Dictionary)->void:
 	runner_messages.clear()
 	for message_variant in payload.get("runner_messages",[]):
 		if message_variant is Dictionary: runner_messages.append((message_variant as Dictionary).duplicate(true))
+	active_division_template_id=maxi(0,int(payload.get("active_division_template_id",0)))
 	army_templates.clear()
 	for template_variant in payload.get("army_templates",[]):
 		if template_variant is Dictionary: army_templates.append((template_variant as Dictionary).duplicate(true))
@@ -5867,11 +5883,13 @@ func _process_equipment_wear_day()->void:
 	var recent_combat:=int(home_army.get("recent_combat_days",0))>0
 	var standardization:=_adoption("workshop_standards")
 	var formations:Array=home_army.get("formations",[])
+	var reliability:=float(preload("res://scripts/division_statistics.gd").support_traits(formations).reliability)
 	for index in formations.size():
 		var formation:Dictionary=formations[index]
 		var equipment:=int(formation.get("equipment",0))
 		if equipment<=0: continue
 		var daily_rate:=maxf(0.0002,0.0007+(0.0075 if recent_combat else 0.0)+(1.0-supply)*0.004-standardization*0.0004)
+		daily_rate*=(1.0-reliability)/.2
 		var accumulator:=float(formation.get("wear_accumulator",0.0))+float(equipment)*daily_rate*WorldSimulation.span
 		var damaged:=mini(equipment,floori(accumulator))
 		formation["wear_accumulator"]=accumulator-float(damaged)

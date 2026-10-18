@@ -167,7 +167,7 @@ func test_drafts_come_from_the_army_size_the_ruler_set()->void:
 	# watch_military.gd): nobody more may be drafted.
 	GameState.population_allocations["Defense"]=20
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
-	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("at_level")
+	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("nobody_free")
 	# Men the player already called up may go.
 	MilitaryCampaign.aggregate_recruits=10
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)

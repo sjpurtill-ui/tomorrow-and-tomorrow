@@ -202,13 +202,14 @@ func rest_day(force:Dictionary,span:float)->Dictionary:
 	var supply:=clampf(float(force.get("supply_level",1.0)),0.0,1.0)
 	var morale:=float(force.get("morale",1.0))
 	var before:=morale
+	var design_support:=preload("res://scripts/division_statistics.gd").support_traits(force.get("formations",[]))
 	if Rations.is_hungry(force):
 		morale=move_toward(morale,MORALE_HUNGER_FLOOR,MORALE_HUNGER_LOSS*span)
 	else:
 		var pace:=MORALE_REST*(MORALE_MARCHING if String(force.get("status","stationed")) in ["moving","turning_back"] else 1.0)
 		var logistics:=clampf(float((force.get("commander",{}) as Dictionary).get("logistics",0.5)) if force.get("commander") is Dictionary else 0.5,0.0,1.0)
 		var ceiling:=0.55+0.45*supply
-		if morale<ceiling: morale=minf(ceiling,morale+pace*(0.35+0.65*supply)*(0.9+0.2*logistics)*span)
+		if morale<ceiling: morale=minf(ceiling,morale+pace*(1.0+float(design_support.initiative))*(0.35+0.65*supply)*(0.9+0.2*logistics)*span)
 	force["morale"]=morale
 	result.morale=morale-before
 	# Battle wounded (not the hunger-sick, not the disabled) heal in camp.

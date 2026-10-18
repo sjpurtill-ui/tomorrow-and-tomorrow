@@ -45,6 +45,8 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 ## Batch 5: military and world
 
+- [x] HOI-style division designer replaces War workforce controls; same visible metric categories from day one, actual composition/equipment costs, tiny starting band. See `DIVISION_DESIGNER.md` for native formulas and remaining parity limits.
+
 - [ ] Army: one Defense manpower source, equipment/readiness, forage/supply comparison.
 - [ ] Actual map marching/V deployment/front thinning/flanking/penetration, including tiny blobs.
 - [ ] Leaders/command/service: direct choices and general-led objectives; reconcile legacy routes.

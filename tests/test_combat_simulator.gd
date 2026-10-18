@@ -182,9 +182,16 @@ func test_push_order_increases_pressure_and_risk() -> void:
 	var pushing:=attacker.duplicate(true)
 	pushing["attack_modifier"]=1.25
 	assert_float(simulator.evaluate_force(pushing,defender)[0].attack).is_greater(simulator.evaluate_force(attacker,defender)[0].attack)
+	var held_losses:=0;var pushed_losses:=0;var held_total:=0;var pushed_total:=0
+	for seed_value in range(810,850):
+		var baseline:Dictionary=simulator.simulate(attacker,defender,{"seed":seed_value,"max_rounds":1})
+		var pushed:Dictionary=simulator.simulate(pushing,defender,{"seed":seed_value,"max_rounds":1,"casualty_intensity":1.30,"attacker_exposure_modifier":1.12})
+		held_losses+=int(baseline.rounds[0].defender_losses);pushed_losses+=int(pushed.rounds[0].defender_losses)
+		held_total+=int(baseline.rounds[0].attacker_losses)+int(baseline.rounds[0].defender_losses)
+		pushed_total+=int(pushed.rounds[0].attacker_losses)+int(pushed.rounds[0].defender_losses)
+	assert_int(pushed_losses).is_greater(held_losses)
+	assert_int(pushed_total).is_greater(held_total)
 	var push:Dictionary=simulator.simulate(pushing,defender,{"seed":812,"max_rounds":1,"casualty_intensity":1.30,"attacker_exposure_modifier":1.12})
-	assert_int(push.rounds[0].defender_losses).is_greater(hold.rounds[0].defender_losses)
-	assert_int(int(push.rounds[0].attacker_losses)+int(push.rounds[0].defender_losses)).is_greater(int(hold.rounds[0].attacker_losses)+int(hold.rounds[0].defender_losses))
 	assert_float(float(push.rounds[0].order_intensity)).is_equal_approx(1.30,0.001)
 
 

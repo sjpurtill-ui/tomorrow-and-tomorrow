@@ -89,7 +89,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	var board:VBoxContainer=auto_free(Board.new())
 	add_child(board)
 	board.setup({})
-	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
+	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_null()
 	assert_object(board.find_child("Allocation",true,false)).is_not_null()
 	# Three parts: the army (its forces with each town's guard), the fronts
 	# (the enemies and the border), the leaders. The bands out are the army
@@ -97,12 +97,13 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	# The global border stays with the Army task at every width.
 	var border_in:="ArmySection"
 	assert_object(board.find_child(border_in,true,false).find_child("BorderCard",true,false)).is_not_null()
-	for part in [["ArmySection",["ForcesCard","TownsCard","MakeupCard","CostCard"]],["FrontsSection",["Enemies"]],["LeadersSection",["Leaders"]]]:
+	for part in [["ArmySection",["ForcesCard","TownsCard","DivisionDesigner","CostCard"]],["FrontsSection",["Enemies"]],["LeadersSection",["Leaders"]]]:
 		var section:Node=board.find_child(String(part[0]),true,false)
 		assert_object(section).is_not_null()
 		for n in part[1]:assert_object(section.find_child(String(n),true,false)).override_failure_message(String(n)).is_not_null()
 	assert_object(board.find_child("BandsCard",true,false)).is_null()
-	for name in ["WatchMore","WatchLess","GuardMore","GuardLess","People"]:assert_object(board.find_child(name,true,false)).is_not_null()
+	for name in ["WatchMore","WatchLess","GuardMore","GuardLess"]:assert_object(board.find_child(name,true,false)).is_null()
+	assert_object(board.find_child("People",true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
 	assert_object(row.find_child("Odds",true,false)).is_not_null()
@@ -245,7 +246,8 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	var board:VBoxContainer=auto_free(Board.new())
 	add_child(board)
 	board.setup({})
-	assert_str((board.find_child("Level_some",true,false) as Button).text).is_equal("3%")
+	assert_object(board.find_child("Level_some",true,false)).is_null()
+	assert_object(board.find_child("DivisionDesigner",true,false)).is_not_null()
 	assert_object(board.find_child("DrawnFrom",true,false)).is_not_null()
 	var levy:Dictionary=Bar.levy_card(MilitaryCampaign)
 	assert_int(int(levy.watch)).is_equal(int(Law.watch(MilitaryCampaign).kept))

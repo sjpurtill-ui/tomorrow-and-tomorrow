@@ -69,7 +69,7 @@ func _command_brief()->Dictionary:
 	if not MilitaryCampaign.threat_snapshot().is_empty() or not MilitaryCampaign.engagement_snapshot().is_empty() or not MilitaryCampaign.pending_aftermath.is_empty():
 		return {"tone":"danger","title":"A war decision awaits","why":"A threat, battle, or aftermath needs your order.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 	if MilitaryCampaign.field_armies.is_empty() and int(MilitaryCampaign.campaign_army_snapshot().get("troops",0))<=0:
-		return {"tone":"info","title":"Nobody keeps watch","why":"The watch is the army. Set more of the people to keep watch on the War screen or in the People view; they join the watch at home at once and drill over time. Everyone keeping watch is absent from food and building."}
+		return {"tone":"info","title":"Nobody keeps watch","why":"The watch is the army. Assign more people to Defense in the People view; they join the watch at home at once and drill over time. Everyone keeping watch is absent from food and building."}
 	return {"tone":"info","title":"How to engage from the map","why":"SCOUTS: click their counter and choose CAPTURE or ATTACK. ENEMY ARMIES: select your field army, click the red enemy counter, then choose MOVE TO INTERCEPT. Battle opens automatically at contact.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 
 func _unit_label(unit:String)->String:
@@ -191,6 +191,7 @@ static func store_protection_tip(stores:Dictionary,defense:Dictionary)->String:
 # --- ARMY BUILDS ------------------------------------------------------------
 
 func _builds_blocks(capabilities:Dictionary,template_filter:int=-1,step:int=0)->Array:
+	if step==0:return [{"type":"actions","items":[{"label":"DIVISION DESIGNER","sub":"Combat groups, support and equipment costs","on_press":func():MilitaryCampaign.open_division_designer(maxi(1,template_filter))}]}]
 	if template_filter<0:return [{"type":"recruit_deploy","edit_template":func(id:int):_open_build(id)}]
 	var blocks:Array=[]
 	if step==2 and not MilitaryCampaign.field_armies.is_empty():

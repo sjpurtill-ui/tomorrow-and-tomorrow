@@ -276,7 +276,10 @@ func _build_watch(f:Dictionary,general:String,makeup:Array=[])->void:
 	# The bands out are the army bar's cards along the bottom of the map;
 	# here they are one part of the bar of where everyone stands.
 	manpower_box.add_child(_forces_card(f,general))
-	manpower_box.add_child(_makeup_card(makeup))
+	var designer:=_small_button("Division designer", "spear", "Design combat groups and support teams; compare their stats and equipment costs.")
+	designer.name="DivisionDesigner"
+	designer.pressed.connect(func():MilitaryCampaign.open_division_designer())
+	manpower_box.add_child(designer)
 	manpower_box.add_child(_cost_card(f))
 
 
@@ -432,7 +435,7 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	var panel:=_card();panel.name="ForcesCard"
 	var column:=panel.get_node("Column") as VBoxContainer
 	var total:=int(f.total);var watch:=int(f.watch)
-	var tip:="The army: everyone in it, anywhere, %s of the people. It is three things: the home guard (some of them out on the border), those free to send, and those in the field. The − and + here set how big it is, as a share of the people: more join at home at once and drill over time; fewer sends the least drilled at home back to their work. Keeping watch on the People view is this same number." % Watch.percent(float(total)/float(maxi(1,int(f.population))))
+	var tip:="The army: everyone in it, anywhere, %s of the people. It is three things: the home guard (some of them out on the border), those free to send, and those in the field. Only People → Defense changes this workforce allocation. The division designer sets composition and equipment." % Watch.percent(float(total)/float(maxi(1,int(f.population))))
 	var head:=_headline(column,"guard",total,"in the army",tip)
 	head.name="Total"
 	# Only when the army is not yet the size asked for: a small tag.
@@ -441,29 +444,6 @@ func _forces_card(f:Dictionary,general:="")->Control:
 		gap.name="Over" if total>watch else "Under";gap.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		gap.tooltip_text=("You asked for %s. %s more are in the army: away in the field, holding towns, hurt, or kept on because so few are over the share that sending them home is not worth it. Those beyond the share go back to their work when they come home." % [EraWords.grouped(watch),EraWords.grouped(total-watch)]) if total>watch else ("You asked for %s: %s more are still joining." % [EraWords.grouped(watch),EraWords.grouped(watch-total)])
 		column.add_child(gap)
-	head.add_child(_step_button("WatchLess","−","A smaller army: one in a hundred of the people fewer. The least drilled at home go back to their work.",func()->void:_step_watch(-1)))
-	head.add_child(_step_button("WatchMore","+","A bigger army: one in a hundred of the people more. They leave other work and join at home.",func()->void:_step_watch(1)))
-	# The quick shares, as plain shares of the people (army_levy_law LEVELS).
-	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",0);column.add_child(pick)
-	var count:=Law.LEVELS.size()
-	var now_level:=_nearest_level(float(f.share))
-	var now_cost:=Economy.cost(0)
-	for i in count:
-		var id:=String((Law.LEVELS[i] as Dictionary).id)
-		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_ALL
-		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(38,40);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",13)
-		for state:String in ["font_color","font_hover_color","font_focus_color"]:button.add_theme_color_override(state,T.INK_MUTED)
-		for state:String in ["font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(state,T.INK)
-		button.add_theme_stylebox_override("normal",_segment(false,false,i,count));button.add_theme_stylebox_override("hover",_segment(false,true,i,count))
-		button.add_theme_stylebox_override("pressed",_segment(true,false,i,count));button.add_theme_stylebox_override("hover_pressed",_segment(true,true,i,count))
-		button.add_theme_stylebox_override("focus",T.gold_outline_style())
-		button.set_pressed_no_signal(id==now_level)
-		var at_level:=Law.target_men(id,int(f.population))
-		var effect:=Economy.step_words(now_cost,Economy.cost(at_level-watch)) if at_level>watch else PackedStringArray()
-		button.tooltip_text="An army of %s of the people.\n%s%s" % [Law.level_name(id),Law.cost_words(id,int(f.population),int(f.able)),("\n\n"+"\n".join(effect)) if not effect.is_empty() else ""]
-		button.pressed.connect(func()->void:_choose_level(id))
-		pick.add_child(button)
 	# Where every one of them stands: one bar, its legend under it (the home
 	# guard's part is named once, on its own line below).
 	var bar:=AllocationBar.new();bar.name="Allocation";bar.parts=f.parts;bar.target=watch;bar.custom_minimum_size=Vector2(0,14)
@@ -515,10 +495,8 @@ func _forces_card(f:Dictionary,general:="")->Control:
 	var swatch:=ColorRect.new();swatch.color=T.TEAL;swatch.custom_minimum_size=Vector2(9,9);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;swatch.mouse_filter=Control.MOUSE_FILTER_IGNORE;split.add_child(swatch)
 	var on_border:=int(preload("res://scripts/fort_border.gd").watch().get("posted",0))
 	var split_words:=_line("Keep %d%% · %s now" % [roundi(float(f.home_share)*100.0),compact(guard)],13,T.INK);split_words.name="GuardLine";split_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;split_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	split_words.tooltip_text="The home guard: the part of the army kept at home and in the towns, %s of them now%s, led by %s. The war council never sends the home guard away; everyone else is free to send. The − and + move it by a tenth of the army." % [EraWords.grouped(guard),(" (%s out on the border)" % EraWords.grouped(on_border)) if on_border>0 else "",(general+", the war leader") if general!="" else "the war leader"]
+	split_words.tooltip_text="The home guard: the part of the army kept at home and in the towns, %s of them now%s, led by %s. The war council never sends the home guard away; everyone else is free to send. Generals retain the existing home reserve." % [EraWords.grouped(guard),(" (%s out on the border)" % EraWords.grouped(on_border)) if on_border>0 else "",(general+", the war leader") if general!="" else "the war leader"]
 	split.add_child(split_words)
-	split.add_child(_step_button("GuardLess","−","A smaller home guard, by a tenth of the army: more are free to send.",func()->void:_step_split(-1)))
-	split.add_child(_step_button("GuardMore","+","A bigger home guard, by a tenth of the army: idle bands come home to guard.",func()->void:_step_split(1)))
 	# Who stands at home and who would rise, in the words every screen uses
 	# (watch_military.gd home_standing).
 	var standing:=Watch.home_standing(MilitaryCampaign)

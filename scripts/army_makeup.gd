@@ -186,6 +186,8 @@ static func counts(mc:Variant,home_only:=false)->Dictionary:
 ## Those joining, split among the kinds short of their share: [{kit, count}].
 ## A kind our people cannot train gives its place to line.
 static func split(mc:Variant,n:int)->Array:
+	var design=load("res://scripts/division_design.gd")
+	if not design.active(mc).is_empty():return design.split(mc,n)
 	if n<=0:return []
 	if not chosen(mc):return [{"kit":_watch().call("arms_kit",mc),"count":n}]
 	var want:=shares(mc)
@@ -228,6 +230,8 @@ static func split(mc:Variant,n:int)->Array:
 ## share of everyone under arms in its best kit, less those already in it
 ## and the sets of it already held.
 static func wanted(mc:Variant)->Dictionary:
+	var design=load("res://scripts/division_design.gd")
+	if not design.active(mc).is_empty():return design.wanted(mc)
 	var out:={}
 	if not chosen(mc):return out
 	var want:=shares(mc)
@@ -263,6 +267,8 @@ static func _men_in_kits(mc:Variant)->Dictionary:
 ## at home and never more than the sets of the new kit held. Returns the men
 ## retrained.
 static func converge_day(mc:Variant)->int:
+	var design=load("res://scripts/division_design.gd")
+	if not design.active(mc).is_empty():return design.converge(mc)
 	if not chosen(mc) or mc.recovery.home_unavailable() or mc._home_battle_running():return 0
 	var formations:Array=mc.home_army.get("formations",[])
 	if formations.is_empty():return 0
@@ -325,7 +331,7 @@ static func _sets_free(mc:Variant,kit:Dictionary,n:int)->int:
 ## Up to `n` men at home of kind `from` (not already in `skip`, and below
 ## `better` worth when given) retrain as `kit`: their old kit back to the
 ## armoury, the new taken up, drill halved. Returns the men moved.
-static func _retrain(mc:Variant,from:String,skip:String,kit:Dictionary,n:int,better:=-INF)->int:
+static func _retrain(mc:Variant,from:String,skip:String,kit:Dictionary,n:int,better:=-INF,source_key:="")->int:
 	var Watch:=_watch()
 	var formations:Array=mc.home_army.get("formations",[])
 	var order:Array=range(formations.size())
@@ -338,6 +344,7 @@ static func _retrain(mc:Variant,from:String,skip:String,kit:Dictionary,n:int,bet
 		if bool(f.get("emergency_militia",false)) or bool(f.get("prototype",false)):continue
 		var unit:=String(f.get("unit","levy"));var item:=String(f.get("weapon","improvised"))
 		if role_of(unit)!=from or "%s|%s" % [unit,item]==skip:continue
+		if not source_key.is_empty() and "%s|%s" % [unit,item]!=source_key:continue
 		if better>-INF and worth(mc,unit,item)>=better:continue
 		var count:=int(f.get("count",0))
 		var off:=mini(left,count)
