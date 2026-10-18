@@ -8,7 +8,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 - [x] Shared retained comparison widgets and bounded visible choices.
 - [ ] Buildings: visible categories, material need/have, capacity before/after, builder/queue state.
-- [ ] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
+- [x] All seven storage types: capacity, expansion costs/gains, actual status and direct actions.
 - [ ] Food/water: aligned supply/consumption/coverage, losses and reserve trend.
 - [ ] Materials: protected supplies/free stock and arrivals/losses; hauling and storage bottlenecks.
 - [ ] Global town/realm scope, compact map controls, stable interaction while running.
@@ -38,7 +38,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [ ] Family court: portraits, program gains/drawbacks/cost, rivalry and wants.
 - [ ] Evolution through all five population thresholds and organization stages.
 - [ ] Separate favor/endorsement/funding consequences, without moving workers.
-- [ ] Culture: all official/lived value pairs and actual bonuses.
+- [x] Culture: all official/lived value pairs and actual bonuses.
 - [ ] Audience/diplomacy: visible targets/actions and adjudicated consequence receipt.
 
 ## Batch 5: military and world
@@ -72,3 +72,7 @@ Validation: 49 distinct cases across storage (13), construction (15), Food (10),
 ## Checkpoint 2 — Visible choices and retained Research
 
 Implemented bounded visible choices across eleven UI components (Home, Research, knowledge, Peoples, Known World, expeditions, scouting, Standing, spies, gallery and exchange). Shared trays preserve identity, metadata and disabled state; searches and pages keep large sets bounded. Research daily numeric refresh retains allocation controls and uses current callbacks; actual structural question changes still use the dock's preserved view state. Native review includes wide/narrow layouts and corrected Standing legend wrapping. All broader redesign tasks above remain required; replacing selectors does not complete their screen redesigns. Integration status records tests and the combined-suite collection-state limitation.
+
+## Checkpoint 3 — All values together; storage arrivals
+
+All ten value axes are visible with lived/official markers and poles, retained value-only updates, exact family shift/target context and existing bonus/history displays. All seven store tiles include scoped physical arrivals, converted bulk loads and a labelled capacity projection; current/incoming/overflow segments share one scale. Existing building actions/costs/progress remain visible. Culture/storage have 23 passing checks and reviewed actual wide/narrow native renders. No rules/save-schema changes.

@@ -26,6 +26,36 @@ static func used()->Dictionary:
 		result[kind]+=maxf(0.0,float(state.resource_stockpiles[item]))*float(profile.bulk)
 	return result
 
+## Actual dispatched cargo, in the store's own units. This is a load forecast,
+## before travel losses, consumption, route failure or further construction.
+static func incoming()->Dictionary:
+	var result:={"food":0.0,"water":0.0,"yard":0.0,"dry":0.0,"covered":0.0,"sealed":0.0,"secure":0.0}
+	var state=WorldSimulation.state
+	var city:=String(state.resource_settlement_id)
+	var primary:=""
+	for settlement:Dictionary in state.player_settlements:
+		if bool(settlement.get("primary",false)):primary=String(settlement.get("id",""));break
+	if city.is_empty():city=primary
+	for shipment:Dictionary in state.city_trade_shipments:
+		if String(shipment.get("status","in_transit"))!="in_transit" or String(shipment.get("destination_id",""))!=city:continue
+		_add_incoming(result,String(shipment.get("resource","")),float(shipment.get("quantity",0)))
+	# Cross-people barter arrives in their primary resource ledger.
+	if city==primary:
+		for shipment:Dictionary in preload("res://scripts/trade_ledger.gd").peek().get("barter_shipments",[]):
+			if String(shipment.get("status",""))!="traveling":continue
+			if String(shipment.get("buyer",""))==WorldSimulation.actor_id:_add_incoming(result,String(shipment.get("want","")),float(shipment.get("count",0)))
+			if String(shipment.get("seller",""))==WorldSimulation.actor_id:_add_incoming(result,String(shipment.get("give","")),float(shipment.get("payment",0)))
+	return result
+
+static func _add_incoming(result:Dictionary,resource:String,quantity:float)->void:
+	if quantity<=0:return
+	if resource=="Food":result.food+=quantity
+	elif resource=="Freshwater":result.water+=quantity
+	elif WorldSimulation.resources._is_material_resource(resource):
+		var profile:Dictionary=WorldSimulation.resources.material_profile(resource)
+		var kind:=String(profile.get("store",""))
+		if result.has(kind):result[kind]+=quantity*float(profile.get("bulk",0))
+
 static func title(kind:String)->String:return "Expand "+String(LABELS.get(kind,kind)).to_lower()
 
 static func requested(kind:String)->bool:
@@ -73,7 +103,7 @@ static func complete(project:Dictionary)->void:
 	if String(city.get("construction_priority",""))==String(project.name):city["construction_priority"]=""
 
 static func rows(kinds:Array=KINDS)->Array[Dictionary]:
-	var held:=used();var room:=capacities();var result:Array[Dictionary]=[]
+	var held:=used();var room:=capacities();var arriving:=incoming();var result:Array[Dictionary]=[]
 	for project:Dictionary in projects():
 		var kind:=String(project.storage_kind)
 		if kind not in kinds:continue
@@ -94,5 +124,5 @@ static func rows(kinds:Array=KINDS)->Array[Dictionary]:
 		for item:String in project.materials:costs.append({"resource":item,"need":float(project.materials[item]),"have":float(WorldSimulation.state.resource_stockpiles.get(item,0))})
 		var bill:PackedStringArray=[]
 		for item:String in project.materials:bill.append("%s %s" % [str(project.materials[item]),item.to_lower()])
-		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"pending":pending,"requested":requested(kind),"building":work>0,"status":status,"added":project.capacity_added,"costs":costs,"work_done":work,"work_required":float(project.days),"capacity_after":float(room[kind])+float(project.capacity_added),"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
+		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"incoming":arriving[kind],"overflow_now":maxf(0,float(held[kind])-float(room[kind])),"overflow_if_arrived":maxf(0,float(held[kind])+float(arriving[kind])-float(room[kind])),"pending":pending,"requested":requested(kind),"building":work>0,"status":status,"added":project.capacity_added,"costs":costs,"work_done":work,"work_required":float(project.days),"capacity_after":float(room[kind])+float(project.capacity_added),"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
 	return result

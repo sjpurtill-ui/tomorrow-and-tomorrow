@@ -109,13 +109,20 @@ static func value_rows(values:Dictionary)->Array:
 	var lived:Dictionary=values.get("lived",{})
 	var official:Dictionary=values.get("official",{})
 	var out:Array=[]
+	var families:Dictionary=WorldSimulation.state.society_exchange.get("major_families",{})
+	var favored:Dictionary={}
+	for family:Dictionary in families.get("families",[]):
+		if String(family.get("id",""))==String(families.get("favored","")):favored=family;break
+	var shifts:Dictionary=families.get("value_shift",{})
 	for axis in ValuesModel.VALUE_ORDER:
 		var d:Dictionary=ValuesModel.VALUE_DEFINITIONS[axis]
 		var l:=clampf(float(lived.get(axis,0.5)),0.0,1.0)
 		var o:=clampf(float(official.get(axis,l)),0.0,1.0)
 		var poles:Array=POLES.get(axis,[String(d.low).capitalize(),String(d.high).capitalize()])
 		out.append({"axis":axis,"name":String(d.name).capitalize(),"low":String(d.low).capitalize(),"high":String(d.high).capitalize(),"low_word":String(poles[0]),"high_word":String(poles[1]),"meaning":String(d.meaning),
-			"lived":l,"official":o,"gap":absf(l-o)})
+			"lived":l,"official":o,"gap":absf(l-o),
+			"family_lived":float(shifts.get("lived",{}).get(axis,0)),"family_official":float(shifts.get("official",{}).get(axis,0)),
+			"favored_family":String(favored.get("name","")),"favored_target":favored.get("character",{}).get("values",{}).get(axis,null)})
 	return out
 
 ## How well what the people live by matches what is upheld: the engine's

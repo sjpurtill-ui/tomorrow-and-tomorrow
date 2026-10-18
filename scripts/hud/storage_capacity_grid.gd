@@ -4,6 +4,22 @@ extends VBoxContainer
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Dense=preload("res://scripts/hud/dense_blocks.gd")
 const S:=preload("res://scripts/hud/econ_sheet.gd")
+class LoadBar extends Control:
+	var held:=0.0
+	var incoming:=0.0
+	var capacity:=0.0
+	func _init()->void:
+		custom_minimum_size=Vector2(120,12);size_flags_horizontal=Control.SIZE_EXPAND_FILL;mouse_filter=Control.MOUSE_FILTER_IGNORE
+	func _draw()->void:
+		var total:=maxf(1,maxf(capacity,held+incoming))
+		var scale:=size.x/total
+		draw_rect(Rect2(0,2,size.x,8),T.TRACK)
+		draw_rect(Rect2(0,2,minf(held,capacity)*scale,8),T.TEAL)
+		var arriving:=minf(incoming,maxf(0,capacity-held))
+		if arriving>0:draw_rect(Rect2(held*scale,2,arriving*scale,8),T.GOLD)
+		if held+incoming>capacity:draw_rect(Rect2(capacity*scale,2,(held+incoming-capacity)*scale,8),T.RED)
+		draw_line(Vector2(capacity*scale,0),Vector2(capacity*scale,12),T.INK,2)
+
 var tiles:Dictionary={}
 var grid:GridContainer
 var action:Callable
@@ -30,16 +46,20 @@ func fill(rows:Array,callback:Callable,assign_builders:Callable=Callable())->voi
 			var label:=S.label(String(row.label),15,T.INK,true);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(label)
 			var button:=S.verb("+ Space",func():if action.is_valid():action.call(kind));button.name="Expand_"+kind;head.add_child(button)
 			var amount:=S.label("",14,T.INK);box.add_child(amount)
-			var bar:=ProgressBar.new();bar.custom_minimum_size.y=6;bar.show_percentage=false;box.add_child(bar)
+			var bar:=LoadBar.new();bar.name="CapacityLoad";box.add_child(bar)
+			var incoming:=S.label("",13,T.INK_MUTED);incoming.name="IncomingLoad";incoming.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(incoming)
 			var status:=S.label("",13,T.INK_MUTED);status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(status)
 			var gain:=S.label("",13,T.TEAL);gain.name="CapacityGain";gain.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(gain)
 			var bill:=HFlowContainer.new();bill.name="ExpansionBill";bill.add_theme_constant_override("h_separation",8);box.add_child(bill)
 			var work:=ProgressBar.new();work.name="BuilderProgress";work.custom_minimum_size.y=5;work.show_percentage=false;box.add_child(work)
-			tiles[kind]={"box":box,"button":button,"amount":amount,"bar":bar,"status":status,"gain":gain,"bill":bill,"cost_signature":[],"work":work}
+			tiles[kind]={"box":box,"button":button,"amount":amount,"bar":bar,"status":status,"incoming":incoming,"gain":gain,"bill":bill,"cost_signature":[],"work":work}
 		var tile:Dictionary=tiles[kind]
 		var over:=float(row.used)>float(row.capacity)
 		S.put(tile.amount,"%s / %s %s%s" % [S.n(float(row.used)),S.n(float(row.capacity)),String(row.unit)," · OVERFLOW" if over else ""],T.RED_TEXT if over else T.INK)
-		tile.bar.value=clampf(float(row.used)/maxf(1,float(row.capacity))*100,0,100)
+		tile.bar.held=float(row.used);tile.bar.incoming=float(row.get("incoming",0));tile.bar.capacity=float(row.capacity);tile.bar.queue_redraw()
+		var incoming:=float(row.get("incoming",0));var projected:=float(row.get("overflow_if_arrived",0))
+		S.put(tile.incoming,"Incoming %s %s%s" % [S.n(incoming),String(row.unit)," · %s over capacity if it all arrived now" % S.n(projected) if projected>0 and incoming>0 else ""],T.AMBER_TEXT if projected>0 else T.INK_MUTED)
+		tile.incoming.tooltip_text="Blue: stored. Gold: incoming. Red: above capacity. White tick: current capacity. Dispatched cargo before travel losses. Compares today's stock and capacity with all incoming loads; consumption and new storage can change the result."
 		S.put(tile.status,String(row.status),T.AMBER_TEXT if String(row.status).begins_with("Needs") else T.INK_MUTED)
 		S.put(tile.gain,"Capacity %s → %s · %s builder-work" % [S.n(float(row.capacity)),S.n(float(row.get("capacity_after",float(row.capacity)+float(row.get("added",0))))),S.n(float(row.get("work_required",0)))])
 		var costs:Array=row.get("costs",[])

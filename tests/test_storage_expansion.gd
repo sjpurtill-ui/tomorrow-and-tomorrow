@@ -174,3 +174,45 @@ func test_expansion_reading_exposes_exact_bill_and_capacity_without_mutation()->
 			assert_float(float(cost.have)).is_equal(float(GameState.resource_stockpiles.get(cost.resource,0)))
 		assert_int(panel.tiles[row.kind].bill.get_child_count()).is_equal(row.costs.size())
 	assert_dict(GameState.storage_works).is_equal(before)
+
+func test_incoming_loads_use_store_units_and_correct_town_and_actor()->void:
+	SettlementModel.ensure_founded()
+	var primary:=String(GameState.player_settlements[0].id)
+	GameState.player_settlements.append({"id":"store_town","name":"Rivermeet","position":Vector2(9,4),"primary":false,"population_share":0.2,"founded_day":0})
+	GameState.city_trade_shipments.assign([
+		{"destination_id":primary,"resource":"Timber","quantity":12.0,"status":"in_transit"},
+		{"destination_id":"store_town","resource":"Freshwater","quantity":50.0,"status":"in_transit"},
+		{"destination_id":primary,"resource":"Food","quantity":80.0,"status":"delivered"}])
+	var old:Dictionary=ForeignDiplomacy.audiences.duplicate(true)
+	var trade:=preload("res://scripts/trade_ledger.gd").empty_state()
+	trade.barter_shipments=[
+		{"buyer":"player","seller":"other","want":"Food","count":60.0,"give":"Clay","payment":8.0,"status":"traveling"},
+		{"buyer":"other","seller":"player","want":"Stone","count":20.0,"give":"Fiber Plants","payment":10.0,"status":"traveling"},
+		{"buyer":"player","seller":"other","want":"Food","count":999.0,"give":"Clay","payment":1.0,"status":"arrived"}]
+	ForeignDiplomacy.audiences.trade=trade
+	var snapshot:=JSON.stringify([GameState.city_trade_shipments,trade])
+	var current:=Stores.incoming()
+	assert_float(float(current.food)).is_equal(60.0)
+	assert_float(float(current.yard)).is_equal(12.0*float(ResourceSystem.material_profile("Timber").bulk))
+	assert_float(float(current.dry)).is_equal(10.0*float(ResourceSystem.material_profile("Fiber Plants").bulk))
+	assert_float(float(current.water)).is_zero()
+	var local:Dictionary=SettlementModel.with_city_resources("store_town",Stores.incoming)
+	assert_float(float(local.water)).is_equal(50.0)
+	assert_float(float(local.food)).is_zero()
+	assert_float(float(local.yard)).is_zero()
+	WorldSimulation.create_actor("other",123)
+	WorldSimulation.scoped("other",func():
+		var theirs:=Stores.incoming()
+		assert_float(float(theirs.food)).is_zero()
+		assert_float(float(theirs.covered)).is_equal(8.0*float(WorldSimulation.resources.material_profile("Clay").bulk)))
+	assert_str(JSON.stringify([GameState.city_trade_shipments,trade])).is_equal(snapshot)
+	ForeignDiplomacy.audiences=old
+
+func test_projected_overflow_uses_existing_capacity_and_does_not_change_stock()->void:
+	SettlementModel.ensure_founded()
+	GameState.city_trade_shipments.assign([{"destination_id":GameState.player_settlements[0].id,"resource":"Timber","quantity":5000.0,"status":"in_transit"}])
+	GameState.resource_stockpiles.Timber=20.0
+	var row:Dictionary=Stores.rows(["yard"])[0]
+	assert_float(float(row.incoming)).is_greater(0)
+	assert_float(float(row.overflow_if_arrived)).is_equal_approx(maxf(0,float(row.used)+float(row.incoming)-float(row.capacity)),0.001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(20.0)

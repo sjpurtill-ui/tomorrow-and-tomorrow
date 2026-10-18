@@ -1,6 +1,6 @@
 extends "res://scripts/hud/settlement_overview.gd"
-## Culture's current course and exact effects, followed by one selected value.
-## All ten lived/upheld readings remain available without ten repeated rows.
+## Culture's current course and exact effects, with all ten paired value axes.
+## The selected value supplies the explanation beneath the comparison grid.
 ## The leaders' temper and allure context keep their original model and actions.
 ## Updates preserve the selected value and focused control.
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
@@ -116,7 +116,8 @@ class Seal extends Control:
 var _print:Array=[]
 var _columns:Array[GridContainer]=[]
 var selected_value:=""
-var value_picker:OptionButton
+var value_grid:GridContainer
+var value_refs:Dictionary={}
 var value_reader:VBoxContainer
 
 func setup(block:Dictionary)->void:
@@ -130,7 +131,11 @@ func update_block(block:Dictionary)->bool:
 	var next:=page_print(block)
 	data=block
 	if next==_print: return true
+	var before_other:=_print.duplicate(true);var after_other:=next.duplicate(true)
+	before_other[2]=[];after_other[2]=[]
 	_print=next
+	if before_other==after_other:
+		_fill_value();return true
 	var saved_view:=preload("res://scripts/hud/view_state.gd").capture(self)
 	# Hold the page's height while it is drawn again, so the reader's place
 	# (the dock's scroll) is not lost to a moment's empty page.
@@ -148,7 +153,7 @@ static func page_print(block:Dictionary)->Array:
 	var ledger:Array=[]
 	for r:Dictionary in c.get("ledger",[]): ledger.append([String(r.id),roundi(float(r.course)*1000.0),roundi(float(r.values)*1000.0)])
 	var values:Array=[]
-	for v:Dictionary in c.get("values",[]): values.append([roundi(float(v.lived)*100.0),roundi(float(v.official)*100.0)])
+	for v:Dictionary in c.get("values",[]): values.append([roundi(float(v.lived)*100.0),roundi(float(v.official)*100.0),v.get("family_lived",0),v.get("family_official",0),v.get("favored_family",""),v.get("favored_target")])
 	var remembered:Array=[]
 	for r:Dictionary in (c.get("course",{}) as Dictionary).get("remembered",[]): remembered.append([String(r.id),roundi(float(r.share)*100.0)])
 	var sides:Array=[]
@@ -291,29 +296,41 @@ func view_state()->Dictionary:
 
 func restore_view_state(state:Dictionary)->void:
 	selected_value=String(state.get("value",selected_value));_fill_value()
-	if value_picker:
-		for index in value_picker.item_count:
-			if String(value_picker.get_item_metadata(index))==selected_value:value_picker.select(index);break
 
 func _values(c:Dictionary,parent:Node)->void:
 	_kicker(parent,"WHAT WE LIVE BY")
-	var head:=HFlowContainer.new();head.add_theme_constant_override("h_separation",16);parent.add_child(head)
-	value_picker=OptionButton.new();value_picker.name="ChooseValue";value_picker.fit_to_longest_item=false;value_picker.clip_text=true;value_picker.custom_minimum_size.x=240;T.apply_button_style(value_picker);head.add_child(value_picker);value_picker.get_popup().max_size.y=320
+	_plain(parent,"● Lived practice   ○ Official position · 0–100",13,T.MUTED)
+	value_grid=GridContainer.new();value_grid.name="ValueAxes";value_grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL;value_grid.add_theme_constant_override("h_separation",22);value_grid.add_theme_constant_override("v_separation",10);parent.add_child(value_grid)
+	value_grid.resized.connect(func():value_grid.columns=2 if value_grid.size.x>=600 else 1)
+	value_refs.clear()
 	var values:Array=c.get("values",[])
 	var widest:Dictionary={}
 	for v:Dictionary in values:
 		if widest.is_empty() or float(v.gap)>float(widest.gap):widest=v
 	if selected_value=="" and not widest.is_empty():selected_value=String(widest.axis)
 	for v:Dictionary in values:
-		value_picker.add_item(String(v.name));var index:=value_picker.item_count-1;value_picker.set_item_metadata(index,String(v.axis))
-		if String(v.axis)==selected_value:value_picker.select(index)
-	_plain(head,"10 values · lived and upheld",14,T.MUTED)
+		var id:=String(v.axis)
+		var cell:=VBoxContainer.new();cell.name="Axis_"+id;cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.add_theme_constant_override("separation",4);value_grid.add_child(cell)
+		var button:=Button.new();button.name="SelectValue_"+id;button.toggle_mode=true;button.alignment=HORIZONTAL_ALIGNMENT_LEFT;T.apply_button_style(button);cell.add_child(button)
+		button.pressed.connect(func():selected_value=id;_fill_value())
+		var bar:=Spectrum.new();bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;cell.add_child(bar)
+		var poles:=HBoxContainer.new();cell.add_child(poles)
+		var low:=_plain(poles,String(v.low_word),12,T.MUTED);low.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		_plain(poles,String(v.high_word),12,T.MUTED)
+		value_refs[id]={"button":button,"bar":bar,"cell":cell}
 	value_reader=VBoxContainer.new();value_reader.name="Values";value_reader.add_theme_constant_override("separation",8);parent.add_child(value_reader)
-	value_picker.item_selected.connect(func(index:int):selected_value=String(value_picker.get_item_metadata(index));_fill_value())
 	_fill_value()
 
 func _fill_value()->void:
 	if value_reader==null:return
+	for value:Dictionary in data.get("culture",{}).get("values",[]):
+		var id:=String(value.axis)
+		if not value_refs.has(id):continue
+		var refs:Dictionary=value_refs[id]
+		refs.button.text="%s   ● %d   ○ %d" % [String(value.name),roundi(float(value.lived)*100),roundi(float(value.official)*100)]
+		refs.button.set_pressed_no_signal(id==selected_value)
+		refs.bar.lived=float(value.lived);refs.bar.official=float(value.official);refs.bar.queue_redraw()
+		refs.cell.tooltip_text="%s\nLived %d · official %d · gap %d in 100" % [String(value.meaning),roundi(float(value.lived)*100),roundi(float(value.official)*100),roundi(float(value.gap)*100)]
 	for child in value_reader.get_children():value_reader.remove_child(child);child.queue_free()
 	var chosen:Dictionary={}
 	for v:Dictionary in data.get("culture",{}).get("values",[]):
@@ -327,6 +344,13 @@ func _fill_value()->void:
 	var readings:=HFlowContainer.new();readings.add_theme_constant_override("h_separation",20);readings.add_theme_constant_override("v_separation",6);value_reader.add_child(readings)
 	_plain(readings,"People live %d · upheld %d" % [roundi(float(chosen.lived)*100),roundi(float(chosen.official)*100)],14,T.INK).name="ValueReadings"
 	_plain(readings,"Gap %d in 100" % roundi(float(chosen.gap)*100),14,T.RED_TEXT if float(chosen.gap)>0.05 else T.MUTED)
+	var family_lived:=float(chosen.get("family_lived",0))*100
+	var family_official:=float(chosen.get("family_official",0))*100
+	if not is_zero_approx(family_lived) or not is_zero_approx(family_official):
+		_plain(value_reader,"Recorded family movement · lived %+.1f pts · official %+.1f pts" % [family_lived,family_official],13,T.MUTED).tooltip_text="Cumulative recorded shifts from family influence, including past favored heads. Not a forecast or the entire cause of today's values."
+	if chosen.get("favored_target")!=null:
+		var family_words:=_plain(value_reader,"%s favors %d on this axis" % [String(chosen.get("favored_family","")),roundi(float(chosen.favored_target)*100)],14,T.GOLD_TEXT)
+		family_words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	value_reader.tooltip_text="Gold dot: where people live. Ring: what is upheld over them. The gap costs cohesion and trust in those who rule. Values run from 0 at %s to 100 at %s." % [chosen.low,chosen.high]
 
 ## One word for a pole: its last word, which carries it ("Equal Standing").

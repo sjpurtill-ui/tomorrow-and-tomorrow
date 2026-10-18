@@ -78,14 +78,16 @@ func test_the_page_draws_what_culture_does_and_holds_still_between_days()->void:
 func test_selected_value_keeps_ten_choices_and_exact_gap_through_refresh()->void:
 	var panel:Control=auto_free(CulturePanel.new());add_child(panel)
 	var block:=_block();block.culture.values[1].lived=0.2;block.culture.values[1].official=0.8;block.culture.values[1].gap=0.6;panel.setup(block)
-	assert_int(panel.value_picker.item_count).is_equal(10)
-	panel.value_picker.select(1);panel.value_picker.item_selected.emit(1)
+	assert_int(panel.value_grid.get_child_count()).is_equal(10)
+	assert_int(panel.find_children("*","OptionButton",true,false).size()).is_zero()
+	var selected:Button=panel.value_refs[String(block.culture.values[1].axis)].button
+	selected.pressed.emit()
 	assert_str(panel.find_child("ValueReadings",true,false).text).is_equal("People live 20 · upheld 80")
-	panel.value_picker.grab_focus();var saved:Dictionary=panel.view_state()
+	selected.grab_focus();var saved:Dictionary=panel.view_state()
 	block.culture.values[1].lived=0.3;block.culture.values[1].gap=0.5;panel.update_block(block)
 	assert_str(panel.selected_value).is_equal(String(saved.value))
 	assert_str(panel.find_child("ValueReadings",true,false).text).is_equal("People live 30 · upheld 80")
-	assert_object(get_viewport().gui_get_focus_owner()).is_same(panel.value_picker)
+	assert_object(get_viewport().gui_get_focus_owner()).is_same(selected)
 
 func test_condition_units_are_points_and_output_units_remain_percent()->void:
 	assert_str(CulturePanel.effect_amount("cohesion",0.06)).is_equal("+6 pts")
@@ -93,3 +95,18 @@ func test_condition_units_are_points_and_output_units_remain_percent()->void:
 	assert_str(CulturePanel.effect_amount("health",-0.01)).is_equal("−1 pts")
 	assert_str(CulturePanel.effect_amount("trade",0.08)).is_equal("+8 pts")
 	assert_str(CulturePanel.effect_amount("building",0.15)).is_equal("+15%")
+
+func test_family_pressure_uses_recorded_shifts_and_actual_favored_values()->void:
+	GameState.society_exchange.major_families={"favored":"Knowledge","families":[{"id":"Knowledge","name":"House Cedar","character":{"values":{"experimentation":0.8}}}],"value_shift":{"lived":{"experimentation":0.023},"official":{"experimentation":0.071}}}
+	var before:=JSON.stringify(GameState.society_exchange)
+	var rows:Array=Model.value_rows(GameState.societal_values)
+	var found:=false
+	for row:Dictionary in rows:
+		if row.axis!="experimentation":continue
+		found=true
+		assert_float(float(row.family_lived)).is_equal(0.023)
+		assert_float(float(row.family_official)).is_equal(0.071)
+		assert_float(float(row.favored_target)).is_equal(0.8)
+		assert_str(String(row.favored_family)).is_equal("House Cedar")
+	assert_bool(found).is_true()
+	assert_str(JSON.stringify(GameState.society_exchange)).is_equal(before)
