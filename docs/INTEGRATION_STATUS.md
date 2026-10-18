@@ -1,3 +1,11 @@
+## October 18 — Trade names both sides without dropdowns
+
+Status: INTEGRATED after validated work on `codex/needs-driven-trade-storage`, based on `91b1b98e8e4f325304ff68aa47ad64b3a1874803`.
+
+Trade leads with named YOU GIVE / YOU RECEIVE quantities, resource icons, the building being supplied, the other town's need, remaining reserves and arrival time. Recent resource flows stay visible instead of hiding behind Goods & dependence, including resources beyond the former four-item limit. Cargo names both legs. No-offer readings show concrete shortages and surplus. Partner buttons remain visible at narrow widths. Squeeze and mature settlement purchases use direct buttons, with three purchases per page; Trade creates no MenuButton or OptionButton. Abstract mixed-resource monetary totals no longer occupy the headline. The same ledger and order handlers perform transactions; no simulation, price, labor or save-schema change.
+
+Validation: all 25 Trade UI and needs-driven trade checks pass, zero errors/failures/orphans, in `/tmp/tt-trade-clarity-verified.log` (report 90). Covers 320px layout, no dropdowns, visible flows, greater-than-four goods, concrete offer dispatch, both cargo legs, actual purchase conservation, embargo and squeeze, retained selection and read-only refresh. Guarded offscreen native captures of the actual widget reviewed at 1280×900 for no-offer and live-offer fixtures; the capture process exited and never presented a player window. Final follow-up only changes the offer purpose caption to “Supports”. `git diff --check` passes. Generated metadata/captures, private saves and reports excluded. Existing player session retains its loaded release; release preparation follows the court-label follow-up.
+
 ## October 18 — Building needs, physical barter and storage follow-through
 
 Status: INTEGRATED — source `ea9f1314d4d20e852ab6be90ac21aef349b0844d`, verified on remote `main` and `codex/needs-driven-trade-storage`, after storage source `72165be9464172343896b71a963611fa6b8e7e08` and integration record `66a43c86f7671a41f2d0cde8eefa30837055b0f7`.

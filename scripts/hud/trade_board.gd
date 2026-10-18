@@ -1,26 +1,6 @@
 extends VBoxContainer
-## THE TRADE PAGE: available goods and recent exchange lead, followed by one
-## selected people: its mark, route status, recorded pace and our decisions.
-## Terms opens its decisions and evidence inline, keeping the partner in
-## view. Each reads the trade ledger's own
-## numbers (trade_ledger.gd, trade_words.gd):
-##   what flows each way a season (or a month, once silver or coin pays), with
-##   each good's mark and a bar of its worth each way;
-##   how much they lean on us and we on them: the share of a good's supply
-##   that comes from the other, and how long the stores last without it;
-##   their stance toward us, and tribute either way;
-##   our stance toward them (the buttons: Trade freely, Favour, Toll,
-##   Embargo, Squeeze, Demand tribute, Send gifts), each with its effect and
-##   their odds in the engine's numbers on the pointer;
-##   their answer: the odds while word travels, then the answer itself;
-##   what our goods buy from them (the "Buy with goods" menu): arms, what they
-##   have to spare, families who come to work, our own taken captive, each
-##   at its stated terms (trade_ledger.gd deal_terms, goods_deal).
-## A stance is the god's word, the same as at court (court_trade.gd): the
-## Messenger (the Headman while there is none) carries it, and it gets a card
-## at the bottom right. Below, the trade between other peoples we know of.
-## Compact menu descriptions retain their full terms in the pointer. Every
-## command calls the same ledger and court handlers as the other interfaces.
+## Named supplies and quantities lead. Offers, cargo and recorded exchange are
+## separate, always-visible readings of the real ledger. No popup selectors.
 
 signal close_wanted
 
@@ -68,7 +48,7 @@ var partner_page:=0
 var browse_open:=false
 var partner_workspace:BoxContainer
 var browser:VBoxContainer
-var partner_choices:VBoxContainer
+var partner_choices:HFlowContainer
 var partner_search:LineEdit
 var browser_close:Button
 var partner_pager:HFlowContainer
@@ -78,6 +58,7 @@ var partner_count:Label
 var other_page:=0
 var others_open:=false
 var evidence_open:Dictionary={}
+var purchase_pages:Dictionary={}
 
 func _ready()->void:
 	_bind_layout.call_deferred()
@@ -173,8 +154,6 @@ func refresh(force:=false)->void:
 
 func _in_use(waited_seconds:float)->bool:
 	if not is_visible_in_tree():return false
-	for node in find_children("*","",true,false):
-		if node is MenuButton and (node as MenuButton).get_popup().visible:return true
 	var focused:=get_viewport().gui_get_focus_owner()
 	if focused!=null and is_ancestor_of(focused) and Input.is_action_pressed("ui_accept"):return true
 	if not get_global_rect().has_point(get_global_mouse_position()):return false
@@ -204,14 +183,13 @@ static func kpi_items()->Array:
 		var o:=Stances.tribute("player",String(c.get("id","")))
 		if not o.is_empty():tribute_out+=float(o.value)
 	var shortages:=Needs.needs()
+	var cargo:=0
+	for shipment:Dictionary in Ledger.peek().get("barter_shipments",[]):
+		if shipment.get("buyer")=="player" and shipment.get("status")=="traveling":cargo+=1
 	var items:Array=[
-		{"id":"spare","label":"Supplies needed","icon":"Timber","value":str(shortages.size()),"ratio":-1.0,"sub":"building and food shortages","tip":"Missing supplies for known buildings, storage expansions and the food reserve. Each exchange protects both towns' own commitments."},
-		{"id":"came","label":"In a season","icon":"carry","icon_kind":"people","value":S.n(came*3.0),"ratio":clampf(came/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.TEAL,"sub":"received, at their prices",
-			"tip":"What other peoples sent us, smoothed monthly and reckoned for a season, at each sender's own prices. The bar: its share of all that passed."},
-		{"id":"sent","label":"Out a season","icon":"carry","icon_kind":"people","value":S.n(sent*3.0),"ratio":clampf(sent/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.GOLD,"sub":"sent, at our prices",
-			"tip":"What we sent other peoples, smoothed monthly and reckoned for a season, at our own prices. The bar: its share of all that passed."},
-		{"id":"partners","label":"Partners","icon":"walker","icon_kind":"chart","value":"%d of %d" % [partners,known],"ratio":float(partners)/float(known) if known>0 else -1.0,"color":T.GREEN,
-			"sub":"recent trade" if partners>0 else ("little trade" if sent+came>0.0 else "no trade yet"),"tip":"Peoples we know with whom goods passed recently, of all the peoples we know."},
+		{"id":"spare","label":"Supplies needed","icon":"Timber","value":str(shortages.size()),"ratio":-1.0,"sub":"food and building materials","tip":"Missing supplies for known buildings, storage expansions and food reserves."},
+		{"id":"cargo","label":"On the road","icon":"carry","icon_kind":"people","value":str(cargo),"ratio":-1.0,"sub":"exchanges in transit","tip":"Dispatched supplies traveling between towns."},
+		{"id":"partners","label":"Trade partners","icon":"walker","icon_kind":"chart","value":str(partners),"ratio":-1.0,"sub":"%d peoples known" % known,"tip":"Peoples with recorded exchanges."},
 	]
 	if tribute_in>0.0 or tribute_out>0.0:
 		items.append({"id":"tribute","label":"Tribute a season","icon":"Coin","value":S.signed(tribute_in-tribute_out),"ratio":-1.0,"sub":"%s in · %s out" % [S.n(tribute_in),S.n(tribute_out)],"tip":"Tribute paid to us and by us, worth a season."})
@@ -223,16 +201,12 @@ func _build_summary()->void:
 	var items:=kpi_items()
 	var lead:=S.voice("Supplies for our next buildings" if int(items[0].value)>0 else "Our immediate building needs are covered",24);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lead.tooltip_text=String(items[0].tip);summary_box.add_child(lead)
 	var need_rows:=Needs.needs()
+	var need_chips:=HFlowContainer.new();need_chips.add_theme_constant_override("h_separation",16);summary_box.add_child(need_chips)
 	for index:int in mini(3,need_rows.size()):
 		var need:Dictionary=need_rows[index]
 		var line:=S.label("%s · need %s %s" % [String(need.purpose),S.n(float(need.amount)),String(need.resource).to_lower()],15,T.INK)
-		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;summary_box.add_child(line)
-	var partners:Dictionary=items[3]
-	var context:=S.label("Recent trade with %s peoples%s" % [String(partners.value)," · "+String(items[0].sub) if Ledger.purse_unit("player")!="" else ""],16,T.INK_MUTED);context.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;context.tooltip_text=String(partners.tip);summary_box.add_child(context)
-	var pace:=S.label("A season's pace: worth %s received · %s sent" % [String(items[1].value),String(items[2].value)],14,T.INK_MUTED);pace.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;pace.tooltip_text=String(items[1].tip)+"\n"+String(items[2].tip);summary_box.add_child(pace)
-	for item:Dictionary in items:
-		if item.id!="tribute":continue
-		var tribute:=S.label("Tribute %s a season · %s" % [String(item.value),String(item.sub)],14,T.INK_MUTED);tribute.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;tribute.tooltip_text=String(item.tip);summary_box.add_child(tribute)
+		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;line.custom_minimum_size.x=250;need_chips.add_child(line)
+
 	var sent:=0.0;var came:=0.0
 	for row:Dictionary in _known_rows():
 		if int(row.contact)<2:continue
@@ -266,7 +240,7 @@ static func known_rows()->Array:
 func _build_partner_browser()->void:
 	browser=VBoxContainer.new();browser.name="PartnerBrowser";browser.add_theme_constant_override("separation",8);partner_workspace.add_child(browser)
 	var heading:=HBoxContainer.new();heading.add_theme_constant_override("separation",8);browser.add_child(heading)
-	var title:=S.label("Choose a people",16,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(title)
+	var title:=S.label("TRADE WITH",14,T.INK_MUTED,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title.size_flags_vertical=Control.SIZE_SHRINK_CENTER;heading.add_child(title)
 	browser_close=S.verb("Back to terms",_toggle_partner_browser,"Close the chooser and return to the selected people's terms");browser_close.name="ClosePartnerChooser";heading.add_child(browser_close)
 	partner_search=LineEdit.new();partner_search.name="FindPartner";partner_search.placeholder_text="Find a people";partner_search.custom_minimum_size.y=40;browser.add_child(partner_search)
 	partner_search.text_changed.connect(func(words:String)->void:partner_query=words;partner_page=0;_build_partner_choices())
@@ -274,7 +248,7 @@ func _build_partner_browser()->void:
 	partner_previous=S.verb("‹",func()->void:partner_page-=1;_build_partner_choices(),"Previous peoples");partner_previous.name="PreviousPartners";partner_pager.add_child(partner_previous)
 	partner_count=S.label("",14,T.INK_MUTED);partner_count.size_flags_vertical=Control.SIZE_SHRINK_CENTER;partner_pager.add_child(partner_count)
 	partner_next=S.verb("›",func()->void:partner_page+=1;_build_partner_choices(),"Next peoples");partner_next.name="NextPartners";partner_pager.add_child(partner_next)
-	partner_choices=VBoxContainer.new();partner_choices.name="PartnerChoices";partner_choices.add_theme_constant_override("separation",6);browser.add_child(partner_choices)
+	partner_choices=HFlowContainer.new();partner_choices.name="PartnerChoices";partner_choices.add_theme_constant_override("h_separation",6);partner_choices.add_theme_constant_override("v_separation",6);browser.add_child(partner_choices)
 
 func _build_partner_choices()->void:
 	_clear(partner_choices)
@@ -292,7 +266,7 @@ func _build_partner_choices()->void:
 	for row:Dictionary in rows.slice(partner_page*PARTNER_PAGE_SIZE,(partner_page+1)*PARTNER_PAGE_SIZE):
 		var id:=String(row.id)
 		var button:=S.verb(String(row.name),_choose_partner.bind(id),String(row.name)+(" · Known only by word" if int(row.contact)<2 else (" · Trade available" if bool(row.available) else " · Route blocked")),id==selected_partner)
-		button.name="PartnerChoice_"+id;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.name="PartnerChoice_"+id;button.custom_minimum_size.x=150;button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.alignment=HORIZONTAL_ALIGNMENT_LEFT;button.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		partner_choices.add_child(button)
 	if rows.is_empty():partner_choices.add_child(S.label("No matching peoples.",14,T.INK_MUTED))
 
@@ -319,7 +293,7 @@ func _build_peoples(force:=false)->void:
 	for row:Dictionary in rows:
 		if String(row.id)!=selected_partner:continue
 		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
-		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false),evidence_open.get(id,false)]
+		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false),purchase_pages.get(id,0)]
 		if int(row.contact)>=2:
 			details.append_array([GameState.resource_stockpiles,GameState.storage_works,Needs.needs(),Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
 				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
@@ -364,22 +338,19 @@ func _people_row(civ_id:String,contact:int)->Control:
 		head.add_child(S.tag("Not met",T.MUTED))
 		return panel
 	var form:=String(p.get("form","gift"))
-	column.add_child(S.label("Recorded pace · "+Words.period_word(form),14,T.INK_MUTED))
-	var summary:=HBoxContainer.new();summary.add_theme_constant_override("separation",16);column.add_child(summary)
-	var bar:=Graphics.new();bar.name="Flows";bar.compact=true;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.size_flags_stretch_ratio=1.2;bar.custom_minimum_size=Vector2(60,20);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	bar.values=[Words.per_period(Ledger.flow_value(civ_id,"player"),form),Words.per_period(Ledger.flow_value("player",civ_id),form)];summary.add_child(bar)
-	bar.tooltip_text="Worth %s at each sender's own prices. Left of center means more received; right means more sent. These are smoothed values, so blocked routes retain readings from earlier trade." % Words.period_word(form)
-	var stance_id:=String(ours.get("id","free"))
-	summary.add_child(S.tag("Our stance: "+String(Words.LABELS.get(stance_id,stance_id)),T.RED if stance_id in Stances.COERCIVE else (T.GREEN if stance_id in ["free","favour","gifts"] else T.GOLD)))
-	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",16);details.visible=bool(expanded_people.get(civ_id,false));column.add_child(details);column=details
-	var decisions:=VBoxContainer.new();decisions.name="TradeDecisions";decisions.add_theme_constant_override("separation",12);column.add_child(decisions)
-	var evidence:=VBoxContainer.new();evidence.name="TradeEvidence";evidence.add_theme_constant_override("separation",12);evidence.visible=bool(evidence_open.get(civ_id,false));column.add_child(evidence)
-	var evidence_toggle:=S.verb("Hide exchange detail" if evidence.visible else "Goods & dependence",func()->void:evidence_open[civ_id]=not bool(evidence_open.get(civ_id,false));_build_peoples();_responsive(),"Exact goods exchanged and how much each people depends on the other")
-	evidence_toggle.name="ExchangeEvidence";evidence_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;column.add_child(evidence_toggle);column.move_child(evidence_toggle,1)
-	var goods:=_grid(evidence,"GoodsExchanged",2,640)
-	goods.add_child(_flows("We send",Words.flow_items("player",civ_id),form))
-	goods.add_child(_flows("They send",Words.flow_items(civ_id,"player"),form))
-	goods.add_theme_constant_override("v_separation",0)
+	# Actual exchanges precede policy and dependence; no disclosure hides goods.
+	_build_supply_offers(column,civ_id)
+	var recorded:=S.label("RECENT EXCHANGE · "+Words.period_word(form),14,T.INK_MUTED,true)
+	recorded.tooltip_text="Smoothed trading pace, including delivered barter. These quantities are recorded flows, not a new offer or cargo still traveling."
+	column.add_child(recorded)
+	var goods:=_grid(column,"GoodsExchanged",2,640)
+	goods.add_child(_flows("We send",Words.flow_items("player",civ_id,Ledger.GOODS.size()),form))
+	goods.add_child(_flows("They send",Words.flow_items(civ_id,"player",Ledger.GOODS.size()),form))
+	var bar:=Graphics.new();bar.name="Flows";bar.visible=false
+	bar.values=[Words.per_period(Ledger.flow_value(civ_id,"player"),form),Words.per_period(Ledger.flow_value("player",civ_id),form)];column.add_child(bar)
+	var details:=VBoxContainer.new();details.name="TradeTerms";details.add_theme_constant_override("separation",12);column.add_child(details)
+	var decisions:=VBoxContainer.new();decisions.name="TradeDecisions";decisions.add_theme_constant_override("separation",8);details.add_child(decisions)
+	var evidence:=VBoxContainer.new();evidence.name="TradeEvidence";evidence.add_theme_constant_override("separation",8);details.add_child(evidence)
 	var needs:=_grid(evidence,"Dependence",2,640)
 	needs.add_theme_constant_override("v_separation",0)
 	for pair_:Array in [["player",civ_id],[civ_id,"player"]]:
@@ -402,13 +373,9 @@ func _people_row(civ_id:String,contact:int)->Control:
 		standing.add_child(debt)
 	if standing.get_child_count()==0:standing.visible=false
 	for reading:Label in standing.get_children():reading.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	# Our terms: the stance buttons and what our goods buy, on one row.
-	var action_head:=HBoxContainer.new();action_head.add_theme_constant_override("separation",12);decisions.add_child(action_head)
-	var lead:=S.label("Set our terms",16,T.INK,true);lead.size_flags_horizontal=Control.SIZE_EXPAND_FILL;lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;action_head.add_child(lead)
-	_build_supply_offers(decisions,civ_id)
-	var buy:=_buy_menu(civ_id) if GameState.population_total>=1000 else null
-	if buy!=null:buy.size_flags_vertical=Control.SIZE_SHRINK_CENTER;action_head.add_child(buy)
+	decisions.add_child(S.label("TRADE POLICY",14,T.INK_MUTED,true))
 	var terms:=_stance_buttons(civ_id,ours);decisions.add_child(terms)
+	if GameState.population_total>=1000:decisions.add_child(_purchase_cards(civ_id))
 	var odds_row:=_odds_row(civ_id,ours)
 	if odds_row!=null:decisions.add_child(odds_row)
 	var last:=Words.answer_label("player",civ_id)
@@ -476,37 +443,30 @@ func _dependence(owner:String,from:String,need:Dictionary)->Control:
 ## The stance buttons: the one in force pressed; the pointer tells what each
 ## does and their odds.
 func _stance_buttons(civ_id:String,ours:Dictionary)->Control:
-	var row:=HFlowContainer.new();row.name="Stances";row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",8)
+	var box:=VBoxContainer.new();box.name="Stances";box.add_theme_constant_override("separation",6)
+	var row:=HFlowContainer.new();row.add_theme_constant_override("h_separation",8);row.add_theme_constant_override("v_separation",6);box.add_child(row)
 	var chosen:=String(ours.get("id","free"))
 	for id:String in STANCE_ORDER:
-		if id=="squeeze":
-			row.add_child(_squeeze_button(civ_id,chosen=="squeeze",String(ours.get("good",""))))
-			continue
+		if id=="squeeze":continue
 		var button:=Button.new();button.name="Stance_%s" % id;button.text=String(Words.LABELS[id]);button.toggle_mode=true;_style_action(button)
 		button.set_pressed_no_signal(chosen==id)
 		button.tooltip_text=Words.tip(id,"player",civ_id)
 		button.pressed.connect(func()->void:_choose(civ_id,id,""))
 		row.add_child(button)
-	return row
+	box.add_child(_squeeze_button(civ_id,chosen=="squeeze",String(ours.get("good",""))))
+	return box
 
 
 func _squeeze_button(civ_id:String,chosen:bool,good_now:String)->Control:
-	var pick:=MenuButton.new();pick.name="Stance_squeeze";pick.flat=false;_style_action(pick)
-	pick.text=("Squeeze %s ▾" % Words.good_word(good_now)) if chosen and good_now!="" else "Squeeze ▾"
-	if chosen:pick.add_theme_stylebox_override("normal",pick.get_theme_stylebox("pressed").duplicate())
+	var row:=HFlowContainer.new();row.name="Stance_squeeze";row.add_theme_constant_override("h_separation",6)
 	var goods:=_squeeze_goods(civ_id)
-	var popup:=pick.get_popup()
-	_style_popup(popup)
 	if goods.is_empty():
-		pick.disabled=true;pick.tooltip_text="They lean on us for no good we could squeeze."
-		return pick
-	for i in goods.size():
-		var row:Dictionary=goods[i]
-		popup.add_item(_short("%s · %s" % [Words.good_word(String(row.good)),String(row.words)]),i)
-		popup.set_item_tooltip(i,Words.tip("squeeze","player",civ_id,String(row.good)))
-	pick.tooltip_text="Cut off a good they lean on, and buy it up from others."
-	popup.id_pressed.connect(func(index:int)->void:_choose(civ_id,"squeeze",String((goods[index] as Dictionary).good)))
-	return pick
+		var none:=S.verb("Squeeze unavailable",Callable(),"They do not depend on any resource we can withhold.");row.add_child(none)
+	for item:Dictionary in goods:
+		var good:=String(item.good)
+		var button:=S.verb("Squeeze "+Words.good_word(good),_choose.bind(civ_id,"squeeze",good),Words.tip("squeeze","player",civ_id,good),chosen and good_now==good)
+		button.name="Squeeze_"+good.replace(" ","_");row.add_child(button)
+	return row
 
 
 ## Goods to squeeze: those they lean on us for, then those they lack.
@@ -522,32 +482,32 @@ func _squeeze_goods(civ_id:String)->Array:
 	return out
 
 
-## What our goods can buy from them, each at its stated terms: arms for the
-## watch, what they have to spare, families who come to work, our own taken
-## captive. Choosing one carries it out (trade_ledger.gd goods_deal).
-func _buy_menu(civ_id:String)->Control:
-	# The terms are read once a day for each people (trade_ledger.gd deal_offers).
+## Mature settlements retain existing purchases, with the full payment and
+## receipt visible before a direct action. Three per page, never a popup menu.
+func _purchase_cards(civ_id:String)->Control:
+	var box:=VBoxContainer.new();box.name="BuyWithGoods";box.add_theme_constant_override("separation",8)
+	box.add_child(S.label("PURCHASES · HOUSEHOLD GOODS AS PAYMENT",14,T.INK_MUTED,true))
 	var offers:=Ledger.deal_offers("player",civ_id)
-	var pick:=MenuButton.new();pick.name="BuyWithGoods";pick.flat=false;_style_action(pick)
-	pick.text="Buy with goods ▾"
 	if offers.is_empty():
-		pick.disabled=true;pick.tooltip_text="They have nothing to spare for our goods."
-		return pick
-	var popup:=pick.get_popup()
-	_style_popup(popup)
-	var terms:Array=offers
-	for i in offers.size():
-		var t:Dictionary=offers[i]
-		var what:=String(t.what)
-		if bool(t.ok):popup.add_item("%s · %s for %s goods" % [_deal_name(what),S.n(float(t.count)),S.n(float(t.goods))],i)
-		else:
-			popup.add_item(_short("%s · %s" % [_deal_name(what),String(t.why)]),i)
-			popup.set_item_disabled(popup.get_item_count()-1,true)
-		popup.set_item_tooltip(popup.get_item_count()-1,"%s\n%s\nWith %s: %s goods a %s at their prices. We have %s goods to spare." % [String(t.get("words","")),String(t.get("why","")),Ledger.name_of(civ_id),str(snappedf(float(t.each),0.1)),"head" if what in Ledger.PEOPLE else ("set" if what==Ledger.ARMS else "load"),str(roundi(float(t.spare)))])
-	pick.tooltip_text="Our goods buy what they have to spare, at their prices."
-	if offers.any(func(offer:Dictionary)->bool:return bool(offer.ok)):T.apply_button_style(pick,true)
-	popup.id_pressed.connect(func(index:int)->void:_deal(civ_id,terms[index] as Dictionary))
-	return pick
+		box.add_child(_line("No purchases available with this people.",14,T.INK_MUTED,true));return box
+	var page:=clampi(int(purchase_pages.get(civ_id,0)),0,maxi(0,ceili(offers.size()/3.0)-1))
+	purchase_pages[civ_id]=page
+	if offers.size()>3:
+		var pager:=HFlowContainer.new();box.add_child(pager)
+		var previous:=S.verb("Previous",_purchase_page.bind(civ_id,page-1));previous.disabled=page==0;pager.add_child(previous)
+		pager.add_child(S.label("%d–%d of %d" % [page*3+1,mini(page*3+3,offers.size()),offers.size()],14,T.INK_MUTED))
+		var next:=S.verb("Next",_purchase_page.bind(civ_id,page+1));next.disabled=(page+1)*3>=offers.size();pager.add_child(next)
+	for offer:Dictionary in offers.slice(page*3,page*3+3):
+		var card:=VBoxContainer.new();box.add_child(card)
+		var caption:="Give %s household goods → Get %s %s" % [_quantity(float(offer.goods)),_quantity(float(offer.count)),_deal_name(String(offer.what)).to_lower()]
+		card.add_child(_line(caption,16,T.INK,true))
+		var button:=S.verb("Buy "+_deal_name(String(offer.what)).to_lower(),_deal.bind(civ_id,offer),String(offer.get("words","")))
+		button.name="Purchase_"+String(offer.what).replace(" ","_");button.disabled=not bool(offer.ok);card.add_child(button)
+		if not bool(offer.ok):card.add_child(_line(String(offer.why),14,T.INK_MUTED,true))
+	return box
+
+func _purchase_page(civ_id:String,page:int)->void:
+	purchase_pages[civ_id]=page;_build_peoples(true);_responsive()
 
 
 func _deal_name(what:String)->String:
@@ -698,11 +658,11 @@ func _responsive()->void:
 		partner_workspace.vertical=available<850.0
 		browser.custom_minimum_size.x=0.0 if partner_workspace.vertical else 260.0
 		browser.size_flags_horizontal=Control.SIZE_EXPAND_FILL if partner_workspace.vertical else Control.SIZE_FILL
-		browser.visible=not _known_rows().is_empty() and (not partner_workspace.vertical or browse_open)
-		browser_close.visible=partner_workspace.vertical and browse_open
+		browser.visible=not _known_rows().is_empty()
+		browser_close.visible=false
 		partner_workspace.move_child(browser,0 if partner_workspace.vertical else 1)
 		var change:=find_child("ChangePartner",true,false) as Button
-		if change!=null:change.visible=partner_workspace.vertical;change.text="Hide chooser" if browse_open else "Change people"
+		if change!=null:change.visible=false
 	# A narrow page keeps each people's name, balance and Terms on its line.
 	for head:Node in find_children("PartnerIdentity","HBoxContainer",true,false):
 		for child in head.get_children():
@@ -718,11 +678,6 @@ func _responsive()->void:
 func _style_action(button:Button)->void:
 	T.apply_button_style(button)
 	button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
-
-func _style_popup(popup:PopupMenu)->void:
-	popup.add_theme_font_override("font",T.font("ui"))
-	popup.add_theme_font_size_override("font_size",16)
-	popup.add_theme_constant_override("v_separation",20)
 
 func _answer(text:String,size:=30)->Label:
 	var label:=_line(text,size,T.INK,true)
@@ -756,33 +711,62 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
 
+static func _quantity(value:float)->String:
+	return ("%.2f" % value).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+
+func _resource_amount(parent:Node,heading:String,resource:String,amount:float,color:Color)->void:
+	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(box)
+	box.add_child(S.label(heading,14,color,true))
+	var row:=HBoxContainer.new();box.add_child(row);row.add_child(S.icon(resource,32))
+	var label:=_line("%s %s" % [_quantity(amount),resource.to_lower()],20,T.INK,true)
+	label.name=heading.replace(" ","");label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(label)
+
 func _build_supply_offers(parent:Control,civ_id:String)->void:
+	parent.add_child(S.label("EXCHANGES YOU CAN SEND",14,T.INK_MUTED,true))
 	var offers:=Needs.offers("player",civ_id)
-	var heading:=S.label("EXCHANGE SUPPLIES",14,T.INK_MUTED,true);parent.add_child(heading)
 	if offers.is_empty():
-		var empty:=S.label("No matching surplus, shortage and carrying room between these towns.",14,T.INK_MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(empty)
+		var blocked:=Ledger.blocked("player",civ_id)
+		parent.add_child(_line(_blocked_words(blocked) if not blocked.is_empty() else "No exchange available right now.",16,T.INK_MUTED,true))
+		var wants:=Needs.needs()
+		var theirs:Array=WorldSimulation.scoped(civ_id,Needs.needs)
+		var stock_grid:=_grid(parent,"SupplyAvailability",2,640)
+		for side:int in 2:
+			var col:=VBoxContainer.new();stock_grid.add_child(col)
+			col.add_child(S.label("WE NEED · THEY CAN SPARE" if side==0 else "THEY NEED · WE CAN SPARE",14,T.INK_MUTED,true))
+			var needs:Array=wants if side==0 else theirs
+			if needs.is_empty():col.add_child(_line("Food and building needs covered",14,T.INK_MUTED,true))
+			for need:Dictionary in needs.slice(0,3):
+				var good:=String(need.resource)
+				var spare:=Ledger.spare_of(civ_id if side==0 else "player",good)
+				col.add_child(_line("%s: need %s · spare %s" % [good,_quantity(float(need.amount)),_quantity(spare)],15,T.INK,true))
+				col.add_child(_line(String(need.purpose),14,T.INK_MUTED,true))
+		if blocked.is_empty() and not wants.is_empty():parent.add_child(_line("An exchange needs surplus on both sides, room in both stores and carrying capacity.",14,T.INK_MUTED,true))
 	for offer:Dictionary in offers:
-		var box:=VBoxContainer.new();box.name="SupplyOffer_"+String(offer.want).replace(" ","_");box.add_theme_constant_override("separation",4);parent.add_child(box)
-		box.add_child(S.label(String(offer.purpose),17,T.INK,true))
-		var exchange:=S.label("Send %s %s  →  Receive %s %s" % [S.n(float(offer.payment)),String(offer.give).to_lower(),S.n(float(offer.count)),String(offer.want).to_lower()],16,T.INK)
-		exchange.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(exchange)
+		var panel:=PanelContainer.new();panel.name="SupplyOffer_"+String(offer.want).replace(" ","_");panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,12,0));parent.add_child(panel)
+		var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);panel.add_child(box)
+		var exchange:=_grid(box,"ExchangeAmounts",2,640)
+		_resource_amount(exchange,"YOU GIVE",String(offer.give),float(offer.payment),T.GOLD_TEXT)
+		_resource_amount(exchange,"YOU RECEIVE",String(offer.want),float(offer.count),T.TEAL_TEXT)
+		box.add_child(_line("Supports: "+String(offer.purpose),16,T.INK,true))
+		var their_needs:Array=WorldSimulation.scoped(civ_id,Needs.needs)
+		var their_purpose:="their households and ongoing work"
+		for need:Dictionary in their_needs:
+			if String(need.resource)==String(offer.give):their_purpose=String(need.purpose).to_lower();break
+		box.add_child(_line("They need %s for %s" % [String(offer.give).to_lower(),their_purpose],14,T.INK_MUTED,true))
 		var covered:=float(offer.count)+.01>=float(offer.shortfall)
-		var note:=S.label("%s · %d days · Keep %s %s" % ["Material covered" if covered else "Partial supply",int(offer.days),S.n(float(offer.remaining)),String(offer.give).to_lower()],14,T.INK_MUTED)
-		note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(note)
-		var button:=S.verb("Send exchange",_send_supplies.bind(offer),"Both towns reserve these actual supplies now. They arrive after the journey; a closed route returns them.")
-		button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;box.add_child(button)
-	var shown:=0
+		box.add_child(_line("%s · Arrives in %d days · Keep %s %s" % ["Covers this material" if covered else "Part of the material needed",int(offer.days),_quantity(float(offer.remaining)),String(offer.give).to_lower()],14,T.INK_MUTED,true))
+		var button:=S.verb("Send this exchange",_send_supplies.bind(offer),"Reserve both loads now. Delivery follows the journey; if the route closes both loads return.")
+		button.name="SendExchange";button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;box.add_child(button)
 	for shipment:Dictionary in Ledger.peek().get("barter_shipments",[]):
 		if shipment.buyer!="player" or shipment.seller!=civ_id or shipment.status!="traveling":continue
-		if shown>=3:break
-		shown+=1
-		var line:=S.label("On the road: %s %s · %d days remaining" % [S.n(float(shipment.count)),String(shipment.want).to_lower(),maxi(0,int(shipment.arrival)-int(GameState.elapsed_days))],14,T.TEAL)
-		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(line)
+		var cargo:=VBoxContainer.new();cargo.name="Cargo_"+str(shipment.id);parent.add_child(cargo)
+		cargo.add_child(_line("ON THE ROAD · %d days left" % maxi(0,int(shipment.arrival)-int(GameState.elapsed_days)),14,T.TEAL_TEXT,true))
+		cargo.add_child(_line("Sent %s %s → Receiving %s %s" % [_quantity(float(shipment.payment)),String(shipment.give).to_lower(),_quantity(float(shipment.count)),String(shipment.want).to_lower()],16,T.INK,true))
 
 func _send_supplies(offer:Dictionary)->void:
 	var result:=Needs.send(offer)
 	var card:=Tracker.register("Exchange supplies for "+String(offer.get("purpose","construction")),"trade")
 	if result.has("error"):Tracker.refuse(card,String(result.error))
 	else:Tracker.claim(card,"barter_shipment",{"id":result.shipment_id},"the traders","trade")
-	feedback.text=String(result.get("error",result.get("message","")))
+	_say(String(result.get("error",result.get("message",""))))
 	refresh(true)

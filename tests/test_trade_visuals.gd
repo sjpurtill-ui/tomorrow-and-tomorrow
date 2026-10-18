@@ -140,32 +140,26 @@ func test_stance_button_uses_real_court_action_and_tracks_order() -> void:
 	assert_int(Tracker.orders().size()).is_equal(orders_before + 1)
 	assert_bool((board.find_child("Said", true, false) as Label).text.is_empty()).is_false()
 
-func test_squeeze_menu_applies_selected_good_with_stated_odds() -> void:
+func test_visible_squeeze_button_applies_named_resource_with_stated_odds() -> void:
 	var board := _board()
 	var id := String(ids[0])
-	var people := board.find_child("People_" + id, true, false)
-	var menu := people.find_child("Stance_squeeze", true, false) as MenuButton
-	assert_bool(menu.disabled).is_false()
-	assert_int(menu.get_popup().item_count).is_greater(0)
-	var flint_index := -1
-	for index in menu.get_popup().item_count:
-		if menu.get_popup().get_item_text(index).to_lower().begins_with("flint"): flint_index = index
-	assert_int(flint_index).is_greater_equal(0)
-	if flint_index < 0: return
-	menu.get_popup().id_pressed.emit(flint_index)
+	var button := board.find_child("Squeeze_Flint", true, false) as Button
+	assert_object(button).is_not_null()
+	if button == null: return
+	assert_str(button.text).contains("flint")
+	button.pressed.emit()
 	var stance := Stances.stance("player", id)
 	assert_str(String(stance.id)).is_equal("squeeze")
 	assert_str(String(stance.good)).is_equal("Flint")
 	assert_int(int(stance.answer)).is_greater(int(GameState.elapsed_days))
 	assert_object(board.find_child("Odds", true, false)).is_not_null()
 
-func test_buy_menu_moves_actual_goods_and_registers_order() -> void:
+func test_visible_purchase_moves_actual_goods_and_registers_order() -> void:
 	GameState.ensure_population_total(1000)
 	for id:String in ids:WorldSimulation.scoped(id,func():WorldSimulation.state.ensure_population_total(1000))
 	var board := _board()
 	var id := String(ids[0])
 	var people := board.find_child("People_" + id, true, false)
-	var menu := people.find_child("BuyWithGoods", true, false) as MenuButton
 	var offers := Ledger.deal_offers("player", id)
 	var chosen := -1
 	for index in offers.size():
@@ -179,8 +173,11 @@ func test_buy_menu_moves_actual_goods_and_registers_order() -> void:
 	var held_before := _stock("player", String(terms.what))
 	var theirs_before := _stock(id, String(terms.what))
 	var orders_before := Tracker.orders().size()
-	assert_bool(menu.get_popup().is_item_disabled(chosen)).is_false()
-	menu.get_popup().id_pressed.emit(chosen)
+	board._purchase_page(id, chosen / 3)
+	var button := board.find_child("Purchase_"+String(terms.what).replace(" ","_"),true,false) as Button
+	assert_object(button).is_not_null()
+	assert_bool(button.disabled).is_false()
+	button.pressed.emit()
 	assert_float(goods_before - float(GameState.resource_stockpiles["Civilian Goods"])).is_equal_approx(float(terms.goods), 0.01)
 	assert_float(_stock("player", String(terms.what)) - held_before).is_equal_approx(float(terms.count), 0.01)
 	assert_float(theirs_before - _stock(id, String(terms.what))).is_equal_approx(float(terms.count), 0.01)
@@ -192,7 +189,10 @@ func test_embargo_disables_buy_without_hiding_stance_choices() -> void:
 	var board := _board()
 	board._choose_partner(String(ids[1]))
 	var people := board.find_child("People_" + String(ids[1]), true, false)
-	assert_bool((people.find_child("BuyWithGoods", true, false) as MenuButton).disabled).is_true()
+	var purchases := people.find_child("BuyWithGoods", true, false)
+	assert_object(purchases).is_not_null()
+	for button:Node in purchases.find_children("Purchase_*", "Button", true, false):
+		assert_bool(button.disabled).is_true()
 	assert_object(people.find_child("Stances", true, false)).is_not_null()
 	assert_str((people.find_child("Theirs", true, false) as Label).text.to_lower()).contains("embargo")
 	assert_object(people.find_child("LastWord", true, false)).is_not_null()
@@ -223,3 +223,31 @@ func test_partner_chooser_is_bounded_searchable_and_keeps_selected_profile() -> 
 	assert_object(board.find_child("People_word_09",true,false)).is_not_null()
 	assert_object(board.find_child("People_"+String(ids[0]),true,false)).is_null()
 	assert_array(Array(Probe.economic_fingerprint())).is_equal(Array(before))
+
+func test_named_flows_and_partner_choices_are_visible_without_disclosures_or_menus() -> void:
+	GameState.ensure_population_total(1000)
+	var board := _board()
+	await await_idle_frame()
+	assert_bool((board.find_child("GoodsExchanged",true,false) as Control).is_visible_in_tree()).is_true()
+	assert_bool((board.find_child("PartnerChoices",true,false) as Control).is_visible_in_tree()).is_true()
+	assert_array(board.find_children("*","MenuButton",true,false)).is_empty()
+	assert_array(board.find_children("*","OptionButton",true,false)).is_empty()
+	var form := String(Ledger.pair("player",String(ids[0])).form)
+	for side:Array in [["player",String(ids[0]),"Wesend"],[String(ids[0]),"player","Theysend"]]:
+		var flow := board.find_child(side[2],true,false)
+		assert_bool(flow.is_visible_in_tree()).is_true()
+		var items := Words.flow_items(side[0],side[1],Ledger.GOODS.size())
+		var chips := flow.find_child("Goods",true,false)
+		assert_int(chips.get_child_count()).is_equal(items.size())
+		for index:int in items.size():
+			assert_str(String(chips.get_child(index).get_meta("good"))).is_equal(String(items[index][0]))
+			assert_float(float(chips.get_child(index).get_meta("amount"))).is_equal(float(items[index][1]))
+
+func test_all_resource_flows_remain_visible_even_beyond_four() -> void:
+	var pair:=Ledger.pair("player",String(ids[0]))
+	var key:="ab" if pair.a=="player" else "ba"
+	for good:String in ["Timber","Stone","Clay","Flint","Food","Fiber Plants"]:pair.ema[key][good]=2.5
+	Ledger.revision+=1
+	var board:=_board()
+	var goods:=board.find_child("Wesend",true,false).find_child("Goods",true,false)
+	assert_int(goods.get_child_count()).is_greater_equal(6)

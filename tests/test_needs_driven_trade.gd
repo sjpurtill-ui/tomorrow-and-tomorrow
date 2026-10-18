@@ -138,3 +138,36 @@ func test_early_goods_wallet_is_unavailable_for_material_deals()->void:
 	assert_bool(bool(Ledger.deal_terms("player",seller,"Timber",1).ok)).is_false()
 	assert_bool(bool(Ledger.goods_deal("player",seller,"Timber",1).ok)).is_false()
 	assert_float(held("player","Civilian Goods")).is_equal(before)
+
+func test_trade_offer_visibly_names_both_loads_and_dispatch_shows_both_cargo_legs()->void:
+	var board:Control=auto_free(preload("res://scripts/hud/trade_board.gd").new())
+	add_child(board);board.setup({});board.set_process(false)
+	var offers:=Needs.offers("player",seller)
+	assert_array(offers).is_not_empty()
+	if offers.is_empty():return
+	var offer:Dictionary=offers[0]
+	var card:=board.find_child("SupplyOffer_"+String(offer.want).replace(" ","_"),true,false)
+	assert_object(card).is_not_null()
+	if card==null:return
+	assert_str((card.find_child("YOUGIVE",true,false) as Label).text).contains(String(offer.give).to_lower())
+	assert_str((card.find_child("YOURECEIVE",true,false) as Label).text).contains(String(offer.want).to_lower())
+	var food_before:=held("player","Food")
+	(card.find_child("SendExchange",true,false) as Button).pressed.emit()
+	assert_float(held("player","Food")).is_equal_approx(food_before-float(offer.payment),.001)
+	var cargo:=board.find_children("Cargo_*","VBoxContainer",true,false)
+	assert_int(cargo.size()).is_equal(1)
+	if cargo.size()>0:
+		assert_str((cargo[0].get_child(1) as Label).text).contains("food")
+		assert_str((cargo[0].get_child(1) as Label).text).contains("timber")
+	assert_bool((board.find_child("Said",true,false) as Label).visible).is_true()
+
+func test_no_offer_shows_named_shortages_and_spares_instead_of_empty_abstract_totals()->void:
+	WorldSimulation.scoped(seller,func():WorldSimulation.state.resource_stockpiles.Timber=0.0)
+	var board:Control=auto_free(preload("res://scripts/hud/trade_board.gd").new())
+	add_child(board);board.setup({});board.set_process(false)
+	var availability:=board.find_child("SupplyAvailability",true,false)
+	assert_object(availability).is_not_null()
+	assert_array(board.find_children("*","MenuButton",true,false)).is_empty()
+	var labels:=""
+	for label:Label in availability.find_children("*","Label",true,false):labels+=label.text+"\n"
+	assert_str(labels).contains("Timber: need 8 · spare 0")
