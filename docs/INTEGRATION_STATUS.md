@@ -1,3 +1,36 @@
+## October 18 — Quiet routine notices
+
+Status: INTEGRATED — source `7348a346711db4c7034485d591337d32fa03cf93`,
+verified on remote `main` and `codex/quiet-routine-notices`. Based on
+`6027e15c416aa125086225d0605de9b8295f8a3b` in
+`/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
+
+The persistent "Others think us weak" notice no longer appears or contributes
+an attention badge. Regard remains in the World screen and simulation ledger.
+Ordinary death announcements (including officials, notables, children and first
+burials) and discovery announcements stay in their records without automatic
+notice rows or illustrated cards. A shared presentation policy covers both
+Chronicle card intake paths and the notice model. Execution notices remain:
+confirmed court executions carry source metadata, while ledger execution events
+are recognized by their original event keys. An obituary mentioning execution
+is not treated as evidence that someone was executed.
+
+Research announcements and the opening's first-discovery path no longer open
+reading popups, even for existing saves whose old mode is "all". Research art,
+records and manual readers remain available. Saved preferences remain valid;
+there is no schema migration or change to discoveries, deaths, adjudication,
+population, succession or diplomacy mechanics. Existing threats, shortages,
+foreign visitors and order outcomes retain their notification behavior.
+
+Validation: 53 checks pass (23 notification-stack, 7 research-announcement,
+23 Chronicle), with no errors or orphan-node warnings in the passing suites.
+Tests cover both illustrated-card paths, no hidden automatic UI creation,
+record retention, execution provenance and retold ledger executions, the first
+opening discovery, legacy save modes and unaffected actionable notices.
+No shared simulation hotspot conflicts. Generated import/UID metadata, logs,
+private saves and builds are excluded from Git. The live player is not restarted;
+canonical Mac release preparation follows remote integration for the next launch.
+
 ## October 17 — Research totals and visual hardship history
 
 Status: INTEGRATED — source `6d3bcee7f1286f9622a8a1f13e96bdf2ac7e0ad9`,
