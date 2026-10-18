@@ -1,6 +1,7 @@
 ## October 17 — Quicksave report-schema compatibility
 
-Status: READY — `codex/quicksave-goods-loading`, based on
+Status: INTEGRATED — source `acb6c0bf0efa0681fe72d9bfc4a397628da37c73`
+verified on remote main and `codex/quicksave-goods-loading`, based on
 `3cb0b9f45da4cbb88649804a7a4fb391246f9a7d`, in the Mac development worktree
 `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
 
@@ -11,8 +12,10 @@ current game actually produces without editing saves or production rules.
 The startup error path also prints the load reason once instead of one character
 per error line. Ten civilian-goods tests pass, including an actual production
 report, local settlement validation and rejection of an oversized report.
-The requested saved-campaign relaunch follows validation against an isolated
-copy of the real quicksave and remote integration. Saves and probes stay local.
+An isolated copy of the actual quicksave loads successfully at year 19, winter,
+148 people (day 6630.643943). The original save is untouched. The requested
+player relaunch follows remote integration and release export. Saves and probes
+stay local.
 
 ## October 17 — Compact health dashboard and map space
 
