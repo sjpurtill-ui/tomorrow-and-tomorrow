@@ -1,6 +1,10 @@
+## October 18 — All-screen visual audit
+
+Documentation delivery: [UI_VISUAL_AUDIT.md](UI_VISUAL_AUDIT.md), audited against integrated source `2a2fc5c9c5d0324c524f070716ae2f7447281282`. Covers every main navigation category and tab, health/court, military and world details, collections, orders, founding and utility overlays. Proposes concrete comparisons, priorities, existing visuals to preserve, mechanics constraints and acceptance checks. Explicitly distinguishes source inspection from runtime visual validation. Flags the remaining watch-visibility language for a border-fort-only rules check; does not claim that check or the proposed redesigns are implemented. No gameplay changes or new save fields in this documentation checkpoint. Local links checked; no player restart.
+
 ## October 18 — Household identities and visual resource comparisons
 
-Status: READY on `codex/needs-driven-trade-storage`, based on `5dcc451491af53fb74602d2324bcd40020178538`; integrator delivery follows the verified push.
+Status: INTEGRATED — source `2a2fc5c9c5d0324c524f070716ae2f7447281282`, freshly verified on remote `main` and `codex/needs-driven-trade-storage`; canonical Mac main fast-forwarded and synchronized 0/0. Based on `5dcc451491af53fb74602d2324bcd40020178538`.
 
 Early court representatives now show their actual household identity and personal want rather than a skill-derived office such as Pathfinder. Established family heads retain their family/trade identities. The early tab is Households and concerns; roster search includes wants. This is presentation only: real government service assignments, labor, family emergence thresholds and saves are unchanged. It does not claim the later family panel has received the broader visual redesign proposed in the audit.
 
