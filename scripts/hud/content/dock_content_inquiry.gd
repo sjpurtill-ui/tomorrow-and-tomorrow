@@ -147,6 +147,19 @@ func _known_page()->Dictionary:
 		if event is Dictionary and not days.has(String(event.get("id",""))):days[String(event.get("id",""))]=int(event.get("day",-1))
 	var by_line:Dictionary={}
 	var inert:Array=[]
+	var global_totals:Array=[]
+	var unlocked:Dictionary={}
+	var recent:Array=[]
+	for id:String in WorldSimulation.state.known_discoveries:
+		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
+		for key:String in definition.get("effects",{}):unlocked[key]=float(unlocked.get(key,0))+float(definition.effects[key])
+		var badges:PackedStringArray=[]
+		for key:String in definition.get("effects",{}):badges.append("%s %+.2f pp" % [Explainer.label(key),float(definition.effects[key])*100])
+		recent.append({"id":id,"label":String(definition.get("name",id)),"day":int(days.get(id,-1)),"effect":" · ".join(badges)})
+	recent.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.day)>int(b.day))
+	for key:String in unlocked:
+		global_totals.append({"id":key,"label":Explainer.label(key),"unlocked":float(unlocked[key]),"current":float(WorldSimulation.discovery.effect(key)),"inert":bool(Explainer.describe(key,float(unlocked[key])).inert)})
+	global_totals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return String(a.label)<String(b.label))
 	for row:Dictionary in Explainer.total_rows():
 		if bool(row.inert):inert.append(row)
 		else:(by_line.get_or_add(String(row.line),[]) as Array).append(row)
@@ -182,7 +195,7 @@ func _known_page()->Dictionary:
 		for field:Dictionary in archive_fields:
 			if int(field.known)>0:archive_selected=String(field.id);break
 		if archive_selected.is_empty() and not archive_fields.is_empty():archive_selected=String(archive_fields[0].id)
-	var archive:={"type":"knowledge_tree","archive":true,"archive_fields":archive_fields,"selected":archive_selected,"on_select":_select_archive_domain,"summary":"%s known of %s · %d learned in ten years · %s open to a team" % [EraWords.grouped(known),EraWords.grouped(rows.size()),this_year,EraWords.grouped(open_now)],"summary_tip":"Answered questions, all questions, discoveries in the last ten years (since year %d), and questions whose foundations, clues and materials are in hand." % maxi(1,today/365+1-10)}
+	var archive:={"type":"knowledge_tree","archive":true,"totals":global_totals,"recent":recent.slice(0,3),"archive_fields":archive_fields,"selected":archive_selected,"on_select":_select_archive_domain,"summary":"%s known of %s · %d learned in ten years · %s open to a team" % [EraWords.grouped(known),EraWords.grouped(rows.size()),this_year,EraWords.grouped(open_now)],"summary_tip":"Answered questions, all questions, discoveries in the last ten years (since year %d), and questions whose foundations, clues and materials are in hand." % maxi(1,today/365+1-10)}
 	if not inert.is_empty():
 		archive["unapplied"]={"label":"%d known effects have no use yet" % inert.size(),"tip":"Part of what the people know, but nothing in the world reads them yet:\n"+"\n".join(inert.map(func(r:Dictionary)->String:return "%s %s" % [String(r.label),String(r.amount)]))}
 	return {"kpis":[],"blocks":[archive]}

@@ -579,9 +579,9 @@ static func _technique_rows()->Array:
 
 static func civilian_lines()->Array:
 	var rows:Array=[]
-	rows.append({"id":"food","name":"Food & water","role":"Food","stock":float(GameState.resource_stockpiles.get("Food",0)),"output":float(GameState.simulation_metrics.get("food_production",0)),"workers":GameState.effective_workers("Food"),"coverage":minf(1.0,float(GameState.simulation_metrics.get("food_production",0))/maxf(1,float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))),"status":"Daily food production · consumed %.1f / day" % float(GameState.simulation_metrics.get("food_consumption",0)),"bar_tip":"Daily food production compared with consumption"})
+	rows.append({"id":"food","purpose":"Meals for households & parties","target_label":"Daily need","target":float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)),"name":"Food","role":"Food","stock":float(GameState.resource_stockpiles.get("Food",0)),"output":float(GameState.simulation_metrics.get("food_production",0)),"workers":GameState.effective_workers("Food"),"coverage":minf(1.0,float(GameState.simulation_metrics.get("food_production",0))/maxf(1,float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))),"status":"Daily food production · consumed %.1f / day" % float(GameState.simulation_metrics.get("food_consumption",0)),"bar_tip":"Daily food production compared with consumption"})
 	for city:Dictionary in household_cards():
-		rows.append({"id":"goods_"+String(city.id),"name":"Civilian goods · "+String(city.city),"role":"Crafting","stock":city.stock,"output":city.made,"workers":city.workers,"coverage":city.coverage,"status":String(city.reason)+" · inputs −%d%% · timber, fiber, clay, stone or flint" % roundi((1.0-float(city.resource_factor))*100),"bar_tip":"Household stock target: %d%% covered" % roundi(float(city.coverage)*100)})
+		rows.append({"id":"goods_"+String(city.id),"purpose":"Households · learning · barter","target":city.target,"target_label":"Stock target","inputs":city.inputs,"input_span":city.input_span,"name":"Civilian goods · "+String(city.city),"role":"Crafting","stock":city.stock,"output":city.made,"workers":city.workers,"coverage":city.coverage,"status":String(city.reason)+" · inputs −%d%% · timber, fiber, clay, stone or flint" % roundi((1.0-float(city.resource_factor))*100),"bar_tip":"Household stock target: %d%% covered" % roundi(float(city.coverage)*100)})
 	var grouped:Dictionary={}
 	for deposit:Dictionary in ResourceSystem.visible_deposits():
 		var resource:=String(deposit.get("resource",""))
@@ -592,5 +592,5 @@ static func civilian_lines()->Array:
 	var names:Array=grouped.keys();names.sort()
 	for resource:String in names:
 		var reading:Dictionary=grouped[resource]
-		rows.append({"id":"raw_"+resource,"name":ResourceSystem.display_name(resource),"role":"Extraction","stock":float(GameState.resource_stockpiles.get(resource,0)),"output":reading.output,"workers":reading.workers,"coverage":1.0 if float(reading.output)>0 else 0.0,"status":"Extraction · today's actual output","bar_tip":"Working" if float(reading.output)>0 else "No extraction recorded today"})
+		rows.append({"id":"raw_"+resource,"purpose":"Construction & workshop supplies","name":ResourceSystem.display_name(resource),"role":"Extraction","stock":float(GameState.resource_stockpiles.get(resource,0)),"output":reading.output,"workers":reading.workers,"coverage":1.0 if float(reading.output)>0 else 0.0,"status":"Extraction · today's actual output","bar_tip":"Working" if float(reading.output)>0 else "No extraction recorded today"})
 	return rows

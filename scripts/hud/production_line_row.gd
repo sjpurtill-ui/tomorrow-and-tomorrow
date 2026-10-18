@@ -54,6 +54,8 @@ var _arm_close:=false
 var _left_rule:=Color(0,0,0,0)
 
 var capacity_grid:GridContainer
+var input_readings:HFlowContainer
+var _input_cells:Dictionary={}
 var shortage:Label
 var efficiency_bar:ProgressBar
 const OLIVE:=Color("344033")
@@ -84,7 +86,7 @@ func build(owner_screen:Node,first:Dictionary)->void:
 	bar=W.OutputBar.new(110);bar.ink_override=LIGHT;bar.name="Output";bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.custom_minimum_size.y=20;reading.add_child(bar)
 	efficiency_bar=ProgressBar.new();efficiency_bar.name="Efficiency";efficiency_bar.show_percentage=false;efficiency_bar.custom_minimum_size.y=7
 	efficiency_bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));efficiency_bar.add_theme_stylebox_override("fill",Industrial.flat(Color("7f9b4c")));reading.add_child(efficiency_bar)
-	var state:=Folio.label("","small",LIGHT);state.name="Condition";state.add_theme_font_size_override("font_size",12);reading.add_child(state)
+	var state:=Folio.label("","small",LIGHT);state.name="Condition";state.add_theme_font_size_override("font_size",12);state.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;reading.add_child(state)
 	var allocation:=VBoxContainer.new();allocation.add_theme_constant_override("separation",2);body.add_child(allocation)
 	capacity_grid=GridContainer.new();capacity_grid.name="CapacityGrid";capacity_grid.columns=5;capacity_grid.add_theme_constant_override("h_separation",2);capacity_grid.add_theme_constant_override("v_separation",2);allocation.add_child(capacity_grid)
 	for index in 15:
@@ -111,10 +113,12 @@ func build(owner_screen:Node,first:Dictionary)->void:
 	auto=W.text_button("Auto","");auto.name="Auto";controls.add_child(auto);auto.pressed.connect(func():screen.act(int(view.id),"auto",0.0 if bool(view.managed) else 1.0))
 	skill=W.SkillGraph.new();skill.name="Skill";skill.visible=false;column.add_child(skill)
 	target_row=Pictures.TargetRow.new();target_row.visible=false;column.add_child(target_row)
+	input_readings=HFlowContainer.new();input_readings.name="NamedInputs";input_readings.add_theme_constant_override("h_separation",14);column.add_child(input_readings)
 	apply(first)
 
 func apply(next:Dictionary)->void:
 	view=next
+	_apply_inputs()
 	var id:=int(view.id)
 	var persistent:=bool(view.persistent)
 	var paused:=bool(view.paused)
@@ -273,3 +277,22 @@ class CapacitySlot extends Button:
 		draw_colored_polygon(PackedVector2Array([at+Vector2(0,10),at+Vector2(0,5),at+Vector2(4,2),at+Vector2(4,5),at+Vector2(8,2),at+Vector2(8,5),at+Vector2(10,5),at+Vector2(10,0),at+Vector2(12,0),at+Vector2(12,10)]),ink)
 		if stopped_share>0 and not blocked:draw_rect(Rect2(at+Vector2(0,8),Vector2(12*stopped_share,2)),Color("bd6550"))
 		for x in [2,6,10]:draw_rect(Rect2(at+Vector2(x,7),Vector2(1,2)),Color("252b22"))
+
+func _apply_inputs()->void:
+	var present:Dictionary={}
+	for input:Dictionary in view.get("materials",[]):
+		var key:=String(input.get("resource",""));present[key]=true
+		if not _input_cells.has(key):
+			var box:=VBoxContainer.new();box.custom_minimum_size.x=128;input_readings.add_child(box)
+			var row:=HBoxContainer.new();box.add_child(row)
+			var icon:=TextureRect.new();icon.texture=Icons.material_texture(key,24);icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(icon)
+			var words:=Folio.label("","small",LIGHT);row.add_child(words)
+			var cover:=ProgressBar.new();cover.show_percentage=false;cover.custom_minimum_size.y=3;box.add_child(cover)
+			_input_cells[key]={"box":box,"words":words,"bar":cover}
+		var cell:Dictionary=_input_cells[key];cell.box.visible=true
+		var held:=float(input.get("stored",0));var need:=float(input.get("per_item",0))
+		cell.words.text="%s · %s held / %s each" % [String(input.get("name",key)),Plain.number(held),Plain.number(need)]
+		cell.bar.value=minf(100,held/maxf(.000001,need)*100)
+		cell.box.tooltip_text="%s held / %s needed per item. Shared stock, not reserved for this line. At today's output: %s / day. Shortages slow work; the line's actual penalty is shown above." % [Plain.number(held),Plain.number(need),Plain.number(float(input.get("per_day",0)))]
+	for key:String in _input_cells:_input_cells[key].box.visible=present.has(key)
+	input_readings.visible=not present.is_empty()

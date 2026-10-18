@@ -18,16 +18,16 @@ Unchecked entries remain required work. An integrated source change is not a cla
 
 - [x] People: reconciled allocation strip, selected mode, donor/recipient change, effects and explicit estimate failures.
 - [ ] Home: compact coverage comparisons and visible current-work choices.
-- [ ] Military production: dense simultaneous lines, actual efficiency/resource penalty/stop threshold.
-- [ ] Civilian production: consistent rows, purpose, inputs/output/target.
+- [x] Military production: dense simultaneous lines, actual efficiency/resource penalty/stop threshold.
+- [x] Civilian production: consistent rows, purpose, inputs/output/target.
 - [ ] Production catalog, selected line and receipts: bounded visual choices and history.
 - [x] Wealth/purse: distinct accounts and funded service cost/coverage comparisons.
 
 ## Batch 3: knowledge and health
 
-- [ ] Research: retained active lanes, visible waiting fields and evidence/effects.
-- [ ] Knowledge exploration: direct field/status choices and bounded dependency branch.
-- [ ] Research totals by additive category, last three discoveries and secondary archive.
+- [x] Research: retained active lanes, visible waiting fields and evidence/effects.
+- [x] Knowledge exploration: direct field/status choices and bounded dependency branch.
+- [x] Research totals by additive category, last three discoveries and secondary archive.
 - [x] Longevity: real unlocked/delivered benefits and adoption blockers, honest attribution.
 - [x] Hardship: existing timeline plus selected event loss pictograms.
 - [ ] Population/capacity details: reconciled flow, trustworthy cohorts, bounded death archive.
@@ -92,3 +92,7 @@ Family court has portraits, stage/organization readings, shared-formula program 
 ## Checkpoint 7 — Resource flow and funded services
 
 Food and Materials have retained arriving/held/leaving readings with explicit units, alongside their existing needs/reserves/hauling/storage controls. Materials explicitly identifies the unrecorded daily work-use quantity. Wealth shows actual paid share, delivered benefit and unknown history. 28 distinct checks pass; all three actual wide/narrow native views reviewed with clean capture exit. No simulation/save change.
+
+## Checkpoint 8 — Named inputs and global research totals
+
+Military rows show named stock/need comparisons and retain current controls. Civilian rows show purpose, actual input rates, output and target; catalog adds search, six choices/page and visible costs/result/blockers. Research opens on all additive totals and the global latest three; archive is secondary. Retained Inquiry lanes and bounded knowledge branches from checkpoint 2 remain. 20 checks pass and actual wide/narrow native renders reviewed with clean capture exit. Line-history and remaining tasks are still outstanding.

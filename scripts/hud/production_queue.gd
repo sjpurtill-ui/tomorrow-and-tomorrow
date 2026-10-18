@@ -805,7 +805,7 @@ func _build_civilian_lines(parent:Node=null)->void:
 		var panel:=PanelContainer.new();panel.name="Civilian_"+String(row.id)
 		panel.add_theme_stylebox_override("panel",Industrial.flat(Color("344033"),Color("59604b"),1,0,6));parent.add_child(panel)
 		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",3);panel.add_child(column)
-		var top:=HBoxContainer.new();column.add_child(top)
+		var top:=HFlowContainer.new();column.add_child(top)
 		var title:=Folio.label(String(row.name),"body",Industrial.INK);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;top.add_child(title)
 		var button:=W.text_button("Assign workers", "Change the workers assigned to "+String(row.name));top.add_child(button)
 		button.pressed.connect(func():
@@ -820,8 +820,9 @@ func _build_civilian_lines(parent:Node=null)->void:
 		var bar:=ProgressBar.new();bar.show_percentage=false;bar.custom_minimum_size.y=7;bar.add_theme_stylebox_override("background",Industrial.flat(Color("191d19")));bar.add_theme_stylebox_override("fill",Industrial.flat(Color("8da760")));reading.add_child(bar)
 		var stored:=Folio.label("","small",Industrial.INK);reading.add_child(stored)
 		var workers:=Folio.label("","small",Industrial.INK);workers.custom_minimum_size.x=100;workers.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT;body.add_child(workers)
-		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;column.add_child(inputs)
-		_civil_rows[String(row.id)]={"panel":panel,"output":output,"bar":bar,"inputs":inputs,"stored":stored,"workers":workers}
+		var purpose:=Folio.label("","small",Industrial.INK);purpose.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(purpose)
+		var inputs:=Folio.label("","small",Color("b7b99d"));inputs.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;column.add_child(inputs)
+		_civil_rows[String(row.id)]={"panel":panel,"purpose":purpose,"output":output,"bar":bar,"inputs":inputs,"stored":stored,"workers":workers}
 
 func _apply_civilian_lines()->void:
 	for row:Dictionary in data.get("civilian_lines",[]):
@@ -829,10 +830,14 @@ func _apply_civilian_lines()->void:
 		if refs.is_empty():continue
 		refs.output.text="%s / day" % Plain.number(float(row.output))
 		refs.stored.text="%s stored" % Plain.number(float(row.stock))
+		if row.has("target"):refs.stored.text+=" · %s %s" % [String(row.get("target_label","Target")),Plain.number(float(row.target))]
+		refs.purpose.text=String(row.get("purpose","Equipment for Defense"))
 		refs.workers.text="%s workers" % Plain.number(float(row.workers))
 		refs.bar.value=clampf(float(row.get("coverage",1.0)),0,1)*100
 		refs.bar.tooltip_text=String(row.get("bar_tip","Store coverage"))
-		refs.inputs.text=String(row.get("status",""));refs.inputs.tooltip_text=refs.inputs.text
+		var parts:PackedStringArray=[]
+		for resource:String in row.get("inputs",{}):parts.append("%s %s / day" % [Plain.number(float(row.inputs[resource])/maxf(1,float(row.get("input_span",1)))),ResourceSystem.display_name(resource)])
+		refs.inputs.text=(" + ".join(parts)+" → " if not parts.is_empty() else "")+String(row.get("status",""));refs.inputs.tooltip_text=refs.inputs.text
 
 func _build_filters(parent:Node)->void:
 	var toolbar:=HFlowContainer.new();toolbar.name="CategoryFilters";toolbar.add_theme_constant_override("h_separation",3);parent.add_child(toolbar)

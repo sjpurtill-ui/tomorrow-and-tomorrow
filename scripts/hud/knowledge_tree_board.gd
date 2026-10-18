@@ -22,6 +22,10 @@ const READY_SHOWN:=3
 const NEXT_SHOWN:=3
 var body:BoxContainer
 var detail:VBoxContainer
+var overview:BoxContainer
+var overview_totals:GridContainer
+var archive_open:=false
+var archive_toggle:Button
 var archive_body:HBoxContainer
 var archive_list:VBoxContainer
 var archive_picker:VisibleChoice
@@ -67,7 +71,10 @@ func setup(block:Dictionary)->void:
 func _arrange()->void:
 	if archive_body:
 		var wide:=size.x>=760.0
-		archive_list.visible=wide;archive_picker.visible=not wide
+		archive_list.visible=wide;archive_picker.visible=not wide and (archive_open or overview==null)
+		if overview:
+			overview.vertical=size.x<900
+			overview_totals.columns=3 if size.x>=1150 else 2 if size.x>=440 else 1
 		for grid:GridContainer in archive_detail.find_children("EffectCategories","GridContainer",true,false):grid.columns=2 if size.x>=1000 else 1
 		archive_body.custom_minimum_size.x=0
 		_fit_archive_reader.call_deferred()
@@ -283,6 +290,7 @@ func _archive(parent:Node)->void:
 	add_theme_constant_override("separation",12)
 	var summary:=_line(parent,String(data.get("summary","")),16,T.TEXT_SOFT)
 	summary.tooltip_text=String(data.get("summary_tip",""));summary.mouse_filter=Control.MOUSE_FILTER_PASS
+	if data.has("totals"):_build_overview(parent)
 	var fields:Array=data.get("archive_fields",[])
 	archive_picker=VisibleChoice.new();archive_picker.name="ArchiveFieldPicker";archive_picker.custom_minimum_size.y=40;archive_picker.add_theme_font_size_override("font_size",16);parent.add_child(archive_picker)
 	archive_body=HBoxContainer.new();archive_body.name="ArchiveBody";archive_body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;archive_body.add_theme_constant_override("separation",24);parent.add_child(archive_body)
@@ -298,6 +306,7 @@ func _archive(parent:Node)->void:
 		button.tooltip_text="%s known · %s" % [String(field.count),String(field.summary)];button.pressed.connect(select_archive.bind(id));archive_list.add_child(button);archive_buttons[id]=button
 	archive_picker.item_selected.connect(func(index:int)->void:select_archive(String(fields[index].id)))
 	select_archive(String(data.get("selected",fields[0].id if not fields.is_empty() else "")),false)
+	if overview:_show_archive(false)
 
 func select_archive(id:String,notify:bool=true)->void:
 	var fields:Array=data.get("archive_fields",[])
@@ -365,10 +374,11 @@ func _render_findings()->void:
 		archive_page_label.text="%d / %d" % [archive_page+1,pages];archive_previous.disabled=archive_page==0;archive_next.disabled=archive_page>=pages-1
 
 func view_state()->Dictionary:
-	return {"archive_selected":archive_selected,"archive_browse":archive_browse,"archive_query":archive_query,"archive_page":archive_page} if archive_body else {"domain":String(data.get("domain","")),"question_query":question_query,"question_filter":question_filter,"question_page":question_page}
+	return {"archive_open":archive_open,"archive_selected":archive_selected,"archive_browse":archive_browse,"archive_query":archive_query,"archive_page":archive_page} if archive_body else {"domain":String(data.get("domain","")),"question_query":question_query,"question_filter":question_filter,"question_page":question_page}
 
 func restore_view_state(state:Dictionary)->void:
 	if archive_body and state.has("archive_selected"):
+		if overview:_show_archive(bool(state.get("archive_open",false)))
 		archive_selected=String(state.archive_selected);archive_browse=bool(state.get("archive_browse",false));archive_query=String(state.get("archive_query",""));archive_page=int(state.get("archive_page",0));select_archive(archive_selected,false)
 	elif question_grid and String(state.get("domain",""))==String(data.get("domain","")):
 		question_query=String(state.get("question_query",""));question_filter=String(state.get("question_filter","open"));question_page=int(state.get("question_page",0));question_search.text=question_query;question_status.select(["open","known","waiting","all"].find(question_filter));_render_questions()
@@ -377,3 +387,30 @@ func _voice(text:String,font_size:int)->Label:
 	var label:=super._voice(text,font_size)
 	label.add_theme_font_override("font",T.font("ui_strong"))
 	return label
+
+func _build_overview(parent:Node)->void:
+	_line(parent,"Unlocked / active now",20,T.INK)
+	_line(parent,"Additive effect points · active totals include adoption, means, focus, trial use, era limits and upkeep. Different categories are not added together.",13,T.TEXT_SOFT)
+	overview=BoxContainer.new();overview.name="ResearchOverview";overview.add_theme_constant_override("separation",22);parent.add_child(overview)
+	overview_totals=GridContainer.new();overview_totals.name="AllEffectTotals";overview_totals.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview_totals.add_theme_constant_override("h_separation",18);overview_totals.add_theme_constant_override("v_separation",10);overview.add_child(overview_totals)
+	for row:Dictionary in data.get("totals",[]):
+		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview_totals.add_child(cell)
+		_line(cell,String(row.label),13,T.TEXT_SOFT)
+		_line(cell,"%+.2f / %+.2f pp" % [float(row.unlocked)*100,float(row.current)*100],18,T.INK)
+		var pair:=preload("res://scripts/hud/signed_effect_pair.gd").new();pair.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pair.fill(float(row.unlocked),float(row.current));cell.add_child(pair)
+		if bool(row.get("inert",false)):_line(cell,"No system uses this yet",12,T.AMBER)
+	if data.get("totals",[]).is_empty():_line(overview_totals,"No additive benefits unlocked yet.",16,T.TEXT_SOFT)
+	var recent:=VBoxContainer.new();recent.name="LatestThree";recent.size_flags_horizontal=Control.SIZE_EXPAND_FILL;recent.size_flags_stretch_ratio=.65;recent.add_theme_constant_override("separation",10);overview.add_child(recent)
+	_line(recent,"Last three discoveries",20,T.INK)
+	for row:Dictionary in data.get("recent",[]).slice(0,3):
+		var cell:=VBoxContainer.new();recent.add_child(cell)
+		_line(cell,String(row.label),17,T.INK)
+		_line(cell,preload("res://scripts/hud/era_words.gd").ago(int(row.day)) if int(row.day)>=0 else "Date not recorded",12,T.TEXT_SOFT)
+		_line(cell,String(row.get("effect","")) if not String(row.get("effect","")).is_empty() else "Opens later knowledge",14,T.TEAL)
+	if data.get("recent",[]).is_empty():_line(recent,"Discoveries will appear here after they are proven.",14,T.TEXT_SOFT)
+	archive_toggle=_button(parent,"Open full archive",func()->void:_show_archive(not archive_open),"Browse every field and finding");T.apply_button_style(archive_toggle);archive_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+
+func _show_archive(open:bool)->void:
+	archive_open=open;overview.visible=not open;archive_body.visible=open
+	archive_toggle.text="Back to totals & last three" if open else "Open full archive"
+	_arrange()

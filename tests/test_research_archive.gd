@@ -60,3 +60,37 @@ func test_archive_can_shrink_after_opening_wide()->void:
 	assert_bool(board.archive_picker.visible).is_true()
 	assert_bool(board.archive_list.visible).is_false()
 	assert_float(board.get_combined_minimum_size().x).is_less_equal(421.0)
+
+func test_global_totals_open_before_archive_and_keep_navigation_state()->void:
+	var block:=_block([])
+	block.totals=[{"id":"health_protection","label":"Protection from sickness","unlocked":.12,"current":.03}]
+	block.recent=[{"id":"a","label":"First","day":3,"effect":"Protection +2 pp"},{"id":"b","label":"Second","day":2,"effect":"Water +3 pp"},{"id":"c","label":"Third","day":1,"effect":"Work +1 pp"},{"id":"d","label":"Old","day":0,"effect":"Work +1 pp"}]
+	var board:Control=auto_free(Board.new());add_child(board);board.size=Vector2(1060,700);board.setup(block)
+	for i in 4:await get_tree().process_frame
+	assert_bool(board.overview.visible).is_true();assert_bool(board.archive_body.visible).is_false()
+	assert_int(board.overview_totals.get_child_count()).is_equal(1)
+	assert_int(board.find_child("LatestThree",true,false).get_child_count()).is_equal(4)
+	board.archive_toggle.pressed.emit()
+	assert_bool(board.archive_body.visible).is_true();assert_bool(board.overview.visible).is_false()
+	var state:Dictionary=board.view_state();board._show_archive(false);board.restore_view_state(state)
+	assert_bool(board.archive_open).is_true()
+	board._show_archive(false);board.size.x=420
+	for i in 5:await get_tree().process_frame
+	assert_int(board.overview_totals.columns).is_equal(1)
+	assert_float(board.get_combined_minimum_size().x).is_less_equal(421.)
+
+func test_provider_aggregates_known_effects_and_last_three_across_fields()->void:
+	WorldSimulation.clear();GameState.reset_for_new_world(908)
+	GameState.known_discoveries=["clean_water","wound_cleaning","shared_childcare","birth_attendants"]
+	GameState.discovery_log=[]
+	var expected:Dictionary={}
+	for i in GameState.known_discoveries.size():
+		var id:String=GameState.known_discoveries[i]
+		GameState.discovery_log.append({"id":id,"day":i+1})
+		for key:String in DiscoverySystem.discovery_definition(id).get("effects",{}):expected[key]=float(expected.get(key,0))+float(DiscoverySystem.discovery_definition(id).effects[key])
+	DiscoverySystem.refresh_operating_effects()
+	var provider=preload("res://scripts/hud/content/dock_content_inquiry.gd").new(null,null)
+	var data:Dictionary=provider.tab(2).blocks[0]
+	assert_int(data.recent.size()).is_equal(3);assert_str(data.recent[0].id).is_equal("birth_attendants")
+	for row:Dictionary in data.totals:assert_float(row.unlocked).is_equal_approx(float(expected[row.id]),.00001)
+	WorldSimulation.clear()

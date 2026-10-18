@@ -102,7 +102,7 @@ func test_screen_has_one_readout_and_worded_controls()->void:
 		assert_str(text).not_contains(banned)
 	# Numbers on the surface; the old card sentences live in the tooltips.
 	var card:Node=panel.find_child("Line1",true,false)
-	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(1)
+	assert_int(card.find_children("*","ProgressBar",true,false).size()).is_equal(2) # Efficiency plus named input coverage.
 	var bar:Control=card.find_child("Output",true,false)
 	assert_str(String(bar.reading)).is_equal("0.02 / day")
 	assert_str(bar.tooltip_text).contains("About 1 every 50 days").contains("Short of timber: the 5 in store covers about 16 of the 25 still wanted.")
@@ -200,3 +200,16 @@ func test_flow_chart_widths_and_dry_ribbons()->void:
 	assert_bool(chart._nodes.has("goods")).is_false()
 	assert_bool(chart._nodes.has("Flint")).is_true()
 	assert_bool(chart._nodes.has("Timber")).is_false()
+
+func test_named_inputs_refresh_without_replacing_line_controls()->void:
+	var panel:Control=auto_free(Queue.new());add_child(panel)
+	var line:=healthy_line()
+	var block:={"mode":"military","lines":[line],"context":CONTEXT,"recipes":[],"stock":[],"materials":[]}
+	panel.setup(block)
+	var row:Control=panel.find_child("Line2",true,false)
+	var button:Button=row.hands_up
+	assert_str(row._input_cells.Timber.words.text).contains("80 held / 0.5 each")
+	line.materials_status[0].stored=.1
+	assert_bool(panel.update_block(block)).is_true()
+	assert_object(row.hands_up).is_same(button)
+	assert_float(row._input_cells.Timber.bar.value).is_equal_approx(20.,.001)
