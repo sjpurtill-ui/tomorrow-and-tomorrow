@@ -112,3 +112,11 @@ Four zoom choices, bounded town tray, explicit realm population and responsive m
 ## Checkpoint 11 — Bounded building capacity and civic choices
 
 The Town shows nine fixed need/capacity comparisons and the current-work/builder lane; Civic Works uses a bounded icon grid with benefits, blockers and pinned costs/actions. The user rejected the physical plan: no added geometry read/copy/draw code remains. Actual early views and prepared 20-million-population values reviewed wide/narrow. 23 assertion cases pass; three previously documented construction-suite orphans remain. Infrastructure and history redesign, full live interaction validation and all other unchecked work remain required.
+
+## October 18 review corrections — effects and scope
+
+The previous Civic Works effects sections retained a selected-row paragraph browser. They now present all capacity/condition/contribution comparisons simultaneously, with distinct native icons and explicit units. Housing risks compare actual engine factors and distinguish neutral versus roomy-home references. All primary values remain visible; optional tooltips explain the formula context. No physical building plan or simulation change is introduced.
+
+The prior map-header rule deliberately showing town scope even with one settlement was rejected: the current game has no expansion. The top-bar selector, city icon and divider are removed. Legacy city data remains intact.
+
+Research meters now label Unlocked and Active now on each pair, state per-pair magnitude scale and good direction, and group by the existing simulation domain. Signed values remain explicit, with cost/benefit status; bars no longer switch to the opposite half of an unexplained zero line. Modifier points are not claimed to equal total output percentages. The latest three discoveries follow the totals; archive navigation remains available. Groups flow into independent columns so shorter groups do not leave empty rows beside taller ones.

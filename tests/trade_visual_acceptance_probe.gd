@@ -30,7 +30,6 @@ class TradeHud extends "res://scripts/hud/command_rail_hud.gd":
 		_build_dock()
 		dock.visibility_changed.connect(_layout)
 		detail_dock.visibility_changed.connect(_layout)
-		_refresh_city_selector()
 		get_viewport().size_changed.connect(_layout)
 		_layout()
 		set_process(false)

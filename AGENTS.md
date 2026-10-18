@@ -46,3 +46,7 @@ The Trade screen's “we need / they can spare” comparison is the reference le
 Primary facts and decisions must be visible. Prefer direct buttons, resource tiles and compact visual comparisons to dropdowns, prose lists, or hidden detail panels. Use brief text for purpose, consequences and blockers; reserve longer explanations for optional detail. A large stack of cards containing paragraphs is still a text list. Do not invent precision or visualize unrelated quantities as one total. Review the rendered result at normal and narrow widths before calling a screen finished. Apply this lesson to new and revised game screens, not just Trade.
 
 Buildings must stay useful at very large populations and late dates: compare aggregate capacity, shortages, current construction and its gains. Do not add a separate physical plot/building plan to this screen; the user explicitly rejected it as unnecessary work and overhead. The main map supplies the physical view.
+
+The current player game does not offer expansion. Do not show a town/city-scope selector in the top bar, including in one-town games. Legacy multi-settlement storage and save data are not authorization to expose expansion controls.
+
+Meters need visible series labels, units, a stated scale, and a clear indication of whether higher or lower helps. Never rely on color or a slash-separated pair alone. Research comparisons must group related effects and distinguish unlocked modifiers from active modifiers; negative disease/spoilage effects are benefits, not incomplete research.

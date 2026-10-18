@@ -166,7 +166,7 @@ func test_landmarks_explain_each_great_work()->void:
 	var rising:Array=page._impact({"status":"building","ambition":"grand"},{"policy":"careful","assessment":{"score":0.7}})
 	var labels:Array=[]
 	for line:Dictionary in rising: labels.append(String(line.label))
-	assert_array(labels).contains(["Builders taken","When it is finished","Materials"])
+	assert_array(labels).contains(["Builders taken","Chance to fall","Materials"])
 	var odds:String=String(rising[1].words)
 	assert_str(odds).contains("triumph")
 	assert_str(odds).contains("falls")

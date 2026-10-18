@@ -71,7 +71,7 @@ static func homes()->Dictionary:
 	lines.append(_line("Fire","×%s" % _two(fire),"Crowded hearths catch: a fire starts ×%s as often as in a roomy town." % _two(fire),"bad" if fire>1.05 else "good"))
 	var spare:=maxi(0,int(places-people))
 	lines.append(_line("Room for newcomers","%d places" % spare,("Newcomers and people brought home can move in only while two or more places stand empty (society_exchange)." if spare>=2 else "No room: newcomers and people brought home cannot move in until more homes go up."),"good" if spare>=2 else "bad"))
-	return {"places":int(places),"people":int(people),"ratio":places/people,"crowd":crowd,"spare":spare,"lines":lines}
+	return {"places":int(places),"people":int(people),"ratio":places/people,"crowd":crowd,"spare":spare,"lines":lines,"numeric":{"work":h*12.0,"health":h*16.0,"cohesion":h*15.0,"death":death,"births":births,"sickness":sick,"fire":fire,"childbirth":maxf(0,(.55-covered)*180),"exposure":maxf(0,(.68-h)*.04*people)}}
 
 
 # --- Civic works ----------------------------------------------------------------------
@@ -104,6 +104,12 @@ static func work(title:String)->Dictionary:
 			lines.append_array(_hall_lines(built,condition))
 		"Hearth Shrine","Shrine House":
 			lines.append_array(_shrine_lines(title,built,condition))
+	if lines.is_empty():
+		for project:Dictionary in preload("res://scripts/storage_works.gd").projects():
+			if String(project.name)!=title:continue
+			var kind:=String(project.storage_kind)
+			var unit:="rations" if kind=="food" else "water units" if kind=="water" else "bulk units"
+			lines.append(_line("Storage capacity","+%s %s"%[_grouped(roundi(project.capacity_added)),unit],String(project.effect),"good"))
 	var f:float=CIVIC.factor(title) if built else condition
 	if CIVIC.FULL.has(title) and f<0.995:
 		var why:="the town's repair is %d%%" % roundi(condition*100.0)

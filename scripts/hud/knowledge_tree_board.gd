@@ -24,6 +24,9 @@ var body:BoxContainer
 var detail:VBoxContainer
 var overview:BoxContainer
 var overview_totals:GridContainer
+var recent_grid:GridContainer
+var effect_groups:Array[Control]=[]
+var effect_column_count:=0
 var archive_open:=false
 var archive_toggle:Button
 var archive_body:HBoxContainer
@@ -73,8 +76,9 @@ func _arrange()->void:
 		var wide:=size.x>=760.0
 		archive_list.visible=wide;archive_picker.visible=not wide and (archive_open or overview==null)
 		if overview:
-			overview.vertical=size.x<900
-			overview_totals.columns=3 if size.x>=1150 else 2 if size.x>=440 else 1
+			overview.vertical=true
+			if recent_grid:recent_grid.columns=3 if size.x>=700 else 1
+			_arrange_effect_groups(3 if size.x>=1150 else 2 if size.x>=440 else 1)
 		for grid:GridContainer in archive_detail.find_children("EffectCategories","GridContainer",true,false):grid.columns=2 if size.x>=1000 else 1
 		archive_body.custom_minimum_size.x=0
 		_fit_archive_reader.call_deferred()
@@ -389,26 +393,54 @@ func _voice(text:String,font_size:int)->Label:
 	return label
 
 func _build_overview(parent:Node)->void:
-	_line(parent,"Unlocked / active now",20,T.INK)
-	_line(parent,"Additive effect points · active totals include adoption, means, focus, trial use, era limits and upkeep. Different categories are not added together.",13,T.TEXT_SOFT)
-	overview=BoxContainer.new();overview.name="ResearchOverview";overview.add_theme_constant_override("separation",22);parent.add_child(overview)
-	overview_totals=GridContainer.new();overview_totals.name="AllEffectTotals";overview_totals.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview_totals.add_theme_constant_override("h_separation",18);overview_totals.add_theme_constant_override("v_separation",10);overview.add_child(overview_totals)
+	var heading:=_line(parent,"What research changes",20,T.INK);heading.name="ResearchComparisonHeading"
+	var legend:=_line(parent,"Unlocked = from discoveries   ·   Active now = applying today",13,T.TEXT_SOFT);legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	legend.tooltip_text="Effect points are modifiers, not research progress or a direct percentage of final output. 1 point means 0.01 of the named modifier. Adoption, supplies, focus and limits affect what applies today."
+	overview=BoxContainer.new();overview.vertical=true;overview.name="ResearchOverview";overview.add_theme_constant_override("separation",18);parent.add_child(overview)
+	overview_totals=GridContainer.new();overview_totals.name="AllEffectTotals";overview_totals.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview_totals.add_theme_constant_override("h_separation",18);overview_totals.add_theme_constant_override("v_separation",18);overview.add_child(overview_totals)
+	var groups:={}
+	var names:={"nutrition":"Food & farming","health":"Health & care","labor":"Work","production":"Craft & materials","infrastructure":"Buildings","logistics":"Storage & transport","institutions":"Organization","knowledge":"Learning","security":"Military","ecology":"Land & resources","demography":"People & homes","culture":"Culture"}
+	var explainer=preload("res://scripts/effect_explainer.gd")
 	for row:Dictionary in data.get("totals",[]):
-		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;overview_totals.add_child(cell)
-		_line(cell,String(row.label),13,T.TEXT_SOFT)
-		_line(cell,"%+.2f / %+.2f pp" % [float(row.unlocked)*100,float(row.current)*100],18,T.INK)
-		var pair:=preload("res://scripts/hud/signed_effect_pair.gd").new();pair.size_flags_horizontal=Control.SIZE_EXPAND_FILL;pair.fill(float(row.unlocked),float(row.current));cell.add_child(pair)
-		if bool(row.get("inert",false)):_line(cell,"No system uses this yet",12,T.AMBER)
-	if data.get("totals",[]).is_empty():_line(overview_totals,"No additive benefits unlocked yet.",16,T.TEXT_SOFT)
+		var group:=String(explainer.line(String(row.id)))
+		if not groups.has(group):groups[group]=[]
+		groups[group].append(row)
+	for group:String in names:
+		if not groups.has(group):continue
+		var panel:=PanelContainer.new();panel.name="EffectGroup_"+group;panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;panel.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;panel.add_theme_stylebox_override("panel",T.paper_panel_style(false,T.RADIUS_CARD,12));overview_totals.add_child(panel);effect_groups.append(panel);panel.set_meta("weight",groups[group].size()+1)
+		var list:=VBoxContainer.new();list.add_theme_constant_override("separation",14);panel.add_child(list)
+		_line(list,String(names[group]),18,T.INK)
+		for row:Dictionary in groups[group]:
+			var meter:=preload("res://scripts/hud/research_effect_meter.gd").new();list.add_child(meter);meter.setup(row)
+	if data.get("totals",[]).is_empty():_line(overview_totals,"No additive effects unlocked yet.",16,T.TEXT_SOFT)
 	var recent:=VBoxContainer.new();recent.name="LatestThree";recent.size_flags_horizontal=Control.SIZE_EXPAND_FILL;recent.size_flags_stretch_ratio=.65;recent.add_theme_constant_override("separation",10);overview.add_child(recent)
 	_line(recent,"Last three discoveries",20,T.INK)
+	recent_grid=GridContainer.new();recent_grid.add_theme_constant_override("h_separation",18);recent_grid.add_theme_constant_override("v_separation",10);recent.add_child(recent_grid)
 	for row:Dictionary in data.get("recent",[]).slice(0,3):
-		var cell:=VBoxContainer.new();recent.add_child(cell)
-		_line(cell,String(row.label),17,T.INK)
+		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;recent_grid.add_child(cell)
+		_line(cell,String(row.label),17,T.INK).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		_line(cell,preload("res://scripts/hud/era_words.gd").ago(int(row.day)) if int(row.day)>=0 else "Date not recorded",12,T.TEXT_SOFT)
-		_line(cell,String(row.get("effect","")) if not String(row.get("effect","")).is_empty() else "Opens later knowledge",14,T.TEAL)
+		_line(cell,String(row.get("effect","")).replace(" pp"," points") if not String(row.get("effect","")).is_empty() else "Opens later knowledge",14,T.TEAL).autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	if data.get("recent",[]).is_empty():_line(recent,"Discoveries will appear here after they are proven.",14,T.TEXT_SOFT)
 	archive_toggle=_button(parent,"Open full archive",func()->void:_show_archive(not archive_open),"Browse every field and finding");T.apply_button_style(archive_toggle);archive_toggle.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN
+
+func _arrange_effect_groups(wanted:int)->void:
+	if effect_groups.is_empty():return
+	var count:=mini(wanted,effect_groups.size())
+	if effect_column_count==count:return
+	effect_column_count=count
+	# Retain meters while reflowing groups into the shortest column. A short
+	# category must not reserve a whole row beside a much longer category.
+	for panel:Control in effect_groups:panel.get_parent().remove_child(panel)
+	for child:Node in overview_totals.get_children():overview_totals.remove_child(child);child.queue_free()
+	overview_totals.columns=count
+	var heights:Array[int]=[]
+	for i in count:
+		var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;column.add_theme_constant_override("separation",18);overview_totals.add_child(column);heights.append(0)
+	for panel:Control in effect_groups:
+		var index:=heights.find(heights.min())
+		overview_totals.get_child(index).add_child(panel)
+		heights[index]+=int(panel.get_meta("weight",1))
 
 func _show_archive(open:bool)->void:
 	archive_open=open;overview.visible=not open;archive_body.visible=open

@@ -41,8 +41,6 @@ func _preview() -> void:
 	add_child(hud)
 	hud.toolbar.hide()
 	hud.time_text.text = "[b]Year 119 · Autumn[/b] · Warm →"
-	hud.city_selector.clear()
-	hud.city_selector.add_item("Ashfire")
 	hud._style_speed_controls(1)
 	var readings: Array[Dictionary] = []
 	for spec: Array in [["population", "PEOPLE", "435 souls"], ["food", "STORES", "225 days"], ["water", "WATER", "5.3 days"], ["health", "LIVES", "31 winters"], ["science", "LORE", "548 known"]]:

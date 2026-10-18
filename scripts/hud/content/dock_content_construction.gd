@@ -972,8 +972,8 @@ func _civic_tab()->Dictionary:
 		cards.append({"section":"homes","key":"homes_"+String(line.label),"icon":"homes","name":String(SHORT_LINES.get(String(line.label),line.label)),"value":preload("res://scripts/hud/content/dock_content_undertakings.gd")._grouped_numbers(String(line.value)),"value_color":Tokens.GREEN if String(line.get("tone",""))=="good" else (Tokens.RED if String(line.get("tone",""))=="bad" else Tokens.INK),"value_width":44,"detail":String(line.get("words",""))})
 	var sections:=[
 		{"id":"works","heading":"Civic works","span":true,"note":("Your priority: %s" % priority) if not priority.is_empty() else "The leader chooses what to build."},
-		{"id":"does","heading":"What the buildings do"},
-		{"id":"homes","heading":"What the homes do"}]
+		{"id":"does","heading":"Capacity & upkeep","presentation":"effects","metrics":preload("res://scripts/building_effect_readings.gd").capacity()},
+		{"id":"homes","heading":"Homes & health","presentation":"effects","metrics":preload("res://scripts/building_effect_readings.gd").homes()}]
 	return {"blocks":[{"type":"town_works","board":true,"sections":sections,"cards":cards,"projects":projects,"completed":GameState.settlement_completed.size(),"priority":priority}]}
 
 ## The homes' lines in a word or two, so a row never cuts its name.

@@ -60,7 +60,7 @@ func _layout(_count:int)->void:
 	category=HFlowContainer.new();category.name="SectionChoices";category.add_theme_constant_override("h_separation",6);category.add_theme_constant_override("v_separation",6);category.visible=_specs.size()>1;add_child(category)
 	for spec:Dictionary in _specs:
 		var key:=String(spec.section.id)
-		var button:=_button({"label":"%s · %d" % [String(spec.section.heading),spec.cards.size()],"primary":key==selected,"on_press":func():view_state.section=key;_layout(1)})
+		var button:=_button({"label":String(spec.section.heading) if spec.section.get("presentation","")=="effects" else "%s · %d" % [String(spec.section.heading),spec.cards.size()],"primary":key==selected,"on_press":func():view_state.section=key;_layout(1)})
 		button.name="Section_"+key;button.toggle_mode=true;button.set_pressed_no_signal(key==selected);category.add_child(button)
 	for spec:Dictionary in _specs:
 		if String(spec.section.id)==selected:add_child(_section(spec.section,spec.cards));break
@@ -84,6 +84,8 @@ static func _has_second_line(card:Dictionary)->bool:
 # --- A section -------------------------------------------------------------------
 
 func _section(section:Dictionary,cards:Array)->Control:
+	if section.get("presentation","")=="effects":
+		var effects:=preload("res://scripts/hud/building_effects_view.gd").new();effects.setup(section.metrics);browser=null;return effects
 	var box:=VBoxContainer.new();box.name="Section_"+String(section.get("id",""));box.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation",10)
 	if _specs.size()==1:

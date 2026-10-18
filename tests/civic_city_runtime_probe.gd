@@ -27,11 +27,11 @@ func _ready()->void:
 	GameState.resource_stockpiles["Timber"]=777.0
 	var hud:Control=terrain.hud
 	hud.refresh()
-	_expect(hud.city_selector.item_count==2,"City dropdown must list both cities")
+	_expect(hud.city_selector==null,"Current player header must not expose expansion scope")
 	var primary_stores:=GameState.resource_stockpiles.duplicate(true)
 	terrain._select_city("dawngate")
 	await get_tree().create_timer(0.8).timeout
-	_expect(GameState.selected_player_settlement_id=="dawngate","Dropdown selection must select Dawngate")
+	_expect(GameState.selected_player_settlement_id=="dawngate","Legacy city context must select Dawngate")
 	_expect(Vector2(terrain.camera_target.x,terrain.camera_target.z).distance_to(Vector2(10,0))<0.1,"Selection must move camera to Dawngate")
 	_expect(GameState.resource_stockpiles==primary_stores,"City selection must not alter first city stores")
 	var economy:RefCounted=load("res://scripts/hud/content/dock_content_economy.gd").new(terrain,hud)

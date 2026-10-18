@@ -886,28 +886,7 @@ func _build_toolbar()->void:
 	row.add_theme_constant_override("h_separation",6);row.add_theme_constant_override("v_separation",4)
 	toolbar.add_child(row)
 	toolbar.minimum_size_changed.connect(func():_position_toolbar.call_deferred())
-	city_selector=preload("res://scripts/hud/town_scope_button.gd").new()
-	city_selector.name="CitySelector"
-	city_selector.custom_minimum_size=Vector2(150,30)
-	city_selector.add_theme_font_override("font",Tokens.font("voice"))
-	city_selector.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
-	city_selector.add_theme_font_size_override("font_size",14)
-	TopbarInk.apply(city_selector)
-	for color_key in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:
-		city_selector.add_theme_color_override(color_key,Folio.RAIL_TEXT)
-	city_selector.add_theme_color_override("icon_normal_color",Folio.RAIL_TEXT)
-	city_selector.add_theme_color_override("icon_hover_color",Folio.RAIL_TEXT)
-	city_selector.add_theme_stylebox_override("hover",Folio.rail_style(false,true))
-	city_selector.add_theme_stylebox_override("pressed",Folio.rail_style(false,true))
-	# The name takes the room left before the clock and is cut short with an
-	# ellipsis there; it never runs under the date.
-	city_selector.clip_text=true;city_selector.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;city_selector.alignment=HORIZONTAL_ALIGNMENT_LEFT
-	city_selector.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	city_selector.tooltip_text="Choose a city to view its stores and move the map to it."
-	city_selector.item_selected.connect(func(index:int)->void: terrain._select_city(String(city_selector.get_item_metadata(index))))
-	var divider:=VSeparator.new();divider.custom_minimum_size=Vector2(1,24);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(divider)
-	var city_mark:=NavIcon.new("settlement");city_mark.set_icon_color(Folio.RAIL_TEXT);city_mark.custom_minimum_size=Vector2(26,24);city_mark.name="TopCityIcon";city_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;brand_row.add_child(city_mark)
-	brand_row.add_child(city_selector)
+	# Expansion is not a current player feature: no town-scope selector.
 	# Each action is a word with a drawn mark (resource_icons.gd), never a glyph.
 	for action in [["settle","Found a settlement",true],["scouts","Send scouts",false],["diplomat","Send envoys",false],["convoy","Find the settlers",false]]:
 		var button:=Button.new()
@@ -1268,7 +1247,6 @@ static func temperature_words(celsius:float,trend:String,known:Array)->String:
 
 func refresh()->void:
 	if terrain==null: return
-	_refresh_city_selector()
 	_refresh_time()
 	_refresh_kpis()
 	_refresh_toolbar()
@@ -1447,21 +1425,6 @@ func _refresh_toolbar()->void:
 	if actions_divider: actions_divider.visible=settle_visible or scouts_visible or diplomat_visible or convoy_active
 	toolbar.reset_size()
 	_position_toolbar()
-
-func _refresh_city_selector()->void:
-	if city_selector==null: return
-	var settlements:=GameState.player_settlements
-	var signature:=GameState.selected_player_settlement_id+str(GameState.settlement_network_revision)+str(settlements.size())
-	if signature==city_selector_signature: return
-	city_selector_signature=signature
-	city_selector.clear()
-	# Keep the affected town explicit, including a single-town campaign.
-	city_selector.visible=not settlements.is_empty()
-	for city in settlements:
-		city_selector.add_item(toolbar_case(String(city.get("name","Settlement"))))
-		var index:=int(city_selector.item_count)-1
-		city_selector.set_item_metadata(index,String(city.id))
-		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)
 
 func show_action_feedback(message:String,category:String="war")->void:
 	if message.is_empty():return
