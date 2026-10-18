@@ -152,3 +152,12 @@ func test_malformed_state_is_rejected()->void:
 	assert_bool(Goods.valid({"initialized":true,"last_day":1.5,"report":{}})).is_false()
 	assert_bool(Goods.valid({"initialized":true,"last_day":1,"report":[]})).is_false()
 	assert_bool(Goods.valid("goods")).is_false()
+
+func test_current_shortage_report_survives_save_validation()->void:
+	Goods.advance()
+	assert_int((GameState.civilian_goods.report as Dictionary).size()).is_equal(18)
+	assert_bool(Goods.valid(GameState.civilian_goods)).is_true()
+	assert_bool(Goods.valid_settlements([{"local_resources":{"civilian_goods":GameState.civilian_goods.duplicate(true)}}])).is_true()
+	var oversized:Dictionary=GameState.civilian_goods.duplicate(true)
+	oversized.report["unexpected"]=0.0
+	assert_bool(Goods.valid(oversized)).is_false()

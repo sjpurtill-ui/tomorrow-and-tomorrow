@@ -449,7 +449,9 @@ static func valid(value:Variant)->bool:
 	if not (last is int or last is float) or not is_finite(float(last)) or float(last)<-1 or float(last)>1e12 or float(last)!=floorf(float(last)):return false
 	if not value.get("report",{}) is Dictionary:return false
 	if value.has("arms") and not value.arms is Dictionary:return false
-	return (value.report as Dictionary).size()<=16
+	# Daily reports include household and arms shortage factors as well as
+	# the original sixteen fields. Both player and rival saves use this schema.
+	return (value.report as Dictionary).size()<=18
 
 static func valid_settlements(records:Variant)->bool:
 	if not records is Array:return false

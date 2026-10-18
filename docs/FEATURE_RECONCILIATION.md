@@ -1,3 +1,19 @@
+## October 17 — Quicksave report-schema compatibility
+
+Status: READY — `codex/quicksave-goods-loading`, based on
+`3cb0b9f45da4cbb88649804a7a4fb391246f9a7d`, in the Mac development worktree
+`/Users/seanpurtill/Documents/Codex/tt-hoi4-production`.
+
+Settled civilian production writes eighteen report fields after resource-shortage
+factors were added; the shared player/rival/settlement validator still allowed
+sixteen. Raising the bounded report size to eighteen accepts the records the
+current game actually produces without editing saves or production rules.
+The startup error path also prints the load reason once instead of one character
+per error line. Ten civilian-goods tests pass, including an actual production
+report, local settlement validation and rejection of an oversized report.
+The requested saved-campaign relaunch follows validation against an isolated
+copy of the real quicksave and remote integration. Saves and probes stay local.
+
 ## October 17 — Compact health dashboard and map space
 
 Integrated source: `38a45f13f376599dec40cc6b3967bf8a4a4f94fb`, verified on remote
