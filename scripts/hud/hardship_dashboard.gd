@@ -182,7 +182,11 @@ func _show_selected()->void:
 		for field:String in ["dead","sick","food","shelter","timber"]:
 			if field!="dead" and int(event.get(field,0))==0:continue
 			var column:=_column(_losses)
-			_label(column,str(int(event.get(field,0))),23,T.RED_TEXT if field=="dead" and int(event.get(field,0))>0 else T.INK)
+			var count_row:=HBoxContainer.new();count_row.add_theme_constant_override("separation",5);column.add_child(count_row)
+			var pictogram:=TextureRect.new();pictogram.name="Loss_"+field;pictogram.custom_minimum_size=Vector2(28,28);pictogram.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;pictogram.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;pictogram.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;count_row.add_child(pictogram)
+			var icons=preload("res://scripts/resource_icons.gd")
+			pictogram.texture=icons.material_texture("Timber",32) if field=="timber" else icons.people_texture({"dead":"life","sick":"life","food":"fed","shelter":"shelter"}.get(field,"life"),T.RED if field=="dead" else T.AMBER,32)
+			_label(count_row,str(int(event.get(field,0))),23,T.RED_TEXT if field=="dead" and int(event.get(field,0))>0 else T.INK)
 			_label(column,{"dead":"Died","sick":"Fell ill","food":"Food lost","shelter":"Lost shelter","timber":"Timber lost"}[field],12,T.MUTED)
 	_action.visible=event.get("on_click") is Callable
 

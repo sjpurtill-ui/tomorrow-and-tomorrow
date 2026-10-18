@@ -28,8 +28,8 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [ ] Research: retained active lanes, visible waiting fields and evidence/effects.
 - [ ] Knowledge exploration: direct field/status choices and bounded dependency branch.
 - [ ] Research totals by additive category, last three discoveries and secondary archive.
-- [ ] Longevity: real unlocked/delivered benefits and adoption blockers, honest attribution.
-- [ ] Hardship: existing timeline plus selected event loss pictograms.
+- [x] Longevity: real unlocked/delivered benefits and adoption blockers, honest attribution.
+- [x] Hardship: existing timeline plus selected event loss pictograms.
 - [ ] Population/capacity details: reconciled flow, trustworthy cohorts, bounded death archive.
 
 ## Batch 4: households and politics
@@ -80,3 +80,7 @@ All ten value axes are visible with lived/official markers and poles, retained v
 ## Checkpoint 4 — People and stopped production slots
 
 People has a reconciled selectable workforce strip and stable donor/recipient feedback. Native review also corrected blank worker counts. Production exposes its actual penalty and stopped-slot threshold, including partial grouped-pip stoppages. 40 checks pass; 1280/720 native layouts reviewed. The isolated capture completed its work but crashed during native shutdown; this limitation is recorded in the integration log. The broader production redesign and remaining screen work are unfinished.
+
+## Checkpoint 5 — Delivered research and hardship losses
+
+Health now distinguishes unlocked/delivered signed effect totals, actual adoption and missing means. No isolated longevity attribution is claimed. The bounded hardship browser adds selected loss pictograms; knowledge archive effects become compact columns. 22 checks pass and native 1280/500 renders were reviewed with clean capture exit. The global research overview and other remaining checklist items stay required.

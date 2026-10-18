@@ -69,3 +69,12 @@ func test_empty_and_narrow_views()->void:
 	assert_str(board._empty.text).is_equal("Nothing written yet")
 	assert_float(board.get_combined_minimum_size().x).is_less_equal(500)
 	assert_bool(board._action.visible).is_false()
+
+func test_selected_losses_have_named_pictograms_and_recorded_quantities()->void:
+	await _open()
+	for field:String in ["dead","sick","food","shelter","timber"]:
+		var mark:=board._losses.find_child("Loss_"+field,true,false) as TextureRect
+		assert_object(mark).is_not_null()
+		assert_object(mark.texture).is_not_null()
+	board._select_slot(1)
+	assert_str(board._title.text).is_equal(_fixture().events[1].name)

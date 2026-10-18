@@ -163,3 +163,19 @@ func test_all_categories_and_last_three_fit_without_dropdowns()->void:
 	var bar=dashboard._detail_scroll.get_v_scroll_bar()
 	print("HEALTH_TOTALS_LAYOUT: content=",dashboard._detail.size," viewport=",dashboard._detail_scroll.size," dashboard=",dashboard.get_combined_minimum_size())
 	assert_float(bar.max_value-bar.page).is_less_equal(1.0)
+
+func test_delivered_practice_uses_means_not_just_adoption()->void:
+	GameState.known_discoveries=["clean_water"]
+	GameState.discovery_adoption={"clean_water":0.8}
+	GameState.water_metrics["clean_water_coverage"]=0.25
+	DiscoverySystem.refresh_operating_effects()
+	var report:=Discoveries.read()
+	assert_float(float(report.recent[0].adoption)).is_equal(0.8)
+	assert_float(float(report.recent[0].delivered)).is_equal_approx(0.2,0.0001)
+	assert_float(float(report.recent[0].means)).is_equal(0.25)
+	assert_str(String(report.recent[0].need)).is_not_empty()
+	await _open(1100)
+	var block:=_fixture();block.research=report;dashboard.update_block(block)
+	var captions:Array=[]
+	for label:Label in dashboard._detail.find_children("*","Label",true,false):captions.append(label.text)
+	assert_str(" ".join(captions)).contains("20% in use").contains("25% covered")

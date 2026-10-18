@@ -21,7 +21,8 @@ static func read()->Dictionary:
 	var discovery:Node=WorldSimulation.discovery
 	if discovery==null:return {"totals":[],"recent":[]}
 	var model:RefCounted=discovery.society_model
-	var sources:Dictionary=model.effect_sources(model.practice_basis(),CHANNELS.keys(),null,false)
+	var levels:Dictionary={}
+	var sources:Dictionary=model.effect_sources(model.practice_basis(),CHANNELS.keys(),levels,false)
 	var dates:Dictionary={}
 	for event:Dictionary in GameState.discovery_log:dates[String(event.get("id",""))]=int(event.get("day",-1))
 	var result:Array=[]
@@ -51,7 +52,8 @@ static func read()->Dictionary:
 		if lines.is_empty() and protections.is_empty():continue
 		result.append({"id":id,"order":index,"day":int(dates.get(id,-1)),"name":definition.get("name",id.replace("_"," ").capitalize()),
 			"mechanism":definition.get("causal_mechanism",definition.get("observation","")),
-			"adoption":discovery.adoption(id),"practice":discovery.practiced(id),"effects":lines,"protections":protections,
+			"adoption":discovery.adoption(id),"practice":discovery.practiced(id),"delivered":float(levels.get(index,0.0)),
+			"means":preload("res://scripts/civilian_goods.gd").factor(id),"need":String(preload("res://scripts/effect_explainer.gd").MEANS.get(id,"household goods kept in use")),"effects":lines,"protections":protections,
 			"record":record_for(id,GameState.discovery_log,GameState.health_history)})
 	result.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var a_day:=int(a.get("day",-1));var b_day:=int(b.get("day",-1))

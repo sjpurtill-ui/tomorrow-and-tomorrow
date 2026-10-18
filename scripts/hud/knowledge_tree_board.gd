@@ -68,6 +68,7 @@ func _arrange()->void:
 	if archive_body:
 		var wide:=size.x>=760.0
 		archive_list.visible=wide;archive_picker.visible=not wide
+		for grid:GridContainer in archive_detail.find_children("EffectCategories","GridContainer",true,false):grid.columns=2 if size.x>=1000 else 1
 		archive_body.custom_minimum_size.x=minf(maxf(0,size.x),1060.0)
 		_fit_archive_reader.call_deferred()
 		return
@@ -323,9 +324,12 @@ func select_archive(id:String,notify:bool=true)->void:
 		archive_detail.add_child(effects)
 		var margin:=MarginContainer.new();margin.add_theme_constant_override("margin_top",12);effects.add_child(margin)
 		margin.add_child(_voice(String(section.get("heading","")),20))
+		var grid:=GridContainer.new();grid.name="EffectCategories";grid.columns=2 if size.x>=1000 else 1;grid.add_theme_constant_override("h_separation",18);grid.add_theme_constant_override("v_separation",10);effects.add_child(grid)
 		for item:Dictionary in section.get("items",[]):
-			var fact:=_line(effects,String(item.label)+" · "+String(item.value),16,tone_color(String(item.get("tone",""))) if String(item.get("tone",""))!="" else T.BODY)
-			fact.tooltip_text=String(item.get("tip",""));fact.mouse_filter=Control.MOUSE_FILTER_PASS
+			var tile:=VBoxContainer.new();tile.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(tile)
+			_line(tile,String(item.label),13,T.TEXT_SOFT)
+			var fact:=_line(tile,String(item.value),22,tone_color(String(item.get("tone",""))) if String(item.get("tone",""))!="" else T.BODY)
+			tile.tooltip_text=String(item.get("tip",""));fact.mouse_filter=Control.MOUSE_FILTER_PASS
 	if data.has("unapplied"):
 		var note:Dictionary=data.unapplied
 		var hint:=_line(archive_detail,String(note.label),14,T.TEXT_SOFT);hint.tooltip_text=String(note.tip);hint.mouse_filter=Control.MOUSE_FILTER_PASS

@@ -172,13 +172,15 @@ func _research()->void:
 	_label(_detail,"Research totals · points before limits",16,T.INK).tooltip_text="Unlocked: full use of learned methods. In use: adoption and available means today. Both reflect research focus, before shared limits and upkeep. These are health-effect points, not years of life."
 	if totals.is_empty():_label(_detail,"No health-related research unlocked yet.",14,T.MUTED)
 	else:
-		var table:=GridContainer.new();table.name="ResearchTotals";table.columns=3
+		var table:=GridContainer.new();table.name="ResearchTotals";table.columns=4
 		table.add_theme_constant_override("h_separation",12);table.add_theme_constant_override("v_separation",1);_detail.add_child(table)
-		for heading:String in ["Category","Unlocked","In use"]:_label(table,heading,12,T.MUTED)
+		for heading:String in ["Category","Unlocked","In use",""]:_label(table,heading,12,T.MUTED)
 		for total:Dictionary in totals:
 			_label(table,String(total.label),13,T.BODY).tooltip_text="%s From %d discoveries." % [total.tip,int(total.count)]
 			_label(table,_points(float(total.unlocked)),14,T.INK)
 			_label(table,_points(float(total.amount)),14,T.TEAL)
+			var pair:=preload("res://scripts/hud/signed_effect_pair.gd").new();table.add_child(pair)
+			pair.fill(float(total.unlocked),float(total.amount));pair.tooltip_text="Gold: unlocked. Teal: delivered. Left of zero reduces this effect; right increases it. Each category has its own scale."
 	_label(_detail,"Latest three discoveries",16,T.INK)
 	var recent:Array=research.get("recent",[])
 	if recent.is_empty():_label(_detail,"New health-related discoveries will appear here.",13,T.MUTED)
@@ -191,12 +193,17 @@ func _research()->void:
 		_detail.add_child(button);button.pressed.connect(_open_discovery.bind(item))
 		var effects:Array[String]=[]
 		for effect:Dictionary in item.get("effects",[]):effects.append("%s %s" % [effect.label,effect.value])
-		var summary:=_label(_detail,"%s · %.0f%% in use · %s" % [Era.when(int(item.day)) if int(item.get("day",-1))>=0 else "Date not recorded",float(item.get("adoption",0))*100,"; ".join(effects)],12,T.MUTED)
+		var summary:=_label(_detail,"%s · %.0f%% in use · %s" % [Era.when(int(item.day)) if int(item.get("day",-1))>=0 else "Date not recorded",float(item.get("delivered",item.get("adoption",0)))*100,"; ".join(effects)],12,T.MUTED)
 		summary.max_lines_visible=1;summary.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		summary.tooltip_text=summary.text
+		if float(item.get("means",1.0))<0.995:
+			var blocker:=_label(_detail,"Needs %s · %d%% covered" % [String(item.get("need","tools and works")),roundi(float(item.means)*100)],12,T.AMBER_TEXT)
+			blocker.max_lines_visible=2;blocker.tooltip_text=blocker.text
+		elif float(item.get("adoption",1.0))<0.995:
+			_label(_detail,"Spreading among people · %d%% adopted" % roundi(float(item.adoption)*100),12,T.MUTED)
 	# Enough room for all eleven categories and three brief discoveries at a
 	# normal desktop width; a smaller window keeps an internal scroll fallback.
-	_detail_scroll.custom_minimum_size.y=420 if not totals.is_empty() else 300
+	_detail_scroll.custom_minimum_size.y=450 if totals.size()>8 else 420 if not totals.is_empty() else 300
 
 func _points(amount:float)->String:
 	if is_zero_approx(amount):return "0"
