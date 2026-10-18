@@ -201,6 +201,7 @@ static func valid_state(data:Variant)->bool:
 	if d.is_empty(): return true
 	for key in ["pairs","stances","answers","tributes","reports"]:
 		if d.has(key) and not d[key] is Dictionary: return false
+	if d.has("barter_shipments") and not preload("res://scripts/needs_driven_trade.gd").valid_shipments(d.barter_shipments):return false
 	if d.has("news") and (not d.news is Array or (d.news as Array).size()>NEWS_MAX*2): return false
 	if (d.get("pairs",{}) as Dictionary).size()>400 or (d.get("stances",{}) as Dictionary).size()>800: return false
 	for p in (d.get("pairs",{}) as Dictionary).values():
@@ -446,6 +447,7 @@ static func advance(day:int)->void:
 	if int(s.get("day",-1))>=day: return
 	var first:=int(s.get("day",-1))<0
 	s["day"]=day
+	preload("res://scripts/needs_driven_trade.gd").advance(day)
 	if first or posmod(day,30)==7: _discover_pairs(day)
 	# One pair's way a day until all are surveyed (once a campaign each).
 	survey_ways(1)
@@ -649,6 +651,7 @@ static func _fill(seller_rep:Dictionary,buyer_rep:Dictionary,seller:String,budge
 	var sg:Dictionary=seller_rep.get("g",{}); var bg:Dictionary=buyer_rep.get("g",{})
 	for good:String in GOODS:
 		if good in deny: continue
+		if good==MONEY_GOOD and minf(float(seller_rep.get("pop",0)),float(buyer_rep.get("pop",0)))<1000:continue
 		var offer:=offer_of(sg,good)
 		if offer<=0.001: continue
 		var want:=want_of(bg,good)
@@ -972,6 +975,7 @@ static func _fresh(owner:String,r:Dictionary)->void:
 			var x:Dictionary=g[good]
 			x["s"]=_held_in_scope(good)
 			x["v"]=Prices.in_scope(good)
+			x["d"]=WorldSimulation.economy._trade_desired_stock(good,WorldSimulation.state.population_exact)
 	)
 
 ## What the people in scope holds of a good: food in all its stores, made
@@ -1013,7 +1017,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 			var came:=float(acc_in.get(good,0.0)); var went:=float(acc_out.get(good,0.0))
 			var used:=food_use if good=="Food" else maxf(0.0,made+came-went-(stock-float(old.get("s0",stock))))
 			var month:=30.0/elapsed
-			goods[good]={"s":stock,"s0":stock,"d":float(eco._desired_stock(good,pop)),"k":known,"v":Prices.in_scope(good),"c":float(cum.get(good,0.0)),
+			goods[good]={"s":stock,"s0":stock,"d":float(eco._trade_desired_stock(good,pop)),"k":known,"v":Prices.in_scope(good),"c":float(cum.get(good,0.0)),
 				"p":_ema(old,"p",made*month,weight),"u":_ema(old,"u",used*month,weight),"m":_ema(old,"m",came*month,weight),"x":_ema(old,"x",went*month,weight)}
 		var boats:=false
 		for id in BOATS:
@@ -1081,7 +1085,7 @@ static func _smooth(p:Dictionary,moved:Dictionary,value:Dictionary,elapsed:int)-
 static func spare_of(owner:String,good:String)->float:
 	return float(WorldSimulation.scoped(owner,func()->float:
 		var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
-		var desired:=float(WorldSimulation.economy._desired_stock(good,pop))
+		var desired:=float(WorldSimulation.economy._trade_desired_stock(good,pop))
 		return maxf(0.0,_held_in_scope(good)-desired*OFFER_OVER)))
 
 ## Goods a people can spend: what it holds beyond its homes' need.
@@ -1187,6 +1191,9 @@ static func deal_terms(buyer:String,seller:String,what:String,count:float)->Dict
 		out.why="No trader of ours reaches them."
 		return out
 	var person:=what in PEOPLE
+	if not person and what!=ARMS and minf(population(buyer),population(seller))<1000:
+		out.why="Small settlements exchange named supplies; open Trade to barter food and materials."
+		return out
 	if not person and (not what in GOODS or what==MONEY_GOOD):
 		out.why="Goods buy goods only in the season's barter."
 		return out

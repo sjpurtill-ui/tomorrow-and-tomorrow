@@ -268,7 +268,7 @@ func _arrange()->void:
 		(slot.label as Control).custom_minimum_size.x=clampf(row_width-60.0-stock_width,60.0,190.0)
 
 func _fill()->void:
-	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()))
+	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()),data.get("on_builders",Callable()))
 	var held:=float(data.get("storage",0.0));var room:=float(data.get("capacity",0.0))
 	var capacity_known:=bool(data.get("capacity_known",room>0.0))
 	var full:=held/room if capacity_known and room>0 else -1.0

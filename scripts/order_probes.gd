@@ -35,6 +35,7 @@ static func read(o:Dictionary)->Dictionary:
 		"recruit_line": return _recruit_line(refs)
 		"research": return _research(refs)
 		"build": return _build(refs)
+		"barter_shipment": return _barter_shipment(refs)
 		"storage": return SettlementModel.with_city_resources(String(refs.get("settlement_id","")),_storage.bind(refs))
 		"defences": return _defences(refs)
 		"directive": return _directive(refs)
@@ -302,3 +303,12 @@ static func _storage(refs:Dictionary)->Dictionary:
 		var work:=float(GameState.settlement_projects.get(storage.title(kind),0))
 		return {"state":"under_way" if work>0 else "accepted","line":String(row.status),"reason":String(row.status),"progress":work,"moved":work>0}
 	return {"state":"stalled","line":"Storage job unavailable","progress":0.0}
+
+static func _barter_shipment(refs:Dictionary)->Dictionary:
+	for shipment:Dictionary in preload("res://scripts/trade_ledger.gd").peek().get("barter_shipments",[]):
+		if int(shipment.id)!=int(refs.get("id",-1)):continue
+		if shipment.status=="delivered":return {"state":"done","line":"Supplies delivered","progress":1.0,"moved":true}
+		if shipment.status=="returned":return {"state":"called_off","line":"Route closed; supplies returned","progress":1.0,"moved":true}
+		var left:=maxi(0,int(shipment.arrival)-int(GameState.elapsed_days))
+		return {"state":"under_way","line":"Supplies on the road · %d days remaining" % left,"progress":1.0-float(left)/maxf(1,float(shipment.days)),"moved":true}
+	return {"state":"done","line":"Exchange receipt archived","progress":1.0,"moved":true}

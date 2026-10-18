@@ -368,6 +368,12 @@ func _desired_stock(resource_name:String,population:float)->float:
 		"Arms": return preload("res://scripts/weapons_stock.gd").trade_wanted()
 		_: return population*0.16
 
+
+## Trade protects physical commitments; monetary accounting keeps its established
+## valuation basket rather than repricing the entire treasury on a building order.
+func _trade_desired_stock(resource_name:String,population:float)->float:
+	return preload("res://scripts/needs_driven_trade.gd").desired(resource_name,population)
+
 func _trade_volume(market_access:float,monetization:float)->float:
 	if market_access<=0.0: return 0.0
 	var delivered:=float(WorldSimulation.state.material_metrics.get("delivered_today",0.0))

@@ -25,6 +25,7 @@ extends VBoxContainer
 signal close_wanted
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const Needs:=preload("res://scripts/needs_driven_trade.gd")
 const Ledger:=preload("res://scripts/trade_ledger.gd")
 const Stances:=preload("res://scripts/trade_stances.gd")
 const Words:=preload("res://scripts/trade_words.gd")
@@ -128,7 +129,7 @@ static func reading_signature()->String:
 	for c:Dictionary in CivilizationSystem.civilizations:
 		peoples.append([c.get("id",""),c.get("name",""),c.get("alive",true),c.get("player_relation",{})])
 	return str(hash([s.get("pairs",{}),s.get("stances",{}),s.get("answers",{}),s.get("tributes",{}),s.get("reports",{}),peoples,
-		int(GameState.elapsed_days),Ledger.revision,Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),T.color_mode]))
+		GameState.storage_works,GameState.resource_stockpiles,GameState.food_stocks,GameState.settlement_completed,int(GameState.elapsed_days),Ledger.revision,Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),T.color_mode]))
 
 
 func refresh(force:=false)->void:
@@ -157,7 +158,7 @@ func refresh(force:=false)->void:
 	visual_sections=kept_sections
 	var peoples_kicker:=find_child("PeoplesHeading",true,false) as Label
 	if peoples_kicker!=null:peoples_kicker.add_theme_color_override("font_color",T.INK_MUTED)
-	var next_summary:=str(hash([_known_rows(),Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),Ledger.peek().get("tributes",{}),T.color_mode]))
+	var next_summary:=str(hash([Needs.needs(),_known_rows(),Goods.spare(),Ledger.purse_unit("player"),Ledger.purse_balance("player"),Ledger.peek().get("tributes",{}),T.color_mode]))
 	if force or next_summary!=summary_signature:
 		summary_signature=next_summary
 		_build_summary()
@@ -202,11 +203,9 @@ static func kpi_items()->Array:
 		if not t.is_empty():tribute_in+=float(t.value)
 		var o:=Stances.tribute("player",String(c.get("id","")))
 		if not o.is_empty():tribute_out+=float(o.value)
-	var spare:=Goods.spare()
-	var unit:=Ledger.purse_unit("player")
+	var shortages:=Needs.needs()
 	var items:Array=[
-		{"id":"spare","label":"Goods to trade","icon":"Civilian Goods","value":S.n(spare),"ratio":-1.0,"sub":("%s %s too" % [S.n(Ledger.purse_balance("player")),unit]) if unit!="" else "spare goods",
-			"tip":"Goods beyond household use and workshop reserves, available to buy what other peoples can spare. This is the same balance used by Buy with goods."},
+		{"id":"spare","label":"Supplies needed","icon":"Timber","value":str(shortages.size()),"ratio":-1.0,"sub":"building and food shortages","tip":"Missing supplies for known buildings, storage expansions and the food reserve. Each exchange protects both towns' own commitments."},
 		{"id":"came","label":"In a season","icon":"carry","icon_kind":"people","value":S.n(came*3.0),"ratio":clampf(came/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.TEAL,"sub":"received, at their prices",
 			"tip":"What other peoples sent us, smoothed monthly and reckoned for a season, at each sender's own prices. The bar: its share of all that passed."},
 		{"id":"sent","label":"Out a season","icon":"carry","icon_kind":"people","value":S.n(sent*3.0),"ratio":clampf(sent/maxf(0.01,came+sent),0.0,1.0) if came+sent>0.0 else -1.0,"color":T.GOLD,"sub":"sent, at our prices",
@@ -222,7 +221,12 @@ static func kpi_items()->Array:
 func _build_summary()->void:
 	_clear(summary_box)
 	var items:=kpi_items()
-	var lead:=S.voice("%s goods available to trade" % String(items[0].value),24);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lead.tooltip_text=String(items[0].tip);summary_box.add_child(lead)
+	var lead:=S.voice("Supplies for our next buildings" if int(items[0].value)>0 else "Our immediate building needs are covered",24);lead.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lead.tooltip_text=String(items[0].tip);summary_box.add_child(lead)
+	var need_rows:=Needs.needs()
+	for index:int in mini(3,need_rows.size()):
+		var need:Dictionary=need_rows[index]
+		var line:=S.label("%s · need %s %s" % [String(need.purpose),S.n(float(need.amount)),String(need.resource).to_lower()],15,T.INK)
+		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;summary_box.add_child(line)
 	var partners:Dictionary=items[3]
 	var context:=S.label("Recent trade with %s peoples%s" % [String(partners.value)," · "+String(items[0].sub) if Ledger.purse_unit("player")!="" else ""],16,T.INK_MUTED);context.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;context.tooltip_text=String(partners.tip);summary_box.add_child(context)
 	var pace:=S.label("A season's pace: worth %s received · %s sent" % [String(items[1].value),String(items[2].value)],14,T.INK_MUTED);pace.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;pace.tooltip_text=String(items[1].tip)+"\n"+String(items[2].tip);summary_box.add_child(pace)
@@ -317,7 +321,7 @@ func _build_peoples(force:=false)->void:
 		var id:=String(row.id);var node_name:="People_"+id;keep.append(node_name)
 		var details:Array=[row,T.color_mode,Ledger.civ(id).get("player_relation",{}),expanded_people.get(id,false),evidence_open.get(id,false)]
 		if int(row.contact)>=2:
-			details.append_array([Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
+			details.append_array([GameState.resource_stockpiles,GameState.storage_works,Needs.needs(),Ledger.pair("player",id),Stances.stance("player",id),Stances.stance(id,"player"),
 				Ledger.most_needed("player",id),Ledger.most_needed(id,"player"),Ledger.blocked("player",id),
 				state.get("answers",{}),state.get("tributes",{}),Ledger.revision,int(GameState.elapsed_days),Goods.spare(),Ledger.purse_balance("player")])
 		var next:=str(hash(details))
@@ -401,7 +405,8 @@ func _people_row(civ_id:String,contact:int)->Control:
 	# Our terms: the stance buttons and what our goods buy, on one row.
 	var action_head:=HBoxContainer.new();action_head.add_theme_constant_override("separation",12);decisions.add_child(action_head)
 	var lead:=S.label("Set our terms",16,T.INK,true);lead.size_flags_horizontal=Control.SIZE_EXPAND_FILL;lead.size_flags_vertical=Control.SIZE_SHRINK_CENTER;action_head.add_child(lead)
-	var buy:=_buy_menu(civ_id)
+	_build_supply_offers(decisions,civ_id)
+	var buy:=_buy_menu(civ_id) if GameState.population_total>=1000 else null
 	if buy!=null:buy.size_flags_vertical=Control.SIZE_SHRINK_CENTER;action_head.add_child(buy)
 	var terms:=_stance_buttons(civ_id,ours);decisions.add_child(terms)
 	var odds_row:=_odds_row(civ_id,ours)
@@ -750,3 +755,34 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(14,size));label.add_theme_color_override("font_color",color)
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
+
+func _build_supply_offers(parent:Control,civ_id:String)->void:
+	var offers:=Needs.offers("player",civ_id)
+	var heading:=S.label("EXCHANGE SUPPLIES",14,T.INK_MUTED,true);parent.add_child(heading)
+	if offers.is_empty():
+		var empty:=S.label("No matching surplus, shortage and carrying room between these towns.",14,T.INK_MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(empty)
+	for offer:Dictionary in offers:
+		var box:=VBoxContainer.new();box.name="SupplyOffer_"+String(offer.want).replace(" ","_");box.add_theme_constant_override("separation",4);parent.add_child(box)
+		box.add_child(S.label(String(offer.purpose),17,T.INK,true))
+		var exchange:=S.label("Send %s %s  →  Receive %s %s" % [S.n(float(offer.payment)),String(offer.give).to_lower(),S.n(float(offer.count)),String(offer.want).to_lower()],16,T.INK)
+		exchange.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(exchange)
+		var covered:=float(offer.count)+.01>=float(offer.shortfall)
+		var note:=S.label("%s · %d days · Keep %s %s" % ["Material covered" if covered else "Partial supply",int(offer.days),S.n(float(offer.remaining)),String(offer.give).to_lower()],14,T.INK_MUTED)
+		note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;box.add_child(note)
+		var button:=S.verb("Send exchange",_send_supplies.bind(offer),"Both towns reserve these actual supplies now. They arrive after the journey; a closed route returns them.")
+		button.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;box.add_child(button)
+	var shown:=0
+	for shipment:Dictionary in Ledger.peek().get("barter_shipments",[]):
+		if shipment.buyer!="player" or shipment.seller!=civ_id or shipment.status!="traveling":continue
+		if shown>=3:break
+		shown+=1
+		var line:=S.label("On the road: %s %s · %d days remaining" % [S.n(float(shipment.count)),String(shipment.want).to_lower(),maxi(0,int(shipment.arrival)-int(GameState.elapsed_days))],14,T.TEAL)
+		line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;parent.add_child(line)
+
+func _send_supplies(offer:Dictionary)->void:
+	var result:=Needs.send(offer)
+	var card:=Tracker.register("Exchange supplies for "+String(offer.get("purpose","construction")),"trade")
+	if result.has("error"):Tracker.refuse(card,String(result.error))
+	else:Tracker.claim(card,"barter_shipment",{"id":result.shipment_id},"the traders","trade")
+	feedback.text=String(result.get("error",result.get("message","")))
+	refresh(true)

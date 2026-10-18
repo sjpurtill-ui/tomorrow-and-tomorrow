@@ -190,46 +190,49 @@ func test_goods_scale_with_makers_and_how_well_people_work()->void:
 
 
 func test_a_people_all_in_on_making_gets_a_little_extra()->void:
+	GameState.ensure_population_total(1000)
 	_work("player","Defense",0)
 	_materials("player",3000.0)
 	# One in four make: each makes 15 in 100 more, and the market holds half
 	# again as many goods a head. No more than that however many make.
-	_work("player","Crafting",50)
+	_work("player","Crafting",250)
 	assert_float(Goods.specialization()).is_equal_approx(1.0+Goods.SPECIALIZATION,0.0001)
 	var held:=Goods.ceiling()
-	_work("player","Crafting",100)
+	_work("player","Crafting",500)
 	assert_float(Goods.specialization()).is_equal_approx(1.0+Goods.SPECIALIZATION,0.0001)
 	assert_float(Goods.ceiling()).is_equal_approx(held,0.0001)
-	_work("player","Crafting",10)
+	_work("player","Crafting",50)
 	assert_float(held-Goods.ceiling()).is_equal_approx(GameState.population_exact*Goods.SURPLUS_PER_HEAD*Goods.HOLD_MORE,0.001)
 	# Arms are as dear for a making people: the set's maker-days do not fall.
-	_work("player","Crafting",50)
+	_work("player","Crafting",250)
 	assert_float(float(Arms.cost_per_fighter().maker_days)).is_equal(10.0)
 
 
 func test_barter_goods_leave_the_builders_share_of_materials()->void:
-	_work("player","Defense",0)
-	_work("player","Crafting",40)
-	# Timber only, and less than the stores want: homes are stocked from it,
-	# but nothing is made for barter from the builders' share.
-	GameState.resource_stockpiles={"Timber":100.0}
+	GameState.ensure_population_total(1000)
+	_work("player","Defense",0);_work("player","Crafting",100)
+	GameState.settlement_completed.assign(["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area","Gathering Yard"])
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":0.0}
+	GameState.resource_stockpiles={"Timber":8.0,"Fiber Plants":6.0,Goods.GOODS:Goods.target()*1.2/(1.0-Goods.DAILY_WEAR)}
+	preload("res://scripts/storage_works.gd").queue("dry")
 	GameState.elapsed_days=40
+	GameState.civilian_goods.last_day=39
 	var report:=Goods.advance()
-	var homes:=Goods.target()*1.2
-	assert_float(float(report.made)).is_equal_approx(homes,0.0001)
 	assert_float(float(report.for_barter)).is_equal(0.0)
-	# Plenty of timber: the rest of the makers' day goes to barter.
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal(8.0)
+	assert_float(float(GameState.resource_stockpiles["Fiber Plants"])).is_equal(6.0)
 	GameState.resource_stockpiles["Timber"]=2000.0
 	GameState.elapsed_days=41
 	report=Goods.advance()
 	assert_float(float(report.for_barter)).is_greater(0.0)
-	var floor_:=float(EconomySystem._desired_stock("Timber",GameState.population_exact))*Goods.BARTER_MATERIAL_FLOOR
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_greater_equal(floor_-0.0001)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_greater_equal(8.0)
 
 
 # --- 3. Goods buy resources, arms and people from another people ----------------------
 
 func test_goods_buy_resources_at_stated_terms_through_the_ledger()->void:
+	GameState.ensure_population_total(1000)
+	for id:String in ids:WorldSimulation.scoped(id,func():WorldSimulation.state.ensure_population_total(1000))
 	var a:=String(ids[0])
 	_stores("player",{Goods.GOODS:300.0,"Timber":0.0})
 	_stores(a,{Goods.GOODS:0.0,"Timber":900.0})
@@ -267,6 +270,8 @@ func test_goods_buy_resources_at_stated_terms_through_the_ledger()->void:
 
 
 func test_goods_buy_only_where_the_peoples_barter()->void:
+	GameState.ensure_population_total(1000)
+	for id:String in ids:WorldSimulation.scoped(id,func():WorldSimulation.state.ensure_population_total(1000))
 	var a:=String(ids[0])
 	_stores("player",{Goods.GOODS:300.0})
 	_stores(a,{"Timber":900.0})

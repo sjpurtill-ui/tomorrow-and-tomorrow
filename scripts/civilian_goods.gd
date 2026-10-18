@@ -166,6 +166,7 @@ static func spare()->float:
 
 ## The most goods the homes and the market hold before makers stop.
 static func ceiling()->float:
+	if WorldSimulation.state.population_exact<1000:return target()*1.20+capital_reserve()+float(preload("res://scripts/research_600_catalog.gd").learners_goods().get("wanted",0.0))
 	var many:=clampf((makers_share()-MAKERS_START)/(MAKERS_FULL-MAKERS_START),0.0,1.0)
 	return target()*1.20+capital_reserve()+maxf(1.0,WorldSimulation.state.population_exact)*SURPLUS_PER_HEAD*(1.0+HOLD_MORE*many)
 
@@ -362,10 +363,14 @@ static func advance()->Dictionary:
 		if left>.000001 and room-for_homes>.000001:
 			var population:=maxf(1.0,WorldSimulation.state.population_exact)
 			var beyond:Dictionary={}
+			var commitments:=preload("res://scripts/local_material_reserves.gd").calculate()
 			for item:String in BASKET:
-				var floor_:=float(WorldSimulation.economy._desired_stock(item,population))*BARTER_MATERIAL_FLOOR if WorldSimulation.economy!=null else 0.0
+				var floor_:=float(WorldSimulation.economy._trade_desired_stock(item,population))*BARTER_MATERIAL_FLOOR if WorldSimulation.economy!=null else 0.0
+				floor_=maxf(floor_,float(commitments.get(item,0)))
 				beyond[item]=minf(float(spendable[item]),maxf(0.0,_stock_of(item)-floor_))
-			for_barter=_make_from(beyond,minf(left,room-for_homes),report.inputs)
+			var spare_raw:=0.0
+			for value:float in beyond.values():spare_raw+=value
+			for_barter=_make_from(beyond,minf(minf(left,room-for_homes),spare_raw/RAW_PER_UNIT),report.inputs)
 			if for_barter<=.000001 and for_homes<=.000001 and report.reason=="" and need<=0.0:report.reason="No materials to spare for barter"
 		var amount:=for_homes+for_barter
 		if amount>.000001:

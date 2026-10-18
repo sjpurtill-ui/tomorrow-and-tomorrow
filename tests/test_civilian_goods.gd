@@ -31,6 +31,9 @@ func labor_output()->float:
 	return GameState.effective_workers("Crafting")*Goods.CRAFT_SHARE*Goods.BASE_RATE*Goods.technique_output()*float(GameState.simulation_metrics.labor_efficiency)*Goods.specialization()
 
 func test_makers_make_for_the_homes_then_for_barter_from_the_raw_basket()->void:
+	GameState.ensure_population_total(1000)
+	GameState.population_allocations.Crafting=100
+	GameState.population_allocations.Defense=0
 	var before:Dictionary=GameState.resource_stockpiles.duplicate()
 	var wanted:=Goods.target()*1.2
 	assert_float(labor_output()).is_greater(wanted)

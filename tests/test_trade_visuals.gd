@@ -44,8 +44,8 @@ func test_hero_totals_convert_real_monthly_flows_once() -> void:
 	assert_array(Array(chart.values)).is_equal([received * 3.0, sent * 3.0])
 	assert_array(Array(chart.labels)).is_equal(["Received", "Sent"])
 	var spare: Dictionary = Board.kpis()[0]
-	assert_str(String(spare.label)).is_equal("GOODS TO TRADE")
-	assert_str(String(spare.value)).is_equal(EraWords.grouped(roundi(Goods.spare())))
+	assert_str(String(spare.label)).is_equal("SUPPLIES NEEDED")
+	assert_str(String(spare.value)).is_equal(str(preload("res://scripts/needs_driven_trade.gd").needs().size()))
 	# The strip says the season's in and out; the bar is not drawn a second time.
 	assert_bool(chart.visible).is_false()
 
@@ -75,6 +75,7 @@ func test_word_only_contacts_have_no_trade_figures_or_actions() -> void:
 			assert_object(people.find_child(key, true, false)).is_null()
 
 func test_refresh_retains_live_controls_and_preserves_domain_state() -> void:
+	GameState.ensure_population_total(1000)
 	var board := _board()
 	var nodes: Dictionary = {}
 	for key: String in ["FlowTotals", "People_" + String(ids[0]), "PartnerChoice_" + String(ids[1]), "Stance_toll", "BuyWithGoods"]:
@@ -159,6 +160,8 @@ func test_squeeze_menu_applies_selected_good_with_stated_odds() -> void:
 	assert_object(board.find_child("Odds", true, false)).is_not_null()
 
 func test_buy_menu_moves_actual_goods_and_registers_order() -> void:
+	GameState.ensure_population_total(1000)
+	for id:String in ids:WorldSimulation.scoped(id,func():WorldSimulation.state.ensure_population_total(1000))
 	var board := _board()
 	var id := String(ids[0])
 	var people := board.find_child("People_" + id, true, false)
@@ -184,6 +187,8 @@ func test_buy_menu_moves_actual_goods_and_registers_order() -> void:
 	assert_int(Tracker.orders().size()).is_equal(orders_before + 1)
 
 func test_embargo_disables_buy_without_hiding_stance_choices() -> void:
+	GameState.ensure_population_total(1000)
+	for id:String in ids:WorldSimulation.scoped(id,func():WorldSimulation.state.ensure_population_total(1000))
 	var board := _board()
 	board._choose_partner(String(ids[1]))
 	var people := board.find_child("People_" + String(ids[1]), true, false)

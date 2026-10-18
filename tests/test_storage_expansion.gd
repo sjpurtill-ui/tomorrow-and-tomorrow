@@ -134,3 +134,32 @@ func test_construction_page_priority_queues_a_repeat_job_and_tracker_observes_co
 	var refs:={"kind":"yard","before":Stores.added("yard"),"settlement_id":id}
 	Stores.complete(p)
 	assert_str(String(preload("res://scripts/order_probes.gd").read({"kind":"storage","refs":refs}).state)).is_equal("done")
+
+func test_storage_tiles_fit_a_narrow_panel_without_a_dropdown()->void:
+	var host:Control=auto_free(Control.new())
+	host.size=Vector2(360,1000);add_child(host)
+	var panel:=Grid.new();host.add_child(panel);panel.size=Vector2(360,900)
+	panel.fill(Stores.rows(),func(_kind:String):pass)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_int(panel.grid.columns).is_equal(1)
+	assert_float(panel.get_combined_minimum_size().x).is_less_equal(360.0)
+	assert_int(panel.tiles.size()).is_equal(7)
+
+func test_daily_builders_expand_all_full_store_types_without_changing_allocations()->void:
+	GameState.population_allocations.merge({"Construction":80,"Logistics":20,"Crafting":20},true)
+	GameState.housing_capacity=1000
+	var room:=Stores.capacities()
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":float(room.food)*.9}
+	GameState.resource_stockpiles={"Freshwater":float(room.water)*.9,"Timber":float(room.yard)*.9/1.35,"Fiber Plants":float(room.dry)*.9/.45,"Clay":float(room.covered)*.9/1.25,"Bitumen":float(room.sealed)*.9/.85,"Coin":float(room.secure)*.9/.05,"Stone":40.0}
+	var allocation:Dictionary=GameState.population_allocations.duplicate(true)
+	var delivered:Dictionary=GameState.resource_stockpiles.duplicate(true)
+	for day:int in 90:
+		# Continuing deliveries replace building inputs. Without them, using
+		# clay/fiber itself frees storage and correctly cancels automatic demand.
+		for item:String in delivered:GameState.resource_stockpiles[item]=maxf(float(GameState.resource_stockpiles.get(item,0)),float(delivered[item]))
+		GameState.elapsed_days=day+1
+		Build.process_day()
+	for kind:String in Stores.KINDS:
+		assert_float(Stores.added(kind)).override_failure_message(kind).is_greater(0)
+	assert_dict(GameState.population_allocations).is_equal(allocation)

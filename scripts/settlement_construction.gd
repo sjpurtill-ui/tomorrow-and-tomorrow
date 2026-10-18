@@ -37,10 +37,11 @@ static func _settlement_definitions() -> Array[Dictionary]:
 	definitions.append_array(preload("res://scripts/storage_works.gd").projects())
 	return definitions
 
-static func _settlement_project_available(project: Dictionary) -> bool:
+static func _settlement_project_available(project: Dictionary,storage_demand:Dictionary={}) -> bool:
 	if project.has("storage_kind"):
 		var storage=preload("res://scripts/storage_works.gd")
-		if not storage.needed(String(project.storage_kind),storage.used(),storage.capacities()):return false
+		var wanted:bool=bool(storage_demand.get(String(project.storage_kind),false)) if not storage_demand.is_empty() else storage.needed(String(project.storage_kind),storage.used(),storage.capacities())
+		if not wanted:return false
 	if String(project.name) in WorldSimulation.state.settlement_completed:
 		return false
 	for required in project.requires:
@@ -92,8 +93,11 @@ static func material_options(project:Dictionary)->Array[Dictionary]:
 
 static func _current_settlement_project() -> Dictionary:
 	var available: Array[Dictionary] = []
+	var storage=preload("res://scripts/storage_works.gd")
+	var held:=storage.used();var room:=storage.capacities();var demand:Dictionary={}
+	for kind:String in storage.KINDS:demand[kind]=storage.needed(kind,held,room)
 	for project in _settlement_definitions():
-		if _settlement_project_available(project): available.append(project)
+		if _settlement_project_available(project,demand): available.append(project)
 	if available.is_empty(): return {}
 	if WorldSimulation.state.settlement_completed.is_empty():
 		for project in available:
@@ -110,9 +114,8 @@ static func _current_settlement_project() -> Dictionary:
 	for project in available:
 		var score := float(WorldSimulation.state.settlement_projects.get(project.name,0.0))*0.08
 		if project.has("storage_kind"):
-			var storage=preload("res://scripts/storage_works.gd")
 			var kind:=String(project.storage_kind)
-			var fill:=float(storage.used()[kind])/maxf(1.0,float(storage.capacities()[kind]))
+			var fill:=float(held[kind])/maxf(1.0,float(room[kind]))
 			score+=5.0+minf(10.0,fill*4.0)+(20.0 if storage.requested(kind) else 0.0)
 		match String(project.name):
 			"Lean-to Shelters": score+=(1.0-clampf(float(WorldSimulation.state.housing_capacity)/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0))*4.0+1.1

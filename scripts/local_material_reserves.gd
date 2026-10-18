@@ -4,10 +4,11 @@ static func calculate()->Dictionary:
 	var state=WorldSimulation.state
 	var result:Dictionary={}
 	var build=preload("res://scripts/settlement_construction.gd")
+	var storage=preload("res://scripts/storage_works.gd")
+	var held:=storage.used();var room:=storage.capacities()
 	for project:Dictionary in build._settlement_definitions():
 		if project.has("storage_kind"):
-			var storage=preload("res://scripts/storage_works.gd")
-			if not storage.needed(String(project.storage_kind),storage.used(),storage.capacities()):continue
+			if not storage.needed(String(project.storage_kind),held,room):continue
 		if String(project.name) in state.settlement_completed:continue
 		if project.has("discovery") and String(project.discovery) not in state.known_discoveries:continue
 		var ready:=true
@@ -15,9 +16,9 @@ static func calculate()->Dictionary:
 			if required not in state.settlement_completed:ready=false
 		if not ready:continue
 		# Protect an affordable local material alternative when one exists; otherwise
-		# retain the default bill so exports cannot prevent its accumulation.
+		# protect the nearest known recipe so imports and reserves use the same bill.
 		var cost:Dictionary=build._settlement_project_material_plan(project)
-		if cost.is_empty():cost=project.materials
+		if cost.is_empty():cost=load("res://scripts/needs_driven_trade.gd").planned_bill(project)
 		for item:String in cost:result[item]=maxf(float(result.get(item,0)),float(cost[item]))
 	if state.resource_settlement_id.is_empty():
 		var host=WorldSimulation.military

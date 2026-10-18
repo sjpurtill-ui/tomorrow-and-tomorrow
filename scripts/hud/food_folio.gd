@@ -212,7 +212,7 @@ func _who()->String:
 	return _who_of(data)
 
 func _fill()->void:
-	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()))
+	_storage_grid.fill(data.get("storage_rows",[]),data.get("on_expand_storage",Callable()),data.get("on_builders",Callable()))
 	var amounts:=flow_amounts(data.get("flow",{}))
 	var measured:=bool(data.get("flow_known",true))
 	var daily_need:=float(data.get("food_need",amounts.Eaten))

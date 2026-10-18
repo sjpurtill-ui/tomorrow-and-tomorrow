@@ -6,17 +6,20 @@ const S:=preload("res://scripts/hud/econ_sheet.gd")
 var tiles:Dictionary={}
 var grid:GridContainer
 var action:Callable
+var builders:Callable
 
 func _init()->void:
 	name="StorageCapacityGrid"
 	add_theme_constant_override("separation",6)
-	add_child(S.label("STORAGE · towns expand at 80% full",14,T.INK_MUTED,true))
+	var head:=HBoxContainer.new();add_child(head)
+	var label:=S.label("STORAGE · towns expand at 80% full",14,T.INK_MUTED,true);label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(label)
+	head.add_child(S.verb("Builders",func():if builders.is_valid():builders.call(),"Assign people to construction"))
 	grid=GridContainer.new();grid.columns=3;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation",14);grid.add_theme_constant_override("v_separation",10);add_child(grid)
 	resized.connect(func():grid.columns=3 if size.x>=900 else 2 if size.x>=530 else 1)
 
-func fill(rows:Array,callback:Callable)->void:
-	action=callback
+func fill(rows:Array,callback:Callable,assign_builders:Callable=Callable())->void:
+	action=callback;builders=assign_builders
 	visible=not rows.is_empty()
 	for row:Dictionary in rows:
 		var kind:=String(row.kind)
@@ -34,6 +37,6 @@ func fill(rows:Array,callback:Callable)->void:
 		S.put(tile.amount,"%s / %s %s%s" % [S.n(float(row.used)),S.n(float(row.capacity)),String(row.unit)," · OVERFLOW" if over else ""],T.RED_TEXT if over else T.INK)
 		tile.bar.value=clampf(float(row.used)/maxf(1,float(row.capacity))*100,0,100)
 		S.put(tile.status,String(row.status),T.INK_MUTED)
-		tile.button.disabled=bool(row.pending)
-		tile.button.text="Queued" if bool(row.pending) else "+ Space"
+		tile.button.disabled=bool(row.get("requested",false)) or bool(row.get("building",false))
+		tile.button.text="Building" if bool(row.get("building",false)) else "Queued" if bool(row.get("requested",false)) else "Build first" if bool(row.pending) else "+ Space"
 		tile.button.tooltip_text=String(row.tip)

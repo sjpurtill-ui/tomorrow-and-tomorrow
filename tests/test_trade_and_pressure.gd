@@ -49,8 +49,18 @@ func before_test()->void:
 	for id:String in ids:
 		WorldSimulation.scoped(id,func()->void:
 			for v:Dictionary in WorldSimulation.world.civilizations: (v.player_relation as Dictionary)["contact_level"]=2)
-	_stores("player",{"Food":6000.0,"Flint":100.0,"Timber":40.0,"Stone":10.0,"Salt":0.0})
-	for id:String in ids: _stores(id,{"Food":5000.0,"Flint":0.0,"Timber":40.0,"Salt":60.0})
+	# Both peoples have a real storage building bill: timber and fiber, not
+	# population-derived demand for minerals nobody is using.
+	for owner:String in ["player"]+ids:
+		WorldSimulation.scoped(owner,func():
+			var st=WorldSimulation.state
+			st.ensure_population_total(120)
+			st.settlement_completed.assign(["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area","Gathering Yard"])
+			st.resource_stockpiles={}
+			st.storage_works={"capacity":{"yard":1000.0,"dry":1000.0,"covered":1000.0},"requests":{"dry":true}}
+		)
+	_stores("player",{"Food":6000.0,"Timber":100.0,"Stone":10.0,"Fiber Plants":0.0})
+	for id:String in ids: _stores(id,{"Food":5000.0,"Timber":0.0,"Fiber Plants":60.0})
 
 func after_test()->void:
 	WorldSimulation.clear()
@@ -90,29 +100,29 @@ func _settle(a:String,b:String,day:int=10)->Dictionary:
 
 func test_gift_and_barter_move_real_goods_before_money()->void:
 	var a:=String(ids[0])
-	var our_flint:=_stock("player","Flint")
-	var their_flint:=_stock(a,"Flint")
+	var our_timber:=_stock("player","Timber")
+	var their_timber:=_stock(a,"Timber")
 	var p:=_settle("player",a)
 	assert_str(String(p.form)).is_equal("gift")
-	var sent:=our_flint-_stock("player","Flint")
-	var got:=_stock(a,"Flint")-their_flint
+	var sent:=our_timber-_stock("player","Timber")
+	var got:=_stock(a,"Timber")-their_timber
 	# Real goods left our stores and reached theirs, the same amount.
 	assert_float(sent).is_greater(0.0)
 	assert_float(got).is_equal_approx(sent,0.0001)
-	assert_float(float(p.last.ab.get("Flint",p.last.ba.get("Flint",0.0)))).is_equal_approx(sent,0.01)
+	assert_float(float(p.last.ab.get("Timber",p.last.ba.get("Timber",0.0)))).is_equal_approx(sent,0.01)
 	# A gift is remembered as owed, and warms them.
 	assert_float(absf(float(p.owed))).is_greater(0.0)
-	# Their salt came the other way (we lack it and know it).
-	assert_float(_stock("player","Salt")).is_greater(0.0)
+	# Their fiber came the other way (we lack it and know it).
+	assert_float(_stock("player","Fiber Plants")).is_greater(0.0)
 	# After seasons of gifts both ways, a meeting place: barter.
 	p["gift_seasons"]=Ledger.MEETING_SEASONS-1
-	_stores("player",{"Flint":100.0,"Salt":0.0})
-	_stores(a,{"Flint":0.0,"Salt":60.0})
+	_stores("player",{"Timber":100.0,"Fiber Plants":0.0})
+	_stores(a,{"Timber":0.0,"Fiber Plants":60.0})
 	p["next"]=0
 	Ledger._settle(p,101)
 	assert_int(int(p.meet)).is_equal(101)
-	_stores("player",{"Flint":100.0,"Salt":0.0})
-	_stores(a,{"Flint":0.0,"Salt":60.0})
+	_stores("player",{"Timber":100.0,"Fiber Plants":0.0})
+	_stores(a,{"Timber":0.0,"Fiber Plants":60.0})
 	Ledger._settle(p,192)
 	assert_str(String(p.form)).is_equal("barter")
 	# Goods for goods: each side's load within a quarter of the other's.
@@ -128,11 +138,11 @@ func test_no_trade_with_a_people_whose_home_we_have_not_found()->void:
 	var a:=String(ids[0])
 	(Ledger.civ(a).player_relation as Dictionary)["home_location_known"]=false
 	assert_str(Ledger.blocked("player",a)).is_equal("unlocated")
-	var our_flint:=_stock("player","Flint")
-	var their_salt:=_stock(a,"Salt")
+	var our_timber:=_stock("player","Timber")
+	var their_fiber:=_stock(a,"Fiber Plants")
 	var p:=_settle("player",a)
-	assert_float(_stock("player","Flint")).is_equal_approx(our_flint,0.0001)
-	assert_float(_stock(a,"Salt")).is_equal_approx(their_salt,0.0001)
+	assert_float(_stock("player","Timber")).is_equal_approx(our_timber,0.0001)
+	assert_float(_stock(a,"Fiber Plants")).is_equal_approx(their_fiber,0.0001)
 	assert_float(float(p.total.ab)+float(p.total.ba)).is_equal(0.0)
 	# Found: the road opens.
 	(Ledger.civ(a).player_relation as Dictionary)["home_location_known"]=true
@@ -175,10 +185,10 @@ func test_no_trade_over_a_sea_too_wide_for_either_peoples_boats()->void:
 	var sheet:=preload("res://scripts/court_facts.gd").sheet(["common","tribute"])
 	var said:=String((load("res://scripts/court_answers.gd") as GDScript).call("answer",sheet,"what do we trade with %s?" % Ledger.name_of(a)))
 	assert_str(said).contains("Nothing passes").contains("650 km of water")
-	var our_flint:=_stock("player","Flint")
+	var our_timber:=_stock("player","Timber")
 	var p:=_settle("player",a)
 	_boats(a,300.0); _boats("player",350.0)
-	assert_float(_stock("player","Flint")).is_equal_approx(our_flint,0.0001)
+	assert_float(_stock("player","Timber")).is_equal_approx(our_timber,0.0001)
 	assert_float(float(p.total.ab)+float(p.total.ba)).is_equal(0.0)
 	# Better ships on either side open it: the share that come home carries.
 	_boats(a,2800.0)
@@ -221,20 +231,21 @@ func _set_stage(owner:String,stage:String)->void:
 func test_priced_trade_after_money_by_one_price_table()->void:
 	var a:=String(ids[0])
 	_set_stage("player","weighed_metal"); _set_stage(a,"weighed_metal")
-	_stores("player",{"Flint":100.0,"Salt":0.0,"Coin":0.0})
-	_stores(a,{"Flint":0.0,"Salt":0.0,"Coin":500.0})
+	_stores("player",{"Timber":100.0,"Fiber Plants":0.0,"Coin":0.0})
+	_stores(a,{"Timber":0.0,"Fiber Plants":0.0,"Coin":500.0})
 	var p:=_settle("player",a)
 	assert_str(String(p.form)).is_equal("silver")
-	var flint:=float((p.last[_dir(p,"player")] as Dictionary).get("Flint",0.0))
-	assert_float(flint).is_greater(0.0)
+	var timber:=float((p.last[_dir(p,"player")] as Dictionary).get("Timber",0.0))
+	assert_float(timber).is_greater(0.0)
 	# They paid in weighed silver from their purse into ours: real on both ledgers.
 	var paid:=_stock("player","Coin")
 	assert_float(paid).is_greater(0.0)
 	assert_float(500.0-_stock(a,"Coin")).is_equal_approx(paid,0.001)
-	# At our own price for flint: one table, the seller's (economy_system's, or
+	# At our own price for timber: one table, the seller's (economy_system's, or
 	# the good it stands on: two loads of stone).
-	assert_float(paid).is_equal_approx(flint*Prices.value("Flint","player"),0.01)
-	assert_float(Prices.value("Flint","player")).is_equal_approx(2.0*float(EconomySystem.BASE_VALUES.Stone),0.001)
+	var outgoing:=float(p.last["trade_"+_dir(p,"player")]);var incoming:=float(p.last["trade_"+_dir(p,a)])
+	assert_float(paid).is_equal_approx(outgoing-incoming,0.02)
+	assert_float(Prices.value("Timber","player")).is_equal_approx(float(EconomySystem.BASE_VALUES.Timber),0.001)
 	# Coin, once both mint it: the one door for money (pay) moves it from
 	# purse to purse, never more than the payer holds, and none is lost.
 	_set_stage("player","currency"); _set_stage(a,"currency")
@@ -252,17 +263,19 @@ func test_priced_trade_after_money_by_one_price_table()->void:
 func test_volumes_scale_with_population()->void:
 	var a:=String(ids[0])
 	var small:=_settle("player",a)
-	var q1:=float((small.last[_dir(small,"player")] as Dictionary).get("Flint",0.0))
+	var q1:=float((small.last[_dir(small,"player")] as Dictionary).get("Timber",0.0))
 	assert_float(q1).is_greater(0.0)
 	_people("player",1200); _people(a,1200)
-	_stores("player",{"Flint":1000.0,"Salt":0.0,"Food":60000.0,"Timber":400.0,"Stone":100.0})
-	_stores(a,{"Flint":0.0,"Salt":600.0,"Food":50000.0,"Timber":400.0})
+	_stores("player",{"Timber":1000.0,"Fiber Plants":0.0,"Food":60000.0,"Stone":100.0})
+	_stores(a,{"Timber":0.0,"Fiber Plants":600.0,"Food":50000.0})
 	var big:=Ledger.pair("player",a)
 	Ledger._refresh_report("player",101); Ledger._refresh_report(a,101)
 	Ledger._settle(big,101)
-	var q2:=float((big.last[_dir(big,"player")] as Dictionary).get("Flint",0.0))
-	# Ten times the people, about ten times the goods (capacity, surplus and need all scale).
-	assert_float(q2/q1).is_between(8.0,12.0)
+	var q2:=float((big.last[_dir(big,"player")] as Dictionary).get("Timber",0.0))
+	# Larger carrying capacity still cannot import beyond the actual building bill.
+	assert_float(q2).is_greater(0.0)
+	var target:float=WorldSimulation.scoped(a,func():return preload("res://scripts/needs_driven_trade.gd").desired("Timber",WorldSimulation.state.population_exact))
+	assert_float(q2).is_less_equal(target)
 	# And the carriers' capacity scales from 120 to a billion alike.
 	var ra:={"pop":120.0,"log":0.3,"tc":0.0}; var rb:={"pop":150.0,"log":0.3,"tc":0.0}
 	var huge_a:={"pop":1.2e9,"log":0.3,"tc":0.0}; var huge_b:={"pop":1.5e9,"log":0.3,"tc":0.0}
@@ -273,43 +286,43 @@ func test_dependence_ledger_reads_share_and_days()->void:
 	var a:=String(ids[0])
 	var p:=_settle("player",a)
 	for season in 3:
-		_stores("player",{"Flint":100.0,"Salt":0.0})
-		_stores(a,{"Flint":float(_stock(a,"Flint")),"Salt":60.0})
+		_stores("player",{"Timber":100.0,"Fiber Plants":0.0})
+		_stores(a,{"Timber":float(_stock(a,"Timber")),"Fiber Plants":60.0})
 		Ledger._refresh_report("player",101+91*season); Ledger._refresh_report(a,101+91*season)
 		Ledger._settle(p,101+91*season)
-	# They make no flint: all the flint they get is ours.
-	assert_float(Ledger.share(a,"player","Flint")).is_greater(0.95)
+	# They make no timber: all the timber they get is ours.
+	assert_float(Ledger.share(a,"player","Timber")).is_greater(0.95)
 	assert_float(Ledger.dependence(a,"player")).is_greater(0.0)
 	# How long their stores last without us: their stock over what they use
 	# beyond what they make and get elsewhere.
 	var r:=Ledger.report(a)
-	var x:Dictionary=(r.g as Dictionary).Flint
-	x["u"]=30.0; x["p"]=0.0; x["m"]=Ledger.flow("player",a,"Flint")
-	assert_float(Ledger.days_without(a,"player","Flint")).is_equal_approx(float(x.s),0.5)
+	var x:Dictionary=(r.g as Dictionary).Timber
+	x["u"]=30.0; x["p"]=0.0; x["m"]=Ledger.flow("player",a,"Timber")
+	assert_float(Ledger.days_without(a,"player","Timber")).is_equal_approx(float(x.s),0.5)
 	var line:=Words.leaning_line(a,"player")
-	assert_str(line).contains("of its flint from us")
+	assert_str(line).contains("of its timber from us")
 	assert_str(line).contains("stores last")
 	# What we lean on them for, the other way.
-	assert_str(Words.leaning_line("player",a)).contains("salt")
+	assert_str(Words.leaning_line("player",a)).contains("fiber")
 	# A good nobody sends: no share.
 	assert_float(Ledger.share(a,"player","Copper Ore")).is_equal(0.0)
 
 func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	var a:=String(ids[0]); var b:=String(ids[1])
 	var p:=_settle("player",a)
-	var salt_before:=float((p.last[_dir(p,a)] as Dictionary).get("Salt",0.0))
-	assert_float(salt_before).is_greater(0.0)
+	var fiber_before:=float((p.last[_dir(p,a)] as Dictionary).get("Fiber Plants",0.0))
+	assert_float(fiber_before).is_greater(0.0)
 	# Embargo: nothing either way; we lose what came from them.
 	var preview:=Stances.preview_for("embargo","player",a)
 	assert_float(float(preview.cost)).is_greater(0.0)
 	assert_bool(Stances.set_stance("player",a,"embargo").ok).is_true()
-	_stores("player",{"Flint":100.0,"Salt":0.0}); _stores(a,{"Flint":0.0,"Salt":60.0})
-	var flint:=_stock("player","Flint"); var salt:=_stock(a,"Salt")
+	_stores("player",{"Timber":100.0,"Fiber Plants":0.0}); _stores(a,{"Timber":0.0,"Fiber Plants":60.0})
+	var timber:=_stock("player","Timber"); var fiber:=_stock(a,"Fiber Plants")
 	Ledger._refresh_report("player",101); Ledger._refresh_report(a,101)
 	Ledger._settle(p,101)
 	assert_str(String(p.last.why)).is_equal("embargo:player")
-	assert_float(_stock("player","Flint")).is_equal(flint)
-	assert_float(_stock(a,"Salt")).is_equal(salt)
+	assert_float(_stock("player","Timber")).is_equal(timber)
+	assert_float(_stock(a,"Fiber Plants")).is_equal(fiber)
 	# Toll: a tenth of the trade's worth comes to us; trade falls a quarter.
 	Stances.set_stance("player",a,"toll")
 	var mods:=Stances.pair_mods("player",a,192)
@@ -324,33 +337,33 @@ func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	# Favour: we sell a fifth below our price, and more of it.
 	Stances.set_stance("player",a,"favour")
 	_set_stage("player","weighed_metal"); _set_stage(a,"weighed_metal")
-	_stores("player",{"Flint":100.0,"Salt":0.0,"Coin":0.0}); _stores(a,{"Flint":0.0,"Salt":0.0,"Coin":500.0})
+	_stores("player",{"Timber":100.0,"Fiber Plants":0.0,"Coin":0.0}); _stores(a,{"Timber":0.0,"Fiber Plants":0.0,"Coin":500.0})
 	Ledger._refresh_report("player",283); Ledger._refresh_report(a,283)
 	Ledger._settle(p,283)
-	var sold:=float((p.last[_dir(p,"player")] as Dictionary).get("Flint",0.0))
-	assert_float(_stock("player","Coin")).is_equal_approx(sold*Prices.value("Flint","player")*(1.0-Stances.FAVOUR_DISCOUNT),0.01)
-	# Squeeze their flint: none goes to them, and we buy it up from others at a premium.
-	Stances.set_stance("player",a,"squeeze","Flint")
+	var outgoing:=float(p.last["trade_"+_dir(p,"player")]);var incoming:=float(p.last["trade_"+_dir(p,a)])
+	assert_float(_stock("player","Coin")).is_equal_approx(outgoing*(1.0-Stances.FAVOUR_DISCOUNT)-incoming,0.02)
+	# Squeeze their timber: none goes to them, and we buy it up from others at a premium.
+	Stances.set_stance("player",a,"squeeze","Timber")
 	_set_stage(b,"weighed_metal")
-	_stores("player",{"Flint":100.0,"Coin":1000.0}); _stores(a,{"Flint":0.0,"Coin":500.0}); _stores(b,{"Flint":200.0,"Coin":0.0})
+	_stores("player",{"Timber":100.0,"Coin":1000.0}); _stores(a,{"Timber":0.0,"Coin":500.0}); _stores(b,{"Timber":200.0,"Coin":0.0})
 	var q:=Ledger.pair("player",b)
 	Ledger._refresh_report("player",374); Ledger._refresh_report(a,374); Ledger._refresh_report(b,374)
 	Ledger._settle(p,374)
-	assert_float(float((p.last[_dir(p,"player")] as Dictionary).get("Flint",0.0))).is_equal(0.0)
+	assert_float(float((p.last[_dir(p,"player")] as Dictionary).get("Timber",0.0))).is_equal(0.0)
 	Ledger._settle(q,374)
-	var bought:=float((q.last[_dir(q,b)] as Dictionary).get("Flint",0.0))
+	var bought:=float((q.last[_dir(q,b)] as Dictionary).get("Timber",0.0))
 	assert_float(bought).is_greater(0.0)
-	assert_float(_stock(b,"Coin")).is_greater_equal(bought*Prices.value("Flint",b)*Ledger.SQUEEZE_PREMIUM-0.01)
+	assert_float(_stock(b,"Coin")).is_greater_equal(bought*Prices.value("Timber",b)*Ledger.SQUEEZE_PREMIUM-float(q.last["trade_"+_dir(q,"player")])-0.04)
 	# Gifts: they cost our stores and warm them.
 	Stances.set_stance("player",a,"gifts")
 	_set_stage("player","subsistence"); _set_stage(a,"subsistence")
 	var opinion:=Ledger.opinion("player",a)
-	var held:=_stock("player","Food")+_stock("player","Flint")
+	var held:=_stock("player","Food")+_stock("player","Timber")
 	Ledger._refresh_report("player",465); Ledger._refresh_report(a,465)
 	Ledger._settle(p,465)
 	assert_float(float(p.last.get("gift_ab" if String(p.a)=="player" else "gift_ba",0.0))).is_greater(0.0)
 	assert_float(float(((p.kinds as Dictionary).get(_dir(p,"player")+":gift",{}) as Dictionary).get("value",0.0))).is_greater(0.0)
-	assert_float(_stock("player","Food")+_stock("player","Flint")).is_less(held)
+	assert_float(_stock("player","Food")+_stock("player","Timber")).is_less(held)
 	assert_float(Ledger.opinion("player",a)).is_greater(opinion)
 	# What they took unreturned is owed, and what is owed eases their answer.
 	p["owed"]=0.0
@@ -396,10 +409,10 @@ func test_tribute_demand_yields_and_refuses_with_stated_odds_seeded()->void:
 			# Yielding binds them to tribute each season, on both ledgers.
 			var t:=Stances.tribute(a,"player")
 			assert_dict(t).is_not_empty()
-			var held:=_stock("player","Food")+_stock("player","Flint")+_stock("player","Salt")+_stock("player","Timber")
+			var held:=_stock("player","Food")+_stock("player","Timber")+_stock("player","Fiber Plants")+_stock("player","Timber")
 			Stances._collect(Stances.skey(a,"player"),t,day+1)
 			assert_float(float(t.get("paid",0.0))).is_greater(0.0)
-			assert_float(_stock("player","Food")+_stock("player","Flint")+_stock("player","Salt")+_stock("player","Timber")).is_greater(held)
+			assert_float(_stock("player","Food")+_stock("player","Timber")+_stock("player","Fiber Plants")+_stock("player","Timber")).is_greater(held)
 		if seen.has("yield") and seen.size()>=2: break
 		Stances.set_stance("player",a,"free")
 	assert_bool(seen.has("yield")).override_failure_message("no yield in %s" % str(seen)).is_true()
@@ -421,10 +434,10 @@ func test_embargo_leads_to_counter_supplier_raid_or_war()->void:
 	assert_int(int((Ledger.pair(a,b).get("boost",{}) as Dictionary).get(a,0))).is_greater(50)
 	Stances._apply("player",a,st,"raid",50)
 	var raid:Dictionary=Ledger.state().raids[Stances.skey(a,"player")]
-	var held:=_stock("player","Food")+_stock("player","Flint")
+	var held:=_stock("player","Food")+_stock("player","Timber")
 	GameState.elapsed_days=int(raid.next)
 	Stances._raid(Stances.skey(a,"player"),raid,int(raid.next))
-	assert_float(_stock("player","Food")+_stock("player","Flint")).is_less(held)
+	assert_float(_stock("player","Food")+_stock("player","Timber")).is_less(held)
 	assert_bool(Ledger.recent_news(400).any(func(n:Dictionary)->bool:return String(n.kind)=="raided")).is_true()
 	# War over it, through the war's own engine, with the plain cause.
 	Stances._apply("player",a,st,"war",60)
@@ -432,7 +445,7 @@ func test_embargo_leads_to_counter_supplier_raid_or_war()->void:
 	assert_bool(bool(WarLoop.call("feuding",a,60)) or bool(Ledger.relation("player",a).get("at_war",false))).is_true()
 	assert_str(String((WarLoop.call("front",a) as Dictionary).get("cause",""))).contains("embargo")
 	# Between two other peoples it is their feud (small peoples) or their war.
-	Stances._apply(a,b,{"id":"squeeze","good":"Salt"},"war",70)
+	Stances._apply(a,b,{"id":"squeeze","good":"Fiber Plants"},"war",70)
 	var rel:=Ledger.relation(a,b)
 	assert_bool(int(rel.get("feud_since",-1))>=0 or bool(rel.get("at_war",false)) or String(rel.get("pending_message",""))=="war").is_true()
 
@@ -468,9 +481,10 @@ func test_trade_page_and_war_line_say_it_in_few_words()->void:
 	var a:=String(ids[0])
 	_settle("player",a)
 	Stances.set_stance("player",a,"embargo")
-	var board:VBoxContainer=preload("res://scripts/hud/trade_board.gd").new()
+	var board:VBoxContainer=auto_free(preload("res://scripts/hud/trade_board.gd").new())
 	add_child(board)
 	board.setup({})
+	board._choose_partner(a)
 	assert_object(board.find_child("People_%s" % a,true,false)).is_not_null()
 	var labels:=0
 	for node in board.find_children("*","",true,false):
@@ -490,7 +504,7 @@ func test_trade_page_and_war_line_say_it_in_few_words()->void:
 	# Every alert line and stance label is short too.
 	for item in Ledger.recent_news(400): assert_int(_word_count(String(item.text))).is_less_equal(12)
 	for id in Words.LABELS: assert_int(_word_count(String(Words.LABELS[id]))).is_less_equal(12)
-	board.queue_free()
+
 	# The trade map: an embargo is a broken line; open trade an inked line each way.
 	var c:=Ledger.civ(a)
 	(c.player_relation as Dictionary)["home_location_known"]=true
@@ -515,9 +529,9 @@ func test_court_lines_read_and_carry_out_with_odds()->void:
 	assert_str(String(Court.read("trade with %s" % ildor).act)).is_equal("free")
 	assert_str(String(Court.read("stop all trade with %s" % ildor).act)).is_equal("embargo")
 	assert_str(String(Court.read("demand tribute from %s" % kezari).act)).is_equal("tribute")
-	var squeeze:=Court.read("buy up the flint of %s" % ildor)
+	var squeeze:=Court.read("buy up the timber of %s" % ildor)
 	assert_str(String(squeeze.act)).is_equal("squeeze")
-	assert_str(String(squeeze.good)).is_equal("Flint")
+	assert_str(String(squeeze.good)).is_equal("Timber")
 	var gift:=Court.read("send %s 200 grain" % ildor)
 	assert_str(String(gift.act)).is_equal("gift")
 	assert_int(int(gift.amount)).is_equal(200)
@@ -528,7 +542,7 @@ func test_court_lines_read_and_carry_out_with_odds()->void:
 	assert_dict(Court.read("what do we trade with %s?" % kezari)).is_empty()
 	# Their, them: the people last named in this audience.
 	var audience:={"origin":"court","lines":[{"text":"How are the %s?" % ildor}]}
-	assert_str(String(Court.read("buy up their flint",audience).civ_id)).is_equal(a)
+	assert_str(String(Court.read("buy up their timber",audience).civ_id)).is_equal(a)
 	assert_str(String(Court.read("send them 200 grain",audience).civ_id)).is_equal(a)
 	# Words that are not trade stay with the court.
 	assert_dict(Court.read("Give Suri a gift of bronze")).is_empty()
@@ -560,7 +574,7 @@ func test_court_lines_read_and_carry_out_with_odds()->void:
 func test_the_ledger_survives_a_save()->void:
 	var a:=String(ids[0])
 	_settle("player",a)
-	Stances.set_stance("player",a,"squeeze","Flint")
+	Stances.set_stance("player",a,"squeeze","Timber")
 	Ledger.state().tributes[Stances.skey(a,"player")]={"value":12.0,"since":10,"until":2000,"next":101,"paid":0.0,"missed":0}
 	var before:=JSON.stringify(Ledger.state())
 	var saved:=ForeignDiplomacy.export_state()
@@ -568,7 +582,7 @@ func test_the_ledger_survives_a_save()->void:
 	ForeignDiplomacy.reset_for_new_world()
 	assert_bool(ForeignDiplomacy.import_state(bytes_to_var(var_to_bytes(saved))).get("ok",false)).is_true()
 	assert_str(JSON.stringify(Ledger.state())).is_equal(before)
-	assert_str(String(Stances.stance("player",a).good)).is_equal("Flint")
+	assert_str(String(Stances.stance("player",a).good)).is_equal("Timber")
 	# An older save has no trade ledger: it starts empty, every stance free.
 	var old:=saved.duplicate(true)
 	(old.audiences as Dictionary).erase("trade")
@@ -587,8 +601,8 @@ func test_settles_on_schedule_over_years_without_spam_or_rising_cost()->void:
 		GameState.elapsed_days=day
 		for id:String in ids: WorldSimulation.actors[id].systems.GameState.elapsed_days=day
 		if day%30==0:
-			_stores("player",{"Flint":100.0,"Salt":0.0})
-			for id:String in ids: _stores(id,{"Flint":0.0,"Salt":60.0})
+			_stores("player",{"Timber":100.0,"Fiber Plants":0.0})
+			for id:String in ids: _stores(id,{"Timber":0.0,"Fiber Plants":60.0})
 		var t0:=Time.get_ticks_usec()
 		Ledger.advance(day)
 		var spent:=Time.get_ticks_usec()-t0

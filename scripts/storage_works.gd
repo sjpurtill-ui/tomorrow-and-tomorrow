@@ -69,6 +69,8 @@ static func complete(project:Dictionary)->void:
 	(state.storage_works.get("requests",{}) as Dictionary).erase(kind)
 	(state.storage_works.get("jobs",{}) as Dictionary).erase(kind)
 	state.settlement_projects.erase(String(project.name))
+	var city:=WorldSimulation.settlements.settlement_record(state.resource_settlement_id)
+	if String(city.get("construction_priority",""))==String(project.name):city["construction_priority"]=""
 
 static func rows(kinds:Array=KINDS)->Array[Dictionary]:
 	var held:=used();var room:=capacities();var result:Array[Dictionary]=[]
@@ -83,12 +85,12 @@ static func rows(kinds:Array=KINDS)->Array[Dictionary]:
 			if shortfall>0:missing.append("%s %s" % [str(snappedf(shortfall,.1)),item.to_lower()])
 		var status:="Auto-expand at 80%"
 		if pending:
-			status="Queued"
+			status="Queued" if requested(kind) else "Auto queued"
 			if "Hearth Circle" not in WorldSimulation.state.settlement_completed:status="Needs a hearth circle"
 			elif WorldSimulation.state.effective_workers("Construction")<=0:status="Needs builders"
 			elif not missing.is_empty():status="Needs "+", ".join(missing)
 			elif work>0:status="Building · %d%%" % roundi(work/float(project.days)*100)
 		var bill:PackedStringArray=[]
 		for item:String in project.materials:bill.append("%s %s" % [str(project.materials[item]),item.to_lower()])
-		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"pending":pending,"status":status,"added":project.capacity_added,"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
+		result.append({"kind":kind,"label":LABELS[kind],"used":held[kind],"capacity":room[kind],"pending":pending,"requested":requested(kind),"building":work>0,"status":status,"added":project.capacity_added,"unit":"rations" if kind=="food" else "water units" if kind=="water" else "bulk","tip":"Adds %s capacity. Costs %s and %s builder-work. Excess stock is exposed to loss; water collection stops when vessels are full." % [str(project.capacity_added),", ".join(bill),str(project.days)]})
 	return result
