@@ -721,6 +721,25 @@ func _resource_amount(parent:Node,heading:String,resource:String,amount:float,co
 	var label:=_line("%s %s" % [_quantity(amount),resource.to_lower()],20,T.INK,true)
 	label.name=heading.replace(" ","");label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(label)
 
+func _availability_tile(parent:Node,need:Dictionary,spare:float,ours:bool)->void:
+	var good:=String(need.resource);var amount:=float(need.amount)
+	var coverage:=clampf(spare/maxf(.01,amount),0.0,1.0)
+	var panel:=PanelContainer.new();panel.name=("OurNeed_" if ours else "TheirNeed_")+good.replace(" ","_")
+	panel.set_meta("needed",amount);panel.set_meta("spare",spare);panel.set_meta("coverage",coverage)
+	panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,10,0));parent.add_child(panel)
+	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",6);panel.add_child(box)
+	var heading:=HBoxContainer.new();box.add_child(heading);heading.add_child(S.icon(good,28))
+	var title:=_line(good,17,T.INK,true);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
+	var amounts:=GridContainer.new();amounts.columns=2;amounts.add_theme_constant_override("h_separation",16);box.add_child(amounts)
+	for index:int in 2:
+		var cell:=VBoxContainer.new();cell.size_flags_horizontal=Control.SIZE_EXPAND_FILL;amounts.add_child(cell)
+		cell.add_child(S.label(("WE NEED" if ours else "THEY NEED") if index==0 else ("THEY CAN SPARE" if ours else "WE CAN SPARE"),14,T.INK_MUTED))
+		var number:=S.label(_quantity(amount if index==0 else spare),24,T.GOLD_TEXT if index==0 else (T.TEAL_TEXT if spare>0 else T.RED_TEXT),true)
+		number.name="NeededAmount" if index==0 else "SpareAmount";cell.add_child(number)
+	var bar:=S.bar(coverage,T.GREEN if coverage>=1 else (T.GOLD if coverage>0 else T.RED),0,8);bar.name="ShortageCoverage";box.add_child(bar)
+	box.add_child(_line(String(need.purpose),14,T.INK_MUTED,true))
+	panel.tooltip_text="%s can cover %d%% of this material shortage from surplus. Barter payment, storage and transport limits still apply." % ["They" if ours else "We",roundi(coverage*100)]
+
 func _build_supply_offers(parent:Control,civ_id:String)->void:
 	parent.add_child(S.label("EXCHANGES YOU CAN SEND",14,T.INK_MUTED,true))
 	var offers:=Needs.offers("player",civ_id)
@@ -732,14 +751,13 @@ func _build_supply_offers(parent:Control,civ_id:String)->void:
 		var stock_grid:=_grid(parent,"SupplyAvailability",2,640)
 		for side:int in 2:
 			var col:=VBoxContainer.new();stock_grid.add_child(col)
-			col.add_child(S.label("WE NEED · THEY CAN SPARE" if side==0 else "THEY NEED · WE CAN SPARE",14,T.INK_MUTED,true))
+			col.add_child(S.label("SUPPLIES FOR US" if side==0 else "SUPPLIES FOR THEM",14,T.INK_MUTED,true))
 			var needs:Array=wants if side==0 else theirs
 			if needs.is_empty():col.add_child(_line("Food and building needs covered",14,T.INK_MUTED,true))
 			for need:Dictionary in needs.slice(0,3):
 				var good:=String(need.resource)
 				var spare:=Ledger.spare_of(civ_id if side==0 else "player",good)
-				col.add_child(_line("%s: need %s · spare %s" % [good,_quantity(float(need.amount)),_quantity(spare)],15,T.INK,true))
-				col.add_child(_line(String(need.purpose),14,T.INK_MUTED,true))
+				_availability_tile(col,need,spare,side==0)
 		if blocked.is_empty() and not wants.is_empty():parent.add_child(_line("An exchange needs surplus on both sides, room in both stores and carrying capacity.",14,T.INK_MUTED,true))
 	for offer:Dictionary in offers:
 		var panel:=PanelContainer.new();panel.name="SupplyOffer_"+String(offer.want).replace(" ","_");panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,12,0));parent.add_child(panel)

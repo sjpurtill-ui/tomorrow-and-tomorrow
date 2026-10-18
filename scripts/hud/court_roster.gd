@@ -76,7 +76,8 @@ static func domestic_people()->Array[Dictionary]:
 		var pid:=int(entry.get("target",{}).get("person_id",0))
 		if pid<=0:continue
 		entry.title=preload("res://scripts/major_families.gd").court_title(pid)
-		if String(entry.group) in ["council","settlement"]:entry.group="folk"
+		entry.interest=preload("res://scripts/major_families.gd").court_interest(pid)
+		entry.group="folk"
 	return roster
 
 static func people()->Array[Dictionary]:

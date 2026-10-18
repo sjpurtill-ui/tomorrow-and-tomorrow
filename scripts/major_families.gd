@@ -316,9 +316,15 @@ static func court_title(person_id:int)->String:
 		if int(f.head)==person_id:return String(f.name)+" · "+String(TRADES[f.id][0])
 	var person:=WorldSimulation.government.person_snapshot(person_id)
 	if person.is_empty():return "Community member"
+	var surname:=String(person.get("family","")).strip_edges()
+	if not surname.is_empty():return surname+" household"
+	var person_name:=String(person.get("name","")).strip_edges()
+	return person_name+"'s household" if not person_name.is_empty() else "Household spokesperson"
+
+static func court_interest(person_id:int)->String:
 	var profile:=speaker_profile(person_id)
-	var role:=String(profile.get("trade","Administration"))
-	return String({"Food":"Food gatherer","Survey":"Pathfinder","Extraction":"Wood and stone worker","Construction":"Builder","Crafting":"Maker","Logistics":"Carrier and trader","Knowledge":"Teacher","Administration":"Household elder","Defense":"Watch organizer"}.get(role,"Community member"))
+	var want:=String(profile.get("want","")).strip_edges()
+	return "Wants to "+want if not want.is_empty() else ""
 
 static func court_rows(person_id:int)->Array:
 	var person:=WorldSimulation.government.person_snapshot(person_id)

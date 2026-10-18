@@ -35,13 +35,11 @@ func test_a_town_leader_has_one_title_on_home_and_in_council()->void:
 	var leader:=GovernmentPeopleSystem.settlement_leader(id)
 	assert_dict(leader).is_not_empty()
 	var post:=Posts.of({"person_id":int(leader.person_id)})
-	assert_str(String(post.title)).contains(GovernmentPeopleSystem.settlement_leader_title())
+	assert_str(String(post.title)).is_equal(preload("res://scripts/major_families.gd").court_title(int(leader.person_id)))
+	assert_str(String(post.title)).contains("household")
 	assert_str(String(post.place)).is_equal(String(GameState.player_settlements[0].get("name","")))
 	# Home's leader row says the same title.
 	var words:=preload("res://scripts/hud/settlement_overview.gd")._office_words(leader)
 	assert_str(words).starts_with(String(post.title)+", age ")
-	# Every office they hold is in it, in the court's own words.
-	for office:Dictionary in GovernmentPeopleSystem.active_offices():
-		var holder:Variant=WorldSimulation.state.leadership_positions.get(String(office.key),{})
-		if holder is Dictionary and int((holder as Dictionary).get("person_id",0))==int(leader.person_id):
-			assert_str(String(post.title)).contains(String(office.title))
+	# Actual service assignments remain internal and do not replace household identity.
+	assert_dict(GameState.leadership_positions).is_not_empty()

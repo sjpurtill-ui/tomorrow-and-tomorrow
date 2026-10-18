@@ -37,3 +37,10 @@ Read docs/ADJUDICATION.md before any court, order, consequence or occupation wor
 Read docs/GENERAL_CAMPAIGN_DESIGN.md before military or leader work. Generals execute battlefield operations in every era; the player observes consequences and gives objectives through conversation. Do not revive the discarded direct-cohort-control design or make routine logistics a mandatory form-filling flow.
 
 The user considers the current development campaign a disposable test and prioritizes playable implementation and behavioral quality. Do not center progress reports on preserving that test save. This preference is scoped to this development campaign, not permission to delete arbitrary user data or interrupt other sessions.
+
+
+## Visual game UI — standing user preference
+
+The Trade screen's “we need / they can spare” comparison is the reference lesson: show quantities and relationships visually, not as sentences to decode. Use recognizable resource/person/building icons, explicit names and units, aligned quantities, and proportional bars where they explain capacity, shortage, coverage or progress. Put the two sides of an exchange next to each other. Color reinforces labels; it never carries meaning alone.
+
+Primary facts and decisions must be visible. Prefer direct buttons, resource tiles and compact visual comparisons to dropdowns, prose lists, or hidden detail panels. Use brief text for purpose, consequences and blockers; reserve longer explanations for optional detail. A large stack of cards containing paragraphs is still a text list. Do not invent precision or visualize unrelated quantities as one total. Review the rendered result at normal and narrow widths before calling a screen finished. Apply this lesson to new and revised game screens, not just Trade.

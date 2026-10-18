@@ -1,3 +1,13 @@
+## October 18 — Household identities and visual resource comparisons
+
+Status: READY on `codex/needs-driven-trade-storage`, based on `5dcc451491af53fb74602d2324bcd40020178538`; integrator delivery follows the verified push.
+
+Early court representatives now show their actual household identity and personal want rather than a skill-derived office such as Pathfinder. Established family heads retain their family/trade identities. The early tab is Households and concerns; roster search includes wants. This is presentation only: real government service assignments, labor, family emergence thresholds and saves are unchanged. It does not claim the later family panel has received the broader visual redesign proposed in the audit.
+
+Trade shortages now pair named resource icons and need/spare quantities with coverage bars and project purpose. Bars represent stock coverage, not a promise of an executable exchange. The user's visual-comparison lesson is recorded permanently in AGENTS.md for every future screen change.
+
+Validation: 62 checks across major families, person posts, Trade visuals and needs-driven trade pass with zero errors, failures or orphans (`/tmp/tt-trade-households-final.log`, report 92). Includes original labor/office preservation, household identity, wants, no premature major families, numeric shortage/coverage presentation, narrow Trade layout and conserved exchanges. Updated Trade native offscreen capture reviewed; no player window was presented. Court presentation has source/test validation; full live court review remains outstanding. No save migration or shared simulation hotspot changes. Generated metadata, captures and reports excluded.
+
 ## October 18 — Trade names both sides without dropdowns
 
 Status: INTEGRATED after validated work on `codex/needs-driven-trade-storage`, based on `91b1b98e8e4f325304ff68aa47ad64b3a1874803`.

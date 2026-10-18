@@ -168,6 +168,11 @@ func test_no_offer_shows_named_shortages_and_spares_instead_of_empty_abstract_to
 	var availability:=board.find_child("SupplyAvailability",true,false)
 	assert_object(availability).is_not_null()
 	assert_array(board.find_children("*","MenuButton",true,false)).is_empty()
-	var labels:=""
-	for label:Label in availability.find_children("*","Label",true,false):labels+=label.text+"\n"
-	assert_str(labels).contains("Timber: need 8 · spare 0")
+	var timber:=availability.find_child("OurNeed_Timber",true,false)
+	assert_object(timber).is_not_null()
+	assert_float(float(timber.get_meta("needed"))).is_equal(8.0)
+	assert_float(float(timber.get_meta("spare"))).is_equal(0.0)
+	assert_float(float(timber.get_meta("coverage"))).is_equal(0.0)
+	assert_str((timber.find_child("NeededAmount",true,false) as Label).text).is_equal("8")
+	assert_str((timber.find_child("SpareAmount",true,false) as Label).text).is_equal("0")
+	assert_object(timber.find_child("ShortageCoverage",true,false)).is_not_null()

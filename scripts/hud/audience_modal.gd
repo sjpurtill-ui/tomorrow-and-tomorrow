@@ -3232,7 +3232,7 @@ func show_court()->void:
 	var title:=Tokens.make_label("THE COURT",24,Tokens.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(title)
 	var close_button:=Button.new();close_button.text="Close";Tokens.apply_button_style(close_button);close_button.pressed.connect(_close);header.add_child(close_button)
 	var tabs:=HBoxContainer.new();tabs.name="CourtTabs";body.add_child(tabs)
-	for pair:Array in ([["interests","Families and parties"],["people","People and business"],["diplomacy","Diplomacy"]] if families.active() else [["interests","Household business"],["diplomacy","Diplomacy"]]):
+	for pair:Array in ([["interests","Families and parties"],["people","People and business"],["diplomacy","Diplomacy"]] if families.active() else [["interests","Households and concerns"],["diplomacy","Diplomacy"]]):
 		var button:=Button.new();button.name="CourtTab"+String(pair[0]);button.text=String(pair[1]);Tokens.apply_button_style(button,domestic_page==String(pair[0]))
 		var view:=String(pair[0]);button.pressed.connect(func()->void:domestic_page=view;show_court());tabs.add_child(button)
 	if domestic_page=="interests" and not families.data().is_empty():
@@ -3342,6 +3342,7 @@ func _rest_seat(entry:Dictionary)->Control:
 	var standing:=Stage.make_figure(entry.get("person",{}) as Dictionary,scene_portraits,String(entry.name).get_slice(" ",0),_short_title(String(entry.title)))
 	standing.name="Figure";standing.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	standing.size=SEAT_SIZE;holder.add_child(standing)
+	if not String(entry.get("interest","")).is_empty():holder.tooltip_text+="\n"+String(entry.interest)
 	if not regard.is_empty():
 		var gauge:=TextureRect.new();gauge.name="Regard";gauge.texture=Divine.meter_texture(float(regard.love),float(regard.dread),18);gauge.custom_minimum_size=Vector2(18,18)
 		gauge.size_flags_horizontal=Control.SIZE_SHRINK_CENTER;gauge.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -3418,7 +3419,7 @@ func _rest_column(node_name:String,heading:String,sub:String,content:Control,rat
 
 func _build_roster_list(roster:Array[Dictionary])->Control:
 	var list:=VBoxContainer.new();list.name="RosterList";list.add_theme_constant_override("separation",5)
-	# Keep the familiar council visible without turning every specialist and
+	# Keep household representatives visible without turning every specialist and
 	# visitor into another permanent row. The full roster stays searchable.
 	var rows:=VBoxContainer.new();rows.name="RosterPeople";rows.add_theme_constant_override("separation",5)
 	var footer:=HBoxContainer.new();footer.add_theme_constant_override("separation",6)
@@ -3428,7 +3429,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 	var fill:=func()->void:
 		for child in rows.get_children():rows.remove_child(child);child.queue_free()
 		var matches:=roster.filter(func(entry:Dictionary)->bool:
-			return roster_query.strip_edges().is_empty() or (String(entry.name)+" "+String(entry.title)+" "+Roster.group_word(String(entry.group))).to_lower().contains(roster_query.strip_edges().to_lower()))
+			return roster_query.strip_edges().is_empty() or (String(entry.name)+" "+String(entry.title)+" "+String(entry.get("interest",""))+" "+Roster.group_word(String(entry.group))).to_lower().contains(roster_query.strip_edges().to_lower()))
 		roster_page=clampi(roster_page,0,maxi(0,ceili(matches.size()/6.0)-1))
 		var first:=roster_page*6
 		for index in range(first,mini(first+6,matches.size())):rows.add_child(_roster_row(matches[index]))
@@ -3443,7 +3444,7 @@ func _build_roster_list(roster:Array[Dictionary])->Control:
 	next.pressed.connect(func()->void:roster_page+=1;fill.call())
 	fill.call()
 	if roster.is_empty():
-		var empty:=Tokens.make_label("No one holds office yet. Officials appear as your government grows.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
+		var empty:=Tokens.make_label("No household spokesperson is ready to meet yet.",13,Tokens.MUTED);empty.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(empty)
 	var aim:=String(preload("res://scripts/legacy_aims.gd").court_line())
 	if not aim.is_empty():
 		var current_aim:=Tokens.make_label(aim,14,Tokens.GOLD_TEXT);current_aim.name="CurrentAim";current_aim.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;list.add_child(current_aim)
@@ -3469,6 +3470,10 @@ func _roster_row(entry:Dictionary)->Control:
 	var sub_text:=String(entry.title)
 	if not regard.is_empty():sub_text+=" · "+String(regard.get("read",""))
 	var sub:=Tokens.make_label(sub_text,14,Tokens.TEXT_SOFT);sub.clip_text=true;sub.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(sub)
+	var interest:=String(entry.get("interest",""))
+	if not interest.is_empty():
+		var concern:=Tokens.make_label(interest,14,Tokens.GOLD_TEXT);concern.name="HouseholdConcern"
+		concern.clip_text=true;concern.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;concern.tooltip_text=interest;words.add_child(concern)
 	if not regard.is_empty():
 		var gauge:=TextureRect.new();gauge.texture=Divine.meter_texture(float(regard.love),float(regard.dread),22);gauge.custom_minimum_size=Vector2(22,22);gauge.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		gauge.tooltip_text=Divine.meter_words(float(regard.love),float(regard.dread));line.add_child(gauge)

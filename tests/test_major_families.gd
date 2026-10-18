@@ -358,3 +358,28 @@ func test_small_households_do_not_show_old_office_management()->void:
 		if int(entry.get("target",{}).get("person_id",0))>0:
 			assert_str(String(entry.title).to_lower()).not_contains("steward").not_contains("minister")
 	modal.queue_free();await get_tree().process_frame
+
+func test_household_identity_and_wants_replace_job_titles_without_reassigning_anyone()->void:
+	GameState.society_exchange.erase("major_families");GameState.ensure_population_total(283)
+	var offices:=GameState.leadership_positions.duplicate(true)
+	var allocation:=GameState.population_allocations.duplicate(true)
+	var roster:=preload("res://scripts/hud/court_roster.gd").domestic_people()
+	var checked:=0
+	for entry:Dictionary in roster:
+		var pid:=int(entry.get("target",{}).get("person_id",0))
+		if pid<=0:continue
+		checked+=1
+		var person:=GovernmentPeopleSystem.person_snapshot(pid)
+		var surname:=String(person.get("family",""))
+		assert_str(String(entry.title)).contains(surname if not surname.is_empty() else String(person.name))
+		assert_str(String(entry.title)).contains("household").not_contains("Pathfinder").not_contains("Keeper").not_contains("Chief")
+		assert_str(String(entry.interest)).starts_with("Wants to ")
+		assert_str(String(entry.group)).is_equal("folk")
+	assert_int(checked).is_greater(0)
+	var modal:=Modal.new();add_child(modal);await get_tree().process_frame
+	assert_str((modal.find_child("CourtTabinterests",true,false) as Button).text).is_equal("Households and concerns")
+	assert_array(modal.find_children("HouseholdConcern","Label",true,false)).is_not_empty()
+	assert_dict(GameState.leadership_positions).is_equal(offices)
+	assert_dict(GameState.population_allocations).is_equal(allocation)
+	assert_bool(F.data().is_empty()).is_true()
+	modal.queue_free();await get_tree().process_frame
