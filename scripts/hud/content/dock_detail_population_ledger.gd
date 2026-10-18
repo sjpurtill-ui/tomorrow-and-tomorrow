@@ -12,7 +12,7 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"All our people",
 		"title":"Births and deaths",
-		"subtabs":["Overview","Every death"],
+		"subtabs":["Overview","Every death","Births & risks"],
 	}
 
 func tab(_sub:int)->Dictionary:
@@ -30,23 +30,27 @@ func tab(_sub:int)->Dictionary:
 		{"label":"NEWBORNS DIED","value":str(GameState.lifetime_neonatal_deaths),"note":"in their first month","note_color":Tokens.RED_TEXT,"tip":"Babies who died in their first month, since the people set out"},
 	]
 	var killing:Dictionary=preload("res://scripts/hud/content/dock_detail_health.gd").mortality_block("How many people this cause kills each year at the present rate")
-	var blocks:Array=[
-		{"type":"tiles","heading":"Mothers and babies","items":maternity_items},
-	]
+	var blocks:Array=[]
+	if _sub==2:
+		blocks.append({"type":"fact_grid","heading":"Mothers and babies","items":maternity_items})
+		if not killing.is_empty():blocks.append(killing)
+		blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
+		return {"kpis":kpis,"blocks":blocks}
 	for reading:Dictionary in kpis:reading["glance"]=true
 	var records:=grouped_deaths(GameState.demographic_ledger)
 	if _sub==1:
 		records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
-		return {"blocks":_death_pages(records,false)}
-	blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
-	if not killing.is_empty():
-		blocks.append(killing)
+		return {"blocks":[{"type":"death_archive","records":GameState.demographic_ledger.filter(func(r:Dictionary)->bool:return String(r.get("kind",""))=="death")}]}
+	var readings=preload("res://scripts/hud/population_readings.gd")
+	var balance:Dictionary=readings.balance(GameState);balance.type="population_balance";balance.heading="Population change";blocks.push_front(balance)
+	var ages:Array=readings.cohorts(GameState)
+	if not ages.is_empty():blocks.append({"type":"bars","heading":"Age groups","note":"Modeled cohorts, all our people","items":ages})
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
-	blocks.append({"type":"tiles","heading":"Where everyone is","items":[
+	blocks.append({"type":"fact_grid","heading":"Where everyone is","min_column":210,"items":[
 		{"label":"WORKING","value":str(int(profile.get("productive",0))),"note":"gathering, making, building","note_color":Tokens.GREEN_TEXT,"tip":"People doing the day's work"},
 		{"label":"TENDING OTHERS","value":str(int(profile.get("support",0))),"note":"care and keeping order","note_color":Tokens.MUTED,"tip":"People looking after others and keeping things running"},
-		{"label":"CHILDREN AND ELDERS","value":str(int(profile.get("dependent",0))),"note":"looked after by the rest","note_color":Tokens.MUTED,"tip":"People too young or too old for the day's work"},
-		{"label":"AWAY","value":str(int(profile.get("absent",0))+int(profile.get("mobilized",0))),"note":"on the road or under arms","note_color":Tokens.AMBER_TEXT,"tip":"People away on journeys or called to fight"},
+		{"label":"DEPENDENTS","value":str(int(profile.get("dependent",0))),"note":"looked after by the rest","note_color":Tokens.MUTED,"tip":"Everyone outside the available workforce"},
+		{"label":"DEFENSE & AWAY","value":str(int(profile.get("absent",0))+int(profile.get("mobilized",0))),"note":"on the road or under arms","note_color":Tokens.AMBER_TEXT,"tip":"People away on journeys or called to fight"},
 	]})
 	var workforce:=GameState.workforce_capacity_snapshot()
 	blocks.append({"type":"text","heading":"How much work gets done","text":"%d people are at work, and between them they get done what %s people at full strength would.%s" % [int(workforce.people),preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),(" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else ""]})
@@ -54,7 +58,7 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [death_page,summary_page,GameState.demographic_ledger.size(),GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0))]
+	return [death_page,summary_page,GameState.demographic_ledger.size(),GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.population_cohorts.duplicate(),GameState.vital_statistics_history.hash(),GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0))]
 
 static func grouped_deaths(ledger:Array)->Array:
 	var groups:Dictionary={}

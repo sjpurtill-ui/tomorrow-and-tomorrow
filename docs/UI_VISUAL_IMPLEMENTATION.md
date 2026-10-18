@@ -17,10 +17,11 @@ Unchecked entries remain required work. An integrated source change is not a cla
 ## Batch 2: people and production
 
 - [x] People: reconciled allocation strip, selected mode, donor/recipient change, effects and explicit estimate failures.
-- [ ] Home: compact coverage comparisons and visible current-work choices.
+- [x] Home: compact coverage comparisons and visible current-work choices.
 - [x] Military production: dense simultaneous lines, actual efficiency/resource penalty/stop threshold.
 - [x] Civilian production: consistent rows, purpose, inputs/output/target.
 - [ ] Production catalog, selected line and receipts: bounded visual choices and history.
+- [ ] Trade: cargo progress, projected shortage coverage and concrete unavailable-offer conditions.
 - [x] Wealth/purse: distinct accounts and funded service cost/coverage comparisons.
 
 ## Batch 3: knowledge and health
@@ -30,7 +31,7 @@ Unchecked entries remain required work. An integrated source change is not a cla
 - [x] Research totals by additive category, last three discoveries and secondary archive.
 - [x] Longevity: real unlocked/delivered benefits and adoption blockers, honest attribution.
 - [x] Hardship: existing timeline plus selected event loss pictograms.
-- [ ] Population/capacity details: reconciled flow, trustworthy cohorts, bounded death archive.
+- [x] Population/capacity details: reconciled flow, trustworthy cohorts, bounded death archive.
 
 ## Batch 4: households and politics
 
@@ -96,3 +97,7 @@ Food and Materials have retained arriving/held/leaving readings with explicit un
 ## Checkpoint 8 — Named inputs and global research totals
 
 Military rows show named stock/need comparisons and retain current controls. Civilian rows show purpose, actual input rates, output and target; catalog adds search, six choices/page and visible costs/result/blockers. Research opens on all additive totals and the global latest three; archive is secondary. Retained Inquiry lanes and bounded knowledge branches from checkpoint 2 remain. 20 checks pass and actual wide/narrow native renders reviewed with clean capture exit. Line-history and remaining tasks are still outstanding.
+
+## Checkpoint 9 — Home and population reconciliation
+
+Home adds paired shelter/care/food readings and bounds its artwork, with narrow action-first layout. Population reconciles one dated interval, exposes unknown/unexplained changes honestly, shows existing complete cohorts and separates birth risks from its searchable six-record archive. Chronicle reuses the same balance. 34 distinct checks pass; actual native Home/population wide/narrow views reviewed with clean exit. No simulation/save change. Broader Chronicle/capacity visual regression and other final acceptance remain tracked above.

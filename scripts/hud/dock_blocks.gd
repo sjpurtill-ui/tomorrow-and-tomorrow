@@ -56,6 +56,10 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 				heading_row.add_child(note)
 		match String(block.get("type","text")):
+			"population_balance":
+				var board:=preload("res://scripts/hud/population_balance_view.gd").new();section.add_child(board);board.setup(block)
+			"death_archive":
+				var board:=preload("res://scripts/hud/death_archive.gd").new();section.add_child(board);board.setup(block)
 			"known_world":
 				var board:=preload("res://scripts/hud/known_world_board.gd").new();section.add_child(board);board.setup(block)
 			"peoples_known":

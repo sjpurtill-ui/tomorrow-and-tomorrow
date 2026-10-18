@@ -9,6 +9,10 @@ var data: Dictionary = {}
 var comparison_active := false
 var comparison: Dictionary = {}
 var _refs: Dictionary = {}
+var _housing_pair:Control
+var _care_pair:Control
+var _food_pair:Control
+var _comparison_grid:GridContainer
 var _buttons: Dictionary = {}
 var _hero: BoxContainer
 var _society: BoxContainer
@@ -101,6 +105,7 @@ func _build() -> void:
 	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_picture_frame.add_child(_portrait)
 	_label(scene, "housing", 20)
+	_housing_pair=preload("res://scripts/hud/comparison_tile.gd").new();scene.add_child(_housing_pair)
 	_label(scene, "housing_detail", 14, T.MUTED)
 	_label(scene, "housing_effect", 14, T.BODY)
 	var right := _column(_hero, 12)
@@ -146,6 +151,9 @@ func _build() -> void:
 	more.tooltip_text = "Preview five percentage points to Keeping & caring across the civilization. Uses the existing donor and food-protection rules. Changes no assignments."
 	more.pressed.connect(_compare_care)
 	_label(right, "comparison", 14)
+	_comparison_grid=GridContainer.new();_comparison_grid.columns=2;_comparison_grid.add_theme_constant_override("h_separation",10);right.add_child(_comparison_grid)
+	_care_pair=preload("res://scripts/hud/comparison_tile.gd").new();_comparison_grid.add_child(_care_pair)
+	_food_pair=preload("res://scripts/hud/comparison_tile.gd").new();_comparison_grid.add_child(_food_pair)
 	var actions := HFlowContainer.new()
 	actions.add_theme_constant_override("h_separation", 8)
 	right.add_child(actions)
@@ -361,7 +369,8 @@ func _fill() -> void:
 	var housing: Dictionary = conditions.get("housing", {})
 	var cap := int(housing.get("capacity", 0))
 	_set_text("housing", "Shelter places for everyone" if cap >= count else "%s people without a shelter place" % _num(maxi(0, count - cap)))
-	_set_text("housing_detail", "%s people · %s places · %s spare\nHome quality %s/100 · upkeep %s%%" % [_num(count), _num(cap), _num(housing.get("spare", 0)), _num(float(housing.get("quality", 0)) * 100), _num(float(housing.get("upkeep", 0)) * 100)])
+	_housing_pair.fill("Shelter", "Residents", count, "Places", cap, "people & shelter places")
+	_set_text("housing_detail", "Home quality %s/100 · upkeep %s%%" % [_num(float(housing.get("quality", 0)) * 100), _num(float(housing.get("upkeep", 0)) * 100)])
 	var illness := (1.0 - float(housing.get("illness_factor", 1))) * 100.0
 	_set_text("housing_effect", "Home quality reduces illness deaths by %s%% in the current calculation." % _num(illness) if illness > .01 else "Shelter capacity and home quality are separate needs.")
 	var water: Dictionary = conditions.get("water", {})
@@ -423,6 +432,11 @@ func _fill_comparison() -> void:
 				if warnings.size() > 1: text += " (+%d more conditions; see tooltip)" % (warnings.size() - 1)
 			_refs.comparison.tooltip_text = "%s\n%s\n%s" % [String(comparison.get("scope", "")), str(comparison.get("warnings", [])), str(comparison.get("assumptions", []))]
 		else: text = String(comparison.get("reason", "A comparison is not available yet."))
+	_comparison_grid.visible=comparison_active and bool(comparison.get("ok",false))
+	if _comparison_grid.visible:
+		_care_pair.fill("Care target", "Current", float(comparison.before.get("care",{}).get("target",0))*100, "Proposed", float(comparison.after.get("care",{}).get("target",0))*100,"% coverage")
+		_food_pair.fill("Food balance", "Current", float(comparison.before.get("food",{}).get("net",0)), "Proposed", float(comparison.after.get("food",{}).get("net",0)),"rations / day")
+		text=text.substr(text.find("All towns:")) if text.contains("All towns:") else text
 	_set_text("comparison", text)
 	var compare: Button = _buttons.CareCompare
 	compare.disabled = not _valid(data.get("compare_care"))
@@ -635,6 +649,9 @@ func _layout() -> void:
 	var available := _hero.size.x if _hero.size.x > 0 else size.x
 	var narrow := available < 620
 	_hero.vertical = narrow
+	var consequences:=_hero.get_node("HumanConsequences")
+	if consequences.get_index()!=(0 if narrow else 1):_hero.move_child(consequences,0 if narrow else 1)
+	_comparison_grid.columns=1 if available<410 else 2
 	_society.vertical = available < 880
 	_foundations.vertical = narrow
 	(_refs.food_box as BoxContainer).vertical = narrow
@@ -644,7 +661,9 @@ func _layout() -> void:
 
 func _fit_picture() -> void:
 	if _picture_frame == null or _picture_frame.size.x <= 0: return
-	var height := ceilf(_picture_frame.size.x / maxf(.1, _picture_frame.ratio))
+	var height := minf(180.0 if _hero.vertical else 280.0,ceilf(_picture_frame.size.x/1.35))
+	_picture_frame.ratio=_picture_frame.size.x/maxf(1,height)
+	_portrait.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	if not is_equal_approx(_picture_frame.custom_minimum_size.y, height):
 		_picture_frame.custom_minimum_size.y = height
 

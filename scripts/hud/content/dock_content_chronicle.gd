@@ -56,7 +56,7 @@ func _lives_blocks()->Array:
 	]
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
 	# Those at work are the top bar's AT WORK (war_forces_model.gd at_work); not repeated here.
-	var groups:=[["Tending others","support","care and keeping order","ceremony"],["Children and elders","dependent","looked after by the rest","birth"],["Away","away","on the road or under arms","scout"]]
+	var groups:=[["Tending others","support","care and keeping order","ceremony"],["Dependents","dependent","looked after by the rest","birth"],["Defense & away","away","on the road or under arms","scout"]]
 	var everyone:=0
 	for key:String in ["productive","support","dependent","absent","mobilized"]:everyone+=int(profile.get(key,0))
 	var where:Array=[]
@@ -67,6 +67,8 @@ func _lives_blocks()->Array:
 	where.append({"label":"Their work, in full-strength hands","value":preload("res://scripts/hud/production_plain.gd").number(float(workforce.effective_workers)),"icon":_mark("work"),
 		"tip":"A different measure from AT WORK on the top bar: what everyone at work gets done, counted as people at full strength (the skilled count for more, the hurt and weary for less).%s" % ((" %d came home from fighting with lasting injuries; they manage lighter work better than carrying or building." % int(workforce.lasting_injuries)) if int(workforce.lasting_injuries)>0 else "")})
 	var blocks:Array=[{"type":"fact_grid","heading":"Since we set out","min_column":250,"items":lifetime},{"type":"fact_grid","heading":"Where everyone is","min_column":250,"items":where}]
+	var balance:Dictionary=preload("res://scripts/hud/population_readings.gd").balance(GameState);balance.type="population_balance";balance.heading="Population change";blocks.push_front(balance)
+	blocks.append({"type":"actions","items":[focused_action("Search death records","Names, causes, places and the selected account",func()->Dictionary:return {"blocks":[{"type":"death_archive","records":GameState.demographic_ledger.filter(func(r:Dictionary)->bool:return String(r.get("kind",""))=="death")}]} )]})
 	var killing:Dictionary=Health.mortality_block("How many people this cause kills each year at the present rate")
 	if not killing.is_empty():blocks.append(killing)
 	# Every cause of death so far, largest first.
