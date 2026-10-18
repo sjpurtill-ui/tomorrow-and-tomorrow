@@ -127,6 +127,7 @@ static func answer_for(audience_id:String,text:String)->String:
 static func sheet(which:Array)->Dictionary:
 	var day:=_day()
 	var out:={"offices":which.duplicate(),"day":day,"when":EraWords.when(day)}
+	out["families"]=preload("res://scripts/major_families.gd").brief()
 	_common(out)
 	if which.has("war"): _war(out)
 	if which.has("stores"): _stores(out)
@@ -726,6 +727,7 @@ static func hands()->Array:
 
 static func text(s:Dictionary)->String:
 	var lines:PackedStringArray=PackedStringArray()
+	lines.append(String(s.get("families","")))
 	lines.append("Today: %s. Home: %s, %d people." % [String(s.get("when","")),String(s.get("home","")),int(s.get("home_people",0))])
 	if String(s.get("nation",""))!="": lines.append("Our nation, all our towns together, is called %s." % String(s.nation))
 	if s.get("purse") is Dictionary and not (s.purse as Dictionary).is_empty(): lines.append(PurseOrders.text(s.purse))

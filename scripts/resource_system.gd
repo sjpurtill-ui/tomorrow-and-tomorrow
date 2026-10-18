@@ -740,6 +740,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")+preload("res://scripts/civic_building_effects.gd").effect("extraction")
 	# Storehouses and yards the builders raised and keep (built_fabric.gd STOREHOUSE_EXTRACTION).
 	output_bonus+=preload("res://scripts/built_fabric.gd").extraction_bonus()
+	output_bonus*=preload("res://scripts/major_families.gd").factor("Extraction")
 	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
 	# Searched land: × (0.75 + 0.5 × cover), an older save's blended in (land_yield_factor).
 	var land_factor:=land_yield_factor()
@@ -844,7 +845,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		var profile:=_material_profile(String(deposit.resource))
 		var route_factor:=0.34+float(deposit.route)*0.66+route_speed_effect
 		var distance_factor:=1.0+float(deposit.get("haul_km",deposit.distance_km))/10.0
-		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor*span
+		var haul_capacity:=assigned_carriers*5.0/maxf(0.2,float(profile.bulk))*route_factor*labor_eff*haul_effect/distance_factor*span*preload("res://scripts/major_families.gd").factor("Logistics")
 		var dispatched:=minf(waiting,haul_capacity)
 		if dispatched>0.0:
 			deposit.stock_at_source=waiting-dispatched

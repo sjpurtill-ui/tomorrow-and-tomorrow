@@ -585,7 +585,7 @@ static func plan()->Dictionary:
 ## sets, kind, inputs, reason}: `hands` makers spent the whole day on arms.
 static func make(makers:float,efficiency:float,reserve:Dictionary={})->Dictionary:
 	_reserved=reserve
-	var out:=_make(makers,efficiency)
+	var out:=_make(makers,efficiency*preload("res://scripts/major_families.gd").factor("Defense"))
 	_reserved={}
 	return out
 

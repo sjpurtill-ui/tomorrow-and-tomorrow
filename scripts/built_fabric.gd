@@ -605,7 +605,7 @@ static func _is_home()->bool:
 	return bool(WorldSimulation.settlements.settlement_record(id).get("primary",false))
 
 static func _labor()->float:
-	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*preload("res://scripts/major_families.gd").factor("Construction")
 
 static func _all_builders()->float:
 	return maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))

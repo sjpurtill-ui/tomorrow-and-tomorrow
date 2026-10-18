@@ -554,7 +554,7 @@ func daily_progress(discovery:Dictionary,team_multiplier:float,leader_factor:flo
 	var activity:=0.65
 	for activity_signal in discovery.get("signals",[]): activity+=float(latest_context.get(activity_signal,0.0))*0.22
 	var daily:=float(discovery.get("chance",0.001))/research_difficulty(discovery,WorldSimulation.state.world_seed)*team_multiplier*activity*material_evidence*leader_factor*WorldSimulation.consequences.discovery_multiplier()*(1.0+WorldSimulation.progression.effect("knowledge_rate"))*0.12
-	return daily*Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)
+	return daily*Pathways.multiplier(discovery)*(.85 if Exchange.studying() else 1.0)*preload("res://scripts/major_families.gd").factor("Knowledge")
 
 
 ## Unknown questions that build on `id` (name it among their foundations).

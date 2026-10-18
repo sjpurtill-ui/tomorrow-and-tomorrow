@@ -287,7 +287,7 @@ static func workforce() -> Dictionary:
 	# reduces the city's built workplace capacity rather than a decorative score.
 	var facilities:=float(WorldSimulation.settlements.city_capacities().get("workplace_condition",.5))
 	var powered_factor:=1.0+minf(.5,preload("res://scripts/technology_operations.gd").service("mechanical_work")/maxf(1.0,workers))
-	return {"powered_factor":powered_factor,"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities*powered_factor}
+	return {"powered_factor":powered_factor,"workers":workers,"health":health,"labor_efficiency":labor,"logistics":logistics,"workplace_condition":facilities,"condition_factor":health*labor*logistics*facilities*powered_factor*preload("res://scripts/major_families.gd").factor("Crafting")*preload("res://scripts/major_families.gd").factor("Defense")}
 
 static func advance(host: Node, job: Dictionary, work: float, supply:Dictionary={}) -> void:
 	job.last_output=0;job.last_work=0.0;job.last_consumed={}

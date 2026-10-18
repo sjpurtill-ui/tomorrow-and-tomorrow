@@ -3215,42 +3215,49 @@ var roster_query:=""
 var roster_page:=0
 var foreign_selected:=""
 
+var domestic_page:="interests"
+var family_selected:="Food"
+
 func show_court()->void:
-	## The whole court gathered in its setting, nobody yet before you.
 	_reset_card("rest")
 	from_court=true
 	accent=Tokens.GOLD
-	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.RULE,1,Tokens.RADIUS_CARD,0)
-	style.shadow_color=Color(0,0,0,.45);style.shadow_size=28
-	card.add_theme_stylebox_override("panel",style)
-	body=VBoxContainer.new();body.name="CourtAtRest";body.add_theme_constant_override("separation",0);card.add_child(body)
-	var roster:=Roster.people()
-	body.add_child(_build_rest_scene(roster))
-	var lower:=MarginContainer.new();lower.size_flags_vertical=Control.SIZE_EXPAND_FILL
-	for side in ["left","right"]:lower.add_theme_constant_override("margin_"+side,18)
-	lower.add_theme_constant_override("margin_top",12);lower.add_theme_constant_override("margin_bottom",10)
-	body.add_child(lower)
-	var columns:=HBoxContainer.new();columns.add_theme_constant_override("separation",16);lower.add_child(columns)
-	columns.add_child(_rest_column("CourtRoster","THE COURT","Send for anyone; they come at once.",_build_roster_list(roster),1.1))
-	var business_scroll:=ScrollContainer.new();business_scroll.name="CourtBusinessScroll";business_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	business_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;columns.add_child(business_scroll)
-	var business:=VBoxContainer.new();business.name="CourtBusiness";business.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	business.add_theme_constant_override("separation",10);business_scroll.add_child(business)
-	var waiting:=_build_antechamber()
-	if bool(waiting.get_meta("has_business",false)):
-		var chamber:=_rest_column("Antechamber","WAITING FOR YOU","",waiting,1.0,false)
-		business.add_child(chamber)
-	else:waiting.queue_free()
-	var abroad:=_rest_column("ForeignPeoples","SEND WORD ABROAD","",_build_foreign_list(),1.0,false)
-	abroad.tooltip_text="Your envoys carry your brief to their rulers.";business.add_child(abroad)
+	card.add_theme_stylebox_override("panel",Tokens.flat(Tokens.PANEL_BG_SOLID,Tokens.RULE,1,Tokens.RADIUS_CARD,16))
+	body=VBoxContainer.new();body.name="CourtAtRest";body.add_theme_constant_override("separation",12);card.add_child(body)
+	var families=preload("res://scripts/major_families.gd")
+	families.ensure()
+	var header:=HBoxContainer.new();body.add_child(header)
+	var title:=Tokens.make_label("THE COURT",24,Tokens.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;header.add_child(title)
+	var close_button:=Button.new();close_button.text="Close";Tokens.apply_button_style(close_button);close_button.pressed.connect(_close);header.add_child(close_button)
+	var tabs:=HBoxContainer.new();tabs.name="CourtTabs";body.add_child(tabs)
+	for pair:Array in [["interests","Families and parties" if families.active() else "Household business"],["officials","Officials and orders"],["diplomacy","Diplomacy"]]:
+		var button:=Button.new();button.name="CourtTab"+String(pair[0]);button.text=String(pair[1]);Tokens.apply_button_style(button,domestic_page==String(pair[0]))
+		var view:=String(pair[0]);button.pressed.connect(func()->void:domestic_page=view;show_court());tabs.add_child(button)
+	if domestic_page=="interests" and not families.data().is_empty():
+		var panel:=preload("res://scripts/hud/court_families_panel.gd").new()
+		if families.family(family_selected).is_empty() and not families.data().families.is_empty():family_selected=String(families.data().families[0].id)
+		body.add_child(panel);panel.build(family_selected)
+		panel.selected.connect(func(id:String)->void:family_selected=id;show_court())
+		panel.changed.connect(show_court)
+		panel.summon.connect(func(id:int)->void:summon({"person_id":id}))
+	else:
+		var scroll:=ScrollContainer.new();scroll.name="CourtBusinessScroll";scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;body.add_child(scroll)
+		var stack:=VBoxContainer.new();stack.size_flags_horizontal=Control.SIZE_EXPAND_FILL;stack.add_theme_constant_override("separation",12);scroll.add_child(stack)
+		if domestic_page=="diplomacy":
+			stack.add_child(_build_antechamber());stack.add_child(_build_foreign_list())
+		elif domestic_page=="officials":
+			stack.add_child(_build_antechamber());stack.add_child(_build_roster_list(Roster.people()))
+		else:
+			var note:=Tokens.make_label(families.brief(),16,Tokens.TEXT_SOFT);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(note)
+			stack.add_child(_build_antechamber())
+			stack.add_child(_build_roster_list(Roster.people()))
 	body.add_child(_build_rest_footer())
 	rest_signature=_rest_state()
 	_fit()
-	_layout_rest_seats.call_deferred()
 
 func _rest_state()->Array:
 	## What the court at rest shows; it redraws only when this changes.
-	return [Hall.waiting().size(),Hall.matter_counts().hash(),Roster.people().size(),Roster.foreign_peoples().size(),int(GameState.elapsed_days),
+	return [Hall.waiting().size(),Hall.matter_counts().hash(),Roster.people().size(),Roster.foreign_peoples().size(),preload("res://scripts/major_families.gd").data().get("revision",0),
 		GovernmentPeopleSystem.revision,AdvisorSystem.council_decision_items(3,false).size(),Tokens.color_mode,ForeignDialogue.pending.size(),Backdrop.current_tier(),Backdrop.current_stage()]
 
 func _rest_scene_height()->float:
@@ -3600,6 +3607,15 @@ func _build_rest_footer()->Control:
 func speak_to_court(text:String)->void:
 	## Words spoken to the court as a whole reach whoever they name, or the
 	## local leader; a foreign ruler's name sets them down as an envoy's brief.
+	var family_order:=preload("res://scripts/court_family_orders.gd").read(text)
+	if not family_order.is_empty():
+		var tracker=preload("res://scripts/order_tracker.gd")
+		var order:int=tracker.register(text,"court",text)
+		var result:=preload("res://scripts/major_families.gd").decide(String(family_order.action),String(family_order.id))
+		if result.ok:tracker.done(order,String(result.text))
+		else:tracker.refuse(order,String(result.text))
+		domestic_page="interests";show_court();_court_note(String(result.text))
+		return
 	var named:=Roster.find_by_words(text)
 	var foreign:=Roster.find_foreign_by_words(text)
 	# "Attack Tsaren" names a foreign people but is an order for our war

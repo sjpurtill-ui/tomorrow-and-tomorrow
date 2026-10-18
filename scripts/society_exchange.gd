@@ -32,6 +32,7 @@ static func number(value:Variant)->bool:return (value is int or value is float) 
 static func valid(value:Variant)->bool:
 	if not value is Dictionary:return false
 	if value.is_empty():return false
+	if not preload("res://scripts/major_families.gd").valid(value.get("major_families",{})):return false
 	if not preload("res://scripts/sec_specialist_supply.gd").valid(value.get("sec_specialist_archive",{})):return false
 	if not preload("res://scripts/scholar_visits.gd").valid(value.get("scholar_visits",{})):return false
 	if not value.has_all(empty_state().keys()):return false

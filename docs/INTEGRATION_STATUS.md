@@ -1,3 +1,17 @@
+## October 17 — Evolving families / contextual court characters
+
+Status: READY — validated in `codex/evolving-major-families`
+at `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, based on
+`96010115c1c897fcf00035ee7dd5a00cd803ffc8`. Not yet integrated.
+
+Domestic court is organized around active trade families and their evolving
+political coalitions. User correction is authoritative: efficiency bonuses and
+penalties, never labor reassignment. Values, inherited culture, succession,
+rival contests and desire-driven voices use the actual simulation records.
+92 distinct regression checks pass; final family run 31/31 with zero errors,
+failures or orphans. Government still owns named people and labor; Defense remains the only troop
+manpower source. See FEATURE_RECONCILIATION for precise behavior and boundaries.
+
 ## October 17 — Consequential visits from 1,000 to 10,000 people
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

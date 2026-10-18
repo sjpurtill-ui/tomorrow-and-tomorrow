@@ -210,6 +210,7 @@ func process_day(day:int)->Array[Dictionary]:
 	_ensure_pool()
 	_synchronize_office_holders(events,true)
 	_ensure_local_leaders(events)
+	preload("res://scripts/major_families.gd").tick(day)
 	_delegate_settlements(day)
 	preload("res://scripts/civic_administration.gd").finish_day(self)
 	_sync_advisor_roster()

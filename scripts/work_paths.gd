@@ -233,7 +233,7 @@ static func current()->String:
 		var day:=int(WorldSimulation.state.elapsed_days)
 		var reviewed:=int(path.get("reviewed",-REVIEW_DAYS))
 		if held()=="" or day-reviewed>=REVIEW_DAYS or reviewed>day:
-			var pick:=choose(PERSONALITY.from_values(WorldSimulation.state.societal_values),situation(),held())
+			var pick:=choose(PERSONALITY.from_values(preload("res://scripts/major_families.gd").work_values()),situation(),held())
 			record(String(pick.id),String(pick.why),float(pick.score),"leaders")
 	var id:=held()
 	return id if id!="" else "balanced"

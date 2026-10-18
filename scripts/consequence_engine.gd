@@ -1208,7 +1208,7 @@ func tools_factor() -> float:
 ## _local_survey_inputs): the work pace, signs of minerals about, and the
 ## founding tradition's promise to searchers (game_state.gd survey_output).
 func survey_factor() -> float:
-	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)*(1.0+WorldSimulation.state.founding_effect("survey_output"))
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)*(1.0+WorldSimulation.state.founding_effect("survey_output"))*preload("res://scripts/major_families.gd").factor("Survey")
 
 
 ## Returns the event raised, or {} while the condition's cooldown runs.

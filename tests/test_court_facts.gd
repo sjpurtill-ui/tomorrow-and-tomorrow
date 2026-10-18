@@ -288,6 +288,11 @@ func test_every_official_knows_who_bowed_who_arms_and_what_is_told()->void:
 	var other:=String(CivilizationSystem.civilizations[1].id)
 	answer._bind(civ_id,int(GameState.elapsed_days),12.0,"Tam, son of Ilak","")
 	answer._begin_arming(other,int(GameState.elapsed_days),{"why_all_in":"they resent us"})
+	# Forewarning is a seeded detection roll. Verify ignorance first, then
+	# explicitly give the officials the report this test expects them to know.
+	answer.state().arming[other].heard=false
+	assert_str(Facts.text(Facts.sheet(["war"]))).not_contains("Gathering every spear against us")
+	answer.state().arming[other].heard=true
 	preload("res://scripts/divine_regard.gd").record_envoy_harm(other,String(CivilizationSystem.civilizations[1].name),"Solv Greyeyes","kill",0.3)
 	for office in [["stores"],["war"],["tribute"]]:
 		var said:=Facts.text(Facts.sheet(office))

@@ -2342,6 +2342,9 @@ static func _grievance_words(person:Dictionary,refused_decree:String)->String:
 
 static func _generate_court_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var type:=String(occasion.get("type",""))
+	# Organized houses replace routine domestic grievance petitions. Crises,
+	# campaign reports, and explicit summons still reach their responsible official.
+	if preload("res://scripts/major_families.gd").active() and type in ["grievance","refusal_grievance"]:return {}
 	var data:Dictionary=occasion.get("data",{}) if occasion.get("data") is Dictionary else {}
 	var person:=_official(int(occasion.get("person_id",0)))
 	# A war the war leader already carries needs no second, generic war petition.

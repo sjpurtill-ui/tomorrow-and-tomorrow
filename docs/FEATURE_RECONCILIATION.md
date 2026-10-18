@@ -1,3 +1,66 @@
+## October 17 — Evolving families and a court of interests
+
+Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch
+`codex/evolving-major-families`, base `96010115c1c897fcf00035ee7dd5a00cd803ffc8`.
+Scope: family institutions, contextual characters, court navigation and dialogue,
+efficiency modifiers, cultural pressure, additive save validation, and tests.
+Shared hotspots: a research-rate multiplier in `discovery_system.gd`; no edits to
+terrain, project settings, manpower, or the save format owner.
+
+Families form from active trades at 10,000 people. Their continuing organizations
+advance through influence at 100,000, factions at 500,000, emerging parties at
+5 million, and established parties at 20 million. Population unlocks a stage;
+6/12/24/36 monthly organization credits mature successive stages. Favor or an
+actual appointment accelerates organization. The same named institution keeps
+its founding history, rivalries, loyalty and standing through head succession.
+GovernmentPeopleSystem remains the sole owner of these public people.
+
+Favor endorses an efficiency program. No family decision reassigns workers,
+changes the People split, or invents manpower. Bonuses are 6–12 percentage
+points distributed across the endorsed program, with a 3-point contextual
+tradeoff. Rival contest victories can impose 3 points of resistance (6 once
+political). Effects are bounded to 0.85–1.15 per domain and enter real food,
+extraction, hauling, survey, building, craft, research, administration, and
+military-production rates. Military production also retains craft efficiency;
+there is no direct combat or extra-recruit bonus. Funding and trade requests
+use the existing purse and enterprise policy controls, with their existing costs.
+
+Official values respond to patronage; lived values respond more slowly to
+measured outcomes. Bounded inherited culture continues to exert pressure after
+favor ends. Its contribution is excluded from the automatic work-path choice.
+Party coalitions form from value agreement, retain their founding history, and
+can lose or gain houses when succession changes an outlook. Established parties
+review leadership annually by expertise and agreement; this does not impose a
+national election system or change the player's government form.
+
+Heads have wants, fears, temperament and optional humor derived from their
+existing personality. Small-hearth motives concern safety, food, useful ideas
+and recognition. Conquest requires at least 100,000 people, 100 existing Defense
+workers, two recorded victories, and an assertive, risk-taking head. This is an
+ideological gate, not a restriction on early raids or battles. Offline dialogue
+and live-voice prompts share these records. Humor is occasional and suppressed
+in hardship. Narration cannot invent an institution, outcome or policy action.
+
+Court opens on domestic interests, with separate Officials and orders and
+Diplomacy tabs. Small settlements retain household visitors. Routine grievance
+petitions give way to family rivalry above 10k; crises, reports and direct
+summons still reach their officials. Court decisions register in OrderTracker.
+
+Save compatibility: additive optional `society_exchange.major_families`; older
+saves initialize it only when eligible. State is bounded to nine trade houses,
+nine party organizations and forty history entries per civilization. No generated
+caches, saves, report artifacts or UIDs belong in this delivery.
+
+Validation: 92 distinct checks pass across families (31), court facts (7),
+early visitors (14), growing visitors (18), and manual work (22). Final focused
+family run: 31/31, zero errors, failures or orphans. The court-facts fixture now
+explicitly tests unseen enemy preparations before marking the report heard;
+it previously assumed a seeded detection roll always succeeded. Save roundtrip,
+AI civilization isolation, succession, dynamic coalitions, voice prompts/offline
+arguments, contextual ambition gates, and unchanged worker counts are covered.
+UI validation is headless control/flow testing, not a captured visual audit.
+Integration: READY; awaiting verified branch push and main integration.
+
 ## October 17 — Consequential visits from 1,000 to 10,000 people
 
 Worktree `/Users/seanpurtill/Documents/Codex/tt-hoi4-production`, branch

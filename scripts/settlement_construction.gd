@@ -129,7 +129,7 @@ static func daily_work()->float:
 ## Skilled builders work faster: x (1 + CRAFT_WORK a level of the builders'
 ## craft, built_fabric.gd).
 static func craft_pace()->float:
-	return 1.0+Fabric.CRAFT_WORK*Fabric.craft()
+	return (1.0+Fabric.CRAFT_WORK*Fabric.craft())*preload("res://scripts/major_families.gd").factor("Construction")
 
 ## A day's work on new homes at today's crews (HOUSING_BATCH_WORK a batch).
 static func housing_work_per_day()->float:

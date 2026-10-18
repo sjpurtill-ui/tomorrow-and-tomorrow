@@ -194,6 +194,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 	var wants_fire:=("hearth_roasting_control" in WorldSimulation.state.known_discoveries and float(demand_breakdown.total)>0.0) or ("smoking" in WorldSimulation.state.known_discoveries and float(stocks.get(FRESH,0.0))>0.0)
 	var fire_report:=preload("res://scripts/fire_practice.gd").advance(int(WorldSimulation.state.elapsed_days),wants_fire,traveling)
 	var harvest:=_produce(workers,labor_efficiency,ecology,traveling)
+	for source in harvest:harvest[source]*=preload("res://scripts/major_families.gd").factor("Food")
 	if WorldSimulation.state.resource_settlement_id.is_empty() and not traveling:
 		var access:=WorldSimulation.military.siege_home_food_access()
 		for source in harvest: harvest[source]*=access

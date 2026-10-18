@@ -114,7 +114,7 @@ static func sealed_storage_rations()->float:
 ## How well people work today (the working efficiency, consequence_engine.gd;
 ## it carries the business sector's factor, enterprise.gd).
 static func efficiency()->float:
-	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",REFERENCE_EFFICIENCY)),.2,1.6)
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",REFERENCE_EFFICIENCY)),.2,1.6)*preload("res://scripts/major_families.gd").factor("Crafting")
 
 ## Goods one maker makes a day now: CRAFT_SHARE of the day x BASE_RATE x
 ## techniques x how well people work.

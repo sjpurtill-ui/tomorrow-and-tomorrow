@@ -254,7 +254,7 @@ func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
 	# Merchant houses and companies carry trade further (enterprise.gd).
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus()+barter_reach(),0.0,1.0)
+	return clampf((logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus()+barter_reach())*preload("res://scripts/major_families.gd").factor("Logistics"),0.0,1.0)
 
 ## What makers and carriers add to market access: goods to trade and hands
 ## to bring them to the hearth (MAKERS_REACH, CARRIERS_REACH at their shares).
@@ -584,7 +584,7 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	match WorldSimulation.state.economy_stage:
 		STAGE_METAL: in_kind_share=clampf(0.88-monetization*0.32,0.62,0.85)
 		STAGE_CURRENCY: in_kind_share=clampf(0.34-monetization*0.22+(1.0-reliability)*0.12,0.12,0.42)
-	var assessment_reach:=clampf(0.40+councils*0.10+customary_law*0.12+tallies*0.10+admin_coverage*0.10+levy_adoption*0.24,0.30,1.0)
+	var assessment_reach:=clampf((0.40+councils*0.10+customary_law*0.12+tallies*0.10+admin_coverage*0.10+levy_adoption*0.24)*preload("res://scripts/major_families.gd").factor("Administration"),0.30,1.0)
 	var settlement_complexity:=minf(0.035,float(WorldSimulation.state.settlement_completed.size())/population*0.10)
 	var gross_labor_due:=able*(0.028+settlement_complexity)*in_kind_share
 	var assessed_labor_due:=gross_labor_due*assessment_reach

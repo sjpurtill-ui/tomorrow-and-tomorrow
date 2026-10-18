@@ -573,6 +573,8 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# soldiers' pay, scholars, crews and food for the hungry; read before the
 	# levy of fighters can take "raise the levy" for a call to arms.
 	if String(audience.get("origin",""))=="court" and not is_harm(clean):
+		var family_order:=preload("res://scripts/court_family_orders.gd").read(clean)
+		if not family_order.is_empty():return preload("res://scripts/court_family_orders.gd").carry(_result("order",_speaker_entry(list),{},clean,false),family_order)
 		var purse:=PurseOrders.read(clean)
 		if not purse.is_empty(): return PurseOrders.carry(_result("order",_speaker_entry(list),{},clean,false),purse)
 		# The stance on business (court_business_orders.gd): guard the trades,

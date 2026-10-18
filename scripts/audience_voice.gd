@@ -2623,6 +2623,9 @@ func _append_if(out:Array[Dictionary],line:Dictionary)->void:
 	if not line.is_empty(): out.append(line)
 
 func _offline_open(s:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
+	var family_profile:=preload("res://scripts/major_families.gd").head_profile(int(s.get("audience",{}).get("speaker",{}).get("person_id",0)))
+	if String(s.kind)=="summons" and not family_profile.is_empty():
+		return [_line_for(s.envoy,preload("res://scripts/family_character.gd").speech(family_profile,int(_day())/30,float(GameState.simulation_metrics.get("food_intake_ratio",1))<.8),false)]
 	if String(s.get("sit_type",""))=="growing_visit":
 		return [_line_for(s.envoy,String(s.audience.situation.visit.opening),false)]
 	if String(s.get("sit_type",""))=="early_visit":
@@ -2944,6 +2947,10 @@ func court_answer(s:Dictionary,member:Dictionary,player_text:String)->String:
 	# Spies and assassins: answered from the covert ledger (covert_ops.gd).
 	var covert:=preload("res://scripts/covert_ops.gd").answer(player_text)
 	if covert!="": return covert
+	var profile:=preload("res://scripts/major_families.gd").speaker_profile(int(member.get("person_id",s.get("audience",{}).get("speaker",{}).get("person_id",0))))
+	var lower:=player_text.to_lower()
+	if not profile.is_empty() and (lower.contains("want") or lower.contains("believe") or lower.contains("your program") or lower.contains("your family") or lower.contains("afraid")):
+		return "I want to %s. I fear %s. %s" % [String(profile.want),String(profile.fear),preload("res://scripts/family_character.gd").speech(profile,int(_day())/30,float(GameState.simulation_metrics.get("food_intake_ratio",1))<.8)]
 	var sheet:=CourtFacts.sheet(_offices_of(s,member))
 	return CourtAnswers.answer(sheet,player_text,_spoken_town(s,sheet),_recent_words(s))
 
@@ -3383,6 +3390,8 @@ func _audience_want(s:Dictionary,member:Dictionary)->String:
 func build_prompt(s:Dictionary,stage:String,extra:Dictionary)->String:
 	var parts:PackedStringArray=PackedStringArray()
 	parts.append("SCENE: "+_kind_words(s))
+	var family_profile:=preload("res://scripts/major_families.gd").speaker_profile(int(s.get("audience",{}).get("speaker",{}).get("person_id",0)))
+	if not family_profile.is_empty():parts.append(preload("res://scripts/family_character.gd").prompt(family_profile))
 	var occasion:Dictionary=s.get("occasion",{})
 	if not String(occasion.get("text","")).is_empty():
 		parts.append("WHY THEY CAME (true; the visitor's first words grow out of this): %s%s" % [String(occasion.text)," (a crisis)" if bool(occasion.get("crisis",false)) else ""])
@@ -3507,6 +3516,8 @@ func _gate_words(s:Dictionary)->String:
 	return " Optionally '%s' adds ONE short line (%s); no other official speaks." % [key,why]
 
 func _stage_instruction(s:Dictionary,stage:String,extra:Dictionary)->String:
+	if stage=="open" and String(s.kind)=="summons" and not preload("res://scripts/major_families.gd").head_profile(int(s.get("audience",{}).get("speaker",{}).get("person_id",0))).is_empty():
+		return "The ruler sent for this family head. Give one short argument for their recorded personal motive and values. A little character is welcome; no invented achievements or outcomes, no automatic policy change. mood_shift 0."
 	if stage=="open" and String(s.get("sit_type",""))=="growing_visit":
 		return "The visitor represents the households or workers in HOUSEHOLD REPRESENTATIVE FACTS. Lead with their concrete problem and proposed terms, in one or two first-person lines. No invented promises or outcomes. mood_shift 0."
 	if stage=="open" and String(s.get("sit_type",""))=="early_visit":
