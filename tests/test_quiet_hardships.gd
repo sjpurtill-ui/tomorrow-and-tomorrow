@@ -341,7 +341,7 @@ func test_the_health_page_lists_the_log()->void:
 	var shown:Dictionary=page.tab(1)
 	var rows:Array=[]
 	for block in shown.blocks:
-		if String(block.get("type",""))=="rows": rows=block.items
+		if String(block.get("type",""))=="hardship_dashboard": rows=block.events
 	assert_int(rows.size()).is_equal(1)
 	assert_str(String(rows[0].name)).is_equal("The Burning")
 	assert_str(String(rows[0].sub)).contains("Fire").contains("Ashford")
@@ -349,13 +349,13 @@ func test_the_health_page_lists_the_log()->void:
 	# Its matter waits at court: the line summons the holder.
 	assert_str(String(rows[0].detail)).contains("waits to be summoned")
 	assert_bool(rows[0].get("on_click") is Callable).is_true()
-	assert_str(String(shown.brief.why)).contains("one in twenty")
+	assert_str(String(shown.blocks[0].tip)).contains("one in twenty")
 	# The page refreshes when the log changes.
 	var before:Array=page.signature()
 	_finish(c)
 	assert_bool(page.signature().hash()!=before.hash()).is_true()
 	var after:Dictionary=page.tab(1)
 	for block in after.blocks:
-		if String(block.get("type",""))=="rows": rows=block.items
+		if String(block.get("type",""))=="hardship_dashboard": rows=block.events
 	assert_bool(rows[0].get("on_click") is Callable).is_false()
 	assert_str(String(rows[0].detail)).not_contains("Still going")
