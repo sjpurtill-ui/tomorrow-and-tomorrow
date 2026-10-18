@@ -1306,7 +1306,7 @@ func _refresh_kpis()->void:
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
-		var days:=float(t[id+"_days"])
+		var days:=float(t.get("food_reserve_days",t.food_days)) if id=="food" else float(t[id+"_days"])
 		var note:String
 		if id=="water" and days>=0.0:
 			# WATER reads every town's own ledger and the dry year
@@ -1323,7 +1323,7 @@ func _refresh_kpis()->void:
 			continue
 		if shortage>0:note="%d short" % shortage if modern else ("running short" if t.cities.size()<=1 else "%s short" % EraWords.places(shortage))
 		elif pending:note="partial"
-		else:note="civ total" if modern else ("of food" if id=="food" else "of drinking water")
+		else:note="civ total" if modern else ("reserve estimate" if id=="food" else "of drinking water")
 		# Food by the one rule for the stores (food_care.gd): bare red, low
 		# amber, holding green, so a short number that is safe does not read as a crisis.
 		var level:=String(preload("res://scripts/food_care.gd").store_level(days)) if id=="food" else ""

@@ -23,8 +23,8 @@ const OPEN_DELAY:=0.25
 const CLOSE_GRACE:=0.12
 const REFRESH_SECONDS:=0.75
 const WIDTH:=300.0
-## Text width inside the card's 14 px side padding.
-const INNER:=WIDTH-28.0
+## Text width inside 14 px side padding and the 1 px border.
+const INNER:=WIDTH-30.0
 const GAP:=8.0
 const MARGIN:=8.0
 const MAX_FACTS:=4

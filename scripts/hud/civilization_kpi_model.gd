@@ -8,10 +8,10 @@ static func snapshot()->Dictionary:
 		local.name=String(city.get("name","Settlement"));cities.append(local)
 	if cities.is_empty() and GameState.player_settlements.is_empty():
 		var local:=_local();local.name="Founding camp";cities.append(local)
-	var totals:={"population":GameState.population_total,"cities":cities,"residents":0.0,"food_stock":0.0,"food_need":0.0,"food_use":0.0,"food_produced":0.0,"food_eaten":0.0,"food_net":0.0,"water_stock":0.0,"water_capacity":0.0,"water_need":0.0,"water_produced":0.0,"water_eaten":0.0,"science":0.0,"output":0.0,"minds":0.0,"life":0.0,"infant":0.0,"education":0.0,"food_shortages":0,"water_shortages":0,"food_reports":0,"water_reports":0,"goods_stock":0.0,"goods_target":0.0,"goods_net":0.0,"goods_shortages":0}
+	var totals:={"population":GameState.population_total,"cities":cities,"residents":0.0,"food_stock":0.0,"food_need":0.0,"food_use":0.0,"food_produced":0.0,"food_eaten":0.0,"food_net":0.0,"food_spoiled":0.0,"water_stock":0.0,"water_capacity":0.0,"water_need":0.0,"water_produced":0.0,"water_eaten":0.0,"science":0.0,"output":0.0,"minds":0.0,"life":0.0,"infant":0.0,"education":0.0,"food_shortages":0,"water_shortages":0,"food_reports":0,"water_reports":0,"goods_stock":0.0,"goods_target":0.0,"goods_net":0.0,"goods_shortages":0}
 	for city:Dictionary in cities:
 		totals.residents+=city.population
-		for key:String in ["food_stock","food_need","food_use","food_produced","food_eaten","food_net","water_stock","water_capacity","water_need","water_produced","water_eaten","science","output","minds","goods_stock","goods_target","goods_net"]:totals[key]+=city[key]
+		for key:String in ["food_stock","food_need","food_use","food_produced","food_eaten","food_net","food_spoiled","water_stock","water_capacity","water_need","water_produced","water_eaten","science","output","minds","goods_stock","goods_target","goods_net"]:totals[key]+=city[key]
 		# A city below half its expected goods is short of everyday tools and containers.
 		if city.goods_stock<city.goods_target*.5:totals.goods_shortages+=1
 		for key:String in ["life","infant","education"]:totals[key]+=city[key]*city.population
@@ -21,6 +21,9 @@ static func snapshot()->Dictionary:
 		if city.water_report and city.water_eaten<city.water_need*.995:totals.water_shortages+=1
 	for key:String in ["life","infant","education"]:totals[key]/=maxf(1,totals.residents)
 	totals.food_days=totals.food_stock/totals.food_use if totals.food_use>0 else -1.0
+	var reserve_meals:=0.0
+	for city:Dictionary in cities:reserve_meals+=maxf(0,float(city.get("food_reserve_days",0)))*float(city.food_use)
+	totals.food_reserve_days=reserve_meals/totals.food_use if totals.food_use>0 else -1.0
 	totals.water_days=totals.water_stock/totals.water_need if totals.water_need>0 else -1.0
 	totals.goods_coverage=clampf(totals.goods_stock/totals.goods_target,0.0,1.0) if totals.goods_target>0 else 0.0
 	# Born and buried in the last year, the whole people (GameState.rolling_vital_balance);
@@ -38,5 +41,6 @@ static func _local()->Dictionary:
 	var fed_eaten:=float(m.get("food_home_eaten",m.get("food_eaten",food_need*float(m.get("food_intake_ratio",0)))))
 	var s:=I.science();var h:=I.health()
 	var goods=preload("res://scripts/civilian_goods.gd")
+	var reserve:Dictionary=WorldSimulation.food.reserve_estimate(food_need)
 	var goods_report:Dictionary=GameState.civilian_goods.get("report",{})
-	return {"population":GameState.population_total,"food_report":m.has("food_consumption"),"water_report":w.has("required_today"),"food_stock":float(m.get("food_total_stock",float(m.get("food_days",0))*food_need)),"food_need":fed_need,"food_use":food_need,"food_produced":float(m.get("food_production",0)),"food_eaten":fed_eaten,"food_net":float(m.get("food_net",0)),"water_stock":float(w.get("stored",float(w.get("days",0))*water_need)),"water_capacity":float(w.get("capacity",0.0)),"water_need":water_need,"water_produced":float(w.get("collected_today",0)),"water_eaten":water_need*float(w.get("intake_ratio",0)),"science":float(s.capacity),"minds":float(s.minds),"education":float(s.education),"output":float(I.economy().gdp),"life":float(h.life_expectancy),"infant":float(h.infant_mortality_per_1000),"goods_stock":goods.stock(),"goods_target":goods.target(),"goods_net":float(goods_report.get("made",0.0))-float(goods_report.get("worn",0.0))-float(goods_report.get("learners",0.0))}
+	return {"food_reserve_days":reserve.days,"population":GameState.population_total,"food_report":m.has("food_consumption"),"water_report":w.has("required_today"),"food_stock":float(m.get("food_total_stock",float(m.get("food_days",0))*food_need)),"food_need":fed_need,"food_use":food_need,"food_produced":float(m.get("food_production",0)),"food_eaten":fed_eaten,"food_net":float(m.get("food_net",0)),"food_spoiled":float(m.get("food_spoilage",0)),"water_stock":float(w.get("stored",float(w.get("days",0))*water_need)),"water_capacity":float(w.get("capacity",0.0)),"water_need":water_need,"water_produced":float(w.get("collected_today",0)),"water_eaten":water_need*float(w.get("intake_ratio",0)),"science":float(s.capacity),"minds":float(s.minds),"education":float(s.education),"output":float(I.economy().gdp),"life":float(h.life_expectancy),"infant":float(h.infant_mortality_per_1000),"goods_stock":goods.stock(),"goods_target":goods.target(),"goods_net":float(goods_report.get("made",0.0))-float(goods_report.get("worn",0.0))-float(goods_report.get("learners",0.0))}

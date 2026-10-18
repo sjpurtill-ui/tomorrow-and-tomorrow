@@ -383,13 +383,13 @@ func _fill_scene(amounts:Dictionary,water:Dictionary)->void:
 	var measured:=bool(data.get("flow_known",true))
 	var stock:=0.0
 	for row:Dictionary in data.get("rows",[]):stock+=float(row.get("stock",0.0))
-	var days:=float(data.get("food_days",-1.0))
+	var days:=float(data.get("food_reserve_days",data.get("food_days",-1.0)))
 	S.put(_refs.reserve_value,S.n(days) if days>=0 else S.n(stock),SCENE_INK)
-	S.put(_refs.reserve_unit,"days of food" if days>=0 else "rations held",SCENE_MUTED)
+	S.put(_refs.reserve_unit,("days after spoilage" if data.has("food_reserve_days") else "days of food") if days>=0 else "rations held",SCENE_MUTED)
 	S.put(_refs.horizon,("Food stores are empty" if stock<=0 else "Food for %s" % EraWords.days_in_words(days)) if days>=0 else "Days of food not measured yet",SCENE_MUTED)
 	S.put(_refs.stock,"%s rations held" % S.n(stock) if days>=0 else "",SCENE_MUTED)
 	_refs.stock.visible=days>=0
-	_refs.reserve.tooltip_text="Food held divided by the current daily need. Food continues to arrive: this is reserve cover, not a countdown to starvation."
+	_refs.reserve.tooltip_text="Estimated reserve if no new food arrives, including spoilage at today’s consumption and storage conditions." if data.has("food_reserve_days") else "Food held divided by current daily need, before future spoilage."
 	var forecast:Dictionary=data.get("forecast90",{})
 	var shortage:=int(forecast.get("first_shortage_day",-1))
 	var ending:=float(forecast.get("ending_days",-1.0))

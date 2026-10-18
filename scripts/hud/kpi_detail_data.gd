@@ -24,11 +24,15 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 					r.status="%s went hungry today: the food eaten fell short of what everyone needs. %s" % [EraWords.grouped(hungry),r.status]
 				else:r.status="Everyone ate their fill today. %s" % r.status
 		"food","water":
-			var food:=id=="food";var days:=float(t[id+"_days"]);var shortages:=int(t[id+"_shortages"])
+			var food:=id=="food";var days:=float(t.get("food_reserve_days",t.food_days)) if food else float(t[id+"_days"]);var shortages:=int(t[id+"_shortages"])
 			r.merge({"title":("Food reserves" if modern else "Stores of food") if food else "Drinking water","value":"%.1f" % days if days>=0 else "Awaiting report","unit":"days · total stores / daily need" if modern else ("days, eating as we eat today" if food else "days, drinking as we drink today"),"status":"%d cities have a shortfall" % shortages if shortages>0 else "Reserves are held locally; city breakdown below.","tone":"warning" if shortages>0 else "neutral"},true)
 			r.rows.append({"label":"Produced today" if food else "Collected today","value":"%.1f" % float(t[id+"_produced"])})
 			r.rows.append({"label":"Required today","value":"%.1f" % float(t[id+"_need"])})
-			if food:r.rows.append({"label":"Net reserve change","value":"%+.1f rations/day" % float(t.food_net)})
+			if food:
+				r.unit="estimated days after spoilage"
+				r.status=("Food ran short today. " if shortages>0 else "")+"If no new food arrives, at today’s consumption and storage conditions."
+				r.rows.append({"label":"Stock before future spoilage","value":"%.1f daily ration-equivalents"%float(t.food_days)})
+				r.rows.append({"label":"Net reserve change","value":"%+.1f rations/day" % float(t.food_net)})
 			if float(t[id+"_need"])>0:
 				r.meter=clampf(float(t[id+"_eaten"])/float(t[id+"_need"]),0,1);r.meter_label="Civilization need met today" if modern else ("Bellies filled today" if food else "Thirst slaked today")
 			if not food and days>=0:
@@ -125,12 +129,12 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			c.action="Click for The People"+(" · ask the Steward at Court why some go hungry" if hungry>0 else "")
 		"food","water":
 			var food:=id=="food"
-			var days:=float(t[id+"_days"])
+			var days:=float(t.get("food_reserve_days",t.food_days)) if food else float(t[id+"_days"])
 			var shortages:=int(t[id+"_shortages"])
 			var produced:=float(t[id+"_produced"])
 			var need:=float(t[id+"_need"])
 			c.value=EraWords.days(days) if days>=0 else "Not yet told"
-			c.unit=("of food" if food else "of drinking water") if days>=0 else ""
+			c.unit=("estimated reserve" if food else "of drinking water") if days>=0 else ""
 			var gaining:=produced>=need
 			# Water: one reading with the tile (water_watch.gd): the worst town
 			# by name, a dry year and its toll, and whether anyone died of thirst.
@@ -148,11 +152,13 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 				if without>0:c.headline=lead+"%s went %s today." % [EraWords.grouped(without),"hungry" if food else "thirsty"]
 				else:c.headline=lead+"%s cannot meet the day's need." % EraWords.places(shortages)
 			elif days<0:c.headline="No %s has been counted yet." % ("food" if food else "water")
-			elif food:c.headline="Food for %s at today's eating, and %s." % [EraWords.days_in_words(days),"more is brought in than eaten" if gaining else "we eat more than we bring in"]
+			elif food:c.headline="About %s if no new food arrives, including spoilage at today’s conditions." % EraWords.days_in_words(days)
 			else:c.headline="Water held for %s at today's drinking, and %s." % [EraWords.days(days),"more is drawn than drunk" if gaining else "we drink more than we draw"]
 			# A warning's own facts come first (the card shows four).
 			if not watch.is_empty() and String(watch.tone)!="calm":
 				for fact:Dictionary in watch.facts:c.facts.append(fact)
+			if food and days>=0:
+				c.facts.append({"text":"Lost %s rations today to spoilage or overflow" % _amount(float(t.get("food_spoiled",0)))})
 			if need>0:
 				var brought:=("Gathered" if hearth else "Brought in") if food else "Drawn"
 				c.facts.append({"text":"%s %s today, %s %s" % [brought,_amount(produced),"eaten" if food else "drunk",_amount(need)],"trend":1 if produced>need*1.02 else -1 if produced<need*0.98 else 0,"good":gaining})
@@ -162,8 +168,8 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			if int(t[id+"_reports"])<cities:c.facts.append({"text":"Some %s have not yet sent word" % EraWords.word("places","places")})
 			if cities<=1:
 				c.spark=_history_days(GameState.food_history if food else GameState.water_history,"stored","required")
-				if c.spark.size()>=3:c.spark_label="Days held, over the last %d days" % c.spark.size()
-			c.action="Click for the %s tally · the Steward keeps the stores at Court" % ("stores" if food else "water")
+				if c.spark.size()>=3:c.spark_label=("Ration-equivalent days held" if food else "Days held")+", over the last %d days" % c.spark.size()
+			c.action="Click for the %s tally" % ("stores" if food else "water")
 		"goods":
 			var coverage:=float(t.goods_coverage)
 			var net:=float(t.goods_net)

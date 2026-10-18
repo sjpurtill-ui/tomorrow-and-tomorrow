@@ -52,7 +52,8 @@ const FOOD_TYPES := [FRESH,STORED]
 ## Harvest sources; each lands in a pool.
 const SOURCES:=["Fresh plants","Fresh meat","Fish","Dry staples"]
 const FOOD_ISSUE_HISTORY_LIMIT:=96
-const SPOILAGE := {FRESH:0.040,STORED:0.0010}
+const StorageModel=preload("res://scripts/food_storage_model.gd")
+const SPOILAGE := {FRESH:0.040,STORED:StorageModel.STORED_DAILY_LOSS}
 ## Timber a smoking fire burns per ration smoked, before fuel economy.
 const SMOKING_FUEL:=0.04
 ## Former five-type stocks, folded into the two pools when an older save loads.
@@ -143,7 +144,7 @@ func technique_lever(lever:String)->float:
 ## resolved once a day for the hands on each: {carry, keep}.
 func _covers()->Dictionary:
 	var state=WorldSimulation.state
-	var key:=[WorldSimulation.actor_id,state.resource_settlement_id,int(state.elapsed_days),state.population_exact,state.population_allocations.get("Logistics",0),state.population_allocations.get("Administration",0)]
+	var key:=[WorldSimulation.actor_id,state.resource_settlement_id,int(state.elapsed_days),state.population_exact,state.population_allocations.get("Logistics",0),state.population_allocations.get("Administration",0),float(state.food_stocks.get(STORED,0))]
 	var cached:Variant=_cover_cache.entries.get(key)
 	if cached!=null:return cached
 	var covers:={"carry":FoodCare.carry_cover_of(state),"keep":FoodCare.keep_cover_of(state)}
@@ -271,6 +272,7 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_workers":workers,
 		"clothing":clothing.coverage,
 		"food_days":food_days,
+		"food_reserve_days":reserve_estimate(demand).days,
 		"food_total_stock":total,
 		"food_production":production_total,
 		"food_consumption":demand,
@@ -611,7 +613,9 @@ func _spoilage_rates(traveling:bool)->Array:
 	var preservation:=WorldSimulation.discovery.food_storage_multipliers(["Fresh plants","Fresh meat","Fish","Dry staples","Preserved food"],traveling)
 	var fresh_preservation:=(float(preservation["Fresh plants"])+float(preservation["Fresh meat"])+float(preservation["Fish"]))/3.0
 	var stored_preservation:=(float(preservation["Dry staples"])+float(preservation["Preserved food"]))*0.5
-	var storage_multiplier:=0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0
+	var environment:=_environment_mix()
+	var climate:=StorageModel.climate_factor(PlanetEnvironment.ambient_temperature_c(environment,WorldSimulation.state.elapsed_days),float(environment.get("precipitation",.5)))
+	var storage_multiplier:=climate*(0.72 if "Storage Pits" in WorldSimulation.state.settlement_completed else 1.0)
 	storage_multiplier*=maxf(0.30,1.0+WorldSimulation.discovery.effect("food_spoilage"))
 	if not traveling:storage_multiplier*=1.0-preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"spoilage")
 	if traveling: storage_multiplier*=1.28
@@ -1013,6 +1017,13 @@ func take_for_levy(requested:float)->float:
 	stocks[STORED]=maxf(0.0,stored-(want-from_fresh))
 	_sync_total()
 	return want
+
+## Read the same current rates used by food losses; never initializes or consumes stocks.
+func reserve_estimate(need:float)->Dictionary:
+	if need<=0:return {"days":-1.0,"fresh_rate":0.0,"stored_rate":0.0}
+	var rates:=_spoilage_rates(bool(WorldSimulation.state.convoy_traveling))
+	var stocks:Dictionary=WorldSimulation.state.food_stocks
+	return {"days":StorageModel.reserve_days(float(stocks.get(FRESH,0)),float(stocks.get(STORED,0)),need,float(rates[0]),float(rates[1])),"fresh_rate":rates[0],"stored_rate":rates[1]}
 
 ## How fast stored food rots a day here (the realm's common store keeps
 ## its grain as the capital keeps its own).

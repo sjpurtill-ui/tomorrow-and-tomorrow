@@ -50,8 +50,9 @@ const FRESH_EVEN:=0.5
 const CARRY_SHARE:=0.03
 const CARRY_FRESH_CUT:=0.5
 const CARRY_REACH:=0.25
-## Keepers (Administration): full cover at KEEP_SHARE of the people cuts
-## stored spoilage by KEEP_STORED_CUT (beside the Quartermaster's hand).
+## Keepers: KEEP_SHARE of the people covers a 30-day stock. Larger stored
+## inventories increase the workload proportionally; full cover cuts stored
+## spoilage by KEEP_STORED_CUT. Capacity itself grants no protection.
 const KEEP_SHARE:=0.02
 const KEEP_STORED_CUT:=0.40
 ## Carers (Administration): full cover at CARE_SHARE of the people, so the
@@ -99,8 +100,9 @@ static func fresh_health(fresh_share:float)->float:
 static func carry_cover(carriers:float,people:float)->float:
 	return clampf(maxf(0.0,carriers)/maxf(1.0,people*CARRY_SHARE),0.0,1.0)
 
-static func keep_cover(keepers:float,people:float)->float:
-	return clampf(maxf(0.0,keepers)/maxf(1.0,people*KEEP_SHARE),0.0,1.0)
+static func keep_cover(keepers:float,people:float,stored:float=0.0)->float:
+	var load:=preload("res://scripts/food_storage_model.gd").keeper_load(people,stored)
+	return clampf(maxf(0.0,keepers)/maxf(1.0,load*KEEP_SHARE),0.0,1.0)
 
 static func care_cover(carers:float,people:float)->float:
 	return clampf(maxf(0.0,carers)/maxf(1.0,people*CARE_SHARE),0.0,1.0)
@@ -135,7 +137,7 @@ static func carry_cover_of(state:Node)->float:
 	return carry_cover(carriers_of(state),_people(state))
 
 static func keep_cover_of(state:Node)->float:
-	return keep_cover(keepers_of(state),_people(state))
+	return keep_cover(keepers_of(state),_people(state),float(state.food_stocks.get("Stored food",0)))
 
 ## The carers' cover the hands on keeping and caring would give at once.
 static func care_target_of(state:Node)->float:
@@ -260,8 +262,9 @@ static func _keeping_and_caring()->Dictionary:
 	var people:=_people(state)
 	var hands:=keepers_of(state)
 	var more_hands:=hands+_ten_more(state,"Administration")
-	var keep:=keep_cover(hands,people)
-	var more_keep:=keep_cover(more_hands,people)
+	var stored:=float(state.food_stocks.get("Stored food",0))
+	var keep:=keep_cover(hands,people,stored)
+	var more_keep:=keep_cover(more_hands,people,stored)
 	var spoiled:Dictionary=m.get("food_spoilage_by_type",{}) if m.get("food_spoilage_by_type") is Dictionary else {}
 	var stored_lost:=float(spoiled.get("Stored food",0.0))
 	var bare:=stored_lost/maxf(0.05,stored_spoilage_factor(keep))
@@ -324,9 +327,10 @@ static func carrying_sentence(cover:float,people:float)->String:
 
 ## The keepers' hand on the stored food.
 static func keeping_sentence(cover:float,people:float)->String:
-	var full:=_count(maxi(1,roundi(people*KEEP_SHARE)))
-	if cover<=0.0:return "No one keeps the stores, so stored food rots as it will. Keepers at 2 in 100 of the people (%s) would cut the rot by %d in 100." % [full,roundi(KEEP_STORED_CUT*100.0)]
-	return "Keepers turn, dry and guard the stored food: it rots %d in 100 less (%d at most, at 2 in 100 of the people: %s)." % [roundi(KEEP_STORED_CUT*clampf(cover,0.0,1.0)*100.0),roundi(KEEP_STORED_CUT*100.0),full]
+	var load:=preload("res://scripts/food_storage_model.gd").keeper_load(people,float(WorldSimulation.state.food_stocks.get("Stored food",0)))
+	var full:=_count(maxi(1,ceili(load*KEEP_SHARE)))
+	if cover<=0.0:return "No one keeps the stores, so stored food rots as it will. About %s keepers for the current stock would cut rot by %d in 100. Larger reserves need more keeping." % [full,roundi(KEEP_STORED_CUT*100.0)]
+	return "Keepers turn, dry and guard the stored food: it rots %d in 100 less (%d at most, with about %s keepers for the current stock)." % [roundi(KEEP_STORED_CUT*clampf(cover,0.0,1.0)*100.0),roundi(KEEP_STORED_CUT*100.0),full]
 
 ## The carers' hand on newborns, mothers and the sick (Health page).
 static func caring_sentence(cover:float,target:float,people:float)->String:

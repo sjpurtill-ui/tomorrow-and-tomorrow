@@ -52,7 +52,7 @@ func signature()->Array:
 func _local_signature()->Array:
 	var metrics:Dictionary=GameState.simulation_metrics
 	var food_report:Array=[]
-	for key:String in ["food_days","food_net","food_production","food_eaten","food_spoilage","food_spoilage_by_type","food_preserved","food_harvest","food_workers","food_labor_share","food_sources","food_forecast_30","food_forecast_90","food_forecast_day","food_intake_ratio","food_consumption","food_home_need","food_home_eaten","fire_practice","food_preservation_inputs"]:
+	for key:String in ["food_days","food_reserve_days","food_net","food_production","food_eaten","food_spoilage","food_spoilage_by_type","food_preserved","food_harvest","food_workers","food_labor_share","food_sources","food_forecast_30","food_forecast_90","food_forecast_day","food_intake_ratio","food_consumption","food_home_need","food_home_eaten","fire_practice","food_preservation_inputs"]:
 		food_report.append(metrics.get(key))
 	return [hash(GameState.storage_works),hash(GameState.settlement_projects),hash(food_report),hash(GameState.food_stocks),hash(GameState.water_metrics),FoodSystem.issued_on_day(int(GameState.elapsed_days)),snappedf(ResourceSystem.stored_bulk(),0.1),snappedf(float(GameState.fire_practice.get("embers",0.0)),0.05),_material_reading_signature()]
 
@@ -142,7 +142,7 @@ func _provisions_data()->Dictionary:
 		deliveries.append({"resource":String(shipment.get("resource","")),"source_name":String(shipment.get("source_name","")),"quantity":float(shipment.get("quantity",0.0)),"when":"arrives today" if left<=0 else "arrives in "+Plain.span_text(left)})
 	var block:={"type":"provisions","leader_name":String(management.get("leader",{}).get("name","")).get_slice(" ",0),"focus":String(management.get("focus","")),"city":String(city.get("name","Founding camp")),"managed":bool(city.get("auto_manage",true)),"can_direct":not city.is_empty() and String(city.get("occupied_by","")).is_empty(),
 		"day":today,"flow_known":metrics.has_all(["food_production","food_eaten","food_spoilage","food_net"]),"forecast_day":metrics.get("food_forecast_day",-1),
-		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(food_days) if food_days>=0.0 else "","food_days":food_days,
+		"rows":rows,"food_plan":GovernmentPeopleSystem.food_plan_words(),"lean":FoodCare.store_sentence(food_days) if food_days>=0.0 else "","food_days":food_days,"food_reserve_days":FoodSystem.reserve_estimate(float(metrics.get("food_consumption",0))).days,
 		"storage_rows":preload("res://scripts/storage_works.gd").rows(["food","water"]),"on_expand_storage":_expand_storage.bind(id),"on_builders":assign_workers("Construction"),"capacity":FoodSystem._food_storage_capacity(),"food_workers":float(metrics.get("food_workers",0.0)),"food_share":float(metrics.get("food_labor_share",0.0)),
 		"water":GameState.water_metrics.duplicate(true),"water_access":ResourceSystem.water_access_snapshot(),"forecast30":metrics.get("food_forecast_30",{}),"forecast90":metrics.get("food_forecast_90",{}),
 		"sources":(metrics.get("food_sources",[]) as Array).duplicate(true),"fire":fire.duplicate(),"fuel":float(fuel.get("Timber",0.0)) if not fuel.is_empty() else -1.0,

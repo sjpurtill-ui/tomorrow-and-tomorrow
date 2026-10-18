@@ -50,3 +50,7 @@ Buildings must stay useful at very large populations and late dates: compare agg
 The current player game does not offer expansion. Do not show a town/city-scope selector in the top bar, including in one-town games. Legacy multi-settlement storage and save data are not authorization to expose expansion controls.
 
 Meters need visible series labels, units, a stated scale, and a clear indication of whether higher or lower helps. Never rely on color or a slash-separated pair alone. Research comparisons must group related effects and distinguish unlocked modifiers from active modifiers; negative disease/spoilage effects are benefits, not incomplete research.
+
+## Same simulation rules for every civilization
+
+The user requires mechanical changes to apply equally to the player and opponents. Use actor-scoped shared systems for storage, spoilage, production, research, family bonuses and military rules. Test equal inputs across player and opponent scopes when changing mechanics; separate AI decision-making from rule exemptions. Check legacy-save mode before claiming that an existing campaign uses shared opponent simulation. UI-only changes need no opponent screen.

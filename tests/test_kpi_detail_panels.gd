@@ -81,7 +81,8 @@ func test_hover_host_opens_once_and_switches_without_stacking()->void:
 func test_food_net_is_rations_not_production_ratio()->void:
 	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_balance":0.25,"food_net":-7.5,"food_intake_ratio":0.8}
 	var data:=Data.snapshot("food")
-	assert_str(data.rows[2].value).is_equal("-7.5 rations/day")
+	var net:Dictionary=data.rows.filter(func(row:Dictionary):return row.label=="Net reserve change")[0]
+	assert_str(net.value).is_equal("-7.5 rations/day")
 	assert_str(data.tone).is_equal("warning")
 	assert_float(data.meter).is_equal(0.8)
 func test_unmeasured_water_does_not_claim_needs_are_met()->void:
@@ -99,7 +100,7 @@ func test_selected_city_resources_do_not_leak_into_primary()->void:
 	var data:=Data.snapshot("water")
 	# Before writing, the whole people is "all our hearths" (era_words.gd).
 	assert_str(data.scope).is_equal("All our hearths")
-	assert_str(data.value).is_equal("7.3")
+	assert_float(float(data.value)).is_equal_approx(7.25,.051) # Platform rounding of the same 7.25-day aggregate.
 	assert_float(data.meter).is_equal(0.875)
 	assert_float(float(GameState.water_metrics.days)).is_equal(9.0)
 func test_population_panel_says_who_went_hungry()->void:
@@ -151,6 +152,7 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	add_child(header)
 	header.set_process(false)
 	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0}
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":120.0}
 	GameState.water_metrics={"days":5.0,"required_today":10.0,"stored":50.0}
 	GameState.elapsed_days=1.0
 	header._process(.75)
@@ -160,13 +162,14 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	assert_str(header.time_text.text).contains(preload("res://scripts/hud/era_words.gd").when(1))
 	assert_str(header.time_text.text).not_contains("Day ")
 	GameState.simulation_metrics.food_days=9.0
+	GameState.food_stocks["Stored food"]=90.0
 	GameState.water_metrics.days=3.0
 	GameState.water_metrics.stored=30.0
 	GameState.elapsed_days=100.0
 	header._process(.25)
 	assert_str(header.kpi_chips.food.value.text).is_equal("12 days")
 	header._process(.5)
-	assert_str(header.kpi_chips.food.value.text).is_equal("9 days")
+	assert_str(header.kpi_chips.food.value.text).is_equal(preload("res://scripts/hud/era_words.gd").days(float(FoodSystem.reserve_estimate(10).days)))
 	assert_str(header.kpi_chips.water.value.text).is_equal("3 days")
 	assert_str(header.time_text.text).contains(preload("res://scripts/hud/era_words.gd").when(100))
 
@@ -239,3 +242,19 @@ func test_the_card_never_prints_a_raw_cause()->void:
 	# the shortfall is not blamed for it.
 	assert_str(Dwindling.misfortune({"Natural causes":30},20)).is_equal("")
 	assert_str(Dwindling.misfortune({"Fire":2,"Natural causes":30},20)).is_equal("")
+
+func test_food_headline_uses_spoilage_estimate_and_retains_raw_stock_count()->void:
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":50000.0}
+	GameState.simulation_metrics={"food_consumption":100.0,"food_total_stock":50000.0,"food_intake_ratio":1.0}
+	# The real game initializes settlement management before opening either view.
+	GovernmentPeopleSystem.settlement_management(GameState.selected_player_settlement_id)
+	var before:=GameState.food_stocks.duplicate()
+	var totals:Dictionary=preload("res://scripts/hud/civilization_kpi_model.gd").snapshot()
+	assert_float(totals.food_days).is_equal(500.)
+	assert_float(totals.food_reserve_days).is_less(500.)
+	assert_dict(GameState.food_stocks).is_equal(before)
+	var provider=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,null)
+	assert_float(float(provider.tab(0).blocks[0].food_reserve_days)).is_equal_approx(float(totals.food_reserve_days),.00001)
+	var card:Dictionary=Data.card_from_totals("food",totals)
+	assert_str(card.headline).contains("including spoilage")
+	assert_str(card.value).is_equal(preload("res://scripts/hud/era_words.gd").days(totals.food_reserve_days))

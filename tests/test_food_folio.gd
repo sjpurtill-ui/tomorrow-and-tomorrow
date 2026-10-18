@@ -258,3 +258,11 @@ func test_narrow_food_scene_keeps_sources_readable_and_restores_wide_layout()->v
 	assert_bool(panel._refs.source_grid.visible).is_false()
 	for source:String in panel.SOURCE_NAMES:
 		assert_object(panel._refs.source_labels[source].box.get_parent()).is_same(panel._scene)
+
+func test_reserve_headline_uses_same_spoilage_estimate_as_topbar()->void:
+	var block:=prepared_food();block.food_reserve_days=180.0
+	var panel=auto_free(FoodPanel.new());add_child(panel);panel.setup(block)
+	assert_str(panel._refs.reserve_value.text).is_equal("180")
+	assert_str(panel._refs.reserve_unit.text).is_equal("days after spoilage")
+	assert_str(panel._refs.reserve.tooltip_text).contains("no new food arrives")
+	assert_float(block.food_days).is_equal(226.3)
