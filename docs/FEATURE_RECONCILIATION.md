@@ -1,3 +1,16 @@
+## November 6 — Chapter campaign integration
+
+Source `c6b2df9ca220979725181069092299972548f19a`, branch
+`codex/chapter-campaign`. This integration-record commit has the same implementation
+as the tested source. Ten independent chapter routes, real prerequisite graph and
+manual focus, saved results, and early shared military pressure are included.
+63 distinct checks pass; native 1280/600 captures reviewed and closed. Detailed
+validation, legacy behavior, excluded files and remaining play-balancing limits
+are in `INTEGRATION_STATUS.md` and `CHAPTER_CAMPAIGN.md`.
+
+Origin/main is pushed and verified before the canonical Mac checkout is advanced.
+No player launch, release export or restart is part of this delivery.
+
 ## October 18 — Building capacity at settlement and large-population scale
 
 READY on `codex/visual-comparison-screens`, base `f8fe1775fe8c537a8645467195b62df53b4502e2`. The Town leads with nine retained, fixed categories: people/places, daily drinking need/supply and each of the seven storage classes. Every known pair shows its gap, with actual incoming cargo where available; unknown daily measurements stay unknown. Large values abbreviate with exact values on hover. The same current-work/waiting-priority lane shows builder assignment and opens the existing People/storage actions. Duplicate home/builder headline readings are suppressed visually.

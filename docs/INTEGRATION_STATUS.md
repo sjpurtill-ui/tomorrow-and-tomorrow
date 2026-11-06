@@ -1,3 +1,52 @@
+## November 6 — Independent campaign chapters and branching research
+
+INTEGRATED from `c6b2df9ca220979725181069092299972548f19a` on
+`codex/chapter-campaign`, base `28b7c51480b82fc29356d60018cc9df7448041e5`,
+worktree `/Users/seanpurtill/Documents/Codex/tt-chapter-campaign`. This integration
+record accompanies the delivery; source and combined implementation are identical.
+
+Ten 300-year content scopes share one continuous civilization. Each has military,
+productive and civic breakthrough routes using real catalog milestones plus 90
+sustained days of measured capability. Advancement is actor-owned, independent of
+the calendar and other peoples. It records the outcome and opens the next chapter's
+research at ordinary date cost; the existing exceptional early-inquiry path remains.
+Research now offers a connected prerequisite graph, direct chapter/field choices,
+manual question targets, attention shares and an optional working route-focus policy.
+The former 300-year protection from unprovoked military pressure is now a two-year
+founding respite with an eight-year ramp, shared by player/rival and rival/rival
+encounters. Existing reachability, treaties, force and supply rules still apply.
+
+63 distinct tests pass, with no errors, failures, skips or orphans across the final
+relevant runs: mechanics/parity/pressure/controller/tree (39 cases, report 2,
+`/tmp/tt-chapters-mechanics.log`), chapter ledger/focus/UI/teams/whole-game save
+continuation (33 cases, report 5, `/tmp/tt-chapters-verification.log`), and the final
+three UI cases after graph polish (report 6, `/tmp/tt-chapters-ui-final.log`).
+Overlap is counted once. Earlier runs identified old calendar fixtures and stale
+Research UI assertions; those now use the earned frontier and actual retained
+controls. Native offscreen fixtures at 1280 and 600 pixels were reviewed, including
+the narrow goals bottom. `/tmp/tt-chapters-capture-final.log` exits cleanly with
+CHAPTER_UI_CAPTURE_PASS. All capture processes exited; no player game was launched.
+
+Chapter progress/focus/history save through the existing reflected owner ledger.
+Legacy campaigns enter from their most advanced known discovery without invented
+past results. Shared opponent save/continuation is tested on disposable worlds;
+no assertion is made about an uninspected existing campaign's simulation mode.
+Hotspots: discovery_system.gd and save_system.gd; no conflicting intentional
+canonical edits. Generated imports/UIDs, caches, screenshots and private saves
+are excluded and remain local. Other worktrees are excluded.
+
+The first push was rejected under the unrelated active GitHub account. The existing
+repository-owner login was used per command; the feature branch was then pushed
+and remotely verified. Integration merges both origin/main and canonical main in
+this worktree, pushes origin/main before advancing canonical main, and verifies
+remote SHAs and zero ahead/behind counts. No global account switch or repository
+permission change. The running/released game is not rebuilt or restarted.
+
+The mechanics and UI are implemented; long-run play balancing is still required.
+Thresholds and first-decade pressure are initial calibration, not a claim that
+all ten chapters have been playtested for equal difficulty or entertainment.
+See `docs/CHAPTER_CAMPAIGN.md` for exact rules and boundaries.
+
 ## October 18 — Food reserves, spoilage and opponent parity
 
 INTEGRATED from `bcadf5df96cc157c419750bafa4d4027d7a095ad` on `codex/food-reserve-realism`, base `2151d92da2542c39bc59c46c64ecdb8c9ae7252c`, worktree `/Users/seanpurtill/Documents/Codex/tt-division-designer`. Owns shared FoodSystem/FoodCare spoilage and keeper workload, the read-only reserve estimator, top-bar and Food-screen reserve headlines/details and their tests. Repeatable storage stays available at its existing costs; added room grants no preservation bonus. Early aggregate stored loss is 0.003/day before modifiers; local seasonal heat/dampness affects both pools, and keeper workload grows with inventory beyond a 30-ration/person buffer. Existing knowledge, goods and operating preservation still matter. `FOOD_STORAGE_BALANCE.md` records formulas, primary sources, limits and the saved-campaign measurement.
