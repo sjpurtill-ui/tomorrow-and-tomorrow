@@ -58,15 +58,29 @@ var question_status:VisibleChoice
 var question_choices:Array=[]
 
 func setup(block:Dictionary)->void:
-	theme=T.control_theme();data=block;name="KnowledgeTree";add_theme_constant_override("separation",24)
+	theme=T.control_theme();data=block;name="KnowledgeTree";add_theme_constant_override("separation",12)
 	if bool(data.get("archive",false)):
 		_archive(self)
 		resized.connect(_arrange);_arrange()
 		return
+	if data.has("chapters"):
+		var current:Dictionary=data.chapters[int(data.chapter)]
+		_line(self,"Chapter %d · %s" % [int(current.id)+1,String(current.name)],20,T.INK)
+		var chapters:=HFlowContainer.new();chapters.name="ChapterChoices";chapters.add_theme_constant_override("h_separation",4);add_child(chapters)
+		for chapter:Dictionary in data.chapters:
+			_button(chapters,str(int(chapter.id)+1),data.on_chapter.bind(int(chapter.id)),"%s · years %d–%d" % [String(chapter.name),int(chapter.start),int(chapter.end)],int(chapter.id)==int(data.chapter))
 	_fields(self)
+	if data.has("on_weight"):
+		var weights:=HFlowContainer.new();add_child(weights)
+		_line(weights,"Field focus: %d shares of research attention" % int(data.weight),14)
+		_button(weights,"− Less",data.on_weight.bind(-1),"Reduce this field's share; no researchers are created.")
+		_button(weights,"+ More",data.on_weight.bind(1),"Increase this field's share of existing researchers.")
+		_line(self,"Drag to pan · wheel to zoom · select a question. Lines include alternative prerequisites; see selected detail. Blue-grey nodes are earlier or cross-field foundations.",13)
 	body=BoxContainer.new();body.name="Body";body.vertical=true;body.add_theme_constant_override("separation",22);add_child(body)
 	var lanes:=VBoxContainer.new();lanes.name="Lanes";lanes.size_flags_horizontal=Control.SIZE_EXPAND_FILL;lanes.add_theme_constant_override("separation",0);body.add_child(lanes)
-	_lanes(lanes)
+	if data.has("chapters"):
+		var graph:=preload("res://scripts/hud/chapter_research_graph.gd").new();lanes.add_child(graph);graph.setup(data.get("rows",[]),data.on_select,String(data.get("selected","")))
+	else:_lanes(lanes)
 	detail=VBoxContainer.new();detail.name="Chosen";detail.add_theme_constant_override("separation",8);body.add_child(detail)
 	_detail(detail)
 	resized.connect(_arrange);_arrange()
@@ -84,12 +98,12 @@ func _arrange()->void:
 		_fit_archive_reader.call_deferred()
 		return
 	if body==null:return
-	var side:=size.x>=SIDE_AT
+	var side:=size.x>=SIDE_AT and not data.has("chapters")
 	if question_grid:question_grid.columns=2 if size.x>=1000 else 1
 	body.vertical=not side
 	detail.custom_minimum_size.x=340 if side else 0
 	detail.size_flags_horizontal=Control.SIZE_FILL if side else Control.SIZE_EXPAND_FILL
-	body.move_child(detail,1 if side else 0)
+	body.move_child(detail,1 if side or data.has("chapters") else 0)
 	var spread:=detail.find_child("QuestionSpread",true,false) as BoxContainer
 	if spread:
 		spread.vertical=side or size.x<430.0
@@ -109,6 +123,12 @@ func _fit_archive_reader()->void:
 func _fields(parent:Node)->void:
 	var row:=HFlowContainer.new();row.name="Fields";row.add_theme_constant_override("h_separation",16);row.add_theme_constant_override("v_separation",6);parent.add_child(row)
 	var label:=T.make_label("Explore a field",24,T.INK);label.add_theme_font_override("font",T.font("ui_strong"));label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(label)
+	if data.has("chapters"):
+		for field:Dictionary in data.get("fields",[]):
+			var id:=String(field.id)
+			var button:=_button(row,Visuals.name_for(id),data.on_field.bind(id),"Choose this field's branches",id==String(data.domain))
+			button.icon=Icons.domain_texture(id,Visuals.color(id));button.add_theme_constant_override("icon_max_width",20)
+		return
 	var picker:=VisibleChoice.new();picker.name="FieldPicker";picker.custom_minimum_size=Vector2(260,40);picker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;picker.add_theme_font_size_override("font_size",16);row.add_child(picker)
 	var ids:Array[String]=[]
 	for field:Dictionary in data.get("fields",[]):

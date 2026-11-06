@@ -135,6 +135,8 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var catalog:=preload("res://scripts/hud/production_catalog.gd").new();section.add_child(catalog);catalog.setup(block)
 			"inquiry_board":
 				var board:=preload("res://scripts/hud/inquiry_board.gd").new();section.add_child(board);board.setup(block)
+			"chapter_board":
+				var board:=preload("res://scripts/hud/chapter_board.gd").new();section.add_child(board);board.setup(block)
 			"knowledge_tree":
 				var tree:=preload("res://scripts/hud/knowledge_tree_board.gd").new();section.add_child(tree);tree.setup(block)
 			"impact":

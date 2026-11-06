@@ -257,6 +257,9 @@ static func _apply_reflected(target:Object,state:Dictionary,skip:Array=[])->void
 		else:
 			target.set(property_name,value)
 
+	if target.has_method("migrate_chapters") and not state.has("chapter_progress"):
+		target.call("migrate_chapters")
+
 func _validate_human_payload(payload:Dictionary,seed_value:int)->Dictionary:
 	if not preload("res://scripts/civic_administration.gd").valid(payload.get("reflected_GovernmentPeopleSystem",{}).get("administration_records",preload("res://scripts/civic_administration.gd").empty_state())):return {"error":"Invalid civic administration records."}
 	var nutrition:=preload("res://scripts/crop_nutrition.gd")

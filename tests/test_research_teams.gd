@@ -119,7 +119,7 @@ func test_a_free_team_takes_its_lines_quickest_question()->void:
 			if String(candidate.id) in GameState.known_discoveries or DiscoverySystem._busy_ids().has(String(candidate.id)) or not DiscoverySystem._discovery_is_eligible(candidate,day): continue
 			assert_float(DiscoverySystem._work_today(candidate,day)).override_failure_message(String(candidate.id)).is_greater_equal(float(pick.work)-0.0001)
 	# Time to proof counts how far ahead of its age a question stands.
-	var year:=float(GameState.elapsed_days)/365.0
+	var year:=DiscoverySystem.research_frontier_year()
 	var now:={"id":"age_test_now","name":"Now","dynamic":"culture","subcategory":"Social cohesion","earliest_year":0.0,"signals":[],"chance":0.01}
 	var later:={"id":"age_test_later","name":"Later","dynamic":"culture","subcategory":"Social cohesion","earliest_year":year+30.0,"signals":[],"chance":0.01}
 	assert_float(DiscoverySystem._work_today(later,day)).is_greater(DiscoverySystem._work_today(now,day))
@@ -135,7 +135,7 @@ func test_a_team_moves_to_a_much_quicker_question_of_its_line_within_a_season()-
 		state.active_investigations.clear();state.research_targets.clear()
 		state.research_subcategory_allocations={"culture":{"Social cohesion":6,"Customs":1}}
 		state.research_allocations={"culture":7}
-		var ahead:={"id":"teams_far_ahead","name":"Far Ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":40.0,"day":0,"requires":[],"signals":[],"observation":"","chance":0.01}
+		var ahead:={"id":"teams_far_ahead","name":"Far Ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":research.research_frontier_year()+30.0,"day":0,"requires":[],"signals":[],"observation":"","chance":0.01}
 		var of_age:={"id":"teams_of_age","name":"Of Its Age","dynamic":"culture","subcategory":"Customs","earliest_year":0.0,"day":0,"requires":["teams_gate"],"signals":[],"observation":"","chance":0.01}
 		state.known_discoveries.erase("teams_gate")
 		research.catalog_by_channel={"culture::Social cohesion":[ahead],"culture::Customs":[of_age]}
@@ -279,7 +279,7 @@ func test_cards_keep_time_and_a_thin_team_is_named_only_below_a_third_of_normal(
 	assert_str(enough).starts_with("REPLICATION")
 	assert_str(enough).contains("5 in 100 households")
 	# Ahead of its age is told first, with its price, so a thin team never hides it.
-	var ahead:={"id":"card_test_ahead","name":"Far ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":float(GameState.elapsed_days)/365.0+10.0,"signals":[]}
+	var ahead:={"id":"card_test_ahead","name":"Far ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":DiscoverySystem.research_frontier_year()+10.0,"signals":[]}
 	var told:=DiscoverySystem._investigation_bottleneck(ahead,1,1.0,1.0,0.1,{"team_people":0.0,"support_multiplier":1.0})
 	assert_str(told).starts_with("AHEAD OF ITS AGE")
 	assert_str(told).contains("three times the usual work")
@@ -292,9 +292,9 @@ func test_cards_keep_time_and_a_thin_team_is_named_only_below_a_third_of_normal(
 		"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
 	assert_str(Board.lead_price(board.data.investigations)).is_equal("Our learning runs ahead of its age. 25 years ahead: six times the work.")
 	# Being early for its age is its price, told on hover; the line names no holdup.
-	var row:Control=board.find_child("Fields",true,false).find_child("Row_0",true,false)
-	assert_str((row.find_child("Cell_question",true,false) as Label).text).is_equal("Far Ahead")
-	assert_str(row.tooltip_text).contains("six times the usual work")
+	var row:Control=board.find_child("Row_culture",true,false)
+	assert_str((row.find_child("Question_lead_test",true,false) as Label).text).is_equal("Far Ahead")
+	assert_str(String(board._lane_refs.culture.detail.tooltip_text)).contains("six times the usual work")
 
 # --- A freed team's choice --------------------------------------------------------------------
 
@@ -316,10 +316,12 @@ func test_a_freed_team_offers_a_choice_for_a_season_then_keeps_its_question()->v
 	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1120,2000);add_child(viewport)
 	var board=Board.new();viewport.add_child(board)
 	board.setup({"fields":[],"investigations":DiscoverySystem.active_investigation_records(),"choices":choices,"on_choose":func(_k:String,_i:String)->void:pass,"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
-	var card:Node=board.find_child("Choice_"+String(choice.key).validate_node_name(),true,false)
+	var popup:PopupPanel=board._pickers.get(String(choice.channel))
+	assert_object(popup).is_not_null()
+	var card:Node=popup.get_child(0)
 	assert_object(card).is_not_null()
 	# The question's line carries a "Choose" verb that opens the picker.
-	assert_object(board.find_child("Fields",true,false).find_child("Verb_Choose",true,false)).is_not_null()
+	assert_bool(board.find_children("*","Button",true,false).any(func(button:Button)->bool:return button.text=="Choose question")).is_true()
 	assert_object(card.get_parent()).is_instanceof(PopupPanel)
 	assert_int(card.find_children("Option_*","",true,false).size()).is_equal(options.size())
 	assert_int(card.find_children("Choose","Button",true,false).size()).is_equal(options.size())

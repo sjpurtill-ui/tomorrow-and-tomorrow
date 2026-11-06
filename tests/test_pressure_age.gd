@@ -1,7 +1,7 @@
 extends GdUnitTestSuite
 ## THE QUIET AGE AND THE PRESSURE AFTER IT (pressure_age.gd, war_loop.gd):
-## for 300 years no people comes against another unprovoked; after that the
-## pressure rises over 60 years, and a neighbour who leans on us and can
+## for two years no people comes against another unprovoked; after that the
+## pressure rises over eight years, and a neighbour who leans on us and can
 ## reach us comes about once in ten years. The same clock for every people.
 ## Quick: three simulated peoples next door to ours, no day simulated.
 
@@ -50,22 +50,22 @@ func after_test()->void:
 func _year(year:float)->void:
 	GameState.elapsed_days=year*365.0
 
-func test_the_clock_is_quiet_for_300_years_then_rises_over_60()->void:
+func test_the_clock_is_quiet_for_two_years_then_rises_over_eight()->void:
 	assert_float(Pressure.at_year(0.0)).is_equal(0.0)
-	assert_float(Pressure.at_year(300.0)).is_equal(0.0)
-	assert_float(Pressure.at_year(330.0)).is_equal_approx(0.5,0.0001)
-	assert_float(Pressure.at_year(360.0)).is_equal(1.0)
+	assert_float(Pressure.at_year(2.0)).is_equal(0.0)
+	assert_float(Pressure.at_year(6.0)).is_equal_approx(0.5,0.0001)
+	assert_float(Pressure.at_year(10.0)).is_equal(1.0)
 	assert_float(Pressure.at_year(2000.0)).is_equal(1.0)
-	_year(120.0)
+	_year(1.0)
 	assert_bool(Pressure.quiet()).is_true()
-	assert_str(Pressure.words()).contains("before year 300")
-	_year(318.0)
+	assert_str(Pressure.words()).contains("before year 2")
+	_year(4.4)
 	assert_bool(Pressure.quiet()).is_false()
 	assert_str(Pressure.words()).contains("3 parts in 10")
 
 func test_in_the_quiet_age_nobody_comes_unless_we_wronged_them()->void:
 	var a:=String(ids[0])
-	_year(120.0)
+	_year(1.0)
 	assert_bool(War.provoked(a)).is_false()
 	assert_bool(War.may_come(a)).is_false()
 	assert_float(War.pressure_chance(a)).is_equal(0.0)
@@ -99,7 +99,7 @@ func test_after_it_a_neighbour_who_can_reach_us_comes_about_once_in_ten_years()-
 	assert_float(monthly).is_equal_approx(Pressure.PER_YEAR/12.0*lean*lerpf(0.5,1.0,War.proximity(a)),0.0001)
 	assert_float(monthly*12.0).is_between(0.02,0.25)
 	# Halfway up the ramp, half as often.
-	_year(330.0)
+	_year(6.0)
 	assert_float(War.pressure_chance(a)).is_equal_approx(monthly*0.5,0.0005)
 	_year(400.0)
 	# A people that dislikes us leans harder than one that likes us.
@@ -149,9 +149,9 @@ func test_other_peoples_keep_the_same_clock_among_themselves()->void:
 	var first:Dictionary=CivilizationSystem.civilizations[0]
 	var second:Dictionary=CivilizationSystem.civilizations[1]
 	var relation:={"opinion":-0.4,"border_tension":0.5}
-	_year(200.0)
+	_year(1.0)
 	assert_float(War.rival_war_hazard(first,second,relation)).is_equal(0.0)
-	_year(301.0)
+	_year(2.1)
 	var early:=War.rival_war_hazard(first,second,relation)
 	assert_float(early).is_greater(0.0)
 	_year(400.0)
@@ -168,8 +168,8 @@ func test_rulers_keep_more_under_arms_and_take_offence_sooner_under_pressure()->
 	var pressed:=clampf(float(band[1])*(1.0+Pressure.WATCH_GAIN),float(band[0]),float(band[3]))/100.0*Scale.ABLE_SHARE
 	assert_float(Strategy.watch_share(p,420.0,false)).is_equal_approx(pressed,0.00001)
 	assert_float(pressed).is_greater_equal(plain)
-	var quiet_band:Array=Scale.anchors(Scale.DEFENSE_SHARE,200.0)
-	assert_float(Strategy.watch_share(p,200.0,false)).is_equal_approx(float(quiet_band[1])/100.0*Scale.ABLE_SHARE,0.00001)
+	var quiet_band:Array=Scale.anchors(Scale.DEFENSE_SHARE,1.0)
+	assert_float(Strategy.watch_share(p,1.0,false)).is_equal_approx(float(quiet_band[1])/100.0*Scale.ABLE_SHARE,0.00001)
 
 ## The user, year 426: "Raiders From Avawa Seen Gathering", from a people
 ## 2,188 km of open water away whose raiders could never arrive. Nobody
@@ -209,7 +209,7 @@ func test_a_people_with_no_way_to_us_gathers_no_raiders_and_raises_no_alarm()->v
 ## world they could only rise: only the old world model eased them.)
 func test_weariness_of_war_eases_in_peace_and_not_while_it_is_fought()->void:
 	var a:=String(ids[0])
-	_year(120.0)
+	_year(1.0)
 	var relation:Dictionary=CivilizationSystem.civilizations[0].player_relation
 	relation["player_war_exhaustion"]=0.6; relation["rival_war_exhaustion"]=0.8; relation["war_score"]=42.0
 	var f:=War.front(a)

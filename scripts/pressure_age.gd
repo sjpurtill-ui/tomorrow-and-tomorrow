@@ -1,19 +1,9 @@
 extends RefCounted
-## THE QUIET AGE, AND THE PRESSURE AFTER IT. One clock for every people.
-##
-## For the first QUIET_YEARS of a world no people comes against another
-## unless it was wronged: the opening is for building and choosing a course.
-## After that the peoples press on one another, and the pressure rises over
-## RAMP_YEARS to its full weight:
-##     pressure = (year - 300) / 60, between 0 and 1
-## At full pressure a ruler who can reach a people and is not bound to peace
-## with it comes against it about once in ten years (PER_YEAR x its lean,
-## war_loop.gd pressure_chance), holds half again as many under arms in peace
-## (civilization_strategy.gd watch_share), and takes offence sooner
-## (civilization_strategy.gd plan war_opinion). Static; preload.
+## A short founding respite, then shared military pressure in the first chapter.
+## Reachability, treaties, relative strength and actual forces still govern action.
 
-const QUIET_YEARS:=300.0
-const RAMP_YEARS:=60.0
+const QUIET_YEARS:=2.0
+const RAMP_YEARS:=8.0
 ## At full pressure and an even lean, comings a year against one neighbour.
 const PER_YEAR:=0.10
 ## A ruler's peace-time watch at full pressure, against the quiet age's.

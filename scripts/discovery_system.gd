@@ -1,5 +1,9 @@
 extends Node
 
+const Chapters=preload("res://scripts/campaign_chapters.gd")
+var chapter_progress:Dictionary={}
+var chapter_cache:=Chapters.Cache.new()
+
 const Pathways=preload("res://scripts/knowledge_pathways.gd")
 ## [built-fabric] Builders' craft speeds building knowledge (built_fabric.gd).
 const BUILT_FABRIC:=preload("res://scripts/built_fabric.gd")
@@ -137,6 +141,8 @@ const EFFECT_DISPLAY_NAMES:Dictionary={
 var _base_entries:Array[Dictionary]=[]
 
 func reset_for_new_world()->void:
+	chapter_progress=Chapters.fresh()
+	chapter_cache=Chapters.Cache.new()
 	initialized=false
 	catalog.resize(BASE_DISCOVERY_COUNT)
 	for i in mini(_base_entries.size(),BASE_DISCOVERY_COUNT): catalog[i]=_base_entries[i].duplicate(true)
@@ -420,6 +426,13 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var held:=WorldSimulation.state.active_investigations.duplicate()
 		_refresh_active_investigations()
 		_note_freed_teams(results,held)
+	var chapter_result:=Chapters.advance(self,current_day,WorldSimulation.span,Chapters.capabilities(),WorldSimulation.state.known_discoveries)
+	if not chapter_result.is_empty():
+		chapter_cache=Chapters.Cache.new()
+		_scan.clear_batch()
+		_work_memo.clear()
+		_idle_look_key=0
+		WorldSimulation.state.simulation_events.push_front({"day":current_day,"title":"Chapter completed: "+String(chapter_result.name),"description":"Advanced through "+String(chapter_result.route)+" after 90 days of sustained capability.","category":"knowledge"})
 	return results
 
 ## The factors every line's day of inquiry shares (process_day).
@@ -1092,6 +1105,8 @@ func _quickest_in_line(line:String,current_day:int,busy:Dictionary,own:String=""
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var best:={}
 	var best_work:=INF
+	var best_preferred:=false
+	var preferred:Dictionary=Chapters.focus_ids(self) if String(chapter_progress.get("focus",""))!="" else {}
 	var first_free:=""
 	begin_research_scan()
 	for sub_variant in (WorldSimulation.state.research_subcategory_allocations.get(line,{}) as Dictionary):
@@ -1105,7 +1120,9 @@ func _quickest_in_line(line:String,current_day:int,busy:Dictionary,own:String=""
 			var id:=String(candidate.get("id",""))
 			if busy.has(id) or _scan_known().has(id) or not _scan_eligible(candidate,current_day): continue
 			var work:=_work_today(candidate,current_day)
-			if work<best_work or (is_equal_approx(work,best_work) and id<String(best.get("id",""))):
+			var favored:=preferred.has(id)
+			if (favored and not best_preferred) or (favored==best_preferred and (work<best_work or (is_equal_approx(work,best_work) and id<String(best.get("id",""))))):
+				best_preferred=favored
 				best_work=work
 				best={"line":line,"channel":channel,"id":id,"work":work}
 	# Foundation work (questions the line's own questions near their age
@@ -1119,7 +1136,9 @@ func _quickest_in_line(line:String,current_day:int,busy:Dictionary,own:String=""
 			var own_desk:=_channel_key(String(foundation.get("dynamic","")),String(foundation.get("subcategory","")))
 			if active.has(own_desk) and String(active[own_desk])==id: continue
 			var work:=_work_today(foundation,current_day)
-			if work<best_work or (is_equal_approx(work,best_work) and id<String(best.get("id",""))):
+			var favored:=preferred.has(id)
+			if (favored and not best_preferred) or (favored==best_preferred and (work<best_work or (is_equal_approx(work,best_work) and id<String(best.get("id",""))))):
+				best_preferred=favored
 				best_work=work
 				best={"line":line,"channel":first_free,"id":id,"work":work}
 	end_research_scan()
@@ -1368,7 +1387,7 @@ const NEAR_AGE_YEARS:=5.0
 func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
-	var year:=learning_year(current_day)
+	var year:=research_frontier_year(current_day)
 	# _scan_eligible, inlined for the channel's many candidates.
 	var scanning:=_scan_active()
 	var memo:Dictionary=_scan.eligible
@@ -1454,7 +1473,7 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 			memo[2]=max_tier;memo[3]=_scan.read_stop
 			if max_tier<TEAM_TIER_LAST: return {}
 		memo[0]=found
-		memo[1]=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),learning_year())
+		memo[1]=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),research_frontier_year())
 	var best:Dictionary=memo[0]
 	if best.is_empty() or int(memo[1])>max_tier: return {}
 	return best
@@ -1506,7 +1525,7 @@ func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={
 				open=_discovery_is_eligible(chosen,current_day,judged_known)
 				if scanning: memo[target]=open
 			if open: return chosen
-	var year:=learning_year()
+	var year:=research_frontier_year()
 	var home:=_research_600_channel_home(channel)
 	var allocation:=_subcategory_allocation(home[0],home[1])
 	var by_age:=_channel_by_age(channel,candidates)
@@ -1669,6 +1688,7 @@ func _candidate_score(discovery:Dictionary)->float:
 	score-=Research600.staleness(id,society_model.ceiling_era)*20.0
 	if Research600.dead_end(id): score-=Research600.DEAD_END_PENALTY
 	score+=_field_need(discovery)+(35.0 if not Pathways.evidence(id).is_empty() else 0.0)
+	if Chapters.focus_ids(self).has(id):score+=350.0
 	return score
 
 
@@ -2084,6 +2104,9 @@ func research_teams()->Dictionary:
 
 ## The people's own age for research, in game years: the calendar on `day`
 ## (today when -1) plus the lead its learning has earned (learning_lead).
+func research_frontier_year(day:int=-1)->float:
+	return maxf(learning_year(day),Chapters.frontier(self))
+
 func learning_year(day:int=-1)->float:
 	var calendar:=float(WorldSimulation.state.elapsed_days) if day<0 else float(day)
 	return calendar/365.0+maxf(0.0,learning_lead)
@@ -2672,14 +2695,14 @@ var _open_year_seed:=0
 ## come); `year` is the people's own age, learning_year() by default.
 func research_years_ahead(discovery:Dictionary,year:float=NAN)->float:
 	if is_nan(year): year=learning_year()
-	return maxf(0.0,research_open_year(discovery)-year)
+	return maxf(0.0,research_open_year(discovery)-maxf(year,Chapters.frontier(self)))
 
 
 ## Work multiplier for `discovery` before its age: proportional to the years
 ## ahead of the people's own age (1 once its age has come). Never a wall.
 func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
 	if is_nan(year): year=learning_year()
-	return Research600.early_factor(research_open_year(discovery),year)
+	return Research600.early_factor(research_open_year(discovery),maxf(year,Chapters.frontier(self)))
 
 
 ## True when the entry's design conditions hold for `society` (default: the
@@ -2690,7 +2713,7 @@ func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
 func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1,horizon_years:float=-1.0)->bool:
 	if horizon_years>=0.0:
 		# The acting people's own age; a rival society snapshot carries its year.
-		var year:=learning_year(day) if society.is_empty() else (float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0)))
+		var year:=research_frontier_year(day) if society.is_empty() else (float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0)))
 		if research_open_year(discovery)-year>horizon_years: return false
 	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
 	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else _player_society())
@@ -2853,7 +2876,7 @@ func _years_recorded(entries:Array,known:Dictionary)->bool:
 ## within FOUNDATION_HORIZON_YEARS of `day` (a question in a later year opens
 ## beyond the horizon, as does every question after it).
 func _foundation_horizon_entries(table:Dictionary,entries:Array,day:int)->Array:
-	var year:=learning_year(day)
+	var year:=research_frontier_year(day)
 	var buckets:Dictionary=table.buckets
 	var indices:Array=[]
 	for bucket in int(table.last)+1:
@@ -2876,3 +2899,14 @@ func _research_600_missing_parents(entry:Dictionary,known:Dictionary)->Array[Str
 		if not satisfied and not (group as Array).is_empty(): parents.append(String((group as Array)[0]))
 	return parents
 # --- research_600 (end) -------------------------------------------------------
+
+## Older campaigns retain their most advanced known research frontier. No past
+## achievement, date, route or score is fabricated during migration.
+func migrate_chapters()->void:
+	chapter_progress=Chapters.fresh()
+	initialize()
+	for id:String in WorldSimulation.state.known_discoveries:
+		var entry:=discovery_definition(id)
+		if not entry.is_empty():chapter_progress.index=maxi(int(chapter_progress.index),Chapters.chapter_of(entry))
+	chapter_progress["legacy_entry"]=int(chapter_progress.index)
+	chapter_cache=Chapters.Cache.new()

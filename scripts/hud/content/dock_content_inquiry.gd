@@ -1,4 +1,7 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
+const Chapters:=preload("res://scripts/campaign_chapters.gd")
+const Paths:=preload("res://scripts/knowledge_pathways.gd")
+var tree_chapter:=-1
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## INQUIRY section: Direct Attention / Investigations / Established.
 ## Replaces the knowledge panel and the progression panel's research views.
@@ -52,13 +55,14 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"What the people know and are learning",
 		"title":"Research",
-		"subtabs":["Work under way","Explore knowledge","What we know"],
+		"subtabs":["Work under way","Chapter tree","What we know","Chapter goals"],
 	}
 
 func tab(sub:int)->Dictionary:
 	# Each tab is one board: its own figures, its own table; nothing is
 	# repeated from the top bar or from another tab.
 	match sub:
+		3:return {"kpis":[],"blocks":[_chapter_block()]}
 		1: return {"kpis":[],"blocks":[_tree_block()]}
 		2:
 			# Capture only: "--capture-open=<field>" opens that field on What we know.
@@ -69,7 +73,7 @@ func tab(sub:int)->Dictionary:
 	var board:=_discovery_board(investigations)
 	# The board keeps teams and pace beside the decision, with forecasts in
 	# its explanatory section, rather than four equally weighted headline tiles.
-	return {"kpis":[],"blocks":[board]}
+	return {"kpis":[],"blocks":[_chapter_block(),board]}
 
 func _toggle_domain(domain:String)->void:
 	archive_selected=domain
@@ -79,13 +83,20 @@ func _select_archive_domain(domain:String)->void:
 	archive_selected=domain
 
 func signature()->Array:
-	return [tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),archive_selected,GovernmentPeopleSystem.revision]
+	return [DiscoverySystem.chapter_progress.duplicate(true),tree_chapter,tree_domain,tree_selected,GameState.research_targets.duplicate(),GameState.discovery_progress.duplicate(),GameState.research_allocations.duplicate(),ArtifactCulture.study_weight(),GameState.society_exchange.collections.size(),GameState.active_investigations.duplicate(),GameState.discovery_log.size(),int(GameState.population_allocations.get("Knowledge",0)),archive_selected,GovernmentPeopleSystem.revision]
 
 ## The knowledge tree as lanes in the dock (knowledge_tree_board.gd): the
 ## chosen field's lines of study, what is known, under way, open and waiting
 ## in each, and the chosen question's account with its one order.
 func _tree_block()->Dictionary:
-	var rows:Array=_all_rows().filter(func(row:Dictionary)->bool:return String(row.get("dynamic",""))==tree_domain)
+	var chapter_index:=Chapters.index(DiscoverySystem) if tree_chapter<0 else tree_chapter
+	var all_rows:=_all_rows()
+	var rows:Array=all_rows.filter(func(row:Dictionary)->bool:return String(row.get("dynamic",""))==tree_domain and Chapters.chapter_of(row)==chapter_index)
+	var selected_definition:=DiscoverySystem.discovery_definition(tree_selected)
+	if not selected_definition.is_empty() and not rows.any(func(row:Dictionary)->bool:return String(row.id)==tree_selected):
+		for row:Dictionary in all_rows:
+			if String(row.id)==tree_selected:rows.append(row);break
+
 	var frontier:=DiscoverySystem.technology_frontier(rows)
 	var known_by:=_known_by_field()
 	var active_by:Dictionary={}
@@ -106,15 +117,25 @@ func _tree_block()->Dictionary:
 			if not chosen_row.is_empty():break
 	# The board gets only what it draws: each question's name, state, evidence, line and wait.
 	var slim:Array=[]
-	for row:Dictionary in rows:slim.append({"id":String(row.id),"name":String(row.name),"status":String(row.status),"progress":float(row.progress),"subcategory":String(row.get("subcategory","")),"earliest_year":float(row.get("earliest_year",0.0)),"missing":(row.get("missing",[]) as Array).duplicate()})
-	return {"type":"knowledge_tree","domain":tree_domain,"fields":fields,"rows":slim,"next":frontier.next,"selected":String(chosen_row.get("id","")),
+	for row:Dictionary in rows:slim.append({"id":String(row.id),"name":String(row.name),"status":String(row.status),"progress":float(row.progress),"subcategory":String(row.get("subcategory","")),"earliest_year":float(row.get("earliest_year",0.0)),"parents":Paths.definition_parents(row),"missing":(row.get("missing",[]) as Array).duplicate()})
+	var shown:Dictionary={}
+	for row:Dictionary in slim:shown[String(row.id)]=true
+	var parents:Array=[]
+	for row:Dictionary in slim:
+		for id:String in row.parents:
+			if shown.has(id):continue
+			shown[id]=true
+			var definition:=DiscoverySystem.discovery_definition(id)
+			parents.append({"id":id,"name":String(definition.get("name",id)),"status":"DISCOVERED" if GameState.known_discoveries.has(id) else "FOUNDATION","progress":float(GameState.discovery_progress.get(id,0)),"parents":[],"external":true})
+	slim.append_array(parents)
+	return {"type":"knowledge_tree","chapter":chapter_index,"chapters":Chapters.definitions(),"on_chapter":_choose_chapter,"on_weight":_change_weight,"weight":int(GameState.research_allocations.get(tree_domain,0)),"domain":tree_domain,"fields":fields,"rows":slim,"next":frontier.next,"selected":String(chosen_row.get("id","")),
 		"chosen":_tree_chosen(chosen_row,frontier.next),"on_field":_choose_tree_domain,"on_select":_choose_tree_question}
 
 ## Every question of every field (DiscoverySystem.technology_tree), made
 ## again only when what it is made from moves: the one source of the tree's
 ## lanes and of every "known" count on these pages.
 func _all_rows()->Array:
-	var rows:Array=memo.take("rows",[GameState.known_discoveries.size(),GameState.active_investigations.hash(),int(GameState.elapsed_days)/30,GameState.resource_deposits.size(),GameState.discovery_progress.size()],func()->Array:return DiscoverySystem.technology_tree())
+	var rows:Array=memo.take("rows",[GameState.known_discoveries.size(),GameState.active_investigations.hash(),Chapters.index(DiscoverySystem),int(GameState.elapsed_days)/30,GameState.resource_deposits.size(),GameState.discovery_progress.size()],func()->Array:return DiscoverySystem.technology_tree())
 	# The evidence moves every day: read it fresh onto the kept rows.
 	for row:Dictionary in rows:row["progress"]=float(GameState.discovery_progress.get(String(row.id),0.0))
 	return rows
@@ -498,3 +519,28 @@ func _artifact_study_item(total_weight:int,observers:int)->Dictionary:
 func _change_artifact_study(delta:int)->void:
 	ArtifactCulture.change_study_weight(delta)
 	hud.request_immediate_dock_refresh()
+
+func _chapter_block()->Dictionary:
+	var chapter:=Chapters.snapshot(DiscoverySystem)
+	for route:Dictionary in chapter.routes:
+		route["named_milestones"]=[]
+		for id:String in route.milestones:
+			route.named_milestones.append({"id":id,"name":String(DiscoverySystem.discovery_definition(id).get("name",id)),"known":GameState.known_discoveries.has(id)})
+	return {"type":"chapter_board","chapter":chapter,"pressure":preload("res://scripts/pressure_age.gd").words(),"on_tree":jump("inquiry",1),"on_war":jump("military",0),"on_people":assign_workers("Knowledge"),"on_question":_open_chapter_question,"on_focus":_focus_route}
+
+func _choose_chapter(value:int)->void:
+	tree_chapter=value;tree_selected=""
+	hud.request_immediate_dock_refresh()
+
+func _change_weight(delta:int)->void:
+	DiscoverySystem.set_domain_research_priority(tree_domain,maxi(0,int(GameState.research_allocations.get(tree_domain,0))+delta))
+	hud.request_immediate_dock_refresh()
+
+func _focus_route(id:String)->void:
+	Chapters.focus(DiscoverySystem,id)
+	hud.request_immediate_dock_refresh()
+
+func _open_chapter_question(id:String)->void:
+	show_question(id)
+	tree_chapter=Chapters.chapter_of(DiscoverySystem.discovery_definition(id))
+	hud.open_dock("inquiry",1,false)
